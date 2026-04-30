@@ -11,6 +11,31 @@
 -- ============================================================
 
 -- ─────────────────────────────────────────────────────────────
+-- Idempotent cleanup — drops any partial state from a prior failed
+-- run so re-running this migration is safe.
+-- ─────────────────────────────────────────────────────────────
+
+drop table if exists public.email_log         cascade;
+drop table if exists public.audit_log          cascade;
+drop table if exists public.invoices           cascade;
+drop table if exists public.subscriptions      cascade;
+drop table if exists public.admin_users        cascade;
+drop table if exists public.candidates         cascade;
+drop table if exists public.dso_users          cascade;
+drop table if exists public.dso_locations      cascade;
+drop table if exists public.dso_slug_history   cascade;
+drop table if exists public.dsos               cascade;
+
+drop function if exists public.set_updated_at() cascade;
+
+drop type if exists subscription_status      cascade;
+drop type if exists subscription_tier        cascade;
+drop type if exists admin_role               cascade;
+drop type if exists candidate_availability   cascade;
+drop type if exists dso_status               cascade;
+drop type if exists dso_user_role            cascade;
+
+-- ─────────────────────────────────────────────────────────────
 -- Extensions
 -- ─────────────────────────────────────────────────────────────
 
@@ -163,7 +188,7 @@ create table public.candidates (
   headline            text,
   summary             text,
   years_experience    int,
-  current_role        text,
+  current_title       text,            -- "current_role" is reserved in Postgres
   desired_roles       text[],
   desired_locations   text[],
   availability        candidate_availability,
@@ -179,17 +204,12 @@ create trigger candidates_set_updated_at
   before update on public.candidates
   for each row execute function public.set_updated_at();
 
--- Q7 — full-text search vector on profile (used at /candidate-search later)
-alter table public.candidates add column search_vector tsvector
-  generated always as (
-    setweight(to_tsvector('english', coalesce(full_name, '')), 'A') ||
-    setweight(to_tsvector('english', coalesce(headline, '')), 'B') ||
-    setweight(to_tsvector('english', coalesce(summary, '')), 'C') ||
-    setweight(to_tsvector('english', coalesce(array_to_string(desired_roles, ' '), '')), 'B')
-  ) stored;
-
-create index candidates_search_vector_idx
-  on public.candidates using gin (search_vector);
+-- Candidate search vector deferred to v1.1+ when the candidate-search
+-- feature ships. The generated-column immutability rules around
+-- setweight() + to_tsvector() with weight literals are finicky enough that
+-- it's not worth solving for a feature gated behind `is_searchable`.
+-- Q7 (Postgres tsvector + pg_trgm) still applies — it gets implemented
+-- in the JOBS table migration (Phase 2 Week 3) where it actually matters.
 create index candidates_searchable_idx
   on public.candidates (is_searchable) where is_searchable = true;
 
