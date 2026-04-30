@@ -6,7 +6,7 @@ export default function Home() {
         <div className="flex items-center gap-3">
           <BrandMark />
           <span className="font-extrabold tracking-tight text-lg leading-none">
-            DSO<span className="text-accent ml-1">Hire</span>
+            DSO<span className="text-heritage ml-1">Hire</span>
           </span>
         </div>
         <ul className="hidden md:flex items-center gap-9 list-none">
@@ -52,16 +52,16 @@ export default function Home() {
 
         <div className="relative z-10 max-w-5xl mx-auto w-full">
           <div className="inline-flex items-center gap-3 mb-6">
-            <span className="text-[10px] font-bold tracking-[3px] uppercase text-accent-deep">
+            <span className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep">
               Built for Mid-Market DSOs
             </span>
-            <span className="h-px w-12 bg-accent/40" />
+            <span className="h-px w-12 bg-heritage/40" />
           </div>
 
           <h1 className="text-5xl sm:text-7xl lg:text-[80px] font-extrabold tracking-[-0.02em] leading-[0.98] max-w-4xl">
             Multi-location hiring,
             <br />
-            <span className="text-accent">one flat fee.</span>
+            <span className="text-heritage">one flat fee.</span>
           </h1>
 
           <p className="mt-8 max-w-2xl text-lg sm:text-xl text-slate-body leading-relaxed">
@@ -172,7 +172,7 @@ function BrandMark() {
         stroke="currentColor"
         strokeWidth="2"
         fill="none"
-        className="text-accent"
+        className="text-heritage"
         strokeLinecap="square"
       />
     </svg>

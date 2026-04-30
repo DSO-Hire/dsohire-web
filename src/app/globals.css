@@ -1,47 +1,240 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
 
 /* ─────────────────────────────────────────
    DSO Hire — locked brand tokens
    See: /Users/cam/DSO Hire/Brand Assets/brand-identity-notes.md
+
+   NOTE: brand `accent` (Heritage green) is registered under the
+   `--color-heritage` namespace to avoid colliding with shadcn's
+   `--color-accent` (which means "subtle hover bg" in shadcn's vocab).
+   Use bg-heritage/text-heritage in app code; shadcn internals stay
+   on bg-accent/text-accent.
 ───────────────────────────────────────── */
 @theme {
-  /* Navy — primary structural color (type, dark surfaces, primary buttons) */
+  /* Navy — primary structural color */
   --color-ink: #14233F;
   --color-ink-1000: #070F1C;
   --color-ink-2: #1B2D4C;
   --color-ink-3: #243854;
   --color-ink-soft: #2D4262;
 
-  /* Heritage — primary accent (CTAs, eyebrows, highlights) */
-  --color-accent: #4D7A60;
-  --color-accent-deep: #2F5D4F;
-  --color-accent-light: #6B9279;
+  /* Heritage — primary brand accent (was --color-accent, renamed) */
+  --color-heritage: #4D7A60;
+  --color-heritage-deep: #2F5D4F;
+  --color-heritage-light: #6B9279;
 
   /* Ivory — page paper, warmer than clinical white */
   --color-ivory: #F7F4ED;
   --color-ivory-deep: #ECE7DB;
   --color-cream: #FAF7F1;
 
-  /* Slate — body text on light surfaces */
+  /* Slate — body text on light */
   --color-slate-body: #4A6278;
   --color-slate-meta: #6E8395;
-
-  /* Type system */
-  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-/* Tinted utilities and rules — used in callouts and dividers */
 :root {
-  --accent-tint: rgba(77, 122, 96, 0.14);
-  --accent-glow: rgba(77, 122, 96, 0.10);
+  /* Inline-style-only utilities (used in CSS, not Tailwind classes) */
+  --heritage-tint: rgba(77, 122, 96, 0.14);
+  --heritage-glow: rgba(77, 122, 96, 0.10);
   --rule: rgba(20, 35, 63, 0.08);
   --rule-strong: rgba(20, 35, 63, 0.14);
+
+  /* ─── shadcn semantic tokens — REWIRED to DSO Hire brand ─── */
+  --background: #F7F4ED;             /* ivory */
+  --foreground: #14233F;             /* ink */
+  --card: #FAF7F1;                   /* cream */
+  --card-foreground: #14233F;        /* ink */
+  --popover: #F7F4ED;                /* ivory */
+  --popover-foreground: #14233F;     /* ink */
+  --primary: #14233F;                /* ink — primary buttons are Navy */
+  --primary-foreground: #F7F4ED;     /* ivory text on navy */
+  --secondary: #FAF7F1;              /* cream */
+  --secondary-foreground: #14233F;   /* ink */
+  --muted: #ECE7DB;                  /* ivory-deep */
+  --muted-foreground: #4A6278;       /* slate */
+  --accent: #FAF7F1;                 /* cream — subtle hover bg in shadcn menus, NOT brand accent */
+  --accent-foreground: #14233F;      /* ink */
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: rgba(20, 35, 63, 0.08);
+  --input: rgba(20, 35, 63, 0.14);
+  --ring: #4D7A60;                   /* heritage — focus rings are brand green */
+  --chart-1: #14233F;
+  --chart-2: #4D7A60;
+  --chart-3: #4A6278;
+  --chart-4: #6B9279;
+  --chart-5: #6E8395;
+  --radius: 0;                       /* brand: no rounded corners on cards/buttons */
+  --sidebar: #F7F4ED;
+  --sidebar-foreground: #14233F;
+  --sidebar-primary: #14233F;
+  --sidebar-primary-foreground: #F7F4ED;
+  --sidebar-accent: #FAF7F1;
+  --sidebar-accent-foreground: #14233F;
+  --sidebar-border: rgba(20, 35, 63, 0.08);
+  --sidebar-ring: #4D7A60;
 }
 
 html, body {
   background: var(--color-ivory);
   color: var(--color-ink);
-  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+@theme inline {
+  /* Force Tailwind's font-sans utility to Manrope (override Geist) */
+  --font-heading: var(--font-manrope);
+  --font-sans: var(--font-manrope);
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+.dark {
+  /* dark mode — not used in v1 but keeping shadcn defaults so dark utilities don't error */
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+/* ─────────────────────────────────────────
+   .dso-prose — shared rules for Tiptap output
+   Used by both <JobDescriptionEditor /> (preview) and
+   <RenderedJobDescription /> (public render). One source of truth.
+───────────────────────────────────────── */
+.dso-prose h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-ink);
+}
+.dso-prose h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  margin-top: 1.25rem;
+  margin-bottom: 0.4rem;
+  color: var(--color-ink);
+}
+.dso-prose p {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  margin-bottom: 0.75rem;
+  color: var(--color-ink);
+}
+.dso-prose ul,
+.dso-prose ol {
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+.dso-prose ul { list-style: disc; }
+.dso-prose ol { list-style: decimal; }
+.dso-prose li {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 0.25rem;
+}
+.dso-prose blockquote {
+  border-left: 3px solid var(--color-heritage);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  color: var(--color-slate-body);
+}
+.dso-prose strong { font-weight: 700; }
+.dso-prose em { font-style: italic; }
+.dso-prose a {
+  color: var(--color-heritage);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.dso-prose a:hover { color: var(--color-heritage-deep); }
+.dso-prose p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--color-slate-meta);
+  float: left;
+  height: 0;
+  pointer-events: none;
 }
