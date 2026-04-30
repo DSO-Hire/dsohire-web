@@ -13,6 +13,8 @@
   "dependencies": {
     "@react-email/components": "^1.0.12",
     "@react-email/render": "^2.0.8",
+    "@supabase/ssr": "^0.10.2",
+    "@supabase/supabase-js": "^2.105.1",
     "@tiptap/extension-link": "^3.22.5",
     "@tiptap/react": "^3.22.5",
     "@tiptap/starter-kit": "^3.22.5",

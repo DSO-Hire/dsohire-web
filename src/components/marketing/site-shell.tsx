@@ -26,12 +26,9 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
 
 export function SiteNav() {
   return (
-    <nav className="fixed top-0 inset-x-0 z-50 h-[72px] px-6 sm:px-14 flex items-center justify-between backdrop-blur-md bg-ivory/85 border-b border-[var(--rule)]">
-      <Link href="/" className="flex items-center gap-3">
-        <BrandMark />
-        <span className="font-extrabold tracking-tight text-lg leading-none text-ink">
-          DSO<span className="text-heritage ml-1">Hire</span>
-        </span>
+    <nav className="fixed top-0 inset-x-0 z-50 h-[80px] px-6 sm:px-14 flex items-center justify-between backdrop-blur-md bg-ivory/85 border-b border-[var(--rule)]">
+      <Link href="/" className="flex items-center" aria-label="DSO Hire — home">
+        <BrandLockup height={42} />
       </Link>
       <ul className="hidden md:flex items-center gap-9 list-none">
         <NavLink href="/for-dsos">For DSOs</NavLink>
@@ -76,12 +73,7 @@ export function SiteFooter() {
       <div className="max-w-[1240px] mx-auto">
         <div className="grid grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-10 lg:gap-14 pb-12 border-b border-white/10 mb-9">
           <div>
-            <div className="flex items-center gap-3">
-              <BrandMark dark />
-              <span className="font-extrabold tracking-tight text-xl text-ivory">
-                DSO<span className="text-heritage ml-1">Hire</span>
-              </span>
-            </div>
+            <BrandLockup dark height={56} />
             <p className="text-[13px] text-ivory/55 leading-[1.7] mt-5 max-w-[280px]">
               The job board built for dental support organizations. One flat
               monthly fee. Unlimited multi-location postings. Made by operators,
@@ -171,6 +163,97 @@ function FooterLink({ href, children }: { href: string; children: React.ReactNod
   );
 }
 
+/**
+ * BrandLockup — the locked Bold Single Arch lockup (arch + Heritage accent arc
+ * + hairline divider + DSO/HIRE wordmark, width-matched). This is the canonical
+ * brand mark used on the site. Keep in sync with /public/logo files and the
+ * source SVGs in DSO Hire/Brand Assets/logo-files/.
+ */
+export function BrandLockup({
+  dark,
+  height = 36,
+}: {
+  dark?: boolean;
+  height?: number;
+}) {
+  const ink = dark ? "#F7F4ED" : "#14233F";
+  const dividerColor = dark
+    ? "rgba(247,244,237,0.18)"
+    : "rgba(20,35,63,0.18)";
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 124 44"
+      height={height}
+      style={{ height, width: "auto" }}
+      role="img"
+      aria-label="DSO Hire"
+    >
+      {/* Outer arch */}
+      <path
+        d="M 5 38 L 5 18 Q 5 6 22 6 L 28 6 Q 45 6 45 18 L 45 38"
+        fill="none"
+        stroke={ink}
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Heritage inner accent arc */}
+      <path
+        d="M 14 22 Q 14 16 22 16 L 32 16"
+        fill="none"
+        stroke="#4D7A60"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      {/* Vertical hairline divider between mark and wordmark */}
+      <line
+        x1="52"
+        y1="6"
+        x2="52"
+        y2="38"
+        stroke={dividerColor}
+        strokeWidth="0.8"
+      />
+      {/* DSO wordmark, heavy weight — explicit textLength locks the width
+          so the HIRE underneath matches exactly regardless of font rendering. */}
+      <text
+        x="58"
+        y="28"
+        fontFamily="'Manrope', 'Helvetica Neue', Arial, sans-serif"
+        fontSize="26"
+        fontWeight="800"
+        letterSpacing="-0.8"
+        fill={ink}
+        textLength="52"
+        lengthAdjust="spacingAndGlyphs"
+      >
+        DSO
+      </text>
+      {/* HIRE wordmark — same textLength as DSO above. lengthAdjust="spacing"
+          means only inter-letter spacing is adjusted, not glyph widths. Drop
+          letterSpacing so textLength is the only width driver. */}
+      <text
+        x="58"
+        y="38"
+        fontFamily="'Manrope', 'Helvetica Neue', Arial, sans-serif"
+        fontSize="9.5"
+        fontWeight="500"
+        fill="#4D7A60"
+        textLength="52"
+        lengthAdjust="spacing"
+      >
+        HIRE
+      </text>
+    </svg>
+  );
+}
+
+/**
+ * BrandMark — compact arch-only icon. Use for favicons, app icons, or
+ * tight-space contexts where the full wordmark won't fit (e.g., 24×24 cell).
+ * For nav and footer use BrandLockup instead.
+ */
 export function BrandMark({ dark }: { dark?: boolean }) {
   const stroke = dark ? "#F7F4ED" : "#14233F";
   return (

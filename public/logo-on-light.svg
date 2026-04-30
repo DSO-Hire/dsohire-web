@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 124 44" width="496" height="176">
+  <title>DSO Hire</title>
+  <desc>DSO Hire locked lockup — Bold Single Arch with width-matched HIRE wordmark.</desc>
+  <!-- Outer arch -->
+  <path d="M 5 38 L 5 18 Q 5 6 22 6 L 28 6 Q 45 6 45 18 L 45 38"
+    fill="none" stroke="#14233F" stroke-width="4"
+    stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Heritage inner accent arc -->
+  <path d="M 14 22 Q 14 16 22 16 L 32 16"
+    fill="none" stroke="#4D7A60" stroke-width="2" stroke-linecap="round"/>
+  <!-- Vertical hairline divider between mark and wordmark -->
+  <line x1="52" y1="6" x2="52" y2="38" stroke="rgba(20,35,63,0.18)" stroke-width="0.8"/>
+  <!-- DSO wordmark, heavy weight -->
+  <text x="58" y="28"
+    font-family="'Manrope', 'Helvetica Neue', Arial, sans-serif"
+    font-size="26" font-weight="800" letter-spacing="-0.8"
+    fill="#14233F">DSO</text>
+  <!-- HIRE wordmark, width-matched to DSO above. textLength+lengthAdjust is the
+       SVG-native way; letter-spacing is the bake-in fallback for renderers that
+       don't honor textLength (cairosvg, some print pipelines). Both target the
+       same width — whichever the renderer respects, we land on width-match. -->
+  <text x="58" y="38"
+    font-family="'Manrope', 'Helvetica Neue', Arial, sans-serif"
+    font-size="9.5" font-weight="500" letter-spacing="11.2"
+    fill="#4D7A60"
+    textLength="52.5" lengthAdjust="spacing">HIRE</text>
+</svg>

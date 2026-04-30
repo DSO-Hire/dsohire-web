@@ -79,6 +79,14 @@
   --sidebar-ring: #4D7A60;
 }
 
+html {
+  /* Base font-size — bumped from browser default 16px to 18px (12.5% larger).
+     Every rem-based size in the app (Tailwind's text-base, text-lg, headings,
+     spacing scales) inherits from this — the whole app scales up. Tweak here
+     if "make everything a little bigger / smaller" comes up later. */
+  font-size: 18px;
+}
+
 html, body {
   background: var(--color-ivory);
   color: var(--color-ink);

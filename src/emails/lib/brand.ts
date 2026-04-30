@@ -39,6 +39,11 @@ export const brand = {
 
   // URLs
   siteUrl: "https://dsohire.com",
-  logoUrl: "https://dsohire.com/email-logo.png", // TODO: upload a 192x192 brand mark to /public for emails
+  // Inline SVGs work in modern email clients (Apple Mail, Gmail webmail, iOS Mail).
+  // For Outlook desktop / other strict clients, render text wordmark fallback —
+  // currently Layout.tsx uses text-based wordmark for max compatibility.
+  logoLockupOnDark: "https://dsohire.com/logo-on-dark.svg",
+  logoLockupOnLight: "https://dsohire.com/logo-on-light.svg",
+  logoMonogram: "https://dsohire.com/logo-monogram.svg",
   supportEmail: "cam@dsohire.com",
 } as const;
