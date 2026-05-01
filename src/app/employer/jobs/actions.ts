@@ -12,6 +12,7 @@
 
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { requireActiveSubscriptionError } from "@/lib/billing/subscription";
 
 export interface JobActionState {
   ok: boolean;
@@ -31,6 +32,10 @@ export async function createJob(
   if ("error" in parsed) return { ok: false, error: parsed.error };
 
   const supabase = await createSupabaseServerClient();
+
+  // Feature gate — block job creation behind an active subscription.
+  const billingError = await requireActiveSubscriptionError(supabase, dsoId);
+  if (billingError) return { ok: false, error: billingError };
 
   const baseSlug = makeSlug(parsed.title);
   if (!baseSlug) return { ok: false, error: "Couldn't generate a URL slug." };

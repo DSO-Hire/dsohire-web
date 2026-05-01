@@ -11,6 +11,7 @@ import { redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getActiveSubscription } from "@/lib/billing/subscription";
 import { JobForm, type LocationOption } from "../job-form";
 import type { Metadata } from "next";
 
@@ -30,6 +31,10 @@ export default async function NewJobPage() {
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) redirect("/employer/onboarding");
+
+  // Feature gate — must have an active subscription to post a job.
+  const subscription = await getActiveSubscription(supabase, dsoUser.dso_id);
+  if (!subscription) redirect("/employer/billing");
 
   const { data: locations } = await supabase
     .from("dso_locations")

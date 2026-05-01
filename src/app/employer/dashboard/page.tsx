@@ -9,7 +9,9 @@
 import Link from "next/link";
 import { ArrowRight, Briefcase, Mail, MapPin, Users } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
+import { BillingBanner } from "@/components/employer/billing-banner";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getSubscriptionAnyStatus } from "@/lib/billing/subscription";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -56,6 +58,11 @@ export default async function EmployerDashboard() {
     .select("*", { count: "exact", head: true })
     .eq("dso_id", dsoId ?? "");
 
+  // Subscription status drives the billing banner at the top of the dashboard.
+  const subscription = dsoId
+    ? await getSubscriptionAnyStatus(supabase, dsoId)
+    : null;
+
   return (
     <EmployerShell active="dashboard">
       <header className="mb-10">
@@ -69,6 +76,9 @@ export default async function EmployerDashboard() {
           Here&apos;s where things stand at <strong className="text-ink font-bold">{dso?.name}</strong>.
         </p>
       </header>
+
+      {/* Billing alert — renders nothing when subscription is healthy */}
+      <BillingBanner subscription={subscription} />
 
       {/* KPI cards */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-[var(--rule)] border border-[var(--rule)]">
