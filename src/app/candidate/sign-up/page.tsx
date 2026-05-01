@@ -63,7 +63,7 @@ export default async function CandidateSignUpPage({ searchParams }: PageProps) {
                 "Save profile + resume once, reuse forever",
                 "Only verified mid-market DSOs — no recruiter spam",
                 "Track every application's status in one dashboard",
-                "Get notified when matching roles open",
+                "Email confirmation the moment your application is sent",
               ].map((f, i) => (
                 <li
                   key={i}

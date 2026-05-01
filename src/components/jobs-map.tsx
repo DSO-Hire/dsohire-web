@@ -78,20 +78,19 @@ const RADIUS_METERS = 14_484;
 const CIRCLE_VERTICES = 64;
 
 /* Available Mapbox styles — picker UI lets the user toggle. Privacy is
- * preserved across all of them because the ~9-mile circle dwarfs any
- * individual building even at high zoom. */
+ * preserved across both because the ~9-mile circle dwarfs any individual
+ * building even at high zoom. Cam settled on Streets + Satellite as the
+ * two options after testing the full set 2026-05-01. */
 const MAP_STYLES = [
-  { id: "light", label: "Light", url: "mapbox://styles/mapbox/light-v11" },
   { id: "streets", label: "Streets", url: "mapbox://styles/mapbox/streets-v12" },
   {
     id: "satellite-streets",
     label: "Satellite",
     url: "mapbox://styles/mapbox/satellite-streets-v12",
   },
-  { id: "outdoors", label: "Outdoors", url: "mapbox://styles/mapbox/outdoors-v12" },
 ] as const;
 type MapStyleId = (typeof MAP_STYLES)[number]["id"];
-const DEFAULT_STYLE_ID: MapStyleId = "light";
+const DEFAULT_STYLE_ID: MapStyleId = "streets";
 const STYLE_STORAGE_KEY = "dsohire:map-style";
 
 const ROLE_LABELS: Record<string, string> = {

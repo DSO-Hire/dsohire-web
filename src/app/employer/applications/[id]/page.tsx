@@ -15,7 +15,10 @@ import {
   FileText,
 } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  createSupabaseServerClient,
+  createSupabaseServiceRoleClient,
+} from "@/lib/supabase/server";
 import { StatusControls } from "./status-controls";
 import { NotesEditor } from "./notes-editor";
 import type { Metadata } from "next";
@@ -112,10 +115,23 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   };
   const cand = (rawCand ?? null) as CandRow | null;
 
-  // Pull candidate's email from auth.users via service-role lookup — but
-  // we don't have that here on the client side. Fall back to undefined
-  // and require Cam to provision an admin lookup later if needed.
-  // For now we just show what's on the public candidates table.
+  // Pull the candidate's email from auth.users via service-role lookup.
+  // candidates.auth_user_id → auth.users.email. The candidate row itself
+  // doesn't store email (it's an auth-system-of-record value), so we go
+  // through admin.getUserById. Failures are non-fatal — the rest of the
+  // page renders without the contact email if anything goes wrong.
+  let candidateEmail: string | null = null;
+  if (cand?.auth_user_id) {
+    try {
+      const admin = createSupabaseServiceRoleClient();
+      const { data: authUser } = await admin.auth.admin.getUserById(
+        cand.auth_user_id
+      );
+      candidateEmail = authUser?.user?.email ?? null;
+    } catch (err) {
+      console.warn("[applications] candidate email lookup failed", err);
+    }
+  }
 
   // Resume signed URL (1-hour expiry). Resume can come from the application
   // override or fall back to the candidate's saved resume.
@@ -303,23 +319,45 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
               Contact
             </div>
-            {cand?.phone && (
-              <div className="text-[13px] text-ink mb-1.5">{cand.phone}</div>
+
+            {candidateEmail ? (
+              <a
+                href={`mailto:${candidateEmail}?subject=${encodeURIComponent(
+                  `Re: your application to ${job.title as string}`
+                )}`}
+                className="inline-flex items-start gap-1.5 text-[13px] text-heritage hover:text-heritage-deep font-semibold mb-1.5 break-all leading-snug"
+              >
+                <Mail className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
+                {candidateEmail}
+              </a>
+            ) : (
+              <div className="text-[12px] text-slate-meta italic mb-1.5">
+                Email unavailable — reply to the application notification
+                email instead.
+              </div>
             )}
+
+            {cand?.phone && (
+              <div className="text-[13px] text-ink mt-2 mb-1.5">
+                {cand.phone}
+              </div>
+            )}
+
             {cand?.linkedin_url && (
               <a
                 href={cand.linkedin_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-[12px] text-heritage hover:text-heritage-deep font-semibold mb-1.5"
+                className="inline-flex items-center gap-1.5 text-[12px] text-heritage hover:text-heritage-deep font-semibold mt-1"
               >
                 <ExternalLink className="h-3.5 w-3.5" />
                 LinkedIn profile
               </a>
             )}
-            <div className="text-[11px] text-slate-meta mt-3 pt-3 border-t border-[var(--rule)]">
-              <Mail className="inline h-3 w-3 mr-1 align-text-top" />
-              Reach out via DSO Hire-routed email (coming Phase 2 Week 5).
+
+            <div className="text-[11px] text-slate-meta mt-4 pt-3 border-t border-[var(--rule)] leading-relaxed">
+              Replying to the candidate&apos;s email also routes back to the
+              application. Internal notes below are not visible to the candidate.
             </div>
           </section>
 

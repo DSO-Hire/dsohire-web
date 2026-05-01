@@ -300,9 +300,9 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
                 href="/candidate/sign-up"
                 className="text-heritage underline underline-offset-2 hover:text-heritage-deep font-semibold"
               >
-                set up a job alert
+                create a free candidate account
               </Link>{" "}
-              and we&apos;ll email you when matching roles open.
+              so you&apos;re ready to apply the moment the right role opens.
             </p>
           </div>
         ) : (
