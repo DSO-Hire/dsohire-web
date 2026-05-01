@@ -277,7 +277,11 @@ export async function verifySignUpEmployer(
     };
   }
 
-  redirect("/employer/onboarding");
+  // After verification, send them to Stripe Checkout (sign-up step 3).
+  // /employer/checkout reads the requested_tier from user_metadata, creates
+  // a session, and redirects to Stripe-hosted checkout. After payment, Stripe
+  // redirects back to /employer/checkout/success → /employer/onboarding.
+  redirect("/employer/checkout");
 }
 
 export async function resendSignUpCode(
