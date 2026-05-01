@@ -13,6 +13,7 @@
  */
 
 import Link from "next/link";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   return (
@@ -24,7 +25,58 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function SiteNav() {
+/**
+ * SiteNav is async so the "Post a Job" CTA can be context-aware:
+ *   - Logged out → /pricing (marketing surface that explains what posting means)
+ *   - Logged in with a DSO membership → /employer/jobs/new (skip the
+ *     marketing detour; /employer/jobs/new will internally redirect to
+ *     /employer/billing or /employer/onboarding if state isn't fully ready)
+ *   - Logged in candidate (no DSO) → /pricing (still the right marketing
+ *     surface; the page itself explains who this product is for)
+ *
+ * Sign-in button gets the same context awareness — once you're signed in,
+ * "Sign In" becomes "Dashboard" and routes to your audience-specific home.
+ */
+export async function SiteNav() {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let postAJobHref = "/pricing";
+  let signInHref: string = "/sign-in";
+  let signInLabel: string = "Sign In";
+
+  if (user) {
+    const [{ data: dsoUser }, { data: candidate }] = await Promise.all([
+      supabase
+        .from("dso_users")
+        .select("dso_id")
+        .eq("auth_user_id", user.id)
+        .maybeSingle(),
+      supabase
+        .from("candidates")
+        .select("id")
+        .eq("auth_user_id", user.id)
+        .maybeSingle(),
+    ]);
+
+    if (dsoUser) {
+      // Paid employer (or one in onboarding/billing) — let the destination
+      // handle any state-specific redirect.
+      postAJobHref = "/employer/jobs/new";
+      signInHref = "/employer/dashboard";
+      signInLabel = "Dashboard";
+    } else if (candidate) {
+      // Signed-in candidate — keep the post-a-job CTA pointed at marketing
+      // (they're not the audience), but the sign-in button becomes their
+      // own dashboard.
+      signInHref = "/candidate/dashboard";
+      signInLabel = "Dashboard";
+    }
+    // else: signed in but no audience row yet (mid-signup) → defaults stand.
+  }
+
   return (
     <nav className="fixed top-0 inset-x-0 z-50 h-[80px] px-6 sm:px-14 flex items-center justify-between backdrop-blur-md bg-ivory/85 border-b border-[var(--rule)]">
       <Link href="/" className="flex items-center" aria-label="DSO Hire — home">
@@ -38,13 +90,13 @@ export function SiteNav() {
       </ul>
       <div className="flex items-center gap-3">
         <Link
-          href="/sign-in"
+          href={signInHref}
           className="hidden sm:inline-flex text-[11px] font-semibold tracking-[1.5px] uppercase text-slate-body hover:text-ink transition-colors"
         >
-          Sign In
+          {signInLabel}
         </Link>
         <Link
-          href="/pricing"
+          href={postAJobHref}
           className="px-5 py-2.5 bg-ink text-ivory text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors"
         >
           Post a Job
