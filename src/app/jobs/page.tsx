@@ -108,7 +108,13 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
         <p className="text-base sm:text-lg text-slate-body leading-relaxed max-w-[640px]">
           Every job on DSO Hire is posted by a verified dental support
           organization — not a recruiter, not a staffing agency, not a solo
-          practice with one location.
+          practice with one location.{" "}
+          <Link
+            href="/companies"
+            className="text-heritage hover:text-heritage-deep underline underline-offset-2 font-semibold"
+          >
+            Browse DSOs →
+          </Link>
         </p>
 
         {/* Search bar */}
