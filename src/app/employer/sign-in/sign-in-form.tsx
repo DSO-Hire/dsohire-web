@@ -1,17 +1,23 @@
 "use client";
 
-import { useActionState } from "react";
-import { Mail, ArrowLeft } from "lucide-react";
+import { useState, useActionState } from "react";
+import { Mail, ArrowLeft, KeyRound } from "lucide-react";
 import {
   signInEmployer,
   verifySignInEmployer,
+  signInWithPasswordEmployer,
   type SignInState,
 } from "./actions";
 
 const initialEmail: SignInState = { ok: false, step: "email" };
 const initialVerify: SignInState = { ok: false, step: "verify" };
+const initialPassword: SignInState = { ok: false, step: "email" };
+
+type Mode = "password" | "code";
 
 export function SignInForm() {
+  const [mode, setMode] = useState<Mode>("password");
+
   const [emailState, sendCode, sendingCode] = useActionState(
     signInEmployer,
     initialEmail
@@ -20,15 +26,18 @@ export function SignInForm() {
     verifySignInEmployer,
     initialVerify
   );
+  const [passwordState, signInPassword, signingInPassword] = useActionState(
+    signInWithPasswordEmployer,
+    initialPassword
+  );
 
-  // After step 1 succeeds, the email-state action returns step=verify; we
-  // render the OTP entry form. The verify action redirects on success so
-  // we never need to render a "signed in!" state — the page navigates away.
+  // After step 1 of code flow succeeds, show OTP input.
   const showVerifyStep =
     emailState.ok && emailState.step === "verify" && emailState.email;
-  const email = emailState.email ?? verifyState.email;
+  const codeEmail = emailState.email ?? verifyState.email;
 
-  if (showVerifyStep && email) {
+  // ─── OTP code verify step ───────────────────────────────────
+  if (mode === "code" && showVerifyStep && codeEmail) {
     return (
       <div className="space-y-5">
         <div className="border-l-4 border-heritage bg-cream p-5">
@@ -41,7 +50,7 @@ export function SignInForm() {
         </div>
 
         <form action={verify} className="space-y-4">
-          <input type="hidden" name="email" value={email} />
+          <input type="hidden" name="email" value={codeEmail} />
 
           <div>
             <label
@@ -91,7 +100,7 @@ export function SignInForm() {
           </button>
 
           <form action={sendCode}>
-            <input type="hidden" name="email" value={email} />
+            <input type="hidden" name="email" value={codeEmail} />
             <button
               type="submit"
               disabled={sendingCode}
@@ -105,57 +114,135 @@ export function SignInForm() {
     );
   }
 
+  // ─── Code mode (email entry) ────────────────────────────────
+  if (mode === "code") {
+    return (
+      <form action={sendCode} className="space-y-5">
+        <div className="hidden" aria-hidden="true">
+          <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+        </div>
+
+        <div>
+          <label
+            htmlFor="employer-email-code"
+            className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+          >
+            Work Email <span className="text-heritage">*</span>
+          </label>
+          <input
+            id="employer-email-code"
+            type="email"
+            name="email"
+            required
+            autoComplete="email"
+            autoFocus
+            placeholder="you@yourdso.com"
+            defaultValue={emailState.email ?? passwordState.email ?? ""}
+            className="w-full px-4 py-3.5 bg-cream border border-[var(--rule-strong)] text-ink text-[15px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+          />
+        </div>
+
+        {emailState.error && (
+          <div className="bg-red-50 border-l-4 border-red-500 p-4">
+            <p className="text-[13px] text-red-900">{emailState.error}</p>
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={sendingCode}
+          className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {sendingCode ? "Sending Code…" : "Send Sign-In Code"}
+          {!sendingCode && <Mail className="h-4 w-4" />}
+        </button>
+
+        <div className="pt-2 text-center">
+          <button
+            type="button"
+            onClick={() => setMode("password")}
+            className="text-[12px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
+          >
+            ← Use password instead
+          </button>
+        </div>
+      </form>
+    );
+  }
+
+  // ─── Password mode (default) ────────────────────────────────
   return (
-    <form action={sendCode} className="space-y-5">
+    <form action={signInPassword} className="space-y-5">
       <div className="hidden" aria-hidden="true">
         <input type="text" name="website" tabIndex={-1} autoComplete="off" />
       </div>
 
       <div>
         <label
-          htmlFor="employer-email"
+          htmlFor="employer-email-pw"
           className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
         >
           Work Email <span className="text-heritage">*</span>
         </label>
         <input
-          id="employer-email"
+          id="employer-email-pw"
           type="email"
           name="email"
           required
           autoComplete="email"
           autoFocus
           placeholder="you@yourdso.com"
-          defaultValue={emailState.email ?? ""}
+          defaultValue={passwordState.email ?? ""}
           className="w-full px-4 py-3.5 bg-cream border border-[var(--rule-strong)] text-ink text-[15px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
         />
       </div>
 
-      {emailState.error && (
+      <div>
+        <label
+          htmlFor="employer-password"
+          className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+        >
+          Password <span className="text-heritage">*</span>
+        </label>
+        <input
+          id="employer-password"
+          type="password"
+          name="password"
+          required
+          autoComplete="current-password"
+          placeholder="Your password"
+          className="w-full px-4 py-3.5 bg-cream border border-[var(--rule-strong)] text-ink text-[15px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+        />
+      </div>
+
+      {passwordState.error && (
         <div className="bg-red-50 border-l-4 border-red-500 p-4">
-          <p className="text-[13px] text-red-900">{emailState.error}</p>
+          <p className="text-[13px] text-red-900">{passwordState.error}</p>
         </div>
       )}
 
       <button
         type="submit"
-        disabled={sendingCode}
+        disabled={signingInPassword}
         className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        {sendingCode ? "Sending Code…" : "Send Sign-In Code"}
-        {!sendingCode && <Mail className="h-4 w-4" />}
+        {signingInPassword ? "Signing In…" : "Sign In"}
+        {!signingInPassword && <KeyRound className="h-4 w-4" />}
       </button>
 
-      <p className="text-[12px] text-slate-meta leading-relaxed">
-        We&apos;ll email a 6-digit code. Enter it on the next screen — works in
-        any browser, no link clicking. Read our{" "}
-        <a
-          href="/legal/privacy"
-          className="text-heritage underline underline-offset-2 hover:text-heritage-deep"
+      <div className="pt-2 text-center">
+        <button
+          type="button"
+          onClick={() => setMode("code")}
+          className="text-[12px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
         >
-          privacy policy
-        </a>
-        .
+          No password? Email me a sign-in code →
+        </button>
+      </div>
+
+      <p className="text-[11px] text-slate-meta leading-relaxed text-center pt-3 border-t border-[var(--rule)]">
+        Forgot your password? Sign in with a code, then reset it from{" "}
+        <span className="font-semibold">Settings</span>.
       </p>
     </form>
   );

@@ -138,6 +138,14 @@ export function SignUpForm({ initialTier }: { initialTier: PricingTier }) {
         placeholder="you@yourdso.com"
         required
       />
+      <Field
+        label="Password (optional)"
+        name="password"
+        type="password"
+        autoComplete="new-password"
+        placeholder="At least 8 characters"
+        helper="Set a password if you'd like to sign in without an emailed code each time. You can set or change this anytime in Settings."
+      />
 
       <div className="pt-2 border-t border-[var(--rule)]" />
 

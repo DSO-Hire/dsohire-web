@@ -33,6 +33,7 @@ export async function signUpCandidate(
 ): Promise<CandidateSignUpState> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const fullName = String(formData.get("full_name") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
   const honeypot = String(formData.get("website") ?? "").trim();
   const nextRaw = String(formData.get("next") ?? "").trim();
   const next = NEXT_ALLOWLIST.test(nextRaw) ? nextRaw : "/candidate/dashboard";
@@ -47,6 +48,14 @@ export async function signUpCandidate(
   if (!fullName) {
     return { ok: false, step: "form", next, error: "Please enter your full name." };
   }
+  if (password && password.length < 8) {
+    return {
+      ok: false,
+      step: "form",
+      next,
+      error: "If you're setting a password, it needs to be at least 8 characters. Or leave it blank — you can sign in via emailed code.",
+    };
+  }
 
   const admin = createSupabaseServiceRoleClient();
 
@@ -54,6 +63,7 @@ export async function signUpCandidate(
     await admin.auth.admin.createUser({
       email,
       email_confirm: false,
+      ...(password ? { password } : {}),
       user_metadata: {
         full_name: fullName,
         role_during_signup: "candidate",

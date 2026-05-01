@@ -142,7 +142,14 @@ export function CandidateSignUpForm({ next }: { next?: string }) {
         autoComplete="email"
         placeholder="you@email.com"
         required
-        helper="We'll email a 6-digit code. No password needed."
+      />
+      <Field
+        label="Password (optional)"
+        name="password"
+        type="password"
+        autoComplete="new-password"
+        placeholder="At least 8 characters"
+        helper="Set a password if you'd like to sign in without an emailed code each time. You can set or change this anytime in Settings."
       />
 
       {formState.error && (

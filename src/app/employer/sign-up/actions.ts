@@ -68,6 +68,7 @@ export async function signUpEmployer(
 ): Promise<SignUpState> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const fullName = String(formData.get("full_name") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
   const dsoName = String(formData.get("dso_name") ?? "").trim();
   const headquartersCity = String(formData.get("headquarters_city") ?? "").trim();
   const headquartersState = String(formData.get("headquarters_state") ?? "")
@@ -106,6 +107,13 @@ export async function signUpEmployer(
       error: "Please enter your number of practice locations.",
     };
   }
+  if (password && password.length < 8) {
+    return {
+      ok: false,
+      step: "form",
+      error: "If you're setting a password, it needs to be at least 8 characters. Or leave it blank — you can sign in via emailed code.",
+    };
+  }
   const tier = isPricingTier(tierParam) ? tierParam : "starter";
 
   const baseSlug = makeSlug(dsoName);
@@ -125,6 +133,7 @@ export async function signUpEmployer(
     await admin.auth.admin.createUser({
       email,
       email_confirm: false,
+      ...(password ? { password } : {}),
       user_metadata: {
         full_name: fullName,
         role_during_signup: "employer",

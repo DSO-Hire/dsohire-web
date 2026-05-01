@@ -142,3 +142,64 @@ export async function verifySignInEmployer(
   }
   redirect("/employer/dashboard");
 }
+
+/**
+ * Password sign-in — alternative to OTP code for users who've set a password.
+ */
+export async function signInWithPasswordEmployer(
+  _prev: SignInState,
+  formData: FormData
+): Promise<SignInState> {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const password = String(formData.get("password") ?? "");
+  const honeypot = String(formData.get("website") ?? "").trim();
+
+  if (honeypot) {
+    return { ok: true, step: "email", email };
+  }
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { ok: false, step: "email", error: "Please enter a valid email address." };
+  }
+  if (!password) {
+    return { ok: false, step: "email", email, error: "Please enter your password." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error || !data.user) {
+    const lower = (error?.message ?? "").toLowerCase();
+    if (lower.includes("invalid")) {
+      return {
+        ok: false,
+        step: "email",
+        email,
+        error: "Email or password didn't match. Try again, or sign in with a code instead.",
+      };
+    }
+    if (lower.includes("not confirmed") || lower.includes("email not confirmed")) {
+      return {
+        ok: false,
+        step: "email",
+        email,
+        error: "Verify your email first — sign in with a code below to confirm, then set/use your password.",
+      };
+    }
+    return {
+      ok: false,
+      step: "email",
+      email,
+      error: error?.message ?? "Sign-in failed. Try again or use a code instead.",
+    };
+  }
+
+  const { data: dsoUser } = await supabase
+    .from("dso_users")
+    .select("id")
+    .eq("auth_user_id", data.user.id)
+    .maybeSingle();
+
+  if (!dsoUser) redirect("/employer/onboarding");
+  redirect("/employer/dashboard");
+}

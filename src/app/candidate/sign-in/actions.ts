@@ -114,3 +114,62 @@ export async function verifySignInCandidate(
 
   redirect(next);
 }
+
+/**
+ * Password sign-in for candidates — alternative to OTP code.
+ */
+export async function signInWithPasswordCandidate(
+  _prev: CandidateSignInState,
+  formData: FormData
+): Promise<CandidateSignInState> {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const password = String(formData.get("password") ?? "");
+  const honeypot = String(formData.get("website") ?? "").trim();
+  const nextRaw = String(formData.get("next") ?? "").trim();
+  const next = NEXT_ALLOWLIST.test(nextRaw) ? nextRaw : "/candidate/dashboard";
+
+  if (honeypot) {
+    return { ok: true, step: "email", email, next };
+  }
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { ok: false, step: "email", next, error: "Please enter a valid email address." };
+  }
+  if (!password) {
+    return { ok: false, step: "email", email, next, error: "Please enter your password." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error || !data.user) {
+    const lower = (error?.message ?? "").toLowerCase();
+    if (lower.includes("invalid")) {
+      return {
+        ok: false,
+        step: "email",
+        email,
+        next,
+        error: "Email or password didn't match. Try again, or sign in with a code instead.",
+      };
+    }
+    if (lower.includes("not confirmed")) {
+      return {
+        ok: false,
+        step: "email",
+        email,
+        next,
+        error: "Verify your email first — sign in with a code below to confirm, then use your password.",
+      };
+    }
+    return {
+      ok: false,
+      step: "email",
+      email,
+      next,
+      error: error?.message ?? "Sign-in failed. Try again or use a code instead.",
+    };
+  }
+
+  redirect(next);
+}
