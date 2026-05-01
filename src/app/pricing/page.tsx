@@ -9,12 +9,13 @@
  */
 
 import Link from "next/link";
-import { ArrowRight, Check, Minus } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import {
   getAllTiers,
   type TierConfig,
   type PricingTier,
 } from "@/lib/stripe/prices";
+import { FaqAccordion } from "./faq-accordion";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -93,14 +94,7 @@ function TierCard({ tier }: { tier: TierConfig }) {
       )}
 
       <div
-        className={`text-[9px] font-bold tracking-[2.5px] uppercase mb-3.5 ${
-          isFeatured ? "text-heritage-light" : "text-heritage-deep"
-        }`}
-      >
-        {tier.name}
-      </div>
-      <div
-        className={`text-lg font-extrabold tracking-[-0.4px] mb-1.5 ${
+        className={`text-2xl font-extrabold tracking-[-0.6px] mb-2 ${
           isFeatured ? "text-ivory" : "text-ink"
         }`}
       >
@@ -190,73 +184,83 @@ interface MatrixRow {
   values: Record<PricingTier, string | boolean>;
 }
 
-const COMPARE_MATRIX: MatrixRow[] = [
+interface MatrixGroup {
+  label: string;
+  rows: MatrixRow[];
+}
+
+const COMPARE_GROUPS: MatrixGroup[] = [
   {
-    feature: "Active job listings",
-    values: {
-      founding: "Up to 25",
-      starter: "Up to 25",
-      growth: "Unlimited",
-      enterprise: "Unlimited",
-    },
+    label: "Capacity",
+    rows: [
+      {
+        feature: "Active job listings",
+        values: { founding: "Up to 25", starter: "Up to 25", growth: "Unlimited", enterprise: "Unlimited" },
+      },
+      {
+        feature: "Practice locations covered",
+        values: { founding: "All", starter: "All", growth: "All", enterprise: "All" },
+      },
+      {
+        feature: "Team members",
+        values: { founding: "Up to 3", starter: "Up to 5", growth: "Unlimited", enterprise: "Unlimited" },
+      },
+    ],
   },
   {
-    feature: "Practice locations covered",
-    values: {
-      founding: "All",
-      starter: "All",
-      growth: "All",
-      enterprise: "All",
-    },
+    label: "Hiring tools",
+    rows: [
+      {
+        feature: "Application kanban + status tracking",
+        values: { founding: true, starter: true, growth: true, enterprise: true },
+      },
+      {
+        feature: "Multi-location posting in one flow",
+        values: { founding: true, starter: true, growth: true, enterprise: true },
+      },
+      {
+        feature: "Custom screening questions per job",
+        values: { founding: false, starter: false, growth: true, enterprise: true },
+      },
+      {
+        feature: "Custom branding on company page",
+        values: { founding: false, starter: false, growth: true, enterprise: true },
+      },
+      {
+        feature: "Cross-job application inbox",
+        values: { founding: false, starter: false, growth: true, enterprise: true },
+      },
+    ],
   },
   {
-    feature: "Team members",
-    values: {
-      founding: "Up to 3",
-      starter: "Up to 5",
-      growth: "Unlimited",
-      enterprise: "Unlimited",
-    },
+    label: "Support",
+    rows: [
+      {
+        feature: "Priority email support",
+        values: { founding: false, starter: false, growth: true, enterprise: true },
+      },
+      {
+        feature: "Dedicated account manager",
+        values: { founding: false, starter: false, growth: false, enterprise: true },
+      },
+      {
+        feature: "SLA with response-time guarantees",
+        values: { founding: false, starter: false, growth: false, enterprise: true },
+      },
+    ],
   },
   {
-    feature: "Application kanban + status tracking",
-    values: { founding: true, starter: true, growth: true, enterprise: true },
-  },
-  {
-    feature: "Multi-location posting in one flow",
-    values: { founding: true, starter: true, growth: true, enterprise: true },
-  },
-  {
-    feature: "Custom screening questions per job",
-    values: { founding: false, starter: false, growth: true, enterprise: true },
-  },
-  {
-    feature: "Custom branding on /companies/[slug]",
-    values: { founding: false, starter: false, growth: true, enterprise: true },
-  },
-  {
-    feature: "Cross-job application inbox",
-    values: { founding: false, starter: false, growth: true, enterprise: true },
-  },
-  {
-    feature: "Priority email support",
-    values: { founding: false, starter: false, growth: true, enterprise: true },
-  },
-  {
-    feature: "Dedicated account manager",
-    values: { founding: false, starter: false, growth: false, enterprise: true },
-  },
-  {
-    feature: "SLA with response-time guarantees",
-    values: { founding: false, starter: false, growth: false, enterprise: true },
-  },
-  {
-    feature: "Founding-customer badge",
-    values: { founding: true, starter: false, growth: false, enterprise: false },
-  },
-  {
-    feature: "12-month rate lock",
-    values: { founding: true, starter: false, growth: false, enterprise: false },
+    label: "Founding-tier exclusives",
+    rows: [
+      {
+        feature: "Founding-customer badge",
+        values: { founding: true, starter: false, growth: false, enterprise: false },
+      },
+      {
+        feature: "12-month rate lock",
+        values: { founding: true, starter: false, growth: false, enterprise: false },
+      },
+    ],
   },
 ];
 
@@ -271,60 +275,117 @@ function CompareMatrix({ tiers }: { tiers: TierConfig[] }) {
       </h2>
 
       <div className="overflow-x-auto -mx-6 sm:-mx-14 px-6 sm:px-14">
-        <table className="w-full min-w-[800px] border-collapse">
+        <table className="w-full min-w-[860px] border-collapse">
+          {/* ── Branded navy header row ── */}
           <thead>
-            <tr className="border-b border-[var(--rule-strong)]">
-              <th className="text-left text-[10px] font-bold tracking-[2px] uppercase text-slate-body py-4 pr-6 align-bottom">
+            <tr className="bg-ink">
+              <th className="text-left text-[10px] font-bold tracking-[2.5px] uppercase text-ivory/60 py-6 pl-5 pr-6 align-bottom rounded-tl-sm">
                 Feature
               </th>
-              {tiers.map((tier) => (
-                <th
-                  key={tier.id}
-                  className={`text-left text-[10px] font-bold tracking-[2px] uppercase py-4 px-3 align-bottom ${
-                    tier.badge === "Most popular" ? "text-heritage-deep" : "text-slate-body"
-                  }`}
-                >
-                  <div className="text-[14px] font-extrabold tracking-[-0.3px] text-ink mb-1">
-                    {tier.name}
-                  </div>
-                  <div className="text-[11px] font-semibold text-slate-meta">
-                    ${tier.monthlyPrice.toLocaleString()}/mo
-                  </div>
-                </th>
-              ))}
+              {tiers.map((tier, idx) => {
+                const isFeatured = tier.badge === "Most popular";
+                const isLast = idx === tiers.length - 1;
+                return (
+                  <th
+                    key={tier.id}
+                    className={`text-left py-6 px-4 align-bottom relative ${
+                      isFeatured ? "bg-ink-soft" : ""
+                    } ${isLast ? "rounded-tr-sm pr-5" : ""}`}
+                  >
+                    {isFeatured && (
+                      <span className="absolute top-2.5 right-3 inline-flex items-center px-2 py-0.5 bg-heritage text-ivory text-[8px] font-bold tracking-[1.5px] uppercase">
+                        Most Popular
+                      </span>
+                    )}
+                    <div className="text-[16px] font-extrabold tracking-[-0.4px] text-ivory mb-1">
+                      {tier.name}
+                    </div>
+                    <div className="text-[12px] font-semibold text-ivory/55">
+                      ${tier.monthlyPrice.toLocaleString()}/mo
+                    </div>
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
-            {COMPARE_MATRIX.map((row, i) => (
-              <tr
-                key={i}
-                className={`border-b border-[var(--rule)] ${i % 2 === 0 ? "bg-cream/50" : ""}`}
-              >
-                <td className="text-[13px] text-ink py-3 pr-6 leading-snug">
-                  {row.feature}
-                </td>
-                {tiers.map((tier) => {
-                  const value = row.values[tier.id];
-                  return (
-                    <td key={tier.id} className="text-[13px] text-ink py-3 px-3">
-                      {typeof value === "boolean" ? (
-                        value ? (
-                          <Check className="h-4 w-4 text-heritage" />
-                        ) : (
-                          <Minus className="h-4 w-4 text-slate-meta/40" />
-                        )
-                      ) : (
-                        <span>{value}</span>
-                      )}
-                    </td>
-                  );
-                })}
-              </tr>
+            {COMPARE_GROUPS.map((group, gi) => (
+              <MatrixGroupBlock
+                key={gi}
+                group={group}
+                tiers={tiers}
+                isFirst={gi === 0}
+              />
             ))}
           </tbody>
         </table>
       </div>
     </section>
+  );
+}
+
+function MatrixGroupBlock({
+  group,
+  tiers,
+  isFirst,
+}: {
+  group: MatrixGroup;
+  tiers: TierConfig[];
+  isFirst: boolean;
+}) {
+  return (
+    <>
+      {/* ── Group label band ── */}
+      <tr className={`bg-cream ${isFirst ? "" : "border-t-4 border-white"}`}>
+        <td
+          colSpan={tiers.length + 1}
+          className="py-3 pl-5 pr-4 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep"
+        >
+          <span className="inline-flex items-center gap-2.5">
+            <span className="block w-5 h-px bg-heritage" />
+            {group.label}
+          </span>
+        </td>
+      </tr>
+      {/* ── Group rows ── */}
+      {group.rows.map((row, ri) => (
+        <tr
+          key={ri}
+          className="border-b border-[var(--rule)] hover:bg-cream/40 transition-colors"
+        >
+          <td className="text-[13.5px] text-ink py-4 pl-5 pr-6 leading-snug font-medium">
+            {row.feature}
+          </td>
+          {tiers.map((tier) => {
+            const value = row.values[tier.id];
+            const isFeatured = tier.badge === "Most popular";
+            return (
+              <td
+                key={tier.id}
+                className={`text-[13px] py-4 px-4 align-middle ${
+                  isFeatured ? "bg-cream/60" : ""
+                }`}
+              >
+                {typeof value === "boolean" ? (
+                  value ? (
+                    <Check
+                      className="h-4 w-4 text-heritage"
+                      strokeWidth={3}
+                    />
+                  ) : (
+                    <span className="text-[18px] leading-none text-slate-meta/30 font-light">
+                      —
+                    </span>
+                  )
+                ) : (
+                  <span className="text-ink font-semibold">{value}</span>
+                )}
+              </td>
+            );
+          })}
+        </tr>
+      ))}
+    </>
   );
 }
 
@@ -375,16 +436,7 @@ function FAQ() {
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink mb-12">
           Common questions.
         </h2>
-        <ul className="list-none border-t border-[var(--rule)]">
-          {FAQ_ITEMS.map((item, i) => (
-            <li key={i} className="border-b border-[var(--rule)] py-7">
-              <h3 className="text-[15px] font-extrabold tracking-[-0.2px] text-ink mb-2.5">
-                {item.q}
-              </h3>
-              <p className="text-[14px] text-slate-body leading-relaxed">{item.a}</p>
-            </li>
-          ))}
-        </ul>
+        <FaqAccordion items={FAQ_ITEMS} />
       </div>
     </section>
   );
