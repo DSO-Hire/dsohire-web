@@ -8,10 +8,21 @@
  *
  * Idempotency: if an application for (job_id, candidate_id) already exists,
  * we update its cover_letter + resume_url instead of inserting again.
+ *
+ * Side effects (fire-and-forget — never block apply success):
+ *   - Email candidate confirmation (ApplicationReceived)
+ *   - Email all DSO members of the new application (NewApplication)
+ *   Both sends are logged to email_log via lib/email/send.
  */
 
 import { revalidatePath } from "next/cache";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  createSupabaseServerClient,
+  createSupabaseServiceRoleClient,
+} from "@/lib/supabase/server";
+import { sendEmail } from "@/lib/email/send";
+import { ApplicationReceived } from "@/emails/candidate/ApplicationReceived";
+import { NewApplication } from "@/emails/employer/NewApplication";
 
 export interface ApplyState {
   ok: boolean;
@@ -26,6 +37,8 @@ const RESUME_MIME = new Set([
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ]);
 const RESUME_MAX_BYTES = 10 * 1024 * 1024; // 10 MB — must match storage.buckets
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
 
 export async function applyToJob(
   _prev: ApplyState,
@@ -54,7 +67,7 @@ export async function applyToJob(
 
   const { data: candidate } = await supabase
     .from("candidates")
-    .select("id, full_name, resume_url")
+    .select("id, full_name, headline, resume_url")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!candidate) {
@@ -67,7 +80,7 @@ export async function applyToJob(
   // Verify job is active
   const { data: job } = await supabase
     .from("jobs")
-    .select("id, title, status, deleted_at")
+    .select("id, dso_id, title, status, deleted_at")
     .eq("id", jobId)
     .maybeSingle();
   if (!job || (job.status as string) !== "active" || job.deleted_at) {
@@ -156,17 +169,34 @@ export async function applyToJob(
     };
   }
 
-  const { error: insertError } = await supabase.from("applications").insert({
-    job_id: jobId,
-    candidate_id: candidate.id as string,
-    cover_letter: coverLetter || null,
-    resume_url: resumeUrl,
-    status: "new",
-  });
+  const { data: newApp, error: insertError } = await supabase
+    .from("applications")
+    .insert({
+      job_id: jobId,
+      candidate_id: candidate.id as string,
+      cover_letter: coverLetter || null,
+      resume_url: resumeUrl,
+      status: "new",
+    })
+    .select("id")
+    .single();
 
   if (insertError) {
     return { ok: false, error: insertError.message };
   }
+
+  // Fire transactional emails — fire-and-forget, never block on these.
+  // Each helper has its own try/catch and logs failures to email_log.
+  void sendApplicationEmails({
+    applicationId: newApp?.id as string,
+    jobId,
+    candidateId: candidate.id as string,
+    candidateAuthUserId: user.id,
+    candidateName: (candidate.full_name as string | null) ?? null,
+    candidateHeadline: (candidate.headline as string | null) ?? null,
+    dsoId: job.dso_id as string,
+    jobTitle: job.title as string,
+  });
 
   revalidatePath(`/candidate/dashboard`);
   revalidatePath(`/candidate/applications`);
@@ -174,4 +204,146 @@ export async function applyToJob(
     ok: true,
     message: `Application submitted to ${job.title as string}. Track its status on your candidate dashboard.`,
   };
+}
+
+/* ───────────────────────────────────────────────────────────────
+ * Email side effects
+ *
+ * Lookups need the service-role client so we can read auth.users and so
+ * email_log inserts pass RLS. Failures are swallowed inside sendEmail —
+ * email is never allowed to break the apply flow.
+ * ───────────────────────────────────────────────────────────── */
+
+interface SendApplicationEmailsParams {
+  applicationId: string;
+  jobId: string;
+  candidateId: string;
+  candidateAuthUserId: string;
+  candidateName: string | null;
+  candidateHeadline: string | null;
+  dsoId: string;
+  jobTitle: string;
+}
+
+async function sendApplicationEmails(
+  params: SendApplicationEmailsParams
+): Promise<void> {
+  try {
+    const admin = createSupabaseServiceRoleClient();
+
+    // Pull DSO name, the locations tagged on this job, and candidate email
+    // in parallel.
+    const [{ data: dso }, { data: jobLocs }, candidateAuthUser] =
+      await Promise.all([
+        admin.from("dsos").select("id, name").eq("id", params.dsoId).maybeSingle(),
+        admin
+          .from("job_locations")
+          .select("location:dso_locations(name, city, state)")
+          .eq("job_id", params.jobId),
+        admin.auth.admin.getUserById(params.candidateAuthUserId),
+      ]);
+
+    const jobLocationsLabel = formatJobLocations(
+      ((jobLocs ?? []) as unknown as Array<{
+        location: { name: string; city: string | null; state: string | null } | null;
+      }>)
+        .map((row) => row.location)
+        .filter((l): l is NonNullable<typeof l> => l !== null)
+    );
+
+    const dsoName = (dso?.name as string | undefined) ?? "your DSO";
+    const candidateEmail = candidateAuthUser?.data?.user?.email ?? null;
+    const candidateDisplayName = params.candidateName?.trim() || "there";
+
+    /* ── Email 1: candidate confirmation ── */
+    if (candidateEmail) {
+      void sendEmail({
+        to: candidateEmail,
+        subject: `Application received: ${params.jobTitle} at ${dsoName}`,
+        template: "candidate.application_received",
+        replyTo: `cam@dsohire.com`,
+        relatedDsoId: params.dsoId,
+        relatedCandidateId: params.candidateId,
+        react: ApplicationReceived({
+          candidateName: candidateDisplayName,
+          jobTitle: params.jobTitle,
+          dsoName,
+          trackingUrl: `${SITE_URL}/candidate/dashboard`,
+        }),
+      });
+    }
+
+    /* ── Email 2: every DSO member ── */
+    const { data: dsoMembers } = await admin
+      .from("dso_users")
+      .select("auth_user_id, full_name, role")
+      .eq("dso_id", params.dsoId);
+
+    const memberRows =
+      (dsoMembers ?? []) as Array<{
+        auth_user_id: string;
+        full_name: string | null;
+        role: string;
+      }>;
+
+    if (memberRows.length === 0) return;
+
+    // Resolve member emails via auth.admin.getUserById (parallel)
+    const memberEmailLookups = await Promise.all(
+      memberRows.map(async (m) => {
+        try {
+          const res = await admin.auth.admin.getUserById(m.auth_user_id);
+          return {
+            email: res.data?.user?.email ?? null,
+            name: m.full_name,
+          };
+        } catch {
+          return { email: null, name: m.full_name };
+        }
+      })
+    );
+
+    const employerApplicationUrl = `${SITE_URL}/employer/applications/${params.applicationId}`;
+
+    for (const recipient of memberEmailLookups) {
+      if (!recipient.email) continue;
+      void sendEmail({
+        to: recipient.email,
+        subject: `New application: ${params.jobTitle} · ${dsoName}`,
+        template: "employer.new_application",
+        replyTo: candidateEmail ?? undefined,
+        relatedDsoId: params.dsoId,
+        relatedCandidateId: params.candidateId,
+        react: NewApplication({
+          recipientName: recipient.name?.split(" ")[0] || "there",
+          candidateName: params.candidateName?.trim() || "A candidate",
+          candidateEmail: candidateEmail ?? undefined,
+          candidateHeadline: params.candidateHeadline,
+          jobTitle: params.jobTitle,
+          jobLocations: jobLocationsLabel,
+          applicationUrl: employerApplicationUrl,
+        }),
+      });
+    }
+  } catch (err) {
+    // Never throw — apply succeeded, email is best-effort.
+    console.error("[apply] sendApplicationEmails failed:", err);
+  }
+}
+
+function formatJobLocations(
+  locs: Array<{ name: string; city: string | null; state: string | null }>
+): string {
+  if (locs.length === 0) return "your DSO";
+  if (locs.length === 1) {
+    const l = locs[0];
+    const parts = [l.name, [l.city, l.state].filter(Boolean).join(", ")].filter(
+      Boolean
+    );
+    return parts.join(" · ");
+  }
+  if (locs.length <= 3) {
+    return locs.map((l) => l.name).join(", ");
+  }
+  return `${locs.length} locations`;
 }
