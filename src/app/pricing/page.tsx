@@ -80,30 +80,61 @@ function TierCard({ tier }: { tier: TierConfig }) {
   const isFeatured = tier.badge === "Most popular";
   return (
     <div
-      className={`relative p-9 flex flex-col ${isFeatured ? "bg-cream pt-16" : "bg-white"}`}
+      className={`relative p-9 flex flex-col ${
+        isFeatured ? "bg-ink text-ivory" : "bg-white text-ink"
+      }`}
     >
+      {/* Floats above the card top edge — doesn't push content down, so all
+          four cards stay aligned at the eyebrow row. */}
       {isFeatured && (
-        <div className="absolute top-0 inset-x-0 h-7 bg-ink text-heritage flex items-center justify-center text-[9px] font-bold tracking-[2px] uppercase">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-heritage text-ivory text-[9px] font-bold tracking-[2px] uppercase whitespace-nowrap z-10">
           Most Popular
         </div>
       )}
-      <div className="text-[9px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3.5">
+
+      <div
+        className={`text-[9px] font-bold tracking-[2.5px] uppercase mb-3.5 ${
+          isFeatured ? "text-heritage-light" : "text-heritage-deep"
+        }`}
+      >
         {tier.name}
       </div>
-      <div className="text-lg font-extrabold tracking-[-0.4px] mb-1.5 text-ink">
+      <div
+        className={`text-lg font-extrabold tracking-[-0.4px] mb-1.5 ${
+          isFeatured ? "text-ivory" : "text-ink"
+        }`}
+      >
         {tier.name}
       </div>
-      <div className="text-xs text-slate-body mb-6 min-h-[34px] leading-snug">
+      <div
+        className={`text-xs mb-6 min-h-[34px] leading-snug ${
+          isFeatured ? "text-ivory/70" : "text-slate-body"
+        }`}
+      >
         {tier.tagline}
       </div>
 
       <div className="flex items-baseline gap-1.5 mb-1.5">
-        <div className="text-[40px] font-extrabold tracking-[-1.5px] text-ink leading-none">
+        <div
+          className={`text-[40px] font-extrabold tracking-[-1.5px] leading-none ${
+            isFeatured ? "text-ivory" : "text-ink"
+          }`}
+        >
           ${tier.monthlyPrice.toLocaleString()}
         </div>
-        <div className="text-[13px] text-slate-body font-medium">/ month</div>
+        <div
+          className={`text-[13px] font-medium ${
+            isFeatured ? "text-ivory/70" : "text-slate-body"
+          }`}
+        >
+          / month
+        </div>
       </div>
-      <div className="text-[11px] text-slate-meta tracking-[0.4px] mb-7 min-h-4">
+      <div
+        className={`text-[11px] tracking-[0.4px] mb-7 min-h-4 ${
+          isFeatured ? "text-ivory/55" : "text-slate-meta"
+        }`}
+      >
         {tier.id === "founding" &&
           `Limited to first ${tier.capActiveSubs ?? 5} customers · 12-month rate lock`}
         {tier.id === "starter" && "Most chosen for sub-20 location operators"}
@@ -115,7 +146,7 @@ function TierCard({ tier }: { tier: TierConfig }) {
         href={`/employer/sign-up?tier=${tier.id}`}
         className={`block text-center px-4 py-3.5 text-[11px] font-bold tracking-[1.5px] uppercase mb-6 transition-colors border ${
           isFeatured
-            ? "bg-ink text-ivory border-ink hover:bg-ink-soft"
+            ? "bg-heritage text-ivory border-heritage hover:bg-heritage-deep hover:border-heritage-deep"
             : "bg-ivory text-ink border-[var(--rule-strong)] hover:bg-ink hover:text-ivory hover:border-ink"
         }`}
       >
@@ -125,13 +156,25 @@ function TierCard({ tier }: { tier: TierConfig }) {
         {tier.id === "enterprise" && "Talk to Cameron"}
       </Link>
 
-      <ul className="list-none border-t border-[var(--rule)] pt-4">
+      <ul
+        className={`list-none border-t pt-4 ${
+          isFeatured ? "border-white/15" : "border-[var(--rule)]"
+        }`}
+      >
         {tier.features.map((feature, i) => (
           <li
             key={i}
-            className="text-[12.5px] text-ink py-1.5 flex items-start gap-2 leading-snug"
+            className={`text-[12.5px] py-1.5 flex items-start gap-2 leading-snug ${
+              isFeatured ? "text-ivory/90" : "text-ink"
+            }`}
           >
-            <span className="text-heritage-light font-extrabold flex-shrink-0">✓</span>
+            <span
+              className={`font-extrabold flex-shrink-0 ${
+                isFeatured ? "text-heritage-light" : "text-heritage-light"
+              }`}
+            >
+              ✓
+            </span>
             <span>{feature}</span>
           </li>
         ))}
