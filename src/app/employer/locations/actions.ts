@@ -15,7 +15,11 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  createSupabaseServerClient,
+  createSupabaseServiceRoleClient,
+} from "@/lib/supabase/server";
+import { geocodeCityState } from "@/lib/geocoding/mapbox";
 
 export interface LocationActionState {
   ok: boolean;
@@ -82,24 +86,32 @@ export async function createLocation(
 
   const supabase = await createSupabaseServerClient();
 
-  const { error } = await supabase.from("dso_locations").insert({
-    dso_id: fields.dsoId,
-    name: fields.name,
-    address_line1: fields.addressLine1 || null,
-    address_line2: fields.addressLine2 || null,
-    city: fields.city,
-    state: fields.state,
-    postal_code: fields.postalCode || null,
-  });
+  const { data: inserted, error } = await supabase
+    .from("dso_locations")
+    .insert({
+      dso_id: fields.dsoId,
+      name: fields.name,
+      address_line1: fields.addressLine1 || null,
+      address_line2: fields.addressLine2 || null,
+      city: fields.city,
+      state: fields.state,
+      postal_code: fields.postalCode || null,
+    })
+    .select("id")
+    .single();
 
-  if (error) {
+  if (error || !inserted) {
     return {
       ok: false,
       error:
-        error.message ??
+        error?.message ??
         "Failed to add location. Refresh and try again, or email cam@dsohire.com.",
     };
   }
+
+  // Fire-and-forget city+state geocoding so the map view picks up the
+  // location without blocking the form submit. Failures are swallowed.
+  void geocodeAndStore(inserted.id as string, fields.city, fields.state);
 
   revalidatePath("/employer/locations");
   revalidatePath("/employer/dashboard");
@@ -125,6 +137,15 @@ export async function updateLocation(
 
   const supabase = await createSupabaseServerClient();
 
+  // Fetch the existing row so we can decide whether to re-geocode. Skip
+  // the round-trip if city/state didn't change AND coords are already set.
+  const { data: prior } = await supabase
+    .from("dso_locations")
+    .select("city, state, latitude, longitude")
+    .eq("id", locationId)
+    .eq("dso_id", fields.dsoId)
+    .maybeSingle();
+
   const { error } = await supabase
     .from("dso_locations")
     .update({
@@ -145,6 +166,20 @@ export async function updateLocation(
         error.message ??
         "Failed to save location. Refresh and try again, or email cam@dsohire.com.",
     };
+  }
+
+  // Re-geocode if city/state changed, OR if the row has no coords yet
+  // (handles backfill recovery — saving a location without changes will
+  // trigger a fresh geocode if the prior write hadn't populated coords).
+  const cityChanged =
+    (prior?.city as string | null | undefined) !== fields.city;
+  const stateChanged =
+    (prior?.state as string | null | undefined) !== fields.state;
+  const missingCoords =
+    (prior?.latitude as number | null | undefined) === null ||
+    (prior?.longitude as number | null | undefined) === null;
+  if (cityChanged || stateChanged || missingCoords) {
+    void geocodeAndStore(locationId, fields.city, fields.state);
   }
 
   revalidatePath("/employer/locations");
@@ -219,4 +254,45 @@ export async function deleteLocation(
   revalidatePath("/employer/locations");
   revalidatePath("/employer/dashboard");
   redirect("/employer/locations");
+}
+
+/* ───────────────────────────────────────────────────────────────
+ * Geocoding side effect
+ *
+ * Uses the service-role client because RLS on dso_locations only allows
+ * owner/admin DSO members to write — the fire-and-forget runs after the
+ * action returns, so auth context isn't reliably preserved. Service-role
+ * is fine because we're scoped to a single row by id.
+ *
+ * Privacy: only city + state get sent to Mapbox, never the street address.
+ * ───────────────────────────────────────────────────────────── */
+
+async function geocodeAndStore(
+  locationId: string,
+  city: string,
+  state: string
+): Promise<void> {
+  try {
+    const result = await geocodeCityState(city, state);
+    if (!result) return;
+
+    const admin = createSupabaseServiceRoleClient();
+    const { error } = await admin
+      .from("dso_locations")
+      .update({
+        latitude: result.lat,
+        longitude: result.lng,
+        geocoded_at: new Date().toISOString(),
+      })
+      .eq("id", locationId);
+
+    if (error) {
+      console.warn("[locations] geocode write failed", error);
+      return;
+    }
+
+    revalidatePath("/jobs");
+  } catch (err) {
+    console.warn("[locations] geocodeAndStore unexpected error", err);
+  }
 }

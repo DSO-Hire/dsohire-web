@@ -4,11 +4,19 @@
  * Powered by the search_jobs_public Postgres function (security definer, so
  * RLS doesn't add per-row checks on every search). Filters: query text,
  * state, employment type, role category, posted-within-days.
+ *
+ * Two view modes via the `view` searchParam:
+ *   - default → list of job cards
+ *   - "map"   → JobsMap (privacy-preserving radius circles)
+ *
+ * Filters apply to BOTH views. The map shows a deduped list of locations
+ * with their geocoded lat/lng, and groups the matching jobs at each one.
  */
 
 import Link from "next/link";
-import { ArrowRight, MapPin, Search } from "lucide-react";
+import { ArrowRight, MapPin, Search, List, Map as MapIcon } from "lucide-react";
 import { SiteShell } from "@/components/marketing/site-shell";
+import { JobsMap, type JobsMapLocation } from "@/components/jobs-map";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
 
@@ -43,6 +51,7 @@ interface PageProps {
     state?: string;
     employment?: string;
     category?: string;
+    view?: string;
   }>;
 }
 
@@ -64,14 +73,16 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
   const dsoIds = Array.from(new Set(jobs.map((j) => j.dso_id)));
   const jobIds = jobs.map((j) => j.id);
 
-  const [{ data: dsos }, { data: jobLocations }] = await Promise.all([
+  const [{ data: dsos }, { data: jobLocationRows }] = await Promise.all([
     dsoIds.length > 0
       ? supabase.from("dsos").select("id, name, slug").in("id", dsoIds)
       : Promise.resolve({ data: [] }),
     jobIds.length > 0
       ? supabase
           .from("job_locations")
-          .select("job_id, location:dso_locations(city, state)")
+          .select(
+            "job_id, location:dso_locations(id, name, city, state, latitude, longitude)"
+          )
           .in("job_id", jobIds)
       : Promise.resolve({ data: [] }),
   ]);
@@ -82,16 +93,82 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
     )
   );
 
-  const locationMap = new Map<string, Array<{ city: string | null; state: string | null }>>();
-  for (const row of (jobLocations ?? []) as unknown as Array<{
+  // Build the per-job location list (used by the list-view cards)
+  const locationMap = new Map<
+    string,
+    Array<{ city: string | null; state: string | null }>
+  >();
+  // And the deduped locations list (used by the map view)
+  const dedupedLocations = new Map<string, JobsMapLocation>();
+
+  for (const row of (jobLocationRows ?? []) as unknown as Array<{
     job_id: string;
-    location: { city: string | null; state: string | null } | null;
+    location: {
+      id: string;
+      name: string;
+      city: string | null;
+      state: string | null;
+      latitude: number | null;
+      longitude: number | null;
+    } | null;
   }>) {
     if (!row.location) continue;
-    const list = locationMap.get(row.job_id) ?? [];
-    list.push(row.location);
-    locationMap.set(row.job_id, list);
+
+    // List-view: just city/state
+    const cityList = locationMap.get(row.job_id) ?? [];
+    cityList.push({ city: row.location.city, state: row.location.state });
+    locationMap.set(row.job_id, cityList);
+
+    // Map-view: only locations with geocoded coords
+    if (row.location.latitude !== null && row.location.longitude !== null) {
+      const job = jobs.find((j) => j.id === row.job_id);
+      if (!job) continue;
+      const dso = dsoMap.get(job.dso_id);
+      const existing = dedupedLocations.get(row.location.id);
+      if (existing) {
+        existing.jobs.push({
+          id: job.id,
+          title: job.title,
+          employment_type: job.employment_type,
+          role_category: job.role_category,
+          dso_id: job.dso_id,
+          dso_name: dso?.name ?? "DSO",
+        });
+      } else {
+        dedupedLocations.set(row.location.id, {
+          id: row.location.id,
+          name: row.location.name,
+          city: row.location.city,
+          state: row.location.state,
+          latitude: row.location.latitude,
+          longitude: row.location.longitude,
+          jobs: [
+            {
+              id: job.id,
+              title: job.title,
+              employment_type: job.employment_type,
+              role_category: job.role_category,
+              dso_id: job.dso_id,
+              dso_name: dso?.name ?? "DSO",
+            },
+          ],
+        });
+      }
+    }
   }
+
+  const mapLocations = Array.from(dedupedLocations.values());
+  const showMap = sp.view === "map";
+  const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? null;
+
+  // Preserve current filters when toggling view modes
+  const filterParams: Array<[string, string]> = [];
+  if (sp.q) filterParams.push(["q", sp.q]);
+  if (sp.state) filterParams.push(["state", sp.state]);
+  if (sp.employment) filterParams.push(["employment", sp.employment]);
+  if (sp.category) filterParams.push(["category", sp.category]);
+  const listViewHref = buildHref("/jobs", filterParams);
+  const mapViewHref = buildHref("/jobs", [...filterParams, ["view", "map"]]);
 
   return (
     <SiteShell>
@@ -123,6 +200,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
           className="mt-12 grid grid-cols-1 sm:grid-cols-[1.6fr_1fr_1fr_auto] gap-px bg-[var(--rule)] border border-[var(--rule)] bg-white"
           style={{ boxShadow: "0 10px 30px -16px rgba(7,15,28,0.14)" }}
         >
+          {showMap && <input type="hidden" name="view" value="map" />}
           <SearchField
             label="Role"
             name="q"
@@ -163,15 +241,54 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
 
       {/* Results */}
       <section className="px-6 sm:px-14 pb-24 max-w-[1240px] mx-auto">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-5">
-          {jobs.length === 0
-            ? "No jobs found"
-            : jobs.length === 1
-              ? "1 open role"
-              : `${jobs.length} open roles`}
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
+          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta">
+            {jobs.length === 0
+              ? "No jobs found"
+              : jobs.length === 1
+                ? "1 open role"
+                : `${jobs.length} open roles`}
+            {showMap && mapLocations.length > 0 && (
+              <span className="ml-2 text-slate-body normal-case tracking-normal font-normal">
+                · across {mapLocations.length}{" "}
+                {mapLocations.length === 1 ? "location" : "locations"}
+              </span>
+            )}
+          </div>
+
+          {/* List/Map toggle */}
+          <div className="inline-flex border border-[var(--rule-strong)]">
+            <Link
+              href={listViewHref}
+              className={`inline-flex items-center gap-2 px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors ${
+                showMap
+                  ? "bg-cream text-slate-body hover:text-ink"
+                  : "bg-ink text-ivory"
+              }`}
+              aria-current={showMap ? undefined : "page"}
+            >
+              <List className="h-3.5 w-3.5" />
+              List
+            </Link>
+            <Link
+              href={mapViewHref}
+              className={`inline-flex items-center gap-2 px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors border-l border-[var(--rule-strong)] ${
+                showMap
+                  ? "bg-ink text-ivory"
+                  : "bg-cream text-slate-body hover:text-ink"
+              }`}
+              aria-current={showMap ? "page" : undefined}
+            >
+              <MapIcon className="h-3.5 w-3.5" />
+              Map
+            </Link>
+          </div>
         </div>
 
-        {jobs.length === 0 ? (
+        {/* MAP VIEW */}
+        {showMap ? (
+          <JobsMap locations={mapLocations} mapboxToken={mapboxToken} />
+        ) : /* LIST VIEW */ jobs.length === 0 ? (
           <div className="border border-[var(--rule)] bg-cream p-12 text-center max-w-[640px] mx-auto">
             <p className="text-[15px] text-ink leading-relaxed mb-4">
               We don&apos;t have any jobs matching that search yet. The platform
@@ -276,6 +393,12 @@ function JobCard({
       </div>
     </Link>
   );
+}
+
+function buildHref(base: string, params: Array<[string, string]>): string {
+  if (params.length === 0) return base;
+  const search = new URLSearchParams(params).toString();
+  return `${base}?${search}`;
 }
 
 function formatLocations(
