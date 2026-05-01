@@ -14,11 +14,13 @@
  *   - Click a circle → opens a side drawer listing the jobs at that location
  *   - Drawer cards link to /jobs/[id]
  *
- * mapbox-gl is browser-only (it touches window/document at import time), so we
- * import it dynamically inside a useEffect that's gated on typeof window. The
- * type-only import gives us autocomplete without forcing SSR evaluation.
+ * mapbox-gl is browser-only (it touches window/document at import time). We
+ * dynamic-import the JS inside a useEffect so it only runs in the browser.
+ * The CSS is statically imported at the top so Next bundles it into the
+ * client CSS chunk.
  */
 
+import "mapbox-gl/dist/mapbox-gl.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Locate, X, MapPin } from "lucide-react";
@@ -117,18 +119,12 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
     let cancelled = false;
 
     (async () => {
-      // Browser-only library — dynamic import + CSS side-effect. We type
-      // the imported namespace as `any` here intentionally; see the type
-      // declaration block at the top of the file for why.
+      // Browser-only library — dynamic import so the bundle only loads
+      // client-side. Typed as `any` because @types/mapbox-gl resolution is
+      // unstable in our local node_modules state; Vercel's clean install
+      // gets real types.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mapboxgl: any = (await import(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        /* webpackIgnore: true */ "mapbox-gl" as any
-      )).default;
-      await import(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        /* webpackIgnore: true */ "mapbox-gl/dist/mapbox-gl.css" as any
-      );
+      const mapboxgl: any = (await import("mapbox-gl")).default;
 
       if (cancelled || !containerRef.current) return;
 
