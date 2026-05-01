@@ -16,6 +16,7 @@ import {
   Head,
   Hr,
   Html,
+  Img,
   Link,
   Preview,
   Section,
@@ -33,24 +34,24 @@ export function Layout({ previewText, children }: LayoutProps) {
   return (
     <Html>
       <Head>
-        {/* Manrope hint for the few clients that respect <link>. Most ignore it. */}
-        <link
-          rel="preconnect"
-          href="https://fonts.googleapis.com"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap"
-          rel="stylesheet"
-        />
+        {/* Force light-mode rendering. Without these, Apple Mail / Gmail
+            auto-invert our ivory background to a muddy brown and break the
+            navy header. Opt out of forced dark mode entirely. */}
+        <meta name="color-scheme" content="light only" />
+        <meta name="supported-color-schemes" content="light" />
       </Head>
       <Preview>{previewText}</Preview>
       <Body style={main}>
         {/* ─── Header strip ─── */}
         <Section style={header}>
           <Container style={headerContainer}>
-            <Text style={brandWordmark}>
-              DSO<span style={{ color: brand.heritageLight, marginLeft: 4 }}>Hire</span>
-            </Text>
+            <Img
+              src={brand.logoLockupOnDark}
+              width="156"
+              height="56"
+              alt="DSO Hire"
+              style={brandLogo}
+            />
           </Container>
         </Section>
 
@@ -86,7 +87,7 @@ export function Layout({ previewText, children }: LayoutProps) {
 /* ───────── styles ───────── */
 
 const main = {
-  backgroundColor: brand.ivory,
+  backgroundColor: "#FFFFFF",
   fontFamily: brand.fontFamily,
   margin: 0,
   padding: 0,
@@ -94,7 +95,7 @@ const main = {
 
 const header = {
   backgroundColor: brand.ink,
-  padding: "20px 0",
+  padding: "24px 0",
 };
 
 const headerContainer = {
@@ -103,23 +104,24 @@ const headerContainer = {
   padding: `0 ${brand.contentPadding}`,
 };
 
-const brandWordmark = {
-  color: brand.ivory,
-  fontSize: "20px",
-  fontWeight: 800,
-  letterSpacing: "-0.5px",
+const brandLogo = {
+  display: "block",
   margin: 0,
+  // Cap rendered size for retina + non-retina; image's intrinsic 4x doubles for
+  // sharp display.
+  height: "auto",
+  maxWidth: "156px",
 };
 
 const content = {
   maxWidth: brand.maxWidth,
   margin: "0 auto",
   padding: `40px ${brand.contentPadding} 32px`,
-  backgroundColor: brand.ivory,
+  backgroundColor: "#FFFFFF",
 };
 
 const footer = {
-  backgroundColor: brand.ivory,
+  backgroundColor: "#FFFFFF",
   padding: `0 0 32px`,
 };
 
