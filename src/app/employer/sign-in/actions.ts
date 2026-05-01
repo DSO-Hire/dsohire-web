@@ -102,12 +102,12 @@ export async function verifySignInEmployer(
     };
   }
 
-  if (!/^\d{6}$/.test(token)) {
+  if (!/^\d{6,10}$/.test(token)) {
     return {
       ok: false,
       step: "verify",
       email,
-      error: "Codes are 6 digits. Double-check and try again.",
+      error: "That doesn't look like a valid code. Enter the digits from your email.",
     };
   }
 

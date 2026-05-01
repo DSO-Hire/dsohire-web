@@ -55,10 +55,10 @@ export function CandidateSignInForm({ next }: { next?: string }) {
               autoComplete="one-time-code"
               autoFocus
               required
-              maxLength={6}
-              pattern="[0-9]{6}"
-              placeholder="123456"
-              className="w-full px-4 py-4 bg-cream border border-[var(--rule-strong)] text-ink text-[24px] font-bold tracking-[10px] text-center placeholder:text-slate-meta placeholder:font-normal placeholder:tracking-[6px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+              maxLength={10}
+              pattern="[0-9 ]{6,16}"
+              placeholder="Enter code from email"
+              className="w-full px-4 py-4 bg-cream border border-[var(--rule-strong)] text-ink text-[22px] font-bold tracking-[6px] text-center placeholder:text-slate-meta placeholder:font-medium placeholder:text-[14px] placeholder:tracking-[1px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
             />
           </div>
 
