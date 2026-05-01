@@ -1,16 +1,19 @@
 "use server";
 
 /**
- * /employer/sign-up server action.
+ * /employer/sign-up — two-step flow.
  *
- * Creates the auth user, DSO, and dso_users (owner) rows atomically using
- * the Supabase service-role client. Then sends a magic-link email so the
- * user verifies their email before they can sign in.
+ * Step 1 (signUpEmployer): create auth user via service-role + DSO row + dso_users
+ *   row, then call signInWithOtp WITHOUT emailRedirectTo to send a 6-digit
+ *   verification code.
+ * Step 2 (verifySignUpEmployer): user enters the code → verifyOtp sets the
+ *   session → redirect to /employer/onboarding.
  *
  * Slug generation per Q5 decision: auto-derive from name, validate against
  * reserved words, append numeric suffix on collision.
  */
 
+import { redirect } from "next/navigation";
 import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
@@ -20,6 +23,7 @@ import { PRICING_TIERS } from "@/lib/stripe/prices";
 
 export interface SignUpState {
   ok: boolean;
+  step: "form" | "verify";
   error?: string;
   message?: string;
   email?: string;
@@ -62,15 +66,11 @@ export async function signUpEmployer(
   _prev: SignUpState,
   formData: FormData
 ): Promise<SignUpState> {
-  const email = String(formData.get("email") ?? "")
-    .trim()
-    .toLowerCase();
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const fullName = String(formData.get("full_name") ?? "").trim();
   const dsoName = String(formData.get("dso_name") ?? "").trim();
   const headquartersCity = String(formData.get("headquarters_city") ?? "").trim();
-  const headquartersState = String(
-    formData.get("headquarters_state") ?? ""
-  )
+  const headquartersState = String(formData.get("headquarters_state") ?? "")
     .trim()
     .toUpperCase();
   const practiceCountRaw = String(formData.get("practice_count") ?? "").trim();
@@ -78,28 +78,33 @@ export async function signUpEmployer(
   const honeypot = String(formData.get("website") ?? "").trim();
 
   if (honeypot) {
-    return { ok: true, email, message: "Sign-up confirmed." };
+    return { ok: true, step: "verify", email, message: "Sign-up confirmed." };
   }
 
   // Validation
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return { ok: false, error: "Please enter a valid email address." };
+    return { ok: false, step: "form", error: "Please enter a valid email address." };
   }
   if (!fullName) {
-    return { ok: false, error: "Please enter your full name." };
+    return { ok: false, step: "form", error: "Please enter your full name." };
   }
   if (!dsoName) {
-    return { ok: false, error: "Please enter your DSO name." };
+    return { ok: false, step: "form", error: "Please enter your DSO name." };
   }
   if (!headquartersState || headquartersState.length !== 2) {
     return {
       ok: false,
+      step: "form",
       error: "Please enter a 2-letter US state code (e.g., KS, TX).",
     };
   }
   const practiceCount = parseInt(practiceCountRaw, 10);
   if (Number.isNaN(practiceCount) || practiceCount < 1) {
-    return { ok: false, error: "Please enter your number of practice locations." };
+    return {
+      ok: false,
+      step: "form",
+      error: "Please enter your number of practice locations.",
+    };
   }
   const tier = isPricingTier(tierParam) ? tierParam : "starter";
 
@@ -107,54 +112,44 @@ export async function signUpEmployer(
   if (!baseSlug) {
     return {
       ok: false,
+      step: "form",
       error:
         "We couldn't generate a URL slug from your DSO name. Try a different name.",
     };
   }
 
-  // Server-side mutations: use service-role client to bypass RLS
   const admin = createSupabaseServiceRoleClient();
-
-  // Check for slug collision; suffix with -2, -3, etc. if needed
   const slug = await resolveAvailableSlug(admin, baseSlug);
 
-  // Create the auth user (or look up existing). signInWithOtp with
-  // shouldCreateUser=true would create + email-link in one call, but we want
-  // to create our DSO rows first and link them BEFORE the user verifies.
-  // So we use admin.createUser to create, then send a magic link separately.
-  const {
-    data: createdUser,
-    error: createUserError,
-  } = await admin.auth.admin.createUser({
-    email,
-    email_confirm: false, // user verifies via magic link, not auto-confirmed
-    user_metadata: {
-      full_name: fullName,
-      role_during_signup: "employer",
-    },
-  });
+  const { data: createdUser, error: createUserError } =
+    await admin.auth.admin.createUser({
+      email,
+      email_confirm: false,
+      user_metadata: {
+        full_name: fullName,
+        role_during_signup: "employer",
+      },
+    });
 
   if (createUserError || !createdUser?.user) {
     if (createUserError?.message?.toLowerCase().includes("already")) {
       return {
         ok: false,
+        step: "form",
         error:
-          "An account with this email already exists. Sign in instead — we'll send you a fresh magic link.",
+          "An account with this email already exists. Sign in instead — we'll send you a fresh code.",
       };
     }
     return {
       ok: false,
+      step: "form",
       error: createUserError?.message ?? "Failed to create user account.",
     };
   }
 
   const authUserId = createdUser.user.id;
 
-  // Create the DSO row (status: pending — Cam manually activates Founding tier)
-  const {
-    data: dso,
-    error: dsoError,
-  } = await admin
+  const { data: dso, error: dsoError } = await admin
     .from("dsos")
     .insert({
       name: dsoName,
@@ -168,16 +163,15 @@ export async function signUpEmployer(
     .single();
 
   if (dsoError || !dso) {
-    // Roll back the auth user if DSO insert failed
     await admin.auth.admin.deleteUser(authUserId);
     return {
       ok: false,
+      step: "form",
       error:
         "Failed to create your DSO record. Please try again or contact cam@dsohire.com.",
     };
   }
 
-  // Create the dso_users row (owner)
   const { error: dsoUserError } = await admin.from("dso_users").insert({
     auth_user_id: authUserId,
     dso_id: dso.id,
@@ -186,17 +180,16 @@ export async function signUpEmployer(
   });
 
   if (dsoUserError) {
-    // Roll back auth user + DSO
     await admin.from("dsos").delete().eq("id", dso.id);
     await admin.auth.admin.deleteUser(authUserId);
     return {
       ok: false,
+      step: "form",
       error:
         "Failed to link your account to the DSO. Please try again or contact cam@dsohire.com.",
     };
   }
 
-  // Stash tier in user metadata so the onboarding flow knows what was chosen.
   await admin.auth.admin.updateUserById(authUserId, {
     user_metadata: {
       full_name: fullName,
@@ -206,21 +199,19 @@ export async function signUpEmployer(
     },
   });
 
-  // Send the magic-link email so the user verifies and signs in
+  // Send the 6-digit verification code (no emailRedirectTo = OTP-only).
   const supabase = await createSupabaseServerClient();
-  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
-
   const { error: otpError } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      shouldCreateUser: false, // user already exists, just send the link
-      emailRedirectTo: `${origin}/auth/callback?next=/employer/onboarding`,
+      shouldCreateUser: false, // user already exists, just send the code
     },
   });
 
   if (otpError) {
     return {
       ok: false,
+      step: "form",
       error:
         "Account created but we couldn't send the verification email. Try signing in.",
     };
@@ -228,8 +219,84 @@ export async function signUpEmployer(
 
   return {
     ok: true,
+    step: "verify",
     email,
-    message: `Check your inbox — we sent a verification link to ${email}. Click it to finish setting up your DSO.`,
+    message: `We sent a 6-digit verification code to ${email}. Enter it below — it expires in 15 minutes.`,
+  };
+}
+
+export async function verifySignUpEmployer(
+  _prev: SignUpState,
+  formData: FormData
+): Promise<SignUpState> {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const token = String(formData.get("token") ?? "").trim().replace(/\s+/g, "");
+
+  if (!email || !token) {
+    return {
+      ok: false,
+      step: "verify",
+      email,
+      error: "Enter the 6-digit code from your email.",
+    };
+  }
+  if (!/^\d{6}$/.test(token)) {
+    return {
+      ok: false,
+      step: "verify",
+      email,
+      error: "Codes are 6 digits. Double-check and try again.",
+    };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: "email",
+  });
+
+  if (error || !data.user) {
+    const lower = (error?.message ?? "").toLowerCase();
+    return {
+      ok: false,
+      step: "verify",
+      email,
+      error: lower.includes("expired")
+        ? "That code expired. Click \"Send a new code\" to get a fresh one."
+        : "That code didn't match. Check the email and try again, or request a new code.",
+    };
+  }
+
+  redirect("/employer/onboarding");
+}
+
+export async function resendSignUpCode(
+  _prev: SignUpState,
+  formData: FormData
+): Promise<SignUpState> {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  if (!email) {
+    return { ok: false, step: "verify", error: "Missing email." };
+  }
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { shouldCreateUser: false },
+  });
+  if (error) {
+    return {
+      ok: false,
+      step: "verify",
+      email,
+      error: "Couldn't resend. Wait a minute and try again.",
+    };
+  }
+  return {
+    ok: true,
+    step: "verify",
+    email,
+    message: `New code sent to ${email}.`,
   };
 }
 
@@ -255,7 +322,6 @@ async function resolveAvailableSlug(
     return resolveAvailableSlug(admin, `${baseSlug}-dso`);
   }
 
-  // Check if slug is taken
   const { data: existing } = await admin
     .from("dsos")
     .select("id")
@@ -264,7 +330,6 @@ async function resolveAvailableSlug(
 
   if (!existing) return baseSlug;
 
-  // Try suffixed variants
   for (let i = 2; i <= 99; i++) {
     const candidate = `${baseSlug}-${i}`;
     const { data: clash } = await admin
@@ -275,6 +340,5 @@ async function resolveAvailableSlug(
     if (!clash) return candidate;
   }
 
-  // Fallback: random suffix
   return `${baseSlug}-${Math.floor(Math.random() * 100000)}`;
 }

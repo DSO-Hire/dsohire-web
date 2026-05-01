@@ -1,16 +1,25 @@
 "use server";
 
 /**
- * /employer/sign-in server action — sends a magic link via Supabase Auth.
+ * /employer/sign-in server actions — two-step OTP flow.
  *
- * Supabase handles the email send (via its built-in SMTP or a configured
- * SMTP provider). The link points at /auth/callback?code=...&next=/employer/dashboard.
+ * Step 1 (signInEmployer): user submits email → server calls signInWithOtp
+ *   WITHOUT emailRedirectTo. With the email template configured to use
+ *   {{ .Token }}, Supabase emails a 6-digit code (no PKCE state cookie
+ *   needed, so cross-browser/cross-device works fine).
+ *
+ * Step 2 (verifySignInEmployer): user enters the 6-digit code on the same
+ *   page → server calls verifyOtp({ type: "email" }) which sets the session
+ *   cookie. We then redirect to onboarding or dashboard based on whether
+ *   the user has a dso_users row.
  */
 
+import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export interface SignInState {
   ok: boolean;
+  step: "email" | "verify";
   error?: string;
   message?: string;
   email?: string;
@@ -26,48 +35,110 @@ export async function signInEmployer(
   const honeypot = String(formData.get("website") ?? "").trim();
 
   if (honeypot) {
-    return { ok: true, email, message: "Sign-in link sent." };
+    return {
+      ok: true,
+      step: "verify",
+      email,
+      message: "Sign-in code sent.",
+    };
   }
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return { ok: false, error: "Please enter a valid email address." };
+    return {
+      ok: false,
+      step: "email",
+      error: "Please enter a valid email address.",
+    };
   }
 
   const supabase = await createSupabaseServerClient();
 
-  const origin =
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
-
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: `${origin}/auth/callback?next=/employer/dashboard`,
-      shouldCreateUser: false, // sign-in, not sign-up — don't auto-create
+      shouldCreateUser: false, // sign-in only, don't create new accounts
     },
   });
 
   if (error) {
-    // Distinguish rate-limit from unknown-user. Supabase returns a generic
-    // message to prevent email enumeration; we map common patterns to
-    // user-friendly hints.
     const lower = (error.message ?? "").toLowerCase();
     if (lower.includes("rate") || lower.includes("limit") || lower.includes("too many")) {
       return {
         ok: false,
+        step: "email",
         error:
-          "Too many sign-in requests in a short time. Check your spam folder for a recent link, or wait a few minutes before trying again.",
+          "Too many sign-in requests in a short time. Check your spam folder for a recent code, or wait a few minutes before trying again.",
       };
     }
     return {
       ok: false,
+      step: "email",
       error:
-        "We couldn't send a sign-in link. Check your spam folder, wait a few minutes, or sign up if you don't have an account yet.",
+        "We couldn't send a sign-in code. Check your spam folder, wait a few minutes, or sign up if you don't have an account yet.",
     };
   }
 
   return {
     ok: true,
+    step: "verify",
     email,
-    message: `Sign-in link sent to ${email}. Check your inbox — it expires in 15 minutes.`,
+    message: `We sent a 6-digit code to ${email}. Enter it below — it expires in 15 minutes.`,
   };
+}
+
+export async function verifySignInEmployer(
+  _prev: SignInState,
+  formData: FormData
+): Promise<SignInState> {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const token = String(formData.get("token") ?? "").trim().replace(/\s+/g, "");
+
+  if (!email || !token) {
+    return {
+      ok: false,
+      step: "verify",
+      email,
+      error: "Enter the 6-digit code from your email.",
+    };
+  }
+
+  if (!/^\d{6}$/.test(token)) {
+    return {
+      ok: false,
+      step: "verify",
+      email,
+      error: "Codes are 6 digits. Double-check and try again.",
+    };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: "email",
+  });
+
+  if (error || !data.user) {
+    const lower = (error?.message ?? "").toLowerCase();
+    return {
+      ok: false,
+      step: "verify",
+      email,
+      error: lower.includes("expired")
+        ? "That code expired. Click \"Send a new code\" to get a fresh one."
+        : "That code didn't match. Check the email and try again, or request a new code.",
+    };
+  }
+
+  // Session is set. Route based on DSO membership.
+  const { data: dsoUser } = await supabase
+    .from("dso_users")
+    .select("id")
+    .eq("auth_user_id", data.user.id)
+    .maybeSingle();
+
+  if (!dsoUser) {
+    redirect("/employer/onboarding");
+  }
+  redirect("/employer/dashboard");
 }

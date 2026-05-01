@@ -1,36 +1,123 @@
 "use client";
 
 import { useActionState } from "react";
-import { ArrowRight } from "lucide-react";
-import { signUpEmployer, type SignUpState } from "./actions";
+import { ArrowRight, ArrowLeft } from "lucide-react";
+import {
+  signUpEmployer,
+  verifySignUpEmployer,
+  resendSignUpCode,
+  type SignUpState,
+} from "./actions";
 import type { PricingTier } from "@/lib/stripe/prices";
 
-const initial: SignUpState = { ok: false };
+const initialForm: SignUpState = { ok: false, step: "form" };
+const initialVerify: SignUpState = { ok: false, step: "verify" };
+const initialResend: SignUpState = { ok: false, step: "verify" };
 
 export function SignUpForm({ initialTier }: { initialTier: PricingTier }) {
-  const [state, action, pending] = useActionState(signUpEmployer, initial);
+  const [formState, submitForm, submittingForm] = useActionState(
+    signUpEmployer,
+    initialForm
+  );
+  const [verifyState, verify, verifying] = useActionState(
+    verifySignUpEmployer,
+    initialVerify
+  );
+  const [resendState, resend, resending] = useActionState(
+    resendSignUpCode,
+    initialResend
+  );
 
-  if (state.ok && state.message) {
+  const showVerify = formState.ok && formState.step === "verify" && formState.email;
+  const email = formState.email ?? verifyState.email ?? resendState.email;
+
+  if (showVerify && email) {
     return (
-      <div className="border-l-4 border-heritage bg-cream p-6">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
-          Account created
+      <div className="space-y-5">
+        <div className="border-l-4 border-heritage bg-cream p-5">
+          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1.5">
+            Account created
+          </div>
+          <p className="text-[14px] text-ink leading-relaxed">
+            {resendState.ok && resendState.message
+              ? resendState.message
+              : formState.message}
+          </p>
         </div>
-        <p className="text-[15px] text-ink leading-relaxed mb-3">
-          {state.message}
-        </p>
-        <p className="text-[13px] text-slate-body leading-relaxed">
-          The link expires in 15 minutes. After verifying you&apos;ll land on your
-          onboarding page where you can add locations, invite teammates, and
-          post your first job.
-        </p>
+
+        <form action={verify} className="space-y-4">
+          <input type="hidden" name="email" value={email} />
+
+          <div>
+            <label
+              htmlFor="signup-otp"
+              className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+            >
+              6-Digit Code <span className="text-heritage">*</span>
+            </label>
+            <input
+              id="signup-otp"
+              type="text"
+              name="token"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              autoFocus
+              required
+              maxLength={6}
+              pattern="[0-9]{6}"
+              placeholder="123456"
+              className="w-full px-4 py-4 bg-cream border border-[var(--rule-strong)] text-ink text-[24px] font-bold tracking-[10px] text-center placeholder:text-slate-meta placeholder:font-normal placeholder:tracking-[6px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+            />
+          </div>
+
+          {verifyState.error && (
+            <div className="bg-red-50 border-l-4 border-red-500 p-4">
+              <p className="text-[13px] text-red-900">{verifyState.error}</p>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={verifying}
+            className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {verifying ? "Verifying…" : "Verify & Continue"}
+            {!verifying && <ArrowRight className="h-4 w-4" />}
+          </button>
+
+          <p className="text-[12px] text-slate-meta leading-relaxed">
+            After verifying you&apos;ll land on your onboarding page where you
+            can add locations, invite teammates, and post your first job.
+          </p>
+        </form>
+
+        <div className="pt-4 border-t border-[var(--rule)] flex items-center justify-between gap-4 flex-wrap">
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
+          >
+            <ArrowLeft className="h-3 w-3" />
+            Back to form
+          </button>
+
+          <form action={resend}>
+            <input type="hidden" name="email" value={email} />
+            <button
+              type="submit"
+              disabled={resending}
+              className="text-[12px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2 disabled:opacity-60"
+            >
+              {resending ? "Sending…" : "Send a new code"}
+            </button>
+          </form>
+        </div>
       </div>
     );
   }
 
   return (
-    <form action={action} className="space-y-5">
-      {/* Honeypot */}
+    <form action={submitForm} className="space-y-5">
       <div className="hidden" aria-hidden="true">
         <input type="text" name="website" tabIndex={-1} autoComplete="off" />
       </div>
@@ -91,19 +178,19 @@ export function SignUpForm({ initialTier }: { initialTier: PricingTier }) {
         helper="Approximate is fine — used to suggest the right tier and validate later."
       />
 
-      {state.error && (
+      {formState.error && (
         <div className="bg-red-50 border-l-4 border-red-500 p-4">
-          <p className="text-[13px] text-red-900">{state.error}</p>
+          <p className="text-[13px] text-red-900">{formState.error}</p>
         </div>
       )}
 
       <button
         type="submit"
-        disabled={pending}
+        disabled={submittingForm}
         className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        {pending ? "Creating Account…" : "Create Account & Send Verification"}
-        {!pending && <ArrowRight className="h-4 w-4" />}
+        {submittingForm ? "Creating Account…" : "Create Account & Send Code"}
+        {!submittingForm && <ArrowRight className="h-4 w-4" />}
       </button>
 
       <p className="text-[12px] text-slate-meta leading-relaxed">
