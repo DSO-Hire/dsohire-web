@@ -220,21 +220,15 @@ export default async function JobDetailPage({ params }: PageProps) {
 
             {/* Apply CTA */}
             <section className="mt-12 pt-8 border-t border-[var(--rule)] flex flex-col sm:flex-row items-start gap-4">
-              <a
-                href="#apply"
+              <Link
+                href={`/jobs/${job.id as string}/apply`}
                 className="inline-flex items-center px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
               >
                 Apply for this Role
-              </a>
+              </Link>
               <p className="text-[12px] text-slate-meta leading-relaxed max-w-[420px]">
-                Application form coming online with the public launch. Email{" "}
-                <a
-                  href={`mailto:cam@dsohire.com?subject=Apply%3A%20${encodeURIComponent(job.title as string)}`}
-                  className="text-heritage underline underline-offset-2 hover:text-heritage-deep"
-                >
-                  cam@dsohire.com
-                </a>{" "}
-                to apply now and we&apos;ll route your resume to {dsoName}.
+                Free for candidates. We&apos;ll route your application directly
+                to {dsoName} — no recruiter middleman, no fees.
               </p>
             </section>
           </div>

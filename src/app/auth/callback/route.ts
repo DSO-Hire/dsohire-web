@@ -48,9 +48,8 @@ export async function GET(request: Request) {
     .eq("auth_user_id", user.id)
     .maybeSingle();
 
-  // No DSO row yet → first-time sign-up, send them to onboarding.
+  // No DSO row yet → either a candidate or a brand-new employer mid-onboarding.
   if (!dsoUser) {
-    // If this is a candidate (matches a candidate row), send to candidate dash
     const { data: candidate } = await supabase
       .from("candidates")
       .select("id")
@@ -58,9 +57,18 @@ export async function GET(request: Request) {
       .maybeSingle();
 
     if (candidate) {
-      return NextResponse.redirect(`${origin}/candidate/dashboard`);
+      // Candidate: honor the requested `next` IF it's a candidate-safe path
+      // (e.g. /jobs/[id]/apply); otherwise default to candidate dashboard.
+      const safeNext =
+        requestedNext.startsWith("/candidate") || requestedNext.startsWith("/jobs/")
+          ? requestedNext
+          : "/candidate/dashboard";
+      return NextResponse.redirect(`${origin}${safeNext}`);
     }
 
+    // No candidate or DSO row → must be a fresh employer sign-up that
+    // hasn't created its DSO row yet (rare; sign-up creates everything).
+    // Send to onboarding as a safety net.
     return NextResponse.redirect(`${origin}/employer/onboarding`);
   }
 

@@ -1,29 +1,30 @@
 "use server";
 
 /**
- * /employer/sign-in server action — sends a magic link via Supabase Auth.
- *
- * Supabase handles the email send (via its built-in SMTP or a configured
- * SMTP provider). The link points at /auth/callback?code=...&next=/employer/dashboard.
+ * /candidate/sign-in server action — magic link sign-in for candidates.
  */
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export interface SignInState {
+export interface CandidateSignInState {
   ok: boolean;
   error?: string;
   message?: string;
   email?: string;
 }
 
-export async function signInEmployer(
-  _prev: SignInState,
+const NEXT_ALLOWLIST = /^\/(candidate\/|jobs\/)/;
+
+export async function signInCandidate(
+  _prev: CandidateSignInState,
   formData: FormData
-): Promise<SignInState> {
+): Promise<CandidateSignInState> {
   const email = String(formData.get("email") ?? "")
     .trim()
     .toLowerCase();
   const honeypot = String(formData.get("website") ?? "").trim();
+  const nextRaw = String(formData.get("next") ?? "").trim();
+  const next = NEXT_ALLOWLIST.test(nextRaw) ? nextRaw : "/candidate/dashboard";
 
   if (honeypot) {
     return { ok: true, email, message: "Sign-in link sent." };
@@ -34,34 +35,29 @@ export async function signInEmployer(
   }
 
   const supabase = await createSupabaseServerClient();
-
-  const origin =
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
+  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: `${origin}/auth/callback?next=/employer/dashboard`,
-      shouldCreateUser: false, // sign-in, not sign-up — don't auto-create
+      shouldCreateUser: false,
+      emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
     },
   });
 
   if (error) {
-    // Distinguish rate-limit from unknown-user. Supabase returns a generic
-    // message to prevent email enumeration; we map common patterns to
-    // user-friendly hints.
     const lower = (error.message ?? "").toLowerCase();
     if (lower.includes("rate") || lower.includes("limit") || lower.includes("too many")) {
       return {
         ok: false,
         error:
-          "Too many sign-in requests in a short time. Check your spam folder for a recent link, or wait a few minutes before trying again.",
+          "Too many sign-in requests. Check your spam folder for a recent link, or wait a few minutes before trying again.",
       };
     }
     return {
       ok: false,
       error:
-        "We couldn't send a sign-in link. Check your spam folder, wait a few minutes, or sign up if you don't have an account yet.",
+        "We couldn't send a sign-in link. If you don't have an account yet, sign up instead.",
     };
   }
 
