@@ -81,8 +81,10 @@ function TierCard({ tier }: { tier: TierConfig }) {
   const isFeatured = tier.badge === "Most popular";
   return (
     <div
-      className={`relative p-9 flex flex-col ${
-        isFeatured ? "bg-ink text-ivory" : "bg-white text-ink"
+      className={`relative p-9 flex flex-col motion-safe:transition-all motion-safe:duration-200 ${
+        isFeatured
+          ? "bg-ink text-ivory"
+          : "bg-white text-ink motion-safe:hover:-translate-y-1 hover:shadow-[0_12px_28px_-14px_rgba(7,15,28,0.18)] hover:bg-cream/30"
       }`}
     >
       {/* Floats above the card top edge — doesn't push content down, so all

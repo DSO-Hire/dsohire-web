@@ -117,7 +117,7 @@ function DsoCard({ dso, openJobs }: { dso: DsoRow; openJobs: number }) {
   return (
     <Link
       href={`/companies/${dso.slug}`}
-      className="group block bg-white p-7 hover:bg-cream transition-colors flex flex-col"
+      className="group block bg-white p-7 hover:bg-cream motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-14px_rgba(7,15,28,0.18)] flex flex-col"
     >
       <div className="flex items-center gap-3 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
         <Building2 className="h-3.5 w-3.5" />
