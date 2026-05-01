@@ -36,10 +36,10 @@ export default async function AuthErrorPage({
             Request a New Link
           </Link>
           <Link
-            href="mailto:cam@dsohire.com"
+            href="/contact"
             className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[11px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
           >
-            Email Cameron
+            Contact Support
           </Link>
         </div>
         {reason && (

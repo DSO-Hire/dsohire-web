@@ -101,7 +101,7 @@ export default async function OnboardingPage() {
           </div>
           <div className="text-[13px] text-ink mb-6">
             {dso?.status === "pending"
-              ? "Pending — Cameron is verifying your DSO. You can keep setting up while we review."
+              ? "Pending — we're verifying your DSO. You can keep setting up while we review."
               : dso?.status}
           </div>
 
@@ -113,7 +113,7 @@ export default async function OnboardingPage() {
             >
               cam@dsohire.com
             </a>{" "}
-            and Cameron will reply within one business day.
+            and we&apos;ll reply within one business day.
           </div>
         </aside>
       </div>

@@ -127,7 +127,7 @@ export function SignUpForm({ initialTier }: { initialTier: PricingTier }) {
         label="Your full name"
         name="full_name"
         autoComplete="name"
-        placeholder="Cameron Eslinger"
+        placeholder="Your full name"
         required
       />
       <Field

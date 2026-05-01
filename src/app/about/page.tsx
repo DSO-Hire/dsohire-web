@@ -1,9 +1,9 @@
 /**
- * /about — founder story and DSO Hire's positioning.
+ * /about — DSO Hire's positioning and operating principles.
  *
- * Tone: operator-to-operator. First-person from Cameron, not corporate-third.
- * Goal: build trust that the platform is built by someone who actually
- * understands the dental industry, not a generic SaaS shop.
+ * Tone: company-voice, operator-led. Talks about the product and the
+ * incentive alignment, not the founder. Anonymized per the launch policy
+ * (see feedback_anonymize_public_copy in product memory).
  */
 
 import Link from "next/link";
@@ -14,7 +14,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "DSO Hire is built by Cameron Eslinger, a Kansas-based operator with years of dental industry experience. Operator-built, not generic SaaS.",
+    "DSO Hire is the job board built specifically for multi-location dental support organizations. Operator-led, bootstrapped, no placement fees ever.",
 };
 
 export default function AboutPage() {
@@ -38,12 +38,13 @@ function Hero() {
         </span>
       </div>
       <h1 className="text-4xl sm:text-7xl font-extrabold tracking-[-2px] leading-[1.02] text-ink mb-7">
-        Built by an operator, not a recruiting platform.
+        Built by operators, for operators.
       </h1>
       <p className="text-lg sm:text-xl text-slate-body leading-relaxed">
-        DSO Hire is a one-person operation by Cameron Eslinger, working out of
-        Kansas. The product was built because the existing options for hiring at
-        a multi-location DSO were genuinely bad and nobody else was fixing them.
+        DSO Hire is the job board purpose-built for multi-location dental
+        support organizations. Every product decision starts from one question:
+        does this make a real DSO recruiter&apos;s day shorter, or does it just
+        add another tool to learn?
       </p>
     </section>
   );
@@ -54,26 +55,24 @@ function Story() {
     <section className="bg-cream border-y border-[var(--rule)] px-6 sm:px-14 py-24">
       <div className="max-w-[760px] mx-auto">
         <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
-          The Story
+          Why DSO Hire exists
         </div>
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink mb-12">
-          How DSO Hire ended up looking like this.
+          The hiring stack the industry needed never got built.
         </h2>
 
         <div className="space-y-7 text-[16px] sm:text-[17px] text-ink leading-[1.7]">
           <p>
-            I&apos;ve spent years in the dental industry — first as an operator,
-            then as someone who builds tools for operators. The pattern I kept
-            seeing across DSOs of every size was the same: clinical work was
-            improving every year, but the back office was stuck on tooling
-            designed for solo practices in 2008.
+            Across DSOs of every size, the pattern is the same. Clinical work
+            has gotten better every year. The back office has stayed stuck on
+            tooling designed for solo practices.
           </p>
           <p>
-            Hiring was the most painful version of that gap. Multi-location DSOs
-            spend tens of thousands of dollars a year on per-listing fees and
-            agency placement charges, then hand the work to recruiters who
-            re-enter the same job description into half a dozen platforms. The
-            tools were never built for the operating model — they were built for
+            Hiring is the most expensive version of that gap. Multi-location
+            DSOs spend tens of thousands a year on per-listing fees and agency
+            placement charges, then hand the work to recruiters who re-enter
+            the same job description into half a dozen platforms. The tools
+            were never built for the operating model — they were built for
             individual practices, then bolted onto larger organizations.
           </p>
           <p>
@@ -81,21 +80,19 @@ function Story() {
             locations from day one. One subscription, one team account,
             unlimited postings across every practice, no placement fees ever.
             What sounds like a small change unlocks a different relationship
-            with hiring — you start posting routine roles you would have skipped
-            because the per-listing math didn&apos;t pencil.
+            with hiring — DSOs start posting routine roles they would have
+            skipped because the per-listing math didn&apos;t pencil.
           </p>
           <p>
-            Right now I write the code, answer the email, and do the customer
-            onboarding personally. That&apos;s by design. The first 5 customers
-            (the &quot;Founding&quot; tier) get a direct line to me, a 12-month
-            rate lock, and proportional input on what we build next. In exchange
-            we get testimonials we can use to recruit customer 6 onward.
+            Founding customers (the first five) get a 12-month rate lock and
+            proportional input on what we build next. In exchange, they help
+            us validate the product against the real operating environment so
+            customer six onward gets a sharper tool.
           </p>
           <p>
             If that&apos;s the kind of vendor relationship that fits how you
-            run your DSO, I&apos;d like to talk.
+            run your DSO, we&apos;d like to talk.
           </p>
-          <p className="pt-2 text-slate-body italic">— Cameron Eslinger</p>
         </div>
       </div>
     </section>
@@ -104,9 +101,9 @@ function Story() {
 
 const PRINCIPLES = [
   {
-    eyebrow: "Operator-built",
-    title: "Decisions get made by someone who has actually hired in this industry.",
-    body: "Every product choice runs through the question: would a real DSO recruiter pick this up and use it tomorrow without a 30-minute training session?",
+    eyebrow: "Operator-led",
+    title: "Decisions get made by people who have actually hired in this industry.",
+    body: "Every product choice runs through one filter: would a real DSO recruiter pick this up and use it tomorrow without a 30-minute training session? If the answer is no, we keep iterating.",
   },
   {
     eyebrow: "No placement fees",
@@ -129,7 +126,7 @@ function Principles() {
   return (
     <section className="px-6 sm:px-14 py-28 max-w-[1240px] mx-auto">
       <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
-        How We Operate
+        How we operate
       </div>
       <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink max-w-[720px] mb-12">
         Four principles we won&apos;t compromise on.
@@ -156,18 +153,19 @@ function FinalCta() {
     <section className="bg-ink text-ivory px-6 sm:px-14 py-24 text-center">
       <div className="max-w-[680px] mx-auto">
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ivory mb-5">
-          Built in Kansas. Hiring DSOs nationwide.
+          Hiring DSOs nationwide.
         </h2>
         <p className="text-base text-ivory/70 leading-[1.7] mb-9">
-          DSO Hire LLC is registered in Kansas. The product runs on Vercel,
-          Supabase, and Stripe. All infrastructure is US-hosted.
+          DSO Hire is a US-hosted, US-operated platform. Every job posting
+          comes from a verified dental support organization — not a recruiter,
+          staffing agency, or solo practice.
         </p>
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Link
-            href="mailto:cam@dsohire.com"
+            href="/contact"
             className="inline-flex items-center gap-2.5 px-9 py-4 bg-heritage text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
           >
-            Email Cameron
+            Contact Us
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <Link

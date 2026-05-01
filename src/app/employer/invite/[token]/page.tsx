@@ -196,7 +196,7 @@ export default async function InviteAcceptPage({ params }: PageProps) {
             href="mailto:cam@dsohire.com?subject=Invitation%20question"
             className="inline-flex items-center gap-2.5 px-7 py-4 text-ink text-[11px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
           >
-            Email Cameron
+            Contact Support
           </a>
         </div>
       </AcceptShell>
@@ -312,7 +312,7 @@ function ErrorScreen({
           href="mailto:cam@dsohire.com"
           className="inline-flex items-center gap-2.5 px-7 py-4 border border-[var(--rule-strong)] text-ink text-[11px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
         >
-          Contact Cameron
+          Contact Support
         </a>
       </div>
     </AcceptShell>

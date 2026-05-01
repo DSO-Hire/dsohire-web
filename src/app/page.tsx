@@ -426,7 +426,7 @@ function PricingTier({ tier }: { tier: TierConfig }) {
         {tier.id === "founding" && "Apply for Founding"}
         {tier.id === "starter" && "Start with Starter"}
         {tier.id === "growth" && "Choose Growth"}
-        {tier.id === "enterprise" && "Talk to Cameron"}
+        {tier.id === "enterprise" && "Contact Sales"}
       </Link>
 
       <ul className="list-none border-t border-[var(--rule)] pt-4">
@@ -537,10 +537,10 @@ function FinalCta() {
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <Link
-            href="mailto:cam@dsohire.com"
+            href="/contact"
             className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[11px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
           >
-            Email Cameron
+            Contact Us
           </Link>
         </div>
       </div>

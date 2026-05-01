@@ -29,10 +29,10 @@ export default function ContactPage() {
           </span>
         </div>
         <h1 className="text-4xl sm:text-7xl font-extrabold tracking-[-2px] leading-[1.02] text-ink mb-6 max-w-[820px]">
-          Talk to Cameron.
+          Get in touch.
         </h1>
         <p className="text-lg sm:text-xl text-slate-body leading-relaxed max-w-[640px] mb-14">
-          The fastest way to get a real answer is to email me directly. The
+          The fastest way to get a real answer is to email us directly. The
           form below routes to the same inbox.
         </p>
 
@@ -98,8 +98,7 @@ export default function ContactPage() {
                 DSO Hire LLC
               </div>
               <p className="text-[13px] text-slate-body leading-[1.7]">
-                Kansas, USA · Founded 2026 · Built and operated by Cameron
-                Eslinger.
+                Founded 2026 · Operator-led, US-hosted, bootstrapped.
               </p>
             </div>
           </div>

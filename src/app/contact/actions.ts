@@ -70,7 +70,7 @@ export async function submitContact(
     return {
       ok: true,
       message:
-        "Thanks — Cameron will reply within one business day.",
+        "Thanks — we'll reply within one business day.",
     };
   } catch (err) {
     console.error("[contact] resend.emails.send failed", err);
