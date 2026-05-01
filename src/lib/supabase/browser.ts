@@ -22,10 +22,11 @@
  */
 
 import { createBrowserClient } from "@supabase/ssr";
-import type { Database } from "./database.types";
+
+// Generic <Database> dropped — see comment in server.ts. Re-add at task #32.
 
 export function createSupabaseBrowserClient() {
-  return createBrowserClient<Database>(
+  return createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );

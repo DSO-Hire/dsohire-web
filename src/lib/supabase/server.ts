@@ -20,12 +20,16 @@
 
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import type { Database } from "./database.types";
+
+// NOTE: Generic <Database> dropped temporarily — our hand-written
+// database.types.ts doesn't include the Relationships fields newer Supabase
+// versions expect, which breaks query-result inference. Regenerate from CLI
+// in Phase 2 Week 2 (task #32) and re-add the generic.
 
 export async function createSupabaseServerClient() {
   const cookieStore = await cookies();
 
-  return createServerClient<Database>(
+  return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -53,7 +57,7 @@ export async function createSupabaseServerClient() {
  * (admin actions, webhook handlers, cron jobs). NEVER expose to the browser.
  */
 export function createSupabaseServiceRoleClient() {
-  return createServerClient<Database>(
+  return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
