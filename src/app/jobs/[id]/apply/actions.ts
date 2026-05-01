@@ -7,7 +7,14 @@
  * `resumes` Supabase Storage bucket at path `${auth_user_id}/${timestamp}-${filename}`.
  *
  * Idempotency: if an application for (job_id, candidate_id) already exists,
- * we update its cover_letter + resume_url instead of inserting again.
+ * we update its cover_letter + resume_url instead of inserting again. Any
+ * existing screening-question answers are upserted (delete+insert) to match
+ * the new submission.
+ *
+ * Screening answers arrive as form fields named:
+ *   q__${questionId}                    — text/yes_no/single/number (string)
+ *   q__${questionId}                    — multi_select (repeated, formData.getAll)
+ * The action looks up each question's kind to know how to interpret the value.
  *
  * Side effects (fire-and-forget — never block apply success):
  *   - Email candidate confirmation (ApplicationReceived)
@@ -23,6 +30,7 @@ import {
 import { sendEmail } from "@/lib/email/send";
 import { ApplicationReceived } from "@/emails/candidate/ApplicationReceived";
 import { NewApplication } from "@/emails/employer/NewApplication";
+import type { ScreeningQuestion } from "./types";
 
 export interface ApplyState {
   ok: boolean;
@@ -90,6 +98,29 @@ export async function applyToJob(
     };
   }
 
+  // Pull screening questions for this job — we need them both to validate
+  // required answers and to know how to interpret each form value.
+  const { data: rawQuestions } = await supabase
+    .from("job_screening_questions")
+    .select("id, prompt, helper_text, kind, options, required, sort_order")
+    .eq("job_id", jobId);
+  const questions = (rawQuestions ?? []) as unknown as ScreeningQuestion[];
+
+  // Parse + validate answers from formData
+  const answersByQuestion = parseAnswers(questions, formData);
+  const missingRequired = questions.find(
+    (q) => q.required && !hasAnswer(answersByQuestion[q.id])
+  );
+  if (missingRequired) {
+    return {
+      ok: false,
+      error: `Please answer the required question: "${missingRequired.prompt.slice(
+        0,
+        80
+      )}"`,
+    };
+  }
+
   // Resume handling: optional override; if not provided, fall back to
   // candidate.resume_url (their saved profile resume).
   let resumeUrl: string | null = (candidate.resume_url as string | null) ?? null;
@@ -108,7 +139,6 @@ export async function applyToJob(
       };
     }
 
-    // Path: ${auth_user_id}/${timestamp}-${filename}
     const safeName = resumeFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
     const path = `${user.id}/${Date.now()}-${safeName}`;
     const { error: uploadError } = await supabase.storage
@@ -127,8 +157,7 @@ export async function applyToJob(
 
     resumeUrl = path;
 
-    // If candidate has no resume_url yet, save this as their default resume
-    // so subsequent applications can reuse it.
+    // If candidate has no resume_url yet, save this as their default resume.
     if (!candidate.resume_url) {
       await supabase
         .from("candidates")
@@ -145,50 +174,79 @@ export async function applyToJob(
     .eq("candidate_id", candidate.id as string)
     .maybeSingle();
 
+  let applicationId: string;
+  let alreadyApplied = false;
+
   if (existing) {
-    // Update cover letter / resume override on re-apply
+    alreadyApplied = true;
+    applicationId = existing.id as string;
+
     const { error: updateError } = await supabase
       .from("applications")
       .update({
         cover_letter: coverLetter || null,
         resume_url: resumeUrl,
       })
-      .eq("id", existing.id as string);
+      .eq("id", applicationId);
 
     if (updateError) {
       return { ok: false, error: updateError.message };
     }
+  } else {
+    const { data: newApp, error: insertError } = await supabase
+      .from("applications")
+      .insert({
+        job_id: jobId,
+        candidate_id: candidate.id as string,
+        cover_letter: coverLetter || null,
+        resume_url: resumeUrl,
+        status: "new",
+      })
+      .select("id")
+      .single();
 
-    revalidatePath(`/candidate/dashboard`);
-    revalidatePath(`/candidate/applications`);
-    return {
-      ok: true,
-      alreadyApplied: true,
-      message:
-        "You'd already applied to this role — we updated your cover letter and resume on the existing application.",
-    };
+    if (insertError) {
+      return { ok: false, error: insertError.message };
+    }
+    applicationId = newApp?.id as string;
   }
 
-  const { data: newApp, error: insertError } = await supabase
-    .from("applications")
-    .insert({
-      job_id: jobId,
-      candidate_id: candidate.id as string,
-      cover_letter: coverLetter || null,
-      resume_url: resumeUrl,
-      status: "new",
-    })
-    .select("id")
-    .single();
+  // ── Persist screening answers ──
+  // Strategy: delete prior answers for this application then re-insert. RLS
+  // on application_question_answers requires the application to be the
+  // candidate's own, which we already enforced via the application
+  // insert/update path above.
+  if (questions.length > 0) {
+    // Delete prior rows (no-op if first submission)
+    await supabase
+      .from("application_question_answers")
+      .delete()
+      .eq("application_id", applicationId);
 
-  if (insertError) {
-    return { ok: false, error: insertError.message };
+    const rowsToInsert = questions
+      .map((q) => answerToRow(applicationId, q, answersByQuestion[q.id]))
+      .filter((r): r is NonNullable<typeof r> => r !== null);
+
+    if (rowsToInsert.length > 0) {
+      const { error: answersError } = await supabase
+        .from("application_question_answers")
+        .insert(rowsToInsert);
+
+      if (answersError) {
+        // Don't roll the application back — surface the error, candidate can
+        // re-submit which will overwrite. Log for ops.
+        console.error("[apply] answer insert failed:", answersError);
+        return {
+          ok: false,
+          error: `Application saved, but we couldn't save your screening answers: ${answersError.message}. Please re-submit.`,
+        };
+      }
+    }
   }
 
   // Fire transactional emails — fire-and-forget, never block on these.
-  // Each helper has its own try/catch and logs failures to email_log.
   void sendApplicationEmails({
-    applicationId: newApp?.id as string,
+    applicationId,
     jobId,
     candidateId: candidate.id as string,
     candidateAuthUserId: user.id,
@@ -202,16 +260,121 @@ export async function applyToJob(
   revalidatePath(`/candidate/applications`);
   return {
     ok: true,
-    message: `Application submitted to ${job.title as string}. Track its status on your candidate dashboard.`,
+    alreadyApplied,
+    message: alreadyApplied
+      ? "You'd already applied to this role — we updated your application with the latest answers, cover letter, and resume."
+      : `Application submitted to ${job.title as string}. Track its status on your candidate dashboard.`,
+  };
+}
+
+/* ───────────────────────────────────────────────────────────────
+ * Answer parsing
+ * ───────────────────────────────────────────────────────────── */
+
+interface ParsedAnswer {
+  text: string | null;
+  choice: string | null;
+  choices: string[] | null;
+  number: number | null;
+}
+
+function parseAnswers(
+  questions: ScreeningQuestion[],
+  formData: FormData
+): Record<string, ParsedAnswer> {
+  const out: Record<string, ParsedAnswer> = {};
+  for (const q of questions) {
+    const key = `q__${q.id}`;
+    const allValues = formData.getAll(key);
+    const first =
+      allValues.length > 0 ? String(allValues[0] ?? "").trim() : "";
+
+    const empty: ParsedAnswer = {
+      text: null,
+      choice: null,
+      choices: null,
+      number: null,
+    };
+
+    switch (q.kind) {
+      case "short_text":
+      case "long_text":
+        out[q.id] = first ? { ...empty, text: first } : empty;
+        break;
+      case "yes_no":
+        if (first === "yes" || first === "no") {
+          out[q.id] = { ...empty, choice: first };
+        } else {
+          out[q.id] = empty;
+        }
+        break;
+      case "single_select": {
+        const validIds = new Set((q.options ?? []).map((o) => o.id));
+        if (first && validIds.has(first)) {
+          out[q.id] = { ...empty, choice: first };
+        } else {
+          out[q.id] = empty;
+        }
+        break;
+      }
+      case "multi_select": {
+        const validIds = new Set((q.options ?? []).map((o) => o.id));
+        const cleaned = allValues
+          .map((v) => String(v ?? "").trim())
+          .filter((v) => v && validIds.has(v));
+        out[q.id] =
+          cleaned.length > 0 ? { ...empty, choices: cleaned } : empty;
+        break;
+      }
+      case "number": {
+        if (first === "") {
+          out[q.id] = empty;
+          break;
+        }
+        const n = Number(first);
+        out[q.id] = Number.isFinite(n) ? { ...empty, number: n } : empty;
+        break;
+      }
+    }
+  }
+  return out;
+}
+
+function hasAnswer(a: ParsedAnswer | undefined): boolean {
+  if (!a) return false;
+  return (
+    a.text !== null ||
+    a.choice !== null ||
+    (a.choices !== null && a.choices.length > 0) ||
+    a.number !== null
+  );
+}
+
+function answerToRow(
+  applicationId: string,
+  q: ScreeningQuestion,
+  a: ParsedAnswer | undefined
+): {
+  application_id: string;
+  question_id: string;
+  answer_text: string | null;
+  answer_choice: string | null;
+  answer_choices: string[] | null;
+  answer_number: number | null;
+} | null {
+  if (!a || !hasAnswer(a)) return null;
+  return {
+    application_id: applicationId,
+    question_id: q.id,
+    answer_text: a.text,
+    answer_choice: a.choice,
+    answer_choices: a.choices,
+    answer_number: a.number,
   };
 }
 
 /* ───────────────────────────────────────────────────────────────
  * Email side effects
- *
- * Lookups need the service-role client so we can read auth.users and so
- * email_log inserts pass RLS. Failures are swallowed inside sendEmail —
- * email is never allowed to break the apply flow.
  * ───────────────────────────────────────────────────────────── */
 
 interface SendApplicationEmailsParams {
@@ -231,8 +394,6 @@ async function sendApplicationEmails(
   try {
     const admin = createSupabaseServiceRoleClient();
 
-    // Pull DSO name, the locations tagged on this job, and candidate email
-    // in parallel.
     const [{ data: dso }, { data: jobLocs }, candidateAuthUser] =
       await Promise.all([
         admin.from("dsos").select("id, name").eq("id", params.dsoId).maybeSingle(),
@@ -288,7 +449,6 @@ async function sendApplicationEmails(
 
     if (memberRows.length === 0) return;
 
-    // Resolve member emails via auth.admin.getUserById (parallel)
     const memberEmailLookups = await Promise.all(
       memberRows.map(async (m) => {
         try {
@@ -326,7 +486,6 @@ async function sendApplicationEmails(
       });
     }
   } catch (err) {
-    // Never throw — apply succeeded, email is best-effort.
     console.error("[apply] sendApplicationEmails failed:", err);
   }
 }

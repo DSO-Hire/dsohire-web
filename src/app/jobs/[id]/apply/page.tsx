@@ -1,12 +1,18 @@
 /**
- * /jobs/[id]/apply — candidate apply form for a specific job.
+ * /jobs/[id]/apply — candidate apply wizard for a specific job.
  *
  * Auth wall: if logged out, bounce to /candidate/sign-up?next=/jobs/[id]/apply
  * so the user comes back to this exact page after verifying their email.
  *
- * If they already have an application for this job, we still show the form
- * (with their previous cover letter prefilled) so they can update it. The
- * action handles upsert semantics.
+ * Multi-step wizard:
+ *   1. Intro (job confirm + profile prefill summary)
+ *   2. Screening questions (only mounted when the job has any)
+ *   3. Resume
+ *   4. Cover letter
+ *   5. Review + submit (with profile-completeness banner)
+ *
+ * Drafts persist in localStorage keyed by jobId+candidateId. Resuming an
+ * existing application surfaces previously saved cover letter + answers.
  */
 
 import Link from "next/link";
@@ -14,7 +20,8 @@ import { redirect, notFound } from "next/navigation";
 import { ArrowLeft, MapPin, Briefcase } from "lucide-react";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { ApplyForm } from "./apply-form";
+import { ApplyWizard } from "./apply-wizard";
+import type { ScreeningQuestion, CandidatePrefill, ExistingAnswer } from "./types";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -55,7 +62,7 @@ export default async function ApplyPage({ params }: PageProps) {
   const { id: jobId } = await params;
   const supabase = await createSupabaseServerClient();
 
-  // Auth wall — redirect to sign-up with next param
+  // Auth wall
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -73,8 +80,12 @@ export default async function ApplyPage({ params }: PageProps) {
     .maybeSingle();
   if (!job || (job.status as string) !== "active") notFound();
 
-  // Pull DSO + locations for context cards
-  const [{ data: dso }, { data: rawLocations }] = await Promise.all([
+  // DSO + locations + screening questions in parallel
+  const [
+    { data: dso },
+    { data: rawLocations },
+    { data: rawQuestions },
+  ] = await Promise.all([
     supabase
       .from("dsos")
       .select("id, name, slug")
@@ -84,6 +95,11 @@ export default async function ApplyPage({ params }: PageProps) {
       .from("job_locations")
       .select("location:dso_locations(city, state)")
       .eq("job_id", jobId),
+    supabase
+      .from("job_screening_questions")
+      .select("id, prompt, helper_text, kind, options, required, sort_order")
+      .eq("job_id", jobId)
+      .order("sort_order", { ascending: true }),
   ]);
 
   const locations = ((rawLocations ?? []) as unknown as Array<{
@@ -92,23 +108,48 @@ export default async function ApplyPage({ params }: PageProps) {
     .map((r) => r.location)
     .filter((l): l is NonNullable<typeof l> => l !== null);
 
-  // Candidate row — must exist (created at sign-up)
-  const { data: candidate } = await supabase
+  const questions = ((rawQuestions ?? []) as unknown as ScreeningQuestion[]) ?? [];
+
+  // Candidate row
+  const { data: rawCandidate } = await supabase
     .from("candidates")
-    .select("id, full_name, resume_url")
+    .select(
+      "id, full_name, headline, summary, years_experience, current_title, availability, resume_url, linkedin_url, phone"
+    )
     .eq("auth_user_id", user.id)
     .maybeSingle();
 
-  if (!candidate) {
-    // User is signed in but has no candidate row — likely an employer who
-    // clicked an apply link. Send them to candidate sign-up so they can
-    // create the candidate side of their account.
+  if (!rawCandidate) {
     redirect(`/candidate/sign-up?next=${encodeURIComponent(`/jobs/${jobId}/apply`)}`);
   }
 
-  const savedResume = (candidate.resume_url as string | null) ?? null;
-  const savedResumeName = savedResume
-    ? savedResume.split("/").pop()?.replace(/^\d+-/, "") ?? null
+  const candidate = rawCandidate as unknown as CandidatePrefill & {
+    id: string;
+    resume_url: string | null;
+  };
+
+  // Existing application — surface for resume-of-prior-attempt
+  const { data: existingApp } = await supabase
+    .from("applications")
+    .select("id, cover_letter, resume_url, status")
+    .eq("job_id", jobId)
+    .eq("candidate_id", candidate.id)
+    .maybeSingle();
+
+  let existingAnswers: ExistingAnswer[] = [];
+  if (existingApp) {
+    const { data: rawAnswers } = await supabase
+      .from("application_question_answers")
+      .select(
+        "question_id, answer_text, answer_choice, answer_choices, answer_number"
+      )
+      .eq("application_id", existingApp.id as string);
+    existingAnswers = (rawAnswers ?? []) as ExistingAnswer[];
+  }
+
+  const savedResumeUrl = candidate.resume_url ?? null;
+  const savedResumeName = savedResumeUrl
+    ? savedResumeUrl.split("/").pop()?.replace(/^\d+-/, "") ?? null
     : null;
 
   return (
@@ -143,25 +184,37 @@ export default async function ApplyPage({ params }: PageProps) {
           )}
         </div>
 
-        <div className="border border-[var(--rule)] bg-white p-8 sm:p-10">
-          <ApplyForm
-            jobId={jobId}
-            jobTitle={job.title as string}
-            hasSavedResume={Boolean(savedResume)}
-            savedResumeName={savedResumeName}
-          />
-        </div>
-
-        <p className="mt-8 text-[12px] text-slate-meta leading-relaxed">
-          Signed in as <span className="font-semibold text-ink">{candidate.full_name ?? user.email}</span>.{" "}
-          <Link
-            href="/candidate/profile"
-            className="text-heritage underline underline-offset-2 hover:text-heritage-deep font-semibold"
-          >
-            Update your profile
-          </Link>{" "}
-          to autofill future applications.
-        </p>
+        <ApplyWizard
+          jobId={jobId}
+          jobTitle={job.title as string}
+          dsoName={dso?.name ?? "this DSO"}
+          questions={questions}
+          candidate={{
+            id: candidate.id,
+            full_name: candidate.full_name,
+            headline: candidate.headline,
+            summary: candidate.summary,
+            years_experience: candidate.years_experience,
+            current_title: candidate.current_title,
+            availability: candidate.availability,
+            linkedin_url: candidate.linkedin_url,
+            phone: candidate.phone,
+          }}
+          savedResumeUrl={savedResumeUrl}
+          savedResumeName={savedResumeName}
+          existingApplication={
+            existingApp
+              ? {
+                  id: existingApp.id as string,
+                  cover_letter:
+                    (existingApp.cover_letter as string | null) ?? null,
+                  status: existingApp.status as string,
+                }
+              : null
+          }
+          existingAnswers={existingAnswers}
+          userEmail={user.email ?? null}
+        />
       </section>
     </SiteShell>
   );
