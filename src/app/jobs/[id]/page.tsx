@@ -112,7 +112,7 @@ export default async function JobDetailPage({ params }: PageProps) {
     supabase.from("job_skills").select("skill").eq("job_id", id),
   ]);
 
-  const locations = ((jobLocations ?? []) as Array<{
+  const locations = ((jobLocations ?? []) as unknown as Array<{
     location: {
       id: string;
       name: string;

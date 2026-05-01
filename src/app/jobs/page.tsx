@@ -83,7 +83,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
   );
 
   const locationMap = new Map<string, Array<{ city: string | null; state: string | null }>>();
-  for (const row of (jobLocations ?? []) as Array<{
+  for (const row of (jobLocations ?? []) as unknown as Array<{
     job_id: string;
     location: { city: string | null; state: string | null } | null;
   }>) {
