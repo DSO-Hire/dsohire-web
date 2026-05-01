@@ -38,7 +38,7 @@ export function SiteNav() {
       </ul>
       <div className="flex items-center gap-3">
         <Link
-          href="/employer/sign-in"
+          href="/sign-in"
           className="hidden sm:inline-flex text-[11px] font-semibold tracking-[1.5px] uppercase text-slate-body hover:text-ink transition-colors"
         >
           Sign In
