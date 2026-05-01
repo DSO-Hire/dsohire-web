@@ -395,7 +395,7 @@ function MatrixGroupBlock({
                   value ? (
                     <Check
                       className={`h-4 w-4 ${
-                        isFeatured ? "text-heritage-light" : "text-heritage"
+                        isFeatured ? "text-ivory" : "text-heritage"
                       }`}
                       strokeWidth={3}
                     />
