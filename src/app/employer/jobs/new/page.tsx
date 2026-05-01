@@ -12,7 +12,7 @@ import { ArrowLeft } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getActiveSubscription } from "@/lib/billing/subscription";
-import { JobForm, type LocationOption } from "../job-form";
+import { JobWizard, type LocationOption } from "../job-wizard";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Post a Job" };
@@ -102,7 +102,7 @@ export default async function NewJobPage() {
         </p>
       </header>
 
-      <JobForm
+      <JobWizard
         dsoId={dsoUser.dso_id}
         locations={locationOptions}
         mode="create"

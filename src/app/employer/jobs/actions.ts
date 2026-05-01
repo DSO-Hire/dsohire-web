@@ -3,20 +3,47 @@
 /**
  * /employer/jobs/* server actions.
  *
- * createJob: inserts jobs row + job_locations join rows. RLS enforces that
- * the user is a recruiter+ in the DSO.
- * updateJob: updates an existing job, replaces job_locations join.
+ * createJob: inserts jobs row + job_locations + job_skills + screening
+ *   questions. RLS enforces that the user is a recruiter+ in the DSO.
+ * updateJob: updates an existing job, replaces job_locations / job_skills /
+ *   screening questions to match the submitted payload.
  * setJobStatus: status transitions (draft → active, paused, etc.).
- * deleteJob: soft-delete (sets deleted_at).
+ * softDeleteJob: soft-delete (sets deleted_at).
+ *
+ * Screening questions arrive as a JSON-encoded `screening_questions` form
+ * field. Each item: { id (null on new), prompt, helper_text, kind, options,
+ * required, sort_order }. Sync strategy on update:
+ *   - rows in payload with id → upsert (update prompt/helper/kind/options/required/sort_order)
+ *   - rows in payload without id → insert
+ *   - rows in DB not in payload → delete (cascade clears any answers, but
+ *     in practice answers shouldn't exist for a question that was just
+ *     created in this same session)
  */
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireActiveSubscriptionError } from "@/lib/billing/subscription";
 
 export interface JobActionState {
   ok: boolean;
   error?: string;
+}
+
+interface ScreeningQuestionPayload {
+  id: string | null;
+  prompt: string;
+  helper_text: string | null;
+  kind:
+    | "short_text"
+    | "long_text"
+    | "yes_no"
+    | "single_select"
+    | "multi_select"
+    | "number";
+  options: Array<{ id: string; label: string }> | null;
+  required: boolean;
+  sort_order: number;
 }
 
 const RESERVED_JOB_SLUGS = new Set(["new", "search", "feed"]);
@@ -102,6 +129,30 @@ export async function createJob(
     await supabase.from("job_skills").insert(skillRows);
   }
 
+  // Insert screening questions (create mode — all rows are new)
+  if (parsed.screeningQuestions.length > 0) {
+    const rows = parsed.screeningQuestions.map((q) => ({
+      job_id: job.id as string,
+      prompt: q.prompt,
+      helper_text: q.helper_text,
+      kind: q.kind,
+      options: q.options,
+      required: q.required,
+      sort_order: q.sort_order,
+    }));
+    const { error: qError } = await supabase
+      .from("job_screening_questions")
+      .insert(rows);
+    if (qError) {
+      // Job is already inserted; surface the error so the user can re-try
+      // editing the job directly.
+      return {
+        ok: false,
+        error: `Job created, but couldn't save screening questions: ${qError.message}. Edit the job to retry.`,
+      };
+    }
+  }
+
   redirect(`/employer/jobs/${job.id}`);
 }
 
@@ -166,6 +217,82 @@ export async function updateJob(
     );
   }
 
+  // Sync screening questions: keep existing rows whose id is in the payload
+  // (update them), insert payload rows without an id, delete DB rows not in
+  // payload.
+  const incomingIds = new Set(
+    parsed.screeningQuestions
+      .map((q) => q.id)
+      .filter((id): id is string => id !== null)
+  );
+
+  // 1. Delete questions whose id is NOT in the incoming set
+  if (incomingIds.size > 0) {
+    await supabase
+      .from("job_screening_questions")
+      .delete()
+      .eq("job_id", jobId)
+      .not("id", "in", `(${[...incomingIds].map((id) => `"${id}"`).join(",")})`);
+  } else {
+    await supabase
+      .from("job_screening_questions")
+      .delete()
+      .eq("job_id", jobId);
+  }
+
+  // 2. Update existing rows
+  for (const q of parsed.screeningQuestions) {
+    if (q.id) {
+      const { error: updateQErr } = await supabase
+        .from("job_screening_questions")
+        .update({
+          prompt: q.prompt,
+          helper_text: q.helper_text,
+          kind: q.kind,
+          options: q.options,
+          required: q.required,
+          sort_order: q.sort_order,
+        })
+        .eq("id", q.id)
+        .eq("job_id", jobId);
+      if (updateQErr) {
+        return {
+          ok: false,
+          error: `Couldn't update screening question: ${updateQErr.message}`,
+        };
+      }
+    }
+  }
+
+  // 3. Insert new rows
+  const newRows = parsed.screeningQuestions
+    .filter((q) => !q.id)
+    .map((q) => ({
+      job_id: jobId,
+      prompt: q.prompt,
+      helper_text: q.helper_text,
+      kind: q.kind,
+      options: q.options,
+      required: q.required,
+      sort_order: q.sort_order,
+    }));
+  if (newRows.length > 0) {
+    const { error: insertQErr } = await supabase
+      .from("job_screening_questions")
+      .insert(newRows);
+    if (insertQErr) {
+      return {
+        ok: false,
+        error: `Couldn't add new screening question: ${insertQErr.message}`,
+      };
+    }
+  }
+
+  // Revalidate the public job page so candidates see the updated questions.
+  revalidatePath(`/jobs/${jobId}`);
+  revalidatePath(`/jobs/${jobId}/apply`);
+  revalidatePath(`/employer/jobs/${jobId}`);
+
   return { ok: true };
 }
 
@@ -225,7 +352,17 @@ interface ParsedJobInput {
   status: string;
   locationIds: string[];
   skills: string[];
+  screeningQuestions: ScreeningQuestionPayload[];
 }
+
+const VALID_KINDS: Set<ScreeningQuestionPayload["kind"]> = new Set([
+  "short_text",
+  "long_text",
+  "yes_no",
+  "single_select",
+  "multi_select",
+  "number",
+]);
 
 function parseJobFormData(
   formData: FormData
@@ -276,6 +413,80 @@ function parseJobFormData(
     .map((s) => s.trim())
     .filter(Boolean);
 
+  // Screening questions — JSON-encoded array
+  const rawQuestions = String(formData.get("screening_questions") ?? "").trim();
+  let screeningQuestions: ScreeningQuestionPayload[] = [];
+  if (rawQuestions) {
+    let parsedRaw: unknown;
+    try {
+      parsedRaw = JSON.parse(rawQuestions);
+    } catch {
+      return { error: "Couldn't parse screening questions payload." };
+    }
+    if (!Array.isArray(parsedRaw)) {
+      return { error: "Screening questions payload must be an array." };
+    }
+    for (let i = 0; i < parsedRaw.length; i++) {
+      const raw = parsedRaw[i] as Record<string, unknown>;
+      const prompt = String(raw.prompt ?? "").trim();
+      if (!prompt) return { error: `Question ${i + 1}: prompt is empty.` };
+      const kind = String(raw.kind ?? "");
+      if (!VALID_KINDS.has(kind as ScreeningQuestionPayload["kind"])) {
+        return { error: `Question ${i + 1}: invalid kind "${kind}".` };
+      }
+      const required = Boolean(raw.required);
+      const sortOrder =
+        typeof raw.sort_order === "number" ? raw.sort_order : i;
+      const helperText =
+        raw.helper_text === null || raw.helper_text === undefined
+          ? null
+          : String(raw.helper_text).trim() || null;
+      const id =
+        raw.id === null || raw.id === undefined || raw.id === ""
+          ? null
+          : String(raw.id);
+
+      let options: ScreeningQuestionPayload["options"] = null;
+      if (kind === "single_select" || kind === "multi_select") {
+        const rawOpts = raw.options;
+        if (!Array.isArray(rawOpts) || rawOpts.length < 2) {
+          return {
+            error: `Question ${i + 1}: needs at least 2 options.`,
+          };
+        }
+        options = [];
+        for (let j = 0; j < rawOpts.length; j++) {
+          const o = rawOpts[j] as Record<string, unknown>;
+          const optId = String(o.id ?? "").trim();
+          const label = String(o.label ?? "").trim();
+          if (!optId || !label) {
+            return {
+              error: `Question ${i + 1}: option ${j + 1} is incomplete.`,
+            };
+          }
+          options.push({ id: optId, label });
+        }
+      }
+
+      screeningQuestions.push({
+        id,
+        prompt,
+        helper_text: helperText,
+        kind: kind as ScreeningQuestionPayload["kind"],
+        options,
+        required,
+        sort_order: sortOrder,
+      });
+    }
+    // Re-number sort_order to match the array order (defensive — the wizard
+    // submits them in order, but if a custom client sends weird values we
+    // overwrite).
+    screeningQuestions = screeningQuestions.map((q, idx) => ({
+      ...q,
+      sort_order: idx,
+    }));
+  }
+
   return {
     title,
     description,
@@ -290,6 +501,7 @@ function parseJobFormData(
     status,
     locationIds,
     skills,
+    screeningQuestions,
   };
 }
 

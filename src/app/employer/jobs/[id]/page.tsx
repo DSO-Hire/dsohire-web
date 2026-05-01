@@ -11,7 +11,12 @@ import { redirect, notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, Trash2 } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { JobForm, type JobFormInitial, type LocationOption } from "../job-form";
+import {
+  JobWizard,
+  type JobWizardInitial,
+  type LocationOption,
+  type WizardScreeningQuestion,
+} from "../job-wizard";
 import { JobStatusActions } from "./status-actions";
 import type { Metadata } from "next";
 
@@ -59,16 +64,25 @@ export default async function EditJobPage({ params }: PageProps) {
 
   if (!job) notFound();
 
-  const [{ data: locations }, { data: jobLocations }, { data: jobSkills }] =
-    await Promise.all([
-      supabase
-        .from("dso_locations")
-        .select("id, name, city, state")
-        .eq("dso_id", dsoUser.dso_id)
-        .order("name"),
-      supabase.from("job_locations").select("location_id").eq("job_id", jobId),
-      supabase.from("job_skills").select("skill").eq("job_id", jobId),
-    ]);
+  const [
+    { data: locations },
+    { data: jobLocations },
+    { data: jobSkills },
+    { data: rawQuestions },
+  ] = await Promise.all([
+    supabase
+      .from("dso_locations")
+      .select("id, name, city, state")
+      .eq("dso_id", dsoUser.dso_id)
+      .order("name"),
+    supabase.from("job_locations").select("location_id").eq("job_id", jobId),
+    supabase.from("job_skills").select("skill").eq("job_id", jobId),
+    supabase
+      .from("job_screening_questions")
+      .select("id, prompt, helper_text, kind, options, required, sort_order")
+      .eq("job_id", jobId)
+      .order("sort_order", { ascending: true }),
+  ]);
 
   const locationOptions: LocationOption[] = (locations ?? []).map((l) => ({
     id: l.id as string,
@@ -77,7 +91,7 @@ export default async function EditJobPage({ params }: PageProps) {
     state: (l.state as string | null) ?? null,
   }));
 
-  const initial: JobFormInitial = {
+  const initial: JobWizardInitial = {
     id: job.id as string,
     title: job.title as string,
     description: (job.description as string) ?? "",
@@ -95,6 +109,27 @@ export default async function EditJobPage({ params }: PageProps) {
     ),
     skills: ((jobSkills ?? []) as Array<{ skill: string }>).map((s) => s.skill),
   };
+
+  const initialQuestions: WizardScreeningQuestion[] = (
+    (rawQuestions ?? []) as Array<{
+      id: string;
+      prompt: string;
+      helper_text: string | null;
+      kind: WizardScreeningQuestion["kind"];
+      options: Array<{ id: string; label: string }> | null;
+      required: boolean;
+      sort_order: number;
+    }>
+  ).map((q) => ({
+    id: q.id,
+    persisted: true,
+    prompt: q.prompt,
+    helper_text: q.helper_text,
+    kind: q.kind,
+    options: q.options,
+    required: q.required,
+    sort_order: q.sort_order,
+  }));
 
   return (
     <EmployerShell active="jobs">
@@ -141,11 +176,12 @@ export default async function EditJobPage({ params }: PageProps) {
         <JobStatusActions jobId={initial.id} currentStatus={initial.status} />
       </header>
 
-      <JobForm
+      <JobWizard
         dsoId={dsoUser.dso_id}
         locations={locationOptions}
         mode="edit"
         initial={initial}
+        initialQuestions={initialQuestions}
       />
 
       {/* Soft-delete (separated from main form for safety) */}
