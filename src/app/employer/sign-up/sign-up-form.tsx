@@ -1,0 +1,181 @@
+"use client";
+
+import { useActionState } from "react";
+import { ArrowRight } from "lucide-react";
+import { signUpEmployer, type SignUpState } from "./actions";
+import type { PricingTier } from "@/lib/stripe/prices";
+
+const initial: SignUpState = { ok: false };
+
+export function SignUpForm({ initialTier }: { initialTier: PricingTier }) {
+  const [state, action, pending] = useActionState(signUpEmployer, initial);
+
+  if (state.ok && state.message) {
+    return (
+      <div className="border-l-4 border-heritage bg-cream p-6">
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+          Account created
+        </div>
+        <p className="text-[15px] text-ink leading-relaxed mb-3">
+          {state.message}
+        </p>
+        <p className="text-[13px] text-slate-body leading-relaxed">
+          The link expires in 15 minutes. After verifying you&apos;ll land on your
+          onboarding page where you can add locations, invite teammates, and
+          post your first job.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <form action={action} className="space-y-5">
+      {/* Honeypot */}
+      <div className="hidden" aria-hidden="true">
+        <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+      </div>
+      <input type="hidden" name="tier" value={initialTier} />
+
+      <Field
+        label="Your full name"
+        name="full_name"
+        autoComplete="name"
+        placeholder="Cameron Eslinger"
+        required
+      />
+      <Field
+        label="Work email"
+        name="email"
+        type="email"
+        autoComplete="email"
+        placeholder="you@yourdso.com"
+        required
+      />
+
+      <div className="pt-2 border-t border-[var(--rule)]" />
+
+      <Field
+        label="DSO name"
+        name="dso_name"
+        autoComplete="organization"
+        placeholder="SmileBright Dental DSO"
+        required
+        helper="Used as the public name and to generate your dsohire.com URL slug. You can edit either later."
+      />
+
+      <div className="grid grid-cols-1 sm:grid-cols-[2fr_1fr] gap-4">
+        <Field
+          label="Headquarters city"
+          name="headquarters_city"
+          autoComplete="address-level2"
+          placeholder="Kansas City"
+        />
+        <Field
+          label="State"
+          name="headquarters_state"
+          autoComplete="address-level1"
+          placeholder="KS"
+          maxLength={2}
+          required
+        />
+      </div>
+
+      <Field
+        label="Number of practice locations"
+        name="practice_count"
+        type="number"
+        min={1}
+        max={500}
+        placeholder="12"
+        required
+        helper="Approximate is fine — used to suggest the right tier and validate later."
+      />
+
+      {state.error && (
+        <div className="bg-red-50 border-l-4 border-red-500 p-4">
+          <p className="text-[13px] text-red-900">{state.error}</p>
+        </div>
+      )}
+
+      <button
+        type="submit"
+        disabled={pending}
+        className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        {pending ? "Creating Account…" : "Create Account & Send Verification"}
+        {!pending && <ArrowRight className="h-4 w-4" />}
+      </button>
+
+      <p className="text-[12px] text-slate-meta leading-relaxed">
+        By continuing you agree to our{" "}
+        <a
+          href="/legal/terms"
+          className="text-heritage underline underline-offset-2 hover:text-heritage-deep"
+        >
+          Terms
+        </a>{" "}
+        and{" "}
+        <a
+          href="/legal/privacy"
+          className="text-heritage underline underline-offset-2 hover:text-heritage-deep"
+        >
+          Privacy Policy
+        </a>
+        . You won&apos;t be charged until you complete payment setup after
+        verification.
+      </p>
+    </form>
+  );
+}
+
+function Field({
+  label,
+  name,
+  type = "text",
+  required,
+  autoComplete,
+  placeholder,
+  helper,
+  min,
+  max,
+  maxLength,
+}: {
+  label: string;
+  name: string;
+  type?: string;
+  required?: boolean;
+  autoComplete?: string;
+  placeholder?: string;
+  helper?: string;
+  min?: number;
+  max?: number;
+  maxLength?: number;
+}) {
+  return (
+    <div>
+      <label
+        htmlFor={`signup-${name}`}
+        className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+      >
+        {label} {required && <span className="text-heritage">*</span>}
+      </label>
+      <input
+        id={`signup-${name}`}
+        type={type}
+        name={name}
+        required={required}
+        autoComplete={autoComplete}
+        placeholder={placeholder}
+        min={min}
+        max={max}
+        maxLength={maxLength}
+        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+      />
+      {helper && (
+        <p className="mt-1.5 text-[11px] text-slate-meta leading-relaxed">
+          {helper}
+        </p>
+      )}
+    </div>
+  );
+}
