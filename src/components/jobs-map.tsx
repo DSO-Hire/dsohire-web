@@ -41,6 +41,7 @@ type MapboxMap = {
   getCanvas(): { style: { cursor: string } };
   fitBounds(bounds: unknown, options?: unknown): void;
   flyTo(options: unknown): void;
+  setStyle(style: string): void;
 };
 type GeoJSONSourceLike = {
   setData(data: unknown): void;
@@ -76,6 +77,23 @@ interface JobsMapProps {
 const RADIUS_METERS = 14_484;
 const CIRCLE_VERTICES = 64;
 
+/* Available Mapbox styles — picker UI lets the user toggle. Privacy is
+ * preserved across all of them because the ~9-mile circle dwarfs any
+ * individual building even at high zoom. */
+const MAP_STYLES = [
+  { id: "light", label: "Light", url: "mapbox://styles/mapbox/light-v11" },
+  { id: "streets", label: "Streets", url: "mapbox://styles/mapbox/streets-v12" },
+  {
+    id: "satellite-streets",
+    label: "Satellite",
+    url: "mapbox://styles/mapbox/satellite-streets-v12",
+  },
+  { id: "outdoors", label: "Outdoors", url: "mapbox://styles/mapbox/outdoors-v12" },
+] as const;
+type MapStyleId = (typeof MAP_STYLES)[number]["id"];
+const DEFAULT_STYLE_ID: MapStyleId = "light";
+const STYLE_STORAGE_KEY = "dsohire:map-style";
+
 const ROLE_LABELS: Record<string, string> = {
   dentist: "Dentist",
   dental_hygienist: "Dental Hygienist",
@@ -98,17 +116,38 @@ const EMP_LABELS: Record<string, string> = {
 export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapboxMap | null>(null);
+  const initialFitDoneRef = useRef(false);
+  /* Latest locations kept in a ref so the style.load handler (attached once
+   * at init) always re-attaches layers using the freshest data. */
+  const locationsRef = useRef<JobsMapLocation[]>(locations);
+  locationsRef.current = locations;
+
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
     null
   );
   const [locating, setLocating] = useState(false);
   const [locateError, setLocateError] = useState<string | null>(null);
   const [mapReady, setMapReady] = useState(false);
+  const [mapStyleId, setMapStyleId] =
+    useState<MapStyleId>(DEFAULT_STYLE_ID);
 
   const selectedLocation = useMemo(
     () => locations.find((l) => l.id === selectedLocationId) ?? null,
     [locations, selectedLocationId]
   );
+
+  /* ── Hydrate style preference from localStorage on mount ────── */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const stored = window.localStorage.getItem(STYLE_STORAGE_KEY);
+      if (stored && MAP_STYLES.some((s) => s.id === stored)) {
+        setMapStyleId(stored as MapStyleId);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   /* ── Initialize map ────────────────────────────────────────── */
   useEffect(() => {
@@ -130,11 +169,14 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
 
       mapboxgl.accessToken = mapboxToken;
 
+      const initialStyleUrl =
+        MAP_STYLES.find((s) => s.id === mapStyleId)?.url ?? MAP_STYLES[0].url;
+
       // Default to a US-wide view; auto-fit to the location bounds once data
       // is loaded below.
       const map = new mapboxgl.Map({
         container: containerRef.current,
-        style: "mapbox://styles/mapbox/light-v11",
+        style: initialStyleUrl,
         center: [-98.5, 39.5],
         zoom: 3.6,
         attributionControl: false,
@@ -151,110 +193,21 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
 
       mapRef.current = map;
 
-      map.on("load", () => {
+      // style.load fires on every style load, including the initial one and
+      // every subsequent setStyle() call. We re-attach our source + layers
+      // here because Mapbox wipes them on style change. Read locations from
+      // the ref so the handler always sees the latest prop value.
+      map.on("style.load", () => {
         if (cancelled) return;
+        const currentLocations = locationsRef.current;
+        attachLocationLayers(map, currentLocations);
+        wireLayerInteractions(map, setSelectedLocationId);
 
-        // Build a FeatureCollection of circle polygons + center points.
-        const features = locations.flatMap((loc) => [
-          {
-            type: "Feature" as const,
-            geometry: {
-              type: "Polygon" as const,
-              coordinates: [
-                buildCircle(loc.longitude, loc.latitude, RADIUS_METERS),
-              ],
-            },
-            properties: {
-              kind: "circle",
-              id: loc.id,
-              jobCount: loc.jobs.length,
-            },
-          },
-          {
-            type: "Feature" as const,
-            geometry: {
-              type: "Point" as const,
-              coordinates: [loc.longitude, loc.latitude],
-            },
-            properties: {
-              kind: "label",
-              id: loc.id,
-              jobCount: loc.jobs.length,
-              label:
-                loc.jobs.length === 1
-                  ? "1 role"
-                  : `${loc.jobs.length} roles`,
-            },
-          },
-        ]);
-
-        map.addSource("dsohire-locations", {
-          type: "geojson",
-          data: { type: "FeatureCollection", features },
-        });
-
-        // Heritage-green fill
-        map.addLayer({
-          id: "dsohire-locations-fill",
-          type: "fill",
-          source: "dsohire-locations",
-          filter: ["==", ["get", "kind"], "circle"],
-          paint: {
-            "fill-color": "#4D7A60",
-            "fill-opacity": 0.18,
-          },
-        });
-        // Navy outline
-        map.addLayer({
-          id: "dsohire-locations-line",
-          type: "line",
-          source: "dsohire-locations",
-          filter: ["==", ["get", "kind"], "circle"],
-          paint: {
-            "line-color": "#14233F",
-            "line-width": 1.5,
-            "line-opacity": 0.55,
-          },
-        });
-        // Job-count label at center
-        map.addLayer({
-          id: "dsohire-locations-label",
-          type: "symbol",
-          source: "dsohire-locations",
-          filter: ["==", ["get", "kind"], "label"],
-          layout: {
-            "text-field": ["get", "label"],
-            "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
-            "text-size": 12,
-            "text-allow-overlap": false,
-          },
-          paint: {
-            "text-color": "#14233F",
-            "text-halo-color": "#F7F4ED",
-            "text-halo-width": 1.5,
-          },
-        });
-
-        // Click handler — pick a circle on click.
-        map.on("click", "dsohire-locations-fill", (e: unknown) => {
-          const feature = (
-            e as { features?: Array<{ properties?: { id?: string } }> }
-          ).features?.[0];
-          if (!feature) return;
-          const id = feature.properties?.id;
-          if (id) setSelectedLocationId(id);
-        });
-        map.on("mouseenter", "dsohire-locations-fill", () => {
-          map.getCanvas().style.cursor = "pointer";
-        });
-        map.on("mouseleave", "dsohire-locations-fill", () => {
-          map.getCanvas().style.cursor = "";
-        });
-
-        // Auto-fit to all locations.
-        if (locations.length > 0) {
+        // Initial auto-fit only — subsequent style changes preserve the
+        // user's zoom / pan.
+        if (!initialFitDoneRef.current && currentLocations.length > 0) {
           const bounds = new mapboxgl.LngLatBounds();
-          for (const loc of locations) {
+          for (const loc of currentLocations) {
             bounds.extend([loc.longitude, loc.latitude]);
           }
           map.fitBounds(bounds, {
@@ -262,6 +215,7 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
             maxZoom: 9,
             duration: 0,
           });
+          initialFitDoneRef.current = true;
         }
 
         setMapReady(true);
@@ -276,40 +230,32 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapboxToken]);
 
+  /* ── Apply style changes after init ────────────────────────── */
+  useEffect(() => {
+    if (!mapReady || !mapRef.current) return;
+    const url = MAP_STYLES.find((s) => s.id === mapStyleId)?.url;
+    if (!url) return;
+    mapRef.current.setStyle(url);
+    // Persist preference
+    if (typeof window !== "undefined") {
+      try {
+        window.localStorage.setItem(STYLE_STORAGE_KEY, mapStyleId);
+      } catch {
+        /* ignore */
+      }
+    }
+  }, [mapStyleId, mapReady]);
+
   /* ── Refresh data when locations prop changes ──────────────── */
   useEffect(() => {
     if (!mapReady || !mapRef.current) return;
     const source = mapRef.current.getSource(
       "dsohire-locations"
     ) as GeoJSONSourceLike | undefined;
+    /* Source may not exist during a style swap — the next style.load will
+     * re-attach with fresh locations from locationsRef, so it's safe to skip. */
     if (!source) return;
-    const features = locations.flatMap((loc) => [
-      {
-        type: "Feature" as const,
-        geometry: {
-          type: "Polygon" as const,
-          coordinates: [
-            buildCircle(loc.longitude, loc.latitude, RADIUS_METERS),
-          ],
-        },
-        properties: { kind: "circle", id: loc.id, jobCount: loc.jobs.length },
-      },
-      {
-        type: "Feature" as const,
-        geometry: {
-          type: "Point" as const,
-          coordinates: [loc.longitude, loc.latitude],
-        },
-        properties: {
-          kind: "label",
-          id: loc.id,
-          jobCount: loc.jobs.length,
-          label:
-            loc.jobs.length === 1 ? "1 role" : `${loc.jobs.length} roles`,
-        },
-      },
-    ]);
-    source.setData({ type: "FeatureCollection", features });
+    source.setData(buildLocationFeatures(locations));
   }, [locations, mapReady]);
 
   /* ── Use my location ───────────────────────────────────────── */
@@ -381,7 +327,7 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
         style={{ borderRadius: 0 }}
       />
 
-      {/* Use my location button — overlay top-left */}
+      {/* Top-left controls — locate + style picker */}
       <div className="absolute top-4 left-4 flex flex-col gap-2 items-start">
         <button
           type="button"
@@ -397,6 +343,31 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
             {locateError}
           </div>
         )}
+
+        {/* Style picker */}
+        <div
+          className="inline-flex border border-[var(--rule-strong)] bg-ivory shadow-sm"
+          role="group"
+          aria-label="Map style"
+        >
+          {MAP_STYLES.map((style, idx) => (
+            <button
+              key={style.id}
+              type="button"
+              onClick={() => setMapStyleId(style.id)}
+              aria-pressed={mapStyleId === style.id}
+              className={
+                "px-3 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors " +
+                (idx > 0 ? "border-l border-[var(--rule-strong)] " : "") +
+                (mapStyleId === style.id
+                  ? "bg-ink text-ivory"
+                  : "text-slate-body hover:text-ink hover:bg-cream")
+              }
+            >
+              {style.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Privacy footnote — overlay bottom-left */}
@@ -469,6 +440,118 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
       )}
     </div>
   );
+}
+
+/* ───────────────────────────────────────────────────────────────
+ * Source + layer attachment.
+ *
+ * Called from the `style.load` event so it runs both on initial map
+ * creation AND every time the user switches styles (Mapbox wipes custom
+ * sources/layers on setStyle, so we re-add them here).
+ * ───────────────────────────────────────────────────────────── */
+
+function buildLocationFeatures(locations: JobsMapLocation[]): unknown {
+  const features = locations.flatMap((loc) => [
+    {
+      type: "Feature" as const,
+      geometry: {
+        type: "Polygon" as const,
+        coordinates: [buildCircle(loc.longitude, loc.latitude, RADIUS_METERS)],
+      },
+      properties: {
+        kind: "circle",
+        id: loc.id,
+        jobCount: loc.jobs.length,
+      },
+    },
+    {
+      type: "Feature" as const,
+      geometry: {
+        type: "Point" as const,
+        coordinates: [loc.longitude, loc.latitude],
+      },
+      properties: {
+        kind: "label",
+        id: loc.id,
+        jobCount: loc.jobs.length,
+        label:
+          loc.jobs.length === 1 ? "1 role" : `${loc.jobs.length} roles`,
+      },
+    },
+  ]);
+  return { type: "FeatureCollection", features };
+}
+
+function attachLocationLayers(
+  map: MapboxMap,
+  locations: JobsMapLocation[]
+): void {
+  map.addSource("dsohire-locations", {
+    type: "geojson",
+    data: buildLocationFeatures(locations),
+  });
+
+  // Heritage-green fill
+  map.addLayer({
+    id: "dsohire-locations-fill",
+    type: "fill",
+    source: "dsohire-locations",
+    filter: ["==", ["get", "kind"], "circle"],
+    paint: {
+      "fill-color": "#4D7A60",
+      "fill-opacity": 0.22,
+    },
+  });
+  // Navy outline
+  map.addLayer({
+    id: "dsohire-locations-line",
+    type: "line",
+    source: "dsohire-locations",
+    filter: ["==", ["get", "kind"], "circle"],
+    paint: {
+      "line-color": "#14233F",
+      "line-width": 1.5,
+      "line-opacity": 0.65,
+    },
+  });
+  // Job-count label at center
+  map.addLayer({
+    id: "dsohire-locations-label",
+    type: "symbol",
+    source: "dsohire-locations",
+    filter: ["==", ["get", "kind"], "label"],
+    layout: {
+      "text-field": ["get", "label"],
+      "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+      "text-size": 12,
+      "text-allow-overlap": false,
+    },
+    paint: {
+      "text-color": "#14233F",
+      "text-halo-color": "#F7F4ED",
+      "text-halo-width": 2,
+    },
+  });
+}
+
+function wireLayerInteractions(
+  map: MapboxMap,
+  setSelectedLocationId: (id: string | null) => void
+): void {
+  map.on("click", "dsohire-locations-fill", (e: unknown) => {
+    const feature = (
+      e as { features?: Array<{ properties?: { id?: string } }> }
+    ).features?.[0];
+    if (!feature) return;
+    const id = feature.properties?.id;
+    if (id) setSelectedLocationId(id);
+  });
+  map.on("mouseenter", "dsohire-locations-fill", () => {
+    map.getCanvas().style.cursor = "pointer";
+  });
+  map.on("mouseleave", "dsohire-locations-fill", () => {
+    map.getCanvas().style.cursor = "";
+  });
 }
 
 /* ───────────────────────────────────────────────────────────────
