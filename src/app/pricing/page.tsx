@@ -274,10 +274,18 @@ function CompareMatrix({ tiers }: { tiers: TierConfig[] }) {
         What you get at each tier.
       </h2>
 
-      <div className="overflow-x-auto -mx-6 sm:-mx-14 px-6 sm:px-14">
+      {/*
+        Sticky thead trick: we need the page (not a wrapper) to be the scroll
+        container for vertical sticky to work. On lg+ the table fits without
+        horizontal scroll, so overflow is visible there. On smaller screens
+        the wrapper falls back to overflow-x-auto for horizontal scroll, and
+        the sticky header just doesn't engage — acceptable trade-off since
+        comparison tables are primarily a desktop surface.
+      */}
+      <div className="-mx-6 sm:-mx-14 px-6 sm:px-14 overflow-x-auto lg:overflow-visible">
         <table className="w-full min-w-[860px] border-collapse">
-          {/* ── Branded navy header row ── */}
-          <thead>
+          {/* ── Branded navy header row — sticks below the 80px nav on scroll ── */}
+          <thead className="sticky top-[80px] z-20 shadow-[0_4px_12px_-8px_rgba(7,15,28,0.25)]">
             <tr className="bg-ink">
               <th className="text-left text-[10px] font-bold tracking-[2.5px] uppercase text-ivory/60 py-6 pl-5 pr-6 align-bottom rounded-tl-sm">
                 Feature
@@ -337,17 +345,30 @@ function MatrixGroupBlock({
 }) {
   return (
     <>
-      {/* ── Group label band ── */}
-      <tr className={`bg-cream ${isFirst ? "" : "border-t-4 border-white"}`}>
-        <td
-          colSpan={tiers.length + 1}
-          className="py-3 pl-5 pr-4 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep"
-        >
+      {/* ── Group label band ──
+          Split into per-column cells so the navy Growth column can continue
+          uninterrupted through the section dividers. */}
+      <tr className={isFirst ? "" : "border-t-4 border-white"}>
+        <td className="bg-cream py-3 pl-5 pr-4 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
           <span className="inline-flex items-center gap-2.5">
             <span className="block w-5 h-px bg-heritage" />
             {group.label}
           </span>
         </td>
+        {tiers.map((tier) => {
+          const isFeatured = tier.badge === "Most popular";
+          return (
+            <td
+              key={tier.id}
+              className={
+                isFeatured
+                  ? "bg-ink border-l-2 border-r-2 border-heritage"
+                  : "bg-cream"
+              }
+              aria-hidden="true"
+            />
+          );
+        })}
       </tr>
       {/* ── Group rows ── */}
       {group.rows.map((row, ri) => (
@@ -366,23 +387,35 @@ function MatrixGroupBlock({
                 key={tier.id}
                 className={`text-[13px] py-4 px-4 align-middle ${
                   isFeatured
-                    ? "bg-cream border-l-2 border-r-2 border-heritage"
+                    ? "bg-ink border-l-2 border-r-2 border-heritage"
                     : ""
                 }`}
               >
                 {typeof value === "boolean" ? (
                   value ? (
                     <Check
-                      className="h-4 w-4 text-heritage"
+                      className={`h-4 w-4 ${
+                        isFeatured ? "text-heritage-light" : "text-heritage"
+                      }`}
                       strokeWidth={3}
                     />
                   ) : (
-                    <span className="text-[18px] leading-none text-slate-meta/30 font-light">
+                    <span
+                      className={`text-[18px] leading-none font-light ${
+                        isFeatured ? "text-ivory/30" : "text-slate-meta/30"
+                      }`}
+                    >
                       —
                     </span>
                   )
                 ) : (
-                  <span className="text-ink font-semibold">{value}</span>
+                  <span
+                    className={`font-semibold ${
+                      isFeatured ? "text-ivory" : "text-ink"
+                    }`}
+                  >
+                    {value}
+                  </span>
                 )}
               </td>
             );
@@ -402,7 +435,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "What happens after the 12-month Founding rate lock expires?",
-    a: "We'll email you about a month before to discuss either renewing the Founding rate for another year (in exchange for a refreshed testimonial) or moving to the Starter tier. We don't auto-migrate.",
+    a: "We'll email you about a month before your rate lock ends. Your subscription then automatically migrates to the standard tier that matches your practice count — Starter (10–20 practices), Growth (20–35), or Enterprise (35+). The Founding rate is a one-time, first-12-months offer; it isn't renewed.",
   },
   {
     q: "Can I change tiers later?",
