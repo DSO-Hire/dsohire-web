@@ -4,7 +4,7 @@
  * Audience: COO / VP HR / Director of Recruiting at DSOs running 10–50
  * practices, currently using DentalPost or staffing agencies.
  *
- * Goal: convert from "browsing" to "Talk to Cameron" or "Apply for Founding".
+ * Goal: convert from "browsing" to "Apply for Founding" or "Contact Sales".
  */
 
 import Link from "next/link";
@@ -61,10 +61,10 @@ function Hero() {
           <ArrowRight className="h-3.5 w-3.5" />
         </Link>
         <Link
-          href="mailto:cam@dsohire.com"
+          href="/contact"
           className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[11px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
         >
-          Talk to Cameron
+          Contact Sales
         </Link>
       </div>
     </section>
@@ -326,13 +326,14 @@ function FoundingCallout() {
               Founding Customers · First 5 Only
             </div>
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ivory mb-5">
-              Lock $299/mo for a year in exchange for a public testimonial.
+              $299/month for 12 months — five seats, by invitation.
             </h2>
             <p className="text-base text-ivory/70 leading-[1.65]">
-              We&apos;re onboarding the first 5 mid-market DSOs at the Founding rate
-              through summer 2026. You get rate lock, a Founding-customer badge,
-              and a direct line to Cameron. We get a testimonial we can use to
-              recruit customer 6 onward.
+              We&apos;re onboarding the first 5 mid-market DSOs at the Founding
+              rate through summer 2026. You get rate lock, a Founding-customer
+              badge, and a direct line to the founder. In exchange, we ask
+              for a single mutually-approved testimonial we can use to
+              introduce DSO Hire to customer 6 onward.
             </p>
           </div>
           <div>
@@ -353,7 +354,7 @@ function FoundingCallout() {
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-4 w-4 text-heritage flex-shrink-0 mt-0.5" />
-                <span>Direct support line to Cameron</span>
+                <span>Direct support line to the founder</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-4 w-4 text-heritage flex-shrink-0 mt-0.5" />
@@ -377,15 +378,16 @@ function FinalCta() {
           15-minute call. No demo gauntlet. No sales script.
         </h2>
         <p className="text-base text-slate-body leading-[1.7] mb-9">
-          Cameron wrote the product, and Cameron answers the email. Ask the
-          questions you actually want answered.
+          Built by operators, for operators — same team that writes the
+          product answers the email. Ask the questions you actually want
+          answered.
         </p>
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Link
-            href="mailto:cam@dsohire.com?subject=DSO%20Hire%20intro%20call"
+            href="/contact"
             className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
           >
-            Email Cameron
+            Contact Us
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <Link

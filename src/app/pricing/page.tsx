@@ -289,7 +289,9 @@ function CompareMatrix({ tiers }: { tiers: TierConfig[] }) {
                   <th
                     key={tier.id}
                     className={`text-left py-6 px-4 align-bottom relative ${
-                      isFeatured ? "bg-ink-soft" : ""
+                      isFeatured
+                        ? "bg-ink-soft border-l-2 border-r-2 border-heritage"
+                        : ""
                     } ${isLast ? "rounded-tr-sm pr-5" : ""}`}
                   >
                     {isFeatured && (
@@ -363,7 +365,9 @@ function MatrixGroupBlock({
               <td
                 key={tier.id}
                 className={`text-[13px] py-4 px-4 align-middle ${
-                  isFeatured ? "bg-cream/60" : ""
+                  isFeatured
+                    ? "bg-cream border-l-2 border-r-2 border-heritage"
+                    : ""
                 }`}
               >
                 {typeof value === "boolean" ? (
@@ -414,7 +418,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Do you support invoicing for Enterprise customers?",
-    a: "Yes. Enterprise tier includes invoicing on net-30 terms. Contact Cameron for setup.",
+    a: "Yes. Enterprise tier includes invoicing on net-30 terms. Reach out via cam@dsohire.com to set up your invoicing profile.",
   },
   {
     q: "Can I cancel anytime?",
@@ -452,8 +456,9 @@ function FinalCta() {
           Still deciding which tier fits?
         </h2>
         <p className="text-base text-slate-body leading-[1.7] mb-8">
-          Email Cameron directly. Most decisions take a 15-minute conversation —
-          no sales pitch, no demo gauntlet.
+          Most decisions take a 15-minute conversation — no sales pitch, no
+          demo gauntlet. Drop us a note and we&apos;ll get back to you the same
+          business day.
         </p>
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Link
@@ -464,10 +469,10 @@ function FinalCta() {
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <Link
-            href="mailto:cam@dsohire.com"
+            href="/contact"
             className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[11px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
           >
-            Email Cameron
+            Contact Us
           </Link>
         </div>
       </div>
