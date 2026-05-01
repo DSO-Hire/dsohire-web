@@ -131,7 +131,7 @@ function TierCard({ tier }: { tier: TierConfig }) {
         </div>
       </div>
       <div
-        className={`text-[11px] tracking-[0.4px] mb-7 min-h-4 ${
+        className={`text-[11px] tracking-[0.4px] mb-7 min-h-[32px] leading-[1.45] ${
           isFeatured ? "text-ivory/55" : "text-slate-meta"
         }`}
       >
@@ -153,7 +153,7 @@ function TierCard({ tier }: { tier: TierConfig }) {
         {tier.id === "founding" && "Apply for Founding"}
         {tier.id === "starter" && "Start with Starter"}
         {tier.id === "growth" && "Choose Growth"}
-        {tier.id === "enterprise" && "Talk to Cameron"}
+        {tier.id === "enterprise" && "Contact Sales"}
       </Link>
 
       <ul
