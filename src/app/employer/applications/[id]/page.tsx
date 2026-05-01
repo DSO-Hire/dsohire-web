@@ -12,7 +12,6 @@ import {
   Mail,
   Briefcase,
   ExternalLink,
-  Linkedin,
   FileText,
 } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
@@ -314,7 +313,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-[12px] text-heritage hover:text-heritage-deep font-semibold mb-1.5"
               >
-                <Linkedin className="h-3.5 w-3.5" />
+                <ExternalLink className="h-3.5 w-3.5" />
                 LinkedIn profile
               </a>
             )}
