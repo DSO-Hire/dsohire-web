@@ -30,12 +30,19 @@ export default async function EmployerDashboard() {
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id, role, full_name, dso:dsos(name, slug, status)")
+    .select("dso_id, role, full_name")
     .eq("auth_user_id", userId)
     .maybeSingle();
 
-  const dso = dsoUser?.dso as unknown as { name: string; slug: string; status: string } | null;
   const dsoId = dsoUser?.dso_id;
+
+  const { data: dso } = dsoId
+    ? await supabase
+        .from("dsos")
+        .select("id, name, slug, status")
+        .eq("id", dsoId)
+        .maybeSingle()
+    : { data: null };
 
   // Count locations for the "complete onboarding" hint
   const { count: locationsCount } = await supabase

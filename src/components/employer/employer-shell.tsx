@@ -61,10 +61,12 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
     redirect("/employer/sign-in");
   }
 
-  // Look up the user's DSO + role for the sidebar context
+  // Look up the user's DSO + role for the sidebar context.
+  // Using two queries (instead of a Supabase join shorthand) for cleaner
+  // TypeScript inference against our hand-written Database type.
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("id, role, full_name, dso:dsos(id, name, slug, status)")
+    .select("id, dso_id, role, full_name")
     .eq("auth_user_id", user.id)
     .maybeSingle();
 
@@ -73,12 +75,11 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
     redirect("/employer/onboarding");
   }
 
-  const dso = dsoUser.dso as unknown as {
-    id: string;
-    name: string;
-    slug: string;
-    status: string;
-  } | null;
+  const { data: dso } = await supabase
+    .from("dsos")
+    .select("id, name, slug, status")
+    .eq("id", dsoUser.dso_id)
+    .maybeSingle();
 
   return (
     <div className="min-h-screen flex bg-ivory">

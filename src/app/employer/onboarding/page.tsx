@@ -33,7 +33,7 @@ export default async function OnboardingPage() {
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id, full_name, dso:dsos(id, name, slug, status)")
+    .select("dso_id, full_name")
     .eq("auth_user_id", user.id)
     .maybeSingle();
 
@@ -43,12 +43,11 @@ export default async function OnboardingPage() {
     redirect("/employer/sign-up");
   }
 
-  const dso = dsoUser.dso as unknown as {
-    id: string;
-    name: string;
-    slug: string;
-    status: string;
-  } | null;
+  const { data: dso } = await supabase
+    .from("dsos")
+    .select("id, name, slug, status")
+    .eq("id", dsoUser.dso_id)
+    .maybeSingle();
 
   // Count locations to decide whether onboarding is "done"
   const { count: locationsCount } = await supabase
