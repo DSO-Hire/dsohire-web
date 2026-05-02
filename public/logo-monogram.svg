@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="1024" height="1024">
   <title>DSO Hire — monogram</title>
-  <desc>DSO Hire compact monogram — same arch shape as the lockup mark, in negative space, with Heritage accent.</desc>
+  <desc>DSO Hire compact monogram — D-form mark with implied-H heritage crossbar on a navy ground.</desc>
   <rect x="0" y="0" width="40" height="40" fill="#14233F"/>
-  <!-- Arch: lockup's arch path uniformly scaled 0.75x and centered (arch occupies x=5..35, y=8..32) -->
-  <path d="M 5 32 L 5 17 Q 5 8 17.75 8 L 22.25 8 Q 35 8 35 17 L 35 32"
+  <!-- D-form mark, scaled + centered into the 40x40 navy tile.
+       Base lockup mark spans (5..40, 5..39) in 124x44 viewBox; here we
+       proportionally scale and center. -->
+  <path d="M 7 7 L 24 7 Q 33 7 33 16 L 33 24 Q 33 33 24 33 L 7 33"
     fill="none" stroke="#F7F4ED" stroke-width="3"
     stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- Inner Heritage accent: same proportional position as lockup's inner accent -->
-  <path d="M 11.75 20 Q 11.75 15.5 17.75 15.5 L 25.25 15.5"
-    fill="none" stroke="#4D7A60" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Heritage horizontal crossbar — implied H -->
+  <line x1="13" y1="20" x2="27" y2="20"
+    stroke="#4D7A60" stroke-width="2.5" stroke-linecap="round"/>
 </svg>

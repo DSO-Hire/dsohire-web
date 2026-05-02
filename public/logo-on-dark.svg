@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 124 44" width="496" height="176">
   <title>DSO Hire</title>
-  <desc>DSO Hire locked lockup — Bold Single Arch with width-matched HIRE wordmark.</desc>
-  <!-- Outer arch -->
-  <path d="M 5 38 L 5 18 Q 5 6 22 6 L 28 6 Q 45 6 45 18 L 45 38"
+  <desc>DSO Hire locked lockup — D-form mark with implied-H heritage crossbar, ivory ink for dark backgrounds.</desc>
+  <!-- Outer D-form (rotated arch, opens left, curve on right) -->
+  <path d="M 5 5 L 28 5 Q 40 5 40 17 L 40 27 Q 40 39 28 39 L 5 39"
     fill="none" stroke="#F7F4ED" stroke-width="4"
     stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- Heritage inner accent arc -->
-  <path d="M 14 22 Q 14 16 22 16 L 32 16"
-    fill="none" stroke="#4D7A60" stroke-width="2" stroke-linecap="round"/>
+  <!-- Heritage horizontal crossbar — implied H -->
+  <line x1="14" y1="22" x2="32" y2="22"
+    stroke="#4D7A60" stroke-width="3" stroke-linecap="round"/>
   <!-- Vertical hairline divider between mark and wordmark -->
   <line x1="52" y1="6" x2="52" y2="38" stroke="rgba(247,244,237,0.18)" stroke-width="0.8"/>
   <!-- DSO wordmark, heavy weight -->
@@ -16,7 +16,7 @@
     font-family="'Manrope', 'Helvetica Neue', Arial, sans-serif"
     font-size="26" font-weight="800" letter-spacing="-0.8"
     fill="#F7F4ED">DSO</text>
-  <!-- HIRE wordmark, width-matched to DSO above. -->
+  <!-- HIRE wordmark, width-matched -->
   <text x="58" y="38"
     font-family="'Manrope', 'Helvetica Neue', Arial, sans-serif"
     font-size="9.5" font-weight="500" letter-spacing="11.2"

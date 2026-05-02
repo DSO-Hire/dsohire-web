@@ -216,10 +216,16 @@ function FooterLink({ href, children }: { href: string; children: React.ReactNod
 }
 
 /**
- * BrandLockup — the locked Bold Single Arch lockup (arch + Heritage accent arc
- * + hairline divider + DSO/HIRE wordmark, width-matched). This is the canonical
- * brand mark used on the site. Keep in sync with /public/logo files and the
- * source SVGs in DSO Hire/Brand Assets/logo-files/.
+ * BrandLockup — the locked D-form mark (rotated arch opening left, curve on right)
+ * with a heritage green horizontal crossbar suggesting an implied "H," paired with
+ * the hairline divider and width-matched DSO/HIRE wordmark.
+ *
+ * Locked 2026-05-02 from the DSO Brand Identity System brand package. Colors
+ * match the existing site palette (#14233F navy, #4D7A60 heritage, #F7F4ED
+ * ivory) — only the mark silhouette changed, not the palette.
+ *
+ * Keep in sync with /public/logo-on-dark.svg, /public/logo-on-light.svg, and
+ * /Users/cam/DSO Hire/Brand Assets/logo-files/.
  */
 export function BrandLockup({
   dark,
@@ -241,21 +247,29 @@ export function BrandLockup({
       role="img"
       aria-label="DSO Hire"
     >
-      {/* Outer arch */}
+      {/* Outer arch — rotated 90° CW so it opens LEFT with the curve on the
+          right. Top arm extends right from x=5 to x=28 at y=5, curves down
+          and around to a short vertical "spine" on the right (x=40, y=17→27),
+          then curves down and around to the bottom arm extending left from
+          x=28 back to x=5 at y=39. */}
       <path
-        d="M 5 38 L 5 18 Q 5 6 22 6 L 28 6 Q 45 6 45 18 L 45 38"
+        d="M 5 5 L 28 5 Q 40 5 40 17 L 40 27 Q 40 39 28 39 L 5 39"
         fill="none"
         stroke={ink}
         strokeWidth="4"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      {/* Heritage inner accent arc */}
-      <path
-        d="M 14 22 Q 14 16 22 16 L 32 16"
-        fill="none"
+      {/* Heritage horizontal crossbar — implied H. Sits at the vertical
+          midpoint of the mark, extending from inside the open left side to
+          just shy of the inner curve on the right. */}
+      <line
+        x1="14"
+        y1="22"
+        x2="32"
+        y2="22"
         stroke="#4D7A60"
-        strokeWidth="2"
+        strokeWidth="3"
         strokeLinecap="round"
       />
       {/* Vertical hairline divider between mark and wordmark */}
@@ -302,9 +316,11 @@ export function BrandLockup({
 }
 
 /**
- * BrandMark — compact arch-only icon. Use for favicons, app icons, or
- * tight-space contexts where the full wordmark won't fit (e.g., 24×24 cell).
- * For nav and footer use BrandLockup instead.
+ * BrandMark — compact mark-only icon (no wordmark). Use for favicons, app
+ * icons, seal/stamps, or tight-space contexts where the full lockup won't fit
+ * (e.g., 24×24 cell). For nav and footer use BrandLockup instead.
+ *
+ * Same D-form silhouette as BrandLockup, fitted to a square viewBox.
  */
 export function BrandMark({ dark }: { dark?: boolean }) {
   const stroke = dark ? "#F7F4ED" : "#14233F";
@@ -312,23 +328,28 @@ export function BrandMark({ dark }: { dark?: boolean }) {
     <svg
       width="32"
       height="32"
-      viewBox="0 0 32 32"
+      viewBox="0 0 44 44"
       xmlns="http://www.w3.org/2000/svg"
       aria-label="DSO Hire"
     >
+      {/* Outer D-form */}
       <path
-        d="M3 28 V16 a13 13 0 0 1 26 0 V28"
+        d="M 5 5 L 28 5 Q 40 5 40 17 L 40 27 Q 40 39 28 39 L 5 39"
+        fill="none"
         stroke={stroke}
-        strokeWidth="2.5"
-        fill="none"
-        strokeLinecap="square"
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
-      <path
-        d="M9 28 V18 a7 7 0 0 1 14 0 V28"
+      {/* Heritage crossbar — implied H */}
+      <line
+        x1="14"
+        y1="22"
+        x2="32"
+        y2="22"
         stroke="#4D7A60"
-        strokeWidth="2"
-        fill="none"
-        strokeLinecap="square"
+        strokeWidth="3"
+        strokeLinecap="round"
       />
     </svg>
   );
