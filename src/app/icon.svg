@@ -5,6 +5,6 @@
   <path d="M 7 7 L 24 7 Q 33 7 33 16 L 33 24 Q 33 33 24 33 L 7 33"
     fill="none" stroke="#F7F4ED" stroke-width="3"
     stroke-linecap="round" stroke-linejoin="round"/>
-  <line x1="12" y1="20" x2="26" y2="20"
+  <line x1="10" y1="20" x2="22" y2="20"
     stroke="#4D7A60" stroke-width="2.5" stroke-linecap="round"/>
 </svg>
