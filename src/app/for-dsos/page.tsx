@@ -9,7 +9,7 @@
 
 import Link from "next/link";
 import { ArrowRight, Check, Minus } from "lucide-react";
-import { SiteShell } from "@/components/marketing/site-shell";
+import { SiteShell, BrandLockup } from "@/components/marketing/site-shell";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -109,9 +109,72 @@ function ProblemSection() {
               "No leverage as your hiring volume grows. Hiring 10 people doesn&apos;t get you a discount",
             ]}
           />
+          <AnswerCard />
         </div>
       </div>
     </section>
+  );
+}
+
+/**
+ * AnswerCard — the branded DSO Hire pivot inside the "Two Real Choices" grid.
+ * Spans both columns at lg+, sits flush below the two ProblemCards via the
+ * grid's gap-px rule so it reads as the third element of the comparison
+ * without restructuring the rhetorical 2-card framing.
+ */
+function AnswerCard() {
+  return (
+    <div className="lg:col-span-2 relative bg-ink text-ivory p-10 lg:p-12 overflow-hidden">
+      {/* Heritage hairline marks the rhetorical pivot from problem to answer. */}
+      <span aria-hidden className="absolute top-0 inset-x-0 h-[3px] bg-heritage" />
+      {/* Soft heritage glow for the same depth treatment used on /how-it-works. */}
+      <div
+        aria-hidden
+        className="absolute pointer-events-none"
+        style={{
+          top: "50%",
+          right: "-15%",
+          width: "520px",
+          height: "520px",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(77,122,96,0.10), transparent 65%)",
+          transform: "translateY(-50%)",
+        }}
+      />
+
+      <div className="relative grid grid-cols-1 lg:grid-cols-[1fr_1.35fr] gap-10 lg:gap-14">
+        <div>
+          <BrandLockup dark height={42} />
+          <h3 className="text-[26px] sm:text-[32px] font-extrabold tracking-[-0.8px] leading-tight mt-8 mb-4">
+            A flat-fee job board, built for DSOs.
+          </h3>
+          <p className="text-[15px] text-ivory/70 leading-[1.7] max-w-[420px]">
+            Subscribe once, post unlimited roles across every practice you
+            operate. One account, no placement fees, cancel anytime.
+          </p>
+        </div>
+
+        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-7 gap-y-3.5 list-none lg:pt-2 self-center">
+          {[
+            "One subscription covers every location",
+            "Unlimited active listings on every tier above Founding",
+            "Multi-location job posting in a single flow",
+            "Team accounts for your recruiters and regional managers",
+          ].map((item, i) => (
+            <li
+              key={i}
+              className="flex items-start gap-2.5 text-[14px] text-ivory leading-[1.55]"
+            >
+              <Check
+                className="h-4 w-4 text-heritage-light flex-shrink-0 mt-0.5"
+                strokeWidth={3}
+              />
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 }
 

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { getAllTiers, type TierConfig } from "@/lib/stripe/prices";
-import { SiteShell } from "@/components/marketing/site-shell";
+import { SiteShell, BrandLockup } from "@/components/marketing/site-shell";
 
 export default function Home() {
   return (
@@ -304,13 +304,21 @@ function CompareCell({
       }`}
     >
       {featured && <span className="absolute top-0 inset-x-0 h-[3px] bg-heritage" />}
-      <div
-        className={`text-[10px] font-bold tracking-[2.5px] uppercase mb-4 ${
-          featured ? "text-heritage" : "text-slate-body"
-        }`}
-      >
-        {label}
-      </div>
+      {featured ? (
+        // Featured cell wears the actual brand lockup in place of the OPTION-A/B
+        // eyebrow — same vertical rhythm, brand identity instead of generic label.
+        <div className="mb-4 -ml-px">
+          <BrandLockup dark height={26} />
+        </div>
+      ) : (
+        <div
+          className={`text-[10px] font-bold tracking-[2.5px] uppercase mb-4 ${
+            featured ? "text-heritage" : "text-slate-body"
+          }`}
+        >
+          {label}
+        </div>
+      )}
       <div className="text-[22px] font-extrabold tracking-[-0.6px] mb-2.5 leading-tight">
         {name}
       </div>
@@ -382,34 +390,63 @@ function PricingTeaser() {
 }
 
 function PricingTier({ tier }: { tier: TierConfig }) {
+  // Mirrors the /pricing page TierCard exactly — Growth column fills navy with
+  // ivory text, heritage-green floating "Most Popular" pill above the card, and
+  // a heritage-green CTA button. Non-featured cards lift on hover for parity
+  // with the rest of the marketing surfaces.
   const isFeatured = tier.badge === "Most popular";
   return (
     <div
-      className={`relative p-9 flex flex-col ${isFeatured ? "bg-cream pt-16" : "bg-white"}`}
+      className={`relative p-9 flex flex-col motion-safe:transition-all motion-safe:duration-200 ${
+        isFeatured
+          ? "bg-ink text-ivory"
+          : "bg-white text-ink motion-safe:hover:-translate-y-1 hover:shadow-[0_12px_28px_-14px_rgba(7,15,28,0.18)] hover:bg-cream/30"
+      }`}
     >
       {isFeatured && (
-        <div className="absolute top-0 inset-x-0 h-7 bg-ink text-heritage flex items-center justify-center text-[9px] font-bold tracking-[2px] uppercase">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-heritage text-ivory text-[9px] font-bold tracking-[2px] uppercase whitespace-nowrap z-10">
           Most Popular
         </div>
       )}
-      <div className="text-[9px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3.5">
+
+      <div
+        className={`text-2xl font-extrabold tracking-[-0.6px] mb-2 ${
+          isFeatured ? "text-ivory" : "text-ink"
+        }`}
+      >
         {tier.name}
       </div>
-      <div className="text-lg font-extrabold tracking-[-0.4px] mb-1.5 text-ink">
-        {tier.name}
-      </div>
-      <div className="text-xs text-slate-body mb-6 min-h-[34px] leading-snug">
+      <div
+        className={`text-xs mb-6 min-h-[34px] leading-snug ${
+          isFeatured ? "text-ivory/70" : "text-slate-body"
+        }`}
+      >
         {tier.tagline}
       </div>
 
       <div className="flex items-baseline gap-1.5 mb-1.5">
-        <div className="text-[40px] font-extrabold tracking-[-1.5px] text-ink leading-none">
+        <div
+          className={`text-[40px] font-extrabold tracking-[-1.5px] leading-none ${
+            isFeatured ? "text-ivory" : "text-ink"
+          }`}
+        >
           ${tier.monthlyPrice.toLocaleString()}
         </div>
-        <div className="text-[13px] text-slate-body font-medium">/ month</div>
+        <div
+          className={`text-[13px] font-medium ${
+            isFeatured ? "text-ivory/70" : "text-slate-body"
+          }`}
+        >
+          / month
+        </div>
       </div>
-      <div className="text-[11px] text-slate-meta tracking-[0.4px] mb-7 min-h-4">
-        {tier.founding && "Limited — accepting applications now"}
+      <div
+        className={`text-[11px] tracking-[0.4px] mb-7 min-h-[32px] leading-[1.45] ${
+          isFeatured ? "text-ivory/55" : "text-slate-meta"
+        }`}
+      >
+        {tier.id === "founding" &&
+          `Limited to first ${tier.capActiveSubs ?? 5} customers · 12-month rate lock`}
         {tier.id === "starter" && "Most chosen for sub-20 location operators"}
         {tier.id === "growth" && "Unlimited listings unlocked"}
         {tier.id === "enterprise" && "Account management included"}
@@ -419,7 +456,7 @@ function PricingTier({ tier }: { tier: TierConfig }) {
         href={`/employer/sign-up?tier=${tier.id}`}
         className={`block text-center px-4 py-3.5 text-[11px] font-bold tracking-[1.5px] uppercase mb-6 transition-colors border ${
           isFeatured
-            ? "bg-ink text-ivory border-ink hover:bg-ink-soft"
+            ? "bg-heritage text-ivory border-heritage hover:bg-heritage-deep hover:border-heritage-deep"
             : "bg-ivory text-ink border-[var(--rule-strong)] hover:bg-ink hover:text-ivory hover:border-ink"
         }`}
       >
@@ -429,11 +466,17 @@ function PricingTier({ tier }: { tier: TierConfig }) {
         {tier.id === "enterprise" && "Contact Sales"}
       </Link>
 
-      <ul className="list-none border-t border-[var(--rule)] pt-4">
+      <ul
+        className={`list-none border-t pt-4 ${
+          isFeatured ? "border-white/15" : "border-[var(--rule)]"
+        }`}
+      >
         {tier.features.map((feature, i) => (
           <li
             key={i}
-            className="text-[12.5px] text-ink py-1.5 flex items-start gap-2 leading-snug"
+            className={`text-[12.5px] py-1.5 flex items-start gap-2 leading-snug ${
+              isFeatured ? "text-ivory/90" : "text-ink"
+            }`}
           >
             <span className="text-heritage-light font-extrabold flex-shrink-0">✓</span>
             <span>{feature}</span>
