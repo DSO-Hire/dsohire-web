@@ -7,7 +7,7 @@
     fill="none" stroke="#F7F4ED" stroke-width="4"
     stroke-linecap="round" stroke-linejoin="round"/>
   <!-- Heritage horizontal crossbar — implied H -->
-  <line x1="14" y1="22" x2="32" y2="22"
+  <line x1="8" y1="22" x2="24" y2="22"
     stroke="#4D7A60" stroke-width="3" stroke-linecap="round"/>
   <!-- Vertical hairline divider between mark and wordmark -->
   <line x1="52" y1="6" x2="52" y2="38" stroke="rgba(247,244,237,0.18)" stroke-width="0.8"/>
