@@ -264,9 +264,9 @@ export function BrandLockup({
           midpoint of the mark, extending from inside the open left side to
           just shy of the inner curve on the right. */}
       <line
-        x1="8"
+        x1="12"
         y1="22"
-        x2="24"
+        x2="30"
         y2="22"
         stroke="#4D7A60"
         strokeWidth="3"
@@ -343,9 +343,9 @@ export function BrandMark({ dark }: { dark?: boolean }) {
       />
       {/* Heritage crossbar — implied H */}
       <line
-        x1="8"
+        x1="12"
         y1="22"
-        x2="24"
+        x2="30"
         y2="22"
         stroke="#4D7A60"
         strokeWidth="3"
