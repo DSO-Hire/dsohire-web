@@ -53,11 +53,19 @@ export async function applyToJob(
   formData: FormData
 ): Promise<ApplyState> {
   const jobId = String(formData.get("job_id") ?? "").trim();
+  const fullName = String(formData.get("full_name") ?? "").trim();
   const coverLetter = String(formData.get("cover_letter") ?? "").trim();
   const resumeFile = formData.get("resume") as File | null;
 
   if (!jobId) {
     return { ok: false, error: "Missing job reference. Please try again." };
+  }
+
+  if (!fullName) {
+    return {
+      ok: false,
+      error: "Please enter your full name before submitting your application.",
+    };
   }
 
   const supabase = await createSupabaseServerClient();
@@ -84,6 +92,17 @@ export async function applyToJob(
       error: "Your candidate profile is missing. Please sign up first.",
     };
   }
+
+  // Persist full_name back to the candidate row whenever the wizard's
+  // submitted name differs from what we have on file. Cheap update, keeps
+  // legacy/imported candidates from staying nameless.
+  if ((candidate.full_name as string | null)?.trim() !== fullName) {
+    await supabase
+      .from("candidates")
+      .update({ full_name: fullName })
+      .eq("id", candidate.id as string);
+  }
+  const candidateName = fullName;
 
   // Verify job is active
   const { data: job } = await supabase
@@ -250,7 +269,7 @@ export async function applyToJob(
     jobId,
     candidateId: candidate.id as string,
     candidateAuthUserId: user.id,
-    candidateName: (candidate.full_name as string | null) ?? null,
+    candidateName,
     candidateHeadline: (candidate.headline as string | null) ?? null,
     dsoId: job.dso_id as string,
     jobTitle: job.title as string,

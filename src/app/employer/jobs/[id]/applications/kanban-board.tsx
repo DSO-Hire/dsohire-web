@@ -75,6 +75,12 @@ import {
   type KanbanStage,
 } from "@/lib/applications/stages";
 import { moveApplicationStage } from "@/app/employer/applications/[id]/actions";
+import {
+  bulkMoveApplications,
+  bulkRejectApplications,
+  bulkArchiveApplications,
+  type BulkActionResult,
+} from "./bulk-actions";
 import type { ApplicationsListItem } from "./applications-list";
 import { KanbanColumn } from "./kanban-column";
 import { KanbanCard } from "./kanban-card";
@@ -83,6 +89,20 @@ import {
   type RemoteChangeEvent,
 } from "./use-realtime-applications";
 import { useBulkSelection } from "./use-bulk-selection";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export interface KanbanApplication extends ApplicationsListItem {
   stage_entered_at: string;
@@ -149,6 +169,20 @@ interface RemoteToast {
 }
 
 /**
+ * Outcome banner for a bulk move/reject/archive run. Surfaces aggregate count
+ * + per-id failure list so the recruiter can see exactly which candidates
+ * didn't move and why. The failures keep the candidate name (resolved at
+ * dispatch time, before the action ran) so the banner is meaningful even if
+ * the failed rows have since left the optimistic state.
+ */
+interface BulkResultBanner {
+  succeededCount: number;
+  actionLabel: string; // "Moved", "Rejected", "Archived"
+  destinationLabel: string; // "to Interview", "" for reject/archive
+  failures: Array<{ id: string; candidateName: string; error: string }>;
+}
+
+/**
  * Closed lane is rendered as a single droppable container so dragging onto
  * it transitions the application to `rejected`. Withdrawn rows live inside
  * the same expanded pane but are NOT a drop target — withdrawn is candidate-
@@ -175,6 +209,18 @@ export function KanbanBoard({ applications }: KanbanBoardProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [error, setError] = useState<ErrorState | null>(null);
   const [remoteToast, setRemoteToast] = useState<RemoteToast | null>(null);
+  const [bulkBanner, setBulkBanner] = useState<BulkResultBanner | null>(null);
+  /**
+   * In-flight bulk run flag — disables every toolbar button while a sequence
+   * of move/reject/archive calls is running so a recruiter can't kick off a
+   * second bulk before the first finishes (would racily clobber pendingIds
+   * + selection state).
+   */
+  const [bulkInFlight, setBulkInFlight] = useState(false);
+  /** Open state for the move-to dropdown + reject/archive dialogs. */
+  const [moveMenuOpen, setMoveMenuOpen] = useState(false);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
   const [, startTransition] = useTransition();
 
   // Day 4: Shared pending-moves ledger. The hook reads (and on echo, clears)
@@ -404,6 +450,215 @@ export function KanbanBoard({ applications }: KanbanBoardProps) {
     [applyOptimistic, commitLocal]
   );
 
+  /**
+   * Run a bulk action (move/reject/archive). Captures per-id candidate name
+   * + prevStatus BEFORE the call so the failure list can render meaningful
+   * names even if the optimistic state has since shifted.
+   *
+   * Optimistic strategy: we prime pendingMovesRef + pendingIds for every id
+   * up front, fire `applyOptimistic` per id inside a single startTransition,
+   * then await the server response. Successes commit via `commitLocal` (same
+   * helper drag-drop uses, plus realtime self-echo dedupe). Failures fall off
+   * the optimistic layer automatically when the transition ends.
+   *
+   * Selection is cleared on full success; partial success keeps the failed
+   * ids selected so the user can retry from the same toolbar without
+   * re-shift-clicking.
+   */
+  const runBulkAction = useCallback(
+    (
+      actionFn: () => Promise<BulkActionResult>,
+      params: {
+        nextStatus: ApplicationStatus;
+        actionLabel: string; // "Moved" | "Rejected" | "Archived"
+        destinationLabel: string; // "to Interview" | ""
+        ids: string[];
+      }
+    ) => {
+      const { nextStatus, actionLabel, destinationLabel, ids } = params;
+      if (ids.length === 0 || bulkInFlight) return;
+
+      // Snapshot per-id metadata BEFORE the action runs. The failure list
+      // needs candidate names that survive the optimistic shuffle, and we
+      // need prevStatus per id for rollback bookkeeping.
+      const snapshots = new Map<
+        string,
+        { candidateName: string; prevStatus: ApplicationStatus }
+      >();
+      for (const id of ids) {
+        const app = optimisticApps.find((a) => a.id === id);
+        if (!app) continue;
+        snapshots.set(id, {
+          candidateName: app.candidate?.full_name ?? "Anonymous candidate",
+          prevStatus: app.status,
+        });
+      }
+
+      // Prime the pending ledger + dim every selected card.
+      for (const id of ids) {
+        pendingMovesRef.current.set(id, nextStatus);
+      }
+      if (isMountedRef.current) {
+        setPendingIds((prev) => {
+          const next = new Set(prev);
+          for (const id of ids) next.add(id);
+          return next;
+        });
+      }
+      setBulkInFlight(true);
+      setBulkBanner(null);
+      setError(null);
+
+      const nextStageEnteredAt = new Date().toISOString();
+
+      // applyOptimistic must run inside a transition. We wrap the entire
+      // async sequence in startTransition so the optimistic state stays
+      // mounted until the server response lands (matches runMove's pattern).
+      startTransition(async () => {
+        for (const id of ids) {
+          applyOptimistic({
+            type: "move",
+            applicationId: id,
+            nextStatus,
+            nextStageEnteredAt,
+          });
+        }
+
+        let result: BulkActionResult;
+        try {
+          result = await actionFn();
+        } catch (err) {
+          // Catastrophic failure (network, etc.). Treat the whole batch as
+          // failed and clear ledger entries.
+          if (!isMountedRef.current) return;
+          const message =
+            err instanceof Error ? err.message : "Unexpected error";
+          for (const id of ids) pendingMovesRef.current.delete(id);
+          setPendingIds((prev) => {
+            const next = new Set(prev);
+            for (const id of ids) next.delete(id);
+            return next;
+          });
+          setBulkBanner({
+            succeededCount: 0,
+            actionLabel,
+            destinationLabel,
+            failures: ids.map((id) => ({
+              id,
+              candidateName:
+                snapshots.get(id)?.candidateName ?? "Anonymous candidate",
+              error: message,
+            })),
+          });
+          setBulkInFlight(false);
+          return;
+        }
+
+        if (!isMountedRef.current) return;
+
+        const succeededIds = new Set(result.succeeded.map((s) => s.id));
+
+        // Commit successful moves to base state. Use commitLocal so realtime
+        // self-echoes for these ids get suppressed via pendingMovesRef.
+        for (const ok of result.succeeded) {
+          commitLocal(ok.id, ok.nextStatus, ok.stageEnteredAt);
+        }
+
+        // Roll back failed ids: drop their pendingMoves entry (no echo will
+        // arrive). Optimistic state for failed ids drops away when the
+        // transition ends; base state for those ids was never written, so
+        // they snap back to their pre-action column.
+        for (const fail of result.failed) {
+          pendingMovesRef.current.delete(fail.id);
+        }
+
+        // Drop pendingIds for everyone — `commitLocal` cleared succeeded
+        // ids from pendingMovesRef already; pendingIds is the visual dim
+        // ledger and needs to clear for both success + failure.
+        setPendingIds((prev) => {
+          const next = new Set(prev);
+          for (const id of ids) next.delete(id);
+          return next;
+        });
+
+        // Show the result banner; prune selection so succeeded ids leave
+        // and failed ids stay selected for one-click retry.
+        const failures = result.failed.map((f) => ({
+          id: f.id,
+          candidateName:
+            snapshots.get(f.id)?.candidateName ?? "Anonymous candidate",
+          error: f.error,
+        }));
+        setBulkBanner({
+          succeededCount: result.succeeded.length,
+          actionLabel,
+          destinationLabel,
+          failures,
+        });
+
+        // Selection cleanup: keep only the failed ids in the set.
+        const surviving: string[] = [];
+        for (const id of selection.selected) {
+          if (!succeededIds.has(id)) surviving.push(id);
+        }
+        selection.selectAll(surviving);
+
+        setBulkInFlight(false);
+      });
+    },
+    [
+      applyOptimistic,
+      commitLocal,
+      optimisticApps,
+      selection,
+      bulkInFlight,
+    ]
+  );
+
+  const selectedIdsArray = useMemo(
+    () => Array.from(selection.selected),
+    [selection.selected]
+  );
+
+  function handleBulkMove(stage: ApplicationStatus) {
+    setMoveMenuOpen(false);
+    runBulkAction(
+      () => bulkMoveApplications(selectedIdsArray, stage),
+      {
+        nextStatus: stage,
+        actionLabel: "Moved",
+        destinationLabel: `to ${STAGE_LABELS[stage]}`,
+        ids: selectedIdsArray,
+      }
+    );
+  }
+
+  function handleBulkReject(reason: string) {
+    setRejectDialogOpen(false);
+    runBulkAction(
+      () => bulkRejectApplications(selectedIdsArray, reason),
+      {
+        nextStatus: "rejected",
+        actionLabel: "Rejected",
+        destinationLabel: "",
+        ids: selectedIdsArray,
+      }
+    );
+  }
+
+  function handleBulkArchive(reason: string) {
+    setArchiveDialogOpen(false);
+    runBulkAction(
+      () => bulkArchiveApplications(selectedIdsArray, reason),
+      {
+        nextStatus: "withdrawn",
+        actionLabel: "Archived",
+        destinationLabel: "",
+        ids: selectedIdsArray,
+      }
+    );
+  }
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     setActiveId(null);
@@ -612,8 +867,90 @@ export function KanbanBoard({ applications }: KanbanBoardProps) {
           <SelectionToolbar
             count={selection.count}
             onClear={selection.clear}
+            disabled={bulkInFlight}
+            moveMenuOpen={moveMenuOpen}
+            onMoveMenuOpenChange={setMoveMenuOpen}
+            onMove={handleBulkMove}
+            onOpenReject={() => setRejectDialogOpen(true)}
+            onOpenArchive={() => setArchiveDialogOpen(true)}
           />
         )}
+
+        {bulkBanner && (
+          <BulkResultDisplay
+            banner={bulkBanner}
+            onDismiss={() => setBulkBanner(null)}
+            onRetry={() => {
+              if (bulkBanner.failures.length === 0) return;
+              const ids = bulkBanner.failures.map((f) => f.id);
+              const banner = bulkBanner;
+              setBulkBanner(null);
+              if (banner.actionLabel === "Moved") {
+                // Recover the destination stage from the destinationLabel.
+                // Cheap reverse lookup via STAGE_LABELS.
+                const dest = banner.destinationLabel.replace(/^to /, "");
+                const stage = (
+                  Object.entries(STAGE_LABELS) as Array<
+                    [ApplicationStatus, string]
+                  >
+                ).find(([, label]) => label === dest)?.[0];
+                if (!stage) return;
+                runBulkAction(
+                  () => bulkMoveApplications(ids, stage),
+                  {
+                    nextStatus: stage,
+                    actionLabel: "Moved",
+                    destinationLabel: banner.destinationLabel,
+                    ids,
+                  }
+                );
+              } else if (banner.actionLabel === "Rejected") {
+                runBulkAction(
+                  () => bulkRejectApplications(ids, ""),
+                  {
+                    nextStatus: "rejected",
+                    actionLabel: "Rejected",
+                    destinationLabel: "",
+                    ids,
+                  }
+                );
+              } else if (banner.actionLabel === "Archived") {
+                runBulkAction(
+                  () => bulkArchiveApplications(ids, ""),
+                  {
+                    nextStatus: "withdrawn",
+                    actionLabel: "Archived",
+                    destinationLabel: "",
+                    ids,
+                  }
+                );
+              }
+            }}
+          />
+        )}
+
+        <BulkConfirmDialog
+          open={rejectDialogOpen}
+          onOpenChange={setRejectDialogOpen}
+          title="Reject candidates"
+          variant="destructive"
+          count={selection.count}
+          confirmLabel="Reject"
+          reasonHelper="This appears in your team's audit log; the candidate doesn't see it."
+          onConfirm={handleBulkReject}
+        />
+
+        <BulkConfirmDialog
+          open={archiveDialogOpen}
+          onOpenChange={setArchiveDialogOpen}
+          title="Archive candidates"
+          variant="neutral"
+          count={selection.count}
+          confirmLabel="Archive"
+          reasonHelper="Archiving moves these candidates out of the active pipeline. Visible to your team only."
+          onConfirm={handleBulkArchive}
+        />
+
 
         {/* Open stages — horizontal scroll on desktop if needed */}
         <div className="overflow-x-auto -mx-4 px-4 pb-2">
@@ -686,20 +1023,44 @@ function LiveIndicator({ isConnected }: { isConnected: boolean }) {
 }
 
 /**
- * Sticky selection toolbar. Sticks to `top-[80px]` to clear the existing
- * employer-shell nav offset used elsewhere in the app. Bulk-action buttons
- * are placeholders — disabled with a tooltip — until sprint feature #3
- * wires the move-many / reject-many mutations.
+ * Sticky selection toolbar — wired on Day 6.
+ *
+ * Sticks to `top-[80px]` to clear the existing employer-shell nav offset.
+ * Three actions:
+ *  - Move to… → DropdownMenu listing the 5 KANBAN_STAGES; click fires
+ *    `onMove(stage)` which runs `bulkMoveApplications` upstream.
+ *  - Reject… → opens a confirmation Dialog (controlled from the parent so
+ *    the dialog state survives re-renders triggered by selection changes).
+ *  - Archive → same pattern as Reject; sets status to `withdrawn`.
+ *
+ * All three buttons go disabled while a bulk run is in flight to prevent
+ * stacking actions before the previous batch resolves.
+ *
+ * The Move dropdown uses our shadcn DropdownMenu primitive but with a
+ * brand-tinted item style override so it matches the heritage toolbar
+ * (rather than the generic popover-foreground default the primitive ships).
  */
 function SelectionToolbar({
   count,
   onClear,
+  disabled,
+  moveMenuOpen,
+  onMoveMenuOpenChange,
+  onMove,
+  onOpenReject,
+  onOpenArchive,
 }: {
   count: number;
   onClear: () => void;
+  disabled: boolean;
+  moveMenuOpen: boolean;
+  onMoveMenuOpenChange: (open: boolean) => void;
+  onMove: (stage: ApplicationStatus) => void;
+  onOpenReject: () => void;
+  onOpenArchive: () => void;
 }) {
   const baseBtn =
-    "inline-flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold tracking-[1.5px] uppercase border transition-colors disabled:cursor-not-allowed disabled:opacity-50";
+    "inline-flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold tracking-[1.5px] uppercase border transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2";
   return (
     <div className="sticky top-[80px] z-30 flex flex-wrap items-center justify-between gap-3 border border-heritage/40 bg-heritage/[0.08] px-4 py-2.5">
       <div className="flex items-center gap-3 text-[13px] text-heritage-deep">
@@ -708,29 +1069,242 @@ function SelectionToolbar({
         <button
           type="button"
           onClick={onClear}
-          className="text-heritage-deep underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
+          disabled={disabled}
+          className="text-heritage-deep underline-offset-2 hover:underline disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
         >
           Clear selection
         </button>
       </div>
       <div className="flex items-center gap-2">
+        <DropdownMenu open={moveMenuOpen} onOpenChange={onMoveMenuOpenChange}>
+          <DropdownMenuTrigger
+            disabled={disabled}
+            className={`${baseBtn} border-heritage/30 text-heritage-deep bg-white hover:bg-heritage/10`}
+          >
+            Move to…
+            <ChevronDown className="h-3 w-3" aria-hidden="true" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-[160px]">
+            {KANBAN_STAGES.map((stage) => (
+              <DropdownMenuItem
+                key={stage}
+                onSelect={() => onMove(stage)}
+                className="text-[12px] font-semibold tracking-[0.5px] text-ink"
+              >
+                {STAGE_LABELS[stage]}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
         <button
           type="button"
-          disabled
-          title="Bulk actions arrive soon"
-          className={`${baseBtn} border-heritage/30 text-heritage-deep bg-white`}
-        >
-          Move to…
-        </button>
-        <button
-          type="button"
-          disabled
-          title="Bulk actions arrive soon"
-          className={`${baseBtn} border-red-300 text-red-700 bg-white`}
+          onClick={onOpenReject}
+          disabled={disabled}
+          className={`${baseBtn} border-red-300 text-red-700 bg-white hover:bg-red-50`}
         >
           Reject…
         </button>
+        <button
+          type="button"
+          onClick={onOpenArchive}
+          disabled={disabled}
+          className={`${baseBtn} border-slate-300 text-slate-body bg-white hover:bg-cream`}
+        >
+          Archive
+        </button>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Confirmation dialog for bulk-reject and bulk-archive. Captures an optional
+ * recruiter-supplied reason that gets attached to the audit log via
+ * `application_status_events.note` (server-side patches the trigger-seeded
+ * row). Reasons are capped at 1000 chars on the server; we soft-limit to
+ * the same here so the textarea matches.
+ */
+function BulkConfirmDialog({
+  open,
+  onOpenChange,
+  title,
+  variant,
+  count,
+  confirmLabel,
+  reasonHelper,
+  onConfirm,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  variant: "destructive" | "neutral";
+  count: number;
+  confirmLabel: string;
+  reasonHelper: string;
+  onConfirm: (reason: string) => void;
+}) {
+  const [reason, setReason] = useState("");
+  // Reset the textarea every time the dialog opens so a previous reason
+  // doesn't leak into the next reject/archive batch.
+  useEffect(() => {
+    if (open) setReason("");
+  }, [open]);
+
+  const confirmClasses =
+    variant === "destructive"
+      ? "bg-red-700 text-white hover:bg-red-800 focus-visible:ring-red-700"
+      : "bg-heritage text-white hover:bg-heritage-deep focus-visible:ring-heritage";
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>
+            {count} candidate{count === 1 ? "" : "s"} selected.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-2">
+          <label
+            htmlFor="bulk-reason"
+            className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body"
+          >
+            Reason (optional)
+          </label>
+          <textarea
+            id="bulk-reason"
+            value={reason}
+            onChange={(e) => setReason(e.target.value.slice(0, 1000))}
+            rows={3}
+            placeholder="Add context for your team's audit log…"
+            className="w-full resize-y border border-[var(--rule-strong)] bg-white px-3 py-2 text-[13px] text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
+          />
+          <p className="text-[11px] text-slate-meta">{reasonHelper}</p>
+        </div>
+        <DialogFooter>
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            className="inline-flex items-center justify-center px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] bg-white text-slate-body hover:bg-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => onConfirm(reason)}
+            className={`inline-flex items-center justify-center px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${confirmClasses}`}
+          >
+            {confirmLabel}
+          </button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/**
+ * Outcome banner for a bulk run. All-success → green-tinted heritage banner
+ * with a single-line summary. Partial-success → amber banner listing each
+ * failure with candidate name + error reason and a Retry button that
+ * re-runs the action against just the failed ids. Total-failure → red
+ * banner, same per-id list, Retry available.
+ */
+function BulkResultDisplay({
+  banner,
+  onDismiss,
+  onRetry,
+}: {
+  banner: BulkResultBanner;
+  onDismiss: () => void;
+  onRetry: () => void;
+}) {
+  const failed = banner.failures.length;
+  const succeeded = banner.succeededCount;
+  const allSucceeded = failed === 0 && succeeded > 0;
+  const allFailed = succeeded === 0 && failed > 0;
+  // Color tone:
+  //   all-success → heritage tint (matches the remote-toast banner style)
+  //   partial     → amber
+  //   all-failed  → red
+  const tone = allSucceeded
+    ? {
+        wrapper: "border-heritage/30 bg-heritage/[0.08]",
+        text: "text-heritage-deep",
+        ring: "focus-visible:ring-heritage",
+      }
+    : allFailed
+      ? {
+          wrapper: "border-red-300 bg-red-50",
+          text: "text-red-900",
+          ring: "focus-visible:ring-red-700",
+        }
+      : {
+          wrapper: "border-amber-300 bg-amber-50",
+          text: "text-amber-900",
+          ring: "focus-visible:ring-amber-700",
+        };
+
+  // Lowercase verb stem for the all-failed copy. The actionLabel is the past
+  // tense ("Moved" / "Rejected" / "Archived"); converting to "move" /
+  // "reject" / "archive" reads more naturally in "Couldn't move 10 candidates."
+  const verbStem =
+    banner.actionLabel === "Moved"
+      ? "move"
+      : banner.actionLabel === "Rejected"
+        ? "reject"
+        : "archive";
+
+  const summary = allSucceeded
+    ? `${banner.actionLabel} ${succeeded} candidate${succeeded === 1 ? "" : "s"}${banner.destinationLabel ? ` ${banner.destinationLabel}` : ""}.`
+    : allFailed
+      ? `Couldn't ${verbStem} ${failed} candidate${failed === 1 ? "" : "s"}.`
+      : `${banner.actionLabel} ${succeeded} of ${succeeded + failed}${banner.destinationLabel ? ` ${banner.destinationLabel}` : ""}. ${failed} failed.`;
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className={`flex items-start gap-3 border ${tone.wrapper} px-4 py-3`}
+    >
+      <AlertCircle
+        className={`h-4 w-4 ${tone.text} flex-shrink-0 mt-0.5`}
+        aria-hidden="true"
+      />
+      <div className={`flex-1 text-[13px] ${tone.text} leading-relaxed`}>
+        <div className="font-bold">{summary}</div>
+        {failed > 0 && (
+          <ul className="mt-1.5 space-y-0.5 text-[12px]">
+            {banner.failures.slice(0, 5).map((f) => (
+              <li key={f.id}>
+                <span className="font-semibold">{f.candidateName}</span>
+                <span className="text-slate-meta"> — {f.error}</span>
+              </li>
+            ))}
+            {banner.failures.length > 5 && (
+              <li className="text-slate-meta">
+                + {banner.failures.length - 5} more
+              </li>
+            )}
+          </ul>
+        )}
+      </div>
+      {failed > 0 && (
+        <button
+          type="button"
+          onClick={onRetry}
+          className={`text-[10px] font-bold tracking-[1.5px] uppercase px-3 py-1.5 border ${tone.text} hover:bg-white/40 transition-colors focus:outline-none focus-visible:ring-2 ${tone.ring} focus-visible:ring-offset-2`}
+        >
+          Retry
+        </button>
+      )}
+      <button
+        type="button"
+        onClick={onDismiss}
+        aria-label="Dismiss"
+        className={`${tone.text} hover:opacity-70 focus:outline-none focus-visible:ring-2 ${tone.ring} focus-visible:ring-offset-2`}
+      >
+        <X className="h-4 w-4" />
+      </button>
     </div>
   );
 }

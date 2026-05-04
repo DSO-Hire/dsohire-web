@@ -93,11 +93,18 @@ export function ApplyWizard(props: ApplyWizardProps) {
   // by reading from localStorage in a useState initializer.
   const initial = useMemo<WizardDraft>(() => {
     return {
+      fullName: candidate.full_name ?? "",
       coverLetter: existingApplication?.cover_letter ?? "",
       answers: seedAnswersFromExisting(questions, existingAnswers),
       resumeChoice: hasSavedResume ? "saved" : "upload",
     };
-  }, [existingApplication, existingAnswers, questions, hasSavedResume]);
+  }, [
+    candidate.full_name,
+    existingApplication,
+    existingAnswers,
+    questions,
+    hasSavedResume,
+  ]);
 
   const [draft, setDraft] = useState<WizardDraft>(initial);
   const [stepIdx, setStepIdx] = useState(0);
@@ -115,13 +122,21 @@ export function ApplyWizard(props: ApplyWizardProps) {
     try {
       const raw = window.localStorage.getItem(draftKey);
       if (!raw) return;
-      const parsed = JSON.parse(raw) as WizardDraft;
+      const parsed = JSON.parse(raw) as Partial<WizardDraft>;
+      // Backfill fullName for older drafts written before this field
+      // existed in WizardDraft.
+      const normalized: WizardDraft = {
+        fullName: parsed.fullName ?? initial.fullName,
+        coverLetter: parsed.coverLetter ?? "",
+        answers: parsed.answers ?? initial.answers,
+        resumeChoice: parsed.resumeChoice ?? initial.resumeChoice,
+      };
       // Only show resume prompt if it's actually different from server state
       const isMeaningfullyDifferent =
-        parsed.coverLetter !== initial.coverLetter ||
-        JSON.stringify(parsed.answers) !== JSON.stringify(initial.answers);
+        normalized.coverLetter !== initial.coverLetter ||
+        JSON.stringify(normalized.answers) !== JSON.stringify(initial.answers);
       if (isMeaningfullyDifferent) {
-        setSavedDraft(parsed);
+        setSavedDraft(normalized);
         setRestorePromptOpen(true);
       }
     } catch {
@@ -160,6 +175,16 @@ export function ApplyWizard(props: ApplyWizardProps) {
   const handleSubmit = () => {
     setSubmitError(null);
 
+    // Full name gate. Required so the employer never sees an anonymous-looking
+    // row; server enforces this too.
+    if (!draft.fullName.trim()) {
+      setSubmitError(
+        "Please enter your full name on the first step before submitting."
+      );
+      setStepIdx(0);
+      return;
+    }
+
     // Required-question gate (client-side; server enforces too)
     const missing = findMissingRequired(questions, draft.answers);
     if (missing) {
@@ -181,6 +206,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
 
     const formData = new FormData();
     formData.set("job_id", jobId);
+    formData.set("full_name", draft.fullName.trim());
     formData.set("cover_letter", draft.coverLetter);
     if (resumeFile) formData.set("resume", resumeFile);
 
@@ -300,6 +326,8 @@ export function ApplyWizard(props: ApplyWizardProps) {
             candidate={candidate}
             userEmail={userEmail}
             existingApplication={existingApplication}
+            fullName={draft.fullName}
+            onFullNameChange={(fullName) => setDraft({ ...draft, fullName })}
           />
         )}
 
@@ -340,6 +368,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
             jobTitle={jobTitle}
             dsoName={dsoName}
             candidate={candidate}
+            fullName={draft.fullName}
             questions={questions}
             answers={draft.answers}
             coverLetter={draft.coverLetter}
@@ -468,14 +497,19 @@ function IntroStep({
   candidate,
   userEmail,
   existingApplication,
+  fullName,
+  onFullNameChange,
 }: {
   jobTitle: string;
   dsoName: string;
   candidate: CandidatePrefill;
   userEmail: string | null;
   existingApplication: { status: string } | null;
+  fullName: string;
+  onFullNameChange: (name: string) => void;
 }) {
-  const prefill = buildPrefillSummary(candidate);
+  const prefill = buildPrefillSummary({ ...candidate, full_name: fullName || candidate.full_name });
+  const trimmedName = fullName.trim();
   return (
     <div className="space-y-6">
       <div>
@@ -483,12 +517,36 @@ function IntroStep({
           Before you begin
         </div>
         <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.5px] text-ink leading-tight mb-3">
-          You're applying as {candidate.full_name ?? userEmail ?? "yourself"}.
+          You're applying as {trimmedName || userEmail || "yourself"}.
         </h2>
         <p className="text-[14px] text-slate-body leading-relaxed">
           {existingApplication
             ? `You already have an application on file for ${jobTitle} at ${dsoName}. Walking through these steps will update your existing application — it won't create a duplicate.`
             : `This wizard will walk you through screening questions, your resume, and a quick cover note for the hiring team at ${dsoName}.`}
+        </p>
+      </div>
+
+      <div>
+        <label
+          htmlFor="apply-full-name"
+          className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+        >
+          Your full name <span className="text-heritage">*</span>
+        </label>
+        <input
+          id="apply-full-name"
+          type="text"
+          name="full_name"
+          required
+          autoComplete="name"
+          value={fullName}
+          onChange={(e) => onFullNameChange(e.target.value)}
+          placeholder="Jordan Rivera"
+          className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+        />
+        <p className="mt-1.5 text-[11px] text-slate-meta leading-relaxed">
+          Required — the hiring team needs a real name on your application.
+          We&apos;ll save this back to your profile.
         </p>
       </div>
 
@@ -902,6 +960,7 @@ function ReviewStep({
   jobTitle,
   dsoName,
   candidate,
+  fullName,
   questions,
   answers,
   coverLetter,
@@ -913,6 +972,7 @@ function ReviewStep({
   jobTitle: string;
   dsoName: string;
   candidate: { id: string } & CandidatePrefill;
+  fullName: string;
   questions: ScreeningQuestion[];
   answers: Record<string, AnswerValue>;
   coverLetter: string;
@@ -921,7 +981,14 @@ function ReviewStep({
   savedResumeName: string | null;
   onJumpTo: (s: StepId) => void;
 }) {
-  const completeness = computeProfileCompleteness(candidate);
+  // Surface the typed-in name to the completeness widget so it doesn't tell
+  // the candidate "your profile is missing your name" after they just typed
+  // it on Step 1.
+  const completeness = computeProfileCompleteness({
+    ...candidate,
+    full_name: fullName || candidate.full_name,
+  });
+  const trimmedName = fullName.trim();
 
   return (
     <div className="space-y-6">
@@ -937,6 +1004,16 @@ function ReviewStep({
           at <span className="font-semibold text-ink">{dsoName}</span>.
         </p>
       </div>
+
+      <ReviewBlock label="Your name" onEdit={() => onJumpTo("intro")}>
+        {trimmedName ? (
+          <p className="text-[13px] text-ink">{trimmedName}</p>
+        ) : (
+          <p className="text-[13px] text-red-700">
+            Missing — go back and add your full name before submitting.
+          </p>
+        )}
+      </ReviewBlock>
 
       {questions.length > 0 && (
         <ReviewBlock

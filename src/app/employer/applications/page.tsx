@@ -16,6 +16,7 @@ import {
   CLOSED_STAGES,
   type ApplicationStatus,
 } from "@/lib/applications/stages";
+import { candidateDisplayName } from "@/lib/applications/candidate-display";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Applications" };
@@ -212,25 +213,35 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
           {apps.map((app) => {
             const job = jobMap.get(app.job_id);
             const cand = candMap.get(app.candidate_id);
+            // Inbox can't afford a per-row auth.users lookup, so we fall
+            // through to the candidate-id-prefix fallback when full_name is
+            // missing. The detail page passes `email` to use the richer
+            // email-username fallback there.
+            const displayName = candidateDisplayName({
+              fullName: cand?.full_name,
+              candidateId: app.candidate_id,
+            });
             return (
               <div
                 key={app.id}
                 className="relative p-5 border-b border-[var(--rule)] last:border-0 hover:bg-cream transition-colors"
               >
                 {/* Outer overlay link covers the full row for the primary
-                    action (open application detail). The job-title link below
-                    is layered above with z-10 so it captures clicks for the
-                    "open this job's kanban" path. */}
+                    action (open application detail). The content wrapper is
+                    pointer-events-none so clicks fall through to the overlay,
+                    and the job-title link inside re-enables pointer events
+                    via `pointer-events-auto` so it still routes to the
+                    kanban. */}
                 <Link
                   href={`/employer/applications/${app.id}`}
-                  aria-label={`Open application from ${cand?.full_name ?? "Anonymous candidate"}`}
+                  aria-label={`Open application from ${displayName}`}
                   className="absolute inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-inset"
                 />
-                <div className="relative flex items-start justify-between gap-4 flex-wrap">
+                <div className="relative pointer-events-none flex items-start justify-between gap-4 flex-wrap">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-3 mb-1.5">
                       <div className="text-[15px] font-bold text-ink truncate">
-                        {cand?.full_name ?? "Anonymous candidate"}
+                        {displayName}
                       </div>
                       <span
                         className={`text-[9px] font-bold tracking-[1.5px] uppercase px-2.5 py-1 ${statusBadgeClass(app.status)}`}
@@ -243,7 +254,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                       {job ? (
                         <Link
                           href={`/employer/jobs/${job.id}/applications`}
-                          className="relative z-10 font-semibold text-ink underline-offset-2 hover:text-heritage-deep hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage rounded-sm"
+                          className="pointer-events-auto relative z-10 font-semibold text-ink underline-offset-2 hover:text-heritage-deep hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage rounded-sm"
                           title="Open this job's pipeline"
                         >
                           {job.title}

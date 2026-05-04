@@ -58,8 +58,14 @@ export interface ExistingAnswer {
  * final step. Resume `File` cannot be serialized, so the draft only
  * remembers whether the candidate intended to upload a fresh resume; on
  * resume the file slot starts empty.
+ *
+ * `fullName` lives in the draft because legacy/imported candidate rows can
+ * be missing it; the IntroStep prompts the candidate to confirm/enter their
+ * name before continuing, and we persist it back to candidates.full_name on
+ * submit.
  */
 export interface WizardDraft {
+  fullName: string;
   coverLetter: string;
   answers: Record<string, AnswerValue>;
   resumeChoice: "saved" | "upload";

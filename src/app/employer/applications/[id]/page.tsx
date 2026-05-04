@@ -51,6 +51,7 @@ import {
   type ApplicationStatus,
   type KanbanStage,
 } from "@/lib/applications/stages";
+import { candidateDisplayName } from "@/lib/applications/candidate-display";
 import type {
   ScreeningQuestion,
   ScreeningQuestionKind,
@@ -390,6 +391,16 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const submitted = new Date(app.created_at);
   const status = app.status as ApplicationStatus;
 
+  // Display-name fallback. We have the candidate's auth email here from the
+  // service-role lookup above, so prefer the email-username path
+  // ("Candidate · jordan.r") over the candidate-id-prefix path that the
+  // inbox falls back to.
+  const displayName = candidateDisplayName({
+    fullName: cand?.full_name,
+    email: candidateEmail,
+    candidateId: app.candidate_id,
+  });
+
   // Header subtitle pieces — only render the line if at least one piece exists.
   const headerMetaParts: string[] = [];
   if (cand?.years_experience !== null && cand?.years_experience !== undefined) {
@@ -432,7 +443,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             Application · {STAGE_LABELS[status] ?? status}
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-2">
-            {cand?.full_name ?? "Anonymous candidate"}
+            {displayName}
           </h1>
           {titleLine && (
             <div className="text-[14px] text-slate-body">{titleLine}</div>

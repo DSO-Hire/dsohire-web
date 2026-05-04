@@ -21,6 +21,7 @@ import {
   STAGE_LABELS,
   type ApplicationStatus,
 } from "@/lib/applications/stages";
+import { candidateDisplayName } from "@/lib/applications/candidate-display";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -276,7 +277,10 @@ export default async function EmployerDashboard() {
                 >
                   <div className="min-w-0 flex-1">
                     <div className="text-[13px] font-bold text-ink truncate">
-                      {cand?.full_name ?? "Anonymous candidate"}
+                      {candidateDisplayName({
+                        fullName: cand?.full_name,
+                        candidateId: app.candidate_id,
+                      })}
                       <span className="ml-2 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
                         {STAGE_LABELS[app.status] ?? app.status}
                       </span>
