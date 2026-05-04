@@ -1,9 +1,14 @@
 /**
  * /employer/dashboard — landing after sign-in.
  *
- * Shows the DSO's headline KPIs (active jobs, applications this week,
- * applications in review, time-to-first-application). All zero for now —
- * real data wires in Phase 2 Week 3+ once jobs and applications tables exist.
+ * Shows the DSO's headline KPIs (open jobs, applications this week,
+ * awaiting review, locations). Counts are scoped to the signed-in user's
+ * DSO via the same jobs/applications joins used by the recent-applications
+ * widget below; RLS handles the rest.
+ *
+ * "Applications This Week" uses date_trunc('week', now()) semantics — i.e.
+ * a Monday-anchored UTC week — so the tile resets every Monday. Good enough
+ * for v1; revisit with the user's locale week-start when we add tz support.
  */
 
 import Link from "next/link";
@@ -83,27 +88,78 @@ export default async function EmployerDashboard() {
     full_name: string | null;
   };
 
+  // KPI tile counts — scoped to this DSO. Computed alongside the recent-apps
+  // pull so we share the jobs query.
+  let openJobsCount = 0;
+  let appsThisWeekCount = 0;
+  let awaitingReviewCount = 0;
+
   let recentApps: DashboardApp[] = [];
   let recentJobMap = new Map<string, DashboardJob>();
   let recentCandMap = new Map<string, DashboardCandidate>();
   if (dsoId) {
+    // All non-deleted jobs for this DSO. We need every job (any status) to
+    // scope the application counts; the "open jobs" tile filters in JS.
     const { data: rawJobs } = await supabase
       .from("jobs")
-      .select("id, title")
+      .select("id, title, status")
       .eq("dso_id", dsoId)
       .is("deleted_at", null);
-    const jobs = (rawJobs ?? []) as DashboardJob[];
-    recentJobMap = new Map(jobs.map((j) => [j.id, j]));
+    type JobWithStatus = DashboardJob & { status: string };
+    const jobs = (rawJobs ?? []) as JobWithStatus[];
+    recentJobMap = new Map(jobs.map((j) => [j.id, { id: j.id, title: j.title }]));
     const jobIds = jobs.map((j) => j.id);
 
+    // Active Jobs tile — matches the 'active' enum value in public.jobs.status.
+    openJobsCount = jobs.filter((j) => j.status === "active").length;
+
     if (jobIds.length > 0) {
-      const { data: rawApps } = await supabase
-        .from("applications")
-        .select("id, job_id, candidate_id, status, created_at")
-        .in("job_id", jobIds)
-        .order("created_at", { ascending: false })
-        .limit(5);
-      recentApps = (rawApps ?? []) as DashboardApp[];
+      // Monday-anchored UTC week start. date_trunc('week', now()) in pg uses
+      // ISO weeks (Monday). Mirror that here so the SSR-rendered count
+      // matches what a SQL inspector would see.
+      const now = new Date();
+      const dayOfWeek = now.getUTCDay(); // 0=Sun..6=Sat
+      const daysSinceMonday = (dayOfWeek + 6) % 7;
+      const weekStart = new Date(
+        Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate() - daysSinceMonday,
+          0,
+          0,
+          0,
+          0,
+        ),
+      );
+
+      const [appsThisWeekRes, awaitingReviewRes, recentAppsRes] =
+        await Promise.all([
+          supabase
+            .from("applications")
+            .select("id", { count: "exact", head: true })
+            .in("job_id", jobIds)
+            .gte("created_at", weekStart.toISOString()),
+          supabase
+            .from("applications")
+            .select("id", { count: "exact", head: true })
+            .in("job_id", jobIds)
+            .eq("status", "new"),
+          supabase
+            .from("applications")
+            .select("id, job_id, candidate_id, status, created_at")
+            .in("job_id", jobIds)
+            .order("created_at", { ascending: false })
+            .limit(5),
+        ]);
+
+      appsThisWeekCount = appsThisWeekRes.count ?? 0;
+      // "Awaiting Review" = candidates that have landed but haven't been
+      // touched yet (status 'new'). Once a recruiter moves them to
+      // 'reviewed' or beyond, they fall off this tile. The old code
+      // filtered to status='reviewed', which is the screening lane and
+      // never the right number to surface as "needs action".
+      awaitingReviewCount = awaitingReviewRes.count ?? 0;
+      recentApps = (recentAppsRes.data ?? []) as DashboardApp[];
 
       const candIds = Array.from(new Set(recentApps.map((a) => a.candidate_id)));
       if (candIds.length > 0) {
@@ -136,9 +192,28 @@ export default async function EmployerDashboard() {
 
       {/* KPI cards */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-[var(--rule)] border border-[var(--rule)]">
-        <KpiCard label="Active Jobs" value="0" icon={Briefcase} hint="Post your first" />
-        <KpiCard label="Applications This Week" value="0" icon={Mail} hint="No applications yet" />
-        <KpiCard label="In Review" value="0" icon={Users} hint="Move candidates forward" />
+        <KpiCard
+          label="Open Jobs"
+          value={String(openJobsCount)}
+          icon={Briefcase}
+          hint={openJobsCount > 0 ? "Live on the board" : "Post your first"}
+        />
+        <KpiCard
+          label="Applications This Week"
+          value={String(appsThisWeekCount)}
+          icon={Mail}
+          hint={appsThisWeekCount > 0 ? "Since Monday" : "No applications yet"}
+        />
+        <KpiCard
+          label="Awaiting Review"
+          value={String(awaitingReviewCount)}
+          icon={Users}
+          hint={
+            awaitingReviewCount > 0
+              ? "Move candidates forward"
+              : "All caught up"
+          }
+        />
         <KpiCard
           label="Locations"
           value={String(locationsCount ?? 0)}

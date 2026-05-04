@@ -1,8 +1,9 @@
 /**
  * /employer/applications/[id] — application detail.
  *
- * Shows candidate profile, cover letter, signed resume link (1-hour TTL),
- * status transition controls, status history, and a notes editor.
+ * Shows candidate profile, screening responses, cover letter, signed resume
+ * link (1-hour TTL), full-pipeline stage selector, status history, and a
+ * notes editor.
  */
 
 import Link from "next/link";
@@ -13,23 +14,56 @@ import {
   Briefcase,
   ExternalLink,
   FileText,
+  Calendar,
+  CheckSquare,
+  ListChecks,
+  ToggleLeft,
+  Hash,
+  AlignLeft,
+  Type,
 } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
-import { StatusControls } from "./status-controls";
+import { StageSelector } from "./stage-selector";
 import { NotesEditor } from "./notes-editor";
 import {
+  STAGE_COLORS,
   STAGE_LABELS,
   type ApplicationStatus,
+  type KanbanStage,
 } from "@/lib/applications/stages";
+import type {
+  ScreeningQuestion,
+  ScreeningQuestionKind,
+  ScreeningQuestionOption,
+  ExistingAnswer,
+} from "@/app/jobs/[id]/apply/types";
 import type { Metadata } from "next";
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
+
+const AVAILABILITY_LABEL: Record<string, string> = {
+  immediate: "Immediately",
+  "2_weeks": "Within 2 weeks",
+  "1_month": "Within 1 month",
+  passive: "Passively looking",
+};
+
+const ROLE_LABELS: Record<string, string> = {
+  dentist: "Dentist",
+  dental_hygienist: "Dental Hygienist",
+  dental_assistant: "Dental Assistant",
+  front_office: "Front Office",
+  office_manager: "Office Manager",
+  regional_manager: "Regional Manager",
+  specialist: "Specialist",
+  other: "Other",
+};
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
@@ -157,37 +191,98 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   };
   const events = (rawEvents ?? []) as EventRow[];
 
+  // Screening questions (in author-defined sort order) + this application's
+  // answers. Two parallel selects rather than a join so RLS rules on each
+  // table get a chance to filter independently and so the frontend can render
+  // an "unanswered" state for a question even if no answer row exists.
+  const { data: rawQuestions } = await supabase
+    .from("job_screening_questions")
+    .select("id, prompt, helper_text, kind, options, required, sort_order")
+    .eq("job_id", app.job_id)
+    .order("sort_order", { ascending: true })
+    .order("created_at", { ascending: true });
+
+  const { data: rawAnswers } = await supabase
+    .from("application_question_answers")
+    .select(
+      "question_id, answer_text, answer_choice, answer_choices, answer_number"
+    )
+    .eq("application_id", appId);
+
+  const questions = ((rawQuestions ?? []) as Array<{
+    id: string;
+    prompt: string;
+    helper_text: string | null;
+    kind: ScreeningQuestionKind;
+    options: ScreeningQuestionOption[] | null;
+    required: boolean;
+    sort_order: number;
+  }>) as ScreeningQuestion[];
+  const answers = (rawAnswers ?? []) as ExistingAnswer[];
+  const answersByQuestionId = new Map<string, ExistingAnswer>(
+    answers.map((a) => [a.question_id, a])
+  );
+
   const submitted = new Date(app.created_at);
+  const status = app.status as ApplicationStatus;
+
+  // Header subtitle pieces — only render the line if at least one piece exists.
+  const headerMetaParts: string[] = [];
+  if (cand?.years_experience !== null && cand?.years_experience !== undefined) {
+    headerMetaParts.push(`${cand.years_experience} yrs experience`);
+  }
+  if (cand?.availability) {
+    headerMetaParts.push(
+      AVAILABILITY_LABEL[cand.availability] ??
+        cand.availability.replace(/_/g, " ")
+    );
+  }
+  if (cand?.desired_roles && cand.desired_roles.length > 0) {
+    const top = cand.desired_roles[0];
+    headerMetaParts.push(ROLE_LABELS[top] ?? top.replace(/_/g, " "));
+  }
+
+  const titleLine = cand?.current_title ?? cand?.headline ?? null;
 
   return (
     <EmployerShell active="applications">
-      <Link
-        href="/employer/applications"
-        className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-6"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Back to All Applications
-      </Link>
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-6">
+        <Link
+          href="/employer/applications"
+          className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back to All Applications
+        </Link>
+        <Link
+          href={`/employer/jobs/${job.id}/applications`}
+          className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+        >
+          View in {String(job.title)} pipeline →
+        </Link>
+      </div>
 
       <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
-            Application · {STAGE_LABELS[app.status as ApplicationStatus] ?? app.status}
+            Application · {STAGE_LABELS[status] ?? status}
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-2">
             {cand?.full_name ?? "Anonymous candidate"}
           </h1>
-          <div className="text-[14px] text-slate-body">
-            {cand?.current_title ?? cand?.headline ?? "Profile minimal"}
-            {cand?.years_experience !== null && cand?.years_experience !== undefined && (
-              <> · {cand.years_experience} years experience</>
-            )}
-          </div>
+          {titleLine && (
+            <div className="text-[14px] text-slate-body">{titleLine}</div>
+          )}
+          {headerMetaParts.length > 0 && (
+            <div className="text-[12px] text-slate-meta mt-1">
+              {headerMetaParts.join(" · ")}
+            </div>
+          )}
         </div>
         <span
-          className={`text-[10px] font-bold tracking-[2px] uppercase px-3 py-2 ${statusBadgeClass(app.status)}`}
+          className={`text-[10px] font-bold tracking-[2px] uppercase px-3 py-2 ring-1 ring-inset ${statusBadgeClasses(status)}`}
         >
-          {STAGE_LABELS[app.status as ApplicationStatus] ?? app.status}
+          {STAGE_LABELS[status] ?? status}
         </span>
       </header>
 
@@ -212,12 +307,12 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             </div>
           </section>
 
-          {/* Status controls */}
+          {/* Stage selector */}
           <section>
             <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-4">
-              Update Status
+              Pipeline Stage
             </h2>
-            <StatusControls applicationId={app.id} currentStatus={app.status} />
+            <StageSelector applicationId={app.id} currentStatus={status} />
           </section>
 
           {/* Cover letter */}
@@ -230,6 +325,24 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 <p className="text-[14px] text-ink leading-relaxed whitespace-pre-wrap">
                   {app.cover_letter}
                 </p>
+              </div>
+            </section>
+          )}
+
+          {/* Screening responses */}
+          {questions.length > 0 && (
+            <section>
+              <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
+                Screening Responses
+              </h2>
+              <div className="border border-[var(--rule)] bg-white divide-y divide-[var(--rule)]">
+                {questions.map((q) => (
+                  <ScreeningResponseRow
+                    key={q.id}
+                    question={q}
+                    answer={answersByQuestionId.get(q.id) ?? null}
+                  />
+                ))}
               </div>
             </section>
           )}
@@ -275,10 +388,21 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                   <DetailRow label="Headline" value={cand.headline} />
                 )}
                 {cand.availability && (
-                  <DetailRow label="Availability" value={cand.availability.replace(/_/g, " ")} />
+                  <DetailRow
+                    label="Availability"
+                    value={
+                      AVAILABILITY_LABEL[cand.availability] ??
+                      cand.availability.replace(/_/g, " ")
+                    }
+                  />
                 )}
                 {cand.desired_roles && cand.desired_roles.length > 0 && (
-                  <DetailRow label="Open To" value={cand.desired_roles.join(", ")} />
+                  <DetailRow
+                    label="Open To"
+                    value={cand.desired_roles
+                      .map((r) => ROLE_LABELS[r] ?? r.replace(/_/g, " "))
+                      .join(", ")}
+                  />
                 )}
                 {cand.desired_locations && cand.desired_locations.length > 0 && (
                   <DetailRow label="Locations" value={cand.desired_locations.join(", ")} />
@@ -397,21 +521,141 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function statusBadgeClass(status: string): string {
-  switch (status) {
-    case "new":
-      return "bg-cream text-ink";
-    case "reviewed":
-      return "bg-blue-50 text-blue-900";
-    case "interviewing":
-      return "bg-heritage/10 text-heritage-deep";
-    case "offered":
-    case "hired":
-      return "bg-emerald-50 text-emerald-900";
-    case "rejected":
-    case "withdrawn":
-      return "bg-slate-100 text-slate-600";
-    default:
-      return "bg-cream text-ink";
+/**
+ * Render the kanban-matched stage badge for the header. For the active
+ * KANBAN_STAGES we lift the bg/ring/text triple straight from STAGE_COLORS
+ * (single source of truth shared with the kanban columns). For the closed
+ * states (rejected/withdrawn) which aren't in the kanban map, we use a muted
+ * slate treatment.
+ */
+function statusBadgeClasses(status: ApplicationStatus): string {
+  const KANBAN_KEYS: readonly KanbanStage[] = [
+    "new",
+    "reviewed",
+    "interviewing",
+    "offered",
+    "hired",
+  ];
+  if ((KANBAN_KEYS as readonly string[]).includes(status)) {
+    const c = STAGE_COLORS[status as KanbanStage];
+    return `${c.bg} ${c.ring} ${c.text}`;
   }
+  // rejected / withdrawn — muted closed-lane treatment.
+  return "bg-slate-100 ring-slate-200 text-slate-600";
+}
+
+const KIND_ICON: Record<
+  ScreeningQuestionKind,
+  React.ComponentType<{ className?: string }>
+> = {
+  short_text: Type,
+  long_text: AlignLeft,
+  yes_no: ToggleLeft,
+  single_select: CheckSquare,
+  multi_select: ListChecks,
+  number: Hash,
+};
+
+const KIND_LABEL: Record<ScreeningQuestionKind, string> = {
+  short_text: "Short text",
+  long_text: "Long text",
+  yes_no: "Yes / No",
+  single_select: "Single choice",
+  multi_select: "Multi choice",
+  number: "Number",
+};
+
+function formatAnswer(
+  question: ScreeningQuestion,
+  answer: ExistingAnswer | null
+): { display: string; missing: boolean } {
+  if (!answer) return { display: "Not answered", missing: true };
+
+  switch (question.kind) {
+    case "short_text":
+    case "long_text": {
+      const v = (answer.answer_text ?? "").trim();
+      if (!v) return { display: "Not answered", missing: true };
+      return { display: v, missing: false };
+    }
+    case "yes_no": {
+      const v = (answer.answer_choice ?? "").trim();
+      if (v === "yes") return { display: "Yes", missing: false };
+      if (v === "no") return { display: "No", missing: false };
+      return { display: "Not answered", missing: true };
+    }
+    case "number": {
+      if (answer.answer_number === null || answer.answer_number === undefined) {
+        return { display: "Not answered", missing: true };
+      }
+      return { display: String(answer.answer_number), missing: false };
+    }
+    case "single_select": {
+      const id = answer.answer_choice;
+      if (!id) return { display: "Not answered", missing: true };
+      const opt = question.options?.find((o) => o.id === id);
+      return { display: opt?.label ?? id, missing: false };
+    }
+    case "multi_select": {
+      const ids = answer.answer_choices ?? [];
+      if (ids.length === 0) return { display: "Not answered", missing: true };
+      const labels = ids.map(
+        (id) => question.options?.find((o) => o.id === id)?.label ?? id
+      );
+      return { display: labels.join(", "), missing: false };
+    }
+    default:
+      return { display: "Not answered", missing: true };
+  }
+}
+
+function ScreeningResponseRow({
+  question,
+  answer,
+}: {
+  question: ScreeningQuestion;
+  answer: ExistingAnswer | null;
+}) {
+  const Icon = KIND_ICON[question.kind] ?? Calendar;
+  const { display, missing } = formatAnswer(question, answer);
+
+  return (
+    <div className="p-5">
+      <div className="flex items-start gap-3">
+        <Icon className="h-4 w-4 text-heritage-deep flex-shrink-0 mt-0.5" />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <div className="text-[14px] font-semibold text-ink leading-snug">
+              {question.prompt}
+            </div>
+            <span className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta">
+              {KIND_LABEL[question.kind]}
+            </span>
+            {question.required && (
+              <span className="text-[9px] font-bold tracking-[2px] uppercase text-heritage-deep">
+                Required
+              </span>
+            )}
+          </div>
+          {question.helper_text && (
+            <div className="text-[12px] text-slate-meta mt-0.5 leading-snug">
+              {question.helper_text}
+            </div>
+          )}
+          <div
+            className={`mt-2 text-[14px] leading-relaxed whitespace-pre-wrap ${
+              missing ? "italic text-slate-meta" : "text-ink"
+            }`}
+          >
+            {display}
+          </div>
+          {missing && question.required && (
+            <div className="mt-1.5 text-[11px] font-bold tracking-[1px] uppercase text-red-700">
+              Required question — no response
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
