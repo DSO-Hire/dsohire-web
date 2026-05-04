@@ -25,6 +25,13 @@ export const metadata: Metadata = {
     siteName: "DSO Hire",
     locale: "en_US",
   },
+  // OG image, Twitter image, and apple-touch-icon are auto-wired by the
+  // Next.js App Router file convention (opengraph-image.png, twitter-image.png,
+  // apple-icon.png in src/app/). Explicit twitter.card here ensures Twitter
+  // renders the large card variant rather than defaulting to summary.
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 export default function RootLayout({
