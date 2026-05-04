@@ -1,8 +1,9 @@
 /**
  * Database type — generated from the live schema.
  *
- * Regenerated 2026-05-04 (Phase 5A kanban migration) via the Supabase MCP
- * `generate_typescript_types` tool against project `viapivvlhjqvjhoflxmp`.
+ * Regenerated 2026-05-04 (Phase 5A application_comments migration) via the
+ * Supabase MCP `generate_typescript_types` tool against project
+ * `viapivvlhjqvjhoflxmp`.
  *
  * To regenerate manually:
  *   npx supabase gen types typescript \
@@ -55,6 +56,60 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      application_comments: {
+        Row: {
+          application_id: string
+          author_dso_user_id: string
+          author_user_id: string
+          body: string
+          created_at: string
+          deleted_at: string | null
+          edited_at: string | null
+          id: string
+          mentioned_user_ids: string[]
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          author_dso_user_id: string
+          author_user_id: string
+          body: string
+          created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
+          id?: string
+          mentioned_user_ids?: string[]
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          author_dso_user_id?: string
+          author_user_id?: string
+          body?: string
+          created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
+          id?: string
+          mentioned_user_ids?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_comments_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_comments_author_dso_user_id_fkey"
+            columns: ["author_dso_user_id"]
+            isOneToOne: false
+            referencedRelation: "dso_users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       application_question_answers: {
         Row: {
@@ -914,7 +969,21 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      application_comment_counts: {
+        Row: {
+          application_id: string | null
+          comment_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_comments_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       current_dso_id: { Args: never; Returns: string }

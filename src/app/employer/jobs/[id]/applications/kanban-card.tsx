@@ -24,6 +24,7 @@
 
 import { useRouter } from "next/navigation";
 import { useDraggable } from "@dnd-kit/core";
+import { MessageCircle } from "lucide-react";
 import type { CSSProperties, MouseEvent, PointerEvent } from "react";
 import {
   daysInStage,
@@ -159,18 +160,30 @@ export function KanbanCard({
       <div className="text-[11px] text-slate-body truncate mb-2">
         {cand?.current_title || cand?.headline || "Profile minimal"}
       </div>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <span
           className={`text-[9px] font-bold tracking-[1px] uppercase px-1.5 py-0.5 ${heatClasses}`}
         >
           {days}d in stage
         </span>
-        {cand?.years_experience !== null &&
-          cand?.years_experience !== undefined && (
-            <span className="text-[10px] text-slate-meta tabular-nums">
-              {cand.years_experience}y
+        <div className="flex items-center gap-2">
+          {application.comment_count > 0 && (
+            <span
+              className="inline-flex items-center gap-0.5 text-[10px] text-slate-meta tabular-nums"
+              title={`${application.comment_count} team comment${application.comment_count === 1 ? "" : "s"}`}
+              aria-label={`${application.comment_count} team comment${application.comment_count === 1 ? "" : "s"}`}
+            >
+              <MessageCircle className="h-3 w-3" />
+              {application.comment_count}
             </span>
           )}
+          {cand?.years_experience !== null &&
+            cand?.years_experience !== undefined && (
+              <span className="text-[10px] text-slate-meta tabular-nums">
+                {cand.years_experience}y
+              </span>
+            )}
+        </div>
       </div>
     </button>
   );

@@ -218,6 +218,7 @@ export function useRealtimeApplications({
             pipeline_position: row.pipeline_position,
             candidate: null,
             jobTitle: current[0]?.jobTitle ?? "",
+            comment_count: 0,
           });
         }
       }

@@ -30,6 +30,11 @@ import {
 import { StageSelector } from "./stage-selector";
 import { NotesEditor } from "./notes-editor";
 import {
+  CommentsThread,
+  type CommentDsoUser,
+  type InitialComment,
+} from "./comments-thread";
+import {
   STAGE_COLORS,
   STAGE_LABELS,
   type ApplicationStatus,
@@ -222,6 +227,65 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const answersByQuestionId = new Map<string, ExistingAnswer>(
     answers.map((a) => [a.question_id, a])
   );
+
+  // ── DSO teammate roster (for @-mention autocomplete in the comments thread)
+  // and initial comment list. Both are RLS-scoped, so we don't need to filter
+  // beyond the dso_id / application_id we already verified above.
+  const { data: rawDsoUsers } = await supabase
+    .from("dso_users")
+    .select("id, auth_user_id, full_name, role")
+    .eq("dso_id", dsoUser.dso_id as string);
+
+  type DsoUserRow = {
+    id: string;
+    auth_user_id: string;
+    full_name: string | null;
+    role: "owner" | "admin" | "recruiter";
+  };
+  const dsoUsersRows = (rawDsoUsers ?? []) as DsoUserRow[];
+  const dsoUsersForThread: CommentDsoUser[] = dsoUsersRows.map((u) => ({
+    id: u.id,
+    authUserId: u.auth_user_id,
+    fullName: u.full_name,
+    role: u.role,
+  }));
+
+  const { data: rawComments } = await supabase
+    .from("application_comments")
+    .select(
+      "id, application_id, author_user_id, author_dso_user_id, body, mentioned_user_ids, created_at, updated_at, edited_at, deleted_at"
+    )
+    .eq("application_id", appId)
+    .is("deleted_at", null)
+    .order("created_at", { ascending: true });
+
+  type CommentRow = {
+    id: string;
+    application_id: string;
+    author_user_id: string;
+    author_dso_user_id: string;
+    body: string;
+    mentioned_user_ids: string[];
+    created_at: string;
+    updated_at: string;
+    edited_at: string | null;
+    deleted_at: string | null;
+  };
+  const commentRows = (rawComments ?? []) as CommentRow[];
+  const dsoUserById = new Map(dsoUsersRows.map((u) => [u.id, u]));
+  const initialComments: InitialComment[] = commentRows.map((c) => {
+    const author = dsoUserById.get(c.author_dso_user_id) ?? null;
+    return {
+      ...c,
+      author: author
+        ? {
+            id: author.id,
+            fullName: author.full_name,
+            role: author.role,
+          }
+        : null,
+    };
+  });
 
   const submitted = new Date(app.created_at);
   const status = app.status as ApplicationStatus;
@@ -427,6 +491,24 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             <NotesEditor
               applicationId={app.id}
               initialValue={app.employer_notes ?? ""}
+            />
+          </section>
+
+          {/* Team comments + @-mentions */}
+          <section>
+            <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
+              Team Comments
+            </h2>
+            <p className="text-[12px] text-slate-meta mb-3">
+              Internal thread for your team. Type{" "}
+              <span className="font-mono text-ink">@</span> to notify a
+              teammate by email. The candidate cannot see comments.
+            </p>
+            <CommentsThread
+              applicationId={app.id}
+              currentUserId={user.id}
+              dsoUsers={dsoUsersForThread}
+              initialComments={initialComments}
             />
           </section>
         </div>

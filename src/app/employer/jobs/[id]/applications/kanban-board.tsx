@@ -87,6 +87,13 @@ import { useBulkSelection } from "./use-bulk-selection";
 export interface KanbanApplication extends ApplicationsListItem {
   stage_entered_at: string;
   pipeline_position: number | null;
+  /**
+   * Count of non-deleted internal comments on this application — drives
+   * the chat-bubble indicator on the card. Aggregated server-side via
+   * the `application_comment_counts` view; defaults to 0 for new rows
+   * delivered via realtime INSERT before a refresh.
+   */
+  comment_count: number;
 }
 
 interface KanbanBoardProps {

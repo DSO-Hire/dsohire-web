@@ -108,6 +108,28 @@ export default async function PerJobApplicationsPage({
   const cands = (rawCands ?? []) as CandRow[];
   const candMap = new Map(cands.map((c) => [c.id, c]));
 
+  // Per-application comment counts (drives the chat-bubble indicator on
+  // the kanban card). The application_comment_counts view is RLS-scoped
+  // via security_invoker, so we only see counts for our own DSO. Missing
+  // ids = zero comments.
+  const appIds = apps.map((a) => a.id);
+  const { data: rawCounts } = appIds.length
+    ? await supabase
+        .from("application_comment_counts")
+        .select("application_id, comment_count")
+        .in("application_id", appIds)
+    : { data: [] };
+  type CountRow = {
+    application_id: string | null;
+    comment_count: number | null;
+  };
+  const countMap = new Map<string, number>();
+  for (const row of (rawCounts ?? []) as CountRow[]) {
+    if (row.application_id) {
+      countMap.set(row.application_id, row.comment_count ?? 0);
+    }
+  }
+
   const jobTitle = job.title as string;
   const initialApplications: KanbanApplication[] = apps.map((a) => ({
     id: a.id,
@@ -119,6 +141,7 @@ export default async function PerJobApplicationsPage({
     pipeline_position: a.pipeline_position,
     candidate: candMap.get(a.candidate_id) ?? null,
     jobTitle,
+    comment_count: countMap.get(a.id) ?? 0,
   }));
 
   const initialView: BoardView = sp.view === "list" ? "list" : "kanban";
