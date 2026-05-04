@@ -39,6 +39,19 @@ const ROLE_LABELS: Record<string, string> = {
   other: "Other",
 };
 
+// Display order for the /jobs Role filter dropdown — most-common roles first,
+// "Other" intentionally omitted (DSOs posting "other" doesn't map to a useful
+// candidate filter; those jobs still surface via keyword search).
+const ROLE_FILTER_ORDER: ReadonlyArray<keyof typeof ROLE_LABELS> = [
+  "dentist",
+  "specialist",
+  "dental_hygienist",
+  "dental_assistant",
+  "front_office",
+  "office_manager",
+  "regional_manager",
+];
+
 const EMP_LABELS: Record<string, string> = {
   full_time: "Full Time",
   part_time: "Part Time",
@@ -199,15 +212,28 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
         {/* Search bar */}
         <form
           method="get"
-          className="mt-12 grid grid-cols-1 sm:grid-cols-[1.6fr_1fr_1fr_auto] gap-px bg-[var(--rule)] border border-[var(--rule)] bg-white"
+          className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_auto] gap-px bg-[var(--rule)] border border-[var(--rule)] bg-white"
           style={{ boxShadow: "0 10px 30px -16px rgba(7,15,28,0.14)" }}
         >
           {showMap && <input type="hidden" name="view" value="map" />}
           <SearchField
-            label="Role"
+            label="Keyword"
             name="q"
-            placeholder="hygienist, associate dentist…"
+            placeholder="e.g. implants, Spanish-speaking, weekends"
             defaultValue={sp.q}
+          />
+          <SearchField
+            label="Role"
+            name="category"
+            select
+            options={[
+              { value: "", label: "Any role" },
+              ...ROLE_FILTER_ORDER.map((v) => ({
+                value: v,
+                label: ROLE_LABELS[v],
+              })),
+            ]}
+            defaultValue={sp.category}
           />
           <div className="px-7 py-5 border-r border-[var(--rule)]">
             <div className="text-[9px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1.5">
