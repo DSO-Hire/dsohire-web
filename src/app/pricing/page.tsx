@@ -191,46 +191,350 @@ interface MatrixGroup {
   rows: MatrixRow[];
 }
 
+/**
+ * Tier-feature matrix locked 2026-05-04. Five governing decisions reflected here:
+ *   - Founding gets full Starter parity + AI JD generator (the one Growth feature
+ *     included as a thank-you for testimonial customers).
+ *   - Capacity: 25/50/Unlimited active jobs · 5/10/Unlimited admin seats ·
+ *     unlimited hiring managers + locations + applications received.
+ *   - CE tracking is universally free for candidates (candidate-density flywheel).
+ *     Growth+ adds employer-side CE compliance reporting on top of the same data.
+ *   - Annual DSO Hiring Report is fully public from launch (no tier gate) — modeled
+ *     on DentalPost's salary survey playbook.
+ *   - Voice-memo screener = Growth+ only (cleanest demo-moment upsell trigger).
+ *
+ * Soft-label values ("H2 2026", "Phase 6+", "Public", "Candidate-side") render
+ * de-emphasized vs. capacity values — see MatrixGroupBlock cell renderer.
+ */
 const COMPARE_GROUPS: MatrixGroup[] = [
   {
     label: "Capacity",
     rows: [
       {
         feature: "Active job listings",
-        values: { founding: "Up to 25", starter: "Up to 25", growth: "Unlimited", enterprise: "Unlimited" },
+        values: { founding: "Up to 25", starter: "Up to 50", growth: "Unlimited", enterprise: "Unlimited" },
       },
       {
         feature: "Practice locations covered",
         values: { founding: "All", starter: "All", growth: "All", enterprise: "All" },
       },
       {
-        feature: "Team members",
-        values: { founding: "Up to 3", starter: "Up to 5", growth: "Unlimited", enterprise: "Unlimited" },
+        feature: "Team members (admin seats)",
+        values: { founding: "Up to 5", starter: "Up to 10", growth: "Unlimited", enterprise: "Unlimited" },
+      },
+      {
+        feature: "Hiring managers (per-location, scoped)",
+        values: { founding: "Unlimited", starter: "Unlimited", growth: "Unlimited", enterprise: "Unlimited" },
+      },
+      {
+        feature: "Applications received",
+        values: { founding: "Uncapped", starter: "Uncapped", growth: "Uncapped", enterprise: "Uncapped" },
       },
     ],
   },
   {
-    label: "Hiring tools",
+    label: "Hiring workflow",
     rows: [
-      {
-        feature: "Application kanban + status tracking",
-        values: { founding: true, starter: true, growth: true, enterprise: true },
-      },
       {
         feature: "Multi-location posting in one flow",
         values: { founding: true, starter: true, growth: true, enterprise: true },
       },
       {
         feature: "Custom screening questions per job",
-        values: { founding: false, starter: false, growth: true, enterprise: true },
+        values: { founding: true, starter: true, growth: true, enterprise: true },
       },
       {
-        feature: "Custom branding on company page",
-        values: { founding: false, starter: false, growth: true, enterprise: true },
+        feature: "Curated dental screening Q library by role",
+        values: { founding: true, starter: true, growth: true, enterprise: true },
+      },
+      {
+        feature: "List view of applications + filters + tags",
+        values: { founding: true, starter: true, growth: true, enterprise: true },
+      },
+      {
+        feature: "Kanban / pipeline view",
+        values: { founding: false, starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "Bulk actions on applications",
+        values: { founding: false, starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "Internal team comments + @mentions",
+        values: { founding: "H2 2026", starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "Candidate scorecards (dental rubrics)",
+        values: { founding: false, starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
       },
       {
         feature: "Cross-job application inbox",
-        values: { founding: false, starter: false, growth: true, enterprise: true },
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "Custom approval chains by role/location",
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+    ],
+  },
+  {
+    label: "Interview scheduling",
+    rows: [
+      {
+        feature: "Calendar integration (Google + Outlook)",
+        values: { founding: false, starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "Self-serve candidate booking link",
+        values: { founding: false, starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "Panel scheduling (multi-interviewer)",
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "AI scheduling agent (best-slot)",
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+    ],
+  },
+  {
+    label: "Verification & credentialing",
+    rows: [
+      {
+        feature: "State dental license verification",
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "License expiration alerts (60-day)",
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "Background check integration (Checkr)",
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "Drug screen integration",
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "DEA registration verification",
+        values: { founding: false, starter: false, growth: false, enterprise: "H2 2026" },
+      },
+      {
+        feature: "Malpractice insurance tracking",
+        values: { founding: false, starter: false, growth: false, enterprise: "H2 2026" },
+      },
+      {
+        feature: "CE compliance reporting (employer-side)",
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "Verified-candidate badge",
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+    ],
+  },
+  {
+    label: "Communication & offers",
+    rows: [
+      {
+        feature: "Templated email replies + auto-reply on apply",
+        values: { founding: true, starter: true, growth: true, enterprise: true },
+      },
+      {
+        feature: "Two-way SMS to candidates",
+        values: { founding: false, starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "Offer letter templates + e-signature",
+        values: { founding: false, starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "Custom approval chain for offers",
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+    ],
+  },
+  {
+    label: "Branding & distribution",
+    rows: [
+      {
+        feature: "Branded company page (logo + colors + locations)",
+        values: { founding: true, starter: true, growth: true, enterprise: true },
+      },
+      {
+        feature: "Map view of locations (privacy-aware)",
+        values: { founding: true, starter: true, growth: true, enterprise: true },
+      },
+      {
+        feature: "Google for Jobs schema",
+        values: { founding: true, starter: true, growth: true, enterprise: true },
+      },
+      {
+        feature: "Photos / video / leadership bios",
+        values: { founding: false, starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "Indeed / LinkedIn / Facebook cross-post",
+        values: { founding: false, starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "Custom domain (careers.yourdso.com)",
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "Multi-brand support (parent + sub-brands)",
+        values: { founding: false, starter: false, growth: false, enterprise: "H2 2026" },
+      },
+    ],
+  },
+  {
+    label: "Analytics & insights",
+    rows: [
+      {
+        feature: "Per-job views / applies / conversion",
+        values: { founding: true, starter: true, growth: true, enterprise: true },
+      },
+      {
+        feature: "Source attribution per candidate",
+        values: { founding: false, starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "Funnel report by stage + time-to-fill",
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "Per-location dashboards",
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "Cross-location benchmarking",
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "Anonymized salary benchmarks (per role/state)",
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "Custom report builder + exports",
+        values: { founding: false, starter: false, growth: false, enterprise: "H2 2026" },
+      },
+    ],
+  },
+  {
+    label: "AI / automation",
+    rows: [
+      {
+        feature: "AI Job Description generator (dental-context)",
+        values: { founding: "H2 2026", starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "AI candidate match-to-job",
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "AI Smart Fit Score (1–100)",
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "AI Interview Assistant (record + summarize)",
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "AI rejection-reason suggester",
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "Voice-memo screener answers (novel)",
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "Agentic sourcing copilot",
+        values: { founding: false, starter: false, growth: false, enterprise: "H2 2026" },
+      },
+    ],
+  },
+  {
+    label: "Integrations",
+    rows: [
+      {
+        feature: "Zapier / Make webhooks",
+        values: { founding: false, starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "Slack / Teams notifications",
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "HRIS handoff (Gusto / Rippling / BambooHR / Workday)",
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "REST API access",
+        values: { founding: false, starter: false, growth: false, enterprise: "H2 2026" },
+      },
+      {
+        feature: "Practice management software integration",
+        values: { founding: false, starter: false, growth: false, enterprise: "Phase 6+" },
+      },
+    ],
+  },
+  {
+    label: "Compliance & security",
+    rows: [
+      {
+        feature: "EEOC self-ID / OFCCP exports",
+        values: { founding: true, starter: true, growth: true, enterprise: true },
+      },
+      {
+        feature: "GDPR / CCPA tooling",
+        values: { founding: true, starter: true, growth: true, enterprise: true },
+      },
+      {
+        feature: "Two-factor authentication",
+        values: { founding: true, starter: true, growth: true, enterprise: true },
+      },
+      {
+        feature: "Role-based access control (custom roles)",
+        values: { founding: false, starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+      },
+      {
+        feature: "Audit log",
+        values: { founding: false, starter: false, growth: false, enterprise: "H2 2026" },
+      },
+      {
+        feature: "SSO / SAML",
+        values: { founding: false, starter: false, growth: false, enterprise: "H2 2026" },
+      },
+      {
+        feature: "SOC 2 Type II",
+        values: { founding: false, starter: false, growth: false, enterprise: "H2 2026" },
+      },
+      {
+        feature: "BAA-readiness (HIPAA-aware)",
+        values: { founding: false, starter: false, growth: false, enterprise: "H2 2026" },
+      },
+    ],
+  },
+  {
+    label: "Industry-specific",
+    rows: [
+      {
+        feature: "Dental role taxonomy + DSO-aware filters",
+        values: { founding: true, starter: true, growth: true, enterprise: true },
+      },
+      {
+        feature: "Verified DSO Hire employer trust badge",
+        values: { founding: true, starter: true, growth: true, enterprise: true },
+      },
+      {
+        feature: "Annual DSO Hiring Report",
+        values: { founding: "Public", starter: "Public", growth: "Public", enterprise: "Public" },
+      },
+      {
+        feature: "CE credit tracking (free for all candidates)",
+        values: { founding: "Candidate-side", starter: "Candidate-side", growth: "Candidate-side", enterprise: "Candidate-side" },
       },
     ],
   },
@@ -238,16 +542,20 @@ const COMPARE_GROUPS: MatrixGroup[] = [
     label: "Support",
     rows: [
       {
-        feature: "Priority email support",
-        values: { founding: false, starter: false, growth: true, enterprise: true },
+        feature: "Email support",
+        values: { founding: true, starter: true, growth: true, enterprise: true },
       },
       {
-        feature: "Dedicated account manager",
-        values: { founding: false, starter: false, growth: false, enterprise: true },
+        feature: "Direct line to founder",
+        values: { founding: true, starter: false, growth: false, enterprise: false },
+      },
+      {
+        feature: "Dedicated CSM",
+        values: { founding: false, starter: false, growth: false, enterprise: "H2 2026" },
       },
       {
         feature: "SLA with response-time guarantees",
-        values: { founding: false, starter: false, growth: false, enterprise: true },
+        values: { founding: false, starter: false, growth: false, enterprise: "H2 2026" },
       },
     ],
   },
@@ -259,7 +567,11 @@ const COMPARE_GROUPS: MatrixGroup[] = [
         values: { founding: true, starter: false, growth: false, enterprise: false },
       },
       {
-        feature: "12-month rate lock",
+        feature: "12-month rate lock at $299/mo",
+        values: { founding: true, starter: false, growth: false, enterprise: false },
+      },
+      {
+        feature: "Co-marketing testimonial spotlight",
         values: { founding: true, starter: false, growth: false, enterprise: false },
       },
     ],
@@ -285,6 +597,15 @@ function CompareMatrix({ tiers }: { tiers: TierConfig[] }) {
         comparison tables are primarily a desktop surface.
       */}
       <div className="-mx-6 sm:-mx-14 px-6 sm:px-14 overflow-x-auto lg:overflow-visible">
+        <p className="hidden lg:block text-[12px] text-slate-meta mb-5 max-w-[680px] leading-relaxed">
+          <strong className="text-ink font-semibold">Reading this matrix:</strong>{" "}
+          checkmarks = available today. <span className="font-bold tracking-[1px] uppercase text-[10px]">H2 2026</span> =
+          on the active roadmap, ships across the second half of 2026.{" "}
+          <span className="font-bold tracking-[1px] uppercase text-[10px]">Phase 6+</span> =
+          on the longer-term roadmap, scheduled after first $5K MRR. We commit to
+          features publicly so prospects see the platform&apos;s shape, not just
+          its current state.
+        </p>
         <table className="w-full min-w-[860px] border-collapse">
           {/* ── Branded navy header row — sticks below the 80px nav on scroll ── */}
           <thead className="sticky top-[80px] z-20 shadow-[0_4px_12px_-8px_rgba(7,15,28,0.25)]">
@@ -384,6 +705,12 @@ function MatrixGroupBlock({
           {tiers.map((tier) => {
             const value = row.values[tier.id];
             const isFeatured = tier.badge === "Most popular";
+            // Soft labels = roadmap markers ("H2 2026", "Phase 6+") and modality
+            // labels ("Public", "Candidate-side") that aren't capacity values and
+            // shouldn't compete visually with the "Up to 5" / "Unlimited" cells.
+            const isSoftLabel =
+              typeof value === "string" &&
+              /^(H[12] 20\d{2}|Phase \d|Public|Candidate-side|Coming)/.test(value);
             return (
               <td
                 key={tier.id}
@@ -410,6 +737,14 @@ function MatrixGroupBlock({
                       —
                     </span>
                   )
+                ) : isSoftLabel ? (
+                  <span
+                    className={`text-[10px] font-bold tracking-[1.5px] uppercase whitespace-nowrap ${
+                      isFeatured ? "text-ivory/55" : "text-slate-meta"
+                    }`}
+                  >
+                    {value}
+                  </span>
                 ) : (
                   <span
                     className={`font-semibold ${

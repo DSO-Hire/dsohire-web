@@ -21,21 +21,15 @@ import {
 } from "@/lib/supabase/server";
 import { StatusControls } from "./status-controls";
 import { NotesEditor } from "./notes-editor";
+import {
+  STAGE_LABELS,
+  type ApplicationStatus,
+} from "@/lib/applications/stages";
 import type { Metadata } from "next";
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
-
-const STATUS_LABELS: Record<string, string> = {
-  new: "New",
-  reviewed: "Reviewed",
-  interviewing: "Interviewing",
-  offered: "Offer extended",
-  hired: "Hired",
-  rejected: "Rejected",
-  withdrawn: "Withdrawn",
-};
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
@@ -178,7 +172,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
       <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
-            Application · {STATUS_LABELS[app.status] ?? app.status}
+            Application · {STAGE_LABELS[app.status as ApplicationStatus] ?? app.status}
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-2">
             {cand?.full_name ?? "Anonymous candidate"}
@@ -193,7 +187,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
         <span
           className={`text-[10px] font-bold tracking-[2px] uppercase px-3 py-2 ${statusBadgeClass(app.status)}`}
         >
-          {STATUS_LABELS[app.status] ?? app.status}
+          {STAGE_LABELS[app.status as ApplicationStatus] ?? app.status}
         </span>
       </header>
 
@@ -371,8 +365,8 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                   <span className="absolute -left-[27px] top-1.5 block w-3 h-3 bg-ink rounded-full border-2 border-ivory" />
                   <div className="text-[12px] font-bold text-ink">
                     {ev.from_status
-                      ? `${STATUS_LABELS[ev.from_status] ?? ev.from_status} → ${STATUS_LABELS[ev.to_status] ?? ev.to_status}`
-                      : `Submitted as ${STATUS_LABELS[ev.to_status] ?? ev.to_status}`}
+                      ? `${STAGE_LABELS[ev.from_status as ApplicationStatus] ?? ev.from_status} → ${STAGE_LABELS[ev.to_status as ApplicationStatus] ?? ev.to_status}`
+                      : `Submitted as ${STAGE_LABELS[ev.to_status as ApplicationStatus] ?? ev.to_status}`}
                   </div>
                   <div className="text-[11px] text-slate-meta mt-0.5">
                     {ev.actor_type} · {new Date(ev.created_at).toLocaleString()}

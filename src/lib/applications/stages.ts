@@ -64,3 +64,18 @@ export function stageHeatLevel(days: number): "cool" | "warm" | "hot" {
   if (days < 14) return "warm";
   return "hot";
 }
+
+/**
+ * Tailwind classes for the days-in-stage heat pill. Single source of truth so
+ * the desktop kanban card and the mobile stage tabs render identical
+ * treatments. Hot adds a subtle pulse to draw the recruiter's eye to stale
+ * candidates without being noisy.
+ */
+export const STAGE_HEAT_CLASSES: Record<
+  ReturnType<typeof stageHeatLevel>,
+  string
+> = {
+  cool: "bg-slate-100 text-slate-600",
+  warm: "bg-amber-50 text-amber-700",
+  hot: "bg-red-50 text-red-700 animate-pulse",
+};

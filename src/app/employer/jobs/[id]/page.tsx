@@ -8,7 +8,7 @@
 
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink, Trash2 } from "lucide-react";
+import { ArrowLeft, ExternalLink, Trash2, Users } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
@@ -170,6 +170,20 @@ export default async function EditJobPage({ params }: PageProps) {
                 <ExternalLink className="h-3 w-3" />
               </Link>
             )}
+          </div>
+          <div className="mt-5">
+            <Link
+              href={`/employer/jobs/${job.id}/applications`}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors"
+            >
+              <Users className="h-3.5 w-3.5" />
+              Open Pipeline
+              {(job.applications_count as number | null) ? (
+                <span className="ml-1 px-1.5 py-0.5 bg-heritage text-ivory text-[9px] tabular-nums">
+                  {job.applications_count as number}
+                </span>
+              ) : null}
+            </Link>
           </div>
         </div>
 

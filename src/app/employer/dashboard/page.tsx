@@ -7,11 +7,15 @@
  */
 
 import Link from "next/link";
-import { ArrowRight, Briefcase, Mail, MapPin, Users } from "lucide-react";
+import { ArrowRight, Briefcase, ChevronRight, Mail, MapPin, Users } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { BillingBanner } from "@/components/employer/billing-banner";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getSubscriptionAnyStatus } from "@/lib/billing/subscription";
+import {
+  STAGE_LABELS,
+  type ApplicationStatus,
+} from "@/lib/applications/stages";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -63,6 +67,56 @@ export default async function EmployerDashboard() {
     ? await getSubscriptionAnyStatus(supabase, dsoId)
     : null;
 
+  // Recent applications across all jobs in this DSO. Day 7: lightweight
+  // dashboard widget that links each row into the per-job pipeline so the
+  // recruiter lands directly on the kanban view. RLS scopes to this DSO.
+  type DashboardJob = { id: string; title: string };
+  type DashboardApp = {
+    id: string;
+    job_id: string;
+    candidate_id: string;
+    status: ApplicationStatus;
+    created_at: string;
+  };
+  type DashboardCandidate = {
+    id: string;
+    full_name: string | null;
+  };
+
+  let recentApps: DashboardApp[] = [];
+  let recentJobMap = new Map<string, DashboardJob>();
+  let recentCandMap = new Map<string, DashboardCandidate>();
+  if (dsoId) {
+    const { data: rawJobs } = await supabase
+      .from("jobs")
+      .select("id, title")
+      .eq("dso_id", dsoId)
+      .is("deleted_at", null);
+    const jobs = (rawJobs ?? []) as DashboardJob[];
+    recentJobMap = new Map(jobs.map((j) => [j.id, j]));
+    const jobIds = jobs.map((j) => j.id);
+
+    if (jobIds.length > 0) {
+      const { data: rawApps } = await supabase
+        .from("applications")
+        .select("id, job_id, candidate_id, status, created_at")
+        .in("job_id", jobIds)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      recentApps = (rawApps ?? []) as DashboardApp[];
+
+      const candIds = Array.from(new Set(recentApps.map((a) => a.candidate_id)));
+      if (candIds.length > 0) {
+        const { data: rawCands } = await supabase
+          .from("candidates")
+          .select("id, full_name")
+          .in("id", candIds);
+        const cands = (rawCands ?? []) as DashboardCandidate[];
+        recentCandMap = new Map(cands.map((c) => [c.id, c]));
+      }
+    }
+  }
+
   return (
     <EmployerShell active="dashboard">
       <header className="mb-10">
@@ -113,6 +167,55 @@ export default async function EmployerDashboard() {
             Continue Onboarding
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
+        </section>
+      )}
+
+      {/* Recent applications — last 5 across all jobs. Each row links into
+          that job's pipeline (kanban view), not the application detail. */}
+      {recentApps.length > 0 && (
+        <section className="mt-12">
+          <div className="flex items-end justify-between gap-4 mb-4">
+            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+              Recent Applications
+            </div>
+            <Link
+              href="/employer/applications"
+              className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage hover:text-heritage-deep transition-colors"
+            >
+              View all
+            </Link>
+          </div>
+          <div className="border border-[var(--rule)] bg-white">
+            {recentApps.map((app) => {
+              const cand = recentCandMap.get(app.candidate_id);
+              const job = recentJobMap.get(app.job_id);
+              return (
+                <Link
+                  key={app.id}
+                  href={
+                    job
+                      ? `/employer/jobs/${job.id}/applications`
+                      : `/employer/applications/${app.id}`
+                  }
+                  className="flex items-center justify-between gap-4 px-5 py-3 border-b border-[var(--rule)] last:border-0 hover:bg-cream transition-colors"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[13px] font-bold text-ink truncate">
+                      {cand?.full_name ?? "Anonymous candidate"}
+                      <span className="ml-2 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+                        {STAGE_LABELS[app.status] ?? app.status}
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-slate-body truncate mt-0.5">
+                      Applied to {job?.title ?? "Unknown job"} ·{" "}
+                      {new Date(app.created_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                  <ChevronRight className="h-3.5 w-3.5 text-slate-meta flex-shrink-0" />
+                </Link>
+              );
+            })}
+          </div>
         </section>
       )}
 

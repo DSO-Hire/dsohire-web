@@ -10,28 +10,22 @@ import { ChevronRight } from "lucide-react";
 import { redirect } from "next/navigation";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  STAGE_LABELS,
+  KANBAN_STAGES,
+  CLOSED_STAGES,
+  type ApplicationStatus,
+} from "@/lib/applications/stages";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Applications" };
 
-const STATUS_LABELS: Record<string, string> = {
-  new: "New",
-  reviewed: "Reviewed",
-  interviewing: "Interviewing",
-  offered: "Offer",
-  hired: "Hired",
-  rejected: "Rejected",
-  withdrawn: "Withdrawn",
-};
-
-const STATUS_ORDER = [
-  "new",
-  "reviewed",
-  "interviewing",
-  "offered",
-  "hired",
-  "rejected",
-  "withdrawn",
+// Status order for the inbox is the canonical pipeline + closed stages, in
+// order. Labels come from the shared STAGE_LABELS (Day 7 reconciliation —
+// the inbox now uses the same "Screening" / "Interview" copy as the kanban).
+const STATUS_ORDER: ApplicationStatus[] = [
+  ...KANBAN_STAGES,
+  ...CLOSED_STAGES,
 ];
 
 interface PageProps {
@@ -151,7 +145,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
             value={sp.status ?? ""}
             options={[
               { value: "", label: "All statuses" },
-              ...STATUS_ORDER.map((s) => ({ value: s, label: STATUS_LABELS[s] })),
+              ...STATUS_ORDER.map((s) => ({ value: s, label: STAGE_LABELS[s] })),
             ]}
           />
           <button
@@ -187,7 +181,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                 : "bg-cream text-ink hover:bg-[var(--rule)]"
             }`}
           >
-            {STATUS_LABELS[s]} · {statusCounts[s]}
+            {STAGE_LABELS[s]} · {statusCounts[s]}
           </Link>
         ))}
       </div>
@@ -219,12 +213,20 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
             const job = jobMap.get(app.job_id);
             const cand = candMap.get(app.candidate_id);
             return (
-              <Link
+              <div
                 key={app.id}
-                href={`/employer/applications/${app.id}`}
-                className="block p-5 border-b border-[var(--rule)] last:border-0 hover:bg-cream transition-colors"
+                className="relative p-5 border-b border-[var(--rule)] last:border-0 hover:bg-cream transition-colors"
               >
-                <div className="flex items-start justify-between gap-4 flex-wrap">
+                {/* Outer overlay link covers the full row for the primary
+                    action (open application detail). The job-title link below
+                    is layered above with z-10 so it captures clicks for the
+                    "open this job's kanban" path. */}
+                <Link
+                  href={`/employer/applications/${app.id}`}
+                  aria-label={`Open application from ${cand?.full_name ?? "Anonymous candidate"}`}
+                  className="absolute inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-inset"
+                />
+                <div className="relative flex items-start justify-between gap-4 flex-wrap">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-3 mb-1.5">
                       <div className="text-[15px] font-bold text-ink truncate">
@@ -233,11 +235,22 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                       <span
                         className={`text-[9px] font-bold tracking-[1.5px] uppercase px-2.5 py-1 ${statusBadgeClass(app.status)}`}
                       >
-                        {STATUS_LABELS[app.status] ?? app.status}
+                        {STAGE_LABELS[app.status as ApplicationStatus] ?? app.status}
                       </span>
                     </div>
                     <div className="text-[13px] text-slate-body mb-2">
-                      Applied to <span className="font-semibold text-ink">{job?.title ?? "Unknown job"}</span>
+                      Applied to{" "}
+                      {job ? (
+                        <Link
+                          href={`/employer/jobs/${job.id}/applications`}
+                          className="relative z-10 font-semibold text-ink underline-offset-2 hover:text-heritage-deep hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage rounded-sm"
+                          title="Open this job's pipeline"
+                        >
+                          {job.title}
+                        </Link>
+                      ) : (
+                        <span className="font-semibold text-ink">Unknown job</span>
+                      )}
                     </div>
                     <div className="text-[12px] text-slate-meta">
                       {[cand?.current_title, cand?.headline]
@@ -252,7 +265,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                   </div>
                   <ChevronRight className="h-4 w-4 text-slate-meta flex-shrink-0 mt-1" />
                 </div>
-              </Link>
+              </div>
             );
           })}
         </div>

@@ -34,6 +34,7 @@ import {
   updateJob,
   type JobActionState,
 } from "./actions";
+import { RecommendedQuestionsPanel } from "./recommended-questions-panel";
 
 /* ───── Types ───── */
 
@@ -370,6 +371,7 @@ export function JobWizard({
 
         {currentStep.id === "screening" && (
           <ScreeningStep
+            roleCategory={roleCategory}
             questions={questions}
             onChange={setQuestions}
           />
@@ -742,9 +744,11 @@ function DetailsStep({
 /* ───── Step 4 — Screening questions ───── */
 
 function ScreeningStep({
+  roleCategory,
   questions,
   onChange,
 }: {
+  roleCategory: string;
   questions: WizardScreeningQuestion[];
   onChange: (qs: WizardScreeningQuestion[]) => void;
 }) {
@@ -800,6 +804,23 @@ function ScreeningStep({
           the ones that actually filter. You can add more later.
         </p>
       </div>
+
+      <RecommendedQuestionsPanel
+        roleCategory={roleCategory}
+        questions={questions}
+        onChange={onChange}
+        onFocusQuestion={(id) => {
+          if (typeof document === "undefined") return;
+          const el = document.getElementById(`screening-q-${id}`);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
+            const input = el.querySelector<HTMLInputElement>(
+              "input[type=text], textarea"
+            );
+            input?.focus();
+          }
+        }}
+      />
 
       {questions.length === 0 && (
         <div className="border border-dashed border-[var(--rule-strong)] p-6 text-center bg-cream/40">
@@ -895,7 +916,10 @@ function QuestionCard({
   };
 
   return (
-    <div className="border border-[var(--rule)] p-5 bg-white">
+    <div
+      id={`screening-q-${question.id}`}
+      className="border border-[var(--rule)] p-5 bg-white"
+    >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <span className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta">
