@@ -35,6 +35,7 @@ import {
   type JobActionState,
 } from "./actions";
 import { RecommendedQuestionsPanel } from "./recommended-questions-panel";
+import { JdGeneratorPanel } from "./jd-generator-panel";
 
 /* ───── Types ───── */
 
@@ -347,6 +348,13 @@ export function JobWizard({
           <DescriptionStep
             description={description}
             onChange={setDescription}
+            roleCategory={roleCategory}
+            roleLabel={
+              ROLE_OPTIONS.find((r) => r.value === roleCategory)?.label ??
+              roleCategory
+            }
+            title={title}
+            onTitle={setTitle}
           />
         )}
 
@@ -601,12 +609,20 @@ function BasicsStep({
 function DescriptionStep({
   description,
   onChange,
+  roleCategory,
+  roleLabel,
+  title,
+  onTitle,
 }: {
   description: string;
   onChange: (v: string) => void;
+  roleCategory: string;
+  roleLabel: string;
+  title: string;
+  onTitle: (v: string) => void;
 }) {
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div>
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Description
@@ -615,6 +631,25 @@ function DescriptionStep({
           Tell candidates about the role.
         </h2>
       </div>
+
+      <JdGeneratorPanel
+        roleCategory={roleCategory}
+        roleLabel={roleLabel}
+        onApplyTitle={(t) => onTitle(t)}
+        onApplyDescription={(html) => onChange(html)}
+        onApplyAll={({ title: t, descriptionHtml }) => {
+          onTitle(t);
+          onChange(descriptionHtml);
+        }}
+      />
+
+      {title.trim() && (
+        <p className="text-[11px] text-slate-meta">
+          Job title is currently:{" "}
+          <span className="font-bold text-ink">{title}</span>. Edit it from the
+          Basics step.
+        </p>
+      )}
 
       <JobDescriptionEditor
         value={description}

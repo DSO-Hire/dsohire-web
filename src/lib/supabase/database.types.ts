@@ -1,7 +1,7 @@
 /**
  * Database type — generated from the live schema.
  *
- * Regenerated 2026-05-04 (Phase 5A application_scorecards migration) via the
+ * Regenerated 2026-05-04 (Phase 5D ai_usage_events migration) via the
  * Supabase MCP `generate_typescript_types` tool against project
  * viapivvlhjqvjhoflxmp (dsohire-prod). Do not hand-edit; rerun after each
  * migration that touches table shape, enum values, or RPC signatures.
@@ -49,6 +49,59 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      ai_usage_events: {
+        Row: {
+          cost_usd_estimate: number
+          created_at: string
+          dso_id: string
+          error_message: string | null
+          feature: string
+          id: string
+          input_tokens: number
+          model: string
+          output_tokens: number
+          request_metadata: Json
+          succeeded: boolean
+          user_id: string
+        }
+        Insert: {
+          cost_usd_estimate: number
+          created_at?: string
+          dso_id: string
+          error_message?: string | null
+          feature: string
+          id?: string
+          input_tokens: number
+          model: string
+          output_tokens: number
+          request_metadata?: Json
+          succeeded?: boolean
+          user_id: string
+        }
+        Update: {
+          cost_usd_estimate?: number
+          created_at?: string
+          dso_id?: string
+          error_message?: string | null
+          feature?: string
+          id?: string
+          input_tokens?: number
+          model?: string
+          output_tokens?: number
+          request_metadata?: Json
+          succeeded?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_usage_events_dso_id_fkey"
+            columns: ["dso_id"]
+            isOneToOne: false
+            referencedRelation: "dsos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       application_comments: {
         Row: {
