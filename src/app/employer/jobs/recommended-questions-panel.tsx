@@ -20,7 +20,10 @@
 import { useMemo, useState } from "react";
 import { Plus, Pencil, Check, ShieldAlert } from "lucide-react";
 import {
+  CATEGORY_LABELS,
+  CATEGORY_ORDER,
   getRecommendationsForRole,
+  type QuestionCategory,
   type RecommendedQuestion,
 } from "@/lib/screening/question-library";
 import type {
@@ -63,6 +66,22 @@ export function RecommendedQuestionsPanel({
 
   /** Filter out cards the employer dismissed for this session. */
   const visible = rec.questions.filter((q) => !skipped.has(q.id));
+
+  /** Bucket the visible questions by category, preserving in-bank order. */
+  const byCategory = useMemo(() => {
+    const grouped: Record<QuestionCategory, RecommendedQuestion[]> = {
+      qualification: [],
+      experience: [],
+      skills: [],
+      logistics: [],
+      compensation: [],
+      fit: [],
+    };
+    for (const q of visible) {
+      grouped[q.category].push(q);
+    }
+    return grouped;
+  }, [visible]);
 
   if (visible.length === 0) {
     return null;
@@ -123,22 +142,37 @@ export function RecommendedQuestionsPanel({
         </div>
       </div>
 
-      <div className="mt-4 space-y-2.5">
-        {visible.map((rq) => {
-          const addedId = addedFromRec[rq.id];
-          const stillInForm =
-            addedId !== undefined && questions.some((q) => q.id === addedId);
-          const isAdded = !!addedId && stillInForm;
+      <div className="mt-5 space-y-6">
+        {CATEGORY_ORDER.map((category) => {
+          const items = byCategory[category];
+          if (items.length === 0) return null;
 
           return (
-            <RecommendedCard
-              key={rq.id}
-              rq={rq}
-              added={isAdded}
-              onAdd={() => handleAdd(rq, false)}
-              onAddAndEdit={() => handleAdd(rq, true)}
-              onSkip={() => handleSkip(rq.id)}
-            />
+            <div key={category}>
+              <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-2.5 pb-1.5 border-b border-[var(--rule)]">
+                {CATEGORY_LABELS[category]}
+              </div>
+              <div className="space-y-2.5">
+                {items.map((rq) => {
+                  const addedId = addedFromRec[rq.id];
+                  const stillInForm =
+                    addedId !== undefined &&
+                    questions.some((q) => q.id === addedId);
+                  const isAdded = !!addedId && stillInForm;
+
+                  return (
+                    <RecommendedCard
+                      key={rq.id}
+                      rq={rq}
+                      added={isAdded}
+                      onAdd={() => handleAdd(rq, false)}
+                      onAddAndEdit={() => handleAdd(rq, true)}
+                      onSkip={() => handleSkip(rq.id)}
+                    />
+                  );
+                })}
+              </div>
+            </div>
           );
         })}
       </div>
