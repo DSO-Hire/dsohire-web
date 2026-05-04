@@ -35,6 +35,17 @@ import {
   type InitialComment,
 } from "./comments-thread";
 import {
+  ScorecardsSection,
+  type InitialScorecard,
+  type ScorecardReviewer,
+} from "./scorecards-section";
+import {
+  getRubricForRole,
+  parseAttributeScores,
+  RECOMMENDATION_ORDER,
+  type OverallRecommendation,
+} from "@/lib/scorecards/rubric-library";
+import {
   STAGE_COLORS,
   STAGE_LABELS,
   type ApplicationStatus,
@@ -287,6 +298,95 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     };
   });
 
+  // ── Scorecards: fetch the current viewer's row (any status) plus all
+  // submitted rows from other reviewers. RLS lets every DSO member read
+  // every row; we only filter out other reviewers' DRAFT rows here so the
+  // detail page never leaks unsubmitted scores cross-reviewer.
+  const scorecardSelect =
+    "id, application_id, reviewer_user_id, reviewer_dso_user_id, rubric_id, attribute_scores, overall_recommendation, overall_note, status, created_at, updated_at, submitted_at";
+  const { data: rawScorecards } = await supabase
+    .from("application_scorecards")
+    .select(scorecardSelect)
+    .eq("application_id", appId)
+    .or(`reviewer_user_id.eq.${user.id},status.eq.submitted`);
+
+  type ScorecardRow = {
+    id: string;
+    application_id: string;
+    reviewer_user_id: string;
+    reviewer_dso_user_id: string;
+    rubric_id: string;
+    attribute_scores: unknown;
+    overall_recommendation: string | null;
+    overall_note: string | null;
+    status: string;
+    created_at: string;
+    updated_at: string;
+    submitted_at: string | null;
+  };
+  const scorecardRows = (rawScorecards ?? []) as ScorecardRow[];
+
+  function rowToInitialScorecard(row: ScorecardRow): InitialScorecard {
+    const reviewer = dsoUserById.get(row.reviewer_dso_user_id) ?? null;
+    const status = row.status === "submitted" ? "submitted" : "draft";
+    const recommendation =
+      row.overall_recommendation &&
+      (RECOMMENDATION_ORDER as string[]).includes(row.overall_recommendation)
+        ? (row.overall_recommendation as OverallRecommendation)
+        : null;
+    return {
+      id: row.id,
+      application_id: row.application_id,
+      reviewer_user_id: row.reviewer_user_id,
+      reviewer_dso_user_id: row.reviewer_dso_user_id,
+      rubric_id: row.rubric_id,
+      attribute_scores: parseAttributeScores(row.attribute_scores),
+      overall_recommendation: recommendation,
+      overall_note: row.overall_note,
+      status,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      submitted_at: row.submitted_at,
+      reviewer: reviewer
+        ? {
+            id: reviewer.id,
+            authUserId: reviewer.auth_user_id,
+            fullName: reviewer.full_name,
+            role: reviewer.role,
+          }
+        : null,
+    };
+  }
+
+  const myRow =
+    scorecardRows.find((r) => r.reviewer_user_id === user.id) ?? null;
+  const otherRows = scorecardRows.filter(
+    (r) => r.reviewer_user_id !== user.id && r.status === "submitted"
+  );
+
+  const initialMyScorecard: InitialScorecard | null = myRow
+    ? rowToInitialScorecard(myRow)
+    : null;
+  const initialOtherScorecards: InitialScorecard[] = otherRows.map(
+    rowToInitialScorecard
+  );
+  // Sort other reviewers' submitted scorecards newest-submission-first so
+  // the visible stack matches the realtime sort order applied in the client.
+  initialOtherScorecards.sort((a, b) => {
+    const at = new Date(a.submitted_at ?? a.updated_at).getTime();
+    const bt = new Date(b.submitted_at ?? b.updated_at).getTime();
+    return bt - at;
+  });
+
+  const scorecardReviewers: ScorecardReviewer[] = dsoUsersRows.map((u) => ({
+    id: u.id,
+    authUserId: u.auth_user_id,
+    fullName: u.full_name,
+    role: u.role,
+  }));
+
+  const scorecardRubric = getRubricForRole(job.role_category as string | null);
+
   const submitted = new Date(app.created_at);
   const status = app.status as ApplicationStatus;
 
@@ -491,6 +591,26 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             <NotesEditor
               applicationId={app.id}
               initialValue={app.employer_notes ?? ""}
+            />
+          </section>
+
+          {/* Scorecards */}
+          <section>
+            <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
+              Candidate Scorecards
+            </h2>
+            <p className="text-[12px] text-slate-meta mb-4">
+              Each reviewer scores against the {scorecardRubric.label.toLowerCase()} rubric.
+              Your draft is private to you; submitted scorecards roll up
+              into the aggregate above.
+            </p>
+            <ScorecardsSection
+              applicationId={app.id}
+              currentUserId={user.id}
+              dsoUsers={scorecardReviewers}
+              rubric={scorecardRubric}
+              initialMyScorecard={initialMyScorecard}
+              initialOtherScorecards={initialOtherScorecards}
             />
           </section>
 

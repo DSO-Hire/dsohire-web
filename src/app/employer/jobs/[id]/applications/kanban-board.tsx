@@ -94,6 +94,14 @@ export interface KanbanApplication extends ApplicationsListItem {
    * delivered via realtime INSERT before a refresh.
    */
   comment_count: number;
+  /**
+   * Aggregate scorecard data for the card-side star indicator. Pulled
+   * from `application_scorecard_summaries` (only submitted scorecards
+   * count; drafts stay private until submission). Both fields are null
+   * when no reviewer has submitted a scorecard yet.
+   */
+  scorecard_avg: number | null;
+  scorecard_reviewer_count: number;
 }
 
 interface KanbanBoardProps {

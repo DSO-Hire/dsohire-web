@@ -24,7 +24,7 @@
 
 import { useRouter } from "next/navigation";
 import { useDraggable } from "@dnd-kit/core";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Star } from "lucide-react";
 import type { CSSProperties, MouseEvent, PointerEvent } from "react";
 import {
   daysInStage,
@@ -167,6 +167,20 @@ export function KanbanCard({
           {days}d in stage
         </span>
         <div className="flex items-center gap-2">
+          {application.scorecard_reviewer_count > 0 &&
+            application.scorecard_avg !== null && (
+              <span
+                className="inline-flex items-center gap-0.5 text-[10px] text-heritage-deep font-semibold tabular-nums"
+                title={`Average ${application.scorecard_avg.toFixed(1)} across ${application.scorecard_reviewer_count} reviewer${application.scorecard_reviewer_count === 1 ? "" : "s"}`}
+                aria-label={`Average score ${application.scorecard_avg.toFixed(1)} across ${application.scorecard_reviewer_count} reviewer${application.scorecard_reviewer_count === 1 ? "" : "s"}`}
+              >
+                <Star className="h-3 w-3 fill-current" />
+                {application.scorecard_avg.toFixed(1)}
+                <span className="text-slate-meta font-normal">
+                  ({application.scorecard_reviewer_count})
+                </span>
+              </span>
+            )}
           {application.comment_count > 0 && (
             <span
               className="inline-flex items-center gap-0.5 text-[10px] text-slate-meta tabular-nums"

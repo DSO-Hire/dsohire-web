@@ -219,6 +219,8 @@ export function useRealtimeApplications({
             candidate: null,
             jobTitle: current[0]?.jobTitle ?? "",
             comment_count: 0,
+            scorecard_avg: null,
+            scorecard_reviewer_count: 0,
           });
         }
       }

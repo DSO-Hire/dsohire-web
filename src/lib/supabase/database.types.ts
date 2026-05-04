@@ -1,17 +1,10 @@
 /**
  * Database type — generated from the live schema.
  *
- * Regenerated 2026-05-04 (Phase 5A application_comments migration) via the
+ * Regenerated 2026-05-04 (Phase 5A application_scorecards migration) via the
  * Supabase MCP `generate_typescript_types` tool against project
- * `viapivvlhjqvjhoflxmp`.
- *
- * To regenerate manually:
- *   npx supabase gen types typescript \
- *     --project-id viapivvlhjqvjhoflxmp \
- *     --schema public \
- *     > src/lib/supabase/database.types.ts
- *
- * Do NOT hand-edit — re-run the generator after each migration.
+ * viapivvlhjqvjhoflxmp (dsohire-prod). Do not hand-edit; rerun after each
+ * migration that touches table shape, enum values, or RPC signatures.
  */
 
 export type Json =
@@ -158,6 +151,66 @@ export type Database = {
             columns: ["question_id"]
             isOneToOne: false
             referencedRelation: "job_screening_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      application_scorecards: {
+        Row: {
+          application_id: string
+          attribute_scores: Json
+          created_at: string
+          id: string
+          overall_note: string | null
+          overall_recommendation: string | null
+          reviewer_dso_user_id: string
+          reviewer_user_id: string
+          rubric_id: string
+          status: string
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          attribute_scores?: Json
+          created_at?: string
+          id?: string
+          overall_note?: string | null
+          overall_recommendation?: string | null
+          reviewer_dso_user_id: string
+          reviewer_user_id: string
+          rubric_id: string
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          attribute_scores?: Json
+          created_at?: string
+          id?: string
+          overall_note?: string | null
+          overall_recommendation?: string | null
+          reviewer_dso_user_id?: string
+          reviewer_user_id?: string
+          rubric_id?: string
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_scorecards_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_scorecards_reviewer_dso_user_id_fkey"
+            columns: ["reviewer_dso_user_id"]
+            isOneToOne: false
+            referencedRelation: "dso_users"
             referencedColumns: ["id"]
           },
         ]
@@ -977,6 +1030,22 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "application_comments_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      application_scorecard_summaries: {
+        Row: {
+          application_id: string | null
+          avg_score: number | null
+          reviewer_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_scorecards_application_id_fkey"
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "applications"

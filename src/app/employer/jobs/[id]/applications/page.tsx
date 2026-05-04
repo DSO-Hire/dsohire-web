@@ -130,19 +130,51 @@ export default async function PerJobApplicationsPage({
     }
   }
 
+  // Per-application scorecard aggregates (drives the star indicator on
+  // the kanban card). Only submitted scorecards are summed; drafts stay
+  // private until submission. Same security_invoker pattern as comments.
+  const { data: rawScorecardSummaries } = appIds.length
+    ? await supabase
+        .from("application_scorecard_summaries")
+        .select("application_id, avg_score, reviewer_count")
+        .in("application_id", appIds)
+    : { data: [] };
+  type ScorecardSummaryRow = {
+    application_id: string | null;
+    avg_score: number | null;
+    reviewer_count: number | null;
+  };
+  const scorecardSummaryMap = new Map<
+    string,
+    { avg: number | null; reviewers: number }
+  >();
+  for (const row of (rawScorecardSummaries ?? []) as ScorecardSummaryRow[]) {
+    if (row.application_id) {
+      scorecardSummaryMap.set(row.application_id, {
+        avg: row.avg_score,
+        reviewers: row.reviewer_count ?? 0,
+      });
+    }
+  }
+
   const jobTitle = job.title as string;
-  const initialApplications: KanbanApplication[] = apps.map((a) => ({
-    id: a.id,
-    job_id: a.job_id,
-    candidate_id: a.candidate_id,
-    status: a.status,
-    created_at: a.created_at,
-    stage_entered_at: a.stage_entered_at,
-    pipeline_position: a.pipeline_position,
-    candidate: candMap.get(a.candidate_id) ?? null,
-    jobTitle,
-    comment_count: countMap.get(a.id) ?? 0,
-  }));
+  const initialApplications: KanbanApplication[] = apps.map((a) => {
+    const summary = scorecardSummaryMap.get(a.id);
+    return {
+      id: a.id,
+      job_id: a.job_id,
+      candidate_id: a.candidate_id,
+      status: a.status,
+      created_at: a.created_at,
+      stage_entered_at: a.stage_entered_at,
+      pipeline_position: a.pipeline_position,
+      candidate: candMap.get(a.candidate_id) ?? null,
+      jobTitle,
+      comment_count: countMap.get(a.id) ?? 0,
+      scorecard_avg: summary?.avg ?? null,
+      scorecard_reviewer_count: summary?.reviewers ?? 0,
+    };
+  });
 
   const initialView: BoardView = sp.view === "list" ? "list" : "kanban";
 
