@@ -19,7 +19,7 @@ import { SiteShell } from "@/components/marketing/site-shell";
 import { JobsMap, type JobsMapLocation } from "@/components/jobs-map";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { JobsStateFilter } from "./jobs-state-filter";
-import { normalizeStateInput } from "@/components/ui/state-combobox";
+import { normalizeStateInput } from "@/lib/us-states";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
