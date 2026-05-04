@@ -18,6 +18,8 @@ import { ArrowRight, MapPin, Search, List, Map as MapIcon } from "lucide-react";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { JobsMap, type JobsMapLocation } from "@/components/jobs-map";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { JobsStateFilter } from "./jobs-state-filter";
+import { normalizeStateInput } from "@/components/ui/state-combobox";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -207,14 +209,14 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
             placeholder="hygienist, associate dentist…"
             defaultValue={sp.q}
           />
-          <SearchField
-            label="State"
-            name="state"
-            placeholder="KS, TX…"
-            defaultValue={sp.state}
-            maxLength={2}
-            uppercase
-          />
+          <div className="px-7 py-5 border-r border-[var(--rule)]">
+            <div className="text-[9px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1.5">
+              State
+            </div>
+            <JobsStateFilter
+              defaultValue={normalizeStateInput(sp.state)}
+            />
+          </div>
           <SearchField
             label="Employment"
             name="employment"

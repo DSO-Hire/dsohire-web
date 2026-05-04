@@ -487,7 +487,12 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-4">
               Pipeline Stage
             </h2>
-            <StageSelector applicationId={app.id} currentStatus={status} />
+            <StageSelector
+              applicationId={app.id}
+              currentStatus={status}
+              candidateName={displayName}
+              jobTitle={String(job.title)}
+            />
           </section>
 
           {/* Cover letter */}

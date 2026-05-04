@@ -24,21 +24,23 @@
  * `application_status_events`. RLS only grants SELECT on that table to DSO
  * members, so we patch the trigger-seeded row's `note` column using the
  * service-role client AFTER the trigger has run. The trigger lives in
- * 20260501000005_fix_application_triggers.sql and inserts with note=null.
+ * 20260501000005_fix_application_triggers.sql (and 20260504000005_fix_status
+ * _event_actor_type.sql) and inserts with note=null. The shared patch helper
+ * lives at `@/lib/applications/status-event-notes` and is reused by the
+ * single-reject path on the application detail StageSelector.
  *
  * Archive semantics: we set status to `withdrawn`. See the report — the
  * application_status enum is exhausted of "soft-close" semantics, withdrawn
  * is candidate-side conventionally but is the cleanest "remove from active
  * pipeline without rejecting" state we have. The status_event's actor_type
- * will be set to 'employer' (override the trigger's default 'candidate' for
- * withdrawn) so the audit trail correctly shows who archived.
+ * is now derived from auth.uid() (see 20260504000005_fix_status_event_actor
+ * _type.sql) so a recruiter-driven withdraw is correctly logged as
+ * 'employer' and a candidate-driven withdraw stays 'candidate'.
  */
 
 import { revalidatePath, revalidateTag } from "next/cache";
-import {
-  createSupabaseServerClient,
-  createSupabaseServiceRoleClient,
-} from "@/lib/supabase/server";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { attachStatusEventNote } from "@/lib/applications/status-event-notes";
 import type { ApplicationStatus } from "@/lib/applications/stages";
 
 const VALID_STATUSES = new Set<ApplicationStatus>([
@@ -217,11 +219,11 @@ export async function bulkRejectApplications(
   const result = await bulkMoveApplications(applicationIds, "rejected");
 
   if (trimmedReason && result.succeeded.length > 0) {
-    await attachStatusNote(
-      result.succeeded.map((r) => r.id),
-      "rejected",
-      trimmedReason
-    );
+    await attachStatusEventNote({
+      applicationIds: result.succeeded.map((r) => r.id),
+      toStatus: "rejected",
+      note: trimmedReason,
+    });
   }
 
   return result;
@@ -244,65 +246,12 @@ export async function bulkArchiveApplications(
   const result = await bulkMoveApplications(applicationIds, "withdrawn");
 
   if (trimmedReason && result.succeeded.length > 0) {
-    await attachStatusNote(
-      result.succeeded.map((r) => r.id),
-      "withdrawn",
-      trimmedReason
-    );
+    await attachStatusEventNote({
+      applicationIds: result.succeeded.map((r) => r.id),
+      toStatus: "withdrawn",
+      note: trimmedReason,
+    });
   }
 
   return result;
-}
-
-/**
- * Patch the note column on the most recent status_events row for each
- * application. The trigger that fired during the UPDATE inserted a row with
- * note=null moments ago; we update it in place rather than insert a second
- * row so the audit trail stays one-event-per-transition.
- *
- * Best-effort: if the lookup or update fails for an individual id we log
- * and move on. The move itself was already reported as succeeded.
- */
-async function attachStatusNote(
-  applicationIds: string[],
-  toStatus: ApplicationStatus,
-  note: string
-): Promise<void> {
-  const admin = createSupabaseServiceRoleClient();
-  for (const appId of applicationIds) {
-    try {
-      const { data: events, error: selErr } = await admin
-        .from("application_status_events")
-        .select("id")
-        .eq("application_id", appId)
-        .eq("to_status", toStatus)
-        .order("created_at", { ascending: false })
-        .limit(1);
-      if (selErr || !events || events.length === 0) {
-        if (selErr) {
-          console.warn(
-            `[bulk-actions] could not locate status event for ${appId}:`,
-            selErr.message
-          );
-        }
-        continue;
-      }
-      const eventId = events[0].id;
-      const { error: updErr } = await admin
-        .from("application_status_events")
-        .update({ note })
-        .eq("id", eventId);
-      if (updErr) {
-        console.warn(
-          `[bulk-actions] note patch failed for event ${eventId}:`,
-          updErr.message
-        );
-      }
-    } catch (err) {
-      console.warn(
-        `[bulk-actions] unexpected error patching note for ${appId}:`,
-        err instanceof Error ? err.message : String(err)
-      );
-    }
-  }
 }

@@ -9,13 +9,17 @@
  */
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { ArrowRight, Save } from "lucide-react";
 import {
   createLocation,
   updateLocation,
   type LocationActionState,
 } from "./actions";
+import {
+  StateCombobox,
+  normalizeStateInput,
+} from "@/components/ui/state-combobox";
 
 export interface LocationFormInitial {
   id: string;
@@ -38,6 +42,9 @@ const initialState: LocationActionState = { ok: false };
 export function LocationForm({ dsoId, mode, initial }: LocationFormProps) {
   const action = mode === "edit" ? updateLocation : createLocation;
   const [state, formAction, pending] = useActionState(action, initialState);
+  const [stateCode, setStateCode] = useState<string | null>(
+    normalizeStateInput(initial?.state ?? null)
+  );
 
   return (
     <form action={formAction} className="space-y-6 max-w-[720px]">
@@ -83,16 +90,23 @@ export function LocationForm({ dsoId, mode, initial }: LocationFormProps) {
           placeholder="Kansas City"
           defaultValue={initial?.city ?? ""}
         />
-        <Field
-          label="State"
-          name="state"
-          required
-          maxLength={2}
-          autoComplete="address-level1"
-          placeholder="KS"
-          uppercase
-          defaultValue={initial?.state ?? ""}
-        />
+        <div>
+          <label
+            htmlFor="loc-state"
+            className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+          >
+            State <span className="text-heritage"> *</span>
+          </label>
+          <StateCombobox
+            id="loc-state"
+            name="state"
+            value={stateCode}
+            onValueChange={setStateCode}
+            placeholder="Select state"
+            required
+            hideClear
+          />
+        </div>
         <Field
           label="ZIP"
           name="postal_code"

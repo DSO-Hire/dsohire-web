@@ -1,13 +1,15 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { addFirstLocation, type OnboardingState } from "./actions";
+import { StateCombobox } from "@/components/ui/state-combobox";
 
 const initial: OnboardingState = { ok: false };
 
 export function OnboardingForm({ dsoId }: { dsoId: string }) {
   const [state, action, pending] = useActionState(addFirstLocation, initial);
+  const [stateCode, setStateCode] = useState<string | null>(null);
 
   return (
     <form action={action} className="space-y-5">
@@ -74,14 +76,14 @@ export function OnboardingForm({ dsoId }: { dsoId: string }) {
           >
             State <span className="text-heritage">*</span>
           </label>
-          <input
+          <StateCombobox
             id="loc-state"
             name="state"
+            value={stateCode}
+            onValueChange={setStateCode}
+            placeholder="Select state"
             required
-            maxLength={2}
-            autoComplete="address-level1"
-            placeholder="KS"
-            className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] uppercase placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+            hideClear
           />
         </div>
         <div>

@@ -32,6 +32,9 @@ export type MoveApplicationStageResult =
     }
   | { ok: false; error: string };
 
+// Includes 'withdrawn' because the StageSelector's "Mark Withdrawn" closed-
+// state transition routes through this action (employer-driven withdraw is a
+// real surface; RLS still gates who can write).
 const VALID_STATUSES = new Set([
   "new",
   "reviewed",
@@ -39,6 +42,7 @@ const VALID_STATUSES = new Set([
   "offered",
   "hired",
   "rejected",
+  "withdrawn",
 ]);
 
 export async function updateApplicationStatus(
