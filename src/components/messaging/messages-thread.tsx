@@ -439,7 +439,7 @@ export function MessagesThread({
           <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
             External · Visible to {externalAudienceLabel}
           </div>
-          <p className="text-[12px] text-heritage-deep/90 mt-1 leading-snug">
+          <p className="text-[13px] text-heritage-deep/90 mt-1 leading-snug">
             Anything you send here is sent directly to{" "}
             <span className="font-bold">{externalAudienceName}</span>{" "}
             {isEmployerView
@@ -459,7 +459,7 @@ export function MessagesThread({
         {visibleCount === 0 ? (
           <div className="p-8 text-center">
             <MessageCircle className="h-5 w-5 text-slate-meta mx-auto mb-2" />
-            <p className="text-[13px] text-slate-meta">
+            <p className="text-[14px] text-slate-meta">
               No messages yet. Start the conversation with{" "}
               <span className="font-bold text-ink">{otherPartyName}</span>.
             </p>
@@ -472,7 +472,7 @@ export function MessagesThread({
                   <li
                     key={m.id}
                     id={`message-${m.id}`}
-                    className="p-4 text-[12px] text-slate-meta italic"
+                    className="p-4 text-[13px] text-slate-meta italic"
                   >
                     Message deleted.
                   </li>
@@ -504,14 +504,14 @@ export function MessagesThread({
                         isMine ? "flex-row-reverse" : "flex-row"
                       }`}
                     >
-                      <span className="text-[13px] font-bold text-ink truncate">
+                      <span className="text-[14px] font-bold text-ink truncate">
                         {senderLabel}
                       </span>
                       <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
                         {senderRoleLabel}
                       </span>
                       <span
-                        className="text-[11px] text-slate-meta"
+                        className="text-[12px] text-slate-meta"
                         title={new Date(m.created_at).toLocaleString()}
                       >
                         {relativeTime(m.created_at)}
@@ -548,7 +548,7 @@ export function MessagesThread({
                             Cancel
                           </button>
                           {editingError && (
-                            <span className="text-[12px] text-red-700">
+                            <span className="text-[13px] text-red-700">
                               {editingError}
                             </span>
                           )}
@@ -607,14 +607,14 @@ export function MessagesThread({
                                 <button
                                   type="button"
                                   onClick={() => startEdit(m)}
-                                  className="block w-full text-left px-3 py-1.5 text-[12px] text-ink hover:bg-cream"
+                                  className="block w-full text-left px-3 py-1.5 text-[13px] text-ink hover:bg-cream"
                                 >
                                   Edit
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => void handleDelete(m.id)}
-                                  className="block w-full text-left px-3 py-1.5 text-[12px] text-red-700 hover:bg-cream"
+                                  className="block w-full text-left px-3 py-1.5 text-[13px] text-red-700 hover:bg-cream"
                                 >
                                   Delete
                                 </button>
@@ -635,14 +635,14 @@ export function MessagesThread({
       {/* Composer */}
       <div className="mt-5">
         {/* Layer 3 — inline warning directly above the textarea */}
-        <div className="mb-2 px-3 py-2 bg-heritage-tint border-l-2 border-heritage text-[12.5px] leading-snug text-ink">
+        <div className="mb-2 px-3 py-2 bg-heritage-tint border-l-2 border-heritage text-[13.5px] leading-snug text-ink">
           <span className="font-semibold text-heritage-deep">
             Sending to {externalAudienceName}.
           </span>{" "}
           This message goes directly to them — internal team notes belong in
           the sections below.
         </div>
-        <p className="text-[12px] italic text-heritage-deep mb-2 leading-snug">
+        <p className="text-[13px] italic text-heritage-deep mb-2 leading-snug">
           Don&apos;t share medical information here — discuss any
           accommodations or health-related context directly with HR.
         </p>
@@ -665,14 +665,14 @@ export function MessagesThread({
           >
             {submitting ? "Sending…" : "Send Message"}
           </button>
-          <span className="text-[11px] text-slate-meta">
+          <span className="text-[12px] text-slate-meta">
             <span className="font-mono">⌘↩</span> to send
           </span>
-          <span className={`text-[11px] ${remainingClass}`}>
+          <span className={`text-[12px] ${remainingClass}`}>
             {remaining} characters left
           </span>
           {composerError && (
-            <span className="text-[12px] text-red-700">{composerError}</span>
+            <span className="text-[13px] text-red-700">{composerError}</span>
           )}
         </div>
       </div>

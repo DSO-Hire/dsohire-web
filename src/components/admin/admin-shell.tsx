@@ -77,7 +77,7 @@ export async function AdminShell({ children, active }: AdminShellProps) {
               <li key={item.id}>
                 <Link
                   href={item.href}
-                  className={`flex items-center gap-3 px-6 py-2.5 text-[13px] font-semibold transition-colors ${
+                  className={`flex items-center gap-3 px-6 py-2.5 text-[14px] font-semibold transition-colors ${
                     active === item.id
                       ? "bg-ivory/10 text-ivory border-l-2 border-heritage"
                       : "text-ivory/70 hover:text-ivory hover:bg-ivory/5"
@@ -92,10 +92,10 @@ export async function AdminShell({ children, active }: AdminShellProps) {
         </nav>
 
         <div className="p-6 border-t border-ivory/10">
-          <div className="text-[11px] text-ivory/50 mb-2">
+          <div className="text-[12px] text-ivory/50 mb-2">
             Signed in as
           </div>
-          <div className="text-[13px] text-ivory font-semibold mb-3 truncate">
+          <div className="text-[14px] text-ivory font-semibold mb-3 truncate">
             {adminRow.full_name ?? user.email}
           </div>
           <form action="/employer/sign-out" method="post">

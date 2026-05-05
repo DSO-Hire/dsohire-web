@@ -53,7 +53,7 @@ export default async function CandidateSignUpPage({ searchParams }: PageProps) {
             <div className="text-2xl font-extrabold tracking-[-0.5px] text-ink mb-2">
               Always free
             </div>
-            <div className="text-[13px] text-slate-body mb-6 leading-snug">
+            <div className="text-[14px] text-slate-body mb-6 leading-snug">
               No subscriptions, no fees, no upsells. Ever.
             </div>
 
@@ -67,7 +67,7 @@ export default async function CandidateSignUpPage({ searchParams }: PageProps) {
               ].map((f, i) => (
                 <li
                   key={i}
-                  className="text-[13px] text-ink flex items-start gap-2 leading-snug"
+                  className="text-[14px] text-ink flex items-start gap-2 leading-snug"
                 >
                   <span className="text-heritage-light font-extrabold flex-shrink-0">
                     ✓

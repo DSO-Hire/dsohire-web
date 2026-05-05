@@ -160,7 +160,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
           <p className="text-[15px] text-ink leading-relaxed mb-2">
             No DSOs match this filter.
           </p>
-          <p className="text-[13px] text-slate-body leading-relaxed">
+          <p className="text-[14px] text-slate-body leading-relaxed">
             Once a DSO signs up, they&apos;ll show up under{" "}
             <span className="font-semibold">Pending verification</span>.
           </p>
@@ -184,11 +184,11 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
                   </span>
                 </div>
 
-                <div className="text-[12px] text-slate-meta tracking-[0.3px] mb-3 font-mono">
+                <div className="text-[13px] text-slate-meta tracking-[0.3px] mb-3 font-mono">
                   /companies/{dso.slug}
                 </div>
 
-                <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-2 text-[12px]">
+                <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-2 text-[13px]">
                   <div>
                     <dt className="text-slate-meta font-bold tracking-[1px] uppercase text-[9px] mb-0.5">
                       Owner
@@ -228,7 +228,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
                   </div>
                 </dl>
 
-                <div className="mt-3 text-[11px] text-slate-meta">
+                <div className="mt-3 text-[12px] text-slate-meta">
                   Signed up {new Date(dso.created_at).toLocaleString()}
                 </div>
               </div>

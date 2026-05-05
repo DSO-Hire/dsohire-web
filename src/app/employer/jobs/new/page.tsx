@@ -76,7 +76,7 @@ export default async function NewJobPage() {
           </p>
           <Link
             href="/employer/onboarding"
-            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[11px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
           >
             Add a Location
           </Link>

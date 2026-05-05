@@ -29,7 +29,7 @@ export default function CandidateSettingsPage() {
         <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink mb-2">
           Set or change your password
         </h2>
-        <p className="text-[13px] text-slate-body leading-relaxed mb-6 max-w-[560px]">
+        <p className="text-[14px] text-slate-body leading-relaxed mb-6 max-w-[560px]">
           Setting a password lets you sign in without an emailed code each
           time. You can always fall back to a code if you forget it.
         </p>
@@ -40,7 +40,7 @@ export default function CandidateSettingsPage() {
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
           More settings coming soon
         </div>
-        <p className="text-[13px] text-slate-body leading-relaxed mb-4">
+        <p className="text-[14px] text-slate-body leading-relaxed mb-4">
           Notification preferences, email change, and account deletion ship
           in a follow-up release. For anything urgent, email{" "}
           <a
@@ -55,7 +55,7 @@ export default function CandidateSettingsPage() {
           <li>
             <Link
               href="/candidate/profile"
-              className="text-[13px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
+              className="text-[14px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
             >
               Edit your profile →
             </Link>
@@ -63,7 +63,7 @@ export default function CandidateSettingsPage() {
           <li>
             <Link
               href="/legal/privacy"
-              className="text-[13px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
+              className="text-[14px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
             >
               Privacy policy →
             </Link>
@@ -71,7 +71,7 @@ export default function CandidateSettingsPage() {
           <li>
             <Link
               href="/legal/candidate-terms"
-              className="text-[13px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
+              className="text-[14px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
             >
               Candidate terms →
             </Link>

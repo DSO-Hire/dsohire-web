@@ -259,7 +259,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
           />
           <button
             type="submit"
-            className="inline-flex items-center justify-center gap-2 px-9 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors min-h-[80px]"
+            className="inline-flex items-center justify-center gap-2 px-9 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors min-h-[80px]"
           >
             <Search className="h-4 w-4" />
             Search
@@ -322,7 +322,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
               We don&apos;t have any jobs matching that search yet. The platform
               is in early launch — verified DSOs are onboarding through summer 2026.
             </p>
-            <p className="text-[13px] text-slate-body leading-relaxed">
+            <p className="text-[14px] text-slate-body leading-relaxed">
               Check back soon, or{" "}
               <Link
                 href="/candidate/sign-up"
@@ -389,7 +389,7 @@ function JobCard({
       <div className="text-lg font-extrabold tracking-[-0.4px] text-ink mb-1 leading-tight">
         {job.title}
       </div>
-      <div className="text-[13px] text-slate-body mb-4">
+      <div className="text-[14px] text-slate-body mb-4">
         {dsoName}
         {locations.length > 0 && (
           <>

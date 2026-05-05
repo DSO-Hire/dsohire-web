@@ -129,7 +129,7 @@ function DsoCard({ dso, openJobs }: { dso: DsoRow; openJobs: number }) {
       </div>
 
       {(cityState || dso.practice_count) && (
-        <div className="text-[12px] tracking-[0.3px] text-slate-meta mb-4 flex flex-wrap gap-x-3 gap-y-1">
+        <div className="text-[13px] tracking-[0.3px] text-slate-meta mb-4 flex flex-wrap gap-x-3 gap-y-1">
           {cityState && (
             <span className="inline-flex items-center gap-1">
               <MapPin className="h-3 w-3" />
@@ -146,7 +146,7 @@ function DsoCard({ dso, openJobs }: { dso: DsoRow; openJobs: number }) {
       )}
 
       {dso.description && (
-        <p className="text-[13px] text-slate-body leading-relaxed line-clamp-3 mb-4">
+        <p className="text-[14px] text-slate-body leading-relaxed line-clamp-3 mb-4">
           {dso.description}
         </p>
       )}

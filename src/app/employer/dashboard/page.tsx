@@ -238,7 +238,7 @@ export default async function EmployerDashboard() {
           </p>
           <Link
             href="/employer/onboarding"
-            className="inline-flex items-center gap-2 px-7 py-3.5 bg-heritage text-ivory text-[11px] font-bold tracking-[1.8px] uppercase hover:bg-heritage-deep transition-colors"
+            className="inline-flex items-center gap-2 px-7 py-3.5 bg-heritage text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-heritage-deep transition-colors"
           >
             Continue Onboarding
             <ArrowRight className="h-3.5 w-3.5" />
@@ -276,7 +276,7 @@ export default async function EmployerDashboard() {
                   className="flex items-center justify-between gap-4 px-5 py-3 border-b border-[var(--rule)] last:border-0 hover:bg-cream transition-colors"
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="text-[13px] font-bold text-ink truncate">
+                    <div className="text-[14px] font-bold text-ink truncate">
                       {candidateDisplayName({
                         fullName: cand?.full_name,
                         candidateId: app.candidate_id,
@@ -285,7 +285,7 @@ export default async function EmployerDashboard() {
                         {STAGE_LABELS[app.status] ?? app.status}
                       </span>
                     </div>
-                    <div className="text-[11px] text-slate-body truncate mt-0.5">
+                    <div className="text-[12px] text-slate-body truncate mt-0.5">
                       Applied to {job?.title ?? "Unknown job"} ·{" "}
                       {new Date(app.created_at).toLocaleDateString()}
                     </div>
@@ -371,7 +371,7 @@ function KpiCard({
         {label}
       </div>
       {hint && (
-        <div className="mt-3 text-[12px] text-slate-meta">{hint}</div>
+        <div className="mt-3 text-[13px] text-slate-meta">{hint}</div>
       )}
     </div>
   );
@@ -396,7 +396,7 @@ function QuickAction({
           <div className="text-[16px] font-extrabold tracking-[-0.3px] text-ink mb-1.5">
             {title}
           </div>
-          <div className="text-[13px] text-slate-body leading-snug">{body}</div>
+          <div className="text-[14px] text-slate-body leading-snug">{body}</div>
         </div>
         <ArrowRight className="h-4 w-4 text-slate-meta group-hover:text-heritage transition-colors flex-shrink-0 mt-1" />
       </div>

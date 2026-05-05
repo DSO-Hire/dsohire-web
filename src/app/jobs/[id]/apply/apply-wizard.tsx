@@ -255,14 +255,14 @@ export function ApplyWizard(props: ApplyWizardProps) {
           <div className="flex flex-wrap gap-3">
             <Link
               href="/candidate/dashboard"
-              className="inline-flex items-center gap-2 px-5 py-3 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
             >
               View Dashboard
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
             <Link
               href="/jobs"
-              className="inline-flex items-center gap-2 px-5 py-3 border border-[var(--rule-strong)] text-ink text-[11px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-3 border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
             >
               Browse More Jobs
             </Link>
@@ -281,10 +281,10 @@ export function ApplyWizard(props: ApplyWizardProps) {
         <div className="border border-heritage/30 bg-heritage/[0.06] p-5 flex items-start gap-4">
           <Pencil className="h-4 w-4 text-heritage-deep flex-shrink-0 mt-1" />
           <div className="flex-1 min-w-0">
-            <div className="text-[13px] font-semibold text-ink leading-snug mb-1">
+            <div className="text-[14px] font-semibold text-ink leading-snug mb-1">
               Resume your draft from earlier?
             </div>
-            <div className="text-[12px] text-slate-body leading-relaxed mb-3">
+            <div className="text-[13px] text-slate-body leading-relaxed mb-3">
               We saved what you started typing on this device. You'll need to
               re-attach a resume if you uploaded one.
             </div>
@@ -384,7 +384,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
 
         {submitError && (
           <div className="mt-6 bg-red-50 border-l-4 border-red-500 p-4">
-            <p className="text-[13px] text-red-900">{submitError}</p>
+            <p className="text-[14px] text-red-900">{submitError}</p>
           </div>
         )}
 
@@ -414,7 +414,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
               type="button"
               onClick={handleSubmit}
               disabled={pending}
-              className="inline-flex items-center gap-2 px-7 py-3.5 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {pending
                 ? "Submitting…"
@@ -427,7 +427,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
         </div>
       </div>
 
-      <p className="text-[12px] text-slate-meta leading-relaxed">
+      <p className="text-[13px] text-slate-meta leading-relaxed">
         Your draft saves automatically on this device. Your application goes
         directly to the hiring team at this DSO. By submitting you agree to our{" "}
         <a
@@ -544,7 +544,7 @@ function IntroStep({
           placeholder="Jordan Rivera"
           className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
         />
-        <p className="mt-1.5 text-[11px] text-slate-meta leading-relaxed">
+        <p className="mt-1.5 text-[12px] text-slate-meta leading-relaxed">
           Required — the hiring team needs a real name on your application.
           We&apos;ll save this back to your profile.
         </p>
@@ -558,7 +558,7 @@ function IntroStep({
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
             {prefill.map((row) => (
               <div key={row.label}>
-                <dt className="text-[11px] font-semibold tracking-[1px] uppercase text-slate-meta">
+                <dt className="text-[12px] font-semibold tracking-[1px] uppercase text-slate-meta">
                   {row.label}
                 </dt>
                 <dd className="text-[14px] text-ink mt-0.5">{row.value}</dd>
@@ -568,7 +568,7 @@ function IntroStep({
           <Link
             href="/candidate/profile"
             target="_blank"
-            className="inline-flex items-center gap-1.5 mt-4 text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+            className="inline-flex items-center gap-1.5 mt-4 text-[12px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
           >
             Update profile
             <ExternalLink className="h-3 w-3" />
@@ -609,13 +609,13 @@ function ScreeningStep({
 
       {questions.map((q, idx) => (
         <div key={q.id} className="space-y-2">
-          <label className="block text-[13px] font-semibold text-ink leading-snug">
+          <label className="block text-[14px] font-semibold text-ink leading-snug">
             <span className="text-slate-meta font-bold mr-2">{idx + 1}.</span>
             {q.prompt}
             {q.required && <span className="text-heritage ml-1">*</span>}
           </label>
           {q.helper_text && (
-            <p className="text-[11px] text-slate-meta leading-relaxed">
+            <p className="text-[12px] text-slate-meta leading-relaxed">
               {q.helper_text}
             </p>
           )}
@@ -688,7 +688,7 @@ function QuestionInput({
               type="button"
               onClick={() => onChange({ kind: "yes_no", value: choice })}
               className={
-                "px-5 py-2.5 border text-[11px] font-bold tracking-[1.5px] uppercase transition-colors " +
+                "px-5 py-2.5 border text-[12px] font-bold tracking-[1.5px] uppercase transition-colors " +
                 (v === choice
                   ? "bg-ink text-ivory border-ink"
                   : "bg-cream text-ink border-[var(--rule-strong)] hover:bg-white")
@@ -721,7 +721,7 @@ function QuestionInput({
                 onChange={() => onChange({ kind: "single", value: opt.id })}
                 className="accent-heritage"
               />
-              <span className="text-[13px] text-ink">{opt.label}</span>
+              <span className="text-[14px] text-ink">{opt.label}</span>
             </label>
           ))}
         </div>
@@ -753,7 +753,7 @@ function QuestionInput({
                   onChange={() => toggle(opt.id)}
                   className="accent-heritage"
                 />
-                <span className="text-[13px] text-ink">{opt.label}</span>
+                <span className="text-[14px] text-ink">{opt.label}</span>
               </label>
             );
           })}
@@ -824,10 +824,10 @@ function ResumeStep({
               className="mt-1 accent-heritage"
             />
             <div className="min-w-0 flex-1">
-              <div className="text-[13px] font-semibold text-ink leading-snug">
+              <div className="text-[14px] font-semibold text-ink leading-snug">
                 Use my saved resume
               </div>
-              <div className="text-[11px] text-slate-body leading-snug mt-0.5">
+              <div className="text-[12px] text-slate-body leading-snug mt-0.5">
                 {savedResumeName ?? "Stored on your profile"}
               </div>
             </div>
@@ -850,10 +850,10 @@ function ResumeStep({
               className="mt-1 accent-heritage"
             />
             <div className="min-w-0 flex-1">
-              <div className="text-[13px] font-semibold text-ink leading-snug">
+              <div className="text-[14px] font-semibold text-ink leading-snug">
                 Upload a different resume for this application
               </div>
-              <div className="text-[11px] text-slate-body leading-snug mt-0.5">
+              <div className="text-[12px] text-slate-body leading-snug mt-0.5">
                 Replace just for this role; doesn't change your saved resume.
               </div>
             </div>
@@ -893,19 +893,19 @@ function ResumeStep({
               }
               onResumeFile(f, null);
             }}
-            className="block w-full text-[13px] text-ink file:mr-4 file:px-5 file:py-2.5 file:border-0 file:text-[10px] file:font-bold file:tracking-[1.5px] file:uppercase file:bg-ink file:text-ivory hover:file:bg-ink-soft file:cursor-pointer file:transition-colors"
+            className="block w-full text-[14px] text-ink file:mr-4 file:px-5 file:py-2.5 file:border-0 file:text-[10px] file:font-bold file:tracking-[1.5px] file:uppercase file:bg-ink file:text-ivory hover:file:bg-ink-soft file:cursor-pointer file:transition-colors"
           />
-          <p className="mt-1.5 text-[11px] text-slate-meta leading-relaxed">
+          <p className="mt-1.5 text-[12px] text-slate-meta leading-relaxed">
             PDF, DOC, or DOCX. Max 10 MB.
           </p>
           {resumeFile && (
-            <p className="mt-2 text-[12px] text-heritage-deep font-semibold">
+            <p className="mt-2 text-[13px] text-heritage-deep font-semibold">
               <Check className="inline h-3.5 w-3.5 mr-1" />
               {resumeFile.name} attached
             </p>
           )}
           {resumeError && (
-            <p className="mt-2 text-[12px] text-red-700">{resumeError}</p>
+            <p className="mt-2 text-[13px] text-red-700">{resumeError}</p>
           )}
         </div>
       )}
@@ -944,7 +944,7 @@ function CoverLetterStep({
         placeholder={`A short note to the hiring team. Mention what excites you about this ${jobTitle.toLowerCase()} role and what experience makes you a fit.`}
         className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed"
       />
-      <p className="text-[12px] text-slate-meta leading-relaxed">
+      <p className="text-[13px] text-slate-meta leading-relaxed">
         Optional, but recommended — personalized cover letters typically get
         2–3× more interview requests than generic applications.
       </p>
@@ -1007,9 +1007,9 @@ function ReviewStep({
 
       <ReviewBlock label="Your name" onEdit={() => onJumpTo("intro")}>
         {trimmedName ? (
-          <p className="text-[13px] text-ink">{trimmedName}</p>
+          <p className="text-[14px] text-ink">{trimmedName}</p>
         ) : (
-          <p className="text-[13px] text-red-700">
+          <p className="text-[14px] text-red-700">
             Missing — go back and add your full name before submitting.
           </p>
         )}
@@ -1023,10 +1023,10 @@ function ReviewStep({
           <ul className="space-y-3">
             {questions.map((q) => (
               <li key={q.id}>
-                <div className="text-[11px] font-semibold text-slate-meta mb-0.5">
+                <div className="text-[12px] font-semibold text-slate-meta mb-0.5">
                   {q.prompt}
                 </div>
-                <div className="text-[13px] text-ink">
+                <div className="text-[14px] text-ink">
                   {formatAnswer(q, answers[q.id]) || (
                     <span className="text-slate-meta italic">No answer</span>
                   )}
@@ -1038,7 +1038,7 @@ function ReviewStep({
       )}
 
       <ReviewBlock label="Resume" onEdit={() => onJumpTo("resume")}>
-        <p className="text-[13px] text-ink">
+        <p className="text-[14px] text-ink">
           {resumeChoice === "upload" && resumeFile
             ? `Uploading: ${resumeFile.name}`
             : resumeChoice === "saved" && savedResumeName
@@ -1049,11 +1049,11 @@ function ReviewStep({
 
       <ReviewBlock label="Cover letter" onEdit={() => onJumpTo("cover")}>
         {coverLetter.trim() ? (
-          <p className="text-[13px] text-ink whitespace-pre-wrap leading-relaxed">
+          <p className="text-[14px] text-ink whitespace-pre-wrap leading-relaxed">
             {coverLetter}
           </p>
         ) : (
-          <p className="text-[13px] text-slate-meta italic">
+          <p className="text-[14px] text-slate-meta italic">
             No cover letter — you can still submit, but personalized cover
             letters get more interviews.
           </p>
@@ -1062,10 +1062,10 @@ function ReviewStep({
 
       {completeness.percent < 100 && (
         <div className="border-l-4 border-heritage bg-heritage/[0.06] p-4">
-          <div className="text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-1">
+          <div className="text-[12px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-1">
             Your profile is {completeness.percent}% complete
           </div>
-          <p className="text-[12px] text-slate-body leading-relaxed">
+          <p className="text-[13px] text-slate-body leading-relaxed">
             Adding {completeness.missing.join(", ")} to your profile lets future
             applications autofill in seconds.{" "}
             <Link

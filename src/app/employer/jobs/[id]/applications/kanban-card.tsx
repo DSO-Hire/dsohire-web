@@ -154,10 +154,10 @@ export function KanbanCard({
           />
         </span>
       )}
-      <div className="text-[13px] font-bold text-ink truncate mb-1 pr-6">
+      <div className="text-[14px] font-bold text-ink truncate mb-1 pr-6">
         {cand?.full_name ?? "Anonymous candidate"}
       </div>
-      <div className="text-[11px] text-slate-body truncate mb-2">
+      <div className="text-[12px] text-slate-body truncate mb-2">
         {cand?.current_title || cand?.headline || "Profile minimal"}
       </div>
       <div className="flex items-center justify-between gap-2">

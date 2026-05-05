@@ -117,12 +117,12 @@ export default async function CandidateApplicationsPage() {
           <p className="text-[15px] text-ink leading-relaxed mb-2">
             You haven&apos;t applied to any jobs yet.
           </p>
-          <p className="text-[13px] text-slate-body leading-relaxed mb-6">
+          <p className="text-[14px] text-slate-body leading-relaxed mb-6">
             Browse open roles at verified dental support organizations.
           </p>
           <Link
             href="/jobs"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
           >
             Browse Jobs
           </Link>
@@ -157,7 +157,7 @@ export default async function CandidateApplicationsPage() {
                         </span>
                       )}
                     </div>
-                    <div className="text-[13px] text-slate-body">
+                    <div className="text-[14px] text-slate-body">
                       {dso?.name ?? "Unknown DSO"} · Applied {new Date(app.created_at).toLocaleDateString()}
                     </div>
                   </div>

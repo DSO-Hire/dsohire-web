@@ -61,21 +61,21 @@ export default async function SignUpPage({ searchParams }: PageProps) {
             <div className="text-2xl font-extrabold tracking-[-0.5px] text-ink mb-2">
               {selectedTier.name}
             </div>
-            <div className="text-[13px] text-slate-body mb-5 leading-snug">
+            <div className="text-[14px] text-slate-body mb-5 leading-snug">
               {selectedTier.tagline}
             </div>
             <div className="flex items-baseline gap-1.5 mb-6 pb-6 border-b border-[var(--rule)]">
               <div className="text-4xl font-extrabold tracking-[-1px] text-ink">
                 ${selectedTier.monthlyPrice.toLocaleString()}
               </div>
-              <div className="text-[13px] text-slate-body font-medium">/ month</div>
+              <div className="text-[14px] text-slate-body font-medium">/ month</div>
             </div>
 
             <ul className="list-none space-y-2.5">
               {selectedTier.features.map((f, i) => (
                 <li
                   key={i}
-                  className="text-[13px] text-ink flex items-start gap-2 leading-snug"
+                  className="text-[14px] text-ink flex items-start gap-2 leading-snug"
                 >
                   <span className="text-heritage-light font-extrabold flex-shrink-0">
                     ✓
@@ -85,7 +85,7 @@ export default async function SignUpPage({ searchParams }: PageProps) {
               ))}
             </ul>
 
-            <p className="mt-7 pt-5 border-t border-[var(--rule)] text-[12px] text-slate-meta leading-relaxed">
+            <p className="mt-7 pt-5 border-t border-[var(--rule)] text-[13px] text-slate-meta leading-relaxed">
               Payment via Stripe. Cancel or change tiers anytime. No setup fees
               or implementation costs.
             </p>
@@ -93,7 +93,7 @@ export default async function SignUpPage({ searchParams }: PageProps) {
             <div className="mt-5">
               <Link
                 href="/pricing"
-                className="text-[12px] font-semibold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink underline underline-offset-2"
+                className="text-[13px] font-semibold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink underline underline-offset-2"
               >
                 ← Change tier
               </Link>

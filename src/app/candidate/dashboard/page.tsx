@@ -133,13 +133,13 @@ export default async function CandidateDashboardPage() {
               <p className="text-[15px] text-ink leading-relaxed mb-1">
                 A complete profile gets {pct < 50 ? "3×" : "2×"} more responses from employers.
               </p>
-              <p className="text-[13px] text-slate-body leading-relaxed">
+              <p className="text-[14px] text-slate-body leading-relaxed">
                 Add your headline, target role, location preferences, and resume.
               </p>
             </div>
             <Link
               href="/candidate/profile"
-              className="inline-flex items-center gap-2 px-5 py-3 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
             >
               <UserCircle className="h-4 w-4" />
               Complete Profile
@@ -158,7 +158,7 @@ export default async function CandidateDashboardPage() {
           {apps.length > 0 && (
             <Link
               href="/candidate/applications"
-              className="text-[11px] font-bold tracking-[1.5px] uppercase text-heritage hover:text-heritage-deep transition-colors"
+              className="text-[12px] font-bold tracking-[1.5px] uppercase text-heritage hover:text-heritage-deep transition-colors"
             >
               View all →
             </Link>
@@ -171,12 +171,12 @@ export default async function CandidateDashboardPage() {
             <p className="text-[15px] text-ink leading-relaxed mb-2">
               You haven&apos;t applied to any jobs yet.
             </p>
-            <p className="text-[13px] text-slate-body leading-relaxed mb-6">
+            <p className="text-[14px] text-slate-body leading-relaxed mb-6">
               Browse open roles at verified dental support organizations.
             </p>
             <Link
               href="/jobs"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
             >
               <Briefcase className="h-4 w-4" />
               Browse Jobs
@@ -198,7 +198,7 @@ export default async function CandidateDashboardPage() {
                     <div className="text-[15px] font-bold text-ink truncate mb-0.5">
                       {job?.title ?? "Job removed"}
                     </div>
-                    <div className="text-[12px] text-slate-body truncate">
+                    <div className="text-[13px] text-slate-body truncate">
                       {dso?.name ?? "Unknown DSO"} · Applied {submitted.toLocaleDateString()}
                     </div>
                   </div>
@@ -242,7 +242,7 @@ function StatCard({
       <div className={`text-4xl font-extrabold tracking-[-1px] leading-none mb-2 ${valueClass}`}>
         {value}
       </div>
-      <div className="text-[12px] text-slate-body">{sub}</div>
+      <div className="text-[13px] text-slate-body">{sub}</div>
     </div>
   );
 }

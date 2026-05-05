@@ -123,10 +123,10 @@ export function RoleHelp() {
           <Info className="h-4 w-4 text-heritage-deep" />
         </span>
         <span className="flex-1 min-w-0">
-          <span className="block text-[13px] font-extrabold tracking-[-0.1px] text-ink">
+          <span className="block text-[14px] font-extrabold tracking-[-0.1px] text-ink">
             Need help picking the right role?
           </span>
-          <span className="block text-[12px] text-slate-body mt-0.5 leading-snug">
+          <span className="block text-[13px] text-slate-body mt-0.5 leading-snug">
             Each role has different permissions and use cases. Hiring Manager is
             scoped to specific locations — useful for dentist-owners and
             regional managers.
@@ -151,7 +151,7 @@ export function RoleHelp() {
               <h3 className="text-[14px] font-extrabold tracking-[-0.3px] text-ink">
                 Team roles, explained
               </h3>
-              <p className="text-[12px] text-slate-meta mt-1 leading-relaxed">
+              <p className="text-[13px] text-slate-meta mt-1 leading-relaxed">
                 Pick the role that matches what this person will actually do
                 day-to-day. Roles are easy to change later for non-hiring-manager
                 teammates.
@@ -190,14 +190,14 @@ function RoleCard({
           <role.Icon className="h-4 w-4 text-heritage-deep" />
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="text-[13px] font-extrabold tracking-[-0.2px] text-ink">
+          <h4 className="text-[14px] font-extrabold tracking-[-0.2px] text-ink">
             {role.label}
           </h4>
-          <p className="text-[12px] text-slate-meta italic mt-0.5 leading-snug">
+          <p className="text-[13px] text-slate-meta italic mt-0.5 leading-snug">
             {role.oneLiner}
           </p>
 
-          <p className="text-[12px] text-ink mt-2.5 leading-relaxed">
+          <p className="text-[13px] text-ink mt-2.5 leading-relaxed">
             <strong className="font-semibold">Who fits this role: </strong>
             {role.whoFitsThisRole}
           </p>
@@ -211,7 +211,7 @@ function RoleCard({
                 {role.canDo.map((item, i) => (
                   <li
                     key={i}
-                    className="text-[11px] text-ink leading-snug flex items-start gap-1.5"
+                    className="text-[12px] text-ink leading-snug flex items-start gap-1.5"
                   >
                     <span className="text-heritage-deep font-bold flex-shrink-0">
                       ✓
@@ -230,7 +230,7 @@ function RoleCard({
                   {role.cantDo.map((item, i) => (
                     <li
                       key={i}
-                      className="text-[11px] text-slate-body leading-snug flex items-start gap-1.5"
+                      className="text-[12px] text-slate-body leading-snug flex items-start gap-1.5"
                     >
                       <span className="text-slate-meta flex-shrink-0">—</span>
                       <span>{item}</span>

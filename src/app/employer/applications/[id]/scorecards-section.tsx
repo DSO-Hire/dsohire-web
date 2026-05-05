@@ -556,7 +556,7 @@ export function ScorecardsSection({
             )}
           </div>
           {myStatus === "submitted" && myScorecard?.submitted_at && (
-            <span className="text-[11px] text-slate-meta">
+            <span className="text-[12px] text-slate-meta">
               Submitted {relativeTime(myScorecard.submitted_at)}
             </span>
           )}
@@ -566,7 +566,7 @@ export function ScorecardsSection({
           <button
             type="button"
             onClick={openEditor}
-            className="w-full px-5 py-4 border border-dashed border-[var(--rule-strong)] bg-cream text-ink text-[13px] font-semibold hover:bg-ivory transition-colors flex items-center justify-center gap-2"
+            className="w-full px-5 py-4 border border-dashed border-[var(--rule-strong)] bg-cream text-ink text-[14px] font-semibold hover:bg-ivory transition-colors flex items-center justify-center gap-2"
           >
             <Star className="h-4 w-4 text-heritage-deep" />
             Score this candidate
@@ -705,7 +705,7 @@ function AggregatePanel({
             <span className="text-3xl font-extrabold tracking-[-1px] text-ink tabular-nums">
               {overall}
             </span>
-            <span className="text-[12px] text-slate-meta">/ 5.0</span>
+            <span className="text-[13px] text-slate-meta">/ 5.0</span>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -728,7 +728,7 @@ function AggregatePanel({
         {aggregate.attributeRows.map((row) => (
           <li
             key={row.attribute.id}
-            className="flex items-center gap-4 text-[12px]"
+            className="flex items-center gap-4 text-[13px]"
           >
             <span className="flex-1 min-w-0 text-ink leading-snug">
               {row.attribute.label}
@@ -742,7 +742,7 @@ function AggregatePanel({
           </li>
         ))}
       </ul>
-      <p className="text-[11px] text-slate-meta mt-4 pt-3 border-t border-[var(--rule)]">
+      <p className="text-[12px] text-slate-meta mt-4 pt-3 border-t border-[var(--rule)]">
         Rubric: {rubric.label}. Averages computed across submitted scorecards
         only — drafts are private to the reviewer until submitted.
       </p>
@@ -801,7 +801,7 @@ function ReadOnlyScorecard({
                 </span>
               )}
               {scorecard.submitted_at && (
-                <span className="text-[11px] text-slate-meta">
+                <span className="text-[12px] text-slate-meta">
                   Submitted {relativeTime(scorecard.submitted_at)}
                 </span>
               )}
@@ -812,7 +812,7 @@ function ReadOnlyScorecard({
             <span className="text-2xl font-extrabold tracking-[-0.6px] text-ink tabular-nums">
               {overall !== null ? overall.toFixed(1) : "—"}
             </span>
-            <span className="text-[11px] text-slate-meta">/ 5.0</span>
+            <span className="text-[12px] text-slate-meta">/ 5.0</span>
           </div>
         </div>
         {recommendation && recColor && (
@@ -830,12 +830,12 @@ function ReadOnlyScorecard({
           return (
             <li
               key={attr.id}
-              className="flex items-start gap-3 text-[12px]"
+              className="flex items-start gap-3 text-[13px]"
             >
               <div className="flex-1 min-w-0">
                 <div className="text-ink leading-snug">{attr.label}</div>
                 {entry?.note && (
-                  <div className="text-[12px] text-slate-body mt-0.5 italic leading-snug whitespace-pre-wrap">
+                  <div className="text-[13px] text-slate-body mt-0.5 italic leading-snug whitespace-pre-wrap">
                     {entry.note}
                   </div>
                 )}
@@ -856,7 +856,7 @@ function ReadOnlyScorecard({
           <div className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta mb-1">
             Overall notes
           </div>
-          <p className="text-[13px] text-ink leading-relaxed whitespace-pre-wrap">
+          <p className="text-[14px] text-ink leading-relaxed whitespace-pre-wrap">
             {scorecard.overall_note}
           </p>
         </div>
@@ -910,7 +910,7 @@ function ScorecardForm({
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
           Rubric · {rubric.label}
         </div>
-        <p className="text-[12px] text-slate-meta leading-snug">
+        <p className="text-[13px] text-slate-meta leading-snug">
           {rubric.description}
         </p>
       </div>
@@ -987,7 +987,7 @@ function ScorecardForm({
       </div>
 
       {error && (
-        <div className="flex items-start gap-2 text-[12px] text-red-700">
+        <div className="flex items-start gap-2 text-[13px] text-red-700">
           <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
           <span>{error}</span>
         </div>
@@ -1022,7 +1022,7 @@ function ScorecardForm({
             Cancel
           </button>
         )}
-        <span className="text-[11px] text-slate-meta">
+        <span className="text-[12px] text-slate-meta">
           Drafts are private to you. Submitting locks scores and shares with
           the hiring team.
         </span>
@@ -1051,10 +1051,10 @@ function AttributeRow({
   return (
     <div className="border border-[var(--rule)] bg-cream p-4">
       <div className="mb-2.5">
-        <div className="text-[13px] font-bold text-ink leading-snug">
+        <div className="text-[14px] font-bold text-ink leading-snug">
           {attribute.label}
         </div>
-        <div className="text-[12px] text-slate-meta leading-snug mt-0.5">
+        <div className="text-[13px] text-slate-meta leading-snug mt-0.5">
           {attribute.description}
         </div>
       </div>
@@ -1075,7 +1075,7 @@ function AttributeRow({
               aria-label={`${value} — ${SCORE_LABELS[value]}`}
               title={SCORE_LABELS[value]}
               onClick={() => onScoreChange(value)}
-              className={`px-4 py-2 text-[12px] font-bold tabular-nums border-r last:border-r-0 border-[var(--rule)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-inset ${
+              className={`px-4 py-2 text-[13px] font-bold tabular-nums border-r last:border-r-0 border-[var(--rule)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-inset ${
                 active
                   ? "bg-heritage text-ivory"
                   : "text-slate-body hover:bg-cream"
@@ -1087,7 +1087,7 @@ function AttributeRow({
         })}
       </div>
       {score !== null && (
-        <div className="text-[11px] text-slate-meta mb-2">
+        <div className="text-[12px] text-slate-meta mb-2">
           {SCORE_LABELS[score]}
         </div>
       )}
@@ -1099,7 +1099,7 @@ function AttributeRow({
           onChange={(e) => onNoteChange(e.target.value)}
           maxLength={1000}
           placeholder="Optional note for this attribute"
-          className="w-full px-3 py-2 bg-white border border-[var(--rule)] text-ink text-[13px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+          className="w-full px-3 py-2 bg-white border border-[var(--rule)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
         />
       )}
     </div>
@@ -1146,7 +1146,7 @@ function ConfirmDialog({
         >
           {title}
         </h4>
-        <p className="text-[13px] text-slate-body leading-relaxed mb-5">
+        <p className="text-[14px] text-slate-body leading-relaxed mb-5">
           {body}
         </p>
         <div className="flex items-center justify-end gap-3">

@@ -79,12 +79,12 @@ export function ApplicationsList({
                   </span>
                 </div>
                 {!hideJobTitle && (
-                  <div className="text-[13px] text-slate-body mb-2">
+                  <div className="text-[14px] text-slate-body mb-2">
                     Applied to{" "}
                     <span className="font-semibold text-ink">{app.jobTitle}</span>
                   </div>
                 )}
-                <div className="text-[12px] text-slate-meta">
+                <div className="text-[13px] text-slate-meta">
                   {[cand?.current_title, cand?.headline]
                     .filter(Boolean)
                     .join(" · ") || "Profile minimal"}

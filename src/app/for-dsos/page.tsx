@@ -54,14 +54,14 @@ function Hero() {
       <div className="flex flex-wrap items-center gap-3.5">
         <Link
           href="/pricing"
-          className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+          className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
         >
           See Pricing
           <ArrowRight className="h-3.5 w-3.5" />
         </Link>
         <Link
           href="/contact"
-          className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[11px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
+          className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
         >
           Contact Sales
         </Link>
@@ -302,7 +302,7 @@ function RoiCard({
         <div className="text-3xl font-extrabold tracking-[-1px] text-ink">
           {total}
         </div>
-        <div className="text-[11px] font-semibold tracking-[1.5px] uppercase text-slate-meta mt-1">
+        <div className="text-[12px] font-semibold tracking-[1.5px] uppercase text-slate-meta mt-1">
           {totalLabel}
         </div>
       </div>
@@ -394,14 +394,14 @@ function FinalCta() {
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Link
             href="/contact"
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
           >
             Contact Us
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <Link
             href="/pricing"
-            className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[11px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
+            className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
           >
             See Pricing
           </Link>

@@ -73,7 +73,7 @@ export function KanbanColumn({
       >
         {applications.length === 0 ? (
           <div
-            className={`text-[12px] italic px-3 py-6 text-center border border-dashed bg-cream/60 ${
+            className={`text-[13px] italic px-3 py-6 text-center border border-dashed bg-cream/60 ${
               isOver
                 ? "border-heritage/50 text-heritage-deep"
                 : "border-[var(--rule)] text-slate-meta"

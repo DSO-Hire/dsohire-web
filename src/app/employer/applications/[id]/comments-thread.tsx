@@ -672,7 +672,7 @@ export function CommentsThread({
         {visibleComments.length === 0 ? (
           <div className="p-8 text-center">
             <AtSign className="h-5 w-5 text-slate-meta mx-auto mb-2" />
-            <p className="text-[13px] text-slate-meta">
+            <p className="text-[14px] text-slate-meta">
               No team comments yet. Use{" "}
               <span className="font-mono text-ink">@</span> to mention a
               teammate.
@@ -686,7 +686,7 @@ export function CommentsThread({
                   <li
                     key={c.id}
                     id={`comment-${c.id}`}
-                    className="p-4 text-[12px] text-slate-meta italic"
+                    className="p-4 text-[13px] text-slate-meta italic"
                   >
                     Comment deleted.
                   </li>
@@ -703,7 +703,7 @@ export function CommentsThread({
                 >
                   <div className="flex items-baseline justify-between gap-3 mb-1">
                     <div className="flex items-baseline gap-2 min-w-0">
-                      <span className="text-[13px] font-bold text-ink truncate">
+                      <span className="text-[14px] font-bold text-ink truncate">
                         {c.authorName ?? "Teammate"}
                       </span>
                       {c.authorRole && (
@@ -712,7 +712,7 @@ export function CommentsThread({
                         </span>
                       )}
                       <span
-                        className="text-[11px] text-slate-meta"
+                        className="text-[12px] text-slate-meta"
                         title={new Date(c.created_at).toLocaleString()}
                       >
                         {relativeTime(c.created_at)}
@@ -742,14 +742,14 @@ export function CommentsThread({
                             <button
                               type="button"
                               onClick={() => startEdit(c)}
-                              className="block w-full text-left px-3 py-1.5 text-[12px] text-ink hover:bg-cream"
+                              className="block w-full text-left px-3 py-1.5 text-[13px] text-ink hover:bg-cream"
                             >
                               Edit
                             </button>
                             <button
                               type="button"
                               onClick={() => void handleDelete(c.id)}
-                              className="block w-full text-left px-3 py-1.5 text-[12px] text-red-700 hover:bg-cream"
+                              className="block w-full text-left px-3 py-1.5 text-[13px] text-red-700 hover:bg-cream"
                             >
                               Delete
                             </button>
@@ -793,7 +793,7 @@ export function CommentsThread({
                           Cancel
                         </button>
                         {editingError && (
-                          <span className="text-[12px] text-red-700">
+                          <span className="text-[13px] text-red-700">
                             {editingError}
                           </span>
                         )}
@@ -838,12 +838,12 @@ export function CommentsThread({
           >
             {submitting ? "Posting…" : "Post Comment"}
           </button>
-          <span className="text-[11px] text-slate-meta">
+          <span className="text-[12px] text-slate-meta">
             <span className="font-mono">⌘↩</span> to post ·{" "}
             <span className="font-mono">@</span> to mention
           </span>
           {composerError && (
-            <span className="text-[12px] text-red-700">{composerError}</span>
+            <span className="text-[13px] text-red-700">{composerError}</span>
           )}
         </div>
       </div>
@@ -888,7 +888,7 @@ function MentionPopover({
                 idx === selectedIdx ? "bg-cream" : "hover:bg-cream"
               }`}
             >
-              <span className="text-[13px] font-semibold text-ink truncate">
+              <span className="text-[14px] font-semibold text-ink truncate">
                 {u.fullName ?? "Teammate"}
               </span>
               <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep">

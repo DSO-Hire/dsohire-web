@@ -65,7 +65,7 @@ function TierGrid({ tiers }: { tiers: TierConfig[] }) {
           <TierCard key={tier.id} tier={tier} />
         ))}
       </div>
-      <p className="mt-10 text-[13px] text-slate-body text-center leading-relaxed">
+      <p className="mt-10 text-[14px] text-slate-body text-center leading-relaxed">
         All tiers include unlimited multi-location posting, candidate dashboards, and
         Stripe-secured billing.{" "}
         <strong className="text-ink font-bold">
@@ -118,7 +118,7 @@ function TierCard({ tier }: { tier: TierConfig }) {
           ${tier.monthlyPrice.toLocaleString()}
         </div>
         <div
-          className={`text-[13px] font-medium ${
+          className={`text-[14px] font-medium ${
             isFeatured ? "text-ivory/70" : "text-slate-body"
           }`}
         >
@@ -126,7 +126,7 @@ function TierCard({ tier }: { tier: TierConfig }) {
         </div>
       </div>
       <div
-        className={`text-[11px] tracking-[0.4px] mb-7 min-h-[32px] leading-[1.45] ${
+        className={`text-[12px] tracking-[0.4px] mb-7 min-h-[32px] leading-[1.45] ${
           isFeatured ? "text-ivory/55" : "text-slate-meta"
         }`}
       >
@@ -137,7 +137,7 @@ function TierCard({ tier }: { tier: TierConfig }) {
 
       <Link
         href={`/employer/sign-up?tier=${tier.id}`}
-        className={`block text-center px-4 py-3.5 text-[11px] font-bold tracking-[1.5px] uppercase mb-6 transition-colors border ${
+        className={`block text-center px-4 py-3.5 text-[12px] font-bold tracking-[1.5px] uppercase mb-6 transition-colors border ${
           isFeatured
             ? "bg-heritage text-ivory border-heritage hover:bg-heritage-deep hover:border-heritage-deep"
             : "bg-ivory text-ink border-[var(--rule-strong)] hover:bg-ink hover:text-ivory hover:border-ink"
@@ -156,7 +156,7 @@ function TierCard({ tier }: { tier: TierConfig }) {
         {tier.features.map((feature, i) => (
           <li
             key={i}
-            className={`text-[12.5px] py-1.5 flex items-start gap-2 leading-snug ${
+            className={`text-[13.5px] py-1.5 flex items-start gap-2 leading-snug ${
               isFeatured ? "text-ivory/90" : "text-ink"
             }`}
           >
@@ -576,7 +576,7 @@ function CompareMatrix({ tiers }: { tiers: TierConfig[] }) {
         comparison tables are primarily a desktop surface.
       */}
       <div className="-mx-6 sm:-mx-14 px-6 sm:px-14 overflow-x-auto lg:overflow-visible">
-        <p className="hidden lg:block text-[12px] text-slate-meta mb-5 max-w-[680px] leading-relaxed">
+        <p className="hidden lg:block text-[13px] text-slate-meta mb-5 max-w-[680px] leading-relaxed">
           <strong className="text-ink font-semibold">Reading this matrix:</strong>{" "}
           checkmarks = available today. <span className="font-bold tracking-[1px] uppercase text-[10px]">H2 2026</span> =
           on the active roadmap, ships across the second half of 2026.{" "}
@@ -612,7 +612,7 @@ function CompareMatrix({ tiers }: { tiers: TierConfig[] }) {
                     <div className="text-[16px] font-extrabold tracking-[-0.4px] text-ivory mb-1">
                       {tier.name}
                     </div>
-                    <div className="text-[12px] font-semibold text-ivory/55">
+                    <div className="text-[13px] font-semibold text-ivory/55">
                       ${tier.monthlyPrice.toLocaleString()}/mo
                     </div>
                   </th>
@@ -678,7 +678,7 @@ function MatrixGroupBlock({
           key={ri}
           className="border-b border-[var(--rule)] hover:bg-cream/40 transition-colors"
         >
-          <td className="text-[13.5px] text-ink py-4 pl-5 pr-6 leading-snug font-medium">
+          <td className="text-[14.5px] text-ink py-4 pl-5 pr-6 leading-snug font-medium">
             {row.feature}
           </td>
           {tiers.map((tier) => {
@@ -693,7 +693,7 @@ function MatrixGroupBlock({
             return (
               <td
                 key={tier.id}
-                className={`text-[13px] py-4 px-4 align-middle ${
+                className={`text-[14px] py-4 px-4 align-middle ${
                   isFeatured
                     ? "bg-ink border-l-2 border-r-2 border-heritage"
                     : ""
@@ -808,14 +808,14 @@ function FinalCta() {
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Link
             href="/employer/sign-up"
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
           >
             Sign Up
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <Link
             href="/contact"
-            className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[11px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
+            className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
           >
             Contact Us
           </Link>

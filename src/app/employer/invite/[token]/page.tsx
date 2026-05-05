@@ -127,14 +127,14 @@ export default async function InviteAcceptPage({ params }: PageProps) {
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
             href={`/employer/sign-in?next=${encodeURIComponent(`/employer/invite/${token}`)}`}
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
           >
             Sign In to Accept
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
             href={`/employer/sign-up?next=${encodeURIComponent(`/employer/invite/${token}`)}`}
-            className="inline-flex items-center gap-2.5 px-7 py-4 border border-[var(--rule-strong)] text-ink text-[11px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-4 border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
           >
             New to DSO Hire? Sign Up
           </Link>
@@ -164,7 +164,7 @@ export default async function InviteAcceptPage({ params }: PageProps) {
           </p>
           <Link
             href="/employer/dashboard"
-            className="mt-8 inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+            className="mt-8 inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
           >
             Go to Dashboard
             <ArrowRight className="h-4 w-4" />
@@ -188,13 +188,13 @@ export default async function InviteAcceptPage({ params }: PageProps) {
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
             href="/employer/dashboard"
-            className="inline-flex items-center gap-2.5 px-7 py-4 border border-[var(--rule-strong)] text-ink text-[11px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-4 border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
           >
             Back to Current DSO
           </Link>
           <a
             href="mailto:cam@dsohire.com?subject=Invitation%20question"
-            className="inline-flex items-center gap-2.5 px-7 py-4 text-ink text-[11px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-4 text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
           >
             Contact Support
           </a>
@@ -211,13 +211,13 @@ export default async function InviteAcceptPage({ params }: PageProps) {
         <input type="hidden" name="token" value={token} />
         <button
           type="submit"
-          className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+          className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
         >
           Accept &amp; Join {dsoName}
           <ArrowRight className="h-4 w-4" />
         </button>
       </form>
-      <p className="mt-4 text-[12px] text-slate-meta">
+      <p className="mt-4 text-[13px] text-slate-meta">
         Signed in as <strong className="text-ink">{user.email}</strong>.{" "}
         <Link
           href="/employer/sign-in"
@@ -302,7 +302,7 @@ function ErrorScreen({
         {cta && (
           <Link
             href={cta.href}
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
           >
             {cta.label}
             <ArrowRight className="h-4 w-4" />
@@ -310,7 +310,7 @@ function ErrorScreen({
         )}
         <a
           href="mailto:cam@dsohire.com"
-          className="inline-flex items-center gap-2.5 px-7 py-4 border border-[var(--rule-strong)] text-ink text-[11px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
+          className="inline-flex items-center gap-2.5 px-7 py-4 border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
         >
           Contact Support
         </a>

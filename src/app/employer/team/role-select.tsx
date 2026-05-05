@@ -23,7 +23,7 @@ export function RoleSelect({ dsoUserId, currentRole }: RoleSelectProps) {
         name="new_role"
         defaultValue={currentRole}
         onChange={(e) => e.currentTarget.form?.requestSubmit()}
-        className="px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[12px] font-semibold tracking-[0.5px] uppercase focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors cursor-pointer"
+        className="px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[13px] font-semibold tracking-[0.5px] uppercase focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors cursor-pointer"
       >
         <option value="admin">Admin</option>
         <option value="recruiter">Recruiter</option>

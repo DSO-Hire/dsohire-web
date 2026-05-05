@@ -820,7 +820,7 @@ export function KanbanBoard({
             className="flex items-start gap-3 border border-red-300 bg-red-50 px-4 py-3"
           >
             <AlertCircle className="h-4 w-4 text-red-700 flex-shrink-0 mt-0.5" />
-            <div className="flex-1 text-[13px] text-red-900 leading-relaxed">
+            <div className="flex-1 text-[14px] text-red-900 leading-relaxed">
               {error.kind === "network" ? (
                 <>
                   <span className="font-bold">Move failed.</span> Check your
@@ -872,7 +872,7 @@ export function KanbanBoard({
             className="flex items-start gap-3 border border-heritage/30 bg-heritage/[0.08] px-4 py-3"
           >
             <Users className="h-4 w-4 text-heritage-deep flex-shrink-0 mt-0.5" />
-            <div className="flex-1 text-[13px] text-heritage-deep leading-relaxed">
+            <div className="flex-1 text-[14px] text-heritage-deep leading-relaxed">
               <span className="font-bold">Teammate</span> moved{" "}
               <span className="font-bold">{remoteToast.candidateName}</span> to{" "}
               <span className="font-bold">{remoteToast.stageLabel}</span>.
@@ -1101,7 +1101,7 @@ function SelectionToolbar({
     "inline-flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold tracking-[1.5px] uppercase border transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2";
   return (
     <div className="sticky top-[80px] z-30 flex flex-wrap items-center justify-between gap-3 border border-heritage/40 bg-heritage/[0.08] px-4 py-2.5">
-      <div className="flex items-center gap-3 text-[13px] text-heritage-deep">
+      <div className="flex items-center gap-3 text-[14px] text-heritage-deep">
         <span className="font-bold">{count} selected</span>
         <span className="text-slate-meta">·</span>
         <button
@@ -1127,7 +1127,7 @@ function SelectionToolbar({
               <DropdownMenuItem
                 key={stage}
                 onSelect={() => onMove(stage)}
-                className="text-[12px] font-semibold tracking-[0.5px] text-ink"
+                className="text-[13px] font-semibold tracking-[0.5px] text-ink"
               >
                 {STAGE_LABELS[stage]}
               </DropdownMenuItem>
@@ -1223,7 +1223,7 @@ function BulkConfirmDialog({
               onApply={(body) => setReason(body.slice(0, 1000))}
             />
           ) : count > 1 ? (
-            <p className="text-[12px] text-slate-meta border border-[var(--rule)] bg-cream/40 px-3 py-2.5 leading-relaxed">
+            <p className="text-[13px] text-slate-meta border border-[var(--rule)] bg-cream/40 px-3 py-2.5 leading-relaxed">
               Generate AI suggestions one candidate at a time — select a single
               candidate to see suggestions.
             </p>
@@ -1241,9 +1241,9 @@ function BulkConfirmDialog({
             onChange={(e) => setReason(e.target.value.slice(0, 1000))}
             rows={3}
             placeholder="Add context for your team's audit log…"
-            className="w-full resize-y border border-[var(--rule-strong)] bg-white px-3 py-2 text-[13px] text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
+            className="w-full resize-y border border-[var(--rule-strong)] bg-white px-3 py-2 text-[14px] text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
           />
-          <p className="text-[11px] text-slate-meta">{reasonHelper}</p>
+          <p className="text-[12px] text-slate-meta">{reasonHelper}</p>
         </div>
         <DialogFooter>
           <button
@@ -1334,10 +1334,10 @@ function BulkResultDisplay({
         className={`h-4 w-4 ${tone.text} flex-shrink-0 mt-0.5`}
         aria-hidden="true"
       />
-      <div className={`flex-1 text-[13px] ${tone.text} leading-relaxed`}>
+      <div className={`flex-1 text-[14px] ${tone.text} leading-relaxed`}>
         <div className="font-bold">{summary}</div>
         {failed > 0 && (
-          <ul className="mt-1.5 space-y-0.5 text-[12px]">
+          <ul className="mt-1.5 space-y-0.5 text-[13px]">
             {banner.failures.slice(0, 5).map((f) => (
               <li key={f.id}>
                 <span className="font-semibold">{f.candidateName}</span>
@@ -1504,7 +1504,7 @@ function ClosedSubsection({
       </header>
       <div className="divide-y divide-[var(--rule)]">
         {apps.length === 0 ? (
-          <div className="px-5 py-3 text-[12px] text-slate-meta italic">
+          <div className="px-5 py-3 text-[13px] text-slate-meta italic">
             Nothing here yet.
           </div>
         ) : variant === "rejected" ? (
@@ -1539,10 +1539,10 @@ function WithdrawnRow({ application }: { application: KanbanApplication }) {
       className="flex items-center justify-between gap-4 px-5 py-3 hover:bg-cream transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-inset"
     >
       <div className="min-w-0 flex-1">
-        <div className="text-[13px] italic font-semibold text-slate-body truncate">
+        <div className="text-[14px] italic font-semibold text-slate-body truncate">
           {cand?.full_name ?? "Anonymous candidate"}
         </div>
-        <div className="text-[11px] text-slate-meta truncate">
+        <div className="text-[12px] text-slate-meta truncate">
           Withdrawn · {new Date(application.created_at).toLocaleDateString()}
         </div>
       </div>

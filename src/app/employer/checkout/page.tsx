@@ -102,7 +102,7 @@ export default async function CheckoutPage({ searchParams }: PageProps) {
             <div className="text-[20px] font-extrabold tracking-[-0.4px] text-ink">
               {tierConfig.name}
             </div>
-            <div className="text-[13px] text-slate-body mt-1">
+            <div className="text-[14px] text-slate-body mt-1">
               ${tierConfig.monthlyPrice}/month · {tierConfig.tagline}
             </div>
           </div>
@@ -110,13 +110,13 @@ export default async function CheckoutPage({ searchParams }: PageProps) {
             <input type="hidden" name="tier" value={tier} />
             <button
               type="submit"
-              className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+              className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
             >
               Resume Checkout
               <ArrowRight className="h-4 w-4" />
             </button>
           </form>
-          <p className="mt-4 text-[12px] text-slate-meta">
+          <p className="mt-4 text-[13px] text-slate-meta">
             Need a different plan?{" "}
             <Link
               href="/pricing"

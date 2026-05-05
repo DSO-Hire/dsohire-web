@@ -29,7 +29,7 @@ export default function SettingsPage() {
         <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink mb-2">
           Set or change your password
         </h2>
-        <p className="text-[13px] text-slate-body leading-relaxed mb-6 max-w-[560px]">
+        <p className="text-[14px] text-slate-body leading-relaxed mb-6 max-w-[560px]">
           Setting a password lets you sign in without an emailed code each
           time. You can always fall back to a code if you forget it.
         </p>
@@ -41,7 +41,7 @@ export default function SettingsPage() {
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
           More settings coming soon
         </div>
-        <p className="text-[13px] text-slate-body leading-relaxed">
+        <p className="text-[14px] text-slate-body leading-relaxed">
           DSO profile (name, slug, logo, description), notification
           preferences, and account deletion ship in a follow-up release. For
           anything urgent, email{" "}

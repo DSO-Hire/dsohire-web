@@ -135,7 +135,7 @@ export function RecommendedQuestionsPanel({
           <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
             Recommended for {rec.label}
           </div>
-          <p className="text-[12px] text-slate-meta leading-relaxed">
+          <p className="text-[13px] text-slate-meta leading-relaxed">
             We curated these from competitor benchmarks and dental hiring best
             practices. One click to add — keep, customize, or skip each one.
           </p>
@@ -238,11 +238,11 @@ function RecommendedCard({
       <p className="text-[14px] text-ink font-semibold leading-snug">
         {rq.prompt}
       </p>
-      <p className="mt-1 text-[12px] text-slate-meta leading-relaxed italic">
+      <p className="mt-1 text-[13px] text-slate-meta leading-relaxed italic">
         {rq.rationale}
       </p>
       {optionPreview && (
-        <p className="mt-2 text-[11px] text-slate-body">
+        <p className="mt-2 text-[12px] text-slate-body">
           <span className="text-slate-meta tracking-[0.3px] uppercase font-bold text-[10px] mr-1.5">
             Options
           </span>
@@ -272,7 +272,7 @@ function RecommendedCard({
             <button
               type="button"
               onClick={onSkip}
-              className="ml-auto text-[11px] tracking-[0.5px] text-slate-meta hover:text-ink transition-colors"
+              className="ml-auto text-[12px] tracking-[0.5px] text-slate-meta hover:text-ink transition-colors"
             >
               Skip
             </button>
@@ -282,7 +282,7 @@ function RecommendedCard({
           <button
             type="button"
             onClick={onSkip}
-            className="ml-auto text-[11px] tracking-[0.5px] text-slate-meta hover:text-ink transition-colors"
+            className="ml-auto text-[12px] tracking-[0.5px] text-slate-meta hover:text-ink transition-colors"
           >
             Hide
           </button>

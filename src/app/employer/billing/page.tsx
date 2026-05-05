@@ -156,13 +156,13 @@ export default async function EmployerBillingPage({ searchParams }: PageProps) {
           <form action={openCustomerPortal} className="mt-7">
             <button
               type="submit"
-              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[11px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
             >
               <Settings className="h-4 w-4" />
               Manage Subscription
             </button>
           </form>
-          <p className="mt-3 text-[12px] text-slate-meta">
+          <p className="mt-3 text-[13px] text-slate-meta">
             Opens Stripe&apos;s Customer Portal. Update card, change plan,
             cancel, or download receipts there.
           </p>
@@ -240,7 +240,7 @@ function Header() {
 function PortalErrorBanner() {
   return (
     <div className="mb-8 max-w-[820px] bg-red-50 border-l-4 border-red-500 p-4">
-      <p className="text-[13px] text-red-900">
+      <p className="text-[14px] text-red-900">
         <strong className="font-semibold">Couldn&apos;t open the Customer Portal.</strong>{" "}
         Refresh and try again, or email cam@dsohire.com if it persists.
       </p>
@@ -253,8 +253,8 @@ function WarningBanner({ title, body }: { title: string; body: string }) {
     <div className="mb-8 max-w-[820px] bg-yellow-50 border-l-4 border-yellow-500 p-4 flex gap-3">
       <AlertTriangle className="h-4 w-4 text-yellow-700 flex-shrink-0 mt-0.5" />
       <div>
-        <p className="text-[13px] text-yellow-900 font-semibold">{title}</p>
-        <p className="mt-1 text-[12px] text-yellow-900/85 leading-relaxed">
+        <p className="text-[14px] text-yellow-900 font-semibold">{title}</p>
+        <p className="mt-1 text-[13px] text-yellow-900/85 leading-relaxed">
           {body}
         </p>
       </div>
@@ -276,7 +276,7 @@ function NoSubscriptionEmpty() {
       </p>
       <Link
         href="/employer/checkout"
-        className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[11px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+        className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
       >
         Start Checkout
       </Link>
@@ -326,7 +326,7 @@ function InvoiceRowItem({ invoice }: { invoice: InvoiceRow }) {
         <div className="text-[14px] font-semibold text-ink">
           {dollars}
         </div>
-        <div className="text-[11px] text-slate-meta tracking-[0.3px]">
+        <div className="text-[12px] text-slate-meta tracking-[0.3px]">
           {formatDate(date)} ·{" "}
           <span
             className={

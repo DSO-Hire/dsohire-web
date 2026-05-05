@@ -181,7 +181,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
             {dsoRow.name}
           </h1>
 
-          <div className="flex flex-wrap gap-x-6 gap-y-2 text-[13px] text-slate-body">
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-[14px] text-slate-body">
             {cityState && (
               <span className="inline-flex items-center gap-1.5">
                 <MapPin className="h-3.5 w-3.5 text-heritage" />
@@ -273,18 +273,18 @@ export default async function CompanyDetailPage({ params }: PageProps) {
                 Practice locations
               </h2>
               {locations.length === 0 ? (
-                <p className="text-[13px] text-slate-body leading-relaxed">
+                <p className="text-[14px] text-slate-body leading-relaxed">
                   Location list coming soon.
                 </p>
               ) : (
                 <ul className="list-none space-y-3">
                   {locations.map((loc) => (
                     <li key={loc.id}>
-                      <div className="text-[13px] font-bold text-ink leading-tight">
+                      <div className="text-[14px] font-bold text-ink leading-tight">
                         {loc.name}
                       </div>
                       {(loc.city || loc.state) && (
-                        <div className="text-[11px] text-slate-meta tracking-[0.3px] mt-0.5">
+                        <div className="text-[12px] text-slate-meta tracking-[0.3px] mt-0.5">
                           {[loc.city, loc.state].filter(Boolean).join(", ")}
                         </div>
                       )}
@@ -362,7 +362,7 @@ function JobRow({
               {job.title}
             </div>
             {locations.length > 0 && (
-              <div className="text-[12px] tracking-[0.3px] text-slate-meta inline-flex items-center gap-1">
+              <div className="text-[13px] tracking-[0.3px] text-slate-meta inline-flex items-center gap-1">
                 <MapPin className="h-3 w-3" />
                 {formatLocations(locations)}
               </div>

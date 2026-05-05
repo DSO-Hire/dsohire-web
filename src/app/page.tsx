@@ -97,14 +97,14 @@ function Hero() {
           <div className="flex flex-wrap items-center gap-3.5 mb-9">
             <Link
               href="#pricing"
-              className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+              className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
             >
               Start Posting Jobs
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
             <Link
               href="/jobs"
-              className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[11px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
+              className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
             >
               Browse Jobs
             </Link>
@@ -219,7 +219,7 @@ function HeroKanbanPreview() {
           <span className="block w-2 h-2 rounded-full bg-ivory-deep" />
           <span className="block w-2 h-2 rounded-full bg-ivory-deep" />
           <span className="block w-2 h-2 rounded-full bg-ivory-deep" />
-          <span className="ml-3 text-[11px] tracking-[0.4px] text-slate-meta truncate">
+          <span className="ml-3 text-[12px] tracking-[0.4px] text-slate-meta truncate">
             dsohire.com / employer / jobs /{" "}
             <strong className="text-ink font-semibold">applications</strong>
           </span>
@@ -233,7 +233,7 @@ function HeroKanbanPreview() {
           <div className="text-[15px] font-bold tracking-[-0.3px] text-ink leading-tight">
             Associate Dentist — General
           </div>
-          <div className="text-[11px] text-slate-body mt-0.5">
+          <div className="text-[12px] text-slate-body mt-0.5">
             8 candidates · 3 locations · 2 reviewers online
           </div>
         </div>
@@ -273,10 +273,10 @@ function HeroKanbanPreview() {
           transform: "rotate(-1.5deg)",
         }}
       >
-        <span className="flex items-center justify-center w-8 h-8 bg-heritage text-ivory font-extrabold text-[12px] tracking-[-0.3px]">
+        <span className="flex items-center justify-center w-8 h-8 bg-heritage text-ivory font-extrabold text-[13px] tracking-[-0.3px]">
           M
         </span>
-        <div className="text-[11px] text-ink leading-snug font-semibold">
+        <div className="text-[12px] text-ink leading-snug font-semibold">
           Maya moved Dr. Chen to Interview
           <small className="block text-[10px] font-normal text-slate-body tracking-[0.3px] mt-0.5">
             Realtime sync · just now
@@ -329,7 +329,7 @@ function ProofStrip() {
   return (
     <div className="bg-cream border-y border-[var(--rule)] px-6 sm:px-14 py-8">
       <div className="max-w-[1240px] mx-auto flex flex-wrap items-center justify-between gap-10">
-        <div className="text-[11px] font-bold tracking-[2.5px] uppercase text-slate-body">
+        <div className="text-[12px] font-bold tracking-[2.5px] uppercase text-slate-body">
           Designed With{" "}
           <strong className="text-ink">Mid-Market DSO Operators</strong>
         </div>
@@ -448,7 +448,7 @@ function CompareCell({
         {name}
       </div>
       <div
-        className={`text-[13px] mb-7 leading-snug ${
+        className={`text-[14px] mb-7 leading-snug ${
           featured ? "text-ivory/70" : "text-slate-body"
         }`}
       >
@@ -462,7 +462,7 @@ function CompareCell({
         {items.map((item, i) => (
           <li
             key={i}
-            className={`text-[13px] py-2.5 flex items-start gap-2.5 leading-snug ${
+            className={`text-[14px] py-2.5 flex items-start gap-2.5 leading-snug ${
               featured ? "text-ivory" : "text-slate-body"
             }`}
           >
@@ -598,7 +598,7 @@ function FeatureCard({ feature }: { feature: ShowcaseFeature }) {
       <div className="text-[18px] font-extrabold tracking-[-0.4px] text-ink mb-2.5 leading-tight pr-20">
         {feature.title}
       </div>
-      <p className="text-[13.5px] text-slate-body leading-[1.65]">
+      <p className="text-[14.5px] text-slate-body leading-[1.65]">
         {feature.body}
       </p>
     </div>
@@ -626,7 +626,7 @@ function PricingTeaser() {
           ))}
         </div>
 
-        <p className="mt-10 text-[13px] text-slate-body text-center leading-relaxed">
+        <p className="mt-10 text-[14px] text-slate-body text-center leading-relaxed">
           All tiers include unlimited multi-location posting, candidate dashboards, and
           Stripe-secured billing.{" "}
           <strong className="text-ink font-bold">
@@ -682,7 +682,7 @@ function PricingTier({ tier }: { tier: TierConfig }) {
           ${tier.monthlyPrice.toLocaleString()}
         </div>
         <div
-          className={`text-[13px] font-medium ${
+          className={`text-[14px] font-medium ${
             isFeatured ? "text-ivory/70" : "text-slate-body"
           }`}
         >
@@ -690,7 +690,7 @@ function PricingTier({ tier }: { tier: TierConfig }) {
         </div>
       </div>
       <div
-        className={`text-[11px] tracking-[0.4px] mb-7 min-h-[32px] leading-[1.45] ${
+        className={`text-[12px] tracking-[0.4px] mb-7 min-h-[32px] leading-[1.45] ${
           isFeatured ? "text-ivory/55" : "text-slate-meta"
         }`}
       >
@@ -701,7 +701,7 @@ function PricingTier({ tier }: { tier: TierConfig }) {
 
       <Link
         href={`/employer/sign-up?tier=${tier.id}`}
-        className={`block text-center px-4 py-3.5 text-[11px] font-bold tracking-[1.5px] uppercase mb-6 transition-colors border ${
+        className={`block text-center px-4 py-3.5 text-[12px] font-bold tracking-[1.5px] uppercase mb-6 transition-colors border ${
           isFeatured
             ? "bg-heritage text-ivory border-heritage hover:bg-heritage-deep hover:border-heritage-deep"
             : "bg-ivory text-ink border-[var(--rule-strong)] hover:bg-ink hover:text-ivory hover:border-ink"
@@ -720,7 +720,7 @@ function PricingTier({ tier }: { tier: TierConfig }) {
         {tier.features.map((feature, i) => (
           <li
             key={i}
-            className={`text-[12.5px] py-1.5 flex items-start gap-2 leading-snug ${
+            className={`text-[13.5px] py-1.5 flex items-start gap-2 leading-snug ${
               isFeatured ? "text-ivory/90" : "text-ink"
             }`}
           >
@@ -791,7 +791,7 @@ function HowItWorks() {
 function HowStep({ n, title, body }: { n: string; title: string; body: string }) {
   return (
     <div className="border-t border-white/10 pt-7">
-      <div className="text-[11px] font-bold tracking-[2.5px] uppercase text-heritage mb-4">
+      <div className="text-[12px] font-bold tracking-[2.5px] uppercase text-heritage mb-4">
         Step {n}
       </div>
       <div className="text-[22px] font-extrabold tracking-[-0.6px] text-ivory mb-3.5 leading-tight">
@@ -820,14 +820,14 @@ function FinalCta() {
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Link
             href="#pricing"
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
           >
             View Pricing
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <Link
             href="/contact"
-            className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[11px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
+            className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
           >
             Contact Us
           </Link>

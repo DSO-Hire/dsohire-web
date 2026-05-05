@@ -87,7 +87,7 @@ export default async function EditLocationPage({ params }: PageProps) {
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.1] text-ink">
           {initial.name}
         </h1>
-        <p className="mt-3 text-[13px] tracking-[0.3px] text-slate-meta">
+        <p className="mt-3 text-[14px] tracking-[0.3px] text-slate-meta">
           Currently tagged on{" "}
           <span className="font-semibold text-ink">
             {liveJobCount} {liveJobCount === 1 ? "job" : "jobs"}

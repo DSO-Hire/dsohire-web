@@ -172,7 +172,7 @@ export default async function CandidateApplicationDetailPage({
             <div className="text-xl font-bold text-ink mb-2">
               {STATUS_LABELS[app.status] ?? app.status}
             </div>
-            <div className="text-[12px] text-slate-body inline-flex items-center gap-2">
+            <div className="text-[13px] text-slate-body inline-flex items-center gap-2">
               <Calendar className="h-3 w-3" />
               Submitted {submitted.toLocaleDateString()} at{" "}
               {submitted.toLocaleTimeString([], {
@@ -187,7 +187,7 @@ export default async function CandidateApplicationDetailPage({
             <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
               Messages
             </h2>
-            <p className="text-[12px] text-slate-meta mb-3">
+            <p className="text-[13px] text-slate-meta mb-3">
               Direct conversation with{" "}
               <span className="font-bold text-ink">{otherPartyName}</span>{" "}
               about this application.
@@ -216,7 +216,7 @@ export default async function CandidateApplicationDetailPage({
               >
                 {job.title}
               </Link>
-              <div className="text-[12px] text-slate-body inline-flex items-center gap-1.5">
+              <div className="text-[13px] text-slate-body inline-flex items-center gap-1.5">
                 <Briefcase className="h-3 w-3" />
                 {job.role_category} · {job.employment_type}
               </div>

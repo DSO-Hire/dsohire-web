@@ -126,7 +126,7 @@ export function CandidateProfileForm({ initial: data }: { initial: ProfileInitia
             Resume
           </label>
           {data.has_resume && (
-            <p className="mb-3 text-[12px] text-slate-body">
+            <p className="mb-3 text-[13px] text-slate-body">
               Currently on file: {" "}
               <span className="font-semibold text-ink">
                 {data.resume_filename ?? "your saved resume"}
@@ -139,9 +139,9 @@ export function CandidateProfileForm({ initial: data }: { initial: ProfileInitia
             type="file"
             name="resume"
             accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            className="block w-full text-[13px] text-ink file:mr-4 file:px-5 file:py-2.5 file:border-0 file:text-[10px] file:font-bold file:tracking-[1.5px] file:uppercase file:bg-ink file:text-ivory hover:file:bg-ink-soft file:cursor-pointer file:transition-colors"
+            className="block w-full text-[14px] text-ink file:mr-4 file:px-5 file:py-2.5 file:border-0 file:text-[10px] file:font-bold file:tracking-[1.5px] file:uppercase file:bg-ink file:text-ivory hover:file:bg-ink-soft file:cursor-pointer file:transition-colors"
           />
-          <p className="mt-1.5 text-[11px] text-slate-meta">PDF, DOC, or DOCX. Max 10 MB.</p>
+          <p className="mt-1.5 text-[12px] text-slate-meta">PDF, DOC, or DOCX. Max 10 MB.</p>
         </div>
         <Field
           label="LinkedIn URL"
@@ -162,10 +162,10 @@ export function CandidateProfileForm({ initial: data }: { initial: ProfileInitia
             className="mt-1 h-4 w-4 accent-ink"
           />
           <div>
-            <div className="text-[13px] font-semibold text-ink">
+            <div className="text-[14px] font-semibold text-ink">
               Make me discoverable to verified DSOs
             </div>
-            <div className="text-[12px] text-slate-body leading-relaxed mt-0.5">
+            <div className="text-[13px] text-slate-body leading-relaxed mt-0.5">
               When on, mid-market DSOs on DSO Hire can reach out about roles you
               haven&apos;t applied to. Off by default. (Candidate search ships in v1.1.)
             </div>
@@ -175,12 +175,12 @@ export function CandidateProfileForm({ initial: data }: { initial: ProfileInitia
 
       {state.error && (
         <div className="bg-red-50 border-l-4 border-red-500 p-4">
-          <p className="text-[13px] text-red-900">{state.error}</p>
+          <p className="text-[14px] text-red-900">{state.error}</p>
         </div>
       )}
       {state.ok && state.message && (
         <div className="bg-emerald-50 border-l-4 border-heritage p-4">
-          <p className="text-[13px] text-heritage-deep font-semibold">{state.message}</p>
+          <p className="text-[14px] text-heritage-deep font-semibold">{state.message}</p>
         </div>
       )}
 
@@ -188,7 +188,7 @@ export function CandidateProfileForm({ initial: data }: { initial: ProfileInitia
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <Save className="h-4 w-4" />
           {pending ? "Saving…" : "Save Profile"}
@@ -250,7 +250,7 @@ function Field({
         className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
       />
       {helper && (
-        <p className="mt-1.5 text-[11px] text-slate-meta leading-relaxed">{helper}</p>
+        <p className="mt-1.5 text-[12px] text-slate-meta leading-relaxed">{helper}</p>
       )}
     </div>
   );

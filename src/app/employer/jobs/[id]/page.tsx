@@ -153,7 +153,7 @@ export default async function EditJobPage({ params }: PageProps) {
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink">
             {initial.title}
           </h1>
-          <div className="mt-3 flex flex-wrap gap-5 text-[12px] text-slate-body">
+          <div className="mt-3 flex flex-wrap gap-5 text-[13px] text-slate-body">
             <span>
               <strong className="text-ink font-bold">{job.applications_count ?? 0}</strong>{" "}
               applications
@@ -206,7 +206,7 @@ export default async function EditJobPage({ params }: PageProps) {
         <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink mb-2">
           Delete this job posting
         </h2>
-        <p className="text-[13px] text-slate-body leading-relaxed mb-5 max-w-[560px]">
+        <p className="text-[14px] text-slate-body leading-relaxed mb-5 max-w-[560px]">
           Soft-deletes the job. It stops showing publicly immediately, but
           historical applications stay linked for your records.
         </p>
@@ -214,7 +214,7 @@ export default async function EditJobPage({ params }: PageProps) {
           <input type="hidden" name="job_id" value={initial.id} />
           <button
             type="submit"
-            className="inline-flex items-center gap-2 px-5 py-2.5 border border-red-300 text-red-700 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-red-50 transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 border border-red-300 text-red-700 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-red-50 transition-colors"
           >
             <Trash2 className="h-3.5 w-3.5" />
             Delete Job

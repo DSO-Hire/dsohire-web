@@ -413,13 +413,13 @@ export function JobWizard({
 
         {error && (
           <div className="mt-6 bg-red-50 border-l-4 border-red-500 p-4">
-            <p className="text-[13px] text-red-900">{error}</p>
+            <p className="text-[14px] text-red-900">{error}</p>
           </div>
         )}
 
         {savedFlash && mode === "edit" && (
           <div className="mt-6 bg-cream border-l-4 border-heritage p-4">
-            <p className="text-[13px] text-ink font-semibold">
+            <p className="text-[14px] text-ink font-semibold">
               Saved. Changes are live.
             </p>
           </div>
@@ -450,7 +450,7 @@ export function JobWizard({
               type="button"
               onClick={handleSubmit}
               disabled={pending}
-              className="inline-flex items-center gap-2 px-7 py-3.5 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {pending
                 ? "Saving…"
@@ -586,7 +586,7 @@ function BasicsStep({
                   <div className="text-[14px] font-semibold text-ink">
                     {loc.name}
                   </div>
-                  <div className="text-[12px] text-slate-meta tracking-[0.3px]">
+                  <div className="text-[13px] text-slate-meta tracking-[0.3px]">
                     {[loc.city, loc.state].filter(Boolean).join(", ") ||
                       "Address not set"}
                   </div>
@@ -595,7 +595,7 @@ function BasicsStep({
             );
           })}
         </div>
-        <p className="mt-2 text-[11px] text-slate-meta">
+        <p className="mt-2 text-[12px] text-slate-meta">
           Tag every location this job is open at. We render separate
           location-specific listings on the public job board automatically.
         </p>
@@ -644,7 +644,7 @@ function DescriptionStep({
       />
 
       {title.trim() && (
-        <p className="text-[11px] text-slate-meta">
+        <p className="text-[12px] text-slate-meta">
           Job title is currently:{" "}
           <span className="font-bold text-ink">{title}</span>. Edit it from the
           Basics step.
@@ -656,7 +656,7 @@ function DescriptionStep({
         onChange={onChange}
         placeholder="Describe the role, responsibilities, day-to-day, and what makes this DSO a great place to work…"
       />
-      <p className="text-[11px] text-slate-meta">
+      <p className="text-[12px] text-slate-meta">
         Headings, bold/italic, lists, links, and blockquotes are supported. Skip
         H1 — that&apos;s reserved for the page title.
       </p>
@@ -739,7 +739,7 @@ function DetailsStep({
             ]}
           />
         </div>
-        <label className="mt-4 flex items-start gap-2.5 text-[13px] text-ink cursor-pointer">
+        <label className="mt-4 flex items-start gap-2.5 text-[14px] text-ink cursor-pointer">
           <input
             type="checkbox"
             checked={compVisible}
@@ -859,10 +859,10 @@ function ScreeningStep({
 
       {questions.length === 0 && (
         <div className="border border-dashed border-[var(--rule-strong)] p-6 text-center bg-cream/40">
-          <p className="text-[13px] text-slate-body mb-4">
+          <p className="text-[14px] text-slate-body mb-4">
             No screening questions yet.
           </p>
-          <p className="text-[11px] text-slate-meta">
+          <p className="text-[12px] text-slate-meta">
             Add a question below to get started.
           </p>
         </div>
@@ -1017,7 +1017,7 @@ function QuestionCard({
             <div className="space-y-2">
               {(question.options ?? []).map((opt, idx) => (
                 <div key={opt.id} className="flex items-center gap-2">
-                  <span className="text-[11px] font-bold text-slate-meta w-6">
+                  <span className="text-[12px] font-bold text-slate-meta w-6">
                     {idx + 1}.
                   </span>
                   <input
@@ -1025,7 +1025,7 @@ function QuestionCard({
                     value={opt.label}
                     onChange={(e) => updateOption(opt.id, e.target.value)}
                     placeholder={`Option ${idx + 1}`}
-                    className="flex-1 px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[13px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+                    className="flex-1 px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
                   />
                   <button
                     type="button"
@@ -1050,7 +1050,7 @@ function QuestionCard({
           </div>
         )}
 
-        <label className="flex items-center gap-2.5 text-[13px] text-ink cursor-pointer pt-1">
+        <label className="flex items-center gap-2.5 text-[14px] text-ink cursor-pointer pt-1">
           <input
             type="checkbox"
             checked={question.required}
@@ -1144,11 +1144,11 @@ function PreviewStep({
       <ReviewBlock label="Description" onEdit={() => onJumpTo("description")}>
         {description.replace(/<[^>]*>/g, "").trim() ? (
           <div
-            className="dso-prose text-[13px]"
+            className="dso-prose text-[14px]"
             dangerouslySetInnerHTML={{ __html: description }}
           />
         ) : (
-          <p className="text-[13px] text-slate-meta italic">
+          <p className="text-[14px] text-slate-meta italic">
             No description yet.
           </p>
         )}
@@ -1169,7 +1169,7 @@ function PreviewStep({
             <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1">
               Requirements
             </div>
-            <pre className="text-[13px] text-ink whitespace-pre-wrap font-sans leading-relaxed">
+            <pre className="text-[14px] text-ink whitespace-pre-wrap font-sans leading-relaxed">
               {requirements}
             </pre>
           </div>
@@ -1181,13 +1181,13 @@ function PreviewStep({
         onEdit={() => onJumpTo("screening")}
       >
         {questions.length === 0 ? (
-          <p className="text-[13px] text-slate-meta italic">
+          <p className="text-[14px] text-slate-meta italic">
             None — candidates apply with just resume + cover letter.
           </p>
         ) : (
           <ul className="space-y-2.5">
             {questions.map((q, idx) => (
-              <li key={q.id} className="text-[13px]">
+              <li key={q.id} className="text-[14px]">
                 <span className="text-slate-meta font-bold mr-2">
                   {idx + 1}.
                 </span>
@@ -1229,7 +1229,7 @@ function PreviewStep({
                   onChange={() => onStatus(opt.value)}
                   className="accent-heritage"
                 />
-                <span className="text-[13px] text-ink">{opt.label}</span>
+                <span className="text-[14px] text-ink">{opt.label}</span>
                 {opt.value === "active" && status === opt.value && (
                   <Check className="h-3.5 w-3.5 text-heritage-deep ml-auto" />
                 )}
@@ -1277,7 +1277,7 @@ function Row({ label, value }: { label: string; value: string }) {
       <dt className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
         {label}
       </dt>
-      <dd className="text-[13px] text-ink mt-0.5">{value}</dd>
+      <dd className="text-[14px] text-ink mt-0.5">{value}</dd>
     </div>
   );
 }

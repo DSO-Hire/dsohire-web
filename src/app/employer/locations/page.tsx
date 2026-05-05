@@ -77,7 +77,7 @@ export default async function EmployerLocationsPage() {
         </div>
         <Link
           href="/employer/locations/new"
-          className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[11px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+          className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
         >
           <Plus className="h-4 w-4" />
           Add Location
@@ -142,7 +142,7 @@ function LocationRowItem({
               {location.name}
             </div>
             {street && (
-              <div className="text-[12px] tracking-[0.3px] text-slate-meta truncate">
+              <div className="text-[13px] tracking-[0.3px] text-slate-meta truncate">
                 {street}
                 {location.postal_code ? ` · ${location.postal_code}` : ""}
               </div>
@@ -179,7 +179,7 @@ function EmptyState() {
       </p>
       <Link
         href="/employer/locations/new"
-        className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[11px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+        className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
       >
         <Plus className="h-4 w-4" />
         Add Location

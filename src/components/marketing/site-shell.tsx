@@ -91,13 +91,13 @@ export async function SiteNav() {
       <div className="flex items-center gap-3">
         <Link
           href={signInHref}
-          className="hidden sm:inline-flex text-[11px] font-semibold tracking-[1.5px] uppercase text-slate-body hover:text-ink transition-colors"
+          className="hidden sm:inline-flex text-[12px] font-semibold tracking-[1.5px] uppercase text-slate-body hover:text-ink transition-colors"
         >
           {signInLabel}
         </Link>
         <Link
           href={postAJobHref}
-          className="px-5 py-2.5 bg-ink text-ivory text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors"
+          className="px-5 py-2.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors"
         >
           Post a Job
         </Link>
@@ -111,7 +111,7 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
     <li>
       <Link
         href={href}
-        className="text-[11px] font-semibold tracking-[1.8px] uppercase text-slate-body hover:text-ink transition-colors"
+        className="text-[12px] font-semibold tracking-[1.8px] uppercase text-slate-body hover:text-ink transition-colors"
       >
         {children}
       </Link>
@@ -126,7 +126,7 @@ export function SiteFooter() {
         <div className="grid grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-10 lg:gap-14 pb-12 border-b border-white/10 mb-9">
           <div>
             <BrandLockup dark height={56} />
-            <p className="text-[13px] text-ivory/55 leading-[1.7] mt-5 max-w-[280px]">
+            <p className="text-[14px] text-ivory/55 leading-[1.7] mt-5 max-w-[280px]">
               The job board built for dental support organizations. One flat
               monthly fee. Unlimited multi-location postings. Made by operators,
               for operators.
@@ -162,10 +162,10 @@ export function SiteFooter() {
         </div>
 
         <div className="flex flex-wrap justify-between items-center gap-4">
-          <div className="text-[11px] tracking-[0.5px] text-ivory/40">
+          <div className="text-[12px] tracking-[0.5px] text-ivory/40">
             © {new Date().getFullYear()} DSO Hire LLC · Kansas
           </div>
-          <div className="flex gap-6 text-[11px] text-ivory/40">
+          <div className="flex gap-6 text-[12px] text-ivory/40">
             <Link
               href="/legal/privacy"
               className="hover:text-ivory/70 transition-colors"
@@ -207,7 +207,7 @@ function FooterLink({ href, children }: { href: string; children: React.ReactNod
     <li>
       <Link
         href={href}
-        className="text-[13px] text-ivory/60 hover:text-ivory transition-colors"
+        className="text-[14px] text-ivory/60 hover:text-ivory transition-colors"
       >
         {children}
       </Link>

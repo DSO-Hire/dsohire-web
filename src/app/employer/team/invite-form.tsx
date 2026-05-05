@@ -77,7 +77,7 @@ export function InviteForm({ locations }: { locations: LocationRow[] }) {
           <button
             type="submit"
             disabled={pending}
-            className="inline-flex items-center justify-center gap-2 px-7 py-3 bg-ink text-ivory text-[11px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed h-[48px] whitespace-nowrap"
+            className="inline-flex items-center justify-center gap-2 px-7 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed h-[48px] whitespace-nowrap"
           >
             {pending ? "Sending…" : "Send Invite"}
             {!pending && <Send className="h-3.5 w-3.5" />}
@@ -95,7 +95,7 @@ export function InviteForm({ locations }: { locations: LocationRow[] }) {
             </label>
           </div>
           {locations.length === 0 ? (
-            <p className="text-[12px] text-slate-meta">
+            <p className="text-[13px] text-slate-meta">
               You don&apos;t have any locations yet. Add locations on{" "}
               <a
                 href="/employer/locations"
@@ -107,7 +107,7 @@ export function InviteForm({ locations }: { locations: LocationRow[] }) {
             </p>
           ) : (
             <>
-              <p className="text-[11px] text-slate-meta leading-relaxed">
+              <p className="text-[12px] text-slate-meta leading-relaxed">
                 The hiring manager will see jobs and applications tied to
                 these locations only. Pick at least one.
               </p>
@@ -124,11 +124,11 @@ export function InviteForm({ locations }: { locations: LocationRow[] }) {
                       className="mt-0.5 h-4 w-4 accent-heritage cursor-pointer"
                     />
                     <span className="flex-1 min-w-0">
-                      <span className="block text-[13px] font-semibold text-ink truncate">
+                      <span className="block text-[14px] font-semibold text-ink truncate">
                         {loc.name}
                       </span>
                       {(loc.city || loc.state) && (
-                        <span className="block text-[11px] text-slate-meta truncate">
+                        <span className="block text-[12px] text-slate-meta truncate">
                           {[loc.city, loc.state].filter(Boolean).join(", ")}
                         </span>
                       )}
@@ -143,16 +143,16 @@ export function InviteForm({ locations }: { locations: LocationRow[] }) {
 
       {state.error && (
         <div className="bg-red-50 border-l-4 border-red-500 p-3">
-          <p className="text-[13px] text-red-900">{state.error}</p>
+          <p className="text-[14px] text-red-900">{state.error}</p>
         </div>
       )}
       {state.ok && state.message && (
         <div className="bg-cream border-l-4 border-heritage p-3">
-          <p className="text-[13px] text-ink font-semibold">{state.message}</p>
+          <p className="text-[14px] text-ink font-semibold">{state.message}</p>
         </div>
       )}
 
-      <p className="text-[11px] text-slate-meta leading-relaxed">
+      <p className="text-[12px] text-slate-meta leading-relaxed">
         <strong className="text-ink font-semibold">Recruiter</strong> — post
         and edit jobs, manage applications across the DSO.{" "}
         <strong className="text-ink font-semibold">Admin</strong> — everything

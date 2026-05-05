@@ -129,7 +129,7 @@ function MobileTabContent({
       tab === "closed" ? "Closed" : STAGE_LABELS[tab as KanbanStage];
     return (
       <div className="border border-dashed border-[var(--rule)] bg-cream/60 p-8 text-center">
-        <p className="text-[13px] text-slate-meta italic">
+        <p className="text-[14px] text-slate-meta italic">
           No candidates in {stageLabel} yet
         </p>
       </div>
@@ -146,10 +146,10 @@ function MobileTabContent({
             className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-cream transition-colors"
           >
             <div className="min-w-0 flex-1">
-              <div className="text-[13px] font-bold text-ink truncate">
+              <div className="text-[14px] font-bold text-ink truncate">
                 {app.candidate?.full_name ?? "Anonymous candidate"}
               </div>
-              <div className="text-[11px] text-slate-meta truncate">
+              <div className="text-[12px] text-slate-meta truncate">
                 {STAGE_LABELS[app.status]} ·{" "}
                 {new Date(app.created_at).toLocaleDateString()}
               </div>
@@ -179,7 +179,7 @@ function MobileTabContent({
             <div className="text-[14px] font-bold text-ink truncate mb-1">
               {cand?.full_name ?? "Anonymous candidate"}
             </div>
-            <div className="text-[12px] text-slate-body truncate mb-2">
+            <div className="text-[13px] text-slate-body truncate mb-2">
               {cand?.current_title || cand?.headline || "Profile minimal"}
             </div>
             <div className="flex items-center justify-between">

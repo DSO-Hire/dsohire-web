@@ -147,7 +147,7 @@ function Banner({ tone, icon, title, body, ctaHref, ctaLabel }: BannerProps) {
           <p className={`text-[14px] font-bold ${titleClasses[tone]}`}>
             {title}
           </p>
-          <p className={`mt-1 text-[12px] leading-relaxed ${bodyClasses[tone]}`}>
+          <p className={`mt-1 text-[13px] leading-relaxed ${bodyClasses[tone]}`}>
             {body}
           </p>
         </div>

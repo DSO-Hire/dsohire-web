@@ -294,7 +294,7 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
         <p className="text-[14px] text-ink font-semibold mb-1">
           Map view isn&apos;t configured yet.
         </p>
-        <p className="text-[12px] text-slate-meta">
+        <p className="text-[13px] text-slate-meta">
           The map provider token is missing. Switch back to the list view to
           browse roles.
         </p>
@@ -309,7 +309,7 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
         <p className="text-[14px] text-ink font-semibold mb-1">
           No mapped locations yet.
         </p>
-        <p className="text-[12px] text-slate-meta">
+        <p className="text-[13px] text-slate-meta">
           Active job locations will show up here as soon as they&apos;re
           geocoded.
         </p>
@@ -338,7 +338,7 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
           {locating ? "Locating…" : "Use my location"}
         </button>
         {locateError && (
-          <div className="bg-red-50 border-l-2 border-red-500 px-3 py-2 text-[11px] text-red-900 max-w-[260px] shadow-sm">
+          <div className="bg-red-50 border-l-2 border-red-500 px-3 py-2 text-[12px] text-red-900 max-w-[260px] shadow-sm">
             {locateError}
           </div>
         )}
@@ -398,14 +398,14 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
             <h2 className="text-2xl font-extrabold tracking-[-0.5px] text-ink leading-tight mb-1.5">
               {selectedLocation.name}
             </h2>
-            <p className="text-[12px] text-slate-meta tracking-[0.3px] mb-6">
+            <p className="text-[13px] text-slate-meta tracking-[0.3px] mb-6">
               {[selectedLocation.city, selectedLocation.state]
                 .filter(Boolean)
                 .join(", ") || "Location unavailable"}
             </p>
 
             {selectedLocation.jobs.length === 0 ? (
-              <p className="text-[13px] text-slate-meta italic">
+              <p className="text-[14px] text-slate-meta italic">
                 No active jobs at this location right now.
               </p>
             ) : (
@@ -424,7 +424,7 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
                         {job.title}
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-[12px] text-slate-body">
+                        <span className="text-[13px] text-slate-body">
                           {job.dso_name}
                         </span>
                         <ArrowRight className="h-3.5 w-3.5 text-heritage-deep opacity-0 group-hover:opacity-100 transition-opacity" />

@@ -67,7 +67,7 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps) {
 
         {sessionEmail && (
           <div className="mt-6 border-l-4 border-heritage bg-cream p-4">
-            <p className="text-[12px] text-slate-body">
+            <p className="text-[13px] text-slate-body">
               Receipt sent to{" "}
               <strong className="text-ink font-semibold">{sessionEmail}</strong>
               . You&apos;ll also get a copy at every renewal.
@@ -78,20 +78,20 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps) {
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
             href="/employer/onboarding"
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
           >
             Continue Setup
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
             href="/employer/dashboard"
-            className="inline-flex items-center gap-2.5 px-7 py-4 border border-[var(--rule-strong)] text-ink text-[11px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-4 border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
           >
             Go to Dashboard
           </Link>
         </div>
 
-        <p className="mt-10 text-[12px] text-slate-meta leading-relaxed max-w-[520px]">
+        <p className="mt-10 text-[13px] text-slate-meta leading-relaxed max-w-[520px]">
           Manage your subscription, view invoices, or change plan anytime under{" "}
           <Link
             href="/employer/billing"

@@ -256,7 +256,7 @@ function MemberRowItem({
   return (
     <li className="border-b border-[var(--rule)] py-5 px-2 flex items-start gap-6 hover:bg-cream/40 transition-colors">
       <div className="h-10 w-10 rounded-full bg-cream border border-[var(--rule-strong)] flex items-center justify-center flex-shrink-0">
-        <span className="text-[12px] font-bold text-ink">
+        <span className="text-[13px] font-bold text-ink">
           {(member.full_name?.[0] ?? email?.[0] ?? "?").toUpperCase()}
         </span>
       </div>
@@ -271,13 +271,13 @@ function MemberRowItem({
             </span>
           )}
         </div>
-        <div className="text-[12px] tracking-[0.3px] text-slate-meta">
+        <div className="text-[13px] tracking-[0.3px] text-slate-meta">
           {email ?? "—"} · Joined {formatDate(member.created_at)}
         </div>
         {isHm && (
           <div className="mt-2 flex flex-wrap gap-1.5">
             {scopedLocationIds.length === 0 ? (
-              <span className="text-[11px] tracking-[0.3px] text-red-700">
+              <span className="text-[12px] tracking-[0.3px] text-red-700">
                 No locations assigned — this user can&apos;t see anything.
               </span>
             ) : (
@@ -384,7 +384,7 @@ function InviteRowItem({
         <div className="text-[14px] font-semibold text-ink truncate">
           {invitation.email}
         </div>
-        <div className="text-[12px] tracking-[0.3px] text-slate-meta">
+        <div className="text-[13px] tracking-[0.3px] text-slate-meta">
           Invited as{" "}
           <span className="text-ink font-semibold">
             {ROLE_LABELS[invitation.role] ?? invitation.role}

@@ -157,14 +157,14 @@ function FinalCta() {
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Link
             href="/contact"
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-heritage text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-heritage text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
           >
             Contact Us
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <Link
             href="/pricing"
-            className="inline-flex items-center px-9 py-[15px] border border-white/20 text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:border-ivory transition-colors"
+            className="inline-flex items-center px-9 py-[15px] border border-white/20 text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:border-ivory transition-colors"
           >
             See Pricing
           </Link>

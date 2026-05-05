@@ -81,7 +81,7 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
                 <li key={item.id}>
                   <Link
                     href={item.href}
-                    className={`flex items-center gap-3 px-3 py-2.5 text-[12px] font-semibold tracking-[0.5px] transition-colors ${
+                    className={`flex items-center gap-3 px-3 py-2.5 text-[13px] font-semibold tracking-[0.5px] transition-colors ${
                       isActive
                         ? "bg-white/10 text-ivory"
                         : "text-ivory/65 hover:bg-white/5 hover:text-ivory"
@@ -100,7 +100,7 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
           <div className="text-[9px] font-bold tracking-[2px] uppercase text-heritage mb-1.5">
             Candidate
           </div>
-          <div className="text-[13px] font-semibold text-ivory truncate mb-0.5">
+          <div className="text-[14px] font-semibold text-ivory truncate mb-0.5">
             {candidate.full_name ?? "Welcome"}
           </div>
           <div className="text-[10px] text-ivory/50 tracking-[0.3px] uppercase truncate">
@@ -110,7 +110,7 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
           <form action="/candidate/sign-out" method="post" className="mt-4">
             <button
               type="submit"
-              className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.5px] text-ivory/55 hover:text-ivory transition-colors"
+              className="flex items-center gap-2 text-[12px] font-semibold tracking-[0.5px] text-ivory/55 hover:text-ivory transition-colors"
             >
               <LogOut className="h-3.5 w-3.5" />
               Sign Out

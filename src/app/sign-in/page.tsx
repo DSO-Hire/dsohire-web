@@ -102,14 +102,14 @@ function SignInCard({
       </p>
       <Link
         href={primaryHref}
-        className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors mb-3"
+        className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors mb-3"
       >
         {primaryLabel}
         <ArrowRight className="h-3.5 w-3.5" />
       </Link>
       <Link
         href={secondaryHref}
-        className="text-[12px] text-heritage-deep hover:text-ink underline underline-offset-2 font-semibold text-center"
+        className="text-[13px] text-heritage-deep hover:text-ink underline underline-offset-2 font-semibold text-center"
       >
         {secondaryLabel}
       </Link>

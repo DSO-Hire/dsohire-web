@@ -512,7 +512,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             <div className="text-[14px] text-slate-body">{titleLine}</div>
           )}
           {headerMetaParts.length > 0 && (
-            <div className="text-[12px] text-slate-meta mt-1">
+            <div className="text-[13px] text-slate-meta mt-1">
               {headerMetaParts.join(" · ")}
             </div>
           )}
@@ -538,7 +538,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             >
               {job.title as string}
             </Link>
-            <div className="text-[12px] text-slate-body">
+            <div className="text-[13px] text-slate-body">
               <Briefcase className="inline h-3 w-3 mr-1 align-text-top" />
               {String(job.role_category)} · {String(job.employment_type)} ·
               Submitted {submitted.toLocaleDateString()} at {submitted.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
@@ -588,17 +588,17 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               >
                 <FileText className="h-5 w-5 text-heritage-deep flex-shrink-0" />
                 <div className="min-w-0">
-                  <div className="text-[13px] font-semibold text-ink truncate">
+                  <div className="text-[14px] font-semibold text-ink truncate">
                     {resumeFileName ?? "Resume"}
                   </div>
-                  <div className="text-[11px] text-slate-body">
+                  <div className="text-[12px] text-slate-body">
                     Click to open · expires in 1 hour
                   </div>
                 </div>
                 <ExternalLink className="h-4 w-4 text-slate-meta ml-2" />
               </a>
             ) : (
-              <p className="text-[13px] text-slate-meta italic">
+              <p className="text-[14px] text-slate-meta italic">
                 No resume on file.
               </p>
             )}
@@ -702,7 +702,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               <Lock className="h-3 w-3" />
               <span className="text-heritage-deep">Internal ·</span> Internal Notes
             </h2>
-            <p className="text-[12px] text-slate-meta mb-3">
+            <p className="text-[13px] text-slate-meta mb-3">
               Visible to your team only. The candidate cannot see this.
             </p>
             <NotesEditor
@@ -717,7 +717,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               <Lock className="h-3 w-3" />
               <span className="text-heritage-deep">Internal ·</span> Candidate Scorecards
             </h2>
-            <p className="text-[12px] text-slate-meta mb-4">
+            <p className="text-[13px] text-slate-meta mb-4">
               Each reviewer scores against the {scorecardRubric.label.toLowerCase()} rubric.
               Your draft is private to you; submitted scorecards roll up
               into the aggregate above.
@@ -738,7 +738,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               <Lock className="h-3 w-3" />
               <span className="text-heritage-deep">Internal ·</span> Team Comments
             </h2>
-            <p className="text-[12px] text-slate-meta mb-3">
+            <p className="text-[13px] text-slate-meta mb-3">
               Internal thread for your team. Type{" "}
               <span className="font-mono text-ink">@</span> to notify a
               teammate by email. The candidate cannot see comments.
@@ -764,20 +764,20 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 href={`mailto:${candidateEmail}?subject=${encodeURIComponent(
                   `Re: your application to ${job.title as string}`
                 )}`}
-                className="inline-flex items-start gap-1.5 text-[13px] text-heritage hover:text-heritage-deep font-semibold mb-1.5 break-all leading-snug"
+                className="inline-flex items-start gap-1.5 text-[14px] text-heritage hover:text-heritage-deep font-semibold mb-1.5 break-all leading-snug"
               >
                 <Mail className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
                 {candidateEmail}
               </a>
             ) : (
-              <div className="text-[12px] text-slate-meta italic mb-1.5">
+              <div className="text-[13px] text-slate-meta italic mb-1.5">
                 Email unavailable — reply to the application notification
                 email instead.
               </div>
             )}
 
             {cand?.phone && (
-              <div className="text-[13px] text-ink mt-2 mb-1.5">
+              <div className="text-[14px] text-ink mt-2 mb-1.5">
                 {cand.phone}
               </div>
             )}
@@ -787,14 +787,14 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 href={cand.linkedin_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-[12px] text-heritage hover:text-heritage-deep font-semibold mt-1"
+                className="inline-flex items-center gap-1.5 text-[13px] text-heritage hover:text-heritage-deep font-semibold mt-1"
               >
                 <ExternalLink className="h-3.5 w-3.5" />
                 LinkedIn profile
               </a>
             )}
 
-            <div className="text-[11px] text-slate-meta mt-4 pt-3 border-t border-[var(--rule)] leading-relaxed">
+            <div className="text-[12px] text-slate-meta mt-4 pt-3 border-t border-[var(--rule)] leading-relaxed">
               Replying to the candidate&apos;s email also routes back to the
               application. Internal notes below are not visible to the candidate.
             </div>
@@ -808,16 +808,16 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               {events.map((ev) => (
                 <li key={ev.id} className="relative">
                   <span className="absolute -left-[27px] top-1.5 block w-3 h-3 bg-ink rounded-full border-2 border-ivory" />
-                  <div className="text-[12px] font-bold text-ink">
+                  <div className="text-[13px] font-bold text-ink">
                     {ev.from_status
                       ? `${STAGE_LABELS[ev.from_status as ApplicationStatus] ?? ev.from_status} → ${STAGE_LABELS[ev.to_status as ApplicationStatus] ?? ev.to_status}`
                       : `Submitted as ${STAGE_LABELS[ev.to_status as ApplicationStatus] ?? ev.to_status}`}
                   </div>
-                  <div className="text-[11px] text-slate-meta mt-0.5">
+                  <div className="text-[12px] text-slate-meta mt-0.5">
                     {ev.actor_type} · {new Date(ev.created_at).toLocaleString()}
                   </div>
                   {ev.note && (
-                    <div className="text-[12px] text-slate-body mt-1 leading-snug">
+                    <div className="text-[13px] text-slate-body mt-1 leading-snug">
                       {ev.note}
                     </div>
                   )}
@@ -837,7 +837,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
       <div className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta mb-1">
         {label}
       </div>
-      <div className="text-[13px] text-ink leading-snug">{value}</div>
+      <div className="text-[14px] text-ink leading-snug">{value}</div>
     </div>
   );
 }
@@ -959,7 +959,7 @@ function ScreeningResponseRow({
             )}
           </div>
           {question.helper_text && (
-            <div className="text-[12px] text-slate-meta mt-0.5 leading-snug">
+            <div className="text-[13px] text-slate-meta mt-0.5 leading-snug">
               {question.helper_text}
             </div>
           )}
@@ -971,7 +971,7 @@ function ScreeningResponseRow({
             {display}
           </div>
           {missing && question.required && (
-            <div className="mt-1.5 text-[11px] font-bold tracking-[1px] uppercase text-red-700">
+            <div className="mt-1.5 text-[12px] font-bold tracking-[1px] uppercase text-red-700">
               Required question — no response
             </div>
           )}

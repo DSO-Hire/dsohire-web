@@ -34,7 +34,7 @@ export function DeleteLocationButton({
         <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
           Delete location
         </div>
-        <p className="text-[13px] text-slate-body leading-relaxed mb-3">
+        <p className="text-[14px] text-slate-body leading-relaxed mb-3">
           This location is currently tagged on{" "}
           <span className="font-semibold text-ink">
             {liveJobCount} {liveJobCount === 1 ? "job" : "jobs"}
@@ -45,7 +45,7 @@ export function DeleteLocationButton({
         <button
           type="button"
           disabled
-          className="inline-flex items-center gap-2 px-5 py-2.5 border border-[var(--rule-strong)] text-slate-meta text-[11px] font-bold tracking-[2px] uppercase cursor-not-allowed"
+          className="inline-flex items-center gap-2 px-5 py-2.5 border border-[var(--rule-strong)] text-slate-meta text-[12px] font-bold tracking-[2px] uppercase cursor-not-allowed"
         >
           <Trash2 className="h-3.5 w-3.5" />
           Delete Location
@@ -62,14 +62,14 @@ export function DeleteLocationButton({
 
       {!confirming ? (
         <>
-          <p className="text-[13px] text-slate-body leading-relaxed mb-3">
+          <p className="text-[14px] text-slate-body leading-relaxed mb-3">
             Permanently remove this location from your DSO. Job postings can no
             longer reference it.
           </p>
           <button
             type="button"
             onClick={() => setConfirming(true)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 border border-red-300 text-red-700 text-[11px] font-bold tracking-[2px] uppercase hover:bg-red-50 transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 border border-red-300 text-red-700 text-[12px] font-bold tracking-[2px] uppercase hover:bg-red-50 transition-colors"
           >
             <Trash2 className="h-3.5 w-3.5" />
             Delete Location
@@ -79,18 +79,18 @@ export function DeleteLocationButton({
         <form action={action} className="space-y-3">
           <input type="hidden" name="dso_id" value={dsoId} />
           <input type="hidden" name="location_id" value={locationId} />
-          <p className="text-[13px] text-ink leading-relaxed">
+          <p className="text-[14px] text-ink leading-relaxed">
             Delete <span className="font-semibold">{locationName}</span>? This
             cannot be undone.
           </p>
           {state.error && (
-            <p className="text-[12px] text-red-700">{state.error}</p>
+            <p className="text-[13px] text-red-700">{state.error}</p>
           )}
           <div className="flex gap-3">
             <button
               type="submit"
               disabled={pending}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white text-[11px] font-bold tracking-[2px] uppercase hover:bg-red-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white text-[12px] font-bold tracking-[2px] uppercase hover:bg-red-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <Trash2 className="h-3.5 w-3.5" />
               {pending ? "Deleting…" : "Yes, Delete"}
@@ -98,7 +98,7 @@ export function DeleteLocationButton({
             <button
               type="button"
               onClick={() => setConfirming(false)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 border border-[var(--rule-strong)] text-ink text-[11px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2.5 border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
             >
               Cancel
             </button>

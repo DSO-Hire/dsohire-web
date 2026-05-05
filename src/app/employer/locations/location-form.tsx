@@ -119,13 +119,13 @@ export function LocationForm({ dsoId, mode, initial }: LocationFormProps) {
 
       {state.error && (
         <div className="bg-red-50 border-l-4 border-red-500 p-4">
-          <p className="text-[13px] text-red-900">{state.error}</p>
+          <p className="text-[14px] text-red-900">{state.error}</p>
         </div>
       )}
 
       {state.ok && mode === "edit" && (
         <div className="bg-cream border-l-4 border-heritage p-4">
-          <p className="text-[13px] text-ink font-semibold">Saved.</p>
+          <p className="text-[14px] text-ink font-semibold">Saved.</p>
         </div>
       )}
 
@@ -133,7 +133,7 @@ export function LocationForm({ dsoId, mode, initial }: LocationFormProps) {
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {pending
             ? mode === "create"
@@ -151,7 +151,7 @@ export function LocationForm({ dsoId, mode, initial }: LocationFormProps) {
         </button>
         <Link
           href="/employer/locations"
-          className="inline-flex items-center gap-2.5 px-7 py-4 border border-[var(--rule-strong)] text-ink text-[11px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
+          className="inline-flex items-center gap-2.5 px-7 py-4 border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
         >
           Cancel
         </Link>
@@ -213,7 +213,7 @@ function Field({
         }`}
       />
       {helper && (
-        <p className="mt-1.5 text-[11px] text-slate-meta leading-relaxed">
+        <p className="mt-1.5 text-[12px] text-slate-meta leading-relaxed">
           {helper}
         </p>
       )}

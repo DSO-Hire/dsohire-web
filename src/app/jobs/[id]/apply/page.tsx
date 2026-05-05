@@ -169,7 +169,7 @@ export default async function ApplyPage({ params }: PageProps) {
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-4 max-w-[760px]">
           {job.title as string}
         </h1>
-        <div className="flex flex-wrap gap-x-5 gap-y-2 text-[13px] text-slate-body mb-10 pb-10 border-b border-[var(--rule)]">
+        <div className="flex flex-wrap gap-x-5 gap-y-2 text-[14px] text-slate-body mb-10 pb-10 border-b border-[var(--rule)]">
           <span className="font-semibold text-ink">{dso?.name ?? "DSO"}</span>
           <span className="inline-flex items-center gap-1.5">
             <Briefcase className="h-3.5 w-3.5" />

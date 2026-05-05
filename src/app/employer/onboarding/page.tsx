@@ -92,20 +92,20 @@ export default async function OnboardingPage() {
           <div className="text-[20px] font-extrabold tracking-[-0.4px] text-ink mb-1">
             {dso?.name}
           </div>
-          <div className="text-[12px] font-mono text-slate-meta tracking-[0.3px] mb-6">
+          <div className="text-[13px] font-mono text-slate-meta tracking-[0.3px] mb-6">
             dsohire.com/companies/{dso?.slug}
           </div>
 
-          <div className="text-[11px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+          <div className="text-[12px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
             Status
           </div>
-          <div className="text-[13px] text-ink mb-6">
+          <div className="text-[14px] text-ink mb-6">
             {dso?.status === "pending"
               ? "Pending — we're verifying your DSO. You can keep setting up while we review."
               : dso?.status}
           </div>
 
-          <div className="pt-6 border-t border-[var(--rule)] text-[12px] text-slate-meta leading-relaxed">
+          <div className="pt-6 border-t border-[var(--rule)] text-[13px] text-slate-meta leading-relaxed">
             Need help? Email{" "}
             <a
               href="mailto:cam@dsohire.com"

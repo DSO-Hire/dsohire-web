@@ -198,7 +198,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
               ? "Nothing matches your current filters."
               : "Once candidates start applying to your jobs, they'll show up here."}
           </p>
-          <p className="text-[13px] text-slate-body leading-relaxed">
+          <p className="text-[14px] text-slate-body leading-relaxed">
             <Link
               href="/employer/jobs"
               className="text-heritage underline underline-offset-2 hover:text-heritage-deep font-semibold"
@@ -249,7 +249,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                         {STAGE_LABELS[app.status as ApplicationStatus] ?? app.status}
                       </span>
                     </div>
-                    <div className="text-[13px] text-slate-body mb-2">
+                    <div className="text-[14px] text-slate-body mb-2">
                       Applied to{" "}
                       {job ? (
                         <Link
@@ -263,7 +263,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                         <span className="font-semibold text-ink">Unknown job</span>
                       )}
                     </div>
-                    <div className="text-[12px] text-slate-meta">
+                    <div className="text-[13px] text-slate-meta">
                       {[cand?.current_title, cand?.headline]
                         .filter(Boolean)
                         .join(" · ") || "Profile minimal"}
@@ -304,7 +304,7 @@ function FilterSelect({
       <select
         name={name}
         defaultValue={value}
-        className="px-3 py-2.5 bg-white border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+        className="px-3 py-2.5 bg-white border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>

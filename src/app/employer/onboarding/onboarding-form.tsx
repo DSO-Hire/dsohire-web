@@ -30,7 +30,7 @@ export function OnboardingForm({ dsoId }: { dsoId: string }) {
           placeholder="Downtown Office"
           className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
         />
-        <p className="mt-1.5 text-[11px] text-slate-meta leading-relaxed">
+        <p className="mt-1.5 text-[12px] text-slate-meta leading-relaxed">
           The name candidates see on the job listing — usually a neighborhood,
           mall, or street name. Not your DSO name.
         </p>
@@ -105,20 +105,20 @@ export function OnboardingForm({ dsoId }: { dsoId: string }) {
 
       {state.error && (
         <div className="bg-red-50 border-l-4 border-red-500 p-4">
-          <p className="text-[13px] text-red-900">{state.error}</p>
+          <p className="text-[14px] text-red-900">{state.error}</p>
         </div>
       )}
 
       <button
         type="submit"
         disabled={pending}
-        className="inline-flex items-center justify-center gap-2.5 w-full sm:w-auto px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        className="inline-flex items-center justify-center gap-2.5 w-full sm:w-auto px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {pending ? "Saving…" : "Add Location & Continue"}
         {!pending && <ArrowRight className="h-4 w-4" />}
       </button>
 
-      <p className="text-[12px] text-slate-meta leading-relaxed">
+      <p className="text-[13px] text-slate-meta leading-relaxed">
         You can add more locations after onboarding. Maps and lat/lng are
         looked up automatically when you save the address.
       </p>

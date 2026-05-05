@@ -31,19 +31,19 @@ export default async function AuthErrorPage({
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Link
             href="/employer/sign-in"
-            className="inline-flex items-center px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
           >
             Request a New Link
           </Link>
           <Link
             href="/contact"
-            className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[11px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
+            className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
           >
             Contact Support
           </Link>
         </div>
         {reason && (
-          <p className="mt-12 text-[11px] text-slate-meta tracking-[0.5px]">
+          <p className="mt-12 text-[12px] text-slate-meta tracking-[0.5px]">
             Error code: <code className="font-mono">{reason}</code>
           </p>
         )}

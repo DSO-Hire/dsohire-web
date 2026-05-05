@@ -57,7 +57,7 @@ export default function LegalIndex() {
         ))}
       </ul>
 
-      <p className="mt-12 text-[13px] text-slate-meta leading-relaxed max-w-[640px]">
+      <p className="mt-12 text-[14px] text-slate-meta leading-relaxed max-w-[640px]">
         Questions about any of these policies? Email{" "}
         <a
           href="mailto:cam@dsohire.com"

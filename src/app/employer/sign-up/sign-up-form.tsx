@@ -72,20 +72,20 @@ export function SignUpForm({ initialTier }: { initialTier: PricingTier }) {
 
           {verifyState.error && (
             <div className="bg-red-50 border-l-4 border-red-500 p-4">
-              <p className="text-[13px] text-red-900">{verifyState.error}</p>
+              <p className="text-[14px] text-red-900">{verifyState.error}</p>
             </div>
           )}
 
           <button
             type="submit"
             disabled={verifying}
-            className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {verifying ? "Verifying…" : "Verify & Continue"}
             {!verifying && <ArrowRight className="h-4 w-4" />}
           </button>
 
-          <p className="text-[12px] text-slate-meta leading-relaxed">
+          <p className="text-[13px] text-slate-meta leading-relaxed">
             After verifying you&apos;ll land on your onboarding page where you
             can add locations, invite teammates, and post your first job.
           </p>
@@ -95,7 +95,7 @@ export function SignUpForm({ initialTier }: { initialTier: PricingTier }) {
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
+            className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
           >
             <ArrowLeft className="h-3 w-3" />
             Back to form
@@ -106,7 +106,7 @@ export function SignUpForm({ initialTier }: { initialTier: PricingTier }) {
             <button
               type="submit"
               disabled={resending}
-              className="text-[12px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2 disabled:opacity-60"
+              className="text-[13px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2 disabled:opacity-60"
             >
               {resending ? "Sending…" : "Send a new code"}
             </button>
@@ -188,20 +188,20 @@ export function SignUpForm({ initialTier }: { initialTier: PricingTier }) {
 
       {formState.error && (
         <div className="bg-red-50 border-l-4 border-red-500 p-4">
-          <p className="text-[13px] text-red-900">{formState.error}</p>
+          <p className="text-[14px] text-red-900">{formState.error}</p>
         </div>
       )}
 
       <button
         type="submit"
         disabled={submittingForm}
-        className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {submittingForm ? "Creating Account…" : "Create Account & Send Code"}
         {!submittingForm && <ArrowRight className="h-4 w-4" />}
       </button>
 
-      <p className="text-[12px] text-slate-meta leading-relaxed">
+      <p className="text-[13px] text-slate-meta leading-relaxed">
         By continuing you agree to our{" "}
         <a
           href="/legal/terms"
@@ -267,7 +267,7 @@ function Field({
         className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
       />
       {helper && (
-        <p className="mt-1.5 text-[11px] text-slate-meta leading-relaxed">
+        <p className="mt-1.5 text-[12px] text-slate-meta leading-relaxed">
           {helper}
         </p>
       )}

@@ -94,7 +94,7 @@ export function JdGeneratorPanel({
           <h3 className="mt-0.5 text-[15px] font-bold text-ink">
             Get a starting draft in seconds.
           </h3>
-          <p className="mt-1 text-[12px] text-slate-meta leading-relaxed">
+          <p className="mt-1 text-[13px] text-slate-meta leading-relaxed">
             Available on every paid tier. Drop a few notes about the role
             and we&apos;ll write a clean structured posting. You stay in
             control — apply each section individually or accept it all.
@@ -107,7 +107,7 @@ export function JdGeneratorPanel({
           <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
             Role
           </label>
-          <div className="flex h-[44px] items-center px-4 bg-cream border border-[var(--rule-strong)] text-ink text-[13px]">
+          <div className="flex h-[44px] items-center px-4 bg-cream border border-[var(--rule-strong)] text-ink text-[14px]">
             {roleLabel}
           </div>
         </div>
@@ -119,7 +119,7 @@ export function JdGeneratorPanel({
             value={tone}
             onChange={(e) => setTone(e.target.value as Tone)}
             disabled={pending}
-            className="h-[44px] px-4 bg-cream border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors disabled:opacity-60"
+            className="h-[44px] px-4 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors disabled:opacity-60"
           >
             {TONE_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -141,7 +141,7 @@ export function JdGeneratorPanel({
           value={brief}
           onChange={(e) => setBrief(e.target.value)}
           disabled={pending}
-          className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[13px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors resize-vertical disabled:opacity-60"
+          className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors resize-vertical disabled:opacity-60"
         />
         <div className="mt-1 text-[10px] text-slate-meta tracking-[0.5px]">
           {brief.length} / 800
@@ -182,9 +182,9 @@ export function JdGeneratorPanel({
 
       {error && (
         <div className="mt-4 bg-red-50 border-l-4 border-red-500 p-4 flex items-start justify-between gap-3">
-          <p className="text-[13px] text-red-900">
+          <p className="text-[14px] text-red-900">
             AI generation failed. Try again or simplify the brief.
-            <span className="block mt-1 text-[11px] text-red-800/80">
+            <span className="block mt-1 text-[12px] text-red-800/80">
               {error}
             </span>
           </p>
@@ -260,7 +260,7 @@ function ResultCard({
         actionLabel="Use this description"
         onUse={onApplyDescription}
       >
-        <div className="space-y-3 text-[13px] text-ink leading-relaxed">
+        <div className="space-y-3 text-[14px] text-ink leading-relaxed">
           <p className="whitespace-pre-wrap">{jd.summary}</p>
 
           <SubSection label="Responsibilities" items={jd.responsibilities} />
@@ -306,7 +306,7 @@ function SubSection({ label, items }: { label: string; items: string[] }) {
   if (items.length === 0) return null;
   return (
     <div>
-      <div className="text-[11px] font-bold uppercase tracking-[1.5px] text-slate-meta mb-1">
+      <div className="text-[12px] font-bold uppercase tracking-[1.5px] text-slate-meta mb-1">
         {label}
       </div>
       <ul className="list-disc pl-5 space-y-1">

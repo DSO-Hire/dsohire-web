@@ -190,7 +190,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                   {(job.benefits as string[]).map((b) => (
                     <li
                       key={b}
-                      className="px-3 py-1.5 text-[12px] font-semibold text-heritage-deep"
+                      className="px-3 py-1.5 text-[13px] font-semibold text-heritage-deep"
                       style={{ background: "var(--heritage-tint)" }}
                     >
                       {b}
@@ -209,7 +209,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                   {skills.map((s) => (
                     <li
                       key={s}
-                      className="px-3 py-1.5 text-[12px] font-semibold text-ink bg-cream border border-[var(--rule-strong)]"
+                      className="px-3 py-1.5 text-[13px] font-semibold text-ink bg-cream border border-[var(--rule-strong)]"
                     >
                       {s}
                     </li>
@@ -222,11 +222,11 @@ export default async function JobDetailPage({ params }: PageProps) {
             <section className="mt-12 pt-8 border-t border-[var(--rule)] flex flex-col sm:flex-row items-start gap-4">
               <Link
                 href={`/jobs/${job.id as string}/apply`}
-                className="inline-flex items-center px-9 py-4 bg-ink text-ivory text-[11px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+                className="inline-flex items-center px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
               >
                 Apply for this Role
               </Link>
-              <p className="text-[12px] text-slate-meta leading-relaxed max-w-[420px]">
+              <p className="text-[13px] text-slate-meta leading-relaxed max-w-[420px]">
                 Free for candidates. We&apos;ll route your application directly
                 to {dsoName} — no recruiter middleman, no fees.
               </p>
@@ -261,10 +261,10 @@ export default async function JobDetailPage({ params }: PageProps) {
                 <ul className="space-y-2 mt-1">
                   {locations.map((loc) => (
                     <li key={loc.id}>
-                      <div className="font-semibold text-ink text-[13px]">
+                      <div className="font-semibold text-ink text-[14px]">
                         {loc.name}
                       </div>
-                      <div className="text-[12px] text-slate-body">
+                      <div className="text-[13px] text-slate-body">
                         {[loc.city, loc.state].filter(Boolean).join(", ")}
                       </div>
                     </li>
@@ -300,7 +300,7 @@ function Detail({
         <Icon className="h-3 w-3" />
         {label}
       </div>
-      <div className="text-[13px] text-ink">{children}</div>
+      <div className="text-[14px] text-ink">{children}</div>
     </div>
   );
 }

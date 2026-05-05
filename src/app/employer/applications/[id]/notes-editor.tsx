@@ -33,10 +33,10 @@ export function NotesEditor({
           {pending ? "Saving…" : "Save Notes"}
         </button>
         {state.error && (
-          <span className="text-[12px] text-red-700">{state.error}</span>
+          <span className="text-[13px] text-red-700">{state.error}</span>
         )}
         {state.ok && state.message && (
-          <span className="text-[12px] text-heritage-deep font-semibold">
+          <span className="text-[13px] text-heritage-deep font-semibold">
             {state.message}
           </span>
         )}

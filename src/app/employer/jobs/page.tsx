@@ -79,7 +79,7 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
         {canPostJobs && (
           <Link
             href="/employer/jobs/new"
-            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[11px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
           >
             <Plus className="h-4 w-4" />
             Post a Job
@@ -159,7 +159,7 @@ function JobRow({ job }: { job: JobRow }) {
             <div className="text-[17px] font-extrabold tracking-[-0.3px] text-ink leading-tight mb-1 truncate">
               {job.title}
             </div>
-            <div className="text-[11px] tracking-[0.3px] text-slate-meta">
+            <div className="text-[12px] tracking-[0.3px] text-slate-meta">
               Updated {updated.toLocaleDateString()}
             </div>
           </div>
@@ -221,7 +221,7 @@ function EmptyState({ canPostJobs }: { canPostJobs: boolean }) {
       {canPostJobs && (
         <Link
           href="/employer/jobs/new"
-          className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[11px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+          className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
         >
           <Plus className="h-4 w-4" />
           Post a Job

@@ -71,7 +71,7 @@ export function RejectReasonAiSuggester({
             <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
               AI rejection-reason suggester
             </div>
-            <p className="mt-1 text-[12px] text-slate-meta leading-relaxed">
+            <p className="mt-1 text-[13px] text-slate-meta leading-relaxed">
               Available on Growth tier and above.{" "}
               <Link
                 href="/pricing"
@@ -120,7 +120,7 @@ export function RejectReasonAiSuggester({
           <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
             Suggest with AI
           </div>
-          <p className="mt-0.5 text-[12px] text-slate-meta leading-relaxed">
+          <p className="mt-0.5 text-[13px] text-slate-meta leading-relaxed">
             Get 2-3 draft rejection reasons based on this candidate&apos;s
             screening answers and scorecards.
           </p>
@@ -152,7 +152,7 @@ export function RejectReasonAiSuggester({
           )}
         </button>
         {!hasContext && !suggestions && (
-          <span className="text-[11px] text-slate-meta">
+          <span className="text-[12px] text-slate-meta">
             Need at least one screening answer or scorecard.
           </span>
         )}
@@ -166,7 +166,7 @@ export function RejectReasonAiSuggester({
 
       {error && (
         <div className="mt-3 flex items-start justify-between gap-3 border-l-4 border-red-500 bg-red-50 p-3">
-          <div className="flex items-start gap-2 text-[12px] text-red-900 leading-relaxed">
+          <div className="flex items-start gap-2 text-[13px] text-red-900 leading-relaxed">
             <AlertCircle
               className="h-3.5 w-3.5 mt-0.5 flex-shrink-0"
               aria-hidden="true"
@@ -219,7 +219,7 @@ export function RejectReasonAiSuggester({
                     )}
                   </button>
                 </div>
-                <p className="mt-2 text-[13px] text-ink leading-relaxed whitespace-pre-wrap">
+                <p className="mt-2 text-[14px] text-ink leading-relaxed whitespace-pre-wrap">
                   {s.body}
                 </p>
               </li>

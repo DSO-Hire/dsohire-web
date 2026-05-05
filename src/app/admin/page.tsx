@@ -57,7 +57,7 @@ export default async function AdminOverviewPage() {
           <div className="text-4xl font-extrabold tracking-[-1px] text-ink mb-2 leading-none">
             {pendingCount ?? 0}
           </div>
-          <div className="text-[12px] text-slate-body">
+          <div className="text-[13px] text-slate-body">
             DSOs awaiting your review
           </div>
           <div className="inline-flex items-center gap-1.5 mt-5 text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep group-hover:text-ink transition-colors">
@@ -77,7 +77,7 @@ export default async function AdminOverviewPage() {
           <div className="text-4xl font-extrabold tracking-[-1px] text-ink mb-2 leading-none">
             {activeCount ?? 0}
           </div>
-          <div className="text-[12px] text-slate-body">
+          <div className="text-[13px] text-slate-body">
             Active DSOs on the platform
           </div>
           <div className="inline-flex items-center gap-1.5 mt-5 text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep group-hover:text-ink transition-colors">
