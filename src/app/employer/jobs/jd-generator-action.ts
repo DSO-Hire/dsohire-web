@@ -1,16 +1,15 @@
 "use server";
 
 /**
- * Phase 5D — AI Job Description generator (Founding+ tier).
+ * Phase 5D — AI Job Description generator (every paid tier).
  *
  * Single LLM round-trip that takes the role + a short operator brief and
  * returns a structured JD payload (title, summary, responsibilities,
  * qualifications, whatWeOffer). The wizard renders each field with a
  * "Use this" button so the operator stays in the driver's seat.
  *
- * Tier gate: Founding/Starter/Growth/Enterprise. Since there is no free tier
- * today, "any DSO with an active subscription" is the gate. Phase 5+ may
- * tighten to Founding+ explicitly once Starter is real.
+ * Tier gate: Starter/Growth/Enterprise. Since there is no free tier,
+ * "any DSO with an active subscription" is the gate.
  *
  * Logging: every invocation (success or failure) writes to ai_usage_events
  * via service role. v1 logs only — caps are not yet enforced. We need real
@@ -78,14 +77,14 @@ export async function generateJobDescription(
     .maybeSingle();
   if (!dsoUser) return { ok: false, error: "No DSO membership" };
 
-  // Tier gate — Founding+ feature. Today every paid tier qualifies because
-  // there is no free tier; gating on active subscription is the right proxy.
+  // Tier gate — available on every paid tier. Gating on active subscription
+  // is the right proxy since there is no free tier.
   const subscription = await getActiveSubscription(supabase, dsoUser.dso_id);
   if (!subscription) {
     return {
       ok: false,
       error:
-        "Upgrade to Founding+ to use the AI Job Description generator.",
+        "An active subscription is required to use the AI Job Description generator.",
     };
   }
 

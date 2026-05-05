@@ -57,7 +57,7 @@ function Hero() {
       <div className="relative z-10 max-w-[1240px] mx-auto grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-16 lg:gap-20 items-center">
         {/* Left column */}
         <div>
-          {/* Founding-pricing urgency chip — replaces the eyebrow rule. */}
+          {/* Eyebrow chip — DSO Hire positioning at a glance. */}
           <div className="mb-8">
             <span
               className="inline-flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold tracking-[1.8px] uppercase text-ink border border-heritage/35"
@@ -67,11 +67,11 @@ function Hero() {
               }}
             >
               <span className="text-heritage-deep">★</span>
-              <span>Founding pricing open</span>
+              <span>Built for DSOs</span>
               <span className="text-heritage-deep">·</span>
-              <span>5 spots</span>
+              <span>10–50 practices</span>
               <span className="text-heritage-deep">·</span>
-              <span>12-month rate lock</span>
+              <span>Flat monthly fee</span>
             </span>
           </div>
 
@@ -113,7 +113,7 @@ function Hero() {
           <div className="flex items-center gap-2.5 text-xs text-slate-body tracking-[0.4px]">
             <span className="block w-1.5 h-1.5 bg-heritage rounded-full" />
             <span>
-              Plans from <strong className="text-ink font-bold">$299/mo</strong> · Founding-customer pricing now open
+              Plans from <strong className="text-ink font-bold">$499/mo</strong> · Unlimited multi-location posting
             </span>
           </div>
         </div>
@@ -398,7 +398,7 @@ function Comparison() {
           tagline="Subscribe once, post unlimited roles across every practice you operate."
           items={[
             "One subscription covers every location",
-            "Unlimited active listings on every tier above Founding",
+            "Unlimited active listings on Growth and Enterprise",
             "Multi-location job posting in a single flow",
             "Team accounts for your recruiters and regional managers",
           ]}
@@ -620,7 +620,7 @@ function PricingTeaser() {
           Pick the tier that matches your practice count. Cancel or change tiers anytime.
         </SectionSub>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-[var(--rule)] border border-[var(--rule)] mt-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-[var(--rule)] border border-[var(--rule)] mt-10">
           {tiers.map((tier) => (
             <PricingTier key={tier.id} tier={tier} />
           ))}
@@ -694,8 +694,6 @@ function PricingTier({ tier }: { tier: TierConfig }) {
           isFeatured ? "text-ivory/55" : "text-slate-meta"
         }`}
       >
-        {tier.id === "founding" &&
-          `Limited to first ${tier.capActiveSubs ?? 5} customers · 12-month rate lock`}
         {tier.id === "starter" && "Most chosen for sub-20 location operators"}
         {tier.id === "growth" && "Unlimited listings unlocked"}
         {tier.id === "enterprise" && "Account management included"}
@@ -709,7 +707,6 @@ function PricingTier({ tier }: { tier: TierConfig }) {
             : "bg-ivory text-ink border-[var(--rule-strong)] hover:bg-ink hover:text-ivory hover:border-ink"
         }`}
       >
-        {tier.id === "founding" && "Apply for Founding"}
         {tier.id === "starter" && "Start with Starter"}
         {tier.id === "growth" && "Choose Growth"}
         {tier.id === "enterprise" && "Contact Sales"}
@@ -817,8 +814,8 @@ function FinalCta() {
           Ready to replace per-listing fees with one flat subscription?
         </h2>
         <p className="text-base text-slate-body leading-[1.7] mb-9">
-          Founding-customer pricing is open through summer 2026. First five DSOs lock in
-          $299/mo for a year in exchange for a public testimonial.
+          One flat monthly subscription covers every practice. No per-listing fees,
+          no placement commissions. Sized to DSOs operating 10–50 practices.
         </p>
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Link

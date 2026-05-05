@@ -261,14 +261,6 @@ async function upsertSubscription(params: UpsertParams): Promise<void> {
   const periodStart = tsToIso(item?.current_period_start ?? null);
   const periodEnd = tsToIso(item?.current_period_end ?? null);
 
-  // 12-month founding rate lock — start from the first period start.
-  const foundingLockedUntil =
-    tier === "founding" && periodStart
-      ? new Date(
-          new Date(periodStart).setMonth(new Date(periodStart).getMonth() + 12)
-        ).toISOString()
-      : null;
-
   const { error } = await admin.from("subscriptions").upsert(
     {
       dso_id: dsoId,
@@ -280,7 +272,6 @@ async function upsertSubscription(params: UpsertParams): Promise<void> {
       current_period_start: periodStart,
       current_period_end: periodEnd,
       cancel_at_period_end: subscription.cancel_at_period_end ?? false,
-      founding_locked_until: foundingLockedUntil,
     },
     { onConflict: "dso_id" }
   );
@@ -309,7 +300,6 @@ function resolveTier(
   // case where the price ID isn't recognized (e.g. a one-off promo price).
   const metaTier = subscription.metadata?.tier;
   if (
-    metaTier === "founding" ||
     metaTier === "starter" ||
     metaTier === "growth" ||
     metaTier === "enterprise"

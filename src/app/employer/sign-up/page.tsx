@@ -8,7 +8,7 @@
  *
  * Stripe Checkout (step 3 of the originally-planned 3-step flow) wires up
  * in Phase 2 Week 5. Until then, sign-up creates a 'pending' DSO with no
- * subscription — Cam manually verifies and activates Founding customers.
+ * subscription — Cam manually verifies and activates customers.
  */
 
 import Link from "next/link";
@@ -117,7 +117,6 @@ export default async function SignUpPage({ searchParams }: PageProps) {
 
 function isPricingTier(value: string | undefined): value is PricingTier {
   return (
-    value === "founding" ||
     value === "starter" ||
     value === "growth" ||
     value === "enterprise"

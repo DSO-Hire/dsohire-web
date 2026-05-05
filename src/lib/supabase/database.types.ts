@@ -1075,7 +1075,6 @@ export type Database = {
           current_period_end: string | null
           current_period_start: string | null
           dso_id: string
-          founding_locked_until: string | null
           id: string
           listings_used: number
           seats_used: number
@@ -1092,7 +1091,6 @@ export type Database = {
           current_period_end?: string | null
           current_period_start?: string | null
           dso_id: string
-          founding_locked_until?: string | null
           id?: string
           listings_used?: number
           seats_used?: number
@@ -1109,7 +1107,6 @@ export type Database = {
           current_period_end?: string | null
           current_period_start?: string | null
           dso_id?: string
-          founding_locked_until?: string | null
           id?: string
           listings_used?: number
           seats_used?: number
@@ -1280,7 +1277,7 @@ export type Database = {
         | "incomplete"
         | "incomplete_expired"
         | "unpaid"
-      subscription_tier: "founding" | "starter" | "growth" | "enterprise"
+      subscription_tier: "starter" | "growth" | "enterprise"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1458,7 +1455,7 @@ export const Constants = {
         "incomplete_expired",
         "unpaid",
       ],
-      subscription_tier: ["founding", "starter", "growth", "enterprise"],
+      subscription_tier: ["starter", "growth", "enterprise"],
     },
   },
 } as const

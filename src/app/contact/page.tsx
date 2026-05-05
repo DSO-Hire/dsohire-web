@@ -59,14 +59,6 @@ export default function ContactPage() {
                   cam@dsohire.com
                 </Link>
               </ContactRow>
-              <ContactRow label="Founding Customers">
-                <Link
-                  href="mailto:cam@dsohire.com?subject=Founding%20customer%20interest"
-                  className="text-[15px] font-semibold text-ink hover:text-heritage-deep transition-colors"
-                >
-                  Apply for Founding tier
-                </Link>
-              </ContactRow>
               <ContactRow label="Press / partnerships">
                 <Link
                   href="mailto:cam@dsohire.com?subject=Press%20%2F%20partnership%20inquiry"

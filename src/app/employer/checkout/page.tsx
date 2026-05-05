@@ -37,7 +37,7 @@ interface PageProps {
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
 
 function isPricingTier(v: string): v is PricingTier {
-  return v === "founding" || v === "starter" || v === "growth" || v === "enterprise";
+  return v === "starter" || v === "growth" || v === "enterprise";
 }
 
 export default async function CheckoutPage({ searchParams }: PageProps) {

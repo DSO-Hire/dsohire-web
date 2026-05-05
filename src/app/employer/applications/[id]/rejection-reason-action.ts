@@ -9,7 +9,7 @@
  * it inline with a "Use this" button per option.
  *
  * Tier gate: STRICT — Growth or Enterprise only. The JD generator gates on
- * "any active subscription" because it's a Founding+ feature; this is the
+ * "any active subscription" because it's a Starter+ feature; this is the
  * first Growth-only feature so we look at `subscriptions.tier` directly.
  *
  * Discrimination guardrails: the system prompt explicitly forbids reasoning
@@ -64,9 +64,8 @@ export type SuggestRejectionResult =
   | { ok: false; error: string };
 
 /**
- * Tiers that get the rejection-reason suggester. Founding/Starter are
- * intentionally excluded — this is a Growth+ feature per the locked tier
- * matrix (R106).
+ * Tiers that get the rejection-reason suggester. Starter is intentionally
+ * excluded — this is a Growth+ feature per the locked tier matrix (R106).
  */
 const ALLOWED_TIERS: ReadonlySet<PricingTier> = new Set<PricingTier>([
   "growth",
@@ -106,9 +105,8 @@ export async function suggestRejectionReason(
   const dsoId = dsoUser.dso_id as string;
 
   // ── Tier gate (Growth+ only). Read tier + status from subscriptions
-  // directly so we can distinguish Growth from Founding/Starter; the
-  // billing helper returns the row for any active tier and would let
-  // Founding through.
+  // directly so we can distinguish Growth from Starter; the billing helper
+  // returns the row for any active tier and would let Starter through.
   const { data: subRow } = await supabase
     .from("subscriptions")
     .select("tier, status")

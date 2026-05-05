@@ -4,7 +4,7 @@
  * Audience: COO / VP HR / Director of Recruiting at DSOs running 10–50
  * practices, currently using DentalPost or staffing agencies.
  *
- * Goal: convert from "browsing" to "Apply for Founding" or "Contact Sales".
+ * Goal: convert from "browsing" to "Start with Starter" or "Contact Sales".
  */
 
 import Link from "next/link";
@@ -25,7 +25,6 @@ export default function ForDsosPage() {
       <ProblemSection />
       <RoiMath />
       <FeatureBreakdown />
-      <FoundingCallout />
       <FinalCta />
     </SiteShell>
   );
@@ -157,7 +156,7 @@ function AnswerCard() {
         <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-7 gap-y-3.5 list-none lg:pt-2 self-center">
           {[
             "One subscription covers every location",
-            "Unlimited active listings on every tier above Founding",
+            "Unlimited active listings on Growth and Enterprise",
             "Multi-location job posting in a single flow",
             "Team accounts for your recruiters and regional managers",
           ].map((item, i) => (
@@ -377,59 +376,6 @@ function FeatureBreakdown() {
   );
 }
 
-/* ───────── Founding callout ───────── */
-
-function FoundingCallout() {
-  return (
-    <section className="bg-ink text-ivory px-6 sm:px-14 py-24">
-      <div className="max-w-[1000px] mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-12 items-center">
-          <div>
-            <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage mb-3.5">
-              Founding Customers · First 5 Only
-            </div>
-            <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ivory mb-5">
-              $299/month for 12 months — five seats, by invitation.
-            </h2>
-            <p className="text-base text-ivory/70 leading-[1.65]">
-              We&apos;re onboarding the first 5 mid-market DSOs at the Founding
-              rate through summer 2026. You get rate lock, a Founding-customer
-              badge, and a direct line to the founder. In exchange, we ask
-              for a single mutually-approved testimonial we can use to
-              introduce DSO Hire to customer 6 onward.
-            </p>
-          </div>
-          <div>
-            <Link
-              href="mailto:cam@dsohire.com?subject=Founding%20customer%20interest"
-              className="inline-flex items-center justify-center w-full text-center px-8 py-5 bg-heritage text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
-            >
-              Apply for Founding
-            </Link>
-            <ul className="list-none mt-6 space-y-2.5 text-[13px] text-ivory/70">
-              <li className="flex items-start gap-2">
-                <Check className="h-4 w-4 text-heritage flex-shrink-0 mt-0.5" />
-                <span>$299/mo locked for 12 months</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Check className="h-4 w-4 text-heritage flex-shrink-0 mt-0.5" />
-                <span>Founding-customer badge on your DSO profile</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Check className="h-4 w-4 text-heritage flex-shrink-0 mt-0.5" />
-                <span>Direct support line to the founder</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Check className="h-4 w-4 text-heritage flex-shrink-0 mt-0.5" />
-                <span>Public testimonial in exchange (mutually approved)</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
 
 /* ───────── Final CTA ───────── */
 

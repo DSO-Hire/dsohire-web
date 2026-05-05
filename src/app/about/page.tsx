@@ -84,12 +84,6 @@ function Story() {
             skipped because the per-listing math didn&apos;t pencil.
           </p>
           <p>
-            Founding customers (the first five) get a 12-month rate lock and
-            proportional input on what we build next. In exchange, they help
-            us validate the product against the real operating environment so
-            customer six onward gets a sharper tool.
-          </p>
-          <p>
             If that&apos;s the kind of vendor relationship that fits how you
             run your DSO, we&apos;d like to talk.
           </p>

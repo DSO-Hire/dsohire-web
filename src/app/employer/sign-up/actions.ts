@@ -316,7 +316,7 @@ export async function resendSignUpCode(
 /* ───── helpers ───── */
 
 function isPricingTier(v: string): v is PricingTier {
-  return v === "founding" || v === "starter" || v === "growth" || v === "enterprise";
+  return v === "starter" || v === "growth" || v === "enterprise";
 }
 
 function makeSlug(name: string): string {

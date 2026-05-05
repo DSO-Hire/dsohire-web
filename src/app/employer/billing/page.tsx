@@ -2,9 +2,9 @@
  * /employer/billing — current subscription + invoice history.
  *
  * Shows the active subscription's tier, status, current period, and any
- * special flags (cancel-at-period-end, founding rate lock). Lists the most
- * recent invoices with links to the Stripe-hosted invoice page (where the
- * user can download a receipt PDF).
+ * special flags (cancel-at-period-end). Lists the most recent invoices
+ * with links to the Stripe-hosted invoice page (where the user can
+ * download a receipt PDF).
  *
  * "Manage Subscription" opens the Stripe Customer Portal — a Stripe-hosted
  * page where the user can change card, change plan, or cancel. Cancel /
@@ -52,7 +52,7 @@ export default async function EmployerBillingPage({ searchParams }: PageProps) {
   const { data: sub } = await supabase
     .from("subscriptions")
     .select(
-      "id, tier, status, current_period_start, current_period_end, cancel_at_period_end, founding_locked_until, stripe_customer_id"
+      "id, tier, status, current_period_start, current_period_end, cancel_at_period_end, stripe_customer_id"
     )
     .eq("dso_id", dsoUser.dso_id)
     .maybeSingle();
@@ -148,17 +148,6 @@ export default async function EmployerBillingPage({ searchParams }: PageProps) {
                     : "—"
               }
             />
-            {subscription.founding_locked_until && (
-              <Field
-                label={
-                  <span className="inline-flex items-center gap-1.5">
-                    <ShieldCheck className="h-3 w-3 text-heritage" />
-                    Founding rate lock
-                  </span>
-                }
-                value={`Locked at ${tierConfig ? `$${tierConfig.monthlyPrice}` : "founding price"}/month until ${formatDate(subscription.founding_locked_until)}`}
-              />
-            )}
           </dl>
 
           <form action={openCustomerPortal} className="mt-7">
@@ -209,7 +198,6 @@ interface SubscriptionRow {
   current_period_start: string | null;
   current_period_end: string | null;
   cancel_at_period_end: boolean;
-  founding_locked_until: string | null;
   stripe_customer_id: string | null;
 }
 

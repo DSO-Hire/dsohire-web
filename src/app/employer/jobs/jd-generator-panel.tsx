@@ -95,8 +95,8 @@ export function JdGeneratorPanel({
             Get a starting draft in seconds.
           </h3>
           <p className="mt-1 text-[12px] text-slate-meta leading-relaxed">
-            Available on Founding tier and above. Drop a few notes about the
-            role and we&apos;ll write a clean structured posting. You stay in
+            Available on every paid tier. Drop a few notes about the role
+            and we&apos;ll write a clean structured posting. You stay in
             control — apply each section individually or accept it all.
           </p>
         </div>

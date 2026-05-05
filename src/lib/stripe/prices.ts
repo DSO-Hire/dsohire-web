@@ -2,19 +2,24 @@
  * Stripe pricing config — single source of truth for tier prices, IDs,
  * and rate-lock rules across the app.
  *
- * Decisions baked in here:
- *   - Q2 (schema_and_routes_sketch.md): Founding is a separate Price ID,
- *     not a coupon on Starter.
- *   - Founding capped at 5 active subscriptions; app checks `capActiveSubs`
- *     on `/pricing` before letting a 6th customer pick it.
- *   - Founding rate-lock = 12 months; we DO NOT auto-migrate to Starter at
- *     month 12 — turn it into a manual retention conversation in month 11.
+ * Public ladder: Starter / Growth / Enterprise.
+ *
+ * Founding tier was retired from public pricing on 2026-05-05 (see
+ * `Business Plan & Strategy/Pricing_Repositioning_Memo.md`). Replacement is
+ * the Charter Customer Program — a non-advertised back-pocket sales tool
+ * deployed by Cam selectively via a Stripe coupon (CHARTER20 or CHARTER15)
+ * on top of a Starter or Growth purchase. Cap = 5. No public surface.
+ *
+ * The legacy Founding test-mode Stripe Product / Price IDs
+ * (prod_UQu8absG1IMXnF / price_1TS2Ig0uFxwSh1Fn1g8PGMGJ) need to be archived
+ * manually in the Stripe dashboard — see hand-off note Cam received with
+ * this change.
  *
  * Live Price IDs get added at Phase 2 Week 6 (soft launch). Until then,
  * test-mode IDs are used in dev/preview/production.
  */
 
-export type PricingTier = "founding" | "starter" | "growth" | "enterprise";
+export type PricingTier = "starter" | "growth" | "enterprise";
 
 export interface TierConfig {
   id: PricingTier;
@@ -30,37 +35,9 @@ export interface TierConfig {
   /** Stripe Product IDs — kept for metadata lookups and admin tooling. */
   stripeProductIdTest?: string;
   badge?: string;
-  /** True for the founding-customer tier. Drives UI affordances. */
-  founding?: boolean;
-  /** Months the founding price is locked. */
-  rateLockMonths?: number;
-  /** Cap on active subscriptions at this price. */
-  capActiveSubs?: number;
 }
 
 export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
-  founding: {
-    id: "founding",
-    name: "Founding",
-    tagline: "First 5 customers · 12-month rate lock",
-    description:
-      "First-5-customer tier with 12-month rate lock, testimonial reciprocity, and AI JD generator included",
-    monthlyPrice: 299,
-    monthlyPriceCents: 29900,
-    features: [
-      "Up to 25 active listings · 5 admin seats",
-      "Unlimited multi-location posting",
-      "AI Job Description generator (dental-context)",
-      "12-month price lock at $299/mo",
-      "Direct line to founder for support",
-    ],
-    stripePriceIdTest: "price_1TS2Ig0uFxwSh1Fn1g8PGMGJ",
-    stripeProductIdTest: "prod_UQu8absG1IMXnF",
-    badge: "First 5 only",
-    founding: true,
-    rateLockMonths: 12,
-    capActiveSubs: 5,
-  },
   starter: {
     id: "starter",
     name: "Starter",
@@ -117,7 +94,6 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
 
 /** Display order for /pricing page (left-to-right). */
 export const PRICING_TIER_ORDER: PricingTier[] = [
-  "founding",
   "starter",
   "growth",
   "enterprise",
