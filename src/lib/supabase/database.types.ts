@@ -530,6 +530,7 @@ export type Database = {
           invited_by: string | null
           revoked_at: string | null
           role: Database["public"]["Enums"]["dso_user_role"]
+          scoped_location_ids: string[] | null
           token: string
         }
         Insert: {
@@ -542,6 +543,7 @@ export type Database = {
           invited_by?: string | null
           revoked_at?: string | null
           role: Database["public"]["Enums"]["dso_user_role"]
+          scoped_location_ids?: string[] | null
           token: string
         }
         Update: {
@@ -554,6 +556,7 @@ export type Database = {
           invited_by?: string | null
           revoked_at?: string | null
           role?: Database["public"]["Enums"]["dso_user_role"]
+          scoped_location_ids?: string[] | null
           token?: string
         }
         Relationships: [
@@ -660,6 +663,42 @@ export type Database = {
             columns: ["dso_id"]
             isOneToOne: false
             referencedRelation: "dsos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dso_user_locations: {
+        Row: {
+          created_at: string
+          dso_location_id: string
+          dso_user_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          dso_location_id: string
+          dso_user_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          dso_location_id?: string
+          dso_user_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dso_user_locations_dso_location_id_fkey"
+            columns: ["dso_location_id"]
+            isOneToOne: false
+            referencedRelation: "dso_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dso_user_locations_dso_user_id_fkey"
+            columns: ["dso_user_id"]
+            isOneToOne: false
+            referencedRelation: "dso_users"
             referencedColumns: ["id"]
           },
         ]
@@ -1185,6 +1224,8 @@ export type Database = {
       }
       is_dso_admin: { Args: { target_dso_id: string }; Returns: boolean }
       is_internal_admin: { Args: never; Returns: boolean }
+      user_accessible_location_ids: { Args: never; Returns: { id: string }[] }
+      user_can_access_job: { Args: { p_job_id: string }; Returns: boolean }
       search_jobs_public: {
         Args: {
           category_filter?: Database["public"]["Enums"]["role_category"]
@@ -1244,7 +1285,7 @@ export type Database = {
       candidate_availability: "immediate" | "2_weeks" | "1_month" | "passive"
       compensation_period: "hourly" | "daily" | "annual"
       dso_status: "pending" | "active" | "suspended" | "cancelled"
-      dso_user_role: "owner" | "admin" | "recruiter"
+      dso_user_role: "owner" | "admin" | "recruiter" | "hiring_manager"
       employment_type: "full_time" | "part_time" | "contract" | "prn" | "locum"
       job_status:
         | "draft"
@@ -1418,7 +1459,7 @@ export const Constants = {
       candidate_availability: ["immediate", "2_weeks", "1_month", "passive"],
       compensation_period: ["hourly", "daily", "annual"],
       dso_status: ["pending", "active", "suspended", "cancelled"],
-      dso_user_role: ["owner", "admin", "recruiter"],
+      dso_user_role: ["owner", "admin", "recruiter", "hiring_manager"],
       employment_type: ["full_time", "part_time", "contract", "prn", "locum"],
       job_status: [
         "draft",

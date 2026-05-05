@@ -27,7 +27,7 @@ import {
 import { sendEmail } from "@/lib/email/send";
 import { TeamInvite } from "@/emails/employer/TeamInvite";
 
-export type DsoRole = "owner" | "admin" | "recruiter";
+export type DsoRole = "owner" | "admin" | "recruiter" | "hiring_manager";
 
 export interface TeamActionState {
   ok: boolean;
@@ -48,17 +48,33 @@ export async function inviteTeammate(
 ): Promise<TeamActionState> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const roleRaw = String(formData.get("role") ?? "").trim();
+  // Hiring-manager scope: form sends location_ids[] as repeated form fields.
+  const locationIdsRaw = formData.getAll("location_ids").map(String).filter(Boolean);
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { ok: false, error: "Please enter a valid email address." };
   }
-  if (roleRaw !== "admin" && roleRaw !== "recruiter") {
+  if (
+    roleRaw !== "admin" &&
+    roleRaw !== "recruiter" &&
+    roleRaw !== "hiring_manager"
+  ) {
     return {
       ok: false,
-      error: "Pick a role — Admin (full access) or Recruiter (jobs + applications).",
+      error:
+        "Pick a role — Admin (full access), Recruiter (jobs + applications), or Hiring Manager (scoped to specific locations).",
     };
   }
   const role = roleRaw as Exclude<DsoRole, "owner">;
+
+  // Hiring managers MUST be scoped to at least one location.
+  if (role === "hiring_manager" && locationIdsRaw.length === 0) {
+    return {
+      ok: false,
+      error:
+        "Hiring managers must be assigned to at least one location. Pick the locations they should manage.",
+    };
+  }
 
   const supabase = await createSupabaseServerClient();
 
@@ -114,6 +130,25 @@ export async function inviteTeammate(
     };
   }
 
+  // For hiring_manager invites, validate the location_ids belong to this DSO.
+  let scopedLocationIds: string[] | null = null;
+  if (role === "hiring_manager") {
+    const { data: validLocations } = await supabase
+      .from("dso_locations")
+      .select("id")
+      .eq("dso_id", dsoUser.dso_id as string)
+      .in("id", locationIdsRaw);
+    const validIds = (validLocations ?? []).map((l) => l.id as string);
+    if (validIds.length !== locationIdsRaw.length) {
+      return {
+        ok: false,
+        error:
+          "One or more locations couldn't be assigned. Refresh the page and try again.",
+      };
+    }
+    scopedLocationIds = validIds;
+  }
+
   const token = crypto.randomBytes(32).toString("hex");
   const expiresAt = new Date(
     Date.now() + INVITATION_TTL_DAYS * 24 * 60 * 60 * 1000
@@ -128,6 +163,7 @@ export async function inviteTeammate(
       token,
       invited_by: dsoUser.id as string,
       expires_at: expiresAt,
+      scoped_location_ids: scopedLocationIds,
     })
     .select("id")
     .single();
@@ -198,7 +234,8 @@ export async function changeTeammateRole(formData: FormData): Promise<void> {
   if (
     newRoleRaw !== "owner" &&
     newRoleRaw !== "admin" &&
-    newRoleRaw !== "recruiter"
+    newRoleRaw !== "recruiter" &&
+    newRoleRaw !== "hiring_manager"
   ) {
     return;
   }
@@ -232,6 +269,73 @@ export async function changeTeammateRole(formData: FormData): Promise<void> {
     .from("dso_users")
     .update({ role: newRole })
     .eq("id", dsoUserId);
+
+  revalidatePath("/employer/team");
+}
+
+/* ───────────────────────────────────────────────────────────────
+ * Assign / re-assign hiring-manager locations
+ *
+ * Admin-only action that replaces an HM's entire location scope
+ * with a new list. We delete all existing dso_user_locations rows
+ * for the HM and insert one row per location_id in the new list.
+ * ───────────────────────────────────────────────────────────── */
+
+export async function assignHmLocations(formData: FormData): Promise<void> {
+  const dsoUserId = String(formData.get("dso_user_id") ?? "").trim();
+  const locationIds = formData.getAll("location_ids").map(String).filter(Boolean);
+  if (!dsoUserId) return;
+
+  const supabase = await createSupabaseServerClient();
+
+  // Confirm caller is owner/admin and HM is in their DSO
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: caller } = await supabase
+    .from("dso_users")
+    .select("dso_id, role")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+  if (!caller || (caller.role !== "owner" && caller.role !== "admin")) return;
+
+  const { data: target } = await supabase
+    .from("dso_users")
+    .select("id, dso_id, role")
+    .eq("id", dsoUserId)
+    .maybeSingle();
+  if (!target) return;
+  if (target.role !== "hiring_manager") return;
+  if (target.dso_id !== caller.dso_id) return;
+
+  // Validate locations all belong to caller's DSO
+  if (locationIds.length > 0) {
+    const { data: validLocations } = await supabase
+      .from("dso_locations")
+      .select("id")
+      .eq("dso_id", caller.dso_id as string)
+      .in("id", locationIds);
+    if ((validLocations ?? []).length !== locationIds.length) {
+      return; // One or more invalid; silent no-op
+    }
+  }
+
+  // Replace: delete + insert
+  await supabase
+    .from("dso_user_locations")
+    .delete()
+    .eq("dso_user_id", dsoUserId);
+
+  if (locationIds.length > 0) {
+    await supabase.from("dso_user_locations").insert(
+      locationIds.map((locId) => ({
+        dso_user_id: dsoUserId,
+        dso_location_id: locId,
+      }))
+    );
+  }
 
   revalidatePath("/employer/team");
 }

@@ -2,10 +2,17 @@
  * /employer/team — manage DSO teammates + pending invitations.
  *
  * Owner/admin can invite by email, change a teammate's role, or remove a
- * teammate. Recruiters see a read-only view of who's on the team.
+ * teammate. Recruiters and hiring managers see a read-only view of who's
+ * on the team.
  *
  * Member emails come from auth.users via the service-role client — RLS
  * doesn't expose auth.users to the regular Supabase client.
+ *
+ * Hiring-manager support (Phase 3a, 2026-05-05): the invite form now
+ * exposes a hiring_manager role option with a multi-select of dso_locations
+ * to scope the new HM to. Existing HMs are listed with their scoped
+ * locations as badges. Re-scoping is handled via the assignHmLocations
+ * action wired to a separate dialog (added in Phase 3b).
  */
 
 import { redirect } from "next/navigation";
@@ -26,6 +33,7 @@ const ROLE_LABELS: Record<string, string> = {
   owner: "Owner",
   admin: "Admin",
   recruiter: "Recruiter",
+  hiring_manager: "Hiring Manager",
 };
 
 export default async function TeamPage() {
@@ -54,6 +62,35 @@ export default async function TeamPage() {
 
   const memberRows = (members ?? []) as MemberRow[];
 
+  // Pull all DSO locations (used by the invite form's location multi-select
+  // and to display HM scoped-location badges).
+  const { data: locations } = await supabase
+    .from("dso_locations")
+    .select("id, name, city, state")
+    .eq("dso_id", dsoUser.dso_id)
+    .order("name", { ascending: true });
+
+  const locationRows = (locations ?? []) as LocationRow[];
+  const locationsById = new Map(locationRows.map((l) => [l.id, l]));
+
+  // For each HM, fetch their location scope. Single query, group in JS.
+  const hmIds = memberRows
+    .filter((m) => m.role === "hiring_manager")
+    .map((m) => m.id);
+
+  const hmScopeByUserId = new Map<string, string[]>();
+  if (hmIds.length > 0) {
+    const { data: assignments } = await supabase
+      .from("dso_user_locations")
+      .select("dso_user_id, dso_location_id")
+      .in("dso_user_id", hmIds);
+    for (const row of assignments ?? []) {
+      const list = hmScopeByUserId.get(row.dso_user_id as string) ?? [];
+      list.push(row.dso_location_id as string);
+      hmScopeByUserId.set(row.dso_user_id as string, list);
+    }
+  }
+
   // Resolve emails via service-role auth lookup (parallel)
   const admin = createSupabaseServiceRoleClient();
   const memberEmails = new Map<string, string>();
@@ -73,7 +110,7 @@ export default async function TeamPage() {
   const nowIso = new Date().toISOString();
   const { data: invites } = await supabase
     .from("dso_invitations")
-    .select("id, email, role, expires_at, created_at, invited_by")
+    .select("id, email, role, expires_at, created_at, invited_by, scoped_location_ids")
     .eq("dso_id", dsoUser.dso_id)
     .is("accepted_at", null)
     .is("revoked_at", null)
@@ -111,7 +148,7 @@ export default async function TeamPage() {
           <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
             Invite a Teammate
           </h2>
-          <InviteForm />
+          <InviteForm locations={locationRows} />
         </section>
       )}
 
@@ -130,6 +167,8 @@ export default async function TeamPage() {
               canManage={canManage}
               ownerCount={ownerCount}
               adminCount={adminCount}
+              scopedLocationIds={hmScopeByUserId.get(m.id) ?? []}
+              locationsById={locationsById}
             />
           ))}
         </ul>
@@ -143,7 +182,11 @@ export default async function TeamPage() {
           </h2>
           <ul className="list-none border-t border-[var(--rule)] max-w-[820px]">
             {inviteRows.map((inv) => (
-              <InviteRowItem key={inv.id} invitation={inv} />
+              <InviteRowItem
+                key={inv.id}
+                invitation={inv}
+                locationsById={locationsById}
+              />
             ))}
           </ul>
         </section>
@@ -167,6 +210,14 @@ interface InviteRow {
   expires_at: string;
   created_at: string;
   invited_by: string | null;
+  scoped_location_ids: string[] | null;
+}
+
+export interface LocationRow {
+  id: string;
+  name: string;
+  city: string | null;
+  state: string | null;
 }
 
 function MemberRowItem({
@@ -176,6 +227,8 @@ function MemberRowItem({
   canManage,
   ownerCount,
   adminCount,
+  scopedLocationIds,
+  locationsById,
 }: {
   member: MemberRow;
   email: string | null;
@@ -183,15 +236,18 @@ function MemberRowItem({
   canManage: boolean;
   ownerCount: number;
   adminCount: number;
+  scopedLocationIds: string[];
+  locationsById: Map<string, LocationRow>;
 }) {
   const isSoleOwner = member.role === "owner" && ownerCount <= 1;
   const isSoleAdmin =
     (member.role === "owner" || member.role === "admin") && adminCount <= 1;
   const canRemove =
     canManage && !isSoleOwner && !(isCurrentUser && isSoleAdmin);
+  const isHm = member.role === "hiring_manager";
 
   return (
-    <li className="border-b border-[var(--rule)] py-5 px-2 flex items-center gap-6 hover:bg-cream/40 transition-colors">
+    <li className="border-b border-[var(--rule)] py-5 px-2 flex items-start gap-6 hover:bg-cream/40 transition-colors">
       <div className="h-10 w-10 rounded-full bg-cream border border-[var(--rule-strong)] flex items-center justify-center flex-shrink-0">
         <span className="text-[12px] font-bold text-ink">
           {(member.full_name?.[0] ?? email?.[0] ?? "?").toUpperCase()}
@@ -211,6 +267,29 @@ function MemberRowItem({
         <div className="text-[12px] tracking-[0.3px] text-slate-meta">
           {email ?? "—"} · Joined {formatDate(member.created_at)}
         </div>
+        {isHm && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {scopedLocationIds.length === 0 ? (
+              <span className="text-[11px] tracking-[0.3px] text-red-700">
+                No locations assigned — this user can&apos;t see anything.
+              </span>
+            ) : (
+              scopedLocationIds.map((id) => {
+                const loc = locationsById.get(id);
+                if (!loc) return null;
+                return (
+                  <span
+                    key={id}
+                    className="inline-flex items-center px-2 py-0.5 bg-cream border border-[var(--rule-strong)] text-[10px] font-semibold tracking-[0.4px] text-ink"
+                  >
+                    {loc.name}
+                    {loc.state ? ` · ${loc.state}` : ""}
+                  </span>
+                );
+              })
+            )}
+          </div>
+        )}
       </div>
 
       <RoleControl
@@ -244,14 +323,19 @@ function RoleControl({
   canManage: boolean;
   isSoleOwner: boolean;
 }) {
-  // If the viewer can't manage, or the row is the sole owner, just show
-  // the badge — no editable control.
-  if (!canManage || isSoleOwner || member.role === "owner") {
+  // If the viewer can't manage, the row is the sole owner, or the row is a
+  // hiring manager (role is set on invite, not editable via the simple
+  // dropdown), just show the badge.
+  if (
+    !canManage ||
+    isSoleOwner ||
+    member.role === "owner" ||
+    member.role === "hiring_manager"
+  ) {
     return <RoleBadge role={member.role} />;
   }
 
-  // Allow toggling between admin and recruiter (owner is set-once via
-  // the unique partial index on dso_users).
+  // Allow toggling between admin and recruiter for non-HM, non-owner members.
   return <RoleSelect dsoUserId={member.id} currentRole={member.role} />;
 }
 
@@ -261,21 +345,31 @@ function RoleBadge({ role }: { role: string }) {
       ? "bg-ink text-ivory"
       : role === "admin"
         ? "bg-heritage text-ivory"
-        : "bg-cream text-ink border border-[var(--rule-strong)]";
+        : role === "hiring_manager"
+          ? "bg-heritage-light text-ink border border-heritage"
+          : "bg-cream text-ink border border-[var(--rule-strong)]";
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase ${cls}`}
+      className={`inline-flex items-center px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase whitespace-nowrap ${cls}`}
     >
       {ROLE_LABELS[role] ?? role}
     </span>
   );
 }
 
-function InviteRowItem({ invitation }: { invitation: InviteRow }) {
+function InviteRowItem({
+  invitation,
+  locationsById,
+}: {
+  invitation: InviteRow;
+  locationsById: Map<string, LocationRow>;
+}) {
   const expiresIn = daysUntil(invitation.expires_at);
+  const scopedIds = invitation.scoped_location_ids ?? [];
+  const isHm = invitation.role === "hiring_manager";
 
   return (
-    <li className="border-b border-[var(--rule)] py-4 px-2 flex items-center gap-6 hover:bg-cream/40 transition-colors">
+    <li className="border-b border-[var(--rule)] py-4 px-2 flex items-start gap-6 hover:bg-cream/40 transition-colors">
       <div className="h-10 w-10 rounded-full bg-ivory-deep border border-[var(--rule)] flex items-center justify-center flex-shrink-0">
         <UserPlus className="h-4 w-4 text-slate-meta" />
       </div>
@@ -293,6 +387,23 @@ function InviteRowItem({ invitation }: { invitation: InviteRow }) {
             ? `Expires in ${expiresIn} ${expiresIn === 1 ? "day" : "days"}`
             : "Expired"}
         </div>
+        {isHm && scopedIds.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {scopedIds.map((id) => {
+              const loc = locationsById.get(id);
+              if (!loc) return null;
+              return (
+                <span
+                  key={id}
+                  className="inline-flex items-center px-2 py-0.5 bg-cream border border-[var(--rule-strong)] text-[10px] font-semibold tracking-[0.4px] text-ink"
+                >
+                  {loc.name}
+                  {loc.state ? ` · ${loc.state}` : ""}
+                </span>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <form action={revokeInvitation}>

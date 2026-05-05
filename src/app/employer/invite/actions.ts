@@ -42,7 +42,9 @@ export async function acceptInvitation(formData: FormData): Promise<void> {
   // Validate the invitation
   const { data: invitation } = await admin
     .from("dso_invitations")
-    .select("id, dso_id, email, role, expires_at, accepted_at, revoked_at")
+    .select(
+      "id, dso_id, email, role, scoped_location_ids, expires_at, accepted_at, revoked_at"
+    )
     .eq("token", token)
     .maybeSingle();
 
@@ -77,18 +79,52 @@ export async function acceptInvitation(formData: FormData): Promise<void> {
 
   // Insert the dso_users row + mark the invitation accepted (service-role
   // bypasses RLS — needed because the invitee isn't a member yet).
-  const { error: insertError } = await admin.from("dso_users").insert({
-    auth_user_id: user.id,
-    dso_id: invitation.dso_id as string,
-    role: invitation.role as string,
-    full_name: fullName,
-  });
+  const { data: insertedDsoUser, error: insertError } = await admin
+    .from("dso_users")
+    .insert({
+      auth_user_id: user.id,
+      dso_id: invitation.dso_id as string,
+      role: invitation.role as string,
+      full_name: fullName,
+    })
+    .select("id")
+    .single();
 
-  if (insertError) {
+  if (insertError || !insertedDsoUser) {
     // Could happen if there's a concurrent acceptance or a role-uniqueness
     // collision (the unique partial index on dso_users would block adding
-    // a second owner via this path, but invites only ever set admin/recruiter).
+    // a second owner via this path, but invites only ever set admin /
+    // recruiter / hiring_manager).
     redirect(`/employer/invite/${token}?error=insert`);
+  }
+
+  // For hiring_manager invites, create one dso_user_locations row per
+  // scoped location. Service-role bypasses the RLS gate on insert (which
+  // requires owner/admin), since the invitee isn't an admin themselves.
+  const scopedLocationIds = (invitation.scoped_location_ids as
+    | string[]
+    | null) ?? [];
+  if (
+    invitation.role === "hiring_manager" &&
+    scopedLocationIds.length > 0
+  ) {
+    const { error: locationsError } = await admin
+      .from("dso_user_locations")
+      .insert(
+        scopedLocationIds.map((locId) => ({
+          dso_user_id: insertedDsoUser.id as string,
+          dso_location_id: locId,
+        }))
+      );
+    if (locationsError) {
+      // Roll back the dso_users insert so the user can retry. Otherwise
+      // they'd be stuck as an unscoped HM and unable to see anything.
+      await admin
+        .from("dso_users")
+        .delete()
+        .eq("id", insertedDsoUser.id as string);
+      redirect(`/employer/invite/${token}?error=locations`);
+    }
   }
 
   await admin
