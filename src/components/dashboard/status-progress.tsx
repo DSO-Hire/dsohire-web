@@ -21,6 +21,14 @@ import { Check } from "lucide-react";
 
 interface StatusProgressProps {
   status: string;
+  /**
+   * When true (employer set hide_stages_from_candidate=true on the job),
+   * the strip renders an abstracted "In review" label until the
+   * application reaches Offer or Hired (terminal-positive stages where
+   * abstraction adds no protection and just confuses the candidate).
+   * Closed-state (rejected / withdrawn) is shown as normal.
+   */
+  hideStages?: boolean;
 }
 
 const STAGES: { key: string; label: string }[] = [
@@ -31,9 +39,35 @@ const STAGES: { key: string; label: string }[] = [
   { key: "hired", label: "Hired" },
 ];
 
-export function StatusProgress({ status }: StatusProgressProps) {
+export function StatusProgress({ status, hideStages }: StatusProgressProps) {
   const isClosed = status === "rejected" || status === "withdrawn";
   const currentIndex = STAGES.findIndex((s) => s.key === status);
+
+  // Abstracted "In review" mode — employer hid stage detail. We keep the
+  // 5-dot strip rendered (so layout matches everywhere else) but with
+  // every dot dim and a single "In review" pill at the end.
+  // Exception: Offer and Hired are positive outcomes, so we always
+  // surface those even when hideStages is on. Closed states render
+  // normally below.
+  if (
+    hideStages &&
+    !isClosed &&
+    status !== "offered" &&
+    status !== "hired"
+  ) {
+    return (
+      <div className="flex items-center gap-1.5">
+        {STAGES.map((stage) => (
+          <div key={stage.key} className="flex items-center gap-1.5">
+            <span className="block w-1.5 h-1.5 rounded-full bg-slate-200" />
+          </div>
+        ))}
+        <span className="ml-2 text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
+          In review
+        </span>
+      </div>
+    );
+  }
 
   if (isClosed) {
     const closedLabel = status === "rejected" ? "Not selected" : "Withdrawn";

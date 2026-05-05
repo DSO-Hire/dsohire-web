@@ -96,6 +96,7 @@ export async function createJob(
       benefits: parsed.benefits.length > 0 ? parsed.benefits : null,
       requirements: parsed.requirements || null,
       status: parsed.status,
+      hide_stages_from_candidate: parsed.hideStagesFromCandidate,
       posted_at: parsed.status === "active" ? new Date().toISOString() : null,
       created_by: dsoUser?.id ?? null,
     })
@@ -185,6 +186,7 @@ export async function updateJob(
       benefits: parsed.benefits.length > 0 ? parsed.benefits : null,
       requirements: parsed.requirements || null,
       status: parsed.status,
+      hide_stages_from_candidate: parsed.hideStagesFromCandidate,
       posted_at:
         parsed.status === "active" ? new Date().toISOString() : null,
     })
@@ -353,6 +355,7 @@ interface ParsedJobInput {
   locationIds: string[];
   skills: string[];
   screeningQuestions: ScreeningQuestionPayload[];
+  hideStagesFromCandidate: boolean;
 }
 
 const VALID_KINDS: Set<ScreeningQuestionPayload["kind"]> = new Set([
@@ -375,6 +378,8 @@ function parseJobFormData(
   const compMaxRaw = String(formData.get("compensation_max") ?? "").trim();
   const compPeriod = String(formData.get("compensation_period") ?? "").trim();
   const compVisible = formData.get("compensation_visible") === "on";
+  const hideStagesFromCandidate =
+    formData.get("hide_stages_from_candidate") === "on";
   const benefitsRaw = String(formData.get("benefits") ?? "").trim();
   const requirements = String(formData.get("requirements") ?? "").trim();
   const status = String(formData.get("status") ?? "draft");
@@ -502,6 +507,7 @@ function parseJobFormData(
     locationIds,
     skills,
     screeningQuestions,
+    hideStagesFromCandidate,
   };
 }
 

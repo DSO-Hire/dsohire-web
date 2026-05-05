@@ -45,7 +45,9 @@ export default async function CandidateApplicationsPage() {
   const { data: rawJobs } = jobIds.length
     ? await supabase
         .from("jobs")
-        .select("id, title, dso_id, role_category, employment_type")
+        .select(
+          "id, title, dso_id, role_category, employment_type, hide_stages_from_candidate",
+        )
         .in("id", jobIds)
     : { data: [] };
   type JobRow = {
@@ -54,6 +56,7 @@ export default async function CandidateApplicationsPage() {
     dso_id: string;
     role_category: string;
     employment_type: string;
+    hide_stages_from_candidate?: boolean | null;
   };
   const jobs = (rawJobs ?? []) as JobRow[];
   const jobMap = new Map(jobs.map((j) => [j.id, j]));
@@ -150,8 +153,16 @@ export default async function CandidateApplicationsPage() {
                     {/* Status progress strip — replaces the old single-pill
                         badge with a 5-step pipeline visualization so the
                         candidate sees their actual position in the funnel
-                        instead of just a status word. */}
-                    <StatusProgress status={app.status} />
+                        instead of just a status word. When the employer
+                        has hide_stages_from_candidate set on the job, the
+                        strip renders an abstracted "In review" label
+                        instead of the explicit stage. */}
+                    <StatusProgress
+                      status={app.status}
+                      hideStages={
+                        job?.hide_stages_from_candidate ?? false
+                      }
+                    />
                   </div>
                   <ChevronRight className="h-4 w-4 text-slate-meta flex-shrink-0 mt-1" />
                 </div>

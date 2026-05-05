@@ -87,6 +87,7 @@ export interface JobWizardInitial {
   status: string;
   location_ids: string[];
   skills: string[];
+  hide_stages_from_candidate: boolean;
 }
 
 interface JobWizardProps {
@@ -187,6 +188,9 @@ export function JobWizard({
   const [compVisible, setCompVisible] = useState(
     initial?.compensation_visible ?? true
   );
+  const [hideStagesFromCandidate, setHideStagesFromCandidate] = useState(
+    initial?.hide_stages_from_candidate ?? false
+  );
   const [skills, setSkills] = useState(initial?.skills.join(", ") ?? "");
   const [benefits, setBenefits] = useState(initial?.benefits.join(", ") ?? "");
   const [requirements, setRequirements] = useState(
@@ -267,6 +271,8 @@ export function JobWizard({
     formData.set("compensation_max", compMax);
     formData.set("compensation_period", compPeriod);
     if (compVisible) formData.set("compensation_visible", "on");
+    if (hideStagesFromCandidate)
+      formData.set("hide_stages_from_candidate", "on");
     formData.set("skills", skills);
     formData.set("benefits", benefits);
     formData.set("requirements", requirements);
@@ -374,6 +380,8 @@ export function JobWizard({
             onBenefits={setBenefits}
             requirements={requirements}
             onRequirements={setRequirements}
+            hideStagesFromCandidate={hideStagesFromCandidate}
+            onHideStagesFromCandidate={setHideStagesFromCandidate}
           />
         )}
 
@@ -681,6 +689,8 @@ function DetailsStep({
   onBenefits,
   requirements,
   onRequirements,
+  hideStagesFromCandidate,
+  onHideStagesFromCandidate,
 }: {
   compMin: string;
   onCompMin: (v: string) => void;
@@ -696,6 +706,8 @@ function DetailsStep({
   onBenefits: (v: string) => void;
   requirements: string;
   onRequirements: (v: string) => void;
+  hideStagesFromCandidate: boolean;
+  onHideStagesFromCandidate: (v: boolean) => void;
 }) {
   return (
     <div className="space-y-7">
@@ -772,6 +784,37 @@ function DetailsStep({
         value={requirements}
         onChange={onRequirements}
       />
+
+      {/* Candidate visibility — escape-hatch toggle for sensitive roles. We
+          ship candidate-transparent by default (DSO Hire's stance), but the
+          toggle is here for the rare role (executive, sensitive search)
+          where the employer wants minimal stage visibility on the candidate
+          side. */}
+      <fieldset className="border border-[var(--rule)] p-6 bg-cream/40">
+        <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
+          Candidate visibility
+        </legend>
+        <label className="mt-2 flex items-start gap-2.5 text-[14px] text-ink cursor-pointer">
+          <input
+            type="checkbox"
+            checked={hideStagesFromCandidate}
+            onChange={(e) => onHideStagesFromCandidate(e.target.checked)}
+            className="mt-1 accent-heritage"
+          />
+          <div>
+            <div className="font-bold mb-1">
+              Hide pipeline stages from candidates
+            </div>
+            <div className="text-[13px] text-slate-body leading-relaxed">
+              By default, candidates see exactly where they sit in the
+              pipeline — Submitted, Screening, Interview, Offer. Turn this on
+              for a sensitive role and candidates will see an abstracted
+              &ldquo;In review&rdquo; label until they reach Offer or Hired.
+              Most roles should leave this off.
+            </div>
+          </div>
+        </label>
+      </fieldset>
     </div>
   );
 }
