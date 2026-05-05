@@ -90,7 +90,7 @@ export default function ContactPage() {
                 DSO Hire LLC
               </div>
               <p className="text-[13px] text-slate-body leading-[1.7]">
-                Founded 2026 · Operator-led, US-hosted, bootstrapped.
+                Founded 2026 · Operator-led, US-hosted, dental-focused.
               </p>
             </div>
           </div>

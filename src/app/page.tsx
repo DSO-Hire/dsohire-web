@@ -69,7 +69,7 @@ function Hero() {
               <span className="text-heritage-deep">★</span>
               <span>Built for DSOs</span>
               <span className="text-heritage-deep">·</span>
-              <span>10–50 practices</span>
+              <span>10+ practices</span>
               <span className="text-heritage-deep">·</span>
               <span>Flat monthly fee</span>
             </span>
@@ -89,7 +89,7 @@ function Hero() {
           </h1>
 
           <p className="text-lg sm:text-xl text-slate-body leading-relaxed max-w-[520px] mb-10">
-            Built for dental support organizations operating 10–50 practices. Post unlimited
+            Built for multi-location dental support organizations. Post unlimited
             roles across every location for a flat monthly subscription — no per-listing
             charges, no 15–25% placement fees, no recruiter middlemen.
           </p>
@@ -334,7 +334,7 @@ function ProofStrip() {
           <strong className="text-ink">Mid-Market DSO Operators</strong>
         </div>
         <div className="flex flex-wrap gap-9 items-center">
-          <ProofTagline>10–50 Locations</ProofTagline>
+          <ProofTagline>Multi-Location DSOs</ProofTagline>
           <ProofTagline>Unlimited Listings</ProofTagline>
           <ProofTagline>Flat Monthly Fee</ProofTagline>
           <ProofTagline>No Placement Charges</ProofTagline>
@@ -815,7 +815,7 @@ function FinalCta() {
         </h2>
         <p className="text-base text-slate-body leading-[1.7] mb-9">
           One flat monthly subscription covers every practice. No per-listing fees,
-          no placement commissions. Sized to DSOs operating 10–50 practices.
+          no placement commissions. Built for multi-location DSOs at every scale.
         </p>
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Link

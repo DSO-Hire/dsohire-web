@@ -1,8 +1,8 @@
 /**
  * /for-dsos — long-form pitch page for DSO operators.
  *
- * Audience: COO / VP HR / Director of Recruiting at DSOs running 10–50
- * practices, currently using DentalPost or staffing agencies.
+ * Audience: COO / VP HR / Director of Recruiting at multi-location DSOs,
+ * currently using DentalPost or staffing agencies.
  *
  * Goal: convert from "browsing" to "Start with Starter" or "Contact Sales".
  */
@@ -15,7 +15,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "For DSOs",
   description:
-    "Why mid-market DSOs running 10–50 practice locations should switch from DentalPost or staffing agencies to a flat-fee job board built for operators.",
+    "Why multi-location DSOs should switch from DentalPost or staffing agencies to a flat-fee job board built for operators.",
 };
 
 export default function ForDsosPage() {
@@ -46,7 +46,7 @@ function Hero() {
         Stop paying placement fees on roles you&apos;d hire anyway.
       </h1>
       <p className="text-lg sm:text-xl text-slate-body leading-relaxed max-w-[640px] mb-10">
-        Mid-market DSOs running 10–50 practices spend $50K–$300K a year on
+        Multi-location DSOs spend $50K–$300K a year on
         per-listing fees and 15–25% staffing-agency placement charges. DSO Hire
         replaces all of it with one flat monthly subscription.
       </p>

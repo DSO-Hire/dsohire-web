@@ -25,7 +25,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Browse Dental Jobs",
   description:
-    "Browse jobs at verified dental support organizations. Hygienist, associate dentist, office manager, and specialist roles posted by DSOs running 10–50 practices.",
+    "Browse jobs at verified dental support organizations. Hygienist, associate dentist, office manager, and specialist roles posted by multi-location DSOs.",
 };
 
 const ROLE_LABELS: Record<string, string> = {

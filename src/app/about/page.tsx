@@ -14,7 +14,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "DSO Hire is the job board built specifically for multi-location dental support organizations. Operator-led, bootstrapped, no placement fees ever.",
+    "DSO Hire is the job board built specifically for multi-location dental support organizations. Operator-led, dental-focused, no placement fees ever.",
 };
 
 export default function AboutPage() {
@@ -110,9 +110,9 @@ const PRINCIPLES = [
     body: "We don't sell candidate data. We don't broker candidates to recruiters who didn't post the job. The platform exists to deliver applications to the DSO that posted, full stop.",
   },
   {
-    eyebrow: "Slow software, on purpose",
-    title: "We ship deliberately. The product gets stable, then it gets bigger.",
-    body: "The dental industry has been burned by VC-backed platforms that sprinted, raised, and disappeared. DSO Hire is bootstrapped and intentionally small. The trade-off: features take a little longer; the platform is around in five years.",
+    eyebrow: "Built to last",
+    title: "The platform you sign with today is the platform you'll have in five years.",
+    body: "The dental industry has been burned by VC-backed platforms that sprinted, raised, and disappeared. DSO Hire is independent and dental-only — no pivot pressure, no acquisition fire-sale, no quarterly growth math forcing a roadmap to chase whatever's hot. Multi-location DSO hiring is the entire mission, and the platform is built to still be running it five years from now.",
   },
 ];
 
