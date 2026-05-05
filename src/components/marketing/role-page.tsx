@@ -1,59 +1,26 @@
 /**
- * /for-[role] — dynamic role-specific landing pages.
+ * RolePage — shared component that renders a /for-{role} marketing page
+ * from a RoleConfig.
  *
- * One file → six rendered pages: /for-dentists, /for-specialists,
- * /for-hygienists, /for-dental-assistants, /for-front-desk, and
- * /for-office-managers.
+ * Lives outside the Next.js routing tree so the six role pages can each
+ * import and call it. Each /for-{role}/page.tsx file is a tiny shim that
+ * pulls its config and returns <RolePage config={...} />.
  *
- * Config lives in `./role-config.ts`. Adding a new role page is as simple
- * as appending an entry to the ROLE_CONFIGS array — no new file required.
- *
- * Page structure mirrors /for-candidates (the hub) but is fully role-
- * specific. Each role page links back to /for-candidates and sideways to
- * other related role pages, so the candidate-side mini-site is internally
- * navigable from any entry point.
- *
- * Static params are pre-generated at build time so all six pages are
- * statically rendered (good for SEO, no per-request DB hit).
+ * Why six static folders instead of a single dynamic route: Next.js App
+ * Router doesn't support partial dynamic segments. A folder named
+ * `for-[role]` is interpreted as a literal name, not as `for-` + dynamic
+ * `[role]` param. Lesson logged in memory.
  */
 
-import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, ArrowLeft, Sparkles } from "lucide-react";
 import { SiteShell } from "@/components/marketing/site-shell";
 import {
   ROLE_BY_SLUG,
-  ROLE_CONFIGS,
-  ROLE_SLUGS,
   type RoleConfig,
-} from "./role-config";
-import type { Metadata } from "next";
+} from "@/lib/roles/role-config";
 
-interface PageProps {
-  params: Promise<{ role: string }>;
-}
-
-export function generateStaticParams() {
-  return ROLE_SLUGS.map((role) => ({ role }));
-}
-
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
-  const { role } = await params;
-  const config = ROLE_BY_SLUG[role];
-  if (!config) return { title: "Role not found" };
-  return {
-    title: `For ${config.label}`,
-    description: config.metaDescription,
-  };
-}
-
-export default async function RolePage({ params }: PageProps) {
-  const { role } = await params;
-  const config = ROLE_BY_SLUG[role];
-  if (!config) notFound();
-
+export function RolePage({ config }: { config: RoleConfig }) {
   return (
     <SiteShell>
       <Hero config={config} />
@@ -71,7 +38,7 @@ export default async function RolePage({ params }: PageProps) {
 function Hero({ config }: { config: RoleConfig }) {
   const { hero, eyebrow, label, Icon, jobsFilterHref } = config;
 
-  // Split the headline so we can wrap the accent phrase in styled span.
+  // Split the headline so we can wrap the accent phrase in a styled span.
   const accentIndex = hero.headline
     .toLowerCase()
     .indexOf(hero.headlineAccent.toLowerCase());
@@ -79,7 +46,10 @@ function Hero({ config }: { config: RoleConfig }) {
     accentIndex >= 0 ? hero.headline.slice(0, accentIndex) : hero.headline;
   const accent =
     accentIndex >= 0
-      ? hero.headline.slice(accentIndex, accentIndex + hero.headlineAccent.length)
+      ? hero.headline.slice(
+          accentIndex,
+          accentIndex + hero.headlineAccent.length
+        )
       : "";
   const after =
     accentIndex >= 0
@@ -88,7 +58,6 @@ function Hero({ config }: { config: RoleConfig }) {
 
   return (
     <section className="relative overflow-hidden pt-[140px] pb-20 px-6 sm:px-14">
-      {/* Soft heritage glow */}
       <div
         aria-hidden
         className="absolute -top-[10%] -right-[15%] w-[60vw] h-[60vw] pointer-events-none"
@@ -100,7 +69,6 @@ function Hero({ config }: { config: RoleConfig }) {
       />
 
       <div className="relative z-10 max-w-[1100px] mx-auto">
-        {/* Breadcrumb back to the hub */}
         <Link
           href="/for-candidates"
           className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-8"
@@ -109,7 +77,6 @@ function Hero({ config }: { config: RoleConfig }) {
           All Dental Careers
         </Link>
 
-        {/* Role badge + eyebrow */}
         <div className="flex items-center gap-3.5 mb-6">
           <div className="h-11 w-11 rounded-full bg-heritage/15 flex items-center justify-center flex-shrink-0">
             <Icon className="h-5 w-5 text-heritage-deep" />
@@ -270,7 +237,6 @@ function Compensation({ config }: { config: RoleConfig }) {
 function RelatedRoles({ config }: { config: RoleConfig }) {
   if (config.relatedRoles.length === 0) return null;
 
-  // Pull the related role configs so we can render their icons + eyebrows too.
   const related = config.relatedRoles
     .map((r) => ROLE_BY_SLUG[r.slug])
     .filter((r): r is RoleConfig => r !== undefined);
