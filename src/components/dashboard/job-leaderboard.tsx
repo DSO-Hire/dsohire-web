@@ -87,7 +87,7 @@ export function JobLeaderboard({
             const intent =
               delta > 0 ? "positive" : delta < 0 ? "negative" : "neutral";
             const sparkStroke =
-              delta < 0 ? "#b91c1c" : "var(--heritage)";
+              delta < 0 ? "#b91c1c" : "var(--color-heritage, #4D7A60)";
             const sparkFill =
               delta < 0 ? "rgba(185,28,28,0.10)" : "rgba(77,122,96,0.12)";
             return (

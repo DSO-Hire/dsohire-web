@@ -125,13 +125,13 @@ export function PipelineFunnel({
               <div className="text-[28px] sm:text-[32px] font-black tracking-[-1.2px] leading-none text-ink mb-2">
                 {count}
               </div>
-              <div className="h-3 bg-cream relative mb-2.5">
-                <span
-                  className="absolute top-0 left-0 bottom-0"
+              <div className="h-4 bg-cream relative mb-2.5">
+                <div
+                  className="absolute inset-y-0 left-0 block"
                   style={{
                     width: `${Math.max(pct, count > 0 ? 4 : 0)}%`,
-                    background:
-                      "linear-gradient(to right, var(--heritage), rgba(141,184,163,1))",
+                    backgroundImage:
+                      "linear-gradient(to right, var(--color-ink, #14233F), var(--color-heritage, #4D7A60))",
                   }}
                 />
               </div>

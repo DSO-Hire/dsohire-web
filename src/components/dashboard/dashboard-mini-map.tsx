@@ -136,7 +136,7 @@ export function DashboardMiniMap({
             preserveAspectRatio="xMidYMid slice"
             style={{
               background:
-                "radial-gradient(ellipse 380px 260px at 35% 50%, #e8e0c8 0%, transparent 70%), radial-gradient(ellipse 280px 200px at 70% 70%, #ddd4b8 0%, transparent 65%), var(--cream, #f1ece0)",
+                "radial-gradient(ellipse 380px 260px at 35% 50%, #e8e0c8 0%, transparent 70%), radial-gradient(ellipse 280px 200px at 70% 70%, #ddd4b8 0%, transparent 65%), var(--color-cream, #FAF7F1)",
             }}
             role="img"
             aria-label={`Application density map across ${projected.length} locations`}
@@ -169,10 +169,10 @@ export function DashboardMiniMap({
               const isTop = loc.applicationCount === maxApps;
               const isMid = ratio >= 0.5 && !isTop;
               const fill = isTop
-                ? "var(--heritage)"
+                ? "var(--color-heritage, #4D7A60)"
                 : isMid
-                  ? "var(--heritage-deep)"
-                  : "var(--ink)";
+                  ? "var(--color-heritage-deep, #2F5D4F)"
+                  : "var(--color-ink, #14233F)";
               return (
                 <g key={loc.id} transform={`translate(${x}, ${y})`}>
                   <circle
@@ -180,14 +180,14 @@ export function DashboardMiniMap({
                     cy={0}
                     r={r}
                     fill={fill}
-                    stroke="var(--ivory)"
+                    stroke="var(--color-ivory, #F7F4ED)"
                     strokeWidth={3}
                   />
                   <text
                     x={0}
                     y={4}
                     textAnchor="middle"
-                    fill="var(--ivory)"
+                    fill="var(--color-ivory, #F7F4ED)"
                     fontFamily="Manrope, sans-serif"
                     fontWeight={800}
                     fontSize={isTop ? 18 : isMid ? 15 : 13}
@@ -203,7 +203,7 @@ export function DashboardMiniMap({
                         y={-9}
                         width={(loc.city.length * 6) + 14}
                         height={18}
-                        fill="var(--ivory)"
+                        fill="var(--color-ivory, #F7F4ED)"
                         stroke="var(--rule)"
                         strokeWidth={1}
                       />
@@ -211,7 +211,7 @@ export function DashboardMiniMap({
                         x={0}
                         y={3.5}
                         textAnchor="middle"
-                        fill="var(--ink)"
+                        fill="var(--color-ink, #14233F)"
                         fontFamily="Manrope, sans-serif"
                         fontWeight={700}
                         fontSize={11}

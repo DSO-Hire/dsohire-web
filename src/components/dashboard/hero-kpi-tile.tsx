@@ -90,8 +90,8 @@ export function HeroKpiTile({
       <span
         className="absolute top-0 left-0 bottom-0 w-1"
         style={{
-          background:
-            "linear-gradient(to bottom, var(--heritage), rgba(141,184,163,1))",
+          backgroundImage:
+            "linear-gradient(to bottom, var(--color-heritage, #4D7A60), #8db8a3)",
         }}
         aria-hidden
       />
