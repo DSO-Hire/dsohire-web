@@ -3,7 +3,7 @@
  */
 
 import Link from "next/link";
-import { ChevronRight, Briefcase } from "lucide-react";
+import { ChevronRight, Briefcase, MessageCircle } from "lucide-react";
 import { CandidateShell } from "@/components/candidate/candidate-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
@@ -75,6 +75,27 @@ export default async function CandidateApplicationsPage() {
   const dsos = (rawDsos ?? []) as DsoRow[];
   const dsoMap = new Map(dsos.map((d) => [d.id, d]));
 
+  // Unread inbound messages per application — view filters by participant
+  // RLS, so we only see counts on applications we own. We only care about
+  // employer-sent messages here (the badge surfaces "they replied to you").
+  const appIds = apps.map((a) => a.id);
+  const { data: rawUnread } = appIds.length
+    ? await supabase
+        .from("application_message_unread_counts")
+        .select("application_id, sender_role, unread_count")
+        .in("application_id", appIds)
+        .eq("sender_role", "employer")
+    : { data: [] };
+  type UnreadRow = {
+    application_id: string;
+    sender_role: string;
+    unread_count: number;
+  };
+  const unread = (rawUnread ?? []) as UnreadRow[];
+  const unreadByAppId = new Map(
+    unread.map((u) => [u.application_id, u.unread_count])
+  );
+
   return (
     <CandidateShell active="applications">
       <header className="mb-8">
@@ -111,15 +132,16 @@ export default async function CandidateApplicationsPage() {
           {apps.map((app) => {
             const job = jobMap.get(app.job_id);
             const dso = job ? dsoMap.get(job.dso_id) : null;
+            const unreadCount = unreadByAppId.get(app.id) ?? 0;
             return (
               <Link
                 key={app.id}
-                href={`/jobs/${app.job_id}`}
+                href={`/candidate/applications/${app.id}`}
                 className="block p-5 border-b border-[var(--rule)] last:border-0 hover:bg-cream transition-colors"
               >
                 <div className="flex items-start justify-between gap-4 flex-wrap">
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-3 mb-1">
+                    <div className="flex items-center gap-3 mb-1 flex-wrap">
                       <div className="text-[15px] font-bold text-ink truncate">
                         {job?.title ?? "Job removed"}
                       </div>
@@ -128,6 +150,12 @@ export default async function CandidateApplicationsPage() {
                       >
                         {STATUS_LABELS[app.status] ?? app.status}
                       </span>
+                      {unreadCount > 0 && (
+                        <span className="inline-flex items-center gap-1 text-[9px] font-bold tracking-[1.5px] uppercase px-2 py-1 bg-heritage/15 text-heritage-deep">
+                          <MessageCircle className="h-3 w-3" />
+                          {unreadCount} new
+                        </span>
+                      )}
                     </div>
                     <div className="text-[13px] text-slate-body">
                       {dso?.name ?? "Unknown DSO"} · Applied {new Date(app.created_at).toLocaleDateString()}

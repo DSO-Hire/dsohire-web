@@ -191,7 +191,7 @@ export default async function CandidateDashboardPage() {
               return (
                 <Link
                   key={app.id}
-                  href={`/jobs/${app.job_id}`}
+                  href={`/candidate/applications/${app.id}`}
                   className="bg-white p-5 hover:bg-cream transition-colors flex items-center justify-between gap-4"
                 >
                   <div className="min-w-0">

@@ -1,7 +1,7 @@
 /**
  * Database type — generated from the live schema.
  *
- * Regenerated 2026-05-04 (Phase 5D ai_usage_events migration) via the
+ * Regenerated 2026-05-04 (Phase 5A application_messages migration) via the
  * Supabase MCP `generate_typescript_types` tool against project
  * viapivvlhjqvjhoflxmp (dsohire-prod). Do not hand-edit; rerun after each
  * migration that touches table shape, enum values, or RPC signatures.
@@ -151,6 +151,63 @@ export type Database = {
           {
             foreignKeyName: "application_comments_author_dso_user_id_fkey"
             columns: ["author_dso_user_id"]
+            isOneToOne: false
+            referencedRelation: "dso_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      application_messages: {
+        Row: {
+          application_id: string
+          body: string
+          created_at: string
+          deleted_at: string | null
+          edited_at: string | null
+          id: string
+          read_at: string | null
+          sender_dso_user_id: string | null
+          sender_role: string
+          sender_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          body: string
+          created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
+          id?: string
+          read_at?: string | null
+          sender_dso_user_id?: string | null
+          sender_role: string
+          sender_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          body?: string
+          created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
+          id?: string
+          read_at?: string | null
+          sender_dso_user_id?: string | null
+          sender_role?: string
+          sender_user_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_messages_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_messages_sender_dso_user_id_fkey"
+            columns: ["sender_dso_user_id"]
             isOneToOne: false
             referencedRelation: "dso_users"
             referencedColumns: ["id"]
@@ -1083,6 +1140,22 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "application_comments_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      application_message_unread_counts: {
+        Row: {
+          application_id: string | null
+          sender_role: string | null
+          unread_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_messages_application_id_fkey"
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "applications"

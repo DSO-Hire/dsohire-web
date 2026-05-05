@@ -34,6 +34,8 @@ import {
   type CommentDsoUser,
   type InitialComment,
 } from "./comments-thread";
+import { MessagesThread } from "@/components/messaging/messages-thread";
+import type { ApplicationMessageRow } from "@/lib/messages/actions";
 import {
   ScorecardsSection,
   type InitialScorecard,
@@ -261,6 +263,45 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     fullName: u.full_name,
     role: u.role,
   }));
+
+  // ── Direct candidate ↔ DSO messages thread (separate from internal
+  // comments). Server-fetch in chronological order; the client component
+  // renders + subscribes to realtime + handles read-receipts.
+  const { data: rawMessages } = await supabase
+    .from("application_messages")
+    .select(
+      "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at"
+    )
+    .eq("application_id", appId)
+    .order("created_at", { ascending: true });
+
+  type MessageRow = {
+    id: string;
+    application_id: string;
+    sender_user_id: string;
+    sender_role: "candidate" | "employer";
+    sender_dso_user_id: string | null;
+    body: string;
+    read_at: string | null;
+    created_at: string;
+    updated_at: string;
+    edited_at: string | null;
+    deleted_at: string | null;
+  };
+  const initialMessages = ((rawMessages ?? []) as MessageRow[]).map(
+    (m): ApplicationMessageRow => ({
+      ...m,
+      sender_role:
+        m.sender_role === "candidate" ? "candidate" : "employer",
+    })
+  );
+  // Unread count of messages from the candidate (we only badge inbound).
+  const candidateUnreadCount = initialMessages.filter(
+    (m) =>
+      !m.deleted_at &&
+      !m.read_at &&
+      m.sender_role === "candidate"
+  ).length;
 
   const { data: rawComments } = await supabase
     .from("application_comments")
@@ -627,6 +668,36 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               rubric={scorecardRubric}
               initialMyScorecard={initialMyScorecard}
               initialOtherScorecards={initialOtherScorecards}
+            />
+          </section>
+
+          {/* Direct candidate ↔ DSO messages */}
+          <section>
+            <div className="flex items-baseline gap-3 mb-3 flex-wrap">
+              <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta">
+                Messages with candidate
+              </h2>
+              {candidateUnreadCount > 0 && (
+                <span className="text-[9px] font-bold tracking-[1.5px] uppercase px-2 py-0.5 bg-heritage/15 text-heritage-deep">
+                  {candidateUnreadCount} unread
+                </span>
+              )}
+            </div>
+            <p className="text-[12px] text-slate-meta mb-3">
+              Two-way messaging with{" "}
+              <span className="font-bold text-ink">{displayName}</span>. Visible
+              to your team and the candidate. Internal team comments are below.
+            </p>
+            <MessagesThread
+              applicationId={app.id}
+              currentUserId={user.id}
+              currentUserRole="employer"
+              currentUserName={
+                dsoUsersRows.find((u) => u.auth_user_id === user.id)
+                  ?.full_name ?? "You"
+              }
+              otherPartyName={displayName}
+              initialMessages={initialMessages}
             />
           </section>
 
