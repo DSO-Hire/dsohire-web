@@ -6,19 +6,10 @@ import Link from "next/link";
 import { ChevronRight, Briefcase, MessageCircle } from "lucide-react";
 import { CandidateShell } from "@/components/candidate/candidate-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { StatusProgress } from "@/components/dashboard/status-progress";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "My Applications" };
-
-const STATUS_LABELS: Record<string, string> = {
-  new: "Submitted",
-  reviewed: "Reviewed",
-  interviewing: "Interviewing",
-  offered: "Offer extended",
-  hired: "Hired",
-  rejected: "Not selected",
-  withdrawn: "Withdrawn",
-};
 
 export default async function CandidateApplicationsPage() {
   const supabase = await createSupabaseServerClient();
@@ -141,15 +132,10 @@ export default async function CandidateApplicationsPage() {
               >
                 <div className="flex items-start justify-between gap-4 flex-wrap">
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-3 mb-1 flex-wrap">
+                    <div className="flex items-center gap-3 mb-1.5 flex-wrap">
                       <div className="text-[15px] font-bold text-ink truncate">
                         {job?.title ?? "Job removed"}
                       </div>
-                      <span
-                        className={`text-[9px] font-bold tracking-[1.5px] uppercase px-2.5 py-1 ${statusBadgeClass(app.status)}`}
-                      >
-                        {STATUS_LABELS[app.status] ?? app.status}
-                      </span>
                       {unreadCount > 0 && (
                         <span className="inline-flex items-center gap-1 text-[9px] font-bold tracking-[1.5px] uppercase px-2 py-1 bg-heritage/15 text-heritage-deep">
                           <MessageCircle className="h-3 w-3" />
@@ -157,9 +143,15 @@ export default async function CandidateApplicationsPage() {
                         </span>
                       )}
                     </div>
-                    <div className="text-[14px] text-slate-body">
-                      {dso?.name ?? "Unknown DSO"} · Applied {new Date(app.created_at).toLocaleDateString()}
+                    <div className="text-[14px] text-slate-body mb-3">
+                      {dso?.name ?? "Unknown DSO"} · Applied{" "}
+                      {new Date(app.created_at).toLocaleDateString()}
                     </div>
+                    {/* Status progress strip — replaces the old single-pill
+                        badge with a 5-step pipeline visualization so the
+                        candidate sees their actual position in the funnel
+                        instead of just a status word. */}
+                    <StatusProgress status={app.status} />
                   </div>
                   <ChevronRight className="h-4 w-4 text-slate-meta flex-shrink-0 mt-1" />
                 </div>
@@ -170,23 +162,4 @@ export default async function CandidateApplicationsPage() {
       )}
     </CandidateShell>
   );
-}
-
-function statusBadgeClass(status: string): string {
-  switch (status) {
-    case "new":
-      return "bg-cream text-ink";
-    case "reviewed":
-      return "bg-blue-50 text-blue-900";
-    case "interviewing":
-      return "bg-heritage/10 text-heritage-deep";
-    case "offered":
-    case "hired":
-      return "bg-emerald-50 text-emerald-900";
-    case "rejected":
-    case "withdrawn":
-      return "bg-slate-100 text-slate-600";
-    default:
-      return "bg-cream text-ink";
-  }
 }

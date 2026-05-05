@@ -10,6 +10,8 @@ import { redirect } from "next/navigation";
 import { ArrowRight, Briefcase, Plus } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { Sparkline } from "@/components/dashboard/sparkline";
+import { TrendPill } from "@/components/dashboard/trend-pill";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Jobs" };
@@ -65,6 +67,58 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
   const { data: jobs } = await query;
   const jobList = (jobs ?? []) as JobRow[];
 
+  // 14-day application velocity per job — used for the per-row sparkline
+  // and week-over-week trend pill on each card. We pull raw rows so we can
+  // bucket per-day in JS (Postgres can group date-trunc here, but the row
+  // count is small enough that JS-side grouping is simpler and lets us
+  // share the same "build a 7-day spark series" helper as the dashboard).
+  const jobIds = jobList.map((j) => j.id);
+  const fourteenDaysAgo = new Date();
+  fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
+  const { data: rawAppEvents } = jobIds.length
+    ? await supabase
+        .from("applications")
+        .select("job_id, created_at")
+        .in("job_id", jobIds)
+        .gte("created_at", fourteenDaysAgo.toISOString())
+    : { data: [] };
+  type AppEventRow = { job_id: string; created_at: string };
+  const appEvents = (rawAppEvents ?? []) as AppEventRow[];
+
+  // Build a Map<jobId, { spark: number[], thisWeek: number, lastWeek: number }>
+  // The spark is 7 buckets covering the last 7 calendar days, oldest first.
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const velocityByJob = new Map<
+    string,
+    { spark: number[]; thisWeek: number; lastWeek: number }
+  >();
+  for (const id of jobIds) {
+    velocityByJob.set(id, {
+      spark: Array(7).fill(0),
+      thisWeek: 0,
+      lastWeek: 0,
+    });
+  }
+  for (const ev of appEvents) {
+    const v = velocityByJob.get(ev.job_id);
+    if (!v) continue;
+    const created = new Date(ev.created_at);
+    created.setHours(0, 0, 0, 0);
+    const daysAgo = Math.round(
+      (today.getTime() - created.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    if (daysAgo >= 0 && daysAgo < 7) {
+      // Sparkline runs oldest → newest, so bucket 0 is "6 days ago" and bucket 6 is "today".
+      v.spark[6 - daysAgo] += 1;
+      v.thisWeek += 1;
+    } else if (daysAgo >= 7 && daysAgo < 14) {
+      v.lastWeek += 1;
+    }
+  }
+
   return (
     <EmployerShell active="jobs">
       <header className="flex flex-wrap items-center justify-between gap-4 mb-8">
@@ -115,9 +169,22 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
         <EmptyState canPostJobs={canPostJobs} />
       ) : (
         <ul className="list-none border-t border-[var(--rule)]">
-          {jobList.map((job) => (
-            <JobRow key={job.id} job={job} />
-          ))}
+          {jobList.map((job) => {
+            const v = velocityByJob.get(job.id) ?? {
+              spark: [],
+              thisWeek: 0,
+              lastWeek: 0,
+            };
+            return (
+              <JobRow
+                key={job.id}
+                job={job}
+                spark={v.spark}
+                thisWeek={v.thisWeek}
+                lastWeek={v.lastWeek}
+              />
+            );
+          })}
         </ul>
       )}
     </EmployerShell>
@@ -137,8 +204,26 @@ interface JobRow {
   updated_at: string;
 }
 
-function JobRow({ job }: { job: JobRow }) {
+function JobRow({
+  job,
+  spark,
+  thisWeek,
+  lastWeek,
+}: {
+  job: JobRow;
+  spark: number[];
+  thisWeek: number;
+  lastWeek: number;
+}) {
   const updated = new Date(job.updated_at);
+  const delta = thisWeek - lastWeek;
+  // Only show the trend pill if there's actually any signal in either of
+  // the two compared weeks — for a job with zero apps in a 14-day window,
+  // showing "0 vs 0" is just noise.
+  const hasTrendSignal = thisWeek > 0 || lastWeek > 0;
+  // Sparkline only earns its space when the job has had at least one app
+  // in the last 7 days; an all-zero spark looks like a glitch.
+  const hasSparkSignal = spark.some((n) => n > 0);
   return (
     <li className="border-b border-[var(--rule)]">
       <Link
@@ -159,11 +244,31 @@ function JobRow({ job }: { job: JobRow }) {
             <div className="text-[17px] font-extrabold tracking-[-0.3px] text-ink leading-tight mb-1 truncate">
               {job.title}
             </div>
-            <div className="text-[12px] tracking-[0.3px] text-slate-meta">
-              Updated {updated.toLocaleDateString()}
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-[12px] tracking-[0.3px] text-slate-meta">
+                Updated {updated.toLocaleDateString()}
+              </span>
+              {hasTrendSignal && (
+                <TrendPill delta={delta} label="vs last week" />
+              )}
             </div>
           </div>
-          <div className="flex items-center gap-8 text-right flex-shrink-0">
+          <div className="flex items-center gap-7 text-right flex-shrink-0">
+            {/* 7-day apps velocity — gives at-a-glance "is this job warming up
+                or cooling off?" without forcing the operator to click in. */}
+            {hasSparkSignal && (
+              <div className="hidden sm:flex flex-col items-end justify-center">
+                <Sparkline
+                  data={spark}
+                  width={88}
+                  height={28}
+                  ariaLabel={`${thisWeek} applications in the last 7 days`}
+                />
+                <div className="text-[9px] font-semibold tracking-[1.5px] uppercase text-slate-meta mt-1">
+                  7-day apps
+                </div>
+              </div>
+            )}
             <Stat label="Apps" value={job.applications_count} />
             <Stat label="Views" value={job.views} />
             <ArrowRight className="h-4 w-4 text-slate-meta group-hover:text-heritage transition-colors" />

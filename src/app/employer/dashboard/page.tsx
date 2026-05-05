@@ -12,7 +12,15 @@
  */
 
 import Link from "next/link";
-import { ArrowRight, Briefcase, ChevronRight, Mail, MapPin, Users } from "lucide-react";
+import {
+  ArrowRight,
+  Briefcase,
+  Mail,
+  MapPin,
+  Users,
+  UserPlus,
+  ArrowRightCircle,
+} from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { BillingBanner } from "@/components/employer/billing-banner";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -22,6 +30,11 @@ import {
   type ApplicationStatus,
 } from "@/lib/applications/stages";
 import { candidateDisplayName } from "@/lib/applications/candidate-display";
+import { KpiTile } from "@/components/dashboard/kpi-tile";
+import {
+  ActivityFeed,
+  type ActivityEvent,
+} from "@/components/dashboard/activity-feed";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -94,6 +107,14 @@ export default async function EmployerDashboard() {
   let openJobsCount = 0;
   let appsThisWeekCount = 0;
   let awaitingReviewCount = 0;
+  // Sparkline + trend-pill enrichments: applications received per day over
+  // the last 14 days. The most recent 7 days drive the sparkline; the
+  // delta vs. the prior 7 days drives the trend pill.
+  let appsLast7Days: number[] = [];
+  let appsWeekOverWeekDelta = 0;
+  // Hint text for the "Awaiting Review" tile — how long the oldest pending
+  // application has been sitting.
+  let oldestAwaitingDays: number | null = null;
 
   let recentApps: DashboardApp[] = [];
   let recentJobMap = new Map<string, DashboardJob>();
@@ -133,25 +154,59 @@ export default async function EmployerDashboard() {
         ),
       );
 
-      const [appsThisWeekRes, awaitingReviewRes, recentAppsRes] =
-        await Promise.all([
-          supabase
-            .from("applications")
-            .select("id", { count: "exact", head: true })
-            .in("job_id", jobIds)
-            .gte("created_at", weekStart.toISOString()),
-          supabase
-            .from("applications")
-            .select("id", { count: "exact", head: true })
-            .in("job_id", jobIds)
-            .eq("status", "new"),
-          supabase
-            .from("applications")
-            .select("id, job_id, candidate_id, status, created_at")
-            .in("job_id", jobIds)
-            .order("created_at", { ascending: false })
-            .limit(5),
-        ]);
+      // 14-day window for sparkline + week-over-week delta.
+      const fourteenDaysAgo = new Date(
+        Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate() - 13,
+          0,
+          0,
+          0,
+          0,
+        ),
+      );
+
+      const [
+        appsThisWeekRes,
+        awaitingReviewRes,
+        oldestAwaitingRes,
+        recentAppsRes,
+        last14DaysRes,
+      ] = await Promise.all([
+        supabase
+          .from("applications")
+          .select("id", { count: "exact", head: true })
+          .in("job_id", jobIds)
+          .gte("created_at", weekStart.toISOString()),
+        supabase
+          .from("applications")
+          .select("id", { count: "exact", head: true })
+          .in("job_id", jobIds)
+          .eq("status", "new"),
+        // Oldest pending application — drives the "Awaiting Review" hint.
+        supabase
+          .from("applications")
+          .select("created_at")
+          .in("job_id", jobIds)
+          .eq("status", "new")
+          .order("created_at", { ascending: true })
+          .limit(1)
+          .maybeSingle(),
+        supabase
+          .from("applications")
+          .select("id, job_id, candidate_id, status, created_at")
+          .in("job_id", jobIds)
+          .order("created_at", { ascending: false })
+          .limit(5),
+        // 14-day raw application timestamps. Group in JS since Supabase's
+        // client doesn't expose GROUP BY without a Postgres function.
+        supabase
+          .from("applications")
+          .select("created_at")
+          .in("job_id", jobIds)
+          .gte("created_at", fourteenDaysAgo.toISOString()),
+      ]);
 
       appsThisWeekCount = appsThisWeekRes.count ?? 0;
       // "Awaiting Review" = candidates that have landed but haven't been
@@ -161,6 +216,42 @@ export default async function EmployerDashboard() {
       // never the right number to surface as "needs action".
       awaitingReviewCount = awaitingReviewRes.count ?? 0;
       recentApps = (recentAppsRes.data ?? []) as DashboardApp[];
+
+      // Compute oldest-awaiting age in days (for the KPI hint).
+      const oldestAwaitingCreated = (
+        oldestAwaitingRes.data as { created_at: string } | null
+      )?.created_at;
+      if (oldestAwaitingCreated) {
+        const ageMs = Date.now() - new Date(oldestAwaitingCreated).getTime();
+        oldestAwaitingDays = Math.max(0, Math.floor(ageMs / 86400000));
+      }
+
+      // Bucket the 14 days of timestamps into per-day counts. Index 0 =
+      // 13 days ago, index 13 = today. We then slice the last 7 for the
+      // sparkline and compare totals across the two halves for the delta.
+      const buckets: number[] = Array.from({ length: 14 }, () => 0);
+      const todayUtc = Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+      );
+      for (const row of (last14DaysRes.data ?? []) as Array<{
+        created_at: string;
+      }>) {
+        const t = new Date(row.created_at);
+        const dayUtc = Date.UTC(
+          t.getUTCFullYear(),
+          t.getUTCMonth(),
+          t.getUTCDate(),
+        );
+        const daysAgo = Math.floor((todayUtc - dayUtc) / 86400000);
+        const idx = 13 - daysAgo;
+        if (idx >= 0 && idx < 14) buckets[idx] += 1;
+      }
+      appsLast7Days = buckets.slice(7);
+      const thisWeekTotal = buckets.slice(7).reduce((a, b) => a + b, 0);
+      const lastWeekTotal = buckets.slice(0, 7).reduce((a, b) => a + b, 0);
+      appsWeekOverWeekDelta = thisWeekTotal - lastWeekTotal;
 
       const candIds = Array.from(new Set(recentApps.map((a) => a.candidate_id)));
       if (candIds.length > 0) {
@@ -191,35 +282,59 @@ export default async function EmployerDashboard() {
       {/* Billing alert — renders nothing when subscription is healthy */}
       <BillingBanner subscription={subscription} />
 
-      {/* KPI cards */}
+      {/* KPI tiles — now with sparklines, trend pills, and contextual
+          secondary lines. Sparkline data only renders when there's actual
+          7-day history; otherwise the tile gracefully omits the chart. */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-[var(--rule)] border border-[var(--rule)]">
-        <KpiCard
-          label="Open Jobs"
-          value={String(openJobsCount)}
+        <KpiTile
           icon={Briefcase}
-          hint={openJobsCount > 0 ? "Live on the board" : "Post your first"}
-        />
-        <KpiCard
-          label="Applications This Week"
-          value={String(appsThisWeekCount)}
-          icon={Mail}
-          hint={appsThisWeekCount > 0 ? "Since Monday" : "No applications yet"}
-        />
-        <KpiCard
-          label="Awaiting Review"
-          value={String(awaitingReviewCount)}
-          icon={Users}
+          value={String(openJobsCount)}
+          label="Open Jobs"
           hint={
-            awaitingReviewCount > 0
-              ? "Move candidates forward"
-              : "All caught up"
+            openJobsCount > 0
+              ? "Live on the board"
+              : "Post your first to start receiving applications"
           }
         />
-        <KpiCard
-          label="Locations"
-          value={String(locationsCount ?? 0)}
+        <KpiTile
+          icon={Mail}
+          value={String(appsThisWeekCount)}
+          label="Applications This Week"
+          hint={
+            appsThisWeekCount > 0
+              ? `Since Monday`
+              : "No applications yet — share the job board to drive traffic"
+          }
+          spark={appsLast7Days.some((v) => v > 0) ? appsLast7Days : undefined}
+          delta={appsWeekOverWeekDelta}
+          deltaLabel="vs last week"
+        />
+        <KpiTile
+          icon={Users}
+          value={String(awaitingReviewCount)}
+          label="Awaiting Review"
+          hint={
+            awaitingReviewCount === 0
+              ? "All caught up"
+              : oldestAwaitingDays !== null && oldestAwaitingDays > 0
+                ? `Oldest waiting ${oldestAwaitingDays}${oldestAwaitingDays === 1 ? " day" : " days"}`
+                : "Move candidates forward"
+          }
+          trendIntent={
+            oldestAwaitingDays !== null && oldestAwaitingDays >= 7
+              ? "negative"
+              : undefined
+          }
+        />
+        <KpiTile
           icon={MapPin}
-          hint={(locationsCount ?? 0) > 0 ? "Edit in Locations" : "Add your first"}
+          value={String(locationsCount ?? 0)}
+          label="Locations"
+          hint={
+            (locationsCount ?? 0) > 0
+              ? `${locationsCount} on file · Edit in Locations`
+              : "Add your first to enable job posting"
+          }
         />
       </section>
 
@@ -246,57 +361,62 @@ export default async function EmployerDashboard() {
         </section>
       )}
 
-      {/* Recent applications — last 5 across all jobs. Each row links into
-          that job's pipeline (kanban view), not the application detail. */}
-      {recentApps.length > 0 && (
-        <section className="mt-12">
-          <div className="flex items-end justify-between gap-4 mb-4">
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
-              Recent Applications
-            </div>
+      {/* Recent activity — uses the shared ActivityFeed primitive so the
+          dashboard's "what's happening" surface matches the visual
+          vocabulary used on the candidate dashboard and elsewhere. */}
+      <section className="mt-12">
+        <div className="flex items-end justify-between gap-4 mb-4">
+          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+            Recent Activity
+          </div>
+          {recentApps.length > 0 && (
             <Link
               href="/employer/applications"
               className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage hover:text-heritage-deep transition-colors"
             >
               View all
             </Link>
-          </div>
-          <div className="border border-[var(--rule)] bg-white">
-            {recentApps.map((app) => {
-              const cand = recentCandMap.get(app.candidate_id);
-              const job = recentJobMap.get(app.job_id);
-              return (
-                <Link
-                  key={app.id}
-                  href={
-                    job
-                      ? `/employer/jobs/${job.id}/applications`
-                      : `/employer/applications/${app.id}`
-                  }
-                  className="flex items-center justify-between gap-4 px-5 py-3 border-b border-[var(--rule)] last:border-0 hover:bg-cream transition-colors"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="text-[14px] font-bold text-ink truncate">
-                      {candidateDisplayName({
-                        fullName: cand?.full_name,
-                        candidateId: app.candidate_id,
-                      })}
-                      <span className="ml-2 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
-                        {STAGE_LABELS[app.status] ?? app.status}
-                      </span>
-                    </div>
-                    <div className="text-[12px] text-slate-body truncate mt-0.5">
-                      Applied to {job?.title ?? "Unknown job"} ·{" "}
-                      {new Date(app.created_at).toLocaleDateString()}
-                    </div>
-                  </div>
-                  <ChevronRight className="h-3.5 w-3.5 text-slate-meta flex-shrink-0" />
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-      )}
+          )}
+        </div>
+        <ActivityFeed
+          title=""
+          emptyMessage="No applications yet — once candidates start applying, recent activity shows up here."
+          events={recentApps.map((app): ActivityEvent => {
+            const cand = recentCandMap.get(app.candidate_id);
+            const job = recentJobMap.get(app.job_id);
+            const name = candidateDisplayName({
+              fullName: cand?.full_name,
+              candidateId: app.candidate_id,
+            });
+            const stageLabel = STAGE_LABELS[app.status] ?? app.status;
+            return {
+              id: app.id,
+              icon: app.status === "new" ? UserPlus : ArrowRightCircle,
+              tone: app.status === "new" ? "positive" : "neutral",
+              body: (
+                <>
+                  <strong className="font-semibold">{name}</strong>{" "}
+                  applied to{" "}
+                  <span className="text-slate-body">
+                    {job?.title ?? "Unknown job"}
+                  </span>
+                  {app.status !== "new" && (
+                    <>
+                      {" "}
+                      · now in{" "}
+                      <span className="text-slate-body">{stageLabel}</span>
+                    </>
+                  )}
+                </>
+              ),
+              timestamp: relativeDate(app.created_at),
+              href: job
+                ? `/employer/jobs/${job.id}/applications`
+                : `/employer/applications/${app.id}`,
+            };
+          })}
+        />
+      </section>
 
       {/* Quick links — admin/recruiter surface only. Hiring managers see
           a scoped variant focused on the work they actually do. */}
@@ -348,33 +468,26 @@ export default async function EmployerDashboard() {
   );
 }
 
-function KpiCard({
-  label,
-  value,
-  icon: Icon,
-  hint,
-}: {
-  label: string;
-  value: string;
-  icon: React.ComponentType<{ className?: string }>;
-  hint?: string;
-}) {
-  return (
-    <div className="bg-white p-6 sm:p-7">
-      <div className="flex items-center justify-between mb-4">
-        <Icon className="h-5 w-5 text-slate-meta" />
-      </div>
-      <div className="text-3xl sm:text-4xl font-extrabold tracking-[-1px] text-ink leading-none">
-        {value}
-      </div>
-      <div className="mt-2 text-[10px] font-bold tracking-[1.8px] uppercase text-slate-body">
-        {label}
-      </div>
-      {hint && (
-        <div className="mt-3 text-[13px] text-slate-meta">{hint}</div>
-      )}
-    </div>
-  );
+/**
+ * Format an ISO date string as a casual relative time
+ * ("2h ago", "yesterday", "3d ago", "Mar 12"). Used by the
+ * dashboard activity feed for human-readable timestamps.
+ */
+function relativeDate(iso: string): string {
+  const ms = Date.now() - new Date(iso).getTime();
+  if (ms < 0) return "just now";
+  const minutes = Math.floor(ms / 60000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "yesterday";
+  if (days < 7) return `${days}d ago`;
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
 }
 
 function QuickAction({

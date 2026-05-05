@@ -6,9 +6,21 @@
  */
 
 import Link from "next/link";
-import { ArrowRight, Briefcase, FileText, UserCircle } from "lucide-react";
+import {
+  ArrowRight,
+  Briefcase,
+  FileText,
+  UserCircle,
+  CheckCircle2,
+  Send,
+} from "lucide-react";
 import { CandidateShell } from "@/components/candidate/candidate-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { KpiTile } from "@/components/dashboard/kpi-tile";
+import {
+  ActivityFeed,
+  type ActivityEvent,
+} from "@/components/dashboard/activity-feed";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -102,23 +114,39 @@ export default async function CandidateDashboardPage() {
         </h1>
       </header>
 
-      {/* Quick stats */}
+      {/* Quick stats — same KpiTile primitive as the employer dashboard
+          for visual continuity across the platform. */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[var(--rule)] border border-[var(--rule)] mb-12">
-        <StatCard
-          label="Profile Completeness"
+        <KpiTile
+          icon={UserCircle}
           value={`${pct}%`}
-          sub={pct < 100 ? `${total - filled} fields to go` : "Profile complete"}
-          accent={pct < 50 ? "warn" : pct < 100 ? "neutral" : "good"}
+          label="Profile Completeness"
+          hint={
+            pct < 100
+              ? `${total - filled} field${total - filled === 1 ? "" : "s"} to go for full visibility`
+              : "Profile complete — employers can find you"
+          }
+          trendIntent={pct < 50 ? "negative" : pct < 100 ? "neutral" : "positive"}
         />
-        <StatCard
+        <KpiTile
+          icon={Send}
+          value={String(
+            apps.filter(
+              (a) => !["hired", "rejected", "withdrawn"].includes(a.status)
+            ).length
+          )}
           label="Active Applications"
-          value={String(apps.filter((a) => !["hired", "rejected", "withdrawn"].includes(a.status)).length)}
-          sub="In review with employers"
+          hint="Open with employers · status updates show up below"
         />
-        <StatCard
-          label="Total Applications"
+        <KpiTile
+          icon={CheckCircle2}
           value={String(apps.length)}
-          sub="All-time"
+          label="Total Applications"
+          hint={
+            apps.length === 0
+              ? "Browse jobs to apply to your first"
+              : "All-time across every DSO you've applied to"
+          }
         />
       </div>
 
@@ -149,16 +177,18 @@ export default async function CandidateDashboardPage() {
         </div>
       )}
 
-      {/* Recent applications */}
+      {/* Recent activity — uses the shared ActivityFeed primitive so the
+          candidate dashboard matches the visual vocabulary of the employer
+          dashboard and the role pages. */}
       <section className="mb-12">
-        <div className="flex items-baseline justify-between mb-5">
-          <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta">
-            Recent Applications
+        <div className="flex items-baseline justify-between mb-4">
+          <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+            Recent Activity
           </h2>
           {apps.length > 0 && (
             <Link
               href="/candidate/applications"
-              className="text-[12px] font-bold tracking-[1.5px] uppercase text-heritage hover:text-heritage-deep transition-colors"
+              className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage hover:text-heritage-deep transition-colors"
             >
               View all →
             </Link>
@@ -167,7 +197,10 @@ export default async function CandidateDashboardPage() {
 
         {apps.length === 0 ? (
           <div className="border border-[var(--rule)] bg-white p-10 text-center">
-            <FileText className="h-8 w-8 text-slate-meta mx-auto mb-4" strokeWidth={1.5} />
+            <FileText
+              className="h-8 w-8 text-slate-meta mx-auto mb-4"
+              strokeWidth={1.5}
+            />
             <p className="text-[15px] text-ink leading-relaxed mb-2">
               You haven&apos;t applied to any jobs yet.
             </p>
@@ -183,85 +216,47 @@ export default async function CandidateDashboardPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-px bg-[var(--rule)] border border-[var(--rule)]">
-            {apps.map((app) => {
+          <ActivityFeed
+            title=""
+            events={apps.map((app): ActivityEvent => {
               const job = jobMap.get(app.job_id);
               const dso = job ? dsoMap.get(job.dso_id) : null;
-              const submitted = new Date(app.created_at);
-              return (
-                <Link
-                  key={app.id}
-                  href={`/candidate/applications/${app.id}`}
-                  className="bg-white p-5 hover:bg-cream transition-colors flex items-center justify-between gap-4"
-                >
-                  <div className="min-w-0">
-                    <div className="text-[15px] font-bold text-ink truncate mb-0.5">
-                      {job?.title ?? "Job removed"}
-                    </div>
-                    <div className="text-[13px] text-slate-body truncate">
-                      {dso?.name ?? "Unknown DSO"} · Applied {submitted.toLocaleDateString()}
-                    </div>
-                  </div>
-                  <span
-                    className={`text-[10px] font-bold tracking-[1.5px] uppercase px-3 py-1.5 flex-shrink-0 ${statusBadgeClass(app.status)}`}
-                  >
-                    {STATUS_LABELS[app.status] ?? app.status}
-                  </span>
-                </Link>
+              const stageLabel = STATUS_LABELS[app.status] ?? app.status;
+              const isClosed = ["hired", "rejected", "withdrawn"].includes(
+                app.status
               );
+              const isWinning = ["interviewing", "offered", "hired"].includes(
+                app.status
+              );
+              return {
+                id: app.id,
+                icon:
+                  app.status === "hired"
+                    ? CheckCircle2
+                    : isClosed
+                      ? FileText
+                      : Send,
+                tone: isWinning ? "positive" : "neutral",
+                body: (
+                  <>
+                    <strong className="font-semibold">
+                      {job?.title ?? "Job removed"}
+                    </strong>{" "}
+                    at{" "}
+                    <span className="text-slate-body">
+                      {dso?.name ?? "Unknown DSO"}
+                    </span>{" "}
+                    · {stageLabel}
+                  </>
+                ),
+                timestamp: `Applied ${new Date(app.created_at).toLocaleDateString()}`,
+                href: `/candidate/applications/${app.id}`,
+              };
             })}
-          </div>
+          />
         )}
       </section>
     </CandidateShell>
   );
 }
 
-function StatCard({
-  label,
-  value,
-  sub,
-  accent,
-}: {
-  label: string;
-  value: string;
-  sub: string;
-  accent?: "warn" | "neutral" | "good";
-}) {
-  const valueClass =
-    accent === "warn"
-      ? "text-amber-700"
-      : accent === "good"
-        ? "text-heritage-deep"
-        : "text-ink";
-  return (
-    <div className="bg-white p-6">
-      <div className="text-[9px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
-        {label}
-      </div>
-      <div className={`text-4xl font-extrabold tracking-[-1px] leading-none mb-2 ${valueClass}`}>
-        {value}
-      </div>
-      <div className="text-[13px] text-slate-body">{sub}</div>
-    </div>
-  );
-}
-
-function statusBadgeClass(status: string): string {
-  switch (status) {
-    case "new":
-      return "bg-cream text-ink";
-    case "reviewed":
-      return "bg-blue-50 text-blue-900";
-    case "interviewing":
-      return "bg-heritage/10 text-heritage-deep";
-    case "offered":
-    case "hired":
-      return "bg-emerald-50 text-emerald-900";
-    case "rejected":
-    case "withdrawn":
-      return "bg-slate-100 text-slate-600";
-    default:
-      return "bg-cream text-ink";
-  }
-}
