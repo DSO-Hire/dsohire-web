@@ -389,6 +389,7 @@ const ROLES = [
     Icon: Stethoscope,
     title: "Dentists (general + specialty)",
     eyebrow: "DDS / DMD",
+    href: "/for-dentists",
     advantages: [
       "Real benefits package — 401(k) match, group health, malpractice, paid CE allowance",
       "Mentorship + peer learning across multi-doc practices",
@@ -400,6 +401,7 @@ const ROLES = [
     Icon: Sparkles,
     title: "Specialists",
     eyebrow: "Endo / Perio / Pedo / OS / Ortho",
+    href: "/for-specialists",
     advantages: [
       "Built-in referral pipeline from sister GP practices",
       "Equipment + facility investments DSOs make at scale",
@@ -411,6 +413,7 @@ const ROLES = [
     Icon: Heart,
     title: "Hygienists",
     eyebrow: "RDH",
+    href: "/for-hygienists",
     advantages: [
       "Defined PTO, real CE allowance, predictable schedules",
       "No 'double-up' expectations on solo-practice short days",
@@ -422,6 +425,7 @@ const ROLES = [
     Icon: GraduationCap,
     title: "Dental Assistants",
     eyebrow: "DA / EFDA",
+    href: "/for-dental-assistants",
     advantages: [
       "Structured EFDA training with reimbursement",
       "Multi-doc variety — assist alongside specialists, not just one GP",
@@ -433,6 +437,7 @@ const ROLES = [
     Icon: Users,
     title: "Front Desk + Treatment Coordinators",
     eyebrow: "Patient-facing ops",
+    href: "/for-front-desk",
     advantages: [
       "Real systems training (PMS, insurance verification, financing tools)",
       "Defined career path to OM is well-traveled at most DSOs",
@@ -444,6 +449,7 @@ const ROLES = [
     Icon: TrendingUp,
     title: "Office + Regional Managers",
     eyebrow: "OM / RM",
+    href: "/for-office-managers",
     advantages: [
       "Real P&L responsibility with KPI scorecards",
       "DSO operating playbooks — not solo-practice trial-and-error",
@@ -469,13 +475,14 @@ function RoleBreakdown() {
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-[var(--rule)] border border-[var(--rule)]">
-        {ROLES.map(({ Icon, title, eyebrow, advantages }) => (
-          <div
+        {ROLES.map(({ Icon, title, eyebrow, href, advantages }) => (
+          <Link
             key={title}
-            className="bg-white p-7 sm:p-8 hover:bg-cream/30 transition-colors flex flex-col"
+            href={href}
+            className="group bg-white p-7 sm:p-8 hover:bg-cream/40 transition-colors flex flex-col"
           >
             <div className="flex items-center gap-3 mb-4">
-              <div className="h-9 w-9 rounded-full bg-heritage/15 flex items-center justify-center flex-shrink-0">
+              <div className="h-9 w-9 rounded-full bg-heritage/15 flex items-center justify-center flex-shrink-0 group-hover:bg-heritage/25 transition-colors">
                 <Icon className="h-4 w-4 text-heritage-deep" />
               </div>
               <div className="min-w-0">
@@ -487,7 +494,7 @@ function RoleBreakdown() {
                 </h3>
               </div>
             </div>
-            <ul className="list-none space-y-2 mt-1">
+            <ul className="list-none space-y-2 mt-1 mb-4">
               {advantages.map((adv, i) => (
                 <li
                   key={i}
@@ -503,7 +510,11 @@ function RoleBreakdown() {
                 </li>
               ))}
             </ul>
-          </div>
+            <div className="mt-auto pt-3 border-t border-[var(--rule)] inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep group-hover:text-ink transition-colors">
+              Learn more
+              <ArrowRight className="h-3 w-3" />
+            </div>
+          </Link>
         ))}
       </div>
     </section>
