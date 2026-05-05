@@ -15,7 +15,7 @@
  */
 
 import { useState } from "react";
-import { Info, X, Crown, Briefcase, Users, MapPin } from "lucide-react";
+import { Info, X, ArrowRight, Crown, Briefcase, Users, MapPin } from "lucide-react";
 
 const ROLE_GUIDE: Array<{
   id: "owner" | "admin" | "recruiter" | "hiring_manager";
@@ -107,17 +107,45 @@ export function RoleHelp() {
 
   return (
     <div className="max-w-[820px]">
+      {/* Banner-style help affordance — clearly identifiable as
+          "click here for guidance" rather than a small inline link. */}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+        aria-expanded={open}
+        className="group w-full flex items-center gap-4 text-left px-5 py-4 bg-cream border border-heritage/40 hover:border-heritage hover:bg-heritage-tint transition-colors"
+        style={{ background: open ? "var(--heritage-tint)" : undefined }}
       >
-        <Info className="h-3.5 w-3.5" />
-        {open ? "Hide role guide" : "What's the difference between these roles?"}
+        <span
+          className="flex-shrink-0 h-9 w-9 rounded-full bg-heritage/15 flex items-center justify-center group-hover:bg-heritage/25 transition-colors"
+          aria-hidden
+        >
+          <Info className="h-4 w-4 text-heritage-deep" />
+        </span>
+        <span className="flex-1 min-w-0">
+          <span className="block text-[13px] font-extrabold tracking-[-0.1px] text-ink">
+            Need help picking the right role?
+          </span>
+          <span className="block text-[12px] text-slate-body mt-0.5 leading-snug">
+            Each role has different permissions and use cases. Hiring Manager is
+            scoped to specific locations — useful for dentist-owners and
+            regional managers.
+          </span>
+        </span>
+        <span
+          className={`flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold tracking-[1.5px] uppercase border transition-colors ${
+            open
+              ? "bg-ink text-ivory border-ink"
+              : "bg-white text-ink border-[var(--rule-strong)] group-hover:bg-ink group-hover:text-ivory group-hover:border-ink"
+          }`}
+        >
+          {open ? "Hide guide" : "See role guide"}
+          {!open && <ArrowRight className="h-3 w-3" />}
+        </span>
       </button>
 
       {open && (
-        <div className="mt-4 bg-cream/60 border border-[var(--rule-strong)] p-5">
+        <div className="mt-3 bg-cream/60 border border-[var(--rule-strong)] p-5">
           <div className="flex items-start justify-between mb-4">
             <div>
               <h3 className="text-[14px] font-extrabold tracking-[-0.3px] text-ink">
