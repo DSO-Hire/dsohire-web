@@ -295,7 +295,18 @@ function resolveTier(
   subscription: Stripe.Subscription,
   priceId: string | null
 ): PricingTier {
-  // Prefer metadata (set explicitly at checkout creation)
+  // Price ID is the authoritative source — it's what actually determines
+  // billing in Stripe. Customer Portal plan switches update price but NOT
+  // metadata, so trusting metadata first caused upgraded subscriptions to
+  // stay marked at their original tier even after the price changed
+  // (regression caught 2026-05-04 when a Starter→Growth upgrade left the
+  // tier column saying 'starter' while stripe_price_id pointed at Growth).
+  if (priceId) {
+    const tier = tierFromStripePriceId(priceId);
+    if (tier) return tier;
+  }
+  // Fall back to metadata (set at checkout creation) — useful for the rare
+  // case where the price ID isn't recognized (e.g. a one-off promo price).
   const metaTier = subscription.metadata?.tier;
   if (
     metaTier === "founding" ||
@@ -304,11 +315,6 @@ function resolveTier(
     metaTier === "enterprise"
   ) {
     return metaTier;
-  }
-  // Fall back to price ID lookup
-  if (priceId) {
-    const tier = tierFromStripePriceId(priceId);
-    if (tier) return tier;
   }
   // Last resort — Starter is the default tier
   return "starter";
