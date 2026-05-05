@@ -298,27 +298,50 @@ export default async function EmployerDashboard() {
         </section>
       )}
 
-      {/* Quick links */}
+      {/* Quick links — admin/recruiter surface only. Hiring managers see
+          a scoped variant focused on the work they actually do. */}
       <section className="mt-12">
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
           Quick Actions
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-[var(--rule)] border border-[var(--rule)]">
-          <QuickAction
-            href="/employer/jobs/new"
-            title="Post a job"
-            body="Write once, deploy across all your practices."
-          />
-          <QuickAction
-            href="/employer/locations"
-            title="Manage locations"
-            body={`${locationsCount ?? 0} location${(locationsCount ?? 0) === 1 ? "" : "s"} on file.`}
-          />
-          <QuickAction
-            href="/employer/team"
-            title="Invite teammates"
-            body={`${teamCount ?? 1} team member${(teamCount ?? 1) === 1 ? "" : "s"}. Owner only.`}
-          />
+          {dsoUser?.role === "hiring_manager" ? (
+            <>
+              <QuickAction
+                href="/employer/applications"
+                title="Review applications"
+                body="See what's new at your assigned locations."
+              />
+              <QuickAction
+                href="/employer/jobs"
+                title="Open jobs"
+                body="Browse open postings at your locations."
+              />
+              <QuickAction
+                href="/employer/settings"
+                title="Account settings"
+                body="Update your profile and notification preferences."
+              />
+            </>
+          ) : (
+            <>
+              <QuickAction
+                href="/employer/jobs/new"
+                title="Post a job"
+                body="Write once, deploy across all your practices."
+              />
+              <QuickAction
+                href="/employer/locations"
+                title="Manage locations"
+                body={`${locationsCount ?? 0} location${(locationsCount ?? 0) === 1 ? "" : "s"} on file.`}
+              />
+              <QuickAction
+                href="/employer/team"
+                title="Invite teammates"
+                body={`${teamCount ?? 1} team member${(teamCount ?? 1) === 1 ? "" : "s"}. Owner only.`}
+              />
+            </>
+          )}
         </div>
       </section>
     </EmployerShell>

@@ -35,18 +35,23 @@ type NavId =
   | "billing"
   | "settings";
 
-const NAV: Array<{
+interface NavItem {
   id: NavId;
   label: string;
   href: string;
   Icon: React.ComponentType<{ className?: string }>;
-}> = [
+  /** Roles that can see this item. Default: visible to all roles. */
+  roles?: ReadonlyArray<"owner" | "admin" | "recruiter" | "hiring_manager">;
+}
+
+const NAV: NavItem[] = [
   { id: "dashboard", label: "Dashboard", href: "/employer/dashboard", Icon: LayoutDashboard },
   { id: "jobs", label: "Jobs", href: "/employer/jobs", Icon: Briefcase },
   { id: "applications", label: "Applications", href: "/employer/applications", Icon: Users },
-  { id: "locations", label: "Locations", href: "/employer/locations", Icon: MapPin },
-  { id: "team", label: "Team", href: "/employer/team", Icon: Users },
-  { id: "billing", label: "Billing", href: "/employer/billing", Icon: CreditCard },
+  // Admin-surface items — hidden from hiring managers and recruiters where appropriate.
+  { id: "locations", label: "Locations", href: "/employer/locations", Icon: MapPin, roles: ["owner", "admin"] },
+  { id: "team", label: "Team", href: "/employer/team", Icon: Users, roles: ["owner", "admin"] },
+  { id: "billing", label: "Billing", href: "/employer/billing", Icon: CreditCard, roles: ["owner", "admin"] },
   { id: "settings", label: "Settings", href: "/employer/settings", Icon: Settings },
 ];
 
@@ -93,7 +98,17 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
 
         <nav className="flex-1 p-3">
           <ul className="list-none space-y-0.5">
-            {NAV.map((item) => {
+            {NAV.filter(
+              (item) =>
+                !item.roles ||
+                item.roles.includes(
+                  dsoUser.role as
+                    | "owner"
+                    | "admin"
+                    | "recruiter"
+                    | "hiring_manager"
+                )
+            ).map((item) => {
               const isActive = active === item.id;
               return (
                 <li key={item.id}>

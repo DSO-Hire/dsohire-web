@@ -27,10 +27,16 @@ export default async function NewJobPage() {
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id")
+    .select("dso_id, role")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) redirect("/employer/onboarding");
+
+  // Permission gate — hiring managers cannot create jobs (per locked
+  // 2026-05-05 decision). RLS would block the insert anyway, but we
+  // bounce them at the page level so they don't see a job-creation UI
+  // they can't submit.
+  if (dsoUser.role === "hiring_manager") redirect("/employer/jobs");
 
   // Feature gate — must have an active subscription to post a job.
   const subscription = await getActiveSubscription(supabase, dsoUser.dso_id);

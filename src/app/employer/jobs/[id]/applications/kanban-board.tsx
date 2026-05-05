@@ -139,6 +139,13 @@ interface KanbanBoardProps {
    * one selected candidate has enough signal to call the model.
    */
   aiSuggesterContextByAppId: Record<string, boolean>;
+  /**
+   * Permission gate for the bulk-action toolbar. False for hiring_manager
+   * users (per locked 2026-05-05 decision: HMs don't get bulk actions).
+   * Default true for owner/admin/recruiter. When false, the SelectionToolbar
+   * is suppressed even if the user manages to multi-select cards.
+   */
+  canBulkAct?: boolean;
 }
 
 interface OptimisticMove {
@@ -221,6 +228,7 @@ export function KanbanBoard({
   applications,
   aiSuggesterAvailable,
   aiSuggesterContextByAppId,
+  canBulkAct = true,
 }: KanbanBoardProps) {
   const [closedExpanded, setClosedExpanded] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -880,7 +888,7 @@ export function KanbanBoard({
           </div>
         )}
 
-        {selection.count > 0 && (
+        {selection.count > 0 && canBulkAct && (
           <SelectionToolbar
             count={selection.count}
             onClear={selection.clear}

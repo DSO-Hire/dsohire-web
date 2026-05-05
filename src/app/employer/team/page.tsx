@@ -24,6 +24,7 @@ import {
 } from "@/lib/supabase/server";
 import { InviteForm } from "./invite-form";
 import { RoleSelect } from "./role-select";
+import { RoleHelp } from "./role-help";
 import { removeTeammate, revokeInvitation } from "./actions";
 import type { Metadata } from "next";
 
@@ -50,6 +51,9 @@ export default async function TeamPage() {
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) redirect("/employer/onboarding");
+
+  // Hiring managers don't access team management.
+  if (dsoUser.role === "hiring_manager") redirect("/employer/dashboard");
 
   const canManage = dsoUser.role === "owner" || dsoUser.role === "admin";
 
@@ -145,9 +149,12 @@ export default async function TeamPage() {
       {/* Invite form */}
       {canManage && (
         <section className="mb-12">
-          <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
+          <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
             Invite a Teammate
           </h2>
+          <div className="mb-5">
+            <RoleHelp />
+          </div>
           <InviteForm locations={locationRows} />
         </section>
       )}

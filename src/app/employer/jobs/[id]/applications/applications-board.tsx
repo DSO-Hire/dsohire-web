@@ -38,6 +38,11 @@ interface ApplicationsBoardProps {
    * for bulk reject.
    */
   aiSuggesterContextByAppId: Record<string, boolean>;
+  /**
+   * Permission gate for bulk actions. False for hiring_manager users.
+   * Threads through to the kanban board's SelectionToolbar render.
+   */
+  canBulkAct?: boolean;
 }
 
 const VIEW_STORAGE_PREFIX = "dsohire.applications.view.";
@@ -48,6 +53,7 @@ export function ApplicationsBoard({
   initialView,
   aiSuggesterAvailable,
   aiSuggesterContextByAppId,
+  canBulkAct = true,
 }: ApplicationsBoardProps) {
   const [view, setView] = useState<BoardView>(initialView);
   const [hydrated, setHydrated] = useState(false);
@@ -129,6 +135,7 @@ export function ApplicationsBoard({
           applications={initialApplications}
           aiSuggesterAvailable={aiSuggesterAvailable}
           aiSuggesterContextByAppId={aiSuggesterContextByAppId}
+          canBulkAct={canBulkAct}
         />
       ) : isMobile ? (
         <MobileStageTabs
@@ -140,6 +147,7 @@ export function ApplicationsBoard({
           applications={initialApplications}
           aiSuggesterAvailable={aiSuggesterAvailable}
           aiSuggesterContextByAppId={aiSuggesterContextByAppId}
+          canBulkAct={canBulkAct}
         />
       )}
     </div>

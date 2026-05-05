@@ -25,10 +25,13 @@ export default async function EmployerLocationsPage() {
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id")
+    .select("dso_id, role")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) redirect("/employer/onboarding");
+
+  // Hiring managers don't manage locations (admin-only surface).
+  if (dsoUser.role === "hiring_manager") redirect("/employer/dashboard");
 
   const { data: locations } = await supabase
     .from("dso_locations")

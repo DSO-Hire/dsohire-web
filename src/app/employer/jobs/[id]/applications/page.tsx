@@ -58,10 +58,13 @@ export default async function PerJobApplicationsPage({
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id")
+    .select("dso_id, role")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) redirect("/employer/onboarding");
+
+  // Hiring managers don't get bulk actions (locked decision 2026-05-05).
+  const canBulkAct = dsoUser.role !== "hiring_manager";
 
   const { data: job } = await supabase
     .from("jobs")
@@ -225,6 +228,7 @@ export default async function PerJobApplicationsPage({
         initialView={initialView}
         aiSuggesterAvailable={aiSuggesterAvailable}
         aiSuggesterContextByAppId={Object.fromEntries(aiContextByAppId)}
+        canBulkAct={canBulkAct}
       />
     </EmployerShell>
   );

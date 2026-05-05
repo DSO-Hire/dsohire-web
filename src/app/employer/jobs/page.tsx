@@ -40,10 +40,12 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id")
+    .select("dso_id, role")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) redirect("/employer/onboarding");
+
+  const canPostJobs = dsoUser.role !== "hiring_manager";
 
   // RLS already filters by dso_id, but explicit eq lets the query planner use
   // the index more cleanly.
@@ -74,13 +76,15 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
             Your job listings
           </h1>
         </div>
-        <Link
-          href="/employer/jobs/new"
-          className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[11px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
-        >
-          <Plus className="h-4 w-4" />
-          Post a Job
-        </Link>
+        {canPostJobs && (
+          <Link
+            href="/employer/jobs/new"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[11px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            Post a Job
+          </Link>
+        )}
       </header>
 
       {/* Status filter */}
@@ -108,7 +112,7 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
       </nav>
 
       {jobList.length === 0 ? (
-        <EmptyState />
+        <EmptyState canPostJobs={canPostJobs} />
       ) : (
         <ul className="list-none border-t border-[var(--rule)]">
           {jobList.map((job) => (
@@ -202,7 +206,7 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function EmptyState() {
+function EmptyState({ canPostJobs }: { canPostJobs: boolean }) {
   return (
     <div className="border border-[var(--rule)] bg-cream p-12 text-center">
       <Briefcase className="h-10 w-10 text-slate-meta mx-auto mb-5" />
@@ -210,17 +214,19 @@ function EmptyState() {
         No jobs yet.
       </h2>
       <p className="text-[14px] text-slate-body leading-relaxed max-w-[440px] mx-auto mb-7">
-        Post your first job to start getting applications. Multi-location
-        posting is one flow — write the role once, assign it to as many
-        practices as you need.
+        {canPostJobs
+          ? "Post your first job to start getting applications. Multi-location posting is one flow — write the role once, assign it to as many practices as you need."
+          : "There are no jobs at your assigned locations yet. Once an admin or recruiter posts a job to one of your locations, it'll appear here."}
       </p>
-      <Link
-        href="/employer/jobs/new"
-        className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[11px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
-      >
-        <Plus className="h-4 w-4" />
-        Post a Job
-      </Link>
+      {canPostJobs && (
+        <Link
+          href="/employer/jobs/new"
+          className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[11px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+        >
+          <Plus className="h-4 w-4" />
+          Post a Job
+        </Link>
+      )}
     </div>
   );
 }

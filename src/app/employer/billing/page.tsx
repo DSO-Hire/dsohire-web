@@ -44,10 +44,13 @@ export default async function EmployerBillingPage({ searchParams }: PageProps) {
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id")
+    .select("dso_id, role")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) redirect("/employer/sign-up");
+
+  // Hiring managers don't see billing — owner/admin surface only.
+  if (dsoUser.role === "hiring_manager") redirect("/employer/dashboard");
 
   const { data: sub } = await supabase
     .from("subscriptions")
