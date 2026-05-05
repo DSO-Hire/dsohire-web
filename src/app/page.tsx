@@ -174,7 +174,6 @@ const HERO_COLUMNS: HeroColumn[] = [
     bg: "bg-slate-50",
     text: "text-slate-700",
     cards: [
-      { name: "Dr. Sarah Chen", role: "Associate Dentist", days: 1, heat: "cool", comments: 1 },
       { name: "Maya Rodriguez RDH", role: "Hygienist", days: 2, heat: "cool" },
       { name: "Jordan Williams DA", role: "Dental Assistant", days: 3, heat: "cool", comments: 2 },
     ],
@@ -194,7 +193,11 @@ const HERO_COLUMNS: HeroColumn[] = [
     dot: "bg-blue-400",
     bg: "bg-blue-50",
     text: "text-blue-700",
+    // Dr. Sarah Chen is at the top of Interview because she just moved
+    // there (days: 0 → "just now", matching the floating "Maya moved
+    // Dr. Chen to Interview · Realtime sync · just now" notification).
     cards: [
+      { name: "Dr. Sarah Chen", role: "Associate Dentist", days: 0, heat: "cool", comments: 1 },
       { name: "Dr. Marcus Lee", role: "Associate Dentist", days: 11, heat: "warm", comments: 5, score: "4.7" },
       { name: "Riley Okafor RDH", role: "Hygienist", days: 16, heat: "hot", comments: 2 },
     ],
@@ -237,13 +240,19 @@ function HeroKanbanPreview() {
           </span>
         </div>
 
-        {/* Pipeline header strip */}
+        {/* Pipeline header strip — frames the kanban as a DSO-wide view
+            since the candidates below span multiple roles (hygienists,
+            dentists, specialists, front desk, etc.). The breadcrumb at
+            the top of the mock (`/employer/jobs/applications`) already
+            implies a cross-job view, so the title here is the DSO name.
+            Greenfield Dental Group is the same fictional DSO used in the
+            /for-candidates mock card for cross-page continuity. */}
         <div className="px-5 pt-5 pb-3 border-b border-[var(--rule)]">
           <div className="text-[9px] font-bold tracking-[3px] uppercase text-heritage-deep mb-1.5">
             Pipeline · Live
           </div>
           <div className="text-[15px] font-bold tracking-[-0.3px] text-ink leading-tight">
-            Associate Dentist — General
+            Greenfield Dental Group
           </div>
           <div className="text-[12px] text-slate-body mt-0.5">
             8 candidates · 3 locations · 2 reviewers online
