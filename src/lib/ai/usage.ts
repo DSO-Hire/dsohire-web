@@ -14,10 +14,17 @@
 
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 
+/**
+ * Whitelisted set of AI features. Must match the
+ * `ai_usage_events_feature_check` constraint in Postgres — extending this
+ * union without the matching migration will fail at insert time.
+ */
+export type AiFeature = "jd_generator" | "rejection_reason";
+
 export interface LogAiUsageInput {
   dsoId: string;
   userId: string;
-  feature: "jd_generator";
+  feature: AiFeature;
   model: string;
   inputTokens: number;
   outputTokens: number;
@@ -49,7 +56,7 @@ export async function logAiUsage(input: LogAiUsageInput): Promise<void> {
 
 export async function getDsoMonthToDateAiUsage(
   dsoId: string,
-  feature: "jd_generator"
+  feature: AiFeature
 ): Promise<{ count: number; costUsd: number }> {
   const admin = createSupabaseServiceRoleClient();
   const startOfMonth = new Date(

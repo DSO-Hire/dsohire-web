@@ -139,6 +139,45 @@ export default async function PerJobApplicationsPage({
         .select("application_id, avg_score, reviewer_count")
         .in("application_id", appIds)
     : { data: [] };
+
+  // Per-application boolean: does this application have ≥1 screening answer
+  // or ≥1 submitted scorecard? Drives the AI rejection-reason suggester's
+  // disabled state in the bulk-reject dialog. We compute this in two cheap
+  // count queries rather than another two joins.
+  const aiContextByAppId = new Map<string, boolean>();
+  if (appIds.length > 0) {
+    const { data: rawAnsRows } = await supabase
+      .from("application_question_answers")
+      .select("application_id")
+      .in("application_id", appIds);
+    for (const r of (rawAnsRows ?? []) as Array<{
+      application_id: string | null;
+    }>) {
+      if (r.application_id) aiContextByAppId.set(r.application_id, true);
+    }
+    const { data: rawScRows } = await supabase
+      .from("application_scorecards")
+      .select("application_id")
+      .in("application_id", appIds)
+      .eq("status", "submitted");
+    for (const r of (rawScRows ?? []) as Array<{
+      application_id: string | null;
+    }>) {
+      if (r.application_id) aiContextByAppId.set(r.application_id, true);
+    }
+  }
+
+  // DSO-level tier gate for the AI rejection-reason suggester (Growth+ only).
+  const { data: subTierRow } = await supabase
+    .from("subscriptions")
+    .select("tier, status")
+    .eq("dso_id", dsoUser.dso_id as string)
+    .maybeSingle();
+  const _subStatus = (subTierRow?.status as string | undefined) ?? null;
+  const _subTier = (subTierRow?.tier as string | undefined) ?? null;
+  const aiSuggesterAvailable =
+    (_subStatus === "active" || _subStatus === "trialing") &&
+    (_subTier === "growth" || _subTier === "enterprise");
   type ScorecardSummaryRow = {
     application_id: string | null;
     avg_score: number | null;
@@ -184,6 +223,8 @@ export default async function PerJobApplicationsPage({
         initialApplications={initialApplications}
         job={{ id: job.id as string, title: jobTitle }}
         initialView={initialView}
+        aiSuggesterAvailable={aiSuggesterAvailable}
+        aiSuggesterContextByAppId={Object.fromEntries(aiContextByAppId)}
       />
     </EmployerShell>
   );

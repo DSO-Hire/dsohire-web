@@ -430,6 +430,27 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
 
   const scorecardRubric = getRubricForRole(job.role_category as string | null);
 
+  // Tier gate for the AI rejection-reason suggester (Growth+ only). We
+  // resolve to a simple "available | upgrade" state on the server so the
+  // StageSelector can render the right surface without round-tripping. We
+  // intentionally compute this once (not per-user) — it's a DSO-level gate.
+  const { data: subTierRow } = await supabase
+    .from("subscriptions")
+    .select("tier, status")
+    .eq("dso_id", dsoUser.dso_id as string)
+    .maybeSingle();
+  const subStatus = (subTierRow?.status as string | undefined) ?? null;
+  const subTier = (subTierRow?.tier as string | undefined) ?? null;
+  const aiSuggesterAvailable =
+    subStatus !== null &&
+    (subStatus === "active" || subStatus === "trialing") &&
+    (subTier === "growth" || subTier === "enterprise");
+  // Whether the application has enough signal to make AI suggestions
+  // useful (≥1 screening answer OR ≥1 submitted scorecard).
+  const aiSuggesterHasContext =
+    answers.length > 0 ||
+    scorecardRows.some((r) => r.status === "submitted");
+
   const submitted = new Date(app.created_at);
   const status = app.status as ApplicationStatus;
 
@@ -534,6 +555,8 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               currentStatus={status}
               candidateName={displayName}
               jobTitle={String(job.title)}
+              aiSuggesterAvailable={aiSuggesterAvailable}
+              aiSuggesterHasContext={aiSuggesterHasContext}
             />
           </section>
 

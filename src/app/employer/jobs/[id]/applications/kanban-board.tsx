@@ -103,6 +103,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { RejectReasonAiSuggester } from "@/app/employer/applications/[id]/reject-reason-ai-suggester";
 
 export interface KanbanApplication extends ApplicationsListItem {
   stage_entered_at: string;
@@ -126,6 +127,18 @@ export interface KanbanApplication extends ApplicationsListItem {
 
 interface KanbanBoardProps {
   applications: KanbanApplication[];
+  /**
+   * DSO tier gate for the bulk-reject AI suggester (Growth+ only). False
+   * collapses the suggester to an upgrade ghost in the reject dialog.
+   */
+  aiSuggesterAvailable: boolean;
+  /**
+   * Per-application boolean: true when the application has ≥1 screening
+   * answer or ≥1 submitted scorecard. The suggester only fires for a
+   * single-candidate bulk-reject; this map tells the dialog whether that
+   * one selected candidate has enough signal to call the model.
+   */
+  aiSuggesterContextByAppId: Record<string, boolean>;
 }
 
 interface OptimisticMove {
@@ -204,7 +217,11 @@ const DROP_ANIMATION: DropAnimation = {
   }),
 };
 
-export function KanbanBoard({ applications }: KanbanBoardProps) {
+export function KanbanBoard({
+  applications,
+  aiSuggesterAvailable,
+  aiSuggesterContextByAppId,
+}: KanbanBoardProps) {
   const [closedExpanded, setClosedExpanded] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [error, setError] = useState<ErrorState | null>(null);
@@ -938,6 +955,19 @@ export function KanbanBoard({ applications }: KanbanBoardProps) {
           confirmLabel="Reject"
           reasonHelper="This appears in your team's audit log; the candidate doesn't see it."
           onConfirm={handleBulkReject}
+          aiSuggester={{
+            available: aiSuggesterAvailable,
+            // Single-candidate selection only — suggestions are per-candidate
+            // and we don't want to mass-paste one draft across N candidates.
+            singleApplicationId:
+              selection.count === 1 ? selectedIdsArray[0] : null,
+            singleApplicationHasContext:
+              selection.count === 1
+                ? Boolean(
+                    aiSuggesterContextByAppId[selectedIdsArray[0] ?? ""]
+                  )
+                : false,
+          }}
         />
 
         <BulkConfirmDialog
@@ -1133,6 +1163,7 @@ function BulkConfirmDialog({
   confirmLabel,
   reasonHelper,
   onConfirm,
+  aiSuggester,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -1142,6 +1173,17 @@ function BulkConfirmDialog({
   confirmLabel: string;
   reasonHelper: string;
   onConfirm: (reason: string) => void;
+  /**
+   * Optional AI rejection-reason suggester wiring. Only the bulk-reject
+   * dialog passes this; bulk-archive omits it since archive is a workflow
+   * action without recruiter-to-candidate copy. v1 only fires for
+   * single-candidate selections — suggestions are per-candidate.
+   */
+  aiSuggester?: {
+    available: boolean;
+    singleApplicationId: string | null;
+    singleApplicationHasContext: boolean;
+  };
 }) {
   const [reason, setReason] = useState("");
   // Reset the textarea every time the dialog opens so a previous reason
@@ -1157,13 +1199,27 @@ function BulkConfirmDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
             {count} candidate{count === 1 ? "" : "s"} selected.
           </DialogDescription>
         </DialogHeader>
+        {aiSuggester &&
+          (aiSuggester.singleApplicationId ? (
+            <RejectReasonAiSuggester
+              applicationId={aiSuggester.singleApplicationId}
+              available={aiSuggester.available}
+              hasContext={aiSuggester.singleApplicationHasContext}
+              onApply={(body) => setReason(body.slice(0, 1000))}
+            />
+          ) : count > 1 ? (
+            <p className="text-[12px] text-slate-meta border border-[var(--rule)] bg-cream/40 px-3 py-2.5 leading-relaxed">
+              Generate AI suggestions one candidate at a time — select a single
+              candidate to see suggestions.
+            </p>
+          ) : null)}
         <div className="grid gap-2">
           <label
             htmlFor="bulk-reason"

@@ -25,6 +25,19 @@ interface ApplicationsBoardProps {
   initialApplications: KanbanApplication[];
   job: { id: string; title: string };
   initialView: BoardView;
+  /**
+   * DSO tier gate for the bulk-reject AI suggester. True only on Growth+.
+   * Forwarded to the kanban board, which threads it into the bulk-reject
+   * confirmation dialog.
+   */
+  aiSuggesterAvailable: boolean;
+  /**
+   * Per-application boolean: true when the application has at least one
+   * screening answer or one submitted scorecard. Drives the suggester's
+   * disabled state when the recruiter has selected a single candidate
+   * for bulk reject.
+   */
+  aiSuggesterContextByAppId: Record<string, boolean>;
 }
 
 const VIEW_STORAGE_PREFIX = "dsohire.applications.view.";
@@ -33,6 +46,8 @@ export function ApplicationsBoard({
   initialApplications,
   job,
   initialView,
+  aiSuggesterAvailable,
+  aiSuggesterContextByAppId,
 }: ApplicationsBoardProps) {
   const [view, setView] = useState<BoardView>(initialView);
   const [hydrated, setHydrated] = useState(false);
@@ -110,14 +125,22 @@ export function ApplicationsBoard({
         // Avoid SSR/CSR mismatch — render a neutral placeholder until we know
         // viewport. Server emitted whatever initialView was; once hydrated we
         // pick desktop or mobile branch.
-        <KanbanBoard applications={initialApplications} />
+        <KanbanBoard
+          applications={initialApplications}
+          aiSuggesterAvailable={aiSuggesterAvailable}
+          aiSuggesterContextByAppId={aiSuggesterContextByAppId}
+        />
       ) : isMobile ? (
         <MobileStageTabs
           applications={initialApplications}
           jobId={job.id}
         />
       ) : (
-        <KanbanBoard applications={initialApplications} />
+        <KanbanBoard
+          applications={initialApplications}
+          aiSuggesterAvailable={aiSuggesterAvailable}
+          aiSuggesterContextByAppId={aiSuggesterContextByAppId}
+        />
       )}
     </div>
   );

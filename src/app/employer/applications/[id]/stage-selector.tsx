@@ -39,6 +39,7 @@ import {
 } from "@/lib/applications/stages";
 import { moveApplicationStage } from "./actions";
 import { rejectWithReason, withdrawWithReason } from "./reject-actions";
+import { RejectReasonAiSuggester } from "./reject-reason-ai-suggester";
 import {
   Dialog,
   DialogContent,
@@ -86,6 +87,18 @@ interface StageSelectorProps {
   currentStatus: ApplicationStatus;
   candidateName: string;
   jobTitle: string;
+  /**
+   * Whether the DSO's tier permits the AI rejection-reason suggester.
+   * Server action enforces this too; this prop drives the in-dialog UI
+   * (panel vs upgrade ghost). Growth+ only.
+   */
+  aiSuggesterAvailable: boolean;
+  /**
+   * Whether the application has ≥1 screening answer or submitted scorecard
+   * available as context. Without context the suggester button is disabled
+   * (the model can only paraphrase the JD, which isn't useful).
+   */
+  aiSuggesterHasContext: boolean;
 }
 
 export function StageSelector({
@@ -93,6 +106,8 @@ export function StageSelector({
   currentStatus,
   candidateName,
   jobTitle,
+  aiSuggesterAvailable,
+  aiSuggesterHasContext,
 }: StageSelectorProps) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -262,9 +277,12 @@ export function StageSelector({
       )}
 
       <ClosedTransitionDialog
+        applicationId={applicationId}
         transition={closedDialog}
         candidateName={candidateName}
         jobTitle={jobTitle}
+        aiSuggesterAvailable={aiSuggesterAvailable}
+        aiSuggesterHasContext={aiSuggesterHasContext}
         onCancel={() => setClosedDialog(null)}
         onConfirm={handleClosedConfirm}
       />
@@ -287,15 +305,21 @@ export function StageSelector({
  * cancelled action doesn't leak into the next confirmation.
  */
 function ClosedTransitionDialog({
+  applicationId,
   transition,
   candidateName,
   jobTitle,
+  aiSuggesterAvailable,
+  aiSuggesterHasContext,
   onCancel,
   onConfirm,
 }: {
+  applicationId: string;
   transition: ClosedTransition | null;
   candidateName: string;
   jobTitle: string;
+  aiSuggesterAvailable: boolean;
+  aiSuggesterHasContext: boolean;
   onCancel: () => void;
   onConfirm: (transition: ClosedTransition, reason: string) => void;
 }) {
@@ -313,15 +337,27 @@ function ClosedTransitionDialog({
       ? "bg-red-700 text-white hover:bg-red-800 focus-visible:ring-red-700"
       : "bg-heritage text-white hover:bg-heritage-deep focus-visible:ring-heritage";
 
+  // The AI suggester only makes sense for the Reject flow — withdrawn is a
+  // candidate-side concept where there's nothing for AI to draft.
+  const showAiSuggester = transition.to === "rejected";
+
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onCancel()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{transition.dialogTitle}</DialogTitle>
           <DialogDescription>
             {candidateName} · {jobTitle}
           </DialogDescription>
         </DialogHeader>
+        {showAiSuggester && (
+          <RejectReasonAiSuggester
+            applicationId={applicationId}
+            available={aiSuggesterAvailable}
+            hasContext={aiSuggesterHasContext}
+            onApply={(body) => setReason(body.slice(0, 1000))}
+          />
+        )}
         <div className="grid gap-2">
           <label
             htmlFor="single-reason"
