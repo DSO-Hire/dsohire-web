@@ -15,7 +15,7 @@
  */
 
 import {
-  Stethoscope,
+  Smile,
   Sparkles,
   Heart,
   GraduationCap,
@@ -56,10 +56,15 @@ export interface RoleConfig {
     title: string;
     paragraphs: string[];
   };
-  /** Compensation context. */
+  /** Compensation context — describes the STRUCTURE, not specific dollar
+   * amounts. We're a job board, not a salary survey. Specific comp shows
+   * up on individual job listings where the DSO chooses to share it. */
   compensation: {
     title: string;
-    range: string;
+    /** One-line summary of how comp is typically structured for this role. */
+    structure: string;
+    /** Longer explanation of the comp model (base, bonus, geographic
+     * variance, etc.) — still no specific dollar ranges. */
     notes: string;
   };
   /** Filtered jobs CTA URL. */
@@ -75,7 +80,7 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     slug: "dentists",
     label: "Dentists",
     eyebrow: "DDS / DMD · Associate Dentist Roles",
-    Icon: Stethoscope,
+    Icon: Smile,
     hero: {
       headline: "Practice dentistry without owning the building.",
       headlineAccent: "without owning the building",
@@ -111,9 +116,9 @@ export const ROLE_CONFIGS: RoleConfig[] = [
       ],
     },
     compensation: {
-      title: "What you can expect to earn",
-      range: "$150K – $300K+ for general dentists; specialists higher",
-      notes: "DSOs typically structure as a guaranteed base plus production percentage (often 25-30% of collections above the base). Geographic variance is significant — coastal urban metros pay more, midwest and rural pay less. Newer DSOs often pay more aggressively to attract talent. We surface comp ranges on every job listing where the DSO shares them.",
+      title: "How comp works at DSOs",
+      structure: "Guaranteed base + production percentage",
+      notes: "Most DSO dentist comp is structured as a monthly base salary plus a percentage of production or collections above that base. The percentage varies by DSO and metro — coastal urban markets typically pay more aggressively than rural / Midwest. Some DSOs add quarterly or annual bonuses tied to practice-level KPIs (patient retention, case acceptance, hygiene-driven revenue). A handful of newer DSOs also offer equity grants or partner-track ownership programs — worth asking about during interviews if that path matters to you. Specific comp shows up on each job listing when the DSO chooses to share it.",
     },
     jobsFilterHref: "/jobs?category=dentist",
     relatedRoles: [
@@ -164,9 +169,9 @@ export const ROLE_CONFIGS: RoleConfig[] = [
       ],
     },
     compensation: {
-      title: "What you can expect to earn",
-      range: "$250K – $500K+; varies significantly by specialty",
-      notes: "Oral surgery and orthodontics top the range. Pediatric dentistry tends lower than general specialty averages but with better lifestyle. Endo and Perio sit in the middle. Production-based comp means high-volume specialists at busy DSOs can substantially exceed the top of typical ranges. Geographic variance is significant — comp scales with metro population density.",
+      title: "How comp works at DSOs",
+      structure: "Production-based, often with a base guarantee",
+      notes: "Most DSO specialist comp is structured as a percentage of collections or adjusted production, often without a meaningful base — your earnings reflect your case volume directly. Some DSOs offer a guaranteed monthly draw against future production, especially during your first 90 days while the referral pipeline ramps. Travel-between-locations roles sometimes include per-diem or mileage on top. Equity / partner-track is available at a handful of DSOs for high-producing specialists. The economics of specialty comp at a DSO depend heavily on the referral pipeline from sister GP practices — worth asking about the DSO's GP-to-specialist referral conversion rate during interviews.",
     },
     jobsFilterHref: "/jobs?category=specialist",
     relatedRoles: [
@@ -216,9 +221,9 @@ export const ROLE_CONFIGS: RoleConfig[] = [
       ],
     },
     compensation: {
-      title: "What you can expect to earn",
-      range: "$35 – $55/hr typical; lead/coordinator roles higher",
-      notes: "Hourly rate varies by region (West Coast and Northeast top the range, Midwest and South lower) and certification (LA-certified hygienists earn $5-10/hr more on average). Many DSOs add production bonuses tied to hygiene-driven service mix (perio, sealants, fluoride). Lead and coordinator roles are often salaried at $75K-$110K depending on scope.",
+      title: "How comp works at DSOs",
+      structure: "Hourly base, often with production bonuses",
+      notes: "Most DSO hygiene roles are paid hourly. The hourly rate scales with metro market (coastal urban higher, Midwest and South lower) and with certification — local-anesthesia and laser certifications typically command a higher rate. Some DSOs layer in production bonuses tied to hygiene-driven service mix (perio probing, sealants, fluoride applications, oral cancer screenings). Lead hygienist and hygiene coordinator roles transition to salary. The benefits package — PTO, CE allowance, paid certifications — often adds substantially to total comp beyond what shows on the hourly rate.",
     },
     jobsFilterHref: "/jobs?category=dental_hygienist",
     relatedRoles: [
@@ -268,9 +273,9 @@ export const ROLE_CONFIGS: RoleConfig[] = [
       ],
     },
     compensation: {
-      title: "What you can expect to earn",
-      range: "$18 – $28/hr; EFDA and lead roles higher",
-      notes: "Standard DA rates land at $18-$22/hr in most US markets. EFDA certification typically adds $4-$6/hr. Lead DAs and surgical assistants earn the top of the range or move to salaried positions. Production bonuses tied to practice-level KPIs are common at larger DSOs (typically $100-$500/month based on practice performance).",
+      title: "How comp works at DSOs",
+      structure: "Hourly base, with EFDA premium + production bonuses where offered",
+      notes: "Standard DA roles are paid hourly. EFDA certification (in states that allow it) typically commands a meaningful per-hour bump. Surgical assistants and lead DAs often earn at the top of their market range or move to salaried positions. Production bonuses tied to practice-level KPIs are common at larger DSOs — typically a fixed monthly amount when the practice hits its targets. CE allowances, certification reimbursement, and benefits add to total comp beyond the hourly rate. Geographic variance is significant — coastal urban markets pay more than rural / Midwest / South.",
     },
     jobsFilterHref: "/jobs?category=dental_assistant",
     relatedRoles: [
@@ -321,9 +326,9 @@ export const ROLE_CONFIGS: RoleConfig[] = [
       ],
     },
     compensation: {
-      title: "What you can expect to earn",
-      range: "$17 – $25/hr base; treatment coordinators + bonuses higher",
-      notes: "Front-desk base rates vary by region but typically sit at $17-$22/hr. Treatment coordinators (more senior, more case-acceptance responsibility) earn $22-$28/hr or move to salary. Production bonuses tied to practice KPIs add $200-$1,000/month for senior front-desk roles. Office manager is salaried, typically $50K-$80K depending on practice size.",
+      title: "How comp works at DSOs",
+      structure: "Hourly base + treatment-acceptance and collection bonuses",
+      notes: "Front-desk roles are typically hourly. Treatment coordinator positions, with more senior responsibility for case acceptance and financing setup, often move to salary. Performance bonuses tied to practice KPIs (collection rate, treatment-plan acceptance, daily production targets) are common at larger DSOs — typically a fixed amount when the practice hits a metric. Office manager promotion track transitions fully to salary. The structured-bonus model is one of the things DSOs typically do meaningfully better than solo practices for this role: you can see the math on the offer letter.",
     },
     jobsFilterHref: "/jobs?category=front_office",
     relatedRoles: [
@@ -373,9 +378,9 @@ export const ROLE_CONFIGS: RoleConfig[] = [
       ],
     },
     compensation: {
-      title: "What you can expect to earn",
-      range: "OM $50K – $95K base; RM $80K – $150K+ with bonus",
-      notes: "Office manager base salary varies by practice size and region — single-practice OM at a smaller DSO might be $50-$65K; multi-practice OM at a larger DSO can be $80-$100K. Bonus structures based on practice KPIs typically add 10-25% to base. Regional managers earn $80-$150K base with similar or larger bonus components, often including DSO-level performance metrics.",
+      title: "How comp works at DSOs",
+      structure: "Salary + KPI bonus structure (often with EBITDA component)",
+      notes: "OM and RM comp is salaried, with bonus structures tied to specific practice or region KPIs — production, collections, labor-cost percentage, patient retention, EBITDA. Bonus components typically add a meaningful percentage on top of base for OMs, and a larger percentage for RMs at larger DSOs. Multi-practice OM and Regional Manager roles often include quarterly bonuses based on DSO-wide initiatives. The standardized math (vs. solo-practice 'we'll figure out a bonus') is a major appeal of DSO operations roles — the formula's on the offer letter and the bonus actually shows up.",
     },
     jobsFilterHref: "/jobs?category=office_manager",
     relatedRoles: [

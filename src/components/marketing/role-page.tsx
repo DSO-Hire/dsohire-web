@@ -211,21 +211,21 @@ function Compensation({ config }: { config: RoleConfig }) {
       />
       <div className="relative max-w-[820px] mx-auto">
         <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
-          Compensation context
+          How compensation is structured
         </div>
         <h2 className="text-3xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-[1.1] text-ink mb-6">
           {config.compensation.title}
         </h2>
-        <div className="text-[20px] sm:text-[24px] font-extrabold tracking-[-0.4px] text-heritage-deep mb-5">
-          {config.compensation.range}
+        <div className="inline-flex items-center gap-3 mb-5 px-4 py-2.5 bg-white/70 border border-heritage/40 text-[15px] font-semibold tracking-[-0.1px] text-heritage-deep">
+          {config.compensation.structure}
         </div>
         <p className="text-[15px] text-ink leading-[1.75] max-w-[680px]">
           {config.compensation.notes}
         </p>
         <p className="mt-5 text-[13px] text-slate-meta italic leading-[1.6]">
-          Directional ranges based on industry observation as of 2026. Not a
-          guarantee. Every job listing on DSO Hire surfaces the DSO&apos;s
-          specific comp where they share it.
+          We don&apos;t publish dollar ranges — comp varies too much by region,
+          DSO, and individual experience to anchor on. Every job listing on
+          DSO Hire surfaces the specific comp the DSO chooses to share.
         </p>
       </div>
     </section>

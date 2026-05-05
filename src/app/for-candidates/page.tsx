@@ -26,7 +26,7 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  Stethoscope,
+  Smile,
   Sparkles,
   Heart,
   Users,
@@ -386,7 +386,7 @@ function Promises() {
 
 const ROLES = [
   {
-    Icon: Stethoscope,
+    Icon: Smile,
     title: "Dentists (general + specialty)",
     eyebrow: "DDS / DMD",
     href: "/for-dentists",
