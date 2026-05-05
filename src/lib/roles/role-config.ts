@@ -107,6 +107,10 @@ export const ROLE_CONFIGS: RoleConfig[] = [
         title: "Career path that doesn't dead-end",
         body: "Associate → senior associate → partner track at some DSOs. Some emerging DSOs offer equity grants. Lead-clinician roles, education-track exits, regional director paths. Much more variety than 'buy a practice or stay an associate forever.'",
       },
+      {
+        title: "No business overhead distraction",
+        body: "You practice dentistry; the DSO handles HR, billing, insurance contracting, supplier relationships, IT, and compliance. Solo-practice owners are running a small business in addition to seeing patients. At a DSO, you get to focus on clinical work without the administrative tax.",
+      },
     ],
     careerPath: {
       title: "What growth looks like",
@@ -160,6 +164,10 @@ export const ROLE_CONFIGS: RoleConfig[] = [
         title: "Peer specialist learning",
         body: "Larger DSOs employ multiple specialists in your discipline. Peer review, case discussions, internal CE — the kind of community you'd otherwise build through specialty associations and conferences alone.",
       },
+      {
+        title: "Room to sub-specialize",
+        body: "At a DSO with the case volume to support it, you can focus your practice on a sub-niche — implant-heavy oral surgery, full-arch restorative, clear-aligner ortho, sleep dentistry. Solo practices typically can't generate the volume to specialize that narrowly. Multi-location DSOs can.",
+      },
     ],
     careerPath: {
       title: "What growth looks like",
@@ -212,6 +220,10 @@ export const ROLE_CONFIGS: RoleConfig[] = [
         title: "Career path beyond hygiene chair",
         body: "Lead hygienist, hygiene coordinator (across multiple practices), DSO clinical operations roles — the kinds of paths that solo practices structurally don't have because there's only one hygienist position to advance into.",
       },
+      {
+        title: "Modern instruments + ergonomic equipment",
+        body: "DSOs invest in current-generation cavitrons, ergonomic operatory chairs, magnification loupes, and laser equipment at scale. Solo practices often run hygienists on whatever was bought 10 years ago. Better tools mean less wear on your hands, neck, and back over a career.",
+      },
     ],
     careerPath: {
       title: "What growth looks like",
@@ -263,6 +275,10 @@ export const ROLE_CONFIGS: RoleConfig[] = [
       {
         title: "Sponsored certifications",
         body: "EFDA, radiology certification, CPR/BLS, OSHA training — DSOs typically cover these as part of CE allowance or as direct reimbursement. The cost of becoming more credentialed isn't on you.",
+      },
+      {
+        title: "Cross-training across specialties",
+        body: "When the DSO has specialists at sister practices, you can rotate to assist on oral surgery, ortho, or pediatric procedures alongside your GP work. That breadth is hard to build at a solo practice that only sees one type of case all day.",
       },
     ],
     careerPath: {
@@ -317,6 +333,10 @@ export const ROLE_CONFIGS: RoleConfig[] = [
         title: "Predictable hours",
         body: "DSOs schedule front-desk shifts around defined practice hours. Solo practices often run on 'whoever's open helps the doctor catch up' models that turn 8-hour shifts into 10. The DSO version has more discipline because the operations team lives separate from the chair.",
       },
+      {
+        title: "Insurance verification support",
+        body: "Many DSOs run a centralized insurance verification team that handles benefit checks, eligibility, and pre-auths in advance — instead of you spending 45 minutes on hold with Aetna during a busy morning. You handle the patient-facing work; the back office handles the carrier-facing work.",
+      },
     ],
     careerPath: {
       title: "What growth looks like",
@@ -368,6 +388,10 @@ export const ROLE_CONFIGS: RoleConfig[] = [
       {
         title: "Career mobility upward",
         body: "OM → multi-practice OM → regional manager → director of operations → VP-level. The path is real and DSOs need to fill it. Solo practices structurally can't offer this — you can't promote out of an OM role at a single practice except by leaving.",
+      },
+      {
+        title: "DSO HQ resources at your back",
+        body: "HR escalation paths, finance and accounting support, legal and compliance team, marketing and recruiting infrastructure — DSO operations roles get backed by a corporate function. Solo-practice OMs handle all of those personally, often without specialized training. At a DSO, you escalate; at a solo practice, you absorb.",
       },
     ],
     careerPath: {
