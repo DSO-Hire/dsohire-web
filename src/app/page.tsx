@@ -54,72 +54,79 @@ function Hero() {
         }}
       />
 
-      <div className="relative z-10 max-w-[1240px] mx-auto grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-16 lg:gap-20 items-center">
-        {/* Left column */}
-        <div>
-          {/* Eyebrow chip — DSO Hire positioning at a glance. */}
-          <div className="mb-8">
-            <span
-              className="inline-flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold tracking-[1.8px] uppercase text-ink border border-heritage/35"
-              style={{
-                background: "var(--heritage-tint)",
-                boxShadow: "0 0 0 4px var(--heritage-glow)",
-              }}
-            >
-              <span className="text-heritage-deep">★</span>
-              <span>Built for DSOs</span>
-              <span className="text-heritage-deep">·</span>
-              <span>10+ practices</span>
-              <span className="text-heritage-deep">·</span>
-              <span>Flat monthly fee</span>
-            </span>
-          </div>
-
-          <h1 className="text-5xl sm:text-7xl lg:text-[80px] font-extrabold tracking-[-0.025em] leading-[0.98] text-ink mb-7">
-            Hire across every practice
-            <br />
-            <em className="not-italic relative whitespace-nowrap text-heritage-light">
-              without per-listing pricing.
-              <span
-                aria-hidden
-                className="absolute left-0 right-0 bottom-1.5 h-2 -z-10"
-                style={{ background: "var(--heritage-tint)" }}
-              />
-            </em>
-          </h1>
-
-          <p className="text-lg sm:text-xl text-slate-body leading-relaxed max-w-[520px] mb-10">
-            Built for multi-location dental support organizations. Post unlimited
-            roles across every location for a flat monthly subscription — no per-listing
-            charges, no 15–25% placement fees, no recruiter middlemen.
-          </p>
-
-          <div className="flex flex-wrap items-center gap-3.5 mb-9">
-            <Link
-              href="#pricing"
-              className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
-            >
-              Start Posting Jobs
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-            <Link
-              href="/jobs"
-              className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
-            >
-              Browse Jobs
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-2.5 text-xs text-slate-body tracking-[0.4px]">
-            <span className="block w-1.5 h-1.5 bg-heritage rounded-full" />
-            <span>
-              Plans from <strong className="text-ink font-bold">$499/mo</strong> · Unlimited multi-location posting
-            </span>
-          </div>
+      <div className="relative z-10 max-w-[1240px] mx-auto">
+        {/* ── Headline band — spans the full container so the H1 owns the
+              top of the hero. The chip + headline don't compete for
+              horizontal space with the kanban illustration anymore. */}
+        <div className="mb-8">
+          <span
+            className="inline-flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold tracking-[1.8px] uppercase text-ink border border-heritage/35"
+            style={{
+              background: "var(--heritage-tint)",
+              boxShadow: "0 0 0 4px var(--heritage-glow)",
+            }}
+          >
+            <span className="text-heritage-deep">★</span>
+            <span>Built for DSOs</span>
+            <span className="text-heritage-deep">·</span>
+            <span>10+ practices</span>
+            <span className="text-heritage-deep">·</span>
+            <span>Flat monthly fee</span>
+          </span>
         </div>
 
-        {/* Right column: stylized employer kanban preview */}
-        <HeroKanbanPreview />
+        <h1 className="text-5xl sm:text-7xl lg:text-[80px] font-extrabold tracking-[-0.025em] leading-[0.98] text-ink mb-12">
+          Hire across every practice
+          <br />
+          <em className="not-italic relative whitespace-nowrap text-heritage-light">
+            without per-listing pricing.
+            <span
+              aria-hidden
+              className="absolute left-0 right-0 bottom-1.5 h-2 -z-10"
+              style={{ background: "var(--heritage-tint)" }}
+            />
+          </em>
+        </h1>
+
+        {/* ── Body band — narrower body copy on the left, wider kanban on
+              the right. The kanban now gets ~60% of the container width
+              (vs. ~49% in the old layout) and sits inset cleanly without
+              crowding the right edge. */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-12 lg:gap-16 items-start">
+          <div>
+            <p className="text-lg sm:text-xl text-slate-body leading-relaxed mb-10">
+              Built for multi-location dental support organizations. Post unlimited
+              roles across every location for a flat monthly subscription — no per-listing
+              charges, no 15–25% placement fees, no recruiter middlemen.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-3.5 mb-9">
+              <Link
+                href="#pricing"
+                className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+              >
+                Start Posting Jobs
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+              <Link
+                href="/jobs"
+                className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
+              >
+                Browse Jobs
+              </Link>
+            </div>
+
+            <div className="flex items-center gap-2.5 text-xs text-slate-body tracking-[0.4px]">
+              <span className="block w-1.5 h-1.5 bg-heritage rounded-full" />
+              <span>
+                Plans from <strong className="text-ink font-bold">$499/mo</strong> · Unlimited multi-location posting
+              </span>
+            </div>
+          </div>
+
+          {/* Right cell: stylized employer kanban preview, now wider */}
+          <HeroKanbanPreview />
+        </div>
       </div>
     </section>
   );
@@ -204,8 +211,13 @@ const HERO_COLUMNS: HeroColumn[] = [
 ];
 
 function HeroKanbanPreview() {
+  // Kanban sits in the wider right cell of the body band (~60% of the
+  // container at lg+). max-w-[720px] keeps it bounded on very wide
+  // viewports while still letting it stretch substantially wider than
+  // the original layout. mx-auto centers it within its cell when the
+  // grid wraps to a single column on smaller screens.
   return (
-    <div className="relative">
+    <div className="relative w-full max-w-[720px] mx-auto lg:ml-auto">
       <div
         className="bg-white border border-[var(--rule)] overflow-hidden"
         style={{
