@@ -21,6 +21,7 @@ import {
   Hash,
   AlignLeft,
   Type,
+  Lock,
 } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import {
@@ -550,24 +551,6 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             </section>
           )}
 
-          {/* Screening responses */}
-          {questions.length > 0 && (
-            <section>
-              <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
-                Screening Responses
-              </h2>
-              <div className="border border-[var(--rule)] bg-white divide-y divide-[var(--rule)]">
-                {questions.map((q) => (
-                  <ScreeningResponseRow
-                    key={q.id}
-                    question={q}
-                    answer={answersByQuestionId.get(q.id) ?? null}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
-
           {/* Resume */}
           <section>
             <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
@@ -637,10 +620,64 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             </section>
           )}
 
+          {/* Screening responses */}
+          {questions.length > 0 && (
+            <section>
+              <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
+                Screening Responses
+              </h2>
+              <div className="border border-[var(--rule)] bg-white divide-y divide-[var(--rule)]">
+                {questions.map((q) => (
+                  <ScreeningResponseRow
+                    key={q.id}
+                    question={q}
+                    answer={answersByQuestionId.get(q.id) ?? null}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Direct candidate ↔ DSO messages — sits BEFORE the internal
+              workspace divider so the visual treatment unambiguously marks
+              this as a candidate-facing surface. */}
+          <section>
+            <div className="flex items-baseline gap-3 mb-3 flex-wrap">
+              <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+                Messages with candidate
+              </h2>
+              {candidateUnreadCount > 0 && (
+                <span className="text-[9px] font-bold tracking-[1.5px] uppercase px-2 py-0.5 bg-heritage/15 text-heritage-deep">
+                  {candidateUnreadCount} unread
+                </span>
+              )}
+            </div>
+            <MessagesThread
+              applicationId={app.id}
+              currentUserId={user.id}
+              currentUserRole="employer"
+              currentUserName={
+                dsoUsersRows.find((u) => u.auth_user_id === user.id)
+                  ?.full_name ?? "You"
+              }
+              otherPartyName={displayName}
+              initialMessages={initialMessages}
+            />
+          </section>
+
+          {/* ───── Internal-workspace divider ───── */}
+          <div className="pt-4">
+            <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-slate-meta text-center mb-2">
+              Internal workspace · only your team sees this
+            </div>
+            <div className="border-t border-[var(--rule-strong)]" />
+          </div>
+
           {/* Notes */}
           <section>
-            <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
-              Internal Notes
+            <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3 inline-flex items-center gap-2">
+              <Lock className="h-3 w-3" />
+              <span className="text-heritage-deep">Internal ·</span> Internal Notes
             </h2>
             <p className="text-[12px] text-slate-meta mb-3">
               Visible to your team only. The candidate cannot see this.
@@ -653,8 +690,9 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
 
           {/* Scorecards */}
           <section>
-            <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
-              Candidate Scorecards
+            <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3 inline-flex items-center gap-2">
+              <Lock className="h-3 w-3" />
+              <span className="text-heritage-deep">Internal ·</span> Candidate Scorecards
             </h2>
             <p className="text-[12px] text-slate-meta mb-4">
               Each reviewer scores against the {scorecardRubric.label.toLowerCase()} rubric.
@@ -671,40 +709,11 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             />
           </section>
 
-          {/* Direct candidate ↔ DSO messages */}
-          <section>
-            <div className="flex items-baseline gap-3 mb-3 flex-wrap">
-              <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta">
-                Messages with candidate
-              </h2>
-              {candidateUnreadCount > 0 && (
-                <span className="text-[9px] font-bold tracking-[1.5px] uppercase px-2 py-0.5 bg-heritage/15 text-heritage-deep">
-                  {candidateUnreadCount} unread
-                </span>
-              )}
-            </div>
-            <p className="text-[12px] text-slate-meta mb-3">
-              Two-way messaging with{" "}
-              <span className="font-bold text-ink">{displayName}</span>. Visible
-              to your team and the candidate. Internal team comments are below.
-            </p>
-            <MessagesThread
-              applicationId={app.id}
-              currentUserId={user.id}
-              currentUserRole="employer"
-              currentUserName={
-                dsoUsersRows.find((u) => u.auth_user_id === user.id)
-                  ?.full_name ?? "You"
-              }
-              otherPartyName={displayName}
-              initialMessages={initialMessages}
-            />
-          </section>
-
           {/* Team comments + @-mentions */}
           <section>
-            <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
-              Team Comments
+            <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3 inline-flex items-center gap-2">
+              <Lock className="h-3 w-3" />
+              <span className="text-heritage-deep">Internal ·</span> Team Comments
             </h2>
             <p className="text-[12px] text-slate-meta mb-3">
               Internal thread for your team. Type{" "}

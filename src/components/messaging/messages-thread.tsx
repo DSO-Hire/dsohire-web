@@ -35,7 +35,7 @@ import {
   type ChangeEvent,
   type KeyboardEvent,
 } from "react";
-import { MoreHorizontal, MessageCircle, Check, CheckCheck } from "lucide-react";
+import { MoreHorizontal, MessageCircle, Check, CheckCheck, Eye } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import {
   REALTIME_LISTEN_TYPES,
@@ -422,13 +422,39 @@ export function MessagesThread({
 
   /* ── Render ── */
 
+  // External-banner copy flips based on which side is viewing. The component
+  // is shared between /employer/applications/[id] and /candidate/applications/[id]
+  // — same visual treatment, mirrored language so neither side can confuse
+  // this surface for an internal/private one.
+  const isEmployerView = currentUserRole === "employer";
+  const externalAudienceLabel = isEmployerView ? "candidate" : "recruiter";
+  const externalAudienceName = otherPartyName;
+
   return (
-    <div>
+    <div className="relative bg-heritage/5 border-2 border-heritage/30 p-6 sm:p-7 shadow-[0_0_0_1px_var(--heritage-glow),0_4px_20px_-8px_var(--heritage-glow)]">
+      {/* Layer 2 — EXTERNAL banner */}
+      <div className="mb-5 flex items-start gap-3 px-4 py-3 bg-heritage-tint border border-heritage/40">
+        <Eye className="h-4 w-4 text-heritage-deep flex-shrink-0 mt-0.5" />
+        <div className="min-w-0">
+          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+            External · Visible to {externalAudienceLabel}
+          </div>
+          <p className="text-[12px] text-heritage-deep/90 mt-1 leading-snug">
+            Anything you send here is sent directly to{" "}
+            <span className="font-bold">{externalAudienceName}</span>{" "}
+            {isEmployerView
+              ? "via email and shown on their applicant dashboard."
+              : "and shown on their hiring dashboard."}{" "}
+            Internal team notes belong in the sections below.
+          </p>
+        </div>
+      </div>
+
       {/* List */}
       <div
         ref={listRef}
         onScroll={handleListScroll}
-        className="border border-[var(--rule)] bg-white max-h-[480px] overflow-y-auto"
+        className="border border-heritage/30 bg-white max-h-[480px] overflow-y-auto"
       >
         {visibleCount === 0 ? (
           <div className="p-8 text-center">
@@ -532,8 +558,8 @@ export function MessagesThread({
                       <div
                         className={`max-w-[520px] px-4 py-3 text-[14px] leading-relaxed whitespace-pre-wrap break-words border ${
                           isMine
-                            ? "bg-heritage/10 border-heritage/30 text-ink"
-                            : "bg-cream border-[var(--rule)] text-ink"
+                            ? "bg-heritage/15 border-heritage/40 text-ink"
+                            : "bg-[var(--heritage-tint)] border-heritage/25 text-ink"
                         }`}
                       >
                         {m.body}
@@ -607,8 +633,16 @@ export function MessagesThread({
       </div>
 
       {/* Composer */}
-      <div className="mt-4">
-        <p className="text-[11px] italic text-slate-meta mb-2 leading-snug">
+      <div className="mt-5">
+        {/* Layer 3 — inline warning directly above the textarea */}
+        <div className="mb-2 px-3 py-2 bg-heritage-tint border-l-2 border-heritage text-[12.5px] leading-snug text-ink">
+          <span className="font-semibold text-heritage-deep">
+            Sending to {externalAudienceName}.
+          </span>{" "}
+          This message goes directly to them — internal team notes belong in
+          the sections below.
+        </div>
+        <p className="text-[12px] italic text-heritage-deep mb-2 leading-snug">
           Don&apos;t share medical information here — discuss any
           accommodations or health-related context directly with HR.
         </p>
@@ -619,12 +653,8 @@ export function MessagesThread({
           onKeyDown={handleComposerKeyDown}
           rows={3}
           maxLength={MAX_BODY}
-          placeholder={
-            currentUserRole === "candidate"
-              ? `Message ${otherPartyName}…`
-              : `Message ${otherPartyName}…`
-          }
-          className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed"
+          placeholder={`Message ${otherPartyName}…`}
+          className="w-full px-4 py-3 bg-white border border-heritage/40 text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed"
         />
         <div className="flex items-center gap-3 mt-3 flex-wrap">
           <button
