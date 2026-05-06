@@ -1,55 +1,127 @@
 /**
- * /candidate/profile — edit candidate profile.
+ * /candidate/profile — section-card profile editor (Phase 4.2.b).
+ *
+ * Replaces the old single-form scroll with a LinkedIn-style stack of
+ * section cards. Each card has a pencil-edit affordance that opens a
+ * modal sheet with structured inputs (combobox/chip wherever a typo
+ * could silently exclude the candidate from search). Photo upload sits
+ * above the sections, resume-import CTA above the photo.
+ *
+ * Server component fetches everything in one round trip; the client
+ * orchestrator (`profile-sections.tsx`) handles modal state. Each save
+ * server action calls `revalidatePath("/candidate/profile")` so the
+ * next render reflects the new state immediately.
  */
 
+import type { Metadata } from "next";
 import { CandidateShell } from "@/components/candidate/candidate-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { CandidateProfileForm, type ProfileInitial } from "./profile-form";
 import { CandidateAvatarUpload } from "./avatar-upload";
-import type { Metadata } from "next";
+import {
+  ProfileSections,
+  type ProfileData,
+} from "./profile-sections";
 
 export const metadata: Metadata = { title: "Your Profile" };
 
 export default async function CandidateProfilePage() {
   const supabase = await createSupabaseServerClient();
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return null; // shell handles redirect
+  if (!user) return null;
 
-  const { data: candidate } = await supabase
-    .from("candidates")
-    .select(
-      "full_name, phone, headline, summary, current_title, years_experience, desired_roles, desired_locations, availability, linkedin_url, resume_url, is_searchable, avatar_url"
-    )
-    .eq("auth_user_id", user.id)
-    .maybeSingle();
-  if (!candidate) return null;
+  const [
+    { data: candidateRow },
+    { data: workHistory },
+    { data: education },
+    { data: licenses },
+    { data: certifications },
+  ] = await Promise.all([
+    supabase
+      .from("candidates")
+      .select(
+        "id, full_name, phone, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, availability, linkedin_url, resume_url, is_searchable, avatar_url, desired_specialty, pms_systems, skills, languages, temp_or_perm, schedule_preferences, min_salary, salary_unit, cv_visibility"
+      )
+      .eq("auth_user_id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("candidate_work_history")
+      .select(
+        "id, title, company_name, is_dso, start_date, end_date, is_current, description, pms_systems_used, procedures_performed, auto_blocklisted"
+      )
+      .order("is_current", { ascending: false })
+      .order("start_date", { ascending: false, nullsFirst: false }),
+    supabase
+      .from("candidate_education")
+      .select("id, school_name, degree, field_of_study, start_year, end_year, description")
+      .order("end_year", { ascending: false, nullsFirst: false }),
+    supabase
+      .from("candidate_licenses")
+      .select("id, license_type, license_number, state, issued_date, expires_date, display_number")
+      .order("expires_date", { ascending: true, nullsFirst: false }),
+    supabase
+      .from("candidate_certifications")
+      .select("id, kind, level, issued_date, expires_date")
+      .order("expires_date", { ascending: true, nullsFirst: false }),
+  ]);
 
-  const avatarUrl = (candidate.avatar_url as string | null) ?? null;
+  if (!candidateRow) return null;
 
-  const resumePath = (candidate.resume_url as string | null) ?? null;
-  const initial: ProfileInitial = {
-    full_name: (candidate.full_name as string | null) ?? "",
-    phone: (candidate.phone as string | null) ?? "",
-    headline: (candidate.headline as string | null) ?? "",
-    summary: (candidate.summary as string | null) ?? "",
-    current_title: (candidate.current_title as string | null) ?? "",
-    years_experience:
-      candidate.years_experience !== null && candidate.years_experience !== undefined
-        ? String(candidate.years_experience)
-        : "",
-    desired_roles: ((candidate.desired_roles as string[] | null) ?? []).join(", "),
-    desired_locations: ((candidate.desired_locations as string[] | null) ?? []).join(", "),
-    availability: (candidate.availability as string | null) ?? "",
-    linkedin_url: (candidate.linkedin_url as string | null) ?? "",
-    is_searchable: Boolean(candidate.is_searchable),
-    has_resume: Boolean(resumePath),
-    resume_filename: resumePath
-      ? resumePath.split("/").pop()?.replace(/^\d+-/, "") ?? null
-      : null,
+  // Cast helper — the database types regen would type this for free,
+  // but `npm run types` isn't wired yet (memory: feedback_verify_npm_versions.md
+  // companion).
+  const c = candidateRow as Record<string, unknown>;
+
+  const data: ProfileData = {
+    identity: {
+      full_name: (c.full_name as string | null) ?? "",
+      pronouns: (c.pronouns as string | null) ?? null,
+      headline: (c.headline as string | null) ?? null,
+      summary: (c.summary as string | null) ?? null,
+      phone: (c.phone as string | null) ?? null,
+      current_location_city: (c.current_location_city as string | null) ?? null,
+      current_location_state:
+        (c.current_location_state as string | null) ?? null,
+      // Prefer dental-specific column; fall back to the generic legacy column
+      // until 4.2.b form refactors writes (this page IS that refactor — but
+      // existing rows may still only have years_experience populated).
+      years_experience_dental:
+        (c.years_experience_dental as number | null) ??
+        (c.years_experience as number | null) ??
+        null,
+      linkedin_url: (c.linkedin_url as string | null) ?? null,
+    },
+    rolePreferences: {
+      desired_roles: ((c.desired_roles as string[] | null) ?? []),
+      desired_specialty: ((c.desired_specialty as string[] | null) ?? []),
+      temp_or_perm: (c.temp_or_perm as ProfileData["rolePreferences"]["temp_or_perm"]) ?? null,
+    },
+    skillsLanguages: {
+      skills: ((c.skills as string[] | null) ?? []),
+      languages: ((c.languages as string[] | null) ?? []),
+      pms_systems: ((c.pms_systems as string[] | null) ?? []),
+    },
+    jobPreferences: {
+      desired_locations: ((c.desired_locations as string[] | null) ?? []),
+      min_salary: (c.min_salary as number | null) ?? null,
+      salary_unit:
+        (c.salary_unit as ProfileData["jobPreferences"]["salary_unit"]) ?? null,
+      schedule_preferences:
+        (c.schedule_preferences as ProfileData["jobPreferences"]["schedule_preferences"]) ??
+        {},
+      cv_visibility:
+        (c.cv_visibility as ProfileData["jobPreferences"]["cv_visibility"]) ??
+        "recruiters_only",
+      availability: (c.availability as string | null) ?? null,
+    },
+    workHistory: ((workHistory ?? []) as ProfileData["workHistory"]),
+    education: ((education ?? []) as ProfileData["education"]),
+    licenses: ((licenses ?? []) as ProfileData["licenses"]),
+    certifications: ((certifications ?? []) as ProfileData["certifications"]),
   };
+
+  const avatarUrl = (c.avatar_url as string | null) ?? null;
 
   return (
     <CandidateShell active="profile">
@@ -61,17 +133,15 @@ export default async function CandidateProfilePage() {
           The version of you employers see.
         </h1>
         <p className="text-[14px] text-slate-body leading-relaxed">
-          Fill out once — every future application autofills from this. Your
-          resume, headline, and target roles all carry job to job.
+          Edit any section below. Saved changes show up immediately — no
+          publish button to remember.
         </p>
       </header>
 
-      {/* Resume import CTA (Phase 4.1.c) — drop-zone-above-the-fold for
-          new candidates. Hides once the candidate has filled in core
-          fields manually so the surface doesn't nag returning users. */}
+      {/* Resume import CTA */}
       <a
         href="/candidate/profile/import"
-        className="mb-8 flex max-w-[820px] items-start gap-4 rounded-lg border border-heritage-deep/30 bg-[#F7F4ED] p-5 transition hover:border-heritage-deep hover:bg-[#F7F4ED]/70 sm:items-center"
+        className="mb-6 flex max-w-[820px] items-start gap-4 rounded-lg border border-heritage-deep/30 bg-[#F7F4ED] p-5 transition hover:border-heritage-deep hover:bg-[#F7F4ED]/70 sm:items-center"
       >
         <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-heritage-deep/10">
           <svg
@@ -98,8 +168,8 @@ export default async function CandidateProfilePage() {
             Import from your resume
           </p>
           <p className="mt-0.5 text-sm text-slate-body">
-            Upload a PDF or DOCX — we&apos;ll fill out your profile in
-            seconds. You review every field before saving.
+            Upload a PDF or DOCX — we&apos;ll fill in every section below in
+            seconds. You review before anything saves.
           </p>
         </div>
         <span className="hidden text-sm font-medium text-heritage-deep sm:block">
@@ -107,23 +177,19 @@ export default async function CandidateProfilePage() {
         </span>
       </a>
 
-      {/* Profile photo (Phase 4.1.a) — independent of the form below;
-          uploads + persists immediately so a saved photo doesn't depend
-          on submitting the rest of the form. */}
+      {/* Profile photo */}
       <div className="mb-6 max-w-[820px] border border-[var(--rule)] bg-white p-7 sm:p-10">
         <h2 className="mb-1 font-display text-lg font-bold text-ink">
           Profile photo
         </h2>
         <p className="mb-5 text-sm text-slate-body">
-          Optional, but DSO recruiters tell us photos make a real
-          difference. We don&apos;t require one.
+          Optional, but DSO recruiters tell us photos make a real difference.
         </p>
         <CandidateAvatarUpload initialUrl={avatarUrl} />
       </div>
 
-      <div className="border border-[var(--rule)] bg-white p-7 sm:p-10 max-w-[820px]">
-        <CandidateProfileForm initial={initial} />
-      </div>
+      {/* Section cards */}
+      <ProfileSections data={data} />
     </CandidateShell>
   );
 }
