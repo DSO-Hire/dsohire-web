@@ -97,18 +97,40 @@ export function EmailChangeForm({
 // Phone capture
 // ─────────────────────────────────────────────────────────────────────
 
+/**
+ * Format raw input as a US phone number.
+ *   ""         → ""
+ *   "9"        → "(9"
+ *   "913"      → "(913"
+ *   "9139"     → "(913) 9"
+ *   "9139723000" → "(913) 972-3000"
+ * Strips anything that isn't a digit; caps at 10 digits. Persisted value
+ * keeps the formatting (recognizable in DB rows + future SMS lookups can
+ * normalize).
+ */
+function formatPhoneInput(raw: string): string {
+  const digits = raw.replace(/\D/g, "").slice(0, 10);
+  if (digits.length === 0) return "";
+  if (digits.length <= 3) return `(${digits}`;
+  if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+}
+
 export function PhoneForm({
   initialPhone,
 }: {
   initialPhone: string | null;
 }) {
-  const [phone, setPhone] = useState(initialPhone ?? "");
+  // Re-format any saved value so existing rows that were stored as raw
+  // digits (pre-formatter) display nicely on first render.
+  const [phone, setPhone] = useState(formatPhoneInput(initialPhone ?? ""));
   const [, startWork] = useTransition();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
 
-  const dirty = phone.trim() !== (initialPhone ?? "").trim();
+  const dirty =
+    phone.trim() !== formatPhoneInput(initialPhone ?? "").trim();
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,9 +159,11 @@ export function PhoneForm({
           <input
             type="tel"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={(e) => setPhone(formatPhoneInput(e.target.value))}
             placeholder="(913) 555-0142"
             autoComplete="tel"
+            inputMode="tel"
+            maxLength={14}
             className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
           />
         </label>
@@ -171,7 +195,7 @@ export function LanguageStub() {
     <SectionCard
       icon={<Languages className="size-5 text-[#4D7A60]" />}
       title="Language"
-      description="The platform is English-only at launch. Spanish ships post-launch for our dental-assistant audience."
+      description="DSO Hire is English-only today. Additional languages are on the roadmap."
     >
       <div className="flex items-center gap-3">
         <select
@@ -179,7 +203,6 @@ export function LanguageStub() {
           className="rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-500"
         >
           <option>English</option>
-          <option disabled>Spanish (coming soon)</option>
         </select>
         <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-600">
           Coming soon
