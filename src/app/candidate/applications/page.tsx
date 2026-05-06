@@ -144,6 +144,9 @@ export default async function CandidateApplicationsPage({
   const dsoMap = new Map(dsos.map((d) => [d.id, d]));
 
   // Job-locations count per job → drives the scope chip.
+  // Supabase types `dso_locations` as an array on the join row even when
+  // the FK is one-to-one, so we accept that shape and flatten in the
+  // consumer instead of force-casting.
   const { data: rawJobLocs } = jobIds.length
     ? await supabase
         .from("job_locations")
@@ -152,10 +155,14 @@ export default async function CandidateApplicationsPage({
     : { data: [] };
   type JobLocRow = {
     job_id: string;
-    dso_locations: { name: string; city: string | null; state: string | null } | null;
+    dso_locations: Array<{
+      name: string;
+      city: string | null;
+      state: string | null;
+    }> | null;
   };
   const locsByJob = new Map<string, JobLocRow[]>();
-  for (const row of (rawJobLocs ?? []) as JobLocRow[]) {
+  for (const row of (rawJobLocs ?? []) as unknown as JobLocRow[]) {
     const list = locsByJob.get(row.job_id) ?? [];
     list.push(row);
     locsByJob.set(row.job_id, list);
@@ -359,7 +366,11 @@ function ApplicationsList({
   locsByJob: Map<
     string,
     Array<{
-      dso_locations: { name: string; city: string | null; state: string | null } | null;
+      dso_locations: Array<{
+        name: string;
+        city: string | null;
+        state: string | null;
+      }> | null;
     }>
   >;
   unreadByAppId: Map<string, number>;
@@ -628,10 +639,16 @@ function ScopeChip({
   locs,
 }: {
   locs: Array<{
-    dso_locations: { name: string; city: string | null; state: string | null } | null;
+    dso_locations: Array<{
+      name: string;
+      city: string | null;
+      state: string | null;
+    }> | null;
   }>;
 }) {
-  const real = locs.map((l) => l.dso_locations).filter((l): l is NonNullable<typeof l> => l !== null);
+  // Each row's dso_locations is itself an array (Supabase one-to-many
+  // shape on the join row). Flatten across rows.
+  const real = locs.flatMap((l) => l.dso_locations ?? []);
   if (real.length === 0) {
     return (
       <span className="inline-flex items-center gap-1 text-slate-meta">
