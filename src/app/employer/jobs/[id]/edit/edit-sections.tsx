@@ -43,11 +43,13 @@ import {
 } from "../../actions";
 import { RecommendedQuestionsPanel } from "../../recommended-questions-panel";
 import { JdGeneratorPanel } from "../../jd-generator-panel";
-import type {
-  LocationOption,
-  WizardScreeningQuestion,
-  ScreeningQuestionKind,
-  ScreeningQuestionOption,
+import {
+  SCOPE_OPTIONS,
+  type LocationOption,
+  type WizardScreeningQuestion,
+  type ScreeningQuestionKind,
+  type ScreeningQuestionOption,
+  type JobScope,
 } from "../../job-wizard";
 
 /* ───── Constants ───── */
@@ -105,6 +107,7 @@ export interface EditSectionsInitial {
   location_ids: string[];
   skills: string[];
   hide_stages_from_candidate: boolean;
+  scope: JobScope;
 }
 
 interface EditSectionsProps {
@@ -130,6 +133,7 @@ export function EditSections({
         initialTitle={initial.title}
         initialRoleCategory={initial.role_category}
         initialEmploymentType={initial.employment_type}
+        initialScope={initial.scope}
         initialLocationIds={initial.location_ids}
         locations={locations}
       />
@@ -244,6 +248,7 @@ function BasicsSection({
   initialTitle,
   initialRoleCategory,
   initialEmploymentType,
+  initialScope,
   initialLocationIds,
   locations,
 }: {
@@ -252,12 +257,14 @@ function BasicsSection({
   initialTitle: string;
   initialRoleCategory: string;
   initialEmploymentType: string;
+  initialScope: JobScope;
   initialLocationIds: string[];
   locations: LocationOption[];
 }) {
   const [title, setTitle] = useState(initialTitle);
   const [roleCategory, setRoleCategory] = useState(initialRoleCategory);
   const [employmentType, setEmploymentType] = useState(initialEmploymentType);
+  const [scope, setScope] = useState<JobScope>(initialScope);
   const [selectedLocationIds, setSelectedLocationIds] = useState<Set<string>>(
     new Set(initialLocationIds)
   );
@@ -269,6 +276,7 @@ function BasicsSection({
     title: initialTitle,
     roleCategory: initialRoleCategory,
     employmentType: initialEmploymentType,
+    scope: initialScope,
     locationIds: [...initialLocationIds].sort().join("|"),
   });
 
@@ -277,6 +285,7 @@ function BasicsSection({
     title !== snapshot.title ||
     roleCategory !== snapshot.roleCategory ||
     employmentType !== snapshot.employmentType ||
+    scope !== snapshot.scope ||
     currentLocationKey !== snapshot.locationIds;
 
   const onSave = () => {
@@ -292,6 +301,7 @@ function BasicsSection({
     fd.set("title", title.trim());
     fd.set("role_category", roleCategory);
     fd.set("employment_type", employmentType);
+    fd.set("scope", scope);
     for (const id of selectedLocationIds) fd.append("location_ids", id);
 
     startTransition(async () => {
@@ -304,6 +314,7 @@ function BasicsSection({
         title: title.trim(),
         roleCategory,
         employmentType,
+        scope,
         locationIds: currentLocationKey,
       });
       setSaved(true);
@@ -390,6 +401,48 @@ function BasicsSection({
               );
             })}
           </div>
+        </div>
+
+        <div>
+          <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
+            Job scope
+          </label>
+          <div className="space-y-2">
+            {SCOPE_OPTIONS.map((opt) => (
+              <label
+                key={opt.value}
+                className={
+                  "flex items-start gap-3 px-4 py-3 border cursor-pointer transition-colors " +
+                  (scope === opt.value
+                    ? "bg-heritage/[0.08] border-heritage"
+                    : "bg-white border-[var(--rule-strong)] hover:bg-cream")
+                }
+              >
+                <input
+                  type="radio"
+                  name="scope"
+                  checked={scope === opt.value}
+                  onChange={() => {
+                    setScope(opt.value);
+                    setSaved(false);
+                  }}
+                  className="mt-1 accent-heritage"
+                />
+                <div className="flex-1">
+                  <div className="text-[14px] font-bold text-ink">
+                    {opt.label}
+                  </div>
+                  <div className="text-[13px] text-slate-body mt-0.5 leading-relaxed">
+                    {opt.helper}
+                  </div>
+                </div>
+              </label>
+            ))}
+          </div>
+          <p className="mt-2 text-[12px] text-slate-meta">
+            Owners, admins, and recruiters always see every job — scope only
+            changes what hiring managers see.
+          </p>
         </div>
       </div>
       <SaveBar

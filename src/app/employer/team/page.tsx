@@ -26,6 +26,7 @@ import {
 import { InviteForm } from "./invite-form";
 import { RoleSelect } from "./role-select";
 import { RoleHelp } from "./role-help";
+import { HmRescopeButton } from "./hm-rescope-button";
 import { removeTeammate, revokeInvitation } from "./actions";
 import type { Metadata } from "next";
 
@@ -177,6 +178,7 @@ export default async function TeamPage() {
               adminCount={adminCount}
               scopedLocationIds={hmScopeByUserId.get(m.id) ?? []}
               locationsById={locationsById}
+              allLocations={locationRows}
             />
           ))}
         </ul>
@@ -237,6 +239,7 @@ function MemberRowItem({
   adminCount,
   scopedLocationIds,
   locationsById,
+  allLocations,
 }: {
   member: MemberRow;
   email: string | null;
@@ -246,6 +249,7 @@ function MemberRowItem({
   adminCount: number;
   scopedLocationIds: string[];
   locationsById: Map<string, LocationRow>;
+  allLocations: LocationRow[];
 }) {
   const isSoleOwner = member.role === "owner" && ownerCount <= 1;
   const isSoleAdmin =
@@ -277,10 +281,11 @@ function MemberRowItem({
           {email ?? "—"} · Joined {formatDate(member.created_at)}
         </div>
         {isHm && (
-          <div className="mt-2 flex flex-wrap gap-1.5">
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
             {scopedLocationIds.length === 0 ? (
               <span className="text-[12px] tracking-[0.3px] text-red-700">
-                No locations assigned — this user can&apos;t see anything.
+                No locations assigned — this user can&apos;t see jobs except
+                corporate-scoped ones.
               </span>
             ) : (
               scopedLocationIds.map((id) => {
@@ -296,6 +301,14 @@ function MemberRowItem({
                   </span>
                 );
               })
+            )}
+            {canManage && (
+              <HmRescopeButton
+                dsoUserId={member.id}
+                hmName={member.full_name || email || "Hiring manager"}
+                initialLocationIds={scopedLocationIds}
+                locations={allLocations}
+              />
             )}
           </div>
         )}

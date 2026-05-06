@@ -72,6 +72,8 @@ export interface WizardScreeningQuestion {
   sort_order: number;
 }
 
+export type JobScope = "location" | "regional" | "corporate";
+
 export interface JobWizardInitial {
   id: string;
   title: string;
@@ -88,7 +90,33 @@ export interface JobWizardInitial {
   location_ids: string[];
   skills: string[];
   hide_stages_from_candidate: boolean;
+  scope: JobScope;
 }
+
+export const SCOPE_OPTIONS: Array<{
+  value: JobScope;
+  label: string;
+  helper: string;
+}> = [
+  {
+    value: "location",
+    label: "Single practice",
+    helper:
+      "This role is open at one specific practice. Hiring managers see it only if they're tagged on that practice.",
+  },
+  {
+    value: "regional",
+    label: "Regional / multi-practice",
+    helper:
+      "Open across several practices. Any hiring manager in your DSO can see and staff this role.",
+  },
+  {
+    value: "corporate",
+    label: "DSO-wide",
+    helper:
+      "A corporate-level role (CEO, CFO, regional director, etc.). Visible to every hiring manager regardless of practice tagging.",
+  },
+];
 
 interface JobWizardProps {
   dsoId: string;
@@ -191,6 +219,7 @@ export function JobWizard({
   const [hideStagesFromCandidate, setHideStagesFromCandidate] = useState(
     initial?.hide_stages_from_candidate ?? false
   );
+  const [scope, setScope] = useState<JobScope>(initial?.scope ?? "location");
   const [skills, setSkills] = useState(initial?.skills.join(", ") ?? "");
   const [benefits, setBenefits] = useState(initial?.benefits.join(", ") ?? "");
   const [requirements, setRequirements] = useState(
@@ -273,6 +302,7 @@ export function JobWizard({
     if (compVisible) formData.set("compensation_visible", "on");
     if (hideStagesFromCandidate)
       formData.set("hide_stages_from_candidate", "on");
+    formData.set("scope", scope);
     formData.set("skills", skills);
     formData.set("benefits", benefits);
     formData.set("requirements", requirements);
@@ -337,6 +367,8 @@ export function JobWizard({
             onRoleCategory={setRoleCategory}
             employmentType={employmentType}
             onEmploymentType={setEmploymentType}
+            scope={scope}
+            onScope={setScope}
             locations={locations}
             selectedLocationIds={selectedLocationIds}
             onToggleLocation={(id) => {
@@ -520,6 +552,8 @@ function BasicsStep({
   onRoleCategory,
   employmentType,
   onEmploymentType,
+  scope,
+  onScope,
   locations,
   selectedLocationIds,
   onToggleLocation,
@@ -530,6 +564,8 @@ function BasicsStep({
   onRoleCategory: (v: string) => void;
   employmentType: string;
   onEmploymentType: (v: string) => void;
+  scope: JobScope;
+  onScope: (v: JobScope) => void;
   locations: LocationOption[];
   selectedLocationIds: Set<string>;
   onToggleLocation: (id: string) => void;
@@ -606,6 +642,46 @@ function BasicsStep({
         <p className="mt-2 text-[12px] text-slate-meta">
           Tag every location this job is open at. We render separate
           location-specific listings on the public job board automatically.
+        </p>
+      </div>
+
+      <div>
+        <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
+          Job scope
+        </label>
+        <div className="space-y-2">
+          {SCOPE_OPTIONS.map((opt) => (
+            <label
+              key={opt.value}
+              className={
+                "flex items-start gap-3 px-4 py-3 border cursor-pointer transition-colors " +
+                (scope === opt.value
+                  ? "bg-heritage/[0.08] border-heritage"
+                  : "bg-white border-[var(--rule-strong)] hover:bg-cream")
+              }
+            >
+              <input
+                type="radio"
+                name="scope"
+                checked={scope === opt.value}
+                onChange={() => onScope(opt.value)}
+                className="mt-1 accent-heritage"
+              />
+              <div className="flex-1">
+                <div className="text-[14px] font-bold text-ink">
+                  {opt.label}
+                </div>
+                <div className="text-[13px] text-slate-body mt-0.5 leading-relaxed">
+                  {opt.helper}
+                </div>
+              </div>
+            </label>
+          ))}
+        </div>
+        <p className="mt-2 text-[12px] text-slate-meta">
+          Scope controls who on your team can see this job. Owners, admins,
+          and recruiters always see every job — this only changes what
+          hiring managers see.
         </p>
       </div>
     </div>

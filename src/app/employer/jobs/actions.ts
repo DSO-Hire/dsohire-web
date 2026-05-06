@@ -97,6 +97,7 @@ export async function createJob(
       requirements: parsed.requirements || null,
       status: parsed.status,
       hide_stages_from_candidate: parsed.hideStagesFromCandidate,
+      scope: parsed.scope,
       posted_at: parsed.status === "active" ? new Date().toISOString() : null,
       created_by: dsoUser?.id ?? null,
     })
@@ -187,6 +188,7 @@ export async function updateJob(
       requirements: parsed.requirements || null,
       status: parsed.status,
       hide_stages_from_candidate: parsed.hideStagesFromCandidate,
+      scope: parsed.scope,
       posted_at:
         parsed.status === "active" ? new Date().toISOString() : null,
     })
@@ -316,6 +318,12 @@ export async function updateJobBasicsSection(
   const title = String(formData.get("title") ?? "").trim();
   const roleCategory = String(formData.get("role_category") ?? "other");
   const employmentType = String(formData.get("employment_type") ?? "full_time");
+  const scopeRaw = String(formData.get("scope") ?? "location").trim();
+  const scope = (
+    VALID_SCOPES.has(scopeRaw as "location" | "regional" | "corporate")
+      ? scopeRaw
+      : "location"
+  ) as "location" | "regional" | "corporate";
   const locationIds = formData
     .getAll("location_ids")
     .map((v) => String(v).trim())
@@ -335,6 +343,7 @@ export async function updateJobBasicsSection(
       title,
       role_category: roleCategory,
       employment_type: employmentType,
+      scope,
     })
     .eq("id", jobId)
     .eq("dso_id", dsoId);
@@ -639,7 +648,14 @@ interface ParsedJobInput {
   skills: string[];
   screeningQuestions: ScreeningQuestionPayload[];
   hideStagesFromCandidate: boolean;
+  scope: "location" | "regional" | "corporate";
 }
+
+const VALID_SCOPES = new Set<"location" | "regional" | "corporate">([
+  "location",
+  "regional",
+  "corporate",
+]);
 
 const VALID_KINDS: Set<ScreeningQuestionPayload["kind"]> = new Set([
   "short_text",
@@ -667,6 +683,12 @@ function parseJobFormData(
   const requirements = String(formData.get("requirements") ?? "").trim();
   const status = String(formData.get("status") ?? "draft");
   const skillsRaw = String(formData.get("skills") ?? "").trim();
+  const scopeRaw = String(formData.get("scope") ?? "location").trim();
+  const scope = (
+    VALID_SCOPES.has(scopeRaw as "location" | "regional" | "corporate")
+      ? scopeRaw
+      : "location"
+  ) as "location" | "regional" | "corporate";
 
   if (!title) return { error: "Job title is required." };
   if (title.length > 200) return { error: "Job title is too long." };
@@ -791,6 +813,7 @@ function parseJobFormData(
     skills,
     screeningQuestions,
     hideStagesFromCandidate,
+    scope,
   };
 }
 
