@@ -1,23 +1,47 @@
+/**
+ * /candidate/settings/data — Phase 4.3.f Data & Account tab.
+ *
+ * Server component fetches the candidate's email + display name so the
+ * client form can render personalized confirmation copy in the delete
+ * flow ("Hi Cameron, you're about to..."). All actual data operations
+ * live in the client form's server-action calls.
+ */
+
 import type { Metadata } from "next";
-import { ComingSoonCard } from "../coming-soon-card";
+import { redirect } from "next/navigation";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { DataForm } from "./data-form";
 
 export const metadata: Metadata = { title: "Data & account · Settings" };
 
-export default function CandidateDataPage() {
+export default async function CandidateDataPage() {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/candidate/sign-in?next=/candidate/settings/data");
+
+  const { data: candidate } = await supabase
+    .from("candidates")
+    .select("full_name")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+
   return (
-    <ComingSoonCard
-      title="Data & account"
-      description="Download a copy of your data, withdraw active applications, or delete your account."
-      features={[
-        "Download my data — async ZIP delivered by email, valid 24 hours",
-        "Application history — quick link to /candidate/applications",
-        "Withdraw applications — bulk withdraw any actives in one click",
-        "Delete account — 30-day soft-delete grace period before hard delete",
-      ]}
-      alternatives={[
-        { label: "View your applications", href: "/candidate/applications" },
-        { label: "Email cam@dsohire.com to request deletion now", href: "mailto:cam@dsohire.com?subject=Delete%20my%20DSO%20Hire%20account" },
-      ]}
-    />
+    <div>
+      <header className="mb-6">
+        <h2 className="font-display text-xl font-bold text-[#14233F]">
+          Your data, your call
+        </h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Download a copy, manage your applications, or delete your
+          account. We make all of it cheap to do.
+        </p>
+      </header>
+      <DataForm
+        candidateEmail={user.email ?? null}
+        candidateName={(candidate?.full_name as string | null) ?? null}
+      />
+    </div>
   );
 }
