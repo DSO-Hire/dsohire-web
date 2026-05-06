@@ -105,6 +105,196 @@ export const CERTIFICATION_KINDS: ReadonlyArray<CanonicalOption> = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────
+// Skills — role-aware suggestions
+//
+// `getSkillSuggestions(desiredRoles)` returns a deduped, ordered list:
+// role-specific skills first (in role order), then universal dental
+// skills as the tail. Candidates can still type free-form values; the
+// canonical list is just for quick-add prompts.
+//
+// Curated from real dental hiring listings + role-specific skill
+// taxonomies. Conservative — we'd rather have a small list of recognized
+// terms than a sprawling list of niche jargon.
+// ─────────────────────────────────────────────────────────────────────
+
+const ASSOCIATE_DENTIST_SKILLS: ReadonlyArray<CanonicalOption> = [
+  { value: "Crown & bridge", label: "Crown & bridge" },
+  { value: "Root canal therapy", label: "Root canal therapy" },
+  { value: "Restorative dentistry", label: "Restorative dentistry" },
+  { value: "Cosmetic dentistry", label: "Cosmetic dentistry" },
+  { value: "Veneers", label: "Veneers" },
+  { value: "Inlays/onlays", label: "Inlays/onlays" },
+  { value: "Implant restorations", label: "Implant restorations" },
+  { value: "Implant placement", label: "Implant placement" },
+  { value: "Surgical extractions", label: "Surgical extractions" },
+  { value: "Endodontics", label: "Endodontics" },
+  { value: "Periodontal therapy", label: "Periodontal therapy" },
+  { value: "Pediatric procedures", label: "Pediatric procedures" },
+  { value: "IV sedation", label: "IV sedation" },
+  { value: "Nitrous oxide", label: "Nitrous oxide" },
+  { value: "Invisalign", label: "Invisalign" },
+  { value: "TMJ treatment", label: "TMJ treatment" },
+  { value: "Digital impressions", label: "Digital impressions" },
+  { value: "CAD/CAM (CEREC)", label: "CAD/CAM (CEREC)" },
+  { value: "CBCT imaging", label: "CBCT imaging" },
+];
+
+const SPECIALIST_DENTIST_SKILLS: ReadonlyArray<CanonicalOption> = [
+  { value: "Endodontic microsurgery", label: "Endodontic microsurgery" },
+  { value: "Apicoectomy", label: "Apicoectomy" },
+  { value: "Bone grafting", label: "Bone grafting" },
+  { value: "Sinus lifts", label: "Sinus lifts" },
+  { value: "Orthognathic surgery", label: "Orthognathic surgery" },
+  { value: "Clear aligners", label: "Clear aligners" },
+  { value: "Traditional braces", label: "Traditional braces" },
+  { value: "Temporary anchorage devices (TADs)", label: "Temporary anchorage devices (TADs)" },
+  { value: "Pediatric sedation", label: "Pediatric sedation" },
+  { value: "Soft tissue grafting", label: "Soft tissue grafting" },
+  { value: "Crown lengthening", label: "Crown lengthening" },
+];
+
+const HYGIENIST_SKILLS: ReadonlyArray<CanonicalOption> = [
+  { value: "Prophylaxis", label: "Prophylaxis" },
+  { value: "Scaling & root planing", label: "Scaling & root planing" },
+  { value: "Periodontal charting", label: "Periodontal charting" },
+  { value: "Local anesthesia administration", label: "Local anesthesia administration" },
+  { value: "Nitrous oxide monitoring", label: "Nitrous oxide monitoring" },
+  { value: "Fluoride treatments", label: "Fluoride treatments" },
+  { value: "Sealants", label: "Sealants" },
+  { value: "Digital x-rays", label: "Digital x-rays" },
+  { value: "Intraoral cameras", label: "Intraoral cameras" },
+  { value: "Cavitron", label: "Cavitron" },
+  { value: "Patient education", label: "Patient education" },
+  { value: "Oral cancer screening", label: "Oral cancer screening" },
+  { value: "Whitening treatments", label: "Whitening treatments" },
+  { value: "Laser-assisted therapy", label: "Laser-assisted therapy" },
+];
+
+const ASSISTANT_SKILLS: ReadonlyArray<CanonicalOption> = [
+  { value: "Four-handed dentistry", label: "Four-handed dentistry" },
+  { value: "Sterilization", label: "Sterilization" },
+  { value: "Tray setups", label: "Tray setups" },
+  { value: "Alginate impressions", label: "Alginate impressions" },
+  { value: "Digital impressions", label: "Digital impressions" },
+  { value: "Temporary crowns", label: "Temporary crowns" },
+  { value: "Coronal polishing", label: "Coronal polishing" },
+  { value: "Sealant placement", label: "Sealant placement" },
+  { value: "Radiography", label: "Radiography" },
+  { value: "Patient prep", label: "Patient prep" },
+  { value: "Inventory management", label: "Inventory management" },
+];
+
+const FRONT_DESK_SKILLS: ReadonlyArray<CanonicalOption> = [
+  { value: "Insurance verification", label: "Insurance verification" },
+  { value: "Insurance billing", label: "Insurance billing" },
+  { value: "CDT coding", label: "CDT coding" },
+  { value: "ICD-10 coding", label: "ICD-10 coding" },
+  { value: "Patient scheduling", label: "Patient scheduling" },
+  { value: "Recall management", label: "Recall management" },
+  { value: "Phone screening", label: "Phone screening" },
+  { value: "Treatment plan presentation", label: "Treatment plan presentation" },
+  { value: "Payment collection", label: "Payment collection" },
+  { value: "Patient intake", label: "Patient intake" },
+  { value: "Multi-line phone systems", label: "Multi-line phone systems" },
+];
+
+const OFFICE_MANAGER_SKILLS: ReadonlyArray<CanonicalOption> = [
+  { value: "Staff scheduling", label: "Staff scheduling" },
+  { value: "Hiring & onboarding", label: "Hiring & onboarding" },
+  { value: "Payroll", label: "Payroll" },
+  { value: "Production reporting", label: "Production reporting" },
+  { value: "Collections management", label: "Collections management" },
+  { value: "AR/AP", label: "AR/AP" },
+  { value: "Insurance contracting", label: "Insurance contracting" },
+  { value: "Vendor management", label: "Vendor management" },
+  { value: "KPI tracking", label: "KPI tracking" },
+  { value: "OSHA training", label: "OSHA training" },
+  { value: "HIPAA training", label: "HIPAA training" },
+  { value: "Conflict resolution", label: "Conflict resolution" },
+];
+
+const REGIONAL_MANAGER_SKILLS: ReadonlyArray<CanonicalOption> = [
+  { value: "Multi-location operations", label: "Multi-location operations" },
+  { value: "P&L management", label: "P&L management" },
+  { value: "Office manager development", label: "Office manager development" },
+  { value: "Provider recruitment", label: "Provider recruitment" },
+  { value: "Standard operating procedures", label: "Standard operating procedures" },
+  { value: "Acquisition integration", label: "Acquisition integration" },
+  { value: "EBITDA optimization", label: "EBITDA optimization" },
+  { value: "Staff retention strategy", label: "Staff retention strategy" },
+  { value: "Performance reviews", label: "Performance reviews" },
+];
+
+const DSO_CORPORATE_SKILLS: ReadonlyArray<CanonicalOption> = [
+  { value: "Corporate strategy", label: "Corporate strategy" },
+  { value: "M&A integration", label: "M&A integration" },
+  { value: "Revenue cycle management", label: "Revenue cycle management" },
+  { value: "Compliance program", label: "Compliance program" },
+  { value: "Vendor negotiations", label: "Vendor negotiations" },
+  { value: "Multi-state operations", label: "Multi-state operations" },
+];
+
+/** Skills universally relevant across every dental role. Always appended
+ *  to the role-specific suggestions so the tail of the quick-add list
+ *  has them, and they're the full fallback when no roles are set. */
+export const UNIVERSAL_DENTAL_SKILLS: ReadonlyArray<CanonicalOption> = [
+  { value: "Patient communication", label: "Patient communication" },
+  { value: "Anxious patient management", label: "Anxious patient management" },
+  { value: "Treatment planning", label: "Treatment planning" },
+  { value: "Pediatric patients", label: "Pediatric patients" },
+  { value: "Spanish-speaking patients", label: "Spanish-speaking patients" },
+  { value: "OSHA compliance", label: "OSHA compliance" },
+  { value: "HIPAA compliance", label: "HIPAA compliance" },
+  { value: "Infection control", label: "Infection control" },
+  { value: "Team leadership", label: "Team leadership" },
+];
+
+/** Map keyed by ROLE_CATEGORIES.value. */
+export const SKILLS_BY_ROLE: Record<string, ReadonlyArray<CanonicalOption>> = {
+  associate_dentist: ASSOCIATE_DENTIST_SKILLS,
+  specialist_dentist: SPECIALIST_DENTIST_SKILLS,
+  hygienist: HYGIENIST_SKILLS,
+  assistant: ASSISTANT_SKILLS,
+  front_desk: FRONT_DESK_SKILLS,
+  office_manager: OFFICE_MANAGER_SKILLS,
+  regional_manager: REGIONAL_MANAGER_SKILLS,
+  dso_corporate: DSO_CORPORATE_SKILLS,
+};
+
+/**
+ * Build a deduped, ordered skill suggestion list for a candidate.
+ * Order: skills from each desired role in order → universal skills.
+ * Returns the universal list when no desired roles are set.
+ */
+export function getSkillSuggestions(
+  desiredRoles: ReadonlyArray<string>
+): ReadonlyArray<CanonicalOption> {
+  const seen = new Set<string>();
+  const out: CanonicalOption[] = [];
+
+  const append = (list: ReadonlyArray<CanonicalOption>) => {
+    for (const opt of list) {
+      if (!seen.has(opt.value)) {
+        seen.add(opt.value);
+        out.push(opt);
+      }
+    }
+  };
+
+  if (desiredRoles.length === 0) {
+    append(UNIVERSAL_DENTAL_SKILLS);
+    return out;
+  }
+
+  for (const role of desiredRoles) {
+    const list = SKILLS_BY_ROLE[role];
+    if (list) append(list);
+  }
+  append(UNIVERSAL_DENTAL_SKILLS);
+  return out;
+}
+
+// ─────────────────────────────────────────────────────────────────────
 // Languages — minimal seed; the chip input lets candidates add free-form
 // for less common languages, since there's no matching impact.
 // ─────────────────────────────────────────────────────────────────────

@@ -55,6 +55,7 @@ import {
   TEMP_OR_PERM_OPTIONS,
   SALARY_UNIT_OPTIONS,
   WEEKDAY_KEYS,
+  getSkillSuggestions,
   type SchedulePreferences,
   type CanonicalOption,
 } from "@/lib/candidate/canonical-lists";
@@ -253,6 +254,7 @@ export function ProfileSections({
       {open?.kind === "skillsLanguages" && (
         <SkillsLanguagesModal
           initial={data.skillsLanguages}
+          desiredRoles={data.rolePreferences.desired_roles}
           onClose={() => setOpen(null)}
         />
       )}
@@ -785,9 +787,11 @@ function SkillsLanguagesCard({
 
 function SkillsLanguagesModal({
   initial,
+  desiredRoles,
   onClose,
 }: {
   initial: ProfileData["skillsLanguages"];
+  desiredRoles: ReadonlyArray<string>;
   onClose: () => void;
 }) {
   const router = useRouter();
@@ -797,6 +801,16 @@ function SkillsLanguagesModal({
   const [skills, setSkills] = useState<string[]>(initial.skills);
   const [languages, setLanguages] = useState<string[]>(initial.languages);
   const [pms, setPms] = useState<string[]>(initial.pms_systems);
+
+  // Suggestions are role-aware — pulled from SKILLS_BY_ROLE for each
+  // desired role + universal skills as the tail. When no roles are
+  // selected yet, falls back to the universal list.
+  const skillSuggestions = getSkillSuggestions(desiredRoles);
+
+  const helperCopy =
+    desiredRoles.length === 0
+      ? "Free-form. Set your desired roles first to get role-specific quick-add suggestions."
+      : "Quick-adds match your desired roles. Type to add custom skills too.";
 
   const onSave = () => {
     setError(null);
@@ -826,8 +840,9 @@ function SkillsLanguagesModal({
         label="Skills"
         values={skills}
         onChange={setSkills}
+        options={skillSuggestions}
         placeholder="Add a skill — type and press Enter"
-        helper="Free-form. Anything specific you'd want highlighted to employers."
+        helper={helperCopy}
       />
       <ChipArrayInput
         label="Languages"
