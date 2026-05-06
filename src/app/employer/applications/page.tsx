@@ -6,9 +6,10 @@
  */
 
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, MapPin } from "lucide-react";
 import { redirect } from "next/navigation";
 import { EmployerShell } from "@/components/employer/employer-shell";
+import { Avatar } from "@/components/ui/avatar";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   STAGE_LABELS,
@@ -88,12 +89,15 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
   };
   const apps = (rawApps ?? []) as AppRow[];
 
-  // Pull candidate info in one batch
+  // Pull candidate info in one batch (incl. avatar_url for the row avatar
+  // primitive added Cam-feedback 2026-05-06 PM).
   const candidateIds = Array.from(new Set(apps.map((a) => a.candidate_id)));
   const { data: rawCands } = candidateIds.length
     ? await supabase
         .from("candidates")
-        .select("id, full_name, current_title, headline, years_experience")
+        .select(
+          "id, full_name, current_title, headline, years_experience, avatar_url"
+        )
         .in("id", candidateIds)
     : { data: [] };
 
@@ -103,9 +107,51 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
     current_title: string | null;
     headline: string | null;
     years_experience: number | null;
+    avatar_url: string | null;
   };
   const cands = (rawCands ?? []) as CandRow[];
   const candMap = new Map(cands.map((c) => [c.id, c]));
+
+  // Per-job location label map (Cam feedback 2026-05-06 PM): the inbox
+  // needs a practice tag on each row so two applications to identically-
+  // titled jobs are visually distinct. Same `buildLocationLabel` shape as
+  // the dashboard leaderboard (Phase 4.7.c).
+  const jobIdsWithApps = Array.from(new Set(apps.map((a) => a.job_id)));
+  const { data: rawJobLocs } = jobIdsWithApps.length
+    ? await supabase
+        .from("job_locations")
+        .select("job_id, dso_locations:dso_locations(id, name, city)")
+        .in("job_id", jobIdsWithApps)
+    : { data: [] };
+  type JobLocRow = {
+    job_id: string;
+    dso_locations:
+      | Array<{ id: string; name: string | null; city: string | null }>
+      | { id: string; name: string | null; city: string | null }
+      | null;
+  };
+  const jobLocMap = new Map<
+    string,
+    Array<{ city: string | null; name: string | null }>
+  >();
+  for (const row of (rawJobLocs ?? []) as unknown as JobLocRow[]) {
+    const loc = Array.isArray(row.dso_locations)
+      ? row.dso_locations[0] ?? null
+      : row.dso_locations;
+    if (!loc) continue;
+    const arr = jobLocMap.get(row.job_id) ?? [];
+    arr.push({ city: loc.city ?? null, name: loc.name ?? null });
+    jobLocMap.set(row.job_id, arr);
+  }
+  const buildLocationLabel = (
+    locs: Array<{ city: string | null; name: string | null }>
+  ): string | null => {
+    if (locs.length === 0) return null;
+    const primary = locs[0].city?.trim() || locs[0].name?.trim() || "Location";
+    if (locs.length === 1) return primary;
+    if (locs.length <= 3) return `${primary} +${locs.length - 1}`;
+    return `${locs.length} locations`;
+  };
 
   // Status counts for the tab strip
   const statusCounts: Record<string, number> = {};
@@ -221,6 +267,9 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
               fullName: cand?.full_name,
               candidateId: app.candidate_id,
             });
+            const locationLabel = buildLocationLabel(
+              jobLocMap.get(app.job_id) ?? []
+            );
             return (
               <div
                 key={app.id}
@@ -237,9 +286,15 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                   aria-label={`Open application from ${displayName}`}
                   className="absolute inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-inset"
                 />
-                <div className="relative pointer-events-none flex items-start justify-between gap-4 flex-wrap">
+                <div className="relative pointer-events-none flex items-start gap-4">
+                  <Avatar
+                    name={cand?.full_name ?? displayName}
+                    imageUrl={cand?.avatar_url ?? null}
+                    size="lg"
+                    className="flex-shrink-0 mt-0.5"
+                  />
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-3 mb-1.5">
+                    <div className="flex items-center gap-3 mb-1.5 flex-wrap">
                       <div className="text-[15px] font-bold text-ink truncate">
                         {displayName}
                       </div>
@@ -249,11 +304,11 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                         {STAGE_LABELS[app.status as ApplicationStatus] ?? app.status}
                       </span>
                     </div>
-                    <div className="text-[14px] text-slate-body mb-2">
-                      Applied to{" "}
+                    <div className="text-[14px] text-slate-body mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span>Applied to</span>
                       {job ? (
                         <Link
-                          href={`/employer/jobs/${job.id}/applications`}
+                          href={`/employer/jobs/${job.id}`}
                           className="pointer-events-auto relative z-10 font-semibold text-ink underline-offset-2 hover:text-heritage-deep hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage rounded-sm"
                           title="Open this job's pipeline"
                         >
@@ -261,6 +316,15 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                         </Link>
                       ) : (
                         <span className="font-semibold text-ink">Unknown job</span>
+                      )}
+                      {locationLabel && (
+                        <span
+                          className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-heritage/20 bg-heritage/[0.07] px-2 py-0.5 text-[10px] font-bold tracking-[0.5px] text-heritage-deep"
+                          title={`Practice: ${locationLabel}`}
+                        >
+                          <MapPin className="h-2.5 w-2.5" strokeWidth={2.5} />
+                          {locationLabel}
+                        </span>
                       )}
                     </div>
                     <div className="text-[13px] text-slate-meta">
@@ -274,7 +338,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                       {" · "}Applied {new Date(app.created_at).toLocaleDateString()}
                     </div>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-slate-meta flex-shrink-0 mt-1" />
+                  <ChevronRight className="h-4 w-4 text-slate-meta flex-shrink-0 mt-2" />
                 </div>
               </div>
             );
