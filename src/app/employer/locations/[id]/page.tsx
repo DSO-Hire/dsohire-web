@@ -13,6 +13,7 @@ import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { LocationForm, type LocationFormInitial } from "../location-form";
 import { DeleteLocationButton } from "./delete-button";
+import { LocationLogoUpload } from "./location-logo-upload";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Edit Location" };
@@ -39,7 +40,9 @@ export default async function EditLocationPage({ params }: PageProps) {
 
   const { data: location } = await supabase
     .from("dso_locations")
-    .select("id, name, address_line1, address_line2, city, state, postal_code, dso_id")
+    .select(
+      "id, name, address_line1, address_line2, city, state, postal_code, dso_id, logo_url"
+    )
     .eq("id", id)
     .eq("dso_id", dsoUser.dso_id)
     .maybeSingle();
@@ -95,6 +98,27 @@ export default async function EditLocationPage({ params }: PageProps) {
           .
         </p>
       </header>
+
+      {/* Practice logo — persisted directly on upload, separate from
+          the form's save path. Shown above the form so the visual
+          identity is the first thing the admin manages. */}
+      <section className="mb-10 max-w-[720px] border border-[var(--rule)] bg-white p-6 sm:p-8">
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+          Practice Logo
+        </div>
+        <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink mb-2">
+          Visual identity for {initial.name}
+        </h2>
+        <p className="text-[14px] text-slate-body leading-relaxed mb-6 max-w-[560px]">
+          Renders next to this practice on the locations list, application
+          inbox, and job leaderboard. Optional — if blank, we render
+          colored initials from the practice name.
+        </p>
+        <LocationLogoUpload
+          locationId={initial.id}
+          initialUrl={(location.logo_url as string | null) ?? null}
+        />
+      </section>
 
       <LocationForm
         dsoId={dsoUser.dso_id}

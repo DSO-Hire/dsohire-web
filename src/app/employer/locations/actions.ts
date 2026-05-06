@@ -30,6 +30,41 @@ export interface DeleteLocationState extends LocationActionState {
   blocked?: { reason: "active_jobs"; jobCount: number };
 }
 
+/**
+ * Persist a per-location logo URL after the <ImageUpload> primitive
+ * finishes its storage write. Owner/admin only — RLS enforces it via
+ * the existing dso_locations admin-write policy. Hiring managers and
+ * recruiters land on a 4xx if they somehow get here (the page itself
+ * already redirects HMs).
+ */
+export async function setLocationLogoUrl(
+  locationId: string,
+  url: string | null
+): Promise<{ ok: boolean; error?: string }> {
+  if (!locationId) {
+    return { ok: false, error: "Missing location id." };
+  }
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Please sign in." };
+
+  const { error } = await supabase
+    .from("dso_locations")
+    .update({ logo_url: url })
+    .eq("id", locationId);
+
+  if (error) {
+    console.error("[employer/locations] setLocationLogoUrl failed", error);
+    return { ok: false, error: "Couldn't save the practice logo." };
+  }
+
+  revalidatePath("/employer/locations");
+  revalidatePath(`/employer/locations/${locationId}`);
+  return { ok: true };
+}
+
 /* ───────────────────────────────────────────────────────────────
  * Shared validation
  * ───────────────────────────────────────────────────────────── */

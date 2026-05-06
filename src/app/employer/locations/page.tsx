@@ -10,6 +10,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRight, MapPin, Plus } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
+import { Avatar } from "@/components/ui/avatar";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
 
@@ -35,7 +36,9 @@ export default async function EmployerLocationsPage() {
 
   const { data: locations } = await supabase
     .from("dso_locations")
-    .select("id, name, address_line1, address_line2, city, state, postal_code, created_at")
+    .select(
+      "id, name, address_line1, address_line2, city, state, postal_code, logo_url, created_at"
+    )
     .eq("dso_id", dsoUser.dso_id)
     .order("name", { ascending: true });
 
@@ -109,6 +112,7 @@ interface LocationRow {
   city: string | null;
   state: string | null;
   postal_code: string | null;
+  logo_url: string | null;
   created_at: string;
 }
 
@@ -130,7 +134,13 @@ function LocationRowItem({
         href={`/employer/locations/${location.id}`}
         className="group block py-5 hover:bg-cream/40 transition-colors -mx-2 px-2"
       >
-        <div className="flex items-start justify-between gap-6">
+        <div className="flex items-start gap-5">
+          <Avatar
+            name={location.name}
+            imageUrl={location.logo_url}
+            size="lg"
+            className="flex-shrink-0 mt-0.5"
+          />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-1.5">
               <MapPin className="h-3.5 w-3.5 text-heritage flex-shrink-0" />
