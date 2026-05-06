@@ -19,7 +19,7 @@ import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
-import { sendEmail } from "@/lib/email/send";
+import { dispatchNotification } from "@/lib/notifications/dispatcher";
 import { CommentMention } from "@/emails/employer/CommentMention";
 
 export interface CommentActionState {
@@ -332,18 +332,21 @@ async function dispatchMentionEmails(
           .split(" ")[0]
           .trim() || "there";
 
-      void sendEmail({
-        to: recipientEmail,
-        subject,
-        template: "employer.comment_mention",
+      void dispatchNotification({
+        userId: mentionedAuthId,
+        eventKind: "employer.comment_mention",
         relatedDsoId: dsoId,
-        react: CommentMention({
-          recipientName,
-          authorName: author,
-          candidateName,
-          commentBody: body,
-          deepLink,
-        }),
+        email: {
+          to: recipientEmail,
+          subject,
+          react: CommentMention({
+            recipientName,
+            authorName: author,
+            candidateName,
+            commentBody: body,
+            deepLink,
+          }),
+        },
       });
     }
   } catch (err) {

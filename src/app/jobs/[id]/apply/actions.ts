@@ -27,7 +27,7 @@ import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
-import { sendEmail } from "@/lib/email/send";
+import { dispatchNotification } from "@/lib/notifications/dispatcher";
 import { ApplicationReceived } from "@/emails/candidate/ApplicationReceived";
 import { NewApplication } from "@/emails/employer/NewApplication";
 import type { ScreeningQuestion } from "./types";
@@ -437,19 +437,22 @@ async function sendApplicationEmails(
 
     /* ── Email 1: candidate confirmation ── */
     if (candidateEmail) {
-      void sendEmail({
-        to: candidateEmail,
-        subject: `Application received: ${params.jobTitle} at ${dsoName}`,
-        template: "candidate.application_received",
-        replyTo: `cam@dsohire.com`,
+      void dispatchNotification({
+        userId: params.candidateAuthUserId,
+        eventKind: "candidate.application_received",
         relatedDsoId: params.dsoId,
         relatedCandidateId: params.candidateId,
-        react: ApplicationReceived({
-          candidateName: candidateDisplayName,
-          jobTitle: params.jobTitle,
-          dsoName,
-          trackingUrl: `${SITE_URL}/candidate/dashboard`,
-        }),
+        email: {
+          to: candidateEmail,
+          subject: `Application received: ${params.jobTitle} at ${dsoName}`,
+          replyTo: `cam@dsohire.com`,
+          react: ApplicationReceived({
+            candidateName: candidateDisplayName,
+            jobTitle: params.jobTitle,
+            dsoName,
+            trackingUrl: `${SITE_URL}/candidate/dashboard`,
+          }),
+        },
       });
     }
 
@@ -473,11 +476,16 @@ async function sendApplicationEmails(
         try {
           const res = await admin.auth.admin.getUserById(m.auth_user_id);
           return {
+            authUserId: m.auth_user_id,
             email: res.data?.user?.email ?? null,
             name: m.full_name,
           };
         } catch {
-          return { email: null, name: m.full_name };
+          return {
+            authUserId: m.auth_user_id,
+            email: null,
+            name: m.full_name,
+          };
         }
       })
     );
@@ -486,22 +494,25 @@ async function sendApplicationEmails(
 
     for (const recipient of memberEmailLookups) {
       if (!recipient.email) continue;
-      void sendEmail({
-        to: recipient.email,
-        subject: `New application: ${params.jobTitle} · ${dsoName}`,
-        template: "employer.new_application",
-        replyTo: candidateEmail ?? undefined,
+      void dispatchNotification({
+        userId: recipient.authUserId,
+        eventKind: "employer.new_application",
         relatedDsoId: params.dsoId,
         relatedCandidateId: params.candidateId,
-        react: NewApplication({
-          recipientName: recipient.name?.split(" ")[0] || "there",
-          candidateName: params.candidateName?.trim() || "A candidate",
-          candidateEmail: candidateEmail ?? undefined,
-          candidateHeadline: params.candidateHeadline,
-          jobTitle: params.jobTitle,
-          jobLocations: jobLocationsLabel,
-          applicationUrl: employerApplicationUrl,
-        }),
+        email: {
+          to: recipient.email,
+          subject: `New application: ${params.jobTitle} · ${dsoName}`,
+          replyTo: candidateEmail ?? undefined,
+          react: NewApplication({
+            recipientName: recipient.name?.split(" ")[0] || "there",
+            candidateName: params.candidateName?.trim() || "A candidate",
+            candidateEmail: candidateEmail ?? undefined,
+            candidateHeadline: params.candidateHeadline,
+            jobTitle: params.jobTitle,
+            jobLocations: jobLocationsLabel,
+            applicationUrl: employerApplicationUrl,
+          }),
+        },
       });
     }
   } catch (err) {

@@ -23,7 +23,7 @@ import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
-import { sendEmail } from "@/lib/email/send";
+import { dispatchNotification } from "@/lib/notifications/dispatcher";
 import { MessageReceived } from "@/emails/MessageReceived";
 
 export interface ApplicationMessageRow {
@@ -420,12 +420,13 @@ async function dispatchMessageNotification(
       if (full) senderName = full;
     }
 
-    // Resolve recipient email + first-name + deep link.
+    // Resolve recipient identity + email + first-name + deep link.
+    let recipientAuthUserId: string | null = null;
     let recipientEmail: string | null = null;
     let recipientName = "there";
     let deepLink = `${SITE_URL}/jobs/${appRow.job_id}`;
-    let relatedDsoId: string | null = job.dso_id as string;
-    let relatedCandidateId: string | null = appRow.candidate_id as string;
+    const relatedDsoId: string | null = job.dso_id as string;
+    const relatedCandidateId: string | null = appRow.candidate_id as string;
 
     if (args.senderRole === "candidate") {
       // Notify the DSO. Pick any one DSO admin/owner; fall back to first
@@ -450,6 +451,7 @@ async function dispatchMessageNotification(
       });
       const recipient = ranked[0] ?? null;
       if (recipient) {
+        recipientAuthUserId = recipient.auth_user_id;
         const { data: authUser } = await admin.auth.admin.getUserById(
           recipient.auth_user_id
         );
@@ -461,6 +463,7 @@ async function dispatchMessageNotification(
     } else {
       // Notify the candidate.
       if (cand?.auth_user_id) {
+        recipientAuthUserId = cand.auth_user_id as string;
         const { data: authUser } = await admin.auth.admin.getUserById(
           cand.auth_user_id as string
         );
@@ -471,27 +474,30 @@ async function dispatchMessageNotification(
       deepLink = `${SITE_URL}/candidate/applications/${appRow.id}#message-${args.messageId}`;
     }
 
-    if (!recipientEmail) return;
+    if (!recipientEmail || !recipientAuthUserId) return;
 
     const subject = `${senderName} sent you a message about ${jobTitle}`;
 
-    void sendEmail({
-      to: recipientEmail,
-      subject,
-      template: "application.message_received",
+    void dispatchNotification({
+      userId: recipientAuthUserId,
+      eventKind: "application.message_received",
       relatedDsoId,
       relatedCandidateId,
-      react: MessageReceived({
-        recipientName,
-        senderName,
-        senderRole: args.senderRole,
-        jobTitle,
-        dsoName,
-        candidateName: candidateFullName,
-        messageBody: args.body,
-        deepLink,
-        fullMessageLink: deepLink,
-      }),
+      email: {
+        to: recipientEmail,
+        subject,
+        react: MessageReceived({
+          recipientName,
+          senderName,
+          senderRole: args.senderRole,
+          jobTitle,
+          dsoName,
+          candidateName: candidateFullName,
+          messageBody: args.body,
+          deepLink,
+          fullMessageLink: deepLink,
+        }),
+      },
     });
   } catch (err) {
     // Never throw out of fire-and-forget.

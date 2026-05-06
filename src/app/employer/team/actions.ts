@@ -182,6 +182,12 @@ export async function inviteTeammate(
     .eq("id", dsoUser.dso_id)
     .maybeSingle();
 
+  // NOTE: This intentionally bypasses dispatchNotification because the
+  // invitee may not have an auth.users row yet — and notification_
+  // dispatch_log.user_id is a NOT NULL FK. The team_invite event is in
+  // ALWAYS_DISPATCH_EVENTS regardless, so the only thing the dispatcher
+  // would add is the dispatch_log row. Revisit when we add a
+  // pre-account recipient type to the dispatcher (Phase 4.5.f).
   void sendEmail({
     to: email,
     subject: `You're invited to join ${(dso?.name as string | undefined) ?? "a DSO"} on DSO Hire`,
