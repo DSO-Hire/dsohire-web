@@ -18,6 +18,7 @@
 import { redirect } from "next/navigation";
 import { Trash2, UserPlus, X } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
+import { Avatar } from "@/components/ui/avatar";
 import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
@@ -255,11 +256,12 @@ function MemberRowItem({
 
   return (
     <li className="border-b border-[var(--rule)] py-5 px-2 flex items-start gap-6 hover:bg-cream/40 transition-colors">
-      <div className="h-10 w-10 rounded-full bg-cream border border-[var(--rule-strong)] flex items-center justify-center flex-shrink-0">
-        <span className="text-[13px] font-bold text-ink">
-          {(member.full_name?.[0] ?? email?.[0] ?? "?").toUpperCase()}
-        </span>
-      </div>
+      <Avatar
+        name={member.full_name ?? email ?? "Teammate"}
+        seed={member.auth_user_id}
+        size="md"
+        className="shrink-0"
+      />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-[15px] font-semibold text-ink">

@@ -21,6 +21,7 @@
 
 import Link from "next/link";
 import { ArrowRight, ChevronRight } from "lucide-react";
+import { Avatar } from "@/components/ui/avatar";
 
 interface ReplyPreview {
   id: string;
@@ -160,13 +161,11 @@ function NewRepliesBody({ unreadCount, replies }: NewRepliesProps) {
               i === 0 ? "border-t border-ivory/10" : "border-t border-ivory/10"
             } ${i === replies.slice(0, 3).length - 1 ? "border-b border-ivory/10" : ""}`}
           >
-            <div
-              className="h-8 w-8 flex items-center justify-center flex-shrink-0 text-[11px] font-extrabold tracking-[-0.3px] text-[#8db8a3]"
-              style={{ background: "rgba(141,184,163,0.18)" }}
-              aria-hidden
-            >
-              {initials(reply.senderName)}
-            </div>
+            <Avatar
+              name={reply.senderName}
+              size="sm"
+              className="shrink-0"
+            />
             <div className="flex-1 min-w-0">
               <div className="text-[13px] text-ivory leading-tight truncate">
                 <strong className="font-bold">{reply.senderName}</strong>
@@ -313,11 +312,4 @@ function SetupBody({ totalSteps, doneSteps, hint, steps }: SetupProps) {
   );
 }
 
-/* ───── Helpers ───── */
-
-function initials(name: string): string {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length === 0) return "?";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
+/* Initials helper removed — replaced by <Avatar> primitive imported above. */

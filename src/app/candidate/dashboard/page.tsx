@@ -48,6 +48,8 @@ import {
   STAGE_LABELS,
   type ApplicationStatus,
 } from "@/lib/applications/stages";
+import { computeCompleteness } from "@/lib/candidate/completeness";
+import type { ProfileData } from "@/app/candidate/profile/profile-sections";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -63,31 +65,99 @@ export default async function CandidateDashboardPage() {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
+  // Pull every column computeCompleteness() reads — keep the existing
+  // legacy columns too (current_title, years_experience, resume_url)
+  // since other downstream sections still display them.
   const { data: candidate } = await supabase
     .from("candidates")
     .select(
-      "id, full_name, headline, summary, current_title, years_experience, desired_roles, desired_locations, availability, resume_url, linkedin_url",
+      "id, full_name, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, desired_specialty, pms_systems, skills, languages, temp_or_perm, schedule_preferences, min_salary, salary_unit, cv_visibility, availability, resume_url, linkedin_url, avatar_url",
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
 
   if (!candidate) return null;
 
-  // ── Profile completeness ────────────────────────────────────────────
-  const profileFields = [
-    candidate.full_name,
-    candidate.headline,
-    candidate.current_title,
-    candidate.years_experience !== null &&
-      candidate.years_experience !== undefined,
-    candidate.desired_roles && (candidate.desired_roles as string[])?.length > 0,
-    candidate.resume_url,
-    candidate.availability,
-  ];
-  const filledFields = profileFields.filter(Boolean).length;
-  const totalFields = profileFields.length;
-  const profilePct = Math.round((filledFields / totalFields) * 100);
-  const missingFields = totalFields - filledFields;
+  // ── Profile completeness (reconciled with /candidate/profile per
+  // ROADMAP 4.2.b.2). Reads every structured-profile table the
+  // computeCompleteness() function expects so both surfaces report the
+  // same tier + missing items.
+  const candidateRowId = candidate.id as string;
+  const [
+    { data: rawWorkHistory },
+    { data: rawEducation },
+    { data: rawLicenses },
+    { data: rawCertifications },
+  ] = await Promise.all([
+    supabase
+      .from("candidate_work_history")
+      .select(
+        "id, title, company_name, is_dso, start_date, end_date, is_current, description, pms_systems_used, procedures_performed, auto_blocklisted",
+      )
+      .eq("candidate_id", candidateRowId),
+    supabase
+      .from("candidate_education")
+      .select("id, school_name, degree, field_of_study, start_year, end_year, description")
+      .eq("candidate_id", candidateRowId),
+    supabase
+      .from("candidate_licenses")
+      .select("id, license_type, license_number, state, issued_date, expires_date, display_number")
+      .eq("candidate_id", candidateRowId),
+    supabase
+      .from("candidate_certifications")
+      .select("id, kind, level, issued_date, expires_date")
+      .eq("candidate_id", candidateRowId),
+  ]);
+
+  const c = candidate as Record<string, unknown>;
+  const profileData: ProfileData = {
+    identity: {
+      full_name: (c.full_name as string | null) ?? "",
+      pronouns: (c.pronouns as string | null) ?? null,
+      headline: (c.headline as string | null) ?? null,
+      summary: (c.summary as string | null) ?? null,
+      phone: null,
+      current_location_city: (c.current_location_city as string | null) ?? null,
+      current_location_state: (c.current_location_state as string | null) ?? null,
+      years_experience_dental:
+        (c.years_experience_dental as number | null) ??
+        (c.years_experience as number | null) ??
+        null,
+      linkedin_url: (c.linkedin_url as string | null) ?? null,
+    },
+    rolePreferences: {
+      desired_roles: (c.desired_roles as string[] | null) ?? [],
+      desired_specialty: (c.desired_specialty as string[] | null) ?? [],
+      temp_or_perm: (c.temp_or_perm as ProfileData["rolePreferences"]["temp_or_perm"]) ?? null,
+    },
+    skillsLanguages: {
+      skills: (c.skills as string[] | null) ?? [],
+      languages: (c.languages as string[] | null) ?? [],
+      pms_systems: (c.pms_systems as string[] | null) ?? [],
+    },
+    jobPreferences: {
+      desired_locations: (c.desired_locations as string[] | null) ?? [],
+      min_salary: (c.min_salary as number | null) ?? null,
+      salary_unit:
+        (c.salary_unit as ProfileData["jobPreferences"]["salary_unit"]) ?? null,
+      schedule_preferences:
+        (c.schedule_preferences as ProfileData["jobPreferences"]["schedule_preferences"]) ?? {},
+      cv_visibility:
+        (c.cv_visibility as ProfileData["jobPreferences"]["cv_visibility"]) ??
+        "recruiters_only",
+      availability: (c.availability as string | null) ?? null,
+    },
+    workHistory: ((rawWorkHistory ?? []) as ProfileData["workHistory"]),
+    education: ((rawEducation ?? []) as ProfileData["education"]),
+    licenses: ((rawLicenses ?? []) as ProfileData["licenses"]),
+    certifications: ((rawCertifications ?? []) as ProfileData["certifications"]),
+  };
+  const completeness = computeCompleteness(
+    profileData,
+    (c.avatar_url as string | null) ?? null,
+  );
+  const profilePct = Math.round((completeness.score / completeness.total) * 100);
+  const missingFields = completeness.missing.length;
 
   // ── All applications ────────────────────────────────────────────────
   const { data: rawApps } = await supabase
