@@ -17,6 +17,7 @@ import {
   htmlToPlainText,
 } from "@/components/rendered-job-description";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { SaveJobButton } from "@/lib/saved-jobs/save-job-button";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -129,6 +130,32 @@ export default async function JobDetailPage({ params }: PageProps) {
 
   const dsoName = (dso?.name as string) ?? "DSO";
 
+  // ── Candidate-side state for the SaveJobButton ──────────────────────
+  // Anonymous visitors get the button hidden. Authenticated DSO members
+  // (employers) also get it hidden — only candidates can save jobs.
+  const {
+    data: { user: viewer },
+  } = await supabase.auth.getUser();
+  let candidateAuthed = false;
+  let initialSaved = false;
+  if (viewer) {
+    const { data: candidateRow } = await supabase
+      .from("candidates")
+      .select("id")
+      .eq("auth_user_id", viewer.id)
+      .maybeSingle();
+    if (candidateRow) {
+      candidateAuthed = true;
+      const { data: existing } = await supabase
+        .from("saved_jobs")
+        .select("id")
+        .eq("candidate_id", candidateRow.id as string)
+        .eq("job_id", id)
+        .maybeSingle();
+      initialSaved = Boolean(existing);
+    }
+  }
+
   // JobPosting JSON-LD for Google for Jobs
   const jsonLd = buildJobPostingJsonLd({
     job,
@@ -218,7 +245,7 @@ export default async function JobDetailPage({ params }: PageProps) {
               </section>
             )}
 
-            {/* Apply CTA */}
+            {/* Apply CTA + Save button */}
             <section className="mt-12 pt-8 border-t border-[var(--rule)] flex flex-col sm:flex-row items-start gap-4">
               <Link
                 href={`/jobs/${job.id as string}/apply`}
@@ -226,6 +253,12 @@ export default async function JobDetailPage({ params }: PageProps) {
               >
                 Apply for this Role
               </Link>
+              <SaveJobButton
+                jobId={job.id as string}
+                initialSaved={initialSaved}
+                candidateAuthed={candidateAuthed}
+                variant="label"
+              />
               <p className="text-[13px] text-slate-meta leading-relaxed max-w-[420px]">
                 Free for candidates. We&apos;ll route your application directly
                 to {dsoName} — no recruiter middleman, no fees.

@@ -3,7 +3,7 @@
  */
 
 import Link from "next/link";
-import { ChevronRight, Briefcase, MessageCircle } from "lucide-react";
+import { ChevronRight, Briefcase, MessageCircle, Bookmark } from "lucide-react";
 import { CandidateShell } from "@/components/candidate/candidate-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { StatusProgress } from "@/components/dashboard/status-progress";
@@ -90,19 +90,39 @@ export default async function CandidateApplicationsPage() {
     unread.map((u) => [u.application_id, u.unread_count])
   );
 
+  // Saved-jobs count for the header link.
+  const { count: savedCount } = await supabase
+    .from("saved_jobs")
+    .select("*", { count: "exact", head: true })
+    .eq("candidate_id", candidate.id as string);
+
   return (
     <CandidateShell active="applications">
-      <header className="mb-8">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
-          My Applications
+      <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
+            My Applications
+          </div>
+          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink">
+            {apps.length === 0
+              ? "No applications yet."
+              : apps.length === 1
+                ? "1 application"
+                : `${apps.length} applications`}
+          </h1>
         </div>
-        <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink">
-          {apps.length === 0
-            ? "No applications yet."
-            : apps.length === 1
-              ? "1 application"
-              : `${apps.length} applications`}
-        </h1>
+        <Link
+          href="/candidate/applications/saved"
+          className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule)] bg-white px-3 py-2 text-sm font-medium text-ink hover:bg-cream"
+        >
+          <Bookmark className="size-4 text-heritage-deep" />
+          Saved jobs
+          {savedCount && savedCount > 0 ? (
+            <span className="ml-1 rounded-full bg-heritage-deep/10 px-2 py-0.5 text-xs font-semibold text-heritage-deep">
+              {savedCount}
+            </span>
+          ) : null}
+        </Link>
       </header>
 
       {apps.length === 0 ? (
