@@ -83,6 +83,8 @@ import {
   computeCompleteness,
   type ProfileSectionModal,
 } from "@/lib/candidate/completeness";
+import { AiWriteHelper } from "./ai-write-helper";
+import type { ProfileContext } from "./ai-write-actions";
 
 // ─────────────────────────────────────────────────────────────────────
 // Data shapes coming from the server page
@@ -242,6 +244,7 @@ export function ProfileSections({
       {open?.kind === "identity" && (
         <IdentityModal
           initial={data.identity}
+          aiContext={buildAiContext(data)}
           onClose={() => setOpen(null)}
         />
       )}
@@ -447,9 +450,11 @@ function Field({ label, value }: { label: string; value: string }) {
 
 function IdentityModal({
   initial,
+  aiContext,
   onClose,
 }: {
   initial: ProfileData["identity"];
+  aiContext: ProfileContext;
   onClose: () => void;
 }) {
   const router = useRouter();
@@ -514,21 +519,35 @@ function IdentityModal({
           autoComplete="tel"
         />
       </div>
-      <TextField
-        label="Professional headline"
-        helper="One short line shown to employers."
-        value={v.headline ?? ""}
-        onChange={(x) => setV((p) => ({ ...p, headline: x }))}
-        maxLength={140}
-      />
-      <TextAreaField
-        label="Summary"
-        helper="2-4 sentences about your experience and what you're looking for."
-        rows={4}
-        value={v.summary ?? ""}
-        onChange={(x) => setV((p) => ({ ...p, summary: x }))}
-        maxLength={1500}
-      />
+      <div>
+        <TextField
+          label="Professional headline"
+          helper="One short line shown to employers."
+          value={v.headline ?? ""}
+          onChange={(x) => setV((p) => ({ ...p, headline: x }))}
+          maxLength={140}
+        />
+        <AiWriteHelper
+          kind="headline"
+          context={{ ...aiContext, current_headline: v.headline ?? null }}
+          onPick={(text) => setV((p) => ({ ...p, headline: text }))}
+        />
+      </div>
+      <div>
+        <TextAreaField
+          label="Summary"
+          helper="2-4 sentences about your experience and what you're looking for."
+          rows={4}
+          value={v.summary ?? ""}
+          onChange={(x) => setV((p) => ({ ...p, summary: x }))}
+          maxLength={1500}
+        />
+        <AiWriteHelper
+          kind="summary"
+          context={{ ...aiContext, current_summary: v.summary ?? null }}
+          onPick={(text) => setV((p) => ({ ...p, summary: text }))}
+        />
+      </div>
       <div className="grid gap-4 sm:grid-cols-3">
         <TextField
           label="City"
@@ -1931,6 +1950,33 @@ function formatDateRange(
   const s = start ? formatYearMonth(start) : "?";
   const e = isCurrent ? "Present" : end ? formatYearMonth(end) : "?";
   return `${s} — ${e}`;
+}
+
+/**
+ * Build the AI Write context from the full ProfileData so headline +
+ * summary suggestions ground in the candidate's actual data. Most
+ * recent role is taken from the first item in workHistory (the page
+ * query orders by is_current desc + start_date desc nulls last).
+ */
+function buildAiContext(data: ProfileData): ProfileContext {
+  const top = data.workHistory[0] ?? null;
+  return {
+    full_name: data.identity.full_name || null,
+    current_headline: data.identity.headline,
+    current_summary: data.identity.summary,
+    pronouns: data.identity.pronouns,
+    years_experience_dental: data.identity.years_experience_dental,
+    desired_roles: data.rolePreferences.desired_roles,
+    desired_specialty: data.rolePreferences.desired_specialty,
+    top_skills: data.skillsLanguages.skills,
+    most_recent_role: top
+      ? {
+          title: top.title,
+          company: top.company_name,
+          is_current: top.is_current,
+        }
+      : null,
+  };
 }
 
 function formatYearMonth(d: string): string {
