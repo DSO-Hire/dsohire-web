@@ -22,7 +22,19 @@ import {
   AlignLeft,
   Type,
   Lock,
+  MapPin,
+  Phone,
+  Sparkles,
+  Clock,
+  MessageSquare,
+  Star,
+  StickyNote,
+  Users,
+  History,
+  ClipboardList,
+  Layers,
 } from "lucide-react";
+import { Avatar } from "@/components/ui/avatar";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import {
   createSupabaseServerClient,
@@ -141,7 +153,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const { data: rawCand } = await supabase
     .from("candidates")
     .select(
-      "id, auth_user_id, full_name, phone, headline, summary, current_title, years_experience, desired_roles, desired_locations, availability, linkedin_url, resume_url"
+      "id, auth_user_id, full_name, phone, headline, summary, current_title, years_experience, desired_roles, desired_locations, availability, linkedin_url, resume_url, avatar_url, current_location_city, current_location_state"
     )
     .eq("id", app.candidate_id)
     .maybeSingle();
@@ -160,6 +172,9 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     availability: string | null;
     linkedin_url: string | null;
     resume_url: string | null;
+    avatar_url: string | null;
+    current_location_city: string | null;
+    current_location_state: string | null;
   };
   const cand = (rawCand ?? null) as CandRow | null;
 
@@ -482,8 +497,36 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
 
   const titleLine = cand?.current_title ?? cand?.headline ?? null;
 
+  // Location label for the candidate (preferred over their full address)
+  const candidateLocation =
+    [cand?.current_location_city, cand?.current_location_state]
+      .filter(Boolean)
+      .join(", ") || null;
+
+  // The 10-section table-of-contents drives both the right-rail nav and
+  // the section-header eyebrow numbers. Keep this list in sync with the
+  // section IDs rendered below.
+  const SECTIONS: Array<{
+    num: string;
+    id: string;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }> = [
+    { num: "01", id: "stage", label: "Pipeline stage", icon: Layers },
+    { num: "02", id: "fit", label: "Practice Fit", icon: Sparkles },
+    { num: "03", id: "resume", label: "Resume", icon: FileText },
+    { num: "04", id: "snapshot", label: "Candidate snapshot", icon: Briefcase },
+    { num: "05", id: "screening", label: "Screening responses", icon: ClipboardList },
+    { num: "06", id: "messages", label: "Messages with candidate", icon: MessageSquare },
+    { num: "07", id: "scorecards", label: "Scorecards", icon: Star },
+    { num: "08", id: "comments", label: "Team comments", icon: Users },
+    { num: "09", id: "notes", label: "Internal notes", icon: StickyNote },
+    { num: "10", id: "activity", label: "Activity timeline", icon: History },
+  ];
+
   return (
     <EmployerShell active="applications">
+      {/* Top back-link strip */}
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-6">
         <Link
           href="/employer/applications"
@@ -493,63 +536,131 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
           Back to All Applications
         </Link>
         <Link
-          href={`/employer/jobs/${job.id}/applications`}
+          href={`/employer/jobs/${job.id}`}
           className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
         >
           View in {String(job.title)} pipeline →
         </Link>
       </div>
 
-      <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
-            Application · {STAGE_LABELS[status] ?? status}
-          </div>
-          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-2">
-            {displayName}
-          </h1>
-          {titleLine && (
-            <div className="text-[14px] text-slate-body">{titleLine}</div>
-          )}
-          {headerMetaParts.length > 0 && (
-            <div className="text-[13px] text-slate-meta mt-1">
-              {headerMetaParts.join(" · ")}
+      {/* Hero — avatar + name + meta + status pill + contact strip */}
+      <header className="mb-8 border border-[var(--rule)] bg-white p-6 sm:p-8">
+        <div className="flex flex-wrap items-start justify-between gap-6">
+          <div className="flex items-start gap-5 min-w-0 flex-1">
+            <Avatar
+              name={cand?.full_name ?? displayName}
+              imageUrl={cand?.avatar_url ?? null}
+              size="2xl"
+            />
+            <div className="min-w-0 flex-1">
+              <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
+                Application
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-[1.05] text-ink mb-2">
+                {displayName}
+              </h1>
+              {titleLine && (
+                <div className="text-[15px] text-slate-body">{titleLine}</div>
+              )}
+              {(headerMetaParts.length > 0 || candidateLocation) && (
+                <div className="text-[13px] text-slate-meta mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                  {candidateLocation && (
+                    <span className="inline-flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {candidateLocation}
+                    </span>
+                  )}
+                  {headerMetaParts.map((part, i) => (
+                    <span key={i}>{i === 0 && candidateLocation ? `· ${part}` : part}</span>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
+          </div>
+          <span
+            className={`text-[10px] font-bold tracking-[2px] uppercase px-3 py-2 ring-1 ring-inset ${statusBadgeClasses(status)}`}
+          >
+            {STAGE_LABELS[status] ?? status}
+          </span>
         </div>
-        <span
-          className={`text-[10px] font-bold tracking-[2px] uppercase px-3 py-2 ring-1 ring-inset ${statusBadgeClasses(status)}`}
-        >
-          {STAGE_LABELS[status] ?? status}
-        </span>
+
+        {/* Contact strip — replaces the old sidebar Contact card */}
+        <div className="mt-6 pt-5 border-t border-[var(--rule)] flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px]">
+          {candidateEmail ? (
+            <a
+              href={`mailto:${candidateEmail}?subject=${encodeURIComponent(
+                `Re: your application to ${job.title as string}`
+              )}`}
+              className="inline-flex items-center gap-1.5 text-heritage hover:text-heritage-deep font-semibold break-all"
+            >
+              <Mail className="h-3.5 w-3.5 flex-shrink-0" />
+              {candidateEmail}
+            </a>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 text-slate-meta italic">
+              <Mail className="h-3.5 w-3.5" />
+              Email unavailable
+            </span>
+          )}
+          {cand?.phone && (
+            <span className="inline-flex items-center gap-1.5 text-ink">
+              <Phone className="h-3.5 w-3.5 text-slate-meta" />
+              {cand.phone}
+            </span>
+          )}
+          {cand?.linkedin_url && (
+            <a
+              href={cand.linkedin_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-heritage hover:text-heritage-deep font-semibold"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              LinkedIn
+            </a>
+          )}
+          <span className="ml-auto text-slate-meta text-[12px]">
+            Replies to your email also route to this application.
+          </span>
+        </div>
+
+        {/* Job context bar */}
+        <div className="mt-5 pt-5 border-t border-[var(--rule)] flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-slate-body">
+          <Briefcase className="h-3.5 w-3.5 text-heritage-deep" />
+          <span>Applied to</span>
+          <Link
+            href={`/employer/jobs/${job.id}`}
+            className="font-bold text-ink hover:text-heritage-deep transition-colors"
+          >
+            {job.title as string}
+          </Link>
+          <span className="text-slate-meta">·</span>
+          <span>
+            {ROLE_LABELS[String(job.role_category)] ?? String(job.role_category)} ·{" "}
+            {String(job.employment_type).replace(/_/g, " ")}
+          </span>
+          <span className="text-slate-meta">·</span>
+          <span className="inline-flex items-center gap-1">
+            <Clock className="h-3 w-3 text-slate-meta" />
+            Submitted {submitted.toLocaleDateString()} at{" "}
+            {submitted.toLocaleTimeString([], {
+              hour: "numeric",
+              minute: "2-digit",
+            })}
+          </span>
+        </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10">
-        {/* Main column */}
-        <div className="space-y-10">
-          {/* Job + applied date */}
-          <section className="border border-[var(--rule)] bg-cream p-6">
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
-              Applied To
-            </div>
-            <Link
-              href={`/employer/jobs/${job.id}`}
-              className="text-xl font-bold text-ink hover:text-heritage-deep transition-colors block mb-1.5"
-            >
-              {job.title as string}
-            </Link>
-            <div className="text-[13px] text-slate-body">
-              <Briefcase className="inline h-3 w-3 mr-1 align-text-top" />
-              {String(job.role_category)} · {String(job.employment_type)} ·
-              Submitted {submitted.toLocaleDateString()} at {submitted.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
-            </div>
-          </section>
-
-          {/* Stage selector */}
-          <section>
-            <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-4">
-              Pipeline Stage
-            </h2>
+      {/* Two-column body — main 10-section column + sticky right-rail TOC */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_240px] gap-10">
+        <div className="space-y-12 min-w-0">
+          {/* 01 · Pipeline stage */}
+          <DetailSection
+            id="stage"
+            num="01"
+            title="Pipeline stage"
+            icon={Layers}
+          >
             <StageSelector
               applicationId={app.id}
               currentStatus={status}
@@ -558,27 +669,26 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               aiSuggesterAvailable={aiSuggesterAvailable}
               aiSuggesterHasContext={aiSuggesterHasContext}
             />
-          </section>
+          </DetailSection>
 
-          {/* Cover letter */}
-          {app.cover_letter && (
-            <section>
-              <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
-                Cover Letter
-              </h2>
-              <div className="border border-[var(--rule)] bg-white p-6">
-                <p className="text-[14px] text-ink leading-relaxed whitespace-pre-wrap">
-                  {app.cover_letter}
-                </p>
-              </div>
-            </section>
-          )}
+          {/* 02 · Practice Fit (Phase 5D placeholder banner per scope §6.4) */}
+          <DetailSection
+            id="fit"
+            num="02"
+            title="Practice Fit"
+            icon={Sparkles}
+            subtitle="DISC-derived match score arriving in a future update."
+          >
+            <PracticeFitPlaceholderBanner />
+          </DetailSection>
 
-          {/* Resume */}
-          <section>
-            <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
-              Resume
-            </h2>
+          {/* 03 · Resume */}
+          <DetailSection
+            id="resume"
+            num="03"
+            title="Resume"
+            icon={FileText}
+          >
             {resumeSignedUrl ? (
               <a
                 href={resumeSignedUrl}
@@ -602,53 +712,87 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 No resume on file.
               </p>
             )}
-          </section>
+          </DetailSection>
 
-          {/* Candidate details */}
-          {cand && (
-            <section>
-              <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
-                Candidate Details
-              </h2>
-              <div className="border border-[var(--rule)] bg-white p-6 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
-                {cand.headline && (
-                  <DetailRow label="Headline" value={cand.headline} />
-                )}
-                {cand.availability && (
-                  <DetailRow
-                    label="Availability"
-                    value={
-                      AVAILABILITY_LABEL[cand.availability] ??
-                      cand.availability.replace(/_/g, " ")
-                    }
-                  />
-                )}
-                {cand.desired_roles && cand.desired_roles.length > 0 && (
-                  <DetailRow
-                    label="Open To"
-                    value={cand.desired_roles
-                      .map((r) => ROLE_LABELS[r] ?? r.replace(/_/g, " "))
-                      .join(", ")}
-                  />
-                )}
-                {cand.desired_locations && cand.desired_locations.length > 0 && (
-                  <DetailRow label="Locations" value={cand.desired_locations.join(", ")} />
-                )}
-                {cand.summary && (
-                  <div className="sm:col-span-2">
-                    <DetailRow label="Summary" value={cand.summary} />
+          {/* 04 · Candidate Snapshot — folds in cover letter + summary +
+                preferences into one compact card. */}
+          <DetailSection
+            id="snapshot"
+            num="04"
+            title="Candidate snapshot"
+            icon={Briefcase}
+          >
+            <div className="space-y-5">
+              {app.cover_letter && (
+                <div className="border border-[var(--rule)] bg-cream/40 p-5">
+                  <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-2">
+                    Cover letter
                   </div>
-                )}
-              </div>
-            </section>
-          )}
+                  <p className="text-[14px] text-ink leading-relaxed whitespace-pre-wrap">
+                    {app.cover_letter}
+                  </p>
+                </div>
+              )}
+              {cand && (
+                <div className="border border-[var(--rule)] bg-white p-6 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+                  {cand.headline && (
+                    <DetailRow label="Headline" value={cand.headline} />
+                  )}
+                  {cand.availability && (
+                    <DetailRow
+                      label="Availability"
+                      value={
+                        AVAILABILITY_LABEL[cand.availability] ??
+                        cand.availability.replace(/_/g, " ")
+                      }
+                    />
+                  )}
+                  {cand.desired_roles && cand.desired_roles.length > 0 && (
+                    <DetailRow
+                      label="Open to"
+                      value={cand.desired_roles
+                        .map((r) => ROLE_LABELS[r] ?? r.replace(/_/g, " "))
+                        .join(", ")}
+                    />
+                  )}
+                  {cand.desired_locations && cand.desired_locations.length > 0 && (
+                    <DetailRow
+                      label="Locations"
+                      value={cand.desired_locations.join(", ")}
+                    />
+                  )}
+                  {cand.summary && (
+                    <div className="sm:col-span-2">
+                      <DetailRow label="Summary" value={cand.summary} />
+                    </div>
+                  )}
+                </div>
+              )}
+              {!app.cover_letter && !cand && (
+                <p className="text-[14px] text-slate-meta italic">
+                  No candidate snapshot data yet.
+                </p>
+              )}
+            </div>
+          </DetailSection>
 
-          {/* Screening responses */}
-          {questions.length > 0 && (
-            <section>
-              <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
-                Screening Responses
-              </h2>
+          {/* 05 · Screening responses */}
+          <DetailSection
+            id="screening"
+            num="05"
+            title="Screening responses"
+            icon={ClipboardList}
+            subtitle={
+              questions.length > 0
+                ? `Answers to the ${questions.length} screening question${questions.length === 1 ? "" : "s"} on this job.`
+                : undefined
+            }
+          >
+            {questions.length === 0 ? (
+              <p className="text-[14px] text-slate-meta italic">
+                No screening questions on this job.
+              </p>
+            ) : (
               <div className="border border-[var(--rule)] bg-white divide-y divide-[var(--rule)]">
                 {questions.map((q) => (
                   <ScreeningResponseRow
@@ -658,23 +802,24 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                   />
                 ))}
               </div>
-            </section>
-          )}
+            )}
+          </DetailSection>
 
-          {/* Direct candidate ↔ DSO messages — sits BEFORE the internal
-              workspace divider so the visual treatment unambiguously marks
-              this as a candidate-facing surface. */}
-          <section>
-            <div className="flex items-baseline gap-3 mb-3 flex-wrap">
-              <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
-                Messages with candidate
-              </h2>
-              {candidateUnreadCount > 0 && (
-                <span className="text-[9px] font-bold tracking-[1.5px] uppercase px-2 py-0.5 bg-heritage/15 text-heritage-deep">
-                  {candidateUnreadCount} unread
-                </span>
-              )}
-            </div>
+          {/* 06 · Messages with candidate — candidate-facing surface,
+                rendered before the internal-workspace divider. */}
+          <DetailSection
+            id="messages"
+            num="06"
+            title="Messages with candidate"
+            icon={MessageSquare}
+            subtitle="Direct candidate ↔ DSO thread. Replies route to email."
+            badge={
+              candidateUnreadCount > 0
+                ? `${candidateUnreadCount} unread`
+                : undefined
+            }
+            tone="candidate"
+          >
             <MessagesThread
               applicationId={app.id}
               currentUserId={user.id}
@@ -686,42 +831,25 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               otherPartyName={displayName}
               initialMessages={initialMessages}
             />
-          </section>
+          </DetailSection>
 
-          {/* ───── Internal-workspace divider ───── */}
-          <div className="pt-4">
+          {/* ───── Internal workspace divider ───── */}
+          <div className="pt-2">
             <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-slate-meta text-center mb-2">
               Internal workspace · only your team sees this
             </div>
             <div className="border-t border-[var(--rule-strong)]" />
           </div>
 
-          {/* Notes */}
-          <section>
-            <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3 inline-flex items-center gap-2">
-              <Lock className="h-3 w-3" />
-              <span className="text-heritage-deep">Internal ·</span> Internal Notes
-            </h2>
-            <p className="text-[13px] text-slate-meta mb-3">
-              Visible to your team only. The candidate cannot see this.
-            </p>
-            <NotesEditor
-              applicationId={app.id}
-              initialValue={app.employer_notes ?? ""}
-            />
-          </section>
-
-          {/* Scorecards */}
-          <section>
-            <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3 inline-flex items-center gap-2">
-              <Lock className="h-3 w-3" />
-              <span className="text-heritage-deep">Internal ·</span> Candidate Scorecards
-            </h2>
-            <p className="text-[13px] text-slate-meta mb-4">
-              Each reviewer scores against the {scorecardRubric.label.toLowerCase()} rubric.
-              Your draft is private to you; submitted scorecards roll up
-              into the aggregate above.
-            </p>
+          {/* 07 · Scorecards */}
+          <DetailSection
+            id="scorecards"
+            num="07"
+            title="Scorecards"
+            icon={Star}
+            tone="internal"
+            subtitle={`Each reviewer scores against the ${scorecardRubric.label.toLowerCase()} rubric. Drafts stay private until submitted.`}
+          >
             <ScorecardsSection
               applicationId={app.id}
               currentUserId={user.id}
@@ -730,104 +858,222 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               initialMyScorecard={initialMyScorecard}
               initialOtherScorecards={initialOtherScorecards}
             />
-          </section>
+          </DetailSection>
 
-          {/* Team comments + @-mentions */}
-          <section>
-            <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3 inline-flex items-center gap-2">
-              <Lock className="h-3 w-3" />
-              <span className="text-heritage-deep">Internal ·</span> Team Comments
-            </h2>
-            <p className="text-[13px] text-slate-meta mb-3">
-              Internal thread for your team. Type{" "}
-              <span className="font-mono text-ink">@</span> to notify a
-              teammate by email. The candidate cannot see comments.
-            </p>
+          {/* 08 · Team comments */}
+          <DetailSection
+            id="comments"
+            num="08"
+            title="Team comments"
+            icon={Users}
+            tone="internal"
+            subtitle="@-mention teammates by typing @. The candidate cannot see this."
+          >
             <CommentsThread
               applicationId={app.id}
               currentUserId={user.id}
               dsoUsers={dsoUsersForThread}
               initialComments={initialComments}
             />
-          </section>
+          </DetailSection>
+
+          {/* 09 · Internal notes */}
+          <DetailSection
+            id="notes"
+            num="09"
+            title="Internal notes"
+            icon={StickyNote}
+            tone="internal"
+            subtitle="Visible to your team only. The candidate cannot see this."
+          >
+            <NotesEditor
+              applicationId={app.id}
+              initialValue={app.employer_notes ?? ""}
+            />
+          </DetailSection>
+
+          {/* 10 · Activity timeline */}
+          <DetailSection
+            id="activity"
+            num="10"
+            title="Activity timeline"
+            icon={History}
+            subtitle="Every stage transition captured for this application."
+          >
+            {events.length === 0 ? (
+              <p className="text-[14px] text-slate-meta italic">
+                No activity recorded yet.
+              </p>
+            ) : (
+              <ol className="list-none space-y-4 border-l-2 border-[var(--rule)] pl-5">
+                {events.map((ev) => (
+                  <li key={ev.id} className="relative">
+                    <span className="absolute -left-[27px] top-1.5 block w-3 h-3 bg-ink rounded-full border-2 border-ivory" />
+                    <div className="text-[13px] font-bold text-ink">
+                      {ev.from_status
+                        ? `${STAGE_LABELS[ev.from_status as ApplicationStatus] ?? ev.from_status} → ${STAGE_LABELS[ev.to_status as ApplicationStatus] ?? ev.to_status}`
+                        : `Submitted as ${STAGE_LABELS[ev.to_status as ApplicationStatus] ?? ev.to_status}`}
+                    </div>
+                    <div className="text-[12px] text-slate-meta mt-0.5">
+                      {ev.actor_type} ·{" "}
+                      {new Date(ev.created_at).toLocaleString()}
+                    </div>
+                    {ev.note && (
+                      <div className="text-[13px] text-slate-body mt-1 leading-snug">
+                        {ev.note}
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            )}
+          </DetailSection>
         </div>
 
-        {/* Sidebar — contact + history */}
-        <aside className="space-y-8">
-          <section className="border border-[var(--rule)] bg-white p-5">
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
-              Contact
-            </div>
-
-            {candidateEmail ? (
-              <a
-                href={`mailto:${candidateEmail}?subject=${encodeURIComponent(
-                  `Re: your application to ${job.title as string}`
-                )}`}
-                className="inline-flex items-start gap-1.5 text-[14px] text-heritage hover:text-heritage-deep font-semibold mb-1.5 break-all leading-snug"
-              >
-                <Mail className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
-                {candidateEmail}
-              </a>
-            ) : (
-              <div className="text-[13px] text-slate-meta italic mb-1.5">
-                Email unavailable — reply to the application notification
-                email instead.
-              </div>
-            )}
-
-            {cand?.phone && (
-              <div className="text-[14px] text-ink mt-2 mb-1.5">
-                {cand.phone}
-              </div>
-            )}
-
-            {cand?.linkedin_url && (
-              <a
-                href={cand.linkedin_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-[13px] text-heritage hover:text-heritage-deep font-semibold mt-1"
-              >
-                <ExternalLink className="h-3.5 w-3.5" />
-                LinkedIn profile
-              </a>
-            )}
-
-            <div className="text-[12px] text-slate-meta mt-4 pt-3 border-t border-[var(--rule)] leading-relaxed">
-              Replying to the candidate&apos;s email also routes back to the
-              application. Internal notes below are not visible to the candidate.
-            </div>
-          </section>
-
-          <section>
+        {/* Sticky right-rail TOC */}
+        <aside className="hidden lg:block">
+          <nav className="sticky top-6">
             <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-4">
-              Status History
+              On this page
             </div>
-            <ol className="list-none space-y-4 border-l-2 border-[var(--rule)] pl-5">
-              {events.map((ev) => (
-                <li key={ev.id} className="relative">
-                  <span className="absolute -left-[27px] top-1.5 block w-3 h-3 bg-ink rounded-full border-2 border-ivory" />
-                  <div className="text-[13px] font-bold text-ink">
-                    {ev.from_status
-                      ? `${STAGE_LABELS[ev.from_status as ApplicationStatus] ?? ev.from_status} → ${STAGE_LABELS[ev.to_status as ApplicationStatus] ?? ev.to_status}`
-                      : `Submitted as ${STAGE_LABELS[ev.to_status as ApplicationStatus] ?? ev.to_status}`}
-                  </div>
-                  <div className="text-[12px] text-slate-meta mt-0.5">
-                    {ev.actor_type} · {new Date(ev.created_at).toLocaleString()}
-                  </div>
-                  {ev.note && (
-                    <div className="text-[13px] text-slate-body mt-1 leading-snug">
-                      {ev.note}
-                    </div>
-                  )}
-                </li>
-              ))}
+            <ol className="list-none space-y-1.5">
+              {SECTIONS.map((s) => {
+                const Icon = s.icon;
+                return (
+                  <li key={s.id}>
+                    <a
+                      href={`#${s.id}`}
+                      className="group flex items-center gap-2.5 py-1.5 px-2 -mx-2 rounded text-[13px] text-slate-body hover:bg-cream hover:text-ink transition-colors"
+                    >
+                      <span className="text-[10px] font-bold tracking-[1.5px] text-slate-meta group-hover:text-heritage-deep transition-colors w-5">
+                        {s.num}
+                      </span>
+                      <Icon className="h-3.5 w-3.5 text-slate-meta group-hover:text-heritage-deep transition-colors flex-shrink-0" />
+                      <span className="leading-snug">{s.label}</span>
+                    </a>
+                  </li>
+                );
+              })}
             </ol>
-          </section>
+          </nav>
         </aside>
       </div>
     </EmployerShell>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+ * Section shell — numbered eyebrow + title + optional subtitle/badge,
+ * with anchored scroll-margin so the right-rail TOC links land cleanly.
+ * `tone` lets a section opt into the candidate-facing or internal visual
+ * accent without us repeating the markup at every call site.
+ * ───────────────────────────────────────────────────────────────────── */
+
+function DetailSection({
+  id,
+  num,
+  title,
+  subtitle,
+  icon,
+  tone,
+  badge,
+  children,
+}: {
+  id: string;
+  num: string;
+  title: string;
+  subtitle?: string;
+  icon: React.ComponentType<{ className?: string }>;
+  tone?: "candidate" | "internal";
+  badge?: string;
+  children: React.ReactNode;
+}) {
+  const Icon = icon;
+  const eyebrowColor =
+    tone === "internal"
+      ? "text-slate-meta"
+      : tone === "candidate"
+        ? "text-heritage-deep"
+        : "text-slate-meta";
+  return (
+    <section id={id} className="scroll-mt-6">
+      <header className="mb-4">
+        <div
+          className={`flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-bold tracking-[2.5px] uppercase ${eyebrowColor}`}
+        >
+          <span className="inline-flex items-center gap-2">
+            {tone === "internal" && <Lock className="h-3 w-3" />}
+            <Icon className="h-3.5 w-3.5" />
+            <span>{num} · {title}</span>
+          </span>
+          {badge && (
+            <span className="text-[9px] font-bold tracking-[1.5px] uppercase px-2 py-0.5 bg-heritage/15 text-heritage-deep">
+              {badge}
+            </span>
+          )}
+        </div>
+        {subtitle && (
+          <p className="text-[13px] text-slate-meta mt-2 leading-relaxed">
+            {subtitle}
+          </p>
+        )}
+      </header>
+      <div>{children}</div>
+    </section>
+  );
+}
+
+/**
+ * Practice Fit placeholder banner. Per parity-sprint scope §6.4, we ship
+ * the surface contract NOW with three sub-bars (Skills / Culture /
+ * Logistics) showing a "coming Phase 5D" treatment. Schema reservations
+ * (`applications.fit_score`, `applications.fit_breakdown`) are not yet
+ * wired here — when 5D ships the matching, this component reads from
+ * those columns and switches off the placeholder treatment.
+ */
+function PracticeFitPlaceholderBanner() {
+  const bars: Array<{ label: string; helper: string }> = [
+    { label: "Skills", helper: "Procedure overlap, PMS familiarity" },
+    { label: "Culture", helper: "DISC-derived working style match" },
+    { label: "Logistics", helper: "Location, schedule, comp" },
+  ];
+  return (
+    <div className="border border-[var(--rule)] bg-cream/40 p-6">
+      <div className="flex items-start justify-between gap-4 mb-5 flex-wrap">
+        <div>
+          <div className="flex items-center gap-2 text-ink mb-1">
+            <Sparkles className="h-4 w-4 text-heritage-deep" />
+            <span className="text-[14px] font-bold">Practice Fit · —</span>
+          </div>
+          <p className="text-[13px] text-slate-body leading-relaxed max-w-[520px]">
+            Match score combining hard-skill overlap, working-style match,
+            and logistics. We&apos;re building this in-house — schedule
+            arrives in a future update.
+          </p>
+        </div>
+        <span className="text-[10px] font-bold tracking-[1.5px] uppercase px-2 py-1 bg-white border border-[var(--rule-strong)] text-slate-meta">
+          Coming soon
+        </span>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {bars.map((b) => (
+          <div key={b.label} className="bg-white border border-[var(--rule)] p-4">
+            <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-2">
+              {b.label}
+            </div>
+            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden mb-2">
+              <div
+                className="h-full bg-slate-200"
+                style={{ width: "30%" }}
+              />
+            </div>
+            <p className="text-[11px] text-slate-meta leading-snug">
+              {b.helper}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
