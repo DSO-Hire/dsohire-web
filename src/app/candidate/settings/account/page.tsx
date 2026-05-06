@@ -1,51 +1,53 @@
 /**
- * /candidate/settings/account — Phase 4.3.a (v1).
+ * /candidate/settings/account — Phase 4.3.a v2.
  *
- * Today: password set/change (existing PasswordForm). Email change with
- * verify-new-before-swap, phone capture for SMS opt-in, and language
- * stub are queued for a follow-up sub-pass; not blocking the IA scaffold.
+ * Four sections:
+ *   1. Password (existing — set/change via Supabase Auth)
+ *   2. Email — verify-new-before-swap via Supabase Auth's updateUser
+ *   3. Phone — capture for future SMS opt-in (writes candidates.phone)
+ *   4. Language — stub, English-only at launch
  */
 
-import Link from "next/link";
-import { PasswordForm } from "../password-form";
 import type { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { PasswordForm } from "../password-form";
+import {
+  EmailChangeForm,
+  PhoneForm,
+  LanguageStub,
+} from "./account-form";
 
 export const metadata: Metadata = { title: "Account · Settings" };
 
-export default function CandidateSettingsAccountPage() {
+export default async function CandidateSettingsAccountPage() {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/candidate/sign-in?next=/candidate/settings/account");
+
+  const { data: candidate } = await supabase
+    .from("candidates")
+    .select("phone")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+
+  const phone = (candidate?.phone as string | null) ?? null;
+
   return (
     <div className="space-y-6">
-      <section className="border border-[var(--rule)] bg-white p-7 sm:p-9">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
-          Password
-        </div>
-        <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink mb-2">
-          Set or change your password
-        </h2>
-        <p className="text-[14px] text-slate-body leading-relaxed mb-6 max-w-[560px]">
-          Setting a password lets you sign in without an emailed code each
-          time. You can always fall back to a code if you forget it.
-        </p>
-        <PasswordForm />
-      </section>
+      <PasswordSection />
+      <EmailChangeForm currentEmail={user.email ?? null} />
+      <PhoneForm initialPhone={phone} />
+      <LanguageStub />
 
       <section className="border border-[var(--rule)] bg-cream p-7">
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
-          Coming soon to Account
+          Quick links
         </div>
-        <p className="text-[14px] text-slate-body leading-relaxed mb-4">
-          Email change with verify-new-before-swap, phone capture for SMS
-          opt-in, and language preferences ship in a follow-up release.
-          For anything urgent, email{" "}
-          <a
-            href="mailto:cam@dsohire.com"
-            className="text-heritage underline underline-offset-2 hover:text-heritage-deep font-semibold"
-          >
-            cam@dsohire.com
-          </a>
-          .
-        </p>
-        <ul className="list-none space-y-2 mt-4 pt-4 border-t border-[var(--rule)]">
+        <ul className="list-none space-y-2">
           <li>
             <Link
               href="/candidate/profile"
@@ -73,5 +75,50 @@ export default function CandidateSettingsAccountPage() {
         </ul>
       </section>
     </div>
+  );
+}
+
+// Password section keeps the existing PasswordForm but inside the new
+// section-card style for visual consistency with Email + Phone.
+function PasswordSection() {
+  return (
+    <section className="border border-[var(--rule)] bg-white p-6 sm:p-8">
+      <header className="mb-4 flex items-start gap-3">
+        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-[#4D7A60]/10">
+          <PasswordIcon />
+        </div>
+        <div>
+          <h2 className="font-display text-lg font-bold text-[#14233F]">
+            Password
+          </h2>
+          <p className="mt-0.5 text-sm text-slate-600">
+            Set or change your password. You can always fall back to an
+            emailed code if you forget it.
+          </p>
+        </div>
+      </header>
+      <PasswordForm />
+    </section>
+  );
+}
+
+function PasswordIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="text-[#4D7A60]"
+      aria-hidden
+    >
+      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
   );
 }

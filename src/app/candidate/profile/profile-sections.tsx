@@ -1678,7 +1678,10 @@ function JobPreferencesCard({
   const days = WEEKDAY_KEYS.filter(
     (k) => data.schedule_preferences[k.key]
   ).map((k) => k.label);
+  // Anchor target for the /candidate/settings/job-preferences redirect.
+  // scroll-mt-24 keeps the card off the top edge once scrolled into view.
   return (
+    <div id="section-job-preferences" className="scroll-mt-24">
     <SectionCard
       title="Job preferences"
       subtitle="Where, when, and how you want to work."
@@ -1718,6 +1721,7 @@ function JobPreferencesCard({
         )}
       </div>
     </SectionCard>
+    </div>
   );
 }
 
