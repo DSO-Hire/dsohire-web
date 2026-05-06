@@ -15,7 +15,6 @@
  */
 
 import { useState, useTransition, useRef, useEffect } from "react";
-import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import {
   MoreVertical,
@@ -33,10 +32,12 @@ import {
   withdrawApplication,
   updateSelfReportedStatus,
   toggleHideApplication,
+} from "./row-actions";
+import {
   WITHDRAW_REASON_CHIPS,
   SELF_REPORTED_OPTIONS,
   type SelfReportedStatus,
-} from "./row-actions";
+} from "./row-actions-data";
 
 interface RowActionsMenuProps {
   applicationId: string;
@@ -466,16 +467,6 @@ function Sheet({
   onClose: () => void;
   children: React.ReactNode;
 }) {
-  const [mounted, setMounted] = useState(false);
-
-  // Wait for client-side mount before portaling so we don't try to
-  // access `document` during SSR. Without this, the modal would never
-  // render in the SSR pass and trigger a hydration mismatch the first
-  // time it tries.
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   // Lock body scroll while sheet is open.
   useEffect(() => {
     const original = document.body.style.overflow;
@@ -494,13 +485,7 @@ function Sheet({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  if (!mounted) return null;
-
-  // Render at document.body so the modal is fully outside the parent
-  // React tree (which lives next to a <Link> on the row card). This
-  // prevents click bubbling, z-index stacking, and Next.js prefetch
-  // interactions from interfering with the modal.
-  return createPortal(
+  return (
     <div
       role="dialog"
       aria-modal="true"
@@ -540,7 +525,6 @@ function Sheet({
           {children}
         </div>
       </div>
-    </div>,
-    document.body
+    </div>
   );
 }

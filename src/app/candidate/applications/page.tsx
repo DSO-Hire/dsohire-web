@@ -37,7 +37,7 @@ import {
   type ApplicationStatus,
 } from "@/lib/applications/stages";
 import { RowActionsMenu } from "./row-actions-menu";
-import type { SelfReportedStatus } from "./row-actions";
+import type { SelfReportedStatus } from "./row-actions-data";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "My Applications" };

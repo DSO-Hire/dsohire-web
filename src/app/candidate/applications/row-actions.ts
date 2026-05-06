@@ -30,6 +30,11 @@
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { ApplicationStatus } from "@/lib/applications/stages";
+import type { SelfReportedStatus } from "./row-actions-data";
+
+// Re-export the type so existing import paths don't break for files
+// pulling SelfReportedStatus from row-actions.ts directly.
+export type { SelfReportedStatus } from "./row-actions-data";
 
 type Result =
   | { ok: true }
@@ -59,20 +64,11 @@ async function getCandidateContext() {
 
 // ─────────────────────────────────────────────────────────────────────
 // Withdraw
+//
+// Reason-chip catalog lives in `./row-actions-data.ts` so the client
+// can import it without the "use server" overhead. Don't co-locate
+// constants with server actions in this file.
 // ─────────────────────────────────────────────────────────────────────
-
-export const WITHDRAW_REASON_CHIPS: ReadonlyArray<{
-  value: string;
-  label: string;
-}> = [
-  { value: "found_another_role", label: "Found another role" },
-  { value: "compensation_low", label: "Pay didn't meet expectations" },
-  { value: "location_mismatch", label: "Location didn't work" },
-  { value: "process_too_slow", label: "Process took too long" },
-  { value: "no_response", label: "Heard nothing back" },
-  { value: "exploring", label: "Just exploring" },
-  { value: "other", label: "Other" },
-];
 
 export async function withdrawApplication(input: {
   applicationId: string;
@@ -143,24 +139,10 @@ export async function withdrawApplication(input: {
 
 // ─────────────────────────────────────────────────────────────────────
 // Self-reported status
+//
+// Type + option list live in `./row-actions-data.ts` (re-exported above)
+// so the client menu can read the labels directly.
 // ─────────────────────────────────────────────────────────────────────
-
-export type SelfReportedStatus =
-  | "interviewing"
-  | "offer_received"
-  | "hired"
-  | "no_longer_interested";
-
-export const SELF_REPORTED_OPTIONS: ReadonlyArray<{
-  value: SelfReportedStatus | null;
-  label: string;
-}> = [
-  { value: null, label: "Clear my self-reported status" },
-  { value: "interviewing", label: "I'm interviewing" },
-  { value: "offer_received", label: "I received an offer" },
-  { value: "hired", label: "I was hired" },
-  { value: "no_longer_interested", label: "I'm no longer interested" },
-];
 
 export async function updateSelfReportedStatus(input: {
   applicationId: string;
