@@ -5,6 +5,7 @@
 import { CandidateShell } from "@/components/candidate/candidate-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CandidateProfileForm, type ProfileInitial } from "./profile-form";
+import { CandidateAvatarUpload } from "./avatar-upload";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Your Profile" };
@@ -20,11 +21,13 @@ export default async function CandidateProfilePage() {
   const { data: candidate } = await supabase
     .from("candidates")
     .select(
-      "full_name, phone, headline, summary, current_title, years_experience, desired_roles, desired_locations, availability, linkedin_url, resume_url, is_searchable"
+      "full_name, phone, headline, summary, current_title, years_experience, desired_roles, desired_locations, availability, linkedin_url, resume_url, is_searchable, avatar_url"
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!candidate) return null;
+
+  const avatarUrl = (candidate.avatar_url as string | null) ?? null;
 
   const resumePath = (candidate.resume_url as string | null) ?? null;
   const initial: ProfileInitial = {
@@ -103,6 +106,20 @@ export default async function CandidateProfilePage() {
           Start →
         </span>
       </a>
+
+      {/* Profile photo (Phase 4.1.a) — independent of the form below;
+          uploads + persists immediately so a saved photo doesn't depend
+          on submitting the rest of the form. */}
+      <div className="mb-6 max-w-[820px] border border-[var(--rule)] bg-white p-7 sm:p-10">
+        <h2 className="mb-1 font-display text-lg font-bold text-ink">
+          Profile photo
+        </h2>
+        <p className="mb-5 text-sm text-slate-body">
+          Optional, but DSO recruiters tell us photos make a real
+          difference. We don&apos;t require one.
+        </p>
+        <CandidateAvatarUpload initialUrl={avatarUrl} />
+      </div>
 
       <div className="border border-[var(--rule)] bg-white p-7 sm:p-10 max-w-[820px]">
         <CandidateProfileForm initial={initial} />
