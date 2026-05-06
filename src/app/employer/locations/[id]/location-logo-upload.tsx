@@ -44,8 +44,11 @@ export function LocationLogoUpload({
   return (
     <div className="space-y-2">
       <ImageUpload
+        // pathPrefix is constrained to [a-z0-9_-]{1,32} server-side; flat
+        // namespace works because the DB column ties each URL to its
+        // specific location, and storage paths get a unique timestamp.
         value={url}
-        pathPrefix={`location-logo/${locationId}`}
+        pathPrefix="location-logo"
         shape="square"
         outputFormat="image/png"
         hint="Square aspect, transparent backgrounds welcome. PNG, JPG, or WebP up to 5MB. Falls back to colored initials when blank."
