@@ -177,8 +177,12 @@ export default async function CandidateProfilePage() {
         </span>
       </a>
 
-      {/* Profile photo */}
-      <div className="mb-6 max-w-[820px] border border-[var(--rule)] bg-white p-7 sm:p-10">
+      {/* Profile photo (anchored — completeness meter scrolls here on the
+          "Add a photo" quick-win CTA) */}
+      <div
+        id="profile-photo"
+        className="mb-6 max-w-[820px] scroll-mt-24 border border-[var(--rule)] bg-white p-7 transition-shadow sm:p-10"
+      >
         <h2 className="mb-1 font-display text-lg font-bold text-ink">
           Profile photo
         </h2>
@@ -188,8 +192,10 @@ export default async function CandidateProfilePage() {
         <CandidateAvatarUpload initialUrl={avatarUrl} />
       </div>
 
-      {/* Section cards */}
-      <ProfileSections data={data} />
+      {/* Section cards (Completeness meter renders inside, before the
+          first section card, so it shares modal-open state with the
+          section editors.) */}
+      <ProfileSections data={data} photoUrl={avatarUrl} />
     </CandidateShell>
   );
 }

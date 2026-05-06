@@ -77,6 +77,11 @@ import {
   type LicenseInput,
   type CertificationInput,
 } from "./section-actions";
+import { CompletenessMeter } from "./completeness-meter";
+import {
+  computeCompleteness,
+  type ProfileSectionModal,
+} from "@/lib/candidate/completeness";
 
 // ─────────────────────────────────────────────────────────────────────
 // Data shapes coming from the server page
@@ -167,12 +172,33 @@ type OpenModal =
 // Main orchestrator
 // ─────────────────────────────────────────────────────────────────────
 
-export function ProfileSections({ data }: { data: ProfileData }) {
+export function ProfileSections({
+  data,
+  photoUrl,
+}: {
+  data: ProfileData;
+  photoUrl: string | null;
+}) {
   const [open, setOpen] = useState<OpenModal>(null);
+  const completeness = computeCompleteness(data, photoUrl);
+
+  // The completeness meter emits ProfileSectionModal — a subset of OpenModal.
+  // The two unions overlap exactly on the kinds the meter knows about, so
+  // a direct cast is safe + cheap. Keeping the types separate so the meter
+  // can't request modal kinds that don't make sense as quick-add CTAs
+  // (education + certification + role preferences are reachable from the
+  // section cards themselves, not via the meter).
+  const handleMeterCta = (modal: ProfileSectionModal) => {
+    setOpen(modal as OpenModal);
+  };
 
   return (
     <>
       <div className="grid max-w-[820px] gap-4">
+        <CompletenessMeter
+          report={completeness}
+          onOpenModal={handleMeterCta}
+        />
         <IdentityCard
           data={data.identity}
           onEdit={() => setOpen({ kind: "identity" })}
