@@ -18,15 +18,21 @@
  */
 
 import Link from "next/link";
-import { ChevronRight, Briefcase } from "lucide-react";
+import { ChevronRight, Briefcase, MapPin } from "lucide-react";
 import { Sparkline } from "./sparkline";
 import { TrendPill } from "./trend-pill";
 
 export interface LeaderboardJob {
   id: string;
   title: string;
-  /** Short context line: "Topeka · Full-time" */
+  /** Short context line: e.g. "Full-time" — does NOT include location. */
   subline: string;
+  /**
+   * Compact location identifier shown as a chip on the right of the title.
+   * Disambiguates two jobs with the same title at different practices.
+   * Examples: "Topeka", "Topeka +2", "5 locations", null.
+   */
+  locationLabel: string | null;
   /** 7-day spark series, oldest first. */
   spark: number[];
   /** Total 7-day applications. */
@@ -109,8 +115,19 @@ export function JobLeaderboard({
                     #{i + 1}
                   </span>
                   <div className="min-w-0">
-                    <div className="text-[13px] font-bold text-ink leading-tight tracking-[-0.1px] truncate">
-                      {j.title}
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-[13px] font-bold text-ink leading-tight tracking-[-0.1px] truncate">
+                        {j.title}
+                      </span>
+                      {j.locationLabel && (
+                        <span
+                          className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-heritage/20 bg-heritage/[0.07] px-2 py-0.5 text-[10px] font-bold tracking-[0.5px] text-heritage-deep"
+                          title={`Location: ${j.locationLabel}`}
+                        >
+                          <MapPin className="h-2.5 w-2.5" strokeWidth={2.5} />
+                          {j.locationLabel}
+                        </span>
+                      )}
                     </div>
                     <div className="text-[10px] text-slate-meta tracking-[0.3px] mt-0.5">
                       {j.subline}

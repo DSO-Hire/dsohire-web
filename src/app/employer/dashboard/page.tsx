@@ -438,6 +438,47 @@ export default async function EmployerDashboard() {
         prn: "PRN",
         locum: "Locum",
       };
+
+      // ── Location chip data (Phase 4.7.c) ───────────────────────────
+      // Pull job_locations + dso_locations so the leaderboard can show a
+      // disambiguating chip ("Topeka", "Topeka +2", "5 locations") next
+      // to the title. This fixes the case where two jobs have the same
+      // title at different practices.
+      const { data: rawJobLocs } = await supabase
+        .from("job_locations")
+        .select("job_id, location_id, dso_locations:dso_locations(id, name, city)")
+        .in("job_id", jobIds);
+      type JobLocRow = {
+        job_id: string;
+        location_id: string;
+        dso_locations:
+          | Array<{ id: string; name: string | null; city: string | null }>
+          | { id: string; name: string | null; city: string | null }
+          | null;
+      };
+      const jobLocMap = new Map<string, Array<{ city: string | null; name: string | null }>>();
+      for (const row of (rawJobLocs ?? []) as unknown as JobLocRow[]) {
+        const loc = Array.isArray(row.dso_locations)
+          ? row.dso_locations[0] ?? null
+          : row.dso_locations;
+        if (!loc) continue;
+        const arr = jobLocMap.get(row.job_id) ?? [];
+        arr.push({ city: loc.city ?? null, name: loc.name ?? null });
+        jobLocMap.set(row.job_id, arr);
+      }
+      const buildLocationLabel = (
+        locs: Array<{ city: string | null; name: string | null }>,
+      ): string | null => {
+        if (locs.length === 0) return null;
+        const primary =
+          locs[0].city?.trim() || locs[0].name?.trim() || "Location";
+        if (locs.length === 1) return primary;
+        // For 2-3 locations, show "Topeka +1" or "Topeka +2".
+        // For 4+, show "5 locations" — keeps the chip from blowing out.
+        if (locs.length <= 3) return `${primary} +${locs.length - 1}`;
+        return `${locs.length} locations`;
+      };
+
       leaderboardJobs = jobs
         .filter((j) => j.status === "active")
         .map((j): LeaderboardJob => {
@@ -450,10 +491,11 @@ export default async function EmployerDashboard() {
             id: j.id,
             title: j.title,
             subline: HUMAN_EMP[j.employment_type] ?? j.employment_type,
+            locationLabel: buildLocationLabel(jobLocMap.get(j.id) ?? []),
             spark: v.spark,
             thisWeek: v.thisWeek,
             lastWeek: v.lastWeek,
-            href: `/employer/jobs/${j.id}/applications`,
+            href: `/employer/jobs/${j.id}`,
           };
         })
         .sort((a, b) => b.thisWeek - a.thisWeek)
