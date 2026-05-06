@@ -147,7 +147,10 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
     locs: Array<{ city: string | null; name: string | null }>
   ): string | null => {
     if (locs.length === 0) return null;
-    const primary = locs[0].city?.trim() || locs[0].name?.trim() || "Location";
+    // Prefer practice name (e.g. "67 Dental") over city — DSOs cluster
+    // multiple practices in the same city, so city alone doesn't
+    // disambiguate. Falls back to city when name is missing.
+    const primary = locs[0].name?.trim() || locs[0].city?.trim() || "Location";
     if (locs.length === 1) return primary;
     if (locs.length <= 3) return `${primary} +${locs.length - 1}`;
     return `${locs.length} locations`;

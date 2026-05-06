@@ -470,10 +470,14 @@ export default async function EmployerDashboard() {
         locs: Array<{ city: string | null; name: string | null }>,
       ): string | null => {
         if (locs.length === 0) return null;
+        // Prefer practice name (e.g. "67 Dental") over city — DSOs cluster
+        // multiple practices in the same city, so city alone doesn't
+        // disambiguate. Falls back to city when name is missing on the
+        // location row (legacy/imported data).
         const primary =
-          locs[0].city?.trim() || locs[0].name?.trim() || "Location";
+          locs[0].name?.trim() || locs[0].city?.trim() || "Location";
         if (locs.length === 1) return primary;
-        // For 2-3 locations, show "Topeka +1" or "Topeka +2".
+        // For 2-3 locations, show "67 Dental +1" or "67 Dental +2".
         // For 4+, show "5 locations" — keeps the chip from blowing out.
         if (locs.length <= 3) return `${primary} +${locs.length - 1}`;
         return `${locs.length} locations`;
