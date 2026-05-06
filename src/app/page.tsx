@@ -75,14 +75,21 @@ function Hero() {
           </span>
         </div>
 
-        <h1 className="text-5xl sm:text-7xl lg:text-[80px] font-extrabold tracking-[-0.025em] leading-[0.98] text-ink mb-12">
-          Hire across every practice
-          <br />
-          <em className="not-italic relative whitespace-nowrap text-heritage-light">
+        {/* Headline: text-4xl on phones (≤640px) → text-5xl at sm → text-7xl
+              at md → text-[80px] at lg. The second-line `<em>` only locks
+              `whitespace-nowrap` from lg up, where the type fits on one line;
+              below that it's allowed to wrap so the headline never overflows
+              the viewport. The heritage-tint underline is only rendered at
+              lg+ for the same reason — `absolute` positioning on a wrapped
+              inline element only sits under the last line and looks broken. */}
+        <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-[80px] font-extrabold tracking-[-0.025em] leading-[0.98] text-ink mb-12">
+          Hire across every practice{" "}
+          <br className="hidden sm:inline" />
+          <em className="not-italic relative lg:whitespace-nowrap text-heritage-light">
             without per-listing pricing.
             <span
               aria-hidden
-              className="absolute left-0 right-0 bottom-1.5 h-2 -z-10"
+              className="hidden lg:block absolute left-0 right-0 bottom-1.5 h-2 -z-10"
               style={{ background: "var(--heritage-tint)" }}
             />
           </em>

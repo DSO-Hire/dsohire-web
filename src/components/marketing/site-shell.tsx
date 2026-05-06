@@ -14,6 +14,7 @@
 
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { MobileMenu } from "./mobile-menu";
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   return (
@@ -103,6 +104,17 @@ export async function SiteNav() {
         >
           Post a Job
         </Link>
+        {/* Hamburger + drawer below md (768px). The drawer holds primary
+            links + the For Dental Pros sub-list (hover dropdowns don't work
+            on touch) + an audience-aware Sign In/Dashboard link + a
+            duplicate Post a Job CTA so the primary action stays a thumb-tap
+            away when the menu is open. Post a Job stays visible at every
+            breakpoint so the conversion CTA is never obscured. */}
+        <MobileMenu
+          signInHref={signInHref}
+          signInLabel={signInLabel}
+          postAJobHref={postAJobHref}
+        />
       </div>
     </nav>
   );
