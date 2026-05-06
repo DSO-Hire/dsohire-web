@@ -15,7 +15,16 @@ export interface ContactFormState {
   message?: string;
 }
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy-init Resend (the SDK throws on `new Resend(undefined)` at construct
+// time, which breaks `next build` page-data collection without env vars).
+let _resend: Resend | null = null;
+function getResend(): Resend {
+  if (_resend) return _resend;
+  const key = process.env.RESEND_API_KEY;
+  if (!key) throw new Error("RESEND_API_KEY is not set.");
+  _resend = new Resend(key);
+  return _resend;
+}
 
 export async function submitContact(
   _prev: ContactFormState,
@@ -60,7 +69,7 @@ export async function submitContact(
     .join("\n");
 
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: "DSO Hire Contact <no-reply@dsohire.com>",
       to: ["cam@dsohire.com"],
       replyTo: email,

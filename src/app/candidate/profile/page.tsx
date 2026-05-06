@@ -63,6 +63,47 @@ export default async function CandidateProfilePage() {
         </p>
       </header>
 
+      {/* Resume import CTA (Phase 4.1.c) — drop-zone-above-the-fold for
+          new candidates. Hides once the candidate has filled in core
+          fields manually so the surface doesn't nag returning users. */}
+      <a
+        href="/candidate/profile/import"
+        className="mb-8 flex max-w-[820px] items-start gap-4 rounded-lg border border-heritage-deep/30 bg-[#F7F4ED] p-5 transition hover:border-heritage-deep hover:bg-[#F7F4ED]/70 sm:items-center"
+      >
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-heritage-deep/10">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-heritage-deep"
+            aria-hidden="true"
+          >
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <path d="M14 2v6h6" />
+            <path d="m9 18 3-3 3 3" />
+            <path d="M12 12v6" />
+          </svg>
+        </div>
+        <div className="flex-1">
+          <p className="font-display text-base font-semibold text-ink">
+            Import from your resume
+          </p>
+          <p className="mt-0.5 text-sm text-slate-body">
+            Upload a PDF or DOCX — we&apos;ll fill out your profile in
+            seconds. You review every field before saving.
+          </p>
+        </div>
+        <span className="hidden text-sm font-medium text-heritage-deep sm:block">
+          Start →
+        </span>
+      </a>
+
       <div className="border border-[var(--rule)] bg-white p-7 sm:p-10 max-w-[820px]">
         <CandidateProfileForm initial={initial} />
       </div>

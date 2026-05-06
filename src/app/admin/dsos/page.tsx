@@ -25,6 +25,10 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+// Auth-protected + service-role-backed — must never prerender at build
+// time. Same reasoning as /admin/page.tsx.
+export const dynamic = "force-dynamic";
+
 const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
   { value: "pending", label: "Pending verification" },
   { value: "active", label: "Active" },

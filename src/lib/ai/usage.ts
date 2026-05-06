@@ -18,11 +18,34 @@ import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
  * Whitelisted set of AI features. Must match the
  * `ai_usage_events_feature_check` constraint in Postgres — extending this
  * union without the matching migration will fail at insert time.
+ *
+ * Employer-side features carry a `dsoId`; candidate-side features (parity
+ * sprint Phase 4.1.c + 4.2.d) leave `dsoId` null and use the candidate's
+ * `auth.users.id` as `user_id`. The Phase 4.1 migration relaxed the
+ * `ai_usage_events.dso_id` NOT NULL constraint to support this split.
  */
-export type AiFeature = "jd_generator" | "rejection_reason";
+export type AiFeature =
+  // Employer-side
+  | "jd_generator"
+  | "rejection_reason"
+  // Candidate-side (parity sprint)
+  | "resume_parse"
+  | "profile_headline"
+  | "profile_summary";
+
+const CANDIDATE_SIDE_FEATURES: ReadonlySet<AiFeature> = new Set<AiFeature>([
+  "resume_parse",
+  "profile_headline",
+  "profile_summary",
+]);
+
+export function isCandidateSideAiFeature(feature: AiFeature): boolean {
+  return CANDIDATE_SIDE_FEATURES.has(feature);
+}
 
 export interface LogAiUsageInput {
-  dsoId: string;
+  /** Required for employer-side features; null/undefined for candidate-side. */
+  dsoId?: string | null;
   userId: string;
   feature: AiFeature;
   model: string;
@@ -37,7 +60,7 @@ export interface LogAiUsageInput {
 export async function logAiUsage(input: LogAiUsageInput): Promise<void> {
   const admin = createSupabaseServiceRoleClient();
   const { error } = await admin.from("ai_usage_events").insert({
-    dso_id: input.dsoId,
+    dso_id: input.dsoId ?? null,
     user_id: input.userId,
     feature: input.feature,
     model: input.model,
@@ -52,6 +75,35 @@ export async function logAiUsage(input: LogAiUsageInput): Promise<void> {
     // Logging failure should never break the user-facing feature.
     console.warn("[ai/usage] failed to log usage event", error);
   }
+}
+
+/**
+ * Per-candidate, per-feature month-to-date usage. Used by candidate-side
+ * AI features (resume parser, AI Write) to enforce per-user soft caps.
+ *
+ * Cap policy: 1 resume parse per candidate per 24h. Counts come from
+ * this same table (filtered by user_id + feature + created_at >= now-24h).
+ */
+export async function getCandidateRecentAiUsage(
+  userId: string,
+  feature: AiFeature,
+  withinHours = 24
+): Promise<{ count: number; lastAt: Date | null }> {
+  const admin = createSupabaseServiceRoleClient();
+  const since = new Date(Date.now() - withinHours * 60 * 60 * 1000).toISOString();
+  const { data, error } = await admin
+    .from("ai_usage_events")
+    .select("created_at")
+    .eq("user_id", userId)
+    .eq("feature", feature)
+    .eq("succeeded", true)
+    .gte("created_at", since)
+    .order("created_at", { ascending: false });
+  if (error || !data) return { count: 0, lastAt: null };
+  return {
+    count: data.length,
+    lastAt: data[0]?.created_at ? new Date(data[0].created_at) : null,
+  };
 }
 
 export async function getDsoMonthToDateAiUsage(

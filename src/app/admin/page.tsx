@@ -16,6 +16,12 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+// Auth-protected, service-role-backed surface — must never prerender at
+// build time, otherwise the build worker can't construct a Supabase
+// client (no SUPABASE_URL / KEY in build env). Same reasoning applies
+// across every /admin route.
+export const dynamic = "force-dynamic";
+
 export default async function AdminOverviewPage() {
   const admin = createSupabaseServiceRoleClient();
 

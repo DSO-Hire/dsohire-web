@@ -21,7 +21,22 @@ import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 
 const FROM_DEFAULT = "DSO Hire <no-reply@dsohire.com>";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy-init Resend client. The Resend SDK throws on `new Resend(undefined)`
+// at construction time, which breaks `next build` page-data collection
+// when RESEND_API_KEY is missing from the local env. Defer instantiation
+// to the first actual send so module imports stay env-independent.
+let _resend: Resend | null = null;
+function getResend(): Resend {
+  if (_resend) return _resend;
+  const key = process.env.RESEND_API_KEY;
+  if (!key) {
+    throw new Error(
+      "RESEND_API_KEY is not set. Add it to Vercel env vars (production + preview) or your local .env.local."
+    );
+  }
+  _resend = new Resend(key);
+  return _resend;
+}
 
 export interface SendEmailParams {
   to: string | string[];
@@ -72,7 +87,9 @@ export async function sendEmail(params: SendEmailParams): Promise<SendEmailResul
   }
 
   try {
-    const payload: Parameters<typeof resend.emails.send>[0] = {
+    const client = getResend();
+    type EmailSendParams = Parameters<typeof client.emails.send>[0];
+    const payload: EmailSendParams = {
       from,
       to: Array.isArray(to) ? to : [to],
       subject,
@@ -80,9 +97,9 @@ export async function sendEmail(params: SendEmailParams): Promise<SendEmailResul
       ...(text ? { text } : {}),
       ...(html ? { html } : {}),
       ...(replyTo ? { replyTo } : {}),
-    } as Parameters<typeof resend.emails.send>[0];
+    } as EmailSendParams;
 
-    const { data, error } = await resend.emails.send(payload);
+    const { data, error } = await client.emails.send(payload);
 
     if (error) {
       console.error(`[email] resend.send failed for "${template}":`, error);
