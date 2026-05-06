@@ -1,14 +1,19 @@
 /**
- * /employer/jobs/[id]/edit — wizard edit surface (Phase 4.7.a).
+ * /employer/jobs/[id]/edit — sectioned edit page (Phase 4.7.b).
  *
- * Moved from /employer/jobs/[id] when 4.7.a flipped the per-job page to
- * pipeline-first. Reuses JobWizard in edit mode + exposes the soft-delete
- * danger zone. Back link returns to the pipeline view.
+ * The wizard chrome (Step X of 5 + Continue button) is gone. Replaced
+ * with five inline-editable section cards (Basics / Description /
+ * Compensation & Details / Screening / Status), each with its own Save
+ * button + per-section server action. Pattern parallels the candidate
+ * profile editor (Phase 4.2.b) but uses inline editing rather than modal
+ * sheets — the JD's TipTap editor and the screening-question CRUD UI are
+ * too heavy for a sheet, and editing a job is a "lean in" surface, not a
+ * "dip in and out" one.
  *
- * Phase 4.7.b will refactor this from wizard chrome to a single-page
- * sectioned form (Basics / Description / Compensation / Screening /
- * Visibility) with no "Step X of 5" indicator. For now we keep the
- * wizard as-is; the route move is what 4.7.a needs.
+ * Soft-delete danger zone stays at the bottom, separated from the form
+ * sections by a rule.
+ *
+ * Back link returns to /employer/jobs/[id] (the pipeline view).
  */
 
 import Link from "next/link";
@@ -16,13 +21,15 @@ import { redirect, notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, Trash2 } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import {
-  JobWizard,
-  type JobWizardInitial,
-  type LocationOption,
-  type WizardScreeningQuestion,
-} from "../../job-wizard";
 import { softDeleteJob } from "../../actions";
+import {
+  EditSections,
+  type EditSectionsInitial,
+} from "./edit-sections";
+import type {
+  LocationOption,
+  WizardScreeningQuestion,
+} from "../../job-wizard";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -96,7 +103,7 @@ export default async function EditJobPage({ params }: PageProps) {
     state: (l.state as string | null) ?? null,
   }));
 
-  const initial: JobWizardInitial = {
+  const initial: EditSectionsInitial = {
     id: job.id as string,
     title: job.title as string,
     description: (job.description as string) ?? "",
@@ -158,20 +165,25 @@ export default async function EditJobPage({ params }: PageProps) {
         {initial.status === "active" && (
           <Link
             href={`/jobs/${job.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
             className="mt-3 inline-flex items-center gap-1 text-[13px] text-heritage hover:text-heritage-deep transition-colors font-semibold"
           >
             View public listing
             <ExternalLink className="h-3 w-3" />
           </Link>
         )}
+        <p className="mt-4 max-w-[680px] text-sm text-slate-body leading-relaxed">
+          Edit any section below. Each section saves on its own — no preview
+          step or publish button to remember.
+        </p>
       </header>
 
-      <JobWizard
-        dsoId={dsoUser.dso_id}
-        locations={locationOptions}
-        mode="edit"
+      <EditSections
+        dsoId={dsoUser.dso_id as string}
         initial={initial}
         initialQuestions={initialQuestions}
+        locations={locationOptions}
       />
 
       {/* Soft-delete (separated from main form for safety) */}

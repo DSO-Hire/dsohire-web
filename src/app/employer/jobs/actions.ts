@@ -298,6 +298,289 @@ export async function updateJob(
   return { ok: true };
 }
 
+/* ───── Per-section saves (Phase 4.7.b — sectioned edit page) ───── */
+
+/**
+ * Update Basics section only: title, role_category, employment_type,
+ * job_locations (replace). Slug is left as-is on edit (changing it would
+ * break inbound links and SEO).
+ */
+export async function updateJobBasicsSection(
+  _prev: JobActionState,
+  formData: FormData
+): Promise<JobActionState> {
+  const jobId = String(formData.get("job_id") ?? "").trim();
+  const dsoId = String(formData.get("dso_id") ?? "").trim();
+  if (!jobId || !dsoId) return { ok: false, error: "Missing job or DSO." };
+
+  const title = String(formData.get("title") ?? "").trim();
+  const roleCategory = String(formData.get("role_category") ?? "other");
+  const employmentType = String(formData.get("employment_type") ?? "full_time");
+  const locationIds = formData
+    .getAll("location_ids")
+    .map((v) => String(v).trim())
+    .filter(Boolean);
+
+  if (!title) return { ok: false, error: "Job title is required." };
+  if (title.length > 200) return { ok: false, error: "Job title is too long." };
+  if (locationIds.length === 0) {
+    return { ok: false, error: "Pick at least one practice location." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+
+  const { error: updateError } = await supabase
+    .from("jobs")
+    .update({
+      title,
+      role_category: roleCategory,
+      employment_type: employmentType,
+    })
+    .eq("id", jobId)
+    .eq("dso_id", dsoId);
+  if (updateError) return { ok: false, error: updateError.message };
+
+  await supabase.from("job_locations").delete().eq("job_id", jobId);
+  await supabase.from("job_locations").insert(
+    locationIds.map((locId) => ({ job_id: jobId, location_id: locId }))
+  );
+
+  revalidatePath(`/jobs/${jobId}`);
+  revalidatePath(`/employer/jobs/${jobId}`);
+  revalidatePath(`/employer/jobs/${jobId}/edit`);
+  return { ok: true };
+}
+
+/**
+ * Update Description section only (the rich-text body).
+ */
+export async function updateJobDescriptionSection(
+  _prev: JobActionState,
+  formData: FormData
+): Promise<JobActionState> {
+  const jobId = String(formData.get("job_id") ?? "").trim();
+  const dsoId = String(formData.get("dso_id") ?? "").trim();
+  if (!jobId || !dsoId) return { ok: false, error: "Missing job or DSO." };
+
+  const description = String(formData.get("description") ?? "").trim();
+  if (!description || description === "<p></p>") {
+    return { ok: false, error: "Job description can't be empty." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase
+    .from("jobs")
+    .update({ description })
+    .eq("id", jobId)
+    .eq("dso_id", dsoId);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath(`/jobs/${jobId}`);
+  revalidatePath(`/employer/jobs/${jobId}/edit`);
+  return { ok: true };
+}
+
+/**
+ * Update Compensation & Details section: comp range/period/visible,
+ * benefits, requirements, candidate-visibility toggle, plus job_skills
+ * (replace).
+ */
+export async function updateJobDetailsSection(
+  _prev: JobActionState,
+  formData: FormData
+): Promise<JobActionState> {
+  const jobId = String(formData.get("job_id") ?? "").trim();
+  const dsoId = String(formData.get("dso_id") ?? "").trim();
+  if (!jobId || !dsoId) return { ok: false, error: "Missing job or DSO." };
+
+  const compMinRaw = String(formData.get("compensation_min") ?? "").trim();
+  const compMaxRaw = String(formData.get("compensation_max") ?? "").trim();
+  const compPeriodRaw = String(formData.get("compensation_period") ?? "").trim();
+  const compVisible = formData.get("compensation_visible") === "on";
+  const hideStagesFromCandidate =
+    formData.get("hide_stages_from_candidate") === "on";
+  const benefitsRaw = String(formData.get("benefits") ?? "").trim();
+  const requirements = String(formData.get("requirements") ?? "").trim();
+  const skillsRaw = String(formData.get("skills") ?? "").trim();
+
+  const compMin = compMinRaw ? parseInt(compMinRaw, 10) : null;
+  const compMax = compMaxRaw ? parseInt(compMaxRaw, 10) : null;
+  if (compMin !== null && Number.isNaN(compMin)) {
+    return { ok: false, error: "Min compensation must be a number." };
+  }
+  if (compMax !== null && Number.isNaN(compMax)) {
+    return { ok: false, error: "Max compensation must be a number." };
+  }
+
+  const benefits = benefitsRaw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const skills = skillsRaw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const supabase = await createSupabaseServerClient();
+  const { error: updateError } = await supabase
+    .from("jobs")
+    .update({
+      compensation_min: compMin,
+      compensation_max: compMax,
+      compensation_period: compPeriodRaw || null,
+      compensation_visible: compVisible,
+      benefits: benefits.length > 0 ? benefits : null,
+      requirements: requirements || null,
+      hide_stages_from_candidate: hideStagesFromCandidate,
+    })
+    .eq("id", jobId)
+    .eq("dso_id", dsoId);
+  if (updateError) return { ok: false, error: updateError.message };
+
+  await supabase.from("job_skills").delete().eq("job_id", jobId);
+  if (skills.length > 0) {
+    await supabase.from("job_skills").insert(
+      skills.map((skill) => ({ job_id: jobId, skill }))
+    );
+  }
+
+  revalidatePath(`/jobs/${jobId}`);
+  revalidatePath(`/employer/jobs/${jobId}/edit`);
+  return { ok: true };
+}
+
+/**
+ * Update Screening Questions section: full sync of job_screening_questions
+ * to match the submitted payload (mirrors the logic in updateJob).
+ */
+export async function updateJobScreeningSection(
+  _prev: JobActionState,
+  formData: FormData
+): Promise<JobActionState> {
+  const jobId = String(formData.get("job_id") ?? "").trim();
+  const dsoId = String(formData.get("dso_id") ?? "").trim();
+  if (!jobId || !dsoId) return { ok: false, error: "Missing job or DSO." };
+
+  const rawQuestions = String(formData.get("screening_questions") ?? "").trim();
+  let parsedRaw: unknown = [];
+  if (rawQuestions) {
+    try {
+      parsedRaw = JSON.parse(rawQuestions);
+    } catch {
+      return { ok: false, error: "Couldn't parse screening questions payload." };
+    }
+  }
+  if (!Array.isArray(parsedRaw)) {
+    return { ok: false, error: "Screening questions payload must be an array." };
+  }
+
+  const screening: ScreeningQuestionPayload[] = [];
+  for (let i = 0; i < parsedRaw.length; i++) {
+    const raw = parsedRaw[i] as Record<string, unknown>;
+    const prompt = String(raw.prompt ?? "").trim();
+    if (!prompt) return { ok: false, error: `Question ${i + 1}: prompt is empty.` };
+    const kind = String(raw.kind ?? "");
+    if (!VALID_KINDS.has(kind as ScreeningQuestionPayload["kind"])) {
+      return { ok: false, error: `Question ${i + 1}: invalid kind "${kind}".` };
+    }
+    const required = Boolean(raw.required);
+    const helperText =
+      raw.helper_text === null || raw.helper_text === undefined
+        ? null
+        : String(raw.helper_text).trim() || null;
+    const id =
+      raw.id === null || raw.id === undefined || raw.id === ""
+        ? null
+        : String(raw.id);
+    let options: ScreeningQuestionPayload["options"] = null;
+    if (kind === "single_select" || kind === "multi_select") {
+      const rawOpts = raw.options;
+      if (!Array.isArray(rawOpts) || rawOpts.length < 2) {
+        return { ok: false, error: `Question ${i + 1}: needs at least 2 options.` };
+      }
+      options = [];
+      for (let j = 0; j < rawOpts.length; j++) {
+        const o = rawOpts[j] as Record<string, unknown>;
+        const optId = String(o.id ?? "").trim();
+        const label = String(o.label ?? "").trim();
+        if (!optId || !label) {
+          return { ok: false, error: `Question ${i + 1}: option ${j + 1} is incomplete.` };
+        }
+        options.push({ id: optId, label });
+      }
+    }
+    screening.push({
+      id,
+      prompt,
+      helper_text: helperText,
+      kind: kind as ScreeningQuestionPayload["kind"],
+      options,
+      required,
+      sort_order: i,
+    });
+  }
+
+  const supabase = await createSupabaseServerClient();
+
+  const incomingIds = new Set(
+    screening.map((q) => q.id).filter((id): id is string => id !== null)
+  );
+  if (incomingIds.size > 0) {
+    await supabase
+      .from("job_screening_questions")
+      .delete()
+      .eq("job_id", jobId)
+      .not("id", "in", `(${[...incomingIds].map((id) => `"${id}"`).join(",")})`);
+  } else {
+    await supabase.from("job_screening_questions").delete().eq("job_id", jobId);
+  }
+
+  for (const q of screening) {
+    if (q.id) {
+      const { error: updateQErr } = await supabase
+        .from("job_screening_questions")
+        .update({
+          prompt: q.prompt,
+          helper_text: q.helper_text,
+          kind: q.kind,
+          options: q.options,
+          required: q.required,
+          sort_order: q.sort_order,
+        })
+        .eq("id", q.id)
+        .eq("job_id", jobId);
+      if (updateQErr) {
+        return { ok: false, error: `Couldn't update screening question: ${updateQErr.message}` };
+      }
+    }
+  }
+
+  const newRows = screening
+    .filter((q) => !q.id)
+    .map((q) => ({
+      job_id: jobId,
+      prompt: q.prompt,
+      helper_text: q.helper_text,
+      kind: q.kind,
+      options: q.options,
+      required: q.required,
+      sort_order: q.sort_order,
+    }));
+  if (newRows.length > 0) {
+    const { error: insertQErr } = await supabase
+      .from("job_screening_questions")
+      .insert(newRows);
+    if (insertQErr) {
+      return { ok: false, error: `Couldn't add new screening question: ${insertQErr.message}` };
+    }
+  }
+
+  revalidatePath(`/jobs/${jobId}`);
+  revalidatePath(`/jobs/${jobId}/apply`);
+  revalidatePath(`/employer/jobs/${jobId}/edit`);
+  return { ok: true };
+}
+
 /* ───── Status transitions / soft delete ───── */
 
 export async function setJobStatus(
