@@ -28,7 +28,6 @@ import {
   Bookmark,
   MapPin,
   Sparkles,
-  EyeOff,
 } from "lucide-react";
 import { CandidateShell } from "@/components/candidate/candidate-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -37,6 +36,8 @@ import {
   STAGE_LABELS,
   type ApplicationStatus,
 } from "@/lib/applications/stages";
+import { RowActionsMenu } from "./row-actions-menu";
+import type { SelfReportedStatus } from "./row-actions";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "My Applications" };
@@ -100,7 +101,9 @@ export default async function CandidateApplicationsPage({
 
   const { data: rawApps } = await supabase
     .from("applications")
-    .select("id, job_id, status, created_at, updated_at")
+    .select(
+      "id, job_id, status, created_at, updated_at, hidden_at, self_reported_status"
+    )
     .eq("candidate_id", candidateId)
     .order("created_at", { ascending: false });
 
@@ -110,6 +113,8 @@ export default async function CandidateApplicationsPage({
     status: ApplicationStatus;
     created_at: string;
     updated_at: string;
+    hidden_at: string | null;
+    self_reported_status: SelfReportedStatus | null;
   };
   const apps = (rawApps ?? []) as AppRow[];
 
@@ -186,6 +191,12 @@ export default async function CandidateApplicationsPage({
   const unreadByAppId = new Map(unread.map((u) => [u.application_id, u.unread_count]));
 
   // ── Tab counts ──────────────────────────────────────────────────────
+  // All / Active / Interview / Offer / Closed counts EXCLUDE hidden
+  // applications; Hidden tab counts ONLY hidden ones. Saved is its own
+  // pool from saved_jobs.
+  const visible = apps.filter((a) => !a.hidden_at);
+  const hidden = apps.filter((a) => Boolean(a.hidden_at));
+
   const isClosed = (s: ApplicationStatus) =>
     s === "hired" || s === "rejected" || s === "withdrawn";
   const isInterview = (s: ApplicationStatus) => s === "interviewing";
@@ -194,13 +205,13 @@ export default async function CandidateApplicationsPage({
     s === "new" || s === "reviewed";
 
   const counts: Record<TabKey, number> = {
-    all: apps.length,
-    active: apps.filter((a) => isActiveEarly(a.status)).length,
-    interview: apps.filter((a) => isInterview(a.status)).length,
-    offer: apps.filter((a) => isOffer(a.status)).length,
-    closed: apps.filter((a) => isClosed(a.status)).length,
+    all: visible.length,
+    active: visible.filter((a) => isActiveEarly(a.status)).length,
+    interview: visible.filter((a) => isInterview(a.status)).length,
+    offer: visible.filter((a) => isOffer(a.status)).length,
+    closed: visible.filter((a) => isClosed(a.status)).length,
     saved: 0, // filled below
-    hidden: 0, // v1 stub
+    hidden: hidden.length,
   };
 
   // Saved-jobs count — always queried for the badge.
@@ -211,17 +222,19 @@ export default async function CandidateApplicationsPage({
   counts.saved = savedCount ?? 0;
 
   // ── Filter the apps by tab ──────────────────────────────────────────
-  let filteredApps: AppRow[] = apps;
+  let filteredApps: AppRow[] = visible;
   if (activeTab === "active") {
-    filteredApps = apps.filter((a) => isActiveEarly(a.status));
+    filteredApps = visible.filter((a) => isActiveEarly(a.status));
   } else if (activeTab === "interview") {
-    filteredApps = apps.filter((a) => isInterview(a.status));
+    filteredApps = visible.filter((a) => isInterview(a.status));
   } else if (activeTab === "offer") {
-    filteredApps = apps.filter((a) => isOffer(a.status));
+    filteredApps = visible.filter((a) => isOffer(a.status));
   } else if (activeTab === "closed") {
-    filteredApps = apps.filter((a) => isClosed(a.status));
-  } else if (activeTab === "saved" || activeTab === "hidden") {
-    filteredApps = []; // tabs render their own content below
+    filteredApps = visible.filter((a) => isClosed(a.status));
+  } else if (activeTab === "hidden") {
+    filteredApps = hidden;
+  } else if (activeTab === "saved") {
+    filteredApps = []; // saved tab renders its own content below
   }
 
   // ── Saved-jobs payload (only fetched when on the Saved tab) ─────────
@@ -266,8 +279,6 @@ export default async function CandidateApplicationsPage({
       <div className="mt-6">
         {activeTab === "saved" ? (
           <SavedJobsList rows={savedJobs} />
-        ) : activeTab === "hidden" ? (
-          <HiddenStub />
         ) : filteredApps.length === 0 ? (
           <EmptyState tab={activeTab} totalApps={apps.length} />
         ) : (
@@ -352,6 +363,8 @@ function ApplicationsList({
     status: ApplicationStatus;
     created_at: string;
     updated_at: string;
+    hidden_at: string | null;
+    self_reported_status: SelfReportedStatus | null;
   }>;
   jobMap: Map<
     string,
@@ -383,19 +396,22 @@ function ApplicationsList({
         const unreadCount = unreadByAppId.get(app.id) ?? 0;
         const locs = job ? locsByJob.get(job.id) ?? [] : [];
         return (
-          <li key={app.id}>
+          <li key={app.id} className="relative">
             <Link
               href={`/candidate/applications/${app.id}`}
               className="block rounded-md border border-[var(--rule)] bg-white p-5 transition hover:border-heritage-deep/40 hover:bg-cream/40"
             >
               <div className="flex items-start justify-between gap-4 flex-wrap">
                 <div className="min-w-0 flex-1">
-                  {/* Top line — status pill + Practice Fit chip + unread badge */}
+                  {/* Top line — status pill + self-reported chip + Practice Fit + unread */}
                   <div className="mb-2 flex flex-wrap items-center gap-2">
                     <StatusPill
                       status={app.status}
                       hideStages={job?.hide_stages_from_candidate ?? false}
                     />
+                    {app.self_reported_status && (
+                      <SelfReportedChip status={app.self_reported_status} />
+                    )}
                     <PracticeFitPlaceholder />
                     {unreadCount > 0 && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-heritage/15 px-2 py-0.5 text-[11px] font-bold text-heritage-deep">
@@ -437,6 +453,16 @@ function ApplicationsList({
                 <ChevronRight className="size-4 shrink-0 text-slate-meta mt-1" />
               </div>
             </Link>
+            {/* Overflow menu — absolutely positioned so it sits above the
+                Link card without nesting an interactive inside an anchor. */}
+            <div className="absolute right-3 top-3">
+              <RowActionsMenu
+                applicationId={app.id}
+                currentStatus={app.status}
+                isHidden={Boolean(app.hidden_at)}
+                currentSelfReported={app.self_reported_status}
+              />
+            </div>
           </li>
         );
       })}
@@ -525,23 +551,6 @@ function SavedJobsList({
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// Hidden tab v1 stub
-// ─────────────────────────────────────────────────────────────────────
-
-function HiddenStub() {
-  return (
-    <div className="rounded-md border border-[var(--rule)] bg-white p-12 text-center max-w-[680px]">
-      <EyeOff className="mx-auto mb-4 size-8 text-slate-meta" strokeWidth={1.5} />
-      <p className="mb-2 text-[15px] text-ink">No hidden applications.</p>
-      <p className="text-[14px] text-slate-body">
-        Once you can hide applications from the row overflow menu, they
-        land here. Coming with the Withdraw + self-update build.
-      </p>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────
 // Empty state
 // ─────────────────────────────────────────────────────────────────────
 
@@ -614,6 +623,28 @@ const TONE_BY_STATUS: Record<ApplicationStatus, string> = {
   rejected: "bg-red-50 text-red-700",
   withdrawn: "bg-slate-100 text-slate-600",
 };
+
+// ─────────────────────────────────────────────────────────────────────
+// Self-reported status chip
+// ─────────────────────────────────────────────────────────────────────
+
+function SelfReportedChip({ status }: { status: SelfReportedStatus }) {
+  const labels: Record<SelfReportedStatus, string> = {
+    interviewing: "I'm interviewing",
+    offer_received: "I have an offer",
+    hired: "I was hired",
+    no_longer_interested: "Not interested",
+  };
+  return (
+    <span
+      className="inline-flex items-center gap-1 rounded-full bg-[#4D7A60]/10 px-2 py-0.5 text-[11px] font-medium text-[#14233F]"
+      title="Your self-reported status — employer doesn't see this label."
+    >
+      <Sparkles className="size-3 text-[#4D7A60]" />
+      {labels[status]}
+    </span>
+  );
+}
 
 // ─────────────────────────────────────────────────────────────────────
 // Practice Fit placeholder chip

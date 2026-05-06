@@ -117,6 +117,35 @@ export async function applyToJob(
     };
   }
 
+  // 30-day cooldown after withdraw (locked rule R9). If the candidate
+  // previously applied to this job and withdrew within the last 30
+  // days, block the re-apply with a friendly message. Calculated from
+  // withdrawn_at; falls back to updated_at when withdrawn_at is null
+  // (legacy applications withdrawn before this column existed).
+  const { data: priorApp } = await supabase
+    .from("applications")
+    .select("id, status, withdrawn_at, updated_at")
+    .eq("job_id", jobId)
+    .eq("candidate_id", candidate.id as string)
+    .maybeSingle();
+  if (
+    priorApp &&
+    (priorApp.status as string) === "withdrawn"
+  ) {
+    const withdrawAt = new Date(
+      ((priorApp.withdrawn_at as string | null) ??
+        (priorApp.updated_at as string)) || Date.now()
+    );
+    const days = (Date.now() - withdrawAt.getTime()) / (1000 * 60 * 60 * 24);
+    if (days < 30) {
+      const remaining = Math.max(1, Math.ceil(30 - days));
+      return {
+        ok: false,
+        error: `You withdrew this application recently — try again in ${remaining} day${remaining === 1 ? "" : "s"}.`,
+      };
+    }
+  }
+
   // Pull screening questions for this job — we need them both to validate
   // required answers and to know how to interpret each form value.
   const { data: rawQuestions } = await supabase
