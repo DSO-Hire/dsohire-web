@@ -443,18 +443,18 @@ function ApplicationsList({
                   </div>
 
                   {/* Status progress strip — preserved from v1 */}
-                  <div className="mt-3">
+                  <div className="mt-3 pr-10">
                     <StatusProgress
                       status={app.status}
                       hideStages={job?.hide_stages_from_candidate ?? false}
                     />
                   </div>
                 </div>
-                <ChevronRight className="size-4 shrink-0 text-slate-meta mt-1" />
               </div>
             </Link>
-            {/* Overflow menu — absolutely positioned so it sits above the
-                Link card without nesting an interactive inside an anchor. */}
+            {/* Overflow menu — absolutely positioned. Sits in the top-right
+                where the chevron used to live; the menu now serves both as
+                the "open me" affordance + the row-action surface. */}
             <div className="absolute right-3 top-3">
               <RowActionsMenu
                 applicationId={app.id}

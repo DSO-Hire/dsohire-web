@@ -15,6 +15,7 @@
  */
 
 import { useState, useTransition, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import {
   MoreVertical,
@@ -208,7 +209,14 @@ function MenuItem({
     <button
       type="button"
       role="menuitem"
-      onClick={onClick}
+      onClick={(e) => {
+        // Defensive — the parent menu div also stops propagation, but
+        // belt-and-suspenders here in case React's event ordering
+        // surprises us. Never let a menu click navigate the row's Link.
+        e.preventDefault();
+        e.stopPropagation();
+        onClick();
+      }}
       disabled={disabled}
       className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition ${
         tone === "danger"
@@ -458,6 +466,16 @@ function Sheet({
   onClose: () => void;
   children: React.ReactNode;
 }) {
+  const [mounted, setMounted] = useState(false);
+
+  // Wait for client-side mount before portaling so we don't try to
+  // access `document` during SSR. Without this, the modal would never
+  // render in the SSR pass and trigger a hydration mismatch the first
+  // time it tries.
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Lock body scroll while sheet is open.
   useEffect(() => {
     const original = document.body.style.overflow;
@@ -476,18 +494,31 @@ function Sheet({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  return (
+  if (!mounted) return null;
+
+  // Render at document.body so the modal is fully outside the parent
+  // React tree (which lives next to a <Link> on the row card). This
+  // prevents click bubbling, z-index stacking, and Next.js prefetch
+  // interactions from interfering with the modal.
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-label={title}
       className="fixed inset-0 z-50 flex items-stretch justify-center sm:items-center sm:p-6"
-      onClick={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
     >
       <button
         type="button"
         aria-label="Close"
-        onClick={onClose}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onClose();
+        }}
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         tabIndex={-1}
       />
@@ -509,6 +540,7 @@ function Sheet({
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
