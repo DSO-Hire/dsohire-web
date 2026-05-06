@@ -18,8 +18,18 @@
  *
  * SiteNav is an async server component; this client island receives the
  * audience-aware hrefs as props rather than re-deriving them.
+ *
+ * IMPORTANT — drawer is portaled to document.body. SiteNav has
+ * `backdrop-blur-md` (frosted-glass effect), which creates a new
+ * containing block for `position: fixed` descendants. Without the portal,
+ * the drawer's `fixed inset-0` would be constrained to the 80px-tall nav
+ * rectangle instead of covering the full viewport — resulting in a
+ * collapsed drawer with the footer CTAs floating mid-page over the hero.
+ * createPortal escapes the nav's containing block so the dialog
+ * positions against the viewport as intended.
  */
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 
 const ROLE_LINKS = [
@@ -68,29 +78,15 @@ export function MobileMenu({
 
   const close = () => setOpen(false);
 
-  return (
-    <>
-      <button
-        type="button"
-        aria-label="Open menu"
-        aria-expanded={open}
-        aria-controls="mobile-menu-drawer"
-        onClick={() => setOpen(true)}
-        className="md:hidden flex flex-col gap-[5px] w-9 h-9 items-center justify-center -mr-1"
+  const drawer =
+    open ? (
+      <div
+        id="mobile-menu-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Site navigation"
+        className="fixed inset-0 z-[60] md:hidden"
       >
-        <span aria-hidden className="block w-5 h-[2px] bg-ink" />
-        <span aria-hidden className="block w-5 h-[2px] bg-ink" />
-        <span aria-hidden className="block w-5 h-[2px] bg-ink" />
-      </button>
-
-      {open ? (
-        <div
-          id="mobile-menu-drawer"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Site navigation"
-          className="fixed inset-0 z-[60] md:hidden"
-        >
           {/* Backdrop — tap to close. <button> rather than <div> so it's
               keyboard-reachable and screen-readers know it's interactive. */}
           <button
@@ -176,7 +172,30 @@ export function MobileMenu({
             </div>
           </div>
         </div>
-      ) : null}
+      ) : null;
+
+  return (
+    <>
+      <button
+        type="button"
+        aria-label="Open menu"
+        aria-expanded={open}
+        aria-controls="mobile-menu-drawer"
+        onClick={() => setOpen(true)}
+        className="md:hidden flex flex-col gap-[5px] w-9 h-9 items-center justify-center -mr-1"
+      >
+        <span aria-hidden className="block w-5 h-[2px] bg-ink" />
+        <span aria-hidden className="block w-5 h-[2px] bg-ink" />
+        <span aria-hidden className="block w-5 h-[2px] bg-ink" />
+      </button>
+      {/* Portal to document.body so the drawer escapes SiteNav's
+          `backdrop-blur-md` containing block. SSR-safe via typeof window
+          guard; harmless during initial client render too because `open`
+          starts false (drawer is null), so no hydration mismatch ever
+          occurs. The portal only mounts post-click, well after hydration. */}
+      {drawer && typeof window !== "undefined"
+        ? createPortal(drawer, document.body)
+        : null}
     </>
   );
 }
