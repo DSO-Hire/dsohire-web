@@ -51,11 +51,45 @@ export async function enrollTotp(): Promise<
   const ctx = await getAuthedUser();
   if (!ctx.ok) return ctx;
 
-  // Note: we used to scrub any existing unverified factor here, but the
-  // Supabase types narrow `factors.totp` to verified factors only, so
-  // unverified rows aren't reachable from this client. Old unverified
-  // factors are harmless — Supabase expires them on its own and the
-  // user just gets a fresh one each time enrollment runs.
+  // Scrub any leftover unverified "DSO Hire" factor from a prior abandoned
+  // attempt (e.g., user closed the tab mid-flow). The regular client's
+  // `mfa.listFactors()` only surfaces VERIFIED factors, so unverified ones
+  // are invisible from there — but they're real on the server and will
+  // collide with `enroll()` if the friendly_name matches. The admin API
+  // does see them, so we use service-role to find + delete.
+  const admin = createSupabaseServiceRoleClient();
+  try {
+    const { data: adminFactors } = await admin.auth.admin.mfa.listFactors({
+      userId: ctx.user.id,
+    });
+    const factors = (adminFactors as unknown as {
+      factors?: Array<{
+        id: string;
+        friendly_name?: string | null;
+        status?: string;
+        factor_type?: string;
+      }>;
+    } | null)?.factors;
+    if (factors) {
+      for (const f of factors) {
+        if (
+          f.factor_type === "totp" &&
+          f.status !== "verified" &&
+          f.friendly_name === "DSO Hire"
+        ) {
+          await admin.auth.admin.mfa.deleteFactor({
+            userId: ctx.user.id,
+            id: f.id,
+          });
+        }
+      }
+    }
+  } catch (err) {
+    // Don't block enrollment on cleanup failure — the user-facing
+    // "duplicate friendly_name" error from enroll() is informative
+    // enough if cleanup didn't run.
+    console.warn("[mfa/enrollTotp] pre-enroll scrub failed", err);
+  }
 
   const { data, error } = await ctx.supabase.auth.mfa.enroll({
     factorType: "totp",
