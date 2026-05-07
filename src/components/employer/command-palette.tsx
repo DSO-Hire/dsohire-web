@@ -200,12 +200,13 @@ function CommandPalette({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-[60] flex items-start justify-center pt-[12vh] px-4">
-      {/* Backdrop */}
+      {/* Backdrop — strong dim + blur so the dashboard fades behind the
+          palette instead of competing with it visually. */}
       <button
         type="button"
         aria-label="Close search"
         onClick={onClose}
-        className="absolute inset-0 bg-ink/55 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-ink/75 backdrop-blur-md"
       />
 
       {/* Panel */}
