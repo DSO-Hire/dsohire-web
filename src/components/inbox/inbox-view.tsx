@@ -534,14 +534,13 @@ export function InboxView({
                 )}
               </div>
 
-              {/* Thread + composer.
-                  MessagesThread now owns its OWN scroll (iMessage-style
-                  single-window layout), so the right-pane wrapper just
-                  provides the height container with `min-h-0` so the
-                  flex child can actually overflow correctly.
-                  key={applicationId} forces a clean remount when the
-                  user switches threads. */}
-              <div className="flex-1 min-h-0 p-5 flex">
+              {/* Thread + composer — bleeds edge-to-edge horizontally.
+                  Cam 2026-05-07: messaging window should fill the right
+                  pane, not sit inside padding. Header above keeps its
+                  own padding so the icon/peer-name row stays inset.
+                  MessagesThread owns its own scroll so the wrapper just
+                  needs `min-h-0` for the flex overflow. */}
+              <div className="flex-1 min-h-0 flex">
                 <MessagesThread
                   key={activeThread.application_id}
                   applicationId={activeThread.application_id}

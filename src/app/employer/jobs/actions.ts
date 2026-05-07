@@ -23,6 +23,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
 import { requireActiveSubscriptionError } from "@/lib/billing/subscription";
 
 export interface JobActionState {
@@ -605,11 +606,46 @@ export async function setJobStatus(
 
   const supabase = await createSupabaseServerClient();
 
+  // Snapshot the prior status + the title (for system-message body) so
+  // we know whether this transition is the "filled" event we want to
+  // broadcast to applicants.
+  const { data: priorJob } = await supabase
+    .from("jobs")
+    .select("status, title")
+    .eq("id", jobId)
+    .maybeSingle();
+  const priorStatus = (priorJob as Record<string, unknown> | null)?.status as
+    | string
+    | null;
+  const jobTitle =
+    ((priorJob as Record<string, unknown> | null)?.title as string | null) ??
+    "the job";
+
   const update: Record<string, unknown> = { status: newStatus };
   if (newStatus === "active") update.posted_at = new Date().toISOString();
 
   const { error } = await supabase.from("jobs").update(update).eq("id", jobId);
   if (error) return { ok: false, error: error.message };
+
+  // Phase 4.8 follow-up — broadcast a job_filled inbox message to every
+  // active applicant when the status transitions to 'filled'. Skip when
+  // the prior status was already 'filled' (idempotent against double-clicks).
+  if (newStatus === "filled" && priorStatus !== "filled") {
+    const { data: activeApps } = await supabase
+      .from("applications")
+      .select("id, status")
+      .eq("job_id", jobId)
+      .not("status", "in", '("hired","rejected","withdrawn")');
+    for (const app of (activeApps ?? []) as Array<Record<string, unknown>>) {
+      void dispatchInboxSystemMessage({
+        applicationId: app.id as string,
+        eventKind: "job_filled",
+        senderRole: "employer",
+        body: `${jobTitle} has been filled. Thanks for your interest — we'll let you know about future openings.`,
+      });
+    }
+  }
+
   return { ok: true };
 }
 

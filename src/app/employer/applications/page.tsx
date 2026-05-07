@@ -21,6 +21,7 @@ import { candidateDisplayName } from "@/lib/applications/candidate-display";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
 import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
 import type { FitResult } from "@/lib/practice-fit/types";
+import { getActiveLocationId } from "@/lib/employer/active-location";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Applications" };
@@ -54,13 +55,39 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
     .maybeSingle();
   if (!dsoUser) redirect("/employer/onboarding");
 
+  // Multi-location filter (Phase 4.6.d) — when an active location is
+  // set, restrict the jobs (and therefore applications) to that
+  // location only. Uses the same cookie-backed primitive that
+  // /employer/jobs uses, so the rail-level switcher controls every
+  // surface consistently.
+  const activeLocationId = await getActiveLocationId();
+  let locationFilteredJobIds: string[] | null = null;
+  if (activeLocationId) {
+    const { data: jobLocRows } = await supabase
+      .from("job_locations")
+      .select("job_id")
+      .eq("location_id", activeLocationId);
+    locationFilteredJobIds = ((jobLocRows ?? []) as Array<{ job_id: string }>).map(
+      (r) => r.job_id
+    );
+  }
+
   // Pull all jobs for this DSO (for the filter dropdown + name lookup)
-  const { data: rawJobs } = await supabase
+  let jobsQuery = supabase
     .from("jobs")
     .select("id, title, status")
     .eq("dso_id", dsoUser.dso_id as string)
-    .is("deleted_at", null)
-    .order("posted_at", { ascending: false, nullsFirst: false });
+    .is("deleted_at", null);
+  if (locationFilteredJobIds !== null) {
+    jobsQuery = jobsQuery.in(
+      "id",
+      locationFilteredJobIds.length > 0 ? locationFilteredJobIds : ["__none__"]
+    );
+  }
+  const { data: rawJobs } = await jobsQuery.order("posted_at", {
+    ascending: false,
+    nullsFirst: false,
+  });
 
   type JobRow = { id: string; title: string; status: string };
   const jobs = (rawJobs ?? []) as JobRow[];

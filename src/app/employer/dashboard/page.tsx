@@ -35,6 +35,7 @@ import { EmployerShell } from "@/components/employer/employer-shell";
 import { BillingBanner } from "@/components/employer/billing-banner";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getSubscriptionAnyStatus } from "@/lib/billing/subscription";
+import { getActiveLocationId } from "@/lib/employer/active-location";
 import {
   KANBAN_STAGES,
   STAGE_LABELS,
@@ -170,15 +171,38 @@ export default async function EmployerDashboard() {
   let recentCandMap = new Map<string, DashboardCandidate>();
 
   if (dsoId) {
+    // Multi-location filter (Phase 4.6.d) — when an active location is
+    // set, scope the dashboard to jobs at that location only.
+    const activeLocationId = await getActiveLocationId();
+    let locationFilteredJobIds: string[] | null = null;
+    if (activeLocationId) {
+      const { data: jobLocRows } = await supabase
+        .from("job_locations")
+        .select("job_id")
+        .eq("location_id", activeLocationId);
+      locationFilteredJobIds = (
+        (jobLocRows ?? []) as Array<{ job_id: string }>
+      ).map((r) => r.job_id);
+    }
+
     // All non-deleted jobs for this DSO. We need every job (any status) to
     // scope the application counts; the "open jobs" tile filters in JS.
-    const { data: rawJobs } = await supabase
+    let jobsQuery = supabase
       .from("jobs")
       .select(
         "id, title, status, role_category, employment_type, applications_count",
       )
       .eq("dso_id", dsoId)
       .is("deleted_at", null);
+    if (locationFilteredJobIds !== null) {
+      jobsQuery = jobsQuery.in(
+        "id",
+        locationFilteredJobIds.length > 0
+          ? locationFilteredJobIds
+          : ["__none__"],
+      );
+    }
+    const { data: rawJobs } = await jobsQuery;
     type JobWithStatus = DashboardJob & {
       status: string;
       role_category: string;

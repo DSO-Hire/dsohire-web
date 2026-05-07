@@ -35,7 +35,18 @@ import {
   type ChangeEvent,
   type KeyboardEvent,
 } from "react";
-import { MoreHorizontal, MessageCircle, Check, CheckCheck, Eye } from "lucide-react";
+import {
+  MoreHorizontal,
+  MessageCircle,
+  Check,
+  CheckCheck,
+  Eye,
+  CheckCircle2,
+  Inbox,
+  X as XIcon,
+  Briefcase,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import {
   REALTIME_LISTEN_TYPES,
@@ -511,6 +522,7 @@ export function MessagesThread({
               // banner instead of an avatar bubble. event_kind being
               // non-NULL is the marker.
               if (m.event_kind) {
+                const EventIcon = systemEventIcon(m.event_kind);
                 return (
                   <li
                     key={m.id}
@@ -522,7 +534,7 @@ export function MessagesThread({
                         className="inline-block h-px flex-1 bg-[var(--rule)]"
                         aria-hidden
                       />
-                      <Eye className="h-3 w-3 text-heritage-deep" />
+                      <EventIcon className="h-3 w-3 text-heritage-deep" />
                       <span className="px-2 text-center">{m.body}</span>
                       <span
                         className="text-[10px] text-slate-meta whitespace-nowrap"
@@ -733,4 +745,24 @@ export function MessagesThread({
       </div>
     </div>
   );
+}
+
+/**
+ * Map event_kind → icon for the system-message banner. Falls back to
+ * Eye for any unrecognized event kind so future events render with a
+ * generic-but-on-brand glyph until we wire a specific one.
+ */
+function systemEventIcon(eventKind: string): LucideIcon {
+  switch (eventKind) {
+    case "stage_changed":
+      return CheckCircle2;
+    case "application_received":
+      return Inbox;
+    case "application_withdrawn":
+      return XIcon;
+    case "job_filled":
+      return Briefcase;
+    default:
+      return Eye;
+  }
 }

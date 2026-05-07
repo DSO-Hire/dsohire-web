@@ -1072,52 +1072,6 @@ function PracticeFitConsentOffBanner() {
   );
 }
 
-function _UnusedPlaceholder() {
-  const bars: Array<{ label: string; helper: string }> = [
-    { label: "Skills", helper: "Procedure overlap, PMS familiarity" },
-    { label: "Culture", helper: "DISC-derived working style match" },
-    { label: "Logistics", helper: "Location, schedule, comp" },
-  ];
-  return (
-    <div className="border border-[var(--rule)] bg-cream/40 p-6">
-      <div className="flex items-start justify-between gap-4 mb-5 flex-wrap">
-        <div>
-          <div className="flex items-center gap-2 text-ink mb-1">
-            <Sparkles className="h-4 w-4 text-heritage-deep" />
-            <span className="text-[14px] font-bold">Practice Fit · —</span>
-          </div>
-          <p className="text-[13px] text-slate-body leading-relaxed max-w-[520px]">
-            Match score combining hard-skill overlap, working-style match,
-            and logistics. We&apos;re building this in-house — schedule
-            arrives in a future update.
-          </p>
-        </div>
-        <span className="text-[10px] font-bold tracking-[1.5px] uppercase px-2 py-1 bg-white border border-[var(--rule-strong)] text-slate-meta">
-          Coming soon
-        </span>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {bars.map((b) => (
-          <div key={b.label} className="bg-white border border-[var(--rule)] p-4">
-            <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-2">
-              {b.label}
-            </div>
-            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden mb-2">
-              <div
-                className="h-full bg-slate-200"
-                style={{ width: "30%" }}
-              />
-            </div>
-            <p className="text-[11px] text-slate-meta leading-snug">
-              {b.helper}
-            </p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
