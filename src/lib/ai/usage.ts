@@ -31,7 +31,10 @@ export type AiFeature =
   // Candidate-side (parity sprint)
   | "resume_parse"
   | "profile_headline"
-  | "profile_summary";
+  | "profile_summary"
+  // Audience-agnostic (Phase 5D v1) — logged with whichever side
+  // triggered the first-expand; dsoId optional.
+  | "practice_fit_narrative";
 
 const CANDIDATE_SIDE_FEATURES: ReadonlySet<AiFeature> = new Set<AiFeature>([
   "resume_parse",

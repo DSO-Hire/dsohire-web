@@ -134,10 +134,10 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   // candidate's consent is 'off', so a null result means either
   // consent off or compute-not-yet-run. Either way, render the
   // consent-off banner.
-  const practiceFit = await getPracticeFit(
-    (rawApp as Record<string, unknown>).candidate_id as string,
-    (rawApp as Record<string, unknown>).job_id as string
-  );
+  const fitCandidateId = (rawApp as Record<string, unknown>)
+    .candidate_id as string;
+  const fitJobId = (rawApp as Record<string, unknown>).job_id as string;
+  const practiceFit = await getPracticeFit(fitCandidateId, fitJobId);
 
   type AppRow = {
     id: string;
@@ -691,7 +691,13 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             subtitle="Proprietary match score across role, comp, location, skills, employment type, and DSO size."
           >
             {practiceFit ? (
-              <WhyThisMatch fit={practiceFit} defaultOpen />
+              <WhyThisMatch
+                fit={practiceFit}
+                candidateId={fitCandidateId}
+                jobId={fitJobId}
+                audience="employer"
+                defaultOpen
+              />
             ) : (
               <PracticeFitConsentOffBanner />
             )}

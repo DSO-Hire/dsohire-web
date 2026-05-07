@@ -143,6 +143,9 @@ export default async function JobDetailPage({ params }: PageProps) {
   let candidateAuthed = false;
   let initialSaved = false;
   let practiceFit: FitResult | null = null;
+  // Hoisted out of the inner block so the JSX can pass it to
+  // WhyThisMatch for the v1 narrative fetch.
+  let viewerCandidateId: string | null = null;
   if (viewer) {
     const { data: candidateRow } = await supabase
       .from("candidates")
@@ -152,6 +155,7 @@ export default async function JobDetailPage({ params }: PageProps) {
     if (candidateRow) {
       candidateAuthed = true;
       const candidateId = (candidateRow as Record<string, unknown>).id as string;
+      viewerCandidateId = candidateId;
       const { data: existing } = await supabase
         .from("saved_jobs")
         .select("id")
@@ -209,9 +213,14 @@ export default async function JobDetailPage({ params }: PageProps) {
         </header>
 
         {/* Practice Fit expander — only when the viewer has a fit on this job */}
-        {practiceFit && (
+        {practiceFit && viewerCandidateId && (
           <div className="mb-10">
-            <WhyThisMatch fit={practiceFit} />
+            <WhyThisMatch
+              fit={practiceFit}
+              candidateId={viewerCandidateId}
+              jobId={id}
+              audience="candidate"
+            />
           </div>
         )}
 
