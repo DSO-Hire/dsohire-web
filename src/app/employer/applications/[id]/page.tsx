@@ -67,6 +67,8 @@ import {
   type KanbanStage,
 } from "@/lib/applications/stages";
 import { candidateDisplayName } from "@/lib/applications/candidate-display";
+import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
+import { WhyThisMatch } from "@/components/practice-fit/why-this-match";
 import type {
   ScreeningQuestion,
   ScreeningQuestionKind,
@@ -127,6 +129,15 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     .maybeSingle();
 
   if (!rawApp) notFound();
+
+  // Practice Fit (Phase 5D v0) — RLS blocks the read when the
+  // candidate's consent is 'off', so a null result means either
+  // consent off or compute-not-yet-run. Either way, render the
+  // consent-off banner.
+  const practiceFit = await getPracticeFit(
+    (rawApp as Record<string, unknown>).candidate_id as string,
+    (rawApp as Record<string, unknown>).job_id as string
+  );
 
   type AppRow = {
     id: string;
@@ -671,15 +682,19 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             />
           </DetailSection>
 
-          {/* 02 · Practice Fit (Phase 5D placeholder banner per scope §6.4) */}
+          {/* 02 · Practice Fit (Phase 5D v0 — structured-feature scoring) */}
           <DetailSection
             id="fit"
             num="02"
             title="Practice Fit"
             icon={Sparkles}
-            subtitle="DISC-derived match score arriving in a future update."
+            subtitle="Proprietary match score across role, comp, location, skills, employment type, and DSO size."
           >
-            <PracticeFitPlaceholderBanner />
+            {practiceFit ? (
+              <WhyThisMatch fit={practiceFit} defaultOpen />
+            ) : (
+              <PracticeFitConsentOffBanner />
+            )}
           </DetailSection>
 
           {/* 03 · Resume */}
@@ -1031,7 +1046,33 @@ function DetailSection({
  * wired here — when 5D ships the matching, this component reads from
  * those columns and switches off the placeholder treatment.
  */
-function PracticeFitPlaceholderBanner() {
+/**
+ * Consent-off / no-fit-yet banner — replaces the old "coming soon"
+ * placeholder. Either the candidate has practice_fit_consent='off'
+ * (RLS blocks the read), or the score hasn't been computed for this
+ * pair yet (cache miss races, etc.).
+ */
+function PracticeFitConsentOffBanner() {
+  return (
+    <div className="border border-[var(--rule)] bg-cream/40 p-6">
+      <div className="flex items-start gap-3">
+        <Sparkles className="h-4 w-4 text-heritage-deep mt-0.5 shrink-0" />
+        <div>
+          <p className="text-[13px] font-semibold text-ink mb-1">
+            Practice Fit not available for this candidate
+          </p>
+          <p className="text-[13px] text-slate-body leading-relaxed">
+            The candidate hasn&apos;t opted into Practice Fit scoring yet,
+            or the score is still computing. Practice Fit is the candidate&apos;s
+            choice to share — it doesn&apos;t affect their application.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function _UnusedPlaceholder() {
   const bars: Array<{ label: string; helper: string }> = [
     { label: "Skills", helper: "Procedure overlap, PMS familiarity" },
     { label: "Culture", helper: "DISC-derived working style match" },

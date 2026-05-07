@@ -19,6 +19,9 @@ import Link from "next/link";
 import { ArrowRight, Briefcase, MapPin, Search } from "lucide-react";
 import { CandidateShell } from "@/components/candidate/candidate-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
+import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
+import type { FitResult } from "@/lib/practice-fit/types";
 
 export const metadata: Metadata = { title: "Jobs · DSO Hire" };
 
@@ -124,6 +127,35 @@ export default async function CandidateJobsPage() {
     dso_name: dsoNameById.get(j.dso_id) ?? null,
   }));
 
+  // Practice Fit (Phase 5D v0) — only when the signed-in user has a
+  // candidate row AND consent != 'off'. Compute in parallel; cached
+  // by (candidate_id, job_id), so repeat visits are sub-ms.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  let fitByJobId = new Map<string, FitResult>();
+  if (user && jobs.length > 0) {
+    const { data: candidate } = await supabase
+      .from("candidates")
+      .select("id, practice_fit_consent")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+    if (
+      candidate &&
+      ((candidate as Record<string, unknown>).practice_fit_consent as string) !==
+        "off"
+    ) {
+      const candidateId = (candidate as Record<string, unknown>).id as string;
+      const fits = await Promise.all(
+        jobs.map((j) => getPracticeFit(candidateId, j.id))
+      );
+      jobs.forEach((j, i) => {
+        const f = fits[i];
+        if (f) fitByJobId.set(j.id, f);
+      });
+    }
+  }
+
   return (
     <CandidateShell active="jobs">
       <div className="space-y-8 max-w-[920px]">
@@ -181,6 +213,7 @@ export default async function CandidateJobsPage() {
                   key={job.id}
                   job={job}
                   locations={locationsByJob.get(job.id) ?? []}
+                  fit={fitByJobId.get(job.id) ?? null}
                 />
               ))}
             </ul>
@@ -194,9 +227,11 @@ export default async function CandidateJobsPage() {
 function JobRowItem({
   job,
   locations,
+  fit,
 }: {
   job: JobRow;
   locations: Array<{ city: string | null; state: string | null }>;
+  fit: FitResult | null;
 }) {
   return (
     <li className="border-b border-[var(--rule)]">
@@ -206,13 +241,14 @@ function JobRowItem({
       >
         <div className="flex items-start justify-between gap-6">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-1.5">
+            <div className="flex items-center gap-3 mb-1.5 flex-wrap">
               <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
                 {ROLE_LABELS[job.role_category] ?? job.role_category}
               </span>
               <span className="text-[10px] tracking-[0.5px] text-slate-meta">
                 {EMP_LABELS[job.employment_type] ?? job.employment_type}
               </span>
+              {fit && <PracticeFitChip fit={fit} size="sm" />}
             </div>
             <div className="text-[17px] font-extrabold tracking-[-0.3px] text-ink leading-tight mb-1 transition-colors group-hover:text-heritage-deep">
               {job.title}
