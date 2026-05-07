@@ -15,7 +15,7 @@
  * Org-wide toggle (Enterprise) renders below as a separate sub-card.
  */
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -240,15 +240,27 @@ function SetupWizard({
   const [recoveryCodes, setRecoveryCodes] = useState<string[] | null>(null);
   const [pending, startTransition] = useTransition();
 
-  // Kick off enrollment on mount.
-  useStartEnrollment(({ factorId, qrCode, secret }) => {
-    setFactorId(factorId);
-    setQrCode(qrCode);
-    setSecret(secret);
-    setStep("qr");
-  }, (msg) => {
-    setError(msg);
-  });
+  // Kick off enrollment on mount. Side effects belong in useEffect, not
+  // in render — calling startTransition during render is unreliable in
+  // React 19 (the transition can be dropped before the effect commits).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const result = await enrollTotp();
+      if (cancelled) return;
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      setFactorId(result.factorId);
+      setQrCode(result.qrCode);
+      setSecret(result.secret);
+      setStep("qr");
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const onVerify = () => {
     if (!factorId) return;
@@ -276,11 +288,30 @@ function SetupWizard({
   };
 
   if (step === "loading") {
+    if (error) {
+      return (
+        <div className="rounded border border-red-200 bg-red-50/60 p-5 space-y-3 text-sm">
+          <p className="inline-flex items-center gap-2 font-semibold text-red-800">
+            <AlertTriangle className="size-4" />
+            Couldn&apos;t start 2FA setup
+          </p>
+          <p className="text-slate-body leading-relaxed">{error}</p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={onCancelClick}
+              className="rounded-md border border-[var(--rule-strong)] bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="flex items-center gap-3 rounded border border-[var(--rule)] bg-cream/40 p-6 text-sm text-slate-body">
         <Loader2 className="size-4 animate-spin" />
         Generating your 2FA setup…
-        {error && <span className="text-red-700 ml-2">{error}</span>}
       </div>
     );
   }
@@ -425,34 +456,6 @@ function SetupWizard({
   }
 
   return null;
-}
-
-/**
- * Pre-mount enrollment kickoff. We use a one-time effect since starting
- * enrollment is a side-effect; we don't want it firing twice in StrictMode
- * dev. A ref-guarded useEffect is the standard pattern.
- */
-function useStartEnrollment(
-  onSuccess: (data: { factorId: string; qrCode: string; secret: string }) => void,
-  onError: (msg: string) => void
-) {
-  const [, startTransition] = useTransition();
-  const [started, setStarted] = useState(false);
-  if (!started) {
-    setStarted(true);
-    startTransition(async () => {
-      const result = await enrollTotp();
-      if (!result.ok) {
-        onError(result.error);
-        return;
-      }
-      onSuccess({
-        factorId: result.factorId,
-        qrCode: result.qrCode,
-        secret: result.secret,
-      });
-    });
-  }
 }
 
 /* ──────────────────────────────────────────────────────────────

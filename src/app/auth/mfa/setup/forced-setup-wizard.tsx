@@ -11,7 +11,7 @@
  * Reuses the same server actions as the Account page wizard.
  */
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
@@ -34,13 +34,14 @@ export function ForcedSetupWizard() {
   const [error, setError] = useState<string | null>(null);
   const [recoveryCodes, setRecoveryCodes] = useState<string[] | null>(null);
   const [pending, startTransition] = useTransition();
-  const [started, setStarted] = useState(false);
 
-  // Kick off enrollment on first render.
-  if (!started) {
-    setStarted(true);
-    startTransition(async () => {
+  // Kick off enrollment on mount via useEffect — calling startTransition
+  // during render isn't reliable in React 19.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
       const result = await enrollTotp();
+      if (cancelled) return;
       if (!result.ok) {
         setError(result.error);
         return;
@@ -49,8 +50,11 @@ export function ForcedSetupWizard() {
       setQrCode(result.qrCode);
       setSecret(result.secret);
       setStep("qr");
-    });
-  }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const onVerify = () => {
     if (!factorId) return;
