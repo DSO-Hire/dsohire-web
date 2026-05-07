@@ -90,8 +90,11 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
 
   return (
     <div className="min-h-screen flex bg-ivory">
-      {/* ── Desktop sidebar ── */}
-      <aside className="hidden lg:flex w-[240px] flex-shrink-0 flex-col bg-ink text-ivory border-r border-white/10">
+      {/* ── Desktop sidebar ──
+           sticky top-0 + h-screen pins the rail to the viewport so the
+           Help / Sign-out footer cluster stays in view even when the page
+           content scrolls past the viewport height. */}
+      <aside className="hidden lg:flex w-[240px] flex-shrink-0 flex-col bg-ink text-ivory border-r border-white/10 sticky top-0 h-screen">
         <div className="p-6 border-b border-white/10">
           <Link
             href="/candidate/dashboard"

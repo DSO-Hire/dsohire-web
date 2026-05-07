@@ -104,17 +104,38 @@ export async function employerSearch(
 
   const dsoId = dsoUser.dso_id as string;
   const pattern = `%${trimmed}%`;
+
+  // Run all three DB queries in parallel — was the latency culprit when
+  // they ran sequentially. The candidates query uses a Supabase inner-join
+  // (`applications!inner`) so we don't need a separate round trip to pull
+  // candidate_ids first; RLS on `applications` already scopes the join to
+  // this DSO's applicants.
+  const [jobsRes, candidatesRes, locationsRes] = await Promise.all([
+    supabase
+      .from("jobs")
+      .select("id, title, role_category, status")
+      .eq("dso_id", dsoId)
+      .is("deleted_at", null)
+      .ilike("title", pattern)
+      .limit(8),
+    supabase
+      .from("candidates")
+      .select("id, full_name, headline, email, applications!inner(id)")
+      .or(
+        `full_name.ilike.${pattern},headline.ilike.${pattern},email.ilike.${pattern}`
+      )
+      .limit(8),
+    supabase
+      .from("dso_locations")
+      .select("id, name, city, state")
+      .eq("dso_id", dsoId)
+      .or(`name.ilike.${pattern},city.ilike.${pattern},state.ilike.${pattern}`)
+      .limit(8),
+  ]);
+
   const out: SearchResult[] = [];
 
-  // ── Jobs ──
-  const { data: jobs } = await supabase
-    .from("jobs")
-    .select("id, title, role_category, status")
-    .eq("dso_id", dsoId)
-    .is("deleted_at", null)
-    .ilike("title", pattern)
-    .limit(8);
-  for (const j of (jobs ?? []) as Array<{
+  for (const j of (jobsRes.data ?? []) as Array<{
     id: string;
     title: string;
     role_category: string;
@@ -129,57 +150,29 @@ export async function employerSearch(
     });
   }
 
-  // ── Candidates who applied to this DSO ──
-  // Pull candidate ids via applications → jobs (RLS guarantees same DSO).
-  const { data: appCandidates } = await supabase
-    .from("applications")
-    .select("candidate_id")
-    .limit(200); // bound the lookup; we'll filter clientside
-  const candidateIds = Array.from(
-    new Set(
-      ((appCandidates ?? []) as Array<{ candidate_id: string }>).map(
-        (a) => a.candidate_id
-      )
-    )
-  );
-  if (candidateIds.length > 0) {
-    const { data: candidates } = await supabase
-      .from("candidates")
-      .select("id, full_name, headline, email")
-      .in("id", candidateIds)
-      .or(
-        `full_name.ilike.${pattern},headline.ilike.${pattern},email.ilike.${pattern}`
-      )
-      .limit(8);
-    for (const c of (candidates ?? []) as Array<{
-      id: string;
-      full_name: string | null;
-      headline: string | null;
-      email: string | null;
-    }>) {
-      out.push({
-        group: "candidates",
-        id: `candidate-${c.id}`,
-        title: c.full_name ?? c.email ?? "Candidate",
-        subtitle: c.headline ?? c.email ?? undefined,
-        // Land on the most recent application detail page is best, but for
-        // simplicity we link to the central applications inbox filtered by
-        // candidate. Future: a dedicated /employer/candidates/[id] surface.
-        href: `/employer/applications?q=${encodeURIComponent(
-          c.full_name ?? c.email ?? ""
-        )}`,
-      });
-    }
+  // Dedupe candidates by id — the inner-join can return duplicates when
+  // a candidate has multiple applications.
+  const seenCandidates = new Set<string>();
+  for (const c of (candidatesRes.data ?? []) as Array<{
+    id: string;
+    full_name: string | null;
+    headline: string | null;
+    email: string | null;
+  }>) {
+    if (seenCandidates.has(c.id)) continue;
+    seenCandidates.add(c.id);
+    out.push({
+      group: "candidates",
+      id: `candidate-${c.id}`,
+      title: c.full_name ?? c.email ?? "Candidate",
+      subtitle: c.headline ?? c.email ?? undefined,
+      href: `/employer/applications?q=${encodeURIComponent(
+        c.full_name ?? c.email ?? ""
+      )}`,
+    });
   }
 
-  // ── Locations ──
-  const { data: locations } = await supabase
-    .from("dso_locations")
-    .select("id, name, city, state")
-    .eq("dso_id", dsoId)
-    .or(`name.ilike.${pattern},city.ilike.${pattern},state.ilike.${pattern}`)
-    .limit(8);
-  for (const l of (locations ?? []) as Array<{
+  for (const l of (locationsRes.data ?? []) as Array<{
     id: string;
     name: string;
     city: string | null;
@@ -194,7 +187,7 @@ export async function employerSearch(
     });
   }
 
-  // ── Static action shortcuts (substring match on title + subtitle) ──
+  // Static action shortcuts (substring match on title + subtitle).
   const lq = trimmed.toLowerCase();
   for (const action of STATIC_ACTIONS) {
     if (
