@@ -199,14 +199,17 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
            Help / Sign-out footer cluster stays in view even when the page
            content scrolls past the viewport height. */}
       <aside className="hidden lg:flex w-[240px] flex-shrink-0 flex-col bg-ink text-ivory border-r border-white/10 sticky top-0 h-screen">
-        {/* Brand */}
-        <div className="p-6 border-b border-white/10">
+        {/* Brand zone — cream backdrop so the locked Navy/Heritage lockup
+            reads with maximum legibility instead of relying on the dark-bg
+            variant. The cream→navy transition below is its own visual rule;
+            no explicit border needed. */}
+        <div className="p-6 bg-cream">
           <Link
             href="/employer/dashboard"
             className="block"
             aria-label="DSO Hire — dashboard"
           >
-            <BrandLockup dark height={36} />
+            <BrandLockup height={36} />
           </Link>
         </div>
 
