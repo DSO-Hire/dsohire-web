@@ -11,7 +11,11 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { ApplicationStatus } from "@/lib/applications/stages";
+import {
+  STAGE_LABELS,
+  type ApplicationStatus,
+} from "@/lib/applications/stages";
+import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
 
 export interface ActionState {
   ok: boolean;
@@ -91,15 +95,21 @@ export async function moveApplicationStage(
 
   const supabase = await createSupabaseServerClient();
 
-  // Read current status first so optimistic rollback has the previous value.
+  // Read current status + the job's hide-from-candidate flag in one
+  // round trip so optimistic rollback has the prev value AND the
+  // post-update inbox system message can be skipped when stages are
+  // hidden from this candidate.
   const { data: prev, error: prevErr } = await supabase
     .from("applications")
-    .select("status")
+    .select("status, jobs:jobs!inner(id, hide_stages_from_candidate)")
     .eq("id", applicationId)
     .single();
   if (prevErr || !prev) {
     return { ok: false, error: prevErr?.message ?? "Application not found" };
   }
+  const prevStatus = (prev as Record<string, unknown>).status as ApplicationStatus;
+  const job = (prev as Record<string, unknown>).jobs as Record<string, unknown> | null;
+  const hideStagesFromCandidate = Boolean(job?.hide_stages_from_candidate);
 
   const { data, error } = await supabase
     .from("applications")
@@ -116,6 +126,21 @@ export async function moveApplicationStage(
     };
   }
 
+  // Drop a system message into the candidate's inbox thread (Phase 4.8
+  // email-supplement vision). Skip when stages are hidden from the
+  // candidate per their employer's setting. Fire-and-forget — never
+  // block the stage move on a dispatch failure.
+  if (!hideStagesFromCandidate && prevStatus !== nextStatus) {
+    const fromLabel = STAGE_LABELS[prevStatus] ?? prevStatus;
+    const toLabel = STAGE_LABELS[nextStatus] ?? nextStatus;
+    void dispatchInboxSystemMessage({
+      applicationId,
+      eventKind: "stage_changed",
+      senderRole: "employer",
+      body: `Your application moved from ${fromLabel} to ${toLabel}.`,
+    });
+  }
+
   revalidatePath(`/employer/applications`);
   revalidatePath(`/employer/applications/${applicationId}`);
   // Next 16 requires the two-argument form; "max" = stale-while-revalidate.
@@ -123,7 +148,7 @@ export async function moveApplicationStage(
 
   return {
     ok: true,
-    prevStatus: prev.status as ApplicationStatus,
+    prevStatus,
     nextStatus: data.status as ApplicationStatus,
     stageEnteredAt: data.stage_entered_at,
   };

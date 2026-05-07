@@ -478,6 +478,37 @@ export function MessagesThread({
                   </li>
                 );
               }
+              // Phase 4.8 — system messages render as a thin centered
+              // banner instead of an avatar bubble. event_kind being
+              // non-NULL is the marker.
+              if (m.event_kind) {
+                return (
+                  <li
+                    key={m.id}
+                    id={`message-${m.id}`}
+                    className="px-4 py-3"
+                  >
+                    <div className="flex items-center gap-2 text-[12px] text-slate-meta italic justify-center">
+                      <span
+                        className="inline-block h-px flex-1 bg-[var(--rule)]"
+                        aria-hidden
+                      />
+                      <Eye className="h-3 w-3 text-heritage-deep" />
+                      <span className="px-2 text-center">{m.body}</span>
+                      <span
+                        className="text-[10px] text-slate-meta whitespace-nowrap"
+                        title={new Date(m.created_at).toLocaleString()}
+                      >
+                        {relativeTime(m.created_at)}
+                      </span>
+                      <span
+                        className="inline-block h-px flex-1 bg-[var(--rule)]"
+                        aria-hidden
+                      />
+                    </div>
+                  </li>
+                );
+              }
               const isMine = m.sender_user_id === currentUserId;
               const editable =
                 isMine && !m.pending && isWithinEditWindow(m.created_at);

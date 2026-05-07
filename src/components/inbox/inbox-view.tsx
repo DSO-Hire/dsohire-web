@@ -204,7 +204,7 @@ export function InboxView({
       const { data } = await supabase
         .from("application_messages")
         .select(
-          "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at"
+          "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at, event_kind"
         )
         .eq("application_id", applicationId)
         .order("created_at", { ascending: true });
@@ -278,6 +278,7 @@ export function InboxView({
           const senderRole = row.sender_role as "candidate" | "employer";
           const body = (row.body as string | null) ?? "";
           const createdAt = (row.created_at as string | null) ?? new Date().toISOString();
+          const eventKind = (row.event_kind as string | null) ?? null;
           const otherSide = audience === "candidate" ? "employer" : "candidate";
 
           setThreads((prev) => {
@@ -294,6 +295,7 @@ export function InboxView({
               last_message_at: createdAt,
               last_message_preview: shortPreview(body),
               last_message_sender_role: senderRole,
+              last_message_event_kind: eventKind,
               unread_count:
                 isIncoming && !isActive
                   ? existing.unread_count + 1
@@ -682,10 +684,12 @@ function ThreadRow({
               thread.unread_count > 0 && !active
                 ? "text-ink"
                 : "text-slate-body"
-            }`}
+            } ${thread.last_message_event_kind ? "italic text-slate-meta" : ""}`}
           >
-            {thread.last_message_sender_role === "employer" &&
-            thread.last_message_preview ? (
+            {/* Skip the "You:" prefix on system messages — system isn't anyone */}
+            {thread.last_message_event_kind == null &&
+            thread.last_message_sender_role &&
+            isSelfSent(thread.last_message_sender_role, audience) ? (
               <span className="text-slate-meta">You: </span>
             ) : null}
             {thread.last_message_preview}
@@ -747,6 +751,13 @@ function EmptyRightPane({ audience }: { audience: Audience }) {
 function shortPreview(body: string): string {
   const clean = body.trim().replace(/\s+/g, " ");
   return clean.length > 140 ? `${clean.slice(0, 137)}…` : clean;
+}
+
+function isSelfSent(
+  senderRole: "candidate" | "employer",
+  audience: Audience
+): boolean {
+  return senderRole === audience;
 }
 
 function timeAgo(iso: string): string {

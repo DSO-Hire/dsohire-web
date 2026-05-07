@@ -30,6 +30,7 @@
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { ApplicationStatus } from "@/lib/applications/stages";
+import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
 import type { SelfReportedStatus } from "./row-actions-data";
 
 // Re-export the type so existing import paths don't break for files
@@ -131,6 +132,17 @@ export async function withdrawApplication(input: {
     // The status flip is the main thing — log + continue rather than fail.
     console.warn("[withdrawApplication] reason write failed", reasonError);
   }
+
+  // Drop a system message into the employer's inbox thread so their
+  // pipeline view picks up the withdrawal in-app, not just on the
+  // kanban board (Phase 4.8 email-supplement vision). senderRole
+  // 'candidate' so the employer's unread-count picks it up.
+  void dispatchInboxSystemMessage({
+    applicationId: input.applicationId,
+    eventKind: "application_withdrawn",
+    senderRole: "candidate",
+    body: "The candidate withdrew their application.",
+  });
 
   revalidatePath("/candidate/applications");
   revalidatePath(`/candidate/applications/${input.applicationId}`);

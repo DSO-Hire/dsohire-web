@@ -29,6 +29,7 @@ interface MessageRowMin {
   created_at: string;
   read_at: string | null;
   deleted_at: string | null;
+  event_kind: string | null;
 }
 
 /* ──────────────────────────────────────────────────────────────
@@ -58,7 +59,7 @@ export async function getEmployerInboxThreads(
       .eq("jobs.dso_id", dsoId),
     supabase
       .from("application_messages")
-      .select("application_id, sender_role, body, created_at, read_at, deleted_at")
+      .select("application_id, sender_role, body, created_at, read_at, deleted_at, event_kind")
       .is("deleted_at", null)
       .order("created_at", { ascending: false }),
     supabase
@@ -151,7 +152,7 @@ export async function getCandidateInboxThreads(
       .eq("candidate_id", candidateId),
     supabase
       .from("application_messages")
-      .select("application_id, sender_role, body, created_at, read_at, deleted_at")
+      .select("application_id, sender_role, body, created_at, read_at, deleted_at, event_kind")
       .is("deleted_at", null)
       .order("created_at", { ascending: false }),
     supabase
@@ -293,6 +294,7 @@ function composeThreads({
       last_message_at: last?.created_at ?? null,
       last_message_preview: last ? preview(last.body) : null,
       last_message_sender_role: last?.sender_role ?? null,
+      last_message_event_kind: last?.event_kind ?? null,
       unread_count: unread,
       archived: isArchived,
       stage,

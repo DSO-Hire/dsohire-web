@@ -286,7 +286,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const { data: rawMessages } = await supabase
     .from("application_messages")
     .select(
-      "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at"
+      "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at, event_kind"
     )
     .eq("application_id", appId)
     .order("created_at", { ascending: true });

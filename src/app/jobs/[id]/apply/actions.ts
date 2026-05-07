@@ -29,6 +29,7 @@ import {
 } from "@/lib/supabase/server";
 import { dispatchNotification } from "@/lib/notifications/dispatcher";
 import { dispatchCandidateEmail } from "@/lib/email/templates/dispatch";
+import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
 import { ApplicationReceived } from "@/emails/candidate/ApplicationReceived";
 import { NewApplication } from "@/emails/employer/NewApplication";
 import type { ScreeningQuestion } from "./types";
@@ -304,6 +305,18 @@ export async function applyToJob(
     dsoId: job.dso_id as string,
     jobTitle: job.title as string,
   });
+
+  // Drop a system message into the candidate's inbox thread (Phase 4.8)
+  // only on the FIRST submission — re-submissions update the existing
+  // application row + answers without a new "received" event.
+  if (!alreadyApplied) {
+    void dispatchInboxSystemMessage({
+      applicationId,
+      eventKind: "application_received",
+      senderRole: "employer",
+      body: `Your application for ${job.title} was received. We'll let you know when the team reviews it or moves it forward.`,
+    });
+  }
 
   revalidatePath(`/candidate/dashboard`);
   revalidatePath(`/candidate/applications`);

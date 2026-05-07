@@ -30,7 +30,8 @@ import { MessageReceived } from "@/emails/MessageReceived";
 export interface ApplicationMessageRow {
   id: string;
   application_id: string;
-  sender_user_id: string;
+  /** NULL for system-authored messages (Phase 4.8 stage_changed / received / etc). */
+  sender_user_id: string | null;
   sender_role: "candidate" | "employer";
   sender_dso_user_id: string | null;
   body: string;
@@ -39,6 +40,8 @@ export interface ApplicationMessageRow {
   updated_at: string;
   edited_at: string | null;
   deleted_at: string | null;
+  /** Non-NULL marks a system message; renderer uses a banner instead of a bubble. */
+  event_kind?: string | null;
 }
 
 export type SendMessageResult =
@@ -147,7 +150,7 @@ export async function sendApplicationMessage({
       body: cleanBody,
     })
     .select(
-      "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at"
+      "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at, event_kind"
     )
     .single();
 
@@ -208,7 +211,7 @@ export async function editApplicationMessage({
     .update({ body: cleanBody })
     .eq("id", messageId)
     .select(
-      "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at"
+      "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at, event_kind"
     )
     .single();
 

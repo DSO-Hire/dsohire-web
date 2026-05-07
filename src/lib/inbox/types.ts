@@ -25,6 +25,8 @@ export interface InboxThread {
   last_message_at: string | null;
   last_message_preview: string | null;
   last_message_sender_role: "candidate" | "employer" | null;
+  /** Non-NULL when the most recent message is a system event. */
+  last_message_event_kind: string | null;
 
   // Unread count — messages from the OTHER side with read_at IS NULL.
   unread_count: number;
