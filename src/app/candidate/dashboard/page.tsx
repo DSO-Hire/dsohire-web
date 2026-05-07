@@ -211,24 +211,31 @@ export default async function CandidateDashboardPage() {
   // can show a practice-name chip. Multi-location jobs use the first
   // location; matches the employer-side convention from
   // project_location_chip_practice_name_revisit (memory).
+  //
+  // Supabase returns the joined `location` as a single object OR an
+  // array depending on FK config — normalize via unknown-cast and a
+  // runtime shape check.
   const locationByJobId = new Map<string, string>();
   if (jobIds.length > 0) {
     const { data: rawLocs } = await supabase
       .from("job_locations")
       .select("job_id, location:dso_locations(name, city, state)")
       .in("job_id", jobIds);
-    for (const row of (rawLocs ?? []) as Array<{
-      job_id: string;
-      location: { name: string | null; city: string | null; state: string | null } | null;
-    }>) {
-      if (locationByJobId.has(row.job_id)) continue; // first wins
-      const loc = row.location;
+    for (const rawRow of (rawLocs ?? []) as unknown as Array<
+      Record<string, unknown>
+    >) {
+      const jobId = rawRow.job_id as string;
+      if (locationByJobId.has(jobId)) continue; // first wins
+      // Normalize array-or-object → single record.
+      const locRaw = rawRow.location;
+      const loc = (Array.isArray(locRaw) ? locRaw[0] : locRaw) as
+        | { name: string | null; city: string | null; state: string | null }
+        | null
+        | undefined;
       if (!loc) continue;
-      const label =
-        loc.name ??
-        [loc.city, loc.state].filter(Boolean).join(", ") ??
-        null;
-      if (label) locationByJobId.set(row.job_id, label);
+      const cityState = [loc.city, loc.state].filter(Boolean).join(", ");
+      const label = loc.name ?? (cityState.length > 0 ? cityState : null);
+      if (label) locationByJobId.set(jobId, label);
     }
   }
 
