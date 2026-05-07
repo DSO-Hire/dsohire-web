@@ -118,6 +118,32 @@ export function MessagesThread({
     )
   );
 
+  // When the parent passes a fresh `initialMessages` prop (e.g. user
+  // selected a different thread in the inbox and the list was fetched
+  // client-side AFTER mount), reset our state to match. We key the
+  // dependency on the IDs so realtime additions inside this component
+  // don't loop into the parent's prop and trigger a reset.
+  //
+  // Caught 2026-05-07 PM: the inbox 2-pane layout passes
+  // `initialMessages={[]}` on first mount because the click-handler
+  // fires the fetch async; without this effect, MessagesThread is
+  // stuck on the empty state forever. (The `key={applicationId}`
+  // remount only triggers when the app changes, not when its
+  // initial-messages payload arrives later.)
+  const initialMessagesKey = useMemo(
+    () => initialMessages.map((m) => m.id).join(","),
+    [initialMessages]
+  );
+  useEffect(() => {
+    setMessages(
+      [...initialMessages].sort(
+        (a, b) =>
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      )
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialMessagesKey]);
+
   const [composerBody, setComposerBody] = useState("");
   const [composerError, setComposerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);

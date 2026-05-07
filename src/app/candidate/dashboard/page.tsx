@@ -207,6 +207,31 @@ export default async function CandidateDashboardPage() {
   const dsos = (rawDsos ?? []) as DsoRow[];
   const dsoMap = new Map(dsos.map((d) => [d.id, d]));
 
+  // Pull the FIRST job_location per active job so the kanban cards
+  // can show a practice-name chip. Multi-location jobs use the first
+  // location; matches the employer-side convention from
+  // project_location_chip_practice_name_revisit (memory).
+  const locationByJobId = new Map<string, string>();
+  if (jobIds.length > 0) {
+    const { data: rawLocs } = await supabase
+      .from("job_locations")
+      .select("job_id, location:dso_locations(name, city, state)")
+      .in("job_id", jobIds);
+    for (const row of (rawLocs ?? []) as Array<{
+      job_id: string;
+      location: { name: string | null; city: string | null; state: string | null } | null;
+    }>) {
+      if (locationByJobId.has(row.job_id)) continue; // first wins
+      const loc = row.location;
+      if (!loc) continue;
+      const label =
+        loc.name ??
+        [loc.city, loc.state].filter(Boolean).join(", ") ??
+        null;
+      if (label) locationByJobId.set(row.job_id, label);
+    }
+  }
+
   // ── Unread employer messages (drives the "New Replies" hero) ────────
   const appIds = apps.map((a) => a.id);
   const { data: rawUnread } = appIds.length
@@ -374,6 +399,7 @@ export default async function CandidateDashboardPage() {
         id: a.id,
         role: job?.title ?? "Unknown role",
         dsoName: dso?.name ?? "Unknown DSO",
+        locationName: job ? locationByJobId.get(job.id) ?? null : null,
         stage: a.status as MyApplicationCard["stage"],
         daysSinceApplied: days,
         hasUnreadMessage: (unreadByAppId.get(a.id) ?? 0) > 0,
