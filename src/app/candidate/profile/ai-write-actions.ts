@@ -29,6 +29,7 @@ import {
   estimateHaikuCostUsd,
 } from "@/lib/ai/anthropic";
 import { logAiUsage, type AiFeature } from "@/lib/ai/usage";
+import { extractJson } from "@/lib/ai/extract-json";
 import {
   ROLE_CATEGORIES,
   SPECIALTIES,
