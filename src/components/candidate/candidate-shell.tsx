@@ -60,7 +60,7 @@ const NAV: ReadonlyArray<NavItem> = [
 const HELP_ITEM: NavItem = {
   id: "help",
   label: "Help & Support",
-  href: "/help",
+  href: "/candidate/help",
   Icon: LifeBuoy,
 };
 

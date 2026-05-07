@@ -202,7 +202,7 @@ function JobRowItem({
     <li className="border-b border-[var(--rule)]">
       <Link
         href={`/jobs/${job.id}`}
-        className="group block py-5 hover:bg-cream/40 transition-colors -mx-2 px-2"
+        className="group relative block py-5 -mx-4 pl-5 pr-4 border-l-4 border-l-transparent transition-all duration-150 hover:border-l-heritage-deep hover:bg-white hover:shadow-[0_2px_18px_-12px_rgba(20,35,63,0.25)]"
       >
         <div className="flex items-start justify-between gap-6">
           <div className="flex-1 min-w-0">
@@ -214,7 +214,7 @@ function JobRowItem({
                 {EMP_LABELS[job.employment_type] ?? job.employment_type}
               </span>
             </div>
-            <div className="text-[17px] font-extrabold tracking-[-0.3px] text-ink leading-tight mb-1">
+            <div className="text-[17px] font-extrabold tracking-[-0.3px] text-ink leading-tight mb-1 transition-colors group-hover:text-heritage-deep">
               {job.title}
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-slate-meta">
@@ -245,7 +245,7 @@ function JobRowItem({
                 )}
               </div>
             )}
-            <ArrowRight className="h-4 w-4 text-slate-meta transition-colors" />
+            <ArrowRight className="h-4 w-4 text-slate-meta transition-all duration-150 group-hover:text-heritage-deep group-hover:translate-x-1" />
           </div>
         </div>
       </Link>
