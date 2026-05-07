@@ -277,6 +277,61 @@ export function ImageUpload({
   }
 
   // Idle state — preview + drop zone + browse trigger.
+  //
+  // Banner shape stacks vertically (preview on top, controls + hint below)
+  // because banner's natural aspect (3:1) wants the full container width;
+  // a horizontal flex would push the button + hint past the right edge.
+  // Circle and square keep the original horizontal layout (compact preview
+  // on the left, controls beside it).
+  const isBanner = shape === "banner";
+
+  const PreviewBox = (
+    <div
+      className={`relative flex items-center justify-center overflow-hidden border border-slate-200 bg-slate-50 ${shapeConfig.sizeClass} ${shapeConfig.previewClass} ${isBanner ? "" : "shrink-0"}`}
+      aria-label={value ? "Current image preview" : "No image set"}
+    >
+      {value ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={value}
+          alt=""
+          className={`h-full w-full object-cover ${shapeConfig.previewClass}`}
+        />
+      ) : (
+        <ImageIcon className="size-7 text-slate-400" aria-hidden="true" />
+      )}
+    </div>
+  );
+
+  const UploadButton = (
+    <button
+      type="button"
+      onClick={() => fileInputRef.current?.click()}
+      className="inline-flex w-fit shrink-0 items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+    >
+      <Camera className="size-4" />
+      {buttonLabel ?? (value ? "Change photo" : "Upload photo")}
+    </button>
+  );
+
+  const RemoveButton =
+    value && onRemove ? (
+      <button
+        type="button"
+        onClick={onRemove}
+        className="inline-flex w-fit items-center gap-1 text-xs font-medium text-slate-500 hover:text-red-700"
+      >
+        <X className="size-3.5" />
+        Remove
+      </button>
+    ) : null;
+
+  const HintText = (
+    <p className="text-xs text-slate-500">
+      {hint} You can also drop a file anywhere on this row.
+    </p>
+  );
+
   return (
     <div
       onDragOver={(e) => {
@@ -286,49 +341,29 @@ export function ImageUpload({
       onDrop={onDrop}
       className="space-y-3"
     >
-      <div className="flex items-start gap-5">
-        <div
-          className={`relative flex shrink-0 items-center justify-center overflow-hidden border border-slate-200 bg-slate-50 ${shapeConfig.sizeClass} ${shapeConfig.previewClass}`}
-          aria-label={value ? "Current image preview" : "No image set"}
-        >
-          {value ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={value}
-              alt=""
-              className={`h-full w-full object-cover ${shapeConfig.previewClass}`}
-            />
-          ) : (
-            <ImageIcon
-              className="size-7 text-slate-400"
-              aria-hidden="true"
-            />
-          )}
+      {isBanner ? (
+        // Banner layout: preview on top, controls + hint below.
+        <>
+          {PreviewBox}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            {UploadButton}
+            {RemoveButton}
+            <p className="min-w-0 flex-1 text-xs text-slate-500">
+              {hint} You can also drop a file anywhere on this row.
+            </p>
+          </div>
+        </>
+      ) : (
+        // Default layout: compact preview on the left, controls beside it.
+        <div className="flex items-start gap-5">
+          {PreviewBox}
+          <div className="flex flex-1 flex-col gap-2">
+            {UploadButton}
+            {RemoveButton}
+            {HintText}
+          </div>
         </div>
-        <div className="flex flex-1 flex-col gap-2">
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="inline-flex w-fit items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            <Camera className="size-4" />
-            {buttonLabel ?? (value ? "Change photo" : "Upload photo")}
-          </button>
-          {value && onRemove && (
-            <button
-              type="button"
-              onClick={onRemove}
-              className="inline-flex w-fit items-center gap-1 text-xs font-medium text-slate-500 hover:text-red-700"
-            >
-              <X className="size-3.5" />
-              Remove
-            </button>
-          )}
-          <p className="text-xs text-slate-500">
-            {hint} You can also drop a file anywhere on this row.
-          </p>
-        </div>
-      </div>
+      )}
       <input
         ref={fileInputRef}
         type="file"
