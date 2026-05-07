@@ -21,6 +21,7 @@ export type NotificationEventKind =
   // Candidate-facing
   | "candidate.application_received"        // apply confirmation
   | "application.message_received"          // DM from employer
+  | "candidate.stage_changed"               // application moved between pipeline stages (Phase 4.5.f registers as a kind; dispatch wiring lands when status-change emails ship)
   // Employer-facing (per-DSO-member)
   | "employer.new_application"              // candidate applied to a job
   | "employer.team_invite"                  // teammate invitation
@@ -51,6 +52,7 @@ export type NotificationDispatchStatus =
 export const EVENT_KIND_LABELS: Record<NotificationEventKind, string> = {
   "candidate.application_received": "Application confirmation",
   "application.message_received": "New message",
+  "candidate.stage_changed": "Stage moved",
   "employer.new_application": "New application",
   "employer.team_invite": "Team invitation",
   "employer.comment_mention": "Comment @-mention",

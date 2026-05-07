@@ -57,6 +57,13 @@ export const NOTIFICATION_DEFAULTS: DefaultsMap = {
     in_app: { enabled: true, frequency: "instant" },
     sms: { enabled: false, frequency: "off" },
   },
+  "candidate.stage_changed": {
+    // Editor exists in 4.5.f; dispatch wiring lands later. Default ON so
+    // when the wiring lands, candidates get notified by default.
+    email: { enabled: true, frequency: "instant" },
+    in_app: { enabled: true, frequency: "instant" },
+    sms: { enabled: false, frequency: "off" },
+  },
   "employer.new_application": {
     email: { enabled: true, frequency: "instant" },
     in_app: { enabled: true, frequency: "instant" },
