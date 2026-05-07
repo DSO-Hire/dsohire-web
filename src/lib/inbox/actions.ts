@@ -1,0 +1,159 @@
+"use server";
+
+/**
+ * Inbox actions (Phase 4.8 — Inbox v0).
+ *
+ * Three actions, all RLS-aware:
+ *   • archiveThread       — soft-hide the thread from the default list.
+ *   • unarchiveThread     — drop the archive flag.
+ *   • markThreadRead      — bulk flips read_at for every unread message
+ *                           from the OTHER side on this application.
+ *
+ * Per the existing messaging RLS, only application participants can
+ * operate on application_messages — the same SELECT policy gates
+ * these calls. Archive flag table has its own user-only RLS.
+ */
+
+import { revalidatePath } from "next/cache";
+import {
+  createSupabaseServerClient,
+  createSupabaseServiceRoleClient,
+} from "@/lib/supabase/server";
+
+type Result =
+  | { ok: true }
+  | { ok: false; error: string };
+
+async function getUser() {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false as const, error: "Please sign in." };
+  return { ok: true as const, supabase, user };
+}
+
+/* ──────────────────────────────────────────────────────────────
+ * Archive
+ * ─────────────────────────────────────────────────────────── */
+
+export async function archiveThread(applicationId: string): Promise<Result> {
+  if (!applicationId) return { ok: false, error: "Missing application id." };
+  const ctx = await getUser();
+  if (!ctx.ok) return ctx;
+
+  const { error } = await ctx.supabase
+    .from("inbox_archived_threads")
+    .upsert(
+      {
+        auth_user_id: ctx.user.id,
+        application_id: applicationId,
+      },
+      { onConflict: "auth_user_id,application_id" }
+    );
+
+  if (error) {
+    console.error("[inbox] archiveThread", error);
+    return { ok: false, error: "Couldn't archive that thread." };
+  }
+  revalidatePath("/employer/inbox");
+  revalidatePath("/candidate/inbox");
+  return { ok: true };
+}
+
+export async function unarchiveThread(
+  applicationId: string
+): Promise<Result> {
+  if (!applicationId) return { ok: false, error: "Missing application id." };
+  const ctx = await getUser();
+  if (!ctx.ok) return ctx;
+
+  const { error } = await ctx.supabase
+    .from("inbox_archived_threads")
+    .delete()
+    .eq("auth_user_id", ctx.user.id)
+    .eq("application_id", applicationId);
+
+  if (error) {
+    console.error("[inbox] unarchiveThread", error);
+    return { ok: false, error: "Couldn't unarchive that thread." };
+  }
+  revalidatePath("/employer/inbox");
+  revalidatePath("/candidate/inbox");
+  return { ok: true };
+}
+
+/* ──────────────────────────────────────────────────────────────
+ * Bulk mark-as-read
+ *
+ * The single-message markMessageAsRead action in src/lib/messages/
+ * uses the service-role client to bypass RLS for read_at flips. We
+ * follow the same pattern here for the bulk equivalent.
+ *
+ * Audience determines which sender_role to flip (candidate flips
+ * employer-sent rows; employer flips candidate-sent rows). We re-
+ * derive the audience from auth context rather than trusting input.
+ * ─────────────────────────────────────────────────────────── */
+
+export async function markThreadRead(
+  applicationId: string
+): Promise<Result> {
+  if (!applicationId) return { ok: false, error: "Missing application id." };
+  const ctx = await getUser();
+  if (!ctx.ok) return ctx;
+
+  // Determine audience from the user's profile state. Candidates have
+  // a row in `candidates`; everyone else with a dso_users row is on
+  // the employer side. If neither, no-op success.
+  const { data: candidate } = await ctx.supabase
+    .from("candidates")
+    .select("id")
+    .eq("auth_user_id", ctx.user.id)
+    .maybeSingle();
+
+  let audience: "candidate" | "employer" | null = null;
+  if (candidate) {
+    audience = "candidate";
+  } else {
+    const { data: dsoUser } = await ctx.supabase
+      .from("dso_users")
+      .select("id")
+      .eq("auth_user_id", ctx.user.id)
+      .maybeSingle();
+    if (dsoUser) audience = "employer";
+  }
+  if (!audience) {
+    return { ok: false, error: "Account context missing." };
+  }
+
+  // Verify the caller is a participant on this application via RLS-
+  // scoped read. If the SELECT returns 0 rows, they can't access this
+  // application, so we refuse the bulk flip.
+  const { data: appRow } = await ctx.supabase
+    .from("applications")
+    .select("id")
+    .eq("id", applicationId)
+    .maybeSingle();
+  if (!appRow) {
+    return { ok: false, error: "Application not found." };
+  }
+
+  const otherSide = audience === "candidate" ? "employer" : "candidate";
+
+  const admin = createSupabaseServiceRoleClient();
+  const { error } = await admin
+    .from("application_messages")
+    .update({ read_at: new Date().toISOString() })
+    .eq("application_id", applicationId)
+    .eq("sender_role", otherSide)
+    .is("read_at", null)
+    .is("deleted_at", null);
+
+  if (error) {
+    console.error("[inbox] markThreadRead", error);
+    return { ok: false, error: "Couldn't mark thread as read." };
+  }
+  revalidatePath("/employer/inbox");
+  revalidatePath("/candidate/inbox");
+  return { ok: true };
+}

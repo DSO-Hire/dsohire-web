@@ -1,26 +1,22 @@
 /**
- * /employer/inbox — Phase 4.8 unified inbox v0.
+ * /candidate/inbox — Phase 4.8 unified inbox v0 (candidate side).
  *
- * 2-pane layout: thread list (left) + active thread (right). Active
- * thread is selected via `?app=<application_id>` so URLs are
- * shareable. Filter tabs (All / Unread / Archived) + dropdown filters
- * (Job / Location / Stage) live in the client component.
+ * Symmetric to /employer/inbox: 2-pane layout, All/Unread/Archived
+ * tabs, per-job filter (no Location/Stage on the candidate side —
+ * those are employer-internal), realtime subscription, mark-as-read
+ * on thread open.
  *
- * RLS:
- *   • Threads come from getEmployerInboxThreads scoped to the caller's
- *     DSO + auth_user_id (for archive flags).
- *   • The active thread's messages come from the existing RLS-aware
- *     read on application_messages.
- *   • Mark-as-read happens in the client when the thread mounts.
+ * Reuses <InboxView> with audience="candidate" so the rendering
+ * components stay in one place.
  */
 
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { EmployerShell } from "@/components/employer/employer-shell";
-import { getEmployerInboxThreads } from "@/lib/inbox/queries";
-import type { ApplicationMessageRow } from "@/lib/messages/actions";
+import { CandidateShell } from "@/components/candidate/candidate-shell";
+import { getCandidateInboxThreads } from "@/lib/inbox/queries";
 import { InboxView } from "@/components/inbox/inbox-view";
+import type { ApplicationMessageRow } from "@/lib/messages/actions";
 
 export const metadata: Metadata = { title: "Inbox · DSO Hire" };
 
@@ -30,32 +26,30 @@ interface PageProps {
   searchParams: Promise<{ app?: string }>;
 }
 
-export default async function EmployerInboxPage({ searchParams }: PageProps) {
+export default async function CandidateInboxPage({ searchParams }: PageProps) {
   const { app: appQuery } = await searchParams;
 
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/employer/sign-in");
+  if (!user) redirect("/candidate/sign-in?next=/candidate/inbox");
 
-  const { data: dsoUser } = await supabase
-    .from("dso_users")
-    .select("dso_id, full_name")
+  const { data: candidate } = await supabase
+    .from("candidates")
+    .select("id, full_name")
     .eq("auth_user_id", user.id)
     .maybeSingle();
-  if (!dsoUser) redirect("/employer/onboarding");
+  if (!candidate) redirect("/candidate/sign-up");
 
-  const dsoId = (dsoUser as Record<string, unknown>).dso_id as string;
+  const candidateId = (candidate as Record<string, unknown>).id as string;
   const userName =
-    ((dsoUser as Record<string, unknown>).full_name as string | null) ??
+    ((candidate as Record<string, unknown>).full_name as string | null) ??
     user.email ??
     "You";
 
-  const threads = await getEmployerInboxThreads(supabase, user.id, dsoId);
+  const threads = await getCandidateInboxThreads(supabase, user.id, candidateId);
 
-  // If the URL points at an application id, prefetch the messages for
-  // the right pane. Otherwise the right pane shows an empty state.
   let activeMessages: ApplicationMessageRow[] = [];
   let activeApplicationId: string | null = null;
   if (appQuery) {
@@ -76,15 +70,15 @@ export default async function EmployerInboxPage({ searchParams }: PageProps) {
   }
 
   return (
-    <EmployerShell active="inbox">
+    <CandidateShell active="inbox">
       <InboxView
-        audience="employer"
+        audience="candidate"
         threads={threads}
         currentUserId={user.id}
         currentUserName={userName}
         initialActiveApplicationId={activeApplicationId}
         initialActiveMessages={activeMessages}
       />
-    </EmployerShell>
+    </CandidateShell>
   );
 }

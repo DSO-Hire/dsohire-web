@@ -23,11 +23,13 @@ import {
   LogOut,
   Search,
   LifeBuoy,
+  Inbox as InboxIcon,
 } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { BrandLockup } from "@/components/marketing/site-shell";
 import { Avatar } from "@/components/ui/avatar";
 import { CandidateMobileNav } from "./candidate-mobile-nav";
+import { getUnreadCount } from "@/lib/inbox/queries";
 
 interface CandidateShellProps {
   children: React.ReactNode;
@@ -38,6 +40,7 @@ export type NavId =
   | "dashboard"
   | "jobs"
   | "applications"
+  | "inbox"
   | "profile"
   | "settings"
   | "help";
@@ -47,12 +50,15 @@ interface NavItem {
   label: string;
   href: string;
   Icon: React.ComponentType<{ className?: string }>;
+  /** Optional unread/notification badge — rendered as a heritage pill when > 0. */
+  badge?: number;
 }
 
 const NAV: ReadonlyArray<NavItem> = [
   { id: "dashboard", label: "Dashboard", href: "/candidate/dashboard", Icon: LayoutDashboard },
   { id: "jobs", label: "Jobs", href: "/candidate/jobs", Icon: Search },
   { id: "applications", label: "Applications", href: "/candidate/applications", Icon: FileText },
+  { id: "inbox", label: "Inbox", href: "/candidate/inbox", Icon: InboxIcon },
   { id: "profile", label: "Profile", href: "/candidate/profile", Icon: UserCircle },
   { id: "settings", label: "Settings", href: "/candidate/settings", Icon: Settings },
 ];
@@ -97,6 +103,13 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
     (candidate.headline as string | null) ??
     "Profile incomplete";
 
+  // Inbox unread badge — counts messages from the OTHER side that
+  // haven't been marked read. RLS scopes the query automatically.
+  const inboxUnread = await getUnreadCount(supabase, "candidate");
+  const navWithBadges = NAV.map((item) =>
+    item.id === "inbox" ? { ...item, badge: inboxUnread } : item
+  );
+
   return (
     <div className="min-h-screen flex bg-ivory">
       {/* ── Desktop sidebar ──
@@ -138,7 +151,7 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
 
         <nav className="flex-1 overflow-y-auto px-3 py-4">
           <ul className="list-none space-y-0.5">
-            {NAV.map((item) => (
+            {navWithBadges.map((item) => (
               <NavRow key={item.id} item={item} active={active} />
             ))}
           </ul>
@@ -213,7 +226,15 @@ function NavRow({
         }
       >
         <Icon className="h-4 w-4 flex-shrink-0" />
-        <span>{item.label}</span>
+        <span className="flex-1">{item.label}</span>
+        {item.badge && item.badge > 0 ? (
+          <span
+            aria-label={`${item.badge} unread`}
+            className="ml-2 inline-flex items-center justify-center rounded-full bg-heritage-deep px-1.5 py-0.5 text-[10px] font-bold text-ivory min-w-[18px]"
+          >
+            {item.badge > 99 ? "99+" : item.badge}
+          </span>
+        ) : null}
       </Link>
     </li>
   );

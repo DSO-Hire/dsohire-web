@@ -49,6 +49,7 @@ import {
 } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { BrandLockup } from "@/components/marketing/site-shell";
+import { getUnreadCount } from "@/lib/inbox/queries";
 import { getMfaState } from "@/lib/auth/mfa";
 import { Avatar } from "@/components/ui/avatar";
 import { EmployerMobileNav } from "./employer-mobile-nav";
@@ -86,6 +87,8 @@ interface NavItem {
   group: NavGroup;
   /** If set, hide the entry from these roles. */
   hideFromRoles?: ReadonlyArray<Role>;
+  /** Optional unread/notification badge — heritage pill when > 0. */
+  badge?: number;
 }
 
 const NAV: ReadonlyArray<NavItem> = [
@@ -155,8 +158,16 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
   }
 
   const role = dsoUser.role as Role;
+
+  // Inbox unread badge — counts messages from candidates that this user
+  // (or any DSO teammate) hasn't marked read. RLS handles scoping to
+  // applications in this DSO.
+  const inboxUnread = await getUnreadCount(supabase, "employer");
+
   const visibleNav = NAV.filter(
     (item) => !item.hideFromRoles?.includes(role)
+  ).map((item) =>
+    item.id === "inbox" ? { ...item, badge: inboxUnread } : item
   );
   const groupedNav = GROUP_ORDER.map((g) => ({
     group: g,
@@ -349,7 +360,15 @@ function NavRow({
         }
       >
         <Icon className="h-4 w-4 flex-shrink-0" />
-        <span>{item.label}</span>
+        <span className="flex-1">{item.label}</span>
+        {item.badge && item.badge > 0 ? (
+          <span
+            aria-label={`${item.badge} unread`}
+            className="ml-2 inline-flex items-center justify-center rounded-full bg-heritage-deep px-1.5 py-0.5 text-[10px] font-bold text-ivory min-w-[18px]"
+          >
+            {item.badge > 99 ? "99+" : item.badge}
+          </span>
+        ) : null}
       </Link>
     </li>
   );
