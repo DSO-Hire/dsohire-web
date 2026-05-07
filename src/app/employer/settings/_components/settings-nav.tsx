@@ -63,7 +63,7 @@ const GROUPS: NavGroup[] = [
     id: "you-and-dso",
     entries: [
       { id: "account", label: "Account", href: "/employer/settings/account", Icon: User },
-      { id: "profile", label: "Public profile", href: "/employer/settings/profile", Icon: Globe, comingSoon: true },
+      { id: "profile", label: "Public profile", href: "/employer/settings/profile", Icon: Globe },
     ],
   },
   {

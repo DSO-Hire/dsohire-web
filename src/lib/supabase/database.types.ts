@@ -749,13 +749,19 @@ export type Database = {
       }
       dsos: {
         Row: {
+          banner_url: string | null
+          brand_color: string | null
+          contact_cta_label: string | null
+          contact_cta_url: string | null
           created_at: string
+          culture_chips: string[]
           description: string | null
           headquarters_city: string | null
           headquarters_state: string | null
           id: string
           legal_name: string | null
           logo_url: string | null
+          mission: string | null
           name: string
           practice_count: number | null
           slug: string
@@ -763,15 +769,22 @@ export type Database = {
           updated_at: string
           verified_at: string | null
           website: string | null
+          why_join_us: Json
         }
         Insert: {
+          banner_url?: string | null
+          brand_color?: string | null
+          contact_cta_label?: string | null
+          contact_cta_url?: string | null
           created_at?: string
+          culture_chips?: string[]
           description?: string | null
           headquarters_city?: string | null
           headquarters_state?: string | null
           id?: string
           legal_name?: string | null
           logo_url?: string | null
+          mission?: string | null
           name: string
           practice_count?: number | null
           slug: string
@@ -779,15 +792,22 @@ export type Database = {
           updated_at?: string
           verified_at?: string | null
           website?: string | null
+          why_join_us?: Json
         }
         Update: {
+          banner_url?: string | null
+          brand_color?: string | null
+          contact_cta_label?: string | null
+          contact_cta_url?: string | null
           created_at?: string
+          culture_chips?: string[]
           description?: string | null
           headquarters_city?: string | null
           headquarters_state?: string | null
           id?: string
           legal_name?: string | null
           logo_url?: string | null
+          mission?: string | null
           name?: string
           practice_count?: number | null
           slug?: string
@@ -795,8 +815,44 @@ export type Database = {
           updated_at?: string
           verified_at?: string | null
           website?: string | null
+          why_join_us?: Json
         }
         Relationships: []
+      }
+      dso_photos: {
+        Row: {
+          caption: string | null
+          created_at: string
+          dso_id: string
+          id: string
+          sort_order: number
+          storage_url: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          dso_id: string
+          id?: string
+          sort_order?: number
+          storage_url: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          dso_id?: string
+          id?: string
+          sort_order?: number
+          storage_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dso_photos_dso_id_fkey"
+            columns: ["dso_id"]
+            isOneToOne: false
+            referencedRelation: "dsos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       email_log: {
         Row: {

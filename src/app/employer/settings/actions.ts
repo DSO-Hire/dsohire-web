@@ -41,6 +41,8 @@ export async function setDsoLogoUrl(
   }
 
   revalidatePath("/employer/settings");
+  revalidatePath("/employer/settings/profile");
+  revalidatePath("/employer/settings/account");
   revalidatePath("/employer/dashboard");
   // Public company page also displays the logo.
   const { data: dso } = await supabase
