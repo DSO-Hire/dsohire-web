@@ -106,9 +106,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
   const { data: dso } = await supabase
     .from("dsos")
     .select(
-      "id, name, legal_name, slug, description, mission, logo_url, banner_url, brand_color, " +
-        "why_join_us, culture_chips, contact_cta_label, contact_cta_url, " +
-        "website, headquarters_city, headquarters_state, practice_count, verified_at, status"
+      "id, name, legal_name, slug, description, mission, logo_url, banner_url, brand_color, why_join_us, culture_chips, contact_cta_label, contact_cta_url, website, headquarters_city, headquarters_state, practice_count, verified_at, status"
     )
     .eq("slug", slug)
     .eq("status", "active")
@@ -136,7 +134,11 @@ export default async function CompanyDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const dsoRow = dso as DsoRow;
+  // Cast through `unknown` — supabase's typed-select infers a row type, but
+  // hand-patched database.types entries (mission/banner_url/why_join_us/etc.
+  // added in 4.5.d) don't always match the consumer-side `DsoRow` shape
+  // exactly. Two-step cast keeps strict mode happy.
+  const dsoRow = dso as unknown as DsoRow;
   const brandColor = dsoRow.brand_color || FALLBACK_BRAND_COLOR;
 
   // Pull DSO locations + their active jobs + photos in parallel
