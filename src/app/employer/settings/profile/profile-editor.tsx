@@ -505,29 +505,41 @@ function BrandVisualsSection({
       title="Logo and banner"
       subtitle="Logo shows in the header of every email and the avatar slot across the platform. Banner is the full-width image on your public profile."
     >
-      <div className="grid grid-cols-1 gap-8 sm:grid-cols-[180px_1fr]">
+      <div className="space-y-8">
+        {/* Logo — small square preview */}
         <div>
-          <h3 className="text-[12px] font-semibold text-ink mb-2">Logo</h3>
+          <div className="mb-2 flex items-baseline justify-between gap-2">
+            <h3 className="text-[12px] font-semibold text-ink">Logo</h3>
+            <span className="text-[11px] text-slate-meta">
+              Square · PNG, JPG, or WebP up to 5MB
+            </span>
+          </div>
           <ImageUpload
             value={logoUrl}
             pathPrefix="dso-logo"
             shape="square"
             outputFormat="image/png"
-            hint="Square. PNG / JPG / WebP, up to 5MB."
+            hint="Transparent backgrounds welcome — recommend at least 400×400."
             buttonLabel={logoUrl ? "Change logo" : "Upload logo"}
             onUploaded={canEdit ? (u) => persistLogo(u) : () => {}}
             onRemove={canEdit ? () => persistLogo(null) : undefined}
           />
         </div>
 
-        <div>
-          <h3 className="text-[12px] font-semibold text-ink mb-2">Banner</h3>
+        {/* Banner — full-width 3:1 hero */}
+        <div className="border-t border-[var(--rule)] pt-6">
+          <div className="mb-2 flex items-baseline justify-between gap-2">
+            <h3 className="text-[12px] font-semibold text-ink">Banner</h3>
+            <span className="text-[11px] text-slate-meta">
+              Wide 3:1 · JPG, PNG, or WebP up to 5MB
+            </span>
+          </div>
           <ImageUpload
             value={bannerUrl}
             pathPrefix="dso-banner"
             shape="banner"
             outputFormat="image/jpeg"
-            hint="Wide hero image (3:1). JPG / PNG / WebP up to 5MB."
+            hint="Recommend at least 1800×600. Avoid text near edges — narrow viewports crop horizontally."
             buttonLabel={bannerUrl ? "Change banner" : "Upload banner"}
             onUploaded={canEdit ? (u) => persistBanner(u) : () => {}}
             onRemove={canEdit ? () => persistBanner(null) : undefined}

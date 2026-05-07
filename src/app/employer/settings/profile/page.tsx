@@ -8,12 +8,17 @@
  * Server component fetches dso + photos in one round trip, hydrates the
  * client orchestrator. Each section card has its own per-section save
  * action; pattern parallels /employer/jobs/[id]/edit (4.7.b).
+ *
+ * Edit / Preview tabs (LinkedIn-style):
+ *   ?view=preview renders the public profile in an iframe so the DSO admin
+ *   can see exactly what visitors see without leaving the editor. Default
+ *   view is the editor.
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Eye, Pencil } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ProfileEditor } from "./profile-editor";
 import type { ProfileData, ProfilePhoto, WhyJoinUsBlock } from "./profile-data";
@@ -24,7 +29,16 @@ export const metadata: Metadata = { title: "Public profile · Settings" };
 // (Companion to feedback_lazy_init_external_sdks.md.)
 export const dynamic = "force-dynamic";
 
-export default async function PublicProfileSettingsPage() {
+interface PageProps {
+  searchParams: Promise<{ view?: string }>;
+}
+
+export default async function PublicProfileSettingsPage({
+  searchParams,
+}: PageProps) {
+  const sp = await searchParams;
+  const view = sp.view === "preview" ? "preview" : "edit";
+
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -86,18 +100,18 @@ export default async function PublicProfileSettingsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-[820px]">
-      <header className="space-y-3 pb-2">
+    <div className="space-y-6 max-w-[1100px]">
+      <header className="space-y-3 pb-2 max-w-[820px]">
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
           Public profile
         </div>
         <h1 className="font-display text-3xl font-extrabold tracking-[-0.8px] text-ink leading-tight">
           The page candidates see when they click your DSO name.
         </h1>
-        <p className="text-sm text-slate-body leading-relaxed max-w-[640px]">
+        <p className="text-sm text-slate-body leading-relaxed">
           Build out your About story, share photos of your practices, and
           highlight the culture chips that make your DSO different.
-          Everything below is public on{" "}
+          Everything you save here is public on{" "}
           <Link
             href={`/companies/${data.slug}`}
             target="_blank"
@@ -111,15 +125,128 @@ export default async function PublicProfileSettingsPage() {
         </p>
       </header>
 
-      {!canEdit ? (
-        <div className="border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
+      {/* Edit / Preview tabs — LinkedIn-style */}
+      <EditPreviewTabs activeView={view} slug={data.slug} />
+
+      {!canEdit && view === "edit" ? (
+        <div className="border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900 max-w-[820px]">
           <strong className="font-semibold">View-only.</strong> Only DSO owners
           and admins can edit the public profile. Ask a teammate with access
           to make changes.
         </div>
       ) : null}
 
-      <ProfileEditor initial={data} canEdit={canEdit} />
+      {view === "preview" ? (
+        <ProfilePreviewPane slug={data.slug} />
+      ) : (
+        <div className="max-w-[820px]">
+          <ProfileEditor initial={data} canEdit={canEdit} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * Edit / Preview tab strip
+ * ────────────────────────────────────────────────────────── */
+
+function EditPreviewTabs({
+  activeView,
+  slug,
+}: {
+  activeView: "edit" | "preview";
+  slug: string;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 border-b border-[var(--rule)]">
+      <nav
+        aria-label="Edit or preview"
+        role="tablist"
+        className="flex gap-0"
+      >
+        <TabLink
+          href="/employer/settings/profile"
+          isActive={activeView === "edit"}
+          icon={<Pencil className="size-3.5" />}
+          label="Edit"
+        />
+        <TabLink
+          href="/employer/settings/profile?view=preview"
+          isActive={activeView === "preview"}
+          icon={<Eye className="size-3.5" />}
+          label="Preview"
+        />
+      </nav>
+
+      {activeView === "preview" && (
+        <Link
+          href={`/companies/${slug}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-heritage-deep underline-offset-2 hover:underline"
+        >
+          Open in new tab
+          <ExternalLink className="size-3" />
+        </Link>
+      )}
+    </div>
+  );
+}
+
+function TabLink({
+  href,
+  isActive,
+  icon,
+  label,
+}: {
+  href: string;
+  isActive: boolean;
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <Link
+      href={href}
+      role="tab"
+      aria-selected={isActive}
+      className={
+        "inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-[13px] font-semibold transition-colors -mb-px " +
+        (isActive
+          ? "border-ink text-ink"
+          : "border-transparent text-slate-meta hover:text-ink")
+      }
+    >
+      {icon}
+      {label}
+    </Link>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * Preview pane — embeds /companies/[slug] in an iframe so the
+ * DSO admin can see exactly what visitors see.
+ *
+ * The iframe shows the full SiteShell (marketing nav + footer)
+ * because that IS what visitors see. We size it tall enough to
+ * avoid double-scroll on most profiles; users can also pop out
+ * via the "Open in new tab" link in the tab strip.
+ * ────────────────────────────────────────────────────────── */
+
+function ProfilePreviewPane({ slug }: { slug: string }) {
+  return (
+    <div className="border border-[var(--rule)] bg-white overflow-hidden">
+      <div className="border-b border-[var(--rule)] bg-cream/40 px-4 py-2 text-[11px] font-medium text-slate-body">
+        Previewing <code className="font-mono">/companies/{slug}</code> as a
+        logged-out visitor would see it. Saved changes appear here within a
+        few seconds.
+      </div>
+      <iframe
+        src={`/companies/${slug}`}
+        title="Public profile preview"
+        className="block w-full"
+        style={{ height: "min(2400px, calc(100vh - 220px))", minHeight: "640px" }}
+      />
     </div>
   );
 }
