@@ -464,6 +464,7 @@ export function InboxView({
                 <ThreadRow
                   key={thread.application_id}
                   thread={thread}
+                  audience={audience}
                   active={thread.application_id === activeId}
                   onSelect={() => selectThread(thread)}
                   onArchive={() => onArchive(thread)}
@@ -534,12 +535,13 @@ export function InboxView({
               </div>
 
               {/* Thread + composer.
-                  key={applicationId} forces a clean remount when the user
-                  switches threads — MessagesThread initializes its
-                  internal state from initialMessages on mount only, so
-                  without the key we'd carry the previous thread's
-                  messages forward. */}
-              <div className="flex-1 min-h-0 overflow-y-auto p-5">
+                  MessagesThread now owns its OWN scroll (iMessage-style
+                  single-window layout), so the right-pane wrapper just
+                  provides the height container with `min-h-0` so the
+                  flex child can actually overflow correctly.
+                  key={applicationId} forces a clean remount when the
+                  user switches threads. */}
+              <div className="flex-1 min-h-0 p-5 flex">
                 <MessagesThread
                   key={activeThread.application_id}
                   applicationId={activeThread.application_id}
@@ -632,6 +634,7 @@ function FilterDropdown({
 
 function ThreadRow({
   thread,
+  audience,
   active,
   onSelect,
   onArchive,
@@ -639,6 +642,7 @@ function ThreadRow({
   busy,
 }: {
   thread: InboxThread;
+  audience: Audience;
   active: boolean;
   onSelect: () => void;
   onArchive: () => void;

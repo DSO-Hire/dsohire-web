@@ -431,30 +431,33 @@ export function MessagesThread({
   const externalAudienceName = otherPartyName;
 
   return (
-    <div className="relative bg-heritage/5 border-2 border-heritage/30 p-6 sm:p-7 shadow-[0_0_0_1px_var(--heritage-glow),0_4px_20px_-8px_var(--heritage-glow)]">
-      {/* Layer 2 — EXTERNAL banner */}
-      <div className="mb-5 flex items-start gap-3 px-4 py-3 bg-heritage-tint border border-heritage/40">
-        <Eye className="h-4 w-4 text-heritage-deep flex-shrink-0 mt-0.5" />
-        <div className="min-w-0">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
-            External · Visible to {externalAudienceLabel}
-          </div>
-          <p className="text-[13px] text-heritage-deep/90 mt-1 leading-snug">
-            Anything you send here is sent directly to{" "}
-            <span className="font-bold">{externalAudienceName}</span>{" "}
-            {isEmployerView
-              ? "via email and shown on their applicant dashboard."
-              : "and shown on their hiring dashboard."}{" "}
-            Internal team notes belong in the sections below.
-          </p>
-        </div>
+    <div className="relative flex flex-col bg-white border-2 border-heritage/30 shadow-[0_0_0_1px_var(--heritage-glow),0_4px_20px_-8px_var(--heritage-glow)] h-full min-h-[480px] overflow-hidden">
+      {/* iMessage-style single-window layout. Top banner shrinks
+          to a single condensed line; messages flex-grow + scroll;
+          composer is pinned to the bottom edge of the same border.
+          The disclaimers Cam wanted to keep stay — just compressed
+          so the visual rhythm reads as one cohesive surface. */}
+
+      {/* Top banner — External + audience reminder, single row */}
+      <div className="shrink-0 flex items-center gap-2 px-4 py-2 border-b border-heritage/30 bg-heritage-tint">
+        <Eye className="h-3.5 w-3.5 text-heritage-deep shrink-0" />
+        <span className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep shrink-0">
+          External
+        </span>
+        <span className="text-[12px] text-heritage-deep/90 leading-tight truncate">
+          · Visible to {externalAudienceLabel}{" "}
+          <span className="font-semibold">{externalAudienceName}</span>{" "}
+          {isEmployerView
+            ? "· sent via email + applicant dashboard"
+            : "· sent via your hiring dashboard"}
+        </span>
       </div>
 
-      {/* List */}
+      {/* List — flex-1 takes the remaining vertical space */}
       <div
         ref={listRef}
         onScroll={handleListScroll}
-        className="border border-heritage/30 bg-white max-h-[480px] overflow-y-auto"
+        className="flex-1 min-h-0 overflow-y-auto bg-white"
       >
         {visibleCount === 0 ? (
           <div className="p-8 text-center">
@@ -663,47 +666,42 @@ export function MessagesThread({
         )}
       </div>
 
-      {/* Composer */}
-      <div className="mt-5">
-        {/* Layer 3 — inline warning directly above the textarea */}
-        <div className="mb-2 px-3 py-2 bg-heritage-tint border-l-2 border-heritage text-[13.5px] leading-snug text-ink">
-          <span className="font-semibold text-heritage-deep">
-            Sending to {externalAudienceName}.
-          </span>{" "}
-          This message goes directly to them — internal team notes belong in
-          the sections below.
-        </div>
-        <p className="text-[13px] italic text-heritage-deep mb-2 leading-snug">
-          Don&apos;t share medical information here — discuss any
-          accommodations or health-related context directly with HR.
+      {/* Composer — pinned to the bottom edge of the same window */}
+      <div className="shrink-0 border-t border-heritage/30 bg-cream/40 px-4 py-3">
+        {/* Compressed medical-info reminder — single line italic */}
+        <p className="text-[11px] italic text-heritage-deep/80 mb-2 leading-snug">
+          Don&apos;t share medical information here — discuss accommodations
+          directly with HR.
         </p>
-        <textarea
-          ref={composerRef}
-          value={composerBody}
-          onChange={handleComposerChange}
-          onKeyDown={handleComposerKeyDown}
-          rows={3}
-          maxLength={MAX_BODY}
-          placeholder={`Message ${otherPartyName}…`}
-          className="w-full px-4 py-3 bg-white border border-heritage/40 text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed"
-        />
-        <div className="flex items-center gap-3 mt-3 flex-wrap">
+        <div className="flex items-end gap-2">
+          <textarea
+            ref={composerRef}
+            value={composerBody}
+            onChange={handleComposerChange}
+            onKeyDown={handleComposerKeyDown}
+            rows={2}
+            maxLength={MAX_BODY}
+            placeholder={`Message ${otherPartyName}…`}
+            className="flex-1 px-3 py-2 bg-white border border-heritage/40 text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed resize-none"
+          />
           <button
             type="button"
             onClick={() => void handleSubmit()}
             disabled={submitting || composerBody.trim().length === 0}
-            className="px-5 py-2.5 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed shrink-0"
           >
-            {submitting ? "Sending…" : "Send Message"}
+            {submitting ? "Sending…" : "Send"}
           </button>
-          <span className="text-[12px] text-slate-meta">
+        </div>
+        <div className="flex items-center gap-3 mt-1.5 text-[10px] text-slate-meta flex-wrap">
+          <span>
             <span className="font-mono">⌘↩</span> to send
           </span>
-          <span className={`text-[12px] ${remainingClass}`}>
+          <span className={remainingClass}>
             {remaining} characters left
           </span>
           {composerError && (
-            <span className="text-[13px] text-red-700">{composerError}</span>
+            <span className="text-[11px] text-red-700">{composerError}</span>
           )}
         </div>
       </div>
