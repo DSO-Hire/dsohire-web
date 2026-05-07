@@ -273,7 +273,11 @@ export function PhoneForm({
       const result = await updatePhone(phone);
       setBusy(false);
       if (!result.ok) return setError(result.error);
-      setFlash(result.message ?? "Saved.");
+      setFlash(
+        phone.trim().length > 0
+          ? "Phone number saved."
+          : "Phone number cleared."
+      );
     });
   };
 
