@@ -34,6 +34,7 @@ import {
   estimateHaikuCostUsd,
 } from "@/lib/ai/anthropic";
 import { logAiUsage } from "@/lib/ai/usage";
+import { extractJson } from "@/lib/ai/extract-json";
 import { getRubricForRole } from "@/lib/scorecards/rubric-library";
 import type { PricingTier } from "@/lib/stripe/prices";
 
@@ -612,8 +613,4 @@ function excerpt(text: string, max: number): string {
   return trimmed.slice(0, max - 1).trimEnd() + "…";
 }
 
-function extractJson(text: string): unknown {
-  const trimmed = text.trim();
-  const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/);
-  return JSON.parse(fenced ? fenced[1] : trimmed);
-}
+// extractJson moved to src/lib/ai/extract-json.ts (shared parser).

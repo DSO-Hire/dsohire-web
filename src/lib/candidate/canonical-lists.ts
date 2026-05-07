@@ -323,23 +323,26 @@ export const CV_VISIBILITY_OPTIONS: ReadonlyArray<{
   label: string;
   description: string;
 }> = [
+  // Cam 2026-05-07: tightened so each option names a concrete behavior
+  // the other two don't have. The original copy overlapped — every
+  // option said "discoverable to DSOs" in different words.
   {
     value: "open_to_work",
     label: "Open to work",
     description:
-      "Prioritized in employer searches. Best when actively job hunting.",
+      "Boosted in DSO searches with a green badge. Pick this when you're actively interviewing.",
   },
   {
     value: "recruiters_only",
     label: "Recruiters only",
     description:
-      "Visible to verified DSO members only. Most candidates land here — privacy-positive but still discoverable.",
+      "Discoverable by signed-in DSOs but not boosted. The default for working clinicians who want to be findable without flagging an active search.",
   },
   {
     value: "hidden",
     label: "Hidden",
     description:
-      "Only employers you apply to can see your profile. You won't appear in any browse or search.",
+      "Invisible to every DSO except those you've applied to. You won't show up in any browse or search.",
   },
 ];
 

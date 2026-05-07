@@ -56,9 +56,33 @@ export function JdGeneratorPanel({
     elapsed_ms: number;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Cam 2026-05-07: after apply, the editor below WAS already editable —
+  // but operators were missing it because the preview card stayed visible
+  // and there was no signal that the description landed. Track applied
+  // state + scroll to the editor so the next move (manual tweaking)
+  // is obvious.
+  const [appliedFlash, setAppliedFlash] = useState<
+    "title" | "description" | "all" | null
+  >(null);
+
+  function flashApplied(which: "title" | "description" | "all") {
+    setAppliedFlash(which);
+    // Scroll the description editor into view so the operator sees that
+    // their AI draft is now sitting in an editable state below.
+    if (which !== "title" && typeof document !== "undefined") {
+      const editor = document.querySelector(
+        '[data-jd-editor-anchor="true"]'
+      );
+      if (editor) {
+        editor.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+    window.setTimeout(() => setAppliedFlash(null), 3500);
+  }
 
   function run() {
     setError(null);
+    setAppliedFlash(null);
     const startedAt = Date.now();
     startTransition(async () => {
       const res = await generateJobDescription({
@@ -202,16 +226,22 @@ export function JdGeneratorPanel({
       {result && !pending && (
         <ResultCard
           jd={result}
-          onApplyTitle={() => onApplyTitle(result.title)}
-          onApplyDescription={() =>
-            onApplyDescription(buildDescriptionHtml(result))
-          }
-          onApplyAll={() =>
+          appliedFlash={appliedFlash}
+          onApplyTitle={() => {
+            onApplyTitle(result.title);
+            flashApplied("title");
+          }}
+          onApplyDescription={() => {
+            onApplyDescription(buildDescriptionHtml(result));
+            flashApplied("description");
+          }}
+          onApplyAll={() => {
             onApplyAll({
               title: result.title,
               descriptionHtml: buildDescriptionHtml(result),
-            })
-          }
+            });
+            flashApplied("all");
+          }}
         />
       )}
     </section>
@@ -222,11 +252,13 @@ export function JdGeneratorPanel({
 
 function ResultCard({
   jd,
+  appliedFlash,
   onApplyTitle,
   onApplyDescription,
   onApplyAll,
 }: {
   jd: JdGeneratorOutput;
+  appliedFlash: "title" | "description" | "all" | null;
   onApplyTitle: () => void;
   onApplyDescription: () => void;
   onApplyAll: () => void;
@@ -235,7 +267,7 @@ function ResultCard({
     <div className="mt-5 border border-[var(--rule-strong)] bg-white p-5">
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[var(--rule)]">
         <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
-          AI draft preview
+          AI draft preview · read-only
         </div>
         <button
           type="button"
@@ -243,13 +275,23 @@ function ResultCard({
           className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-heritage text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-heritage-deep transition-colors"
         >
           <Check className="h-3 w-3" />
-          Apply all
+          {appliedFlash === "all" ? "Applied ✓" : "Apply all"}
         </button>
       </div>
 
+      {/* Cam 2026-05-07 fix: clear post-apply signal so operators don't
+          think the AI output got "locked." Banner appears for ~3.5s
+          after any apply action and links the eye to the editor below. */}
+      {appliedFlash && (
+        <div className="mt-3 px-3 py-2 bg-heritage/10 border-l-2 border-heritage text-[12.5px] text-heritage-deep">
+          ✓ Applied to the editor below. Scroll down to tweak the wording —
+          everything stays editable.
+        </div>
+      )}
+
       <Section
         label="Title"
-        actionLabel="Use this title"
+        actionLabel={appliedFlash === "title" ? "Applied ✓" : "Use this title"}
         onUse={onApplyTitle}
       >
         <p className="text-[15px] font-bold text-ink">{jd.title}</p>
@@ -257,7 +299,11 @@ function ResultCard({
 
       <Section
         label="Description (summary + lists)"
-        actionLabel="Use this description"
+        actionLabel={
+          appliedFlash === "description" || appliedFlash === "all"
+            ? "Applied ✓"
+            : "Use this description"
+        }
         onUse={onApplyDescription}
       >
         <div className="space-y-3 text-[14px] text-ink leading-relaxed">

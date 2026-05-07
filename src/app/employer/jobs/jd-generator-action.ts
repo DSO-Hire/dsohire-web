@@ -25,6 +25,7 @@ import {
   estimateHaikuCostUsd,
 } from "@/lib/ai/anthropic";
 import { logAiUsage } from "@/lib/ai/usage";
+import { extractJson } from "@/lib/ai/extract-json";
 import { ROLE_RECOMMENDATIONS } from "@/lib/screening/question-library";
 import { getActiveSubscription } from "@/lib/billing/subscription";
 
@@ -244,9 +245,4 @@ ${args.brief || "(no specific notes — write a strong default for this role)"}
 Return only the JSON object specified in the system prompt.`;
 }
 
-function extractJson(text: string): unknown {
-  // Strip code fences if the model wrapped the JSON despite instructions.
-  const trimmed = text.trim();
-  const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/);
-  return JSON.parse(fenced ? fenced[1] : trimmed);
-}
+// extractJson moved to src/lib/ai/extract-json.ts (shared parser).

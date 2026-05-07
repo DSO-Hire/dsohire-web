@@ -315,8 +315,5 @@ function contextSection(context: ProfileContext): string {
 // Helpers
 // ─────────────────────────────────────────────────────────────────────
 
-function extractJson(text: string): unknown {
-  const trimmed = text.trim();
-  const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/);
-  return JSON.parse(fenced ? fenced[1] : trimmed);
-}
+// extractJson moved to src/lib/ai/extract-json.ts (shared with
+// jd-generator-action, rejection-reason-action, and resume/parse).

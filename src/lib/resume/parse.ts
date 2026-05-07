@@ -38,6 +38,7 @@ import {
   estimateHaikuCostUsd,
 } from "@/lib/ai/anthropic";
 import { logAiUsage } from "@/lib/ai/usage";
+import { extractJson } from "@/lib/ai/extract-json";
 
 // ─────────────────────────────────────────────────────────────────────
 // Output schema
@@ -435,9 +436,6 @@ ${text}
 Return only the JSON object.`;
 }
 
-function extractJson(text: string): unknown {
-  // Strip code fences if the model wrapped JSON despite instructions.
-  const trimmed = text.trim();
-  const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/);
-  return JSON.parse(fenced ? fenced[1] : trimmed);
-}
+// extractJson lives in src/lib/ai/extract-json.ts — shared across every
+// AI surface so the parser fix from 2026-05-07 (Haiku adding preamble
+// breaking the naive fenced-block matcher) covers everything at once.

@@ -535,17 +535,22 @@ function DescriptionSection({
             <span className="font-bold text-ink">{initialTitle}</span>.
           </p>
         )}
-        <JobDescriptionEditor
-          value={description}
-          onChange={(v) => {
-            setDescription(v);
-            setSaved(false);
-          }}
-          placeholder="Describe the role, responsibilities, day-to-day, and what makes this DSO a great place to work…"
-        />
+        {/* data-jd-editor-anchor lets JdGeneratorPanel scroll into view
+            after Apply so operators see the editable editor below. */}
+        <div data-jd-editor-anchor="true" className="scroll-mt-24">
+          <JobDescriptionEditor
+            value={description}
+            onChange={(v) => {
+              setDescription(v);
+              setSaved(false);
+            }}
+            placeholder="Describe the role, responsibilities, day-to-day, and what makes this DSO a great place to work…"
+          />
+        </div>
         <p className="text-[12px] text-slate-meta">
           Headings, bold/italic, lists, links, and blockquotes supported. Skip
-          H1 — that&apos;s reserved for the page title.
+          H1 — that&apos;s reserved for the page title. The AI draft above is a
+          read-only preview — your edits live below.
         </p>
       </div>
       <SaveBar
