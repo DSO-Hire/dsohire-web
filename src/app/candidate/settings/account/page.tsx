@@ -28,18 +28,40 @@ export default async function CandidateSettingsAccountPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/candidate/sign-in?next=/candidate/settings/account");
 
-  const { data: candidate } = await supabase
-    .from("candidates")
-    .select("phone")
-    .eq("auth_user_id", user.id)
-    .maybeSingle();
+  const [{ data: candidate }, { data: pendingRows }] = await Promise.all([
+    supabase
+      .from("candidates")
+      .select("phone")
+      .eq("auth_user_id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("pending_email_changes")
+      .select("id, new_email, expires_at, created_at")
+      .eq("candidate_user_id", user.id)
+      .is("consumed_at", null)
+      .is("revoked_at", null)
+      .gt("expires_at", new Date().toISOString())
+      .order("created_at", { ascending: false })
+      .limit(1),
+  ]);
 
   const phone = (candidate?.phone as string | null) ?? null;
+  const pendingRow = (pendingRows?.[0] ?? null) as
+    | {
+        id: string;
+        new_email: string;
+        expires_at: string;
+        created_at: string;
+      }
+    | null;
 
   return (
     <div className="space-y-6">
       <PasswordSection />
-      <EmailChangeForm currentEmail={user.email ?? null} />
+      <EmailChangeForm
+        currentEmail={user.email ?? null}
+        initialPending={pendingRow}
+      />
       <PhoneForm initialPhone={phone} />
       <LanguageStub />
 

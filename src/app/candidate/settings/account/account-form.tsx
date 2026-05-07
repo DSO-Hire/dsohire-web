@@ -14,28 +14,56 @@
  */
 
 import { useState, useTransition } from "react";
-import { Mail, Phone, Languages, Sparkles, AlertCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Mail, Phone, Languages, Sparkles, AlertCircle, Clock } from "lucide-react";
 import {
   requestEmailChange,
+  verifyEmailChangeOtp,
+  cancelEmailChange,
   updatePhone,
 } from "./actions";
+
+export interface PendingEmailChange {
+  id: string;
+  new_email: string;
+  expires_at: string;
+  created_at: string;
+}
 
 // ─────────────────────────────────────────────────────────────────────
 // Email change
 // ─────────────────────────────────────────────────────────────────────
 
+/**
+ * EmailChangeForm — OTP-first two-step (Phase 4.3.a rebuild).
+ *
+ * Step 1: candidate enters new email; we send a 6-digit OTP to the NEW
+ *         address + a "this wasn't me" link to the OLD.
+ * Step 2: candidate enters the 6-digit code; we look up the pending row,
+ *         swap auth.users.email, and mark consumed.
+ *
+ * If the page loads with an unconsumed/unrevoked/unexpired pending row
+ * (passed via `initialPending`), we render Step 2 directly.
+ */
 export function EmailChangeForm({
   currentEmail,
+  initialPending,
 }: {
   currentEmail: string | null;
+  initialPending?: PendingEmailChange | null;
 }) {
+  const router = useRouter();
+  const [pending, setPending] = useState<PendingEmailChange | null>(
+    initialPending ?? null
+  );
   const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
   const [, startWork] = useTransition();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onRequest = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setFlash(null);
@@ -44,8 +72,57 @@ export function EmailChangeForm({
       const result = await requestEmailChange(email);
       setBusy(false);
       if (!result.ok) return setError(result.error);
-      setFlash(result.message ?? "Confirmation sent.");
+      const trimmed = email.trim().toLowerCase();
+      // Synthesize the pending row so the UI flips to Step 2 immediately.
+      setPending({
+        id: result.requestId,
+        new_email: trimmed,
+        expires_at: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+        created_at: new Date().toISOString(),
+      });
+      setFlash(`Code sent to ${trimmed}. Enter it below.`);
       setEmail("");
+    });
+  };
+
+  const onVerify = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pending) return;
+    setError(null);
+    setFlash(null);
+    setBusy(true);
+    startWork(async () => {
+      const result = await verifyEmailChangeOtp({
+        requestId: pending.id,
+        code,
+      });
+      setBusy(false);
+      if (!result.ok) return setError(result.error);
+      setPending(null);
+      setCode("");
+      setFlash(`Email changed to ${result.newEmail}.`);
+      // Pull a fresh server payload so the heading reflects the new email.
+      router.refresh();
+    });
+  };
+
+  const onCancel = () => {
+    if (!pending) return;
+    if (
+      !confirm("Cancel this email-change request? You can start over after.")
+    ) {
+      return;
+    }
+    setError(null);
+    setFlash(null);
+    setBusy(true);
+    startWork(async () => {
+      const result = await cancelEmailChange(pending.id);
+      setBusy(false);
+      if (!result.ok) return setError(result.error);
+      setPending(null);
+      setCode("");
+      setFlash("Email-change request canceled.");
     });
   };
 
@@ -55,40 +132,95 @@ export function EmailChangeForm({
       title="Email"
       description={
         currentEmail
-          ? `Currently signing in as ${currentEmail}. Change it below — we send a confirmation to the new address before swapping.`
+          ? `Currently signing in as ${currentEmail}. We send a 6-digit code to the new address before swapping.`
           : "Set or change the email you use to sign in."
       }
     >
-      <form onSubmit={onSubmit} className="space-y-3">
-        <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-800">
-            New email
-          </span>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@new-address.com"
-            autoComplete="email"
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
-          />
-        </label>
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-slate-500">
-            We&apos;ll send a confirmation link to the new address. Your
-            current email stays active until you click it.
-          </span>
-          <button
-            type="submit"
-            disabled={busy || email.trim().length === 0}
-            className="inline-flex items-center gap-1.5 rounded-md bg-[#14233F] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d172b] disabled:opacity-50"
-          >
-            {busy ? "Sending…" : "Send confirmation"}
-          </button>
-        </div>
-        {error && <FlashError message={error} />}
-        {flash && <FlashSuccess message={flash} />}
-      </form>
+      {pending ? (
+        <form onSubmit={onVerify} className="space-y-3">
+          <div className="rounded-md border border-[#4D7A60]/30 bg-[#F7F4ED] p-3 text-sm">
+            <p className="font-medium text-[#14233F]">
+              Code sent to{" "}
+              <span className="font-semibold">{pending.new_email}</span>
+            </p>
+            <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-slate-600">
+              <Clock className="size-3" />
+              Expires{" "}
+              {new Date(pending.expires_at).toLocaleTimeString([], {
+                hour: "numeric",
+                minute: "2-digit",
+              })}
+            </p>
+          </div>
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-slate-800">
+              6-digit code
+            </span>
+            <input
+              type="text"
+              value={code}
+              onChange={(e) =>
+                setCode(e.target.value.replace(/\D/g, "").slice(0, 6))
+              }
+              placeholder="• • • • • •"
+              autoComplete="one-time-code"
+              inputMode="numeric"
+              maxLength={6}
+              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-center font-mono text-lg tracking-[8px] shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+            />
+          </label>
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              onClick={onCancel}
+              disabled={busy}
+              className="text-xs font-medium text-slate-500 hover:text-red-700 disabled:opacity-50"
+            >
+              Cancel this request
+            </button>
+            <button
+              type="submit"
+              disabled={busy || code.length !== 6}
+              className="inline-flex items-center gap-1.5 rounded-md bg-[#14233F] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d172b] disabled:opacity-50"
+            >
+              {busy ? "Verifying…" : "Verify and swap"}
+            </button>
+          </div>
+          {error && <FlashError message={error} />}
+          {flash && <FlashSuccess message={flash} />}
+        </form>
+      ) : (
+        <form onSubmit={onRequest} className="space-y-3">
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-slate-800">
+              New email
+            </span>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@new-address.com"
+              autoComplete="email"
+              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+            />
+          </label>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-slate-500">
+              We&apos;ll send a 6-digit code to the new address. Your current
+              email stays active until you verify it.
+            </span>
+            <button
+              type="submit"
+              disabled={busy || email.trim().length === 0}
+              className="inline-flex items-center gap-1.5 rounded-md bg-[#14233F] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d172b] disabled:opacity-50"
+            >
+              {busy ? "Sending…" : "Send code"}
+            </button>
+          </div>
+          {error && <FlashError message={error} />}
+          {flash && <FlashSuccess message={flash} />}
+        </form>
+      )}
     </SectionCard>
   );
 }

@@ -5,7 +5,7 @@
  * of these are already firing through the dispatcher (e.g.
  * `application.message_received` shipped in 4.1.b); others are
  * placeholder rows for events that downstream phases will start
- * emitting (`application.stage_changed` once 4.4 ships, `job_alert_match`
+ * emitting (`candidate.stage_changed` once 4.4 ships, `job_alert_match`
  * once 4.3.e ships saved searches, etc.).
  *
  * Building the UI ahead of every emitter is intentional — the
@@ -57,7 +57,7 @@ export const CANDIDATE_NOTIFICATION_EVENTS: ReadonlyArray<CandidateNotificationE
       shipped: true,
     },
     {
-      event_kind: "application.stage_changed",
+      event_kind: "candidate.stage_changed",
       group: "Applications",
       title: "Application status updates",
       description:
@@ -127,7 +127,7 @@ export const CANDIDATE_NOTIFICATION_DEFAULTS: Record<
   Record<string, boolean>
 > = {
   "candidate.application_received": { email: true, in_app: true },
-  "application.stage_changed": { email: true, in_app: true },
+  "candidate.stage_changed": { email: true, in_app: true },
   "application.message_received": { email: true, in_app: true },
   "job_alert.match": { email: true },
   "job_alert.recommended": { email: true },

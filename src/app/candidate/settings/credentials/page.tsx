@@ -1,11 +1,13 @@
 /**
- * /candidate/settings/credentials — Phase 4.3.e v1.
+ * /candidate/settings/credentials — Phase 4.3.e.
  *
  * Four sections:
  *   1. Licenses — read-only summary of candidate_licenses with expiry
  *      highlighting (red 30 days out, amber 60 days out)
  *   2. Certifications — same pattern from candidate_certifications
- *   3. CE tracking — explicit "coming soon" with detailed scope
+ *   3. CE tracking — full CRUD via <CeTracker> (Phase 4.3.e shipped
+ *      2026-05-07): hours by year, certificate file uploads to the
+ *      ce_certificates bucket, 50-cert / 10MB caps
  *   4. Saved searches — full CRUD on candidate_saved_searches
  *
  * Licenses + certs editing lives on /candidate/profile (already shipped
@@ -30,6 +32,7 @@ import {
   CERTIFICATION_KINDS,
 } from "@/lib/candidate/canonical-lists";
 import { SavedSearches, type SavedSearch } from "./saved-searches";
+import { CeTracker, type CeRow } from "./ce-tracker";
 
 export const metadata: Metadata = { title: "Credentials · Settings" };
 
@@ -53,6 +56,7 @@ export default async function CandidateCredentialsPage() {
     { data: licenses },
     { data: certifications },
     { data: savedSearches },
+    { data: ceCertificates },
   ] = await Promise.all([
     supabase
       .from("candidate_licenses")
@@ -69,6 +73,13 @@ export default async function CandidateCredentialsPage() {
       .select("*")
       .eq("candidate_id", candidateId)
       .order("updated_at", { ascending: false }),
+    supabase
+      .from("ce_certificates")
+      .select(
+        "id, course_name, provider, hours_credit, category, completion_date, license_type, file_path, file_size_bytes, created_at"
+      )
+      .eq("candidate_id", candidateId)
+      .order("completion_date", { ascending: false }),
   ]);
 
   return (
@@ -104,7 +115,7 @@ export default async function CandidateCredentialsPage() {
           }>
         }
       />
-      <CeTrackingSection />
+      <CeTrackingSection ceRows={(ceCertificates ?? []) as unknown as CeRow[]} />
       <SavedSearchesSection
         searches={(savedSearches ?? []) as unknown as SavedSearch[]}
       />
@@ -217,29 +228,18 @@ function CertificationsSection({
 // CE tracking — explicit stub
 // ─────────────────────────────────────────────────────────────────────
 
-function CeTrackingSection() {
+function CeTrackingSection({ ceRows }: { ceRows: CeRow[] }) {
   return (
     <SectionCard
       icon={<GraduationCap className="size-5 text-[#4D7A60]" />}
-      title="Continuing education tracking"
-      description="The big differentiator. Track CE hours against your state's requirements + upload certificates for your records."
+      title={`Continuing education${ceRows.length > 0 ? ` (${ceRows.length})` : ""}`}
+      description="Track CE hours, attach certificate files, and keep a year-by-year record. The dental-ops differentiator no other job board has."
     >
-      <div className="rounded-md border border-[#4D7A60]/30 bg-[#F7F4ED] p-4">
-        <p className="text-sm font-semibold text-[#14233F]">Coming soon</p>
-        <p className="mt-1 text-sm text-slate-700">
-          CE tracking is an XL build — file uploads (10MB cap, 50-cert max
-          per candidate), state-specific CE requirements lookup, hours
-          tracking by category, expiry reminders. Building it cleanly takes
-          a focused session, not a tail-end add to a long sprint.
-        </p>
-        <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-slate-700">
-          <li>Per-license CE entries with course name, hours, category, completion date</li>
-          <li>State-specific requirement lookup (initial states: CA, TX, FL, NY, IL)</li>
-          <li>Certificate file upload to a private candidate-credentials bucket</li>
-          <li>Compliance summary: &quot;You have 12 of 24 required hours for KS RDH renewal&quot;</li>
-          <li>30-day pre-expiration reminders via the notification orchestration we shipped earlier today</li>
-        </ul>
-      </div>
+      <CeTracker initial={ceRows} />
+      <p className="mt-4 text-xs text-slate-500">
+        State-specific CE-requirement lookup (e.g. &ldquo;You&apos;ve got 12 of
+        24 required hours for KS RDH renewal&rdquo;) lands in a follow-up.
+      </p>
     </SectionCard>
   );
 }
