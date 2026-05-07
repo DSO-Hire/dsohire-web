@@ -15,7 +15,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { EmployerShell } from "@/components/employer/employer-shell";
 import { ShieldAlert } from "lucide-react";
 import { DataForm } from "./data-form";
 
@@ -23,6 +22,12 @@ export const metadata: Metadata = { title: "Data & deletion · Settings" };
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Settings layout (`/employer/settings/layout.tsx`) already provides the
+ * EmployerShell + the outer "Configure DSO Hire for your team" header
+ * + the SettingsNav rail. This page renders ONLY the inner content for
+ * the right-hand column — no shell wrapper, no duplicate header.
+ */
 export default async function EmployerDataPage() {
   const supabase = await createSupabaseServerClient();
   const {
@@ -50,29 +55,27 @@ export default async function EmployerDataPage() {
   const dsoName = (dso?.name as string | null) ?? "this DSO";
 
   return (
-    <EmployerShell active="settings">
-      <div className="max-w-[820px] space-y-6">
-        <header>
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
-            Data &amp; deletion
-          </div>
-          <h1 className="font-display text-3xl font-extrabold tracking-[-0.8px] text-ink leading-tight">
-            Your org&apos;s data, your call
-          </h1>
-          <p className="mt-2 text-sm text-slate-body">
-            Download every row tied to <strong>{dsoName}</strong>, or schedule
-            the org for deletion. We make all of it cheap to do, and we never
-            send your data anywhere you didn&apos;t explicitly ask us to.
-          </p>
-        </header>
+    <div className="max-w-[820px] space-y-6">
+      <header>
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+          Data &amp; deletion
+        </div>
+        <h2 className="font-display text-2xl font-extrabold tracking-[-0.6px] text-ink leading-tight">
+          Your org&apos;s data, your call
+        </h2>
+        <p className="mt-2 text-sm text-slate-body">
+          Download every row tied to <strong>{dsoName}</strong>, or schedule
+          the org for deletion. We make all of it cheap to do, and we never
+          send your data anywhere you didn&apos;t explicitly ask us to.
+        </p>
+      </header>
 
-        {role !== "owner" ? (
-          <NonOwnerNotice />
-        ) : (
-          <DataForm dsoName={dsoName} />
-        )}
-      </div>
-    </EmployerShell>
+      {role !== "owner" ? (
+        <NonOwnerNotice />
+      ) : (
+        <DataForm dsoName={dsoName} />
+      )}
+    </div>
   );
 }
 
