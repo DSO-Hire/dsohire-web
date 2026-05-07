@@ -21,7 +21,7 @@ import {
   FileText,
   Settings,
   LogOut,
-  Search,
+  Briefcase,
   LifeBuoy,
   Inbox as InboxIcon,
 } from "lucide-react";
@@ -56,7 +56,7 @@ interface NavItem {
 
 const NAV: ReadonlyArray<NavItem> = [
   { id: "dashboard", label: "Dashboard", href: "/candidate/dashboard", Icon: LayoutDashboard },
-  { id: "jobs", label: "Jobs", href: "/candidate/jobs", Icon: Search },
+  { id: "jobs", label: "Jobs", href: "/candidate/jobs", Icon: Briefcase },
   { id: "applications", label: "Applications", href: "/candidate/applications", Icon: FileText },
   { id: "inbox", label: "Inbox", href: "/candidate/inbox", Icon: InboxIcon },
   { id: "profile", label: "Profile", href: "/candidate/profile", Icon: UserCircle },

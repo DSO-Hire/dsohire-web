@@ -10,8 +10,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import { ArrowLeft, LayoutGrid, List } from "lucide-react";
+import { LayoutGrid, List } from "lucide-react";
 import {
   ApplicationsList,
   type ApplicationsListItem,
@@ -93,23 +92,16 @@ export function ApplicationsBoard({
 
   return (
     <div>
-      <Link
-        href={`/employer/jobs/${job.id}`}
-        className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-6"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Back to Job
-      </Link>
-
+      {/* Outer page already renders the "Back to Jobs" + job title above
+          this board, so we drop the duplicate "Back to Job" + redundant
+          job-title H1 that used to live here. The eyebrow + description
+          stay so the section still has context when the toggle is on. */}
       <header className="mb-8 flex flex-wrap items-end justify-between gap-6">
         <div className="min-w-0">
           <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
             Applications · {initialApplications.length}
           </div>
-          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink truncate">
-            {job.title}
-          </h1>
-          <p className="mt-3 text-[14px] text-slate-body leading-relaxed max-w-[640px]">
+          <p className="mt-1 text-[14px] text-slate-body leading-relaxed max-w-[640px]">
             Pipeline view of every candidate who applied to this job. Click any
             card to review.
           </p>

@@ -36,6 +36,7 @@ import { redirect } from "next/navigation";
 import {
   LayoutDashboard,
   Briefcase,
+  FileText,
   Inbox as InboxIcon,
   MapPin,
   CreditCard,
@@ -45,7 +46,6 @@ import {
   UsersRound,
   BarChart3,
   LifeBuoy,
-  MessageSquare,
 } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { BrandLockup } from "@/components/marketing/site-shell";
@@ -95,9 +95,9 @@ const NAV: ReadonlyArray<NavItem> = [
   // ─── Work ───
   { id: "dashboard", label: "Dashboard", href: "/employer/dashboard", Icon: LayoutDashboard, group: "work" },
   { id: "jobs", label: "Jobs", href: "/employer/jobs", Icon: Briefcase, group: "work" },
-  { id: "applications", label: "Applications", href: "/employer/applications", Icon: InboxIcon, group: "work" },
+  { id: "applications", label: "Applications", href: "/employer/applications", Icon: FileText, group: "work" },
   { id: "talent-pool", label: "Talent Pool", href: "/employer/talent-pool", Icon: UsersRound, group: "work" },
-  { id: "inbox", label: "Inbox", href: "/employer/inbox", Icon: MessageSquare, group: "work" },
+  { id: "inbox", label: "Inbox", href: "/employer/inbox", Icon: InboxIcon, group: "work" },
   // ─── Insight ───
   { id: "reports", label: "Reports", href: "/employer/reports", Icon: BarChart3, group: "insight", hideFromRoles: ["hiring_manager"] },
   // ─── Setup ───
