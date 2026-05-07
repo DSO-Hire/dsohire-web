@@ -129,6 +129,168 @@ export const ParsedResumeSchema = z.object({
 
 export type ParsedResume = z.infer<typeof ParsedResumeSchema>;
 
+/**
+ * Normalize the raw AI response into the strict ParsedResumeSchema
+ * shape. Caught 2026-05-07 (Cam test) — Haiku occasionally:
+ *   • Omits fields entirely when the resume doesn't mention them
+ *     (the prompt says "use null" but the model still drops keys)
+ *   • Emits a bare value instead of {value, confidence} for fields
+ *     it's confident about
+ *   • Skips the confidence label when it forgets the wrapper
+ *
+ * The strict Zod schema rejected every one of those shapes, surfacing
+ * a generic "unexpected response shape" error to the user. Better to
+ * be tolerant: fill in missing keys with {value: null, confidence: "low"}
+ * and re-wrap bare values into the expected shape. The type stays
+ * strict for consumers; only the entry path is forgiving.
+ */
+function normalizeAiResponse(raw: unknown): unknown {
+  if (!isPlainObject(raw)) return raw;
+
+  const r = { ...raw } as Record<string, unknown>;
+
+  // basics — coerce every expected key into {value, confidence}.
+  const basicsKeys = [
+    "full_name",
+    "headline",
+    "summary",
+    "email",
+    "phone",
+    "pronouns",
+    "current_location_city",
+    "current_location_state",
+    "years_experience_dental",
+    "linkedin_url",
+  ];
+  const basicsRaw = isPlainObject(r.basics) ? (r.basics as Record<string, unknown>) : {};
+  const basics: Record<string, unknown> = {};
+  for (const key of basicsKeys) {
+    basics[key] = coerceField(basicsRaw[key]);
+  }
+  r.basics = basics;
+
+  // Per-entry array fields. Each entry's own keys also get coerced.
+  r.work_history = coerceEntries(r.work_history, [
+    "title",
+    "company_name",
+    "is_dso",
+    "start_date",
+    "end_date",
+    "is_current",
+    "description",
+    "pms_systems_used",
+    "procedures_performed",
+  ]);
+  r.education = coerceEntries(r.education, [
+    "school_name",
+    "degree",
+    "field_of_study",
+    "start_year",
+    "end_year",
+    "description",
+  ]);
+  r.licenses = coerceEntries(r.licenses, [
+    "license_type",
+    "license_number",
+    "state",
+    "issued_date",
+    "expires_date",
+  ]);
+  r.certifications = coerceEntries(r.certifications, [
+    "kind",
+    "level",
+    "issued_date",
+    "expires_date",
+  ]);
+
+  // Plain string arrays — default to [] if missing or wrong shape.
+  for (const key of [
+    "skills",
+    "languages",
+    "desired_roles",
+    "desired_specialty",
+  ] as const) {
+    r[key] = Array.isArray(r[key])
+      ? (r[key] as unknown[]).filter((x): x is string => typeof x === "string")
+      : [];
+  }
+
+  // flagged_redactions — defensive default + shape coercion per item.
+  if (!Array.isArray(r.flagged_redactions)) {
+    r.flagged_redactions = [];
+  } else {
+    r.flagged_redactions = (r.flagged_redactions as unknown[])
+      .filter(isPlainObject)
+      .map((entry) => {
+        const e = entry as Record<string, unknown>;
+        const kind = typeof e.kind === "string" ? e.kind : "other";
+        const allowed = ["ssn", "dob", "dea", "other"];
+        return {
+          kind: allowed.includes(kind) ? kind : "other",
+          note: typeof e.note === "string" ? e.note : null,
+        };
+      });
+  }
+
+  return r;
+}
+
+function coerceField(raw: unknown): { value: unknown; confidence: string } {
+  // Already in the expected shape — pass through (Zod will validate the
+  // inner value type).
+  if (
+    isPlainObject(raw) &&
+    "value" in raw &&
+    "confidence" in raw &&
+    typeof (raw as { confidence: unknown }).confidence === "string"
+  ) {
+    const c = (raw as { confidence: string }).confidence;
+    return {
+      value: (raw as { value: unknown }).value,
+      confidence:
+        c === "high" || c === "medium" || c === "low" ? c : "low",
+    };
+  }
+
+  // {value: ..., (no confidence)} — pull value out, default confidence
+  // to "low". Without this branch we'd wrap the whole object and Zod
+  // would reject it.
+  if (isPlainObject(raw) && "value" in raw) {
+    return {
+      value: (raw as { value: unknown }).value,
+      confidence: "low",
+    };
+  }
+
+  // Bare value — wrap it. Treat undefined/missing as null with low
+  // confidence; everything else stays as-is.
+  if (raw === undefined || raw === null) {
+    return { value: null, confidence: "low" };
+  }
+  return { value: raw, confidence: "low" };
+}
+
+function coerceEntries(
+  raw: unknown,
+  fields: readonly string[]
+): Array<Record<string, { value: unknown; confidence: string }>> {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter(isPlainObject)
+    .map((entry) => {
+      const e = entry as Record<string, unknown>;
+      const out: Record<string, { value: unknown; confidence: string }> = {};
+      for (const key of fields) {
+        out[key] = coerceField(e[key]);
+      }
+      return out;
+    });
+}
+
+function isPlainObject(x: unknown): x is Record<string, unknown> {
+  return typeof x === "object" && x !== null && !Array.isArray(x);
+}
+
 // ─────────────────────────────────────────────────────────────────────
 // Public API
 // ─────────────────────────────────────────────────────────────────────
@@ -220,10 +382,26 @@ export async function parseResumeWithAI(
   let parsed: ParsedResume;
   try {
     const json = extractJson(rawText);
-    parsed = ParsedResumeSchema.parse(json);
+    const normalized = normalizeAiResponse(json);
+    parsed = ParsedResumeSchema.parse(normalized);
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Could not parse AI response";
+    // ZodError carries an `issues` array — pull the first few so the
+    // production log row tells us *which* field broke (e.g.
+    // "basics.email.value: Expected string, received number") rather
+    // than the opaque generic "unexpected response shape" we surfaced
+    // before. The normalizer above should catch the common omission/
+    // bare-value cases; anything that still fails is a real schema
+    // mismatch worth seeing.
+    const zodIssues =
+      err instanceof z.ZodError
+        ? err.issues.slice(0, 5).map((i) => ({
+            path: i.path.join("."),
+            code: i.code,
+            message: i.message,
+          }))
+        : null;
     await logAiUsage({
       dsoId: null,
       userId: input.userId,
@@ -237,6 +415,7 @@ export async function parseResumeWithAI(
       ),
       requestMetadata: {
         parse_error: message,
+        zod_issues: zodIssues,
         raw_preview: rawText.slice(0, 500),
         input_chars: text.length,
       },
