@@ -1,57 +1,41 @@
 "use client";
 
 /**
- * Data & Account tab client UI (Phase 4.3.f).
+ * Employer Data & Deletion client form (Phase 4.5.g).
  *
- * Four sections:
- *   1. Download my data — calls exportMyData server action, drops a
- *      JSON file into the browser. v1: synchronous. v2 (future): async
- *      ZIP via background job + 24h email link.
- *   2. Application history — link to /candidate/applications.
- *   3. Withdraw active applications — link to filtered list.
- *   4. Delete account — multi-step confirmation modal with type-DELETE
- *      gate + pre-delete export prompt + soft-delete kicked off; user
- *      is signed out and routed to a confirmation page.
+ * Two sections:
+ *   1. Download org data — ZIP export, owner-only.
+ *   2. Delete this DSO — multi-step confirmation modal:
+ *      • Step 1: pre-delete export prompt (highly recommended)
+ *      • Step 2: Type DSO name + DELETE gate
+ *      • Step 3: Done — Stripe canceled, signed out, redirected
  */
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Download,
-  FileText,
-  ArrowRight,
-  AlertTriangle,
   Loader2,
   X,
+  AlertTriangle,
   ShieldAlert,
 } from "lucide-react";
-import {
-  exportMyData,
-  softDeleteAccount,
-} from "./actions";
+import { exportOrgData, softDeleteOrg } from "./actions";
 
-interface DataFormProps {
-  candidateEmail: string | null;
-  candidateName: string | null;
-}
-
-export function DataForm({ candidateEmail, candidateName }: DataFormProps) {
+export function DataForm({ dsoName }: { dsoName: string }) {
   return (
     <div className="space-y-6">
-      <DownloadMyDataSection email={candidateEmail} />
-      <ApplicationHistorySection />
-      <WithdrawApplicationsSection />
-      <DeleteAccountSection name={candidateName} />
+      <DownloadOrgDataSection />
+      <DeleteOrgSection dsoName={dsoName} />
     </div>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// Section 1 — Download my data
+// Section 1 — Download org data
 // ─────────────────────────────────────────────────────────────────────
 
-function DownloadMyDataSection({ email: _email }: { email: string | null }) {
+function DownloadOrgDataSection() {
   const [, startWork] = useTransition();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +47,7 @@ function DownloadMyDataSection({ email: _email }: { email: string | null }) {
     setMissingCount(0);
     setBusy(true);
     startWork(async () => {
-      const result = await exportMyData();
+      const result = await exportOrgData();
       setBusy(false);
       if (!result.ok) return setError(result.error);
       triggerZipDownload(result.zipBytes, result.filename);
@@ -73,17 +57,31 @@ function DownloadMyDataSection({ email: _email }: { email: string | null }) {
   };
 
   return (
-    <SectionCard
-      icon={<Download className="size-5 text-[#4D7A60]" />}
-      title="Download my data"
-      description="Pull a ZIP with every row tied to your DSO Hire account — profile, work history, education, licenses, certifications, CE certificates, applications, notification preferences, saved searches, and your block list — plus your resume + CE certificate files + profile photo."
-    >
+    <section className="border border-[var(--rule)] bg-white p-6 sm:p-8">
+      <header className="mb-4 flex items-start gap-3">
+        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-[#4D7A60]/10">
+          <Download className="size-5 text-[#4D7A60]" />
+        </div>
+        <div>
+          <h2 className="font-display text-lg font-bold text-ink">
+            Download organization data
+          </h2>
+          <p className="mt-0.5 text-sm text-slate-body">
+            Pull a ZIP with every job posting, application, screening
+            response, comment, scorecard, status event, message, team
+            member, location, email template, subscription record, and
+            invoice — plus your DSO logo + per-location logos + photo
+            gallery.
+          </p>
+        </div>
+      </header>
+
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
           onClick={onDownload}
           disabled={busy}
-          className="inline-flex items-center gap-2 rounded-md bg-[#14233F] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0d172b] disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 text-sm font-semibold text-ivory hover:bg-ink-soft disabled:opacity-60"
         >
           {busy ? (
             <>
@@ -98,11 +96,12 @@ function DownloadMyDataSection({ email: _email }: { email: string | null }) {
           )}
         </button>
         {downloadedAt && (
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-slate-meta">
             Downloaded {downloadedAt.toLocaleTimeString()}.
           </span>
         )}
       </div>
+
       {error && (
         <p role="alert" className="mt-3 text-sm text-red-700">
           {error}
@@ -114,12 +113,12 @@ function DownloadMyDataSection({ email: _email }: { email: string | null }) {
           fetched. See MISSING_FILES.txt inside the ZIP for details.
         </p>
       )}
-      <p className="mt-3 text-xs text-slate-500">
-        Coming soon: async build via background job with a 24-hour download
-        link emailed to you for very large exports. The sync ZIP works today
-        for everyone under the 50-CE / 10MB-per-file caps.
+      <p className="mt-3 text-xs text-slate-meta">
+        Excluded: candidate-uploaded resumes (those are owned by the
+        candidate; they have their own export). Async build via background
+        job for very large exports lands in a follow-up.
       </p>
-    </SectionCard>
+    </section>
   );
 }
 
@@ -136,58 +135,10 @@ function triggerZipDownload(zipBytes: ArrayBuffer, filename: string) {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// Section 2 — Application history (deep link)
+// Section 2 — Delete this DSO
 // ─────────────────────────────────────────────────────────────────────
 
-function ApplicationHistorySection() {
-  return (
-    <SectionCard
-      icon={<FileText className="size-5 text-[#4D7A60]" />}
-      title="Application history"
-      description="Every job you've applied to, with the current status."
-    >
-      <Link
-        href="/candidate/applications"
-        className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
-      >
-        Open my applications
-        <ArrowRight className="size-3.5" />
-      </Link>
-    </SectionCard>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────
-// Section 3 — Withdraw applications
-// ─────────────────────────────────────────────────────────────────────
-
-function WithdrawApplicationsSection() {
-  return (
-    <SectionCard
-      icon={<X className="size-5 text-[#4D7A60]" />}
-      title="Withdraw active applications"
-      description="Pulled-in candidates and inactive seekers handle this differently. Use the per-application withdraw on the applications list."
-    >
-      <Link
-        href="/candidate/applications?status=active"
-        className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
-      >
-        Open active applications
-        <ArrowRight className="size-3.5" />
-      </Link>
-      <p className="mt-2 text-xs text-slate-500">
-        Bulk withdraw lands in a follow-up. For now, withdraw
-        per-application on the list view.
-      </p>
-    </SectionCard>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────
-// Section 4 — Delete account
-// ─────────────────────────────────────────────────────────────────────
-
-function DeleteAccountSection({ name }: { name: string | null }) {
+function DeleteOrgSection({ dsoName }: { dsoName: string }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   return (
@@ -197,14 +148,14 @@ function DeleteAccountSection({ name }: { name: string | null }) {
           <ShieldAlert className="size-5 text-red-700" />
         </div>
         <div>
-          <h2 className="font-display text-lg font-bold text-[#14233F]">
-            Delete my account
+          <h2 className="font-display text-lg font-bold text-ink">
+            Delete this organization
           </h2>
-          <p className="mt-0.5 text-sm text-slate-600">
-            Soft-deleted immediately, hard-deleted 30 days later. You
-            can&apos;t apply to jobs while soft-deleted, and your profile
-            is hidden from every employer. Email cam@dsohire.com within
-            30 days to undo.
+          <p className="mt-0.5 text-sm text-slate-body">
+            Soft-deleted immediately, hard-deleted 30 days later. Your team
+            members lose access right away. Any active Stripe subscription
+            cancels at the end of its current period. Email
+            cam@dsohire.com within 30 days to undo.
           </p>
         </div>
       </header>
@@ -213,12 +164,12 @@ function DeleteAccountSection({ name }: { name: string | null }) {
         onClick={() => setConfirmOpen(true)}
         className="rounded-md border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 hover:border-red-400 hover:bg-red-50"
       >
-        Delete account
+        Delete {dsoName}
       </button>
 
       {confirmOpen && (
-        <DeleteAccountModal
-          name={name}
+        <DeleteOrgModal
+          dsoName={dsoName}
           onClose={() => setConfirmOpen(false)}
         />
       )}
@@ -230,11 +181,11 @@ function DeleteAccountSection({ name }: { name: string | null }) {
 // Multi-step delete confirmation
 // ─────────────────────────────────────────────────────────────────────
 
-function DeleteAccountModal({
-  name,
+function DeleteOrgModal({
+  dsoName,
   onClose,
 }: {
-  name: string | null;
+  dsoName: string;
   onClose: () => void;
 }) {
   const router = useRouter();
@@ -242,6 +193,7 @@ function DeleteAccountModal({
     "export-prompt"
   );
   const [confirmText, setConfirmText] = useState("");
+  const [nameTyped, setNameTyped] = useState("");
   const [, startWork] = useTransition();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -251,7 +203,7 @@ function DeleteAccountModal({
     setError(null);
     setBusy(true);
     startWork(async () => {
-      const result = await exportMyData();
+      const result = await exportOrgData();
       setBusy(false);
       if (!result.ok) return setError(result.error);
       triggerZipDownload(result.zipBytes, result.filename);
@@ -266,12 +218,19 @@ function DeleteAccountModal({
   const onConfirmDelete = () => {
     setError(null);
     if (confirmText.trim().toUpperCase() !== "DELETE") {
-      setError("Please type DELETE to confirm.");
+      setError("Please type DELETE in the confirm field.");
+      return;
+    }
+    if (nameTyped.trim().toLowerCase() !== dsoName.trim().toLowerCase()) {
+      setError(`Type the DSO name exactly ("${dsoName}") to confirm.`);
       return;
     }
     setBusy(true);
     startWork(async () => {
-      const result = await softDeleteAccount(confirmText);
+      const result = await softDeleteOrg({
+        confirmation: confirmText,
+        dsoNameTyped: nameTyped,
+      });
       setBusy(false);
       if (!result.ok) return setError(result.error);
       setHardDeleteOn(result.hardDeleteOn);
@@ -292,7 +251,7 @@ function DeleteAccountModal({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Delete account"
+      aria-label="Delete organization"
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
     >
       <button
@@ -302,14 +261,14 @@ function DeleteAccountModal({
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         tabIndex={-1}
       />
-      <div className="relative z-10 w-full max-w-[480px] overflow-hidden rounded-lg bg-white shadow-2xl">
+      <div className="relative z-10 w-full max-w-[520px] overflow-hidden rounded-lg bg-white shadow-2xl">
         <header className="flex items-start justify-between border-b border-slate-200 px-5 py-4">
-          <h2 className="font-display text-lg font-bold text-[#14233F]">
+          <h2 className="font-display text-lg font-bold text-ink">
             {step === "export-prompt"
-              ? "First — download a copy?"
+              ? "Download a copy first?"
               : step === "confirm"
                 ? "Last step"
-                : "Account scheduled for deletion"}
+                : "Organization scheduled for deletion"}
           </h2>
           <button
             type="button"
@@ -326,15 +285,15 @@ function DeleteAccountModal({
             <>
               <p className="text-sm text-slate-700">
                 Once you delete, we can&apos;t restore your data after the
-                30-day grace period ends. Want to download a JSON copy
-                first?
+                30-day grace period ends. Strongly recommended: download a
+                ZIP copy first.
               </p>
               <div className="flex flex-wrap items-center gap-3">
                 <button
                   type="button"
                   onClick={onExportFirst}
                   disabled={busy}
-                  className="inline-flex items-center gap-2 rounded-md bg-[#14233F] px-3 py-1.5 text-sm font-semibold text-white hover:bg-[#0d172b] disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-md bg-ink px-3 py-1.5 text-sm font-semibold text-ivory hover:bg-ink-soft disabled:opacity-60"
                 >
                   {busy ? (
                     <>
@@ -370,20 +329,40 @@ function DeleteAccountModal({
               <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
                 <AlertTriangle className="mt-0.5 size-4 shrink-0" />
                 <span>
-                  {name ? `Hi ${name}. ` : ""}
-                  Deleting your account hides your profile + applications
-                  from every DSO. Hard delete in 30 days.
+                  Deleting <strong>{dsoName}</strong> hides every job posting,
+                  removes team access, and cancels your Stripe subscription
+                  at the end of the current billing period. Hard delete in
+                  30 days.
                 </span>
               </div>
               <label className="block">
                 <span className="mb-1 block text-sm font-medium text-slate-800">
-                  Type <code className="rounded bg-slate-100 px-1 py-0.5 text-xs font-semibold text-red-700">DELETE</code> to confirm
+                  Type the DSO name (
+                  <code className="rounded bg-slate-100 px-1 py-0.5 text-xs font-semibold text-ink">
+                    {dsoName}
+                  </code>
+                  ) to confirm
+                </span>
+                <input
+                  type="text"
+                  value={nameTyped}
+                  onChange={(e) => setNameTyped(e.target.value)}
+                  autoFocus
+                  className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-red-400 focus:outline-none focus:ring-1 focus:ring-red-400"
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-sm font-medium text-slate-800">
+                  Type{" "}
+                  <code className="rounded bg-slate-100 px-1 py-0.5 text-xs font-semibold text-red-700">
+                    DELETE
+                  </code>{" "}
+                  to confirm
                 </span>
                 <input
                   type="text"
                   value={confirmText}
                   onChange={(e) => setConfirmText(e.target.value)}
-                  autoFocus
                   className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-red-400 focus:outline-none focus:ring-1 focus:ring-red-400"
                 />
               </label>
@@ -413,7 +392,7 @@ function DeleteAccountModal({
                       Deleting…
                     </>
                   ) : (
-                    "Delete my account"
+                    "Delete organization"
                   )}
                 </button>
               </div>
@@ -423,7 +402,8 @@ function DeleteAccountModal({
           {step === "done" && hardDeleteOn && (
             <>
               <p className="text-sm text-slate-700">
-                Your account is soft-deleted. We&apos;ll hard-delete it on{" "}
+                <strong>{dsoName}</strong> is soft-deleted. We&apos;ll
+                hard-delete it on{" "}
                 <strong>
                   {new Date(hardDeleteOn).toLocaleDateString("en-US", {
                     month: "long",
@@ -431,9 +411,10 @@ function DeleteAccountModal({
                     year: "numeric",
                   })}
                 </strong>
-                . Email{" "}
+                . Stripe will charge nothing further; your subscription
+                cancels at the end of its current billing period. Email{" "}
                 <a
-                  href="mailto:cam@dsohire.com?subject=Restore%20my%20DSO%20Hire%20account"
+                  href="mailto:cam@dsohire.com?subject=Restore%20my%20DSO%20Hire%20organization"
                   className="font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
                 >
                   cam@dsohire.com
@@ -443,7 +424,7 @@ function DeleteAccountModal({
               <button
                 type="button"
                 onClick={closeAndRedirectIfDeleted}
-                className="inline-flex items-center gap-2 rounded-md bg-[#14233F] px-3 py-1.5 text-sm font-semibold text-white hover:bg-[#0d172b]"
+                className="inline-flex items-center gap-2 rounded-md bg-ink px-3 py-1.5 text-sm font-semibold text-ivory hover:bg-ink-soft"
               >
                 Got it — sign me out
               </button>
@@ -452,38 +433,5 @@ function DeleteAccountModal({
         </div>
       </div>
     </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────
-// Shared section card
-// ─────────────────────────────────────────────────────────────────────
-
-function SectionCard({
-  icon,
-  title,
-  description,
-  children,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="border border-[var(--rule)] bg-white p-6 sm:p-8">
-      <header className="mb-4 flex items-start gap-3">
-        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-[#4D7A60]/10">
-          {icon}
-        </div>
-        <div>
-          <h2 className="font-display text-lg font-bold text-[#14233F]">
-            {title}
-          </h2>
-          <p className="mt-0.5 text-sm text-slate-600">{description}</p>
-        </div>
-      </header>
-      <div>{children}</div>
-    </section>
   );
 }

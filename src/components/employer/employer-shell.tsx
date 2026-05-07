@@ -133,9 +133,16 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
 
   const { data: dso } = await supabase
     .from("dsos")
-    .select("id, name, slug, status, logo_url, require_mfa")
+    .select("id, name, slug, status, logo_url, require_mfa, deleted_at")
     .eq("id", dsoUser.dso_id)
     .maybeSingle();
+
+  // ── Soft-deleted DSO guard (Phase 4.5.g) ──
+  // If the DSO is soft-deleted, every team member hits the restore
+  // landing page until the owner restores or the cron hard-deletes.
+  if ((dso as Record<string, unknown> | null)?.deleted_at) {
+    redirect("/employer/restore");
+  }
 
   // ── MFA enforcement (Phase 4.5.d) ──
   const mfaState = await getMfaState(supabase);

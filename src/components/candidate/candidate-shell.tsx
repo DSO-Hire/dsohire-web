@@ -74,11 +74,20 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
 
   const { data: candidate } = await supabase
     .from("candidates")
-    .select("id, full_name, headline, current_title, is_searchable, avatar_url")
+    .select(
+      "id, full_name, headline, current_title, is_searchable, avatar_url, deleted_at"
+    )
     .eq("auth_user_id", user.id)
     .maybeSingle();
 
   if (!candidate) redirect("/candidate/sign-up");
+
+  // Soft-deleted accounts can't reach any candidate-area page — they
+  // hit the restore landing page until they restore or the 30-day
+  // grace period expires (after which the cron hard-deletes the row).
+  if ((candidate as Record<string, unknown>).deleted_at) {
+    redirect("/candidate/restore");
+  }
 
   const candidateName =
     (candidate.full_name as string | null) ?? user.email ?? "Candidate";

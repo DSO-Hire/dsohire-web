@@ -39,6 +39,7 @@ import {
   ShieldCheck,
   History,
   Plug,
+  Database,
   ExternalLink,
 } from "lucide-react";
 
@@ -92,6 +93,7 @@ const GROUPS: NavGroup[] = [
     entries: [
       { id: "audit", label: "Activity & audit", href: "/employer/settings/audit", Icon: History, comingSoon: true },
       { id: "integrations", label: "Integrations", href: "/employer/settings/integrations", Icon: Plug, comingSoon: true },
+      { id: "data", label: "Data & deletion", href: "/employer/settings/data", Icon: Database },
     ],
   },
 ];
