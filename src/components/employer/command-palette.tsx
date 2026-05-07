@@ -24,6 +24,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import {
   Briefcase,
@@ -62,6 +63,13 @@ const GROUP_ICONS: Record<
 
 export function CommandPaletteTrigger() {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Track client-side mount so the portal is only attempted in the
+  // browser. document.body doesn't exist during SSR.
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Cmd/Ctrl+K opens the palette globally.
   useEffect(() => {
@@ -88,7 +96,14 @@ export function CommandPaletteTrigger() {
           ⌘K
         </kbd>
       </button>
-      {open && <CommandPalette onClose={() => setOpen(false)} />}
+      {/* Portal to document.body so the palette escapes any ancestor
+          stacking context (sticky sidebar, transform-using cards, etc.)
+          and renders above every page element regardless of z-index. */}
+      {open && mounted &&
+        createPortal(
+          <CommandPalette onClose={() => setOpen(false)} />,
+          document.body
+        )}
     </>
   );
 }
