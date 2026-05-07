@@ -18,6 +18,9 @@ import {
   type ApplicationStatus,
 } from "@/lib/applications/stages";
 import { candidateDisplayName } from "@/lib/applications/candidate-display";
+import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
+import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
+import type { FitResult } from "@/lib/practice-fit/types";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Applications" };
@@ -160,6 +163,20 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
   const statusCounts: Record<string, number> = {};
   for (const a of apps) {
     statusCounts[a.status] = (statusCounts[a.status] ?? 0) + 1;
+  }
+
+  // Practice Fit (Phase 5D) — cross-job list, so we fetch per (candidate,
+  // job) in parallel. Cached on subsequent renders, so this is fast on
+  // re-visit. Map keyed by application_id for quick lookup at render time.
+  const fitByAppId = new Map<string, FitResult>();
+  if (apps.length > 0) {
+    const results = await Promise.all(
+      apps.map((a) => getPracticeFit(a.candidate_id, a.job_id))
+    );
+    apps.forEach((a, i) => {
+      const r = results[i];
+      if (r) fitByAppId.set(a.id, r);
+    });
   }
 
   return (
@@ -306,6 +323,12 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                       >
                         {STAGE_LABELS[app.status as ApplicationStatus] ?? app.status}
                       </span>
+                      {fitByAppId.get(app.id) && (
+                        <PracticeFitChip
+                          fit={fitByAppId.get(app.id) ?? null}
+                          size="sm"
+                        />
+                      )}
                     </div>
                     <div className="text-[14px] text-slate-body mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
                       <span>Applied to</span>

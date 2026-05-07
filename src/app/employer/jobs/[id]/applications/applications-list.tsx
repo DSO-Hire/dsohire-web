@@ -14,6 +14,7 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { STAGE_LABELS, type ApplicationStatus } from "@/lib/applications/stages";
+import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
 
 export interface ApplicationsListItem {
   id: string;
@@ -28,6 +29,8 @@ export interface ApplicationsListItem {
     years_experience: number | null;
   } | null;
   jobTitle: string;
+  /** Practice Fit (Phase 5D) — null when consent off OR not yet computed. */
+  practiceFit?: import("@/lib/practice-fit/types").FitResult | null;
 }
 
 interface ApplicationsListProps {
@@ -68,7 +71,7 @@ export function ApplicationsList({
           >
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-3 mb-1.5">
+                <div className="flex items-center gap-3 mb-1.5 flex-wrap">
                   <div className="text-[15px] font-bold text-ink truncate">
                     {cand?.full_name ?? "Anonymous candidate"}
                   </div>
@@ -77,6 +80,9 @@ export function ApplicationsList({
                   >
                     {STAGE_LABELS[app.status] ?? app.status}
                   </span>
+                  {app.practiceFit && (
+                    <PracticeFitChip fit={app.practiceFit} size="sm" />
+                  )}
                 </div>
                 {!hideJobTitle && (
                   <div className="text-[14px] text-slate-body mb-2">

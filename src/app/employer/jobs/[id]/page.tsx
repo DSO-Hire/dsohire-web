@@ -28,6 +28,8 @@ import {
 } from "./applications/applications-board";
 import type { KanbanApplication } from "./applications/kanban-board";
 import type { ApplicationStatus } from "@/lib/applications/stages";
+import { getPracticeFitForJob } from "@/lib/practice-fit/get-or-compute";
+import type { FitResult } from "@/lib/practice-fit/types";
 import { JobStatusActions } from "./status-actions";
 import type { Metadata } from "next";
 
@@ -197,6 +199,14 @@ export default async function PerJobPipelinePage({
   }
 
   const jobTitle = job.title as string;
+
+  // Practice Fit (Phase 5D) — bulk-compute per-candidate scores for
+  // every application on this job in one call. RLS gates which scores
+  // we can see (consent != 'off'); missing entries → null.
+  const fitMap = candidateIds.length > 0
+    ? await getPracticeFitForJob(jobId, candidateIds)
+    : new Map<string, FitResult>();
+
   const initialApplications: KanbanApplication[] = apps.map((a) => {
     const summary = scorecardSummaryMap.get(a.id);
     return {
@@ -212,6 +222,7 @@ export default async function PerJobPipelinePage({
       comment_count: countMap.get(a.id) ?? 0,
       scorecard_avg: summary?.avg ?? null,
       scorecard_reviewer_count: summary?.reviewers ?? 0,
+      practiceFit: fitMap.get(a.candidate_id) ?? null,
     };
   });
 

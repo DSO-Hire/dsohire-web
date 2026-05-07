@@ -18,6 +18,10 @@ import {
 } from "@/components/rendered-job-description";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { SaveJobButton } from "@/lib/saved-jobs/save-job-button";
+import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
+import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
+import { WhyThisMatch } from "@/components/practice-fit/why-this-match";
+import type { FitResult } from "@/lib/practice-fit/types";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -130,7 +134,7 @@ export default async function JobDetailPage({ params }: PageProps) {
 
   const dsoName = (dso?.name as string) ?? "DSO";
 
-  // ── Candidate-side state for the SaveJobButton ──────────────────────
+  // ── Candidate-side state for the SaveJobButton + Practice Fit ──────
   // Anonymous visitors get the button hidden. Authenticated DSO members
   // (employers) also get it hidden — only candidates can save jobs.
   const {
@@ -138,21 +142,30 @@ export default async function JobDetailPage({ params }: PageProps) {
   } = await supabase.auth.getUser();
   let candidateAuthed = false;
   let initialSaved = false;
+  let practiceFit: FitResult | null = null;
   if (viewer) {
     const { data: candidateRow } = await supabase
       .from("candidates")
-      .select("id")
+      .select("id, practice_fit_consent")
       .eq("auth_user_id", viewer.id)
       .maybeSingle();
     if (candidateRow) {
       candidateAuthed = true;
+      const candidateId = (candidateRow as Record<string, unknown>).id as string;
       const { data: existing } = await supabase
         .from("saved_jobs")
         .select("id")
-        .eq("candidate_id", candidateRow.id as string)
+        .eq("candidate_id", candidateId)
         .eq("job_id", id)
         .maybeSingle();
       initialSaved = Boolean(existing);
+
+      // Practice Fit (Phase 5D) — only when the candidate has opted in.
+      const consent = (candidateRow as Record<string, unknown>)
+        .practice_fit_consent as string;
+      if (consent !== "off") {
+        practiceFit = await getPracticeFit(candidateId, id);
+      }
     }
   }
 
@@ -184,13 +197,23 @@ export default async function JobDetailPage({ params }: PageProps) {
           <h1 className="text-3xl sm:text-6xl font-extrabold tracking-[-1.8px] leading-[1.05] text-ink mb-5">
             {job.title as string}
           </h1>
-          <Link
-            href={`/companies/${dso?.slug as string}`}
-            className="inline-flex items-center gap-1 text-[15px] text-slate-body hover:text-ink transition-colors"
-          >
-            at <span className="font-semibold text-ink ml-0.5">{dsoName}</span>
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href={`/companies/${dso?.slug as string}`}
+              className="inline-flex items-center gap-1 text-[15px] text-slate-body hover:text-ink transition-colors"
+            >
+              at <span className="font-semibold text-ink ml-0.5">{dsoName}</span>
+            </Link>
+            {practiceFit && <PracticeFitChip fit={practiceFit} size="md" />}
+          </div>
         </header>
+
+        {/* Practice Fit expander — only when the viewer has a fit on this job */}
+        {practiceFit && (
+          <div className="mb-10">
+            <WhyThisMatch fit={practiceFit} />
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-12">
           {/* Description */}

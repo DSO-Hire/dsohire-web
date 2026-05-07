@@ -31,6 +31,7 @@ import {
   stageHeatLevel,
   STAGE_HEAT_CLASSES,
 } from "@/lib/applications/stages";
+import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
 import type { KanbanApplication } from "./kanban-board";
 
 interface KanbanCardProps {
@@ -160,6 +161,11 @@ export function KanbanCard({
       <div className="text-[12px] text-slate-body truncate mb-2">
         {cand?.current_title || cand?.headline || "Profile minimal"}
       </div>
+      {application.practiceFit && (
+        <div className="mb-2">
+          <PracticeFitChip fit={application.practiceFit} size="sm" />
+        </div>
+      )}
       <div className="flex items-center justify-between gap-2">
         <span
           className={`text-[9px] font-bold tracking-[1px] uppercase px-1.5 py-0.5 ${heatClasses}`}
