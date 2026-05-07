@@ -28,6 +28,7 @@ import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { Sparkline } from "@/components/dashboard/sparkline";
 import { TrendPill } from "@/components/dashboard/trend-pill";
+import { getActiveLocationId } from "@/lib/employer/active-location";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Jobs" };
@@ -66,16 +67,42 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
 
   const canPostJobs = dsoUser.role !== "hiring_manager";
 
+  // ── Multi-location filter (Phase 4.6.d). When an active location is
+  // set, restrict the jobs query to jobs tagged with that location. ─
+  const activeLocationId = await getActiveLocationId();
+  let locationFilteredJobIds: string[] | null = null;
+  if (activeLocationId) {
+    const { data: jobLocRows } = await supabase
+      .from("job_locations")
+      .select("job_id")
+      .eq("location_id", activeLocationId);
+    locationFilteredJobIds = ((jobLocRows ?? []) as Array<{ job_id: string }>).map(
+      (r) => r.job_id
+    );
+  }
+
   // ── Pull all jobs once. RLS scopes to this DSO. We need the full list
   // so the aggregate strip + status filter counts come from the same set. ─
-  const { data: allJobsRaw } = await supabase
+  let jobsQuery = supabase
     .from("jobs")
     .select(
       "id, title, slug, status, employment_type, role_category, posted_at, applications_count, views, updated_at",
     )
     .eq("dso_id", dsoUser.dso_id)
-    .is("deleted_at", null)
-    .order("updated_at", { ascending: false });
+    .is("deleted_at", null);
+  if (locationFilteredJobIds !== null) {
+    // Empty filter list → restrict to a sentinel that matches nothing,
+    // so the page renders an empty state for "no jobs at this location".
+    jobsQuery = jobsQuery.in(
+      "id",
+      locationFilteredJobIds.length > 0
+        ? locationFilteredJobIds
+        : ["00000000-0000-0000-0000-000000000000"]
+    );
+  }
+  const { data: allJobsRaw } = await jobsQuery.order("updated_at", {
+    ascending: false,
+  });
   type AllJobRow = {
     id: string;
     title: string;

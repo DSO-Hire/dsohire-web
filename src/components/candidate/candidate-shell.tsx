@@ -1,9 +1,16 @@
 /**
- * CandidateShell — auth-gated layout for /candidate/dashboard, profile,
- * applications, settings.
+ * CandidateShell — auth-gated layout for /candidate/* (Phase 4.6 rewrite).
  *
- * Sidebar nav + top header. Server-side auth check redirects to sign-in
- * if no session. Mirrors EmployerShell visually but with a leaner nav.
+ * 5-entry left rail: Dashboard / Jobs / Applications / Profile / Settings.
+ * Jobs now points to `/candidate/jobs` (a candidate-shelled wrapper around
+ * the public /jobs surface) so candidates don't bounce out of their authed
+ * nav context — the kick-out bug Cam flagged 2026-05-06 evening.
+ *
+ * Sticky footer cluster: avatar + name + Help & Support + Sign out
+ * (parallels EmployerShell's footer pattern).
+ *
+ * Mobile: dedicated hamburger drop-down opens the same items as the
+ * desktop rail. The previous mobile bar was missing this entirely.
  */
 
 import Link from "next/link";
@@ -15,29 +22,47 @@ import {
   Settings,
   LogOut,
   Search,
+  LifeBuoy,
 } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { BrandLockup } from "@/components/marketing/site-shell";
+import { Avatar } from "@/components/ui/avatar";
+import { CandidateMobileNav } from "./candidate-mobile-nav";
 
 interface CandidateShellProps {
   children: React.ReactNode;
   active?: NavId;
 }
 
-type NavId = "dashboard" | "profile" | "applications" | "browse" | "settings";
+export type NavId =
+  | "dashboard"
+  | "jobs"
+  | "applications"
+  | "profile"
+  | "settings"
+  | "help";
 
-const NAV: Array<{
+interface NavItem {
   id: NavId;
   label: string;
   href: string;
   Icon: React.ComponentType<{ className?: string }>;
-}> = [
+}
+
+const NAV: ReadonlyArray<NavItem> = [
   { id: "dashboard", label: "Dashboard", href: "/candidate/dashboard", Icon: LayoutDashboard },
-  { id: "browse", label: "Browse Jobs", href: "/jobs", Icon: Search },
-  { id: "applications", label: "My Applications", href: "/candidate/applications", Icon: FileText },
+  { id: "jobs", label: "Jobs", href: "/candidate/jobs", Icon: Search },
+  { id: "applications", label: "Applications", href: "/candidate/applications", Icon: FileText },
   { id: "profile", label: "Profile", href: "/candidate/profile", Icon: UserCircle },
   { id: "settings", label: "Settings", href: "/candidate/settings", Icon: Settings },
 ];
+
+const HELP_ITEM: NavItem = {
+  id: "help",
+  label: "Help & Support",
+  href: "/help",
+  Icon: LifeBuoy,
+};
 
 export async function CandidateShell({ children, active }: CandidateShellProps) {
   const supabase = await createSupabaseServerClient();
@@ -45,93 +70,135 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/candidate/sign-in");
-  }
+  if (!user) redirect("/candidate/sign-in");
 
   const { data: candidate } = await supabase
     .from("candidates")
-    .select("id, full_name, headline, current_title, is_searchable")
+    .select("id, full_name, headline, current_title, is_searchable, avatar_url")
     .eq("auth_user_id", user.id)
     .maybeSingle();
 
-  if (!candidate) {
-    // Signed in but not a candidate — could be an employer who clicked the
-    // wrong link. Bounce them to the candidate sign-up page; if they're an
-    // employer they can navigate to /employer/dashboard instead.
-    redirect("/candidate/sign-up");
-  }
+  if (!candidate) redirect("/candidate/sign-up");
+
+  const candidateName =
+    (candidate.full_name as string | null) ?? user.email ?? "Candidate";
+  const candidateAvatar = (candidate.avatar_url as string | null) ?? null;
+  const candidateSubtitle =
+    (candidate.current_title as string | null) ??
+    (candidate.headline as string | null) ??
+    "Profile incomplete";
 
   return (
     <div className="min-h-screen flex bg-ivory">
-      {/* Sidebar */}
+      {/* ── Desktop sidebar ── */}
       <aside className="hidden lg:flex w-[240px] flex-shrink-0 flex-col bg-ink text-ivory border-r border-white/10">
         <div className="p-6 border-b border-white/10">
-          <Link href="/candidate/dashboard" className="block" aria-label="DSO Hire — candidate dashboard">
+          <Link
+            href="/candidate/dashboard"
+            className="block"
+            aria-label="DSO Hire — candidate dashboard"
+          >
             <BrandLockup dark height={36} />
           </Link>
         </div>
 
-        <nav className="flex-1 p-3">
+        {/* Identity strip — avatar + name */}
+        <div className="px-4 py-3 border-b border-white/10 flex items-center gap-2.5">
+          <Avatar
+            name={candidateName}
+            imageUrl={candidateAvatar}
+            size="sm"
+            className="ring-1 ring-white/10"
+          />
+          <div className="min-w-0 flex-1">
+            <div className="text-[12px] font-semibold text-ivory truncate leading-tight">
+              {candidateName}
+            </div>
+            <div className="text-[9px] tracking-[1.5px] uppercase text-ivory/50 truncate">
+              Candidate
+            </div>
+          </div>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto px-3 py-4">
           <ul className="list-none space-y-0.5">
-            {NAV.map((item) => {
-              const isActive = active === item.id;
-              return (
-                <li key={item.id}>
-                  <Link
-                    href={item.href}
-                    className={`flex items-center gap-3 px-3 py-2.5 text-[13px] font-semibold tracking-[0.5px] transition-colors ${
-                      isActive
-                        ? "bg-white/10 text-ivory"
-                        : "text-ivory/65 hover:bg-white/5 hover:text-ivory"
-                    }`}
-                  >
-                    <item.Icon className="h-4 w-4 flex-shrink-0" />
-                    <span>{item.label}</span>
-                  </Link>
-                </li>
-              );
-            })}
+            {NAV.map((item) => (
+              <NavRow key={item.id} item={item} active={active} />
+            ))}
           </ul>
         </nav>
 
-        <div className="p-4 border-t border-white/10">
-          <div className="text-[9px] font-bold tracking-[2px] uppercase text-heritage mb-1.5">
-            Candidate
-          </div>
-          <div className="text-[14px] font-semibold text-ivory truncate mb-0.5">
-            {candidate.full_name ?? "Welcome"}
-          </div>
-          <div className="text-[10px] text-ivory/50 tracking-[0.3px] uppercase truncate">
-            {candidate.current_title ?? candidate.headline ?? "Profile incomplete"}
-          </div>
-
-          <form action="/candidate/sign-out" method="post" className="mt-4">
+        {/* Footer cluster: Help + Sign out */}
+        <div className="border-t border-white/10 p-3 space-y-1">
+          <NavRow item={HELP_ITEM} active={active} />
+          <form action="/candidate/sign-out" method="post">
             <button
               type="submit"
-              className="flex items-center gap-2 text-[12px] font-semibold tracking-[0.5px] text-ivory/55 hover:text-ivory transition-colors"
+              className="flex w-full items-center gap-3 px-3 py-2 text-[13px] font-semibold tracking-[0.5px] text-ivory/55 hover:text-ivory hover:bg-white/5 rounded transition-colors"
             >
-              <LogOut className="h-3.5 w-3.5" />
-              Sign Out
+              <LogOut className="h-4 w-4 flex-shrink-0" />
+              <span>Sign out</span>
             </button>
           </form>
         </div>
       </aside>
 
-      {/* Main column */}
+      {/* ── Main column ── */}
       <div className="flex-1 min-w-0 flex flex-col">
-        <header className="lg:hidden h-[64px] px-5 flex items-center justify-between border-b border-[var(--rule)] bg-ivory/90 backdrop-blur-md">
+        {/* Mobile top bar */}
+        <header className="lg:hidden sticky top-0 z-30 h-[64px] px-5 flex items-center justify-between border-b border-[var(--rule)] bg-ivory/95 backdrop-blur-md">
           <Link href="/candidate/dashboard">
             <BrandLockup height={28} />
           </Link>
-          <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body">
-            Candidate
-          </span>
+          <CandidateMobileNav
+            active={active}
+            items={NAV.map((item) => ({
+              id: item.id,
+              label: item.label,
+              href: item.href,
+            }))}
+            help={{ id: HELP_ITEM.id, label: HELP_ITEM.label, href: HELP_ITEM.href }}
+            user={{
+              fullName: candidateName,
+              avatarUrl: candidateAvatar,
+              subtitle: candidateSubtitle,
+            }}
+          />
         </header>
 
         <main className="flex-1 px-6 sm:px-10 py-10">{children}</main>
       </div>
     </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * Single nav row
+ * ────────────────────────────────────────────────────────── */
+
+function NavRow({
+  item,
+  active,
+}: {
+  item: NavItem;
+  active?: NavId;
+}) {
+  const isActive = active === item.id;
+  const Icon = item.Icon;
+  return (
+    <li>
+      <Link
+        href={item.href}
+        className={
+          "flex items-center gap-3 px-3 py-2.5 text-[13px] font-semibold tracking-[0.5px] rounded transition-colors " +
+          (isActive
+            ? "bg-white/10 text-ivory"
+            : "text-ivory/65 hover:bg-white/5 hover:text-ivory")
+        }
+      >
+        <Icon className="h-4 w-4 flex-shrink-0" />
+        <span>{item.label}</span>
+      </Link>
+    </li>
   );
 }
