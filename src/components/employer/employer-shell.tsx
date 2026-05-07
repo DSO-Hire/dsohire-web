@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { BrandLockup } from "@/components/marketing/site-shell";
+import { getMfaState } from "@/lib/auth/mfa";
 
 interface EmployerShellProps {
   children: React.ReactNode;
@@ -82,9 +83,26 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
 
   const { data: dso } = await supabase
     .from("dsos")
-    .select("id, name, slug, status")
+    .select("id, name, slug, status, require_mfa")
     .eq("id", dsoUser.dso_id)
     .maybeSingle();
+
+  // ─── MFA enforcement (Phase 4.5.d) ─────────────────────────
+  // Two cases force a redirect:
+  //   1. Per-account: user has a verified factor but session is aal1.
+  //      → /auth/mfa/challenge (step up).
+  //   2. Org-wide: dso.require_mfa is true AND user has no factor.
+  //      → /auth/mfa/setup (forced enrollment).
+  // The MFA pages themselves are not under EmployerShell, so there's
+  // no redirect loop.
+  const mfaState = await getMfaState(supabase);
+  const dsoRequiresMfa = (dso?.require_mfa as boolean | null) === true;
+  if (mfaState.isEnrolled && mfaState.currentLevel !== "aal2") {
+    redirect("/auth/mfa/challenge?next=/employer/dashboard");
+  }
+  if (dsoRequiresMfa && !mfaState.isEnrolled) {
+    redirect("/auth/mfa/setup");
+  }
 
   return (
     <div className="min-h-screen flex bg-ivory">

@@ -764,6 +764,7 @@ export type Database = {
           mission: string | null
           name: string
           practice_count: number | null
+          require_mfa: boolean
           slug: string
           status: Database["public"]["Enums"]["dso_status"]
           updated_at: string
@@ -787,6 +788,7 @@ export type Database = {
           mission?: string | null
           name: string
           practice_count?: number | null
+          require_mfa?: boolean
           slug: string
           status?: Database["public"]["Enums"]["dso_status"]
           updated_at?: string
@@ -810,6 +812,7 @@ export type Database = {
           mission?: string | null
           name?: string
           practice_count?: number | null
+          require_mfa?: boolean
           slug?: string
           status?: Database["public"]["Enums"]["dso_status"]
           updated_at?: string
@@ -1203,6 +1206,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      mfa_recovery_codes: {
+        Row: {
+          auth_user_id: string
+          code_hash: string
+          created_at: string
+          id: string
+          used_at: string | null
+        }
+        Insert: {
+          auth_user_id: string
+          code_hash: string
+          created_at?: string
+          id?: string
+          used_at?: string | null
+        }
+        Update: {
+          auth_user_id?: string
+          code_hash?: string
+          created_at?: string
+          id?: string
+          used_at?: string | null
+        }
+        Relationships: []
       }
       subscriptions: {
         Row: {

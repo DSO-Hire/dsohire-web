@@ -16,6 +16,7 @@
 
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getMfaState } from "@/lib/auth/mfa";
 
 export interface SignInState {
   ok: boolean;
@@ -130,17 +131,26 @@ export async function verifySignInEmployer(
     };
   }
 
-  // Session is set. Route based on DSO membership.
+  // Session is set. If the user has 2FA enabled, step up before routing.
+  const mfaState = await getMfaState(supabase);
+  const finalDest = await resolveSignedInDestination(supabase, data.user.id);
+  if (mfaState.isEnrolled && mfaState.currentLevel !== "aal2") {
+    redirect(`/auth/mfa/challenge?next=${encodeURIComponent(finalDest)}`);
+  }
+  redirect(finalDest);
+}
+
+/** Shared: where does a signed-in employer land based on DSO membership? */
+async function resolveSignedInDestination(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  userId: string
+): Promise<string> {
   const { data: dsoUser } = await supabase
     .from("dso_users")
     .select("id")
-    .eq("auth_user_id", data.user.id)
+    .eq("auth_user_id", userId)
     .maybeSingle();
-
-  if (!dsoUser) {
-    redirect("/employer/onboarding");
-  }
-  redirect("/employer/dashboard");
+  return dsoUser ? "/employer/dashboard" : "/employer/onboarding";
 }
 
 /**
@@ -194,12 +204,10 @@ export async function signInWithPasswordEmployer(
     };
   }
 
-  const { data: dsoUser } = await supabase
-    .from("dso_users")
-    .select("id")
-    .eq("auth_user_id", data.user.id)
-    .maybeSingle();
-
-  if (!dsoUser) redirect("/employer/onboarding");
-  redirect("/employer/dashboard");
+  const mfaState = await getMfaState(supabase);
+  const finalDest = await resolveSignedInDestination(supabase, data.user.id);
+  if (mfaState.isEnrolled && mfaState.currentLevel !== "aal2") {
+    redirect(`/auth/mfa/challenge?next=${encodeURIComponent(finalDest)}`);
+  }
+  redirect(finalDest);
 }

@@ -1,15 +1,14 @@
 /**
- * /employer/settings/account — Account category (Phase 4.5.a).
+ * /employer/settings/account — Account category (Phase 4.5.a + 4.5.d).
  *
- * The default landing page for /employer/settings (the bare /settings
- * route redirects here). Now credentials-only — the DSO logo moved to
- * /employer/settings/profile in Phase 4.5.d, where it semantically
- * belongs alongside banner + photos + culture chips.
+ * The default landing page for /employer/settings. Credentials-only +
+ * MFA — the DSO logo moved to /employer/settings/profile in Phase 4.5.d
+ * where it belongs alongside banner + photos + culture chips.
  *
- * Phase 4.5 follow-ups land here too:
- *   - 4.5.h — 2FA TOTP setup (locked Q4 — sprint scope)
- *   - email change flow (deferred from old "Coming soon" stub)
- *   - your-name editing (currently surfaces from onboarding)
+ * Sections:
+ *   - Password (set / change)
+ *   - 2FA two-factor authentication (4.5.d)
+ *   - Org-wide MFA toggle (Enterprise + owner only)
  *
  * No EmployerShell wrapper here — the parent settings/layout.tsx
  * provides it.
@@ -18,11 +17,67 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { PasswordForm } from "../password-form";
+import { MfaSection } from "./mfa-section";
+import { createSupabaseServerClient, createSupabaseServiceRoleClient } from "@/lib/supabase/server";
+import { getActiveSubscription } from "@/lib/billing/subscription";
+import { getMfaState } from "@/lib/auth/mfa";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Account · Settings" };
 
+export const dynamic = "force-dynamic";
+
 export default async function AccountSettingsPage() {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Defaults for the unauthenticated/edge case (settings layout already
+  // protects the route, so this is mostly defensive).
+  let mfaInitialEnrolled = false;
+  let mfaFactorId: string | null = null;
+  let remainingRecoveryCodes = 0;
+  let isOwner = false;
+  let isEnterprise = false;
+  let initialRequireMfa = false;
+
+  if (user) {
+    const mfaState = await getMfaState(supabase);
+    mfaInitialEnrolled = mfaState.isEnrolled;
+    mfaFactorId = mfaState.verifiedFactorId;
+
+    // Recovery code count uses service-role to avoid an RLS round trip.
+    const admin = createSupabaseServiceRoleClient();
+    const { count } = await admin
+      .from("mfa_recovery_codes")
+      .select("id", { count: "exact", head: true })
+      .eq("auth_user_id", user.id)
+      .is("used_at", null);
+    remainingRecoveryCodes = count ?? 0;
+
+    const { data: dsoUser } = await supabase
+      .from("dso_users")
+      .select("dso_id, role")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+    if (dsoUser) {
+      isOwner = (dsoUser.role as string) === "owner";
+      const sub = await getActiveSubscription(
+        supabase,
+        dsoUser.dso_id as string
+      );
+      isEnterprise = sub?.tier === "enterprise";
+
+      const { data: dsoRow } = await supabase
+        .from("dsos")
+        .select("require_mfa")
+        .eq("id", dsoUser.dso_id as string)
+        .maybeSingle();
+      initialRequireMfa = (dsoRow?.require_mfa as boolean) ?? false;
+    }
+  }
+
   return (
     <div className="space-y-8 max-w-[760px]">
       <section className="border border-[var(--rule)] bg-white p-7 sm:p-8">
@@ -38,6 +93,15 @@ export default async function AccountSettingsPage() {
         </p>
         <PasswordForm />
       </section>
+
+      <MfaSection
+        initialEnrolled={mfaInitialEnrolled}
+        initialFactorId={mfaFactorId}
+        remainingRecoveryCodes={remainingRecoveryCodes}
+        isOwner={isOwner}
+        isEnterprise={isEnterprise}
+        initialRequireMfa={initialRequireMfa}
+      />
 
       <Link
         href="/employer/settings/profile"

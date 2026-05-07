@@ -10,6 +10,7 @@
 
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getMfaState } from "@/lib/auth/mfa";
 
 const NEXT_ALLOWLIST = /^\/(candidate\/|jobs\/)/;
 
@@ -112,6 +113,11 @@ export async function verifySignInCandidate(
     };
   }
 
+  // Step up to aal2 if 2FA is enrolled.
+  const mfaState = await getMfaState(supabase);
+  if (mfaState.isEnrolled && mfaState.currentLevel !== "aal2") {
+    redirect(`/auth/mfa/challenge?next=${encodeURIComponent(next)}`);
+  }
   redirect(next);
 }
 
@@ -171,5 +177,10 @@ export async function signInWithPasswordCandidate(
     };
   }
 
+  // Step up to aal2 if 2FA is enrolled.
+  const mfaState = await getMfaState(supabase);
+  if (mfaState.isEnrolled && mfaState.currentLevel !== "aal2") {
+    redirect(`/auth/mfa/challenge?next=${encodeURIComponent(next)}`);
+  }
   redirect(next);
 }
