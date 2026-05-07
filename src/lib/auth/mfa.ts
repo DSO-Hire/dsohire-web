@@ -76,7 +76,7 @@ export interface MfaState {
 
 export async function getMfaState(supabase: SupabaseClient): Promise<MfaState> {
   const [aalRes, factorsRes] = await Promise.all([
-    supabase.auth.getAuthenticatorAssuranceLevel(),
+    supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
     supabase.auth.mfa.listFactors(),
   ]);
 
