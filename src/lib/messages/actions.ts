@@ -24,6 +24,7 @@ import {
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
 import { dispatchNotification } from "@/lib/notifications/dispatcher";
+import { dispatchCandidateEmail } from "@/lib/email/templates/dispatch";
 import { MessageReceived } from "@/emails/MessageReceived";
 
 export interface ApplicationMessageRow {
@@ -477,28 +478,61 @@ async function dispatchMessageNotification(
     if (!recipientEmail || !recipientAuthUserId) return;
 
     const subject = `${senderName} sent you a message about ${jobTitle}`;
-
-    void dispatchNotification({
-      userId: recipientAuthUserId,
-      eventKind: "application.message_received",
-      relatedDsoId,
-      relatedCandidateId,
-      email: {
-        to: recipientEmail,
-        subject,
-        react: MessageReceived({
-          recipientName,
-          senderName,
-          senderRole: args.senderRole,
-          jobTitle,
-          dsoName,
-          candidateName: candidateFullName,
-          messageBody: args.body,
-          deepLink,
-          fullMessageLink: deepLink,
-        }),
-      },
+    const fallbackReact = MessageReceived({
+      recipientName,
+      senderName,
+      senderRole: args.senderRole,
+      jobTitle,
+      dsoName,
+      candidateName: candidateFullName,
+      messageBody: args.body,
+      deepLink,
+      fullMessageLink: deepLink,
     });
+
+    if (args.senderRole === "employer") {
+      // Recipient is the candidate → eligible for the DSO's custom template
+      // (Phase 4.5.f). dispatchCandidateEmail short-circuits to the fallback
+      // when the DSO isn't on Growth+ or hasn't customized this template.
+      void dispatchCandidateEmail({
+        kind: "application.message_received",
+        dsoId: job.dso_id as string,
+        recipientUserId: recipientAuthUserId,
+        recipientEmail,
+        candidate: {
+          first_name: recipientName,
+          full_name: candidateFullName ?? recipientName,
+          email: recipientEmail,
+        },
+        job: {
+          title: jobTitle,
+          url: `${SITE_URL}/jobs/${appRow.job_id}`,
+        },
+        extraContext: {
+          message: {
+            preview: args.body.slice(0, 200),
+            thread_url: deepLink,
+          },
+        },
+        relatedDsoId,
+        relatedCandidateId,
+        fallback: { subject, react: fallbackReact },
+      });
+    } else {
+      // Recipient is a DSO admin/owner — employer-internal notification, no
+      // custom-template path. Goes through dispatchNotification directly.
+      void dispatchNotification({
+        userId: recipientAuthUserId,
+        eventKind: "application.message_received",
+        relatedDsoId,
+        relatedCandidateId,
+        email: {
+          to: recipientEmail,
+          subject,
+          react: fallbackReact,
+        },
+      });
+    }
   } catch (err) {
     // Never throw out of fire-and-forget.
     console.warn("[messages] notification dispatch failed", err);

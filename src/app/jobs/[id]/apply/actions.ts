@@ -28,6 +28,7 @@ import {
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
 import { dispatchNotification } from "@/lib/notifications/dispatcher";
+import { dispatchCandidateEmail } from "@/lib/email/templates/dispatch";
 import { ApplicationReceived } from "@/emails/candidate/ApplicationReceived";
 import { NewApplication } from "@/emails/employer/NewApplication";
 import type { ScreeningQuestion } from "./types";
@@ -464,17 +465,33 @@ async function sendApplicationEmails(
     const candidateEmail = candidateAuthUser?.data?.user?.email ?? null;
     const candidateDisplayName = params.candidateName?.trim() || "there";
 
-    /* ── Email 1: candidate confirmation ── */
+    /* ── Email 1: candidate confirmation ──
+       Phase 4.5.f: dispatchCandidateEmail() short-circuits to a custom
+       template if the DSO is on Growth+ and has saved one for this kind;
+       otherwise falls back to the existing ApplicationReceived component. */
     if (candidateEmail) {
-      void dispatchNotification({
-        userId: params.candidateAuthUserId,
-        eventKind: "candidate.application_received",
+      const firstName =
+        candidateDisplayName.trim().split(/\s+/)[0] || candidateDisplayName;
+      void dispatchCandidateEmail({
+        kind: "candidate.application_received",
+        dsoId: params.dsoId,
+        recipientUserId: params.candidateAuthUserId,
+        recipientEmail: candidateEmail,
+        candidate: {
+          first_name: firstName,
+          full_name: candidateDisplayName,
+          email: candidateEmail,
+        },
+        job: {
+          title: params.jobTitle,
+          url: `${SITE_URL}/jobs/${params.jobId}`,
+          location_name: jobLocationsLabel || null,
+        },
         relatedDsoId: params.dsoId,
         relatedCandidateId: params.candidateId,
-        email: {
-          to: candidateEmail,
+        replyTo: "cam@dsohire.com",
+        fallback: {
           subject: `Application received: ${params.jobTitle} at ${dsoName}`,
-          replyTo: `cam@dsohire.com`,
           react: ApplicationReceived({
             candidateName: candidateDisplayName,
             jobTitle: params.jobTitle,

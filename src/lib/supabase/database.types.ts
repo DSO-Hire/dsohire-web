@@ -911,6 +911,47 @@ export type Database = {
           },
         ]
       }
+      email_templates: {
+        Row: {
+          body_html: string
+          created_at: string
+          dso_id: string
+          id: string
+          kind: Database["public"]["Enums"]["email_template_kind"]
+          subject: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          body_html: string
+          created_at?: string
+          dso_id: string
+          id?: string
+          kind: Database["public"]["Enums"]["email_template_kind"]
+          subject: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          body_html?: string
+          created_at?: string
+          dso_id?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["email_template_kind"]
+          subject?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_templates_dso_id_fkey"
+            columns: ["dso_id"]
+            isOneToOne: false
+            referencedRelation: "dsos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoices: {
         Row: {
           amount_cents: number
@@ -1342,6 +1383,10 @@ export type Database = {
       compensation_period: "hourly" | "daily" | "annual"
       dso_status: "pending" | "active" | "suspended" | "cancelled"
       dso_user_role: "owner" | "admin" | "recruiter" | "hiring_manager"
+      email_template_kind:
+        | "candidate.application_received"
+        | "application.message_received"
+        | "candidate.stage_changed"
       employment_type: "full_time" | "part_time" | "contract" | "prn" | "locum"
       job_status:
         | "draft"
@@ -1516,6 +1561,11 @@ export const Constants = {
       compensation_period: ["hourly", "daily", "annual"],
       dso_status: ["pending", "active", "suspended", "cancelled"],
       dso_user_role: ["owner", "admin", "recruiter", "hiring_manager"],
+      email_template_kind: [
+        "candidate.application_received",
+        "application.message_received",
+        "candidate.stage_changed",
+      ],
       employment_type: ["full_time", "part_time", "contract", "prn", "locum"],
       job_status: [
         "draft",
