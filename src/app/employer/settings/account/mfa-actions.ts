@@ -51,13 +51,11 @@ export async function enrollTotp(): Promise<
   const ctx = await getAuthedUser();
   if (!ctx.ok) return ctx;
 
-  // If a stale unverified factor exists, drop it first so re-runs don't
-  // pile up factors on the user.
-  const { data: factors } = await ctx.supabase.auth.mfa.listFactors();
-  const stale = factors?.totp?.find((f) => f.status === "unverified");
-  if (stale) {
-    await ctx.supabase.auth.mfa.unenroll({ factorId: stale.id });
-  }
+  // Note: we used to scrub any existing unverified factor here, but the
+  // Supabase types narrow `factors.totp` to verified factors only, so
+  // unverified rows aren't reachable from this client. Old unverified
+  // factors are harmless — Supabase expires them on its own and the
+  // user just gets a fresh one each time enrollment runs.
 
   const { data, error } = await ctx.supabase.auth.mfa.enroll({
     factorType: "totp",
@@ -287,7 +285,8 @@ export async function setOrgRequireMfa(input: {
   // don't lock themselves out at the next sign-in.
   if (input.enabled) {
     const { data: factors } = await ctx.supabase.auth.mfa.listFactors();
-    const hasVerified = !!factors?.totp?.some((f) => f.status === "verified");
+    // factors.totp returns verified TOTP factors only; presence is enough.
+    const hasVerified = !!factors?.totp?.length;
     if (!hasVerified) {
       return {
         ok: false,

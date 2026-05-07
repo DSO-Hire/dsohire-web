@@ -64,7 +64,8 @@ export async function submitChallenge(
   }
 
   const { data: factors } = await supabase.auth.mfa.listFactors();
-  const verifiedFactor = factors?.totp?.find((f) => f.status === "verified");
+  // factors.totp contains verified TOTP factors only; pick the first one.
+  const verifiedFactor = factors?.totp?.[0];
   if (!verifiedFactor) {
     // Nothing to challenge against — caller probably reached this page
     // by accident. Push to dashboard.

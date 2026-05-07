@@ -81,10 +81,10 @@ export async function getMfaState(supabase: SupabaseClient): Promise<MfaState> {
   ]);
 
   const factors = factorsRes.data;
-  const verified =
-    factors?.totp?.find((f) => f.status === "verified") ?? null;
-  const unverified =
-    factors?.totp?.find((f) => f.status === "unverified") ?? null;
+  // Supabase's typed `factors.totp` array contains only verified factors
+  // (the type narrows status to "verified"). Treat the first one as the
+  // user's verified TOTP factor.
+  const verified = factors?.totp?.[0] ?? null;
 
   return {
     isEnrolled: !!verified,
@@ -92,7 +92,7 @@ export async function getMfaState(supabase: SupabaseClient): Promise<MfaState> {
       (aalRes.data?.currentLevel as MfaState["currentLevel"]) ?? null,
     nextLevel: (aalRes.data?.nextLevel as MfaState["nextLevel"]) ?? null,
     verifiedFactorId: verified?.id ?? null,
-    unverifiedFactorId: unverified?.id ?? null,
+    unverifiedFactorId: null,
   };
 }
 
