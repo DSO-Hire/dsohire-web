@@ -91,6 +91,9 @@ export interface JobWizardInitial {
   skills: string[];
   hide_stages_from_candidate: boolean;
   scope: JobScope;
+  // v1.1 — Practice Fit scoring inputs
+  specialty: string[];
+  min_years_experience: number | null;
 }
 
 export const SCOPE_OPTIONS: Array<{
@@ -137,6 +140,23 @@ const ROLE_OPTIONS: Array<{ value: string; label: string }> = [
   { value: "regional_manager", label: "Regional Manager" },
   { value: "specialist", label: "Specialist" },
   { value: "other", label: "Other" },
+];
+
+// v1.1 — mirrors SPECIALTIES in src/lib/candidate/canonical-lists.ts.
+// Inlined here to keep job-wizard a "use client" file without crossing
+// the server-side canonical-lists boundary (which carries other types
+// the wizard doesn't need).
+const SPECIALTY_OPTIONS: Array<{ value: string; label: string }> = [
+  { value: "general_dentistry", label: "General Dentistry" },
+  { value: "pediatric_dentistry", label: "Pediatric Dentistry" },
+  { value: "orthodontics", label: "Orthodontics" },
+  { value: "endodontics", label: "Endodontics" },
+  { value: "periodontics", label: "Periodontics" },
+  { value: "prosthodontics", label: "Prosthodontics" },
+  { value: "oral_surgery", label: "Oral & Maxillofacial Surgery" },
+  { value: "oral_medicine", label: "Oral Medicine" },
+  { value: "dental_anesthesiology", label: "Dental Anesthesiology" },
+  { value: "public_health_dentistry", label: "Public Health Dentistry" },
 ];
 
 const EMPLOYMENT_OPTIONS: Array<{ value: string; label: string }> = [
@@ -229,6 +249,16 @@ export function JobWizard({
     initialQuestions ?? []
   );
   const [status, setStatus] = useState(initial?.status ?? "draft");
+  // v1.1 — Practice Fit inputs.
+  const [specialty, setSpecialty] = useState<Set<string>>(
+    new Set(initial?.specialty ?? [])
+  );
+  const [minYearsExperience, setMinYearsExperience] = useState(
+    initial?.min_years_experience !== null &&
+      initial?.min_years_experience !== undefined
+      ? String(initial.min_years_experience)
+      : ""
+  );
 
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -299,6 +329,12 @@ export function JobWizard({
     formData.set("compensation_min", compMin);
     formData.set("compensation_max", compMax);
     formData.set("compensation_period", compPeriod);
+    // v1.1 — repeated `specialty` form entries; min_years_experience is
+    // a single optional integer string.
+    for (const sp of specialty) {
+      formData.append("specialty", sp);
+    }
+    formData.set("min_years_experience", minYearsExperience);
     if (compVisible) formData.set("compensation_visible", "on");
     if (hideStagesFromCandidate)
       formData.set("hide_stages_from_candidate", "on");
@@ -414,6 +450,10 @@ export function JobWizard({
             onRequirements={setRequirements}
             hideStagesFromCandidate={hideStagesFromCandidate}
             onHideStagesFromCandidate={setHideStagesFromCandidate}
+            specialty={specialty}
+            onSpecialty={setSpecialty}
+            minYearsExperience={minYearsExperience}
+            onMinYearsExperience={setMinYearsExperience}
           />
         )}
 
@@ -773,6 +813,10 @@ function DetailsStep({
   onRequirements,
   hideStagesFromCandidate,
   onHideStagesFromCandidate,
+  specialty,
+  onSpecialty,
+  minYearsExperience,
+  onMinYearsExperience,
 }: {
   compMin: string;
   onCompMin: (v: string) => void;
@@ -790,6 +834,10 @@ function DetailsStep({
   onRequirements: (v: string) => void;
   hideStagesFromCandidate: boolean;
   onHideStagesFromCandidate: (v: boolean) => void;
+  specialty: Set<string>;
+  onSpecialty: (v: Set<string>) => void;
+  minYearsExperience: string;
+  onMinYearsExperience: (v: string) => void;
 }) {
   return (
     <div className="space-y-7">
@@ -845,6 +893,59 @@ function DetailsStep({
             states with pay-transparency laws.
           </span>
         </label>
+      </fieldset>
+
+      <fieldset className="border border-[var(--rule)] p-6 bg-cream/40">
+        <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
+          Match scoring
+        </legend>
+        <p className="mt-1 text-[12px] text-slate-meta leading-relaxed">
+          These fields drive Practice Fit — the proprietary match score
+          candidates and recruiters see on every application. Both are
+          optional; the score adapts to whatever you fill in.
+        </p>
+        <div className="mt-4">
+          <label className="block text-[12px] font-semibold text-ink mb-2">
+            Specialty <span className="text-slate-meta font-normal">(pick any that apply)</span>
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {SPECIALTY_OPTIONS.map((opt) => {
+              const checked = specialty.has(opt.value);
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => {
+                    const next = new Set(specialty);
+                    if (checked) next.delete(opt.value);
+                    else next.add(opt.value);
+                    onSpecialty(next);
+                  }}
+                  className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
+                    checked
+                      ? "bg-heritage-deep text-ivory border-heritage-deep"
+                      : "bg-white text-ink border-[var(--rule)] hover:border-heritage"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <div className="mt-5">
+          <Input
+            label="Minimum years of dental experience (optional)"
+            type="number"
+            placeholder="e.g. 2"
+            value={minYearsExperience}
+            onChange={onMinYearsExperience}
+          />
+          <p className="mt-1 text-[11px] text-slate-meta">
+            Leave blank if there&apos;s no minimum. The score excludes this
+            dimension when blank — it doesn&apos;t penalize newer candidates.
+          </p>
+        </div>
       </fieldset>
 
       <Input

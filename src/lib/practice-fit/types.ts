@@ -1,40 +1,78 @@
 /**
- * Practice Fit shape definitions (Phase 5D v0).
+ * Practice Fit shape definitions (Phase 5D v1.1).
  *
- * The compute function and the cache layer share these types so the
- * stored row's `dimensions` jsonb can be deserialized into the same
- * structure that the in-memory compute returns.
+ * v1.1 architecture changes vs v0:
+ *   • `role` is no longer a dimension — it's a HARD FILTER. Pairs with
+ *     a role mismatch produce no FitResult at all.
+ *   • Each scored dimension carries a `scored: boolean`. Dimensions
+ *     where the data is missing on either side are still emitted (so
+ *     the UI can show "Add X to factor this in"), but they're excluded
+ *     from the score's denominator.
+ *   • Final score is sum(scored contributions) / sum(scored weights) × 100.
+ *     A pair with all dims scored hits the same score it would in v0;
+ *     a pair with 2 missing dims is scored only on the 5 it can see,
+ *     so missing data doesn't drag the score down — it just narrows
+ *     the confidence.
+ *   • Two new dimensions added: `specialty` (15) and `years_experience`
+ *     (10). v0's role weight (25) is reallocated to these two.
  */
 
 export type FitBucket = "excellent" | "strong" | "solid" | "light" | "low";
 
 export type FitDimensionKey =
-  | "role"
   | "compensation"
   | "location"
+  | "specialty"
   | "skills"
+  | "years_experience"
   | "employment_type"
   | "dso_size";
 
 export interface FitDimension {
-  /** Maximum points this dimension can contribute to the overall 0-100 score. */
+  /** Maximum points this dimension can contribute when scored (0 when excluded). */
   weight: number;
-  /** Raw fit on this dimension, 0-100. */
+  /** Raw fit on this dimension, 0-100. 0 when not scored. */
   raw: number;
   /** weight * raw / 100 — what this dimension contributed to the final score. */
   contribution: number;
+  /**
+   * False when one side has no data for this dimension. Excluded
+   * dimensions are NOT counted toward the score's denominator —
+   * they surface in the UI as "Add X to factor this in" rows but
+   * don't drag the number down.
+   */
+  scored: boolean;
   /** Short label for the dimension (rendered in WhyThisMatch). */
   label: string;
-  /** One-line detail explaining the fit on this dimension. */
+  /** One-line detail explaining the fit (or, when !scored, what's missing). */
   detail: string;
+  /**
+   * Optional profile/job-link CTA shown next to excluded rows.
+   * `cta_href` is the link the user should follow to fill in the gap;
+   * `cta_label` is the button text. Both null on scored rows.
+   */
+  cta_href: string | null;
+  cta_label: string | null;
 }
 
 export interface FitResult {
+  /** 0-100 normalized over scored dimensions only. */
   score: number;
   bucket: FitBucket;
   dimensions: Record<FitDimensionKey, FitDimension>;
-  /** Top 3 dimension keys, ordered by contribution desc. */
+  /** Top 3 SCORED dimensions by contribution desc — drives the highlights row. */
   top_factors: FitDimensionKey[];
+  /**
+   * Coverage = sum of scored weights / sum of total weights. The UI
+   * uses this to render "Solid fit · 6 of 7 dims" so readers know
+   * when the score is based on partial data.
+   */
+  coverage: {
+    scored_weight: number;
+    total_weight: number;
+    scored_count: number;
+    total_count: number;
+  };
   /** SHA-256 hex of the canonical input snapshot. */
   input_hash: string;
 }
@@ -68,9 +106,20 @@ export interface CandidateFitInputs {
   salary_unit: "hourly" | "yearly" | "per_visit" | "per_day" | null;
   temp_or_perm: "temp" | "perm" | "either" | null;
   dso_size_preference: "small" | "mid" | "large" | "any" | null;
+  /**
+   * v1.1 — used by the years_experience dimension. Null means "not
+   * provided," which excludes that dim from the score (rather than
+   * penalizing).
+   */
+  years_experience_dental: number | null;
 }
 
 export interface JobFitInputs {
+  /**
+   * v1.1 — role is a HARD FILTER. computePracticeFit returns null
+   * when candidate has non-empty `desired_roles` and this category
+   * is not in that list.
+   */
   role_category: string;
   employment_type: string;
   compensation_min: number | null;
@@ -80,6 +129,14 @@ export interface JobFitInputs {
   locations: Array<{ state: string | null; city: string | null }>;
   /** From job_skills join. v1 schema doesn't distinguish required vs preferred. */
   skills: string[];
+  /**
+   * v1.1 — multi-select against the SPECIALTIES canonical list. Empty
+   * array means "specialty-agnostic" (admin / front-desk roles); the
+   * specialty dim is excluded for those.
+   */
+  specialty: string[];
+  /** v1.1 — null means "no minimum experience requirement"; the dim is excluded. */
+  min_years_experience: number | null;
 }
 
 export interface DsoFitInputs {

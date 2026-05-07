@@ -98,6 +98,8 @@ export async function createJob(
       requirements: parsed.requirements || null,
       status: parsed.status,
       hide_stages_from_candidate: parsed.hideStagesFromCandidate,
+      specialty: parsed.specialty,
+      min_years_experience: parsed.minYearsExperience,
       scope: parsed.scope,
       posted_at: parsed.status === "active" ? new Date().toISOString() : null,
       created_by: dsoUser?.id ?? null,
@@ -189,6 +191,8 @@ export async function updateJob(
       requirements: parsed.requirements || null,
       status: parsed.status,
       hide_stages_from_candidate: parsed.hideStagesFromCandidate,
+      specialty: parsed.specialty,
+      min_years_experience: parsed.minYearsExperience,
       scope: parsed.scope,
       posted_at:
         parsed.status === "active" ? new Date().toISOString() : null,
@@ -431,6 +435,20 @@ export async function updateJobDetailsSection(
     .map((s) => s.trim())
     .filter(Boolean);
 
+  // v1.1 — multi-select specialty + optional min years of experience.
+  const specialty = formData
+    .getAll("specialty")
+    .map((v) => String(v).trim())
+    .filter(Boolean);
+  const minYearsRaw = String(formData.get("min_years_experience") ?? "").trim();
+  const minYearsExperience = minYearsRaw ? parseInt(minYearsRaw, 10) : null;
+  if (minYearsExperience !== null && Number.isNaN(minYearsExperience)) {
+    return { ok: false, error: "Min years of experience must be a number." };
+  }
+  if (minYearsExperience !== null && minYearsExperience < 0) {
+    return { ok: false, error: "Min years of experience can't be negative." };
+  }
+
   const supabase = await createSupabaseServerClient();
   const { error: updateError } = await supabase
     .from("jobs")
@@ -442,6 +460,8 @@ export async function updateJobDetailsSection(
       benefits: benefits.length > 0 ? benefits : null,
       requirements: requirements || null,
       hide_stages_from_candidate: hideStagesFromCandidate,
+      specialty,
+      min_years_experience: minYearsExperience,
     })
     .eq("id", jobId)
     .eq("dso_id", dsoId);
@@ -685,6 +705,9 @@ interface ParsedJobInput {
   screeningQuestions: ScreeningQuestionPayload[];
   hideStagesFromCandidate: boolean;
   scope: "location" | "regional" | "corporate";
+  // v1.1 — Practice Fit scoring inputs
+  specialty: string[];
+  minYearsExperience: number | null;
 }
 
 const VALID_SCOPES = new Set<"location" | "regional" | "corporate">([
@@ -758,6 +781,21 @@ function parseJobFormData(
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
+
+  // v1.1 — multi-select submitted as repeated `specialty` form entries.
+  const specialty = formData
+    .getAll("specialty")
+    .map((v) => String(v).trim())
+    .filter(Boolean);
+
+  const minYearsRaw = String(formData.get("min_years_experience") ?? "").trim();
+  const minYearsExperience = minYearsRaw ? parseInt(minYearsRaw, 10) : null;
+  if (minYearsExperience !== null && Number.isNaN(minYearsExperience)) {
+    return { error: "Min years of experience must be a number." };
+  }
+  if (minYearsExperience !== null && minYearsExperience < 0) {
+    return { error: "Min years of experience can't be negative." };
+  }
 
   // Screening questions — JSON-encoded array
   const rawQuestions = String(formData.get("screening_questions") ?? "").trim();
@@ -850,6 +888,8 @@ function parseJobFormData(
     screeningQuestions,
     hideStagesFromCandidate,
     scope,
+    specialty,
+    minYearsExperience,
   };
 }
 

@@ -68,7 +68,7 @@ export default async function EditJobPage({ params }: PageProps) {
   const { data: job } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_visible, benefits, requirements, status, posted_at, applications_count, views, hide_stages_from_candidate, scope"
+      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_visible, benefits, requirements, status, posted_at, applications_count, views, hide_stages_from_candidate, scope, specialty, min_years_experience"
     )
     .eq("id", jobId)
     .eq("dso_id", dsoUser.dso_id)
@@ -125,6 +125,9 @@ export default async function EditJobPage({ params }: PageProps) {
     scope:
       (job.scope as "location" | "regional" | "corporate" | null) ??
       "location",
+    specialty: ((job.specialty as string[] | null) ?? []) as string[],
+    min_years_experience:
+      (job.min_years_experience as number | null) ?? null,
   };
 
   const initialQuestions: WizardScreeningQuestion[] = (

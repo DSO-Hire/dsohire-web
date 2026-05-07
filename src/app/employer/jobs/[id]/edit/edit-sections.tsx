@@ -89,6 +89,20 @@ const STATUS_OPTIONS: Array<{ value: string; label: string; helper: string }> = 
   { value: "filled", label: "Filled", helper: "Closed because you hired someone." },
 ];
 
+// v1.1 — mirrors src/lib/candidate/canonical-lists.ts SPECIALTIES.
+const SPECIALTY_OPTIONS: Array<{ value: string; label: string }> = [
+  { value: "general_dentistry", label: "General Dentistry" },
+  { value: "pediatric_dentistry", label: "Pediatric Dentistry" },
+  { value: "orthodontics", label: "Orthodontics" },
+  { value: "endodontics", label: "Endodontics" },
+  { value: "periodontics", label: "Periodontics" },
+  { value: "prosthodontics", label: "Prosthodontics" },
+  { value: "oral_surgery", label: "Oral & Maxillofacial Surgery" },
+  { value: "oral_medicine", label: "Oral Medicine" },
+  { value: "dental_anesthesiology", label: "Dental Anesthesiology" },
+  { value: "public_health_dentistry", label: "Public Health Dentistry" },
+];
+
 /* ───── Initial-data shape (mirrors JobWizardInitial) ───── */
 
 export interface EditSectionsInitial {
@@ -108,6 +122,9 @@ export interface EditSectionsInitial {
   skills: string[];
   hide_stages_from_candidate: boolean;
   scope: JobScope;
+  // v1.1 — Practice Fit scoring inputs
+  specialty: string[];
+  min_years_experience: number | null;
 }
 
 interface EditSectionsProps {
@@ -155,6 +172,8 @@ export function EditSections({
         initialBenefits={initial.benefits}
         initialRequirements={initial.requirements ?? ""}
         initialHideStages={initial.hide_stages_from_candidate}
+        initialSpecialty={initial.specialty}
+        initialMinYearsExperience={initial.min_years_experience}
       />
       <ScreeningSection
         dsoId={dsoId}
@@ -577,6 +596,8 @@ function DetailsSection({
   initialBenefits,
   initialRequirements,
   initialHideStages,
+  initialSpecialty,
+  initialMinYearsExperience,
 }: {
   dsoId: string;
   jobId: string;
@@ -588,6 +609,8 @@ function DetailsSection({
   initialBenefits: string[];
   initialRequirements: string;
   initialHideStages: boolean;
+  initialSpecialty: string[];
+  initialMinYearsExperience: number | null;
 }) {
   const [compMin, setCompMin] = useState(
     initialCompMin !== null ? String(initialCompMin) : ""
@@ -601,7 +624,17 @@ function DetailsSection({
   const [benefits, setBenefits] = useState(initialBenefits.join(", "));
   const [requirements, setRequirements] = useState(initialRequirements);
   const [hideStages, setHideStages] = useState(initialHideStages);
+  // v1.1 — Practice Fit fields. specialty as a Set for chip-toggle ergonomics.
+  const [specialty, setSpecialty] = useState<Set<string>>(
+    new Set(initialSpecialty)
+  );
+  const [minYearsExperience, setMinYearsExperience] = useState(
+    initialMinYearsExperience !== null
+      ? String(initialMinYearsExperience)
+      : ""
+  );
 
+  const initialSpecialtyKey = [...initialSpecialty].sort().join(",");
   const initialSnapshot = {
     compMin: initialCompMin !== null ? String(initialCompMin) : "",
     compMax: initialCompMax !== null ? String(initialCompMax) : "",
@@ -611,6 +644,11 @@ function DetailsSection({
     benefits: initialBenefits.join(", "),
     requirements: initialRequirements,
     hideStages: initialHideStages,
+    specialtyKey: initialSpecialtyKey,
+    minYearsExperience:
+      initialMinYearsExperience !== null
+        ? String(initialMinYearsExperience)
+        : "",
   };
   const [snapshot, setSnapshot] = useState(initialSnapshot);
 
@@ -618,6 +656,7 @@ function DetailsSection({
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
+  const specialtyKey = [...specialty].sort().join(",");
   const dirty =
     compMin !== snapshot.compMin ||
     compMax !== snapshot.compMax ||
@@ -626,7 +665,9 @@ function DetailsSection({
     skills !== snapshot.skills ||
     benefits !== snapshot.benefits ||
     requirements !== snapshot.requirements ||
-    hideStages !== snapshot.hideStages;
+    hideStages !== snapshot.hideStages ||
+    specialtyKey !== snapshot.specialtyKey ||
+    minYearsExperience !== snapshot.minYearsExperience;
 
   const touch = () => setSaved(false);
 
@@ -644,6 +685,8 @@ function DetailsSection({
     fd.set("skills", skills);
     fd.set("benefits", benefits);
     fd.set("requirements", requirements);
+    for (const sp of specialty) fd.append("specialty", sp);
+    fd.set("min_years_experience", minYearsExperience);
 
     startTransition(async () => {
       const result: JobActionState = await updateJobDetailsSection(
@@ -663,6 +706,8 @@ function DetailsSection({
         benefits,
         requirements,
         hideStages,
+        specialtyKey,
+        minYearsExperience,
       });
       setSaved(true);
     });
@@ -727,6 +772,66 @@ function DetailsSection({
               states with pay-transparency laws.
             </span>
           </label>
+        </fieldset>
+
+        <fieldset className="border border-[var(--rule)] p-5 bg-cream/40">
+          <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
+            Match scoring
+          </legend>
+          <p className="mt-1 text-[12px] text-slate-meta leading-relaxed">
+            Drives Practice Fit — the proprietary match score on every
+            application. Both fields are optional; the score adapts to
+            whatever you fill in.
+          </p>
+          <div className="mt-4">
+            <label className="block text-[12px] font-semibold text-ink mb-2">
+              Specialty{" "}
+              <span className="text-slate-meta font-normal">
+                (pick any that apply)
+              </span>
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {SPECIALTY_OPTIONS.map((opt) => {
+                const checked = specialty.has(opt.value);
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => {
+                      const next = new Set(specialty);
+                      if (checked) next.delete(opt.value);
+                      else next.add(opt.value);
+                      setSpecialty(next);
+                      touch();
+                    }}
+                    className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
+                      checked
+                        ? "bg-heritage-deep text-ivory border-heritage-deep"
+                        : "bg-white text-ink border-[var(--rule)] hover:border-heritage"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div className="mt-5">
+            <Input
+              label="Minimum years of dental experience (optional)"
+              type="number"
+              placeholder="e.g. 2"
+              value={minYearsExperience}
+              onChange={(v) => {
+                setMinYearsExperience(v);
+                touch();
+              }}
+            />
+            <p className="mt-1 text-[11px] text-slate-meta">
+              Leave blank if there&apos;s no minimum. Excluded from the
+              score when blank — doesn&apos;t penalize newer candidates.
+            </p>
+          </div>
         </fieldset>
 
         <Input

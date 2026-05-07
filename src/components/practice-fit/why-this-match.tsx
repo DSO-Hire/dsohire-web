@@ -1,28 +1,35 @@
 "use client";
 
 /**
- * <WhyThisMatch /> — collapsible top-3-factors expander (Phase 5D v0)
- * with optional AI narrative on top (Phase 5D v1).
+ * <WhyThisMatch /> — Practice Fit expander (Phase 5D v1.1).
  *
  * Drops below the PracticeFitChip on application detail pages and
  * candidate job detail pages. Click expands to show:
- *   1. (v1) A 2-3 sentence audience-framed AI narrative — generated
- *      lazily on first expand, cached in practice_fit_scores. Skipped
- *      entirely when bucket='low' (the dimension breakdown is more
- *      useful at that bucket; warm prose reads as apologetic).
- *   2. (v0) Top 3 dimension contributions with progress bars.
+ *   1. (v1)   2-3 sentence audience-framed AI narrative, lazy-fetched
+ *             on first open. Skipped for bucket='low' or when ids are
+ *             missing. Cached on the practice_fit_scores row.
+ *   2. (v1.1) ALL active dimensions sorted by contribution desc, with
+ *             progress bars. Replaces v0's top-3 slice — readers want
+ *             to see the whole picture.
+ *   3. (v1.1) Excluded dimensions ("Add specialty to factor this in")
+ *             rendered as muted rows with a profile-completion CTA.
+ *             Encouragement, not penalty — they don't drag the score.
+ *   4. (v1.1) Coverage chip in the header ("· 6 of 7 dims") when the
+ *             score is based on partial data. Hidden at full coverage.
  *
- * Audience prop drives which framing of the narrative renders. The
- * server action returns BOTH framings so the column doesn't double-call
- * Haiku when an employer + candidate hit the same pair.
+ * Audience prop drives which narrative framing renders. The server
+ * action returns BOTH framings so a candidate + employer viewing the
+ * same pair don't double-call Haiku.
  *
  * Client component because expand state + lazy fetch are interactive.
  */
 
 import { useEffect, useState } from "react";
-import { ChevronDown, ChevronUp, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { ChevronDown, ChevronUp, Plus, Sparkles } from "lucide-react";
 import { BUCKET_STYLES } from "@/lib/practice-fit/buckets";
 import type {
+  FitDimension,
   FitDimensionKey,
   FitResult,
 } from "@/lib/practice-fit/types";
@@ -126,6 +133,26 @@ export function WhyThisMatch({
   const narrativeText =
     audience === "candidate" ? narrative.candidate : narrative.employer;
 
+  // v1.1 — sort dimensions: scored first (by contribution desc), then
+  // excluded ones at the bottom (so the "to factor X in" rows don't
+  // interrupt the scoring story).
+  const orderedDims = (
+    Object.entries(fit.dimensions) as Array<[FitDimensionKey, FitDimension]>
+  ).sort((a, b) => {
+    if (a[1].scored !== b[1].scored) return a[1].scored ? -1 : 1;
+    if (b[1].contribution !== a[1].contribution) {
+      return b[1].contribution - a[1].contribution;
+    }
+    if (b[1].weight !== a[1].weight) return b[1].weight - a[1].weight;
+    return a[0].localeCompare(b[0]);
+  });
+
+  // v1.1 — coverage chip: only show when the score is based on partial
+  // data. At full coverage (all dims scored) we hide it to keep the
+  // header minimal.
+  const partialCoverage =
+    fit.coverage && fit.coverage.scored_count < fit.coverage.total_count;
+
   return (
     <section
       className={`border ${style.borderClass} bg-white overflow-hidden`}
@@ -136,7 +163,7 @@ export function WhyThisMatch({
         aria-expanded={open}
         className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left ${style.bgClass} ${style.textClass} hover:opacity-95`}
       >
-        <span className="inline-flex items-center gap-2">
+        <span className="inline-flex items-center gap-2 flex-wrap">
           <Sparkles className="h-3.5 w-3.5" aria-hidden />
           <span className="text-[11px] font-bold tracking-[1.5px] uppercase">
             Practice Fit
@@ -145,6 +172,11 @@ export function WhyThisMatch({
             {style.label}
           </span>
           <span className="text-[12px] opacity-80">· {style.tagline}</span>
+          {partialCoverage && (
+            <span className="text-[11px] opacity-70 font-medium">
+              · {fit.coverage.scored_count} of {fit.coverage.total_count} dims
+            </span>
+          )}
         </span>
         <span className="inline-flex items-center gap-1 text-[12px] font-medium">
           {open ? "Hide details" : "Why this match"}
@@ -182,40 +214,25 @@ export function WhyThisMatch({
                 )}
               </li>
             )}
-          {fit.top_factors.map((key) => {
-            const dim = fit.dimensions[key as FitDimensionKey];
-            if (!dim) return null;
-            const fillPct = Math.round(
-              (dim.contribution / Math.max(dim.weight, 1)) * 100
-            );
-            return (
-              <li key={key} className="px-4 py-3">
-                <div className="flex items-baseline justify-between gap-3 mb-1">
-                  <p className="text-[13px] font-semibold text-ink">
-                    {dim.label}
-                  </p>
-                  <span className="text-[11px] font-mono text-slate-meta">
-                    +{Math.round(dim.contribution)} of {dim.weight}
-                  </span>
-                </div>
-                <div className="h-1 bg-slate-100 overflow-hidden">
-                  <div
-                    className="h-full bg-heritage transition-all"
-                    style={{ width: `${fillPct}%` }}
-                  />
-                </div>
-                <p className="mt-2 text-[12px] text-slate-body leading-snug">
-                  {dim.detail}
-                </p>
-              </li>
-            );
-          })}
+          {orderedDims.map(([key, dim]) =>
+            dim.scored ? (
+              <ScoredDimRow key={key} dim={dim} />
+            ) : (
+              <UnscoredDimRow
+                key={key}
+                dim={dim}
+                showCta={audience === "candidate"}
+              />
+            )
+          )}
           <li className="px-4 py-3 bg-slate-50/50">
             <p className="text-[11px] text-slate-meta leading-relaxed">
-              Practice Fit is computed from your structured prefs against
-              the job&apos;s posting + the DSO&apos;s size. We use 6
-              weighted dimensions: role, compensation, location/license,
-              skills, employment type, and DSO size. Score updates
+              Practice Fit weighs compensation, location/license,
+              specialty, skills, years of experience, employment type,
+              and DSO size — normalized over the dimensions we have
+              data on, so missing fields don&apos;t drag the score down.
+              Role match is a pre-filter: pairs where the role doesn&apos;t
+              line up don&apos;t get a chip at all. Score updates
               automatically when either side changes.
             </p>
           </li>
@@ -237,5 +254,75 @@ function NarrativeSkeleton() {
       <div className="h-3 bg-slate-200/70 w-[88%] rounded-sm" />
       <div className="h-3 bg-slate-200/70 w-[60%] rounded-sm" />
     </div>
+  );
+}
+
+/**
+ * Standard dimension row — used for SCORED dims. Progress bar fill is
+ * proportional to raw (0-100), not contribution-of-total — that way a
+ * 100% match on a 5-weight dim and a 100% match on a 25-weight dim both
+ * visually fill the bar.
+ */
+function ScoredDimRow({ dim }: { dim: FitDimension }) {
+  const fillPct = Math.max(0, Math.min(100, dim.raw));
+  return (
+    <li className="px-4 py-3">
+      <div className="flex items-baseline justify-between gap-3 mb-1">
+        <p className="text-[13px] font-semibold text-ink">{dim.label}</p>
+        <span className="text-[11px] font-mono text-slate-meta">
+          +{Math.round(dim.contribution)} of {dim.weight}
+        </span>
+      </div>
+      <div className="h-1 bg-slate-100 overflow-hidden">
+        <div
+          className="h-full bg-heritage transition-all"
+          style={{ width: `${fillPct}%` }}
+        />
+      </div>
+      <p className="mt-2 text-[12px] text-slate-body leading-snug">
+        {dim.detail}
+      </p>
+    </li>
+  );
+}
+
+/**
+ * Excluded-dimension row — muted styling, no progress bar. Shows the
+ * detail text + an optional profile-completion CTA.
+ *
+ * The CTA renders only on the candidate side (the candidate is the one
+ * who can fill the gap; the employer would just be told "candidate
+ * hasn't set their salary preference," which isn't actionable for them).
+ */
+function UnscoredDimRow({
+  dim,
+  showCta,
+}: {
+  dim: FitDimension;
+  showCta: boolean;
+}) {
+  return (
+    <li className="px-4 py-3 bg-slate-50/40">
+      <div className="flex items-baseline justify-between gap-3 mb-1">
+        <p className="text-[13px] font-semibold text-slate-meta">
+          {dim.label}
+        </p>
+        <span className="text-[11px] font-mono text-slate-meta opacity-70">
+          not scored
+        </span>
+      </div>
+      <p className="text-[12px] text-slate-body leading-snug">
+        {dim.detail}
+      </p>
+      {showCta && dim.cta_href && dim.cta_label && (
+        <Link
+          href={dim.cta_href}
+          className="mt-2 inline-flex items-center gap-1 text-[12px] font-semibold text-heritage-deep hover:underline"
+        >
+          <Plus className="h-3 w-3" aria-hidden />
+          {dim.cta_label}
+        </Link>
+      )}
+    </li>
   );
 }

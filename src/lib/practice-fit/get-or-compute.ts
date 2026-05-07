@@ -75,6 +75,12 @@ export async function getPracticeFit(
 
   // Cache miss / stale / hash drift — recompute.
   const result = computePracticeFit(inputs);
+  if (result === null) {
+    // v1.1 — role filter rejected the pair. Delete any stale row so a
+    // legacy v0 score doesn't keep showing on a now-filtered pair.
+    await deleteScore(candidateId, jobId);
+    return null;
+  }
   await upsertScore(candidateId, jobId, result);
   return result;
 }
@@ -132,6 +138,12 @@ export async function getPracticeFitForJob(
     }
 
     const result = computePracticeFit(inputs);
+    if (result === null) {
+      // Role-filtered — make sure no stale row hangs around; skip
+      // adding to the result map (caller treats as "no fit").
+      await deleteScore(candidateId, jobId);
+      continue;
+    }
     await upsertScore(candidateId, jobId, result);
     out.set(candidateId, result);
   }
@@ -167,7 +179,7 @@ async function loadCandidateInputs(
   const { data: c } = await supabase
     .from("candidates")
     .select(
-      "desired_roles, desired_specialty, license_states, desired_locations, skills, schedule_preferences, min_salary, salary_unit, temp_or_perm, dso_size_preference"
+      "desired_roles, desired_specialty, license_states, desired_locations, skills, schedule_preferences, min_salary, salary_unit, temp_or_perm, dso_size_preference, years_experience_dental"
     )
     .eq("id", candidateId)
     .maybeSingle();
@@ -190,6 +202,8 @@ async function loadCandidateInputs(
     dso_size_preference:
       (r.dso_size_preference as FitInputs["candidate"]["dso_size_preference"]) ??
       null,
+    years_experience_dental:
+      (r.years_experience_dental as number | null) ?? null,
   };
 }
 
@@ -202,6 +216,7 @@ async function loadJobAndDso(
     .select(
       `id, dso_id, role_category, employment_type,
        compensation_min, compensation_max, compensation_period,
+       specialty, min_years_experience,
        job_locations(location:dso_locations(city, state)),
        job_skills(skill)`
     )
@@ -240,6 +255,9 @@ async function loadJobAndDso(
         null,
       locations,
       skills,
+      specialty: ((r.specialty as string[] | null) ?? []) as string[],
+      min_years_experience:
+        (r.min_years_experience as number | null) ?? null,
     },
     dso: {
       location_count: locationCount ?? 0,
@@ -275,6 +293,26 @@ async function upsertScore(
   }
 }
 
+/**
+ * v1.1 — delete a stale score row when the role filter newly rejects
+ * a pair that previously had a v0 score. Idempotent (no-op if the row
+ * doesn't exist), so safe to call on every filtered compute.
+ */
+async function deleteScore(
+  candidateId: string,
+  jobId: string
+): Promise<void> {
+  const admin = createSupabaseServiceRoleClient();
+  const { error } = await admin
+    .from("practice_fit_scores")
+    .delete()
+    .eq("candidate_id", candidateId)
+    .eq("job_id", jobId);
+  if (error) {
+    console.error("[practice-fit] delete failed:", error);
+  }
+}
+
 /* ──────────────────────────────────────────────────────────────
  * Helpers
  * ─────────────────────────────────────────────────────────── */
@@ -286,11 +324,28 @@ function isFresh(computedAtIso: string): boolean {
 }
 
 function rowToResult(row: Record<string, unknown>): FitResult {
+  const dims = row.dimensions as FitResult["dimensions"];
+  // Derive coverage from the stored dimensions rather than persisting
+  // it as a separate column. The dims JSON already carries the per-
+  // dim weight + scored flag we need.
+  let scored_weight = 0;
+  let total_weight = 0;
+  let scored_count = 0;
+  let total_count = 0;
+  for (const d of Object.values(dims)) {
+    total_weight += d.weight;
+    total_count += 1;
+    if (d.scored) {
+      scored_weight += d.weight;
+      scored_count += 1;
+    }
+  }
   return {
     score: row.score as number,
     bucket: scoreToBucket(row.score as number),
-    dimensions: row.dimensions as FitResult["dimensions"],
+    dimensions: dims,
     top_factors: row.top_factors as FitResult["top_factors"],
+    coverage: { scored_weight, total_weight, scored_count, total_count },
     input_hash: row.input_hash as string,
   };
 }
