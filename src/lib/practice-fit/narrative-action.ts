@@ -132,11 +132,28 @@ export async function generatePracticeFitNarrative(
     return { ok: false, error: "Couldn't assemble match context." };
   }
 
+  // v1.1 — derive coverage from the stored dimensions JSON. Same
+  // approach the cache reader uses; saves a column.
+  const dims = row.dimensions as FitResult["dimensions"];
+  let scored_weight = 0;
+  let total_weight = 0;
+  let scored_count = 0;
+  let total_count = 0;
+  for (const d of Object.values(dims)) {
+    total_weight += d.weight;
+    total_count += 1;
+    if (d.scored) {
+      scored_weight += d.weight;
+      scored_count += 1;
+    }
+  }
+
   const fit: FitResult = {
     score: row.score as number,
     bucket,
-    dimensions: row.dimensions as FitResult["dimensions"],
+    dimensions: dims,
     top_factors: row.top_factors as FitDimensionKey[],
+    coverage: { scored_weight, total_weight, scored_count, total_count },
     input_hash: row.input_hash as string,
   };
 
