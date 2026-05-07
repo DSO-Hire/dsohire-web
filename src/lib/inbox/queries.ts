@@ -7,7 +7,7 @@
  * Strategy: pull every application the caller can see (RLS handles the
  * scoping), pull every application_messages row in one query, group +
  * project the latest message + unread count per application, and join
- * the archive flags. Two round trips total.
+ * the archive flags. Two-to-three round trips total.
  *
  * Why not a Postgres view: the inbox shape needs to know the calling
  * user's auth.uid() to compute `unread_count` (count = messages from
@@ -51,8 +51,7 @@ export async function getEmployerInboxThreads(
     supabase
       .from("applications")
       .select(
-        `id, candidate_id, job_id, current_stage,
-         primary_location_id,
+        `id, candidate_id, job_id, status,
          jobs:jobs!inner(id, title, dso_id),
          candidate:candidates(id, full_name, avatar_url)`
       )
@@ -68,6 +67,13 @@ export async function getEmployerInboxThreads(
       .eq("auth_user_id", authUserId),
   ]);
 
+  if (appsResult.error) {
+    console.error("[inbox] employer apps query", appsResult.error);
+  }
+  if (messagesResult.error) {
+    console.error("[inbox] employer messages query", messagesResult.error);
+  }
+
   const apps = (appsResult.data ?? []) as Array<Record<string, unknown>>;
   const messages = (messagesResult.data ?? []) as MessageRowMin[];
   const archivedSet = new Set(
@@ -76,27 +82,37 @@ export async function getEmployerInboxThreads(
     )
   );
 
-  // Pull all locations referenced by any of the apps in one query so
-  // the location dropdown filter has names (not just ids).
-  const locationIds = Array.from(
+  // Pull every job_location row for the jobs we just loaded so the
+  // employer Location dropdown filter has names. Each application
+  // gets the FIRST location of its job — multi-location jobs collapse
+  // to one for filter purposes (still discoverable via job filter).
+  const jobIds = Array.from(
     new Set(
       apps
-        .map((a) => a.primary_location_id as string | null)
+        .map((a) => {
+          const j = a.jobs as Record<string, unknown> | null;
+          return j ? (j.id as string) : null;
+        })
         .filter((id): id is string => Boolean(id))
     )
   );
-  const locationMap = new Map<string, string>();
-  if (locationIds.length > 0) {
-    const { data: locs } = await supabase
-      .from("dso_locations")
-      .select("id, name, city, state")
-      .in("id", locationIds);
-    for (const loc of (locs ?? []) as Array<Record<string, unknown>>) {
+  const jobToLocation = new Map<string, { id: string; name: string }>();
+  if (jobIds.length > 0) {
+    const { data: jl } = await supabase
+      .from("job_locations")
+      .select("job_id, location:dso_locations(id, name, city, state)")
+      .in("job_id", jobIds);
+    for (const row of (jl ?? []) as Array<Record<string, unknown>>) {
+      const jobId = row.job_id as string;
+      if (jobToLocation.has(jobId)) continue; // first location wins
+      const loc = row.location as Record<string, unknown> | null;
+      if (!loc) continue;
       const id = loc.id as string;
-      const name = (loc.name as string | null) ??
+      const name =
+        (loc.name as string | null) ??
         [loc.city, loc.state].filter(Boolean).join(", ") ??
         "Unnamed";
-      locationMap.set(id, name);
+      jobToLocation.set(jobId, { id, name });
     }
   }
 
@@ -104,7 +120,7 @@ export async function getEmployerInboxThreads(
     apps,
     messages,
     archivedSet,
-    locationMap,
+    jobToLocation,
     audience: "employer",
   });
 }
@@ -129,7 +145,7 @@ export async function getCandidateInboxThreads(
     supabase
       .from("applications")
       .select(
-        `id, candidate_id, job_id, current_stage, primary_location_id,
+        `id, candidate_id, job_id, status,
          jobs:jobs!inner(id, title, dso_id, dso:dsos(id, name, logo_url))`
       )
       .eq("candidate_id", candidateId),
@@ -144,6 +160,13 @@ export async function getCandidateInboxThreads(
       .eq("auth_user_id", authUserId),
   ]);
 
+  if (appsResult.error) {
+    console.error("[inbox] candidate apps query", appsResult.error);
+  }
+  if (messagesResult.error) {
+    console.error("[inbox] candidate messages query", messagesResult.error);
+  }
+
   const apps = (appsResult.data ?? []) as Array<Record<string, unknown>>;
   const messages = (messagesResult.data ?? []) as MessageRowMin[];
   const archivedSet = new Set(
@@ -156,7 +179,7 @@ export async function getCandidateInboxThreads(
     apps,
     messages,
     archivedSet,
-    locationMap: new Map(),
+    jobToLocation: new Map(),
     audience: "candidate",
   });
 }
@@ -192,13 +215,13 @@ function composeThreads({
   apps,
   messages,
   archivedSet,
-  locationMap,
+  jobToLocation,
   audience,
 }: {
   apps: Array<Record<string, unknown>>;
   messages: MessageRowMin[];
   archivedSet: Set<string>;
-  locationMap: Map<string, string>;
+  jobToLocation: Map<string, { id: string; name: string }>;
   audience: "candidate" | "employer";
 }): InboxThread[] {
   // Bucket messages by application; first message in each bucket is the
@@ -219,9 +242,7 @@ function composeThreads({
     const hasAnyMessage = msgs.length > 0;
     const isArchived = archivedSet.has(appId);
     // Skip applications with NO messages AND not archived — they're
-    // not really "threads" yet. A user can archive an empty
-    // conversation if they want to; that surfaces it on the
-    // Archived tab so they don't lose it.
+    // not really "threads" yet.
     if (!hasAnyMessage && !isArchived) continue;
 
     const last = msgs[0] ?? null;
@@ -243,12 +264,16 @@ function composeThreads({
           (candidate?.full_name as string | null) ?? "(name not provided)",
         avatar_url: (candidate?.avatar_url as string | null) ?? null,
       };
-      stage = (app.current_stage as string | null) ?? null;
-      locationId = (app.primary_location_id as string | null) ?? null;
-      locationName = locationId ? locationMap.get(locationId) ?? null : null;
+      // applications.status is the canonical pipeline-stage column
+      // (kanban + reject flows write to it). Surfacing as `stage` on
+      // the thread so the rendering layer doesn't have to know.
+      stage = (app.status as string | null) ?? null;
       const job = app.jobs as Record<string, unknown>;
       jobId = job.id as string;
       jobTitle = job.title as string;
+      const loc = jobToLocation.get(jobId);
+      locationId = loc?.id ?? null;
+      locationName = loc?.name ?? null;
     } else {
       const job = app.jobs as Record<string, unknown>;
       const dso = job.dso as Record<string, unknown> | null;

@@ -435,11 +435,27 @@ export function InboxView({
           <ul className="flex-1 overflow-y-auto list-none divide-y divide-[var(--rule)]">
             {filteredThreads.length === 0 ? (
               <li className="p-8 text-center text-sm text-slate-meta">
-                {tab === "archived"
-                  ? "No archived threads."
-                  : tab === "unread"
-                  ? "Inbox zero. ✨"
-                  : "No conversations yet."}
+                {tab === "archived" ? (
+                  "No archived threads."
+                ) : tab === "unread" ? (
+                  "Inbox zero. ✨"
+                ) : (
+                  <span>
+                    No conversations yet.
+                    <a
+                      href={
+                        audience === "employer"
+                          ? "/employer/applications"
+                          : "/candidate/applications"
+                      }
+                      className="mt-2 block font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
+                    >
+                      {audience === "employer"
+                        ? "Open applications →"
+                        : "View your applications →"}
+                    </a>
+                  </span>
+                )}
               </li>
             ) : (
               filteredThreads.map((thread) => (
