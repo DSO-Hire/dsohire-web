@@ -14,6 +14,7 @@
  */
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Menu, X, LifeBuoy, LogOut } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
@@ -44,6 +45,11 @@ export function EmployerMobileNav({
   user,
 }: EmployerMobileNavProps) {
   const [open, setOpen] = useState(false);
+  // Defer portal target until mount — server render has no document.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Lock body scroll while drawer is open.
   useEffect(() => {
@@ -77,7 +83,13 @@ export function EmployerMobileNav({
         <Menu className="size-5" />
       </button>
 
-      {open && (
+      {/* Drawer portaled to document.body — the parent /employer/*
+          mobile header uses `backdrop-blur-md` which creates a
+          containing block for fixed-positioned descendants (per
+          feedback_backdrop_filter_containing_block.md), clipping the
+          drawer to the 64px header bounds. Fixed 2026-05-08 PM after
+          Cam caught the same bug on the candidate side. */}
+      {mounted && open && createPortal(
         <div className="fixed inset-0 z-50 lg:hidden">
           {/* Backdrop */}
           <button
@@ -161,7 +173,8 @@ export function EmployerMobileNav({
               </form>
             </div>
           </aside>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
