@@ -13,6 +13,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Mail, MessageSquare, BookOpen } from "lucide-react";
 import { CandidateShell } from "@/components/candidate/candidate-shell";
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
 
 export const metadata: Metadata = { title: "Help & Support" };
 
@@ -68,7 +69,7 @@ export default function CandidateHelpPage() {
         {/* Contact */}
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Link
-            href="mailto:cam@dsohire.com"
+            href={SUPPORT_MAILTO}
             className="group border border-[var(--rule)] bg-white p-6 hover:border-heritage-deep transition-colors"
           >
             <Mail className="size-5 text-heritage-deep mb-3" />
@@ -76,11 +77,11 @@ export default function CandidateHelpPage() {
               Email support
             </h2>
             <p className="text-[13px] text-slate-body leading-relaxed mb-3">
-              Quickest way to reach us. We answer everything personally and
-              usually within a few hours.
+              The fastest path to support. Every message gets a real reply,
+              typically within one business day.
             </p>
             <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-heritage-deep">
-              cam@dsohire.com
+              {SUPPORT_EMAIL}
               <ArrowRight className="size-3 group-hover:translate-x-0.5 transition-transform" />
             </span>
           </Link>

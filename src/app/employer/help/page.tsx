@@ -66,8 +66,8 @@ export default function HelpPage() {
               Email support
             </h2>
             <p className="text-[13px] text-slate-body leading-relaxed mb-3">
-              Quickest way to reach us. We answer everything personally and
-              usually within a few hours.
+              The fastest path to support. Every message gets a real reply,
+              typically within one business day.
             </p>
             <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-heritage-deep">
               {SUPPORT_EMAIL}
