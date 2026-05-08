@@ -21,6 +21,7 @@ import {
   Briefcase,
   ChevronRight,
   Mail,
+  MapPin,
   Plus,
   Star,
 } from "lucide-react";
@@ -29,6 +30,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { Sparkline } from "@/components/dashboard/sparkline";
 import { TrendPill } from "@/components/dashboard/trend-pill";
 import { getActiveLocationId } from "@/lib/employer/active-location";
+import { JobsListControls } from "./jobs-list-controls";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Jobs" };
@@ -42,14 +44,45 @@ const STATUS_FILTERS = [
 ] as const;
 
 interface PageProps {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{
+    status?: string;
+    /**
+     * Sort key. Defaults to recently-updated.
+     *   updated — updated_at desc (default)
+     *   posted  — posted_at desc, nulls last
+     *   alpha   — title asc
+     *   apps    — applications_count desc
+     *   views   — views desc
+     */
+    sort?: string;
+    /** dso_locations.id values to filter by (multi). */
+    loc?: string | string[];
+  }>;
 }
+
+const SORT_OPTIONS = [
+  { value: "updated", label: "Recently updated" },
+  { value: "posted", label: "Recently posted" },
+  { value: "alpha", label: "Alphabetical" },
+  { value: "apps", label: "Most applications" },
+  { value: "views", label: "Most views" },
+] as const;
+type SortKey = (typeof SORT_OPTIONS)[number]["value"];
 
 export default async function EmployerJobsPage({ searchParams }: PageProps) {
   const nowMs = new Date().getTime();
-  const { status: statusParam } = await searchParams;
+  const sp = await searchParams;
+  const statusParam = sp.status;
   const activeStatus =
     STATUS_FILTERS.find((f) => f.value === statusParam)?.value ?? "all";
+  const sortKey: SortKey =
+    (SORT_OPTIONS.find((s) => s.value === sp.sort)?.value as SortKey | undefined) ??
+    "updated";
+  const locFilters = Array.isArray(sp.loc)
+    ? sp.loc
+    : sp.loc
+      ? [sp.loc]
+      : [];
 
   const supabase = await createSupabaseServerClient();
 
@@ -117,11 +150,110 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
   };
   const allJobs = (allJobsRaw ?? []) as AllJobRow[];
 
+  // Pull every job's location associations in one batch — drives the
+  // chip rendering on each row AND the location filter dropdown. We
+  // also use the linked-location set to apply the page-level multi-
+  // select filter below.
+  const allJobIds = allJobs.map((j) => j.id);
+  const locationsByJob = new Map<
+    string,
+    Array<{ id: string; name: string; city: string | null; state: string | null }>
+  >();
+  if (allJobIds.length > 0) {
+    const { data: jlRows } = await supabase
+      .from("job_locations")
+      .select(
+        "job_id, dso_locations:dso_locations(id, name, city, state)"
+      )
+      .in("job_id", allJobIds);
+    for (const row of (jlRows ?? []) as unknown as Array<{
+      job_id: string;
+      dso_locations: Array<{
+        id: string;
+        name: string;
+        city: string | null;
+        state: string | null;
+      }> | {
+        id: string;
+        name: string;
+        city: string | null;
+        state: string | null;
+      } | null;
+    }>) {
+      const dl = Array.isArray(row.dso_locations)
+        ? row.dso_locations[0]
+        : row.dso_locations;
+      if (!dl) continue;
+      const list = locationsByJob.get(row.job_id) ?? [];
+      list.push(dl);
+      locationsByJob.set(row.job_id, list);
+    }
+  }
+
+  // Pull all DSO locations for the filter dropdown — RLS scopes to the
+  // DSO automatically. Skipping when the rail-level location switcher
+  // is already active (the rail did the narrowing; the per-page
+  // multi-select would be redundant in that mode).
+  let allLocationsForFilter: Array<{
+    id: string;
+    name: string;
+    city: string | null;
+    state: string | null;
+  }> = [];
+  if (!activeLocationId) {
+    const { data: locRows } = await supabase
+      .from("dso_locations")
+      .select("id, name, city, state")
+      .eq("dso_id", dsoUser.dso_id)
+      .order("name", { ascending: true });
+    allLocationsForFilter = (locRows ?? []) as typeof allLocationsForFilter;
+  }
+
+  // Apply sort. Default `updated` matches the DB ordering already in
+  // place, so it's a no-op for that key. Other keys re-sort in JS.
+  const sortedJobs = [...allJobs];
+  switch (sortKey) {
+    case "posted":
+      sortedJobs.sort((a, b) => {
+        const ta = a.posted_at ? new Date(a.posted_at).getTime() : 0;
+        const tb = b.posted_at ? new Date(b.posted_at).getTime() : 0;
+        return tb - ta;
+      });
+      break;
+    case "alpha":
+      sortedJobs.sort((a, b) =>
+        a.title.localeCompare(b.title, undefined, { sensitivity: "base" })
+      );
+      break;
+    case "apps":
+      sortedJobs.sort(
+        (a, b) => (b.applications_count ?? 0) - (a.applications_count ?? 0)
+      );
+      break;
+    case "views":
+      sortedJobs.sort((a, b) => (b.views ?? 0) - (a.views ?? 0));
+      break;
+    case "updated":
+    default:
+      // already ordered by updated_at desc from the query
+      break;
+  }
+
+  // Apply page-level location filter (multi-select). A job qualifies
+  // when at least one of its linked locations is in the selected set.
+  const locFilteredJobs =
+    locFilters.length > 0
+      ? sortedJobs.filter((j) => {
+          const locs = locationsByJob.get(j.id) ?? [];
+          return locs.some((l) => locFilters.includes(l.id));
+        })
+      : sortedJobs;
+
   // Filter for the rendered list view.
   const filteredJobs =
     activeStatus === "all"
-      ? allJobs
-      : allJobs.filter((j) => j.status === activeStatus);
+      ? locFilteredJobs
+      : locFilteredJobs.filter((j) => j.status === activeStatus);
 
   // ── 14-day per-job application velocity ────────────────────────────
   const jobIds = allJobs.map((j) => j.id);
@@ -317,14 +449,19 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
         </section>
       )}
 
-      {/* Status filter pills */}
+      {/* Status filter pills — preserve sort + loc filters in the URL
+          when toggling so the user doesn't lose their narrowing on
+          status flip. */}
       <nav className="flex flex-wrap gap-2 mb-6">
         {STATUS_FILTERS.map((filter) => {
           const isActive = filter.value === activeStatus;
-          const href =
-            filter.value === "all"
-              ? "/employer/jobs"
-              : `/employer/jobs?status=${filter.value}`;
+          const params = new URLSearchParams();
+          if (filter.value !== "all") params.set("status", filter.value);
+          if (sortKey !== "updated") params.set("sort", sortKey);
+          for (const id of locFilters) params.append("loc", id);
+          const href = params.size
+            ? `/employer/jobs?${params.toString()}`
+            : "/employer/jobs";
           const count = statusCounts[filter.value] ?? 0;
           return (
             <Link
@@ -350,6 +487,19 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
           );
         })}
       </nav>
+
+      {/* Sort + location filter controls — Cam 2026-05-08 PM. The
+          location filter is hidden when the rail-level switcher is
+          already narrowing to a single location. */}
+      {allJobs.length > 0 && (
+        <JobsListControls
+          sortOptions={SORT_OPTIONS}
+          activeSort={sortKey}
+          locations={allLocationsForFilter}
+          activeLocationIds={locFilters}
+          hideLocationFilter={Boolean(activeLocationId)}
+        />
+      )}
 
       {/* Hero job card */}
       {showHeroJob && topPerformer && (
@@ -396,6 +546,7 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
                 thisWeek={v.thisWeek}
                 lastWeek={v.lastWeek}
                 isLast={i === listJobs.length - 1}
+                locations={locationsByJob.get(job.id) ?? []}
               />
             );
           })}
@@ -658,12 +809,24 @@ function JobRow({
   thisWeek,
   lastWeek,
   isLast,
+  locations,
 }: {
   job: JobRowData;
   spark: number[];
   thisWeek: number;
   lastWeek: number;
   isLast: boolean;
+  /**
+   * Per-job location associations — drives the location chip(s) under
+   * the title so 50+ practice DSOs can tell which job belongs where
+   * at a glance (Cam 2026-05-08 PM).
+   */
+  locations: Array<{
+    id: string;
+    name: string;
+    city: string | null;
+    state: string | null;
+  }>;
 }) {
   const updated = new Date(job.updated_at);
   const delta = thisWeek - lastWeek;
@@ -691,6 +854,28 @@ function JobRow({
         <div className="text-[16px] font-extrabold tracking-[-0.2px] leading-tight text-ink truncate mb-1">
           {job.title}
         </div>
+        {/* Location chips — show first 2 inline, "+N" overflow when
+            more. Falls through to "No locations" only on legitimately
+            unscoped jobs (corporate/regional). */}
+        {locations.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-1 mb-1">
+            <MapPin className="h-3 w-3 text-slate-meta" />
+            {locations.slice(0, 2).map((loc) => (
+              <span
+                key={loc.id}
+                className="inline-flex items-center px-1.5 py-0.5 bg-cream border border-[var(--rule-strong)] text-[10px] font-semibold tracking-[0.3px] text-ink"
+              >
+                {loc.name}
+                {loc.state ? ` · ${loc.state}` : ""}
+              </span>
+            ))}
+            {locations.length > 2 && (
+              <span className="text-[10px] font-semibold tracking-[0.3px] text-slate-meta">
+                +{locations.length - 2} more
+              </span>
+            )}
+          </div>
+        ) : null}
         <div className="text-[11px] text-slate-meta tracking-[0.3px]">
           Updated {updated.toLocaleDateString()}
         </div>
