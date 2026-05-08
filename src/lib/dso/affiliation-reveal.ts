@@ -71,14 +71,19 @@ export async function revealDsoToCandidate(
   // user_can_access_job already enforces this for HMs by checking
   // job_locations intersection; this guard catches the case where a
   // misconfigured RLS rule lets a cross-DSO read through.
+  //
+  // Supabase typing: !inner returns the inner row as an array (1
+  // element for to-one FKs). Type as Array<...> + access [0]. See
+  // feedback_supabase_inner_returns_array.md.
   type AppRow = {
     id: string;
     job_id: string;
     affiliation_revealed: boolean;
-    jobs: { dso_id: string };
+    jobs: Array<{ dso_id: string }>;
   };
   const appTyped = app as unknown as AppRow;
-  if (appTyped.jobs.dso_id !== dsoUser.dso_id) {
+  const appJob = appTyped.jobs[0];
+  if (!appJob || appJob.dso_id !== dsoUser.dso_id) {
     return { ok: false, error: "Cross-DSO access denied." };
   }
 

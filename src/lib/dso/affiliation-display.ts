@@ -207,52 +207,63 @@ async function fetchJobAffiliationContextsBatch(
       .in("job_id", jobIds),
   ]);
 
+  // Supabase typing note (caught on Vercel 2026-05-08 PM): embedded
+  // selects with !inner come back as ARRAYS at runtime even for
+  // to-one FK relationships — the inner row is always wrapped in a
+  // 1-element array. The type declarations here mirror that runtime
+  // shape and we index via [0]. Casting through unknown is the
+  // pragmatic step since Supabase's auto-inferred types use the array
+  // form and rejecting them with our singular-object type triggers
+  // tsc's "types too dissimilar" error.
   type JobRow = {
     id: string;
     dso_id: string;
     scope: "location" | "regional" | "corporate" | null;
-    dsos: {
+    dsos: Array<{
       id: string;
       name: string;
       affiliation_reveal_policy: "never" | "after_hire" | "per_application";
-    };
+    }>;
   };
   type JobLocRow = {
     job_id: string;
-    dso_locations: {
+    dso_locations: Array<{
       id: string;
       name: string;
       public_dso_affiliation: boolean;
-    };
+    }>;
   };
 
-  const jobs = (jobsRes.data ?? []) as JobRow[];
-  const jobLocs = (jobLocsRes.data ?? []) as JobLocRow[];
+  const jobs = (jobsRes.data ?? []) as unknown as JobRow[];
+  const jobLocs = (jobLocsRes.data ?? []) as unknown as JobLocRow[];
 
   const locsByJob = new Map<
     string,
     Array<{ id: string; name: string; isPublic: boolean }>
   >();
   for (const row of jobLocs) {
+    const dsoLoc = row.dso_locations[0];
+    if (!dsoLoc) continue;
     const arr = locsByJob.get(row.job_id) ?? [];
     arr.push({
-      id: row.dso_locations.id,
-      name: row.dso_locations.name,
-      isPublic: row.dso_locations.public_dso_affiliation,
+      id: dsoLoc.id,
+      name: dsoLoc.name,
+      isPublic: dsoLoc.public_dso_affiliation,
     });
     locsByJob.set(row.job_id, arr);
   }
 
   return jobs.map<JobAffiliationContext>((j) => {
     const locs = locsByJob.get(j.id) ?? [];
+    const dso = j.dsos[0];
     const allLocationsPublic =
       locs.length > 0 && locs.every((l) => l.isPublic);
     const singlePracticeName = locs.length === 1 ? locs[0]!.name : null;
     return {
       jobId: j.id,
       dsoId: j.dso_id,
-      dsoName: j.dsos.name,
-      affiliationRevealPolicy: j.dsos.affiliation_reveal_policy,
+      dsoName: dso?.name ?? "DSO",
+      affiliationRevealPolicy: dso?.affiliation_reveal_policy ?? "never",
       allLocationsPublic,
       scope: j.scope ?? "location",
       singlePracticeName,
