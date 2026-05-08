@@ -146,7 +146,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
     await Promise.all([
       supabase
         .from("dso_locations")
-        .select("id, name, city, state")
+        .select("id, name, city, state, public_dso_affiliation")
         .eq("dso_id", dsoRow.id)
         .order("name", { ascending: true }),
       supabase
@@ -165,8 +165,28 @@ export default async function CompanyDetailPage({ params }: PageProps) {
         .order("sort_order", { ascending: true }),
     ]);
 
-  const locations = (rawLocations ?? []) as LocationRow[];
-  const jobs = (rawJobs ?? []) as JobRow[];
+  // Affiliation filtering (Phase 4.5.b launch-blocker, Q4 + Q7).
+  // Per Cam's locked direction: keep the page rendered even when every
+  // location is private (sandbox philosophy — the DSO can flip a
+  // location to public anytime). BUT exclude private locations from
+  // the public location list and exclude private-affiliated jobs from
+  // the open-roles list — both would directly leak the corporate
+  // affiliation if rendered.
+  type LocationWithFlag = LocationRow & { public_dso_affiliation: boolean };
+  const allLocationsTyped = (rawLocations ?? []) as LocationWithFlag[];
+  const locations = allLocationsTyped.filter(
+    (l) => l.public_dso_affiliation !== false
+  );
+  // Build the set of private location ids so we can filter the jobs
+  // query in JS using the most-private-inherits rule (any private
+  // location on a job → exclude the job entirely from this surface).
+  const privateLocationIds = new Set(
+    allLocationsTyped
+      .filter((l) => l.public_dso_affiliation === false)
+      .map((l) => l.id)
+  );
+
+  const allJobs = (rawJobs ?? []) as JobRow[];
   const photos = (rawPhotos ?? []) as PhotoRow[];
   const whyBlocks = (dsoRow.why_join_us ?? []).filter(
     (b): b is WhyJoinUsBlock =>
@@ -174,28 +194,46 @@ export default async function CompanyDetailPage({ params }: PageProps) {
   );
   const cultureChips = dsoRow.culture_chips ?? [];
 
-  // Pull each job's location associations so we can show location chips on cards
-  const jobIds = jobs.map((j) => j.id);
+  // Pull each job's location associations — used both for the
+  // affiliation filter (drop jobs touching any private location) and
+  // for the location chips rendered on the job cards.
+  const allJobIds = allJobs.map((j) => j.id);
+  const jobLocationIdsByJob = new Map<string, string[]>();
   const locationsByJob = new Map<
     string,
     Array<{ city: string | null; state: string | null }>
   >();
-  if (jobIds.length > 0) {
+  if (allJobIds.length > 0) {
     const { data: jobLocs } = await supabase
       .from("job_locations")
-      .select("job_id, location:dso_locations(city, state)")
-      .in("job_id", jobIds);
+      .select("job_id, location_id, location:dso_locations(city, state)")
+      .in("job_id", allJobIds);
 
     for (const row of (jobLocs ?? []) as unknown as Array<{
       job_id: string;
+      location_id: string;
       location: { city: string | null; state: string | null } | null;
     }>) {
-      if (!row.location) continue;
-      const list = locationsByJob.get(row.job_id) ?? [];
-      list.push(row.location);
-      locationsByJob.set(row.job_id, list);
+      const ids = jobLocationIdsByJob.get(row.job_id) ?? [];
+      ids.push(row.location_id);
+      jobLocationIdsByJob.set(row.job_id, ids);
+      if (row.location) {
+        const list = locationsByJob.get(row.job_id) ?? [];
+        list.push(row.location);
+        locationsByJob.set(row.job_id, list);
+      }
     }
   }
+
+  // Filter out jobs that touch any private-affiliation location. A
+  // privately-affiliated job rendered on /companies/[slug] would
+  // directly link the corporate brand to a practice the DSO has
+  // chosen to keep separate publicly. Most-private-inherits across
+  // the whole job (Q3).
+  const jobs = allJobs.filter((j) => {
+    const locIds = jobLocationIdsByJob.get(j.id) ?? [];
+    return locIds.every((id) => !privateLocationIds.has(id));
+  });
 
   const cityState = [dsoRow.headquarters_city, dsoRow.headquarters_state]
     .filter(Boolean)
@@ -503,7 +541,9 @@ export default async function CompanyDetailPage({ params }: PageProps) {
               </h2>
               {locations.length === 0 ? (
                 <p className="text-[14px] text-slate-body leading-relaxed">
-                  Location list coming soon.
+                  Practice locations aren&apos;t publicly listed for
+                  this DSO. Visit individual job postings to see where
+                  each role is based.
                 </p>
               ) : (
                 <ul className="list-none space-y-3">

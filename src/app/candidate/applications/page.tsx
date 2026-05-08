@@ -105,7 +105,7 @@ export default async function CandidateApplicationsPage({
   const { data: rawApps } = await supabase
     .from("applications")
     .select(
-      "id, job_id, status, created_at, updated_at, hidden_at, self_reported_status"
+      "id, job_id, status, created_at, updated_at, hidden_at, self_reported_status, affiliation_revealed"
     )
     .eq("candidate_id", candidateId)
     .order("created_at", { ascending: false });
@@ -118,6 +118,7 @@ export default async function CandidateApplicationsPage({
     updated_at: string;
     hidden_at: string | null;
     self_reported_status: SelfReportedStatus | null;
+    affiliation_revealed: boolean;
   };
   const apps = (rawApps ?? []) as AppRow[];
 
@@ -145,9 +146,16 @@ export default async function CandidateApplicationsPage({
 
   const dsoIds = Array.from(new Set(jobs.map((j) => j.dso_id)));
   const { data: rawDsos } = dsoIds.length
-    ? await supabase.from("dsos").select("id, name").in("id", dsoIds)
+    ? await supabase
+        .from("dsos")
+        .select("id, name, affiliation_reveal_policy")
+        .in("id", dsoIds)
     : { data: [] };
-  type DsoRow = { id: string; name: string };
+  type DsoRow = {
+    id: string;
+    name: string;
+    affiliation_reveal_policy: "never" | "after_hire" | "per_application";
+  };
   const dsos = (rawDsos ?? []) as DsoRow[];
   const dsoMap = new Map(dsos.map((d) => [d.id, d]));
 
@@ -174,6 +182,70 @@ export default async function CandidateApplicationsPage({
     const list = locsByJob.get(row.job_id) ?? [];
     list.push(row);
     locsByJob.set(row.job_id, list);
+  }
+
+  // Affiliation display per application (Phase 4.5.b launch-blocker).
+  // For each application's job, compute whether the candidate should
+  // see the DSO name or the masked practice name. Done inline (vs.
+  // calling getDisplayedDsoName per application) so the page stays
+  // O(1) round-trips on this surface — we already have the data.
+  // Need the per-job public-affiliation status (most-private inherits
+  // across linked locations); fetch in a single query using the
+  // already-known set of job ids.
+  const jobAffPublicMap = new Map<string, boolean>();
+  if (jobIds.length > 0) {
+    const { data: affLocRows } = await supabase
+      .from("job_locations")
+      .select("job_id, dso_locations!inner(public_dso_affiliation)")
+      .in("job_id", jobIds);
+    type AffRow = {
+      job_id: string;
+      dso_locations: Array<{ public_dso_affiliation: boolean }>;
+    };
+    const privateByJob = new Set<string>();
+    for (const row of (affLocRows ?? []) as unknown as AffRow[]) {
+      const loc = row.dso_locations[0];
+      if (loc && loc.public_dso_affiliation === false) {
+        privateByJob.add(row.job_id);
+      }
+    }
+    // Default to public unless marked private. Corporate/regional
+    // jobs without job_locations rows fall through to public, which
+    // matches the SQL helper's behavior.
+    for (const id of jobIds) {
+      jobAffPublicMap.set(id, !privateByJob.has(id));
+    }
+  }
+  // Resolve a single practice name per job (when only one location).
+  const singlePracticeByJob = new Map<string, string>();
+  for (const [jid, list] of locsByJob.entries()) {
+    if (list.length === 1) {
+      const dl = list[0]!.dso_locations?.[0];
+      if (dl?.name) singlePracticeByJob.set(jid, dl.name);
+    }
+  }
+  // Resolve the displayed employer name per application.
+  function resolveDisplayedName(app: AppRow): string {
+    const job = jobMap.get(app.job_id);
+    if (!job) return "Unknown employer";
+    const dso = dsoMap.get(job.dso_id);
+    const dsoName = dso?.name ?? "Hiring team";
+    const isPublic = jobAffPublicMap.get(app.job_id) ?? true;
+    if (isPublic) return dsoName;
+    // Job is privately affiliated. Apply DSO policy + per-app override.
+    const policy = dso?.affiliation_reveal_policy ?? "never";
+    const allowReveal =
+      policy === "after_hire"
+        ? app.status === "hired"
+        : policy === "per_application"
+          ? app.affiliation_revealed === true
+          : false;
+    if (allowReveal) return dsoName;
+    return singlePracticeByJob.get(app.job_id) ?? "Multiple locations";
+  }
+  const displayedNameByAppId = new Map<string, string>();
+  for (const a of apps) {
+    displayedNameByAppId.set(a.id, resolveDisplayedName(a));
   }
 
   // Unread message counts (existing behavior — surfaces "they replied").
@@ -293,6 +365,55 @@ export default async function CandidateApplicationsPage({
     }
   }
 
+  // Affiliation display for saved jobs (Phase 4.5.b launch-blocker).
+  // The candidate hasn't applied yet — there's no application_id to
+  // gate per-application reveal — so we treat saved-jobs as a public
+  // viewer context: DSO name shown if all linked locations are
+  // public, masked otherwise. Identical to the /jobs board logic.
+  const savedDisplayedByJobId = new Map<string, string>();
+  if (savedJobs.length > 0) {
+    const savedJobIds = savedJobs
+      .map((r) => r.job?.id)
+      .filter((id): id is string => Boolean(id));
+    if (savedJobIds.length > 0) {
+      const { data: savedAffRows } = await supabase
+        .from("job_locations")
+        .select(
+          "job_id, dso_locations!inner(name, public_dso_affiliation)"
+        )
+        .in("job_id", savedJobIds);
+      type SavedAffRow = {
+        job_id: string;
+        dso_locations: Array<{ name: string; public_dso_affiliation: boolean }>;
+      };
+      const locsBySavedJob = new Map<
+        string,
+        Array<{ name: string; isPublic: boolean }>
+      >();
+      for (const row of (savedAffRows ?? []) as unknown as SavedAffRow[]) {
+        const dl = row.dso_locations[0];
+        if (!dl) continue;
+        const list = locsBySavedJob.get(row.job_id) ?? [];
+        list.push({ name: dl.name, isPublic: dl.public_dso_affiliation });
+        locsBySavedJob.set(row.job_id, list);
+      }
+      for (const r of savedJobs) {
+        if (!r.job) continue;
+        const dsoName = r.job.dsos?.name ?? "Employer";
+        const locs = locsBySavedJob.get(r.job.id) ?? [];
+        const allPublic = locs.length === 0 || locs.every((l) => l.isPublic);
+        if (allPublic) {
+          savedDisplayedByJobId.set(r.job.id, dsoName);
+        } else {
+          savedDisplayedByJobId.set(
+            r.job.id,
+            locs.length === 1 ? locs[0]!.name : "Multiple locations"
+          );
+        }
+      }
+    }
+  }
+
   return (
     <CandidateShell active="applications">
       <header className="mb-6">
@@ -308,7 +429,11 @@ export default async function CandidateApplicationsPage({
 
       <div className="mt-6">
         {activeTab === "saved" ? (
-          <SavedJobsList rows={savedJobs} fitsByJobId={fitsBySavedJobId} />
+          <SavedJobsList
+            rows={savedJobs}
+            fitsByJobId={fitsBySavedJobId}
+            displayedNameByJobId={savedDisplayedByJobId}
+          />
         ) : filteredApps.length === 0 ? (
           <EmptyState tab={activeTab} totalApps={apps.length} />
         ) : (
@@ -470,7 +595,9 @@ function ApplicationsList({
                     {job?.title ?? "Job removed"}
                   </p>
                   <p className="text-[13px] text-slate-body">
-                    {dso?.name ?? "Unknown DSO"}
+                    {displayedNameByAppId.get(app.id) ??
+                      dso?.name ??
+                      "Unknown employer"}
                   </p>
 
                   {/* Meta line — scope chip + dates */}
@@ -521,6 +648,7 @@ function ApplicationsList({
 function SavedJobsList({
   rows,
   fitsByJobId,
+  displayedNameByJobId,
 }: {
   rows: Array<{
     id: string;
@@ -535,6 +663,11 @@ function SavedJobsList({
     } | null;
   }>;
   fitsByJobId: Map<string, FitResult | null>;
+  /**
+   * Per-job displayed employer name resolved by the parent — masks
+   * the DSO name when the job is privately affiliated (Phase 4.5.b).
+   */
+  displayedNameByJobId: Map<string, string>;
 }) {
   if (rows.length === 0) {
     return (
@@ -586,7 +719,9 @@ function SavedJobsList({
                   </div>
                   <p className="text-[15px] font-bold text-ink">{row.job.title}</p>
                   <p className="text-[13px] text-slate-body">
-                    {row.job.dsos?.name ?? "DSO"}
+                    {displayedNameByJobId.get(row.job.id) ??
+                      row.job.dsos?.name ??
+                      "Employer"}
                   </p>
                   <p className="mt-2 text-[12px] text-slate-meta">
                     Saved {timeAgo(new Date(row.saved_at))}

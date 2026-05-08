@@ -20,6 +20,7 @@ import type { ApplicationMessageRow } from "@/lib/messages/actions";
 import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
 import { WhyThisMatch } from "@/components/practice-fit/why-this-match";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
+import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -135,7 +136,21 @@ export default async function CandidateApplicationDetailPage({
   );
 
   const submitted = new Date(app.created_at);
-  const otherPartyName = dso?.name ?? "Hiring team";
+
+  // Affiliation display — candidate viewer (Phase 4.5.b launch-blocker).
+  // Falls back to "Hiring team" when the helper can't resolve (rare —
+  // shouldn't happen for live applications). When the job is privately
+  // affiliated, this returns the practice name (or "Multiple
+  // locations") unless the DSO's reveal policy + application state
+  // grants reveal. The same value drives both the inbox peer name
+  // ("From: <X>") and the header "<Building2> <X>" line below.
+  const displayed = job
+    ? await getDisplayedDsoName({
+        jobId: app.job_id,
+        viewer: { role: "candidate", applicationId: app.id as string },
+      })
+    : null;
+  const otherPartyName = displayed?.name ?? dso?.name ?? "Hiring team";
   const candidateName = candidate.full_name?.trim() || "You";
 
   // Practice Fit (Phase 5D v1.4 — wired into the candidate detail page).
@@ -166,10 +181,10 @@ export default async function CandidateApplicationDetailPage({
           {job?.title ?? "Job removed"}
         </h1>
         <div className="flex items-center gap-3 flex-wrap">
-          {dso && (
+          {displayed && (
             <div className="text-[14px] text-slate-body inline-flex items-center gap-2">
               <Building2 className="h-4 w-4" />
-              {dso.name}
+              {displayed.name}
             </div>
           )}
           {practiceFit && (

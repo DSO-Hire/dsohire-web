@@ -458,23 +458,68 @@ async function sendApplicationEmails(
 
     const [{ data: dso }, { data: jobLocs }, candidateAuthUser] =
       await Promise.all([
-        admin.from("dsos").select("id, name").eq("id", params.dsoId).maybeSingle(),
+        admin
+          .from("dsos")
+          .select("id, name, affiliation_reveal_policy")
+          .eq("id", params.dsoId)
+          .maybeSingle(),
         admin
           .from("job_locations")
-          .select("location:dso_locations(name, city, state)")
+          .select(
+            "location:dso_locations(name, city, state, public_dso_affiliation)"
+          )
           .eq("job_id", params.jobId),
         admin.auth.admin.getUserById(params.candidateAuthUserId),
       ]);
 
-    const jobLocationsLabel = formatJobLocations(
-      ((jobLocs ?? []) as unknown as Array<{
-        location: { name: string; city: string | null; state: string | null } | null;
-      }>)
-        .map((row) => row.location)
-        .filter((l): l is NonNullable<typeof l> => l !== null)
-    );
+    const allLocs = ((jobLocs ?? []) as unknown as Array<{
+      location: {
+        name: string;
+        city: string | null;
+        state: string | null;
+        public_dso_affiliation: boolean;
+      } | null;
+    }>)
+      .map((row) => row.location)
+      .filter((l): l is NonNullable<typeof l> => l !== null);
+
+    const jobLocationsLabel = formatJobLocations(allLocs);
 
     const dsoName = (dso?.name as string | undefined) ?? "your DSO";
+
+    // Affiliation display for the candidate confirmation email
+    // (Phase 4.5.b launch-blocker). At apply time, the application is
+    // fresh (status='new', affiliation_revealed=false), so:
+    //   - Public job → DSO name
+    //   - Private job + policy=never|after_hire|per_application →
+    //     practice name (single-loc) or "Multiple locations"
+    // The "after_hire" policy can flip later when status changes;
+    // future status-change emails would re-run this logic. Per Cam's
+    // 2026-05-08 direction, only NEW emails use the affiliation
+    // wrapper; the receipt email runs once at apply time.
+    const allLocsPublic =
+      allLocs.length === 0 || allLocs.every((l) => l.public_dso_affiliation);
+    const policy =
+      ((dso?.affiliation_reveal_policy as
+        | "never"
+        | "after_hire"
+        | "per_application"
+        | undefined) ?? "never");
+    // For a fresh application, only `never` reveals (it can't); after_hire
+    // requires status='hired' which isn't the case yet; per_application
+    // requires the bit flipped which isn't either. So when the job is
+    // private, the email always uses the masked name.
+    const policyAllowsRevealAtApply = false; // see comment above
+    const singlePracticeName =
+      allLocs.length === 1 ? allLocs[0]!.name : null;
+    const displayedEmployerName = allLocsPublic
+      ? dsoName
+      : policyAllowsRevealAtApply
+        ? dsoName
+        : (singlePracticeName ?? "Multiple locations");
+    // Suppress unused warning — `policy` is reserved for the
+    // status-change email wave we'll wire next.
+    void policy;
     const candidateEmail = candidateAuthUser?.data?.user?.email ?? null;
     const candidateDisplayName = params.candidateName?.trim() || "there";
 
@@ -504,11 +549,11 @@ async function sendApplicationEmails(
         relatedCandidateId: params.candidateId,
         replyTo: "cam@dsohire.com",
         fallback: {
-          subject: `Application received: ${params.jobTitle} at ${dsoName}`,
+          subject: `Application received: ${params.jobTitle} at ${displayedEmployerName}`,
           react: ApplicationReceived({
             candidateName: candidateDisplayName,
             jobTitle: params.jobTitle,
-            dsoName,
+            dsoName: displayedEmployerName,
             trackingUrl: `${SITE_URL}/candidate/dashboard`,
           }),
         },

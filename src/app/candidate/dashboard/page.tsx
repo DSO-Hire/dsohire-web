@@ -165,7 +165,9 @@ export default async function CandidateDashboardPage() {
   // ── All applications ────────────────────────────────────────────────
   const { data: rawApps } = await supabase
     .from("applications")
-    .select("id, job_id, status, created_at, updated_at")
+    .select(
+      "id, job_id, status, created_at, updated_at, affiliation_revealed"
+    )
     .eq("candidate_id", candidate.id)
     .order("created_at", { ascending: false });
 
@@ -175,6 +177,7 @@ export default async function CandidateDashboardPage() {
     status: ApplicationStatus;
     created_at: string;
     updated_at: string;
+    affiliation_revealed: boolean;
   };
   const apps = (rawApps ?? []) as AppRow[];
 
@@ -215,9 +218,16 @@ export default async function CandidateDashboardPage() {
 
   const dsoIds = Array.from(new Set(jobs.map((j) => j.dso_id)));
   const { data: rawDsos } = dsoIds.length
-    ? await supabase.from("dsos").select("id, name").in("id", dsoIds)
+    ? await supabase
+        .from("dsos")
+        .select("id, name, affiliation_reveal_policy")
+        .in("id", dsoIds)
     : { data: [] };
-  type DsoRow = { id: string; name: string };
+  type DsoRow = {
+    id: string;
+    name: string;
+    affiliation_reveal_policy: "never" | "after_hire" | "per_application";
+  };
   const dsos = (rawDsos ?? []) as DsoRow[];
   const dsoMap = new Map(dsos.map((d) => [d.id, d]));
 
@@ -251,6 +261,63 @@ export default async function CandidateDashboardPage() {
       const label = loc.name ?? (cityState.length > 0 ? cityState : null);
       if (label) locationByJobId.set(jobId, label);
     }
+  }
+
+  // ── Affiliation display per application (Phase 4.5.b) ───────────────
+  // Resolve whether the candidate should see the DSO name on each
+  // application card / reply preview, or the masked practice / "Multi"
+  // fallback. Same logic family as /candidate/applications.
+  const jobAffPublicMap = new Map<string, boolean>();
+  const singlePracticeByJob = new Map<string, string>();
+  if (jobIds.length > 0) {
+    const { data: affLocRows } = await supabase
+      .from("job_locations")
+      .select(
+        "job_id, dso_locations!inner(name, public_dso_affiliation)"
+      )
+      .in("job_id", jobIds);
+    type AffRow = {
+      job_id: string;
+      dso_locations: Array<{ name: string; public_dso_affiliation: boolean }>;
+    };
+    const locsByJob = new Map<
+      string,
+      Array<{ name: string; isPublic: boolean }>
+    >();
+    for (const row of (affLocRows ?? []) as unknown as AffRow[]) {
+      const dl = row.dso_locations[0];
+      if (!dl) continue;
+      const list = locsByJob.get(row.job_id) ?? [];
+      list.push({ name: dl.name, isPublic: dl.public_dso_affiliation });
+      locsByJob.set(row.job_id, list);
+    }
+    for (const id of jobIds) {
+      const locs = locsByJob.get(id) ?? [];
+      const allPublic = locs.length === 0 || locs.every((l) => l.isPublic);
+      jobAffPublicMap.set(id, allPublic);
+      if (locs.length === 1) singlePracticeByJob.set(id, locs[0]!.name);
+    }
+  }
+  function resolveDisplayedDsoForApp(app: AppRow): string {
+    const job = jobMap.get(app.job_id);
+    if (!job) return "Hiring team";
+    const dso = dsoMap.get(job.dso_id);
+    const dsoName = dso?.name ?? "Hiring team";
+    const isPublic = jobAffPublicMap.get(app.job_id) ?? true;
+    if (isPublic) return dsoName;
+    const policy = dso?.affiliation_reveal_policy ?? "never";
+    const allowReveal =
+      policy === "after_hire"
+        ? app.status === "hired"
+        : policy === "per_application"
+          ? app.affiliation_revealed === true
+          : false;
+    if (allowReveal) return dsoName;
+    return singlePracticeByJob.get(app.job_id) ?? "Multiple locations";
+  }
+  const displayedDsoByAppId = new Map<string, string>();
+  for (const a of apps) {
+    displayedDsoByAppId.set(a.id, resolveDisplayedDsoForApp(a));
   }
 
   // ── Unread employer messages (drives the "New Replies" hero) ────────
@@ -339,13 +406,14 @@ export default async function CandidateDashboardPage() {
         .map((m): ReplyPreview => {
           const app = apps.find((a) => a.id === m.application_id);
           const job = app ? jobMap.get(app.job_id) : null;
-          const dso = job ? dsoMap.get(job.dso_id) : null;
           return {
             id: m.id,
             senderName: m.sender_dso_user_id
               ? (senderMap.get(m.sender_dso_user_id) ?? "Recruiter")
               : "Recruiter",
-            dsoName: dso?.name ?? "Unknown DSO",
+            dsoName: app
+              ? (displayedDsoByAppId.get(app.id) ?? "Hiring team")
+              : "Hiring team",
             preview: truncatePreview(m.body, 60),
             timestamp: relativeDate(m.created_at, nowMs),
             jobTitle: job?.title ?? "Unknown role",
@@ -411,7 +479,6 @@ export default async function CandidateDashboardPage() {
   const kanbanCards: MyApplicationCard[] = activeApps.map(
     (a): MyApplicationCard => {
       const job = jobMap.get(a.job_id);
-      const dso = job ? dsoMap.get(job.dso_id) : null;
       const days = Math.max(
         0,
         Math.floor((nowMs - new Date(a.created_at).getTime()) / 86400000),
@@ -419,7 +486,7 @@ export default async function CandidateDashboardPage() {
       return {
         id: a.id,
         role: job?.title ?? "Unknown role",
-        dsoName: dso?.name ?? "Unknown DSO",
+        dsoName: displayedDsoByAppId.get(a.id) ?? "Hiring team",
         locationName: job ? locationByJobId.get(job.id) ?? null : null,
         stage: a.status as MyApplicationCard["stage"],
         daysSinceApplied: days,
@@ -668,7 +735,6 @@ export default async function CandidateDashboardPage() {
             title=""
             events={recentForFeed.map((app): ActivityEvent => {
               const job = jobMap.get(app.job_id);
-              const dso = job ? dsoMap.get(job.dso_id) : null;
               const stageLabel = STAGE_LABELS[app.status] ?? app.status;
               const isWinning = ["interviewing", "offered", "hired"].includes(
                 app.status,
@@ -691,7 +757,7 @@ export default async function CandidateDashboardPage() {
                     </strong>{" "}
                     at{" "}
                     <span className="text-slate-body">
-                      {dso?.name ?? "Unknown DSO"}
+                      {displayedDsoByAppId.get(app.id) ?? "Hiring team"}
                     </span>{" "}
                     · {stageLabel}
                   </>

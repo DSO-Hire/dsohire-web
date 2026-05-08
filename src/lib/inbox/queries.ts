@@ -146,8 +146,8 @@ export async function getCandidateInboxThreads(
     supabase
       .from("applications")
       .select(
-        `id, candidate_id, job_id, status,
-         jobs:jobs!inner(id, title, dso_id, dso:dsos(id, name, logo_url))`
+        `id, candidate_id, job_id, status, affiliation_revealed,
+         jobs:jobs!inner(id, title, dso_id, dso:dsos(id, name, logo_url, affiliation_reveal_policy))`
       )
       .eq("candidate_id", candidateId),
     supabase
@@ -176,13 +176,108 @@ export async function getCandidateInboxThreads(
     )
   );
 
-  return composeThreads({
+  // Affiliation display per application (Phase 4.5.b launch-blocker).
+  // Resolve which name the candidate should see as the thread peer:
+  // DSO name if the job is publicly affiliated, otherwise check the
+  // DSO's reveal policy + the per-application override before falling
+  // back to the practice name (single location) or "Multiple
+  // locations" (multi).
+  const jobIds = Array.from(
+    new Set(
+      apps
+        .map((a) => {
+          const j = a.jobs as Record<string, unknown> | undefined;
+          return j ? (j.id as string) : null;
+        })
+        .filter((id): id is string => Boolean(id))
+    )
+  );
+  const jobAffPublicMap = new Map<string, boolean>();
+  const singlePracticeByJob = new Map<string, string>();
+  if (jobIds.length > 0) {
+    const { data: affLocRows } = await supabase
+      .from("job_locations")
+      .select(
+        "job_id, dso_locations!inner(name, public_dso_affiliation)"
+      )
+      .in("job_id", jobIds);
+    type AffRow = {
+      job_id: string;
+      dso_locations: Array<{ name: string; public_dso_affiliation: boolean }>;
+    };
+    const locsByJob = new Map<
+      string,
+      Array<{ name: string; isPublic: boolean }>
+    >();
+    for (const row of (affLocRows ?? []) as unknown as AffRow[]) {
+      const dl = row.dso_locations[0];
+      if (!dl) continue;
+      const list = locsByJob.get(row.job_id) ?? [];
+      list.push({ name: dl.name, isPublic: dl.public_dso_affiliation });
+      locsByJob.set(row.job_id, list);
+    }
+    for (const id of jobIds) {
+      const locs = locsByJob.get(id) ?? [];
+      const allPublic = locs.length === 0 || locs.every((l) => l.isPublic);
+      jobAffPublicMap.set(id, allPublic);
+      if (locs.length === 1) singlePracticeByJob.set(id, locs[0]!.name);
+    }
+  }
+  // Resolve each application's displayed peer name.
+  const displayedDsoByAppId = new Map<string, string>();
+  for (const app of apps) {
+    const appId = app.id as string;
+    const job = app.jobs as Record<string, unknown> | undefined;
+    if (!job) continue;
+    const jobId = job.id as string;
+    const dso = (job.dso as Record<string, unknown> | null) ?? null;
+    const dsoName = (dso?.name as string | null) ?? "DSO";
+    const isPublic = jobAffPublicMap.get(jobId) ?? true;
+    if (isPublic) {
+      displayedDsoByAppId.set(appId, dsoName);
+      continue;
+    }
+    const policy =
+      (dso?.affiliation_reveal_policy as
+        | "never"
+        | "after_hire"
+        | "per_application"
+        | null) ?? "never";
+    const status = (app.status as string | null) ?? "new";
+    const revealed = (app.affiliation_revealed as boolean | null) ?? false;
+    const allowReveal =
+      policy === "after_hire"
+        ? status === "hired"
+        : policy === "per_application"
+          ? revealed
+          : false;
+    displayedDsoByAppId.set(
+      appId,
+      allowReveal
+        ? dsoName
+        : (singlePracticeByJob.get(jobId) ?? "Multiple locations")
+    );
+  }
+
+  const threads = composeThreads({
     apps,
     messages,
     archivedSet,
     jobToLocation: new Map(),
     audience: "candidate",
   });
+
+  // Patch each candidate-side thread peer to use the resolved display
+  // name. Keeping this outside composeThreads keeps that helper
+  // audience-agnostic — the affiliation logic only applies when the
+  // candidate is the viewer.
+  return threads.map((t) => ({
+    ...t,
+    peer: {
+      ...t.peer,
+      display_name: displayedDsoByAppId.get(t.application_id) ?? t.peer.display_name,
+    },
+  }));
 }
 
 /* ──────────────────────────────────────────────────────────────
