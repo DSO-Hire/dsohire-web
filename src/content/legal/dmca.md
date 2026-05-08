@@ -5,7 +5,7 @@ effectiveDate: 2026-04-30
 
 ## 1. Notice of claimed infringement
 
-If you believe content on the Services infringes a copyright you own or are authorized to enforce, you may submit a written notice to our designated agent at cam@dsohire.com. The notice must comply with the requirements of 17 U.S.C. § 512(c)(3) and include:
+If you believe content on the Services infringes a copyright you own or are authorized to enforce, you may submit a written notice to our designated agent at info@dsohire.com. The notice must comply with the requirements of 17 U.S.C. § 512(c)(3) and include:
 
 - A physical or electronic signature of the copyright owner or a person authorized to act on the copyright owner's behalf.
 - Identification of the copyrighted work claimed to have been infringed (or, if multiple copyrighted works at a single online site are covered by a single notification, a representative list of such works).
@@ -19,13 +19,14 @@ If you believe content on the Services infringes a copyright you own or are auth
 Notices of claimed infringement should be sent to:
 
 DSO Hire LLC — DMCA Designated Agent
-cam@dsohire.com
+4018 West 74th Street, Prairie Village, Kansas 66208, USA
+info@dsohire.com
 
 (DSO Hire LLC will register a designated agent with the U.S. Copyright Office before user-generated content goes live on the Services.)
 
 ## 3. Counter-notification
 
-If material you posted has been removed in response to a DMCA notice and you believe the removal was the result of mistake or misidentification, you may submit a written counter-notification to cam@dsohire.com. A valid counter-notification must include:
+If material you posted has been removed in response to a DMCA notice and you believe the removal was the result of mistake or misidentification, you may submit a written counter-notification to info@dsohire.com. A valid counter-notification must include:
 
 - Your physical or electronic signature.
 - Identification of the material that was removed and the location at which the material appeared before it was removed.

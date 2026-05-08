@@ -54,7 +54,7 @@ Some US states and cities require employers to disclose pay range information in
 
 ## 3. Reporting violations
 
-If you believe a user, posting, or piece of content violates this Acceptable Use Policy, please report it to cam@dsohire.com with sufficient detail (URL, screenshot, description of the issue) for us to investigate.
+If you believe a user, posting, or piece of content violates this Acceptable Use Policy, please report it to info@dsohire.com with sufficient detail (URL, screenshot, description of the issue) for us to investigate.
 
 ## 4. Enforcement
 

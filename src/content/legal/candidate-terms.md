@@ -53,4 +53,4 @@ These Terms are governed by the laws of the State of Kansas. Any dispute will be
 
 ## 12. Changes; contact
 
-We may update these Terms from time to time and will post the updated version on https://dsohire.com. Continued use after the new effective date constitutes acceptance. Questions: cam@dsohire.com.
+We may update these Terms from time to time and will post the updated version on https://dsohire.com. Continued use after the new effective date constitutes acceptance. Questions: info@dsohire.com.

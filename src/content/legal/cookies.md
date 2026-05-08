@@ -50,4 +50,4 @@ We may update this Cookie Policy when we add or remove tracking technologies. Th
 
 ## 6. Contact us
 
-Questions about cookies can be sent to cam@dsohire.com.
+Questions about cookies can be sent to info@dsohire.com.

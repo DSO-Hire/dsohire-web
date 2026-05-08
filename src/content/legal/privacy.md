@@ -5,7 +5,7 @@ effectiveDate: 2026-04-30
 
 ## 1. Who we are
 
-DSO Hire LLC ("DSO Hire," "we," "us," or "our") operates the website at https://dsohire.com and the related job-board services (the "Services"). Our principal office is in Kansas. You can contact us at cam@dsohire.com.
+DSO Hire LLC ("DSO Hire," "we," "us," or "our") operates the website at https://dsohire.com and the related job-board services (the "Services"). Our principal office is in Prairie Village, Kansas. You can contact us at info@dsohire.com.
 
 ## 2. Scope of this policy
 
@@ -77,7 +77,7 @@ We retain personal information for as long as your account is active and for a r
 
 Depending on your jurisdiction, you may have the right to: (a) confirm whether we process personal information about you; (b) access a copy of that information; (c) correct inaccurate information; (d) delete information; (e) restrict or object to certain processing; (f) data portability; and (g) opt out of targeted advertising or sales (we do not sell or use your data for cross-context behavioral advertising as those terms are defined under US state privacy laws).
 
-To exercise any of these rights, contact us at cam@dsohire.com. We will respond within the timeframe required by applicable law (typically 30 to 45 days). If you are unsatisfied with our response, you may also lodge a complaint with your state attorney general or applicable supervisory authority.
+To exercise any of these rights, contact us at info@dsohire.com. We will respond within the timeframe required by applicable law (typically 30 to 45 days). If you are unsatisfied with our response, you may also lodge a complaint with your state attorney general or applicable supervisory authority.
 
 ## 9. Children's privacy
 
@@ -97,4 +97,4 @@ We may update this Privacy Policy from time to time. We will post the updated po
 
 ## 13. Contact us
 
-Questions about this Privacy Policy or our handling of your information can be sent to cam@dsohire.com or to DSO Hire LLC, [BUSINESS ADDRESS], Kansas, USA.
+Questions about this Privacy Policy or our handling of your information can be sent to info@dsohire.com or to DSO Hire LLC, 4018 West 74th Street, Prairie Village, Kansas 66208, USA.

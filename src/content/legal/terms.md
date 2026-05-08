@@ -51,7 +51,7 @@ You agree to indemnify, defend, and hold harmless DSO Hire LLC and its members, 
 
 ## 11. Termination
 
-We may suspend or terminate your access to the Services at any time, with or without cause and with or without notice, including for violation of these Terms or the Acceptable Use Policy. You may terminate your account at any time by contacting cam@dsohire.com or using the in-product account closure tool. Sections 5 (license grant in User Content), 6, 8, 9, 10, 12, 13, and 14 survive termination.
+We may suspend or terminate your access to the Services at any time, with or without cause and with or without notice, including for violation of these Terms or the Acceptable Use Policy. You may terminate your account at any time by contacting info@dsohire.com or using the in-product account closure tool. Sections 5 (license grant in User Content), 6, 8, 9, 10, 12, 13, and 14 survive termination.
 
 ## 12. Governing law and dispute resolution
 
@@ -65,4 +65,4 @@ We may update these Terms from time to time. The updated Terms will be posted on
 
 ## 14. General
 
-These Terms, together with the Privacy Policy and any other agreements expressly incorporated by reference, are the entire agreement between you and us regarding the Services. If any provision of these Terms is held invalid or unenforceable, the remaining provisions will remain in full force and effect. Our failure to enforce any provision is not a waiver. You may not assign these Terms without our written consent; we may assign without restriction. Notices to us must be sent to cam@dsohire.com and are effective when received.
+These Terms, together with the Privacy Policy and any other agreements expressly incorporated by reference, are the entire agreement between you and us regarding the Services. If any provision of these Terms is held invalid or unenforceable, the remaining provisions will remain in full force and effect. Our failure to enforce any provision is not a waiver. You may not assign these Terms without our written consent; we may assign without restriction. Notices to us must be sent to info@dsohire.com and are effective when received.
