@@ -14,6 +14,7 @@
 
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
 import { MobileMenu } from "./mobile-menu";
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
@@ -261,7 +262,7 @@ export function SiteFooter() {
 
         <div className="flex flex-wrap justify-between items-center gap-4">
           <div className="text-[12px] tracking-[0.5px] text-ivory/40">
-            © {new Date().getFullYear()} DSO Hire LLC · Kansas
+            © {new Date().getFullYear()} DSO Hire LLC
           </div>
           <div className="flex gap-6 text-[12px] text-ivory/40">
             <Link
@@ -277,10 +278,10 @@ export function SiteFooter() {
               Terms
             </Link>
             <Link
-              href="mailto:cam@dsohire.com"
+              href={SUPPORT_MAILTO}
               className="hover:text-ivory/70 transition-colors"
             >
-              cam@dsohire.com
+              {SUPPORT_EMAIL}
             </Link>
           </div>
         </div>
