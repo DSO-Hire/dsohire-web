@@ -33,6 +33,7 @@ import { CandidateShell } from "@/components/candidate/candidate-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
+import { canonicalizeRoleCategory } from "@/lib/practice-fit/role-canonicalize";
 import {
   resolveCandidateApplicationAffiliations,
   getDisplayedDsoNamesBatch,
@@ -113,11 +114,21 @@ export default async function CandidateApplicationsPage({
 
   const { data: candidate } = await supabase
     .from("candidates")
-    .select("id")
+    .select("id, desired_roles")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!candidate) return null;
   const candidateId = candidate.id as string;
+  // Practice Fit placeholder reason resolution (focused pass on the
+  // candidate side). The candidate sees their own data, so we CAN
+  // disambiguate why fit is unavailable — unlike the employer side
+  // where RLS forces a generic banner. Per get-or-compute.ts, consent
+  // doesn't gate the candidate's own view, so we only need
+  // desired_roles + the job's role_category to decide between
+  // "role_mismatch" and generic "unavailable".
+  const candidateDesiredRoles =
+    ((candidate as Record<string, unknown>).desired_roles as string[] | null) ??
+    [];
 
   const { data: rawApps } = await supabase
     .from("applications")
@@ -313,11 +324,31 @@ export default async function CandidateApplicationsPage({
   // call hits the cache; v1.1 role filter may return null, in which
   // case we fall back to the placeholder chip.
   const fitsByAppId = new Map<string, FitResult | null>();
+  // Reason-rich placeholder support (Phase 5D, focused pass on the
+  // candidate side). When fit is unavailable for a row, we classify why
+  // using the candidate's OWN data (which the candidate is allowed to
+  // see in full): role-mismatch vs generic-unavailable. Only the
+  // candidate's own surface gets to disambiguate — the employer side
+  // keeps the privacy-preserving generic banner because RLS would leak
+  // candidate existence otherwise.
+  const fitReasonByAppId = new Map<string, PlaceholderReason>();
   if (activeTab !== "saved" && filteredApps.length > 0) {
     const fits = await Promise.all(
       filteredApps.map((a) => getPracticeFit(candidateId, a.job_id))
     );
-    filteredApps.forEach((a, i) => fitsByAppId.set(a.id, fits[i]));
+    filteredApps.forEach((a, i) => {
+      fitsByAppId.set(a.id, fits[i]);
+      if (!fits[i]) {
+        const jobRow = jobMap.get(a.job_id);
+        fitReasonByAppId.set(
+          a.id,
+          classifyPlaceholderReason(
+            candidateDesiredRoles,
+            jobRow?.role_category
+          )
+        );
+      }
+    });
   }
 
   // ── Saved-jobs payload (only fetched when on the Saved tab) ─────────
@@ -429,6 +460,7 @@ export default async function CandidateApplicationsPage({
             locsByJob={locsByJob}
             unreadByAppId={unreadByAppId}
             fitsByAppId={fitsByAppId}
+            fitReasonByAppId={fitReasonByAppId}
             displayedNameByAppId={displayedNameByAppId}
           />
         )}
@@ -499,6 +531,7 @@ function ApplicationsList({
   locsByJob,
   unreadByAppId,
   fitsByAppId,
+  fitReasonByAppId,
   displayedNameByAppId,
 }: {
   apps: Array<{
@@ -532,6 +565,12 @@ function ApplicationsList({
   >;
   unreadByAppId: Map<string, number>;
   fitsByAppId: Map<string, FitResult | null>;
+  /**
+   * Per-application reason for the Practice Fit placeholder when fit is
+   * null. Used to pick precise tooltip + label copy on the candidate
+   * side. Defaults to "unavailable" when no entry is present.
+   */
+  fitReasonByAppId: Map<string, PlaceholderReason>;
   /**
    * Per-application displayed employer name resolved by the parent
    * (Phase 4.5.b launch-blocker). Masks the DSO name when the job is
@@ -568,12 +607,15 @@ function ApplicationsList({
                       const fit = fitsByAppId.get(app.id);
                       // Render the live chip when we have a score; the
                       // placeholder is the fallback for: role-filtered
-                      // pairs (computePracticeFit returned null), consent
-                      // off, or compute-not-yet-run on a fresh row.
+                      // pairs (computePracticeFit returned null) or
+                      // compute-not-yet-run on a fresh row. The reason
+                      // map disambiguates which copy to show.
                       return fit ? (
                         <PracticeFitChip fit={fit} size="sm" />
                       ) : (
-                        <PracticeFitPlaceholder />
+                        <PracticeFitPlaceholder
+                          reason={fitReasonByAppId.get(app.id) ?? "unavailable"}
+                        />
                       );
                     })()}
                     {unreadCount > 0 && (
@@ -831,14 +873,61 @@ function SelfReportedChip({ status }: { status: SelfReportedStatus }) {
 // Practice Fit placeholder chip
 // ─────────────────────────────────────────────────────────────────────
 
-function PracticeFitPlaceholder() {
+/**
+ * Reason a Practice Fit chip is showing as a placeholder rather than a
+ * scored chip. Pulled from the candidate's own data; the candidate sees
+ * their own state in full so we can disambiguate cleanly here (the
+ * employer side keeps a generic banner because RLS would leak whether
+ * the candidate exists otherwise).
+ *
+ * "consent_off" is intentionally NOT a state — per get-or-compute.ts
+ * the candidate's own view isn't gated by consent, so the placeholder
+ * never fires for that reason on this surface.
+ */
+type PlaceholderReason = "role_mismatch" | "unavailable";
+
+/**
+ * Classify why a fit is unavailable, given the candidate's own profile
+ * + the job's role category. Both sides are run through the canonical
+ * role mapper so the legacy job-side enum (`dental_assistant`) lines
+ * up with the candidate-side vocabulary (`assistant`).
+ */
+function classifyPlaceholderReason(
+  candidateDesiredRoles: string[],
+  jobRoleCategory: string | null | undefined
+): PlaceholderReason {
+  // Candidate hasn't told us their preferences yet — we can't know
+  // whether this is a mismatch, so default to generic.
+  if (candidateDesiredRoles.length === 0) return "unavailable";
+  const canonicalJob = canonicalizeRoleCategory(jobRoleCategory);
+  // "other" jobs aren't filtered by the role-as-filter rule (per
+  // canonicalize-role.ts comments), so their placeholder isn't a role
+  // mismatch — it's genuinely no-data.
+  if (canonicalJob === "other") return "unavailable";
+  const candidateCanonical = new Set(
+    candidateDesiredRoles.map(canonicalizeRoleCategory)
+  );
+  if (!candidateCanonical.has(canonicalJob)) return "role_mismatch";
+  return "unavailable";
+}
+
+function PracticeFitPlaceholder({
+  reason = "unavailable",
+}: {
+  reason?: PlaceholderReason;
+}) {
+  const label = reason === "role_mismatch" ? "Different role" : "Fit · —";
+  const tooltip =
+    reason === "role_mismatch"
+      ? "This role isn't in your role preferences, so Practice Fit can't compare it. Update your preferred roles in your profile if your goals have changed."
+      : "Practice Fit isn't ready for this pair yet. Add more to your profile to give us more to work with, or check back in a moment.";
   return (
     <span
       className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500"
-      title="Practice Fit unavailable — likely a different role from your preferences, or your privacy settings have it off. Open your profile to adjust."
+      title={tooltip}
     >
       <Sparkles className="size-3" />
-      Fit · —
+      {label}
     </span>
   );
 }
