@@ -218,7 +218,7 @@ export function RecommendedQuestionsPanel({
                       key={rq.id}
                       rq={rq}
                       added={isAdded}
-                      onAdd={() => handleAdd(rq, false)}
+                      onAdd={() => handleAdd(rq)}
                       onSkip={() => handleSkip(rq.id)}
                     />
                   );
