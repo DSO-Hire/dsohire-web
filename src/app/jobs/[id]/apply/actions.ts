@@ -225,23 +225,20 @@ export async function applyToJob(
     .maybeSingle();
 
   let applicationId: string;
-  let alreadyApplied = false;
+  const alreadyApplied = false;
 
   if (existing) {
-    alreadyApplied = true;
-    applicationId = existing.id as string;
-
-    const { error: updateError } = await supabase
-      .from("applications")
-      .update({
-        cover_letter: coverLetter || null,
-        resume_url: resumeUrl,
-      })
-      .eq("id", applicationId);
-
-    if (updateError) {
-      return { ok: false, error: updateError.message };
-    }
+    // Hard block on duplicate apply (Cam 2026-05-08 PM). Page-level
+    // redirect catches the canonical UX path; this branch defends
+    // against direct form posts (curl, replays, etc.). The candidate
+    // should be looking at their existing application surface, not
+    // rewriting it.
+    return {
+      ok: false,
+      alreadyApplied: true,
+      error:
+        "You've already applied to this job. Visit My Applications to track its status or message the team.",
+    };
   } else {
     const { data: newApp, error: insertError } = await supabase
       .from("applications")

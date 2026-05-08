@@ -148,13 +148,23 @@ export default async function ApplyPage({ params }: PageProps) {
     resume_url: string | null;
   };
 
-  // Existing application — surface for resume-of-prior-attempt
+  // Existing application — block re-apply (Cam 2026-05-08 PM:
+  // candidates shouldn't be able to apply twice to the same role).
+  // Redirect to the existing application detail surface so they can
+  // see their status / message the recruiter / withdraw if needed.
+  // The action layer also enforces this server-side (defense in depth).
   const { data: existingApp } = await supabase
     .from("applications")
     .select("id, cover_letter, resume_url, status")
     .eq("job_id", jobId)
     .eq("candidate_id", candidate.id)
     .maybeSingle();
+
+  if (existingApp) {
+    redirect(
+      `/candidate/applications/${(existingApp as { id: string }).id}?already_applied=1`
+    );
+  }
 
   let existingAnswers: ExistingAnswer[] = [];
   if (existingApp) {

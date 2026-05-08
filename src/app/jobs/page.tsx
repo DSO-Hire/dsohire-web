@@ -233,6 +233,34 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
     }
   }
 
+  // Already-applied set (Cam 2026-05-08 PM) — when a candidate is
+  // signed in, mark cards for jobs they've already submitted to so
+  // they don't redundantly apply. Anonymous viewers get no badge.
+  const appliedJobIds = new Set<string>();
+  {
+    const {
+      data: { user: viewer },
+    } = await supabase.auth.getUser();
+    if (viewer && jobs.length > 0) {
+      const { data: cand } = await supabase
+        .from("candidates")
+        .select("id")
+        .eq("auth_user_id", viewer.id)
+        .maybeSingle();
+      if (cand) {
+        const candidateId = (cand as { id: string }).id;
+        const { data: appliedRows } = await supabase
+          .from("applications")
+          .select("job_id")
+          .eq("candidate_id", candidateId)
+          .in("job_id", jobIds);
+        for (const r of (appliedRows ?? []) as Array<{ job_id: string }>) {
+          appliedJobIds.add(r.job_id);
+        }
+      }
+    }
+  }
+
   // Preserve current filters when toggling view modes
   const filterParams: Array<[string, string]> = [];
   if (sp.q) filterParams.push(["q", sp.q]);
@@ -402,6 +430,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
                   job={job}
                   dsoName={displayed}
                   locations={locs}
+                  applied={appliedJobIds.has(job.id)}
                 />
               );
             })}
@@ -430,19 +459,29 @@ function JobCard({
   job,
   dsoName,
   locations,
+  applied,
 }: {
   job: JobRow;
   dsoName: string;
   locations: Array<{ city: string | null; state: string | null }>;
+  /** True when the signed-in candidate already applied to this job. */
+  applied: boolean;
 }) {
   return (
     <Link
       href={`/jobs/${job.id}`}
       className="group block bg-white p-7 hover:bg-cream motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-14px_rgba(7,15,28,0.18)] flex flex-col"
     >
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
-        {ROLE_LABELS[job.role_category] ?? job.role_category} ·{" "}
-        {EMP_LABELS[job.employment_type] ?? job.employment_type}
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+          {ROLE_LABELS[job.role_category] ?? job.role_category} ·{" "}
+          {EMP_LABELS[job.employment_type] ?? job.employment_type}
+        </div>
+        {applied && (
+          <span className="inline-flex items-center px-2 py-0.5 bg-heritage text-ivory text-[10px] font-bold tracking-[1.2px] uppercase">
+            Applied
+          </span>
+        )}
       </div>
       <div className="text-lg font-extrabold tracking-[-0.4px] text-ink mb-1 leading-tight">
         {job.title}

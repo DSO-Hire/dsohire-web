@@ -621,7 +621,7 @@ function SavedJobsList({
           Click <strong>Save</strong> on any job page to bookmark it for later.
         </p>
         <Link
-          href="/jobs"
+          href="/candidate/jobs"
           className="inline-flex items-center gap-2 px-6 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
         >
           Browse jobs

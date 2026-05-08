@@ -759,7 +759,6 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 candidateId={fitCandidateId}
                 jobId={fitJobId}
                 audience="employer"
-                defaultOpen
               />
             ) : (
               <PracticeFitConsentOffBanner />

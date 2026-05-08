@@ -165,6 +165,9 @@ export default async function JobDetailPage({ params }: PageProps) {
   // Hoisted out of the inner block so the JSX can pass it to
   // WhyThisMatch for the v1 narrative fetch.
   let viewerCandidateId: string | null = null;
+  // Already-applied state (Cam 2026-05-08 PM) — drives Apply CTA swap
+  // to "View my application" so candidates don't redundantly apply.
+  let existingApplicationId: string | null = null;
   if (viewer) {
     const { data: candidateRow } = await supabase
       .from("candidates")
@@ -188,6 +191,17 @@ export default async function JobDetailPage({ params }: PageProps) {
         .practice_fit_consent as string;
       if (consent !== "off") {
         practiceFit = await getPracticeFit(candidateId, id);
+      }
+
+      // Existing application lookup — drives the Apply button swap.
+      const { data: existingApp } = await supabase
+        .from("applications")
+        .select("id")
+        .eq("candidate_id", candidateId)
+        .eq("job_id", id)
+        .maybeSingle();
+      if (existingApp) {
+        existingApplicationId = (existingApp as { id: string }).id;
       }
     }
   }
@@ -250,14 +264,25 @@ export default async function JobDetailPage({ params }: PageProps) {
             {practiceFit && <PracticeFitChip fit={practiceFit} size="md" />}
           </div>
           {/* Top CTA bar — Apply + Save. Repeats at the bottom of the
-              description for long postings. */}
+              description for long postings. When the candidate has
+              already applied, the Apply CTA swaps to "View my
+              application" linking to the candidate-side detail. */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <Link
-              href={`/jobs/${job.id as string}/apply`}
-              className="inline-flex items-center justify-center px-8 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
-            >
-              Apply for this Role
-            </Link>
+            {existingApplicationId ? (
+              <Link
+                href={`/candidate/applications/${existingApplicationId}`}
+                className="inline-flex items-center justify-center px-8 py-3.5 bg-heritage text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
+              >
+                View My Application
+              </Link>
+            ) : (
+              <Link
+                href={`/jobs/${job.id as string}/apply`}
+                className="inline-flex items-center justify-center px-8 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+              >
+                Apply for this Role
+              </Link>
+            )}
             <SaveJobButton
               jobId={job.id as string}
               initialSaved={initialSaved}
@@ -336,12 +361,21 @@ export default async function JobDetailPage({ params }: PageProps) {
                 postings. Matches the top bar's button shapes. */}
             <section className="mt-12 pt-8 border-t border-[var(--rule)]">
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-4">
-                <Link
-                  href={`/jobs/${job.id as string}/apply`}
-                  className="inline-flex items-center justify-center px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
-                >
-                  Apply for this Role
-                </Link>
+                {existingApplicationId ? (
+                  <Link
+                    href={`/candidate/applications/${existingApplicationId}`}
+                    className="inline-flex items-center justify-center px-9 py-4 bg-heritage text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
+                  >
+                    View My Application
+                  </Link>
+                ) : (
+                  <Link
+                    href={`/jobs/${job.id as string}/apply`}
+                    className="inline-flex items-center justify-center px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+                  >
+                    Apply for this Role
+                  </Link>
+                )}
                 <SaveJobButton
                   jobId={job.id as string}
                   initialSaved={initialSaved}
@@ -350,8 +384,9 @@ export default async function JobDetailPage({ params }: PageProps) {
                 />
               </div>
               <p className="text-[13px] text-slate-meta leading-relaxed max-w-[420px]">
-                Free for candidates. We&apos;ll route your application directly
-                to {displayedEmployerName} — no recruiter middleman, no fees.
+                {existingApplicationId
+                  ? "You've already applied to this role. Track its status from My Applications."
+                  : `Free for candidates. We'll route your application directly to ${displayedEmployerName} — no recruiter middleman, no fees.`}
               </p>
             </section>
           </div>

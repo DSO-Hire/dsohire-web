@@ -543,7 +543,7 @@ export default async function CandidateDashboardPage() {
                 },
                 { label: "Watch employers respond", done: false },
               ]}
-              href={profilePct < 100 ? "/candidate/profile" : "/jobs"}
+              href={profilePct < 100 ? "/candidate/profile" : "/candidate/jobs"}
               ctaLabel={profilePct < 100 ? "Finish my profile" : "Browse jobs"}
             />
           )}
@@ -588,7 +588,7 @@ export default async function CandidateDashboardPage() {
                 ? "No matches yet. Try widening your role preferences."
                 : "Across verified DSOs in your area."
           }
-          href={desiredRoles.length > 0 ? "/jobs?match=1" : "/jobs"}
+          href={desiredRoles.length > 0 ? "/candidate/jobs?match=1" : "/candidate/jobs"}
           routeLabel={desiredRoles.length > 0 ? "Browse matches" : "Browse jobs"}
         />
 
@@ -678,7 +678,7 @@ export default async function CandidateDashboardPage() {
               Browse open roles at verified dental support organizations.
             </p>
             <Link
-              href="/jobs"
+              href="/candidate/jobs"
               className="inline-flex items-center gap-2 px-6 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
             >
               <Briefcase className="h-4 w-4" />

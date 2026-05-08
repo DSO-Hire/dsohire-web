@@ -147,25 +147,40 @@ export default async function CandidateJobsPage() {
     data: { user },
   } = await supabase.auth.getUser();
   let fitByJobId = new Map<string, FitResult>();
+  // Already-applied set (Cam 2026-05-08 PM) — drives the "Applied"
+  // badge so candidates know which jobs they've already submitted to.
+  const appliedJobIds = new Set<string>();
   if (user && jobs.length > 0) {
     const { data: candidate } = await supabase
       .from("candidates")
       .select("id, practice_fit_consent")
       .eq("auth_user_id", user.id)
       .maybeSingle();
-    if (
-      candidate &&
-      ((candidate as Record<string, unknown>).practice_fit_consent as string) !==
-        "off"
-    ) {
+    if (candidate) {
       const candidateId = (candidate as Record<string, unknown>).id as string;
-      const fits = await Promise.all(
-        jobs.map((j) => getPracticeFit(candidateId, j.id))
-      );
-      jobs.forEach((j, i) => {
-        const f = fits[i];
-        if (f) fitByJobId.set(j.id, f);
-      });
+
+      // Pull the candidate's existing applications for these jobs.
+      const { data: appliedRows } = await supabase
+        .from("applications")
+        .select("job_id")
+        .eq("candidate_id", candidateId)
+        .in("job_id", jobIds);
+      for (const row of (appliedRows ?? []) as Array<{ job_id: string }>) {
+        appliedJobIds.add(row.job_id);
+      }
+
+      if (
+        ((candidate as Record<string, unknown>).practice_fit_consent as string) !==
+        "off"
+      ) {
+        const fits = await Promise.all(
+          jobs.map((j) => getPracticeFit(candidateId, j.id))
+        );
+        jobs.forEach((j, i) => {
+          const f = fits[i];
+          if (f) fitByJobId.set(j.id, f);
+        });
+      }
     }
   }
 
@@ -227,6 +242,7 @@ export default async function CandidateJobsPage() {
                   job={job}
                   locations={locationsByJob.get(job.id) ?? []}
                   fit={fitByJobId.get(job.id) ?? null}
+                  applied={appliedJobIds.has(job.id)}
                 />
               ))}
             </ul>
@@ -241,10 +257,13 @@ function JobRowItem({
   job,
   locations,
   fit,
+  applied,
 }: {
   job: JobRow;
   locations: Array<{ city: string | null; state: string | null }>;
   fit: FitResult | null;
+  /** True when this candidate already submitted an application here. */
+  applied: boolean;
 }) {
   return (
     <li className="border-b border-[var(--rule)]">
@@ -262,6 +281,11 @@ function JobRowItem({
                 {EMP_LABELS[job.employment_type] ?? job.employment_type}
               </span>
               {fit && <PracticeFitChip fit={fit} size="sm" />}
+              {applied && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-heritage text-ivory text-[10px] font-bold tracking-[1.2px] uppercase">
+                  Applied
+                </span>
+              )}
             </div>
             <div className="text-[17px] font-extrabold tracking-[-0.3px] text-ink leading-tight mb-1 transition-colors group-hover:text-heritage-deep">
               {job.title}

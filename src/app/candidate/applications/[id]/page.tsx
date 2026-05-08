@@ -226,7 +226,6 @@ export default async function CandidateApplicationDetailPage({
                 candidateId={candidate.id as string}
                 jobId={app.job_id}
                 audience="candidate"
-                defaultOpen
               />
             </section>
           )}
