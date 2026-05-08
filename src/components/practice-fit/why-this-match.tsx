@@ -35,6 +35,7 @@ import type {
 } from "@/lib/practice-fit/types";
 import { generatePracticeFitNarrative } from "@/lib/practice-fit/narrative-action";
 import type { PracticeFitNarrativeAudience } from "@/lib/practice-fit/narrative-types";
+import { InlineDimEditor } from "@/components/practice-fit/inline-dim-editor";
 
 export interface WhyThisMatchProps {
   fit: FitResult;
@@ -216,12 +217,13 @@ export function WhyThisMatch({
             )}
           {orderedDims.map(([key, dim]) =>
             dim.scored ? (
-              <ScoredDimRow key={key} dim={dim} />
+              <ScoredDimRow key={key} dim={dim} audience={audience} />
             ) : (
               <UnscoredDimRow
                 key={key}
+                dimKey={key}
                 dim={dim}
-                showCta={audience === "candidate"}
+                audience={audience}
               />
             )
           )}
@@ -263,8 +265,15 @@ function NarrativeSkeleton() {
  * 100% match on a 5-weight dim and a 100% match on a 25-weight dim both
  * visually fill the bar.
  */
-function ScoredDimRow({ dim }: { dim: FitDimension }) {
+function ScoredDimRow({
+  dim,
+  audience,
+}: {
+  dim: FitDimension;
+  audience: PracticeFitNarrativeAudience;
+}) {
   const fillPct = Math.max(0, Math.min(100, dim.raw));
+  const detail = audience === "employer" ? dim.detail_employer : dim.detail;
   return (
     <li className="px-4 py-3">
       <div className="flex items-baseline justify-between gap-3 mb-1">
@@ -280,7 +289,7 @@ function ScoredDimRow({ dim }: { dim: FitDimension }) {
         />
       </div>
       <p className="mt-2 text-[12px] text-slate-body leading-snug">
-        {dim.detail}
+        {detail}
       </p>
     </li>
   );
@@ -295,12 +304,16 @@ function ScoredDimRow({ dim }: { dim: FitDimension }) {
  * hasn't set their salary preference," which isn't actionable for them).
  */
 function UnscoredDimRow({
+  dimKey,
   dim,
-  showCta,
+  audience,
 }: {
+  dimKey: FitDimensionKey;
   dim: FitDimension;
-  showCta: boolean;
+  audience: PracticeFitNarrativeAudience;
 }) {
+  const isCandidate = audience === "candidate";
+  const detail = isCandidate ? dim.detail : dim.detail_employer;
   return (
     <li className="px-4 py-3 bg-slate-50/40">
       <div className="flex items-baseline justify-between gap-3 mb-1">
@@ -312,9 +325,18 @@ function UnscoredDimRow({
         </span>
       </div>
       <p className="text-[12px] text-slate-body leading-snug">
-        {dim.detail}
+        {detail}
       </p>
-      {showCta && dim.cta_href && dim.cta_label && (
+      {/*
+        v1.3 — candidate-side action surface. Inline editor (cta_inline=true)
+        for simple single-value dims; profile link for multi-select dims.
+        Employer side never gets an action surface — they can't edit a
+        candidate's preferences.
+      */}
+      {isCandidate && dim.cta_inline && (
+        <InlineDimEditor dimKey={dimKey} />
+      )}
+      {isCandidate && !dim.cta_inline && dim.cta_href && dim.cta_label && (
         <Link
           href={dim.cta_href}
           className="mt-2 inline-flex items-center gap-1 text-[12px] font-semibold text-heritage-deep hover:underline"

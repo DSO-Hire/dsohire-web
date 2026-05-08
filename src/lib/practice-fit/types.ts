@@ -44,15 +44,35 @@ export interface FitDimension {
   scored: boolean;
   /** Short label for the dimension (rendered in WhyThisMatch). */
   label: string;
-  /** One-line detail explaining the fit (or, when !scored, what's missing). */
+  /**
+   * Candidate-voice detail. Reads as "you" / "your" — used on candidate
+   * surfaces. For SCORED dims this is the same as the employer voice;
+   * for UNSCORED dims it's the action prompt ("You haven't set a
+   * minimum salary — add one to factor compensation into your match.").
+   */
   detail: string;
   /**
-   * Optional profile/job-link CTA shown next to excluded rows.
-   * `cta_href` is the link the user should follow to fill in the gap;
-   * `cta_label` is the button text. Both null on scored rows.
+   * Employer-voice detail. Reads in third person — used on employer
+   * surfaces (kanban / applications detail). v1.3: was missing in v1.1,
+   * which left employers reading candidate-voice prose ("You haven't
+   * set..."). Same content as `detail` for scored dims.
+   */
+  detail_employer: string;
+  /**
+   * Optional profile/job-link CTA shown next to excluded rows on the
+   * candidate side. `cta_href` is the profile section link; `cta_label`
+   * is the button text. Both null on scored rows AND on dims with an
+   * inline editor (cta_inline=true) — the inline form replaces the link.
    */
   cta_href: string | null;
   cta_label: string | null;
+  /**
+   * v1.3 — when true, the WhyThisMatch UI renders an inline mini-editor
+   * for this dim instead of a link out to the profile. Only the simple
+   * single-value dims (compensation, years, employment type, DSO size)
+   * set this; multi-selects stay link-out for now.
+   */
+  cta_inline: boolean;
 }
 
 export interface FitResult {

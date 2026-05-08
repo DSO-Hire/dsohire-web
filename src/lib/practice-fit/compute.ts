@@ -154,12 +154,21 @@ export function computePracticeFit(inputs: FitInputs): FitResult | null {
  * score's numerator/denominator.
  * ─────────────────────────────────────────────────────────── */
 
+interface UnscoredOpts {
+  /** Candidate-voice detail ("You haven't set..."). */
+  detail: string;
+  /** Employer-voice detail ("Candidate hasn't set..."). */
+  detail_employer: string;
+  cta_label: string | null;
+  cta_href: string | null;
+  /** Inline editor on the candidate-side row instead of a link-out. */
+  cta_inline?: boolean;
+}
+
 function makeUnscoredDim(
   key: FitDimensionKey,
   label: string,
-  detail: string,
-  cta_label: string | null,
-  cta_href: string | null
+  opts: UnscoredOpts
 ): FitDimension {
   return {
     weight: WEIGHTS[key],
@@ -167,9 +176,11 @@ function makeUnscoredDim(
     contribution: 0,
     scored: false,
     label,
-    detail,
-    cta_label,
-    cta_href,
+    detail: opts.detail,
+    detail_employer: opts.detail_employer,
+    cta_label: opts.cta_label,
+    cta_href: opts.cta_href,
+    cta_inline: opts.cta_inline ?? false,
   };
 }
 
@@ -188,8 +199,10 @@ function makeScoredDim(
     scored: true,
     label,
     detail,
+    detail_employer: detail, // scored dims read identically to both audiences
     cta_href: null,
     cta_label: null,
+    cta_inline: false,
   };
 }
 
@@ -198,22 +211,25 @@ function scoreCompensation({ candidate, job }: FitInputs): FitDimension {
   // side could fix it (we point at the candidate's profile by default
   // since that's the surface they usually own).
   if (candidate.min_salary == null) {
-    return makeUnscoredDim(
-      "compensation",
-      "Compensation",
-      "You haven't set a minimum salary — add one to factor compensation into your match.",
-      "Set salary preference",
-      "/candidate/profile#compensation"
-    );
+    return makeUnscoredDim("compensation", "Compensation", {
+      detail:
+        "You haven't set a minimum salary — add one to factor compensation into your match.",
+      detail_employer:
+        "Candidate hasn't set a minimum salary — comp excluded from their score.",
+      cta_label: "Set salary preference",
+      cta_href: "/candidate/profile#compensation",
+      cta_inline: true,
+    });
   }
   if (job.compensation_min == null) {
-    return makeUnscoredDim(
-      "compensation",
-      "Compensation",
-      "This job didn't post a compensation range — comp is excluded from the score.",
-      null, // No actionable CTA on the candidate side
-      null
-    );
+    return makeUnscoredDim("compensation", "Compensation", {
+      detail:
+        "This job didn't post a compensation range — comp is excluded from the score.",
+      detail_employer:
+        "Job has no compensation range posted — comp excluded from the score.",
+      cta_label: null,
+      cta_href: null,
+    });
   }
 
   if (candidate.salary_unit !== job.compensation_period) {
@@ -262,13 +278,13 @@ function scoreLocation({ candidate, job }: FitInputs): FitDimension {
   // No locations on the job → excluded entirely (the dim isn't
   // meaningful for fully-remote / spec-only postings yet).
   if (jobStates.size === 0) {
-    return makeUnscoredDim(
-      "location",
-      "Location",
-      "Job has no locations on file — location is excluded from the score.",
-      null,
-      null
-    );
+    return makeUnscoredDim("location", "Location", {
+      detail: "Job has no locations on file — location is excluded from the score.",
+      detail_employer:
+        "Job has no locations on file — location excluded from the score.",
+      cta_label: null,
+      cta_href: null,
+    });
   }
 
   const candidateStates = new Set(
@@ -281,13 +297,14 @@ function scoreLocation({ candidate, job }: FitInputs): FitDimension {
     candidateStates.size === 0 &&
     (candidate.desired_locations ?? []).length === 0
   ) {
-    return makeUnscoredDim(
-      "location",
-      "Location",
-      "Add your license state(s) and desired locations to factor location into your match.",
-      "Add license + locations",
-      "/candidate/profile#license"
-    );
+    return makeUnscoredDim("location", "Location", {
+      detail:
+        "Add your license state(s) and desired locations to factor location into your match.",
+      detail_employer:
+        "Candidate hasn't listed license states or desired locations — location excluded from their score.",
+      cta_label: "Add license + locations",
+      cta_href: "/candidate/profile#license",
+    });
   }
 
   const stateMatch = [...jobStates].some((s) => candidateStates.has(s));
@@ -332,23 +349,24 @@ function scoreSpecialty({ candidate, job }: FitInputs): FitDimension {
 
   // Job is specialty-agnostic (admin / front-desk roles) → exclude.
   if (jobSpecs.length === 0) {
-    return makeUnscoredDim(
-      "specialty",
-      "Specialty",
-      "This posting doesn't specify a specialty — excluded from the score.",
-      null,
-      null
-    );
+    return makeUnscoredDim("specialty", "Specialty", {
+      detail:
+        "This posting doesn't specify a specialty — excluded from the score.",
+      detail_employer:
+        "Job has no specialty set — specialty excluded from the score.",
+      cta_label: null,
+      cta_href: null,
+    });
   }
   // Candidate hasn't picked specialties → exclude with CTA.
   if (candSpecs.length === 0) {
-    return makeUnscoredDim(
-      "specialty",
-      "Specialty",
-      "Pick your specialties to factor specialty fit into your match.",
-      "Add specialties",
-      "/candidate/profile#specialty"
-    );
+    return makeUnscoredDim("specialty", "Specialty", {
+      detail: "Pick your specialties to factor specialty fit into your match.",
+      detail_employer:
+        "Candidate hasn't picked specialties — specialty excluded from their score.",
+      cta_label: "Add specialties",
+      cta_href: "/candidate/profile#specialty",
+    });
   }
 
   const overlap = jobSpecs.filter((s) => candSpecs.includes(s));
@@ -375,23 +393,23 @@ function scoreSkills({ candidate, job }: FitInputs): FitDimension {
 
   // Job didn't list skills → exclude (not meaningful).
   if (jobSkills.length === 0) {
-    return makeUnscoredDim(
-      "skills",
-      "Skills",
-      "Job didn't list specific skills — skills are excluded from the score.",
-      null,
-      null
-    );
+    return makeUnscoredDim("skills", "Skills", {
+      detail: "Job didn't list specific skills — skills are excluded from the score.",
+      detail_employer:
+        "Job has no listed skills — skills excluded from the score.",
+      cta_label: null,
+      cta_href: null,
+    });
   }
   // Candidate hasn't listed skills → exclude with CTA.
   if (candidateSkills.size === 0) {
-    return makeUnscoredDim(
-      "skills",
-      "Skills",
-      "Add your skills to factor skill match into your score.",
-      "Add skills",
-      "/candidate/profile#skills"
-    );
+    return makeUnscoredDim("skills", "Skills", {
+      detail: "Add your skills to factor skill match into your score.",
+      detail_employer:
+        "Candidate hasn't listed skills — skills excluded from their score.",
+      cta_label: "Add skills",
+      cta_href: "/candidate/profile#skills",
+    });
   }
 
   const matched = jobSkills.filter((s) => candidateSkills.has(s));
@@ -413,23 +431,25 @@ function scoreYearsExperience({
 
   // Job has no minimum → exclude (most postings are like this).
   if (min == null) {
-    return makeUnscoredDim(
-      "years_experience",
-      "Years of experience",
-      "This posting has no minimum experience — excluded from the score.",
-      null,
-      null
-    );
+    return makeUnscoredDim("years_experience", "Years of experience", {
+      detail: "This posting has no minimum experience — excluded from the score.",
+      detail_employer:
+        "Job has no minimum experience set — years experience excluded from the score.",
+      cta_label: null,
+      cta_href: null,
+    });
   }
   // Candidate hasn't filled in years → exclude with CTA.
   if (cand == null) {
-    return makeUnscoredDim(
-      "years_experience",
-      "Years of experience",
-      "Add your years of dental experience to factor experience into your match.",
-      "Add experience",
-      "/candidate/profile#experience"
-    );
+    return makeUnscoredDim("years_experience", "Years of experience", {
+      detail:
+        "Add your years of dental experience to factor experience into your match.",
+      detail_employer:
+        "Candidate hasn't logged years of experience — years excluded from their score.",
+      cta_label: "Add experience",
+      cta_href: "/candidate/profile#experience",
+      cta_inline: true,
+    });
   }
 
   let raw: number;
@@ -458,24 +478,26 @@ function scoreEmploymentType({ candidate, job }: FitInputs): FitDimension {
   const jobType = (job.employment_type ?? "").toLowerCase();
 
   if (!jobType) {
-    return makeUnscoredDim(
-      "employment_type",
-      "Employment type",
-      "Job didn't specify employment type — excluded from the score.",
-      null,
-      null
-    );
+    return makeUnscoredDim("employment_type", "Employment type", {
+      detail: "Job didn't specify employment type — excluded from the score.",
+      detail_employer:
+        "Job has no employment type set — employment type excluded from the score.",
+      cta_label: null,
+      cta_href: null,
+    });
   }
 
   const candPref = candidate.temp_or_perm ?? null;
   if (candPref === null) {
-    return makeUnscoredDim(
-      "employment_type",
-      "Employment type",
-      "Pick whether you want permanent or temp/contract roles to factor employment type in.",
-      "Set preference",
-      "/candidate/profile#employment"
-    );
+    return makeUnscoredDim("employment_type", "Employment type", {
+      detail:
+        "Pick whether you want permanent or temp/contract roles to factor employment type in.",
+      detail_employer:
+        "Candidate hasn't picked permanent vs temp/contract — employment type excluded from their score.",
+      cta_label: "Set preference",
+      cta_href: "/candidate/profile#employment",
+      cta_inline: true,
+    });
   }
 
   const tempLike = new Set(["contract", "prn", "locum", "part_time"]);
@@ -516,13 +538,14 @@ function scoreDsoSize({ candidate, dso }: FitInputs): FitDimension {
   else actual = "large";
 
   if (pref === null) {
-    return makeUnscoredDim(
-      "dso_size",
-      "DSO size",
-      "Pick a DSO-size preference to factor it into your match.",
-      "Set preference",
-      "/candidate/profile#dso-size"
-    );
+    return makeUnscoredDim("dso_size", "DSO size", {
+      detail: "Pick a DSO-size preference to factor it into your match.",
+      detail_employer:
+        "Candidate hasn't picked a DSO-size preference — DSO size excluded from their score.",
+      cta_label: "Set preference",
+      cta_href: "/candidate/profile#dso-size",
+      cta_inline: true,
+    });
   }
 
   let raw: number;
