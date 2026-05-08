@@ -497,6 +497,7 @@ function resolveDisplayedName(
       isCorporate: false,
       dsoName: ctx.dsoName,
       practiceName: ctx.singlePracticeName,
+      avatarUrl: null,
     };
   }
 
@@ -527,5 +528,6 @@ function resolveDisplayedName(
     isCorporate: false,
     dsoName: ctx.dsoName,
     practiceName: ctx.singlePracticeName,
+    avatarUrl: null,
   };
 }
