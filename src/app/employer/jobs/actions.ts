@@ -26,6 +26,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
 import { requireActiveSubscriptionError } from "@/lib/billing/subscription";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 
 export interface JobActionState {
   ok: boolean;
@@ -114,7 +115,7 @@ export async function createJob(
       ok: false,
       error:
         jobError?.message ??
-        "Failed to create job. Refresh and try again, or email cam@dsohire.com.",
+        `Failed to create job. Refresh and try again, or email ${SUPPORT_EMAIL}.`,
     };
   }
 

@@ -8,6 +8,7 @@
  */
 
 import { Resend } from "resend";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 
 export interface ContactFormState {
   ok: boolean;
@@ -85,8 +86,7 @@ export async function submitContact(
     console.error("[contact] resend.emails.send failed", err);
     return {
       ok: false,
-      error:
-        "Something went wrong sending your message. Email cam@dsohire.com directly.",
+      error: `Something went wrong sending your message. Email ${SUPPORT_EMAIL} directly.`,
     };
   }
 }

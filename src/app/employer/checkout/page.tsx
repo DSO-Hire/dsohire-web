@@ -24,6 +24,7 @@ import {
   getStripePriceId,
   type PricingTier,
 } from "@/lib/stripe/prices";
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -126,10 +127,10 @@ export default async function CheckoutPage({ searchParams }: PageProps) {
             </Link>
             {" "}or email{" "}
             <a
-              href="mailto:cam@dsohire.com"
+              href={SUPPORT_MAILTO}
               className="text-heritage hover:text-heritage-deep underline underline-offset-2"
             >
-              cam@dsohire.com
+              {SUPPORT_EMAIL}
             </a>
             .
           </p>
@@ -158,10 +159,10 @@ export default async function CheckoutPage({ searchParams }: PageProps) {
             Something went wrong creating your checkout session. Refresh to
             retry, or email{" "}
             <a
-              href="mailto:cam@dsohire.com"
+              href={SUPPORT_MAILTO}
               className="text-heritage hover:text-heritage-deep underline underline-offset-2 font-semibold"
             >
-              cam@dsohire.com
+              {SUPPORT_EMAIL}
             </a>{" "}
             and we&apos;ll set up your subscription manually.
           </p>

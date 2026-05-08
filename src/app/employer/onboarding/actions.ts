@@ -9,6 +9,7 @@
 
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 
 export interface OnboardingState {
   ok: boolean;
@@ -51,7 +52,7 @@ export async function addFirstLocation(
       ok: false,
       error:
         error.message ??
-        "Failed to save location. Refresh and try again, or email cam@dsohire.com.",
+        `Failed to save location. Refresh and try again, or email ${SUPPORT_EMAIL}.`,
     };
   }
 

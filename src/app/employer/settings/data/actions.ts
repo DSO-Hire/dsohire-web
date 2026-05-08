@@ -31,6 +31,7 @@ import {
   type ZipFile,
 } from "@/lib/data-export/build-zip";
 import { getStripe } from "@/lib/stripe/server";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 
 const SOFT_DELETE_GRACE_DAYS = 30;
 
@@ -338,7 +339,7 @@ export async function exportOrgData(): Promise<ExportOrgResult> {
       "This export contains every row tied to your DSO Hire organization, " +
       "plus brand logos and DSO photos. Resume files belong to the candidates " +
       "who uploaded them — those are downloadable from each candidate's own " +
-      "settings, not from the org-level export. Email cam@dsohire.com if you " +
+      `settings, not from the org-level export. Email ${SUPPORT_EMAIL} if you ` +
       "need a more comprehensive export.",
   };
 
@@ -357,7 +358,7 @@ export async function exportOrgData(): Promise<ExportOrgResult> {
     "Excluded: candidate-uploaded resumes (those are owned by candidates;",
     "they have their own export at /candidate/settings/data).",
     "",
-    "Questions? Email cam@dsohire.com.",
+    `Questions? Email ${SUPPORT_EMAIL}.`,
   ].join("\n");
 
   const { blob, fetchFailures } = await buildExportZip(supabase, {
@@ -441,7 +442,7 @@ export async function softDeleteOrg(input: {
     console.error("[employer/data] softDeleteOrg", error);
     return {
       ok: false,
-      error: "Couldn't schedule deletion. Email cam@dsohire.com if this persists.",
+      error: `Couldn't schedule deletion. Email ${SUPPORT_EMAIL} if this persists.`,
     };
   }
 

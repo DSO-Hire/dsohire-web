@@ -21,6 +21,7 @@ import {
 } from "@/lib/supabase/server";
 import { geocodeCityState } from "@/lib/geocoding/mapbox";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 
 export interface LocationActionState {
   ok: boolean;
@@ -154,7 +155,7 @@ export async function createLocation(
       ok: false,
       error:
         error?.message ??
-        "Failed to add location. Refresh and try again, or email cam@dsohire.com.",
+        `Failed to add location. Refresh and try again, or email ${SUPPORT_EMAIL}.`,
     };
   }
 
@@ -236,14 +237,14 @@ export async function updateLocation(
       ok: false,
       error:
         error.message ??
-        "Failed to save location. Refresh and try again, or email cam@dsohire.com.",
+        `Failed to save location. Refresh and try again, or email ${SUPPORT_EMAIL}.`,
     };
   }
   if (!updatedRows || updatedRows.length === 0) {
     return {
       ok: false,
       error:
-        "The save didn't land — refresh and try again. If it keeps happening, email cam@dsohire.com.",
+        `The save didn't land — refresh and try again. If it keeps happening, email ${SUPPORT_EMAIL}.`,
     };
   }
 
@@ -363,7 +364,7 @@ export async function deleteLocation(
       ok: false,
       error:
         deleteError.message ??
-        "Failed to delete location. Refresh and try again, or email cam@dsohire.com.",
+        `Failed to delete location. Refresh and try again, or email ${SUPPORT_EMAIL}.`,
     };
   }
 

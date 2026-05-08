@@ -15,6 +15,7 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/server";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 
 type Result =
   | { ok: true }
@@ -79,7 +80,7 @@ export async function restoreOrg(): Promise<Result> {
     console.error("[employer/restore] restoreOrg", error);
     return {
       ok: false,
-      error: "Couldn't restore the organization. Email cam@dsohire.com.",
+      error: `Couldn't restore the organization. Email ${SUPPORT_EMAIL}.`,
     };
   }
   return { ok: true };

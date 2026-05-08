@@ -15,6 +15,7 @@ import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 
 const NEXT_ALLOWLIST = /^\/(candidate\/|jobs\/)/;
 
@@ -103,7 +104,7 @@ export async function signUpCandidate(
       step: "form",
       next,
       error:
-        "We couldn't create your candidate profile. Please try again or contact cam@dsohire.com.",
+        `We couldn't create your candidate profile. Please try again or contact ${SUPPORT_EMAIL}.`,
     };
   }
 

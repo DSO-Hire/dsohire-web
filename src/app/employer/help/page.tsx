@@ -10,6 +10,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Mail, MessageSquare, BookOpen } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
 
 export const metadata: Metadata = { title: "Help & Support" };
 
@@ -57,7 +58,7 @@ export default function HelpPage() {
         {/* Contact */}
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Link
-            href="mailto:cam@dsohire.com"
+            href={SUPPORT_MAILTO}
             className="group border border-[var(--rule)] bg-white p-6 hover:border-heritage-deep transition-colors"
           >
             <Mail className="size-5 text-heritage-deep mb-3" />
@@ -69,7 +70,7 @@ export default function HelpPage() {
               usually within a few hours.
             </p>
             <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-heritage-deep">
-              cam@dsohire.com
+              {SUPPORT_EMAIL}
               <ArrowRight className="size-3 group-hover:translate-x-0.5 transition-transform" />
             </span>
           </Link>

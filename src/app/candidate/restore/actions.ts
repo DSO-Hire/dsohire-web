@@ -11,6 +11,7 @@
 
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 
 type Result =
   | { ok: true }
@@ -32,7 +33,7 @@ export async function restoreAccount(): Promise<Result> {
     console.error("[candidate/restore] restoreAccount", error);
     return {
       ok: false,
-      error: "Couldn't restore the account. Email cam@dsohire.com if this persists.",
+      error: `Couldn't restore the account. Email ${SUPPORT_EMAIL} if this persists.`,
     };
   }
   return { ok: true };

@@ -19,6 +19,7 @@
 
 import JSZip from "jszip";
 import type { createSupabaseServerClient } from "@/lib/supabase/server";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 
 type SupabaseClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
 
@@ -101,7 +102,7 @@ export async function buildExportZip(
   if (fetchFailures.length > 0) {
     const lines = [
       "Some files couldn't be included in this export.",
-      "Email cam@dsohire.com if you need them.",
+      `Email ${SUPPORT_EMAIL} if you need them.`,
       "",
       ...fetchFailures.map(
         (f) => `- ${f.pathInZip}  (reason: ${f.reason})`

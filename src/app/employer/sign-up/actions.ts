@@ -20,6 +20,7 @@ import {
 } from "@/lib/supabase/server";
 import type { PricingTier } from "@/lib/stripe/prices";
 import { PRICING_TIERS } from "@/lib/stripe/prices";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 
 export interface SignUpState {
   ok: boolean;
@@ -177,7 +178,7 @@ export async function signUpEmployer(
       ok: false,
       step: "form",
       error:
-        "Failed to create your DSO record. Please try again or contact cam@dsohire.com.",
+        `Failed to create your DSO record. Please try again or contact ${SUPPORT_EMAIL}.`,
     };
   }
 
@@ -195,7 +196,7 @@ export async function signUpEmployer(
       ok: false,
       step: "form",
       error:
-        "Failed to link your account to the DSO. Please try again or contact cam@dsohire.com.",
+        `Failed to link your account to the DSO. Please try again or contact ${SUPPORT_EMAIL}.`,
     };
   }
 

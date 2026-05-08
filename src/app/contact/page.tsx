@@ -10,12 +10,12 @@
 import Link from "next/link";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { ContactForm } from "./contact-form";
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description:
-    "Get in touch with DSO Hire. Email cam@dsohire.com or use the contact form.",
+  description: `Get in touch with DSO Hire. Email ${SUPPORT_EMAIL} or use the contact form.`,
 };
 
 export default function ContactPage() {
@@ -53,15 +53,15 @@ export default function ContactPage() {
             <ul className="list-none space-y-7">
               <ContactRow label="Email">
                 <Link
-                  href="mailto:cam@dsohire.com"
+                  href={SUPPORT_MAILTO}
                   className="text-[15px] font-semibold text-ink hover:text-heritage-deep transition-colors"
                 >
-                  cam@dsohire.com
+                  {SUPPORT_EMAIL}
                 </Link>
               </ContactRow>
               <ContactRow label="Press / partnerships">
                 <Link
-                  href="mailto:cam@dsohire.com?subject=Press%20%2F%20partnership%20inquiry"
+                  href={`${SUPPORT_MAILTO}?subject=Press%20%2F%20partnership%20inquiry`}
                   className="text-[15px] font-semibold text-ink hover:text-heritage-deep transition-colors"
                 >
                   Send a partnership inquiry
@@ -69,7 +69,7 @@ export default function ContactPage() {
               </ContactRow>
               <ContactRow label="Legal / DPA / Compliance">
                 <Link
-                  href="mailto:cam@dsohire.com?subject=Legal%20%2F%20DPA%20inquiry"
+                  href={`${SUPPORT_MAILTO}?subject=Legal%20%2F%20DPA%20inquiry`}
                   className="text-[15px] font-semibold text-ink hover:text-heritage-deep transition-colors"
                 >
                   Request a DPA or legal review

@@ -25,6 +25,7 @@ import {
   exportTimestamp,
   type ZipFile,
 } from "@/lib/data-export/build-zip";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 
 const SOFT_DELETE_GRACE_DAYS = 30;
 
@@ -269,7 +270,7 @@ export async function exportMyData(): Promise<ExportResult> {
       "comments authored about your application are excluded for the privacy of the " +
       "DSO. Practices that have opted out of public DSO branding appear as 'Private " +
       "practice (name hidden)' in your blocked-employers list. " +
-      "Email cam@dsohire.com if you need a more comprehensive export.",
+      `Email ${SUPPORT_EMAIL} if you need a more comprehensive export.`,
   };
 
   const readme = [
@@ -284,7 +285,7 @@ export async function exportMyData(): Promise<ExportResult> {
     "  avatar.<ext>           — your profile photo (if set)",
     "",
     "If any files were skipped due to a fetch error, see MISSING_FILES.txt.",
-    "Questions? Email cam@dsohire.com.",
+    `Questions? Email ${SUPPORT_EMAIL}.`,
   ].join("\n");
 
   const { blob, fetchFailures } = await buildExportZip(supabase, {
@@ -356,7 +357,7 @@ export async function softDeleteAccount(
     console.error("[settings/data] softDeleteAccount", error);
     return {
       ok: false,
-      error: "Couldn't schedule deletion. Email cam@dsohire.com if this persists.",
+      error: `Couldn't schedule deletion. Email ${SUPPORT_EMAIL} if this persists.`,
     };
   }
 
