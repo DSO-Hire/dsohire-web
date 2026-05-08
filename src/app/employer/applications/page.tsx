@@ -35,7 +35,17 @@ const STATUS_ORDER: ApplicationStatus[] = [
 ];
 
 interface PageProps {
-  searchParams: Promise<{ job?: string; status?: string }>;
+  searchParams: Promise<{
+    job?: string;
+    status?: string;
+    /**
+     * Practice Fit sort + filter (Phase 5D v1.2).
+     * sort: "fit" → desc by fit score; absent → default (created_at desc)
+     * min_fit: "solid" | "strong" | "excellent" → filter rows by bucket floor
+     */
+    sort?: string;
+    min_fit?: string;
+  }>;
 }
 
 export default async function ApplicationsPage({ searchParams }: PageProps) {
@@ -117,7 +127,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
     created_at: string;
     updated_at: string;
   };
-  const apps = (rawApps ?? []) as AppRow[];
+  let apps = (rawApps ?? []) as AppRow[];
 
   // Pull candidate info in one batch (incl. avatar_url for the row avatar
   // primitive added Cam-feedback 2026-05-06 PM).
@@ -206,6 +216,36 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
     });
   }
 
+  // ── Min-fit filter + Practice Fit sort (Phase 5D v1.2) ──────────────
+  // Bucket floors map to score thresholds via the locked v1.1 cutoffs
+  // (75/60/45/30 — see src/lib/practice-fit/buckets.ts). Apps with no
+  // fit (role-filtered or consent-off) are kept when min_fit is unset
+  // and dropped when min_fit is active — applying a fit floor to a
+  // pair without a score doesn't have a sensible answer; better to
+  // hide it than to either accept or reject silently.
+  const MIN_FIT_FLOOR: Record<string, number> = {
+    solid: 45,
+    strong: 60,
+    excellent: 75,
+  };
+  if (sp.min_fit && MIN_FIT_FLOOR[sp.min_fit] !== undefined) {
+    const floor = MIN_FIT_FLOOR[sp.min_fit];
+    apps = apps.filter((a) => {
+      const fit = fitByAppId.get(a.id);
+      return fit !== undefined && fit.score >= floor;
+    });
+  }
+  if (sp.sort === "fit") {
+    apps = [...apps].sort((a, b) => {
+      const sa = fitByAppId.get(a.id)?.score ?? -1;
+      const sb = fitByAppId.get(b.id)?.score ?? -1;
+      if (sa !== sb) return sb - sa;
+      // Stable tiebreaker: original created_at desc — matches the
+      // default ordering when fits tie or both are missing.
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+  }
+
   return (
     <EmployerShell active="applications">
       <header className="mb-8">
@@ -242,13 +282,33 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
               ...STATUS_ORDER.map((s) => ({ value: s, label: STAGE_LABELS[s] })),
             ]}
           />
+          <FilterSelect
+            label="Min fit"
+            name="min_fit"
+            value={sp.min_fit ?? ""}
+            options={[
+              { value: "", label: "Any fit" },
+              { value: "solid", label: "Solid (45+)" },
+              { value: "strong", label: "Strong (60+)" },
+              { value: "excellent", label: "Excellent (75+)" },
+            ]}
+          />
+          <FilterSelect
+            label="Sort"
+            name="sort"
+            value={sp.sort ?? ""}
+            options={[
+              { value: "", label: "Newest first" },
+              { value: "fit", label: "Best fit first" },
+            ]}
+          />
           <button
             type="submit"
             className="px-5 py-2.5 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors"
           >
             Apply
           </button>
-          {(sp.job || sp.status) && (
+          {(sp.job || sp.status || sp.min_fit || sp.sort) && (
             <Link
               href="/employer/applications"
               className="px-5 py-2.5 border border-[var(--rule-strong)] text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"

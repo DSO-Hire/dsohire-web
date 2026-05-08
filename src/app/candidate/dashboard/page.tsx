@@ -50,6 +50,9 @@ import {
 } from "@/lib/applications/stages";
 import { computeCompleteness } from "@/lib/candidate/completeness";
 import type { ProfileData } from "@/app/candidate/profile/profile-sections";
+import { CandidateFitSummary } from "@/components/practice-fit/candidate-fit-summary";
+import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
+import type { FitResult } from "@/lib/practice-fit/types";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -178,6 +181,17 @@ export default async function CandidateDashboardPage() {
   const activeApps = apps.filter(
     (a) => !["hired", "rejected", "withdrawn"].includes(a.status),
   );
+
+  // ── Practice Fit per active application (Phase 5D v1.2) ─────────────
+  // Compute in parallel; cached after first compute. Role-filtered or
+  // consent-off pairs return null — handled by the summary widget.
+  const fitsByActiveAppId = new Map<string, FitResult | null>();
+  if (activeApps.length > 0) {
+    const fits = await Promise.all(
+      activeApps.map((a) => getPracticeFit(candidateRowId, a.job_id))
+    );
+    activeApps.forEach((a, i) => fitsByActiveAppId.set(a.id, fits[i]));
+  }
 
   // ── Job + DSO maps ──────────────────────────────────────────────────
   const jobIds = Array.from(new Set(apps.map((a) => a.job_id)));
@@ -600,6 +614,12 @@ export default async function CandidateDashboardPage() {
           </div>
         </section>
       )}
+
+      {/* Practice Fit summary — best match + lift-your-match nudges */}
+      <CandidateFitSummary
+        fitsByAppId={fitsByActiveAppId}
+        totalActiveApps={activeApps.length}
+      />
 
       {/* My Application Stages — personal kanban */}
       {activeApps.length > 0 && (

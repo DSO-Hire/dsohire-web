@@ -131,14 +131,23 @@ interface JobWizardProps {
 
 /* ───── Constants ───── */
 
+// Stored values are the legacy job-side enum (dental_hygienist etc) — we
+// keep them to avoid a Postgres enum migration. Labels match the
+// candidate-side ROLE_CATEGORIES vocabulary so an employer's "Dental
+// Assistant" posting reads identically to a candidate's "Dental
+// Assistant" preference. Practice Fit's role-canonicalize layer
+// (src/lib/practice-fit/role-canonicalize.ts) maps both vocabularies to
+// a single internal key before comparing — that's how an "assistant"
+// candidate now matches a "dental_assistant" job, instead of dropping
+// out of the chip pool.
 const ROLE_OPTIONS: Array<{ value: string; label: string }> = [
-  { value: "dentist", label: "Dentist" },
+  { value: "dentist", label: "Associate Dentist" },
+  { value: "specialist", label: "Specialist Dentist" },
   { value: "dental_hygienist", label: "Dental Hygienist" },
   { value: "dental_assistant", label: "Dental Assistant" },
-  { value: "front_office", label: "Front Office" },
+  { value: "front_office", label: "Front Desk / Receptionist" },
   { value: "office_manager", label: "Office Manager" },
   { value: "regional_manager", label: "Regional Manager" },
-  { value: "specialist", label: "Specialist" },
   { value: "other", label: "Other" },
 ];
 

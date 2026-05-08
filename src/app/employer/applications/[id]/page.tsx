@@ -1053,10 +1053,16 @@ function DetailSection({
  * those columns and switches off the placeholder treatment.
  */
 /**
- * Consent-off / no-fit-yet banner — replaces the old "coming soon"
- * placeholder. Either the candidate has practice_fit_consent='off'
- * (RLS blocks the read), or the score hasn't been computed for this
- * pair yet (cache miss races, etc.).
+ * Fit-unavailable banner — appears when getPracticeFit returns null.
+ * v1.2 made the copy honest about the multiple causes:
+ *   • candidate has practice_fit_consent='off' (RLS blocks the read)
+ *   • role-as-filter rejected the pair (candidate's desired_roles
+ *     doesn't include this job's role_category, post-canonicalization)
+ *   • score hasn't been computed yet (rare — first-render races)
+ *
+ * We don't disambiguate here because RLS prevents us from knowing
+ * whether the candidate has consent off vs role-filtered without
+ * leaking whether the candidate exists. Generic copy + neutral tone.
  */
 function PracticeFitConsentOffBanner() {
   return (
@@ -1065,12 +1071,14 @@ function PracticeFitConsentOffBanner() {
         <Sparkles className="h-4 w-4 text-heritage-deep mt-0.5 shrink-0" />
         <div>
           <p className="text-[13px] font-semibold text-ink mb-1">
-            Practice Fit not available for this candidate
+            Practice Fit isn&apos;t available for this pair
           </p>
           <p className="text-[13px] text-slate-body leading-relaxed">
-            The candidate hasn&apos;t opted into Practice Fit scoring yet,
-            or the score is still computing. Practice Fit is the candidate&apos;s
-            choice to share — it doesn&apos;t affect their application.
+            This can happen when the candidate&apos;s privacy settings
+            keep their score private, or when their role preferences
+            don&apos;t cover this posting. Their application stands on
+            its own — Practice Fit is informational only and never
+            gates hiring decisions.
           </p>
         </div>
       </div>

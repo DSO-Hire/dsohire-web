@@ -20,6 +20,7 @@
 
 import { createHash } from "crypto";
 import { scoreToBucket } from "./buckets";
+import { canonicalizeRoleCategory } from "./role-canonicalize";
 import type {
   CandidateFitInputs,
   FitDimension,
@@ -55,11 +56,14 @@ const WEIGHTS: Record<FitDimensionKey, number> = {
 
 export function isRoleApplicable(inputs: FitInputs): boolean {
   const desired = (inputs.candidate.desired_roles ?? [])
-    .map((r) => r.toLowerCase())
-    .filter(Boolean);
+    .map(canonicalizeRoleCategory)
+    .filter((r) => r !== "other"); // unmappable candidate prefs don't filter
+
   if (desired.length === 0) return true; // candidate is open to anything
-  const jobRole = (inputs.job.role_category ?? "").toLowerCase();
-  if (!jobRole) return true; // job has no role category — don't filter
+
+  const jobRole = canonicalizeRoleCategory(inputs.job.role_category);
+  if (jobRole === "other") return true; // unmappable job role doesn't filter
+
   return desired.includes(jobRole);
 }
 

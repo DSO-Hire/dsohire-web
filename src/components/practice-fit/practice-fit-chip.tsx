@@ -35,7 +35,7 @@ export function PracticeFitChip({
     return (
       <span
         className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${style.bgClass} ${style.textClass} ${style.borderClass}`}
-        title={`Practice Fit · ${style.label} · ${fit.score}/100`}
+        title={buildChipTooltip(fit, style.label)}
       >
         <Sparkles className="h-2.5 w-2.5" aria-hidden />
         {style.label}
@@ -49,7 +49,7 @@ export function PracticeFitChip({
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-bold tracking-wider uppercase ${style.bgClass} ${style.textClass} ${style.borderClass}`}
-      title={`Practice Fit · ${style.label} · ${fit.score}/100`}
+      title={buildChipTooltip(fit, style.label)}
     >
       <Sparkles className="h-3 w-3" aria-hidden />
       Practice Fit · {style.label}
@@ -60,4 +60,20 @@ export function PracticeFitChip({
       )}
     </span>
   );
+}
+
+/**
+ * Tooltip body — leans on LinkedIn's natural-language transparency
+ * pattern but kept tight. Coverage info appears only when the score
+ * is based on partial data, so the common case stays terse.
+ */
+function buildChipTooltip(fit: FitResult, bucketLabel: string): string {
+  const base = `Practice Fit · ${bucketLabel} · ${fit.score}/100`;
+  if (
+    fit.coverage &&
+    fit.coverage.scored_count < fit.coverage.total_count
+  ) {
+    return `${base} · Based on ${fit.coverage.scored_count} of ${fit.coverage.total_count} dimensions`;
+  }
+  return base;
 }
