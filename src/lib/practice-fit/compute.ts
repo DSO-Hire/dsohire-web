@@ -217,7 +217,7 @@ function scoreCompensation({ candidate, job }: FitInputs): FitDimension {
       detail_employer:
         "Candidate hasn't set a minimum salary — comp excluded from their score.",
       cta_label: "Set salary preference",
-      cta_href: "/candidate/profile#compensation",
+      cta_href: "/candidate/profile#section-job-preferences",
       cta_inline: true,
     });
   }
@@ -303,7 +303,7 @@ function scoreLocation({ candidate, job }: FitInputs): FitDimension {
       detail_employer:
         "Candidate hasn't listed license states or desired locations — location excluded from their score.",
       cta_label: "Add license + locations",
-      cta_href: "/candidate/profile#license",
+      cta_href: "/candidate/profile#section-licenses",
     });
   }
 
@@ -365,7 +365,7 @@ function scoreSpecialty({ candidate, job }: FitInputs): FitDimension {
       detail_employer:
         "Candidate hasn't picked specialties — specialty excluded from their score.",
       cta_label: "Add specialties",
-      cta_href: "/candidate/profile#specialty",
+      cta_href: "/candidate/profile#section-role-specialty",
     });
   }
 
@@ -408,7 +408,7 @@ function scoreSkills({ candidate, job }: FitInputs): FitDimension {
       detail_employer:
         "Candidate hasn't listed skills — skills excluded from their score.",
       cta_label: "Add skills",
-      cta_href: "/candidate/profile#skills",
+      cta_href: "/candidate/profile#section-skills",
     });
   }
 
@@ -447,7 +447,7 @@ function scoreYearsExperience({
       detail_employer:
         "Candidate hasn't logged years of experience — years excluded from their score.",
       cta_label: "Add experience",
-      cta_href: "/candidate/profile#experience",
+      cta_href: "/candidate/profile#section-identity",
       cta_inline: true,
     });
   }
@@ -495,7 +495,7 @@ function scoreEmploymentType({ candidate, job }: FitInputs): FitDimension {
       detail_employer:
         "Candidate hasn't picked permanent vs temp/contract — employment type excluded from their score.",
       cta_label: "Set preference",
-      cta_href: "/candidate/profile#employment",
+      cta_href: "/candidate/profile#section-role-specialty",
       cta_inline: true,
     });
   }
@@ -543,7 +543,7 @@ function scoreDsoSize({ candidate, dso }: FitInputs): FitDimension {
       detail_employer:
         "Candidate hasn't picked a DSO-size preference — DSO size excluded from their score.",
       cta_label: "Set preference",
-      cta_href: "/candidate/profile#dso-size",
+      cta_href: "/candidate/profile#section-job-preferences",
       cta_inline: true,
     });
   }

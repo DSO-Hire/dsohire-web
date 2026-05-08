@@ -397,6 +397,7 @@ function IdentityCard({
     .filter(Boolean)
     .join(", ");
   return (
+    <div id="section-identity" className="scroll-mt-24">
     <SectionCard
       title="Identity"
       subtitle="Name, headline, contact, location."
@@ -434,6 +435,7 @@ function IdentityCard({
         </dl>
       </div>
     </SectionCard>
+    </div>
   );
 }
 
@@ -610,6 +612,7 @@ function RolePreferencesCard({
     (o) => o.value === data.temp_or_perm
   )?.label;
   return (
+    <div id="section-role-specialty" className="scroll-mt-24">
     <SectionCard
       title="Role & specialty"
       subtitle="What you're looking for."
@@ -633,6 +636,7 @@ function RolePreferencesCard({
         )}
       </div>
     </SectionCard>
+    </div>
   );
 }
 
@@ -777,6 +781,7 @@ function SkillsLanguagesCard({
   onEdit: () => void;
 }) {
   return (
+    <div id="section-skills" className="scroll-mt-24">
     <SectionCard
       title="Skills, languages & systems"
       subtitle="Skills, languages spoken, and the practice-management software you've used."
@@ -801,6 +806,7 @@ function SkillsLanguagesCard({
         />
       </div>
     </SectionCard>
+    </div>
   );
 }
 
@@ -1310,6 +1316,7 @@ function LicensesCard({
   onEdit: (id: string) => void;
 }) {
   return (
+    <div id="section-licenses" className="scroll-mt-24">
     <SectionCard
       title={`Licenses${entries.length ? ` (${entries.length})` : ""}`}
       subtitle="License numbers stay private by default — opt in per license to display."
@@ -1367,6 +1374,7 @@ function LicensesCard({
         </ul>
       )}
     </SectionCard>
+    </div>
   );
 }
 

@@ -854,13 +854,25 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             />
           </DetailSection>
 
-          {/* ───── Internal workspace divider ───── */}
-          <div className="pt-2">
-            <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-slate-meta text-center mb-2">
-              Internal workspace · only your team sees this
+          {/* ───── Internal workspace ─────
+              Visually differentiated so employers don't accidentally
+              treat scorecards / comments / notes as candidate-visible.
+              All sections (07-10) wrap in a heritage-tinted box with a
+              prominent header pill. */}
+          <div className="-mx-4 sm:-mx-6 mt-10 px-4 sm:px-6 py-8 bg-heritage/[0.04] border-y-2 border-heritage/30">
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center gap-2 px-5 py-2 bg-heritage-deep text-ivory text-[12px] font-extrabold tracking-[3px] uppercase">
+                <Lock className="h-3.5 w-3.5" />
+                Internal Workspace
+              </div>
+              <p className="mt-3 text-[12px] text-slate-meta max-w-[480px] mx-auto leading-relaxed">
+                Only your team sees what&apos;s below. Scorecards,
+                comments, and notes never reach the candidate — keep
+                anything candidate-bound in the Messages section above.
+              </p>
             </div>
-            <div className="border-t border-[var(--rule-strong)]" />
-          </div>
+
+            <div className="space-y-10">
 
           {/* 07 · Scorecards */}
           <DetailSection
@@ -949,6 +961,9 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               </ol>
             )}
           </DetailSection>
+            </div>
+          </div>
+          {/* ───── End internal workspace ───── */}
         </div>
 
         {/* Sticky right-rail TOC */}

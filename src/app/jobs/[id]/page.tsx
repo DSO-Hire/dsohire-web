@@ -201,7 +201,7 @@ export default async function JobDetailPage({ params }: PageProps) {
           <h1 className="text-3xl sm:text-6xl font-extrabold tracking-[-1.8px] leading-[1.05] text-ink mb-5">
             {job.title as string}
           </h1>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3 mb-6">
             <Link
               href={`/companies/${dso?.slug as string}`}
               className="inline-flex items-center gap-1 text-[15px] text-slate-body hover:text-ink transition-colors"
@@ -209,6 +209,22 @@ export default async function JobDetailPage({ params }: PageProps) {
               at <span className="font-semibold text-ink ml-0.5">{dsoName}</span>
             </Link>
             {practiceFit && <PracticeFitChip fit={practiceFit} size="md" />}
+          </div>
+          {/* Top CTA bar — Apply + Save. Repeats at the bottom of the
+              description for long postings. */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <Link
+              href={`/jobs/${job.id as string}/apply`}
+              className="inline-flex items-center justify-center px-8 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+            >
+              Apply for this Role
+            </Link>
+            <SaveJobButton
+              jobId={job.id as string}
+              initialSaved={initialSaved}
+              candidateAuthed={candidateAuthed}
+              variant="label"
+            />
           </div>
         </header>
 
@@ -277,20 +293,23 @@ export default async function JobDetailPage({ params }: PageProps) {
               </section>
             )}
 
-            {/* Apply CTA + Save button */}
-            <section className="mt-12 pt-8 border-t border-[var(--rule)] flex flex-col sm:flex-row items-start gap-4">
-              <Link
-                href={`/jobs/${job.id as string}/apply`}
-                className="inline-flex items-center px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
-              >
-                Apply for this Role
-              </Link>
-              <SaveJobButton
-                jobId={job.id as string}
-                initialSaved={initialSaved}
-                candidateAuthed={candidateAuthed}
-                variant="label"
-              />
+            {/* Apply CTA + Save button — repeated bottom for long
+                postings. Matches the top bar's button shapes. */}
+            <section className="mt-12 pt-8 border-t border-[var(--rule)]">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-4">
+                <Link
+                  href={`/jobs/${job.id as string}/apply`}
+                  className="inline-flex items-center justify-center px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+                >
+                  Apply for this Role
+                </Link>
+                <SaveJobButton
+                  jobId={job.id as string}
+                  initialSaved={initialSaved}
+                  candidateAuthed={candidateAuthed}
+                  variant="label"
+                />
+              </div>
               <p className="text-[13px] text-slate-meta leading-relaxed max-w-[420px]">
                 Free for candidates. We&apos;ll route your application directly
                 to {dsoName} — no recruiter middleman, no fees.
