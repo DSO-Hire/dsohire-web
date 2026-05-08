@@ -96,7 +96,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
       ? supabase
           .from("job_locations")
           .select(
-            "job_id, location:dso_locations(id, name, city, state, latitude, longitude)"
+            "job_id, location:dso_locations(id, name, city, state, latitude, longitude, public_dso_affiliation)"
           )
           .in("job_id", jobIds)
       : Promise.resolve({ data: [] }),
@@ -116,6 +116,15 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
   // And the deduped locations list (used by the map view)
   const dedupedLocations = new Map<string, JobsMapLocation>();
 
+  // For affiliation display: track each job's set of linked locations
+  // along with their public_dso_affiliation flags. Used below to
+  // compute the displayed employer name per job (most-private inherits
+  // per Q3 + practice-name fallback for single-location private jobs).
+  const jobAffiliationLocations = new Map<
+    string,
+    Array<{ name: string; isPublic: boolean }>
+  >();
+
   for (const row of (jobLocationRows ?? []) as unknown as Array<{
     job_id: string;
     location: {
@@ -125,9 +134,19 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
       state: string | null;
       latitude: number | null;
       longitude: number | null;
+      public_dso_affiliation: boolean;
     } | null;
   }>) {
     if (!row.location) continue;
+
+    // Affiliation lookup: every linked location, regardless of geocoded
+    // status (used for the most-private-inherits check).
+    const affList = jobAffiliationLocations.get(row.job_id) ?? [];
+    affList.push({
+      name: row.location.name,
+      isPublic: row.location.public_dso_affiliation,
+    });
+    jobAffiliationLocations.set(row.job_id, affList);
 
     // List-view: just city/state
     const cityList = locationMap.get(row.job_id) ?? [];
@@ -175,6 +194,44 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
   const mapLocations = Array.from(dedupedLocations.values());
   const showMap = sp.view === "map";
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? null;
+
+  // Resolve each job's displayed employer name for the public viewer
+  // (Phase 4.5.b launch-blocker). Same rule as the SQL helper:
+  //   - Every linked location public → DSO name
+  //   - Any linked location private → practice name (single-loc) or
+  //     "Multiple locations" (multi-loc)
+  // Note: this list view doesn't have job.scope loaded, so corporate /
+  // regional jobs are handled via their location set being empty (no
+  // private location to flip the inherit). Corporate jobs that DO get
+  // listed here will fall through to the all-public path since they
+  // have no job_locations rows; that matches the helper SQL behavior.
+  const displayedEmployerNameByJob = new Map<string, string>();
+  for (const job of jobs) {
+    const dso = dsoMap.get(job.dso_id);
+    const fallbackDsoName = dso?.name ?? "DSO";
+    const affLocs = jobAffiliationLocations.get(job.id) ?? [];
+    const allPublic = affLocs.length === 0 || affLocs.every((l) => l.isPublic);
+    if (allPublic) {
+      displayedEmployerNameByJob.set(job.id, fallbackDsoName);
+    } else {
+      // At least one private location → mask. Single-loc → practice
+      // name; multi-loc → neutral "Multiple locations" since showing
+      // one practice name out of N would mislead candidates.
+      const displayed =
+        affLocs.length === 1 ? affLocs[0]!.name : "Multiple locations";
+      displayedEmployerNameByJob.set(job.id, displayed);
+    }
+  }
+
+  // Map view's per-pin job tooltip should also follow the affiliation
+  // rule. Patch the pre-built dedupedLocations entries — replace the
+  // raw DSO name with the displayed name we just computed.
+  for (const loc of mapLocations) {
+    for (const j of loc.jobs) {
+      const displayed = displayedEmployerNameByJob.get(j.id);
+      if (displayed) j.dso_name = displayed;
+    }
+  }
 
   // Preserve current filters when toggling view modes
   const filterParams: Array<[string, string]> = [];
@@ -336,13 +393,14 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-px bg-[var(--rule)] border border-[var(--rule)]">
             {jobs.map((job) => {
-              const dso = dsoMap.get(job.dso_id);
               const locs = locationMap.get(job.id) ?? [];
+              const displayed =
+                displayedEmployerNameByJob.get(job.id) ?? "DSO";
               return (
                 <JobCard
                   key={job.id}
                   job={job}
-                  dsoName={dso?.name ?? "DSO"}
+                  dsoName={displayed}
                   locations={locs}
                 />
               );

@@ -41,13 +41,22 @@ export default async function EditLocationPage({ params }: PageProps) {
   const { data: location } = await supabase
     .from("dso_locations")
     .select(
-      "id, name, address_line1, address_line2, city, state, postal_code, dso_id, logo_url"
+      "id, name, address_line1, address_line2, city, state, postal_code, dso_id, logo_url, public_dso_affiliation"
     )
     .eq("id", id)
     .eq("dso_id", dsoUser.dso_id)
     .maybeSingle();
 
   if (!location) notFound();
+
+  // Pull the DSO name so the affiliation toggle can interpolate it into
+  // the helper copy ("Display [DSO Name] on the public job page").
+  const { data: dso } = await supabase
+    .from("dsos")
+    .select("name")
+    .eq("id", dsoUser.dso_id)
+    .maybeSingle();
+  const dsoName = (dso?.name as string | undefined) ?? "your DSO";
 
   // Count non-deleted jobs that still tag this location — drives the delete
   // safety guard.
@@ -71,6 +80,8 @@ export default async function EditLocationPage({ params }: PageProps) {
     city: (location.city as string | null) ?? null,
     state: (location.state as string | null) ?? null,
     postal_code: (location.postal_code as string | null) ?? null,
+    public_dso_affiliation:
+      (location.public_dso_affiliation as boolean | null) ?? true,
   };
 
   return (
@@ -124,6 +135,7 @@ export default async function EditLocationPage({ params }: PageProps) {
         dsoId={dsoUser.dso_id}
         mode="edit"
         initial={initial}
+        dsoName={dsoName}
       />
 
       <div className="mt-12 max-w-[720px]">

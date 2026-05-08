@@ -134,6 +134,25 @@ export default async function JobDetailPage({ params }: PageProps) {
 
   const dsoName = (dso?.name as string) ?? "DSO";
 
+  // Affiliation display (Phase 4.5.b launch-blocker, locked 2026-05-08).
+  // Public-affiliated jobs render the DSO name + a link to the company
+  // page, which is the historical behavior. Private-affiliated jobs
+  // mask the DSO name with the practice name (single-location) or
+  // "Multiple locations" (multi-location) — and the link goes away.
+  // Helper: job_is_publicly_dso_affiliated runs the same check used
+  // everywhere else (most-private inherits across multi-location;
+  // regional/corporate jobs always public).
+  const { data: isPublicAffiliatedRpc } = await supabase.rpc(
+    "job_is_publicly_dso_affiliated",
+    { p_job_id: id }
+  );
+  const isPublicAffiliated = isPublicAffiliatedRpc === true;
+  const singlePracticeName =
+    locations.length === 1 ? locations[0]!.name : null;
+  const displayedEmployerName = isPublicAffiliated
+    ? dsoName
+    : (singlePracticeName ?? "Multiple locations");
+
   // ── Candidate-side state for the SaveJobButton + Practice Fit ──────
   // Anonymous visitors get the button hidden. Authenticated DSO members
   // (employers) also get it hidden — only candidates can save jobs.
@@ -173,11 +192,18 @@ export default async function JobDetailPage({ params }: PageProps) {
     }
   }
 
-  // JobPosting JSON-LD for Google for Jobs
+  // JobPosting JSON-LD for Google for Jobs. For private-affiliation
+  // jobs, hiringOrganization.name flips to the displayed name (practice
+  // name single-loc, "Multiple locations" multi-loc). Q5 locked: no
+  // parentOrganization extension — the corporate name must not leak
+  // through indexed schema. We also drop the `sameAs` link to the
+  // /companies/[slug] page since the slug exposes the corporate name.
   const jsonLd = buildJobPostingJsonLd({
     job,
     dso: dso as DsoForSchema | null,
     locations,
+    isPublicAffiliated,
+    displayedEmployerName,
   });
 
   return (
@@ -202,12 +228,25 @@ export default async function JobDetailPage({ params }: PageProps) {
             {job.title as string}
           </h1>
           <div className="flex flex-wrap items-center gap-3 mb-6">
-            <Link
-              href={`/companies/${dso?.slug as string}`}
-              className="inline-flex items-center gap-1 text-[15px] text-slate-body hover:text-ink transition-colors"
-            >
-              at <span className="font-semibold text-ink ml-0.5">{dsoName}</span>
-            </Link>
+            {isPublicAffiliated ? (
+              <Link
+                href={`/companies/${dso?.slug as string}`}
+                className="inline-flex items-center gap-1 text-[15px] text-slate-body hover:text-ink transition-colors"
+              >
+                at <span className="font-semibold text-ink ml-0.5">{dsoName}</span>
+              </Link>
+            ) : (
+              // Private affiliation — show the practice name (or
+              // "Multiple locations" for multi-loc private jobs) with
+              // NO link to /companies/[slug]. Linking would be the
+              // direct leak: the URL slug is the corporate name.
+              <span className="inline-flex items-center gap-1 text-[15px] text-slate-body">
+                at{" "}
+                <span className="font-semibold text-ink ml-0.5">
+                  {displayedEmployerName}
+                </span>
+              </span>
+            )}
             {practiceFit && <PracticeFitChip fit={practiceFit} size="md" />}
           </div>
           {/* Top CTA bar — Apply + Save. Repeats at the bottom of the
@@ -312,7 +351,7 @@ export default async function JobDetailPage({ params }: PageProps) {
               </div>
               <p className="text-[13px] text-slate-meta leading-relaxed max-w-[420px]">
                 Free for candidates. We&apos;ll route your application directly
-                to {dsoName} — no recruiter middleman, no fees.
+                to {displayedEmployerName} — no recruiter middleman, no fees.
               </p>
             </section>
           </div>
@@ -457,10 +496,14 @@ function buildJobPostingJsonLd({
   job,
   dso,
   locations,
+  isPublicAffiliated,
+  displayedEmployerName,
 }: {
   job: JobForSchema;
   dso: DsoForSchema | null;
   locations: LocationForSchema[];
+  isPublicAffiliated: boolean;
+  displayedEmployerName: string;
 }) {
   return {
     "@context": "https://schema.org/",
@@ -470,11 +513,19 @@ function buildJobPostingJsonLd({
     datePosted: job.posted_at as string | null,
     employmentType: EMP_SCHEMA[job.employment_type as string] ?? "OTHER",
     hiringOrganization: dso
-      ? {
-          "@type": "Organization",
-          name: dso.name,
-          sameAs: `https://dsohire.com/companies/${dso.slug}`,
-        }
+      ? isPublicAffiliated
+        ? {
+            "@type": "Organization",
+            name: dso.name,
+            sameAs: `https://dsohire.com/companies/${dso.slug}`,
+          }
+        : {
+            // Private-affiliation: practice/multi-loc name only. No
+            // sameAs (would expose corporate slug). No parentOrganization
+            // (would expose corporate name through schema indexing).
+            "@type": "Organization",
+            name: displayedEmployerName,
+          }
       : undefined,
     jobLocation: locations.map((loc) => ({
       "@type": "Place",

@@ -31,6 +31,7 @@ import { usePathname } from "next/navigation";
 import {
   User,
   Globe,
+  EyeOff,
   Users,
   MapPin,
   Bell,
@@ -65,6 +66,7 @@ const GROUPS: NavGroup[] = [
     entries: [
       { id: "account", label: "Account", href: "/employer/settings/account", Icon: User },
       { id: "profile", label: "Public profile", href: "/employer/settings/profile", Icon: Globe },
+      { id: "affiliation", label: "Affiliation", href: "/employer/settings/affiliation", Icon: EyeOff },
     ],
   },
   {

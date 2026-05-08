@@ -93,7 +93,9 @@ export default async function ApplyPage({ params }: PageProps) {
       .maybeSingle(),
     supabase
       .from("job_locations")
-      .select("location:dso_locations(city, state)")
+      .select(
+        "location:dso_locations(name, city, state, public_dso_affiliation)"
+      )
       .eq("job_id", jobId),
     supabase
       .from("job_screening_questions")
@@ -103,10 +105,28 @@ export default async function ApplyPage({ params }: PageProps) {
   ]);
 
   const locations = ((rawLocations ?? []) as unknown as Array<{
-    location: { city: string | null; state: string | null } | null;
+    location: {
+      name: string;
+      city: string | null;
+      state: string | null;
+      public_dso_affiliation: boolean;
+    } | null;
   }>)
     .map((r) => r.location)
     .filter((l): l is NonNullable<typeof l> => l !== null);
+
+  // Apply-flow employer name (Phase 4.5.b launch-blocker). The
+  // candidate is in the "applying" funnel — they haven't applied yet
+  // so the per-application reveal bit doesn't exist; treat them as a
+  // public viewer. After they apply, they fall under the candidate-
+  // dashboard surfaces which read the application's revealed bit.
+  const allLocationsPublic =
+    locations.length === 0 || locations.every((l) => l.public_dso_affiliation);
+  const singlePracticeName =
+    locations.length === 1 ? locations[0]!.name : null;
+  const displayedEmployerName = allLocationsPublic
+    ? ((dso?.name as string | undefined) ?? "this DSO")
+    : (singlePracticeName ?? "Multiple locations");
 
   const questions = ((rawQuestions ?? []) as unknown as ScreeningQuestion[]) ?? [];
 
@@ -170,7 +190,7 @@ export default async function ApplyPage({ params }: PageProps) {
           {job.title as string}
         </h1>
         <div className="flex flex-wrap gap-x-5 gap-y-2 text-[14px] text-slate-body mb-10 pb-10 border-b border-[var(--rule)]">
-          <span className="font-semibold text-ink">{dso?.name ?? "DSO"}</span>
+          <span className="font-semibold text-ink">{displayedEmployerName}</span>
           <span className="inline-flex items-center gap-1.5">
             <Briefcase className="h-3.5 w-3.5" />
             {ROLE_LABELS[job.role_category as string] ?? job.role_category} ·{" "}
@@ -187,7 +207,7 @@ export default async function ApplyPage({ params }: PageProps) {
         <ApplyWizard
           jobId={jobId}
           jobTitle={job.title as string}
-          dsoName={dso?.name ?? "this DSO"}
+          dsoName={displayedEmployerName}
           questions={questions}
           candidate={{
             id: candidate.id,

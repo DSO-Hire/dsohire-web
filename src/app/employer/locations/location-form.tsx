@@ -29,21 +29,38 @@ export interface LocationFormInitial {
   city: string | null;
   state: string | null;
   postal_code: string | null;
+  /**
+   * Per-location DSO-affiliation toggle (Phase 4.5.b launch-blocker,
+   * locked 2026-05-08). True (default) shows the DSO name on public
+   * surfaces; false hides it for acquired-brand practices that retain
+   * their original brand publicly.
+   */
+  public_dso_affiliation: boolean;
 }
 
 interface LocationFormProps {
   dsoId: string;
   mode: "create" | "edit";
   initial?: LocationFormInitial;
+  /**
+   * The DSO's display name — interpolated into the affiliation toggle's
+   * helper copy ("Display {dsoName} on the public job page"). Required
+   * when mode = 'edit'; ignored on 'create' (toggle isn't shown there
+   * since new locations default to public + can be flipped post-create).
+   */
+  dsoName?: string;
 }
 
 const initialState: LocationActionState = { ok: false };
 
-export function LocationForm({ dsoId, mode, initial }: LocationFormProps) {
+export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProps) {
   const action = mode === "edit" ? updateLocation : createLocation;
   const [state, formAction, pending] = useActionState(action, initialState);
   const [stateCode, setStateCode] = useState<string | null>(
     normalizeStateInput(initial?.state ?? null)
+  );
+  const [showDsoAffiliation, setShowDsoAffiliation] = useState<boolean>(
+    initial?.public_dso_affiliation ?? true
   );
 
   return (
@@ -116,6 +133,60 @@ export function LocationForm({ dsoId, mode, initial }: LocationFormProps) {
           optional
         />
       </div>
+
+      {/* Per-location DSO-affiliation toggle. Edit mode only — the
+          create flow defaults to public; admins can flip after creation
+          if the new location is an acquired brand. Form posts the
+          checkbox value as `public_dso_affiliation`; unchecked means
+          false. The hidden input ensures the field is always present
+          in formData even when the checkbox is unchecked (browsers
+          omit unchecked checkbox values, which would otherwise leave
+          the existing DB value unchanged on submit). */}
+      {mode === "edit" && (
+        <div className="border border-[var(--rule-strong)] bg-cream/50 px-5 py-4">
+          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+            Public Branding
+          </div>
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              name="public_dso_affiliation_checkbox"
+              checked={showDsoAffiliation}
+              onChange={(e) => setShowDsoAffiliation(e.currentTarget.checked)}
+              className="mt-1 h-4 w-4 accent-heritage cursor-pointer flex-shrink-0"
+            />
+            <div className="min-w-0">
+              <div className="text-[14px] font-semibold text-ink">
+                Display{" "}
+                <span className="text-heritage-deep">
+                  {dsoName ?? "your DSO"}
+                </span>{" "}
+                on the public job page
+              </div>
+              <p className="mt-1 text-[12px] text-slate-meta leading-relaxed">
+                When off, candidates see this practice as a standalone
+                brand. They won&apos;t see {dsoName ?? "your DSO"}{" "}
+                anywhere — not on the job, the location page, the apply
+                flow, or in confirmation emails. Use this for acquired
+                practices that keep their original public brand.
+              </p>
+              <p className="mt-2 text-[12px] text-slate-meta leading-relaxed">
+                Multi-location jobs that include a private location will
+                also hide {dsoName ?? "the DSO name"} on every other
+                location they touch — &ldquo;most-private&rdquo;
+                inherits across the whole job.
+              </p>
+            </div>
+          </label>
+          {/* Hidden field carries the actual boolean value to the action.
+              Always present, regardless of checkbox state. */}
+          <input
+            type="hidden"
+            name="public_dso_affiliation"
+            value={showDsoAffiliation ? "true" : "false"}
+          />
+        </div>
+      )}
 
       {state.error && (
         <div className="bg-red-50 border-l-4 border-red-500 p-4">

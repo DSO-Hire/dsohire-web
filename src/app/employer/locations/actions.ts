@@ -80,6 +80,18 @@ function parseFormFields(formData: FormData) {
     .toUpperCase();
   const postalCode = String(formData.get("postal_code") ?? "").trim();
 
+  // Per-location DSO-affiliation toggle (Phase 4.5.b). Hidden input
+  // carries "true" or "false" — only present in edit mode. Default
+  // null so the update path can distinguish "field not posted"
+  // (preserve current value) from "explicitly toggled" (write the new
+  // value). On create the field never appears, so the DB default of
+  // true takes effect.
+  const rawAffiliation = formData.get("public_dso_affiliation");
+  const publicDsoAffiliation =
+    rawAffiliation === null
+      ? null
+      : String(rawAffiliation).toLowerCase() === "true";
+
   return {
     dsoId,
     name,
@@ -88,6 +100,7 @@ function parseFormFields(formData: FormData) {
     city,
     state,
     postalCode,
+    publicDsoAffiliation,
   };
 }
 
@@ -181,16 +194,32 @@ export async function updateLocation(
     .eq("dso_id", fields.dsoId)
     .maybeSingle();
 
+  // Build the update payload — only include public_dso_affiliation
+  // when the form actually posted a value (edit form does, create
+  // doesn't). This keeps the create flow on the DB default of true.
+  const updatePayload: {
+    name: string;
+    address_line1: string | null;
+    address_line2: string | null;
+    city: string;
+    state: string;
+    postal_code: string | null;
+    public_dso_affiliation?: boolean;
+  } = {
+    name: fields.name,
+    address_line1: fields.addressLine1 || null,
+    address_line2: fields.addressLine2 || null,
+    city: fields.city,
+    state: fields.state,
+    postal_code: fields.postalCode || null,
+  };
+  if (fields.publicDsoAffiliation !== null) {
+    updatePayload.public_dso_affiliation = fields.publicDsoAffiliation;
+  }
+
   const { error } = await supabase
     .from("dso_locations")
-    .update({
-      name: fields.name,
-      address_line1: fields.addressLine1 || null,
-      address_line2: fields.addressLine2 || null,
-      city: fields.city,
-      state: fields.state,
-      postal_code: fields.postalCode || null,
-    })
+    .update(updatePayload)
     .eq("id", locationId)
     .eq("dso_id", fields.dsoId);
 
@@ -219,6 +248,15 @@ export async function updateLocation(
 
   revalidatePath("/employer/locations");
   revalidatePath(`/employer/locations/${locationId}`);
+  // Affiliation flip changes public-facing copy on /jobs and on the
+  // /companies/[slug] consumer. Bust both so the toggle takes effect
+  // on the next public render. /jobs/[id] caches per-id; we don't
+  // know the affected job ids cheaply from here, so the broader
+  // /jobs revalidate is the pragmatic catch-all.
+  if (fields.publicDsoAffiliation !== null) {
+    revalidatePath("/jobs");
+    revalidatePath("/companies", "page");
+  }
   return { ok: true };
 }
 

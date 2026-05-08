@@ -41,6 +41,7 @@ import {
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
 import { StageSelector } from "./stage-selector";
+import { AffiliationCard } from "./affiliation-card";
 import { NotesEditor } from "./notes-editor";
 import {
   CommentsThread,
@@ -123,7 +124,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const { data: rawApp } = await supabase
     .from("applications")
     .select(
-      "id, job_id, candidate_id, status, cover_letter, resume_url, employer_notes, created_at, updated_at"
+      "id, job_id, candidate_id, status, cover_letter, resume_url, employer_notes, created_at, updated_at, affiliation_revealed, affiliation_revealed_at, affiliation_revealed_by_dso_user_id"
     )
     .eq("id", appId)
     .maybeSingle();
@@ -149,6 +150,9 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     employer_notes: string | null;
     created_at: string;
     updated_at: string;
+    affiliation_revealed: boolean;
+    affiliation_revealed_at: string | null;
+    affiliation_revealed_by_dso_user_id: string | null;
   };
   const app = rawApp as AppRow;
 
@@ -160,6 +164,48 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     .eq("id", app.job_id)
     .maybeSingle();
   if (!job || (job.dso_id as string) !== (dsoUser.dso_id as string)) notFound();
+
+  // Pull affiliation context for the AffiliationCard. Three things:
+  //   1. Whether the job is publicly DSO-affiliated (uses the SQL
+  //      helper we added with the launch-blocker migration so the
+  //      most-private-inherits + corporate/regional logic stays in
+  //      one place — no risk of drift between this page and the
+  //      public surfaces).
+  //   2. The DSO's name + reveal policy.
+  //   3. The display name of the dso_users row that flipped the bit
+  //      (if it's been flipped). Optional — we only show "Revealed
+  //      by X" when both are present.
+  const [
+    { data: isPublicRpcRaw },
+    { data: dsoForAffiliation },
+    revealedByLookup,
+  ] = await Promise.all([
+    supabase.rpc("job_is_publicly_dso_affiliated", { p_job_id: app.job_id }),
+    supabase
+      .from("dsos")
+      .select("id, name, affiliation_reveal_policy")
+      .eq("id", dsoUser.dso_id)
+      .maybeSingle(),
+    app.affiliation_revealed_by_dso_user_id
+      ? supabase
+          .from("dso_users")
+          .select("full_name")
+          .eq("id", app.affiliation_revealed_by_dso_user_id as string)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+
+  const isPublicAffiliated = isPublicRpcRaw === true;
+  const dsoNameForAffiliation =
+    (dsoForAffiliation?.name as string | undefined) ?? "your DSO";
+  const affiliationPolicy =
+    (dsoForAffiliation?.affiliation_reveal_policy as
+      | "never"
+      | "after_hire"
+      | "per_application"
+      | undefined) ?? "never";
+  const revealedByName =
+    (revealedByLookup?.data?.full_name as string | null | undefined) ?? null;
 
   const { data: rawCand } = await supabase
     .from("candidates")
@@ -665,6 +711,23 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
       {/* Two-column body — main 10-section column + sticky right-rail TOC */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_240px] gap-10">
         <div className="space-y-12 min-w-0">
+          {/* DSO Affiliation card — only renders when the job has at
+              least one private-affiliation location. Self-suppresses
+              for publicly-affiliated jobs. Sits above the numbered
+              detail sections so the recruiter sees the affiliation
+              context first. */}
+          <AffiliationCard
+            isPublicAffiliated={isPublicAffiliated}
+            policy={affiliationPolicy}
+            applicationStatus={status}
+            alreadyRevealed={app.affiliation_revealed}
+            revealedAt={app.affiliation_revealed_at}
+            revealedByName={revealedByName}
+            applicationId={app.id}
+            dsoName={dsoNameForAffiliation}
+            candidateFirstName={displayName.split(" ")[0] ?? "Candidate"}
+          />
+
           {/* 01 · Pipeline stage */}
           <DetailSection
             id="stage"
