@@ -44,7 +44,28 @@ export default async function CompaniesPage() {
     .eq("status", "active")
     .order("name", { ascending: true });
 
-  const dsos = (rawDsos ?? []) as DsoRow[];
+  const allDsos = (rawDsos ?? []) as DsoRow[];
+
+  // Affiliation filter (Phase 4.5.b launch-blocker, Q7 + Q4 sandbox).
+  // Hide DSOs from this directory if every one of their locations is
+  // private — surfacing "Heartland" in a public list would be the
+  // direct leak Q7 was locked to prevent. The DSO's /companies/[slug]
+  // page itself still renders for them (per Q4 sandbox philosophy);
+  // they just don't get listed in the directory until they flip at
+  // least one location to public.
+  const allDsoIds = allDsos.map((d) => d.id);
+  const dsosWithPublicLocation = new Set<string>();
+  if (allDsoIds.length > 0) {
+    const { data: pubLocs } = await supabase
+      .from("dso_locations")
+      .select("dso_id")
+      .in("dso_id", allDsoIds)
+      .eq("public_dso_affiliation", true);
+    for (const r of (pubLocs ?? []) as Array<{ dso_id: string }>) {
+      dsosWithPublicLocation.add(r.dso_id);
+    }
+  }
+  const dsos = allDsos.filter((d) => dsosWithPublicLocation.has(d.id));
   const dsoIds = dsos.map((d) => d.id);
 
   // Count active jobs per DSO. RLS already filters to active+non-deleted, so

@@ -133,9 +133,14 @@ export async function exportMyData(): Promise<ExportResult> {
       .select("*")
       .eq("user_id", user.id)
       .then((r) => r.data ?? []),
+    // No embedded dsos:dsos(name, slug) — the candidate-side
+    // affiliation toggle (Phase 4.5.b) means the DSO's name shouldn't
+    // leak into an export when the DSO has chosen to hide it. We
+    // replace the names below with affiliation-resolved values
+    // before the payload is written.
     supabase
       .from("candidate_blocked_employers")
-      .select("*, dsos:dsos(name, slug)")
+      .select("*")
       .eq("candidate_id", candidateId)
       .then((r) => r.data ?? []),
     supabase
@@ -200,6 +205,50 @@ export async function exportMyData(): Promise<ExportResult> {
     }
   }
 
+  // Enrich blocked_employers with affiliation-resolved DSO names
+  // (Phase 4.5.b launch-blocker, Tier-2 closeout). For DSOs whose
+  // every location is private, the corporate name shouldn't leak into
+  // the candidate's export — we substitute "Private practice (name
+  // hidden)". DSOs with at least one public location surface their
+  // name as expected.
+  const blockedDsoIds = Array.from(
+    new Set(
+      (blockedEmployers as Array<Record<string, unknown>>)
+        .map((b) => b.dso_id as string | null)
+        .filter((id): id is string => Boolean(id))
+    )
+  );
+  const dsoNameByIdForExport = new Map<string, string>();
+  if (blockedDsoIds.length > 0) {
+    const [{ data: dsoRows }, { data: pubLocs }] = await Promise.all([
+      supabase
+        .from("dsos")
+        .select("id, name")
+        .in("id", blockedDsoIds),
+      supabase
+        .from("dso_locations")
+        .select("dso_id")
+        .in("dso_id", blockedDsoIds)
+        .eq("public_dso_affiliation", true),
+    ]);
+    const publicDsoIds = new Set(
+      ((pubLocs ?? []) as Array<{ dso_id: string }>).map((r) => r.dso_id)
+    );
+    for (const d of (dsoRows ?? []) as Array<{ id: string; name: string }>) {
+      dsoNameByIdForExport.set(
+        d.id,
+        publicDsoIds.has(d.id) ? d.name : "Private practice (name hidden)"
+      );
+    }
+  }
+  const blockedEmployersWithName = (
+    blockedEmployers as Array<Record<string, unknown>>
+  ).map((b) => ({
+    ...b,
+    dso_name_at_export:
+      dsoNameByIdForExport.get(b.dso_id as string) ?? "Unknown employer",
+  }));
+
   const payload: ExportPayload = {
     exported_at: new Date().toISOString(),
     exported_by: user.email ?? user.id,
@@ -212,13 +261,15 @@ export async function exportMyData(): Promise<ExportResult> {
     ce_certificates: ceCertificates,
     applications,
     notification_preferences: notificationPrefs,
-    blocked_employers: blockedEmployers,
+    blocked_employers: blockedEmployersWithName,
     saved_searches: savedSearches,
     notes:
       "This export contains every row tied to your DSO Hire account that we can " +
       "share without exposing other users. Application screening answers + employer " +
       "comments authored about your application are excluded for the privacy of the " +
-      "DSO. Email cam@dsohire.com if you need a more comprehensive export.",
+      "DSO. Practices that have opted out of public DSO branding appear as 'Private " +
+      "practice (name hidden)' in your blocked-employers list. " +
+      "Email cam@dsohire.com if you need a more comprehensive export.",
   };
 
   const readme = [
