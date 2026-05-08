@@ -720,10 +720,14 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 <FileText className="h-5 w-5 text-heritage-deep flex-shrink-0" />
                 <div className="min-w-0">
                   <div className="text-[14px] font-semibold text-ink truncate">
-                    {resumeFileName ?? "Resume"}
+                    {displayName !== "Candidate"
+                      ? `${displayName}'s resume`
+                      : "Candidate resume"}
                   </div>
                   <div className="text-[12px] text-slate-body">
-                    Click to open · expires in 1 hour
+                    {resumeFileName
+                      ? `${resumeFileName} · click to open · expires in 1 hour`
+                      : "Click to open · expires in 1 hour"}
                   </div>
                 </div>
                 <ExternalLink className="h-4 w-4 text-slate-meta ml-2" />
@@ -858,8 +862,11 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               Visually differentiated so employers don't accidentally
               treat scorecards / comments / notes as candidate-visible.
               All sections (07-10) wrap in a heritage-tinted box with a
-              prominent header pill. */}
-          <div className="-mx-4 sm:-mx-6 mt-10 px-4 sm:px-6 py-8 bg-heritage/[0.04] border-y-2 border-heritage/30">
+              prominent header pill. v1.7 bumped the wash from /[0.04] to
+              /15 per Cam — barely-there tint wasn't reading as "this is
+              private" at a glance. The white DetailSection cards inside
+              still pop cleanly against the green wash. */}
+          <div className="-mx-4 sm:-mx-6 mt-10 px-4 sm:px-6 py-8 bg-heritage/15 border-y-2 border-heritage/40">
             <div className="text-center mb-8">
               <div className="inline-flex items-center gap-2 px-5 py-2 bg-heritage-deep text-ivory text-[12px] font-extrabold tracking-[3px] uppercase">
                 <Lock className="h-3.5 w-3.5" />
