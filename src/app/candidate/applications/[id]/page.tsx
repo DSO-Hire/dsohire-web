@@ -12,13 +12,21 @@
 
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
-import { ArrowLeft, Briefcase, Calendar, Building2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Briefcase,
+  Building2,
+  Calendar,
+  Sparkles,
+} from "lucide-react";
 import { CandidateShell } from "@/components/candidate/candidate-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { MessagesThread } from "@/components/messaging/messages-thread";
 import type { ApplicationMessageRow } from "@/lib/messages/actions";
 import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
 import { WhyThisMatch } from "@/components/practice-fit/why-this-match";
+import { classifyPlaceholderReason } from "@/components/practice-fit/placeholder";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
 import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
 import type { Metadata } from "next";
@@ -55,10 +63,14 @@ export default async function CandidateApplicationDetailPage({
 
   const { data: candidate } = await supabase
     .from("candidates")
-    .select("id, full_name")
+    .select("id, full_name, desired_roles")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!candidate) redirect("/candidate/sign-up");
+  const candidateDesiredRoles =
+    ((candidate as Record<string, unknown>).desired_roles as
+      | string[]
+      | null) ?? [];
 
   const { data: rawApp } = await supabase
     .from("applications")
@@ -154,12 +166,17 @@ export default async function CandidateApplicationDetailPage({
   const candidateName = candidate.full_name?.trim() || "You";
 
   // Practice Fit (Phase 5D v1.4 — wired into the candidate detail page).
-  // Returns null when role-filtered, consent off, or compute fails. Banner
-  // / chip render conditionally on the result.
+  // Returns null when role-filtered or compute hasn't populated yet.
+  // When null, we classify the reason against the candidate's own
+  // desired_roles + the job's role to decide whether to render an
+  // explanation panel (role_mismatch) or stay silent (unavailable).
   const practiceFit = await getPracticeFit(
     candidate.id as string,
     app.job_id
   );
+  const practiceFitReason = practiceFit
+    ? null
+    : classifyPlaceholderReason(candidateDesiredRoles, job?.role_category);
 
   return (
     <CandidateShell active="applications">
@@ -213,10 +230,13 @@ export default async function CandidateApplicationDetailPage({
             </div>
           </section>
 
-          {/* Practice Fit — only when we have a fit. WhyThisMatch's inline
-              editors give the candidate the lift-your-match flow without
-              bouncing through /candidate/profile. */}
-          {practiceFit && (
+          {/* Practice Fit. When we have a scored fit we render
+              WhyThisMatch (with inline editors for lift-your-match
+              flow); when fit is null but the reason is a role-mismatch,
+              we render an explanation panel so the candidate isn't
+              left wondering. Generic "unavailable" stays silent —
+              compute usually populates within seconds. */}
+          {practiceFit ? (
             <section>
               <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
                 Practice Fit
@@ -228,7 +248,37 @@ export default async function CandidateApplicationDetailPage({
                 audience="candidate"
               />
             </section>
-          )}
+          ) : practiceFitReason === "role_mismatch" ? (
+            <section>
+              <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
+                Practice Fit
+              </h2>
+              <div className="border border-[var(--rule)] bg-cream/40 p-5">
+                <div className="flex items-start gap-3">
+                  <Sparkles className="h-4 w-4 text-heritage-deep mt-0.5 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-semibold text-ink mb-1">
+                      This role isn&apos;t in your preferences
+                    </p>
+                    <p className="text-[13px] text-slate-body leading-relaxed mb-3">
+                      Practice Fit only scores roles you&apos;ve told us
+                      you&apos;re interested in. Your application still
+                      stands — but if your goals have changed, update
+                      your preferred roles to start seeing fit scores
+                      on roles like this one.
+                    </p>
+                    <Link
+                      href="/candidate/profile#roles"
+                      className="inline-flex items-center gap-1.5 text-[12px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+                    >
+                      Update preferred roles
+                      <ArrowRight className="h-3 w-3" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </section>
+          ) : null}
 
           {/* Direct candidate ↔ DSO messages */}
           <section>

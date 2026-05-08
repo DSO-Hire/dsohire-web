@@ -61,29 +61,30 @@ export function CandidateFitSummary({
   // No scored fits but candidate has active apps → empty-state
   // disclosure. Don't disappear the section silently; the candidate
   // should know Practice Fit exists and what's preventing it.
+  //
+  // Copy correction (focused-pass follow-up): the prior copy named
+  // privacy as a possible cause, but `getPracticeFit` returns the
+  // candidate's own scores regardless of consent (see comment in
+  // get-or-compute.ts). On THIS surface, the only realistic causes
+  // are role-as-filter (the candidate's desired_roles excludes every
+  // active application's role_category) or compute hasn't populated
+  // yet — neither of which is a privacy decision.
   if (scoredFits.length === 0) {
     return (
       <section className="mb-6">
         <SectionHeader />
         <div className="border border-[var(--rule)] bg-cream/40 p-5 text-[13px] text-slate-body leading-relaxed">
           Practice Fit isn&apos;t available on your active applications
-          yet. This usually means your privacy setting is keeping fit
-          private, or your role preferences exclude these postings. You
-          can adjust either in{" "}
-          <Link
-            href="/candidate/settings/privacy"
-            className="font-semibold text-heritage-deep hover:underline"
-          >
-            settings
-          </Link>{" "}
-          or{" "}
+          yet. This usually means your role preferences don&apos;t
+          cover these postings, or compute hasn&apos;t finished. Update
+          your preferred roles in{" "}
           <Link
             href="/candidate/profile#roles"
             className="font-semibold text-heritage-deep hover:underline"
           >
             your profile
-          </Link>
-          .
+          </Link>{" "}
+          or check back in a moment.
         </div>
       </section>
     );
