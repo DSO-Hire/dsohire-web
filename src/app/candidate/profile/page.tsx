@@ -41,7 +41,7 @@ export default async function CandidateProfilePage() {
     supabase
       .from("candidates")
       .select(
-        "id, full_name, phone, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, availability, linkedin_url, resume_url, is_searchable, avatar_url, desired_specialty, pms_systems, skills, languages, temp_or_perm, schedule_preferences, min_salary, salary_unit, cv_visibility"
+        "id, full_name, phone, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, availability, linkedin_url, resume_url, is_searchable, avatar_url, desired_specialty, pms_systems, skills, languages, temp_or_perm, schedule_preferences, min_salary, salary_unit, cv_visibility, last_parsed_at"
       )
       .eq("auth_user_id", user.id)
       .maybeSingle(),
@@ -72,6 +72,12 @@ export default async function CandidateProfilePage() {
   // but `npm run types` isn't wired yet (memory: feedback_verify_npm_versions.md
   // companion).
   const c = candidateRow as Record<string, unknown>;
+
+  // v1.3 — collapse the resume-import CTA to a thin "Re-import" link
+  // once the candidate has used the parser before. last_parsed_at is
+  // the source-of-truth signal: it's set by the parse-and-confirm
+  // action when the candidate goes through /candidate/profile/import.
+  const hasImportedResume = c.last_parsed_at !== null && c.last_parsed_at !== undefined;
 
   const data: ProfileData = {
     identity: {
@@ -138,44 +144,62 @@ export default async function CandidateProfilePage() {
         </p>
       </header>
 
-      {/* Resume import CTA */}
-      <a
-        href="/candidate/profile/import"
-        className="mb-6 flex max-w-[820px] items-start gap-4 rounded-lg border border-heritage-deep/30 bg-[#F7F4ED] p-5 transition hover:border-heritage-deep hover:bg-[#F7F4ED]/70 sm:items-center"
-      >
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-heritage-deep/10">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-heritage-deep"
-            aria-hidden="true"
+      {/* Resume import CTA — first-time hero panel for candidates who
+          haven't imported yet; thin "Re-import" link once they have.
+          Signal: `last_parsed_at` is set by the parse-and-confirm action. */}
+      {hasImportedResume ? (
+        <div className="mb-6 flex max-w-[820px] items-center justify-between gap-4 border border-[var(--rule)] bg-white px-4 py-2.5">
+          <p className="text-[12px] text-slate-body leading-snug">
+            <span className="font-semibold text-ink">Resume on file.</span>{" "}
+            Edit any section below to update — or re-import if you have a
+            newer resume.
+          </p>
+          <a
+            href="/candidate/profile/import"
+            className="shrink-0 text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:underline"
           >
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-            <path d="M14 2v6h6" />
-            <path d="m9 18 3-3 3 3" />
-            <path d="M12 12v6" />
-          </svg>
+            Re-import →
+          </a>
         </div>
-        <div className="flex-1">
-          <p className="font-display text-base font-semibold text-ink">
-            Import from your resume
-          </p>
-          <p className="mt-0.5 text-sm text-slate-body">
-            Upload a PDF or DOCX — we&apos;ll fill in every section below in
-            seconds. You review before anything saves.
-          </p>
-        </div>
-        <span className="hidden text-sm font-medium text-heritage-deep sm:block">
-          Start →
-        </span>
-      </a>
+      ) : (
+        <a
+          href="/candidate/profile/import"
+          className="mb-6 flex max-w-[820px] items-start gap-4 rounded-lg border border-heritage-deep/30 bg-[#F7F4ED] p-5 transition hover:border-heritage-deep hover:bg-[#F7F4ED]/70 sm:items-center"
+        >
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-heritage-deep/10">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-heritage-deep"
+              aria-hidden="true"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <path d="M14 2v6h6" />
+              <path d="m9 18 3-3 3 3" />
+              <path d="M12 12v6" />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <p className="font-display text-base font-semibold text-ink">
+              Import from your resume
+            </p>
+            <p className="mt-0.5 text-sm text-slate-body">
+              Upload a PDF or DOCX — we&apos;ll fill in every section below in
+              seconds. You review before anything saves.
+            </p>
+          </div>
+          <span className="hidden text-sm font-medium text-heritage-deep sm:block">
+            Start →
+          </span>
+        </a>
+      )}
 
       {/* Profile photo (anchored — completeness meter scrolls here on the
           "Add a photo" quick-win CTA) */}
