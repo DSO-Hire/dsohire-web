@@ -44,10 +44,19 @@ const RANGE_DAYS: Record<string, number | null> = {
 const EVENT_KIND_LABELS: Record<string, string> = {
   "application.stage_moved": "Application stage moved",
   "application.affiliation_revealed": "DSO affiliation revealed",
+  "bulk_action.applied": "Bulk action",
   "settings.affiliation_policy_changed": "Affiliation policy changed",
   "location.affiliation_toggled": "Location affiliation toggled",
   "team.invited": "Teammate invited",
   "team.role_changed": "Teammate role changed",
+  "job.created": "Job created",
+  "job.updated": "Job updated",
+  "job.status_changed": "Job status changed",
+  "job.archived": "Job deleted",
+  "security.2fa_enabled": "2FA enabled",
+  "security.2fa_disabled": "2FA disabled",
+  "security.recovery_codes_regenerated": "2FA recovery codes regenerated",
+  "security.org_mfa_enforcement_changed": "Org-wide 2FA toggle",
 };
 
 export default async function AuditSettingsPage({ searchParams }: PageProps) {

@@ -25,6 +25,28 @@ import {
   hashRecoveryCode,
 } from "@/lib/auth/mfa";
 import { getActiveSubscription } from "@/lib/billing/subscription";
+import { recordAuditEvent } from "@/lib/audit/record";
+
+/**
+ * Resolve the signed-in user's DSO membership so we can scope MFA audit
+ * events. Some users (e.g. mid-invite) may not have a row yet — in that
+ * case we skip the audit emit (returns null).
+ */
+async function resolveDsoForAudit(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  authUserId: string
+): Promise<{ dsoId: string; dsoUserId: string } | null> {
+  const { data: dsoUser } = await supabase
+    .from("dso_users")
+    .select("id, dso_id")
+    .eq("auth_user_id", authUserId)
+    .maybeSingle();
+  if (!dsoUser) return null;
+  return {
+    dsoId: (dsoUser as { dso_id: string }).dso_id,
+    dsoUserId: (dsoUser as { id: string }).id,
+  };
+}
 
 type Result<T = unknown> =
   | ({ ok: true } & T)
@@ -170,6 +192,19 @@ export async function verifyEnrollment(input: {
     return { ok: true, recoveryCodes: [] };
   }
 
+  // Audit log (Phase 4.5.e completion).
+  const audit = await resolveDsoForAudit(ctx.supabase, ctx.user.id);
+  if (audit) {
+    void recordAuditEvent({
+      dsoId: audit.dsoId,
+      actorUserId: ctx.user.id,
+      actorDsoUserId: audit.dsoUserId,
+      eventKind: "security.2fa_enabled",
+      summary: "Enabled two-factor authentication",
+      metadata: { factor_type: "totp", recovery_code_count: codes.length },
+    });
+  }
+
   revalidatePath("/employer/settings/account");
   return { ok: true, recoveryCodes: codes };
 }
@@ -233,6 +268,19 @@ export async function disableMfa(input: {
     .delete()
     .eq("auth_user_id", ctx.user.id);
 
+  // Audit log (Phase 4.5.e completion).
+  const audit = await resolveDsoForAudit(ctx.supabase, ctx.user.id);
+  if (audit) {
+    void recordAuditEvent({
+      dsoId: audit.dsoId,
+      actorUserId: ctx.user.id,
+      actorDsoUserId: audit.dsoUserId,
+      eventKind: "security.2fa_disabled",
+      summary: "Disabled two-factor authentication",
+      metadata: { factor_type: "totp" },
+    });
+  }
+
   revalidatePath("/employer/settings/account");
   return { ok: true };
 }
@@ -280,6 +328,19 @@ export async function regenerateRecoveryCodes(input: {
       code_hash: hashRecoveryCode(c),
     }))
   );
+
+  // Audit log (Phase 4.5.e completion).
+  const audit = await resolveDsoForAudit(ctx.supabase, ctx.user.id);
+  if (audit) {
+    void recordAuditEvent({
+      dsoId: audit.dsoId,
+      actorUserId: ctx.user.id,
+      actorDsoUserId: audit.dsoUserId,
+      eventKind: "security.recovery_codes_regenerated",
+      summary: "Regenerated 2FA recovery codes",
+      metadata: { count: codes.length },
+    });
+  }
 
   revalidatePath("/employer/settings/account");
   return { ok: true, recoveryCodes: codes };
@@ -337,6 +398,20 @@ export async function setOrgRequireMfa(input: {
     console.error("[mfa/setOrgRequireMfa]", error);
     return { ok: false, error: "Couldn't save the setting." };
   }
+
+  // Audit log (Phase 4.5.e completion). Owner-only org-wide toggle is the
+  // single highest-stakes security event in the app.
+  void recordAuditEvent({
+    dsoId: dsoUser.dso_id as string,
+    actorUserId: ctx.user.id,
+    eventKind: "security.org_mfa_enforcement_changed",
+    targetTable: "dsos",
+    targetId: dsoUser.dso_id as string,
+    summary: input.enabled
+      ? "Required two-factor authentication for all team members"
+      : "Removed organization-wide two-factor requirement",
+    metadata: { enabled: input.enabled },
+  });
 
   revalidatePath("/employer/settings/account");
   return { ok: true };

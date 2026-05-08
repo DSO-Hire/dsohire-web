@@ -41,7 +41,11 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { attachStatusEventNote } from "@/lib/applications/status-event-notes";
-import type { ApplicationStatus } from "@/lib/applications/stages";
+import {
+  STAGE_LABELS,
+  type ApplicationStatus,
+} from "@/lib/applications/stages";
+import { recordAuditEvent } from "@/lib/audit/record";
 
 const VALID_STATUSES = new Set<ApplicationStatus>([
   "new",
@@ -150,6 +154,21 @@ export async function bulkMoveApplications(
   applicationIds: string[],
   nextStatus: ApplicationStatus
 ): Promise<BulkActionResult> {
+  return bulkMoveApplicationsImpl(applicationIds, nextStatus, "move");
+}
+
+/**
+ * Internal worker. The exported `bulkMoveApplications` calls this with
+ * `action: "move"`; the reject/archive wrappers call it with their own
+ * label so the audit summary reads correctly. Reason note is passed
+ * through to the audit metadata.
+ */
+async function bulkMoveApplicationsImpl(
+  applicationIds: string[],
+  nextStatus: ApplicationStatus,
+  action: "move" | "reject" | "archive",
+  reason?: string
+): Promise<BulkActionResult> {
   if (!Array.isArray(applicationIds) || applicationIds.length === 0) {
     return { succeeded: [], failed: [] };
   }
@@ -191,7 +210,94 @@ export async function bulkMoveApplications(
     revalidatePath(`/employer/applications`);
   }
 
+  // Audit-log a single summary event per bulk op (Phase 4.5.e completion).
+  // Emitting per-application would 10× the audit volume on a typical bulk —
+  // the summary line is the high-signal one. Per-app traceability lives in
+  // application_status_events (already populated by the BEFORE-UPDATE trigger).
+  if (succeeded.length > 0) {
+    await emitBulkAuditSummary({
+      action,
+      nextStatus,
+      succeededIds: succeeded.map((s) => s.id),
+      failedCount: failed.length,
+      reason,
+    });
+  }
+
   return { succeeded, failed };
+}
+
+/**
+ * Single audit emit for a bulk operation. Resolves dso_id by reading any one
+ * of the just-mutated applications (they're all in the same DSO since RLS
+ * scopes them). Fail-open per the audit-log contract — summary failure must
+ * not affect the parent bulk op.
+ */
+async function emitBulkAuditSummary(input: {
+  action: "move" | "reject" | "archive";
+  nextStatus: ApplicationStatus;
+  succeededIds: string[];
+  failedCount: number;
+  reason?: string;
+}): Promise<void> {
+  if (input.succeededIds.length === 0) return;
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  // Pull the dso_id for one application — all bulk-selected items share a job
+  // (the kanban scopes selection per-job), so any one row gives us the DSO.
+  const { data: anchor } = await supabase
+    .from("applications")
+    .select("job_id, jobs:jobs!inner(id, dso_id, title)")
+    .eq("id", input.succeededIds[0])
+    .single();
+  if (!anchor) return;
+  // Supabase !inner returns arrays at runtime even for to-one FKs.
+  const jobsRecord = (anchor as Record<string, unknown>).jobs as
+    | { id: string; dso_id: string; title: string | null }
+    | Array<{ id: string; dso_id: string; title: string | null }>
+    | null;
+  const job = Array.isArray(jobsRecord) ? jobsRecord[0] ?? null : jobsRecord;
+  if (!job?.dso_id) return;
+
+  const stageLabel = STAGE_LABELS[input.nextStatus] ?? input.nextStatus;
+  const count = input.succeededIds.length;
+  const verb =
+    input.action === "reject"
+      ? "Rejected"
+      : input.action === "archive"
+        ? "Archived"
+        : "Moved";
+  const candidateNoun = count === 1 ? "candidate" : "candidates";
+  const summary =
+    input.action === "move"
+      ? `${verb} ${count} ${candidateNoun} to ${stageLabel}`
+      : `${verb} ${count} ${candidateNoun}`;
+
+  await recordAuditEvent({
+    dsoId: job.dso_id,
+    actorUserId: user.id,
+    eventKind: "bulk_action.applied",
+    targetTable: "jobs",
+    targetId: job.id,
+    summary:
+      input.failedCount > 0
+        ? `${summary} (${input.failedCount} failed)`
+        : summary,
+    metadata: {
+      action: input.action,
+      next_status: input.nextStatus,
+      job_id: job.id,
+      job_title: job.title,
+      succeeded_count: count,
+      failed_count: input.failedCount,
+      application_ids: input.succeededIds,
+      ...(input.reason ? { reason: input.reason } : {}),
+    },
+  });
 }
 
 /**
@@ -216,7 +322,12 @@ export async function bulkRejectApplications(
   reason: string
 ): Promise<BulkActionResult> {
   const trimmedReason = (reason ?? "").trim().slice(0, 1000);
-  const result = await bulkMoveApplications(applicationIds, "rejected");
+  const result = await bulkMoveApplicationsImpl(
+    applicationIds,
+    "rejected",
+    "reject",
+    trimmedReason || undefined
+  );
 
   if (trimmedReason && result.succeeded.length > 0) {
     await attachStatusEventNote({
@@ -243,7 +354,12 @@ export async function bulkArchiveApplications(
   reason: string
 ): Promise<BulkActionResult> {
   const trimmedReason = (reason ?? "").trim().slice(0, 1000);
-  const result = await bulkMoveApplications(applicationIds, "withdrawn");
+  const result = await bulkMoveApplicationsImpl(
+    applicationIds,
+    "withdrawn",
+    "archive",
+    trimmedReason || undefined
+  );
 
   if (trimmedReason && result.succeeded.length > 0) {
     await attachStatusEventNote({

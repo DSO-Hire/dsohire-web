@@ -25,6 +25,7 @@ import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
 import { requireActiveSubscriptionError } from "@/lib/billing/subscription";
+import { recordAuditEvent } from "@/lib/audit/record";
 
 export interface JobActionState {
   ok: boolean;
@@ -158,6 +159,29 @@ export async function createJob(
       };
     }
   }
+
+  // Audit log (Phase 4.5.e). Must run BEFORE redirect — redirect() throws
+  // and would skip the await.
+  await recordAuditEvent({
+    dsoId,
+    actorUserId: user.id,
+    actorDsoUserId: dsoUser?.id ?? null,
+    eventKind: "job.created",
+    targetTable: "jobs",
+    targetId: job.id as string,
+    summary:
+      parsed.status === "active"
+        ? `Posted "${parsed.title}"`
+        : `Drafted "${parsed.title}"`,
+    metadata: {
+      job_id: job.id,
+      title: parsed.title,
+      status: parsed.status,
+      role_category: parsed.roleCategory,
+      employment_type: parsed.employmentType,
+      location_count: parsed.locationIds.length,
+    },
+  });
 
   redirect(`/employer/jobs/${job.id}`);
 }
@@ -304,6 +328,18 @@ export async function updateJob(
   revalidatePath(`/jobs/${jobId}/apply`);
   revalidatePath(`/employer/jobs/${jobId}`);
 
+  // Audit log (Phase 4.5.e completion).
+  void emitJobAuditEvent(supabase, dsoId, jobId, {
+    eventKind: "job.updated",
+    summary: `Updated "${parsed.title}"`,
+    metadata: {
+      job_id: jobId,
+      title: parsed.title,
+      status: parsed.status,
+      section: "all",
+    },
+  });
+
   return { ok: true };
 }
 
@@ -364,6 +400,13 @@ export async function updateJobBasicsSection(
   revalidatePath(`/jobs/${jobId}`);
   revalidatePath(`/employer/jobs/${jobId}`);
   revalidatePath(`/employer/jobs/${jobId}/edit`);
+
+  void emitJobAuditEvent(supabase, dsoId, jobId, {
+    eventKind: "job.updated",
+    summary: `Updated basics on "${title}"`,
+    metadata: { job_id: jobId, title, section: "basics" },
+  });
+
   return { ok: true };
 }
 
@@ -393,6 +436,13 @@ export async function updateJobDescriptionSection(
 
   revalidatePath(`/jobs/${jobId}`);
   revalidatePath(`/employer/jobs/${jobId}/edit`);
+
+  void emitJobAuditEvent(supabase, dsoId, jobId, {
+    eventKind: "job.updated",
+    summary: `Updated description`,
+    metadata: { job_id: jobId, section: "description" },
+  });
+
   return { ok: true };
 }
 
@@ -504,6 +554,18 @@ export async function updateJobDetailsSection(
 
   revalidatePath(`/jobs/${jobId}`);
   revalidatePath(`/employer/jobs/${jobId}/edit`);
+
+  void emitJobAuditEvent(supabase, dsoId, jobId, {
+    eventKind: "job.updated",
+    summary: `Updated compensation & details`,
+    metadata: {
+      job_id: jobId,
+      section: "details",
+      compensation_visible: compVisible,
+      hide_stages_from_candidate: hideStagesFromCandidate,
+    },
+  });
+
   return { ok: true };
 }
 
@@ -636,6 +698,17 @@ export async function updateJobScreeningSection(
   revalidatePath(`/jobs/${jobId}`);
   revalidatePath(`/jobs/${jobId}/apply`);
   revalidatePath(`/employer/jobs/${jobId}/edit`);
+
+  void emitJobAuditEvent(supabase, dsoId, jobId, {
+    eventKind: "job.updated",
+    summary: `Updated screening questions (${screening.length} ${screening.length === 1 ? "question" : "questions"})`,
+    metadata: {
+      job_id: jobId,
+      section: "screening",
+      question_count: screening.length,
+    },
+  });
+
   return { ok: true };
 }
 
@@ -694,6 +767,38 @@ export async function setJobStatus(
     }
   }
 
+  // Audit log (Phase 4.5.e completion). Resolve dso_id off the job since
+  // setJobStatus doesn't accept one in the form payload.
+  if (priorStatus !== newStatus) {
+    const { data: jobRow } = await supabase
+      .from("jobs")
+      .select("dso_id")
+      .eq("id", jobId)
+      .maybeSingle();
+    const dsoId = (jobRow as { dso_id: string } | null)?.dso_id ?? null;
+    if (dsoId) {
+      const verbByStatus: Record<string, string> = {
+        active: "Activated",
+        paused: "Paused",
+        filled: "Marked as filled",
+        archived: "Archived",
+        draft: "Reverted to draft",
+        closed: "Closed",
+      };
+      const verb = verbByStatus[newStatus] ?? `Set status to ${newStatus}`;
+      void emitJobAuditEvent(supabase, dsoId, jobId, {
+        eventKind: "job.status_changed",
+        summary: `${verb} "${jobTitle}"`,
+        metadata: {
+          job_id: jobId,
+          title: jobTitle,
+          from_status: priorStatus,
+          to_status: newStatus,
+        },
+      });
+    }
+  }
+
   return { ok: true };
 }
 
@@ -705,12 +810,41 @@ export async function softDeleteJob(
   if (!jobId) return { ok: false, error: "Missing job ID." };
 
   const supabase = await createSupabaseServerClient();
+
+  // Snapshot title + dso_id BEFORE the soft-delete so we can audit-log
+  // with full context.
+  const { data: priorJob } = await supabase
+    .from("jobs")
+    .select("title, dso_id")
+    .eq("id", jobId)
+    .maybeSingle();
+  const jobTitle =
+    ((priorJob as Record<string, unknown> | null)?.title as string | null) ??
+    "the job";
+  const dsoId =
+    ((priorJob as Record<string, unknown> | null)?.dso_id as string | null) ??
+    null;
+
   const { error } = await supabase
     .from("jobs")
     .update({ deleted_at: new Date().toISOString(), status: "archived" })
     .eq("id", jobId);
 
   if (error) return { ok: false, error: error.message };
+
+  // Audit log (Phase 4.5.e completion). Must run BEFORE redirect.
+  if (dsoId) {
+    await emitJobAuditEvent(supabase, dsoId, jobId, {
+      eventKind: "job.archived",
+      summary: `Deleted "${jobTitle}"`,
+      metadata: {
+        job_id: jobId,
+        title: jobTitle,
+        soft_delete: true,
+      },
+    });
+  }
+
   redirect("/employer/jobs");
 }
 
@@ -962,6 +1096,36 @@ function makeSlug(title: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .substring(0, 80);
+}
+
+/**
+ * Audit-log helper for job mutations. Wraps recordAuditEvent with the
+ * actor-resolution boilerplate so each call site stays a one-liner.
+ * Fail-open: errors are swallowed inside recordAuditEvent itself.
+ */
+async function emitJobAuditEvent(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  dsoId: string,
+  jobId: string,
+  input: {
+    eventKind: string;
+    summary: string;
+    metadata?: Record<string, unknown>;
+  }
+): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+  await recordAuditEvent({
+    dsoId,
+    actorUserId: user.id,
+    eventKind: input.eventKind,
+    targetTable: "jobs",
+    targetId: jobId,
+    summary: input.summary,
+    metadata: input.metadata ?? {},
+  });
 }
 
 async function resolveAvailableJobSlug(
