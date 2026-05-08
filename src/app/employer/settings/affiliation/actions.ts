@@ -10,6 +10,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { recordAuditEvent } from "@/lib/audit/record";
 
 export type AffiliationRevealPolicy =
   | "never"
@@ -27,6 +28,13 @@ const VALID_POLICIES = new Set<AffiliationRevealPolicy>([
   "after_hire",
   "per_application",
 ]);
+
+// Audit-summary copy for policy values.
+const POLICY_LABEL: Record<AffiliationRevealPolicy, string> = {
+  never: "Never",
+  after_hire: "After hire",
+  per_application: "Per application",
+};
 
 export async function updateAffiliationRevealPolicy(
   _prev: AffiliationActionState,
@@ -61,6 +69,17 @@ export async function updateAffiliationRevealPolicy(
     };
   }
 
+  // Read prior value so the audit summary can show "Never → Per
+  // application" or similar.
+  const { data: priorRow } = await supabase
+    .from("dsos")
+    .select("affiliation_reveal_policy")
+    .eq("id", dsoUser.dso_id)
+    .maybeSingle();
+  const priorPolicy =
+    (priorRow?.affiliation_reveal_policy as AffiliationRevealPolicy | null) ??
+    null;
+
   const { error } = await supabase
     .from("dsos")
     .update({ affiliation_reveal_policy: policy })
@@ -68,6 +87,19 @@ export async function updateAffiliationRevealPolicy(
 
   if (error) {
     return { ok: false, error: error.message };
+  }
+
+  // Audit log (Phase 4.5.e).
+  if (priorPolicy !== policy) {
+    void recordAuditEvent({
+      dsoId: dsoUser.dso_id as string,
+      actorUserId: user.id,
+      eventKind: "settings.affiliation_policy_changed",
+      targetTable: "dsos",
+      targetId: dsoUser.dso_id as string,
+      summary: `Changed affiliation reveal policy from ${POLICY_LABEL[priorPolicy ?? "never"]} to ${POLICY_LABEL[policy]}`,
+      metadata: { from: priorPolicy, to: policy },
+    });
   }
 
   // Affiliation policy changes affect candidate-facing render paths

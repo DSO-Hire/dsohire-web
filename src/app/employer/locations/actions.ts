@@ -20,6 +20,7 @@ import {
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
 import { geocodeCityState } from "@/lib/geocoding/mapbox";
+import { recordAuditEvent } from "@/lib/audit/record";
 
 export interface LocationActionState {
   ok: boolean;
@@ -185,11 +186,11 @@ export async function updateLocation(
 
   const supabase = await createSupabaseServerClient();
 
-  // Fetch the existing row so we can decide whether to re-geocode. Skip
-  // the round-trip if city/state didn't change AND coords are already set.
+  // Fetch the existing row so we can decide whether to re-geocode +
+  // detect an affiliation toggle for audit logging.
   const { data: prior } = await supabase
     .from("dso_locations")
-    .select("city, state, latitude, longitude")
+    .select("city, state, latitude, longitude, name, public_dso_affiliation")
     .eq("id", locationId)
     .eq("dso_id", fields.dsoId)
     .maybeSingle();
@@ -258,6 +259,34 @@ export async function updateLocation(
     (prior?.longitude as number | null | undefined) === null;
   if (cityChanged || stateChanged || missingCoords) {
     void geocodeAndStore(locationId, fields.city, fields.state);
+  }
+
+  // Audit log (Phase 4.5.e) — record only when public_dso_affiliation
+  // actually flipped. Generic location field edits aren't audit-worthy
+  // at this MVP scope (would create a lot of low-value rows).
+  if (
+    fields.publicDsoAffiliation !== null &&
+    fields.publicDsoAffiliation !== (prior?.public_dso_affiliation as boolean | null)
+  ) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      const locName = (prior?.name as string | null) ?? fields.name;
+      void recordAuditEvent({
+        dsoId: fields.dsoId,
+        actorUserId: user.id,
+        eventKind: "location.affiliation_toggled",
+        targetTable: "dso_locations",
+        targetId: locationId,
+        summary: `Set ${locName} to ${fields.publicDsoAffiliation ? "publicly affiliated" : "private (DSO name hidden)"}`,
+        metadata: {
+          location_id: locationId,
+          location_name: locName,
+          public_dso_affiliation: fields.publicDsoAffiliation,
+        },
+      });
+    }
   }
 
   revalidatePath("/employer/locations");

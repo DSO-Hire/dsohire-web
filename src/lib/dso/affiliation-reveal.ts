@@ -25,6 +25,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { recordAuditEvent } from "@/lib/audit/record";
 
 export interface RevealResult {
   ok: boolean;
@@ -112,6 +113,21 @@ export async function revealDsoToCandidate(
     };
   }
 
+  // Look up the candidate name for the audit summary line. Service-
+  // role isn't strictly needed here — RLS allows the action's caller
+  // to read this row — but we already have admin authn'd context via
+  // the policy check, and the parallel lookup keeps us simple.
+  const { data: candRow } = await supabase
+    .from("applications")
+    .select("candidate_id, candidates:candidates(full_name)")
+    .eq("id", applicationId)
+    .maybeSingle();
+  const candFullName =
+    ((Array.isArray(candRow?.candidates)
+      ? candRow.candidates[0]
+      : candRow?.candidates) as { full_name: string | null } | null)
+      ?.full_name ?? "the candidate";
+
   // Flip + stamp audit columns
   const { error: updateErr } = await supabase
     .from("applications")
@@ -125,6 +141,21 @@ export async function revealDsoToCandidate(
   if (updateErr) {
     return { ok: false, error: updateErr.message };
   }
+
+  // Audit log (Phase 4.5.e). One-way flip — record once.
+  void recordAuditEvent({
+    dsoId: dsoUser.dso_id as string,
+    actorUserId: user.id,
+    actorDsoUserId: dsoUser.id as string,
+    eventKind: "application.affiliation_revealed",
+    targetTable: "applications",
+    targetId: applicationId,
+    summary: `Revealed DSO name to ${candFullName}`,
+    metadata: {
+      application_id: applicationId,
+      candidate_name: candFullName,
+    },
+  });
 
   // Revalidate the candidate-facing surfaces so the next render shows
   // the corporate name. Employer side never showed the practice name,

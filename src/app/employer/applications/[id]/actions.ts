@@ -16,6 +16,7 @@ import {
   type ApplicationStatus,
 } from "@/lib/applications/stages";
 import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
+import { recordAuditEvent } from "@/lib/audit/record";
 
 export interface ActionState {
   ok: boolean;
@@ -95,13 +96,14 @@ export async function moveApplicationStage(
 
   const supabase = await createSupabaseServerClient();
 
-  // Read current status + the job's hide-from-candidate flag in one
-  // round trip so optimistic rollback has the prev value AND the
-  // post-update inbox system message can be skipped when stages are
-  // hidden from this candidate.
+  // Read current status + the job's hide-from-candidate flag + dso_id
+  // (needed for audit logging) + candidate name (for the audit summary
+  // line) in one round trip.
   const { data: prev, error: prevErr } = await supabase
     .from("applications")
-    .select("status, jobs:jobs!inner(id, hide_stages_from_candidate)")
+    .select(
+      "status, candidate_id, candidates:candidates(full_name), jobs:jobs!inner(id, dso_id, hide_stages_from_candidate, title)"
+    )
     .eq("id", applicationId)
     .single();
   if (prevErr || !prev) {
@@ -110,6 +112,17 @@ export async function moveApplicationStage(
   const prevStatus = (prev as Record<string, unknown>).status as ApplicationStatus;
   const job = (prev as Record<string, unknown>).jobs as Record<string, unknown> | null;
   const hideStagesFromCandidate = Boolean(job?.hide_stages_from_candidate);
+  const dsoId = (job?.dso_id as string | null) ?? null;
+  const jobTitle = (job?.title as string | null) ?? "the job";
+  const candidateRecord = (prev as Record<string, unknown>).candidates as
+    | Record<string, unknown>
+    | Array<Record<string, unknown>>
+    | null;
+  const candidateRow = Array.isArray(candidateRecord)
+    ? candidateRecord[0] ?? null
+    : candidateRecord;
+  const candidateName =
+    (candidateRow?.full_name as string | null) ?? "(unnamed candidate)";
 
   const { data, error } = await supabase
     .from("applications")
@@ -139,6 +152,34 @@ export async function moveApplicationStage(
       senderRole: "employer",
       body: `Your application moved from ${fromLabel} to ${toLabel}.`,
     });
+  }
+
+  // Audit log (Phase 4.5.e). Fire-and-forget; the helper internally
+  // logs+swallows errors so a failed insert never breaks the parent
+  // stage move.
+  if (dsoId && prevStatus !== nextStatus) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      const fromLabel = STAGE_LABELS[prevStatus] ?? prevStatus;
+      const toLabel = STAGE_LABELS[nextStatus] ?? nextStatus;
+      void recordAuditEvent({
+        dsoId,
+        actorUserId: user.id,
+        eventKind: "application.stage_moved",
+        targetTable: "applications",
+        targetId: applicationId,
+        summary: `Moved ${candidateName}'s application for ${jobTitle} from ${fromLabel} to ${toLabel}`,
+        metadata: {
+          application_id: applicationId,
+          from_status: prevStatus,
+          to_status: nextStatus,
+          candidate_name: candidateName,
+          job_title: jobTitle,
+        },
+      });
+    }
   }
 
   revalidatePath(`/employer/applications`);

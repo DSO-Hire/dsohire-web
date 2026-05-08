@@ -26,6 +26,7 @@ import {
 } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/send";
 import { TeamInvite } from "@/emails/employer/TeamInvite";
+import { recordAuditEvent } from "@/lib/audit/record";
 
 export type DsoRole = "owner" | "admin" | "recruiter" | "hiring_manager";
 
@@ -203,6 +204,24 @@ export async function inviteTeammate(
     }),
   });
 
+  // Audit log
+  void recordAuditEvent({
+    dsoId: dsoUser.dso_id as string,
+    actorUserId: user.id,
+    actorDsoUserId: dsoUser.id as string,
+    actorName: (dsoUser.full_name as string | null) ?? null,
+    actorRole: dsoUser.role as string,
+    eventKind: "team.invited",
+    targetTable: "dso_invitations",
+    targetId: invite.id as string,
+    summary: `Invited ${email} as ${role.replace("_", " ")}`,
+    metadata: {
+      email,
+      role,
+      scoped_location_count: scopedLocationIds?.length ?? 0,
+    },
+  });
+
   revalidatePath("/employer/team");
   return {
     ok: true,
@@ -275,6 +294,35 @@ export async function changeTeammateRole(formData: FormData): Promise<void> {
     .from("dso_users")
     .update({ role: newRole })
     .eq("id", dsoUserId);
+
+  // Audit log — record only when the role actually changed.
+  if ((target.role as string) !== newRole) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      // Pull the target's display name for the summary
+      const { data: targetRow } = await supabase
+        .from("dso_users")
+        .select("full_name")
+        .eq("id", dsoUserId)
+        .maybeSingle();
+      const targetName = (targetRow?.full_name as string | null) ?? "a teammate";
+      void recordAuditEvent({
+        dsoId: target.dso_id as string,
+        actorUserId: user.id,
+        eventKind: "team.role_changed",
+        targetTable: "dso_users",
+        targetId: dsoUserId,
+        summary: `Changed ${targetName}'s role from ${(target.role as string).replace("_", " ")} to ${newRole.replace("_", " ")}`,
+        metadata: {
+          target_dso_user_id: dsoUserId,
+          from_role: target.role,
+          to_role: newRole,
+        },
+      });
+    }
+  }
 
   revalidatePath("/employer/team");
 }
