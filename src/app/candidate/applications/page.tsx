@@ -444,6 +444,7 @@ export default async function CandidateApplicationsPage({
             locsByJob={locsByJob}
             unreadByAppId={unreadByAppId}
             fitsByAppId={fitsByAppId}
+            displayedNameByAppId={displayedNameByAppId}
           />
         )}
       </div>
@@ -513,6 +514,7 @@ function ApplicationsList({
   locsByJob,
   unreadByAppId,
   fitsByAppId,
+  displayedNameByAppId,
 }: {
   apps: Array<{
     id: string;
@@ -545,6 +547,13 @@ function ApplicationsList({
   >;
   unreadByAppId: Map<string, number>;
   fitsByAppId: Map<string, FitResult | null>;
+  /**
+   * Per-application displayed employer name resolved by the parent
+   * (Phase 4.5.b launch-blocker). Masks the DSO name when the job is
+   * privately affiliated and the policy + reveal-state don't allow
+   * disclosure.
+   */
+  displayedNameByAppId: Map<string, string>;
 }) {
   return (
     <ul className="space-y-3">
