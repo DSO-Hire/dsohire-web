@@ -20,6 +20,7 @@ import { JobsMap, type JobsMapLocation } from "@/components/jobs-map";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { JobsStateFilter } from "./jobs-state-filter";
 import { normalizeStateInput } from "@/lib/us-states";
+import { ListSort } from "@/components/ui/list-sort";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -60,6 +61,16 @@ const EMP_LABELS: Record<string, string> = {
   locum: "Locum",
 };
 
+// Sort options for the public /jobs board. RPC returns by relevance/recency
+// already, but candidates skim differently — give them control.
+const JOBS_SORT_OPTIONS = [
+  { value: "newest", label: "Newest first" },
+  { value: "oldest", label: "Oldest first" },
+  { value: "pay", label: "Highest pay" },
+  { value: "title", label: "Title (A→Z)" },
+] as const;
+type JobsSortKey = (typeof JOBS_SORT_OPTIONS)[number]["value"];
+
 interface PageProps {
   searchParams: Promise<{
     q?: string;
@@ -67,12 +78,18 @@ interface PageProps {
     employment?: string;
     category?: string;
     view?: string;
+    sort?: string;
   }>;
 }
 
 export default async function PublicJobsPage({ searchParams }: PageProps) {
   const sp = await searchParams;
   const supabase = await createSupabaseServerClient();
+
+  const sortKey: JobsSortKey =
+    (JOBS_SORT_OPTIONS.find((o) => o.value === sp.sort)?.value as
+      | JobsSortKey
+      | undefined) ?? "newest";
 
   const { data: rawJobs } = await supabase.rpc("search_jobs_public", {
     query_text: sp.q || null,
@@ -82,7 +99,13 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
     posted_within_days: null,
   });
 
-  const jobs = ((rawJobs ?? []) as JobRow[]).slice(0, 60);
+  // Apply candidate-side sort. RPC returns a relevance-blended order; for
+  // anything other than the default we re-sort the slice in memory. Always
+  // bound to the top 60 first so the comparator runs over a small set.
+  const jobs = sortJobsList(
+    ((rawJobs ?? []) as JobRow[]).slice(0, 60),
+    sortKey
+  );
 
   // Pull DSO names + locations for the cards in one batch
   const dsoIds = Array.from(new Set(jobs.map((j) => j.dso_id)));
@@ -267,7 +290,13 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
   if (sp.state) filterParams.push(["state", sp.state]);
   if (sp.employment) filterParams.push(["employment", sp.employment]);
   if (sp.category) filterParams.push(["category", sp.category]);
-  const listViewHref = buildHref("/jobs", filterParams);
+  // Sort travels with the list view but is meaningless on the map (which
+  // groups by location), so we deliberately drop it from mapViewHref.
+  const listViewParams =
+    sortKey === "newest"
+      ? filterParams
+      : [...filterParams, ["sort", sortKey] as [string, string]];
+  const listViewHref = buildHref("/jobs", listViewParams);
   const mapViewHref = buildHref("/jobs", [...filterParams, ["view", "map"]]);
 
   return (
@@ -369,10 +398,20 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
             )}
           </div>
 
-          {/* List/Map toggle */}
-          <div className="inline-flex border border-[var(--rule-strong)]">
-            <Link
-              href={listViewHref}
+          <div className="flex items-center gap-3">
+            {!showMap && jobs.length > 1 && (
+              <ListSort
+                basePath="/jobs"
+                options={JOBS_SORT_OPTIONS}
+                activeValue={sortKey}
+                defaultValue="newest"
+              />
+            )}
+
+            {/* List/Map toggle */}
+            <div className="inline-flex border border-[var(--rule-strong)]">
+              <Link
+                href={listViewHref}
               className={`inline-flex items-center gap-2 px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors ${
                 showMap
                   ? "bg-cream text-slate-body hover:text-ink"
@@ -395,6 +434,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
               <MapIcon className="h-3.5 w-3.5" />
               Map
             </Link>
+          </div>
           </div>
         </div>
 
@@ -524,6 +564,52 @@ function buildHref(base: string, params: Array<[string, string]>): string {
   if (params.length === 0) return base;
   const search = new URLSearchParams(params).toString();
   return `${base}?${search}`;
+}
+
+/**
+ * Sort the public jobs list by candidate-selectable key.
+ *
+ * "newest" mirrors the RPC's default ordering (no-op fallback by posted_at
+ * desc with null-safe tie-break). "pay" prefers compensation_max desc but
+ * skips jobs with hidden comp by sorting them after visible ones — both
+ * groups stay internally newest-first so the UX still reads as
+ * recency-aware. "title" is straightforward locale-sensitive A→Z.
+ */
+function sortJobsList(rows: JobRow[], sortKey: JobsSortKey): JobRow[] {
+  const sorted = [...rows];
+  if (sortKey === "newest") {
+    sorted.sort((a, b) => {
+      const ta = a.posted_at ? new Date(a.posted_at).getTime() : 0;
+      const tb = b.posted_at ? new Date(b.posted_at).getTime() : 0;
+      return tb - ta;
+    });
+  } else if (sortKey === "oldest") {
+    sorted.sort((a, b) => {
+      const ta = a.posted_at ? new Date(a.posted_at).getTime() : Infinity;
+      const tb = b.posted_at ? new Date(b.posted_at).getTime() : Infinity;
+      return ta - tb;
+    });
+  } else if (sortKey === "pay") {
+    // Effective comp signal: max if present, else min. Hidden comp goes
+    // to the bottom of the list (still recency-sorted within the group).
+    const payOf = (j: JobRow): number => {
+      if (!j.compensation_visible) return -1;
+      return j.compensation_max ?? j.compensation_min ?? 0;
+    };
+    sorted.sort((a, b) => {
+      const pa = payOf(a);
+      const pb = payOf(b);
+      if (pb !== pa) return pb - pa;
+      const ta = a.posted_at ? new Date(a.posted_at).getTime() : 0;
+      const tb = b.posted_at ? new Date(b.posted_at).getTime() : 0;
+      return tb - ta;
+    });
+  } else if (sortKey === "title") {
+    sorted.sort((a, b) =>
+      a.title.localeCompare(b.title, undefined, { sensitivity: "base" })
+    );
+  }
+  return sorted;
 }
 
 function formatLocations(
