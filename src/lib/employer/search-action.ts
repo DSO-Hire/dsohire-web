@@ -139,12 +139,19 @@ export async function employerSearch(
       .is("deleted_at", null)
       .ilike("title", pattern)
       .limit(8),
+    // Note: candidates does NOT have an email column — emails live on
+    // auth.users and are looked up via service-role separately. Querying
+    // c.email here used to fail silently (Supabase returns an error,
+    // (data ?? []) swallows it) which is why Cmd-K candidate search
+    // appeared dead even before the affiliation work landed. Caught by
+    // Cam 2026-05-08 PM via a diagnostic SQL that hit the same error.
+    // Email-based search is a follow-up: would need a service-role
+    // pre-pass on auth.users by email pattern, then fetch the candidate
+    // row by auth_user_id and merge with the name/headline matches.
     supabase
       .from("candidates")
-      .select("id, full_name, headline, email, applications!inner(id, job_id)")
-      .or(
-        `full_name.ilike.${pattern},headline.ilike.${pattern},email.ilike.${pattern}`
-      )
+      .select("id, full_name, headline, applications!inner(id, job_id)")
+      .or(`full_name.ilike.${pattern},headline.ilike.${pattern}`)
       .limit(isHm ? 24 : 8),
     supabase
       .from("dso_locations")
@@ -183,7 +190,6 @@ export async function employerSearch(
     id: string;
     full_name: string | null;
     headline: string | null;
-    email: string | null;
     applications: Array<{ id: string; job_id: string }>;
   }>) {
     if (seenCandidates.has(c.id)) continue;
@@ -198,11 +204,9 @@ export async function employerSearch(
     out.push({
       group: "candidates",
       id: `candidate-${c.id}`,
-      title: c.full_name ?? c.email ?? "Candidate",
-      subtitle: c.headline ?? c.email ?? undefined,
-      href: `/employer/applications?q=${encodeURIComponent(
-        c.full_name ?? c.email ?? ""
-      )}`,
+      title: c.full_name ?? "Candidate",
+      subtitle: c.headline ?? undefined,
+      href: `/employer/applications?q=${encodeURIComponent(c.full_name ?? "")}`,
     });
     if (candidateRendered >= 8) break;
   }

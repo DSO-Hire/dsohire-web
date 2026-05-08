@@ -725,6 +725,7 @@ export function JobWizard({
             }
             title={title}
             onTitle={setTitle}
+            locationIds={Array.from(selectedLocationIds)}
           />
         )}
 
@@ -1035,6 +1036,7 @@ function DescriptionStep({
   roleLabel,
   title,
   onTitle,
+  locationIds,
 }: {
   description: string;
   onChange: (v: string) => void;
@@ -1042,6 +1044,12 @@ function DescriptionStep({
   roleLabel: string;
   title: string;
   onTitle: (v: string) => void;
+  /**
+   * Threaded down from the wizard's selectedLocationIds Set so the AI
+   * JD generator can resolve the affiliation context before drafting
+   * (Phase 4.5.b launch-blocker).
+   */
+  locationIds: string[];
 }) {
   return (
     <div className="space-y-6">
@@ -1057,6 +1065,7 @@ function DescriptionStep({
       <JdGeneratorPanel
         roleCategory={roleCategory}
         roleLabel={roleLabel}
+        locationIds={locationIds}
         onApplyTitle={(t) => onTitle(t)}
         onApplyDescription={(html) => onChange(html)}
         onApplyAll={({ title: t, descriptionHtml }) => {

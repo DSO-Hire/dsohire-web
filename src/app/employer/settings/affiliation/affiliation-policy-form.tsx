@@ -11,7 +11,7 @@
  * useActionState pattern.
  */
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { Check, AlertCircle, Lock, ShieldCheck, MousePointerClick } from "lucide-react";
 import {
   updateAffiliationRevealPolicy,
@@ -25,6 +25,10 @@ interface AffiliationPolicyFormProps {
   currentPolicy: AffiliationRevealPolicy;
   dsoName: string;
 }
+
+// Stable identity for "no save has happened yet in this session" so the
+// useEffect below can distinguish initial mount from post-save renders.
+const SAVE_SENTINEL_INITIAL = Symbol("initial");
 
 interface PolicyOption {
   id: AffiliationRevealPolicy;
@@ -43,6 +47,33 @@ export function AffiliationPolicyForm({
     initialState
   );
   const [selected, setSelected] = useState<AffiliationRevealPolicy>(currentPolicy);
+  // effectivePolicy mirrors the DB-persisted value as the form sees it.
+  // On mount it equals currentPolicy (the server-rendered prop); after a
+  // successful save it advances to whatever was just persisted, so the
+  // "Current" badge + the dirty-form check track reality without
+  // waiting for a full Server Component refetch. Without this, save
+  // reports "Saved." but the badge sits on the previous value and the
+  // recruiter has to refresh to see the change land — exactly the bug
+  // Cam caught 2026-05-08 PM.
+  const [effectivePolicy, setEffectivePolicy] =
+    useState<AffiliationRevealPolicy>(currentPolicy);
+  // Track which `state` object's success we've already absorbed so the
+  // effect doesn't double-fire when React re-renders.
+  const [lastAbsorbedState, setLastAbsorbedState] = useState<
+    AffiliationActionState | typeof SAVE_SENTINEL_INITIAL
+  >(SAVE_SENTINEL_INITIAL);
+
+  useEffect(() => {
+    if (state === lastAbsorbedState) return;
+    if (state.ok && state.message) {
+      setEffectivePolicy(selected);
+    }
+    setLastAbsorbedState(state);
+    // selected intentionally excluded — we only care about the value
+    // at the moment the save succeeded, which is what useActionState
+    // captured. Including it would re-run on every radio click.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, lastAbsorbedState]);
 
   const options: PolicyOption[] = [
     {
@@ -85,7 +116,7 @@ export function AffiliationPolicyForm({
       <div className="space-y-3">
         {options.map((opt) => {
           const isSelected = selected === opt.id;
-          const isCurrent = currentPolicy === opt.id;
+          const isCurrent = effectivePolicy === opt.id;
           const Icon = opt.Icon;
           return (
             <label
@@ -155,12 +186,12 @@ export function AffiliationPolicyForm({
       <div className="pt-2 flex items-center gap-3">
         <button
           type="submit"
-          disabled={pending || selected === currentPolicy}
+          disabled={pending || selected === effectivePolicy}
           className="inline-flex items-center gap-2 px-7 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {pending ? "Saving…" : "Save policy"}
         </button>
-        {selected !== currentPolicy && !pending && (
+        {selected !== effectivePolicy && !pending && (
           <span className="text-[12px] text-slate-meta">
             Unsaved change.
           </span>

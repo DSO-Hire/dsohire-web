@@ -34,6 +34,17 @@ const InputSchema = z.object({
   // Operator-supplied notes, e.g. "5+ years GP, implant focus, weekend coverage".
   brief: z.string().max(800),
   tone: z.enum(["professional", "friendly", "concise"]).default("professional"),
+  // The dso_locations.id values currently selected on the wizard. Used
+  // to determine whether the resulting JD copy should mask the DSO name
+  // (Phase 4.5.b launch-blocker affiliation toggle, locked 2026-05-08).
+  // If any selected location has public_dso_affiliation = false, the
+  // prompt instructs the model to use the practice name (or a generic
+  // "the practice") rather than the corporate DSO name. Existing
+  // generated JDs are NOT revisited — this only affects new generations.
+  // Optional so /employer/jobs surfaces that don't yet pass it (or
+  // can't, e.g. the role chooser before locations are picked) still
+  // work — they fall through to the legacy behavior.
+  locationIds: z.array(z.string()).optional(),
 });
 
 const OutputSchema = z.object({
@@ -101,13 +112,44 @@ export async function generateJobDescription(
     ROLE_RECOMMENDATIONS[parsed.data.roleCategory]?.label ??
     parsed.data.roleCategory;
 
-  const systemPrompt = buildSystemPrompt();
+  // Resolve the affiliation context for the selected locations (if
+  // any). Mirrors the most-private-inherits rule (Q3): if any of the
+  // selected locations has public_dso_affiliation = false, the whole
+  // job's public surfaces hide the DSO name — so the AI-generated copy
+  // must do the same. Single private location → use that practice's
+  // name. Multiple private locations → "the practice" (we can't
+  // safely pick one). All public OR no locations selected yet →
+  // legacy behavior, use the DSO name.
+  let useDsoName = true;
+  let employerNameForPrompt = dso?.name ?? "the practice";
+  if (parsed.data.locationIds && parsed.data.locationIds.length > 0) {
+    const { data: selectedLocs } = await supabase
+      .from("dso_locations")
+      .select("id, name, public_dso_affiliation")
+      .eq("dso_id", dsoUser.dso_id)
+      .in("id", parsed.data.locationIds);
+    const locs = (selectedLocs ?? []) as Array<{
+      id: string;
+      name: string;
+      public_dso_affiliation: boolean;
+    }>;
+    const allPublic = locs.length > 0 && locs.every((l) => l.public_dso_affiliation);
+    if (!allPublic && locs.length > 0) {
+      useDsoName = false;
+      const privateLocs = locs.filter((l) => !l.public_dso_affiliation);
+      employerNameForPrompt =
+        privateLocs.length === 1 ? privateLocs[0]!.name : "the practice";
+    }
+  }
+
+  const systemPrompt = buildSystemPrompt({ useDsoName });
   const userPrompt = buildUserPrompt({
     roleLabel,
     roleCategory: parsed.data.roleCategory,
     brief: parsed.data.brief,
     tone: parsed.data.tone,
-    dsoName: dso?.name ?? "the practice",
+    employerName: employerNameForPrompt,
+    useDsoName,
   });
 
   let response: Anthropic.Messages.Message;
@@ -204,7 +246,16 @@ export async function generateJobDescription(
   };
 }
 
-function buildSystemPrompt(): string {
+function buildSystemPrompt({ useDsoName }: { useDsoName: boolean }): string {
+  // Affiliation-aware variant of the summary instruction. When the
+  // caller's selected location set includes any private-affiliation
+  // practice, we instruct the model NOT to mention the corporate DSO
+  // name and to refer only to the practice / "our practice." Phase
+  // 4.5.b launch-blocker, locked 2026-05-08.
+  const summaryConstraint = useDsoName
+    ? `- summary: 2-3 paragraphs, conversational but professional, mentions the employer name and role focus`
+    : `- summary: 2-3 paragraphs, conversational but professional, refers ONLY to the practice (the employer name supplied below). Do NOT mention any parent DSO, corporate parent, or affiliated brand. Do NOT use phrases like "part of a larger DSO," "owned by," or anything that implies corporate ownership. The practice presents as a standalone brand.`;
+
   return `You are a dental hiring expert helping a DSO write a job description for the DSO Hire job board. Tone: practical, declarative, no marketing fluff, no exclamation marks, no emoji.
 
 Output ONLY a single JSON object with this exact shape (no surrounding prose, no code fences):
@@ -218,7 +269,7 @@ Output ONLY a single JSON object with this exact shape (no surrounding prose, no
 
 Constraints:
 - title: a clean, professional job title with seniority where appropriate (e.g., "Associate Dentist — Multi-Location DSO")
-- summary: 2-3 paragraphs, conversational but professional, mentions the DSO name and role focus
+${summaryConstraint}
 - responsibilities: 5-8 bullet items, each one short imperative phrase
 - qualifications: 4-6 bullet items mixing required + preferred
 - whatWeOffer: 4-6 bullet items covering compensation philosophy, benefits, growth, culture
@@ -231,16 +282,25 @@ function buildUserPrompt(args: {
   roleCategory: string;
   brief: string;
   tone: "professional" | "friendly" | "concise";
-  dsoName: string;
+  employerName: string;
+  useDsoName: boolean;
 }): string {
+  // Label the employer field correctly for the model — when affiliation
+  // is private, signal that this is the public-facing practice name,
+  // not a DSO brand. Reinforces the system-prompt constraint.
+  const employerFieldLabel = args.useDsoName ? "DSO" : "Practice (public brand)";
+  const privacyReminder = args.useDsoName
+    ? ""
+    : `\n\nIMPORTANT: This practice presents publicly as a standalone brand. The corporate ownership is intentionally not disclosed in this job description. Refer to the employer only as "${args.employerName}" or generic terms like "our practice." Do not mention any DSO, corporate parent, or multi-location operator.`;
+
   return `Write a job posting for:
 
-DSO: ${args.dsoName}
+${employerFieldLabel}: ${args.employerName}
 Role: ${args.roleLabel} (${args.roleCategory})
 Tone: ${args.tone}
 
 Operator-supplied brief (use as guidance, not verbatim):
-${args.brief || "(no specific notes — write a strong default for this role)"}
+${args.brief || "(no specific notes — write a strong default for this role)"}${privacyReminder}
 
 Return only the JSON object specified in the system prompt.`;
 }

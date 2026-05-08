@@ -541,6 +541,7 @@ function DescriptionSection({
         <JdGeneratorPanel
           roleCategory={roleCategory}
           roleLabel={roleLabel}
+          locationIds={Array.from(selectedLocationIds)}
           onApplyTitle={() => {
             /* edit page keeps title in Basics section — JD generator only
                applies description here. Title-apply on edit is intentionally

@@ -24,6 +24,14 @@ import {
 interface JdGeneratorPanelProps {
   roleCategory: string;
   roleLabel: string;
+  /**
+   * dso_locations.id values currently selected on the wizard. Used by
+   * the action to determine whether to mask the DSO name in the
+   * generated copy (Phase 4.5.b launch-blocker affiliation toggle).
+   * If any selected location is private-affiliation, the AI uses the
+   * practice name only.
+   */
+  locationIds?: string[];
   /** Called when the operator clicks "Use this" for the title. */
   onApplyTitle: (title: string) => void;
   /** Called when the operator applies any prose body — Tiptap HTML. */
@@ -43,6 +51,7 @@ const TONE_OPTIONS: Array<{ value: Tone; label: string }> = [
 export function JdGeneratorPanel({
   roleCategory,
   roleLabel,
+  locationIds,
   onApplyTitle,
   onApplyDescription,
   onApplyAll,
@@ -89,6 +98,7 @@ export function JdGeneratorPanel({
         roleCategory,
         brief,
         tone,
+        locationIds,
       });
       const elapsed = Date.now() - startedAt;
       if (!res.ok) {
