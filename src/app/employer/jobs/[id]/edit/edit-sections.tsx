@@ -166,6 +166,7 @@ export function EditSections({
         initialDescription={initial.description}
         initialTitle={initial.title}
         roleCategory={initial.role_category}
+        initialLocationIds={initial.location_ids}
       />
       <DetailsSection
         dsoId={dsoId}
@@ -490,12 +491,30 @@ function DescriptionSection({
   initialDescription,
   initialTitle,
   roleCategory,
+  initialLocationIds,
 }: {
   dsoId: string;
   jobId: string;
   initialDescription: string;
   initialTitle: string;
   roleCategory: string;
+  /**
+   * Snapshot of the job's currently-tagged locations from the parent
+   * EditSections (passed through from the server-rendered initial
+   * data). The JD generator uses these to resolve affiliation context
+   * — if any are private-affiliation, the AI prompt switches to
+   * practice-name-only mode (Phase 4.5.b launch-blocker).
+   *
+   * Note: this is the SAVED location set, not the in-flight basics-
+   * section selection. If the recruiter changes locations in the
+   * Basics section but hasn't saved, regenerating before saving uses
+   * the prior location set. That's a fine seam for v1 — the wizard
+   * (vs. the edit page) reads from live React state and gets the
+   * up-to-date set. We can lift this to EditSections-level state if
+   * the seam becomes a real problem, but it's not worth the refactor
+   * today.
+   */
+  initialLocationIds: string[];
 }) {
   const [description, setDescription] = useState(initialDescription);
   const [snapshot, setSnapshot] = useState(initialDescription);
@@ -541,7 +560,7 @@ function DescriptionSection({
         <JdGeneratorPanel
           roleCategory={roleCategory}
           roleLabel={roleLabel}
-          locationIds={Array.from(selectedLocationIds)}
+          locationIds={initialLocationIds}
           onApplyTitle={() => {
             /* edit page keeps title in Basics section — JD generator only
                applies description here. Title-apply on edit is intentionally
