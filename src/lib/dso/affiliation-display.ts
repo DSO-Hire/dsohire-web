@@ -82,6 +82,163 @@ export interface DisplayedDsoName {
    * /jobs/[id] page even when the corporate DSO is the headliner.
    */
   practiceName: string | null;
+  /**
+   * The image URL to show alongside the name. Mirrors the masking
+   * logic — DSO logo when isCorporate=true, practice logo (single
+   * location) when isCorporate=false, null otherwise. Surfaces that
+   * render an avatar should swap to this; showing the DSO logo while
+   * masking the DSO name is itself a leak (the logo is the brand
+   * identity).
+   */
+  avatarUrl: string | null;
+}
+
+/**
+ * Per-application affiliation context for candidate-side surfaces.
+ * Resolves name + logo for every application in one service-role
+ * pass. Use from /candidate/dashboard, /candidate/applications,
+ * inbox queries — anywhere you need to mask the DSO identity for the
+ * candidate view across many applications efficiently.
+ *
+ * Service-role on purpose: candidate's RLS path through job_locations
+ * + dso_locations was returning empty silently (caught by Cam's stress
+ * test on 2026-05-08 PM — DSO name + logo were showing through despite
+ * the location toggle being private). Service-role bypasses RLS and
+ * gives us the underlying truth; the caller already has authn'd the
+ * candidate via their dashboard route guard, so the security boundary
+ * isn't "what the candidate can read" — it's "what we choose to show
+ * the candidate based on policy."
+ */
+export async function resolveCandidateApplicationAffiliations(
+  applicationIds: string[]
+): Promise<Map<string, DisplayedDsoName>> {
+  const out = new Map<string, DisplayedDsoName>();
+  if (applicationIds.length === 0) return out;
+
+  const admin = createSupabaseServiceRoleClient();
+
+  // 1. Pull applications + their job + dso (with logo + policy).
+  const { data: appsRes, error: appsErr } = await admin
+    .from("applications")
+    .select(
+      `id, job_id, status, affiliation_revealed,
+       jobs!inner(id, dso_id, scope,
+         dsos!inner(id, name, logo_url, affiliation_reveal_policy))`
+    )
+    .in("id", applicationIds);
+  if (appsErr) {
+    console.warn("[affiliation] candidate-apps lookup failed", appsErr);
+    return out;
+  }
+
+  type AppShape = {
+    id: string;
+    job_id: string;
+    status: string;
+    affiliation_revealed: boolean;
+    jobs: Array<{
+      id: string;
+      dso_id: string;
+      scope: "location" | "regional" | "corporate" | null;
+      dsos: Array<{
+        id: string;
+        name: string;
+        logo_url: string | null;
+        affiliation_reveal_policy: "never" | "after_hire" | "per_application";
+      }>;
+    }>;
+  };
+  const apps = (appsRes ?? []) as unknown as AppShape[];
+
+  // 2. Pull job_locations + dso_locations (with logo + public flag)
+  // for every involved job. One query, decompose in JS.
+  const jobIds = Array.from(new Set(apps.map((a) => a.jobs[0]?.id).filter(Boolean) as string[]));
+  type LocShape = {
+    job_id: string;
+    location_id: string;
+    dso_locations: Array<{
+      id: string;
+      name: string;
+      logo_url: string | null;
+      public_dso_affiliation: boolean;
+    }>;
+  };
+  let locRows: LocShape[] = [];
+  if (jobIds.length > 0) {
+    const { data: locRes, error: locErr } = await admin
+      .from("job_locations")
+      .select(
+        "job_id, location_id, dso_locations!inner(id, name, logo_url, public_dso_affiliation)"
+      )
+      .in("job_id", jobIds);
+    if (locErr) {
+      console.warn("[affiliation] job_locations lookup failed", locErr);
+    }
+    locRows = (locRes ?? []) as unknown as LocShape[];
+  }
+  const locsByJob = new Map<
+    string,
+    Array<{
+      id: string;
+      name: string;
+      logoUrl: string | null;
+      isPublic: boolean;
+    }>
+  >();
+  for (const row of locRows) {
+    const dl = row.dso_locations[0];
+    if (!dl) continue;
+    const list = locsByJob.get(row.job_id) ?? [];
+    list.push({
+      id: dl.id,
+      name: dl.name,
+      logoUrl: dl.logo_url,
+      isPublic: dl.public_dso_affiliation,
+    });
+    locsByJob.set(row.job_id, list);
+  }
+
+  // 3. Resolve each application
+  for (const app of apps) {
+    const job = app.jobs[0];
+    if (!job) continue;
+    const dso = job.dsos[0];
+    if (!dso) continue;
+
+    const dsoName = dso.name;
+    const dsoLogo = dso.logo_url;
+    const policy = dso.affiliation_reveal_policy;
+    const locs = locsByJob.get(job.id) ?? [];
+
+    // Corporate / regional jobs: governed by jobs.scope, not by
+    // location tagging. Always show DSO name + logo.
+    const isScopeOverride = job.scope === "corporate" || job.scope === "regional";
+    const allLocsPublic = locs.length === 0 || locs.every((l) => l.isPublic);
+    const jobIsPublicAffiliated = isScopeOverride || allLocsPublic;
+
+    const policyAllowsReveal =
+      policy === "after_hire"
+        ? app.status === "hired"
+        : policy === "per_application"
+          ? app.affiliation_revealed === true
+          : false;
+
+    const showDsoName = jobIsPublicAffiliated || policyAllowsReveal;
+
+    const singlePractice = locs.length === 1 ? locs[0]! : null;
+    const fallbackName = singlePractice?.name ?? "Multiple locations";
+    const fallbackLogo = singlePractice?.logoUrl ?? null;
+
+    out.set(app.id, {
+      name: showDsoName ? dsoName : fallbackName,
+      isCorporate: showDsoName,
+      dsoName,
+      practiceName: singlePractice?.name ?? null,
+      avatarUrl: showDsoName ? dsoLogo : fallbackLogo,
+    });
+  }
+
+  return out;
 }
 
 interface JobAffiliationContext {
@@ -301,6 +458,7 @@ function resolveDisplayedName(
       isCorporate: true,
       dsoName: ctx.dsoName,
       practiceName: ctx.singlePracticeName,
+      avatarUrl: null,
     };
   }
 
@@ -313,6 +471,7 @@ function resolveDisplayedName(
       isCorporate: true,
       dsoName: ctx.dsoName,
       practiceName: ctx.singlePracticeName,
+      avatarUrl: null,
     };
   }
 
@@ -323,6 +482,7 @@ function resolveDisplayedName(
       isCorporate: true,
       dsoName: ctx.dsoName,
       practiceName: ctx.singlePracticeName,
+      avatarUrl: null,
     };
   }
 
@@ -358,6 +518,7 @@ function resolveDisplayedName(
       isCorporate: true,
       dsoName: ctx.dsoName,
       practiceName: ctx.singlePracticeName,
+      avatarUrl: null,
     };
   }
 

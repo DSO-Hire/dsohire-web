@@ -53,6 +53,7 @@ import type { ProfileData } from "@/app/candidate/profile/profile-sections";
 import { CandidateFitSummary } from "@/components/practice-fit/candidate-fit-summary";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
 import type { FitResult } from "@/lib/practice-fit/types";
+import { resolveCandidateApplicationAffiliations } from "@/lib/dso/affiliation-display";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -264,61 +265,15 @@ export default async function CandidateDashboardPage() {
   }
 
   // ── Affiliation display per application (Phase 4.5.b) ───────────────
-  // Resolve whether the candidate should see the DSO name on each
-  // application card / reply preview, or the masked practice / "Multi"
-  // fallback. Same logic family as /candidate/applications.
-  const jobAffPublicMap = new Map<string, boolean>();
-  const singlePracticeByJob = new Map<string, string>();
-  if (jobIds.length > 0) {
-    const { data: affLocRows } = await supabase
-      .from("job_locations")
-      .select(
-        "job_id, dso_locations!inner(name, public_dso_affiliation)"
-      )
-      .in("job_id", jobIds);
-    type AffRow = {
-      job_id: string;
-      dso_locations: Array<{ name: string; public_dso_affiliation: boolean }>;
-    };
-    const locsByJob = new Map<
-      string,
-      Array<{ name: string; isPublic: boolean }>
-    >();
-    for (const row of (affLocRows ?? []) as unknown as AffRow[]) {
-      const dl = row.dso_locations[0];
-      if (!dl) continue;
-      const list = locsByJob.get(row.job_id) ?? [];
-      list.push({ name: dl.name, isPublic: dl.public_dso_affiliation });
-      locsByJob.set(row.job_id, list);
-    }
-    for (const id of jobIds) {
-      const locs = locsByJob.get(id) ?? [];
-      const allPublic = locs.length === 0 || locs.every((l) => l.isPublic);
-      jobAffPublicMap.set(id, allPublic);
-      if (locs.length === 1) singlePracticeByJob.set(id, locs[0]!.name);
-    }
-  }
-  function resolveDisplayedDsoForApp(app: AppRow): string {
-    const job = jobMap.get(app.job_id);
-    if (!job) return "Hiring team";
-    const dso = dsoMap.get(job.dso_id);
-    const dsoName = dso?.name ?? "Hiring team";
-    const isPublic = jobAffPublicMap.get(app.job_id) ?? true;
-    if (isPublic) return dsoName;
-    const policy = dso?.affiliation_reveal_policy ?? "never";
-    const allowReveal =
-      policy === "after_hire"
-        ? app.status === "hired"
-        : policy === "per_application"
-          ? app.affiliation_revealed === true
-          : false;
-    if (allowReveal) return dsoName;
-    return singlePracticeByJob.get(app.job_id) ?? "Multiple locations";
-  }
-  const displayedDsoByAppId = new Map<string, string>();
-  for (const a of apps) {
-    displayedDsoByAppId.set(a.id, resolveDisplayedDsoForApp(a));
-  }
+  // Service-role resolver so RLS can't silently zero out the lookup
+  // (caught 2026-05-08 PM stress test — DSO name + logo were leaking
+  // through across the dashboard / list / inbox because the inline
+  // candidate-RLS query was returning empty). The helper handles
+  // policy + per-app reveal + single-vs-multi-loc fallback + logo
+  // masking in one call.
+  const affiliationByAppId = await resolveCandidateApplicationAffiliations(
+    apps.map((a) => a.id)
+  );
 
   // ── Unread employer messages (drives the "New Replies" hero) ────────
   const appIds = apps.map((a) => a.id);
@@ -412,7 +367,7 @@ export default async function CandidateDashboardPage() {
               ? (senderMap.get(m.sender_dso_user_id) ?? "Recruiter")
               : "Recruiter",
             dsoName: app
-              ? (displayedDsoByAppId.get(app.id) ?? "Hiring team")
+              ? ((affiliationByAppId.get(app.id)?.name ?? "Hiring team"))
               : "Hiring team",
             preview: truncatePreview(m.body, 60),
             timestamp: relativeDate(m.created_at, nowMs),
@@ -486,7 +441,7 @@ export default async function CandidateDashboardPage() {
       return {
         id: a.id,
         role: job?.title ?? "Unknown role",
-        dsoName: displayedDsoByAppId.get(a.id) ?? "Hiring team",
+        dsoName: affiliationByAppId.get(a.id)?.name ?? "Hiring team",
         locationName: job ? locationByJobId.get(job.id) ?? null : null,
         stage: a.status as MyApplicationCard["stage"],
         daysSinceApplied: days,
@@ -757,7 +712,7 @@ export default async function CandidateDashboardPage() {
                     </strong>{" "}
                     at{" "}
                     <span className="text-slate-body">
-                      {displayedDsoByAppId.get(app.id) ?? "Hiring team"}
+                      {(affiliationByAppId.get(app.id)?.name ?? "Hiring team")}
                     </span>{" "}
                     · {stageLabel}
                   </>
