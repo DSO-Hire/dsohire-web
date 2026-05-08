@@ -52,7 +52,7 @@ export interface WhyThisMatchProps {
 }
 
 interface NarrativeState {
-  status: "idle" | "loading" | "ready" | "skipped" | "error";
+  status: "idle" | "loading" | "ready" | "error";
   employer: string | null;
   candidate: string | null;
   errorMessage: string | null;
@@ -80,18 +80,20 @@ export function WhyThisMatch({
     if (!open) return;
     if (narrative.status !== "idle") return;
     if (!candidateId || !jobId) return;
-    // bucket='low' bypass — surface the breakdown only.
-    if (fit.bucket === "low") {
-      setNarrative({
-        status: "skipped",
-        employer: null,
-        candidate: null,
-        errorMessage: null,
-      });
-      return;
-    }
+    // bucket='low' bypass — surface the breakdown only. Leaving
+    // status='idle' is functionally equivalent to the prior 'skipped'
+    // sentinel since the render path only displays the narrative panel
+    // for status in {loading, ready, error}. Keeps setState out of the
+    // effect body (was tripping react-hooks/set-state-in-effect).
+    if (fit.bucket === "low") return;
 
     let cancelled = false;
+    // Sync "loading" before async fetch — canonical pattern for showing
+    // a skeleton while the network request is in flight. The
+    // set-state-in-effect rule fires here but the alternative (deriving
+    // loading from a separate hook) buys nothing for a one-shot fetch
+    // gated on `narrative.status !== "idle"`.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNarrative((s) => ({ ...s, status: "loading" }));
     generatePracticeFitNarrative({
       candidateId,

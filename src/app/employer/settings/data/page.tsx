@@ -16,6 +16,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ShieldAlert } from "lucide-react";
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
 import { DataForm } from "./data-form";
 
 export const metadata: Metadata = { title: "Data & deletion · Settings" };
@@ -93,10 +94,10 @@ function NonOwnerNotice() {
             schedule it for deletion. Ask your owner to make these changes,
             or email{" "}
             <a
-              href="mailto:cam@dsohire.com"
+              href={SUPPORT_MAILTO}
               className="font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
             >
-              cam@dsohire.com
+              {SUPPORT_EMAIL}
             </a>{" "}
             if you need help.
           </p>

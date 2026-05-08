@@ -39,7 +39,6 @@ export default async function CandidateDataPage() {
         </p>
       </header>
       <DataForm
-        candidateEmail={user.email ?? null}
         candidateName={(candidate?.full_name as string | null) ?? null}
       />
     </div>

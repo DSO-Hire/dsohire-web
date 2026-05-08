@@ -50,8 +50,13 @@ export function CandidateMobileNav({
   const [open, setOpen] = useState(false);
   // Defer the portal target until after mount — Server Components
   // render this file too and document doesn't exist there.
+  // The setState-in-effect lint rule fires here, but this is the
+  // canonical React.createPortal mount-detection pattern: empty deps,
+  // one-time fire, no cascade risk. The rule can't distinguish
+  // single-shot mount detection from genuine setState loops.
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 

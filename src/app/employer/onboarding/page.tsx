@@ -15,6 +15,7 @@ import { redirect } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { EmployerShell } from "@/components/employer/employer-shell";
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
 import { OnboardingForm } from "./onboarding-form";
 import type { Metadata } from "next";
 
@@ -108,10 +109,10 @@ export default async function OnboardingPage() {
           <div className="pt-6 border-t border-[var(--rule)] text-[13px] text-slate-meta leading-relaxed">
             Need help? Email{" "}
             <a
-              href="mailto:cam@dsohire.com"
+              href={SUPPORT_MAILTO}
               className="text-heritage underline underline-offset-2 hover:text-heritage-deep"
             >
-              cam@dsohire.com
+              {SUPPORT_EMAIL}
             </a>{" "}
             and we&apos;ll reply within one business day.
           </div>

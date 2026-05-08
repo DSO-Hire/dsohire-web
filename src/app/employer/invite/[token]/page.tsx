@@ -28,6 +28,7 @@ import {
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
 import { acceptInvitation } from "../actions";
+import { SUPPORT_MAILTO } from "@/lib/contact";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -222,7 +223,7 @@ export default async function InviteAcceptPage({ params }: PageProps) {
             Back to Current DSO
           </Link>
           <a
-            href="mailto:cam@dsohire.com?subject=Invitation%20question"
+            href={`${SUPPORT_MAILTO}?subject=Invitation%20question`}
             className="inline-flex items-center gap-2.5 px-7 py-4 text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
           >
             Contact Support
@@ -381,7 +382,7 @@ function ErrorScreen({
           </Link>
         )}
         <a
-          href="mailto:cam@dsohire.com"
+          href={SUPPORT_MAILTO}
           className="inline-flex items-center gap-2.5 px-7 py-4 border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
         >
           Contact Support

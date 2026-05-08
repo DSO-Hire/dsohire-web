@@ -21,6 +21,7 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { exportOrgData, softDeleteOrg } from "./actions";
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
 
 export function DataForm({ dsoName }: { dsoName: string }) {
   return (
@@ -154,8 +155,8 @@ function DeleteOrgSection({ dsoName }: { dsoName: string }) {
           <p className="mt-0.5 text-sm text-slate-body">
             Soft-deleted immediately, hard-deleted 30 days later. Your team
             members lose access right away. Any active Stripe subscription
-            cancels at the end of its current period. Email
-            cam@dsohire.com within 30 days to undo.
+            cancels at the end of its current period. Email{" "}
+            {SUPPORT_EMAIL} within 30 days to undo.
           </p>
         </div>
       </header>
@@ -414,10 +415,10 @@ function DeleteOrgModal({
                 . Stripe will charge nothing further; your subscription
                 cancels at the end of its current billing period. Email{" "}
                 <a
-                  href="mailto:cam@dsohire.com?subject=Restore%20my%20DSO%20Hire%20organization"
+                  href={`${SUPPORT_MAILTO}?subject=Restore%20my%20DSO%20Hire%20organization`}
                   className="font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
                 >
-                  cam@dsohire.com
+                  {SUPPORT_EMAIL}
                 </a>{" "}
                 before then to undo.
               </p>

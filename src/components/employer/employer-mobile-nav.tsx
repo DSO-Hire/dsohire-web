@@ -46,8 +46,12 @@ export function EmployerMobileNav({
 }: EmployerMobileNavProps) {
   const [open, setOpen] = useState(false);
   // Defer portal target until mount — server render has no document.
+  // setState-in-effect lint fires here; this is the canonical React
+  // portal mount-detection pattern with empty deps and no cascade
+  // risk. Mirrors the candidate-mobile-nav rationale.
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 

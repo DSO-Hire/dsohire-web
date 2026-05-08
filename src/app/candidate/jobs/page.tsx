@@ -151,7 +151,7 @@ export default async function CandidateJobsPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  let fitByJobId = new Map<string, FitResult>();
+  const fitByJobId = new Map<string, FitResult>();
   // Reason-rich placeholder support (focused-pass extension): when a
   // job has no scored fit, classify why so we can show "Different role"
   // pills on browse for actionable cases. We only carry role_mismatch

@@ -15,6 +15,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
 import { RestoreForm } from "./restore-form";
 
 export const metadata: Metadata = { title: "Restore your account · DSO Hire" };
@@ -47,9 +48,15 @@ export default async function CandidateRestorePage() {
   const hardDeleteOn = new Date(
     new Date(deletedAt).getTime() + 30 * 24 * 60 * 60 * 1000
   );
+  // Server component running at request time — Date.now() is exactly
+  // what we want for "days remaining until hard-delete" relative to
+  // the current request. The react-hooks/purity rule is broader than
+  // necessary for App Router server components.
+  // eslint-disable-next-line react-hooks/purity
+  const nowMs = Date.now();
   const daysRemaining = Math.max(
     0,
-    Math.ceil((hardDeleteOn.getTime() - Date.now()) / (24 * 60 * 60 * 1000))
+    Math.ceil((hardDeleteOn.getTime() - nowMs) / (24 * 60 * 60 * 1000))
   );
 
   const candidateName =
@@ -104,10 +111,10 @@ export default async function CandidateRestorePage() {
           <p className="mt-6 text-xs text-slate-meta">
             Need a hand?{" "}
             <a
-              href="mailto:cam@dsohire.com"
+              href={SUPPORT_MAILTO}
               className="font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
             >
-              cam@dsohire.com
+              {SUPPORT_EMAIL}
             </a>
           </p>
         </div>

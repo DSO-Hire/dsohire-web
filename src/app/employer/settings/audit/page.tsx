@@ -131,8 +131,14 @@ export default async function AuditSettingsPage({ searchParams }: PageProps) {
     .order("created_at", { ascending: false });
 
   if (effectiveFloorDays !== null && effectiveFloorDays > 0) {
+    // Server component running at request time — Date.now() is the
+    // intended call here (the audit cutoff is "events newer than N days
+    // before this request"). The react-hooks/purity rule is broader than
+    // it needs to be for Next.js App Router server components, which
+    // execute once per request rather than during a re-rendering tree.
+    const nowMs = Date.now(); // eslint-disable-line react-hooks/purity
     const cutoff = new Date(
-      Date.now() - effectiveFloorDays * 24 * 60 * 60 * 1000
+      nowMs - effectiveFloorDays * 24 * 60 * 60 * 1000
     ).toISOString();
     query = query.gte("created_at", cutoff);
   }
@@ -333,12 +339,11 @@ interface AuditEventRowData {
 function AuditEventRow({ event }: { event: AuditEventRowData }) {
   const reason = extractReason(event.metadata);
   const targetHref = resolveTargetHref(event);
-  const Icon = resolveEventIcon(event.event_kind);
 
   const body = (
     <div className="flex items-start gap-3">
       <div className="h-7 w-7 rounded-full bg-cream border border-[var(--rule-strong)] flex items-center justify-center flex-shrink-0 mt-0.5">
-        <Icon className="h-3.5 w-3.5 text-slate-meta" />
+        <EventKindIcon eventKind={event.event_kind} />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-[14px] text-ink leading-snug">
@@ -434,20 +439,40 @@ function resolveTargetHref(event: AuditEventRowData): string | null {
 }
 
 /**
- * Map event kind → icon. Uses a dotted-namespace prefix match so adding
- * a new kind under an existing namespace (e.g. `job.something_new`) gets
- * the right icon for free.
+ * Render the per-kind icon for an audit event row. Uses a dotted-
+ * namespace prefix match so adding a new event kind under an existing
+ * namespace (e.g. `job.something_new`) picks up the right icon for
+ * free.
+ *
+ * Implemented as a component (rather than a `const Icon = lookup(kind)`
+ * binding inside AuditEventRow) so we don't trip
+ * `react-hooks/static-components`. Each branch returns a stable element
+ * tied to a module-scope component reference.
  */
-function resolveEventIcon(eventKind: string) {
-  if (eventKind.startsWith("job.")) return Briefcase;
-  if (eventKind.startsWith("application.")) return Layers;
-  if (eventKind.startsWith("bulk_action.")) return Layers;
-  if (eventKind.startsWith("security.")) return ShieldCheck;
-  if (eventKind.startsWith("team.")) return Users;
-  if (eventKind.startsWith("settings.") || eventKind.startsWith("location.")) {
-    return SettingsIcon;
+function EventKindIcon({ eventKind }: { eventKind: string }) {
+  const className = "h-3.5 w-3.5 text-slate-meta";
+  if (eventKind.startsWith("job.")) {
+    return <Briefcase className={className} />;
   }
-  return UserIcon;
+  if (
+    eventKind.startsWith("application.") ||
+    eventKind.startsWith("bulk_action.")
+  ) {
+    return <Layers className={className} />;
+  }
+  if (eventKind.startsWith("security.")) {
+    return <ShieldCheck className={className} />;
+  }
+  if (eventKind.startsWith("team.")) {
+    return <Users className={className} />;
+  }
+  if (
+    eventKind.startsWith("settings.") ||
+    eventKind.startsWith("location.")
+  ) {
+    return <SettingsIcon className={className} />;
+  }
+  return <UserIcon className={className} />;
 }
 
 /**

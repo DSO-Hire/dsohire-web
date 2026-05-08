@@ -15,6 +15,7 @@ import {
   type PricingTier,
 } from "@/lib/stripe/prices";
 import { FaqAccordion } from "./faq-accordion";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -763,7 +764,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Do you support invoicing for Enterprise customers?",
-    a: "Yes. Enterprise tier includes invoicing on net-30 terms. Reach out via cam@dsohire.com to set up your invoicing profile.",
+    a: `Yes. Enterprise tier includes invoicing on net-30 terms. Reach out via ${SUPPORT_EMAIL} to set up your invoicing profile.`,
   },
   {
     q: "Can I cancel anytime?",

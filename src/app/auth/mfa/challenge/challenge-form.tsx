@@ -9,6 +9,7 @@
 import { useActionState } from "react";
 import { AlertTriangle, KeyRound, Loader2 } from "lucide-react";
 import { submitChallenge, type ChallengeState } from "./actions";
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
 
 const initialState: ChallengeState = { ok: false };
 
@@ -76,8 +77,9 @@ export function ChallengeForm({ next }: { next: string | null }) {
       <p className="pt-3 text-center text-[11px] text-slate-meta border-t border-[var(--rule)]">
         Locked out entirely?{" "}
         <a
-          href="mailto:cam@dsohire.com"
+          href={SUPPORT_MAILTO}
           className="font-semibold underline underline-offset-2 hover:text-ink"
+          aria-label={`Email ${SUPPORT_EMAIL}`}
         >
           Email support
         </a>

@@ -5,6 +5,7 @@
 
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
 
 interface ComingSoonProps {
   title: string;
@@ -40,10 +41,10 @@ export function ComingSoon({ title, blurb, phase }: ComingSoonProps) {
           then, the sidebar link gets you here. If you have feedback on what
           you&apos;d want to see when this lands, email{" "}
           <a
-            href="mailto:cam@dsohire.com"
+            href={SUPPORT_MAILTO}
             className="text-heritage underline underline-offset-2 hover:text-heritage-deep"
           >
-            cam@dsohire.com
+            {SUPPORT_EMAIL}
           </a>
           .
         </p>

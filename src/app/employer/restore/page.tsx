@@ -13,6 +13,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
 import { RestoreForm } from "./restore-form";
 
 export const metadata: Metadata = { title: "Restore your organization · DSO Hire" };
@@ -57,9 +58,13 @@ export default async function EmployerRestorePage() {
   const hardDeleteOn = new Date(
     new Date(deletedAt).getTime() + 30 * 24 * 60 * 60 * 1000
   );
+  // Server component running at request time — see candidate/restore
+  // for the same pattern + rationale.
+  // eslint-disable-next-line react-hooks/purity
+  const nowMs = Date.now();
   const daysRemaining = Math.max(
     0,
-    Math.ceil((hardDeleteOn.getTime() - Date.now()) / (24 * 60 * 60 * 1000))
+    Math.ceil((hardDeleteOn.getTime() - nowMs) / (24 * 60 * 60 * 1000))
   );
 
   return (
@@ -118,10 +123,10 @@ export default async function EmployerRestorePage() {
                 Only the DSO owner can restore. Reach out to your owner to
                 ask them to sign in here, or email{" "}
                 <a
-                  href="mailto:cam@dsohire.com"
+                  href={SUPPORT_MAILTO}
                   className="font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
                 >
-                  cam@dsohire.com
+                  {SUPPORT_EMAIL}
                 </a>{" "}
                 if you need help.
               </p>
@@ -132,10 +137,10 @@ export default async function EmployerRestorePage() {
           <p className="mt-6 text-xs text-slate-meta">
             Need a hand?{" "}
             <a
-              href="mailto:cam@dsohire.com"
+              href={SUPPORT_MAILTO}
               className="font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
             >
-              cam@dsohire.com
+              {SUPPORT_EMAIL}
             </a>
           </p>
         </div>

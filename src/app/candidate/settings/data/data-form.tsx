@@ -30,16 +30,16 @@ import {
   exportMyData,
   softDeleteAccount,
 } from "./actions";
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
 
 interface DataFormProps {
-  candidateEmail: string | null;
   candidateName: string | null;
 }
 
-export function DataForm({ candidateEmail, candidateName }: DataFormProps) {
+export function DataForm({ candidateName }: DataFormProps) {
   return (
     <div className="space-y-6">
-      <DownloadMyDataSection email={candidateEmail} />
+      <DownloadMyDataSection />
       <ApplicationHistorySection />
       <WithdrawApplicationsSection />
       <DeleteAccountSection name={candidateName} />
@@ -51,7 +51,7 @@ export function DataForm({ candidateEmail, candidateName }: DataFormProps) {
 // Section 1 — Download my data
 // ─────────────────────────────────────────────────────────────────────
 
-function DownloadMyDataSection({ email: _email }: { email: string | null }) {
+function DownloadMyDataSection() {
   const [, startWork] = useTransition();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -203,7 +203,7 @@ function DeleteAccountSection({ name }: { name: string | null }) {
           <p className="mt-0.5 text-sm text-slate-600">
             Soft-deleted immediately, hard-deleted 30 days later. You
             can&apos;t apply to jobs while soft-deleted, and your profile
-            is hidden from every employer. Email cam@dsohire.com within
+            is hidden from every employer. Email {SUPPORT_EMAIL} within
             30 days to undo.
           </p>
         </div>
@@ -433,10 +433,10 @@ function DeleteAccountModal({
                 </strong>
                 . Email{" "}
                 <a
-                  href="mailto:cam@dsohire.com?subject=Restore%20my%20DSO%20Hire%20account"
+                  href={`${SUPPORT_MAILTO}?subject=Restore%20my%20DSO%20Hire%20account`}
                   className="font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
                 >
-                  cam@dsohire.com
+                  {SUPPORT_EMAIL}
                 </a>{" "}
                 before then to undo.
               </p>

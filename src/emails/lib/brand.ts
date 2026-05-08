@@ -45,5 +45,10 @@ export const brand = {
   logoLockupOnDark: "https://dsohire.com/logo-on-dark.svg",
   logoLockupOnLight: "https://dsohire.com/logo-on-light.svg",
   logoMonogram: "https://dsohire.com/logo-monogram.svg",
-  supportEmail: "cam@dsohire.com",
+  // Public-facing support address shown in every transactional email
+  // footer. Mirrors src/lib/contact.ts SUPPORT_EMAIL — kept as a
+  // separate constant rather than imported because the email bundle
+  // ships its own self-contained brand tokens (no app/lib imports
+  // from email templates per the React Email convention).
+  supportEmail: "info@dsohire.com",
 } as const;

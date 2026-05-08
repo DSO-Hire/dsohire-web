@@ -19,11 +19,11 @@ import {
   ExternalLink,
   Receipt,
   Settings,
-  ShieldCheck,
 } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { PRICING_TIERS } from "@/lib/stripe/prices";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 import { openCustomerPortal } from "./actions";
 import type { Metadata } from "next";
 
@@ -106,7 +106,7 @@ export default async function EmployerBillingPage({ searchParams }: PageProps) {
       {subscription.status === "canceled" && (
         <WarningBanner
           title="Subscription canceled."
-          body="You no longer have an active subscription. Reactivate via the Customer Portal or contact cam@dsohire.com."
+          body={`You no longer have an active subscription. Reactivate via the Customer Portal or contact ${SUPPORT_EMAIL}.`}
         />
       )}
 
@@ -242,7 +242,7 @@ function PortalErrorBanner() {
     <div className="mb-8 max-w-[820px] bg-red-50 border-l-4 border-red-500 p-4">
       <p className="text-[14px] text-red-900">
         <strong className="font-semibold">Couldn&apos;t open the Customer Portal.</strong>{" "}
-        Refresh and try again, or email cam@dsohire.com if it persists.
+        Refresh and try again, or email {SUPPORT_EMAIL} if it persists.
       </p>
     </div>
   );

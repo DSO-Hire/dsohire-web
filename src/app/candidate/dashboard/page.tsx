@@ -217,21 +217,6 @@ export default async function CandidateDashboardPage() {
   const jobs = (rawJobs ?? []) as JobRow[];
   const jobMap = new Map(jobs.map((j) => [j.id, j]));
 
-  const dsoIds = Array.from(new Set(jobs.map((j) => j.dso_id)));
-  const { data: rawDsos } = dsoIds.length
-    ? await supabase
-        .from("dsos")
-        .select("id, name, affiliation_reveal_policy")
-        .in("id", dsoIds)
-    : { data: [] };
-  type DsoRow = {
-    id: string;
-    name: string;
-    affiliation_reveal_policy: "never" | "after_hire" | "per_application";
-  };
-  const dsos = (rawDsos ?? []) as DsoRow[];
-  const dsoMap = new Map(dsos.map((d) => [d.id, d]));
-
   // Pull the FIRST job_location per active job so the kanban cards
   // can show a practice-name chip. Multi-location jobs use the first
   // location; matches the employer-side convention from
