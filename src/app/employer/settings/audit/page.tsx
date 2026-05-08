@@ -12,8 +12,17 @@
  * real customer asking for them.
  */
 
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { History, User as UserIcon } from "lucide-react";
+import {
+  Briefcase,
+  History,
+  Layers,
+  ShieldCheck,
+  Settings as SettingsIcon,
+  User as UserIcon,
+  Users,
+} from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { AUDIT_RETENTION_DAYS } from "@/lib/audit/record";
 import { AuditFiltersBar } from "./audit-filters-bar";
@@ -210,30 +219,7 @@ export default async function AuditSettingsPage({ searchParams }: PageProps) {
         ) : (
           <ul className="list-none divide-y divide-[var(--rule)]">
             {events.map((event) => (
-              <li key={event.id} className="px-5 py-4">
-                <div className="flex items-start gap-3">
-                  <div className="h-7 w-7 rounded-full bg-cream border border-[var(--rule-strong)] flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <UserIcon className="h-3.5 w-3.5 text-slate-meta" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[14px] text-ink leading-snug">
-                      <strong className="font-semibold">
-                        {event.actor_name ?? "(deleted user)"}
-                      </strong>{" "}
-                      <span className="text-slate-body">{event.summary}</span>
-                    </p>
-                    <p className="mt-1 text-[11px] tracking-[0.3px] text-slate-meta">
-                      {EVENT_KIND_LABELS[event.event_kind] ?? event.event_kind}
-                      {" · "}
-                      {event.actor_role
-                        ? event.actor_role.replace("_", " ")
-                        : "—"}
-                      {" · "}
-                      {formatTimestamp(event.created_at)}
-                    </p>
-                  </div>
-                </div>
-              </li>
+              <AuditEventRow key={event.id} event={event} />
             ))}
           </ul>
         )}
@@ -318,4 +304,168 @@ function formatTimestamp(iso: string): string {
     hour: "numeric",
     minute: "2-digit",
   });
+}
+
+/* ───── v0.1 polish: per-event row component + helpers ───── */
+
+interface AuditEventRowData {
+  id: string;
+  event_kind: string;
+  summary: string;
+  actor_dso_user_id: string | null;
+  actor_name: string | null;
+  actor_role: string | null;
+  created_at: string;
+  metadata: Record<string, unknown>;
+  target_table: string | null;
+  target_id: string | null;
+}
+
+/**
+ * Single event row. Adds three things over the MVP:
+ *   1. Per-kind icon (Briefcase for jobs, ShieldCheck for security, etc.)
+ *   2. Optional `metadata.reason` rendered as a quoted secondary line
+ *      — preserves the recruiter's note from bulk reject/archive ops so
+ *      audit readers can see WHY without drilling into status_events.
+ *   3. Wraps the event in a Next Link when a meaningful target_href can
+ *      be resolved (jobs detail, application detail, location detail).
+ */
+function AuditEventRow({ event }: { event: AuditEventRowData }) {
+  const reason = extractReason(event.metadata);
+  const targetHref = resolveTargetHref(event);
+  const Icon = resolveEventIcon(event.event_kind);
+
+  const body = (
+    <div className="flex items-start gap-3">
+      <div className="h-7 w-7 rounded-full bg-cream border border-[var(--rule-strong)] flex items-center justify-center flex-shrink-0 mt-0.5">
+        <Icon className="h-3.5 w-3.5 text-slate-meta" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-[14px] text-ink leading-snug">
+          <strong className="font-semibold">
+            {event.actor_name ?? "(deleted user)"}
+          </strong>{" "}
+          <span className="text-slate-body">{event.summary}</span>
+        </p>
+        {reason && (
+          <p className="mt-1 text-[13px] text-slate-body italic leading-snug border-l-2 border-[var(--rule-strong)] pl-3">
+            &ldquo;{reason}&rdquo;
+          </p>
+        )}
+        <p className="mt-1 text-[11px] tracking-[0.3px] text-slate-meta">
+          {EVENT_KIND_LABELS[event.event_kind] ?? event.event_kind}
+          {" · "}
+          {event.actor_role
+            ? event.actor_role.replace("_", " ")
+            : "—"}
+          {" · "}
+          <time
+            dateTime={event.created_at}
+            title={formatTimestamp(event.created_at)}
+          >
+            {formatRelativeTimestamp(event.created_at)}
+          </time>
+        </p>
+      </div>
+    </div>
+  );
+
+  if (targetHref) {
+    return (
+      <li className="px-5 py-4 hover:bg-cream/30 transition-colors">
+        <Link href={targetHref} className="block">
+          {body}
+        </Link>
+      </li>
+    );
+  }
+  return <li className="px-5 py-4">{body}</li>;
+}
+
+/**
+ * Pull a recruiter-supplied note off the metadata. Today this lives at
+ * `metadata.reason` (set by bulk reject + bulk archive). Future event
+ * kinds with a free-text rationale should populate the same key.
+ */
+function extractReason(metadata: Record<string, unknown>): string | null {
+  const raw = (metadata as { reason?: unknown })?.reason;
+  if (typeof raw !== "string") return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  // Hard cap on line length so a misbehaving caller can't blow up the row.
+  return trimmed.length > 280 ? trimmed.slice(0, 280) + "…" : trimmed;
+}
+
+/**
+ * Resolve a "go to the affected thing" link from an audit event.
+ * Returns null when there's no useful target (e.g. settings changes,
+ * security events, deleted targets).
+ */
+function resolveTargetHref(event: AuditEventRowData): string | null {
+  const meta = event.metadata as Record<string, unknown>;
+  // bulk_action.applied — link to the job whose pipeline was acted on.
+  if (event.event_kind === "bulk_action.applied") {
+    const jobId = (meta.job_id as string | undefined) ?? null;
+    if (jobId) return `/employer/jobs/${jobId}/applications`;
+  }
+  // application.stage_moved + application.affiliation_revealed — link
+  // straight to the candidate's application detail.
+  if (
+    event.event_kind === "application.stage_moved" ||
+    event.event_kind === "application.affiliation_revealed"
+  ) {
+    const appId =
+      (meta.application_id as string | undefined) ?? event.target_id ?? null;
+    if (appId) return `/employer/applications/${appId}`;
+  }
+  // Any job.* event — link to the job detail page.
+  if (event.event_kind.startsWith("job.")) {
+    const jobId = (meta.job_id as string | undefined) ?? event.target_id ?? null;
+    if (jobId) return `/employer/jobs/${jobId}`;
+  }
+  // location.affiliation_toggled — link to the location detail page.
+  if (event.event_kind === "location.affiliation_toggled" && event.target_id) {
+    return `/employer/locations/${event.target_id}`;
+  }
+  // team.* — link to the team page (no per-row detail surface today).
+  if (event.event_kind.startsWith("team.")) return "/employer/team";
+  // settings/security — no target; the audit log itself is the surface.
+  return null;
+}
+
+/**
+ * Map event kind → icon. Uses a dotted-namespace prefix match so adding
+ * a new kind under an existing namespace (e.g. `job.something_new`) gets
+ * the right icon for free.
+ */
+function resolveEventIcon(eventKind: string) {
+  if (eventKind.startsWith("job.")) return Briefcase;
+  if (eventKind.startsWith("application.")) return Layers;
+  if (eventKind.startsWith("bulk_action.")) return Layers;
+  if (eventKind.startsWith("security.")) return ShieldCheck;
+  if (eventKind.startsWith("team.")) return Users;
+  if (eventKind.startsWith("settings.") || eventKind.startsWith("location.")) {
+    return SettingsIcon;
+  }
+  return UserIcon;
+}
+
+/**
+ * Relative timestamp for the event line. Falls back to the absolute
+ * formatTimestamp output for anything older than ~30 days. Pairs with
+ * the `<time title="...">` wrapper so the absolute timestamp is always
+ * one hover away.
+ */
+function formatRelativeTimestamp(iso: string): string {
+  const d = new Date(iso);
+  const ms = Date.now() - d.getTime();
+  const seconds = Math.round(ms / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours} hr ago`;
+  const days = Math.round(hours / 24);
+  if (days < 30) return `${days} ${days === 1 ? "day" : "days"} ago`;
+  return formatTimestamp(iso);
 }
