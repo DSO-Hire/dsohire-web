@@ -9,7 +9,8 @@
  */
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useActionState, useEffect, useState } from "react";
 import { ArrowRight, Save } from "lucide-react";
 import {
   createLocation,
@@ -56,12 +57,26 @@ const initialState: LocationActionState = { ok: false };
 export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProps) {
   const action = mode === "edit" ? updateLocation : createLocation;
   const [state, formAction, pending] = useActionState(action, initialState);
+  const router = useRouter();
   const [stateCode, setStateCode] = useState<string | null>(
     normalizeStateInput(initial?.state ?? null)
   );
   const [showDsoAffiliation, setShowDsoAffiliation] = useState<boolean>(
     initial?.public_dso_affiliation ?? true
   );
+  // After a successful save, refresh the route so the Server Component
+  // re-fetches the dso_locations row and the next render of this form
+  // (e.g. after the user navigates away + back, or hits Cancel + opens
+  // the same location) sees the new value as `initial.public_dso_
+  // affiliation`. Without router.refresh(), Next.js's RSC cache can
+  // serve stale data even after the action's revalidatePath fires.
+  // Caught by Cam 2026-05-08 PM on the affiliation toggle persistence
+  // issue.
+  useEffect(() => {
+    if (state.ok && mode === "edit") {
+      router.refresh();
+    }
+  }, [state, mode, router]);
 
   return (
     <form action={formAction} className="space-y-6 max-w-[720px]">
@@ -144,8 +159,28 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
           the existing DB value unchanged on submit). */}
       {mode === "edit" && (
         <div className="border border-[var(--rule-strong)] bg-cream/50 px-5 py-4">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
-            Public Branding
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+              Public Branding
+            </div>
+            {/* Persistent at-a-glance status badge — reads from the
+                ORIGINAL initial value (server-rendered prop) so the
+                user can always see what's currently saved. The form
+                state above shows their pending edit; this shows the
+                last-persisted truth. After save, router.refresh()
+                pulls a fresh prop and this badge re-aligns. */}
+            <span
+              className={
+                "inline-flex items-center px-2 py-0.5 text-[10px] font-bold tracking-[1.2px] uppercase " +
+                ((initial?.public_dso_affiliation ?? true)
+                  ? "bg-heritage text-ivory"
+                  : "bg-ink text-ivory")
+              }
+            >
+              {(initial?.public_dso_affiliation ?? true)
+                ? "Currently public"
+                : "Currently private"}
+            </span>
           </div>
           <label className="flex items-start gap-3 cursor-pointer">
             <input
@@ -176,6 +211,12 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
                 location they touch — &ldquo;most-private&rdquo;
                 inherits across the whole job.
               </p>
+              {showDsoAffiliation !==
+                (initial?.public_dso_affiliation ?? true) && (
+                <p className="mt-2 text-[12px] text-amber-800 font-semibold">
+                  Unsaved change. Click Save to persist.
+                </p>
+              )}
             </div>
           </label>
           {/* Hidden field carries the actual boolean value to the action.

@@ -18,7 +18,7 @@
  */
 
 import { useMemo, useState } from "react";
-import { Plus, Pencil, Check, ShieldAlert } from "lucide-react";
+import { Plus, Check, ShieldAlert } from "lucide-react";
 import {
   CATEGORY_LABELS,
   CATEGORY_ORDER,
@@ -45,14 +45,12 @@ interface RecommendedQuestionsPanelProps {
   roleCategory: string;
   questions: WizardScreeningQuestion[];
   onChange: (qs: WizardScreeningQuestion[]) => void;
-  onFocusQuestion?: (id: string) => void;
 }
 
 export function RecommendedQuestionsPanel({
   roleCategory,
   questions,
   onChange,
-  onFocusQuestion,
 }: RecommendedQuestionsPanelProps) {
   const [skipped, setSkipped] = useState<Set<string>>(new Set());
   const [addedFromRec, setAddedFromRec] = useState<
@@ -110,20 +108,18 @@ export function RecommendedQuestionsPanel({
     };
   }
 
-  function handleAdd(rq: RecommendedQuestion, focusAfter: boolean) {
+  function handleAdd(rq: RecommendedQuestion) {
     const wq = buildWizardQuestion(rq, questions.length);
     onChange([...questions, wq]);
     const newAdded = { ...addedFromRec, [rq.id]: wq.id };
     setAddedFromRec(newAdded);
-    if (focusAfter && onFocusQuestion) {
-      // Defer to next tick so the DOM has the new card
-      setTimeout(() => onFocusQuestion(wq.id), 0);
-      return;
-    }
     // v1.7 — auto-scroll the next unadded recommended card into view
     // so the employer can keep clicking Add without manual scrolling.
-    // Build the same ordered list the panel renders (categories in
-    // CATEGORY_ORDER, in-bank order within each category).
+    // The "Add & edit" branch was removed 2026-05-08 PM — it scrolled
+    // away from this panel into the QuestionCard list below, which
+    // disoriented users (they hit browser-back to recover and lost
+    // the wizard's local state). Customization happens AFTER the
+    // recommended-add pass, in the QuestionCards below the panel.
     const orderedIds: string[] = [];
     for (const cat of CATEGORY_ORDER) {
       for (const q of byCategory[cat]) orderedIds.push(q.id);
@@ -133,8 +129,6 @@ export function RecommendedQuestionsPanel({
       .slice(idx + 1)
       .find((id) => !newAdded[id]);
     if (nextRecId) {
-      // Defer to next paint so the just-added card has finished
-      // its visual state change before we move the viewport.
       setTimeout(() => {
         const el = document.querySelector<HTMLElement>(
           `[data-recid="${nextRecId}"]`
@@ -154,17 +148,50 @@ export function RecommendedQuestionsPanel({
     });
   }
 
+  // Running tally — count how many recommended cards have been added
+  // (still present in the wizard's questions array) so the header
+  // shows progress at a glance. Doesn't count manually-added questions
+  // since this panel is specifically about the recommended set.
+  const addedCount = Object.entries(addedFromRec).filter(([, qid]) =>
+    questions.some((q) => q.id === qid)
+  ).length;
+  const totalCount = rec.questions.length;
+  const skippedCount = skipped.size;
+
   return (
     <div className="border border-[var(--rule)] bg-cream/40 p-5">
       <div className="flex items-start justify-between gap-4 mb-1">
-        <div>
+        <div className="min-w-0">
           <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
             Recommended for {rec.label}
           </div>
           <p className="text-[13px] text-slate-meta leading-relaxed">
             We curated these from competitor benchmarks and dental hiring best
-            practices. One click to add — keep, customize, or skip each one.
+            practices. One click to add — customize from the editable
+            cards below the panel.
           </p>
+        </div>
+        {/* Running tally — sits in the header so the user sees their
+            progress at a glance. Updates live as they click Add /
+            Skip. Helps avoid the "did anything happen?" disorientation
+            that pushed users to hit browser-back and lose their work
+            (Cam, 2026-05-08 PM). */}
+        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+          <span
+            className={
+              "inline-flex items-center px-2.5 py-1 text-[10px] font-bold tracking-[1.2px] uppercase " +
+              (addedCount > 0
+                ? "bg-heritage text-ivory"
+                : "bg-cream text-slate-meta border border-[var(--rule-strong)]")
+            }
+          >
+            <Check className="h-3 w-3 mr-1" />
+            {addedCount} added
+          </span>
+          <span className="text-[10px] tracking-[0.5px] text-slate-meta">
+            {totalCount - addedCount - skippedCount} remaining
+            {skippedCount > 0 ? ` · ${skippedCount} skipped` : ""}
+          </span>
         </div>
       </div>
 
@@ -192,7 +219,6 @@ export function RecommendedQuestionsPanel({
                       rq={rq}
                       added={isAdded}
                       onAdd={() => handleAdd(rq, false)}
-                      onAddAndEdit={() => handleAdd(rq, true)}
                       onSkip={() => handleSkip(rq.id)}
                     />
                   );
@@ -210,13 +236,11 @@ function RecommendedCard({
   rq,
   added,
   onAdd,
-  onAddAndEdit,
   onSkip,
 }: {
   rq: RecommendedQuestion;
   added: boolean;
   onAdd: () => void;
-  onAddAndEdit: () => void;
   onSkip: () => void;
 }) {
   const optionPreview =
@@ -288,14 +312,10 @@ function RecommendedCard({
               <Plus className="h-3 w-3" />
               Add
             </button>
-            <button
-              type="button"
-              onClick={onAddAndEdit}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-[var(--rule-strong)] text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
-            >
-              <Pencil className="h-3 w-3" />
-              Add & edit
-            </button>
+            <span className="text-[11px] text-slate-meta">
+              Customize the prompt and options after the panel — your
+              added questions appear below.
+            </span>
             <button
               type="button"
               onClick={onSkip}

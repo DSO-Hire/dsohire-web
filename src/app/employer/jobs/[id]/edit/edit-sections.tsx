@@ -1151,17 +1151,6 @@ function ScreeningSection({
             setQuestions(next);
             touch();
           }}
-          onFocusQuestion={(id) => {
-            if (typeof document === "undefined") return;
-            const el = document.getElementById(`screening-q-${id}`);
-            if (el) {
-              el.scrollIntoView({ behavior: "smooth", block: "center" });
-              const input = el.querySelector<HTMLInputElement>(
-                "input[type=text], textarea"
-              );
-              input?.focus();
-            }
-          }}
         />
 
         {questions.length === 0 && (

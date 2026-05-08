@@ -18,6 +18,12 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Edit Location" };
 
+// Auth-protected route — must read live cookies + always re-fetch the
+// affiliation toggle state. Default static cache would let a saved
+// toggle look reverted on the next nav. Companion to the same flag on
+// /employer/settings/profile + /employer/settings/affiliation.
+export const dynamic = "force-dynamic";
+
 interface PageProps {
   params: Promise<{ id: string }>;
 }

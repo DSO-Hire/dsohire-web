@@ -217,11 +217,18 @@ export async function updateLocation(
     updatePayload.public_dso_affiliation = fields.publicDsoAffiliation;
   }
 
-  const { error } = await supabase
+  // Add .select("id") so we get the row back and can verify the update
+  // landed. RLS-denied UPDATEs return 0 rows with NO error from
+  // PostgREST (per feedback_supabase_error_swallowing.md) — without
+  // this check we'd ship { ok: true, message: "Saved." } even when
+  // the write was silently denied. Caught by Cam 2026-05-08 PM on the
+  // affiliation toggle persistence issue.
+  const { data: updatedRows, error } = await supabase
     .from("dso_locations")
     .update(updatePayload)
     .eq("id", locationId)
-    .eq("dso_id", fields.dsoId);
+    .eq("dso_id", fields.dsoId)
+    .select("id");
 
   if (error) {
     return {
@@ -229,6 +236,13 @@ export async function updateLocation(
       error:
         error.message ??
         "Failed to save location. Refresh and try again, or email cam@dsohire.com.",
+    };
+  }
+  if (!updatedRows || updatedRows.length === 0) {
+    return {
+      ok: false,
+      error:
+        "The save didn't land — refresh and try again. If it keeps happening, email cam@dsohire.com.",
     };
   }
 
