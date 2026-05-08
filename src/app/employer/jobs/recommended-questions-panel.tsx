@@ -113,10 +113,36 @@ export function RecommendedQuestionsPanel({
   function handleAdd(rq: RecommendedQuestion, focusAfter: boolean) {
     const wq = buildWizardQuestion(rq, questions.length);
     onChange([...questions, wq]);
-    setAddedFromRec((prev) => ({ ...prev, [rq.id]: wq.id }));
+    const newAdded = { ...addedFromRec, [rq.id]: wq.id };
+    setAddedFromRec(newAdded);
     if (focusAfter && onFocusQuestion) {
       // Defer to next tick so the DOM has the new card
       setTimeout(() => onFocusQuestion(wq.id), 0);
+      return;
+    }
+    // v1.7 — auto-scroll the next unadded recommended card into view
+    // so the employer can keep clicking Add without manual scrolling.
+    // Build the same ordered list the panel renders (categories in
+    // CATEGORY_ORDER, in-bank order within each category).
+    const orderedIds: string[] = [];
+    for (const cat of CATEGORY_ORDER) {
+      for (const q of byCategory[cat]) orderedIds.push(q.id);
+    }
+    const idx = orderedIds.indexOf(rq.id);
+    const nextRecId = orderedIds
+      .slice(idx + 1)
+      .find((id) => !newAdded[id]);
+    if (nextRecId) {
+      // Defer to next paint so the just-added card has finished
+      // its visual state change before we move the viewport.
+      setTimeout(() => {
+        const el = document.querySelector<HTMLElement>(
+          `[data-recid="${nextRecId}"]`
+        );
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 50);
     }
   }
 
@@ -203,8 +229,9 @@ function RecommendedCard({
 
   return (
     <div
+      data-recid={rq.id}
       className={
-        "border p-4 transition-colors " +
+        "border p-4 transition-colors scroll-mt-24 " +
         (added
           ? "border-heritage bg-heritage/[0.06]"
           : "border-[var(--rule-strong)] bg-white")

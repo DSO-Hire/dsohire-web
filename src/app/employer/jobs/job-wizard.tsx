@@ -17,7 +17,7 @@
  * which parses + syncs `job_screening_questions`.
  */
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import {
   ArrowRight,
   ArrowLeft,
@@ -221,6 +221,17 @@ export function JobWizard({
   initialQuestions,
 }: JobWizardProps) {
   const [stepIdx, setStepIdx] = useState(0);
+
+  // v1.7 — every step change scrolls the page back to top. Without this
+  // the user was getting dumped at the bottom (Next button) of the new
+  // step, since the browser preserves scroll position and the buttons
+  // sit at the page footer. Smooth-scroll feels right; instant feels
+  // jarring on a long form.
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [stepIdx]);
 
   // Form state
   const [title, setTitle] = useState(initial?.title ?? "");

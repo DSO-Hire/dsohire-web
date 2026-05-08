@@ -239,6 +239,7 @@ export function ChipArrayInput(props: {
   labelFor?: (value: string) => string;
 }) {
   const [draft, setDraft] = useState("");
+  const [showAll, setShowAll] = useState(false);
 
   const add = (raw: string) => {
     const v = raw.trim();
@@ -254,9 +255,30 @@ export function ChipArrayInput(props: {
     props.onChange(props.values.filter((_, i) => i !== idx));
 
   // Quick-add options that aren't already selected.
-  const remainingOptions = props.options?.filter(
+  const allRemainingOptions = props.options?.filter(
     (opt) => !props.values.includes(opt.value)
   );
+  // v1.7 — typing into the search box filters the quick-add chips
+  // (case-insensitive substring on label + value). When typing, we
+  // also drop the 12-chip cap so the user can scan the full filtered
+  // result. Default (no draft) keeps the cap with a "Show all" toggle.
+  const draftLower = draft.trim().toLowerCase();
+  const filteredOptions = allRemainingOptions
+    ? draftLower
+      ? allRemainingOptions.filter((opt) =>
+          (opt.label + " " + opt.value).toLowerCase().includes(draftLower)
+        )
+      : allRemainingOptions
+    : undefined;
+  const isFiltering = Boolean(draftLower);
+  const remainingOptions =
+    filteredOptions && (showAll || isFiltering)
+      ? filteredOptions
+      : filteredOptions?.slice(0, 12);
+  const hiddenCount =
+    !isFiltering && filteredOptions
+      ? Math.max(0, filteredOptions.length - 12)
+      : 0;
 
   return (
     <div>
@@ -314,9 +336,13 @@ export function ChipArrayInput(props: {
         </button>
       </div>
       {remainingOptions && remainingOptions.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-2">
-          <span className="text-xs text-slate-500">Quick add:</span>
-          {remainingOptions.slice(0, 12).map((opt) => (
+        <div className="mt-3 flex flex-wrap gap-2 items-center">
+          <span className="text-xs text-slate-500">
+            {isFiltering
+              ? `Matching (${remainingOptions.length}):`
+              : "Quick add:"}
+          </span>
+          {remainingOptions.map((opt) => (
             <button
               key={opt.value}
               type="button"
@@ -326,7 +352,34 @@ export function ChipArrayInput(props: {
               + {opt.label}
             </button>
           ))}
+          {/* Show all / show less toggle. Only renders when there are
+              hidden options AND we're not actively filtering — search
+              already widens the visible set, so the toggle would be
+              redundant during search. */}
+          {!isFiltering && hiddenCount > 0 && !showAll && (
+            <button
+              type="button"
+              onClick={() => setShowAll(true)}
+              className="text-xs font-semibold text-[#4D7A60] hover:text-[#14233F] underline underline-offset-2"
+            >
+              Show all ({hiddenCount} more)
+            </button>
+          )}
+          {!isFiltering && showAll && (
+            <button
+              type="button"
+              onClick={() => setShowAll(false)}
+              className="text-xs font-semibold text-[#4D7A60] hover:text-[#14233F] underline underline-offset-2"
+            >
+              Show less
+            </button>
+          )}
         </div>
+      )}
+      {isFiltering && remainingOptions && remainingOptions.length === 0 && (
+        <p className="mt-3 text-xs italic text-slate-400">
+          No matches — press Enter to add &ldquo;{draft.trim()}&rdquo; as a custom value.
+        </p>
       )}
     </div>
   );
