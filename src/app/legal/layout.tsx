@@ -7,6 +7,7 @@
 
 import Link from "next/link";
 import { BrandLockup } from "@/components/marketing/site-shell";
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
 
 export default function LegalLayout({
   children,
@@ -45,7 +46,7 @@ function LegalFooter() {
     <footer className="bg-ink text-ivory px-6 sm:px-14 pt-10 pb-8 mt-16">
       <div className="max-w-[1240px] mx-auto flex flex-wrap justify-between items-center gap-4">
         <div className="text-[12px] tracking-[0.5px] text-ivory/40">
-          © {new Date().getFullYear()} DSO Hire LLC · Kansas
+          © {new Date().getFullYear()} DSO Hire LLC
         </div>
         <div className="flex gap-6 text-[12px] text-ivory/40">
           <Link href="/legal/privacy" className="hover:text-ivory/70 transition-colors">
@@ -55,10 +56,10 @@ function LegalFooter() {
             Terms
           </Link>
           <Link
-            href="mailto:cam@dsohire.com"
+            href={SUPPORT_MAILTO}
             className="hover:text-ivory/70 transition-colors"
           >
-            cam@dsohire.com
+            {SUPPORT_EMAIL}
           </Link>
         </div>
       </div>

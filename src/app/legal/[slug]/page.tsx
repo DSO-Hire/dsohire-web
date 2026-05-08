@@ -11,6 +11,7 @@ import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { LEGAL_INDEX, loadLegalDoc, listLegalSlugs } from "@/lib/legal/loader";
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -71,10 +72,10 @@ export default async function LegalDocPage({ params }: PageProps) {
         <p className="text-[14px] text-slate-meta leading-relaxed">
           Questions? Email{" "}
           <a
-            href="mailto:cam@dsohire.com"
+            href={SUPPORT_MAILTO}
             className="text-heritage underline underline-offset-2 hover:text-heritage-deep"
           >
-            cam@dsohire.com
+            {SUPPORT_EMAIL}
           </a>
           . See all{" "}
           <Link

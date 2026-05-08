@@ -5,6 +5,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { LEGAL_INDEX, loadLegalDoc } from "@/lib/legal/loader";
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -60,10 +61,10 @@ export default function LegalIndex() {
       <p className="mt-12 text-[14px] text-slate-meta leading-relaxed max-w-[640px]">
         Questions about any of these policies? Email{" "}
         <a
-          href="mailto:cam@dsohire.com"
+          href={SUPPORT_MAILTO}
           className="text-heritage underline underline-offset-2 hover:text-heritage-deep"
         >
-          cam@dsohire.com
+          {SUPPORT_EMAIL}
         </a>
         . For copyright takedown notices, see the{" "}
         <Link
