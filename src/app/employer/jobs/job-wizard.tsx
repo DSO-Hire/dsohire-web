@@ -301,9 +301,74 @@ export function JobWizard({
     }
   }, [stepIdx]);
 
-  // v1.8 — draft autosave. Mount: probe localStorage; if a non-trivial
-  // draft exists, surface a banner. Subsequent state changes are
-  // serialized and saved with a 500ms debounce.
+  // Form state
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [roleCategory, setRoleCategory] = useState(
+    initial?.role_category ?? "dentist"
+  );
+  const [employmentType, setEmploymentType] = useState(
+    initial?.employment_type ?? "full_time"
+  );
+  const [selectedLocationIds, setSelectedLocationIds] = useState<Set<string>>(
+    new Set(initial?.location_ids ?? [])
+  );
+  const [description, setDescription] = useState(initial?.description ?? "");
+  const [compMin, setCompMin] = useState(
+    initial?.compensation_min !== null && initial?.compensation_min !== undefined
+      ? String(initial.compensation_min)
+      : ""
+  );
+  const [compMax, setCompMax] = useState(
+    initial?.compensation_max !== null && initial?.compensation_max !== undefined
+      ? String(initial.compensation_max)
+      : ""
+  );
+  const [compPeriod, setCompPeriod] = useState(
+    initial?.compensation_period ?? ""
+  );
+  // v1.8 — flexible comp type. Drives which inputs render in the
+  // Compensation fieldset and how the value is displayed downstream.
+  const [compType, setCompType] = useState<CompensationType>(
+    (initial?.compensation_type as CompensationType | undefined) ?? "range"
+  );
+  const [compVisible, setCompVisible] = useState(
+    initial?.compensation_visible ?? true
+  );
+  const [hideStagesFromCandidate, setHideStagesFromCandidate] = useState(
+    initial?.hide_stages_from_candidate ?? false
+  );
+  const [scope, setScope] = useState<JobScope>(initial?.scope ?? "location");
+  // v1.6 — skills + benefits are now string[] (chip-picker), not the
+  // legacy comma-separated string. Existing rows hydrate from initial.skills
+  // / initial.benefits arrays directly.
+  const [skills, setSkills] = useState<string[]>(initial?.skills ?? []);
+  const [benefits, setBenefits] = useState<string[]>(initial?.benefits ?? []);
+  const [requirements, setRequirements] = useState(
+    initial?.requirements ?? ""
+  );
+  const [questions, setQuestions] = useState<WizardScreeningQuestion[]>(
+    initialQuestions ?? []
+  );
+  const [status, setStatus] = useState(initial?.status ?? "draft");
+  // v1.1 — Practice Fit inputs.
+  const [specialty, setSpecialty] = useState<Set<string>>(
+    new Set(initial?.specialty ?? [])
+  );
+  const [minYearsExperience, setMinYearsExperience] = useState(
+    initial?.min_years_experience !== null &&
+      initial?.min_years_experience !== undefined
+      ? String(initial.min_years_experience)
+      : ""
+  );
+
+  const [error, setError] = useState<string | null>(null);
+
+  // v1.8 — draft autosave. Placed AFTER all form state declarations so
+  // the deps array's references resolve cleanly (block-scoped const TDZ
+  // catches forward-refs on Vercel's clean build even though incremental
+  // tsc lets it slide locally). Mount probes localStorage and surfaces
+  // a banner if there's a non-trivial draft. Subsequent state changes
+  // serialize the wizard with a 500ms debounce.
   useEffect(() => {
     if (!draftKey || typeof window === "undefined") return;
     try {
@@ -311,28 +376,22 @@ export function JobWizard({
       if (!raw) return;
       const parsed = JSON.parse(raw) as { savedAt?: string; title?: string };
       if (!parsed?.savedAt) return;
-      // Skip empty drafts.
       if (!parsed.title?.trim()) {
         window.localStorage.removeItem(draftKey);
         return;
       }
       setDraftFound({ savedAt: parsed.savedAt });
     } catch {
-      // Malformed payload — ignore + clear.
       try {
         window.localStorage.removeItem(draftKey);
       } catch {
         /* noop */
       }
     }
-    // Empty deps — only run once on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     if (!draftKey || typeof window === "undefined") return;
-    // Don't save while the banner is visible — the user hasn't decided
-    // yet whether to restore. Saving would overwrite the draft we want
-    // to offer them.
     if (draftFound) return;
     const handle = setTimeout(() => {
       const payload = {
@@ -365,7 +424,6 @@ export function JobWizard({
       }
     }, 500);
     return () => clearTimeout(handle);
-    // Intentional: re-run on every form-state change.
   }, [
     draftKey,
     draftFound,
@@ -438,68 +496,6 @@ export function JobWizard({
     setDraftFound(null);
     setDraftDismissed(true);
   }
-
-  // Form state
-  const [title, setTitle] = useState(initial?.title ?? "");
-  const [roleCategory, setRoleCategory] = useState(
-    initial?.role_category ?? "dentist"
-  );
-  const [employmentType, setEmploymentType] = useState(
-    initial?.employment_type ?? "full_time"
-  );
-  const [selectedLocationIds, setSelectedLocationIds] = useState<Set<string>>(
-    new Set(initial?.location_ids ?? [])
-  );
-  const [description, setDescription] = useState(initial?.description ?? "");
-  const [compMin, setCompMin] = useState(
-    initial?.compensation_min !== null && initial?.compensation_min !== undefined
-      ? String(initial.compensation_min)
-      : ""
-  );
-  const [compMax, setCompMax] = useState(
-    initial?.compensation_max !== null && initial?.compensation_max !== undefined
-      ? String(initial.compensation_max)
-      : ""
-  );
-  const [compPeriod, setCompPeriod] = useState(
-    initial?.compensation_period ?? ""
-  );
-  // v1.8 — flexible comp type. Drives which inputs render in the
-  // Compensation fieldset and how the value is displayed downstream.
-  const [compType, setCompType] = useState<CompensationType>(
-    (initial?.compensation_type as CompensationType | undefined) ?? "range"
-  );
-  const [compVisible, setCompVisible] = useState(
-    initial?.compensation_visible ?? true
-  );
-  const [hideStagesFromCandidate, setHideStagesFromCandidate] = useState(
-    initial?.hide_stages_from_candidate ?? false
-  );
-  const [scope, setScope] = useState<JobScope>(initial?.scope ?? "location");
-  // v1.6 — skills + benefits are now string[] (chip-picker), not the
-  // legacy comma-separated string. Existing rows hydrate from initial.skills
-  // / initial.benefits arrays directly.
-  const [skills, setSkills] = useState<string[]>(initial?.skills ?? []);
-  const [benefits, setBenefits] = useState<string[]>(initial?.benefits ?? []);
-  const [requirements, setRequirements] = useState(
-    initial?.requirements ?? ""
-  );
-  const [questions, setQuestions] = useState<WizardScreeningQuestion[]>(
-    initialQuestions ?? []
-  );
-  const [status, setStatus] = useState(initial?.status ?? "draft");
-  // v1.1 — Practice Fit inputs.
-  const [specialty, setSpecialty] = useState<Set<string>>(
-    new Set(initial?.specialty ?? [])
-  );
-  const [minYearsExperience, setMinYearsExperience] = useState(
-    initial?.min_years_experience !== null &&
-      initial?.min_years_experience !== undefined
-      ? String(initial.min_years_experience)
-      : ""
-  );
-
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   /* ───── Step navigation + per-step validation ───── */
