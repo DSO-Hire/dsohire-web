@@ -268,6 +268,10 @@ export default async function CandidateApplicationsPage({
     } | null;
   };
   let savedJobs: SavedJobRow[] = [];
+  // Practice Fit per saved job — parallel compute, cached after first
+  // visit. v1.4 closes the parallel gap with /candidate/applications
+  // (the active-apps tab); both tabs now show the same chip pattern.
+  const fitsBySavedJobId = new Map<string, FitResult | null>();
   if (activeTab === "saved") {
     const { data: rawSaved } = await supabase
       .from("saved_jobs")
@@ -277,6 +281,16 @@ export default async function CandidateApplicationsPage({
       .eq("candidate_id", candidateId)
       .order("saved_at", { ascending: false });
     savedJobs = (rawSaved ?? []) as unknown as SavedJobRow[];
+
+    const savedJobIds = savedJobs
+      .map((r) => r.job?.id)
+      .filter((id): id is string => Boolean(id));
+    if (savedJobIds.length > 0) {
+      const fits = await Promise.all(
+        savedJobIds.map((jobId) => getPracticeFit(candidateId, jobId))
+      );
+      savedJobIds.forEach((jobId, i) => fitsBySavedJobId.set(jobId, fits[i]));
+    }
   }
 
   return (
@@ -294,7 +308,7 @@ export default async function CandidateApplicationsPage({
 
       <div className="mt-6">
         {activeTab === "saved" ? (
-          <SavedJobsList rows={savedJobs} />
+          <SavedJobsList rows={savedJobs} fitsByJobId={fitsBySavedJobId} />
         ) : filteredApps.length === 0 ? (
           <EmptyState tab={activeTab} totalApps={apps.length} />
         ) : (
@@ -506,6 +520,7 @@ function ApplicationsList({
 
 function SavedJobsList({
   rows,
+  fitsByJobId,
 }: {
   rows: Array<{
     id: string;
@@ -519,6 +534,7 @@ function SavedJobsList({
       dsos: { name: string } | null;
     } | null;
   }>;
+  fitsByJobId: Map<string, FitResult | null>;
 }) {
   if (rows.length === 0) {
     return (
@@ -561,6 +577,12 @@ function SavedJobsList({
                         {row.job.status}
                       </span>
                     )}
+                    {(() => {
+                      const fit = fitsByJobId.get(row.job.id);
+                      return fit ? (
+                        <PracticeFitChip fit={fit} size="sm" />
+                      ) : null;
+                    })()}
                   </div>
                   <p className="text-[15px] font-bold text-ink">{row.job.title}</p>
                   <p className="text-[13px] text-slate-body">

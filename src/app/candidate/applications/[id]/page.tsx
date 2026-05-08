@@ -17,6 +17,9 @@ import { CandidateShell } from "@/components/candidate/candidate-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { MessagesThread } from "@/components/messaging/messages-thread";
 import type { ApplicationMessageRow } from "@/lib/messages/actions";
+import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
+import { WhyThisMatch } from "@/components/practice-fit/why-this-match";
+import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -135,6 +138,14 @@ export default async function CandidateApplicationDetailPage({
   const otherPartyName = dso?.name ?? "Hiring team";
   const candidateName = candidate.full_name?.trim() || "You";
 
+  // Practice Fit (Phase 5D v1.4 — wired into the candidate detail page).
+  // Returns null when role-filtered, consent off, or compute fails. Banner
+  // / chip render conditionally on the result.
+  const practiceFit = await getPracticeFit(
+    candidate.id as string,
+    app.job_id
+  );
+
   return (
     <CandidateShell active="applications">
       <div className="mb-6">
@@ -154,12 +165,17 @@ export default async function CandidateApplicationDetailPage({
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-2">
           {job?.title ?? "Job removed"}
         </h1>
-        {dso && (
-          <div className="text-[14px] text-slate-body inline-flex items-center gap-2">
-            <Building2 className="h-4 w-4" />
-            {dso.name}
-          </div>
-        )}
+        <div className="flex items-center gap-3 flex-wrap">
+          {dso && (
+            <div className="text-[14px] text-slate-body inline-flex items-center gap-2">
+              <Building2 className="h-4 w-4" />
+              {dso.name}
+            </div>
+          )}
+          {practiceFit && (
+            <PracticeFitChip fit={practiceFit} size="sm" />
+          )}
+        </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10">
@@ -181,6 +197,24 @@ export default async function CandidateApplicationDetailPage({
               })}
             </div>
           </section>
+
+          {/* Practice Fit — only when we have a fit. WhyThisMatch's inline
+              editors give the candidate the lift-your-match flow without
+              bouncing through /candidate/profile. */}
+          {practiceFit && (
+            <section>
+              <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
+                Practice Fit
+              </h2>
+              <WhyThisMatch
+                fit={practiceFit}
+                candidateId={candidate.id as string}
+                jobId={app.job_id}
+                audience="candidate"
+                defaultOpen
+              />
+            </section>
+          )}
 
           {/* Direct candidate ↔ DSO messages */}
           <section>
