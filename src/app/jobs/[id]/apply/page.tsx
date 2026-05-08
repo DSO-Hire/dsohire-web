@@ -166,16 +166,11 @@ export default async function ApplyPage({ params }: PageProps) {
     );
   }
 
-  let existingAnswers: ExistingAnswer[] = [];
-  if (existingApp) {
-    const { data: rawAnswers } = await supabase
-      .from("application_question_answers")
-      .select(
-        "question_id, answer_text, answer_choice, answer_choices, answer_number"
-      )
-      .eq("application_id", existingApp.id as string);
-    existingAnswers = (rawAnswers ?? []) as ExistingAnswer[];
-  }
+  // First-attempt apply only — the redirect above sends repeat applies
+  // to the candidate's existing application detail. So `existingAnswers`
+  // is always empty by the time we get here. The wizard still gets the
+  // prop so its prefill + answer-rehydration code path stays unchanged.
+  const existingAnswers: ExistingAnswer[] = [];
 
   const savedResumeUrl = candidate.resume_url ?? null;
   const savedResumeName = savedResumeUrl
