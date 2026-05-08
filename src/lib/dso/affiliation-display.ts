@@ -117,92 +117,120 @@ export async function resolveCandidateApplicationAffiliations(
 
   const admin = createSupabaseServiceRoleClient();
 
-  // 1. Pull applications + their job + dso (with logo + policy).
-  const { data: appsRes, error: appsErr } = await admin
+  // Four separate queries instead of one deep nested embed. The
+  // nested-embed version (jobs!inner(... dsos!inner(...))) was
+  // returning empty silently — caught 2026-05-08 PM stress test
+  // when the candidate dashboard kept falling back to "Hiring team."
+  // Splitting into flat queries sidesteps every Supabase
+  // relationship-name + cardinality + RLS gotcha.
+
+  // 1. Applications
+  const { data: appRows, error: appsErr } = await admin
     .from("applications")
-    .select(
-      `id, job_id, status, affiliation_revealed,
-       jobs!inner(id, dso_id, scope,
-         dsos!inner(id, name, logo_url, affiliation_reveal_policy))`
-    )
+    .select("id, job_id, status, affiliation_revealed")
     .in("id", applicationIds);
   if (appsErr) {
-    console.warn("[affiliation] candidate-apps lookup failed", appsErr);
+    console.warn("[affiliation] applications lookup failed", appsErr);
     return out;
   }
-
-  type AppShape = {
+  const apps = (appRows ?? []) as Array<{
     id: string;
     job_id: string;
     status: string;
     affiliation_revealed: boolean;
-    jobs: Array<{
-      id: string;
-      dso_id: string;
-      scope: "location" | "regional" | "corporate" | null;
-      dsos: Array<{
-        id: string;
-        name: string;
-        logo_url: string | null;
-        affiliation_reveal_policy: "never" | "after_hire" | "per_application";
-      }>;
-    }>;
-  };
-  const apps = (appsRes ?? []) as unknown as AppShape[];
+  }>;
+  if (apps.length === 0) return out;
 
-  // 2. Pull job_locations + dso_locations (with logo + public flag)
-  // for every involved job. One query, decompose in JS.
-  const jobIds = Array.from(new Set(apps.map((a) => a.jobs[0]?.id).filter(Boolean) as string[]));
-  type LocShape = {
+  // 2. Jobs (just dso_id + scope per job)
+  const jobIds = Array.from(new Set(apps.map((a) => a.job_id)));
+  const { data: jobRows, error: jobsErr } = await admin
+    .from("jobs")
+    .select("id, dso_id, scope")
+    .in("id", jobIds);
+  if (jobsErr) {
+    console.warn("[affiliation] jobs lookup failed", jobsErr);
+    return out;
+  }
+  const jobsArr = (jobRows ?? []) as Array<{
+    id: string;
+    dso_id: string;
+    scope: "location" | "regional" | "corporate" | null;
+  }>;
+  const jobMap = new Map(jobsArr.map((j) => [j.id, j]));
+
+  // 3. DSOs (name + logo + policy)
+  const dsoIds = Array.from(new Set(jobsArr.map((j) => j.dso_id)));
+  const { data: dsoRows, error: dsosErr } = await admin
+    .from("dsos")
+    .select("id, name, logo_url, affiliation_reveal_policy")
+    .in("id", dsoIds);
+  if (dsosErr) {
+    console.warn("[affiliation] dsos lookup failed", dsosErr);
+    return out;
+  }
+  const dsosArr = (dsoRows ?? []) as Array<{
+    id: string;
+    name: string;
+    logo_url: string | null;
+    affiliation_reveal_policy: "never" | "after_hire" | "per_application";
+  }>;
+  const dsoMap = new Map(dsosArr.map((d) => [d.id, d]));
+
+  // 4. Job-locations + their dso_locations rows. Two-step: the
+  // join row (with location_id), then dso_locations by id.
+  const { data: jobLocRows, error: jlErr } = await admin
+    .from("job_locations")
+    .select("job_id, location_id")
+    .in("job_id", jobIds);
+  if (jlErr) {
+    console.warn("[affiliation] job_locations lookup failed", jlErr);
+  }
+  const jobLocs = (jobLocRows ?? []) as Array<{
     job_id: string;
     location_id: string;
-    dso_locations: Array<{
-      id: string;
-      name: string;
-      logo_url: string | null;
-      public_dso_affiliation: boolean;
-    }>;
-  };
-  let locRows: LocShape[] = [];
-  if (jobIds.length > 0) {
-    const { data: locRes, error: locErr } = await admin
-      .from("job_locations")
-      .select(
-        "job_id, location_id, dso_locations!inner(id, name, logo_url, public_dso_affiliation)"
-      )
-      .in("job_id", jobIds);
+  }>;
+  const allLocationIds = Array.from(new Set(jobLocs.map((r) => r.location_id)));
+  let locsArr: Array<{
+    id: string;
+    name: string;
+    logo_url: string | null;
+    public_dso_affiliation: boolean;
+  }> = [];
+  if (allLocationIds.length > 0) {
+    const { data: locRows, error: locErr } = await admin
+      .from("dso_locations")
+      .select("id, name, logo_url, public_dso_affiliation")
+      .in("id", allLocationIds);
     if (locErr) {
-      console.warn("[affiliation] job_locations lookup failed", locErr);
+      console.warn("[affiliation] dso_locations lookup failed", locErr);
     }
-    locRows = (locRes ?? []) as unknown as LocShape[];
+    locsArr = (locRows ?? []) as typeof locsArr;
   }
+  const locById = new Map(locsArr.map((l) => [l.id, l]));
+
+  // Group locations by job, preserving order (first wins for fallback)
   const locsByJob = new Map<
     string,
-    Array<{
-      id: string;
-      name: string;
-      logoUrl: string | null;
-      isPublic: boolean;
-    }>
+    Array<{ id: string; name: string; logoUrl: string | null; isPublic: boolean }>
   >();
-  for (const row of locRows) {
-    const dl = row.dso_locations[0];
-    if (!dl) continue;
-    const list = locsByJob.get(row.job_id) ?? [];
+  for (const jl of jobLocs) {
+    const loc = locById.get(jl.location_id);
+    if (!loc) continue;
+    const list = locsByJob.get(jl.job_id) ?? [];
     list.push({
-      id: dl.id,
-      name: dl.name,
-      logoUrl: dl.logo_url,
-      isPublic: dl.public_dso_affiliation,
+      id: loc.id,
+      name: loc.name,
+      logoUrl: loc.logo_url,
+      isPublic: loc.public_dso_affiliation,
     });
-    locsByJob.set(row.job_id, list);
+    locsByJob.set(jl.job_id, list);
   }
 
-  // 3. Resolve each application
+  // 5. Resolve each application
   for (const app of apps) {
-    const job = app.jobs[0];
+    const job = jobMap.get(app.job_id);
     if (!job) continue;
-    const dso = job.dsos[0];
+    const dso = dsoMap.get(job.dso_id);
     if (!dso) continue;
 
     const dsoName = dso.name;
@@ -210,8 +238,8 @@ export async function resolveCandidateApplicationAffiliations(
     const policy = dso.affiliation_reveal_policy;
     const locs = locsByJob.get(job.id) ?? [];
 
-    // Corporate / regional jobs: governed by jobs.scope, not by
-    // location tagging. Always show DSO name + logo.
+    // Corporate / regional jobs: governed by jobs.scope, not location
+    // tagging. Always show DSO name + logo.
     const isScopeOverride = job.scope === "corporate" || job.scope === "regional";
     const allLocsPublic = locs.length === 0 || locs.every((l) => l.isPublic);
     const jobIsPublicAffiliated = isScopeOverride || allLocsPublic;
@@ -225,15 +253,25 @@ export async function resolveCandidateApplicationAffiliations(
 
     const showDsoName = jobIsPublicAffiliated || policyAllowsReveal;
 
+    // Mask fallback: prefer the FIRST PRIVATE location's name + logo.
+    // Cam's 2026-05-08 PM direction — "Multiple locations" felt
+    // generic and unhelpful; using the actual practice name is more
+    // candidate-friendly even when the job spans multiple locations.
+    // Most-private-inherits guarantees there's at least one private
+    // location to point at. Fall through to the first overall location
+    // (defensive) and finally to "Hiring team" only when there are
+    // literally no locations on the job.
+    const privateLocs = locs.filter((l) => !l.isPublic);
+    const fallbackLoc = privateLocs[0] ?? locs[0] ?? null;
+    const fallbackName = fallbackLoc?.name ?? "Hiring team";
+    const fallbackLogo = fallbackLoc?.logoUrl ?? null;
     const singlePractice = locs.length === 1 ? locs[0]! : null;
-    const fallbackName = singlePractice?.name ?? "Multiple locations";
-    const fallbackLogo = singlePractice?.logoUrl ?? null;
 
     out.set(app.id, {
       name: showDsoName ? dsoName : fallbackName,
       isCorporate: showDsoName,
       dsoName,
-      practiceName: singlePractice?.name ?? null,
+      practiceName: singlePractice?.name ?? fallbackLoc?.name ?? null,
       avatarUrl: showDsoName ? dsoLogo : fallbackLogo,
     });
   }
@@ -255,6 +293,13 @@ interface JobAffiliationContext {
    * null for multi-location jobs.
    */
   singlePracticeName: string | null;
+  /**
+   * For multi-location jobs: the FIRST linked location's name —
+   * preferring the first private location when at least one is
+   * private (per Cam 2026-05-08 PM, "Multiple locations" was too
+   * generic). Used as the masked display fallback.
+   */
+  firstLocationName: string | null;
 }
 
 /**
@@ -336,6 +381,7 @@ async function fetchJobAffiliationContext(
       allLocationsPublic: false,
       scope: "location",
       singlePracticeName: null,
+      firstLocationName: null,
     };
   }
   return all[0]!;
@@ -416,6 +462,13 @@ async function fetchJobAffiliationContextsBatch(
     const allLocationsPublic =
       locs.length > 0 && locs.every((l) => l.isPublic);
     const singlePracticeName = locs.length === 1 ? locs[0]!.name : null;
+    // Prefer the first PRIVATE location's name as the masked display
+    // fallback for multi-location jobs (Cam 2026-05-08 PM). When no
+    // location is private (defensive — shouldn't reach masking branch
+    // anyway), fall through to the first overall location.
+    const privateLocs = locs.filter((l) => !l.isPublic);
+    const firstLocationName =
+      privateLocs[0]?.name ?? locs[0]?.name ?? null;
     return {
       jobId: j.id,
       dsoId: j.dso_id,
@@ -424,6 +477,7 @@ async function fetchJobAffiliationContextsBatch(
       allLocationsPublic,
       scope: j.scope ?? "location",
       singlePracticeName,
+      firstLocationName,
     };
   });
 }
@@ -493,10 +547,10 @@ function resolveDisplayedName(
   //   - candidate: layered policy from the DSO.
   if (viewer.role === "public") {
     return {
-      name: ctx.singlePracticeName ?? "Multiple locations",
+      name: ctx.singlePracticeName ?? ctx.firstLocationName ?? "Hiring team",
       isCorporate: false,
       dsoName: ctx.dsoName,
-      practiceName: ctx.singlePracticeName,
+      practiceName: ctx.singlePracticeName ?? ctx.firstLocationName,
       avatarUrl: null,
     };
   }
@@ -524,10 +578,10 @@ function resolveDisplayedName(
   }
 
   return {
-    name: ctx.singlePracticeName ?? "Multiple locations",
+    name: ctx.singlePracticeName ?? ctx.firstLocationName ?? "Hiring team",
     isCorporate: false,
     dsoName: ctx.dsoName,
-    practiceName: ctx.singlePracticeName,
+    practiceName: ctx.singlePracticeName ?? ctx.firstLocationName,
     avatarUrl: null,
   };
 }
