@@ -31,6 +31,9 @@ import {
 } from "lucide-react";
 import { CandidateShell } from "@/components/candidate/candidate-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
+import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
+import type { FitResult } from "@/lib/practice-fit/types";
 import { StatusProgress } from "@/components/dashboard/status-progress";
 import {
   STAGE_LABELS,
@@ -237,6 +240,19 @@ export default async function CandidateApplicationsPage({
     filteredApps = []; // saved tab renders its own content below
   }
 
+  // ── Practice Fit per filtered application ──────────────────────────
+  // Compute fits ONLY for the currently-rendered tab, in parallel.
+  // Skipped on the Saved tab (it has its own data path below). Each
+  // call hits the cache; v1.1 role filter may return null, in which
+  // case we fall back to the placeholder chip.
+  const fitsByAppId = new Map<string, FitResult | null>();
+  if (activeTab !== "saved" && filteredApps.length > 0) {
+    const fits = await Promise.all(
+      filteredApps.map((a) => getPracticeFit(candidateId, a.job_id))
+    );
+    filteredApps.forEach((a, i) => fitsByAppId.set(a.id, fits[i]));
+  }
+
   // ── Saved-jobs payload (only fetched when on the Saved tab) ─────────
   type SavedJobRow = {
     id: string;
@@ -288,6 +304,7 @@ export default async function CandidateApplicationsPage({
             dsoMap={dsoMap}
             locsByJob={locsByJob}
             unreadByAppId={unreadByAppId}
+            fitsByAppId={fitsByAppId}
           />
         )}
       </div>
@@ -356,6 +373,7 @@ function ApplicationsList({
   dsoMap,
   locsByJob,
   unreadByAppId,
+  fitsByAppId,
 }: {
   apps: Array<{
     id: string;
@@ -387,6 +405,7 @@ function ApplicationsList({
     }>
   >;
   unreadByAppId: Map<string, number>;
+  fitsByAppId: Map<string, FitResult | null>;
 }) {
   return (
     <ul className="space-y-3">
@@ -412,7 +431,18 @@ function ApplicationsList({
                     {app.self_reported_status && (
                       <SelfReportedChip status={app.self_reported_status} />
                     )}
-                    <PracticeFitPlaceholder />
+                    {(() => {
+                      const fit = fitsByAppId.get(app.id);
+                      // Render the live chip when we have a score; the
+                      // placeholder is the fallback for: role-filtered
+                      // pairs (computePracticeFit returned null), consent
+                      // off, or compute-not-yet-run on a fresh row.
+                      return fit ? (
+                        <PracticeFitChip fit={fit} size="sm" />
+                      ) : (
+                        <PracticeFitPlaceholder />
+                      );
+                    })()}
                     {unreadCount > 0 && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-heritage/15 px-2 py-0.5 text-[11px] font-bold text-heritage-deep">
                         <MessageCircle className="size-3" />
@@ -654,7 +684,7 @@ function PracticeFitPlaceholder() {
   return (
     <span
       className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500"
-      title="Practice Fit launches in a future update."
+      title="Practice Fit unavailable — likely a different role from your preferences, or your privacy settings have it off. Open your profile to adjust."
     >
       <Sparkles className="size-3" />
       Fit · —
