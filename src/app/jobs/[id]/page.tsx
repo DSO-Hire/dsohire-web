@@ -10,7 +10,15 @@
 
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, MapPin, Briefcase, Clock, DollarSign } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Briefcase,
+  Clock,
+  DollarSign,
+  MapPin,
+  Sparkles,
+} from "lucide-react";
 import { SiteShell } from "@/components/marketing/site-shell";
 import {
   RenderedJobDescription,
@@ -20,6 +28,11 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { SaveJobButton } from "@/lib/saved-jobs/save-job-button";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
 import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
+import {
+  PracticeFitPlaceholder,
+  classifyPlaceholderReason,
+  type PlaceholderReason,
+} from "@/components/practice-fit/placeholder";
 import { WhyThisMatch } from "@/components/practice-fit/why-this-match";
 import type { FitResult } from "@/lib/practice-fit/types";
 import type { Metadata } from "next";
@@ -162,6 +175,12 @@ export default async function JobDetailPage({ params }: PageProps) {
   let candidateAuthed = false;
   let initialSaved = false;
   let practiceFit: FitResult | null = null;
+  // Reason-rich placeholder support (focused-pass extension, gap caught
+  // by Cam 2026-05-08 PM viewing a Front Office job as a dental
+  // assistant — page went silent on Practice Fit). Classified only on
+  // the candidate's own data, just like the other candidate-side
+  // surfaces.
+  let practiceFitReason: PlaceholderReason | null = null;
   // Hoisted out of the inner block so the JSX can pass it to
   // WhyThisMatch for the v1 narrative fetch.
   let viewerCandidateId: string | null = null;
@@ -171,13 +190,17 @@ export default async function JobDetailPage({ params }: PageProps) {
   if (viewer) {
     const { data: candidateRow } = await supabase
       .from("candidates")
-      .select("id, practice_fit_consent")
+      .select("id, practice_fit_consent, desired_roles")
       .eq("auth_user_id", viewer.id)
       .maybeSingle();
     if (candidateRow) {
       candidateAuthed = true;
       const candidateId = (candidateRow as Record<string, unknown>).id as string;
       viewerCandidateId = candidateId;
+      const candidateDesiredRoles =
+        ((candidateRow as Record<string, unknown>).desired_roles as
+          | string[]
+          | null) ?? [];
       const { data: existing } = await supabase
         .from("saved_jobs")
         .select("id")
@@ -191,6 +214,12 @@ export default async function JobDetailPage({ params }: PageProps) {
         .practice_fit_consent as string;
       if (consent !== "off") {
         practiceFit = await getPracticeFit(candidateId, id);
+        if (!practiceFit) {
+          practiceFitReason = classifyPlaceholderReason(
+            candidateDesiredRoles,
+            (job as { role_category?: string | null } | null)?.role_category
+          );
+        }
       }
 
       // Existing application lookup — drives the Apply button swap.
@@ -261,7 +290,11 @@ export default async function JobDetailPage({ params }: PageProps) {
                 </span>
               </span>
             )}
-            {practiceFit && <PracticeFitChip fit={practiceFit} size="md" />}
+            {practiceFit ? (
+              <PracticeFitChip fit={practiceFit} size="md" />
+            ) : practiceFitReason === "role_mismatch" ? (
+              <PracticeFitPlaceholder reason="role_mismatch" />
+            ) : null}
           </div>
           {/* Top CTA bar — Apply + Save. Repeats at the bottom of the
               description for long postings. When the candidate has
@@ -292,8 +325,14 @@ export default async function JobDetailPage({ params }: PageProps) {
           </div>
         </header>
 
-        {/* Practice Fit expander — only when the viewer has a fit on this job */}
-        {practiceFit && viewerCandidateId && (
+        {/* Practice Fit. Scored fit → WhyThisMatch expander with
+            inline-editor lift-your-match flow. No fit + role_mismatch
+            → explanation panel so a signed-in candidate viewing a job
+            outside their preferences understands why fit is missing
+            (gap caught by Cam stress-testing as Jordan Bailey 2026-05-08).
+            Generic "unavailable" stays silent — compute typically
+            populates within seconds. */}
+        {practiceFit && viewerCandidateId ? (
           <div className="mb-10">
             <WhyThisMatch
               fit={practiceFit}
@@ -302,7 +341,32 @@ export default async function JobDetailPage({ params }: PageProps) {
               audience="candidate"
             />
           </div>
-        )}
+        ) : practiceFitReason === "role_mismatch" ? (
+          <div className="mb-10 border border-[var(--rule)] bg-cream/40 p-5">
+            <div className="flex items-start gap-3">
+              <Sparkles className="h-4 w-4 text-heritage-deep mt-0.5 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] font-semibold text-ink mb-1">
+                  Practice Fit isn&apos;t scoring this role for you
+                </p>
+                <p className="text-[13px] text-slate-body leading-relaxed mb-3">
+                  This job&apos;s role isn&apos;t in your preferences,
+                  so we&apos;re not comparing it. Your application would
+                  still go through — but if your goals have shifted,
+                  update your preferred roles to start seeing fit
+                  scores on roles like this one.
+                </p>
+                <Link
+                  href="/candidate/profile#roles"
+                  className="inline-flex items-center gap-1.5 text-[12px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+                >
+                  Update preferred roles
+                  <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-12">
           {/* Description */}
