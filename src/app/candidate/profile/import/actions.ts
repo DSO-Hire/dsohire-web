@@ -30,6 +30,7 @@ import {
 } from "@/lib/resume/extract";
 import { parseResumeWithAI, type ParsedResume } from "@/lib/resume/parse";
 import { getCandidateRecentAiUsage } from "@/lib/ai/usage";
+import { canonicalizeSkill } from "@/lib/candidate/canonical-lists";
 
 // ─────────────────────────────────────────────────────────────────────
 // parseResumeAction
@@ -138,6 +139,23 @@ export async function parseResumeAction(
   });
   if (!result.ok) {
     return { ok: false, errorCode: result.errorCode, error: result.error };
+  }
+
+  // v1.6 — canonicalize free-text skills so the candidate's stored
+  // values share the canonical vocabulary used on the job-side picker.
+  // Practice Fit's skills dim does case-insensitive equality; matching
+  // canonical-to-canonical produces real matches instead of textual
+  // misses ("scaling" → "Scaling & root planing"). De-duplicates the
+  // resulting array since the parser sometimes emits both raw + canon.
+  if (result.parsed.skills.length > 0) {
+    const canon = result.parsed.skills.map(canonicalizeSkill);
+    const seen = new Set<string>();
+    result.parsed.skills = canon.filter((s) => {
+      const k = s.toLowerCase();
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
   }
 
   // Cache the parsed payload + page count + warnings on the candidate

@@ -36,6 +36,11 @@ import {
 } from "./actions";
 import { RecommendedQuestionsPanel } from "./recommended-questions-panel";
 import { JdGeneratorPanel } from "./jd-generator-panel";
+import { ChipArrayInput } from "@/app/candidate/profile/edit-sheet";
+import {
+  getAllDentalSkills,
+  BENEFITS,
+} from "@/lib/candidate/canonical-lists";
 
 /* ───── Types ───── */
 
@@ -249,8 +254,11 @@ export function JobWizard({
     initial?.hide_stages_from_candidate ?? false
   );
   const [scope, setScope] = useState<JobScope>(initial?.scope ?? "location");
-  const [skills, setSkills] = useState(initial?.skills.join(", ") ?? "");
-  const [benefits, setBenefits] = useState(initial?.benefits.join(", ") ?? "");
+  // v1.6 — skills + benefits are now string[] (chip-picker), not the
+  // legacy comma-separated string. Existing rows hydrate from initial.skills
+  // / initial.benefits arrays directly.
+  const [skills, setSkills] = useState<string[]>(initial?.skills ?? []);
+  const [benefits, setBenefits] = useState<string[]>(initial?.benefits ?? []);
   const [requirements, setRequirements] = useState(
     initial?.requirements ?? ""
   );
@@ -348,8 +356,10 @@ export function JobWizard({
     if (hideStagesFromCandidate)
       formData.set("hide_stages_from_candidate", "on");
     formData.set("scope", scope);
-    formData.set("skills", skills);
-    formData.set("benefits", benefits);
+    // v1.6 — multi-value form keys, mirroring specialty. Lets the
+    // server action read getAll() and avoid comma-split parsing.
+    for (const s of skills) formData.append("skills", s);
+    for (const b of benefits) formData.append("benefits", b);
     formData.set("requirements", requirements);
     formData.set("status", status);
     formData.set(
@@ -835,10 +845,11 @@ function DetailsStep({
   onCompPeriod: (v: string) => void;
   compVisible: boolean;
   onCompVisible: (v: boolean) => void;
-  skills: string;
-  onSkills: (v: string) => void;
-  benefits: string;
-  onBenefits: (v: string) => void;
+  // v1.6 — string[] (canonical chip-picker), not legacy comma-string.
+  skills: string[];
+  onSkills: (v: string[]) => void;
+  benefits: string[];
+  onBenefits: (v: string[]) => void;
   requirements: string;
   onRequirements: (v: string) => void;
   hideStagesFromCandidate: boolean;
@@ -957,17 +968,26 @@ function DetailsStep({
         </div>
       </fieldset>
 
-      <Input
-        label="Required skills (comma-separated)"
-        placeholder="implant placement, scaling and root planing, intraoral camera"
-        value={skills}
+      {/* v1.6 — both fields use the SAME canonical pool the candidate
+          side draws from, so skills + benefits no longer require exact
+          string matches between sides. Type to search; pick canonical
+          chips. Custom values still allowed (Enter to add) but matching
+          works best on the canonical vocabulary. */}
+      <ChipArrayInput
+        label="Required skills"
+        values={skills}
         onChange={onSkills}
+        options={getAllDentalSkills()}
+        placeholder="Search skills — type and press Enter for custom"
+        helper="Pick from the canonical dental skill list. Candidates' resumes auto-canonicalize to the same vocabulary, so picking from the suggestions improves match quality."
       />
-      <Input
-        label="Benefits (comma-separated)"
-        placeholder="health, dental, 401k match, PTO, CE allowance"
-        value={benefits}
+      <ChipArrayInput
+        label="Benefits"
+        values={benefits}
         onChange={onBenefits}
+        options={BENEFITS}
+        placeholder="Search benefits — type and press Enter for custom"
+        helper="Standard DSO benefits package. Pick what applies; the chip-picker keeps phrasing consistent across listings."
       />
       <Textarea
         label="Requirements (one per line)"
@@ -1332,8 +1352,8 @@ function PreviewStep({
   compMax: string;
   compPeriod: string;
   compVisible: boolean;
-  skills: string;
-  benefits: string;
+  skills: string[];
+  benefits: string[];
   requirements: string;
   questions: WizardScreeningQuestion[];
   status: string;
@@ -1396,8 +1416,12 @@ function PreviewStep({
             value={formatComp(compMin, compMax, compPeriod)}
           />
           <Row label="Public" value={compVisible ? "Yes" : "Hidden"} />
-          {skills.trim() && <Row label="Skills" value={skills} />}
-          {benefits.trim() && <Row label="Benefits" value={benefits} />}
+          {skills.length > 0 && (
+            <Row label="Skills" value={skills.join(", ")} />
+          )}
+          {benefits.length > 0 && (
+            <Row label="Benefits" value={benefits.join(", ")} />
+          )}
         </dl>
         {requirements.trim() && (
           <div className="mt-3 pt-3 border-t border-[var(--rule)]">

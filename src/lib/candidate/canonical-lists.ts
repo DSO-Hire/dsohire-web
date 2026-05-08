@@ -294,6 +294,170 @@ export function getSkillSuggestions(
   return out;
 }
 
+/**
+ * Flat, deduped, sorted list of every canonical dental skill across all
+ * roles + universals. Used by the JOB-side picker (where the employer
+ * doesn't have a "desired role" context to scope to) so both sides
+ * draw from the same pool. v1.6.
+ */
+export function getAllDentalSkills(): ReadonlyArray<CanonicalOption> {
+  const seen = new Set<string>();
+  const out: CanonicalOption[] = [];
+  const append = (list: ReadonlyArray<CanonicalOption>) => {
+    for (const opt of list) {
+      if (!seen.has(opt.value)) {
+        seen.add(opt.value);
+        out.push(opt);
+      }
+    }
+  };
+  for (const list of Object.values(SKILLS_BY_ROLE)) append(list);
+  append(UNIVERSAL_DENTAL_SKILLS);
+  // Sort alphabetically so the picker's quick-add list scans cleanly.
+  return [...out].sort((a, b) => a.label.localeCompare(b.label));
+}
+
+/**
+ * Canonical synonym → canonical-value table for skill normalization
+ * (resume parser + free-text fallbacks). Lowercase keys, canonical
+ * value matches the canonical SKILLS list exactly.
+ *
+ * Conservative — only obvious synonyms. We'd rather miss a match than
+ * silently re-tag a skill the candidate meant differently.
+ */
+export const SKILL_SYNONYMS: Readonly<Record<string, string>> = {
+  // Hygiene
+  "prophy": "Prophylaxis",
+  "scaling": "Scaling & root planing",
+  "srp": "Scaling & root planing",
+  "perio charting": "Periodontal charting",
+  // Restorative
+  "fillings": "Restorative dentistry",
+  "restorations": "Restorative dentistry",
+  "crowns": "Crown & bridge",
+  "bridges": "Crown & bridge",
+  "rct": "Root canal therapy",
+  "root canals": "Root canal therapy",
+  "endo": "Endodontics",
+  "perio": "Periodontal therapy",
+  // Imaging
+  "x-rays": "Digital x-rays",
+  "xrays": "Digital x-rays",
+  "pano": "CBCT imaging",
+  "panoramic": "CBCT imaging",
+  // Sedation / pain
+  "n2o": "Nitrous oxide",
+  "laughing gas": "Nitrous oxide",
+  "iv": "IV sedation",
+  // CAD/CAM
+  "cerec": "CAD/CAM (CEREC)",
+  "itero": "Digital impressions",
+  "trios": "Digital impressions",
+  // Clinical assistant
+  "4-handed": "Four-handed dentistry",
+  "four handed": "Four-handed dentistry",
+  "sterile": "Sterilization",
+  "autoclave": "Sterilization",
+  // Front desk
+  "billing": "Insurance billing",
+  "scheduling": "Patient scheduling",
+  "intake": "Patient intake",
+  "cdt": "CDT coding",
+  "icd-10": "ICD-10 coding",
+  "icd 10": "ICD-10 coding",
+  // Soft / universal
+  "communication": "Patient communication",
+  "spanish": "Spanish-speaking patients",
+  "se habla espanol": "Spanish-speaking patients",
+  "bilingual": "Spanish-speaking patients",
+  "osha": "OSHA compliance",
+  "hipaa": "HIPAA compliance",
+  "infection": "Infection control",
+};
+
+/**
+ * Map a free-text skill string to its canonical value when possible.
+ * Falls back to the trimmed input. v1.6.
+ */
+export function canonicalizeSkill(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return trimmed;
+  const lower = trimmed.toLowerCase();
+
+  // 1. Direct hit on the canonical-value casing-insensitive lookup.
+  for (const opt of getAllDentalSkills()) {
+    if (opt.value.toLowerCase() === lower) return opt.value;
+  }
+
+  // 2. Known synonym table (lowercase keys).
+  if (SKILL_SYNONYMS[lower]) return SKILL_SYNONYMS[lower];
+
+  // 3. Substring fallback — the input contains a canonical label.
+  // Conservative: only if the input is reasonably close to the label
+  // length, to avoid "patient education materials specialist" matching
+  // "Patient education".
+  for (const opt of getAllDentalSkills()) {
+    const optLower = opt.value.toLowerCase();
+    if (lower === optLower) return opt.value;
+    // Substring match within 30% length tolerance
+    if (optLower.length >= 6 && lower.includes(optLower)
+        && lower.length <= optLower.length * 1.3) {
+      return opt.value;
+    }
+  }
+
+  // 4. No match — return the trimmed original. The candidate keeps
+  // their custom language and we don't silently retag.
+  return trimmed;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Benefits — canonical list of common DSO perks. Job-side chip-picker
+// (v1.6) draws from this so employers don't type "401k", "401(k)",
+// "401-K" inconsistently. Candidates don't have a "desired benefits"
+// field today, but the canonical vocab makes future filtering /
+// matching feasible without re-typing.
+// ─────────────────────────────────────────────────────────────────────
+
+export const BENEFITS: ReadonlyArray<CanonicalOption> = [
+  // Insurance
+  { value: "Health insurance", label: "Health insurance" },
+  { value: "Dental insurance", label: "Dental insurance" },
+  { value: "Vision insurance", label: "Vision insurance" },
+  { value: "Life insurance", label: "Life insurance" },
+  { value: "Short-term disability", label: "Short-term disability" },
+  { value: "Long-term disability", label: "Long-term disability" },
+  // Retirement
+  { value: "401(k)", label: "401(k)" },
+  { value: "401(k) match", label: "401(k) match" },
+  // Time off
+  { value: "Paid time off (PTO)", label: "Paid time off (PTO)" },
+  { value: "Paid holidays", label: "Paid holidays" },
+  { value: "Paid sick leave", label: "Paid sick leave" },
+  { value: "Paid maternity / paternity leave", label: "Paid maternity / paternity leave" },
+  // Professional development
+  { value: "CE allowance", label: "CE allowance" },
+  { value: "License renewal reimbursement", label: "License renewal reimbursement" },
+  { value: "Mentorship program", label: "Mentorship program" },
+  { value: "Professional dues / membership", label: "Professional dues / membership" },
+  // Financial
+  { value: "Sign-on bonus", label: "Sign-on bonus" },
+  { value: "Production bonus", label: "Production bonus" },
+  { value: "Relocation assistance", label: "Relocation assistance" },
+  { value: "Student loan repayment", label: "Student loan repayment" },
+  { value: "Equity / partnership track", label: "Equity / partnership track" },
+  // Wellness / lifestyle
+  { value: "Free dental for staff + family", label: "Free dental for staff + family" },
+  { value: "Discounted dental for friends", label: "Discounted dental for friends" },
+  { value: "Mental health support", label: "Mental health support" },
+  { value: "Gym / wellness stipend", label: "Gym / wellness stipend" },
+  // Schedule
+  { value: "Flexible schedule", label: "Flexible schedule" },
+  { value: "4-day work week", label: "4-day work week" },
+  { value: "No nights / weekends", label: "No nights / weekends" },
+  { value: "Remote / hybrid (eligible roles)", label: "Remote / hybrid (eligible roles)" },
+];
+
 // ─────────────────────────────────────────────────────────────────────
 // Languages — minimal seed; the chip input lets candidates add free-form
 // for less common languages, since there's no matching impact.

@@ -413,9 +413,24 @@ export async function updateJobDetailsSection(
   const compVisible = formData.get("compensation_visible") === "on";
   const hideStagesFromCandidate =
     formData.get("hide_stages_from_candidate") === "on";
-  const benefitsRaw = String(formData.get("benefits") ?? "").trim();
+  // v1.6 — chip-picker multi-value path with CSV legacy fallback.
+  const skillsMulti = formData
+    .getAll("skills")
+    .map((v) => String(v).trim())
+    .filter(Boolean);
+  const benefitsMulti = formData
+    .getAll("benefits")
+    .map((v) => String(v).trim())
+    .filter(Boolean);
+  const skillsCsv =
+    skillsMulti.length === 1 && skillsMulti[0].includes(",")
+      ? skillsMulti[0]
+      : "";
+  const benefitsCsv =
+    benefitsMulti.length === 1 && benefitsMulti[0].includes(",")
+      ? benefitsMulti[0]
+      : "";
   const requirements = String(formData.get("requirements") ?? "").trim();
-  const skillsRaw = String(formData.get("skills") ?? "").trim();
 
   const compMin = compMinRaw ? parseInt(compMinRaw, 10) : null;
   const compMax = compMaxRaw ? parseInt(compMaxRaw, 10) : null;
@@ -426,14 +441,18 @@ export async function updateJobDetailsSection(
     return { ok: false, error: "Max compensation must be a number." };
   }
 
-  const benefits = benefitsRaw
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  const skills = skillsRaw
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const benefits = benefitsMulti.length > 0 && !benefitsCsv
+    ? benefitsMulti
+    : benefitsCsv
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+  const skills = skillsMulti.length > 0 && !skillsCsv
+    ? skillsMulti
+    : skillsCsv
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
 
   // v1.1 — multi-select specialty + optional min years of experience.
   const specialty = formData
@@ -738,10 +757,32 @@ function parseJobFormData(
   const compVisible = formData.get("compensation_visible") === "on";
   const hideStagesFromCandidate =
     formData.get("hide_stages_from_candidate") === "on";
-  const benefitsRaw = String(formData.get("benefits") ?? "").trim();
+  // v1.6 — skills + benefits are multi-value form keys (chip-picker)
+  // backed by the canonical lists. Legacy comma-string fallback kept
+  // for any older callers; we read getAll first and only fall back to
+  // the comma-split when no multi-values were submitted.
+  const skillsMulti = formData
+    .getAll("skills")
+    .map((v) => String(v).trim())
+    .filter(Boolean);
+  const benefitsMulti = formData
+    .getAll("benefits")
+    .map((v) => String(v).trim())
+    .filter(Boolean);
+  // Comma-split fallback only when the multi-value path is empty AND
+  // the field was submitted as a single CSV string (legacy). Detect by
+  // checking the FIRST entry — if it contains a comma, it's likely CSV.
+  const skillsRaw =
+    skillsMulti.length === 1 && skillsMulti[0].includes(",")
+      ? skillsMulti[0]
+      : "";
+  const benefitsRaw =
+    benefitsMulti.length === 1 && benefitsMulti[0].includes(",")
+      ? benefitsMulti[0]
+      : "";
+
   const requirements = String(formData.get("requirements") ?? "").trim();
   const status = String(formData.get("status") ?? "draft");
-  const skillsRaw = String(formData.get("skills") ?? "").trim();
   const scopeRaw = String(formData.get("scope") ?? "location").trim();
   const scope = (
     VALID_SCOPES.has(scopeRaw as "location" | "regional" | "corporate")
@@ -773,14 +814,19 @@ function parseJobFormData(
     return { error: "Max compensation must be a number." };
   }
 
-  const benefits = benefitsRaw
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  const skills = skillsRaw
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
+  // Prefer the multi-value chip-picker submissions; fall back to CSV.
+  const benefits = benefitsMulti.length > 0 && !benefitsRaw
+    ? benefitsMulti
+    : benefitsRaw
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+  const skills = skillsMulti.length > 0 && !skillsRaw
+    ? skillsMulti
+    : skillsRaw
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
 
   // v1.1 — multi-select submitted as repeated `specialty` form entries.
   const specialty = formData

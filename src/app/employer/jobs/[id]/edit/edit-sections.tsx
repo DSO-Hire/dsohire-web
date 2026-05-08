@@ -43,6 +43,11 @@ import {
 } from "../../actions";
 import { RecommendedQuestionsPanel } from "../../recommended-questions-panel";
 import { JdGeneratorPanel } from "../../jd-generator-panel";
+import { ChipArrayInput } from "@/app/candidate/profile/edit-sheet";
+import {
+  getAllDentalSkills,
+  BENEFITS,
+} from "@/lib/candidate/canonical-lists";
 import {
   SCOPE_OPTIONS,
   type LocationOption,
@@ -620,8 +625,9 @@ function DetailsSection({
   );
   const [compPeriod, setCompPeriod] = useState(initialCompPeriod);
   const [compVisible, setCompVisible] = useState(initialCompVisible);
-  const [skills, setSkills] = useState(initialSkills.join(", "));
-  const [benefits, setBenefits] = useState(initialBenefits.join(", "));
+  // v1.6 — string[] chip-picker, not legacy comma-string.
+  const [skills, setSkills] = useState<string[]>(initialSkills);
+  const [benefits, setBenefits] = useState<string[]>(initialBenefits);
   const [requirements, setRequirements] = useState(initialRequirements);
   const [hideStages, setHideStages] = useState(initialHideStages);
   // v1.1 — Practice Fit fields. specialty as a Set for chip-toggle ergonomics.
@@ -640,8 +646,10 @@ function DetailsSection({
     compMax: initialCompMax !== null ? String(initialCompMax) : "",
     compPeriod: initialCompPeriod,
     compVisible: initialCompVisible,
-    skills: initialSkills.join(", "),
-    benefits: initialBenefits.join(", "),
+    // v1.6 — store as sorted-join key so order changes don't trigger
+    // false dirty state.
+    skills: [...initialSkills].sort().join("|"),
+    benefits: [...initialBenefits].sort().join("|"),
     requirements: initialRequirements,
     hideStages: initialHideStages,
     specialtyKey: initialSpecialtyKey,
@@ -657,13 +665,15 @@ function DetailsSection({
   const [saved, setSaved] = useState(false);
 
   const specialtyKey = [...specialty].sort().join(",");
+  const skillsKey = [...skills].sort().join("|");
+  const benefitsKey = [...benefits].sort().join("|");
   const dirty =
     compMin !== snapshot.compMin ||
     compMax !== snapshot.compMax ||
     compPeriod !== snapshot.compPeriod ||
     compVisible !== snapshot.compVisible ||
-    skills !== snapshot.skills ||
-    benefits !== snapshot.benefits ||
+    skillsKey !== snapshot.skills ||
+    benefitsKey !== snapshot.benefits ||
     requirements !== snapshot.requirements ||
     hideStages !== snapshot.hideStages ||
     specialtyKey !== snapshot.specialtyKey ||
@@ -682,8 +692,9 @@ function DetailsSection({
     fd.set("compensation_period", compPeriod);
     if (compVisible) fd.set("compensation_visible", "on");
     if (hideStages) fd.set("hide_stages_from_candidate", "on");
-    fd.set("skills", skills);
-    fd.set("benefits", benefits);
+    // v1.6 — multi-value submission for chip-pickers.
+    for (const s of skills) fd.append("skills", s);
+    for (const b of benefits) fd.append("benefits", b);
     fd.set("requirements", requirements);
     for (const sp of specialty) fd.append("specialty", sp);
     fd.set("min_years_experience", minYearsExperience);
@@ -702,8 +713,8 @@ function DetailsSection({
         compMax,
         compPeriod,
         compVisible,
-        skills,
-        benefits,
+        skills: skillsKey,
+        benefits: benefitsKey,
         requirements,
         hideStages,
         specialtyKey,
@@ -834,23 +845,29 @@ function DetailsSection({
           </div>
         </fieldset>
 
-        <Input
-          label="Required skills (comma-separated)"
-          placeholder="implant placement, scaling and root planing, intraoral camera"
-          value={skills}
-          onChange={(v) => {
-            setSkills(v);
+        {/* v1.6 — canonical chip-pickers. Same vocabulary the candidate
+            side uses, so skills + benefits actually match between sides. */}
+        <ChipArrayInput
+          label="Required skills"
+          values={skills}
+          onChange={(next) => {
+            setSkills(next);
             touch();
           }}
+          options={getAllDentalSkills()}
+          placeholder="Search skills — type and press Enter for custom"
+          helper="Pick from the canonical dental skill list. Custom entries allowed but matching works best on the canonical vocabulary."
         />
-        <Input
-          label="Benefits (comma-separated)"
-          placeholder="health, dental, 401k match, PTO, CE allowance"
-          value={benefits}
-          onChange={(v) => {
-            setBenefits(v);
+        <ChipArrayInput
+          label="Benefits"
+          values={benefits}
+          onChange={(next) => {
+            setBenefits(next);
             touch();
           }}
+          options={BENEFITS}
+          placeholder="Search benefits — type and press Enter for custom"
+          helper="Standard DSO benefits. Pick what applies."
         />
         <Textarea
           label="Requirements (one per line)"
