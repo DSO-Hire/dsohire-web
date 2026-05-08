@@ -392,80 +392,95 @@ async function fetchJobAffiliationContextsBatch(
 ): Promise<JobAffiliationContext[]> {
   const admin = createSupabaseServiceRoleClient();
 
-  // Two parallel queries: (1) jobs joined to dsos for the policy, (2)
-  // job_locations joined to dso_locations for the affiliation/practice
-  // names. Keeps the query plans simple at our row volume.
-  const [jobsRes, jobLocsRes] = await Promise.all([
-    admin
-      .from("jobs")
-      .select(
-        "id, dso_id, scope, dsos!inner(id, name, affiliation_reveal_policy)"
-      )
-      .in("id", jobIds),
-    admin
-      .from("job_locations")
-      .select(
-        "job_id, dso_locations!inner(id, name, public_dso_affiliation)"
-      )
-      .in("job_id", jobIds),
-  ]);
-
-  // Supabase typing note (caught on Vercel 2026-05-08 PM): embedded
-  // selects with !inner come back as ARRAYS at runtime even for
-  // to-one FK relationships — the inner row is always wrapped in a
-  // 1-element array. The type declarations here mirror that runtime
-  // shape and we index via [0]. Casting through unknown is the
-  // pragmatic step since Supabase's auto-inferred types use the array
-  // form and rejecting them with our singular-object type triggers
-  // tsc's "types too dissimilar" error.
-  type JobRow = {
+  // Four flat queries instead of two with embedded inner-joins. The
+  // embedded `dsos!inner(...)` and `dso_locations!inner(...)` selects
+  // were silently returning empty in production (caught 2026-05-08 PM
+  // when the application detail + /jobs surfaces kept rendering the
+  // "Hiring team" fallback). Same fix shape as
+  // resolveCandidateApplicationAffiliations — split + JS-side join.
+  const { data: jobRows, error: jobsErr } = await admin
+    .from("jobs")
+    .select("id, dso_id, scope")
+    .in("id", jobIds);
+  if (jobsErr) {
+    console.warn("[affiliation] jobs lookup failed", jobsErr);
+    return [];
+  }
+  const jobsArr = (jobRows ?? []) as Array<{
     id: string;
     dso_id: string;
     scope: "location" | "regional" | "corporate" | null;
-    dsos: Array<{
-      id: string;
-      name: string;
-      affiliation_reveal_policy: "never" | "after_hire" | "per_application";
-    }>;
-  };
-  type JobLocRow = {
-    job_id: string;
-    dso_locations: Array<{
-      id: string;
-      name: string;
-      public_dso_affiliation: boolean;
-    }>;
-  };
+  }>;
 
-  const jobs = (jobsRes.data ?? []) as unknown as JobRow[];
-  const jobLocs = (jobLocsRes.data ?? []) as unknown as JobLocRow[];
+  const dsoIds = Array.from(new Set(jobsArr.map((j) => j.dso_id)));
+  let dsosArr: Array<{
+    id: string;
+    name: string;
+    affiliation_reveal_policy: "never" | "after_hire" | "per_application";
+  }> = [];
+  if (dsoIds.length > 0) {
+    const { data: dsoRows, error: dsosErr } = await admin
+      .from("dsos")
+      .select("id, name, affiliation_reveal_policy")
+      .in("id", dsoIds);
+    if (dsosErr) {
+      console.warn("[affiliation] dsos lookup failed", dsosErr);
+    }
+    dsosArr = (dsoRows ?? []) as typeof dsosArr;
+  }
+  const dsoMap = new Map(dsosArr.map((d) => [d.id, d]));
+
+  const { data: jlRows, error: jlErr } = await admin
+    .from("job_locations")
+    .select("job_id, location_id")
+    .in("job_id", jobIds);
+  if (jlErr) {
+    console.warn("[affiliation] job_locations lookup failed", jlErr);
+  }
+  const jobLocs = (jlRows ?? []) as Array<{
+    job_id: string;
+    location_id: string;
+  }>;
+  const allLocationIds = Array.from(new Set(jobLocs.map((r) => r.location_id)));
+  let locsArr: Array<{
+    id: string;
+    name: string;
+    public_dso_affiliation: boolean;
+  }> = [];
+  if (allLocationIds.length > 0) {
+    const { data: locRows, error: locErr } = await admin
+      .from("dso_locations")
+      .select("id, name, public_dso_affiliation")
+      .in("id", allLocationIds);
+    if (locErr) {
+      console.warn("[affiliation] dso_locations lookup failed", locErr);
+    }
+    locsArr = (locRows ?? []) as typeof locsArr;
+  }
+  const locById = new Map(locsArr.map((l) => [l.id, l]));
 
   const locsByJob = new Map<
     string,
     Array<{ id: string; name: string; isPublic: boolean }>
   >();
-  for (const row of jobLocs) {
-    const dsoLoc = row.dso_locations[0];
-    if (!dsoLoc) continue;
-    const arr = locsByJob.get(row.job_id) ?? [];
+  for (const jl of jobLocs) {
+    const loc = locById.get(jl.location_id);
+    if (!loc) continue;
+    const arr = locsByJob.get(jl.job_id) ?? [];
     arr.push({
-      id: dsoLoc.id,
-      name: dsoLoc.name,
-      isPublic: dsoLoc.public_dso_affiliation,
+      id: loc.id,
+      name: loc.name,
+      isPublic: loc.public_dso_affiliation,
     });
-    locsByJob.set(row.job_id, arr);
+    locsByJob.set(jl.job_id, arr);
   }
 
-  return jobs.map<JobAffiliationContext>((j) => {
+  return jobsArr.map<JobAffiliationContext>((j) => {
     const locs = locsByJob.get(j.id) ?? [];
-    const dso = j.dsos[0];
+    const dso = dsoMap.get(j.dso_id);
     const allLocationsPublic =
       locs.length > 0 && locs.every((l) => l.isPublic);
     const singlePracticeName = locs.length === 1 ? locs[0]!.name : null;
-    // Prefer the first PRIVATE location's name as the masked display
-    // fallback for multi-location jobs (Cam 2026-05-08 PM). When no
-    // location is private (defensive — shouldn't reach masking branch
-    // anyway), fall through to the first overall location.
     const privateLocs = locs.filter((l) => !l.isPublic);
     const firstLocationName =
       privateLocs[0]?.name ?? locs[0]?.name ?? null;

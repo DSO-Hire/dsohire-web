@@ -22,6 +22,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
 import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
 import type { FitResult } from "@/lib/practice-fit/types";
+import { getDisplayedDsoNamesBatch } from "@/lib/dso/affiliation-display";
 
 export const metadata: Metadata = { title: "Jobs · DSO Hire" };
 
@@ -122,9 +123,21 @@ export default async function CandidateJobsPage() {
     }
   }
 
+  // Affiliation display per job (Phase 4.5.b launch-blocker). Public
+  // viewer — no application context. Service-role-backed batch helper
+  // resolves the right name (DSO name if all linked locations public,
+  // first private location's practice name if any are private).
+  const displayedNameByJob = await getDisplayedDsoNamesBatch({
+    jobIds,
+    viewer: { role: "public" },
+  });
+
   const enriched: JobRow[] = jobs.map((j) => ({
     ...j,
-    dso_name: dsoNameById.get(j.dso_id) ?? null,
+    dso_name:
+      displayedNameByJob.get(j.id)?.name ??
+      dsoNameById.get(j.dso_id) ??
+      null,
   }));
 
   // Practice Fit (Phase 5D v0) — only when the signed-in user has a
