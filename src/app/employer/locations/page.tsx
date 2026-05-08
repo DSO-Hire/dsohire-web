@@ -12,11 +12,29 @@ import { ArrowRight, MapPin, Plus } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { Avatar } from "@/components/ui/avatar";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { ListSort } from "@/components/ui/list-sort";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Locations" };
 
-export default async function EmployerLocationsPage() {
+const LOC_SORT_OPTIONS = [
+  { value: "name", label: "Name (A→Z)" },
+  { value: "city", label: "City (A→Z)" },
+  { value: "jobs", label: "Most active jobs" },
+  { value: "newest", label: "Recently added" },
+] as const;
+type LocSortKey = (typeof LOC_SORT_OPTIONS)[number]["value"];
+
+interface PageProps {
+  searchParams: Promise<{ sort?: string }>;
+}
+
+export default async function EmployerLocationsPage({ searchParams }: PageProps) {
+  const sp = await searchParams;
+  const sortKey: LocSortKey =
+    (LOC_SORT_OPTIONS.find((o) => o.value === sp.sort)?.value as
+      | LocSortKey
+      | undefined) ?? "name";
   const supabase = await createSupabaseServerClient();
 
   const {
@@ -42,10 +60,10 @@ export default async function EmployerLocationsPage() {
     .eq("dso_id", dsoUser.dso_id)
     .order("name", { ascending: true });
 
-  const locationList = (locations ?? []) as LocationRow[];
+  const allLocations = (locations ?? []) as LocationRow[];
 
   // Count active job tags per location so we can show "in use on N jobs"
-  const locationIds = locationList.map((l) => l.id);
+  const locationIds = allLocations.map((l) => l.id);
   const jobTagCounts = new Map<string, number>();
 
   if (locationIds.length > 0) {
@@ -62,6 +80,31 @@ export default async function EmployerLocationsPage() {
       jobTagCounts.set(row.location_id, (jobTagCounts.get(row.location_id) ?? 0) + 1);
     }
   }
+
+  // Apply sort
+  const locationList = (() => {
+    const sorted = [...allLocations];
+    if (sortKey === "city") {
+      sorted.sort((a, b) =>
+        (a.city ?? "").localeCompare(b.city ?? "", undefined, {
+          sensitivity: "base",
+        })
+      );
+    } else if (sortKey === "jobs") {
+      sorted.sort(
+        (a, b) =>
+          (jobTagCounts.get(b.id) ?? 0) - (jobTagCounts.get(a.id) ?? 0)
+      );
+    } else if (sortKey === "newest") {
+      sorted.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() -
+          new Date(a.created_at).getTime()
+      );
+    }
+    // Default: name (already DB-ordered).
+    return sorted;
+  })();
 
   return (
     <EmployerShell active="locations">
@@ -90,15 +133,27 @@ export default async function EmployerLocationsPage() {
       {locationList.length === 0 ? (
         <EmptyState />
       ) : (
-        <ul className="list-none border-t border-[var(--rule)]">
-          {locationList.map((loc) => (
-            <LocationRowItem
-              key={loc.id}
-              location={loc}
-              activeJobs={jobTagCounts.get(loc.id) ?? 0}
-            />
-          ))}
-        </ul>
+        <>
+          {locationList.length > 1 && (
+            <div className="mb-3 flex items-center justify-end">
+              <ListSort
+                basePath="/employer/locations"
+                options={LOC_SORT_OPTIONS}
+                activeValue={sortKey}
+                defaultValue="name"
+              />
+            </div>
+          )}
+          <ul className="list-none border-t border-[var(--rule)]">
+            {locationList.map((loc) => (
+              <LocationRowItem
+                key={loc.id}
+                location={loc}
+                activeJobs={jobTagCounts.get(loc.id) ?? 0}
+              />
+            ))}
+          </ul>
+        </>
       )}
     </EmployerShell>
   );

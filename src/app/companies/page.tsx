@@ -13,6 +13,7 @@ import Link from "next/link";
 import { ArrowRight, Building2, MapPin } from "lucide-react";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { ListSort } from "@/components/ui/list-sort";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -20,6 +21,18 @@ export const metadata: Metadata = {
   description:
     "Browse the dental support organizations hiring through DSO Hire — verified, mid-market dental groups operating 10+ practices across the U.S.",
 };
+
+const COMPANIES_SORT_OPTIONS = [
+  { value: "name", label: "Name (A→Z)" },
+  { value: "practices", label: "Most practices" },
+  { value: "jobs", label: "Most open jobs" },
+  { value: "newest", label: "Recently verified" },
+] as const;
+type CompaniesSortKey = (typeof COMPANIES_SORT_OPTIONS)[number]["value"];
+
+interface PageProps {
+  searchParams: Promise<{ sort?: string }>;
+}
 
 interface DsoRow {
   id: string;
@@ -33,7 +46,12 @@ interface DsoRow {
   verified_at: string | null;
 }
 
-export default async function CompaniesPage() {
+export default async function CompaniesPage({ searchParams }: PageProps) {
+  const sp = await searchParams;
+  const sortKey: CompaniesSortKey =
+    (COMPANIES_SORT_OPTIONS.find((o) => o.value === sp.sort)?.value as
+      | CompaniesSortKey
+      | undefined) ?? "name";
   const supabase = await createSupabaseServerClient();
 
   const { data: rawDsos } = await supabase
@@ -65,8 +83,10 @@ export default async function CompaniesPage() {
       dsosWithPublicLocation.add(r.dso_id);
     }
   }
-  const dsos = allDsos.filter((d) => dsosWithPublicLocation.has(d.id));
-  const dsoIds = dsos.map((d) => d.id);
+  const filteredDsos = allDsos.filter((d) =>
+    dsosWithPublicLocation.has(d.id)
+  );
+  const dsoIds = filteredDsos.map((d) => d.id);
 
   // Count active jobs per DSO. RLS already filters to active+non-deleted, so
   // a single query gives us the raw rows; we group in memory.
@@ -83,6 +103,29 @@ export default async function CompaniesPage() {
       jobCountByDso.set(row.dso_id, (jobCountByDso.get(row.dso_id) ?? 0) + 1);
     }
   }
+
+  // Apply sort
+  const dsos = (() => {
+    const sorted = [...filteredDsos];
+    if (sortKey === "practices") {
+      sorted.sort(
+        (a, b) => (b.practice_count ?? 0) - (a.practice_count ?? 0)
+      );
+    } else if (sortKey === "jobs") {
+      sorted.sort(
+        (a, b) =>
+          (jobCountByDso.get(b.id) ?? 0) - (jobCountByDso.get(a.id) ?? 0)
+      );
+    } else if (sortKey === "newest") {
+      sorted.sort((a, b) => {
+        const ta = a.verified_at ? new Date(a.verified_at).getTime() : 0;
+        const tb = b.verified_at ? new Date(b.verified_at).getTime() : 0;
+        return tb - ta;
+      });
+    }
+    // Default: name (already DB-ordered).
+    return sorted;
+  })();
 
   return (
     <SiteShell>
@@ -104,12 +147,22 @@ export default async function CompaniesPage() {
       </section>
 
       <section className="px-6 sm:px-14 pb-24 max-w-[1240px] mx-auto">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-5">
-          {dsos.length === 0
-            ? "No DSOs listed yet"
-            : dsos.length === 1
-              ? "1 verified DSO"
-              : `${dsos.length} verified DSOs`}
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta">
+            {dsos.length === 0
+              ? "No DSOs listed yet"
+              : dsos.length === 1
+                ? "1 verified DSO"
+                : `${dsos.length} verified DSOs`}
+          </div>
+          {dsos.length > 1 && (
+            <ListSort
+              basePath="/companies"
+              options={COMPANIES_SORT_OPTIONS}
+              activeValue={sortKey}
+              defaultValue="name"
+            />
+          )}
         </div>
 
         {dsos.length === 0 ? (

@@ -45,6 +45,7 @@ import {
 } from "@/lib/applications/stages";
 import { RowActionsMenu } from "./row-actions-menu";
 import type { SelfReportedStatus } from "./row-actions-data";
+import { ListSort } from "@/components/ui/list-sort";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "My Applications" };
@@ -79,8 +80,16 @@ const TAB_LABELS: Record<TabKey, string> = {
 };
 
 interface PageProps {
-  searchParams: Promise<{ tab?: string | string[] }>;
+  searchParams: Promise<{ tab?: string | string[]; sort?: string }>;
 }
+
+const APPS_SORT_OPTIONS = [
+  { value: "newest", label: "Most recently applied" },
+  { value: "oldest", label: "Oldest first" },
+  { value: "updated", label: "Recently updated" },
+  { value: "alpha", label: "Employer (A→Z)" },
+] as const;
+type AppsSortKey = (typeof APPS_SORT_OPTIONS)[number]["value"];
 
 export default async function CandidateApplicationsPage({
   searchParams,
@@ -91,6 +100,10 @@ export default async function CandidateApplicationsPage({
     rawTab && (TAB_ORDER as ReadonlyArray<string>).includes(rawTab)
       ? (rawTab as TabKey)
       : "all";
+  const sortKey: AppsSortKey =
+    (APPS_SORT_OPTIONS.find((s) => s.value === params.sort)?.value as
+      | AppsSortKey
+      | undefined) ?? "newest";
 
   const supabase = await createSupabaseServerClient();
   const {
@@ -267,6 +280,33 @@ export default async function CandidateApplicationsPage({
     filteredApps = []; // saved tab renders its own content below
   }
 
+  // ── Sort the filtered list ──────────────────────────────────────────
+  if (sortKey !== "newest") {
+    const sorted = [...filteredApps];
+    if (sortKey === "oldest") {
+      sorted.sort(
+        (a, b) =>
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      );
+    } else if (sortKey === "updated") {
+      sorted.sort(
+        (a, b) =>
+          new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+      );
+    } else if (sortKey === "alpha") {
+      sorted.sort((a, b) => {
+        const nameA = (
+          displayedNameByAppId.get(a.id) ?? ""
+        ).toLowerCase();
+        const nameB = (
+          displayedNameByAppId.get(b.id) ?? ""
+        ).toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
+    }
+    filteredApps = sorted;
+  }
+
   // ── Practice Fit per filtered application ──────────────────────────
   // Compute fits ONLY for the currently-rendered tab, in parallel.
   // Skipped on the Saved tab (it has its own data path below). Each
@@ -358,6 +398,19 @@ export default async function CandidateApplicationsPage({
       </header>
 
       <TabBar activeTab={activeTab} counts={counts} />
+
+      {/* Sort selector — hidden on Saved tab (saved jobs sort by
+          saved_at desc, no user-facing knob today). */}
+      {activeTab !== "saved" && filteredApps.length > 1 && (
+        <div className="mt-4 flex items-center gap-3">
+          <ListSort
+            basePath="/candidate/applications"
+            options={APPS_SORT_OPTIONS}
+            activeValue={sortKey}
+            defaultValue="newest"
+          />
+        </div>
+      )}
 
       <div className="mt-6">
         {activeTab === "saved" ? (

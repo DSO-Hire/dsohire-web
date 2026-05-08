@@ -235,6 +235,10 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
       return fit !== undefined && fit.score >= floor;
     });
   }
+  // Sort dispatch — `fit` was the original (Phase 5D v1.2); other
+  // values came in with the platform-wide sort/filter pass on
+  // 2026-05-08 PM. Default (no param) keeps created_at desc from the
+  // DB query.
   if (sp.sort === "fit") {
     apps = [...apps].sort((a, b) => {
       const sa = fitByAppId.get(a.id)?.score ?? -1;
@@ -242,6 +246,29 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
       if (sa !== sb) return sb - sa;
       // Stable tiebreaker: original created_at desc — matches the
       // default ordering when fits tie or both are missing.
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+  } else if (sp.sort === "oldest") {
+    apps = [...apps].sort(
+      (a, b) =>
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+  } else if (sp.sort === "alpha") {
+    apps = [...apps].sort((a, b) => {
+      const candA = candMap.get(a.candidate_id);
+      const candB = candMap.get(b.candidate_id);
+      const nameA = (candA?.full_name ?? "").trim().toLowerCase();
+      const nameB = (candB?.full_name ?? "").trim().toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+  } else if (sp.sort === "stage") {
+    // Stage order: new → reviewed → interviewing → offered → hired →
+    // rejected → withdrawn. Mirror STATUS_ORDER for consistency.
+    const idx = (s: string) => STATUS_ORDER.indexOf(s as ApplicationStatus);
+    apps = [...apps].sort((a, b) => {
+      const ia = idx(a.status);
+      const ib = idx(b.status);
+      if (ia !== ib) return ia - ib;
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
   }
@@ -299,7 +326,10 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
             value={sp.sort ?? ""}
             options={[
               { value: "", label: "Newest first" },
-              { value: "fit", label: "Best fit first" },
+              { value: "oldest", label: "Oldest first" },
+              { value: "alpha", label: "Candidate name (A→Z)" },
+              { value: "stage", label: "Stage order" },
+              { value: "fit", label: "Best Practice Fit" },
             ]}
           />
           <button

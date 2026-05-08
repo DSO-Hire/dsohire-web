@@ -28,9 +28,25 @@ import { RoleSelect } from "./role-select";
 import { RoleHelp } from "./role-help";
 import { HmRescopeButton } from "./hm-rescope-button";
 import { removeTeammate, revokeInvitation } from "./actions";
+import { ListSort } from "@/components/ui/list-sort";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Team" };
+
+const TEAM_SORT_OPTIONS = [
+  { value: "name", label: "Name (A→Z)" },
+  { value: "joined", label: "Recently joined" },
+  { value: "joined_oldest", label: "Longest tenured" },
+  { value: "role", label: "Role order" },
+] as const;
+type TeamSortKey = (typeof TEAM_SORT_OPTIONS)[number]["value"];
+
+const ROLE_SORT_ORDER: Record<string, number> = {
+  owner: 0,
+  admin: 1,
+  recruiter: 2,
+  hiring_manager: 3,
+};
 
 const ROLE_LABELS: Record<string, string> = {
   owner: "Owner",
@@ -39,7 +55,17 @@ const ROLE_LABELS: Record<string, string> = {
   hiring_manager: "Hiring Manager",
 };
 
-export default async function TeamPage() {
+interface PageProps {
+  searchParams: Promise<{ sort?: string; role?: string }>;
+}
+
+export default async function TeamPage({ searchParams }: PageProps) {
+  const sp = await searchParams;
+  const sortKey: TeamSortKey =
+    (TEAM_SORT_OPTIONS.find((o) => o.value === sp.sort)?.value as
+      | TeamSortKey
+      | undefined) ?? "name";
+  const roleFilter = sp.role ?? "";
   const supabase = await createSupabaseServerClient();
 
   const {
@@ -66,7 +92,48 @@ export default async function TeamPage() {
     .eq("dso_id", dsoUser.dso_id)
     .order("created_at", { ascending: true });
 
-  const memberRows = (members ?? []) as MemberRow[];
+  const allMemberRows = (members ?? []) as MemberRow[];
+
+  // Apply role filter (if any) + sort.
+  let memberRows = roleFilter
+    ? allMemberRows.filter((m) => m.role === roleFilter)
+    : allMemberRows;
+  memberRows = (() => {
+    const sorted = [...memberRows];
+    if (sortKey === "name") {
+      sorted.sort((a, b) =>
+        ((a.full_name ?? "").trim()).localeCompare(
+          (b.full_name ?? "").trim(),
+          undefined,
+          { sensitivity: "base" }
+        )
+      );
+    } else if (sortKey === "joined") {
+      sorted.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() -
+          new Date(a.created_at).getTime()
+      );
+    } else if (sortKey === "joined_oldest") {
+      sorted.sort(
+        (a, b) =>
+          new Date(a.created_at).getTime() -
+          new Date(b.created_at).getTime()
+      );
+    } else if (sortKey === "role") {
+      sorted.sort((a, b) => {
+        const ra = ROLE_SORT_ORDER[a.role] ?? 99;
+        const rb = ROLE_SORT_ORDER[b.role] ?? 99;
+        if (ra !== rb) return ra - rb;
+        return ((a.full_name ?? "").trim()).localeCompare(
+          (b.full_name ?? "").trim(),
+          undefined,
+          { sensitivity: "base" }
+        );
+      });
+    }
+    return sorted;
+  })();
 
   // Pull all DSO locations (used by the invite form's location multi-select
   // and to display HM scoped-location badges).
@@ -163,9 +230,42 @@ export default async function TeamPage() {
 
       {/* Members */}
       <section className="mb-12">
-        <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
-          Active Team ({memberRows.length})
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+            Active Team ({memberRows.length}
+            {roleFilter ? ` of ${allMemberRows.length}` : ""})
+          </h2>
+          {allMemberRows.length > 1 && (
+            <div className="flex items-center gap-3">
+              <ListSort
+                basePath="/employer/team"
+                options={TEAM_SORT_OPTIONS}
+                activeValue={sortKey}
+                defaultValue="name"
+              />
+              <form method="get" className="inline-flex items-center gap-2">
+                <label className="text-[10px] font-bold tracking-[2px] uppercase text-slate-body">
+                  Role
+                </label>
+                <select
+                  name="role"
+                  defaultValue={roleFilter}
+                  onChange={(e) => e.currentTarget.form?.submit()}
+                  className="text-[12px] px-2.5 py-1.5 bg-white border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage"
+                >
+                  <option value="">All roles</option>
+                  <option value="owner">Owner</option>
+                  <option value="admin">Admin</option>
+                  <option value="recruiter">Recruiter</option>
+                  <option value="hiring_manager">Hiring Manager</option>
+                </select>
+                {sortKey !== "name" && (
+                  <input type="hidden" name="sort" value={sortKey} />
+                )}
+              </form>
+            </div>
+          )}
+        </div>
         <ul className="list-none border-t border-[var(--rule)] max-w-[820px]">
           {memberRows.map((m) => (
             <MemberRowItem
