@@ -390,20 +390,37 @@ function Detail({
 }
 
 function formatComp(job: { [k: string]: unknown }): string {
-  const min = job.compensation_min as number;
+  // v1.8 — render shape varies by compensation_type. Existing rows
+  // were backfilled to a sensible type so old jobs still format the
+  // way they used to.
+  const type = (job.compensation_type as string | null) ?? "range";
+  if (type === "doe") return "Discussed at offer";
+
+  const min = job.compensation_min as number | null;
   const max = job.compensation_max as number | null;
   const period = job.compensation_period as string | null;
   const fmt = new Intl.NumberFormat("en-US");
-  let range: string;
-  if (max === null) {
-    range = `$${fmt.format(min)}+`;
-  } else if (period === "annual") {
-    range = `$${Math.round(min / 1000)}K–$${Math.round(max / 1000)}K`;
-  } else {
-    range = `$${fmt.format(min)}–$${fmt.format(max)}`;
-  }
+  const formatNum = (n: number) =>
+    period === "annual" ? `$${Math.round(n / 1000)}K` : `$${fmt.format(n)}`;
   const periodLabel =
     { hourly: "/hr", daily: "/day", annual: "/yr" }[period ?? ""] ?? "";
+
+  let range: string;
+  if (type === "exact" && min !== null) {
+    range = formatNum(min);
+  } else if (type === "starting_at" && min !== null) {
+    range = `From ${formatNum(min)}`;
+  } else if (type === "up_to" && max !== null) {
+    range = `Up to ${formatNum(max)}`;
+  } else if (min !== null && max !== null) {
+    range = `${formatNum(min)}–${formatNum(max)}`;
+  } else if (min !== null) {
+    range = `${formatNum(min)}+`;
+  } else if (max !== null) {
+    range = `Up to ${formatNum(max)}`;
+  } else {
+    return "Discussed at offer";
+  }
   return `${range}${periodLabel}`;
 }
 

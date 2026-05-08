@@ -93,6 +93,7 @@ export async function createJob(
       compensation_min: parsed.compMin,
       compensation_max: parsed.compMax,
       compensation_period: parsed.compPeriod,
+      compensation_type: parsed.compType,
       compensation_visible: parsed.compVisible,
       benefits: parsed.benefits.length > 0 ? parsed.benefits : null,
       requirements: parsed.requirements || null,
@@ -186,6 +187,7 @@ export async function updateJob(
       compensation_min: parsed.compMin,
       compensation_max: parsed.compMax,
       compensation_period: parsed.compPeriod,
+      compensation_type: parsed.compType,
       compensation_visible: parsed.compVisible,
       benefits: parsed.benefits.length > 0 ? parsed.benefits : null,
       requirements: parsed.requirements || null,
@@ -410,6 +412,12 @@ export async function updateJobDetailsSection(
   const compMinRaw = String(formData.get("compensation_min") ?? "").trim();
   const compMaxRaw = String(formData.get("compensation_max") ?? "").trim();
   const compPeriodRaw = String(formData.get("compensation_period") ?? "").trim();
+  // v1.8
+  const compTypeRawEdit = String(formData.get("compensation_type") ?? "range").trim();
+  const compTypeEdit: "range" | "starting_at" | "up_to" | "exact" | "doe" =
+    ["range", "starting_at", "up_to", "exact", "doe"].includes(compTypeRawEdit)
+      ? (compTypeRawEdit as "range" | "starting_at" | "up_to" | "exact" | "doe")
+      : "range";
   const compVisible = formData.get("compensation_visible") === "on";
   const hideStagesFromCandidate =
     formData.get("hide_stages_from_candidate") === "on";
@@ -475,6 +483,7 @@ export async function updateJobDetailsSection(
       compensation_min: compMin,
       compensation_max: compMax,
       compensation_period: compPeriodRaw || null,
+      compensation_type: compTypeEdit,
       compensation_visible: compVisible,
       benefits: benefits.length > 0 ? benefits : null,
       requirements: requirements || null,
@@ -715,6 +724,7 @@ interface ParsedJobInput {
   compMin: number | null;
   compMax: number | null;
   compPeriod: string | null;
+  compType: "range" | "starting_at" | "up_to" | "exact" | "doe";
   compVisible: boolean;
   benefits: string[];
   requirements: string;
@@ -754,6 +764,12 @@ function parseJobFormData(
   const compMinRaw = String(formData.get("compensation_min") ?? "").trim();
   const compMaxRaw = String(formData.get("compensation_max") ?? "").trim();
   const compPeriod = String(formData.get("compensation_period") ?? "").trim();
+  // v1.8 — compensation_type drives display + Practice Fit comp dim.
+  const compTypeRaw = String(formData.get("compensation_type") ?? "range").trim();
+  const compType: "range" | "starting_at" | "up_to" | "exact" | "doe" =
+    ["range", "starting_at", "up_to", "exact", "doe"].includes(compTypeRaw)
+      ? (compTypeRaw as "range" | "starting_at" | "up_to" | "exact" | "doe")
+      : "range";
   const compVisible = formData.get("compensation_visible") === "on";
   const hideStagesFromCandidate =
     formData.get("hide_stages_from_candidate") === "on";
@@ -925,6 +941,7 @@ function parseJobFormData(
     compMin,
     compMax,
     compPeriod: compPeriod || null,
+    compType,
     compVisible,
     benefits,
     requirements,

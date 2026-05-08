@@ -142,6 +142,16 @@ export interface JobFitInputs {
    */
   role_category: string;
   employment_type: string;
+  /**
+   * v1.8 — the comp shape the employer chose. Drives whether the
+   * Practice Fit comp dim is excluded (doe) or comparable (others).
+   */
+  compensation_type:
+    | "range"
+    | "starting_at"
+    | "up_to"
+    | "exact"
+    | "doe";
   compensation_min: number | null;
   compensation_max: number | null;
   compensation_period: "hourly" | "yearly" | "per_visit" | "per_day" | null;

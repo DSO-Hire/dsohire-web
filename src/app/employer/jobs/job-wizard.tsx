@@ -79,6 +79,61 @@ export interface WizardScreeningQuestion {
 
 export type JobScope = "location" | "regional" | "corporate";
 
+// v1.8 — relative-time helper for the draft banner. Tight format:
+// "30s", "5m", "2h", "1d". Returns "just now" under 30 seconds.
+function timeAgoShort(date: Date): string {
+  const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+  if (seconds < 30) return "just now";
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  return `${days}d`;
+}
+
+// v1.8 — locked compensation_type vocabulary; mirrored in the SQL
+// check constraint on jobs.compensation_type.
+export type CompensationType =
+  | "range"
+  | "starting_at"
+  | "up_to"
+  | "exact"
+  | "doe";
+
+const COMP_TYPE_OPTIONS: Array<{
+  value: CompensationType;
+  label: string;
+  helper: string;
+}> = [
+  {
+    value: "range",
+    label: "Range",
+    helper: "Min & max — most common, fits the broadest set of postings.",
+  },
+  {
+    value: "starting_at",
+    label: "Starting at",
+    helper: "A floor only. Use when you don't want to publicly cap the top.",
+  },
+  {
+    value: "up_to",
+    label: "Up to",
+    helper: "A ceiling only. Useful for capped hourly or contract roles.",
+  },
+  {
+    value: "exact",
+    label: "Exact",
+    helper: "A single number. Common for hourly assistant / hygienist roles.",
+  },
+  {
+    value: "doe",
+    label: "DOE / discussed",
+    helper: "Discussed at the offer stage. Comp drops out of Practice Fit.",
+  },
+];
+
 export interface JobWizardInitial {
   id: string;
   title: string;
@@ -88,6 +143,7 @@ export interface JobWizardInitial {
   compensation_min: number | null;
   compensation_max: number | null;
   compensation_period: string | null;
+  compensation_type: CompensationType | null;
   compensation_visible: boolean;
   benefits: string[];
   requirements: string | null;
@@ -233,6 +289,144 @@ export function JobWizard({
     }
   }, [stepIdx]);
 
+  // v1.8 — draft autosave. Mount: probe localStorage; if a non-trivial
+  // draft exists, surface a banner. Subsequent state changes are
+  // serialized and saved with a 500ms debounce.
+  useEffect(() => {
+    if (!draftKey || typeof window === "undefined") return;
+    try {
+      const raw = window.localStorage.getItem(draftKey);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as { savedAt?: string; title?: string };
+      if (!parsed?.savedAt) return;
+      // Skip empty drafts.
+      if (!parsed.title?.trim()) {
+        window.localStorage.removeItem(draftKey);
+        return;
+      }
+      setDraftFound({ savedAt: parsed.savedAt });
+    } catch {
+      // Malformed payload — ignore + clear.
+      try {
+        window.localStorage.removeItem(draftKey);
+      } catch {
+        /* noop */
+      }
+    }
+    // Empty deps — only run once on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (!draftKey || typeof window === "undefined") return;
+    // Don't save while the banner is visible — the user hasn't decided
+    // yet whether to restore. Saving would overwrite the draft we want
+    // to offer them.
+    if (draftFound) return;
+    const handle = setTimeout(() => {
+      const payload = {
+        savedAt: new Date().toISOString(),
+        title,
+        roleCategory,
+        employmentType,
+        selectedLocationIds: [...selectedLocationIds],
+        description,
+        compType,
+        compMin,
+        compMax,
+        compPeriod,
+        compVisible,
+        scope,
+        hideStagesFromCandidate,
+        skills,
+        benefits,
+        requirements,
+        questions,
+        status,
+        specialty: [...specialty],
+        minYearsExperience,
+        stepIdx,
+      };
+      try {
+        window.localStorage.setItem(draftKey, JSON.stringify(payload));
+      } catch {
+        /* localStorage full or disabled — silent fallback. */
+      }
+    }, 500);
+    return () => clearTimeout(handle);
+    // Intentional: re-run on every form-state change.
+  }, [
+    draftKey,
+    draftFound,
+    title,
+    roleCategory,
+    employmentType,
+    selectedLocationIds,
+    description,
+    compType,
+    compMin,
+    compMax,
+    compPeriod,
+    compVisible,
+    scope,
+    hideStagesFromCandidate,
+    skills,
+    benefits,
+    requirements,
+    questions,
+    status,
+    specialty,
+    minYearsExperience,
+    stepIdx,
+  ]);
+
+  function restoreDraft() {
+    if (!draftKey || typeof window === "undefined") return;
+    try {
+      const raw = window.localStorage.getItem(draftKey);
+      if (!raw) return;
+      const d = JSON.parse(raw) as Record<string, unknown>;
+      setTitle((d.title as string) ?? "");
+      setRoleCategory((d.roleCategory as string) ?? "dentist");
+      setEmploymentType((d.employmentType as string) ?? "full_time");
+      setSelectedLocationIds(
+        new Set(((d.selectedLocationIds as string[]) ?? []))
+      );
+      setDescription((d.description as string) ?? "");
+      setCompType(
+        ((d.compType as CompensationType) ?? "range") as CompensationType
+      );
+      setCompMin((d.compMin as string) ?? "");
+      setCompMax((d.compMax as string) ?? "");
+      setCompPeriod((d.compPeriod as string) ?? "");
+      setCompVisible(Boolean(d.compVisible));
+      setScope(((d.scope as JobScope) ?? "location") as JobScope);
+      setHideStagesFromCandidate(Boolean(d.hideStagesFromCandidate));
+      setSkills(((d.skills as string[]) ?? []));
+      setBenefits(((d.benefits as string[]) ?? []));
+      setRequirements((d.requirements as string) ?? "");
+      setQuestions(((d.questions as WizardScreeningQuestion[]) ?? []));
+      setStatus((d.status as string) ?? "draft");
+      setSpecialty(new Set(((d.specialty as string[]) ?? [])));
+      setMinYearsExperience((d.minYearsExperience as string) ?? "");
+      if (typeof d.stepIdx === "number") setStepIdx(d.stepIdx as number);
+    } catch {
+      /* noop */
+    } finally {
+      setDraftFound(null);
+    }
+  }
+  function dismissDraft() {
+    if (draftKey && typeof window !== "undefined") {
+      try {
+        window.localStorage.removeItem(draftKey);
+      } catch {
+        /* noop */
+      }
+    }
+    setDraftFound(null);
+    setDraftDismissed(true);
+  }
+
   // Form state
   const [title, setTitle] = useState(initial?.title ?? "");
   const [roleCategory, setRoleCategory] = useState(
@@ -257,6 +451,11 @@ export function JobWizard({
   );
   const [compPeriod, setCompPeriod] = useState(
     initial?.compensation_period ?? ""
+  );
+  // v1.8 — flexible comp type. Drives which inputs render in the
+  // Compensation fieldset and how the value is displayed downstream.
+  const [compType, setCompType] = useState<CompensationType>(
+    (initial?.compensation_type as CompensationType | undefined) ?? "range"
   );
   const [compVisible, setCompVisible] = useState(
     initial?.compensation_visible ?? true
@@ -289,6 +488,12 @@ export function JobWizard({
   );
 
   const [error, setError] = useState<string | null>(null);
+  // v1.8 — draft autosave. Only on create (we don't want a stale local
+  // draft overriding edits on a saved job). Key per dso so multiple
+  // owners on different DSOs don't collide.
+  const draftKey = mode === "create" ? `dsohire-job-wizard-draft-${dsoId}` : null;
+  const [draftFound, setDraftFound] = useState<{ savedAt: string } | null>(null);
+  const [draftDismissed, setDraftDismissed] = useState(false);
   const [pending, startTransition] = useTransition();
 
   /* ───── Step navigation + per-step validation ───── */
@@ -354,9 +559,28 @@ export function JobWizard({
     for (const id of selectedLocationIds) {
       formData.append("location_ids", id);
     }
-    formData.set("compensation_min", compMin);
-    formData.set("compensation_max", compMax);
-    formData.set("compensation_period", compPeriod);
+    // v1.8 — normalize per compensation_type so backend stores the
+    // canonical shape regardless of whatever lingered in the alternate
+    // field after a type-toggle.
+    formData.set("compensation_type", compType);
+    if (compType === "range") {
+      formData.set("compensation_min", compMin);
+      formData.set("compensation_max", compMax);
+    } else if (compType === "starting_at") {
+      formData.set("compensation_min", compMin);
+      formData.set("compensation_max", "");
+    } else if (compType === "up_to") {
+      formData.set("compensation_min", "");
+      formData.set("compensation_max", compMax);
+    } else if (compType === "exact") {
+      formData.set("compensation_min", compMin);
+      formData.set("compensation_max", compMin); // same value both ends
+    } else {
+      // doe
+      formData.set("compensation_min", "");
+      formData.set("compensation_max", "");
+    }
+    formData.set("compensation_period", compType === "doe" ? "" : compPeriod);
     // v1.1 — repeated `specialty` form entries; min_years_experience is
     // a single optional integer string.
     for (const sp of specialty) {
@@ -401,6 +625,15 @@ export function JobWizard({
         setError(result.error ?? "Something went wrong.");
         return;
       }
+      // v1.8 — clear the draft on a successful create. createJob
+      // redirects, so this is the last chance to clean up before nav.
+      if (draftKey && typeof window !== "undefined") {
+        try {
+          window.localStorage.removeItem(draftKey);
+        } catch {
+          /* noop */
+        }
+      }
       // createJob redirects on success; updateJob returns ok=true and stays on page.
       // For edit mode, surface a saved confirmation; the page's revalidation pulls fresh data.
       if (mode === "edit") {
@@ -422,6 +655,37 @@ export function JobWizard({
 
   return (
     <div className="space-y-8 max-w-[820px]">
+      {/* v1.8 — draft autosave banner. Only on create mode (draftKey
+          is null in edit mode). Renders until the user picks Restore
+          or Start fresh. */}
+      {draftFound && !draftDismissed && (
+        <div className="border border-heritage/50 bg-heritage/10 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <p className="text-[13px] font-bold text-ink mb-0.5">
+              We saved a draft of an in-progress job posting.
+            </p>
+            <p className="text-[12px] text-slate-meta">
+              Last edit {timeAgoShort(new Date(draftFound.savedAt))} ago. Resume where you left off?
+            </p>
+          </div>
+          <div className="flex gap-2 flex-shrink-0">
+            <button
+              type="button"
+              onClick={restoreDraft}
+              className="px-4 py-2 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors"
+            >
+              Restore draft
+            </button>
+            <button
+              type="button"
+              onClick={dismissDraft}
+              className="px-4 py-2 border border-[var(--rule-strong)] text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
+            >
+              Start fresh
+            </button>
+          </div>
+        </div>
+      )}
       <Stepper currentIdx={stepIdx} />
 
       <div className="border border-[var(--rule)] bg-white p-8 sm:p-10">
@@ -464,6 +728,8 @@ export function JobWizard({
 
         {currentStep.id === "details" && (
           <DetailsStep
+            compType={compType}
+            onCompType={setCompType}
             compMin={compMin}
             onCompMin={setCompMin}
             compMax={compMax}
@@ -827,6 +1093,8 @@ function DescriptionStep({
 /* ───── Step 3 — Compensation & details ───── */
 
 function DetailsStep({
+  compType,
+  onCompType,
   compMin,
   onCompMin,
   compMax,
@@ -848,6 +1116,8 @@ function DetailsStep({
   minYearsExperience,
   onMinYearsExperience,
 }: {
+  compType: CompensationType;
+  onCompType: (v: CompensationType) => void;
   compMin: string;
   onCompMin: (v: string) => void;
   compMax: string;
@@ -885,33 +1155,82 @@ function DetailsStep({
         <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
           Compensation
         </legend>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mt-2">
-          <Input
-            label="Minimum"
-            type="number"
-            placeholder="190000"
-            value={compMin}
-            onChange={onCompMin}
-          />
-          <Input
-            label="Maximum"
-            type="number"
-            placeholder="240000"
-            value={compMax}
-            onChange={onCompMax}
-          />
-          <Select
-            label="Period"
-            value={compPeriod}
-            onChange={onCompPeriod}
-            options={[
-              { value: "", label: "—" },
-              { value: "hourly", label: "Per hour" },
-              { value: "daily", label: "Per day" },
-              { value: "annual", label: "Per year" },
-            ]}
-          />
+
+        {/* v1.8 — comp type radio. The dynamic inputs below swap based
+            on this choice so range / starting / up-to / exact / DOE
+            postings all express their intent cleanly. */}
+        <div className="mt-1 mb-4">
+          <label className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-2">
+            Compensation type
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {COMP_TYPE_OPTIONS.map((opt) => {
+              const checked = compType === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => onCompType(opt.value)}
+                  className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
+                    checked
+                      ? "bg-heritage-deep text-ivory border-heritage-deep"
+                      : "bg-white text-ink border-[var(--rule)] hover:border-heritage"
+                  }`}
+                  title={opt.helper}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-2 text-[11px] text-slate-meta leading-snug">
+            {COMP_TYPE_OPTIONS.find((o) => o.value === compType)?.helper}
+          </p>
         </div>
+
+        {/* Dynamic input grid — shape changes by type. */}
+        {compType !== "doe" && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            {(compType === "range" ||
+              compType === "starting_at" ||
+              compType === "exact") && (
+              <Input
+                label={
+                  compType === "range"
+                    ? "Minimum"
+                    : compType === "starting_at"
+                      ? "Starting at"
+                      : "Pay"
+                }
+                type="number"
+                placeholder="190000"
+                value={compMin}
+                onChange={onCompMin}
+              />
+            )}
+            {(compType === "range" || compType === "up_to") && (
+              <Input
+                label={compType === "range" ? "Maximum" : "Up to"}
+                type="number"
+                placeholder="240000"
+                value={compMax}
+                onChange={onCompMax}
+              />
+            )}
+            <Select
+              label="Period"
+              value={compPeriod}
+              onChange={onCompPeriod}
+              options={[
+                { value: "", label: "—" },
+                { value: "hourly", label: "Per hour" },
+                { value: "daily", label: "Per day" },
+                { value: "annual", label: "Per year" },
+              ]}
+            />
+          </div>
+        )}
+
         <label className="mt-4 flex items-start gap-2.5 text-[14px] text-ink cursor-pointer">
           <input
             type="checkbox"
@@ -920,7 +1239,7 @@ function DetailsStep({
             className="mt-1 accent-heritage"
           />
           <span>
-            Show pay range publicly. Required in CA, CO, WA, NY, and other
+            Show pay publicly. Required in CA, CO, WA, NY, and other
             states with pay-transparency laws.
           </span>
         </label>
@@ -985,12 +1304,12 @@ function DetailsStep({
           chips. Custom values still allowed (Enter to add) but matching
           works best on the canonical vocabulary. */}
       <ChipArrayInput
-        label="Required skills"
+        label="Preferred skills"
         values={skills}
         onChange={onSkills}
         options={getAllDentalSkills()}
         placeholder="Search skills — type and press Enter for custom"
-        helper="Pick from the canonical dental skill list. Candidates' resumes auto-canonicalize to the same vocabulary, so picking from the suggestions improves match quality."
+        helper="Skills you'd like to see in candidates — not a hard filter. Practice Fit rewards candidates who match a few of these; missing skills don't disqualify anyone."
       />
       <ChipArrayInput
         label="Benefits"

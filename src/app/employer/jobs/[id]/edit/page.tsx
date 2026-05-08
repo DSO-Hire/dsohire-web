@@ -68,7 +68,7 @@ export default async function EditJobPage({ params }: PageProps) {
   const { data: job } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_visible, benefits, requirements, status, posted_at, applications_count, views, hide_stages_from_candidate, scope, specialty, min_years_experience"
+      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, benefits, requirements, status, posted_at, applications_count, views, hide_stages_from_candidate, scope, specialty, min_years_experience"
     )
     .eq("id", jobId)
     .eq("dso_id", dsoUser.dso_id)
@@ -112,6 +112,14 @@ export default async function EditJobPage({ params }: PageProps) {
     compensation_min: (job.compensation_min as number | null) ?? null,
     compensation_max: (job.compensation_max as number | null) ?? null,
     compensation_period: (job.compensation_period as string | null) ?? null,
+    compensation_type:
+      (job.compensation_type as
+        | "range"
+        | "starting_at"
+        | "up_to"
+        | "exact"
+        | "doe"
+        | null) ?? "range",
     compensation_visible: (job.compensation_visible as boolean) ?? true,
     benefits: ((job.benefits as string[] | null) ?? []) as string[],
     requirements: (job.requirements as string | null) ?? null,

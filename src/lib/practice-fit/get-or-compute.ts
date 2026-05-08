@@ -216,6 +216,7 @@ async function loadJobAndDso(
     .select(
       `id, dso_id, role_category, employment_type,
        compensation_min, compensation_max, compensation_period,
+       compensation_type,
        specialty, min_years_experience,
        job_locations(location:dso_locations(city, state)),
        job_skills(skill)`
@@ -248,6 +249,9 @@ async function loadJobAndDso(
     job: {
       role_category: (r.role_category as string) ?? "other",
       employment_type: (r.employment_type as string) ?? "full_time",
+      compensation_type:
+        (r.compensation_type as FitInputs["job"]["compensation_type"]) ??
+        "range",
       compensation_min: (r.compensation_min as number | null) ?? null,
       compensation_max: (r.compensation_max as number | null) ?? null,
       compensation_period:

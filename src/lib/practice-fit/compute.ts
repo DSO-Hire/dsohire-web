@@ -207,6 +207,18 @@ function makeScoredDim(
 }
 
 function scoreCompensation({ candidate, job }: FitInputs): FitDimension {
+  // v1.8 — DOE jobs don't expose a number for comparison. Excluded
+  // from the score regardless of candidate side.
+  if (job.compensation_type === "doe") {
+    return makeUnscoredDim("compensation", "Compensation", {
+      detail:
+        "Compensation is discussed at the offer stage on this job — comp is excluded from the score.",
+      detail_employer:
+        "Job is set to 'Discussed at offer' — comp excluded from the score.",
+      cta_label: null,
+      cta_href: null,
+    });
+  }
   // Either side missing → exclude from score, surface CTA to whichever
   // side could fix it (we point at the candidate's profile by default
   // since that's the surface they usually own).
@@ -221,12 +233,18 @@ function scoreCompensation({ candidate, job }: FitInputs): FitDimension {
       cta_inline: true,
     });
   }
-  if (job.compensation_min == null) {
+  // v1.8 — pick the right comparison number based on the job's
+  // compensation_type. starting_at uses min (the floor) as ceiling for
+  // candidate's perspective; up_to uses max; exact compares against
+  // the single number; range falls through to the existing logic.
+  const jobMinForComparison =
+    job.compensation_type === "up_to" ? null : job.compensation_min;
+  if (jobMinForComparison == null && job.compensation_max == null) {
     return makeUnscoredDim("compensation", "Compensation", {
       detail:
-        "This job didn't post a compensation range — comp is excluded from the score.",
+        "This job didn't post compensation — comp is excluded from the score.",
       detail_employer:
-        "Job has no compensation range posted — comp excluded from the score.",
+        "Job has no compensation posted — comp excluded from the score.",
       cta_label: null,
       cta_href: null,
     });
@@ -244,7 +262,15 @@ function scoreCompensation({ candidate, job }: FitInputs): FitDimension {
     );
   }
 
-  const jobTop = job.compensation_max ?? job.compensation_min;
+  // v1.8 — derive the right "ceiling" for the candidate's comparison.
+  // For up_to jobs: max IS the ceiling. For starting_at: min IS the
+  // ceiling we compare candidate's expectation against (since max is
+  // unspecified, we treat the floor as the comparable number — they're
+  // committing to at least that). For exact + range: legacy max-or-min.
+  const jobTop =
+    job.compensation_type === "starting_at"
+      ? (job.compensation_min ?? 0)
+      : (job.compensation_max ?? job.compensation_min ?? 0);
   let raw: number;
   let detail: string;
   if (jobTop >= candidate.min_salary) {
@@ -413,12 +439,29 @@ function scoreSkills({ candidate, job }: FitInputs): FitDimension {
   }
 
   const matched = jobSkills.filter((s) => candidateSkills.has(s));
-  const ratio = matched.length / jobSkills.length;
+  // v1.8 — "preferred" framing: we cap the denominator at 5 so jobs
+  // listing many skills don't punish candidates who hit the most
+  // important few. 3+ matches → strong; 5+ → effectively full credit.
+  // Also boosts the "1 match" floor so a single relevant skill isn't
+  // scored as 14/100 on a 7-skill posting.
+  const denom = Math.min(jobSkills.length, 5);
+  const baseRatio = matched.length / denom;
+  const ratio = Math.min(1, baseRatio);
+  // Floor at 30 when there's at least one match — single matches still
+  // signal something. 0 matches → 0.
+  const raw =
+    matched.length === 0
+      ? 0
+      : Math.max(30, Math.round(ratio * 100));
   return makeScoredDim(
     "skills",
     "Skills",
-    Math.round(ratio * 100),
-    `${matched.length} of ${jobSkills.length} skills on the post match yours.`
+    raw,
+    matched.length >= jobSkills.length
+      ? `Every skill on the posting matches yours (${matched.length} of ${jobSkills.length}).`
+      : matched.length > 0
+        ? `${matched.length} of ${jobSkills.length} skills match — preferred, not required.`
+        : `Posting lists ${jobSkills.length} preferred skills; none match your profile yet.`
   );
 }
 

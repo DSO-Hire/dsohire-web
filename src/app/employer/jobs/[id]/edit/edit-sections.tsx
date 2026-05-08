@@ -119,6 +119,7 @@ export interface EditSectionsInitial {
   compensation_min: number | null;
   compensation_max: number | null;
   compensation_period: string | null;
+  compensation_type: "range" | "starting_at" | "up_to" | "exact" | "doe";
   compensation_visible: boolean;
   benefits: string[];
   requirements: string | null;
@@ -169,6 +170,7 @@ export function EditSections({
       <DetailsSection
         dsoId={dsoId}
         jobId={initial.id}
+        initialCompType={initial.compensation_type}
         initialCompMin={initial.compensation_min}
         initialCompMax={initial.compensation_max}
         initialCompPeriod={initial.compensation_period ?? ""}
@@ -593,6 +595,7 @@ function DescriptionSection({
 function DetailsSection({
   dsoId,
   jobId,
+  initialCompType,
   initialCompMin,
   initialCompMax,
   initialCompPeriod,
@@ -606,6 +609,7 @@ function DetailsSection({
 }: {
   dsoId: string;
   jobId: string;
+  initialCompType: "range" | "starting_at" | "up_to" | "exact" | "doe";
   initialCompMin: number | null;
   initialCompMax: number | null;
   initialCompPeriod: string;
@@ -617,6 +621,10 @@ function DetailsSection({
   initialSpecialty: string[];
   initialMinYearsExperience: number | null;
 }) {
+  // v1.8 — comp type drives input shape.
+  const [compType, setCompType] = useState<
+    "range" | "starting_at" | "up_to" | "exact" | "doe"
+  >(initialCompType);
   const [compMin, setCompMin] = useState(
     initialCompMin !== null ? String(initialCompMin) : ""
   );
@@ -642,6 +650,7 @@ function DetailsSection({
 
   const initialSpecialtyKey = [...initialSpecialty].sort().join(",");
   const initialSnapshot = {
+    compType: initialCompType,
     compMin: initialCompMin !== null ? String(initialCompMin) : "",
     compMax: initialCompMax !== null ? String(initialCompMax) : "",
     compPeriod: initialCompPeriod,
@@ -668,6 +677,7 @@ function DetailsSection({
   const skillsKey = [...skills].sort().join("|");
   const benefitsKey = [...benefits].sort().join("|");
   const dirty =
+    compType !== snapshot.compType ||
     compMin !== snapshot.compMin ||
     compMax !== snapshot.compMax ||
     compPeriod !== snapshot.compPeriod ||
@@ -687,9 +697,26 @@ function DetailsSection({
     const fd = new FormData();
     fd.set("job_id", jobId);
     fd.set("dso_id", dsoId);
-    fd.set("compensation_min", compMin);
-    fd.set("compensation_max", compMax);
-    fd.set("compensation_period", compPeriod);
+    // v1.8 — compensation_type drives the canonical shape downstream;
+    // keep min/max consistent with type before submitting.
+    fd.set("compensation_type", compType);
+    if (compType === "range") {
+      fd.set("compensation_min", compMin);
+      fd.set("compensation_max", compMax);
+    } else if (compType === "starting_at") {
+      fd.set("compensation_min", compMin);
+      fd.set("compensation_max", "");
+    } else if (compType === "up_to") {
+      fd.set("compensation_min", "");
+      fd.set("compensation_max", compMax);
+    } else if (compType === "exact") {
+      fd.set("compensation_min", compMin);
+      fd.set("compensation_max", compMin);
+    } else {
+      fd.set("compensation_min", "");
+      fd.set("compensation_max", "");
+    }
+    fd.set("compensation_period", compType === "doe" ? "" : compPeriod);
     if (compVisible) fd.set("compensation_visible", "on");
     if (hideStages) fd.set("hide_stages_from_candidate", "on");
     // v1.6 — multi-value submission for chip-pickers.
@@ -709,6 +736,7 @@ function DetailsSection({
         return;
       }
       setSnapshot({
+        compType,
         compMin,
         compMax,
         compPeriod,
@@ -734,40 +762,93 @@ function DetailsSection({
           <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
             Compensation
           </legend>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2">
-            <Input
-              label="Minimum"
-              type="number"
-              value={compMin}
-              onChange={(v) => {
-                setCompMin(v);
-                touch();
-              }}
-            />
-            <Input
-              label="Maximum"
-              type="number"
-              value={compMax}
-              onChange={(v) => {
-                setCompMax(v);
-                touch();
-              }}
-            />
-            <Select
-              label="Period"
-              value={compPeriod}
-              onChange={(v) => {
-                setCompPeriod(v);
-                touch();
-              }}
-              options={[
-                { value: "", label: "—" },
-                { value: "hourly", label: "Per hour" },
-                { value: "daily", label: "Per day" },
-                { value: "annual", label: "Per year" },
-              ]}
-            />
+
+          {/* v1.8 — comp type radio in the edit page mirrors the
+              wizard. Inputs swap based on type. */}
+          <div className="mt-1 mb-4">
+            <label className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-2">
+              Compensation type
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  { value: "range", label: "Range" },
+                  { value: "starting_at", label: "Starting at" },
+                  { value: "up_to", label: "Up to" },
+                  { value: "exact", label: "Exact" },
+                  { value: "doe", label: "DOE / discussed" },
+                ] as const
+              ).map((opt) => {
+                const checked = compType === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => {
+                      setCompType(opt.value);
+                      touch();
+                    }}
+                    className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
+                      checked
+                        ? "bg-heritage-deep text-ivory border-heritage-deep"
+                        : "bg-white text-ink border-[var(--rule)] hover:border-heritage"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
+
+          {compType !== "doe" && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {(compType === "range" ||
+                compType === "starting_at" ||
+                compType === "exact") && (
+                <Input
+                  label={
+                    compType === "range"
+                      ? "Minimum"
+                      : compType === "starting_at"
+                        ? "Starting at"
+                        : "Pay"
+                  }
+                  type="number"
+                  value={compMin}
+                  onChange={(v) => {
+                    setCompMin(v);
+                    touch();
+                  }}
+                />
+              )}
+              {(compType === "range" || compType === "up_to") && (
+                <Input
+                  label={compType === "range" ? "Maximum" : "Up to"}
+                  type="number"
+                  value={compMax}
+                  onChange={(v) => {
+                    setCompMax(v);
+                    touch();
+                  }}
+                />
+              )}
+              <Select
+                label="Period"
+                value={compPeriod}
+                onChange={(v) => {
+                  setCompPeriod(v);
+                  touch();
+                }}
+                options={[
+                  { value: "", label: "—" },
+                  { value: "hourly", label: "Per hour" },
+                  { value: "daily", label: "Per day" },
+                  { value: "annual", label: "Per year" },
+                ]}
+              />
+            </div>
+          )}
           <label className="mt-4 flex items-start gap-2.5 text-[14px] text-ink cursor-pointer">
             <input
               type="checkbox"
@@ -848,7 +929,7 @@ function DetailsSection({
         {/* v1.6 — canonical chip-pickers. Same vocabulary the candidate
             side uses, so skills + benefits actually match between sides. */}
         <ChipArrayInput
-          label="Required skills"
+          label="Preferred skills"
           values={skills}
           onChange={(next) => {
             setSkills(next);
@@ -856,7 +937,7 @@ function DetailsSection({
           }}
           options={getAllDentalSkills()}
           placeholder="Search skills — type and press Enter for custom"
-          helper="Pick from the canonical dental skill list. Custom entries allowed but matching works best on the canonical vocabulary."
+          helper="Skills you'd like to see in candidates — not a hard filter. Custom entries allowed; canonical picks match candidate vocab best."
         />
         <ChipArrayInput
           label="Benefits"
