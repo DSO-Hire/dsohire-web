@@ -227,16 +227,10 @@ export default async function ApplyPage({ params }: PageProps) {
           }}
           savedResumeUrl={savedResumeUrl}
           savedResumeName={savedResumeName}
-          existingApplication={
-            existingApp
-              ? {
-                  id: existingApp.id as string,
-                  cover_letter:
-                    (existingApp.cover_letter as string | null) ?? null,
-                  status: existingApp.status as string,
-                }
-              : null
-          }
+          // Always null at this point — repeat-applies are caught by
+          // the redirect above, so this branch only runs for first-
+          // attempt applies where there's no prior application.
+          existingApplication={null}
           existingAnswers={existingAnswers}
           userEmail={user.email ?? null}
         />
