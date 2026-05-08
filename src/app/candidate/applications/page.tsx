@@ -32,8 +32,12 @@ import {
 import { CandidateShell } from "@/components/candidate/candidate-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
+import {
+  PracticeFitPlaceholder,
+  classifyPlaceholderReason,
+  type PlaceholderReason,
+} from "@/components/practice-fit/placeholder";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
-import { canonicalizeRoleCategory } from "@/lib/practice-fit/role-canonicalize";
 import {
   resolveCandidateApplicationAffiliations,
   getDisplayedDsoNamesBatch,
@@ -370,6 +374,11 @@ export default async function CandidateApplicationsPage({
   // visit. v1.4 closes the parallel gap with /candidate/applications
   // (the active-apps tab); both tabs now show the same chip pattern.
   const fitsBySavedJobId = new Map<string, FitResult | null>();
+  // Reason map for the saved tab — same browse-style policy as
+  // /candidate/jobs: only `role_mismatch` reaches the UI; generic
+  // "unavailable" reasons are not surfaced because they'd create pill
+  // clutter on rows the candidate is just browsing.
+  const fitReasonBySavedJobId = new Map<string, PlaceholderReason>();
   if (activeTab === "saved") {
     const { data: rawSaved } = await supabase
       .from("saved_jobs")
@@ -387,7 +396,19 @@ export default async function CandidateApplicationsPage({
       const fits = await Promise.all(
         savedJobIds.map((jobId) => getPracticeFit(candidateId, jobId))
       );
-      savedJobIds.forEach((jobId, i) => fitsBySavedJobId.set(jobId, fits[i]));
+      savedJobIds.forEach((jobId, i) => {
+        fitsBySavedJobId.set(jobId, fits[i]);
+        if (!fits[i]) {
+          const savedJob = savedJobs.find((s) => s.job?.id === jobId)?.job;
+          fitReasonBySavedJobId.set(
+            jobId,
+            classifyPlaceholderReason(
+              candidateDesiredRoles,
+              savedJob?.role_category
+            )
+          );
+        }
+      });
     }
   }
 
@@ -448,6 +469,7 @@ export default async function CandidateApplicationsPage({
           <SavedJobsList
             rows={savedJobs}
             fitsByJobId={fitsBySavedJobId}
+            fitReasonByJobId={fitReasonBySavedJobId}
             displayedNameByJobId={savedDisplayedByJobId}
           />
         ) : filteredApps.length === 0 ? (
@@ -684,6 +706,7 @@ function ApplicationsList({
 function SavedJobsList({
   rows,
   fitsByJobId,
+  fitReasonByJobId,
   displayedNameByJobId,
 }: {
   rows: Array<{
@@ -699,6 +722,12 @@ function SavedJobsList({
     } | null;
   }>;
   fitsByJobId: Map<string, FitResult | null>;
+  /**
+   * Per-job placeholder reason when fit is null. Only `role_mismatch`
+   * actually reaches the UI on this surface — generic "unavailable"
+   * stays hidden to avoid pill clutter.
+   */
+  fitReasonByJobId: Map<string, PlaceholderReason>;
   /**
    * Per-job displayed employer name resolved by the parent — masks
    * the DSO name when the job is privately affiliated (Phase 4.5.b).
@@ -748,9 +777,14 @@ function SavedJobsList({
                     )}
                     {(() => {
                       const fit = fitsByJobId.get(row.job.id);
-                      return fit ? (
-                        <PracticeFitChip fit={fit} size="sm" />
-                      ) : null;
+                      const reason = fitReasonByJobId.get(row.job.id);
+                      if (fit) return <PracticeFitChip fit={fit} size="sm" />;
+                      if (reason === "role_mismatch") {
+                        return (
+                          <PracticeFitPlaceholder reason="role_mismatch" />
+                        );
+                      }
+                      return null;
                     })()}
                   </div>
                   <p className="text-[15px] font-bold text-ink">{row.job.title}</p>
@@ -869,68 +903,9 @@ function SelfReportedChip({ status }: { status: SelfReportedStatus }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────
-// Practice Fit placeholder chip
-// ─────────────────────────────────────────────────────────────────────
-
-/**
- * Reason a Practice Fit chip is showing as a placeholder rather than a
- * scored chip. Pulled from the candidate's own data; the candidate sees
- * their own state in full so we can disambiguate cleanly here (the
- * employer side keeps a generic banner because RLS would leak whether
- * the candidate exists otherwise).
- *
- * "consent_off" is intentionally NOT a state — per get-or-compute.ts
- * the candidate's own view isn't gated by consent, so the placeholder
- * never fires for that reason on this surface.
- */
-type PlaceholderReason = "role_mismatch" | "unavailable";
-
-/**
- * Classify why a fit is unavailable, given the candidate's own profile
- * + the job's role category. Both sides are run through the canonical
- * role mapper so the legacy job-side enum (`dental_assistant`) lines
- * up with the candidate-side vocabulary (`assistant`).
- */
-function classifyPlaceholderReason(
-  candidateDesiredRoles: string[],
-  jobRoleCategory: string | null | undefined
-): PlaceholderReason {
-  // Candidate hasn't told us their preferences yet — we can't know
-  // whether this is a mismatch, so default to generic.
-  if (candidateDesiredRoles.length === 0) return "unavailable";
-  const canonicalJob = canonicalizeRoleCategory(jobRoleCategory);
-  // "other" jobs aren't filtered by the role-as-filter rule (per
-  // canonicalize-role.ts comments), so their placeholder isn't a role
-  // mismatch — it's genuinely no-data.
-  if (canonicalJob === "other") return "unavailable";
-  const candidateCanonical = new Set(
-    candidateDesiredRoles.map(canonicalizeRoleCategory)
-  );
-  if (!candidateCanonical.has(canonicalJob)) return "role_mismatch";
-  return "unavailable";
-}
-
-function PracticeFitPlaceholder({
-  reason = "unavailable",
-}: {
-  reason?: PlaceholderReason;
-}) {
-  const label = reason === "role_mismatch" ? "Different role" : "Fit · —";
-  const tooltip =
-    reason === "role_mismatch"
-      ? "This role isn't in your role preferences, so Practice Fit can't compare it. Update your preferred roles in your profile if your goals have changed."
-      : "Practice Fit isn't ready for this pair yet. Add more to your profile to give us more to work with, or check back in a moment.";
-  return (
-    <span
-      className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500"
-      title={tooltip}
-    >
-      <Sparkles className="size-3" />
-      {label}
-    </span>
-  );
-}
+// PracticeFitPlaceholder, PlaceholderReason, and classifyPlaceholderReason
+// were extracted to @/components/practice-fit/placeholder for reuse on
+// /candidate/jobs + future surfaces.
 
 // ─────────────────────────────────────────────────────────────────────
 // Scope chip

@@ -21,6 +21,11 @@ import { CandidateShell } from "@/components/candidate/candidate-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
 import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
+import {
+  PracticeFitPlaceholder,
+  classifyPlaceholderReason,
+  type PlaceholderReason,
+} from "@/components/practice-fit/placeholder";
 import type { FitResult } from "@/lib/practice-fit/types";
 import { getDisplayedDsoNamesBatch } from "@/lib/dso/affiliation-display";
 
@@ -147,17 +152,27 @@ export default async function CandidateJobsPage() {
     data: { user },
   } = await supabase.auth.getUser();
   let fitByJobId = new Map<string, FitResult>();
+  // Reason-rich placeholder support (focused-pass extension): when a
+  // job has no scored fit, classify why so we can show "Different role"
+  // pills on browse for actionable cases. We only carry role_mismatch
+  // through to the UI here — generic "unavailable" placeholders create
+  // pill clutter on a browse-heavy surface.
+  const fitReasonByJobId = new Map<string, PlaceholderReason>();
   // Already-applied set (Cam 2026-05-08 PM) — drives the "Applied"
   // badge so candidates know which jobs they've already submitted to.
   const appliedJobIds = new Set<string>();
   if (user && jobs.length > 0) {
     const { data: candidate } = await supabase
       .from("candidates")
-      .select("id, practice_fit_consent")
+      .select("id, practice_fit_consent, desired_roles")
       .eq("auth_user_id", user.id)
       .maybeSingle();
     if (candidate) {
       const candidateId = (candidate as Record<string, unknown>).id as string;
+      const candidateDesiredRoles =
+        ((candidate as Record<string, unknown>).desired_roles as
+          | string[]
+          | null) ?? [];
 
       // Pull the candidate's existing applications for these jobs.
       const { data: appliedRows } = await supabase
@@ -178,7 +193,14 @@ export default async function CandidateJobsPage() {
         );
         jobs.forEach((j, i) => {
           const f = fits[i];
-          if (f) fitByJobId.set(j.id, f);
+          if (f) {
+            fitByJobId.set(j.id, f);
+          } else {
+            fitReasonByJobId.set(
+              j.id,
+              classifyPlaceholderReason(candidateDesiredRoles, j.role_category)
+            );
+          }
         });
       }
     }
@@ -242,6 +264,7 @@ export default async function CandidateJobsPage() {
                   job={job}
                   locations={locationsByJob.get(job.id) ?? []}
                   fit={fitByJobId.get(job.id) ?? null}
+                  fitReason={fitReasonByJobId.get(job.id) ?? null}
                   applied={appliedJobIds.has(job.id)}
                 />
               ))}
@@ -257,11 +280,19 @@ function JobRowItem({
   job,
   locations,
   fit,
+  fitReason,
   applied,
 }: {
   job: JobRow;
   locations: Array<{ city: string | null; state: string | null }>;
   fit: FitResult | null;
+  /**
+   * Placeholder reason when fit is null. We intentionally only render
+   * the placeholder for `role_mismatch` on this surface — generic
+   * "unavailable" placeholders create pill clutter on a browse-heavy
+   * surface where most rows are not yet computed.
+   */
+  fitReason: PlaceholderReason | null;
   /** True when this candidate already submitted an application here. */
   applied: boolean;
 }) {
@@ -280,7 +311,11 @@ function JobRowItem({
               <span className="text-[10px] tracking-[0.5px] text-slate-meta">
                 {EMP_LABELS[job.employment_type] ?? job.employment_type}
               </span>
-              {fit && <PracticeFitChip fit={fit} size="sm" />}
+              {fit ? (
+                <PracticeFitChip fit={fit} size="sm" />
+              ) : fitReason === "role_mismatch" ? (
+                <PracticeFitPlaceholder reason="role_mismatch" />
+              ) : null}
               {applied && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-heritage text-ivory text-[10px] font-bold tracking-[1.2px] uppercase">
                   Applied
