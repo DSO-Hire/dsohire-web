@@ -278,6 +278,18 @@ export function JobWizard({
 }: JobWizardProps) {
   const [stepIdx, setStepIdx] = useState(0);
 
+  // v1.8 — draft autosave. Only on create (we don't want a stale local
+  // draft overriding edits on a saved job). Key per dso so multiple
+  // owners on different DSOs don't collide. Declared up here so the
+  // load/save effects below can close over them — block-scoped const
+  // refs would otherwise hit "used before declaration."
+  const draftKey =
+    mode === "create" ? `dsohire-job-wizard-draft-${dsoId}` : null;
+  const [draftFound, setDraftFound] = useState<{ savedAt: string } | null>(
+    null
+  );
+  const [draftDismissed, setDraftDismissed] = useState(false);
+
   // v1.7 — every step change scrolls the page back to top. Without this
   // the user was getting dumped at the bottom (Next button) of the new
   // step, since the browser preserves scroll position and the buttons
@@ -488,12 +500,6 @@ export function JobWizard({
   );
 
   const [error, setError] = useState<string | null>(null);
-  // v1.8 — draft autosave. Only on create (we don't want a stale local
-  // draft overriding edits on a saved job). Key per dso so multiple
-  // owners on different DSOs don't collide.
-  const draftKey = mode === "create" ? `dsohire-job-wizard-draft-${dsoId}` : null;
-  const [draftFound, setDraftFound] = useState<{ savedAt: string } | null>(null);
-  const [draftDismissed, setDraftDismissed] = useState(false);
   const [pending, startTransition] = useTransition();
 
   /* ───── Step navigation + per-step validation ───── */
