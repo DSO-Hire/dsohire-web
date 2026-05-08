@@ -78,9 +78,34 @@ export default async function EmployerDashboard() {
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id, role, full_name")
+    .select("id, dso_id, role, full_name")
     .eq("auth_user_id", userId)
     .maybeSingle();
+
+  // For hiring managers, resolve their scoped locations so we can render
+  // a persistent context bar at the top of the dashboard. Two-query
+  // pattern (same as /employer/team/page.tsx) — sidesteps any embedded
+  // FK-relationship-naming surprises and is plenty fast at our row volume.
+  let hmScopeLocations: Array<{ name: string; state: string | null }> = [];
+  if (dsoUser?.role === "hiring_manager") {
+    const { data: scopeRows } = await supabase
+      .from("dso_user_locations")
+      .select("dso_location_id")
+      .eq("dso_user_id", dsoUser.id as string);
+    const scopeLocationIds = ((scopeRows ?? []) as Array<{
+      dso_location_id: string;
+    }>).map((r) => r.dso_location_id);
+    if (scopeLocationIds.length > 0) {
+      const { data: locRows } = await supabase
+        .from("dso_locations")
+        .select("name, state")
+        .in("id", scopeLocationIds);
+      hmScopeLocations = ((locRows ?? []) as Array<{
+        name: string;
+        state: string | null;
+      }>);
+    }
+  }
 
   const dsoId = dsoUser?.dso_id;
 
@@ -532,11 +557,30 @@ export default async function EmployerDashboard() {
 
     // ── Mini-map: locations + per-location application count ────────
     // We pull all locations (with coords) and counter-join applications
-    // via job_locations + applications. RLS already scopes both.
-    const { data: rawLocations } = await supabase
+    // via job_locations + applications. RLS scopes the application
+    // counts naturally, but `dso_locations` itself has a DSO-wide read
+    // policy — so an HM viewing the map would see pins for locations
+    // they have no scope on (with 0 application counts). Filter to the
+    // HM's scoped location set when role = hiring_manager so the map
+    // matches the rest of their dashboard view.
+    let locationsQuery = supabase
       .from("dso_locations")
       .select("id, city, state, latitude, longitude")
       .eq("dso_id", dsoId);
+    if (dsoUser?.role === "hiring_manager") {
+      const { data: scopeRows2 } = await supabase
+        .from("dso_user_locations")
+        .select("dso_location_id")
+        .eq("dso_user_id", dsoUser.id as string);
+      const ids = ((scopeRows2 ?? []) as Array<{ dso_location_id: string }>).map(
+        (r) => r.dso_location_id
+      );
+      locationsQuery = locationsQuery.in(
+        "id",
+        ids.length > 0 ? ids : ["__none__"]
+      );
+    }
+    const { data: rawLocations } = await locationsQuery;
     type LocRow = {
       id: string;
       city: string | null;
@@ -674,6 +718,10 @@ export default async function EmployerDashboard() {
           <strong className="text-ink font-bold">{dso?.name}</strong>.
         </p>
       </header>
+
+      {dsoUser?.role === "hiring_manager" && (
+        <HmScopeContextBar locations={hmScopeLocations} />
+      )}
 
       <BillingBanner subscription={subscription} />
 
@@ -962,5 +1010,58 @@ function CommandTile({
       </div>
       <ArrowRight className="h-4 w-4 text-slate-meta group-hover:text-heritage group-hover:translate-x-1 transition-all flex-shrink-0" />
     </Link>
+  );
+}
+
+/**
+ * Persistent scope-context bar for hiring managers — sits at the top of
+ * the dashboard so an HM always knows which locations the data on this
+ * page is scoped to. Trust signal + sales-demo answer to "will my
+ * dentist owner see her competitor's candidates?" — no, scoped to her
+ * practice only, and the product literally tells her so.
+ */
+function HmScopeContextBar({
+  locations,
+}: {
+  locations: Array<{ name: string; state: string | null }>;
+}) {
+  const labels = locations.map((l) => (l.state ? `${l.name} · ${l.state}` : l.name));
+  return (
+    <div className="mb-6 border-l-2 border-heritage bg-cream/60 px-4 py-3">
+      <div className="flex items-start gap-2 flex-wrap">
+        <MapPin className="h-3.5 w-3.5 text-heritage-deep mt-1 flex-shrink-0" />
+        <div className="min-w-0 flex-1">
+          <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
+            Your Hiring-Manager Scope
+          </div>
+          {labels.length === 0 ? (
+            <p className="text-[13px] text-amber-800 leading-relaxed">
+              No locations assigned to you yet. Reach out to whoever invited
+              you so they can update your scope on the Team page — until then,
+              you&apos;ll only see corporate-scoped jobs.
+            </p>
+          ) : (
+            <>
+              <p className="text-[13px] text-slate-body leading-relaxed">
+                You&apos;re reviewing applications for{" "}
+                {labels.length === 1 ? "this location" : `these ${labels.length} locations`}{" "}
+                only. Other locations at this DSO won&apos;t appear anywhere
+                in your view.
+              </p>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {labels.map((label) => (
+                  <span
+                    key={label}
+                    className="inline-flex items-center px-2.5 py-0.5 bg-ivory border border-[var(--rule-strong)] text-[10px] font-semibold tracking-[0.4px] text-ink"
+                  >
+                    {label}
+                  </span>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

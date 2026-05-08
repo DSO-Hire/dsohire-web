@@ -16,10 +16,11 @@
  * the updated badges.
  */
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Pencil, X, Check, AlertCircle } from "lucide-react";
 import { assignHmLocations } from "./actions";
 import type { LocationRow } from "./page";
+import { HmScopePreviewBlock } from "./hm-scope-preview-block";
 
 interface HmRescopeButtonProps {
   dsoUserId: string;
@@ -72,6 +73,11 @@ export function HmRescopeButton({
   };
   const selectAll = () => setSelected(new Set(locations.map((l) => l.id)));
   const clearAll = () => setSelected(new Set());
+
+  // Stable array form fed into the preview block — useMemo so the
+  // child's effect dep array doesn't churn on every parent re-render
+  // when the underlying Set is structurally unchanged.
+  const selectedIdsArray = useMemo(() => Array.from(selected), [selected]);
 
   const onSave = () => {
     const fd = new FormData();
@@ -201,6 +207,11 @@ export function HmRescopeButton({
                   })
                 )}
               </div>
+
+              <HmScopePreviewBlock
+                selectedLocationIds={selectedIdsArray}
+                variant="modal"
+              />
             </div>
 
             <footer className="sticky bottom-0 bg-ivory border-t border-[var(--rule)] px-6 py-4 flex items-center justify-end gap-3">

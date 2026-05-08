@@ -97,13 +97,34 @@ export async function employerSearch(
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id")
+    .select("id, dso_id, role")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) return { ok: false, results: [], error: "No DSO membership." };
 
   const dsoId = dsoUser.dso_id as string;
   const pattern = `%${trimmed}%`;
+  const isHm = dsoUser.role === "hiring_manager";
+
+  // For HMs, pre-resolve the set of jobs they're scoped to so we can
+  // gate the candidate result set. The candidates SELECT policy
+  // (dso_can_read_candidate) only checks DSO membership — it doesn't
+  // know about HM location scope. Filtering here at the application
+  // layer is cheaper than another RLS migration and avoids leaking
+  // out-of-scope candidate names through Cmd-K. Defense in depth: even
+  // if a candidate name slips through, clicking the result lands on
+  // /employer/applications which RLS-filters to the scoped set.
+  let hmAccessibleJobIds: Set<string> | null = null;
+  if (isHm) {
+    const { data: scopedJobs } = await supabase
+      .from("jobs")
+      .select("id")
+      .eq("dso_id", dsoId)
+      .is("deleted_at", null);
+    hmAccessibleJobIds = new Set(
+      ((scopedJobs ?? []) as Array<{ id: string }>).map((j) => j.id)
+    );
+  }
 
   // Run all three DB queries in parallel — was the latency culprit when
   // they ran sequentially. The candidates query uses a Supabase inner-join
@@ -120,11 +141,11 @@ export async function employerSearch(
       .limit(8),
     supabase
       .from("candidates")
-      .select("id, full_name, headline, email, applications!inner(id)")
+      .select("id, full_name, headline, email, applications!inner(id, job_id)")
       .or(
         `full_name.ilike.${pattern},headline.ilike.${pattern},email.ilike.${pattern}`
       )
-      .limit(8),
+      .limit(isHm ? 24 : 8),
     supabase
       .from("dso_locations")
       .select("id, name, city, state")
@@ -151,16 +172,29 @@ export async function employerSearch(
   }
 
   // Dedupe candidates by id — the inner-join can return duplicates when
-  // a candidate has multiple applications.
+  // a candidate has multiple applications. For HMs, also gate on the
+  // candidate having at least one application on a scope-accessible
+  // job; this keeps Cmd-K results aligned with what the HM can actually
+  // open downstream. We over-fetched (limit 24 vs. 8) to give the
+  // post-filter pass enough to surface 8 results.
   const seenCandidates = new Set<string>();
+  let candidateRendered = 0;
   for (const c of (candidatesRes.data ?? []) as Array<{
     id: string;
     full_name: string | null;
     headline: string | null;
     email: string | null;
+    applications: Array<{ id: string; job_id: string }>;
   }>) {
     if (seenCandidates.has(c.id)) continue;
+    if (hmAccessibleJobIds) {
+      const inScope = (c.applications ?? []).some((a) =>
+        hmAccessibleJobIds!.has(a.job_id)
+      );
+      if (!inScope) continue;
+    }
     seenCandidates.add(c.id);
+    candidateRendered += 1;
     out.push({
       group: "candidates",
       id: `candidate-${c.id}`,
@@ -170,6 +204,7 @@ export async function employerSearch(
         c.full_name ?? c.email ?? ""
       )}`,
     });
+    if (candidateRendered >= 8) break;
   }
 
   for (const l of (locationsRes.data ?? []) as Array<{

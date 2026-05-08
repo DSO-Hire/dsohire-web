@@ -16,6 +16,7 @@ import { useActionState, useState } from "react";
 import { Mail, Send, MapPin } from "lucide-react";
 import { inviteTeammate, type TeamActionState } from "./actions";
 import type { LocationRow } from "./page";
+import { HmScopePreviewBlock } from "./hm-scope-preview-block";
 
 const initialState: TeamActionState = { ok: false };
 
@@ -24,6 +25,16 @@ export function InviteForm({ locations }: { locations: LocationRow[] }) {
   const [role, setRole] = useState<"recruiter" | "admin" | "hiring_manager">(
     "recruiter"
   );
+  // Tracked separately from form state because we feed it to the live
+  // preview block; the form still pulls location_ids out of formData on
+  // submit, so this is purely a controlled-mirror for the preview.
+  const [selectedLocationIds, setSelectedLocationIds] = useState<string[]>([]);
+
+  const toggleLocation = (id: string, checked: boolean) => {
+    setSelectedLocationIds((prev) =>
+      checked ? [...prev, id] : prev.filter((existing) => existing !== id)
+    );
+  };
 
   return (
     <form action={action} className="space-y-4 max-w-[820px]">
@@ -121,6 +132,9 @@ export function InviteForm({ locations }: { locations: LocationRow[] }) {
                       type="checkbox"
                       name="location_ids"
                       value={loc.id}
+                      onChange={(e) =>
+                        toggleLocation(loc.id, e.currentTarget.checked)
+                      }
                       className="mt-0.5 h-4 w-4 accent-heritage cursor-pointer"
                     />
                     <span className="flex-1 min-w-0">
@@ -136,6 +150,10 @@ export function InviteForm({ locations }: { locations: LocationRow[] }) {
                   </label>
                 ))}
               </div>
+              <HmScopePreviewBlock
+                selectedLocationIds={selectedLocationIds}
+                variant="form"
+              />
             </>
           )}
         </div>
