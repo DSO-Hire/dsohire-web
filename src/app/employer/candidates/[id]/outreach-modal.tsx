@@ -17,6 +17,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Send, X, Loader2, CheckCircle2, Mail } from "lucide-react";
 import { sendOutreachToCandidate } from "./outreach-actions";
+import { InsertMergeFieldButton } from "@/components/outreach/insert-merge-field-button";
 
 export interface OutreachTemplate {
   id: string;
@@ -48,6 +49,7 @@ export function OutreachModal({
   const [sent, setSent] = useState(false);
   const [pending, startTransition] = useTransition();
   const subjectRef = useRef<HTMLInputElement>(null);
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
 
   function applyTemplate(id: string) {
     setTemplateId(id);
@@ -203,12 +205,18 @@ export function OutreachModal({
               </div>
             )}
             <div>
-              <label
-                htmlFor="outreach-subject"
-                className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5"
-              >
-                Subject
-              </label>
+              <div className="flex items-baseline justify-between mb-1.5 gap-3">
+                <label
+                  htmlFor="outreach-subject"
+                  className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta"
+                >
+                  Subject
+                </label>
+                <InsertMergeFieldButton
+                  fieldRef={subjectRef}
+                  onInsert={setSubject}
+                />
+              </div>
               <input
                 ref={subjectRef}
                 id="outreach-subject"
@@ -221,13 +229,20 @@ export function OutreachModal({
               />
             </div>
             <div>
-              <label
-                htmlFor="outreach-body"
-                className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5"
-              >
-                Message
-              </label>
+              <div className="flex items-baseline justify-between mb-1.5 gap-3">
+                <label
+                  htmlFor="outreach-body"
+                  className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta"
+                >
+                  Message
+                </label>
+                <InsertMergeFieldButton
+                  fieldRef={bodyRef}
+                  onInsert={setBody}
+                />
+              </div>
               <textarea
+                ref={bodyRef}
                 id="outreach-body"
                 value={body}
                 onChange={(e) => setBody(e.target.value)}

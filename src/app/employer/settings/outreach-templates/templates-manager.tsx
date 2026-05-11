@@ -8,7 +8,7 @@
  * the server actions in ./actions.ts.
  */
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Pencil, Trash2, Save, X, Loader2 } from "lucide-react";
 import {
@@ -17,6 +17,7 @@ import {
   deleteOutreachTemplate,
 } from "./actions";
 import { SUPPORTED_MERGE_FIELDS } from "@/lib/outreach/merge-fields";
+import { InsertMergeFieldButton } from "@/components/outreach/insert-merge-field-button";
 
 interface TemplateRow {
   id: string;
@@ -186,6 +187,13 @@ function TemplateForm({
   pending: boolean;
   error: string | null;
 }) {
+  // Controlled subject + body so Insert-variable can patch the value.
+  // Name stays uncontrolled — no merge-field UX on it.
+  const [subject, setSubject] = useState(template?.subject ?? "");
+  const [body, setBody] = useState(template?.body ?? "");
+  const subjectRef = useRef<HTMLInputElement | null>(null);
+  const bodyRef = useRef<HTMLTextAreaElement | null>(null);
+
   return (
     <form
       onSubmit={onSubmit}
@@ -209,13 +217,25 @@ function TemplateForm({
         />
       </div>
       <div>
-        <label className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
-          Subject
-        </label>
+        <div className="flex items-baseline justify-between mb-1.5 gap-3">
+          <label
+            htmlFor="template-subject"
+            className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta"
+          >
+            Subject
+          </label>
+          <InsertMergeFieldButton
+            fieldRef={subjectRef}
+            onInsert={setSubject}
+          />
+        </div>
         <input
+          id="template-subject"
+          ref={subjectRef}
           name="subject"
           type="text"
-          defaultValue={template?.subject ?? ""}
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
           placeholder="e.g. {{candidate.first_name}}, an Associate Dentist role you'd be perfect for"
           maxLength={200}
           required
@@ -223,12 +243,21 @@ function TemplateForm({
         />
       </div>
       <div>
-        <label className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
-          Body
-        </label>
+        <div className="flex items-baseline justify-between mb-1.5 gap-3">
+          <label
+            htmlFor="template-body"
+            className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta"
+          >
+            Body
+          </label>
+          <InsertMergeFieldButton fieldRef={bodyRef} onInsert={setBody} />
+        </div>
         <textarea
+          id="template-body"
+          ref={bodyRef}
           name="body"
-          defaultValue={template?.body ?? ""}
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
           rows={10}
           required
           placeholder="Hi {{candidate.first_name}},&#10;&#10;I'm {{sender.first_name}} at {{dso.name}}. We have an Associate Dentist role opening at our Prairie Village practice and your background looked like a strong fit.&#10;&#10;Open to a quick conversation this week?"
