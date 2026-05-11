@@ -273,7 +273,9 @@ export default async function PerJobPipelinePage({
               applications
             </span>
             <span>
-              <strong className="text-ink font-bold">{job.views ?? 0}</strong>{" "}
+              <strong className="text-ink font-bold">
+                {analytics.views_total}
+              </strong>{" "}
               views
             </span>
           </div>

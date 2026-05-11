@@ -90,10 +90,11 @@ export async function recordJobView(input: RecordJobViewInput): Promise<void> {
       is_authenticated: Boolean(input.authenticatedUserId),
     });
 
-    // Legacy jobs.views column intentionally NOT bumped here. All
-    // analytics surfaces should read from job_view_events; the legacy
-    // column was effectively unused pre-Phase 5C and gets deprecated
-    // organically when downstream readers migrate.
+    // Also +1 the legacy jobs.views counter so historical readers
+    // (/employer/jobs list — sort, top-performer card, row counts)
+    // stay accurate. SQL function added in migration
+    // 20260511000004_job_view_increment_fn.sql does this atomically.
+    await admin.rpc("increment_job_view_count", { p_job_id: input.jobId });
   } catch (err) {
     // Fail silent — analytics must never break the page.
     console.warn("[record-view] insert failed", err);
