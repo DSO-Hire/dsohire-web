@@ -1,41 +1,375 @@
 /**
- * /employer/talent-pool — proactive sourcing surface (Phase 5A — stub at 4.6).
+ * /employer/talent-pool — proactive sourcing surface
+ * (E7.1–E7.7 / Phase 5D, shipped 2026-05-11).
  *
- * Placeholder until Phase 5A's "search candidates → save to talent pool →
- * outreach campaigns" loop ships. Lives in the rail today so the IA is
- * visible to prospects and Cam doesn't have to remember to add it later.
+ * Two tabs:
+ *   - Discover: search opt-in candidates across the platform with
+ *     filters for role, state, license state, years experience,
+ *     availability.
+ *   - Saved: candidates this DSO has saved to the pool, with notes,
+ *     tags, and quick-remove.
+ *
+ * Visibility: only candidates with `is_searchable = true` AND
+ * `is_guest = false` AND `deleted_at IS NULL` appear in Discover.
+ * Enforced by RLS + a defensive `.is("deleted_at", null)` in the
+ * server query.
  */
 
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { Users, Bookmark, Search } from "lucide-react";
 import type { Metadata } from "next";
 import { EmployerShell } from "@/components/employer/employer-shell";
-import { ComingSoon } from "../settings/_components/coming-soon";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { DiscoverFilters } from "./discover-filters";
+import { CandidateResultCard } from "./candidate-result-card";
+import { SavedEntryCard } from "./saved-entry-card";
 
 export const metadata: Metadata = { title: "Talent Pool" };
+export const dynamic = "force-dynamic";
 
-export default function TalentPoolPage() {
+const ROLE_FILTERS = [
+  { value: "", label: "Any role" },
+  { value: "dentist", label: "Dentist" },
+  { value: "dental_hygienist", label: "Dental Hygienist" },
+  { value: "dental_assistant", label: "Dental Assistant" },
+  { value: "office_manager", label: "Office Manager" },
+  { value: "front_office", label: "Front Office" },
+  { value: "regional_manager", label: "Regional Manager" },
+  { value: "specialist", label: "Specialist" },
+] as const;
+
+interface PageProps {
+  searchParams?: Promise<{
+    tab?: string;
+    q?: string;
+    role?: string;
+    state?: string;
+    license?: string;
+    min_years?: string;
+  }>;
+}
+
+export default async function TalentPoolPage({ searchParams }: PageProps) {
+  const sp = searchParams ? await searchParams : {};
+  const tab = sp.tab === "saved" ? "saved" : "discover";
+
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/employer/sign-in");
+
+  const { data: dsoUser } = await supabase
+    .from("dso_users")
+    .select("dso_id")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+  if (!dsoUser) redirect("/employer/onboarding");
+
+  // Saved tab — pool entries for this DSO, joined to candidate fields.
+  let savedEntries: Array<{
+    entry_id: string;
+    candidate_id: string;
+    full_name: string | null;
+    headline: string | null;
+    current_title: string | null;
+    years_experience: number | null;
+    avatar_url: string | null;
+    notes: string | null;
+    tags: string[] | null;
+    created_at: string;
+  }> = [];
+  if (tab === "saved") {
+    const { data: entries } = await supabase
+      .from("dso_talent_pool_entries")
+      .select(
+        "id, candidate_id, notes, tags, created_at, candidates(full_name, headline, current_title, years_experience, avatar_url)"
+      )
+      .eq("dso_id", dsoUser.dso_id as string)
+      .order("created_at", { ascending: false });
+    savedEntries = ((entries ?? []) as unknown as Array<{
+      id: string;
+      candidate_id: string;
+      notes: string | null;
+      tags: string[] | null;
+      created_at: string;
+      candidates: Array<{
+        full_name: string | null;
+        headline: string | null;
+        current_title: string | null;
+        years_experience: number | null;
+        avatar_url: string | null;
+      }>;
+    }>).map((e) => {
+      const c = e.candidates?.[0];
+      return {
+        entry_id: e.id,
+        candidate_id: e.candidate_id,
+        full_name: c?.full_name ?? null,
+        headline: c?.headline ?? null,
+        current_title: c?.current_title ?? null,
+        years_experience: c?.years_experience ?? null,
+        avatar_url: c?.avatar_url ?? null,
+        notes: e.notes,
+        tags: e.tags,
+        created_at: e.created_at,
+      };
+    });
+  }
+
+  // Discover tab — search candidates with is_searchable = true.
+  let discoverResults: Array<{
+    id: string;
+    full_name: string | null;
+    headline: string | null;
+    current_title: string | null;
+    years_experience: number | null;
+    avatar_url: string | null;
+    license_states: string[] | null;
+    current_location_city: string | null;
+    current_location_state: string | null;
+    availability: string | null;
+    saved: boolean;
+    saved_entry_id: string | null;
+  }> = [];
+  let discoverTotal = 0;
+  if (tab === "discover") {
+    const keyword = (sp.q ?? "").trim();
+    const role = (sp.role ?? "").trim();
+    const stateFilter = (sp.state ?? "").trim().toUpperCase();
+    const licenseFilter = (sp.license ?? "").trim().toUpperCase();
+    const minYears = Number.parseInt(sp.min_years ?? "", 10);
+
+    let q = supabase
+      .from("candidates")
+      .select(
+        "id, full_name, headline, current_title, years_experience, avatar_url, license_states, current_location_city, current_location_state, availability, desired_roles, deleted_at",
+        { count: "exact" }
+      )
+      .eq("is_searchable", true)
+      .eq("is_guest", false)
+      .is("deleted_at", null)
+      .order("updated_at", { ascending: false })
+      .limit(40);
+
+    if (keyword) {
+      const safe = keyword.replace(/[%,]/g, " ").trim();
+      if (safe.length > 0) {
+        q = q.or(
+          `full_name.ilike.%${safe}%,headline.ilike.%${safe}%,current_title.ilike.%${safe}%`
+        );
+      }
+    }
+    if (role) {
+      q = q.contains("desired_roles", [role]);
+    }
+    if (stateFilter && /^[A-Z]{2}$/.test(stateFilter)) {
+      q = q.eq("current_location_state", stateFilter);
+    }
+    if (licenseFilter && /^[A-Z]{2}$/.test(licenseFilter)) {
+      q = q.contains("license_states", [licenseFilter]);
+    }
+    if (Number.isFinite(minYears) && minYears > 0) {
+      q = q.gte("years_experience", minYears);
+    }
+
+    const { data, count, error } = await q;
+    if (error) {
+      console.warn("[talent-pool] discover query failed", error);
+    }
+    const rows = (data ?? []) as Array<{
+      id: string;
+      full_name: string | null;
+      headline: string | null;
+      current_title: string | null;
+      years_experience: number | null;
+      avatar_url: string | null;
+      license_states: string[] | null;
+      current_location_city: string | null;
+      current_location_state: string | null;
+      availability: string | null;
+    }>;
+    discoverTotal = count ?? rows.length;
+
+    // Cross-reference saved entries so each card can show "Saved"
+    // vs "Save to pool".
+    const ids = rows.map((r) => r.id);
+    const savedSet = new Map<string, string>();
+    if (ids.length > 0) {
+      const { data: existing } = await supabase
+        .from("dso_talent_pool_entries")
+        .select("id, candidate_id")
+        .eq("dso_id", dsoUser.dso_id as string)
+        .in("candidate_id", ids);
+      for (const e of (existing ?? []) as Array<{
+        id: string;
+        candidate_id: string;
+      }>) {
+        savedSet.set(e.candidate_id, e.id);
+      }
+    }
+    discoverResults = rows.map((r) => ({
+      ...r,
+      saved: savedSet.has(r.id),
+      saved_entry_id: savedSet.get(r.id) ?? null,
+    }));
+  }
+
   return (
     <EmployerShell active="talent-pool">
-      <div className="space-y-6 max-w-[820px]">
-        <header>
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
-            Talent Pool
-          </div>
-          <h1 className="font-display text-3xl font-extrabold tracking-[-0.8px] text-ink leading-tight">
-            Proactive sourcing for roles you haven&apos;t posted yet.
-          </h1>
-        </header>
-        <ComingSoon
-          phaseTag="Phase 5A"
-          title="Search the candidate database, save to lists, run outreach"
-          description="The flip side of the job board: search active and passive candidates, save them to named pools, and run nurture campaigns when a fit role opens. Pulls from every candidate who applied to your DSO + opt-in candidates from across the platform."
-          bullets={[
-            "Search by role, specialty, license state, years of experience, PMS familiarity",
-            "Save searches as live pools that auto-update",
-            "1-click outreach using your custom email templates (4.5.f)",
-            "Talent CRM view: notes, tags, last contacted, status",
-          ]}
-        />
+      <header className="mb-8 max-w-[820px]">
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+          Talent Pool
+        </div>
+        <h1 className="font-display text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-3">
+          Find candidates before they apply.
+        </h1>
+        <p className="text-[14px] text-slate-body leading-relaxed">
+          Search opt-in candidates across DSO Hire, save the best fits to
+          your DSO&apos;s pool, and reach out when a matching role opens.
+          Only candidates who&apos;ve enabled discoverability appear in
+          Discover.
+        </p>
+      </header>
+
+      {/* Tab bar */}
+      <div className="mb-6 border-b border-[var(--rule)] flex gap-6">
+        <TabLink active={tab === "discover"} href="/employer/talent-pool">
+          <Search className="h-3.5 w-3.5" /> Discover
+        </TabLink>
+        <TabLink active={tab === "saved"} href="/employer/talent-pool?tab=saved">
+          <Bookmark className="h-3.5 w-3.5" /> Saved ({savedEntries.length})
+        </TabLink>
       </div>
+
+      {tab === "discover" && (
+        <>
+          <DiscoverFilters
+            initial={{
+              q: sp.q ?? "",
+              role: sp.role ?? "",
+              state: sp.state ?? "",
+              license: sp.license ?? "",
+              min_years: sp.min_years ?? "",
+            }}
+            roleOptions={ROLE_FILTERS}
+          />
+
+          <div className="mt-6 mb-4 text-[12px] text-slate-meta">
+            {discoverResults.length === 0
+              ? "No candidates match these filters."
+              : `${discoverResults.length} candidate${discoverResults.length === 1 ? "" : "s"} shown${discoverTotal > discoverResults.length ? ` of ${discoverTotal} total` : ""}`}
+          </div>
+
+          {discoverResults.length === 0 ? (
+            <EmptyDiscoverState />
+          ) : (
+            <ul className="space-y-3">
+              {discoverResults.map((r) => (
+                <li key={r.id}>
+                  <CandidateResultCard
+                    candidateId={r.id}
+                    fullName={r.full_name}
+                    headline={r.headline}
+                    currentTitle={r.current_title}
+                    yearsExperience={r.years_experience}
+                    avatarUrl={r.avatar_url}
+                    licenseStates={r.license_states}
+                    cityState={[r.current_location_city, r.current_location_state]
+                      .filter(Boolean)
+                      .join(", ")}
+                    availability={r.availability}
+                    initiallySaved={r.saved}
+                    initialEntryId={r.saved_entry_id}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
+
+      {tab === "saved" && (
+        <>
+          {savedEntries.length === 0 ? (
+            <EmptySavedState />
+          ) : (
+            <ul className="space-y-3">
+              {savedEntries.map((e) => (
+                <li key={e.entry_id}>
+                  <SavedEntryCard
+                    entryId={e.entry_id}
+                    candidateId={e.candidate_id}
+                    fullName={e.full_name}
+                    headline={e.headline}
+                    currentTitle={e.current_title}
+                    yearsExperience={e.years_experience}
+                    avatarUrl={e.avatar_url}
+                    notes={e.notes}
+                    tags={e.tags}
+                    addedAt={e.created_at}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
     </EmployerShell>
+  );
+}
+
+function TabLink({
+  active,
+  href,
+  children,
+}: {
+  active: boolean;
+  href: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className={
+        "inline-flex items-center gap-2 pb-3 -mb-px border-b-2 text-[11px] font-bold tracking-[1.5px] uppercase transition-colors " +
+        (active
+          ? "border-heritage text-ink"
+          : "border-transparent text-slate-meta hover:text-ink")
+      }
+    >
+      {children}
+    </Link>
+  );
+}
+
+function EmptyDiscoverState() {
+  return (
+    <div className="border border-[var(--rule)] bg-cream/30 p-8 text-center">
+      <Users
+        className="h-10 w-10 text-slate-meta mx-auto mb-3"
+        aria-hidden
+      />
+      <p className="text-[14px] text-slate-body leading-relaxed max-w-[480px] mx-auto">
+        No candidates yet match these filters. As more candidates opt
+        into discoverability, this pool grows.
+      </p>
+    </div>
+  );
+}
+
+function EmptySavedState() {
+  return (
+    <div className="border border-[var(--rule)] bg-cream/30 p-8 text-center">
+      <Bookmark
+        className="h-10 w-10 text-slate-meta mx-auto mb-3"
+        aria-hidden
+      />
+      <p className="text-[14px] text-slate-body leading-relaxed max-w-[480px] mx-auto">
+        No candidates saved yet. Discover candidates above and click
+        &quot;Save to pool&quot; to start building your list.
+      </p>
+    </div>
   );
 }
