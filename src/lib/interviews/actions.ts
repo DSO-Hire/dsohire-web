@@ -25,6 +25,11 @@ import { sendEmail } from "@/lib/email/send";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { InterviewProposed } from "@/emails/candidate/InterviewProposed";
 import { InterviewBooked } from "@/emails/InterviewBooked";
+import {
+  getConnection,
+  type CalendarProvider,
+} from "@/lib/integrations/connections";
+import { pushInterviewEvent } from "@/lib/integrations/calendar-push";
 
 export interface InterviewActionResult {
   ok: boolean;
@@ -403,6 +408,23 @@ export async function bookInterviewSlot(
       });
     }
 
+    // Day 2: push to connected calendars (best-effort, never fail the
+    // booking on push errors). Pushes happen sequentially because each
+    // call involves a refresh-token round-trip + an API write.
+    await pushCalendarsForBooking({
+      bookingId: booking.id as string,
+      proposalId: input.proposalId,
+      startAtIso: option.start_at as string,
+      durationMinutes: propCtx.duration_minutes,
+      interviewKind: propCtx.interview_kind,
+      jobTitle,
+      dsoName,
+      locationText: propCtx.location_text,
+      candidateAuthUserId: cand?.auth_user_id ?? null,
+      candidateName: cand?.full_name ?? null,
+      applicationId: propCtx.application_id,
+    });
+
     revalidatePath(`/employer/applications/${propCtx.application_id}`);
     revalidatePath(`/candidate/applications/${propCtx.application_id}`);
   }
@@ -515,4 +537,172 @@ async function dsoNameById(
     .eq("id", dsoId)
     .maybeSingle();
   return (data?.name as string | undefined) ?? "the DSO";
+}
+
+// ─────────────────────────────────────────────────────────────
+// Calendar push (Day 2)
+// ─────────────────────────────────────────────────────────────
+
+interface PushCalendarsInput {
+  bookingId: string;
+  proposalId: string;
+  startAtIso: string;
+  durationMinutes: number;
+  interviewKind: string;
+  jobTitle: string;
+  dsoName: string;
+  locationText: string | null;
+  candidateAuthUserId: string | null;
+  candidateName: string | null;
+  applicationId: string;
+}
+
+/**
+ * Mirror the booked interview onto every connected calendar — candidate's
+ * (if they connected one) and the proposing interviewer's (if they did).
+ * Each provider connection per user gets its own push. Pushes are
+ * best-effort: a failure logs a warning but does NOT roll back the
+ * booking. The InterviewBooked email is the durable notification; the
+ * calendar mirror is convenience layered on top.
+ *
+ * We push to the user who proposed the interview rather than every DSO
+ * team member because (a) the proposer is the most likely interviewer,
+ * and (b) flooding 5 team members' calendars with the same event is
+ * spammy. Future enhancement: a "calendar invitees" field on the
+ * interview_proposals row that lets the proposer pick additional
+ * interviewers to mirror to.
+ */
+async function pushCalendarsForBooking(input: PushCalendarsInput): Promise<void> {
+  try {
+    const admin = createSupabaseServiceRoleClient();
+
+    const startAt = new Date(input.startAtIso);
+    const endAt = new Date(
+      startAt.getTime() + input.durationMinutes * 60 * 1000
+    );
+    const kindLabel = KIND_LABELS[input.interviewKind] ?? "Interview";
+    const siteUrl = SITE_URL;
+
+    // Candidate-side push.
+    if (input.candidateAuthUserId) {
+      const summary = `${kindLabel} · ${input.jobTitle} · ${input.dsoName}`;
+      const description = [
+        `${kindLabel} with ${input.dsoName} for the ${input.jobTitle} role.`,
+        input.locationText ? `Location: ${input.locationText}` : null,
+        `Booked via DSO Hire.`,
+        `${siteUrl}/candidate/applications/${input.applicationId}`,
+      ]
+        .filter(Boolean)
+        .join("\n\n");
+
+      await pushForUser({
+        authUserId: input.candidateAuthUserId,
+        bookingId: input.bookingId,
+        startAt,
+        endAt,
+        summary,
+        description,
+        locationText: input.locationText,
+      });
+    }
+
+    // Employer (proposer) side push.
+    const { data: proposerLink } = await admin
+      .from("interview_proposals")
+      .select("proposed_by")
+      .eq("id", input.proposalId)
+      .maybeSingle();
+
+    const proposerDsoUserId =
+      (proposerLink as { proposed_by?: string } | null)?.proposed_by ?? null;
+    if (proposerDsoUserId) {
+      const { data: proposerRow } = await admin
+        .from("dso_users")
+        .select("auth_user_id")
+        .eq("id", proposerDsoUserId)
+        .maybeSingle();
+      const proposerAuthId =
+        (proposerRow as { auth_user_id?: string } | null)?.auth_user_id ??
+        null;
+
+      if (proposerAuthId) {
+        const summary = `${kindLabel} · ${
+          input.candidateName ?? "Candidate"
+        } · ${input.jobTitle}`;
+        const description = [
+          `${kindLabel} with ${
+            input.candidateName ?? "the candidate"
+          } for the ${input.jobTitle} role.`,
+          input.locationText ? `Location: ${input.locationText}` : null,
+          `Booked via DSO Hire.`,
+          `${siteUrl}/employer/applications/${input.applicationId}`,
+        ]
+          .filter(Boolean)
+          .join("\n\n");
+
+        await pushForUser({
+          authUserId: proposerAuthId,
+          bookingId: input.bookingId,
+          startAt,
+          endAt,
+          summary,
+          description,
+          locationText: input.locationText,
+        });
+      }
+    }
+  } catch (err) {
+    // Belt-and-suspenders: any unexpected throw should not propagate out
+    // of the booking flow. Log + move on.
+    console.warn("[interview-book] calendar push wrapper error", err);
+  }
+}
+
+interface PushForUserInput {
+  authUserId: string;
+  bookingId: string;
+  startAt: Date;
+  endAt: Date;
+  summary: string;
+  description: string;
+  locationText: string | null;
+}
+
+/**
+ * For a single user, push the event to whichever calendar provider(s)
+ * they have connected. Most users will have at most one — but the loop
+ * handles a Google-AND-Microsoft user gracefully (uncommon but possible).
+ */
+async function pushForUser(input: PushForUserInput): Promise<void> {
+  const providers: CalendarProvider[] = ["google", "microsoft"];
+  for (const provider of providers) {
+    try {
+      const conn = await getConnection(input.authUserId, provider);
+      if (!conn) continue;
+      const result = await pushInterviewEvent({
+        authUserId: input.authUserId,
+        provider,
+        bookingId: input.bookingId,
+        startAt: input.startAt,
+        endAt: input.endAt,
+        summary: input.summary,
+        description: input.description,
+        attendees: [],
+        locationText: input.locationText,
+      });
+      if (!result.ok) {
+        console.warn("[interview-book] calendar push failed", {
+          provider,
+          bookingId: input.bookingId,
+          error: result.error,
+        });
+      }
+    } catch (err) {
+      console.warn("[interview-book] calendar push threw", {
+        provider,
+        bookingId: input.bookingId,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
 }

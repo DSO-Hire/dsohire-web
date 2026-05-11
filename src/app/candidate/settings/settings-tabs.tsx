@@ -22,6 +22,7 @@ const TABS: ReadonlyArray<Tab> = [
   { href: "/candidate/settings/job-preferences", label: "Job preferences" },
   { href: "/candidate/settings/privacy", label: "Privacy & visibility" },
   { href: "/candidate/settings/credentials", label: "Credentials" },
+  { href: "/candidate/settings/integrations", label: "Integrations" },
   { href: "/candidate/settings/data", label: "Data & account" },
 ];
 

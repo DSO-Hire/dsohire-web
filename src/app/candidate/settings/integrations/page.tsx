@@ -1,13 +1,14 @@
 /**
- * /employer/settings/integrations — Phase 5A Day 2.
+ * /candidate/settings/integrations — Phase 5A Day 2 candidate side.
  *
- * Lists calendar connections (Google + Outlook) with connect /
- * disconnect controls. Replaces the earlier <ComingSoon> placeholder
- * now that the OAuth + token-refresh foundation is in place.
+ * Mirrors the employer page — same shared <CalendarIntegrationsCard>
+ * component — but loads the candidate user's connections and points
+ * the OAuth round-trip back to the candidate route.
  *
- * PMS connectors, webhooks, and API tokens are still on the roadmap
- * — they'll appear here as additional cards under the same header
- * when they ship in later phases.
+ * Candidates connect a calendar so accepted interview times auto-
+ * create events on their personal calendar with the video link
+ * embedded. They never lose track of an interview because we own
+ * delivery on both ends.
  */
 
 import { redirect } from "next/navigation";
@@ -19,17 +20,6 @@ import { CalendarIntegrationsCard } from "@/components/integrations/calendar-int
 export const metadata: Metadata = { title: "Integrations · Settings" };
 export const dynamic = "force-dynamic";
 
-/**
- * Normalize the querystring written by the OAuth callbacks
- * (`?connected=google|microsoft` on success, `?error=<reason>` on
- * failure, `?denied=1` if we ever add explicit cancel handling) into
- * the banner's three-state `integration` prop.
- *
- * Google's consent screen returns ?error=access_denied when the user
- * clicks Cancel; we map that to the friendlier "denied" banner. All
- * other errors fall through to the red "error" banner with the raw
- * reason as the message.
- */
 function normalizeStatus(params: {
   connected?: string;
   error?: string;
@@ -50,7 +40,7 @@ function normalizeStatus(params: {
   return {};
 }
 
-export default async function IntegrationsSettingsPage({
+export default async function CandidateIntegrationsSettingsPage({
   searchParams,
 }: {
   searchParams: Promise<{
@@ -63,7 +53,7 @@ export default async function IntegrationsSettingsPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/employer/sign-in");
+  if (!user) redirect("/candidate/sign-in?next=/candidate/settings/integrations");
 
   const [google, microsoft] = await Promise.all([
     getConnection(user.id, "google"),
@@ -74,7 +64,7 @@ export default async function IntegrationsSettingsPage({
   const status = normalizeStatus(params);
 
   return (
-    <div className="max-w-[820px]">
+    <div>
       <CalendarIntegrationsCard
         google={{
           connected: !!google,
@@ -86,7 +76,7 @@ export default async function IntegrationsSettingsPage({
           connectedEmail: microsoft?.connected_email,
           expiresAt: microsoft?.expires_at,
         }}
-        returnTo="/employer/settings/integrations"
+        returnTo="/candidate/settings/integrations"
         searchParams={status}
       />
     </div>
