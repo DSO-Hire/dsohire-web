@@ -156,7 +156,7 @@ export async function sendOutreachToCandidate(formData: FormData): Promise<SendO
     return {
       ok: false,
       error:
-        result.reason ??
+        result.error ??
         "Email service rejected the send. The message is saved; you can retry.",
     };
   }
