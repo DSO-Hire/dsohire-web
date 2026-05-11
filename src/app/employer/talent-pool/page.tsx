@@ -144,10 +144,10 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
     let q = supabase
       .from("candidates")
       .select(
-        "id, full_name, headline, current_title, years_experience, avatar_url, license_states, current_location_city, current_location_state, availability, desired_roles, deleted_at",
+        "id, full_name, headline, current_title, years_experience, avatar_url, license_states, current_location_city, current_location_state, availability, desired_roles, cv_visibility, deleted_at",
         { count: "exact" }
       )
-      .eq("is_searchable", true)
+      .in("cv_visibility", ["open_to_work", "recruiters_only"])
       .eq("is_guest", false)
       .is("deleted_at", null)
       .order("updated_at", { ascending: false })

@@ -42,7 +42,7 @@ export async function saveCandidateToPool(
   // than a silent failure).
   const { data: candidate } = await supabase
     .from("candidates")
-    .select("id, full_name, is_searchable, is_guest, deleted_at")
+    .select("id, full_name, cv_visibility, is_guest, deleted_at")
     .eq("id", candidateId)
     .maybeSingle();
   if (!candidate) {
