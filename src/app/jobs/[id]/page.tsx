@@ -116,18 +116,6 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
 
   if (!job || (job.status as string) !== "active") notFound();
 
-  // Record a view event for Phase 5C analytics. Fire-and-forget — never
-  // gates page render. Captures ?source= param + Referer header inside
-  // the helper.
-  const {
-    data: { user: viewer },
-  } = await supabase.auth.getUser();
-  void recordJobView({
-    jobId: id,
-    sourceParam: sp.source ?? null,
-    authenticatedUserId: viewer?.id ?? null,
-  });
-
   const [
     { data: dso },
     { data: jobLocations },
@@ -191,6 +179,15 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
   const {
     data: { user: viewer },
   } = await supabase.auth.getUser();
+
+  // Record a view event for Phase 5C analytics. Fire-and-forget — never
+  // gates page render. Reuses the `viewer` lookup above. Source +
+  // Referer captured inside the helper.
+  void recordJobView({
+    jobId: id,
+    sourceParam: sp.source ?? null,
+    authenticatedUserId: viewer?.id ?? null,
+  });
   let candidateAuthed = false;
   let initialSaved = false;
   let practiceFit: FitResult | null = null;
