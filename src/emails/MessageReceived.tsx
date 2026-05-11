@@ -50,7 +50,7 @@ export function MessageReceived({
   dsoName = "the hiring team",
   candidateName = "the candidate",
   messageBody = "",
-  deepLink = "https://dsohire.com",
+  deepLink = "https://www.dsohire.com",
   fullMessageLink,
 }: MessageReceivedProps) {
   const fullLink = fullMessageLink ?? deepLink;

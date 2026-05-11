@@ -76,7 +76,7 @@ const JOB_GROUP: MergefieldGroup = {
     {
       token: "job.url",
       label: "Public job URL",
-      example: "https://dsohire.com/jobs/sample-id",
+      example: "https://www.dsohire.com/jobs/sample-id",
     },
   ],
 };
@@ -89,7 +89,7 @@ const DSO_GROUP: MergefieldGroup = {
     {
       token: "dso.profile_url",
       label: "Public profile URL",
-      example: "https://dsohire.com/companies/eslinger",
+      example: "https://www.dsohire.com/companies/eslinger",
     },
     {
       token: "dso.contact_cta_url",
@@ -124,7 +124,7 @@ const MESSAGE_GROUP: MergefieldGroup = {
     {
       token: "message.thread_url",
       label: "Thread URL",
-      example: "https://dsohire.com/candidate/applications/sample-id",
+      example: "https://www.dsohire.com/candidate/applications/sample-id",
     },
   ],
 };

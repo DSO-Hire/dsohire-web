@@ -56,7 +56,7 @@ export type DeleteMessageResult = { ok: true } | { ok: false; error: string };
 
 export type MarkReadResult = { ok: true } | { ok: false; error: string };
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.dsohire.com";
 
 const MAX_BODY = 5000;
 

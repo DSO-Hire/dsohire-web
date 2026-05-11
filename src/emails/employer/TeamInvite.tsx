@@ -34,7 +34,7 @@ export function TeamInvite({
   inviterName = "Your teammate",
   dsoName = "Your DSO",
   role = "recruiter",
-  acceptUrl = "https://dsohire.com/employer/invite/preview",
+  acceptUrl = "https://www.dsohire.com/employer/invite/preview",
   expiresInDays = 7,
 }: TeamInviteProps) {
   const greeting = inviteeName ? `Hi ${inviteeName},` : "Hi there,";

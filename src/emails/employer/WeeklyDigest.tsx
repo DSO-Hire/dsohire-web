@@ -51,7 +51,7 @@ export function WeeklyDigest({
   openRoles = 0,
   topJobs = [],
   staleCandidates = [],
-  dashboardUrl = "https://dsohire.com/employer/reports",
+  dashboardUrl = "https://www.dsohire.com/employer/reports",
 }: WeeklyDigestProps) {
   const delta = applicationsThisWeek - applicationsLastWeek;
   const deltaLabel =

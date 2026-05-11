@@ -30,7 +30,7 @@ import { CustomTemplate } from "@/emails/CustomTemplate";
 import type { EmailTemplateKind } from "./manifest";
 
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.dsohire.com";
 
 export interface CandidateMergeContext {
   first_name: string;

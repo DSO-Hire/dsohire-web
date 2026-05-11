@@ -29,7 +29,7 @@ export function OutreachMessage({
   senderName = null,
   subject = "",
   body = "",
-  siteUrl = "https://dsohire.com",
+  siteUrl = "https://www.dsohire.com",
 }: OutreachMessageProps) {
   const greeting = candidateFirstName ? `Hi ${candidateFirstName} —` : "Hi —";
 

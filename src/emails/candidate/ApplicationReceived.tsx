@@ -27,7 +27,7 @@ export function ApplicationReceived({
   candidateName = "there",
   jobTitle = "Dental Hygienist",
   dsoName = "SmileBright DSO",
-  trackingUrl = "https://dsohire.com/candidate/auth/callback?token=preview",
+  trackingUrl = "https://www.dsohire.com/candidate/auth/callback?token=preview",
 }: ApplicationReceivedProps) {
   return (
     <Layout previewText={`Your application for ${jobTitle} at ${dsoName} was received`}>

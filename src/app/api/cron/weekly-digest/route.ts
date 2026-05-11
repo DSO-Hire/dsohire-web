@@ -37,7 +37,7 @@ type AdminClient = ReturnType<typeof createSupabaseServiceRoleClient>;
 type ServerClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
 void ({} as ServerClient);
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.dsohire.com";
 
 const STAGE_LABEL: Record<string, string> = {
   new: "Applied",

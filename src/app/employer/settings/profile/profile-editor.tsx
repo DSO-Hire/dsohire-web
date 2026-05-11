@@ -53,7 +53,7 @@ import { ProfilePhotoGallery } from "./photo-gallery";
 const PUBLIC_ORIGIN =
   typeof window !== "undefined"
     ? window.location.origin
-    : "https://dsohire.com";
+    : "https://www.dsohire.com";
 
 /* ───────── Top-level component ───────── */
 

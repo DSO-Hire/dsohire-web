@@ -21,7 +21,7 @@ import { InterviewReminder } from "@/emails/InterviewReminder";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.dsohire.com";
 
 const KIND_LABELS: Record<string, string> = {
   phone: "Phone call",
