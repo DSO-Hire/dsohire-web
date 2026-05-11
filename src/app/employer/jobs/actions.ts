@@ -803,6 +803,168 @@ export async function setJobStatus(
   return { ok: true };
 }
 
+/**
+ * Clone an existing job (E1.15 / Cam re-audit 2026-05-11).
+ *
+ * Universal ATS pattern absent from the dental cluster — saves the
+ * employer from re-creating a near-duplicate job by hand. Copies:
+ *   - jobs row (title prefixed "Copy of …", new slug, status = draft,
+ *     fresh views/applications_count, no posted_at)
+ *   - job_locations join rows
+ *   - job_skills join rows
+ *   - job_screening_questions rows (new IDs, same content)
+ *
+ * Does NOT copy:
+ *   - job_attachments — storage objects are job-scoped, and copying
+ *     binaries between jobs has ambiguous semantics (does the new job
+ *     own a fresh signed-URL surface, or share?). Skip for v1; the
+ *     employer can re-upload in the cloned job's edit page.
+ *   - applications — applications are tied to the source job, not its
+ *     clone.
+ *
+ * Redirects to /employer/jobs/{newId}/edit on success.
+ */
+export async function cloneJob(formData: FormData): Promise<void> {
+  const jobId = String(formData.get("job_id") ?? "").trim();
+  if (!jobId) return;
+
+  const supabase = await createSupabaseServerClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/employer/sign-in");
+
+  // 1. Read source job + DSO context.
+  const { data: src, error: srcErr } = await supabase
+    .from("jobs")
+    .select(
+      "id, dso_id, title, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, benefits, requirements, hide_stages_from_candidate, scope, specialty, min_years_experience"
+    )
+    .eq("id", jobId)
+    .maybeSingle();
+  if (srcErr || !src) return;
+
+  const dsoId = src.dso_id as string;
+
+  // Active-subscription gate (matches createJob's posture).
+  const billingError = await requireActiveSubscriptionError(supabase, dsoId);
+  if (billingError) return;
+
+  // 2. Build the new title + slug.
+  const sourceTitle = (src.title as string) ?? "Untitled";
+  const newTitle = `Copy of ${sourceTitle}`.slice(0, 200);
+  const baseSlug = makeSlug(newTitle);
+  if (!baseSlug) return;
+  const slug = await resolveAvailableJobSlug(supabase, dsoId, baseSlug);
+
+  // 3. Look up the cloning user's dso_users row for created_by.
+  const { data: dsoUser } = await supabase
+    .from("dso_users")
+    .select("id")
+    .eq("auth_user_id", user.id)
+    .eq("dso_id", dsoId)
+    .maybeSingle();
+
+  // 4. Insert the new job (status = draft).
+  const { data: newJob, error: insertErr } = await supabase
+    .from("jobs")
+    .insert({
+      dso_id: dsoId,
+      title: newTitle,
+      slug,
+      description: (src.description as string) ?? "",
+      employment_type: src.employment_type,
+      role_category: src.role_category,
+      compensation_min: src.compensation_min,
+      compensation_max: src.compensation_max,
+      compensation_period: src.compensation_period,
+      compensation_type: src.compensation_type,
+      compensation_visible: src.compensation_visible,
+      benefits: src.benefits,
+      requirements: src.requirements,
+      status: "draft",
+      hide_stages_from_candidate: src.hide_stages_from_candidate,
+      scope: src.scope,
+      specialty: src.specialty,
+      min_years_experience: src.min_years_experience,
+      posted_at: null,
+      created_by: (dsoUser?.id as string | undefined) ?? null,
+    })
+    .select("id")
+    .single();
+  if (insertErr || !newJob) {
+    console.warn("[cloneJob] jobs insert failed", insertErr);
+    return;
+  }
+  const newId = newJob.id as string;
+
+  // 5. Duplicate job_locations.
+  const { data: srcLocs } = await supabase
+    .from("job_locations")
+    .select("location_id")
+    .eq("job_id", jobId);
+  const locRows = ((srcLocs ?? []) as Array<{ location_id: string }>).map(
+    (l) => ({ job_id: newId, location_id: l.location_id })
+  );
+  if (locRows.length > 0) {
+    await supabase.from("job_locations").insert(locRows);
+  }
+
+  // 6. Duplicate job_skills.
+  const { data: srcSkills } = await supabase
+    .from("job_skills")
+    .select("skill")
+    .eq("job_id", jobId);
+  const skillRows = ((srcSkills ?? []) as Array<{ skill: string }>).map(
+    (s) => ({ job_id: newId, skill: s.skill })
+  );
+  if (skillRows.length > 0) {
+    await supabase.from("job_skills").insert(skillRows);
+  }
+
+  // 7. Duplicate screening questions (new IDs, same content).
+  const { data: srcQs } = await supabase
+    .from("job_screening_questions")
+    .select("prompt, helper_text, kind, options, required, sort_order")
+    .eq("job_id", jobId)
+    .order("sort_order", { ascending: true });
+  const qRows = ((srcQs ?? []) as Array<{
+    prompt: string;
+    helper_text: string | null;
+    kind: string;
+    options: Array<{ id: string; label: string }> | null;
+    required: boolean;
+    sort_order: number;
+  }>).map((q) => ({
+    job_id: newId,
+    prompt: q.prompt,
+    helper_text: q.helper_text,
+    kind: q.kind,
+    options: q.options,
+    required: q.required,
+    sort_order: q.sort_order,
+  }));
+  if (qRows.length > 0) {
+    await supabase.from("job_screening_questions").insert(qRows);
+  }
+
+  // 8. Audit log.
+  void emitJobAuditEvent(supabase, dsoId, newId, {
+    eventKind: "job.cloned",
+    summary: `Cloned "${sourceTitle}" → "${newTitle}"`,
+    metadata: {
+      source_job_id: jobId,
+      source_title: sourceTitle,
+      new_job_id: newId,
+      new_title: newTitle,
+    },
+  });
+
+  revalidatePath("/employer/jobs");
+  redirect(`/employer/jobs/${newId}/edit`);
+}
+
 export async function softDeleteJob(
   _prev: JobActionState,
   formData: FormData

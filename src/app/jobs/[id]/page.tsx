@@ -26,6 +26,8 @@ import {
 } from "@/components/rendered-job-description";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { SaveJobButton } from "@/lib/saved-jobs/save-job-button";
+import { loadJobAttachmentsWithUrls } from "@/lib/jobs/attachments";
+import { JobAttachmentsPublic } from "@/components/job-attachments-public";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
 import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
 import {
@@ -115,6 +117,7 @@ export default async function JobDetailPage({ params }: PageProps) {
     { data: dso },
     { data: jobLocations },
     { data: jobSkills },
+    jobAttachments,
   ] = await Promise.all([
     supabase
       .from("dsos")
@@ -128,6 +131,7 @@ export default async function JobDetailPage({ params }: PageProps) {
       )
       .eq("job_id", id),
     supabase.from("job_skills").select("skill").eq("job_id", id),
+    loadJobAttachmentsWithUrls(supabase, id),
   ]);
 
   const locations = ((jobLocations ?? []) as unknown as Array<{
@@ -316,6 +320,14 @@ export default async function JobDetailPage({ params }: PageProps) {
                 Apply for this Role
               </Link>
             )}
+            {!existingApplicationId && !candidateAuthed && (
+              <Link
+                href={`/jobs/${job.id as string}/apply/guest`}
+                className="inline-flex items-center justify-center px-6 py-3.5 border border-[var(--rule-strong)] bg-white text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
+              >
+                Apply as guest
+              </Link>
+            )}
             <SaveJobButton
               jobId={job.id as string}
               initialSaved={initialSaved}
@@ -419,6 +431,10 @@ export default async function JobDetailPage({ params }: PageProps) {
                   ))}
                 </ul>
               </section>
+            )}
+
+            {jobAttachments.length > 0 && (
+              <JobAttachmentsPublic attachments={jobAttachments} />
             )}
 
             {/* Apply CTA + Save button — repeated bottom for long

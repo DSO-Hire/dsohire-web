@@ -8,6 +8,7 @@ import {
   signInWithPasswordCandidate,
   type CandidateSignInState,
 } from "./actions";
+import { LinkedInOAuthButton } from "@/components/auth/linkedin-oauth-button";
 
 const initialEmail: CandidateSignInState = { ok: false, step: "email" };
 const initialVerify: CandidateSignInState = { ok: false, step: "verify" };
@@ -247,6 +248,17 @@ export function CandidateSignInForm({ next }: { next?: string }) {
         Forgot your password? Sign in with a code, then reset it from{" "}
         <span className="font-semibold">Settings</span>.
       </p>
+
+      <div className="relative pt-2">
+        <div className="absolute inset-0 flex items-center" aria-hidden>
+          <div className="w-full border-t border-[var(--rule)]" />
+        </div>
+        <div className="relative flex justify-center text-[10px] font-bold tracking-[2px] uppercase">
+          <span className="bg-white px-3 text-slate-meta">or</span>
+        </div>
+      </div>
+
+      <LinkedInOAuthButton next={next} label="Sign in with LinkedIn" />
     </form>
   );
 }

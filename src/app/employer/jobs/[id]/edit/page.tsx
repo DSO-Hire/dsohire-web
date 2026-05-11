@@ -21,11 +21,18 @@ import { redirect, notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, Trash2 } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getActiveSubscription } from "@/lib/billing/subscription";
+import {
+  loadJobAttachments,
+  JOB_ATTACHMENT_TIER_CAPS,
+  tierLabel,
+} from "@/lib/jobs/attachments";
 import { softDeleteJob } from "../../actions";
 import {
   EditSections,
   type EditSectionsInitial,
 } from "./edit-sections";
+import { JobAttachmentsSection } from "../job-attachments-section";
 import type {
   LocationOption,
   WizardScreeningQuestion,
@@ -138,6 +145,18 @@ export default async function EditJobPage({ params }: PageProps) {
       (job.min_years_experience as number | null) ?? null,
   };
 
+  // Load attachments + active subscription tier in parallel with the
+  // initial-state composition above. Both are needed to render the new
+  // JobAttachmentsSection beneath the existing edit sections.
+  const [attachments, sub] = await Promise.all([
+    loadJobAttachments(supabase, jobId),
+    getActiveSubscription(supabase, dsoUser.dso_id as string),
+  ]);
+  const subTier = sub?.tier ?? "starter";
+  const attachmentTierCap =
+    JOB_ATTACHMENT_TIER_CAPS[subTier] ?? JOB_ATTACHMENT_TIER_CAPS.starter;
+  const attachmentTierLabel = tierLabel(subTier);
+
   const initialQuestions: WizardScreeningQuestion[] = (
     (rawQuestions ?? []) as Array<{
       id: string;
@@ -199,6 +218,15 @@ export default async function EditJobPage({ params }: PageProps) {
         initialQuestions={initialQuestions}
         locations={locationOptions}
       />
+
+      <div className="mt-8 max-w-[820px]">
+        <JobAttachmentsSection
+          jobId={initial.id}
+          initialAttachments={attachments}
+          tierCap={attachmentTierCap}
+          tierLabel={attachmentTierLabel}
+        />
+      </div>
 
       {/* Soft-delete (separated from main form for safety) */}
       <section className="mt-16 pt-10 border-t border-[var(--rule)] max-w-[820px]">

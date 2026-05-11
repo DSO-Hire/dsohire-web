@@ -8,6 +8,7 @@ import {
   resendCandidateSignUpCode,
   type CandidateSignUpState,
 } from "./actions";
+import { LinkedInOAuthButton } from "@/components/auth/linkedin-oauth-button";
 
 const initialForm: CandidateSignUpState = { ok: false, step: "form" };
 const initialVerify: CandidateSignUpState = { ok: false, step: "verify" };
@@ -184,6 +185,17 @@ export function CandidateSignUpForm({ next }: { next?: string }) {
         </a>
         . Always free for job seekers.
       </p>
+
+      <div className="relative pt-2">
+        <div className="absolute inset-0 flex items-center" aria-hidden>
+          <div className="w-full border-t border-[var(--rule)]" />
+        </div>
+        <div className="relative flex justify-center text-[10px] font-bold tracking-[2px] uppercase">
+          <span className="bg-white px-3 text-slate-meta">or</span>
+        </div>
+      </div>
+
+      <LinkedInOAuthButton next={next} label="Continue with LinkedIn" />
     </form>
   );
 }

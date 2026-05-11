@@ -19,7 +19,7 @@
 
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink, Pencil, Users } from "lucide-react";
+import { ArrowLeft, Copy, ExternalLink, Pencil, Users } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
@@ -31,6 +31,7 @@ import type { ApplicationStatus } from "@/lib/applications/stages";
 import { getPracticeFitForJob } from "@/lib/practice-fit/get-or-compute";
 import type { FitResult } from "@/lib/practice-fit/types";
 import { JobStatusActions } from "./status-actions";
+import { cloneJob } from "../actions";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -277,6 +278,17 @@ export default async function PerJobPipelinePage({
             <Pencil className="size-3.5" />
             Edit job
           </Link>
+          <form action={cloneJob}>
+            <input type="hidden" name="job_id" value={jobId} />
+            <button
+              type="submit"
+              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-ink hover:bg-cream"
+              title="Create a new job from a copy of this one"
+            >
+              <Copy className="size-3.5" />
+              Clone
+            </button>
+          </form>
           {status === "active" && (
             <Link
               href={`/jobs/${jobId}`}
