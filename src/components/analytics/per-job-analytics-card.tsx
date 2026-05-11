@@ -12,6 +12,7 @@
 
 import { Eye, Briefcase, TrendingUp, Globe } from "lucide-react";
 import type { PerJobAnalytics } from "@/lib/analytics/metrics";
+import { AppsSparkline } from "./apps-sparkline";
 
 interface PerJobAnalyticsCardProps {
   metrics: PerJobAnalytics;
@@ -59,7 +60,7 @@ export function PerJobAnalyticsCard({ metrics }: PerJobAnalyticsCardProps) {
           <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-2">
             Applications · last 30 days
           </div>
-          <Sparkline data={metrics.apps_sparkline_30d} />
+          <AppsSparkline data={metrics.apps_per_day} />
         </div>
         <div>
           <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-2">
@@ -125,60 +126,4 @@ function Tile({
   );
 }
 
-function Sparkline({ data }: { data: number[] }) {
-  if (data.length === 0 || data.every((v) => v === 0)) {
-    return (
-      <div className="h-16 flex items-center text-[12px] text-slate-meta italic">
-        No applications yet in this window.
-      </div>
-    );
-  }
-
-  const width = 600;
-  const height = 64;
-  const padX = 4;
-  const padY = 6;
-  const innerW = width - padX * 2;
-  const innerH = height - padY * 2;
-  const max = Math.max(...data, 1);
-  const step = data.length > 1 ? innerW / (data.length - 1) : 0;
-
-  const points = data.map((v, i) => {
-    const x = padX + i * step;
-    const y = padY + innerH - (v / max) * innerH;
-    return [x, y] as const;
-  });
-
-  const linePath = points
-    .map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`)
-    .join(" ");
-  const areaPath =
-    linePath +
-    ` L${(padX + (data.length - 1) * step).toFixed(1)},${(padY + innerH).toFixed(1)}` +
-    ` L${padX.toFixed(1)},${(padY + innerH).toFixed(1)} Z`;
-
-  return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      preserveAspectRatio="none"
-      className="w-full h-16"
-      role="img"
-      aria-label={`Applications per day, last ${data.length} days, peak ${max}`}
-    >
-      <path d={areaPath} fill="#4D7A60" fillOpacity="0.12" />
-      <path
-        d={linePath}
-        fill="none"
-        stroke="#4D7A60"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {points.map(([x, y], i) =>
-        data[i] > 0 ? (
-          <circle key={i} cx={x} cy={y} r="2" fill="#14233F" />
-        ) : null
-      )}
-    </svg>
-  );
-}
+// Sparkline rendering moved to AppsSparkline (client component) above.

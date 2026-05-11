@@ -50,6 +50,14 @@ function startOfDayIso(daysAgo: number): string {
 // Per-job analytics
 // ─────────────────────────────────────────────────────────────
 
+export interface SparklineDay {
+  /** ISO date (UTC midnight, YYYY-MM-DD). */
+  date: string;
+  count: number;
+  /** Application IDs for that day — drives the click-through on dots. */
+  application_ids: string[];
+}
+
 export interface PerJobAnalytics {
   views_total: number;
   views_7d: number;
@@ -61,6 +69,8 @@ export interface PerJobAnalytics {
   conversion_rate: number;
   /** Daily application count for the last 30 days (oldest first, length=30). */
   apps_sparkline_30d: number[];
+  /** Same 30 days but with the application IDs that came in each day. */
+  apps_per_day: SparklineDay[];
   /** Top source channels with counts, last 30 days, sorted desc. */
   top_sources: Array<{ source: string; count: number }>;
 }
@@ -113,7 +123,7 @@ export async function getPerJobAnalytics(
       .gte("created_at", since30d),
     supabase
       .from("applications")
-      .select("created_at")
+      .select("id, created_at")
       .eq("job_id", jobId)
       .gte("created_at", since30d),
     supabase
@@ -124,11 +134,13 @@ export async function getPerJobAnalytics(
       .not("source", "is", null),
   ]);
 
-  // Build the 30-day sparkline (apps per day, oldest first).
-  const sparkline = bucketByDay(
-    (appsLast30dRows ?? []) as Array<{ created_at: string }>,
-    30
-  );
+  // Build the 30-day sparkline with per-day application IDs.
+  const appsLast30d = (appsLast30dRows ?? []) as Array<{
+    id: string;
+    created_at: string;
+  }>;
+  const appsPerDay: SparklineDay[] = bucketAppsByDay(appsLast30d, 30);
+  const sparkline = appsPerDay.map((d) => d.count);
 
   // Top sources: group by source, count, sort.
   const sourceCounts = new Map<string, number>();
@@ -153,6 +165,7 @@ export async function getPerJobAnalytics(
     applications_30d: apps30d ?? 0,
     conversion_rate: conversionRate,
     apps_sparkline_30d: sparkline,
+    apps_per_day: appsPerDay,
     top_sources: topSources,
   };
 }
@@ -484,23 +497,37 @@ export async function getDsoAnalytics(
 // Helpers
 // ─────────────────────────────────────────────────────────────
 
-/** Bucket events by day. Returns an array of length `days`, oldest first. */
-function bucketByDay(
-  rows: Array<{ created_at: string }>,
+/**
+ * Bucket applications by day. Returns an array of length `days`, oldest
+ * first. Each entry carries an ISO date and the list of application IDs
+ * that landed in that bucket (drives the sparkline's click-through).
+ */
+function bucketAppsByDay(
+  rows: Array<{ id: string; created_at: string }>,
   days: number
-): number[] {
-  const buckets = new Array(days).fill(0);
-  const now = new Date();
-  now.setUTCHours(0, 0, 0, 0);
+): SparklineDay[] {
+  const buckets: SparklineDay[] = [];
+  const todayUtc = new Date();
+  todayUtc.setUTCHours(0, 0, 0, 0);
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(todayUtc);
+    d.setUTCDate(d.getUTCDate() - i);
+    buckets.push({
+      date: d.toISOString().slice(0, 10),
+      count: 0,
+      application_ids: [],
+    });
+  }
   for (const row of rows) {
     const d = new Date(row.created_at);
     d.setUTCHours(0, 0, 0, 0);
     const daysAgo = Math.floor(
-      (now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24)
+      (todayUtc.getTime() - d.getTime()) / (1000 * 60 * 60 * 24)
     );
     if (daysAgo >= 0 && daysAgo < days) {
-      // index 0 = oldest, index days-1 = today
-      buckets[days - 1 - daysAgo] += 1;
+      const bucket = buckets[days - 1 - daysAgo];
+      bucket.count += 1;
+      bucket.application_ids.push(row.id);
     }
   }
   return buckets;
