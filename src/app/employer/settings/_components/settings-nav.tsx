@@ -81,6 +81,7 @@ const GROUPS: NavGroup[] = [
     entries: [
       { id: "notifications", label: "Notifications", href: "/employer/settings/notifications", Icon: Bell },
       { id: "templates", label: "Email templates", href: "/employer/settings/templates", Icon: Mail },
+      { id: "outreach-templates", label: "Outreach templates", href: "/employer/settings/outreach-templates", Icon: Mail },
     ],
   },
   {

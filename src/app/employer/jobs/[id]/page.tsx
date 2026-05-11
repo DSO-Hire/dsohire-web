@@ -40,6 +40,8 @@ import {
 import { PerJobAnalyticsCard } from "@/components/analytics/per-job-analytics-card";
 import { FunnelChart } from "@/components/analytics/funnel-chart";
 import { StageDwellCard } from "@/components/analytics/stage-dwell-card";
+import { getSmartPicks } from "@/lib/talent-pool/smart-picks";
+import { SmartPicksCard } from "@/components/talent-pool/smart-picks-card";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -238,11 +240,12 @@ export default async function PerJobPipelinePage({
   const initialView: BoardView = sp.view === "list" ? "list" : "kanban";
   const status = job.status as string;
 
-  // Phase 5C per-job analytics + funnel + stage dwell. Run in parallel.
-  const [analytics, funnel, stageDwell] = await Promise.all([
+  // Phase 5C analytics + funnel + stage dwell + Phase 5D Smart Picks.
+  const [analytics, funnel, stageDwell, smartPicks] = await Promise.all([
     getPerJobAnalytics(supabase, jobId),
     getJobFunnel(supabase, jobId),
     getJobStageDwell(supabase, jobId),
+    getSmartPicks(supabase, jobId, job.dso_id as string, 5),
   ]);
 
   return (
@@ -330,6 +333,8 @@ export default async function PerJobPipelinePage({
       </header>
 
       <PerJobAnalyticsCard metrics={analytics} />
+
+      <SmartPicksCard picks={smartPicks} />
 
       <div className="mb-10 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
         <FunnelChart

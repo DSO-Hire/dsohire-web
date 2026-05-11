@@ -13,13 +13,22 @@
  */
 
 import { useEffect, useRef, useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Send, X, Loader2, CheckCircle2 } from "lucide-react";
+import { Send, X, Loader2, CheckCircle2, Mail } from "lucide-react";
 import { sendOutreachToCandidate } from "./outreach-actions";
+
+export interface OutreachTemplate {
+  id: string;
+  name: string;
+  subject: string;
+  body: string;
+}
 
 interface OutreachModalProps {
   candidateId: string;
   candidateName: string | null;
+  templates: OutreachTemplate[];
   isOpen: boolean;
   onClose: () => void;
 }
@@ -27,16 +36,28 @@ interface OutreachModalProps {
 export function OutreachModal({
   candidateId,
   candidateName,
+  templates,
   isOpen,
   onClose,
 }: OutreachModalProps) {
   const router = useRouter();
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
+  const [templateId, setTemplateId] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [pending, startTransition] = useTransition();
   const subjectRef = useRef<HTMLInputElement>(null);
+
+  function applyTemplate(id: string) {
+    setTemplateId(id);
+    if (!id) return;
+    const t = templates.find((t) => t.id === id);
+    if (t) {
+      setSubject(t.subject);
+      setBody(t.body);
+    }
+  }
 
   useEffect(() => {
     if (isOpen) {
@@ -64,6 +85,7 @@ export function OutreachModal({
     fd.set("candidate_id", candidateId);
     fd.set("subject", subject.trim());
     fd.set("body", body.trim());
+    if (templateId) fd.set("template_id", templateId);
     startTransition(async () => {
       const res = await sendOutreachToCandidate(fd);
       if (!res.ok) {
@@ -132,6 +154,54 @@ export function OutreachModal({
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            {templates.length > 0 ? (
+              <div>
+                <label className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
+                  Start from a template
+                  <span className="ml-2 text-slate-meta font-normal normal-case tracking-normal">
+                    (optional)
+                  </span>
+                </label>
+                <div className="flex items-center gap-2">
+                  <select
+                    value={templateId}
+                    onChange={(e) => applyTemplate(e.target.value)}
+                    className="flex-1 px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+                  >
+                    <option value="">— Blank message —</option>
+                    {templates.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
+                  <Link
+                    href="/employer/settings/outreach-templates"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[11px] font-semibold text-heritage-deep hover:text-ink underline underline-offset-2 whitespace-nowrap"
+                  >
+                    Manage
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-md border border-[var(--rule)] bg-cream/40 px-3 py-2.5 text-[12px] text-slate-body inline-flex items-center gap-2">
+                <Mail className="h-3.5 w-3.5 text-heritage-deep" aria-hidden />
+                <span>
+                  Tip: save reusable outreach messages in{" "}
+                  <Link
+                    href="/employer/settings/outreach-templates"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-heritage-deep hover:text-ink underline underline-offset-2"
+                  >
+                    Settings → Outreach templates
+                  </Link>
+                  .
+                </span>
+              </div>
+            )}
             <div>
               <label
                 htmlFor="outreach-subject"
@@ -205,11 +275,13 @@ export function OutreachModal({
 interface OutreachLauncherProps {
   candidateId: string;
   candidateName: string | null;
+  templates: OutreachTemplate[];
 }
 
 export function OutreachLauncher({
   candidateId,
   candidateName,
+  templates,
 }: OutreachLauncherProps) {
   const [open, setOpen] = useState(false);
   return (
@@ -225,6 +297,7 @@ export function OutreachLauncher({
       <OutreachModal
         candidateId={candidateId}
         candidateName={candidateName}
+        templates={templates}
         isOpen={open}
         onClose={() => setOpen(false)}
       />

@@ -30,6 +30,7 @@ import {
 import { sendEmail } from "@/lib/email/send";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { OutreachMessage } from "@/emails/employer/OutreachMessage";
+import { resolveMergeFields } from "@/lib/outreach/merge-fields";
 
 export interface SendOutreachResult {
   ok: boolean;
@@ -43,6 +44,7 @@ export async function sendOutreachToCandidate(formData: FormData): Promise<SendO
   const candidateId = String(formData.get("candidate_id") ?? "").trim();
   const subject = String(formData.get("subject") ?? "").trim().slice(0, 200);
   const body = String(formData.get("body") ?? "").trim();
+  const templateId = String(formData.get("template_id") ?? "").trim() || null;
 
   if (!candidateId) return { ok: false, error: "Missing candidate." };
   if (!subject) return { ok: false, error: "Subject is required." };
@@ -115,6 +117,17 @@ export async function sendOutreachToCandidate(formData: FormData): Promise<SendO
     .maybeSingle();
   const dsoName = (dso?.name as string | undefined) ?? "A DSO";
 
+  // Resolve merge fields in subject + body. Even when no template was
+  // picked, employers can type tokens directly into the modal — so we
+  // always run the resolver, not just on template sends.
+  const mergeCtx = {
+    candidate: { full_name: (candidate.full_name as string | null) ?? null },
+    sender: { full_name: (dsoUser.full_name as string | null) ?? null },
+    dso: { name: dsoName },
+  };
+  const resolvedSubject = resolveMergeFields(subject, mergeCtx);
+  const resolvedBody = resolveMergeFields(body, mergeCtx);
+
   // Persist the row first; if Resend fails we'll have a record + can
   // retry. (vs send-first which would lose the message body on a row-
   // insert failure.)
@@ -124,8 +137,8 @@ export async function sendOutreachToCandidate(formData: FormData): Promise<SendO
       dso_id: dsoUser.dso_id as string,
       candidate_id: candidateId,
       sent_by: dsoUser.id as string,
-      subject,
-      body,
+      subject: resolvedSubject,
+      body: resolvedBody,
     })
     .select("id")
     .single();
@@ -137,7 +150,7 @@ export async function sendOutreachToCandidate(formData: FormData): Promise<SendO
   // Send via Resend.
   const result = await sendEmail({
     to: candidateEmail,
-    subject: `${dsoName} · ${subject}`,
+    subject: `${dsoName} · ${resolvedSubject}`,
     template: "employer.outreach_message",
     replyTo: replyToEmail,
     relatedDsoId: dsoUser.dso_id as string,
@@ -146,8 +159,8 @@ export async function sendOutreachToCandidate(formData: FormData): Promise<SendO
       candidateFirstName: (candidate.full_name as string | null)?.split(/\s+/)[0] ?? null,
       dsoName,
       senderName: (dsoUser.full_name as string | null) ?? null,
-      subject,
-      body,
+      subject: resolvedSubject,
+      body: resolvedBody,
       siteUrl: SITE_URL,
     }),
   });
@@ -167,6 +180,25 @@ export async function sendOutreachToCandidate(formData: FormData): Promise<SendO
       .from("dso_outreach_messages")
       .update({ resend_message_id: result.messageId })
       .eq("id", row.id as string);
+  }
+
+  // Bump template usage stats when a template drove the send.
+  if (templateId) {
+    const { data: prior } = await admin
+      .from("dso_outreach_templates")
+      .select("usage_count")
+      .eq("id", templateId)
+      .eq("dso_id", dsoUser.dso_id as string)
+      .maybeSingle();
+    const nextCount = ((prior?.usage_count as number | undefined) ?? 0) + 1;
+    await admin
+      .from("dso_outreach_templates")
+      .update({
+        usage_count: nextCount,
+        last_used_at: new Date().toISOString(),
+      })
+      .eq("id", templateId)
+      .eq("dso_id", dsoUser.dso_id as string);
   }
 
   await recordAuditEvent({

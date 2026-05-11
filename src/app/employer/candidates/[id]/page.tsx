@@ -99,6 +99,20 @@ export default async function CandidateDetailPage({ params }: PageProps) {
     .eq("candidate_id", id)
     .maybeSingle();
 
+  // Saved outreach templates for the picker in the modal.
+  const { data: templateRows } = await supabase
+    .from("dso_outreach_templates")
+    .select("id, name, subject, body")
+    .eq("dso_id", dsoUser.dso_id as string)
+    .order("last_used_at", { ascending: false, nullsFirst: false })
+    .order("name", { ascending: true });
+  const outreachTemplates = (templateRows ?? []) as Array<{
+    id: string;
+    name: string;
+    subject: string;
+    body: string;
+  }>;
+
   // Past outreach from this DSO to this candidate.
   const { data: outreachRows } = await supabase
     .from("dso_outreach_messages")
@@ -201,7 +215,11 @@ export default async function CandidateDetailPage({ params }: PageProps) {
           </div>
         </div>
         <div className="flex flex-col items-end gap-2 shrink-0">
-          <OutreachLauncher candidateId={c.id} candidateName={c.full_name} />
+          <OutreachLauncher
+            candidateId={c.id}
+            candidateName={c.full_name}
+            templates={outreachTemplates}
+          />
           <TalentPoolSaveButton
             candidateId={c.id}
             initialEntryId={(poolEntry?.id as string | undefined) ?? null}
