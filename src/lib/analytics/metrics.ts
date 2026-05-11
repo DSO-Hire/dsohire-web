@@ -530,7 +530,13 @@ export async function getDsoCrossLocationStats(
   const since30d = daysAgoIso(30);
   const since90d = daysAgoIso(90);
 
-  // 1. Load all locations for the DSO.
+  // Built as flat queries rather than nested embeds. PostgREST's
+  // `!inner` + `eq("jobs.X", Y)` filter pattern silently no-ops on
+  // empty/null returns under RLS in some configurations — per
+  // feedback_supabase_inner_returns_array + the "prefer flat queries
+  // over nested embeds when the data path involves RLS" rule.
+
+  // 1. All locations for the DSO.
   const { data: locs } = await supabase
     .from("dso_locations")
     .select("id, name, city, state")
@@ -545,63 +551,101 @@ export async function getDsoCrossLocationStats(
     }>;
   if (locations.length === 0) return [];
 
-  // 2. Open roles per location: count distinct active jobs joined via
-  //    job_locations. Use a single query that fetches the join rows
-  //    for active jobs in this DSO and aggregate in memory (small N).
-  const { data: activeJobLocs } = await supabase
-    .from("job_locations")
-    .select("location_id, jobs!inner(id, dso_id, status, deleted_at, posted_at)")
-    .eq("jobs.dso_id", dsoId)
-    .eq("jobs.status", "active")
-    .is("jobs.deleted_at", null);
-
-  const activeJobsByLoc = new Map<string, Set<string>>();
-  for (const row of (activeJobLocs ?? []) as unknown as Array<{
-    location_id: string;
-    jobs: Array<{ id: string }>;
+  // 2. All jobs for the DSO (id, status, posted_at). Used both for
+  //    "is this job active?" and the time-to-fill calc.
+  const { data: jobsRows } = await supabase
+    .from("jobs")
+    .select("id, status, deleted_at, posted_at")
+    .eq("dso_id", dsoId);
+  const jobMap = new Map<string, { status: string; deleted_at: string | null; posted_at: string | null }>();
+  for (const j of (jobsRows ?? []) as Array<{
+    id: string;
+    status: string;
+    deleted_at: string | null;
+    posted_at: string | null;
   }>) {
-    const jobId = row.jobs?.[0]?.id;
-    if (!jobId) continue;
-    const set = activeJobsByLoc.get(row.location_id) ?? new Set<string>();
-    set.add(jobId);
-    activeJobsByLoc.set(row.location_id, set);
+    jobMap.set(j.id, {
+      status: j.status,
+      deleted_at: j.deleted_at,
+      posted_at: j.posted_at,
+    });
   }
 
-  // 3. Apps + hires per location: pull all DSO applications in window
-  //    with their job's location join, aggregate in memory.
+  if (jobMap.size === 0) {
+    // No jobs at all → every location is 0/0/0/null.
+    return locations.map((loc) => ({
+      location_id: loc.id,
+      name: loc.name,
+      city: loc.city,
+      state: loc.state,
+      open_roles: 0,
+      apps_30d: 0,
+      hires_quarter: 0,
+      avg_time_to_fill_days: null,
+    }));
+  }
+
+  // 3. All job_locations join rows for those jobs.
+  const jobIds = Array.from(jobMap.keys());
+  const { data: jlRows } = await supabase
+    .from("job_locations")
+    .select("job_id, location_id")
+    .in("job_id", jobIds);
+  const locsByJob = new Map<string, string[]>();
+  for (const r of (jlRows ?? []) as Array<{ job_id: string; location_id: string }>) {
+    const arr = locsByJob.get(r.job_id) ?? [];
+    arr.push(r.location_id);
+    locsByJob.set(r.job_id, arr);
+  }
+
+  // 4. Open roles per location: count distinct active+undeleted jobs
+  //    whose job_locations rows touch this location.
+  const activeJobsByLoc = new Map<string, Set<string>>();
+  for (const [jobId, jobLocs] of locsByJob.entries()) {
+    const meta = jobMap.get(jobId);
+    if (!meta) continue;
+    if (meta.status !== "active") continue;
+    if (meta.deleted_at !== null) continue;
+    for (const locId of jobLocs) {
+      const set = activeJobsByLoc.get(locId) ?? new Set<string>();
+      set.add(jobId);
+      activeJobsByLoc.set(locId, set);
+    }
+  }
+
+  // 5. Applications for those jobs in the 90-day window.
   const { data: appsRows } = await supabase
     .from("applications")
-    .select(
-      "id, status, created_at, hired_at, jobs!inner(id, dso_id, posted_at, job_locations(location_id))"
-    )
-    .eq("jobs.dso_id", dsoId)
+    .select("id, job_id, status, created_at, hired_at")
+    .in("job_id", jobIds)
     .gte("created_at", since90d);
+
+  const since30dMs = new Date(since30d).getTime();
+  const since90dMs = new Date(since90d).getTime();
 
   const appsByLoc = new Map<
     string,
     { apps30d: number; hiresWindow: Array<{ posted: string | null; hired: string }> }
   >();
-  for (const r of (appsRows ?? []) as unknown as Array<{
+  for (const r of (appsRows ?? []) as Array<{
     id: string;
+    job_id: string;
     status: string;
     created_at: string;
     hired_at: string | null;
-    jobs: Array<{
-      id: string;
-      posted_at: string | null;
-      job_locations: Array<{ location_id: string }>;
-    }>;
   }>) {
-    const job = r.jobs?.[0];
+    const locsForJob = locsByJob.get(r.job_id);
+    if (!locsForJob || locsForJob.length === 0) continue;
+    const job = jobMap.get(r.job_id);
     if (!job) continue;
-    const locsForJob = job.job_locations ?? [];
-    const isLast30d = new Date(r.created_at).getTime() >= new Date(since30d).getTime();
+    const createdMs = new Date(r.created_at).getTime();
+    const isLast30d = createdMs >= since30dMs;
     const isHiredInWindow =
       r.status === "hired" &&
       r.hired_at !== null &&
-      new Date(r.hired_at).getTime() >= new Date(since90d).getTime();
-    for (const jl of locsForJob) {
-      const stats = appsByLoc.get(jl.location_id) ?? {
+      new Date(r.hired_at).getTime() >= since90dMs;
+    for (const locId of locsForJob) {
+      const stats = appsByLoc.get(locId) ?? {
         apps30d: 0,
         hiresWindow: [],
       };
@@ -612,7 +656,7 @@ export async function getDsoCrossLocationStats(
           hired: r.hired_at,
         });
       }
-      appsByLoc.set(jl.location_id, stats);
+      appsByLoc.set(locId, stats);
     }
   }
 
