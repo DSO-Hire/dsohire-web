@@ -28,7 +28,7 @@ export function getStripe(): Stripe {
     typescript: true,
     appInfo: {
       name: "DSO Hire",
-      url: "https://www.dsohire.com",
+      url: "https://dsohire.com",
     },
   });
 

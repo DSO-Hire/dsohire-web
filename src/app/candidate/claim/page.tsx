@@ -128,7 +128,7 @@ async function sendClaimLink(formData: FormData) {
     email,
     options: {
       shouldCreateUser: true,
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.dsohire.com"}/auth/callback?next=${encodeURIComponent(next)}`,
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com"}/auth/callback?next=${encodeURIComponent(next)}`,
     },
   });
 

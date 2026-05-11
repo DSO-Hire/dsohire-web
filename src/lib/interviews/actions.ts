@@ -33,7 +33,7 @@ export interface InterviewActionResult {
   bookingId?: string;
 }
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.dsohire.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
 
 const KIND_LABELS: Record<string, string> = {
   phone: "Phone call",

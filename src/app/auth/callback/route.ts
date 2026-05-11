@@ -3,7 +3,7 @@
  *
  * The flow:
  *   1. User submits email on /employer/sign-in or /employer/sign-up
- *   2. Supabase emails them a link like https://www.dsohire.com/auth/callback?code=ABC123&next=/employer/dashboard
+ *   2. Supabase emails them a link like https://dsohire.com/auth/callback?code=ABC123&next=/employer/dashboard
  *   3. They click → this route hits → we exchange the code for a session,
  *      set the auth cookie, and redirect them where they were headed
  *

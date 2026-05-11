@@ -26,7 +26,7 @@ interface CandidateMagicLinkProps {
 }
 
 export function CandidateMagicLink({
-  magicUrl = "https://www.dsohire.com/candidate/auth/callback?token=preview",
+  magicUrl = "https://dsohire.com/candidate/auth/callback?token=preview",
   expiresInMinutes = 15,
 }: CandidateMagicLinkProps) {
   return (

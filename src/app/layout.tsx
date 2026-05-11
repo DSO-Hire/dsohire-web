@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   },
   description:
     "The job board built for mid-market Dental Support Organizations. Flat-fee, unlimited multi-location postings — no placement fees, no per-listing surcharges.",
-  metadataBase: new URL("https://www.dsohire.com"),
+  metadataBase: new URL("https://dsohire.com"),
   openGraph: {
     type: "website",
     siteName: "DSO Hire",

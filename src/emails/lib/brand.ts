@@ -38,13 +38,13 @@ export const brand = {
   contentPadding: "32px",
 
   // URLs
-  siteUrl: "https://www.dsohire.com",
+  siteUrl: "https://dsohire.com",
   // Inline SVGs work in modern email clients (Apple Mail, Gmail webmail, iOS Mail).
   // For Outlook desktop / other strict clients, render text wordmark fallback —
   // currently Layout.tsx uses text-based wordmark for max compatibility.
-  logoLockupOnDark: "https://www.dsohire.com/logo-on-dark.svg",
-  logoLockupOnLight: "https://www.dsohire.com/logo-on-light.svg",
-  logoMonogram: "https://www.dsohire.com/logo-monogram.svg",
+  logoLockupOnDark: "https://dsohire.com/logo-on-dark.svg",
+  logoLockupOnLight: "https://dsohire.com/logo-on-light.svg",
+  logoMonogram: "https://dsohire.com/logo-monogram.svg",
   // Public-facing support address shown in every transactional email
   // footer. Mirrors src/lib/contact.ts SUPPORT_EMAIL — kept as a
   // separate constant rather than imported because the email bundle

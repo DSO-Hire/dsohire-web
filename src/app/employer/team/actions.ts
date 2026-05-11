@@ -36,7 +36,7 @@ export interface TeamActionState {
   message?: string;
 }
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.dsohire.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
 const INVITATION_TTL_DAYS = 7;
 
 /* ───────────────────────────────────────────────────────────────

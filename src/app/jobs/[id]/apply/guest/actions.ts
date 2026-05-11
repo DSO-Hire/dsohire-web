@@ -44,7 +44,7 @@ const RESUME_MIME = new Set([
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ]);
 const RESUME_MAX_BYTES = 10 * 1024 * 1024;
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.dsohire.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
 const CLAIM_TTL_DAYS = 90;
 
 const initialAnswerEmpty: AnswerValue = {};

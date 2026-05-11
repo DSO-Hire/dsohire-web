@@ -16,7 +16,7 @@
  * Setup note for Supabase project config:
  *   - Auth → Providers → LinkedIn (OIDC) must be enabled
  *   - Client ID + Client Secret from LinkedIn Developer app
- *   - Authorized redirect: https://www.dsohire.com/auth/callback (prod)
+ *   - Authorized redirect: https://dsohire.com/auth/callback (prod)
  *     + http://localhost:3000/auth/callback (dev)
  *
  * Profile data scope: the default OIDC scope returns `name`, `email`,

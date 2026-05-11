@@ -107,6 +107,6 @@ export async function GET(request: Request) {
     "Revoked",
     `<h1>Revoked</h1>
      <p class="accent">The pending email change has been canceled. Your DSO Hire account email is unchanged.</p>
-     <p>If you've never received an account-change email like this before, that's a good signal to update your password — <a href="https://www.dsohire.com/candidate/sign-in">sign in</a> and head to Settings → Account.</p>`
+     <p>If you've never received an account-change email like this before, that's a good signal to update your password — <a href="https://dsohire.com/candidate/sign-in">sign in</a> and head to Settings → Account.</p>`
   );
 }

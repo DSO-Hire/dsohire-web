@@ -644,7 +644,7 @@ function buildJobPostingJsonLd({
         ? {
             "@type": "Organization",
             name: dso.name,
-            sameAs: `https://www.dsohire.com/companies/${dso.slug}`,
+            sameAs: `https://dsohire.com/companies/${dso.slug}`,
           }
         : {
             // Private-affiliation: practice/multi-loc name only. No

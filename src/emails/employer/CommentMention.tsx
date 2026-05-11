@@ -41,7 +41,7 @@ export function CommentMention({
   authorName = "A teammate",
   candidateName = "a candidate",
   commentBody = "",
-  deepLink = "https://www.dsohire.com/employer/applications/preview",
+  deepLink = "https://dsohire.com/employer/applications/preview",
 }: CommentMentionProps) {
   return (
     <Layout

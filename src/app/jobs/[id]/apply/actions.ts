@@ -48,7 +48,7 @@ const RESUME_MIME = new Set([
 ]);
 const RESUME_MAX_BYTES = 10 * 1024 * 1024; // 10 MB — must match storage.buckets
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.dsohire.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
 
 export async function applyToJob(
   _prev: ApplyState,

@@ -56,7 +56,7 @@ async function siteOrigin(): Promise<string> {
   const proto = h.get("x-forwarded-proto") ?? "https";
   const host = h.get("host");
   if (host) return `${proto}://${host}`;
-  return process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.dsohire.com";
+  return process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
 }
 
 /* ──────────────────────────────────────────────────────────────

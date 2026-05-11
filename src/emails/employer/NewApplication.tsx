@@ -37,7 +37,7 @@ export function NewApplication({
   candidateHeadline = null,
   jobTitle = "Dental Hygienist",
   jobLocations = "Downtown Office, Kansas City, KS",
-  applicationUrl = "https://www.dsohire.com/employer/applications/preview",
+  applicationUrl = "https://dsohire.com/employer/applications/preview",
 }: NewApplicationProps) {
   return (
     <Layout

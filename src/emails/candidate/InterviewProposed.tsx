@@ -45,7 +45,7 @@ export function InterviewProposed({
   message = null,
   locationText = null,
   proposedStartsIso = [],
-  pickUrl = "https://www.dsohire.com/candidate/dashboard",
+  pickUrl = "https://dsohire.com/candidate/dashboard",
 }: InterviewProposedProps) {
   const greeting = candidateFirstName
     ? `Hi ${candidateFirstName} —`

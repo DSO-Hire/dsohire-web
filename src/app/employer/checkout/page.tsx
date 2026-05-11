@@ -35,7 +35,7 @@ interface PageProps {
   searchParams: Promise<{ canceled?: string; tier?: string }>;
 }
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.dsohire.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
 
 function isPricingTier(v: string): v is PricingTier {
   return v === "starter" || v === "growth" || v === "enterprise";

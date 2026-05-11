@@ -258,9 +258,9 @@ export default async function HiringReportPage() {
             publisher: {
               "@type": "Organization",
               name: "DSO Hire",
-              url: "https://www.dsohire.com",
+              url: "https://dsohire.com",
             },
-            url: "https://www.dsohire.com/dental-hiring-report",
+            url: "https://dsohire.com/dental-hiring-report",
           }),
         }}
       />

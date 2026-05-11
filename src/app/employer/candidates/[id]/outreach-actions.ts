@@ -38,7 +38,7 @@ export interface SendOutreachResult {
   messageId?: string;
 }
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.dsohire.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
 
 export async function sendOutreachToCandidate(formData: FormData): Promise<SendOutreachResult> {
   const candidateId = String(formData.get("candidate_id") ?? "").trim();
