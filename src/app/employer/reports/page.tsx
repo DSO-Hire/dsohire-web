@@ -16,7 +16,14 @@
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Briefcase, Users, CheckCircle2, Clock, ArrowRight } from "lucide-react";
+import {
+  Briefcase,
+  Users,
+  CheckCircle2,
+  Clock,
+  ArrowRight,
+  Download,
+} from "lucide-react";
 import type { Metadata } from "next";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -68,18 +75,28 @@ export default async function ReportsPage() {
 
   return (
     <EmployerShell active="reports">
-      <header className="mb-10 max-w-[820px]">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
-          Reports
+      <header className="mb-10 flex flex-wrap items-start justify-between gap-6">
+        <div className="max-w-[820px]">
+          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+            Reports
+          </div>
+          <h1 className="font-display text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-3">
+            Hiring at a glance.
+          </h1>
+          <p className="text-[14px] text-slate-body leading-relaxed">
+            DSO-wide metrics across every job, location, and recruiter.
+            Updates live as candidates apply and you move them through the
+            pipeline.
+          </p>
         </div>
-        <h1 className="font-display text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-3">
-          Hiring at a glance.
-        </h1>
-        <p className="text-[14px] text-slate-body leading-relaxed">
-          DSO-wide metrics across every job, location, and recruiter.
-          Updates live as candidates apply and you move them through the
-          pipeline.
-        </p>
+        <a
+          href="/api/employer/applications.csv"
+          className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-ink hover:bg-cream shrink-0"
+          title="Download all applications as CSV"
+        >
+          <Download className="size-3.5" />
+          Export CSV
+        </a>
       </header>
 
       {/* Headline tiles */}

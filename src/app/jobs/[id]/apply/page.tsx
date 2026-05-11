@@ -26,6 +26,7 @@ import type { Metadata } from "next";
 
 interface PageProps {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ source?: string }>;
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -58,8 +59,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return { title: job ? `Apply: ${job.title as string}` : "Apply" };
 }
 
-export default async function ApplyPage({ params }: PageProps) {
+export default async function ApplyPage({ params, searchParams }: PageProps) {
   const { id: jobId } = await params;
+  const sp = searchParams ? await searchParams : {};
+  const sourceTag = (sp.source ?? "").trim().slice(0, 64) || null;
   const supabase = await createSupabaseServerClient();
 
   // Auth wall
@@ -233,6 +236,7 @@ export default async function ApplyPage({ params }: PageProps) {
           existingApplication={null}
           existingAnswers={existingAnswers}
           userEmail={user.email ?? null}
+          sourceTag={sourceTag}
         />
       </section>
     </SiteShell>

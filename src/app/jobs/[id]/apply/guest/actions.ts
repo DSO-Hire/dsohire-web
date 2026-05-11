@@ -102,6 +102,8 @@ export async function submitGuestApplication(
   const fullName = String(formData.get("full_name") ?? "").trim();
   const coverLetter = String(formData.get("cover_letter") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
+  const sourceTag =
+    String(formData.get("source") ?? "").trim().slice(0, 64) || null;
   const honeypot = String(formData.get("website") ?? "").trim();
   const resumeFile = formData.get("resume") as File | null;
 
@@ -264,6 +266,7 @@ export async function submitGuestApplication(
         cover_letter: coverLetter || null,
         resume_url: resumeUrl,
         status: "new",
+        ...(sourceTag ? { source: sourceTag } : {}),
       })
       .eq("id", applicationId);
   } else {
@@ -275,6 +278,7 @@ export async function submitGuestApplication(
         cover_letter: coverLetter || null,
         resume_url: resumeUrl,
         status: "new",
+        source: sourceTag,
       })
       .select("id")
       .single();

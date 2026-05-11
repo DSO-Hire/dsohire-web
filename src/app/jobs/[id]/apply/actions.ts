@@ -57,6 +57,8 @@ export async function applyToJob(
   const jobId = String(formData.get("job_id") ?? "").trim();
   const fullName = String(formData.get("full_name") ?? "").trim();
   const coverLetter = String(formData.get("cover_letter") ?? "").trim();
+  const sourceTag =
+    String(formData.get("source") ?? "").trim().slice(0, 64) || null;
   const resumeFile = formData.get("resume") as File | null;
 
   if (!jobId) {
@@ -248,6 +250,7 @@ export async function applyToJob(
         cover_letter: coverLetter || null,
         resume_url: resumeUrl,
         status: "new",
+        source: sourceTag,
       })
       .select("id")
       .single();

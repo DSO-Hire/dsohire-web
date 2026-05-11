@@ -55,6 +55,8 @@ interface ApplyWizardProps {
   } | null;
   existingAnswers: ExistingAnswer[];
   userEmail: string | null;
+  /** Phase 5C — attribution channel from ?source= on the apply URL. */
+  sourceTag?: string | null;
 }
 
 export function ApplyWizard(props: ApplyWizardProps) {
@@ -208,6 +210,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
     formData.set("job_id", jobId);
     formData.set("full_name", draft.fullName.trim());
     formData.set("cover_letter", draft.coverLetter);
+    if (props.sourceTag) formData.set("source", props.sourceTag);
     if (resumeFile) formData.set("resume", resumeFile);
 
     // Encode answers — see actions.ts for the matching parser.

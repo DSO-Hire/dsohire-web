@@ -158,6 +158,98 @@ export async function getPerJobAnalytics(
 }
 
 // ─────────────────────────────────────────────────────────────
+// Time-in-stage (per-job)
+// ─────────────────────────────────────────────────────────────
+
+export interface StageDwellRow {
+  stage: FunnelStage;
+  label: string;
+  /** Mean dwell time in days for apps that left this stage. */
+  avg_days: number | null;
+  /** Number of applications observed transitioning OUT of this stage. */
+  observed_transitions: number;
+}
+
+/**
+ * Compute average time each application spends in each pipeline stage,
+ * based on application_status_events transitions. For each app, the
+ * dwell time in stage X is the delta between the event where
+ * to_status=X and the event where from_status=X. Apps still in stage
+ * X (no outgoing transition) are excluded from that stage's mean —
+ * they'd otherwise drag the metric toward "stuck" indefinitely.
+ *
+ * Returns a row per funnel stage (Applied → Screening → Interview →
+ * Offered). Hired isn't included because it's terminal — no dwell.
+ */
+export async function getJobStageDwell(
+  supabase: SupabaseClient,
+  jobId: string
+): Promise<StageDwellRow[]> {
+  // Pull all events for this job's applications.
+  const { data: events } = await supabase
+    .from("application_status_events")
+    .select(
+      "application_id, from_status, to_status, created_at, applications!inner(job_id)"
+    )
+    .eq("applications.job_id", jobId)
+    .order("created_at", { ascending: true });
+
+  // !inner returns the joined row as an array — see
+  // feedback_supabase_inner_returns_array.
+  const rows =
+    (events ?? []) as unknown as Array<{
+      application_id: string;
+      from_status: string | null;
+      to_status: string;
+      created_at: string;
+      applications: Array<{ job_id: string }>;
+    }>;
+
+  // Group events by application_id, sorted asc by created_at.
+  const eventsByApp = new Map<string, Array<{ from: string | null; to: string; at: number }>>();
+  for (const r of rows) {
+    const arr = eventsByApp.get(r.application_id) ?? [];
+    arr.push({
+      from: r.from_status,
+      to: r.to_status,
+      at: new Date(r.created_at).getTime(),
+    });
+    eventsByApp.set(r.application_id, arr);
+  }
+
+  // For each application's event chain, walk and accumulate dwell.
+  const stageTotals: Record<string, { totalMs: number; n: number }> = {};
+  for (const stage of FUNNEL_ORDER) {
+    stageTotals[stage] = { totalMs: 0, n: 0 };
+  }
+
+  for (const arr of eventsByApp.values()) {
+    for (let i = 1; i < arr.length; i++) {
+      const prev = arr[i - 1];
+      const cur = arr[i];
+      if (!prev.to) continue;
+      const stage = prev.to as FunnelStage;
+      if (!(stage in stageTotals)) continue;
+      const delta = cur.at - prev.at;
+      if (delta < 0) continue;
+      stageTotals[stage].totalMs += delta;
+      stageTotals[stage].n += 1;
+    }
+  }
+
+  return FUNNEL_ORDER.filter((s) => s !== "hired").map((stage) => {
+    const t = stageTotals[stage];
+    const days = t.n > 0 ? t.totalMs / t.n / (1000 * 60 * 60 * 24) : null;
+    return {
+      stage,
+      label: STAGE_LABEL[stage],
+      avg_days: days,
+      observed_transitions: t.n,
+    };
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
 // Per-job funnel (stage drop-off)
 // ─────────────────────────────────────────────────────────────
 

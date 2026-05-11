@@ -26,9 +26,11 @@ const initial: GuestApplyState = { ok: false };
 interface GuestApplyFormProps {
   jobId: string;
   questions: ScreeningQuestion[];
+  /** Phase 5C — attribution channel from ?source= on the guest apply URL. */
+  sourceTag?: string | null;
 }
 
-export function GuestApplyForm({ jobId, questions }: GuestApplyFormProps) {
+export function GuestApplyForm({ jobId, questions, sourceTag }: GuestApplyFormProps) {
   const [state, submit, submitting] = useActionState(
     submitGuestApplication,
     initial
@@ -62,6 +64,7 @@ export function GuestApplyForm({ jobId, questions }: GuestApplyFormProps) {
   return (
     <form action={submit} className="space-y-8" encType="multipart/form-data">
       <input type="hidden" name="job_id" value={jobId} />
+      {sourceTag && <input type="hidden" name="source" value={sourceTag} />}
       <div className="hidden" aria-hidden>
         <input type="text" name="website" tabIndex={-1} autoComplete="off" />
       </div>

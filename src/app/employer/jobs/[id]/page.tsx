@@ -19,7 +19,7 @@
 
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
-import { ArrowLeft, Copy, ExternalLink, Pencil, Users } from "lucide-react";
+import { ArrowLeft, Copy, Download, ExternalLink, Pencil, Users } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
@@ -32,9 +32,14 @@ import { getPracticeFitForJob } from "@/lib/practice-fit/get-or-compute";
 import type { FitResult } from "@/lib/practice-fit/types";
 import { JobStatusActions } from "./status-actions";
 import { cloneJob } from "../actions";
-import { getPerJobAnalytics, getJobFunnel } from "@/lib/analytics/metrics";
+import {
+  getPerJobAnalytics,
+  getJobFunnel,
+  getJobStageDwell,
+} from "@/lib/analytics/metrics";
 import { PerJobAnalyticsCard } from "@/components/analytics/per-job-analytics-card";
 import { FunnelChart } from "@/components/analytics/funnel-chart";
+import { StageDwellCard } from "@/components/analytics/stage-dwell-card";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -233,10 +238,11 @@ export default async function PerJobPipelinePage({
   const initialView: BoardView = sp.view === "list" ? "list" : "kanban";
   const status = job.status as string;
 
-  // Phase 5C per-job analytics + funnel. Run in parallel.
-  const [analytics, funnel] = await Promise.all([
+  // Phase 5C per-job analytics + funnel + stage dwell. Run in parallel.
+  const [analytics, funnel, stageDwell] = await Promise.all([
     getPerJobAnalytics(supabase, jobId),
     getJobFunnel(supabase, jobId),
+    getJobStageDwell(supabase, jobId),
   ]);
 
   return (
@@ -311,19 +317,28 @@ export default async function PerJobPipelinePage({
               View public posting
             </Link>
           )}
+          <a
+            href={`/api/employer/jobs/${jobId}/applications.csv`}
+            className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-ink hover:bg-cream"
+            title="Download applications as CSV"
+          >
+            <Download className="size-3.5" />
+            Export CSV
+          </a>
           <JobStatusActions jobId={jobId} currentStatus={status} />
         </div>
       </header>
 
       <PerJobAnalyticsCard metrics={analytics} />
 
-      <div className="mb-10">
+      <div className="mb-10 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
         <FunnelChart
           rows={funnel.rows}
           rejected={funnel.rejected}
           withdrawn={funnel.withdrawn}
           title="Pipeline funnel · this job"
         />
+        <StageDwellCard rows={stageDwell} />
       </div>
 
       {/* Pipeline (kanban inline) */}

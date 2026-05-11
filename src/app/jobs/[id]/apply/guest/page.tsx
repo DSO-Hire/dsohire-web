@@ -24,6 +24,7 @@ import type { Metadata } from "next";
 
 interface PageProps {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ source?: string }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -39,8 +40,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function GuestApplyPage({ params }: PageProps) {
+export default async function GuestApplyPage({ params, searchParams }: PageProps) {
   const { id: jobId } = await params;
+  const sp = searchParams ? await searchParams : {};
+  const sourceTag = (sp.source ?? "").trim().slice(0, 64) || null;
   const supabase = await createSupabaseServerClient();
 
   // If already authenticated, send to the canonical apply page.
@@ -154,7 +157,7 @@ export default async function GuestApplyPage({ params }: PageProps) {
           </div>
         </header>
 
-        <GuestApplyForm jobId={jobId} questions={questions} />
+        <GuestApplyForm jobId={jobId} questions={questions} sourceTag={sourceTag} />
       </div>
     </SiteShell>
   );

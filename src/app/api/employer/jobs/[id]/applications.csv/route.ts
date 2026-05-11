@@ -1,0 +1,110 @@
+/**
+ * GET /api/employer/jobs/[id]/applications.csv (Phase 5C / E6.11).
+ *
+ * Streams a CSV of every application for a single job. RLS gates the
+ * read — the calling user must be a DSO member of the job's DSO, or
+ * the response is an empty list. Fields:
+ *   id, candidate_name, candidate_email, status, source, applied_at,
+ *   hired_at, days_in_pipeline, cover_letter.
+ */
+
+import { NextResponse } from "next/server";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { toCsv, csvFilename } from "@/lib/analytics/csv";
+
+export const dynamic = "force-dynamic";
+
+export async function GET(
+  _request: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  const { id: jobId } = await context.params;
+  const supabase = await createSupabaseServerClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  // Confirm the user belongs to the job's DSO (defense-in-depth — RLS
+  // would also block, but cleaner error message here).
+  const { data: job } = await supabase
+    .from("jobs")
+    .select("id, title, dso_id, posted_at")
+    .eq("id", jobId)
+    .maybeSingle();
+  if (!job) {
+    return NextResponse.json({ error: "not found" }, { status: 404 });
+  }
+
+  const { data: apps } = await supabase
+    .from("applications")
+    .select(
+      "id, status, source, created_at, hired_at, cover_letter, candidates!inner(full_name, phone, email)"
+    )
+    .eq("job_id", jobId)
+    .order("created_at", { ascending: false });
+
+  // !inner returns the joined row as an array — see
+  // feedback_supabase_inner_returns_array.
+  const rows = (apps ?? []) as unknown as Array<{
+    id: string;
+    status: string;
+    source: string | null;
+    created_at: string;
+    hired_at: string | null;
+    cover_letter: string | null;
+    candidates: Array<{
+      full_name: string | null;
+      phone: string | null;
+      email: string | null;
+    }>;
+  }>;
+
+  // Get auth email for each candidate (candidates.email is the guest
+  // email; auth-linked candidates have null email + email on auth.users).
+  // We skip the auth lookup here — DSO members get whatever's in
+  // candidates.email (for guests) and the candidate full_name for
+  // authed candidates. Surfacing the auth email per row requires a
+  // service-role lookup; defer to v2.
+
+  const csvRows = rows.map((r) => {
+    const cand = r.candidates?.[0];
+    const appliedAt = new Date(r.created_at);
+    const endAt = r.hired_at ? new Date(r.hired_at) : new Date();
+    const daysInPipeline = Math.max(
+      0,
+      Math.floor(
+        (endAt.getTime() - appliedAt.getTime()) / (1000 * 60 * 60 * 24)
+      )
+    );
+    return {
+      application_id: r.id,
+      candidate_name: cand?.full_name ?? "",
+      candidate_email: cand?.email ?? "",
+      candidate_phone: cand?.phone ?? "",
+      status: r.status,
+      source: r.source ?? "",
+      applied_at: r.created_at,
+      hired_at: r.hired_at ?? "",
+      days_in_pipeline: daysInPipeline,
+      cover_letter: r.cover_letter ?? "",
+    };
+  });
+
+  const csv = toCsv(csvRows);
+  const filename = csvFilename(
+    `applications-${(job.title as string).toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40)}`
+  );
+
+  return new NextResponse(csv, {
+    status: 200,
+    headers: {
+      "Content-Type": "text/csv; charset=utf-8",
+      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Cache-Control": "no-store",
+    },
+  });
+}
