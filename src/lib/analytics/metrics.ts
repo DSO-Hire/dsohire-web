@@ -494,6 +494,162 @@ export async function getDsoAnalytics(
 }
 
 // ─────────────────────────────────────────────────────────────
+// Cross-location benchmarking
+// ─────────────────────────────────────────────────────────────
+
+export interface CrossLocationRow {
+  location_id: string;
+  name: string;
+  city: string | null;
+  state: string | null;
+  open_roles: number;
+  apps_30d: number;
+  hires_quarter: number;
+  /** Average days posted_at→hired_at across hires this quarter. */
+  avg_time_to_fill_days: number | null;
+}
+
+/**
+ * Per-location performance rollup for DSO Reports (E6.13).
+ *
+ * Multi-location-DSO moat: aggregates open roles, applications,
+ * hires, and time-to-fill at the practice-location grain so an owner
+ * can spot which locations are hiring fastest, slowest, or generating
+ * the most pipeline. The dental-vertical competitor cluster doesn't
+ * surface this (14 of 14 at N or P per re-audit).
+ *
+ * Returns one row per dso_locations row for the DSO. Empty array if
+ * the DSO has zero locations. The caller is expected to hide the
+ * surface when length < 2 (single-location DSOs don't benefit from
+ * benchmarking against themselves).
+ */
+export async function getDsoCrossLocationStats(
+  supabase: SupabaseClient,
+  dsoId: string
+): Promise<CrossLocationRow[]> {
+  const since30d = daysAgoIso(30);
+  const since90d = daysAgoIso(90);
+
+  // 1. Load all locations for the DSO.
+  const { data: locs } = await supabase
+    .from("dso_locations")
+    .select("id, name, city, state")
+    .eq("dso_id", dsoId)
+    .order("name", { ascending: true });
+  const locations =
+    (locs ?? []) as Array<{
+      id: string;
+      name: string;
+      city: string | null;
+      state: string | null;
+    }>;
+  if (locations.length === 0) return [];
+
+  // 2. Open roles per location: count distinct active jobs joined via
+  //    job_locations. Use a single query that fetches the join rows
+  //    for active jobs in this DSO and aggregate in memory (small N).
+  const { data: activeJobLocs } = await supabase
+    .from("job_locations")
+    .select("location_id, jobs!inner(id, dso_id, status, deleted_at, posted_at)")
+    .eq("jobs.dso_id", dsoId)
+    .eq("jobs.status", "active")
+    .is("jobs.deleted_at", null);
+
+  const activeJobsByLoc = new Map<string, Set<string>>();
+  for (const row of (activeJobLocs ?? []) as unknown as Array<{
+    location_id: string;
+    jobs: Array<{ id: string }>;
+  }>) {
+    const jobId = row.jobs?.[0]?.id;
+    if (!jobId) continue;
+    const set = activeJobsByLoc.get(row.location_id) ?? new Set<string>();
+    set.add(jobId);
+    activeJobsByLoc.set(row.location_id, set);
+  }
+
+  // 3. Apps + hires per location: pull all DSO applications in window
+  //    with their job's location join, aggregate in memory.
+  const { data: appsRows } = await supabase
+    .from("applications")
+    .select(
+      "id, status, created_at, hired_at, jobs!inner(id, dso_id, posted_at, job_locations(location_id))"
+    )
+    .eq("jobs.dso_id", dsoId)
+    .gte("created_at", since90d);
+
+  const appsByLoc = new Map<
+    string,
+    { apps30d: number; hiresWindow: Array<{ posted: string | null; hired: string }> }
+  >();
+  for (const r of (appsRows ?? []) as unknown as Array<{
+    id: string;
+    status: string;
+    created_at: string;
+    hired_at: string | null;
+    jobs: Array<{
+      id: string;
+      posted_at: string | null;
+      job_locations: Array<{ location_id: string }>;
+    }>;
+  }>) {
+    const job = r.jobs?.[0];
+    if (!job) continue;
+    const locsForJob = job.job_locations ?? [];
+    const isLast30d = new Date(r.created_at).getTime() >= new Date(since30d).getTime();
+    const isHiredInWindow =
+      r.status === "hired" &&
+      r.hired_at !== null &&
+      new Date(r.hired_at).getTime() >= new Date(since90d).getTime();
+    for (const jl of locsForJob) {
+      const stats = appsByLoc.get(jl.location_id) ?? {
+        apps30d: 0,
+        hiresWindow: [],
+      };
+      if (isLast30d) stats.apps30d += 1;
+      if (isHiredInWindow && r.hired_at) {
+        stats.hiresWindow.push({
+          posted: job.posted_at,
+          hired: r.hired_at,
+        });
+      }
+      appsByLoc.set(jl.location_id, stats);
+    }
+  }
+
+  return locations.map((loc) => {
+    const openRoles = activeJobsByLoc.get(loc.id)?.size ?? 0;
+    const stats = appsByLoc.get(loc.id);
+    const apps30d = stats?.apps30d ?? 0;
+    const hiresWindow = stats?.hiresWindow ?? [];
+    let avg_time_to_fill_days: number | null = null;
+    if (hiresWindow.length > 0) {
+      let total = 0;
+      let n = 0;
+      for (const h of hiresWindow) {
+        if (!h.posted || !h.hired) continue;
+        const days =
+          (new Date(h.hired).getTime() - new Date(h.posted).getTime()) /
+          (1000 * 60 * 60 * 24);
+        if (days < 0) continue;
+        total += days;
+        n += 1;
+      }
+      if (n > 0) avg_time_to_fill_days = total / n;
+    }
+    return {
+      location_id: loc.id,
+      name: loc.name,
+      city: loc.city,
+      state: loc.state,
+      open_roles: openRoles,
+      apps_30d: apps30d,
+      hires_quarter: hiresWindow.length,
+      avg_time_to_fill_days,
+    };
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────
 

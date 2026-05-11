@@ -27,8 +27,12 @@ import {
 import type { Metadata } from "next";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getDsoAnalytics } from "@/lib/analytics/metrics";
+import {
+  getDsoAnalytics,
+  getDsoCrossLocationStats,
+} from "@/lib/analytics/metrics";
 import { FunnelChart } from "@/components/analytics/funnel-chart";
+import { CrossLocationTable } from "@/components/analytics/cross-location-table";
 
 export const metadata: Metadata = { title: "Reports" };
 export const dynamic = "force-dynamic";
@@ -49,7 +53,10 @@ export default async function ReportsPage() {
   if (!dsoUser) redirect("/employer/onboarding");
 
   const dsoId = dsoUser.dso_id as string;
-  const analytics = await getDsoAnalytics(supabase, dsoId);
+  const [analytics, crossLocationRows] = await Promise.all([
+    getDsoAnalytics(supabase, dsoId),
+    getDsoCrossLocationStats(supabase, dsoId),
+  ]);
 
   // Top jobs by application count.
   const { data: topJobs } = await supabase
@@ -190,18 +197,24 @@ export default async function ReportsPage() {
         </section>
       </div>
 
+      {crossLocationRows.length >= 2 && (
+        <div className="mb-10">
+          <CrossLocationTable rows={crossLocationRows} />
+        </div>
+      )}
+
       <section className="border border-[var(--rule)] bg-cream/40 p-6">
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Coming this week
         </div>
         <h2 className="text-lg font-extrabold tracking-[-0.3px] text-ink mb-2">
-          Cross-location benchmarking · Annual Hiring Report
+          Weekly digest · Annual Hiring Report
         </h2>
         <p className="text-[13px] text-slate-body leading-relaxed max-w-[560px]">
-          Per-location performance comparison (apps · time-to-fill ·
-          conversion) for DSOs with 2+ locations, plus the public Annual
-          Hiring Report for industry visibility. Both ship this week as
-          part of the Phase 5C run.
+          Monday-morning email digest summarizing the past week&apos;s
+          activity, plus the public Annual Hiring Report — platform-wide
+          trend report for industry visibility (SEO + LinkedIn). Both ship
+          before launch.
         </p>
       </section>
     </EmployerShell>
