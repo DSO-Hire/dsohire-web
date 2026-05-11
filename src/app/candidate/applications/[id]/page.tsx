@@ -23,6 +23,10 @@ import {
 import { CandidateShell } from "@/components/candidate/candidate-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { MessagesThread } from "@/components/messaging/messages-thread";
+import {
+  CandidateInterviewPicker,
+  type CandidateInterviewProposal,
+} from "@/components/interviews/candidate-interview-picker";
 import type { ApplicationMessageRow } from "@/lib/messages/actions";
 import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
 import { WhyThisMatch } from "@/components/practice-fit/why-this-match";
@@ -178,6 +182,62 @@ export default async function CandidateApplicationDetailPage({
     ? null
     : classifyPlaceholderReason(candidateDesiredRoles, job?.role_category);
 
+  // Phase 5A — interview proposals to show the candidate. We surface
+  // the most recent pending or booked proposal at the top of the page.
+  const { data: proposalRows } = await supabase
+    .from("interview_proposals")
+    .select(
+      "id, status, interview_kind, duration_minutes, location_text, message_to_candidate, interview_proposal_options(id, start_at, sort_order), interview_bookings(id, selected_option_id, candidate_confirmed_at), applications!inner(jobs!inner(dso_id, dsos(name)))"
+    )
+    .eq("application_id", app.id)
+    .in("status", ["pending", "booked"])
+    .order("created_at", { ascending: false })
+    .limit(1);
+  let activeProposal: CandidateInterviewProposal | null = null;
+  if (proposalRows && proposalRows.length > 0) {
+    const p = proposalRows[0] as unknown as {
+      id: string;
+      status: CandidateInterviewProposal["status"];
+      interview_kind: CandidateInterviewProposal["interview_kind"];
+      duration_minutes: number;
+      location_text: string | null;
+      message_to_candidate: string | null;
+      interview_proposal_options: Array<{
+        id: string;
+        start_at: string;
+        sort_order: number;
+      }>;
+      interview_bookings: Array<{
+        id: string;
+        selected_option_id: string;
+        candidate_confirmed_at: string;
+      }>;
+      applications: Array<{
+        jobs: Array<{
+          dso_id: string;
+          dsos: Array<{ name: string }>;
+        }>;
+      }>;
+    };
+    const booking = p.interview_bookings?.[0] ?? null;
+    const dsoName =
+      p.applications?.[0]?.jobs?.[0]?.dsos?.[0]?.name ?? "the practice";
+    activeProposal = {
+      proposal_id: p.id,
+      status: p.status,
+      interview_kind: p.interview_kind,
+      duration_minutes: p.duration_minutes,
+      location_text: p.location_text,
+      message_to_candidate: p.message_to_candidate,
+      dso_name: dsoName,
+      options: (p.interview_proposal_options ?? []).sort(
+        (a, b) => a.sort_order - b.sort_order
+      ),
+      booked_option_id: booking?.selected_option_id ?? null,
+      booked_at: booking?.candidate_confirmed_at ?? null,
+    };
+  }
+
   return (
     <CandidateShell active="applications">
       <div className="mb-6">
@@ -189,6 +249,10 @@ export default async function CandidateApplicationDetailPage({
           Back to My Applications
         </Link>
       </div>
+
+      {activeProposal && (
+        <CandidateInterviewPicker proposal={activeProposal} />
+      )}
 
       <header className="mb-8">
         <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">

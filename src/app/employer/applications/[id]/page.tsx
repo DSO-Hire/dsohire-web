@@ -41,6 +41,10 @@ import {
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
 import { StageSelector } from "./stage-selector";
+import {
+  EmployerInterviewSection,
+  type InterviewProposalState,
+} from "@/components/interviews/interview-section";
 import { AffiliationCard } from "./affiliation-card";
 import { NotesEditor } from "./notes-editor";
 import {
@@ -526,6 +530,57 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const submitted = new Date(app.created_at);
   const status = app.status as ApplicationStatus;
 
+  // Phase 5A — interview proposals + their options + bookings.
+  const { data: proposalRows } = await supabase
+    .from("interview_proposals")
+    .select(
+      "id, status, interview_kind, duration_minutes, location_text, message_to_candidate, created_at, interview_proposal_options(id, start_at, sort_order), interview_bookings(id, selected_option_id, candidate_confirmed_at, candidate_notes)"
+    )
+    .eq("application_id", app.id)
+    .order("created_at", { ascending: false });
+  const interviewProposals: InterviewProposalState[] = (
+    (proposalRows ?? []) as unknown as Array<{
+      id: string;
+      status: InterviewProposalState["status"];
+      interview_kind: InterviewProposalState["interview_kind"];
+      duration_minutes: number;
+      location_text: string | null;
+      message_to_candidate: string | null;
+      created_at: string;
+      interview_proposal_options: Array<{
+        id: string;
+        start_at: string;
+        sort_order: number;
+      }>;
+      interview_bookings: Array<{
+        id: string;
+        selected_option_id: string;
+        candidate_confirmed_at: string;
+        candidate_notes: string | null;
+      }>;
+    }>
+  ).map((p) => ({
+    proposal_id: p.id,
+    status: p.status,
+    interview_kind: p.interview_kind,
+    duration_minutes: p.duration_minutes,
+    location_text: p.location_text,
+    message_to_candidate: p.message_to_candidate,
+    created_at: p.created_at,
+    options: (p.interview_proposal_options ?? []).sort(
+      (a, b) => a.sort_order - b.sort_order
+    ),
+    booking: p.interview_bookings?.[0]
+      ? {
+          id: p.interview_bookings[0].id,
+          selected_option_id: p.interview_bookings[0].selected_option_id,
+          candidate_confirmed_at:
+            p.interview_bookings[0].candidate_confirmed_at,
+          candidate_notes: p.interview_bookings[0].candidate_notes,
+        }
+      : null,
+  }));
+
   // Display-name fallback. We have the candidate's auth email here from the
   // service-role lookup above, so prefer the email-username path
   // ("Candidate · jordan.r") over the candidate-id-prefix path that the
@@ -743,6 +798,14 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               aiSuggesterAvailable={aiSuggesterAvailable}
               aiSuggesterHasContext={aiSuggesterHasContext}
             />
+
+            <div className="mt-6">
+              <EmployerInterviewSection
+                applicationId={app.id}
+                candidateName={displayName}
+                proposals={interviewProposals}
+              />
+            </div>
           </DetailSection>
 
           {/* 02 · Practice Fit (Phase 5D v0 — structured-feature scoring) */}
