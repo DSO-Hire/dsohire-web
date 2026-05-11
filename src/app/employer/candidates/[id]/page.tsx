@@ -25,6 +25,7 @@ import type { Metadata } from "next";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { TalentPoolSaveButton } from "./talent-pool-save-button";
+import { OutreachLauncher } from "./outreach-modal";
 
 export const dynamic = "force-dynamic";
 
@@ -97,6 +98,31 @@ export default async function CandidateDetailPage({ params }: PageProps) {
     .eq("dso_id", dsoUser.dso_id as string)
     .eq("candidate_id", id)
     .maybeSingle();
+
+  // Past outreach from this DSO to this candidate.
+  const { data: outreachRows } = await supabase
+    .from("dso_outreach_messages")
+    .select("id, subject, body, sent_at, sent_by, dso_users(full_name)")
+    .eq("dso_id", dsoUser.dso_id as string)
+    .eq("candidate_id", id)
+    .order("sent_at", { ascending: false })
+    .limit(10);
+  const outreachHistory = (
+    (outreachRows ?? []) as unknown as Array<{
+      id: string;
+      subject: string;
+      body: string;
+      sent_at: string;
+      sent_by: string | null;
+      dso_users: Array<{ full_name: string | null }> | null;
+    }>
+  ).map((r) => ({
+    id: r.id,
+    subject: r.subject,
+    body: r.body,
+    sent_at: r.sent_at,
+    sender_name: r.dso_users?.[0]?.full_name ?? null,
+  }));
 
   const c = candidate as {
     id: string;
@@ -174,10 +200,13 @@ export default async function CandidateDetailPage({ params }: PageProps) {
             </div>
           </div>
         </div>
-        <TalentPoolSaveButton
-          candidateId={c.id}
-          initialEntryId={(poolEntry?.id as string | undefined) ?? null}
-        />
+        <div className="flex flex-col items-end gap-2 shrink-0">
+          <OutreachLauncher candidateId={c.id} candidateName={c.full_name} />
+          <TalentPoolSaveButton
+            candidateId={c.id}
+            initialEntryId={(poolEntry?.id as string | undefined) ?? null}
+          />
+        </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10">
@@ -211,6 +240,42 @@ export default async function CandidateDetailPage({ params }: PageProps) {
           {(c.schedule_preferences ?? []).length > 0 && (
             <Section title="Schedule preferences">
               <ChipList items={c.schedule_preferences ?? []} />
+            </Section>
+          )}
+
+          {outreachHistory.length > 0 && (
+            <Section title={`Outreach history (${outreachHistory.length})`}>
+              <ul className="space-y-3">
+                {outreachHistory.map((m) => (
+                  <li
+                    key={m.id}
+                    className="border border-[var(--rule)] bg-white p-4"
+                  >
+                    <div className="flex items-baseline justify-between gap-3 mb-1">
+                      <span className="text-[13px] font-bold text-ink">
+                        {m.subject}
+                      </span>
+                      <span className="text-[11px] text-slate-meta whitespace-nowrap">
+                        {new Date(m.sent_at).toLocaleDateString(undefined, {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </span>
+                    </div>
+                    {m.sender_name && (
+                      <div className="text-[11px] text-slate-meta uppercase tracking-wide mb-2">
+                        From {m.sender_name}
+                      </div>
+                    )}
+                    <p className="text-[13px] text-slate-body leading-relaxed whitespace-pre-wrap">
+                      {m.body.length > 280
+                        ? `${m.body.slice(0, 280).trim()}…`
+                        : m.body}
+                    </p>
+                  </li>
+                ))}
+              </ul>
             </Section>
           )}
         </div>
