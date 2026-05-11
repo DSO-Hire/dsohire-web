@@ -205,17 +205,23 @@ export default async function ReportsPage() {
 
       <section className="border border-[var(--rule)] bg-cream/40 p-6">
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
-          Coming this week
+          Public report
         </div>
         <h2 className="text-lg font-extrabold tracking-[-0.3px] text-ink mb-2">
-          Weekly digest · Annual Hiring Report
+          Dental Hiring Report · 2026
         </h2>
-        <p className="text-[13px] text-slate-body leading-relaxed max-w-[560px]">
-          Monday-morning email digest summarizing the past week&apos;s
-          activity, plus the public Annual Hiring Report — platform-wide
-          trend report for industry visibility (SEO + LinkedIn). Both ship
-          before launch.
+        <p className="text-[13px] text-slate-body leading-relaxed max-w-[560px] mb-3">
+          Anonymized, continuously-updated trend report drawn from the
+          DSO Hire platform: compensation bands by role, role mix, top
+          states by activity, time-to-fill. Public-facing, SEO-indexed,
+          built for industry distribution.
         </p>
+        <Link
+          href="/dental-hiring-report"
+          className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink"
+        >
+          View the report <ArrowRight className="h-3 w-3" />
+        </Link>
       </section>
     </EmployerShell>
   );
