@@ -92,7 +92,7 @@ export function EmployerInterviewSection({
         <PendingView proposal={active} />
       )}
 
-      {proposals.filter((p) => p.id !== active?.proposal_id).slice(0, 3)
+      {proposals.filter((p) => p.proposal_id !== active?.proposal_id).slice(0, 3)
         .length > 0 && (
         <details className="mt-4 pt-3 border-t border-[var(--rule)]">
           <summary className="cursor-pointer text-[11px] font-bold tracking-[1.5px] uppercase text-slate-meta hover:text-ink">
