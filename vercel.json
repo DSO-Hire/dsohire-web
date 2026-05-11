@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/hard-delete-accounts",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-digest",
+      "schedule": "0 13 * * 1"
     }
   ]
 }
