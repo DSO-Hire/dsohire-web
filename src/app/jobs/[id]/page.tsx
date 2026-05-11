@@ -28,6 +28,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { SaveJobButton } from "@/lib/saved-jobs/save-job-button";
 import { loadJobAttachmentsWithUrls } from "@/lib/jobs/attachments";
 import { JobAttachmentsPublic } from "@/components/job-attachments-public";
+import { recordJobView } from "@/lib/analytics/record-view";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
 import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
 import {
@@ -41,6 +42,7 @@ import type { Metadata } from "next";
 
 interface PageProps {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ source?: string }>;
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -99,8 +101,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function JobDetailPage({ params }: PageProps) {
+export default async function JobDetailPage({ params, searchParams }: PageProps) {
   const { id } = await params;
+  const sp = searchParams ? await searchParams : {};
   const supabase = await createSupabaseServerClient();
 
   const { data: job } = await supabase
@@ -112,6 +115,18 @@ export default async function JobDetailPage({ params }: PageProps) {
     .maybeSingle();
 
   if (!job || (job.status as string) !== "active") notFound();
+
+  // Record a view event for Phase 5C analytics. Fire-and-forget — never
+  // gates page render. Captures ?source= param + Referer header inside
+  // the helper.
+  const {
+    data: { user: viewer },
+  } = await supabase.auth.getUser();
+  void recordJobView({
+    jobId: id,
+    sourceParam: sp.source ?? null,
+    authenticatedUserId: viewer?.id ?? null,
+  });
 
   const [
     { data: dso },

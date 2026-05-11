@@ -1,42 +1,219 @@
 /**
- * /employer/reports — analytics + Annual Hiring Report (Phase 5C — stub at 4.6).
+ * /employer/reports — DSO-wide analytics dashboard
+ * (Phase 5C / E6.2, shipped 2026-05-11).
  *
- * Placeholder until Phase 5C ships time-to-hire, source attribution,
- * salary benchmarks, and the public Annual Hiring Report (locked feature
- * for DentalPost parity per project_dentalpost_parity_pre_launch.md).
+ * Replaces the Phase 4.6 stub. Surfaces:
+ *   - Headline tile row: open roles, applications (30d), hires (this
+ *     quarter), avg time-to-fill (days).
+ *   - DSO-wide pipeline funnel.
+ *   - Top jobs leaderboard.
+ *   - "Coming this week" callout for cross-location + Annual Hiring
+ *     Report (lands later in the Phase 5C run).
+ *
+ * Server component — all data fetched via the authenticated supabase
+ * client, RLS gates appropriately.
  */
 
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { Briefcase, Users, CheckCircle2, Clock, ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import { EmployerShell } from "@/components/employer/employer-shell";
-import { ComingSoon } from "../settings/_components/coming-soon";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getDsoAnalytics } from "@/lib/analytics/metrics";
+import { FunnelChart } from "@/components/analytics/funnel-chart";
 
 export const metadata: Metadata = { title: "Reports" };
+export const dynamic = "force-dynamic";
 
-export default function ReportsPage() {
+export default async function ReportsPage() {
+  const supabase = await createSupabaseServerClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/employer/sign-in");
+
+  const { data: dsoUser } = await supabase
+    .from("dso_users")
+    .select("dso_id, role")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+  if (!dsoUser) redirect("/employer/onboarding");
+
+  const dsoId = dsoUser.dso_id as string;
+  const analytics = await getDsoAnalytics(supabase, dsoId);
+
+  // Top jobs by application count.
+  const { data: topJobs } = await supabase
+    .from("jobs")
+    .select(
+      "id, title, employment_type, applications_count, posted_at, status"
+    )
+    .eq("dso_id", dsoId)
+    .is("deleted_at", null)
+    .neq("status", "draft")
+    .order("applications_count", { ascending: false })
+    .limit(5);
+
+  const topJobsList =
+    (topJobs ?? []) as Array<{
+      id: string;
+      title: string;
+      employment_type: string;
+      applications_count: number;
+      posted_at: string | null;
+      status: string;
+    }>;
+
   return (
     <EmployerShell active="reports">
-      <div className="space-y-6 max-w-[820px]">
-        <header>
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
-            Reports
-          </div>
-          <h1 className="font-display text-3xl font-extrabold tracking-[-0.8px] text-ink leading-tight">
-            Hiring metrics that justify the budget.
-          </h1>
-        </header>
-        <ComingSoon
-          phaseTag="Phase 5C"
-          title="Time-to-hire, source attribution, salary benchmarks, Annual Hiring Report"
-          description="Operator-grade analytics: how long roles sit open, where your hires actually came from, how your comp stacks against the market, and a public Annual Hiring Report that drives SEO + thought leadership."
-          bullets={[
-            "Time-to-fill by role, location, recruiter",
-            "Source attribution (where applications come from)",
-            "Salary benchmarks against aggregate platform data",
-            "Per-location dashboards (Growth+ tier)",
-            "Public Annual Hiring Report — DentalPost-parity differentiator",
-          ]}
+      <header className="mb-10 max-w-[820px]">
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+          Reports
+        </div>
+        <h1 className="font-display text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-3">
+          Hiring at a glance.
+        </h1>
+        <p className="text-[14px] text-slate-body leading-relaxed">
+          DSO-wide metrics across every job, location, and recruiter.
+          Updates live as candidates apply and you move them through the
+          pipeline.
+        </p>
+      </header>
+
+      {/* Headline tiles */}
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+        <Tile
+          icon={Briefcase}
+          label="Open roles"
+          value={analytics.open_roles.toLocaleString()}
         />
+        <Tile
+          icon={Users}
+          label="Apps · last 30d"
+          value={analytics.applications_30d.toLocaleString()}
+          secondary={`${analytics.applications_quarter.toLocaleString()} this quarter`}
+        />
+        <Tile
+          icon={CheckCircle2}
+          label="Hires · quarter"
+          value={analytics.hires_quarter.toLocaleString()}
+        />
+        <Tile
+          icon={Clock}
+          label="Avg time-to-fill"
+          value={
+            analytics.avg_time_to_fill_days !== null
+              ? `${analytics.avg_time_to_fill_days.toFixed(0)}d`
+              : "—"
+          }
+          secondary={
+            analytics.avg_time_to_fill_days !== null
+              ? "posted → hired"
+              : "no hires this quarter"
+          }
+        />
+      </section>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+        <FunnelChart rows={analytics.funnel} title="Pipeline funnel · all jobs" />
+
+        <section className="border border-[var(--rule)] bg-white p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+              Top jobs by applications
+            </div>
+            <Link
+              href="/employer/jobs"
+              className="text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink inline-flex items-center gap-1"
+            >
+              All jobs <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+          {topJobsList.length === 0 ? (
+            <p className="text-[13px] text-slate-meta italic">
+              No jobs yet. Post a role to start seeing performance data.
+            </p>
+          ) : (
+            <ol className="space-y-2">
+              {topJobsList.map((job, i) => (
+                <li key={job.id}>
+                  <Link
+                    href={`/employer/jobs/${job.id}`}
+                    className="flex items-center gap-3 px-3 py-2 border border-[var(--rule)] hover:bg-cream/40 transition-colors"
+                  >
+                    <span className="font-bold tabular-nums text-slate-meta w-5 text-right text-[12px]">
+                      {i + 1}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="truncate text-[13px] font-semibold text-ink">
+                        {job.title}
+                      </div>
+                      <div className="text-[11px] text-slate-meta uppercase tracking-wide">
+                        {(job.employment_type || "")
+                          .replace("_", " ")
+                          .replace(/\b\w/g, (c) => c.toUpperCase())}{" "}
+                        · {job.status}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-[14px] font-extrabold tabular-nums text-ink leading-none">
+                        {job.applications_count}
+                      </div>
+                      <div className="text-[10px] text-slate-meta uppercase tracking-wide mt-0.5">
+                        apps
+                      </div>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
       </div>
+
+      <section className="border border-[var(--rule)] bg-cream/40 p-6">
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+          Coming this week
+        </div>
+        <h2 className="text-lg font-extrabold tracking-[-0.3px] text-ink mb-2">
+          Cross-location benchmarking · Annual Hiring Report
+        </h2>
+        <p className="text-[13px] text-slate-body leading-relaxed max-w-[560px]">
+          Per-location performance comparison (apps · time-to-fill ·
+          conversion) for DSOs with 2+ locations, plus the public Annual
+          Hiring Report for industry visibility. Both ship this week as
+          part of the Phase 5C run.
+        </p>
+      </section>
     </EmployerShell>
+  );
+}
+
+function Tile({
+  icon: Icon,
+  label,
+  value,
+  secondary,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+  secondary?: string;
+}) {
+  return (
+    <div className="border border-[var(--rule)] bg-white p-5">
+      <div className="flex items-center gap-1.5 text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-3">
+        <Icon className="h-3 w-3" aria-hidden />
+        {label}
+      </div>
+      <div className="text-3xl font-extrabold tracking-[-0.8px] text-ink leading-none mb-1">
+        {value}
+      </div>
+      {secondary && (
+        <div className="text-[11px] text-slate-body">{secondary}</div>
+      )}
+    </div>
   );
 }

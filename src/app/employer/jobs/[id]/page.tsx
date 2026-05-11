@@ -32,6 +32,9 @@ import { getPracticeFitForJob } from "@/lib/practice-fit/get-or-compute";
 import type { FitResult } from "@/lib/practice-fit/types";
 import { JobStatusActions } from "./status-actions";
 import { cloneJob } from "../actions";
+import { getPerJobAnalytics, getJobFunnel } from "@/lib/analytics/metrics";
+import { PerJobAnalyticsCard } from "@/components/analytics/per-job-analytics-card";
+import { FunnelChart } from "@/components/analytics/funnel-chart";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -230,6 +233,12 @@ export default async function PerJobPipelinePage({
   const initialView: BoardView = sp.view === "list" ? "list" : "kanban";
   const status = job.status as string;
 
+  // Phase 5C per-job analytics + funnel. Run in parallel.
+  const [analytics, funnel] = await Promise.all([
+    getPerJobAnalytics(supabase, jobId),
+    getJobFunnel(supabase, jobId),
+  ]);
+
   return (
     <EmployerShell active="jobs">
       <Link
@@ -303,6 +312,17 @@ export default async function PerJobPipelinePage({
           <JobStatusActions jobId={jobId} currentStatus={status} />
         </div>
       </header>
+
+      <PerJobAnalyticsCard metrics={analytics} />
+
+      <div className="mb-10">
+        <FunnelChart
+          rows={funnel.rows}
+          rejected={funnel.rejected}
+          withdrawn={funnel.withdrawn}
+          title="Pipeline funnel · this job"
+        />
+      </div>
 
       {/* Pipeline (kanban inline) */}
       <ApplicationsBoard
