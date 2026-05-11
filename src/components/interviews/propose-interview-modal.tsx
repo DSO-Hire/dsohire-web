@@ -259,7 +259,7 @@ function ProposeInterviewModal({
                 type="text"
                 value={locationText}
                 onChange={(e) => setLocationText(e.target.value)}
-                placeholder="e.g. https://zoom.us/j/123456789  ·  Or: 4018 W 74th St, Prairie Village KS"
+                placeholder="e.g. https://zoom.us/j/123456789  ·  Or: 123 Main St, City, State"
                 maxLength={300}
                 className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
               />
