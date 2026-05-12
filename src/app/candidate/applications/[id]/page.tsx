@@ -286,7 +286,7 @@ export default async function CandidateApplicationDetailPage({
 
       <header className="mb-8">
         <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
-          Application · {STATUS_LABELS[app.status] ?? app.status}
+          Application · {STATUS_LABELS[app.kind] ?? app.kind}
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-2">
           {job?.title ?? "Job removed"}
@@ -312,7 +312,7 @@ export default async function CandidateApplicationDetailPage({
               Status
             </div>
             <div className="text-xl font-bold text-ink mb-2">
-              {STATUS_LABELS[app.status] ?? app.status}
+              {STATUS_LABELS[app.kind] ?? app.kind}
             </div>
             <div className="text-[13px] text-slate-body inline-flex items-center gap-2">
               <Calendar className="h-3 w-3" />
