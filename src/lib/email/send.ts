@@ -169,7 +169,7 @@ async function logEmail(params: LogEmailParams): Promise<void> {
 
   try {
     const supabase = createSupabaseServiceRoleClient();
-    await supabase.from("email_log").insert({
+    const { error: insertError } = await supabase.from("email_log").insert({
       to_email: params.toEmail,
       from_email: params.fromEmail,
       template: params.template,
@@ -180,6 +180,16 @@ async function logEmail(params: LogEmailParams): Promise<void> {
       related_dso_id: params.relatedDsoId ?? null,
       related_candidate_id: params.relatedCandidateId ?? null,
     });
+    // Supabase's typed client doesn't throw on insert failures — it
+    // returns the error in the response object. Surface it via
+    // console.warn so future logging breaks are debuggable.
+    if (insertError) {
+      console.warn(
+        "[email] email_log insert returned error:",
+        insertError.message,
+        insertError
+      );
+    }
   } catch (err) {
     // Logging failures should never break a send. Only console-warn.
     console.warn("[email] email_log insert failed:", err);

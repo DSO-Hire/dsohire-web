@@ -167,24 +167,10 @@ export async function proposeInterview(
   // Email candidate.
   const candAuth = candidate?.auth_user_id ?? null;
   let candidateEmail: string | null = null;
-  let authLookupError: string | null = null;
   if (candAuth) {
     const admin = createSupabaseServiceRoleClient();
     const res = await admin.auth.admin.getUserById(candAuth);
     candidateEmail = res.data?.user?.email ?? null;
-    authLookupError = res.error?.message ?? null;
-  }
-  // Instrumentation (Track C debugging 2026-05-12) — surface why the
-  // email gets skipped. Remove once the email flow is verified end-
-  // to-end.
-  if (!candidateEmail) {
-    console.warn("[proposeInterview] skipped email", {
-      applicationId: input.applicationId,
-      candidateFound: Boolean(candidate),
-      candidateHasAuth: Boolean(candAuth),
-      authLookupError,
-      candidateEmbedKeys: candidate ? Object.keys(candidate) : null,
-    });
   }
   const dsoName = await dsoNameForAppId(supabase, input.applicationId);
 
@@ -588,10 +574,18 @@ async function dsoIdForAppId(
     .select("jobs(dso_id)")
     .eq("id", applicationId)
     .maybeSingle();
+  // PostgREST returns to-one FK embeds as a single object when no
+  // !inner hint is set; can also come back as an array depending on
+  // version. Accept both shapes.
   const joined = data as unknown as {
-    jobs?: Array<{ dso_id: string }>;
+    jobs?:
+      | { dso_id: string }
+      | Array<{ dso_id: string }>
+      | null;
   } | null;
-  return joined?.jobs?.[0]?.dso_id ?? null;
+  const jobsField = joined?.jobs ?? null;
+  const jobRow = Array.isArray(jobsField) ? jobsField[0] ?? null : jobsField;
+  return jobRow?.dso_id ?? null;
 }
 
 async function dsoNameForAppId(
