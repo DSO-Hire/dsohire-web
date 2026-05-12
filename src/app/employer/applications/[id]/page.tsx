@@ -288,10 +288,16 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     resumeFileName = resumePath.split("/").pop()?.replace(/^\d+-/, "") ?? null;
   }
 
-  // Status history — now snapshots kind, not stage_id.
+  // Status history — snapshots both kind and label so the timeline
+  // shows the DSO-customized stage name (e.g., "Interview → Phone
+  // Screening") when two stages share a kind. Falls back to the
+  // kind default for events recorded before the label-snapshot
+  // migration landed.
   const { data: rawEvents } = await supabase
     .from("application_status_events")
-    .select("id, from_stage_kind, to_stage_kind, actor_type, note, created_at")
+    .select(
+      "id, from_stage_kind, to_stage_kind, from_stage_label, to_stage_label, actor_type, note, created_at"
+    )
     .eq("application_id", appId)
     .order("created_at", { ascending: true });
 
@@ -299,6 +305,8 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     id: string;
     from_stage_kind: string | null;
     to_stage_kind: string;
+    from_stage_label: string | null;
+    to_stage_label: string | null;
     actor_type: string;
     note: string | null;
     created_at: string;
@@ -1329,13 +1337,20 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             ) : (
               <ol className="list-none space-y-4 border-l-2 border-[var(--rule)] pl-5">
                 {events.map((ev) => {
-                  const fromLabel = ev.from_stage_kind
-                    ? KIND_DEFAULT_LABELS[ev.from_stage_kind as StageKind] ??
-                      ev.from_stage_kind
-                    : null;
-                  const toLabel =
-                    KIND_DEFAULT_LABELS[ev.to_stage_kind as StageKind] ??
-                    ev.to_stage_kind;
+                  // Prefer the DSO-customized label snapshot (recorded
+                  // at event time) over the kind default. Events from
+                  // before the label-snapshot migration only have kind,
+                  // so we fall back gracefully.
+                  const fromLabel = ev.from_stage_label
+                    ? ev.from_stage_label
+                    : ev.from_stage_kind
+                      ? KIND_DEFAULT_LABELS[ev.from_stage_kind as StageKind] ??
+                        ev.from_stage_kind
+                      : null;
+                  const toLabel = ev.to_stage_label
+                    ? ev.to_stage_label
+                    : KIND_DEFAULT_LABELS[ev.to_stage_kind as StageKind] ??
+                      ev.to_stage_kind;
                   return (
                   <li key={ev.id} className="relative">
                     <span className="absolute -left-[27px] top-1.5 block w-3 h-3 bg-ink rounded-full border-2 border-ivory" />
