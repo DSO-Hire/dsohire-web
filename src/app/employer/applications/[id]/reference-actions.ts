@@ -30,6 +30,7 @@ import {
 } from "@/lib/supabase/server";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { sendEmail } from "@/lib/email/send";
+import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
 import { ReferenceRequest as ReferenceRequestEmail } from "@/emails/employer/ReferenceRequest";
 import { referenceUrlForToken } from "./reference-data";
 
@@ -234,6 +235,7 @@ async function dispatchReferenceEmail(requestId: string): Promise<void> {
     .maybeSingle();
 
   let jobTitle: string | null = null;
+  let jobId: string | null = null;
   let dsoId: string | null = null;
   let dsoName: string | null = null;
   if (appRow) {
@@ -244,6 +246,7 @@ async function dispatchReferenceEmail(requestId: string): Promise<void> {
     const jobRow = Array.isArray(jobsRel) ? jobsRel[0] ?? null : jobsRel;
     if (jobRow) {
       jobTitle = (jobRow.title as string | null) ?? null;
+      jobId = (jobRow.id as string | null) ?? null;
       dsoId = (jobRow.dso_id as string | null) ?? null;
       const dsoRel = (jobRow as Record<string, unknown>).dsos as
         | Record<string, unknown>
@@ -251,6 +254,24 @@ async function dispatchReferenceEmail(requestId: string): Promise<void> {
         | null;
       const dsoRow = Array.isArray(dsoRel) ? dsoRel[0] ?? null : dsoRel;
       dsoName = (dsoRow?.name as string | null | undefined) ?? null;
+    }
+  }
+
+  // Apply affiliation-reveal policy — the reference is a third party
+  // who shouldn't learn the corporate DSO parent. Same pattern as the
+  // interview emails. Falls back to the raw corporate name if the
+  // resolver fails.
+  if (jobId && applicationId) {
+    try {
+      const displayed = await getDisplayedDsoName({
+        jobId,
+        viewer: { role: "candidate", applicationId },
+      });
+      if (displayed?.name) {
+        dsoName = displayed.name;
+      }
+    } catch {
+      // keep the raw dsoName fallback
     }
   }
 

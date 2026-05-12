@@ -17,6 +17,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
+import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
 import { ReferenceForm } from "./reference-form";
 
 interface PageProps {
@@ -95,16 +96,40 @@ export default async function PublicReferencePage({ params }: PageProps) {
       const jobRow = Array.isArray(jobsRel) ? jobsRel[0] ?? null : jobsRel;
       if (jobRow) {
         jobTitle = (jobRow.title as string | null) ?? null;
-        const dsoRel = (jobRow as Record<string, unknown>).dsos as
-          | Record<string, unknown>
-          | Array<Record<string, unknown>>
-          | null;
-        const dsoRow = Array.isArray(dsoRel) ? dsoRel[0] ?? null : dsoRel;
-        dsoName =
-          ((dsoRow as Record<string, unknown> | null)?.name as
-            | string
-            | null
-            | undefined) ?? null;
+        // Use the affiliation-aware displayed name so the reference
+        // sees the practice name (e.g. "67 Dental"), not the corporate
+        // parent (e.g. "dso hire"). The reference has no direct
+        // relationship with the DSO — they only know the candidate —
+        // and shouldn't learn the corporate parent any more than the
+        // candidate themselves would. Same posture as the propose-
+        // interview + booking-confirmation emails.
+        const jobId = (jobRow.id as string | null) ?? null;
+        if (jobId && applicationId) {
+          try {
+            const displayed = await getDisplayedDsoName({
+              jobId,
+              viewer: { role: "candidate", applicationId },
+            });
+            dsoName = displayed.name ?? null;
+          } catch {
+            dsoName = null;
+          }
+        }
+        // Fallback to raw corporate name only if the displayed
+        // resolver fails entirely. Keeps the prior behavior on
+        // exception paths.
+        if (!dsoName) {
+          const dsoRel = (jobRow as Record<string, unknown>).dsos as
+            | Record<string, unknown>
+            | Array<Record<string, unknown>>
+            | null;
+          const dsoRow = Array.isArray(dsoRel) ? dsoRel[0] ?? null : dsoRel;
+          dsoName =
+            ((dsoRow as Record<string, unknown> | null)?.name as
+              | string
+              | null
+              | undefined) ?? null;
+        }
       }
     }
 
