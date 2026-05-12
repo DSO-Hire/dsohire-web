@@ -630,7 +630,7 @@ export async function getDsoCrossLocationStats(
     string,
     { apps30d: number; hiresWindow: Array<{ posted: string | null; hired: string }> }
   >();
-  for (const r of (appsRows ?? []) as Array<{
+  for (const r of (appsRows ?? []) as unknown as Array<{
     id: string;
     job_id: string;
     created_at: string;

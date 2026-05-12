@@ -218,7 +218,7 @@ async function buildDigestForDso(
     stage_entered_at: string | null;
     candidate_id: string;
   };
-  const appsThisWeek = ((appsThisWeekRows ?? []) as EmbeddedAppRow[]).map(
+  const appsThisWeek = (((appsThisWeekRows ?? []) as unknown) as EmbeddedAppRow[]).map(
     (row) => {
       const rel = row.stage;
       const stageRow = Array.isArray(rel) ? rel[0] ?? null : rel;
