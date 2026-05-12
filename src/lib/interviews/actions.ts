@@ -101,15 +101,30 @@ export async function proposeInterview(
     .eq("id", input.applicationId)
     .maybeSingle();
   if (!appRow) return { ok: false, error: "Application not found." };
+  // PostgREST returns to-one FK embeds as a single object when the FK
+  // is unambiguous (no `!inner` / no hint). It returns arrays when the
+  // join hint is `!inner` or when multiple FK paths exist. Defensive:
+  // accept either shape. Same pattern as credential-actions.ts.
   const appCtx = appRow as unknown as {
     id: string;
     job_id: string;
     candidate_id: string;
-    jobs: Array<{ title: string }>;
-    candidates: Array<{ full_name: string | null; auth_user_id: string | null }>;
+    jobs:
+      | { title: string }
+      | Array<{ title: string }>
+      | null;
+    candidates:
+      | { full_name: string | null; auth_user_id: string | null }
+      | Array<{ full_name: string | null; auth_user_id: string | null }>
+      | null;
   };
-  const jobTitle = appCtx.jobs?.[0]?.title ?? "the role";
-  const candidate = appCtx.candidates?.[0];
+  const jobsRecord = appCtx.jobs;
+  const jobRow = Array.isArray(jobsRecord) ? jobsRecord[0] ?? null : jobsRecord;
+  const jobTitle = jobRow?.title ?? "the role";
+  const candidatesRecord = appCtx.candidates;
+  const candidate = Array.isArray(candidatesRecord)
+    ? candidatesRecord[0] ?? null
+    : candidatesRecord;
 
   // Insert proposal.
   const { data: proposal, error: pErr } = await supabase
