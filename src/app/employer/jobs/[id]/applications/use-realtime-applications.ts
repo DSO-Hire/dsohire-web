@@ -154,7 +154,7 @@ export function useRealtimeApplications({
     setApplications((current) => {
       const byId = new Map(current.map((a) => [a.id, a]));
       const next: KanbanApplication[] = [];
-      for (const row of data as EmbeddedRow[]) {
+      for (const row of data as unknown as EmbeddedRow[]) {
         const stageRel = Array.isArray(row.stage)
           ? row.stage[0] ?? null
           : row.stage;

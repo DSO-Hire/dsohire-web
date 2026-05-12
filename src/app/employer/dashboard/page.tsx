@@ -370,7 +370,7 @@ export default async function EmployerDashboard() {
 
       appsThisWeekCount = appsThisWeekRes.count ?? 0;
       awaitingReviewCount = awaitingReviewRes.count ?? 0;
-      recentApps = ((recentAppsRes.data ?? []) as Array<
+      recentApps = ((recentAppsRes.data ?? []) as unknown as Array<
         Record<string, unknown>
       >).map((row): DashboardApp => {
         const stageRel = row.stage as
@@ -461,7 +461,7 @@ export default async function EmployerDashboard() {
       type FunnelRow = {
         stage: { kind: string } | Array<{ kind: string }> | null;
       };
-      for (const row of (funnel30dRes.data ?? []) as FunnelRow[]) {
+      for (const row of (funnel30dRes.data ?? []) as unknown as FunnelRow[]) {
         const rel = row.stage;
         const stageRow = Array.isArray(rel) ? rel[0] ?? null : rel;
         const kind = stageRow?.kind;

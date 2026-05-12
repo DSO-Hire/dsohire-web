@@ -139,7 +139,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
     created_at: string;
     updated_at: string;
   };
-  let apps: AppRow[] = ((rawApps ?? []) as Array<
+  let apps: AppRow[] = ((rawApps ?? []) as unknown as Array<
     Record<string, unknown>
   >)
     .map((row) => {
