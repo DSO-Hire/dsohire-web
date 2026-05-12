@@ -22,14 +22,17 @@ import type { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type SupabaseClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
 
-const FUNNEL_ORDER = ["new", "reviewed", "interviewing", "offered", "hired"] as const;
+// Funnel buckets by stage *kind* (system category), not by stage_id. The
+// per-DSO label/color belongs to the kanban; analytics speaks the
+// canonical funnel so cross-DSO benchmarks stay coherent.
+const FUNNEL_ORDER = ["open", "screen", "interview", "offer", "hired"] as const;
 type FunnelStage = (typeof FUNNEL_ORDER)[number];
 
 const STAGE_LABEL: Record<FunnelStage, string> = {
-  new: "Applied",
-  reviewed: "Screening",
-  interviewing: "Interview",
-  offered: "Offered",
+  open: "Applied",
+  screen: "Screening",
+  interview: "Interview",
+  offer: "Offered",
   hired: "Hired",
 };
 
@@ -202,7 +205,7 @@ export async function getJobStageDwell(
   const { data: events } = await supabase
     .from("application_status_events")
     .select(
-      "application_id, from_status, to_status, created_at, applications!inner(job_id)"
+      "application_id, from_stage_kind, to_stage_kind, created_at, applications!inner(job_id)"
     )
     .eq("applications.job_id", jobId)
     .order("created_at", { ascending: true });
@@ -212,8 +215,8 @@ export async function getJobStageDwell(
   const rows =
     (events ?? []) as unknown as Array<{
       application_id: string;
-      from_status: string | null;
-      to_status: string;
+      from_stage_kind: string | null;
+      to_stage_kind: string;
       created_at: string;
       applications: Array<{ job_id: string }>;
     }>;
@@ -223,8 +226,8 @@ export async function getJobStageDwell(
   for (const r of rows) {
     const arr = eventsByApp.get(r.application_id) ?? [];
     arr.push({
-      from: r.from_status,
-      to: r.to_status,
+      from: r.from_stage_kind,
+      to: r.to_stage_kind,
       at: new Date(r.created_at).getTime(),
     });
     eventsByApp.set(r.application_id, arr);
@@ -284,52 +287,40 @@ export async function getJobFunnel(
   supabase: SupabaseClient,
   jobId: string
 ): Promise<JobFunnel> {
-  // We compute "ever reached this stage" by looking at
-  // application_status_events. An application's status moves forward
-  // through to_status='hired' (or rejected/withdrawn); the events
-  // table captures every transition. "Count for stage X" = number of
-  // distinct applications whose status_events include to_status=X.
-  const { data: events } = await supabase
-    .from("application_status_events")
-    .select("application_id, to_status")
-    .in("to_status", ["new", "reviewed", "interviewing", "offered", "hired"])
-    .eq("application_id", "00000000-0000-0000-0000-000000000000"); // sentinel — overridden below
-
-  // The sentinel filter above is silly — we actually need to filter by
-  // job_id. status_events has application_id not job_id, so we have
-  // to join. Simpler: count applications grouped by current status,
-  // then back-fill "ever reached" by ordering: every app that's now
-  // hired must have passed through interviewing, etc.
-  void events;
-
-  const { data: apps } = await supabase
+  // Count current stage_kind per app. The kind is on the linked
+  // dso_pipeline_stages row, so we embed and read kind through the join.
+  const { data: apps, error } = await supabase
     .from("applications")
-    .select("status")
+    .select("id, stage:dso_pipeline_stages!stage_id(kind)")
     .eq("job_id", jobId);
+  if (error) {
+    console.warn("[analytics] funnel apps fetch failed", error);
+  }
 
-  const applications = (apps ?? []) as Array<{ status: FunnelStage | "rejected" | "withdrawn" }>;
-
-  // Count current-status per app.
+  type AppRel = { stage: { kind: string } | Array<{ kind: string }> | null };
   const currentCounts: Record<string, number> = {
-    new: 0,
-    reviewed: 0,
-    interviewing: 0,
-    offered: 0,
+    open: 0,
+    screen: 0,
+    interview: 0,
+    offer: 0,
     hired: 0,
     rejected: 0,
     withdrawn: 0,
   };
-  for (const a of applications) {
-    currentCounts[a.status] = (currentCounts[a.status] ?? 0) + 1;
+  for (const a of (apps ?? []) as AppRel[]) {
+    const rel = a.stage;
+    const row = Array.isArray(rel) ? rel[0] ?? null : rel;
+    const k = row?.kind;
+    if (!k) continue;
+    currentCounts[k] = (currentCounts[k] ?? 0) + 1;
   }
 
   // "Ever reached stage X" = sum of (current=X) + every later stage.
-  // i.e. anyone now hired was once interviewing, etc.
   const reachedCounts: Record<FunnelStage, number> = {
-    new: 0,
-    reviewed: 0,
-    interviewing: 0,
-    offered: 0,
+    open: 0,
+    screen: 0,
+    interview: 0,
+    offer: 0,
     hired: 0,
   };
   let runningLater = 0;
@@ -339,8 +330,8 @@ export async function getJobFunnel(
     reachedCounts[stage] = here + runningLater;
     runningLater += here;
   }
-  // Also count rejected + withdrawn in `new` since they all started there.
-  reachedCounts.new += currentCounts.rejected + currentCounts.withdrawn;
+  // Also count rejected + withdrawn in `open` since they all started there.
+  reachedCounts.open += currentCounts.rejected + currentCounts.withdrawn;
 
   const rows: FunnelStageRow[] = FUNNEL_ORDER.map((stage, i) => {
     const count = reachedCounts[stage];
@@ -408,27 +399,33 @@ export async function getDsoAnalytics(
       .gte("created_at", quarterStart),
     supabase
       .from("applications")
-      .select("hired_at, jobs!inner(dso_id, posted_at)")
+      .select("hired_at, jobs!inner(dso_id, posted_at), stage:dso_pipeline_stages!stage_id(kind)")
       .eq("jobs.dso_id", dsoId)
-      .eq("status", "hired")
+      .eq("stage.kind", "hired")
       .gte("hired_at", quarterStart),
     supabase
       .from("applications")
-      .select("status, jobs!inner(dso_id)")
+      .select("jobs!inner(dso_id), stage:dso_pipeline_stages!stage_id(kind)")
       .eq("jobs.dso_id", dsoId),
   ]);
 
   // Time-to-fill: average days between job.posted_at and application.hired_at.
   // The !inner join returns the jobs row as an array (Supabase quirk —
   // see feedback_supabase_inner_returns_array). Cast through unknown.
+  // We also re-filter on stage.kind === 'hired' defensively because the
+  // embed filter is best-effort under some PostgREST versions.
   const hireRows =
     (hiresQuarter ?? []) as unknown as Array<{
       hired_at: string;
       jobs: Array<{ posted_at: string | null }>;
+      stage: { kind: string } | Array<{ kind: string }> | null;
     }>;
   let totalDays = 0;
   let countHires = 0;
   for (const row of hireRows) {
+    const stageRel = row.stage;
+    const stageRow = Array.isArray(stageRel) ? stageRel[0] ?? null : stageRel;
+    if (stageRow?.kind !== "hired") continue;
     const posted = row.jobs?.[0]?.posted_at;
     if (!posted || !row.hired_at) continue;
     const days =
@@ -441,25 +438,29 @@ export async function getDsoAnalytics(
   const avgTimeToFill = countHires > 0 ? totalDays / countHires : null;
 
   // DSO-wide funnel rollup (same algorithm as per-job).
-  const appsAll =
-    (allApps ?? []) as Array<{ status: FunnelStage | "rejected" | "withdrawn" }>;
+  type AppRel = { stage: { kind: string } | Array<{ kind: string }> | null };
+  const appsAll = (allApps ?? []) as AppRel[];
   const currentCounts: Record<string, number> = {
-    new: 0,
-    reviewed: 0,
-    interviewing: 0,
-    offered: 0,
+    open: 0,
+    screen: 0,
+    interview: 0,
+    offer: 0,
     hired: 0,
     rejected: 0,
     withdrawn: 0,
   };
   for (const a of appsAll) {
-    currentCounts[a.status] = (currentCounts[a.status] ?? 0) + 1;
+    const rel = a.stage;
+    const row = Array.isArray(rel) ? rel[0] ?? null : rel;
+    const k = row?.kind;
+    if (!k) continue;
+    currentCounts[k] = (currentCounts[k] ?? 0) + 1;
   }
   const reachedCounts: Record<FunnelStage, number> = {
-    new: 0,
-    reviewed: 0,
-    interviewing: 0,
-    offered: 0,
+    open: 0,
+    screen: 0,
+    interview: 0,
+    offer: 0,
     hired: 0,
   };
   let runningLater = 0;
@@ -469,7 +470,7 @@ export async function getDsoAnalytics(
     reachedCounts[stage] = here + runningLater;
     runningLater += here;
   }
-  reachedCounts.new += currentCounts.rejected + currentCounts.withdrawn;
+  reachedCounts.open += currentCounts.rejected + currentCounts.withdrawn;
 
   const funnel: FunnelStageRow[] = FUNNEL_ORDER.map((stage, i) => {
     const count = reachedCounts[stage];
@@ -616,7 +617,9 @@ export async function getDsoCrossLocationStats(
   // 5. Applications for those jobs in the 90-day window.
   const { data: appsRows } = await supabase
     .from("applications")
-    .select("id, job_id, status, created_at, hired_at")
+    .select(
+      "id, job_id, created_at, hired_at, stage:dso_pipeline_stages!stage_id(kind)"
+    )
     .in("job_id", jobIds)
     .gte("created_at", since90d);
 
@@ -630,18 +633,21 @@ export async function getDsoCrossLocationStats(
   for (const r of (appsRows ?? []) as Array<{
     id: string;
     job_id: string;
-    status: string;
     created_at: string;
     hired_at: string | null;
+    stage: { kind: string } | Array<{ kind: string }> | null;
   }>) {
     const locsForJob = locsByJob.get(r.job_id);
     if (!locsForJob || locsForJob.length === 0) continue;
     const job = jobMap.get(r.job_id);
     if (!job) continue;
+    const stageRel = r.stage;
+    const stageRow = Array.isArray(stageRel) ? stageRel[0] ?? null : stageRel;
+    const kind = stageRow?.kind ?? null;
     const createdMs = new Date(r.created_at).getTime();
     const isLast30d = createdMs >= since30dMs;
     const isHiredInWindow =
-      r.status === "hired" &&
+      kind === "hired" &&
       r.hired_at !== null &&
       new Date(r.hired_at).getTime() >= since90dMs;
     for (const locId of locsForJob) {

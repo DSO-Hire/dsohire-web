@@ -39,11 +39,14 @@ void ({} as ServerClient);
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
 
+// Keyed by stage kind (the system category snapshot). Per-DSO labels
+// intentionally aren't used in the weekly digest copy — the canonical
+// label keeps the email coherent across the customer base.
 const STAGE_LABEL: Record<string, string> = {
-  new: "Applied",
-  reviewed: "Screening",
-  interviewing: "Interview",
-  offered: "Offered",
+  open: "Applied",
+  screen: "Screening",
+  interview: "Interview",
+  offer: "Offered",
 };
 
 interface DigestReport {
@@ -194,7 +197,10 @@ async function buildDigestForDso(
   // Apps this week + last week.
   const { data: appsThisWeekRows } = await admin
     .from("applications")
-    .select("id, job_id, status, stage_entered_at, candidate_id")
+    .select(
+      "id, job_id, stage_id, stage_entered_at, candidate_id, " +
+        "stage:dso_pipeline_stages!stage_id(kind)"
+    )
     .in("job_id", jobIds)
     .gte("created_at", since7);
   const { count: appsLastWeek } = await admin
@@ -204,21 +210,50 @@ async function buildDigestForDso(
     .gte("created_at", since14)
     .lt("created_at", since7);
 
-  const appsThisWeek = (appsThisWeekRows ?? []) as Array<{
+  type EmbeddedAppRow = {
     id: string;
     job_id: string;
-    status: string;
+    stage_id: string;
+    stage: { kind: string } | Array<{ kind: string }> | null;
     stage_entered_at: string | null;
     candidate_id: string;
-  }>;
+  };
+  const appsThisWeek = ((appsThisWeekRows ?? []) as EmbeddedAppRow[]).map(
+    (row) => {
+      const rel = row.stage;
+      const stageRow = Array.isArray(rel) ? rel[0] ?? null : rel;
+      return {
+        id: row.id,
+        job_id: row.job_id,
+        // Surface kind as `status` so the downstream consumers (which
+        // didn't care about per-DSO labels) keep reading a stable field.
+        status: (stageRow?.kind ?? "open") as string,
+        stage_entered_at: row.stage_entered_at,
+        candidate_id: row.candidate_id,
+      };
+    }
+  );
 
-  // Hires this week.
-  const { count: hiresThisWeek } = await admin
-    .from("applications")
-    .select("id", { count: "exact", head: true })
-    .in("job_id", jobIds)
-    .eq("status", "hired")
-    .gte("hired_at", since7);
+  // Hires this week — resolve hired-kind stage ids for the DSO and
+  // filter on stage_id (head:true counts can't reliably embed-filter).
+  const { data: hiredStageRows } = await admin
+    .from("dso_pipeline_stages")
+    .select("id")
+    .eq("dso_id", dsoId)
+    .eq("kind", "hired");
+  const hiredStageIds = ((hiredStageRows ?? []) as Array<{ id: string }>).map(
+    (r) => r.id
+  );
+  const hiresThisWeekCountResult =
+    hiredStageIds.length > 0
+      ? await admin
+          .from("applications")
+          .select("id", { count: "exact", head: true })
+          .in("job_id", jobIds)
+          .in("stage_id", hiredStageIds)
+          .gte("hired_at", since7)
+      : { count: 0 };
+  const hiresThisWeek = hiresThisWeekCountResult.count;
 
   // Top jobs by apps this week (max 5).
   const appsByJob = new Map<string, number>();
@@ -238,20 +273,37 @@ async function buildDigestForDso(
     .slice(0, 5);
 
   // Stale candidates: apps currently in a non-terminal stage with
-  // stage_entered_at >14 days ago.
-  const { data: staleRows } = await admin
-    .from("applications")
-    .select("id, job_id, status, stage_entered_at, candidates(full_name)")
-    .in("job_id", jobIds)
-    .in("status", ["new", "reviewed", "interviewing", "offered"])
-    .lte("stage_entered_at", since14)
-    .order("stage_entered_at", { ascending: true })
-    .limit(5);
+  // stage_entered_at >14 days ago. Resolve open/screen/interview/offer
+  // stage ids for the DSO and filter on stage_id.
+  const { data: nonTerminalStageRows } = await admin
+    .from("dso_pipeline_stages")
+    .select("id, kind")
+    .eq("dso_id", dsoId)
+    .in("kind", ["open", "screen", "interview", "offer"]);
+  const nonTerminalStageKindById = new Map<string, string>(
+    ((nonTerminalStageRows ?? []) as Array<{ id: string; kind: string }>).map(
+      (r) => [r.id, r.kind]
+    )
+  );
+  const nonTerminalStageIds = Array.from(nonTerminalStageKindById.keys());
+
+  const { data: staleRows } = nonTerminalStageIds.length
+    ? await admin
+        .from("applications")
+        .select(
+          "id, job_id, stage_id, stage_entered_at, candidates(full_name)"
+        )
+        .in("job_id", jobIds)
+        .in("stage_id", nonTerminalStageIds)
+        .lte("stage_entered_at", since14)
+        .order("stage_entered_at", { ascending: true })
+        .limit(5)
+    : { data: [] };
   const stale: WeeklyDigestStaleCandidate[] = (
     (staleRows ?? []) as unknown as Array<{
       id: string;
       job_id: string;
-      status: string;
+      stage_id: string;
       stage_entered_at: string | null;
       candidates: Array<{ full_name: string | null }>;
     }>
@@ -265,10 +317,11 @@ async function buildDigestForDso(
       0,
       Math.floor((now.getTime() - enteredMs) / (1000 * 60 * 60 * 24))
     );
+    const kind = nonTerminalStageKindById.get(r.stage_id) ?? "open";
     return {
       name: cand?.full_name ?? "Candidate",
       job_title: job?.title ?? "—",
-      stage_label: STAGE_LABEL[r.status] ?? r.status,
+      stage_label: STAGE_LABEL[kind] ?? kind,
       days_in_stage: daysInStage,
       url: `${SITE_URL}/employer/applications/${r.id}`,
     };

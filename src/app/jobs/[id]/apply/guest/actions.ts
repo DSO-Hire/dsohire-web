@@ -257,6 +257,28 @@ export async function submitGuestApplication(
     .eq("job_id", jobId)
     .eq("candidate_id", candidateId)
     .maybeSingle();
+  // Resolve the job's DSO and its default 'open'-kind stage so re-applies
+  // can flip the application back to the open stage (the original insert
+  // gets stage_id auto-filled by the BEFORE INSERT trigger).
+  let openStageId: string | null = null;
+  {
+    const { data: jobRow } = await admin
+      .from("jobs")
+      .select("dso_id")
+      .eq("id", jobId)
+      .maybeSingle();
+    const dsoId = (jobRow as { dso_id: string } | null)?.dso_id ?? null;
+    if (dsoId) {
+      const { data: stageRow } = await admin
+        .from("dso_pipeline_stages")
+        .select("id")
+        .eq("dso_id", dsoId)
+        .eq("kind", "open")
+        .eq("is_default", true)
+        .maybeSingle();
+      openStageId = (stageRow as { id: string } | null)?.id ?? null;
+    }
+  }
   let applicationId: string;
   if (priorApp) {
     applicationId = priorApp.id as string;
@@ -265,11 +287,12 @@ export async function submitGuestApplication(
       .update({
         cover_letter: coverLetter || null,
         resume_url: resumeUrl,
-        status: "new",
+        ...(openStageId ? { stage_id: openStageId } : {}),
         ...(sourceTag ? { source: sourceTag } : {}),
       })
       .eq("id", applicationId);
   } else {
+    // stage_id auto-filled by the applications_fill_default_stage trigger.
     const { data: inserted, error: appErr } = await admin
       .from("applications")
       .insert({
@@ -277,7 +300,6 @@ export async function submitGuestApplication(
         candidate_id: candidateId,
         cover_letter: coverLetter || null,
         resume_url: resumeUrl,
-        status: "new",
         source: sourceTag,
       })
       .select("id")

@@ -21,7 +21,10 @@ import {
   Sparkles,
 } from "lucide-react";
 import { CandidateShell } from "@/components/candidate/candidate-shell";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  createSupabaseServerClient,
+  createSupabaseServiceRoleClient,
+} from "@/lib/supabase/server";
 import { MessagesThread } from "@/components/messaging/messages-thread";
 import {
   CandidateInterviewPicker,
@@ -39,11 +42,14 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+// Candidate-friendly labels keyed by stage kind (the system category).
+// Per-DSO labels intentionally aren't used here — the candidate sees a
+// canonical funnel regardless of how the DSO renamed their stages.
 const STATUS_LABELS: Record<string, string> = {
-  new: "Submitted",
-  reviewed: "Reviewed",
-  interviewing: "Interviewing",
-  offered: "Offer extended",
+  open: "Submitted",
+  screen: "Reviewed",
+  interview: "Interviewing",
+  offer: "Offer extended",
   hired: "Hired",
   rejected: "Not selected",
   withdrawn: "Withdrawn",
@@ -76,11 +82,10 @@ export default async function CandidateApplicationDetailPage({
       | string[]
       | null) ?? [];
 
+  // RLS-scoped read of the candidate's own application row.
   const { data: rawApp } = await supabase
     .from("applications")
-    .select(
-      "id, job_id, candidate_id, status, created_at, updated_at"
-    )
+    .select("id, job_id, candidate_id, stage_id, created_at, updated_at")
     .eq("id", appId)
     .maybeSingle();
 
@@ -90,11 +95,35 @@ export default async function CandidateApplicationDetailPage({
     id: string;
     job_id: string;
     candidate_id: string;
+    stage_id: string;
+    /** Resolved kind for the current stage. */
     status: string;
     created_at: string;
     updated_at: string;
   };
-  const app = rawApp as AppRow;
+  const appRaw = rawApp as Record<string, unknown>;
+  // Resolve the stage_id → kind via service-role (RLS on
+  // dso_pipeline_stages is DSO-scoped, candidates can't read it).
+  let resolvedKind = "open";
+  const stageId = appRaw.stage_id as string | undefined;
+  if (stageId) {
+    const admin = createSupabaseServiceRoleClient();
+    const { data: stageRow } = await admin
+      .from("dso_pipeline_stages")
+      .select("kind")
+      .eq("id", stageId)
+      .maybeSingle();
+    resolvedKind = (stageRow as { kind: string } | null)?.kind ?? "open";
+  }
+  const app: AppRow = {
+    id: appRaw.id as string,
+    job_id: appRaw.job_id as string,
+    candidate_id: appRaw.candidate_id as string,
+    stage_id: appRaw.stage_id as string,
+    status: resolvedKind,
+    created_at: appRaw.created_at as string,
+    updated_at: appRaw.updated_at as string,
+  };
   if (app.candidate_id !== (candidate.id as string)) notFound();
 
   const { data: rawJob } = await supabase

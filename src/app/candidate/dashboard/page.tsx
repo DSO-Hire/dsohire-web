@@ -32,7 +32,10 @@ import {
   UserCircle,
 } from "lucide-react";
 import { CandidateShell } from "@/components/candidate/candidate-shell";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  createSupabaseServerClient,
+  createSupabaseServiceRoleClient,
+} from "@/lib/supabase/server";
 import { KpiTile } from "@/components/dashboard/kpi-tile";
 import { CandidateHero } from "@/components/dashboard/candidate-hero";
 import {
@@ -44,9 +47,10 @@ import {
   type ActivityEvent,
 } from "@/components/dashboard/activity-feed";
 import {
-  KANBAN_STAGES,
-  STAGE_LABELS,
-  type ApplicationStatus,
+  KANBAN_KINDS,
+  KIND_DEFAULT_LABELS,
+  isTerminalKind,
+  type StageKind,
 } from "@/lib/applications/stages";
 import { computeCompleteness } from "@/lib/candidate/completeness";
 import type { ProfileData } from "@/app/candidate/profile/profile-sections";
@@ -164,26 +168,59 @@ export default async function CandidateDashboardPage() {
   const missingFields = completeness.missing.length;
 
   // ── All applications ────────────────────────────────────────────────
-  const { data: rawApps } = await supabase
+  // RLS on dso_pipeline_stages is DSO-only, so the candidate's RLS-scoped
+  // client can't read stage kinds via embed. Two-step: pull the
+  // candidate's own application rows (RLS-scoped), then resolve each
+  // stage_id to a kind via the service-role client. RLS still gates
+  // which applications they can see — the kind lookup is just metadata
+  // on rows they're already permitted to read.
+  const { data: rawApps, error: appsErr } = await supabase
     .from("applications")
     .select(
-      "id, job_id, status, created_at, updated_at, affiliation_revealed"
+      "id, job_id, stage_id, created_at, updated_at, affiliation_revealed"
     )
     .eq("candidate_id", candidate.id)
     .order("created_at", { ascending: false });
+  if (appsErr) {
+    console.warn("[candidate dashboard] applications fetch failed", appsErr);
+  }
 
   type AppRow = {
     id: string;
     job_id: string;
-    status: ApplicationStatus;
+    stage_id: string;
+    kind: StageKind;
     created_at: string;
     updated_at: string;
     affiliation_revealed: boolean;
   };
-  const apps = (rawApps ?? []) as AppRow[];
+  const rawAppsList = (rawApps ?? []) as Array<Record<string, unknown>>;
+  const stageIdsToLookup = Array.from(
+    new Set(rawAppsList.map((r) => r.stage_id as string).filter(Boolean))
+  );
+  const kindByStageId = new Map<string, StageKind>();
+  if (stageIdsToLookup.length > 0) {
+    const admin = createSupabaseServiceRoleClient();
+    const { data: stageRows } = await admin
+      .from("dso_pipeline_stages")
+      .select("id, kind")
+      .in("id", stageIdsToLookup);
+    for (const r of (stageRows ?? []) as Array<{ id: string; kind: string }>) {
+      kindByStageId.set(r.id, r.kind as StageKind);
+    }
+  }
+  const apps: AppRow[] = rawAppsList.map((row) => ({
+    id: row.id as string,
+    job_id: row.job_id as string,
+    stage_id: row.stage_id as string,
+    kind: kindByStageId.get(row.stage_id as string) ?? "open",
+    created_at: row.created_at as string,
+    updated_at: row.updated_at as string,
+    affiliation_revealed: row.affiliation_revealed as boolean,
+  }));
 
   const activeApps = apps.filter(
-    (a) => !["hired", "rejected", "withdrawn"].includes(a.status),
+    (a) => a.kind !== "hired" && !isTerminalKind(a.kind),
   );
 
   // ── Practice Fit per active application (Phase 5D v1.2) ─────────────
@@ -383,35 +420,35 @@ export default async function CandidateDashboardPage() {
   }
 
   // ── Stage breakdown (active apps only) ──────────────────────────────
-  const stageBreakdown: Record<(typeof KANBAN_STAGES)[number], number> = {
-    new: 0,
-    reviewed: 0,
-    interviewing: 0,
-    offered: 0,
+  const stageBreakdown: Record<(typeof KANBAN_KINDS)[number], number> = {
+    open: 0,
+    screen: 0,
+    interview: 0,
+    offer: 0,
     hired: 0,
   };
   for (const a of activeApps) {
-    if ((a.status as string) in stageBreakdown) {
-      stageBreakdown[a.status as keyof typeof stageBreakdown] += 1;
+    if (a.kind in stageBreakdown) {
+      stageBreakdown[a.kind as keyof typeof stageBreakdown] += 1;
     }
   }
 
   const heroStageStrip = [
-    { key: "new", label: STAGE_LABELS.new, count: stageBreakdown.new },
+    { key: "open", label: KIND_DEFAULT_LABELS.open, count: stageBreakdown.open },
     {
-      key: "reviewed",
-      label: STAGE_LABELS.reviewed,
-      count: stageBreakdown.reviewed,
+      key: "screen",
+      label: KIND_DEFAULT_LABELS.screen,
+      count: stageBreakdown.screen,
     },
     {
-      key: "interviewing",
-      label: STAGE_LABELS.interviewing,
-      count: stageBreakdown.interviewing,
+      key: "interview",
+      label: KIND_DEFAULT_LABELS.interview,
+      count: stageBreakdown.interview,
     },
     {
-      key: "offered",
-      label: STAGE_LABELS.offered,
-      count: stageBreakdown.offered,
+      key: "offer",
+      label: KIND_DEFAULT_LABELS.offer,
+      count: stageBreakdown.offer,
     },
   ];
 
@@ -428,10 +465,10 @@ export default async function CandidateDashboardPage() {
         role: job?.title ?? "Unknown role",
         dsoName: affiliationByAppId.get(a.id)?.name ?? "Hiring team",
         locationName: job ? locationByJobId.get(job.id) ?? null : null,
-        stage: a.status as MyApplicationCard["stage"],
+        stage: a.kind as MyApplicationCard["stage"],
         daysSinceApplied: days,
         hasUnreadMessage: (unreadByAppId.get(a.id) ?? 0) > 0,
-        offerPending: a.status === "offered",
+        offerPending: a.kind === "offer",
         hideStageBadge: job?.hide_stages_from_candidate ?? false,
         href: `/candidate/applications/${a.id}`,
       };
@@ -675,18 +712,18 @@ export default async function CandidateDashboardPage() {
             title=""
             events={recentForFeed.map((app): ActivityEvent => {
               const job = jobMap.get(app.job_id);
-              const stageLabel = STAGE_LABELS[app.status] ?? app.status;
-              const isWinning = ["interviewing", "offered", "hired"].includes(
-                app.status,
+              const stageLabel = KIND_DEFAULT_LABELS[app.kind] ?? app.kind;
+              const isWinning = ["interview", "offer", "hired"].includes(
+                app.kind,
               );
               return {
                 id: app.id,
                 icon:
-                  app.status === "hired"
+                  app.kind === "hired"
                     ? CheckCircle2
-                    : ["rejected", "withdrawn"].includes(app.status)
+                    : isTerminalKind(app.kind)
                       ? FileText
-                      : app.status === "offered"
+                      : app.kind === "offer"
                         ? Mail
                         : Send,
                 tone: isWinning ? "positive" : "neutral",
@@ -716,20 +753,20 @@ export default async function CandidateDashboardPage() {
 /* ───── Helpers ───── */
 
 function buildActiveAppsHint(
-  breakdown: Record<(typeof KANBAN_STAGES)[number], number>,
+  breakdown: Record<(typeof KANBAN_KINDS)[number], number>,
 ): string {
   const parts: string[] = [];
-  if (breakdown.interviewing > 0) {
-    parts.push(`${breakdown.interviewing} in interview`);
+  if (breakdown.interview > 0) {
+    parts.push(`${breakdown.interview} in interview`);
   }
-  if (breakdown.offered > 0) {
-    parts.push(`${breakdown.offered} with an offer`);
+  if (breakdown.offer > 0) {
+    parts.push(`${breakdown.offer} with an offer`);
   }
-  if (breakdown.new > 0) {
-    parts.push(`${breakdown.new} awaiting first review`);
+  if (breakdown.open > 0) {
+    parts.push(`${breakdown.open} awaiting first review`);
   }
-  if (breakdown.reviewed > 0) {
-    parts.push(`${breakdown.reviewed} in screening`);
+  if (breakdown.screen > 0) {
+    parts.push(`${breakdown.screen} in screening`);
   }
   if (parts.length === 0) return "Track each application's progress here.";
   return parts.join(" · ") + ".";

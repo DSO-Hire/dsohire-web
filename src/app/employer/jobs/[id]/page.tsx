@@ -27,7 +27,7 @@ import {
   type BoardView,
 } from "./applications/applications-board";
 import type { KanbanApplication } from "./applications/kanban-board";
-import type { ApplicationStatus } from "@/lib/applications/stages";
+import type { PipelineStage, StageKind } from "@/lib/applications/stages";
 import { getPracticeFitForJob } from "@/lib/practice-fit/get-or-compute";
 import type { FitResult } from "@/lib/practice-fit/types";
 import { JobStatusActions } from "./status-actions";
@@ -95,19 +95,38 @@ export default async function PerJobPipelinePage({
     .maybeSingle();
   if (!job) notFound();
 
-  const { data: rawApps } = await supabase
+  // Pull the DSO's pipeline stages once — drives both the kanban columns
+  // and the per-application kind lookup. visibleStages() ordering happens
+  // in the board.
+  const { data: rawStages, error: stagesErr } = await supabase
+    .from("dso_pipeline_stages")
+    .select(
+      "id, dso_id, kind, label, slug, sort_order, is_hidden, is_default, color_class"
+    )
+    .eq("dso_id", dsoUser.dso_id as string)
+    .order("sort_order", { ascending: true });
+  if (stagesErr) {
+    console.warn("[per-job page] dso_pipeline_stages fetch failed", stagesErr);
+  }
+  const stages = (rawStages ?? []) as PipelineStage[];
+  const stageById = new Map(stages.map((s) => [s.id, s]));
+
+  const { data: rawApps, error: appsErr } = await supabase
     .from("applications")
     .select(
-      "id, job_id, candidate_id, status, created_at, stage_entered_at, pipeline_position"
+      "id, job_id, candidate_id, stage_id, created_at, stage_entered_at, pipeline_position"
     )
     .eq("job_id", jobId)
     .order("created_at", { ascending: false });
+  if (appsErr) {
+    console.warn("[per-job page] applications fetch failed", appsErr);
+  }
 
   type AppRow = {
     id: string;
     job_id: string;
     candidate_id: string;
-    status: ApplicationStatus;
+    stage_id: string;
     created_at: string;
     stage_entered_at: string;
     pipeline_position: number | null;
@@ -220,11 +239,14 @@ export default async function PerJobPipelinePage({
 
   const initialApplications: KanbanApplication[] = apps.map((a) => {
     const summary = scorecardSummaryMap.get(a.id);
+    const stage = stageById.get(a.stage_id);
+    const kind: StageKind = (stage?.kind ?? "open") as StageKind;
     return {
       id: a.id,
       job_id: a.job_id,
       candidate_id: a.candidate_id,
-      status: a.status,
+      stage_id: a.stage_id,
+      kind,
       created_at: a.created_at,
       stage_entered_at: a.stage_entered_at,
       pipeline_position: a.pipeline_position,
@@ -349,6 +371,7 @@ export default async function PerJobPipelinePage({
       {/* Pipeline (kanban inline) */}
       <ApplicationsBoard
         initialApplications={initialApplications}
+        stages={stages}
         job={{ id: job.id as string, title: jobTitle }}
         initialView={initialView}
         aiSuggesterAvailable={aiSuggesterAvailable}

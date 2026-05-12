@@ -33,8 +33,8 @@ export interface MyApplicationCard {
   dsoName: string;
   /** Optional location label appended to the DSO line. */
   locationName?: string | null;
-  /** Current stage (kanban key). */
-  stage: "new" | "reviewed" | "interviewing" | "offered" | "hired";
+  /** Current stage kind (open/screen/interview/offer/hired). */
+  stage: "open" | "screen" | "interview" | "offer" | "hired";
   /** Days since the candidate applied. Used only for the "Applied Xd ago" timestamp on Submitted column cards — never to flag staleness. */
   daysSinceApplied: number;
   /** When true, the candidate has unread messages from the employer on this app. */
@@ -60,10 +60,10 @@ interface MyApplicationStagesProps {
 }
 
 const STAGE_COLUMNS = [
-  { key: "new" as const, label: "Submitted" },
-  { key: "reviewed" as const, label: "Reviewed" },
-  { key: "interviewing" as const, label: "Interview" },
-  { key: "offered" as const, label: "Offer" },
+  { key: "open" as const, label: "Submitted" },
+  { key: "screen" as const, label: "Reviewed" },
+  { key: "interview" as const, label: "Interview" },
+  { key: "offer" as const, label: "Offer" },
   { key: "hired" as const, label: "Hired" },
 ];
 
@@ -193,12 +193,12 @@ function Card({ card }: { card: MyApplicationCard }) {
             Waiting on you
           </span>
         ) : null}
-        {card.stage === "new" && card.daysSinceApplied >= 0 && (
+        {card.stage === "open" && card.daysSinceApplied >= 0 && (
           <span className="text-[9px] text-slate-meta tracking-[0.3px]">
             Applied {timestampLabel(card.daysSinceApplied)}
           </span>
         )}
-        {card.hideStageBadge && card.stage !== "new" && (
+        {card.hideStageBadge && card.stage !== "open" && (
           <span className="text-[9px] text-slate-meta tracking-[0.3px] italic">
             In review
           </span>

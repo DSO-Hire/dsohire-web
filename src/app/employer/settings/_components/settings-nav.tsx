@@ -34,6 +34,7 @@ import {
   EyeOff,
   Users,
   MapPin,
+  Workflow,
   Bell,
   Mail,
   CreditCard,
@@ -74,6 +75,7 @@ const GROUPS: NavGroup[] = [
     entries: [
       { id: "team", label: "Team", href: "/employer/team", Icon: Users, external: true },
       { id: "locations", label: "Locations", href: "/employer/locations", Icon: MapPin, external: true },
+      { id: "pipeline", label: "Pipeline", href: "/employer/settings/pipeline", Icon: Workflow },
     ],
   },
   {

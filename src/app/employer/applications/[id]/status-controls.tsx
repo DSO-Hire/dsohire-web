@@ -12,37 +12,41 @@ import {
 
 const initial: ActionState = { ok: false };
 
+// Keyed by stage *kind* (post-Track-B). The form's `next_status` value is
+// sent through updateApplicationStatus which resolves to the DSO's default
+// stage of that kind. Surface is legacy; the StageSelector is canonical
+// today but this component lingers in case any old surface re-imports it.
 const ALL_TRANSITIONS: Record<
   string,
   Array<{ to: string; label: string; tone: "primary" | "neutral" | "danger" }>
 > = {
-  new: [
-    { to: "reviewed", label: "Mark Reviewed", tone: "primary" },
+  open: [
+    { to: "screen", label: "Mark Reviewed", tone: "primary" },
     { to: "rejected", label: "Reject", tone: "danger" },
   ],
-  reviewed: [
-    { to: "interviewing", label: "Schedule Interview", tone: "primary" },
+  screen: [
+    { to: "interview", label: "Schedule Interview", tone: "primary" },
     { to: "rejected", label: "Reject", tone: "danger" },
   ],
-  interviewing: [
-    { to: "offered", label: "Make Offer", tone: "primary" },
+  interview: [
+    { to: "offer", label: "Make Offer", tone: "primary" },
     { to: "rejected", label: "Reject", tone: "danger" },
   ],
-  offered: [
+  offer: [
     { to: "hired", label: "Mark Hired", tone: "primary" },
     { to: "rejected", label: "Withdrawn / Declined", tone: "danger" },
   ],
   hired: [],
   rejected: [
-    { to: "reviewed", label: "Reopen", tone: "neutral" },
+    { to: "screen", label: "Reopen", tone: "neutral" },
   ],
   withdrawn: [],
 };
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  reviewed: Eye,
-  interviewing: MessagesSquare,
-  offered: Send,
+  screen: Eye,
+  interview: MessagesSquare,
+  offer: Send,
   hired: CheckCircle2,
   rejected: XCircle,
 };

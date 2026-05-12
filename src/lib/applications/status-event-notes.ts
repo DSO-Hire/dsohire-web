@@ -19,11 +19,16 @@
  */
 
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
-import type { ApplicationStatus } from "@/lib/applications/stages";
+import type { StageKind } from "@/lib/applications/stages";
 
 export interface AttachStatusNoteOptions {
   applicationIds: string[];
-  toStatus: ApplicationStatus;
+  /**
+   * The destination kind for the just-moved application(s). We key off
+   * kind (the system category) rather than stage_id because the events
+   * table snapshots kind, not the id — see migration §6.
+   */
+  toKind: StageKind;
   /**
    * Recruiter-supplied reason. Trimmed + capped at 1000 chars upstream; we
    * write whatever caller passes verbatim. Empty string → caller should not
@@ -34,7 +39,7 @@ export interface AttachStatusNoteOptions {
 
 export async function attachStatusEventNote({
   applicationIds,
-  toStatus,
+  toKind,
   note,
 }: AttachStatusNoteOptions): Promise<void> {
   if (!note || applicationIds.length === 0) return;
@@ -46,7 +51,7 @@ export async function attachStatusEventNote({
         .from("application_status_events")
         .select("id")
         .eq("application_id", appId)
-        .eq("to_status", toStatus)
+        .eq("to_stage_kind", toKind)
         .order("created_at", { ascending: false })
         .limit(1);
       if (selErr || !events || events.length === 0) {

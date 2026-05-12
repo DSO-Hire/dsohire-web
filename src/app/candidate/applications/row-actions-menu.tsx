@@ -41,7 +41,7 @@ import {
 
 interface RowActionsMenuProps {
   applicationId: string;
-  /** Current status — controls which actions are enabled. */
+  /** Current stage kind — controls which actions are enabled. */
   currentStatus: string;
   /** Whether the row is currently hidden (drives Hide / Restore label). */
   isHidden: boolean;

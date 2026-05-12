@@ -7,19 +7,24 @@
  * clear visual of where they sit in the funnel — "Submitted, in review,
  * scheduled for interview, offer received, hired."
  *
- * Five canonical stages, plus terminal states for rejected/withdrawn:
- *   - submitted (status='new')
- *   - reviewed (status='reviewed')
- *   - interviewing (status='interviewing')
- *   - offered (status='offered')
- *   - hired (status='hired')
+ * Five canonical kinds, plus terminal states for rejected/withdrawn:
+ *   - submitted (kind='open')
+ *   - reviewed (kind='screen')
+ *   - interviewing (kind='interview')
+ *   - offered (kind='offer')
+ *   - hired (kind='hired')
  *   - rejected / withdrawn → render the strip with all stages dim and a
  *     terminal pill at the end
+ *
+ * Caller passes the stage *kind* (system category) — not stage_id —
+ * because the per-DSO label/color is rendered by the kanban; here we want
+ * a candidate-friendly canonical funnel regardless of DSO customizations.
  */
 
 import { Check } from "lucide-react";
 
 interface StatusProgressProps {
+  /** Stage kind: open/screen/interview/offer/hired/rejected/withdrawn. */
   status: string;
   /**
    * When true (employer set hide_stages_from_candidate=true on the job),
@@ -32,10 +37,10 @@ interface StatusProgressProps {
 }
 
 const STAGES: { key: string; label: string }[] = [
-  { key: "new", label: "Submitted" },
-  { key: "reviewed", label: "Reviewed" },
-  { key: "interviewing", label: "Interview" },
-  { key: "offered", label: "Offer" },
+  { key: "open", label: "Submitted" },
+  { key: "screen", label: "Reviewed" },
+  { key: "interview", label: "Interview" },
+  { key: "offer", label: "Offer" },
   { key: "hired", label: "Hired" },
 ];
 
@@ -52,7 +57,7 @@ export function StatusProgress({ status, hideStages }: StatusProgressProps) {
   if (
     hideStages &&
     !isClosed &&
-    status !== "offered" &&
+    status !== "offer" &&
     status !== "hired"
   ) {
     return (

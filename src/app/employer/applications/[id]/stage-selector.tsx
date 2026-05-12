@@ -3,23 +3,17 @@
 /**
  * <StageSelector> — full-pipeline stage control for the application detail page.
  *
- * Shows all five active KANBAN_STAGES as a segmented control with the current
- * stage highlighted (matched to STAGE_COLORS so the badge here looks identical
- * to the kanban column). Terminal/closed transitions (Reject, Withdrawn) live
- * in a "More actions" dropdown so primary moves stay one click away.
+ * Shows the DSO's visible kanban stages as a segmented control with the
+ * current stage highlighted. Terminal/closed transitions (Reject, Withdrawn)
+ * live in a "More actions" dropdown so primary moves stay one click away.
  *
  * Closed-state transitions open a confirmation dialog with an optional
- * recruiter reason textarea (parity with the bulk-reject + bulk-archive flow).
- * The reason is patched onto the trigger-seeded `application_status_events`
- * row via the shared helper at `@/lib/applications/status-event-notes` —
- * RLS denies client-side INSERT/UPDATE on that table, so the helper uses
- * the service-role client server-side.
+ * recruiter reason textarea. The reason is patched onto the trigger-seeded
+ * `application_status_events` row via the shared helper.
  *
- * Calls the same `moveApplicationStage` server action the kanban board uses.
- * Optimistic state via `useOptimistic` so the highlight snaps to the new stage
- * immediately; on failure we surface an inline error and the optimistic state
- * unwinds when the transition resolves. `useTransition` gates the buttons so
- * recruiters can't double-fire mid-flight.
+ * Calls the same `moveApplicationStage` server action the kanban board
+ * uses. Optimistic state via `useOptimistic` so the highlight snaps to the
+ * new stage immediately.
  */
 
 import {
@@ -31,11 +25,11 @@ import {
 } from "react";
 import { ChevronDown, MoreHorizontal, Loader2 } from "lucide-react";
 import {
-  KANBAN_STAGES,
-  STAGE_COLORS,
-  STAGE_LABELS,
-  type ApplicationStatus,
-  type KanbanStage,
+  colorTripleFor,
+  isTerminalKind,
+  partitionStagesForKanban,
+  type PipelineStage,
+  type StageKind,
 } from "@/lib/applications/stages";
 import { moveApplicationStage } from "./actions";
 import { rejectWithReason, withdrawWithReason } from "./reject-actions";
@@ -52,10 +46,9 @@ import {
 type ClosedTone = "danger" | "neutral";
 
 interface ClosedTransition {
-  to: ApplicationStatus;
+  toKind: Extract<StageKind, "rejected" | "withdrawn">;
   label: string;
   tone: ClosedTone;
-  // Dialog copy
   dialogTitle: string;
   dialogConfirmLabel: string;
   dialogReasonHelper: string;
@@ -63,7 +56,7 @@ interface ClosedTransition {
 
 const CLOSED_TRANSITIONS: ClosedTransition[] = [
   {
-    to: "rejected",
+    toKind: "rejected",
     label: "Reject",
     tone: "danger",
     dialogTitle: "Reject this candidate?",
@@ -72,7 +65,7 @@ const CLOSED_TRANSITIONS: ClosedTransition[] = [
       "This appears in your team's audit log; the candidate doesn't see it.",
   },
   {
-    to: "withdrawn",
+    toKind: "withdrawn",
     label: "Mark Withdrawn",
     tone: "neutral",
     dialogTitle: "Mark this candidate as withdrawn?",
@@ -84,26 +77,23 @@ const CLOSED_TRANSITIONS: ClosedTransition[] = [
 
 interface StageSelectorProps {
   applicationId: string;
-  currentStatus: ApplicationStatus;
+  /** Current stage_id on the application. */
+  currentStageId: string;
+  /** Current stage kind (used for terminal-state detection + fallback). */
+  currentKind: StageKind;
+  /** Full pipeline stage list for the DSO. */
+  stages: PipelineStage[];
   candidateName: string;
   jobTitle: string;
-  /**
-   * Whether the DSO's tier permits the AI rejection-reason suggester.
-   * Server action enforces this too; this prop drives the in-dialog UI
-   * (panel vs upgrade ghost). Growth+ only.
-   */
   aiSuggesterAvailable: boolean;
-  /**
-   * Whether the application has ≥1 screening answer or submitted scorecard
-   * available as context. Without context the suggester button is disabled
-   * (the model can only paraphrase the JD, which isn't useful).
-   */
   aiSuggesterHasContext: boolean;
 }
 
 export function StageSelector({
   applicationId,
-  currentStatus,
+  currentStageId,
+  currentKind,
+  stages,
   candidateName,
   jobTitle,
   aiSuggesterAvailable,
@@ -117,15 +107,16 @@ export function StageSelector({
     null
   );
 
-  // Optimistic stage so the highlight moves the moment a button is clicked.
-  // Reverts automatically when the transition finishes if the server action
-  // failed (we set `error` and don't replace `currentStatus` in the parent).
-  const [optimisticStatus, setOptimisticStatus] = useOptimistic<
-    ApplicationStatus,
-    ApplicationStatus
-  >(currentStatus, (_prev, next) => next);
+  const { kanban: kanbanStages } = partitionStagesForKanban(stages);
 
-  // Close the More-actions menu on outside click / Esc.
+  // Optimistic stage_id + kind so the highlight moves the moment a button
+  // is clicked. Reverts when the transition finishes if the server action
+  // fails (we set `error` and don't replace the parent values).
+  const [optimisticState, setOptimisticState] = useOptimistic<
+    { stageId: string; kind: StageKind },
+    { stageId: string; kind: StageKind }
+  >({ stageId: currentStageId, kind: currentKind }, (_prev, next) => next);
+
   useEffect(() => {
     if (!menuOpen) return;
     function handleClick(e: MouseEvent) {
@@ -144,44 +135,53 @@ export function StageSelector({
     };
   }, [menuOpen]);
 
-  function move(next: ApplicationStatus) {
-    if (next === optimisticStatus) return;
+  function moveToStage(stage: PipelineStage) {
+    if (stage.id === optimisticState.stageId) return;
     setError(null);
     setMenuOpen(false);
     startTransition(async () => {
-      setOptimisticStatus(next);
-      const result = await moveApplicationStage(applicationId, next);
+      setOptimisticState({ stageId: stage.id, kind: stage.kind });
+      const result = await moveApplicationStage(applicationId, {
+        stageId: stage.id,
+      });
       if (!result.ok) {
         setError(result.error);
       }
     });
   }
 
-  function handleSegmentedClick(next: ApplicationStatus) {
-    move(next);
-  }
-
   function handleClosedMenuItem(transition: ClosedTransition) {
-    if (transition.to === optimisticStatus) return;
+    if (transition.toKind === optimisticState.kind) return;
     setMenuOpen(false);
     setClosedDialog(transition);
   }
 
   function handleClosedConfirm(transition: ClosedTransition, reason: string) {
     setClosedDialog(null);
-    if (transition.to === optimisticStatus) return;
+    if (transition.toKind === optimisticState.kind) return;
     setError(null);
-    const next = transition.to;
     startTransition(async () => {
-      setOptimisticStatus(next);
+      // Optimistic: switch to the DSO's terminal stage row of the right
+      // kind if we have it; otherwise just flip the kind so the highlight
+      // moves off the segmented control while the server resolves it.
+      const targetRow =
+        stages.find(
+          (s) => s.kind === transition.toKind && s.is_default
+        ) ?? null;
+      setOptimisticState({
+        stageId: targetRow?.id ?? optimisticState.stageId,
+        kind: transition.toKind,
+      });
       const action =
-        next === "rejected" ? rejectWithReason : withdrawWithReason;
+        transition.toKind === "rejected" ? rejectWithReason : withdrawWithReason;
       const result = await action(applicationId, reason);
       if (!result.ok) {
         setError(result.error);
       }
     });
   }
+
+  const onSegmentedControl = !isTerminalKind(optimisticState.kind);
 
   return (
     <div>
@@ -190,17 +190,17 @@ export function StageSelector({
         aria-label="Pipeline stage"
         className="inline-flex flex-wrap items-stretch gap-0 border border-[var(--rule-strong)] bg-white"
       >
-        {KANBAN_STAGES.map((stage) => {
-          const active = optimisticStatus === stage;
-          const color = STAGE_COLORS[stage as KanbanStage];
+        {kanbanStages.map((stage) => {
+          const active = onSegmentedControl && optimisticState.stageId === stage.id;
+          const color = colorTripleFor(stage.color_class, stage.kind);
           return (
             <button
-              key={stage}
+              key={stage.id}
               type="button"
               role="radio"
               aria-checked={active}
               disabled={pending}
-              onClick={() => handleSegmentedClick(stage)}
+              onClick={() => moveToStage(stage)}
               className={`relative inline-flex items-center gap-2 px-4 py-2.5 text-[10px] font-bold tracking-[1.5px] uppercase border-r last:border-r-0 border-[var(--rule)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-inset ${
                 active
                   ? `${color.bg} ${color.text} ring-1 ring-inset ${color.ring}`
@@ -220,7 +220,7 @@ export function StageSelector({
                   aria-hidden="true"
                 />
               )}
-              {STAGE_LABELS[stage]}
+              {stage.label}
             </button>
           );
         })}
@@ -244,10 +244,10 @@ export function StageSelector({
               className="absolute right-0 top-full mt-1 z-20 min-w-[180px] border border-[var(--rule-strong)] bg-white shadow-lg"
             >
               {CLOSED_TRANSITIONS.map((t) => {
-                const active = optimisticStatus === t.to;
+                const active = optimisticState.kind === t.toKind;
                 return (
                   <button
-                    key={t.to}
+                    key={t.toKind}
                     type="button"
                     role="menuitem"
                     disabled={pending || active}
@@ -290,20 +290,6 @@ export function StageSelector({
   );
 }
 
-/**
- * Confirmation dialog for closed-state transitions (Reject / Mark Withdrawn).
- *
- * Mirrors the shape of the bulk-reject confirmation in the kanban board so
- * recruiters get the same flow whether they're moving one candidate or many:
- *  - headline naming the action
- *  - body line citing the candidate + role for context
- *  - optional reason textarea capped at 1000 chars (matches server cap)
- *  - Cancel + Confirm; Confirm is destructive-red for Reject, heritage for
- *    Mark Withdrawn
- *
- * The reason resets every time the dialog opens so a previous draft from a
- * cancelled action doesn't leak into the next confirmation.
- */
 function ClosedTransitionDialog({
   applicationId,
   transition,
@@ -337,9 +323,7 @@ function ClosedTransitionDialog({
       ? "bg-red-700 text-white hover:bg-red-800 focus-visible:ring-red-700"
       : "bg-heritage text-white hover:bg-heritage-deep focus-visible:ring-heritage";
 
-  // The AI suggester only makes sense for the Reject flow — withdrawn is a
-  // candidate-side concept where there's nothing for AI to draft.
-  const showAiSuggester = transition.to === "rejected";
+  const showAiSuggester = transition.toKind === "rejected";
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onCancel()}>

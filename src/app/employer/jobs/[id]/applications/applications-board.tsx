@@ -17,11 +17,18 @@ import {
 } from "./applications-list";
 import { KanbanBoard, type KanbanApplication } from "./kanban-board";
 import { MobileStageTabs } from "./mobile-stage-tabs";
+import type { PipelineStage } from "@/lib/applications/stages";
 
 export type BoardView = "list" | "kanban";
 
 interface ApplicationsBoardProps {
   initialApplications: KanbanApplication[];
+  /**
+   * The DSO's configured pipeline stages, in sort order. Drives the
+   * kanban columns + mobile tabs (per-DSO labels, colors, hidden flag).
+   * Pulled by the server entry from dso_pipeline_stages.
+   */
+  stages: PipelineStage[];
   job: { id: string; title: string };
   initialView: BoardView;
   /**
@@ -48,6 +55,7 @@ const VIEW_STORAGE_PREFIX = "dsohire.applications.view.";
 
 export function ApplicationsBoard({
   initialApplications,
+  stages,
   job,
   initialView,
   aiSuggesterAvailable,
@@ -82,7 +90,8 @@ export function ApplicationsBoard({
         id: a.id,
         job_id: a.job_id,
         candidate_id: a.candidate_id,
-        status: a.status,
+        stage_id: a.stage_id,
+        kind: a.kind,
         created_at: a.created_at,
         candidate: a.candidate,
         jobTitle: a.jobTitle,
@@ -118,13 +127,14 @@ export function ApplicationsBoard({
 
       {/* Render: list, kanban (desktop), or mobile stage tabs (kanban + small viewport) */}
       {view === "list" ? (
-        <ApplicationsList applications={listItems} hideJobTitle />
+        <ApplicationsList applications={listItems} stages={stages} hideJobTitle />
       ) : !hydrated ? (
         // Avoid SSR/CSR mismatch — render a neutral placeholder until we know
         // viewport. Server emitted whatever initialView was; once hydrated we
         // pick desktop or mobile branch.
         <KanbanBoard
           applications={initialApplications}
+          stages={stages}
           aiSuggesterAvailable={aiSuggesterAvailable}
           aiSuggesterContextByAppId={aiSuggesterContextByAppId}
           canBulkAct={canBulkAct}
@@ -132,11 +142,13 @@ export function ApplicationsBoard({
       ) : isMobile ? (
         <MobileStageTabs
           applications={initialApplications}
+          stages={stages}
           jobId={job.id}
         />
       ) : (
         <KanbanBoard
           applications={initialApplications}
+          stages={stages}
           aiSuggesterAvailable={aiSuggesterAvailable}
           aiSuggesterContextByAppId={aiSuggesterContextByAppId}
           canBulkAct={canBulkAct}

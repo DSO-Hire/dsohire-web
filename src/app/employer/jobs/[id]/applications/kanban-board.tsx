@@ -1,36 +1,25 @@
 /**
- * <KanbanBoard> — pipeline board for one job, with drag-drop (Day 3) +
- * realtime sync across recruiters (Day 4) + a11y/multi-select (Day 5).
+ * <KanbanBoard> — pipeline board for one job, with drag-drop, realtime sync,
+ * and a11y/multi-select. Configurable per-DSO stages as of Track B (2026-05-12).
  *
  * Architecture:
- *  - Base state lives in `useRealtimeApplications` (Day 4); it owns the
- *    committed truth, listens to `postgres_changes` UPDATEs scoped to this
- *    job_id, and reconciles into local state. Self-echoes are filtered via
- *    the shared `pendingMovesRef`.
+ *  - Base state lives in `useRealtimeApplications`; it owns the committed
+ *    truth, listens to `postgres_changes` UPDATEs scoped to this job_id, and
+ *    reconciles into local state. Self-echoes are filtered via the shared
+ *    `pendingMovesRef` (now keyed by next stage_id, not status enum).
  *  - `useOptimistic` layers in-flight moves on top of base state so the
  *    dragged card visually snaps to the new column the instant it's dropped.
- *  - `useTransition` runs the server action without blocking input.
- *  - Selection lives in `useBulkSelection` (Day 5); `count > 0` reveals a
- *    sticky toolbar with placeholder bulk actions (wired in sprint feature #3).
- *  - Closed lane is split into rejected (drop target) + withdrawn (read-only)
- *    subsections. Only `column:closed` is a droppable; withdrawn rows render
- *    italic with no checkbox / no drag handle.
+ *  - Columns are now driven by the DSO's live `dso_pipeline_stages` list
+ *    (visible, non-terminal). The "closed lane" is the terminal stages
+ *    (rejected + withdrawn kinds) collapsed into a single droppable area.
+ *  - droppable IDs are `column:<stage_id>` and `column:closed`; the closed
+ *    drop target maps to the DSO's default rejected-kind stage at server
+ *    action time.
  *
  * Self-echo prevention:
- *  - `pendingMovesRef` records `applicationId -> expectedStatus`. <KanbanBoard>
- *    sets it on drag-drop and clears it ONLY in the failure branch (the
- *    realtime hook clears successful entries when the echo arrives, so we
- *    have a single owner per outcome and never get a phantom "teammate moved
- *    …" toast for our own move).
- *  - Per-card `pending` flag (rendered dimmed/disabled) is owned by
- *    `pendingIds` in this component and cleared on either outcome.
- *
- * What this PR does NOT do (deferred):
- *  - In-column reorder via useSortable — Day 5+
- *  - Bulk action mutations (move-many, reject-many) — sprint feature #3
- *  - Presence indicators / "who's watching" — Day 5+
- *  - Conflict resolution UI when two recruiters race — Day 5+
- *  - INSERT events (new application appeared) — Day 5+
+ *  - `pendingMovesRef` records `applicationId -> expectedStageId`.
+ *  - Realtime hook clears successful entries when the echo arrives; we clear
+ *    failure-path entries here.
  */
 
 "use client";
@@ -68,11 +57,11 @@ import {
   type DropAnimation,
 } from "@dnd-kit/core";
 import {
-  KANBAN_STAGES,
-  CLOSED_STAGES,
-  STAGE_LABELS,
-  type ApplicationStatus,
-  type KanbanStage,
+  KIND_DEFAULT_LABELS,
+  isTerminalKind,
+  partitionStagesForKanban,
+  type PipelineStage,
+  type StageKind,
 } from "@/lib/applications/stages";
 import { moveApplicationStage } from "@/app/employer/applications/[id]/actions";
 import {
@@ -108,19 +97,7 @@ import { RejectReasonAiSuggester } from "@/app/employer/applications/[id]/reject
 export interface KanbanApplication extends ApplicationsListItem {
   stage_entered_at: string;
   pipeline_position: number | null;
-  /**
-   * Count of non-deleted internal comments on this application — drives
-   * the chat-bubble indicator on the card. Aggregated server-side via
-   * the `application_comment_counts` view; defaults to 0 for new rows
-   * delivered via realtime INSERT before a refresh.
-   */
   comment_count: number;
-  /**
-   * Aggregate scorecard data for the card-side star indicator. Pulled
-   * from `application_scorecard_summaries` (only submitted scorecards
-   * count; drafts stay private until submission). Both fields are null
-   * when no reviewer has submitted a scorecard yet.
-   */
   scorecard_avg: number | null;
   scorecard_reviewer_count: number;
 }
@@ -128,57 +105,34 @@ export interface KanbanApplication extends ApplicationsListItem {
 interface KanbanBoardProps {
   applications: KanbanApplication[];
   /**
-   * DSO tier gate for the bulk-reject AI suggester (Growth+ only). False
-   * collapses the suggester to an upgrade ghost in the reject dialog.
+   * The DSO's pipeline stages — drives the column list + the terminal
+   * (closed lane) partition. Passed from the server entry; reseeded if
+   * the prop changes.
    */
+  stages: PipelineStage[];
   aiSuggesterAvailable: boolean;
-  /**
-   * Per-application boolean: true when the application has ≥1 screening
-   * answer or ≥1 submitted scorecard. The suggester only fires for a
-   * single-candidate bulk-reject; this map tells the dialog whether that
-   * one selected candidate has enough signal to call the model.
-   */
   aiSuggesterContextByAppId: Record<string, boolean>;
-  /**
-   * Permission gate for the bulk-action toolbar. False for hiring_manager
-   * users (per locked 2026-05-05 decision: HMs don't get bulk actions).
-   * Default true for owner/admin/recruiter. When false, the SelectionToolbar
-   * is suppressed even if the user manages to multi-select cards.
-   */
   canBulkAct?: boolean;
 }
 
 interface OptimisticMove {
   type: "move";
   applicationId: string;
-  nextStatus: ApplicationStatus;
-  /**
-   * Updated stage_entered_at — for the optimistic phase we approximate with
-   * `new Date().toISOString()` so the heat indicator resets immediately.
-   */
+  nextStageId: string;
+  nextKind: StageKind;
   nextStageEnteredAt: string;
 }
 
-/**
- * Errors come in two flavors:
- *  - "network": the request couldn't reach the server (offline, fetch threw,
- *    ambiguous failure). Recoverable; the banner offers a Retry button that
- *    re-attempts the same move.
- *  - "denied": the server returned an authorization / not-found response (RLS
- *    blocks the move, the row was deleted, etc.). Permanent for this user;
- *    only a dismiss button is offered.
- *
- * The `pendingMove` payload lets Retry re-run `moveApplicationStage` with the
- * exact same arguments without rebuilding state from the live board.
- */
 interface ErrorState {
   kind: "network" | "denied";
   candidateName: string;
   stageLabel: string;
   pendingMove: {
     applicationId: string;
-    nextStatus: ApplicationStatus;
-    prevStatus: ApplicationStatus;
+    nextStageId: string;
+    nextKind: StageKind;
+    prevStageId: string;
+    prevKind: StageKind;
   } | null;
 }
 
@@ -188,34 +142,16 @@ interface RemoteToast {
   stageLabel: string;
 }
 
-/**
- * Outcome banner for a bulk move/reject/archive run. Surfaces aggregate count
- * + per-id failure list so the recruiter can see exactly which candidates
- * didn't move and why. The failures keep the candidate name (resolved at
- * dispatch time, before the action ran) so the banner is meaningful even if
- * the failed rows have since left the optimistic state.
- */
 interface BulkResultBanner {
   succeededCount: number;
   actionLabel: string; // "Moved", "Rejected", "Archived"
-  destinationLabel: string; // "to Interview", "" for reject/archive
+  destinationLabel: string;
+  destinationKind: StageKind | null;
   failures: Array<{ id: string; candidateName: string; error: string }>;
 }
 
-/**
- * Closed lane is rendered as a single droppable container so dragging onto
- * it transitions the application to `rejected`. Withdrawn rows live inside
- * the same expanded pane but are NOT a drop target — withdrawn is candidate-
- * side only.
- */
 const CLOSED_DROPPABLE_ID = "column:closed";
 
-/**
- * Drop animation: 150ms ease-out so cards land softly into their new column
- * instead of snapping. (Day 3 had `dropAnimation={null}` for a hard snap.)
- * `dragSourceOpacity: 0` matches our in-place dim while the overlay ghost
- * animates home.
- */
 const DROP_ANIMATION: DropAnimation = {
   duration: 150,
   easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)",
@@ -226,6 +162,7 @@ const DROP_ANIMATION: DropAnimation = {
 
 export function KanbanBoard({
   applications,
+  stages,
   aiSuggesterAvailable,
   aiSuggesterContextByAppId,
   canBulkAct = true,
@@ -235,32 +172,19 @@ export function KanbanBoard({
   const [error, setError] = useState<ErrorState | null>(null);
   const [remoteToast, setRemoteToast] = useState<RemoteToast | null>(null);
   const [bulkBanner, setBulkBanner] = useState<BulkResultBanner | null>(null);
-  /**
-   * In-flight bulk run flag — disables every toolbar button while a sequence
-   * of move/reject/archive calls is running so a recruiter can't kick off a
-   * second bulk before the first finishes (would racily clobber pendingIds
-   * + selection state).
-   */
   const [bulkInFlight, setBulkInFlight] = useState(false);
-  /** Open state for the move-to dropdown + reject/archive dialogs. */
   const [moveMenuOpen, setMoveMenuOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
   const [, startTransition] = useTransition();
 
-  // Day 4: Shared pending-moves ledger. The hook reads (and on echo, clears)
-  // this; we write to it on drag-drop and clear it ONLY on failure.
-  const pendingMovesRef = useRef<Map<string, ApplicationStatus>>(new Map());
+  // pendingMovesRef tracks {applicationId -> expectedStageId}.
+  const pendingMovesRef = useRef<Map<string, string>>(new Map());
 
-  // Track which cards are currently in-flight so they render dimmed/disabled.
   const [pendingIds, setPendingIds] = useState<ReadonlySet<string>>(
     new Set<string>()
   );
 
-  // Day 7: track mounted state so a server-action response that lands after
-  // unmount doesn't try to setState (would log a memory-leak warning AND fire
-  // rollback against state that no longer exists). Every state write inside
-  // the async handler now gates on `isMountedRef.current`.
   const isMountedRef = useRef(true);
   useEffect(() => {
     isMountedRef.current = true;
@@ -269,8 +193,26 @@ export function KanbanBoard({
     };
   }, []);
 
-  // Day 5: selection state.
   const selection = useBulkSelection();
+
+  // Compute the kanban + terminal lanes from the DSO's stages list.
+  const { kanban: kanbanStages, terminal: terminalStages } = useMemo(
+    () => partitionStagesForKanban(stages),
+    [stages]
+  );
+
+  // Quick lookups.
+  const stageById = useMemo(
+    () => new Map(stages.map((s) => [s.id, s])),
+    [stages]
+  );
+
+  // First rejected-kind row in sort_order — that's the destination for a
+  // drop on the closed lane (the most natural recruiter-driven terminal).
+  const rejectedStage = useMemo(
+    () => terminalStages.find((s) => s.kind === "rejected") ?? null,
+    [terminalStages]
+  );
 
   const { applications: appsState, isConnected, commitLocal, reseed } =
     useRealtimeApplications({
@@ -278,9 +220,9 @@ export function KanbanBoard({
       initialApplications: applications,
       pendingMovesRef,
       onRemoteChange: (event: RemoteChangeEvent) => {
-        // Don't toast for our own optimistic moves (already filtered upstream
-        // via pendingMovesRef) or for stages we don't render labels for.
-        const stageLabel = STAGE_LABELS[event.nextStatus];
+        const row = stageById.get(event.nextStageId);
+        const stageLabel =
+          row?.label ?? KIND_DEFAULT_LABELS[event.nextKind] ?? null;
         if (!stageLabel) return;
         setRemoteToast({
           applicationId: event.applicationId,
@@ -290,11 +232,11 @@ export function KanbanBoard({
       },
     });
 
-  // Reseed on parent prop change (revalidation, view-toggle remount, etc.).
-  // Hash by id+status so we don't clobber realtime updates with a stale prop.
+  // Reseed on parent prop change. Hash by id+stage_id so we don't clobber
+  // realtime updates with a stale prop.
   const lastSeedKeyRef = useRef<string>("");
   useEffect(() => {
-    const key = applications.map((a) => `${a.id}:${a.status}`).join("|");
+    const key = applications.map((a) => `${a.id}:${a.stage_id}`).join("|");
     if (key !== lastSeedKeyRef.current) {
       lastSeedKeyRef.current = key;
       reseed(applications);
@@ -310,7 +252,8 @@ export function KanbanBoard({
       app.id === action.applicationId
         ? {
             ...app,
-            status: action.nextStatus,
+            stage_id: action.nextStageId,
+            kind: action.nextKind,
             stage_entered_at: action.nextStageEnteredAt,
           }
         : app
@@ -321,22 +264,16 @@ export function KanbanBoard({
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
     }),
-    // dnd-kit's KeyboardSensor defaults handle: Tab to focus, Space to pick
-    // up, arrow keys to move between droppables, Space to drop, Esc to cancel.
-    // We don't need a custom KeyboardCoordinateGetter — the sortableKeyboard
-    // coordinates are for sortable lists; for cross-droppable kanban, the
-    // default coordinate getter walks droppables in DOM order, which matches
-    // our left-to-right column layout exactly.
     useSensor(KeyboardSensor)
   );
 
-  // Bucket apps by stage for rendering.
-  const byStage = useMemo(() => {
-    const m = new Map<ApplicationStatus, KanbanApplication[]>();
-    for (const stage of KANBAN_STAGES) m.set(stage, []);
-    for (const stage of CLOSED_STAGES) m.set(stage, []);
+  // Bucket apps by stage_id for rendering.
+  const byStageId = useMemo(() => {
+    const m = new Map<string, KanbanApplication[]>();
+    for (const stage of kanbanStages) m.set(stage.id, []);
+    for (const stage of terminalStages) m.set(stage.id, []);
     for (const app of optimisticApps) {
-      const bucket = m.get(app.status);
+      const bucket = m.get(app.stage_id);
       if (bucket) bucket.push(app);
     }
     for (const list of m.values()) {
@@ -350,23 +287,43 @@ export function KanbanBoard({
       });
     }
     return m;
-  }, [optimisticApps]);
+  }, [optimisticApps, kanbanStages, terminalStages]);
 
-  const rejectedApps = byStage.get("rejected") ?? [];
-  const withdrawnApps = byStage.get("withdrawn") ?? [];
+  // Apps in any rejected-kind stage (drop-target lane) vs withdrawn-kind
+  // (read-only). Collapse all rejected-kind rows across all rejected
+  // stages into one list — same for withdrawn.
+  const rejectedApps = useMemo(() => {
+    const out: KanbanApplication[] = [];
+    for (const s of terminalStages) {
+      if (s.kind === "rejected") {
+        out.push(...(byStageId.get(s.id) ?? []));
+      }
+    }
+    return out;
+  }, [byStageId, terminalStages]);
+
+  const withdrawnApps = useMemo(() => {
+    const out: KanbanApplication[] = [];
+    for (const s of terminalStages) {
+      if (s.kind === "withdrawn") {
+        out.push(...(byStageId.get(s.id) ?? []));
+      }
+    }
+    return out;
+  }, [byStageId, terminalStages]);
+
   const closedCount = rejectedApps.length + withdrawnApps.length;
 
-  // Day 5: column-major id-order array for shift-click range select. Excludes
-  // withdrawn rows (not selectable). Open columns first in canonical stage
-  // order, then rejected.
+  // Column-major id-order array for shift-click range select. Excludes
+  // withdrawn rows. Open columns first in sort order, then rejected.
   const selectionOrder = useMemo<string[]>(() => {
     const out: string[] = [];
-    for (const stage of KANBAN_STAGES) {
-      for (const app of byStage.get(stage) ?? []) out.push(app.id);
+    for (const stage of kanbanStages) {
+      for (const app of byStageId.get(stage.id) ?? []) out.push(app.id);
     }
     for (const app of rejectedApps) out.push(app.id);
     return out;
-  }, [byStage, rejectedApps]);
+  }, [byStageId, kanbanStages, rejectedApps]);
 
   const handleToggleSelect = useCallback(
     (id: string, shiftKey: boolean) => {
@@ -385,24 +342,18 @@ export function KanbanBoard({
     setActiveId(String(event.active.id));
   }
 
-  /**
-   * Day 7: extracted from handleDragEnd so the retry button on a network-fail
-   * banner can re-run the same move with the same arguments. `prevStatus` is
-   * captured at the original drop time so we always roll back to the right
-   * column even if the user has done other moves in between (the optimistic
-   * layer carries the latest snapshot, but rollback target should match what
-   * the user last saw the card at).
-   */
   const runMove = useCallback(
     (
       applicationId: string,
-      nextStatus: ApplicationStatus,
-      prevStatus: ApplicationStatus,
+      nextStageId: string,
+      nextKind: StageKind,
+      prevStageId: string,
+      prevKind: StageKind,
       candidateName: string
     ) => {
       const nextStageEnteredAt = new Date().toISOString();
 
-      pendingMovesRef.current.set(applicationId, nextStatus);
+      pendingMovesRef.current.set(applicationId, nextStageId);
       if (isMountedRef.current) {
         setPendingIds((prev) => {
           const next = new Set(prev);
@@ -415,21 +366,28 @@ export function KanbanBoard({
         applyOptimistic({
           type: "move",
           applicationId,
-          nextStatus,
+          nextStageId,
+          nextKind,
           nextStageEnteredAt,
         });
 
-        // Distinguish network-level throw (fetch failed, offline, etc.) from a
-        // typed `{ ok: false }` server response. The former gets a Retry path.
         let result:
-          | { ok: true; nextStatus: ApplicationStatus; stageEnteredAt: string }
+          | {
+              ok: true;
+              nextStageId: string;
+              nextKind: StageKind;
+              stageEnteredAt: string;
+            }
           | { ok: false; error: string; networkError?: boolean };
         try {
-          const raw = await moveApplicationStage(applicationId, nextStatus);
+          const raw = await moveApplicationStage(applicationId, {
+            stageId: nextStageId,
+          });
           if (raw.ok) {
             result = {
               ok: true,
-              nextStatus: raw.nextStatus,
+              nextStageId: raw.nextStageId,
+              nextKind: raw.nextKind,
               stageEnteredAt: raw.stageEnteredAt,
             };
           } else {
@@ -443,24 +401,32 @@ export function KanbanBoard({
           };
         }
 
-        // Bail if the component unmounted while the request was in flight.
-        // Don't touch state, don't clear pendingMovesRef — there's nothing
-        // left to update and the hook's cleanup already tore down the
-        // realtime channel.
         if (!isMountedRef.current) return;
 
         if (result.ok) {
-          commitLocal(applicationId, result.nextStatus, result.stageEnteredAt);
+          commitLocal(
+            applicationId,
+            result.nextStageId,
+            result.nextKind,
+            result.stageEnteredAt
+          );
         } else {
-          // No echo will arrive on the failure path, so this branch owns the
-          // ledger cleanup. Pick the right banner based on error kind.
           pendingMovesRef.current.delete(applicationId);
+          const prevLabel =
+            stageById.get(prevStageId)?.label ??
+            KIND_DEFAULT_LABELS[prevKind];
           setError({
             kind: result.networkError ? "network" : "denied",
             candidateName,
-            stageLabel: STAGE_LABELS[prevStatus],
+            stageLabel: prevLabel,
             pendingMove: result.networkError
-              ? { applicationId, nextStatus, prevStatus }
+              ? {
+                  applicationId,
+                  nextStageId,
+                  nextKind,
+                  prevStageId,
+                  prevKind,
+                }
               : null,
           });
         }
@@ -472,56 +438,44 @@ export function KanbanBoard({
         });
       });
     },
-    [applyOptimistic, commitLocal]
+    [applyOptimistic, commitLocal, stageById]
   );
 
-  /**
-   * Run a bulk action (move/reject/archive). Captures per-id candidate name
-   * + prevStatus BEFORE the call so the failure list can render meaningful
-   * names even if the optimistic state has since shifted.
-   *
-   * Optimistic strategy: we prime pendingMovesRef + pendingIds for every id
-   * up front, fire `applyOptimistic` per id inside a single startTransition,
-   * then await the server response. Successes commit via `commitLocal` (same
-   * helper drag-drop uses, plus realtime self-echo dedupe). Failures fall off
-   * the optimistic layer automatically when the transition ends.
-   *
-   * Selection is cleared on full success; partial success keeps the failed
-   * ids selected so the user can retry from the same toolbar without
-   * re-shift-clicking.
-   */
   const runBulkAction = useCallback(
     (
       actionFn: () => Promise<BulkActionResult>,
       params: {
-        nextStatus: ApplicationStatus;
-        actionLabel: string; // "Moved" | "Rejected" | "Archived"
-        destinationLabel: string; // "to Interview" | ""
+        nextStageId: string;
+        nextKind: StageKind;
+        actionLabel: string;
+        destinationLabel: string;
         ids: string[];
       }
     ) => {
-      const { nextStatus, actionLabel, destinationLabel, ids } = params;
+      const { nextStageId, nextKind, actionLabel, destinationLabel, ids } =
+        params;
       if (ids.length === 0 || bulkInFlight) return;
 
-      // Snapshot per-id metadata BEFORE the action runs. The failure list
-      // needs candidate names that survive the optimistic shuffle, and we
-      // need prevStatus per id for rollback bookkeeping.
       const snapshots = new Map<
         string,
-        { candidateName: string; prevStatus: ApplicationStatus }
+        {
+          candidateName: string;
+          prevStageId: string;
+          prevKind: StageKind;
+        }
       >();
       for (const id of ids) {
         const app = optimisticApps.find((a) => a.id === id);
         if (!app) continue;
         snapshots.set(id, {
           candidateName: app.candidate?.full_name ?? "Anonymous candidate",
-          prevStatus: app.status,
+          prevStageId: app.stage_id,
+          prevKind: app.kind,
         });
       }
 
-      // Prime the pending ledger + dim every selected card.
       for (const id of ids) {
-        pendingMovesRef.current.set(id, nextStatus);
+        pendingMovesRef.current.set(id, nextStageId);
       }
       if (isMountedRef.current) {
         setPendingIds((prev) => {
@@ -536,15 +490,13 @@ export function KanbanBoard({
 
       const nextStageEnteredAt = new Date().toISOString();
 
-      // applyOptimistic must run inside a transition. We wrap the entire
-      // async sequence in startTransition so the optimistic state stays
-      // mounted until the server response lands (matches runMove's pattern).
       startTransition(async () => {
         for (const id of ids) {
           applyOptimistic({
             type: "move",
             applicationId: id,
-            nextStatus,
+            nextStageId,
+            nextKind,
             nextStageEnteredAt,
           });
         }
@@ -553,8 +505,6 @@ export function KanbanBoard({
         try {
           result = await actionFn();
         } catch (err) {
-          // Catastrophic failure (network, etc.). Treat the whole batch as
-          // failed and clear ledger entries.
           if (!isMountedRef.current) return;
           const message =
             err instanceof Error ? err.message : "Unexpected error";
@@ -568,6 +518,7 @@ export function KanbanBoard({
             succeededCount: 0,
             actionLabel,
             destinationLabel,
+            destinationKind: nextKind,
             failures: ids.map((id) => ({
               id,
               candidateName:
@@ -583,31 +534,25 @@ export function KanbanBoard({
 
         const succeededIds = new Set(result.succeeded.map((s) => s.id));
 
-        // Commit successful moves to base state. Use commitLocal so realtime
-        // self-echoes for these ids get suppressed via pendingMovesRef.
         for (const ok of result.succeeded) {
-          commitLocal(ok.id, ok.nextStatus, ok.stageEnteredAt);
+          commitLocal(
+            ok.id,
+            ok.nextStageId,
+            ok.nextKind,
+            ok.stageEnteredAt
+          );
         }
 
-        // Roll back failed ids: drop their pendingMoves entry (no echo will
-        // arrive). Optimistic state for failed ids drops away when the
-        // transition ends; base state for those ids was never written, so
-        // they snap back to their pre-action column.
         for (const fail of result.failed) {
           pendingMovesRef.current.delete(fail.id);
         }
 
-        // Drop pendingIds for everyone — `commitLocal` cleared succeeded
-        // ids from pendingMovesRef already; pendingIds is the visual dim
-        // ledger and needs to clear for both success + failure.
         setPendingIds((prev) => {
           const next = new Set(prev);
           for (const id of ids) next.delete(id);
           return next;
         });
 
-        // Show the result banner; prune selection so succeeded ids leave
-        // and failed ids stay selected for one-click retry.
         const failures = result.failed.map((f) => ({
           id: f.id,
           candidateName:
@@ -618,10 +563,10 @@ export function KanbanBoard({
           succeededCount: result.succeeded.length,
           actionLabel,
           destinationLabel,
+          destinationKind: nextKind,
           failures,
         });
 
-        // Selection cleanup: keep only the failed ids in the set.
         const surviving: string[] = [];
         for (const id of selection.selected) {
           if (!succeededIds.has(id)) surviving.push(id);
@@ -645,14 +590,15 @@ export function KanbanBoard({
     [selection.selected]
   );
 
-  function handleBulkMove(stage: ApplicationStatus) {
+  function handleBulkMove(stage: PipelineStage) {
     setMoveMenuOpen(false);
     runBulkAction(
-      () => bulkMoveApplications(selectedIdsArray, stage),
+      () => bulkMoveApplications(selectedIdsArray, stage.kind),
       {
-        nextStatus: stage,
+        nextStageId: stage.id,
+        nextKind: stage.kind,
         actionLabel: "Moved",
-        destinationLabel: `to ${STAGE_LABELS[stage]}`,
+        destinationLabel: `to ${stage.label}`,
         ids: selectedIdsArray,
       }
     );
@@ -660,10 +606,12 @@ export function KanbanBoard({
 
   function handleBulkReject(reason: string) {
     setRejectDialogOpen(false);
+    if (!rejectedStage) return;
     runBulkAction(
       () => bulkRejectApplications(selectedIdsArray, reason),
       {
-        nextStatus: "rejected",
+        nextStageId: rejectedStage.id,
+        nextKind: "rejected",
         actionLabel: "Rejected",
         destinationLabel: "",
         ids: selectedIdsArray,
@@ -673,10 +621,14 @@ export function KanbanBoard({
 
   function handleBulkArchive(reason: string) {
     setArchiveDialogOpen(false);
+    const withdrawnStage =
+      terminalStages.find((s) => s.kind === "withdrawn") ?? null;
+    if (!withdrawnStage) return;
     runBulkAction(
       () => bulkArchiveApplications(selectedIdsArray, reason),
       {
-        nextStatus: "withdrawn",
+        nextStageId: withdrawnStage.id,
+        nextKind: "withdrawn",
         actionLabel: "Archived",
         destinationLabel: "",
         ids: selectedIdsArray,
@@ -689,40 +641,42 @@ export function KanbanBoard({
     setActiveId(null);
     if (!over) return;
 
-    const overData = over.data.current as
-      | { type: "column"; status: KanbanStage }
-      | undefined;
-
-    // Resolve target status. Two valid drop targets: a regular stage column
-    // (column:<stage>) or the closed lane (column:closed → rejected).
-    let nextStatus: ApplicationStatus | null = null;
+    // Resolve target stage. Drop targets are either `column:<stage_id>`
+    // (a real DSO stage row) or `column:closed` (the rejected drop zone).
+    let nextStage: PipelineStage | null = null;
     if (over.id === CLOSED_DROPPABLE_ID) {
-      nextStatus = "rejected";
-    } else if (overData?.type === "column") {
-      nextStatus = overData.status;
+      nextStage = rejectedStage;
+    } else {
+      const overData = over.data.current as
+        | { type: "column"; stageId?: string }
+        | undefined;
+      if (overData?.type === "column" && overData.stageId) {
+        nextStage = stageById.get(overData.stageId) ?? null;
+      }
     }
-    if (!nextStatus) return;
+    if (!nextStage) return;
 
     const applicationId = String(active.id);
     const app = optimisticApps.find((a) => a.id === applicationId);
     if (!app) return;
-    if (app.status === nextStatus) return; // same-column drop = no-op
+    if (app.stage_id === nextStage.id) return;
 
-    const prevStatus = app.status;
     const candidateName = app.candidate?.full_name ?? "Anonymous candidate";
-    runMove(applicationId, nextStatus, prevStatus, candidateName);
+    runMove(
+      applicationId,
+      nextStage.id,
+      nextStage.kind,
+      app.stage_id,
+      app.kind,
+      candidateName
+    );
   }
 
-  // Day 7: warn before unload while a drag is in-flight (mid-drag OR awaiting
-  // server confirmation). Without this, a click-and-close drops in-flight
-  // moves silently. We add the listener only when there's actual risk so the
-  // warning doesn't fire on every navigation.
   useEffect(() => {
     const inFlight = activeId !== null || pendingIds.size > 0;
     if (!inFlight) return;
     function handleBeforeUnload(e: BeforeUnloadEvent) {
       e.preventDefault();
-      // Required by some browsers; the actual prompt copy is fixed by the UA.
       e.returnValue = "";
     }
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -733,20 +687,32 @@ export function KanbanBoard({
     setActiveId(null);
   }
 
-  // Day 5: custom screen-reader announcements. The board overrides every hook
-  // dnd-kit fires so the recruiter hears candidate names + stage labels rather
-  // than the generic "Picked up draggable item" defaults. We track the start-
-  // stage in a ref so the onDragOver hook can detect "back over original" and
-  // the onDragEnd hook can detect a no-change return.
-  const dragStartStageRef = useRef<ApplicationStatus | null>(null);
+  // Track start stage for SR announcements.
+  const dragStartStageRef = useRef<string | null>(null);
+
+  function labelForDroppable(droppableId: string): string | null {
+    if (droppableId === CLOSED_DROPPABLE_ID) {
+      return rejectedStage?.label ?? KIND_DEFAULT_LABELS.rejected;
+    }
+    if (droppableId.startsWith("column:")) {
+      const id = droppableId.slice("column:".length);
+      const row = stageById.get(id);
+      if (!row) return null;
+      return row.label;
+    }
+    return null;
+  }
 
   const announcements: Announcements = useMemo(
     () => ({
       onDragStart({ active }) {
         const app = optimisticApps.find((a) => a.id === active.id);
         const name = app?.candidate?.full_name ?? "Anonymous candidate";
-        const stageLabel = app ? STAGE_LABELS[app.status] : "the board";
-        dragStartStageRef.current = app?.status ?? null;
+        const stageLabel = app
+          ? stageById.get(app.stage_id)?.label ??
+            KIND_DEFAULT_LABELS[app.kind]
+          : "the board";
+        dragStartStageRef.current = app?.stage_id ?? null;
         return (
           `Picked up ${name} from ${stageLabel}. ` +
           `Use arrow keys to move between columns. ` +
@@ -755,49 +721,56 @@ export function KanbanBoard({
       },
       onDragOver({ active, over }) {
         if (!over) return undefined;
-        const targetStage = stageFromDroppableId(String(over.id));
-        if (!targetStage) return undefined;
+        const targetLabel = labelForDroppable(String(over.id));
+        if (!targetLabel) return undefined;
         const app = optimisticApps.find((a) => a.id === active.id);
         const name = app?.candidate?.full_name ?? "Card";
-        const startStage = dragStartStageRef.current;
-        if (startStage && targetStage === startStage) {
-          return `Return ${name} to ${STAGE_LABELS[startStage]}?`;
+        const startStageId = dragStartStageRef.current;
+        if (
+          startStageId &&
+          (String(over.id) === `column:${startStageId}` ||
+            (over.id === CLOSED_DROPPABLE_ID &&
+              stageById.get(startStageId)?.kind === "rejected"))
+        ) {
+          return `Return ${name} to ${targetLabel}?`;
         }
-        return `Drop ${name} on ${STAGE_LABELS[targetStage]}?`;
+        return `Drop ${name} on ${targetLabel}?`;
       },
       onDragEnd({ active, over }) {
         const app = optimisticApps.find((a) => a.id === active.id);
         const name = app?.candidate?.full_name ?? "Card";
-        const startStage = dragStartStageRef.current;
+        const startStageId = dragStartStageRef.current;
         dragStartStageRef.current = null;
         if (!over) {
-          const homeLabel = startStage ? STAGE_LABELS[startStage] : "its column";
+          const homeLabel = startStageId
+            ? stageById.get(startStageId)?.label ?? "its column"
+            : "its column";
           return `Cancelled. ${name} returned to ${homeLabel}.`;
         }
-        const targetStage = stageFromDroppableId(String(over.id));
-        if (!targetStage) {
-          const homeLabel = startStage ? STAGE_LABELS[startStage] : "its column";
+        const targetLabel = labelForDroppable(String(over.id));
+        if (!targetLabel) {
+          const homeLabel = startStageId
+            ? stageById.get(startStageId)?.label ?? "its column"
+            : "its column";
           return `Cancelled. ${name} returned to ${homeLabel}.`;
         }
-        if (startStage && targetStage === startStage) {
-          return `Returned ${name} to ${STAGE_LABELS[startStage]}.`;
-        }
-        return `Moved ${name} to ${STAGE_LABELS[targetStage]}.`;
+        return `Moved ${name} to ${targetLabel}.`;
       },
       onDragCancel({ active }) {
         const app = optimisticApps.find((a) => a.id === active.id);
         const name = app?.candidate?.full_name ?? "Card";
-        const startStage = dragStartStageRef.current;
+        const startStageId = dragStartStageRef.current;
         dragStartStageRef.current = null;
-        const homeLabel = startStage
-          ? STAGE_LABELS[startStage]
+        const homeLabel = startStageId
+          ? stageById.get(startStageId)?.label ?? "its column"
           : app
-            ? STAGE_LABELS[app.status]
+            ? stageById.get(app.stage_id)?.label ?? "its column"
             : "its column";
         return `Cancelled. ${name} returned to ${homeLabel}.`;
       },
     }),
-    [optimisticApps]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [optimisticApps, stageById, rejectedStage?.label]
   );
 
   return (
@@ -844,8 +817,10 @@ export function KanbanBoard({
                   setError(null);
                   runMove(
                     move.applicationId,
-                    move.nextStatus,
-                    move.prevStatus,
+                    move.nextStageId,
+                    move.nextKind,
+                    move.prevStageId,
+                    move.prevKind,
                     error.candidateName
                   );
                 }}
@@ -895,6 +870,7 @@ export function KanbanBoard({
             disabled={bulkInFlight}
             moveMenuOpen={moveMenuOpen}
             onMoveMenuOpenChange={setMoveMenuOpen}
+            moveStages={kanbanStages}
             onMove={handleBulkMove}
             onOpenReject={() => setRejectDialogOpen(true)}
             onOpenArchive={() => setArchiveDialogOpen(true)}
@@ -910,40 +886,43 @@ export function KanbanBoard({
               const ids = bulkBanner.failures.map((f) => f.id);
               const banner = bulkBanner;
               setBulkBanner(null);
-              if (banner.actionLabel === "Moved") {
-                // Recover the destination stage from the destinationLabel.
-                // Cheap reverse lookup via STAGE_LABELS.
-                const dest = banner.destinationLabel.replace(/^to /, "");
-                const stage = (
-                  Object.entries(STAGE_LABELS) as Array<
-                    [ApplicationStatus, string]
-                  >
-                ).find(([, label]) => label === dest)?.[0];
+              if (banner.actionLabel === "Moved" && banner.destinationKind) {
+                // Find the kanban stage row matching the kind.
+                const stage = kanbanStages.find(
+                  (s) => s.kind === banner.destinationKind
+                );
                 if (!stage) return;
                 runBulkAction(
-                  () => bulkMoveApplications(ids, stage),
+                  () => bulkMoveApplications(ids, stage.kind),
                   {
-                    nextStatus: stage,
+                    nextStageId: stage.id,
+                    nextKind: stage.kind,
                     actionLabel: "Moved",
                     destinationLabel: banner.destinationLabel,
                     ids,
                   }
                 );
               } else if (banner.actionLabel === "Rejected") {
+                if (!rejectedStage) return;
                 runBulkAction(
                   () => bulkRejectApplications(ids, ""),
                   {
-                    nextStatus: "rejected",
+                    nextStageId: rejectedStage.id,
+                    nextKind: "rejected",
                     actionLabel: "Rejected",
                     destinationLabel: "",
                     ids,
                   }
                 );
               } else if (banner.actionLabel === "Archived") {
+                const withdrawnStage =
+                  terminalStages.find((s) => s.kind === "withdrawn") ?? null;
+                if (!withdrawnStage) return;
                 runBulkAction(
                   () => bulkArchiveApplications(ids, ""),
                   {
-                    nextStatus: "withdrawn",
+                    nextStageId: withdrawnStage.id,
+                    nextKind: "withdrawn",
                     actionLabel: "Archived",
                     destinationLabel: "",
                     ids,
@@ -965,8 +944,6 @@ export function KanbanBoard({
           onConfirm={handleBulkReject}
           aiSuggester={{
             available: aiSuggesterAvailable,
-            // Single-candidate selection only — suggestions are per-candidate
-            // and we don't want to mass-paste one draft across N candidates.
             singleApplicationId:
               selection.count === 1 ? selectedIdsArray[0] : null,
             singleApplicationHasContext:
@@ -993,11 +970,11 @@ export function KanbanBoard({
         {/* Open stages — horizontal scroll on desktop if needed */}
         <div className="overflow-x-auto -mx-4 px-4 pb-2">
           <div className="flex gap-4 min-w-max">
-            {KANBAN_STAGES.map((stage) => (
+            {kanbanStages.map((stage) => (
               <KanbanColumn
-                key={stage}
+                key={stage.id}
                 stage={stage}
-                applications={byStage.get(stage) ?? []}
+                applications={byStageId.get(stage.id) ?? []}
                 pendingApplicationIds={pendingIds}
                 selectedIds={selection.selected}
                 onToggleSelect={handleToggleSelect}
@@ -1006,8 +983,7 @@ export function KanbanBoard({
           </div>
         </div>
 
-        {/* Closed lane — collapsible, splits rejected (drop target) +
-            withdrawn (read-only display). */}
+        {/* Closed lane — rejected (drop target) + withdrawn (read-only). */}
         <ClosedLane
           rejectedApps={rejectedApps}
           withdrawnApps={withdrawnApps}
@@ -1017,6 +993,7 @@ export function KanbanBoard({
           selectedIds={selection.selected}
           onToggleSelect={handleToggleSelect}
           pendingApplicationIds={pendingIds}
+          rejectedStage={rejectedStage}
         />
       </div>
 
@@ -1060,30 +1037,13 @@ function LiveIndicator({ isConnected }: { isConnected: boolean }) {
   );
 }
 
-/**
- * Sticky selection toolbar — wired on Day 6.
- *
- * Sticks to `top-[80px]` to clear the existing employer-shell nav offset.
- * Three actions:
- *  - Move to… → DropdownMenu listing the 5 KANBAN_STAGES; click fires
- *    `onMove(stage)` which runs `bulkMoveApplications` upstream.
- *  - Reject… → opens a confirmation Dialog (controlled from the parent so
- *    the dialog state survives re-renders triggered by selection changes).
- *  - Archive → same pattern as Reject; sets status to `withdrawn`.
- *
- * All three buttons go disabled while a bulk run is in flight to prevent
- * stacking actions before the previous batch resolves.
- *
- * The Move dropdown uses our shadcn DropdownMenu primitive but with a
- * brand-tinted item style override so it matches the heritage toolbar
- * (rather than the generic popover-foreground default the primitive ships).
- */
 function SelectionToolbar({
   count,
   onClear,
   disabled,
   moveMenuOpen,
   onMoveMenuOpenChange,
+  moveStages,
   onMove,
   onOpenReject,
   onOpenArchive,
@@ -1093,7 +1053,8 @@ function SelectionToolbar({
   disabled: boolean;
   moveMenuOpen: boolean;
   onMoveMenuOpenChange: (open: boolean) => void;
-  onMove: (stage: ApplicationStatus) => void;
+  moveStages: PipelineStage[];
+  onMove: (stage: PipelineStage) => void;
   onOpenReject: () => void;
   onOpenArchive: () => void;
 }) {
@@ -1123,13 +1084,13 @@ function SelectionToolbar({
             <ChevronDown className="h-3 w-3" aria-hidden="true" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="min-w-[160px]">
-            {KANBAN_STAGES.map((stage) => (
+            {moveStages.map((stage) => (
               <DropdownMenuItem
-                key={stage}
+                key={stage.id}
                 onSelect={() => onMove(stage)}
                 className="text-[13px] font-semibold tracking-[0.5px] text-ink"
               >
-                {STAGE_LABELS[stage]}
+                {stage.label}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -1155,13 +1116,6 @@ function SelectionToolbar({
   );
 }
 
-/**
- * Confirmation dialog for bulk-reject and bulk-archive. Captures an optional
- * recruiter-supplied reason that gets attached to the audit log via
- * `application_status_events.note` (server-side patches the trigger-seeded
- * row). Reasons are capped at 1000 chars on the server; we soft-limit to
- * the same here so the textarea matches.
- */
 function BulkConfirmDialog({
   open,
   onOpenChange,
@@ -1181,12 +1135,6 @@ function BulkConfirmDialog({
   confirmLabel: string;
   reasonHelper: string;
   onConfirm: (reason: string) => void;
-  /**
-   * Optional AI rejection-reason suggester wiring. Only the bulk-reject
-   * dialog passes this; bulk-archive omits it since archive is a workflow
-   * action without recruiter-to-candidate copy. v1 only fires for
-   * single-candidate selections — suggestions are per-candidate.
-   */
   aiSuggester?: {
     available: boolean;
     singleApplicationId: string | null;
@@ -1194,8 +1142,6 @@ function BulkConfirmDialog({
   };
 }) {
   const [reason, setReason] = useState("");
-  // Reset the textarea every time the dialog opens so a previous reason
-  // doesn't leak into the next reject/archive batch.
   useEffect(() => {
     if (open) setReason("");
   }, [open]);
@@ -1266,13 +1212,6 @@ function BulkConfirmDialog({
   );
 }
 
-/**
- * Outcome banner for a bulk run. All-success → green-tinted heritage banner
- * with a single-line summary. Partial-success → amber banner listing each
- * failure with candidate name + error reason and a Retry button that
- * re-runs the action against just the failed ids. Total-failure → red
- * banner, same per-id list, Retry available.
- */
 function BulkResultDisplay({
   banner,
   onDismiss,
@@ -1286,10 +1225,6 @@ function BulkResultDisplay({
   const succeeded = banner.succeededCount;
   const allSucceeded = failed === 0 && succeeded > 0;
   const allFailed = succeeded === 0 && failed > 0;
-  // Color tone:
-  //   all-success → heritage tint (matches the remote-toast banner style)
-  //   partial     → amber
-  //   all-failed  → red
   const tone = allSucceeded
     ? {
         wrapper: "border-heritage/30 bg-heritage/[0.08]",
@@ -1308,9 +1243,6 @@ function BulkResultDisplay({
           ring: "focus-visible:ring-amber-700",
         };
 
-  // Lowercase verb stem for the all-failed copy. The actionLabel is the past
-  // tense ("Moved" / "Rejected" / "Archived"); converting to "move" /
-  // "reject" / "archive" reads more naturally in "Couldn't move 10 candidates."
   const verbStem =
     banner.actionLabel === "Moved"
       ? "move"
@@ -1373,17 +1305,6 @@ function BulkResultDisplay({
   );
 }
 
-function stageFromDroppableId(id: string): ApplicationStatus | null {
-  if (id === CLOSED_DROPPABLE_ID) return "rejected";
-  if (id.startsWith("column:")) {
-    const stage = id.slice("column:".length);
-    if ((KANBAN_STAGES as readonly string[]).includes(stage)) {
-      return stage as ApplicationStatus;
-    }
-  }
-  return null;
-}
-
 function ClosedLane({
   rejectedApps,
   withdrawnApps,
@@ -1393,6 +1314,7 @@ function ClosedLane({
   selectedIds,
   onToggleSelect,
   pendingApplicationIds,
+  rejectedStage,
 }: {
   rejectedApps: KanbanApplication[];
   withdrawnApps: KanbanApplication[];
@@ -1402,14 +1324,22 @@ function ClosedLane({
   selectedIds: ReadonlySet<string>;
   onToggleSelect: (id: string, shiftKey: boolean) => void;
   pendingApplicationIds: ReadonlySet<string>;
+  rejectedStage: PipelineStage | null;
 }) {
-  // Lane wrapper is itself a droppable so cards can be dragged onto the
-  // collapsed strip without expanding it first. Drop = rejected (withdrawn
-  // is candidate-side only).
+  // Lane wrapper is itself a droppable. Drop = first rejected-kind stage.
+  // Disable as a droppable if no rejected stage exists (defensive — every
+  // DSO is seeded with one).
   const { isOver, setNodeRef } = useDroppable({
     id: CLOSED_DROPPABLE_ID,
-    data: { type: "column", status: "rejected" as const },
+    data: rejectedStage
+      ? { type: "column", stageId: rejectedStage.id }
+      : { type: "column" },
+    disabled: !rejectedStage,
   });
+
+  // Disabled-cast: `isTerminalKind` lives here only to keep the import
+  // tree honest when callers later add intermediate logic.
+  void isTerminalKind;
 
   return (
     <div
@@ -1445,8 +1375,6 @@ function ClosedLane({
         </div>
       </button>
 
-      {/* Smooth expand/collapse via grid-rows trick — keeps content in DOM
-          for measurement, animates max-height without a JS observer. */}
       <div
         className={`grid transition-[grid-template-rows] duration-200 ease-out ${
           expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
@@ -1526,11 +1454,6 @@ function ClosedSubsection({
   );
 }
 
-/**
- * Withdrawn rows are intentionally NOT a draggable card and NOT selectable.
- * Italic candidate name signals "this candidate took themselves out" — no
- * recruiter action available except viewing the detail page.
- */
 function WithdrawnRow({ application }: { application: KanbanApplication }) {
   const cand = application.candidate;
   return (

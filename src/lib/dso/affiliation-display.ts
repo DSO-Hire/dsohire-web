@@ -124,21 +124,34 @@ export async function resolveCandidateApplicationAffiliations(
   // Splitting into flat queries sidesteps every Supabase
   // relationship-name + cardinality + RLS gotcha.
 
-  // 1. Applications
+  // 1. Applications — embed stage row so we get the kind in one round trip
+  // (affiliation policy keys off "hired" specifically; nothing else here
+  // cares about the rest of the kinds).
   const { data: appRows, error: appsErr } = await admin
     .from("applications")
-    .select("id, job_id, status, affiliation_revealed")
+    .select(
+      "id, job_id, affiliation_revealed, stage:dso_pipeline_stages!stage_id(kind)"
+    )
     .in("id", applicationIds);
   if (appsErr) {
     console.warn("[affiliation] applications lookup failed", appsErr);
     return out;
   }
-  const apps = (appRows ?? []) as Array<{
-    id: string;
-    job_id: string;
-    status: string;
-    affiliation_revealed: boolean;
-  }>;
+  const apps = ((appRows ?? []) as Array<Record<string, unknown>>).map(
+    (row) => {
+      const rel = row.stage as
+        | { kind: string }
+        | Array<{ kind: string }>
+        | null;
+      const stageRow = Array.isArray(rel) ? rel[0] ?? null : rel;
+      return {
+        id: row.id as string,
+        job_id: row.job_id as string,
+        status: (stageRow?.kind ?? "open") as string,
+        affiliation_revealed: row.affiliation_revealed as boolean,
+      };
+    }
+  );
   if (apps.length === 0) return out;
 
   // 2. Jobs (just dso_id + scope per job)
@@ -504,13 +517,20 @@ async function maybeFetchApplication(
   const admin = createSupabaseServiceRoleClient();
   const { data } = await admin
     .from("applications")
-    .select("id, status, affiliation_revealed")
+    .select(
+      "id, affiliation_revealed, stage:dso_pipeline_stages!stage_id(kind)"
+    )
     .eq("id", viewer.applicationId)
     .maybeSingle();
   if (!data) return undefined;
+  const rel = (data as Record<string, unknown>).stage as
+    | { kind: string }
+    | Array<{ kind: string }>
+    | null;
+  const stageRow = Array.isArray(rel) ? rel[0] ?? null : rel;
   return {
     id: data.id as string,
-    status: data.status as string,
+    status: (stageRow?.kind ?? "open") as string,
     affiliationRevealed: data.affiliation_revealed as boolean,
   };
 }

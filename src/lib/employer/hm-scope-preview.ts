@@ -70,7 +70,7 @@ export interface HmScopePreview {
   error?: string;
 }
 
-const TERMINAL_STATUSES = ["rejected", "withdrawn", "hired"] as const;
+const TERMINAL_KINDS_FOR_PREVIEW = ["rejected", "withdrawn", "hired"] as const;
 
 /**
  * Compute the preview for a candidate set of location ids.
@@ -209,14 +209,32 @@ export async function previewHmScope(
   const totalJobs = visibleJobIdSet.size;
   const activeJobs = activeCount;
 
-  // 6. Open applications on visible jobs.
+  // 6. Open applications on visible jobs. Post-Track-B: filter via
+  // stage_id rather than the dropped status column. Resolve every
+  // stage_id at the DSO whose kind is terminal — that's a small set —
+  // then count applications NOT in that set.
   let openApplications = 0;
   if (visibleJobIdSet.size > 0) {
-    const { count } = await admin
+    const { data: terminalStageRows } = await admin
+      .from("dso_pipeline_stages")
+      .select("id")
+      .eq("dso_id", dsoId)
+      .in("kind", [...TERMINAL_KINDS_FOR_PREVIEW]);
+    const terminalStageIds = ((terminalStageRows ?? []) as Array<{
+      id: string;
+    }>).map((r) => r.id);
+    let query = admin
       .from("applications")
       .select("id", { count: "exact", head: true })
-      .in("job_id", Array.from(visibleJobIdSet))
-      .not("status", "in", `(${TERMINAL_STATUSES.join(",")})`);
+      .in("job_id", Array.from(visibleJobIdSet));
+    if (terminalStageIds.length > 0) {
+      query = query.not(
+        "stage_id",
+        "in",
+        `(${terminalStageIds.join(",")})`
+      );
+    }
+    const { count } = await query;
     openApplications = count ?? 0;
   }
 

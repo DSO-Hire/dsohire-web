@@ -72,10 +72,12 @@ import {
   type OverallRecommendation,
 } from "@/lib/scorecards/rubric-library";
 import {
-  STAGE_COLORS,
-  STAGE_LABELS,
-  type ApplicationStatus,
-  type KanbanStage,
+  KIND_DEFAULT_LABELS,
+  colorTripleFor,
+  findStage,
+  isTerminalKind,
+  type PipelineStage,
+  type StageKind,
 } from "@/lib/applications/stages";
 import { candidateDisplayName } from "@/lib/applications/candidate-display";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
@@ -134,7 +136,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const { data: rawApp } = await supabase
     .from("applications")
     .select(
-      "id, job_id, candidate_id, status, cover_letter, resume_url, employer_notes, created_at, updated_at, affiliation_revealed, affiliation_revealed_at, affiliation_revealed_by_dso_user_id"
+      "id, job_id, candidate_id, stage_id, cover_letter, resume_url, employer_notes, created_at, updated_at, affiliation_revealed, affiliation_revealed_at, affiliation_revealed_by_dso_user_id"
     )
     .eq("id", appId)
     .maybeSingle();
@@ -154,7 +156,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     id: string;
     job_id: string;
     candidate_id: string;
-    status: string;
+    stage_id: string;
     cover_letter: string | null;
     resume_url: string | null;
     employer_notes: string | null;
@@ -276,22 +278,41 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     resumeFileName = resumePath.split("/").pop()?.replace(/^\d+-/, "") ?? null;
   }
 
-  // Status history
+  // Status history — now snapshots kind, not stage_id.
   const { data: rawEvents } = await supabase
     .from("application_status_events")
-    .select("id, from_status, to_status, actor_type, note, created_at")
+    .select("id, from_stage_kind, to_stage_kind, actor_type, note, created_at")
     .eq("application_id", appId)
     .order("created_at", { ascending: true });
 
   type EventRow = {
     id: string;
-    from_status: string | null;
-    to_status: string;
+    from_stage_kind: string | null;
+    to_stage_kind: string;
     actor_type: string;
     note: string | null;
     created_at: string;
   };
   const events = (rawEvents ?? []) as EventRow[];
+
+  // DSO pipeline stages — drives the StageSelector (per-DSO labels +
+  // colors). Fetched once at the page level so the segmented control +
+  // any future surface on this page can share.
+  const { data: rawStages, error: stagesErr } = await supabase
+    .from("dso_pipeline_stages")
+    .select(
+      "id, dso_id, kind, label, slug, sort_order, is_hidden, is_default, color_class"
+    )
+    .eq("dso_id", dsoUser.dso_id as string)
+    .order("sort_order", { ascending: true });
+  if (stagesErr) {
+    console.warn("[application detail] stages fetch failed", stagesErr);
+  }
+  const stages = (rawStages ?? []) as PipelineStage[];
+  const currentStageRow = findStage(stages, app.stage_id);
+  const currentKind: StageKind = (currentStageRow?.kind ?? "open") as StageKind;
+  const currentStageLabel =
+    currentStageRow?.label ?? KIND_DEFAULT_LABELS[currentKind];
 
   // Screening questions (in author-defined sort order) + this application's
   // answers. Two parallel selects rather than a join so RLS rules on each
@@ -534,7 +555,6 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     scorecardRows.some((r) => r.status === "submitted");
 
   const submitted = new Date(app.created_at);
-  const status = app.status as ApplicationStatus;
 
   // Phase 5A — interview proposals + their options + bookings.
   const { data: proposalRows } = await supabase
@@ -737,9 +757,9 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             </div>
           </div>
           <span
-            className={`text-[10px] font-bold tracking-[2px] uppercase px-3 py-2 ring-1 ring-inset ${statusBadgeClasses(status)}`}
+            className={`text-[10px] font-bold tracking-[2px] uppercase px-3 py-2 ring-1 ring-inset ${statusBadgeClasses(currentKind)}`}
           >
-            {STAGE_LABELS[status] ?? status}
+            {currentStageLabel}
           </span>
         </div>
 
@@ -821,7 +841,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
           <AffiliationCard
             isPublicAffiliated={isPublicAffiliated}
             policy={affiliationPolicy}
-            applicationStatus={status}
+            applicationStatus={currentKind}
             alreadyRevealed={app.affiliation_revealed}
             revealedAt={app.affiliation_revealed_at}
             revealedByName={revealedByName}
@@ -839,7 +859,9 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
           >
             <StageSelector
               applicationId={app.id}
-              currentStatus={status}
+              currentStageId={app.stage_id}
+              currentKind={currentKind}
+              stages={stages}
               candidateName={displayName}
               jobTitle={String(job.title)}
               aiSuggesterAvailable={aiSuggesterAvailable}
@@ -1135,13 +1157,21 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               </p>
             ) : (
               <ol className="list-none space-y-4 border-l-2 border-[var(--rule)] pl-5">
-                {events.map((ev) => (
+                {events.map((ev) => {
+                  const fromLabel = ev.from_stage_kind
+                    ? KIND_DEFAULT_LABELS[ev.from_stage_kind as StageKind] ??
+                      ev.from_stage_kind
+                    : null;
+                  const toLabel =
+                    KIND_DEFAULT_LABELS[ev.to_stage_kind as StageKind] ??
+                    ev.to_stage_kind;
+                  return (
                   <li key={ev.id} className="relative">
                     <span className="absolute -left-[27px] top-1.5 block w-3 h-3 bg-ink rounded-full border-2 border-ivory" />
                     <div className="text-[13px] font-bold text-ink">
-                      {ev.from_status
-                        ? `${STAGE_LABELS[ev.from_status as ApplicationStatus] ?? ev.from_status} → ${STAGE_LABELS[ev.to_status as ApplicationStatus] ?? ev.to_status}`
-                        : `Submitted as ${STAGE_LABELS[ev.to_status as ApplicationStatus] ?? ev.to_status}`}
+                      {fromLabel
+                        ? `${fromLabel} → ${toLabel}`
+                        : `Submitted as ${toLabel}`}
                     </div>
                     <div className="text-[12px] text-slate-meta mt-0.5">
                       {ev.actor_type} ·{" "}
@@ -1153,7 +1183,8 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                       </div>
                     )}
                   </li>
-                ))}
+                  );
+                })}
               </ol>
             )}
           </DetailSection>
@@ -1309,26 +1340,16 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 }
 
 /**
- * Render the kanban-matched stage badge for the header. For the active
- * KANBAN_STAGES we lift the bg/ring/text triple straight from STAGE_COLORS
- * (single source of truth shared with the kanban columns). For the closed
- * states (rejected/withdrawn) which aren't in the kanban map, we use a muted
- * slate treatment.
+ * Render the kanban-matched stage badge for the header. For non-terminal
+ * kinds we resolve the kind's default color triple via colorTripleFor();
+ * for terminal kinds (rejected/withdrawn) we use a muted slate treatment.
  */
-function statusBadgeClasses(status: ApplicationStatus): string {
-  const KANBAN_KEYS: readonly KanbanStage[] = [
-    "new",
-    "reviewed",
-    "interviewing",
-    "offered",
-    "hired",
-  ];
-  if ((KANBAN_KEYS as readonly string[]).includes(status)) {
-    const c = STAGE_COLORS[status as KanbanStage];
-    return `${c.bg} ${c.ring} ${c.text}`;
+function statusBadgeClasses(kind: StageKind): string {
+  if (isTerminalKind(kind)) {
+    return "bg-slate-100 ring-slate-200 text-slate-600";
   }
-  // rejected / withdrawn — muted closed-lane treatment.
-  return "bg-slate-100 ring-slate-200 text-slate-600";
+  const c = colorTripleFor(null, kind);
+  return `${c.bg} ${c.ring} ${c.text}`;
 }
 
 const KIND_ICON: Record<

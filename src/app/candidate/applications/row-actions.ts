@@ -28,8 +28,10 @@
  */
 
 import { revalidatePath } from "next/cache";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { ApplicationStatus } from "@/lib/applications/stages";
+import {
+  createSupabaseServerClient,
+  createSupabaseServiceRoleClient,
+} from "@/lib/supabase/server";
 import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
 import type { SelfReportedStatus } from "./row-actions-data";
 
@@ -80,28 +82,73 @@ export async function withdrawApplication(input: {
   if (!ctx.ok) return ctx;
 
   // Authorization: confirm the application belongs to this candidate
-  // before any mutation. RLS already enforces this server-side, but
-  // returning a clean error message is friendlier than the RLS denial.
+  // before any mutation. RLS gates this read on the candidate's own row.
+  // We use the RLS-scoped client here.
   const { data: existing } = await ctx.supabase
     .from("applications")
-    .select("id, status")
+    .select("id, job_id, stage_id")
     .eq("id", input.applicationId)
     .eq("candidate_id", ctx.candidateId)
     .maybeSingle();
   if (!existing) {
     return { ok: false, error: "Application not found." };
   }
-  if (existing.status === "withdrawn") {
+  const existingApp = existing as {
+    id: string;
+    job_id: string;
+    stage_id: string;
+  };
+
+  // Resolve DSO + the destination withdrawn stage via the service-role
+  // client. The candidate's RLS context can't read dso_pipeline_stages
+  // (the policy is DSO-only) or jobs.dso_id directly in all setups, so
+  // service-role is the cleanest path — same pattern as the affiliation
+  // resolver.
+  const admin = createSupabaseServiceRoleClient();
+  const { data: jobRow } = await admin
+    .from("jobs")
+    .select("dso_id")
+    .eq("id", existingApp.job_id)
+    .maybeSingle();
+  const dsoId = (jobRow as { dso_id: string } | null)?.dso_id ?? null;
+  if (!dsoId) {
+    return { ok: false, error: "Couldn't resolve DSO for this application." };
+  }
+
+  // Check current stage kind (already-withdrawn guard).
+  const { data: currentStageRow } = await admin
+    .from("dso_pipeline_stages")
+    .select("kind")
+    .eq("id", existingApp.stage_id)
+    .maybeSingle();
+  const currentKind = (currentStageRow as { kind: string } | null)?.kind ?? null;
+  if (currentKind === "withdrawn") {
     return { ok: false, error: "This application is already withdrawn." };
+  }
+
+  const { data: withdrawnStageRow } = await admin
+    .from("dso_pipeline_stages")
+    .select("id")
+    .eq("dso_id", dsoId)
+    .eq("kind", "withdrawn")
+    .eq("is_default", true)
+    .maybeSingle();
+  const withdrawnStageId =
+    (withdrawnStageRow as { id: string } | null)?.id ?? null;
+  if (!withdrawnStageId) {
+    return {
+      ok: false,
+      error: "Couldn't find this DSO's withdrawn stage.",
+    };
   }
 
   const now = new Date().toISOString();
 
-  // 1. Flip status + withdrawn_at on the application row.
+  // 1. Flip stage_id + withdrawn_at on the application row.
   const { error: updateError } = await ctx.supabase
     .from("applications")
     .update({
-      status: "withdrawn" as ApplicationStatus,
+      stage_id: withdrawnStageId,
       withdrawn_at: now,
     })
     .eq("id", input.applicationId)

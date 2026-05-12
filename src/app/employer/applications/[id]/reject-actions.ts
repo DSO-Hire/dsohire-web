@@ -24,7 +24,7 @@
 
 import { moveApplicationStage } from "./actions";
 import { attachStatusEventNote } from "@/lib/applications/status-event-notes";
-import type { ApplicationStatus } from "@/lib/applications/stages";
+import type { StageKind } from "@/lib/applications/stages";
 
 export type RejectActionResult = { ok: true } | { ok: false; error: string };
 
@@ -32,12 +32,12 @@ const NOTE_MAX = 1000;
 
 async function moveAndAttachNote(
   applicationId: string,
-  toStatus: Extract<ApplicationStatus, "rejected" | "withdrawn">,
+  toKind: Extract<StageKind, "rejected" | "withdrawn">,
   reason: string
 ): Promise<RejectActionResult> {
   const trimmed = (reason ?? "").trim().slice(0, NOTE_MAX);
 
-  const move = await moveApplicationStage(applicationId, toStatus);
+  const move = await moveApplicationStage(applicationId, { kind: toKind });
   if (!move.ok) {
     return { ok: false, error: move.error };
   }
@@ -45,7 +45,7 @@ async function moveAndAttachNote(
   if (trimmed) {
     await attachStatusEventNote({
       applicationIds: [applicationId],
-      toStatus,
+      toKind,
       note: trimmed,
     });
   }

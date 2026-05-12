@@ -59,11 +59,15 @@ import {
 type Audience = "employer" | "candidate";
 type Tab = "all" | "unread" | "archived";
 
+// Keyed by stage kind (the system category snapshot delivered by the
+// inbox composer). Per-DSO label customizations aren't surfaced in the
+// inbox v0 — the canonical label keeps both sides reading the same
+// vocabulary at a glance.
 const STAGE_LABELS: Record<string, string> = {
-  applied: "Applied",
-  in_review: "In Review",
-  interviewed: "Interviewed",
-  offered: "Offered",
+  open: "New",
+  screen: "Screening",
+  interview: "Interview",
+  offer: "Offer",
   hired: "Hired",
   rejected: "Rejected",
   withdrawn: "Withdrawn",

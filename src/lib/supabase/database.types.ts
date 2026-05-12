@@ -331,30 +331,30 @@ export type Database = {
           actor_type: string
           application_id: string
           created_at: string
-          from_status: Database["public"]["Enums"]["application_status"] | null
+          from_stage_kind: string | null
           id: string
           note: string | null
-          to_status: Database["public"]["Enums"]["application_status"]
+          to_stage_kind: string
         }
         Insert: {
           actor_id?: string | null
           actor_type: string
           application_id: string
           created_at?: string
-          from_status?: Database["public"]["Enums"]["application_status"] | null
+          from_stage_kind?: string | null
           id?: string
           note?: string | null
-          to_status: Database["public"]["Enums"]["application_status"]
+          to_stage_kind: string
         }
         Update: {
           actor_id?: string | null
           actor_type?: string
           application_id?: string
           created_at?: string
-          from_status?: Database["public"]["Enums"]["application_status"] | null
+          from_stage_kind?: string | null
           id?: string
           note?: string | null
-          to_status?: Database["public"]["Enums"]["application_status"]
+          to_stage_kind?: string
         }
         Relationships: [
           {
@@ -377,7 +377,7 @@ export type Database = {
           pipeline_position: number | null
           resume_url: string | null
           stage_entered_at: string
-          status: Database["public"]["Enums"]["application_status"]
+          stage_id: string
           updated_at: string
         }
         Insert: {
@@ -390,7 +390,7 @@ export type Database = {
           pipeline_position?: number | null
           resume_url?: string | null
           stage_entered_at?: string
-          status?: Database["public"]["Enums"]["application_status"]
+          stage_id?: string
           updated_at?: string
         }
         Update: {
@@ -403,7 +403,7 @@ export type Database = {
           pipeline_position?: number | null
           resume_url?: string | null
           stage_entered_at?: string
-          status?: Database["public"]["Enums"]["application_status"]
+          stage_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -419,6 +419,63 @@ export type Database = {
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "dso_pipeline_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dso_pipeline_stages: {
+        Row: {
+          color_class: string | null
+          created_at: string
+          dso_id: string
+          id: string
+          is_default: boolean
+          is_hidden: boolean
+          kind: string
+          label: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          color_class?: string | null
+          created_at?: string
+          dso_id: string
+          id?: string
+          is_default?: boolean
+          is_hidden?: boolean
+          kind: string
+          label: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          color_class?: string | null
+          created_at?: string
+          dso_id?: string
+          id?: string
+          is_default?: boolean
+          is_hidden?: boolean
+          kind?: string
+          label?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dso_pipeline_stages_dso_id_fkey"
+            columns: ["dso_id"]
+            isOneToOne: false
+            referencedRelation: "dsos"
             referencedColumns: ["id"]
           },
         ]
@@ -1398,14 +1455,6 @@ export type Database = {
     }
     Enums: {
       admin_role: "superadmin" | "support"
-      application_status:
-        | "new"
-        | "reviewed"
-        | "interviewing"
-        | "offered"
-        | "hired"
-        | "rejected"
-        | "withdrawn"
       candidate_availability: "immediate" | "2_weeks" | "1_month" | "passive"
       compensation_period: "hourly" | "daily" | "annual"
       dso_status: "pending" | "active" | "suspended" | "cancelled"
@@ -1575,15 +1624,6 @@ export const Constants = {
   public: {
     Enums: {
       admin_role: ["superadmin", "support"],
-      application_status: [
-        "new",
-        "reviewed",
-        "interviewing",
-        "offered",
-        "hired",
-        "rejected",
-        "withdrawn",
-      ],
       candidate_availability: ["immediate", "2_weeks", "1_month", "passive"],
       compensation_period: ["hourly", "daily", "annual"],
       dso_status: ["pending", "active", "suspended", "cancelled"],

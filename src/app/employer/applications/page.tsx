@@ -12,10 +12,11 @@ import { EmployerShell } from "@/components/employer/employer-shell";
 import { Avatar } from "@/components/ui/avatar";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
-  STAGE_LABELS,
-  KANBAN_STAGES,
-  CLOSED_STAGES,
-  type ApplicationStatus,
+  KANBAN_KINDS,
+  KIND_DEFAULT_LABELS,
+  STAGE_KINDS,
+  TERMINAL_KINDS,
+  type StageKind,
 } from "@/lib/applications/stages";
 import { candidateDisplayName } from "@/lib/applications/candidate-display";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
@@ -26,13 +27,11 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Applications" };
 
-// Status order for the inbox is the canonical pipeline + closed stages, in
-// order. Labels come from the shared STAGE_LABELS (Day 7 reconciliation —
-// the inbox now uses the same "Screening" / "Interview" copy as the kanban).
-const STATUS_ORDER: ApplicationStatus[] = [
-  ...KANBAN_STAGES,
-  ...CLOSED_STAGES,
-];
+// Stage-kind order for the inbox is the canonical pipeline + closed
+// kinds, in order. The inbox filters cross-DSO so the stage_id route
+// doesn't work here — we filter by stage_kind via a join.
+const STATUS_ORDER: StageKind[] = [...KANBAN_KINDS, ...TERMINAL_KINDS];
+const VALID_STATUS_FILTER = new Set<string>(STAGE_KINDS);
 
 interface PageProps {
   searchParams: Promise<{
@@ -104,30 +103,75 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
   const jobMap = new Map(jobs.map((j) => [j.id, j]));
   const dsoJobIds = jobs.map((j) => j.id);
 
-  // Query applications scoped to this DSO's jobs
+  // Query applications scoped to this DSO's jobs. We embed the stage row
+  // so we get the kind in one round trip (cross-job inbox — no shared
+  // stages list available to bucket on the fly).
   let appQuery = supabase
     .from("applications")
     .select(
-      "id, job_id, candidate_id, status, cover_letter, created_at, updated_at"
+      "id, job_id, candidate_id, stage_id, cover_letter, created_at, updated_at, " +
+        "stage:dso_pipeline_stages!stage_id(kind, label)"
     )
     .in("job_id", dsoJobIds.length > 0 ? dsoJobIds : ["__none__"])
     .order("created_at", { ascending: false });
 
   if (sp.job) appQuery = appQuery.eq("job_id", sp.job);
-  if (sp.status) appQuery = appQuery.eq("status", sp.status);
+  // Status filter is keyed by stage_kind via the join (the URL still uses
+  // the kind text — open/screen/interview/etc.).
+  if (sp.status && VALID_STATUS_FILTER.has(sp.status)) {
+    // Filter via the embedded stage row's kind column.
+    appQuery = appQuery.eq("stage.kind", sp.status);
+  }
 
-  const { data: rawApps } = await appQuery;
+  const { data: rawApps, error: appsErr } = await appQuery;
+  if (appsErr) {
+    console.warn("[employer applications] query failed", appsErr);
+  }
 
   type AppRow = {
     id: string;
     job_id: string;
     candidate_id: string;
-    status: string;
+    stage_id: string;
+    kind: StageKind;
+    stageLabel: string;
     cover_letter: string | null;
     created_at: string;
     updated_at: string;
   };
-  let apps = (rawApps ?? []) as AppRow[];
+  let apps: AppRow[] = ((rawApps ?? []) as Array<
+    Record<string, unknown>
+  >)
+    .map((row) => {
+      const stageRel = row.stage as
+        | { kind: string; label: string }
+        | Array<{ kind: string; label: string }>
+        | null;
+      const stageRow = Array.isArray(stageRel)
+        ? stageRel[0] ?? null
+        : stageRel;
+      const kind = (stageRow?.kind ?? "open") as StageKind;
+      return {
+        id: row.id as string,
+        job_id: row.job_id as string,
+        candidate_id: row.candidate_id as string,
+        stage_id: row.stage_id as string,
+        kind,
+        stageLabel:
+          (stageRow?.label as string | undefined) ?? KIND_DEFAULT_LABELS[kind],
+        cover_letter: row.cover_letter as string | null,
+        created_at: row.created_at as string,
+        updated_at: row.updated_at as string,
+      };
+    })
+    // .eq("stage.kind", X) is an inner-join filter that drops apps whose
+    // stage row didn't match — but our embed is declared as a to-one and
+    // can return rows where the embed didn't match the filter; defensively
+    // re-filter on the JS side.
+    .filter((row) => {
+      if (!sp.status) return true;
+      return row.kind === sp.status;
+    });
 
   // Pull candidate info in one batch (incl. avatar_url for the row avatar
   // primitive added Cam-feedback 2026-05-06 PM).
@@ -196,10 +240,10 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
     return `${locs.length} locations`;
   };
 
-  // Status counts for the tab strip
+  // Status counts for the tab strip (keyed by kind).
   const statusCounts: Record<string, number> = {};
   for (const a of apps) {
-    statusCounts[a.status] = (statusCounts[a.status] ?? 0) + 1;
+    statusCounts[a.kind] = (statusCounts[a.kind] ?? 0) + 1;
   }
 
   // Practice Fit (Phase 5D) — cross-job list, so we fetch per (candidate,
@@ -262,12 +306,12 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
       return nameA.localeCompare(nameB);
     });
   } else if (sp.sort === "stage") {
-    // Stage order: new → reviewed → interviewing → offered → hired →
-    // rejected → withdrawn. Mirror STATUS_ORDER for consistency.
-    const idx = (s: string) => STATUS_ORDER.indexOf(s as ApplicationStatus);
+    // Stage order: open → screen → interview → offer → hired → rejected
+    // → withdrawn. Mirror STATUS_ORDER for consistency.
+    const idx = (s: string) => STATUS_ORDER.indexOf(s as StageKind);
     apps = [...apps].sort((a, b) => {
-      const ia = idx(a.status);
-      const ib = idx(b.status);
+      const ia = idx(a.kind);
+      const ib = idx(b.kind);
       if (ia !== ib) return ia - ib;
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
@@ -306,7 +350,10 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
             value={sp.status ?? ""}
             options={[
               { value: "", label: "All statuses" },
-              ...STATUS_ORDER.map((s) => ({ value: s, label: STAGE_LABELS[s] })),
+              ...STATUS_ORDER.map((s) => ({
+                value: s,
+                label: KIND_DEFAULT_LABELS[s],
+              })),
             ]}
           />
           <FilterSelect
@@ -365,7 +412,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                 : "bg-cream text-ink hover:bg-[var(--rule)]"
             }`}
           >
-            {STAGE_LABELS[s]} · {statusCounts[s]}
+            {KIND_DEFAULT_LABELS[s]} · {statusCounts[s]}
           </Link>
         ))}
       </div>
@@ -436,9 +483,9 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                         {displayName}
                       </div>
                       <span
-                        className={`text-[9px] font-bold tracking-[1.5px] uppercase px-2.5 py-1 ${statusBadgeClass(app.status)}`}
+                        className={`text-[9px] font-bold tracking-[1.5px] uppercase px-2.5 py-1 ${statusBadgeClass(app.kind)}`}
                       >
-                        {STAGE_LABELS[app.status as ApplicationStatus] ?? app.status}
+                        {app.stageLabel}
                       </span>
                       {fitByAppId.get(app.id) && (
                         <PracticeFitChip
@@ -523,15 +570,15 @@ function FilterSelect({
   );
 }
 
-function statusBadgeClass(status: string): string {
-  switch (status) {
-    case "new":
+function statusBadgeClass(kind: string): string {
+  switch (kind) {
+    case "open":
       return "bg-cream text-ink";
-    case "reviewed":
+    case "screen":
       return "bg-blue-50 text-blue-900";
-    case "interviewing":
+    case "interview":
       return "bg-heritage/10 text-heritage-deep";
-    case "offered":
+    case "offer":
     case "hired":
       return "bg-emerald-50 text-emerald-900";
     case "rejected":

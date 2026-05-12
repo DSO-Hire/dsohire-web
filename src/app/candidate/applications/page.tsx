@@ -30,7 +30,10 @@ import {
   Sparkles,
 } from "lucide-react";
 import { CandidateShell } from "@/components/candidate/candidate-shell";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  createSupabaseServerClient,
+  createSupabaseServiceRoleClient,
+} from "@/lib/supabase/server";
 import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
 import {
   PracticeFitPlaceholder,
@@ -45,8 +48,8 @@ import {
 import type { FitResult } from "@/lib/practice-fit/types";
 import { StatusProgress } from "@/components/dashboard/status-progress";
 import {
-  STAGE_LABELS,
-  type ApplicationStatus,
+  KIND_DEFAULT_LABELS,
+  type StageKind,
 } from "@/lib/applications/stages";
 import { RowActionsMenu } from "./row-actions-menu";
 import type { SelfReportedStatus } from "./row-actions-data";
@@ -134,25 +137,84 @@ export default async function CandidateApplicationsPage({
     ((candidate as Record<string, unknown>).desired_roles as string[] | null) ??
     [];
 
-  const { data: rawApps } = await supabase
+  // Candidate-side RLS on dso_pipeline_stages is DSO-only; resolve the
+  // kind + label via service-role after the RLS-scoped applications
+  // read. The candidate is already authenticated and limited by RLS to
+  // their own application rows.
+  const { data: rawApps, error: appsErr } = await supabase
     .from("applications")
     .select(
-      "id, job_id, status, created_at, updated_at, hidden_at, self_reported_status, affiliation_revealed"
+      "id, job_id, stage_id, created_at, updated_at, hidden_at, self_reported_status, affiliation_revealed"
     )
     .eq("candidate_id", candidateId)
     .order("created_at", { ascending: false });
+  if (appsErr) {
+    console.warn("[candidate apps] applications fetch failed", appsErr);
+  }
 
   type AppRow = {
     id: string;
     job_id: string;
-    status: ApplicationStatus;
+    stage_id: string;
+    kind: StageKind;
+    /** DSO-customized label for the current stage; falls back to kind default. */
+    stageLabel: string;
+    /** Owning DSO id — used to pull the per-DSO stage list for the StatusProgress strip. */
+    dsoId: string | null;
     created_at: string;
     updated_at: string;
     hidden_at: string | null;
     self_reported_status: SelfReportedStatus | null;
     affiliation_revealed: boolean;
   };
-  const apps = (rawApps ?? []) as AppRow[];
+  const rawAppsList = (rawApps ?? []) as Array<Record<string, unknown>>;
+  const stageIdsToLookup = Array.from(
+    new Set(rawAppsList.map((r) => r.stage_id as string).filter(Boolean))
+  );
+  type StageLookupRow = {
+    id: string;
+    kind: StageKind;
+    label: string;
+    dsoId: string;
+  };
+  const stageLookup = new Map<string, StageLookupRow>();
+  if (stageIdsToLookup.length > 0) {
+    const admin = createSupabaseServiceRoleClient();
+    const { data: stageRows } = await admin
+      .from("dso_pipeline_stages")
+      .select("id, kind, label, dso_id")
+      .in("id", stageIdsToLookup);
+    for (const r of (stageRows ?? []) as Array<{
+      id: string;
+      kind: string;
+      label: string;
+      dso_id: string;
+    }>) {
+      stageLookup.set(r.id, {
+        id: r.id,
+        kind: r.kind as StageKind,
+        label: r.label,
+        dsoId: r.dso_id,
+      });
+    }
+  }
+  const apps: AppRow[] = rawAppsList.map((row) => {
+    const stage = stageLookup.get(row.stage_id as string);
+    const kind = (stage?.kind ?? "open") as StageKind;
+    return {
+      id: row.id as string,
+      job_id: row.job_id as string,
+      stage_id: row.stage_id as string,
+      kind,
+      stageLabel: stage?.label ?? KIND_DEFAULT_LABELS[kind],
+      dsoId: stage?.dsoId ?? null,
+      created_at: row.created_at as string,
+      updated_at: row.updated_at as string,
+      hidden_at: row.hidden_at as string | null,
+      self_reported_status: row.self_reported_status as SelfReportedStatus | null,
+      affiliation_revealed: row.affiliation_revealed as boolean,
+    };
+  });
 
   // Job + DSO + location lookups (used by every tab except Saved which
   // has its own join).
@@ -255,19 +317,18 @@ export default async function CandidateApplicationsPage({
   const visible = apps.filter((a) => !a.hidden_at);
   const hidden = apps.filter((a) => Boolean(a.hidden_at));
 
-  const isClosed = (s: ApplicationStatus) =>
-    s === "hired" || s === "rejected" || s === "withdrawn";
-  const isInterview = (s: ApplicationStatus) => s === "interviewing";
-  const isOffer = (s: ApplicationStatus) => s === "offered";
-  const isActiveEarly = (s: ApplicationStatus) =>
-    s === "new" || s === "reviewed";
+  const isClosed = (k: StageKind) =>
+    k === "hired" || k === "rejected" || k === "withdrawn";
+  const isInterview = (k: StageKind) => k === "interview";
+  const isOffer = (k: StageKind) => k === "offer";
+  const isActiveEarly = (k: StageKind) => k === "open" || k === "screen";
 
   const counts: Record<TabKey, number> = {
     all: visible.length,
-    active: visible.filter((a) => isActiveEarly(a.status)).length,
-    interview: visible.filter((a) => isInterview(a.status)).length,
-    offer: visible.filter((a) => isOffer(a.status)).length,
-    closed: visible.filter((a) => isClosed(a.status)).length,
+    active: visible.filter((a) => isActiveEarly(a.kind)).length,
+    interview: visible.filter((a) => isInterview(a.kind)).length,
+    offer: visible.filter((a) => isOffer(a.kind)).length,
+    closed: visible.filter((a) => isClosed(a.kind)).length,
     saved: 0, // filled below
     hidden: hidden.length,
   };
@@ -282,13 +343,13 @@ export default async function CandidateApplicationsPage({
   // ── Filter the apps by tab ──────────────────────────────────────────
   let filteredApps: AppRow[] = visible;
   if (activeTab === "active") {
-    filteredApps = visible.filter((a) => isActiveEarly(a.status));
+    filteredApps = visible.filter((a) => isActiveEarly(a.kind));
   } else if (activeTab === "interview") {
-    filteredApps = visible.filter((a) => isInterview(a.status));
+    filteredApps = visible.filter((a) => isInterview(a.kind));
   } else if (activeTab === "offer") {
-    filteredApps = visible.filter((a) => isOffer(a.status));
+    filteredApps = visible.filter((a) => isOffer(a.kind));
   } else if (activeTab === "closed") {
-    filteredApps = visible.filter((a) => isClosed(a.status));
+    filteredApps = visible.filter((a) => isClosed(a.kind));
   } else if (activeTab === "hidden") {
     filteredApps = hidden;
   } else if (activeTab === "saved") {
@@ -559,7 +620,9 @@ function ApplicationsList({
   apps: Array<{
     id: string;
     job_id: string;
-    status: ApplicationStatus;
+    stage_id: string;
+    kind: StageKind;
+    stageLabel: string;
     created_at: string;
     updated_at: string;
     hidden_at: string | null;
@@ -619,7 +682,8 @@ function ApplicationsList({
                   {/* Top line — status pill + self-reported chip + Practice Fit + unread */}
                   <div className="mb-2 flex flex-wrap items-center gap-2">
                     <StatusPill
-                      status={app.status}
+                      kind={app.kind}
+                      label={app.stageLabel}
                       hideStages={job?.hide_stages_from_candidate ?? false}
                     />
                     {app.self_reported_status && (
@@ -674,7 +738,7 @@ function ApplicationsList({
                   {/* Status progress strip — preserved from v1 */}
                   <div className="mt-3 pr-10">
                     <StatusProgress
-                      status={app.status}
+                      status={app.kind}
                       hideStages={job?.hide_stages_from_candidate ?? false}
                     />
                   </div>
@@ -687,7 +751,7 @@ function ApplicationsList({
             <div className="absolute right-3 top-3">
               <RowActionsMenu
                 applicationId={app.id}
-                currentStatus={app.status}
+                currentStatus={app.kind}
                 isHidden={Boolean(app.hidden_at)}
                 currentSelfReported={app.self_reported_status}
               />
@@ -851,31 +915,35 @@ function EmptyState({
 // ─────────────────────────────────────────────────────────────────────
 
 function StatusPill({
-  status,
+  kind,
+  label,
   hideStages,
 }: {
-  status: ApplicationStatus;
+  kind: StageKind;
+  /** DSO-customized stage label (resolved upstream). */
+  label: string;
   hideStages: boolean;
 }) {
-  const label = hideStages && !["hired", "rejected", "withdrawn"].includes(status)
-    ? "In review"
-    : STAGE_LABELS[status];
+  const renderLabel =
+    hideStages && !["hired", "rejected", "withdrawn"].includes(kind)
+      ? "In review"
+      : label;
 
-  const tone = TONE_BY_STATUS[status];
+  const tone = TONE_BY_KIND[kind];
   return (
     <span
       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${tone}`}
     >
-      {label}
+      {renderLabel}
     </span>
   );
 }
 
-const TONE_BY_STATUS: Record<ApplicationStatus, string> = {
-  new: "bg-blue-50 text-blue-700",
-  reviewed: "bg-cyan-50 text-cyan-700",
-  interviewing: "bg-amber-50 text-amber-800",
-  offered: "bg-emerald-50 text-emerald-800",
+const TONE_BY_KIND: Record<StageKind, string> = {
+  open: "bg-blue-50 text-blue-700",
+  screen: "bg-cyan-50 text-cyan-700",
+  interview: "bg-amber-50 text-amber-800",
+  offer: "bg-emerald-50 text-emerald-800",
   hired: "bg-[#4D7A60] text-[#F7F4ED]",
   rejected: "bg-red-50 text-red-700",
   withdrawn: "bg-slate-100 text-slate-600",

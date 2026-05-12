@@ -75,7 +75,7 @@ export function KanbanCard({
     isDragging,
   } = useDraggable({
     id: application.id,
-    data: { type: "application", status: application.status },
+    data: { type: "application", stageId: application.stage_id, kind: application.kind },
     disabled: pending && !isOverlay,
   });
 

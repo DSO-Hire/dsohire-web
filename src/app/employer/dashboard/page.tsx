@@ -37,9 +37,9 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getSubscriptionAnyStatus } from "@/lib/billing/subscription";
 import { getActiveLocationId } from "@/lib/employer/active-location";
 import {
-  KANBAN_STAGES,
-  STAGE_LABELS,
-  type ApplicationStatus,
+  KANBAN_KINDS,
+  KIND_DEFAULT_LABELS,
+  type StageKind,
 } from "@/lib/applications/stages";
 import { candidateDisplayName } from "@/lib/applications/candidate-display";
 import { KpiTile } from "@/components/dashboard/kpi-tile";
@@ -150,15 +150,14 @@ export default async function EmployerDashboard() {
   let stuckCandidates: StuckCandidateRow[] = [];
   let stuckTotalCount = 0;
 
-  // ── Pipeline funnel scaffolding (counts of CURRENT status, last 30 days
-  // of submissions). v1: status-snapshot funnel. A flow-based funnel would
-  // require querying application_status_events; that's a Phase 5E follow-up
-  // when we wire up the analytics surface. ────────────────────────────
-  const stage30dCounts: Record<(typeof KANBAN_STAGES)[number], number> = {
-    new: 0,
-    reviewed: 0,
-    interviewing: 0,
-    offered: 0,
+  // ── Pipeline funnel scaffolding (counts of CURRENT stage kind, last 30
+  // days of submissions). v1: kind-snapshot funnel. A flow-based funnel
+  // would require querying application_status_events. ───────────────
+  const stage30dCounts: Record<(typeof KANBAN_KINDS)[number], number> = {
+    open: 0,
+    screen: 0,
+    interview: 0,
+    offer: 0,
     hired: 0,
   };
   let stageStripCounts: Array<{ key: string; label: string; count: number }> =
@@ -184,7 +183,8 @@ export default async function EmployerDashboard() {
     id: string;
     job_id: string;
     candidate_id: string;
-    status: ApplicationStatus;
+    /** Stage kind resolved from the embedded stage row. */
+    kind: StageKind;
     created_at: string;
   };
   type DashboardCandidate = {
@@ -243,6 +243,20 @@ export default async function EmployerDashboard() {
     openJobsCount = jobs.filter((j) => j.status === "active").length;
 
     if (jobIds.length > 0) {
+      // Resolve the DSO's open-kind stage row ids — the "Awaiting Review"
+      // tile + stuck-candidate lookup filter on stage_id (head:true
+      // counts can't reliably embed-filter via the join).
+      const { data: openStageRows } = await supabase
+        .from("dso_pipeline_stages")
+        .select("id")
+        .eq("dso_id", dsoId)
+        .eq("kind", "open");
+      const openStageIds = ((openStageRows ?? []) as Array<{ id: string }>).map(
+        (r) => r.id
+      );
+      const openStageIdsForFilter =
+        openStageIds.length > 0 ? openStageIds : ["__none__"];
+
       // ── Date math ──────────────────────────────────────────────────
       const now = new Date();
       const dayOfWeek = now.getUTCDay();
@@ -300,18 +314,20 @@ export default async function EmployerDashboard() {
           .from("applications")
           .select("id", { count: "exact", head: true })
           .in("job_id", jobIds)
-          .eq("status", "new"),
+          .in("stage_id", openStageIdsForFilter),
         supabase
           .from("applications")
           .select("created_at")
           .in("job_id", jobIds)
-          .eq("status", "new")
+          .in("stage_id", openStageIdsForFilter)
           .order("created_at", { ascending: true })
           .limit(1)
           .maybeSingle(),
         supabase
           .from("applications")
-          .select("id, job_id, candidate_id, status, created_at")
+          .select(
+            "id, job_id, candidate_id, created_at, stage:dso_pipeline_stages!stage_id(kind)"
+          )
           .in("job_id", jobIds)
           .order("created_at", { ascending: false })
           .limit(5),
@@ -320,15 +336,16 @@ export default async function EmployerDashboard() {
           .select("created_at")
           .in("job_id", jobIds)
           .gte("created_at", fourteenDaysAgo.toISOString()),
-        // Stuck candidates — status='new' and created_at older than SLA.
-        // We pull the row + candidate name in one go via FK join.
+        // Stuck candidates — kind='open' (resolved via stage_id list) and
+        // created_at older than SLA. We pull the row + candidate name via
+        // the FK join.
         supabase
           .from("applications")
           .select(
             "id, job_id, created_at, candidate_id, candidate:candidates(full_name)",
           )
           .in("job_id", jobIds)
-          .eq("status", "new")
+          .in("stage_id", openStageIdsForFilter)
           .lte(
             "created_at",
             new Date(
@@ -336,10 +353,10 @@ export default async function EmployerDashboard() {
             ).toISOString(),
           )
           .order("created_at", { ascending: true }),
-        // Funnel: applications submitted in the last 30 days, by current status.
+        // Funnel: applications submitted in the last 30 days, by current kind.
         supabase
           .from("applications")
-          .select("status")
+          .select("id, stage:dso_pipeline_stages!stage_id(kind)")
           .in("job_id", jobIds)
           .gte("created_at", thirtyDaysAgo.toISOString()),
         // Per-job leaderboard: 14-day window of application timestamps so
@@ -353,7 +370,22 @@ export default async function EmployerDashboard() {
 
       appsThisWeekCount = appsThisWeekRes.count ?? 0;
       awaitingReviewCount = awaitingReviewRes.count ?? 0;
-      recentApps = (recentAppsRes.data ?? []) as DashboardApp[];
+      recentApps = ((recentAppsRes.data ?? []) as Array<
+        Record<string, unknown>
+      >).map((row): DashboardApp => {
+        const stageRel = row.stage as
+          | { kind: string }
+          | Array<{ kind: string }>
+          | null;
+        const stageRow = Array.isArray(stageRel) ? stageRel[0] ?? null : stageRel;
+        return {
+          id: row.id as string,
+          job_id: row.job_id as string,
+          candidate_id: row.candidate_id as string,
+          kind: (stageRow?.kind ?? "open") as StageKind,
+          created_at: row.created_at as string,
+        };
+      });
 
       const oldestAwaitingCreated = (
         oldestAwaitingRes.data as { created_at: string } | null
@@ -426,26 +458,31 @@ export default async function EmployerDashboard() {
       });
 
       // ── Pipeline funnel ──────────────────────────────────────────
-      type FunnelRow = { status: ApplicationStatus };
+      type FunnelRow = {
+        stage: { kind: string } | Array<{ kind: string }> | null;
+      };
       for (const row of (funnel30dRes.data ?? []) as FunnelRow[]) {
-        if ((row.status as string) in stage30dCounts) {
-          stage30dCounts[row.status as keyof typeof stage30dCounts] += 1;
+        const rel = row.stage;
+        const stageRow = Array.isArray(rel) ? rel[0] ?? null : rel;
+        const kind = stageRow?.kind;
+        if (kind && kind in stage30dCounts) {
+          stage30dCounts[kind as keyof typeof stage30dCounts] += 1;
         }
       }
       // Hero stage strip — same data, different shape.
       stageStripCounts = [
-        { key: "new", label: "New", count: stage30dCounts.new },
+        { key: "open", label: "New", count: stage30dCounts.open },
         {
-          key: "reviewed",
+          key: "screen",
           label: "Screening",
-          count: stage30dCounts.reviewed,
+          count: stage30dCounts.screen,
         },
         {
-          key: "interviewing",
+          key: "interview",
           label: "Interview",
-          count: stage30dCounts.interviewing,
+          count: stage30dCounts.interview,
         },
-        { key: "offered", label: "Offer", count: stage30dCounts.offered },
+        { key: "offer", label: "Offer", count: stage30dCounts.offer },
       ];
 
       // ── Per-job leaderboard ──────────────────────────────────────
@@ -924,18 +961,18 @@ export default async function EmployerDashboard() {
               fullName: cand?.full_name,
               candidateId: app.candidate_id,
             });
-            const stageLabel = STAGE_LABELS[app.status] ?? app.status;
+            const stageLabel = KIND_DEFAULT_LABELS[app.kind] ?? app.kind;
             return {
               id: app.id,
-              icon: app.status === "new" ? UserPlus : ArrowRightCircle,
-              tone: app.status === "new" ? "positive" : "neutral",
+              icon: app.kind === "open" ? UserPlus : ArrowRightCircle,
+              tone: app.kind === "open" ? "positive" : "neutral",
               body: (
                 <>
                   <strong className="font-semibold">{name}</strong> applied to{" "}
                   <span className="text-slate-body">
                     {job?.title ?? "Unknown job"}
                   </span>
-                  {app.status !== "new" && (
+                  {app.kind !== "open" && (
                     <>
                       {" "}
                       · now in{" "}

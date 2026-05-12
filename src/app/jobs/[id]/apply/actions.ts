@@ -242,6 +242,8 @@ export async function applyToJob(
         "You've already applied to this job. Visit My Applications to track its status or message the team.",
     };
   } else {
+    // stage_id is auto-filled by the applications_fill_default_stage
+    // trigger to the DSO's default 'open'-kind stage. Don't pass it.
     const { data: newApp, error: insertError } = await supabase
       .from("applications")
       .insert({
@@ -249,7 +251,6 @@ export async function applyToJob(
         candidate_id: candidate.id as string,
         cover_letter: coverLetter || null,
         resume_url: resumeUrl,
-        status: "new",
         source: sourceTag,
       })
       .select("id")

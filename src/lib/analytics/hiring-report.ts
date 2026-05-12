@@ -226,19 +226,30 @@ export async function getHiringReportSnapshot(): Promise<HiringReportSnapshot> {
     .sort((a, b) => b.applications - a.applications)
     .slice(0, 15);
 
-  // 5. Avg time-to-fill across the platform (last 12 months).
+  // 5. Avg time-to-fill across the platform (last 12 months). Post-Track-B
+  // we filter on the linked stage's kind = 'hired' rather than the dropped
+  // applications.status column.
   const yearAgo = new Date(Date.now() - 365 * 86400 * 1000).toISOString();
   const { data: hireRows } = await admin
     .from("applications")
-    .select("hired_at, jobs!inner(posted_at)")
-    .eq("status", "hired")
+    .select(
+      "hired_at, jobs!inner(posted_at), stage:dso_pipeline_stages!stage_id(kind)"
+    )
+    .eq("stage.kind", "hired")
     .gte("hired_at", yearAgo);
   let ttfTotal = 0;
   let ttfN = 0;
   for (const r of (hireRows ?? []) as unknown as Array<{
     hired_at: string;
     jobs: Array<{ posted_at: string | null }>;
+    stage: { kind: string } | Array<{ kind: string }> | null;
   }>) {
+    // The .eq("stage.kind", ...) filter is enforced via the embed; rows
+    // where the embed didn't match drop the stage relation entirely.
+    // Defensive re-check here matches the pattern used elsewhere.
+    const stageRel = r.stage;
+    const stageRow = Array.isArray(stageRel) ? stageRel[0] ?? null : stageRel;
+    if (stageRow?.kind !== "hired") continue;
     const posted = r.jobs?.[0]?.posted_at;
     if (!posted || !r.hired_at) continue;
     const days =

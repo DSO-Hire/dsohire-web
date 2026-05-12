@@ -11,7 +11,7 @@
  *     batched UPDATE that touches 10 rows where 2 are denied would return 8
  *     rows of "success" and silently swallow the 2 failures — the kanban UI
  *     could never show partial-success feedback.
- *  2. The previous status (needed for optimistic rollback + audit copy) is a
+ *  2. The previous stage (needed for optimistic rollback + audit copy) is a
  *     per-row value. We'd have to read all 10 first, batch-update, then diff
  *     the returned rows against the read rows. Simpler to loop.
  *
@@ -20,47 +20,39 @@
  * ledger ordering, and avoids hammering the connection. Latency at our scale
  * (≤25 cards selected at once on the most generous tier) is fine.
  *
- * Reject + Archive both attach a recruiter-supplied note to the audit log via
- * `application_status_events`. RLS only grants SELECT on that table to DSO
- * members, so we patch the trigger-seeded row's `note` column using the
- * service-role client AFTER the trigger has run. The trigger lives in
- * 20260501000005_fix_application_triggers.sql (and 20260504000005_fix_status
- * _event_actor_type.sql) and inserts with note=null. The shared patch helper
- * lives at `@/lib/applications/status-event-notes` and is reused by the
- * single-reject path on the application detail StageSelector.
+ * Reject + Archive both attach a recruiter-supplied note to the audit log
+ * via `application_status_events`. RLS only grants SELECT on that table to
+ * DSO members, so we patch the trigger-seeded row's `note` column using
+ * the service-role client AFTER the trigger has run. The shared patch
+ * helper lives at `@/lib/applications/status-event-notes`.
  *
- * Archive semantics: we set status to `withdrawn`. See the report — the
- * application_status enum is exhausted of "soft-close" semantics, withdrawn
- * is candidate-side conventionally but is the cleanest "remove from active
- * pipeline without rejecting" state we have. The status_event's actor_type
- * is now derived from auth.uid() (see 20260504000005_fix_status_event_actor
- * _type.sql) so a recruiter-driven withdraw is correctly logged as
- * 'employer' and a candidate-driven withdraw stays 'candidate'.
+ * Post-Track-B (2026-05-12): applications.status is gone — every mutation
+ * now writes applications.stage_id (FK to dso_pipeline_stages). The bulk
+ * API still accepts a target `kind` from the caller (the kanban's
+ * SelectionToolbar / BulkConfirmDialog) and resolves it to the DSO's
+ * default stage row server-side, since the kanban already knows which
+ * column the user clicked but not which DSO it belongs to (all cards on
+ * one board share a DSO, but we resolve defensively per call).
  */
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { attachStatusEventNote } from "@/lib/applications/status-event-notes";
 import {
-  STAGE_LABELS,
-  type ApplicationStatus,
+  KIND_DEFAULT_LABELS,
+  STAGE_KINDS,
+  type StageKind,
 } from "@/lib/applications/stages";
 import { recordAuditEvent } from "@/lib/audit/record";
 
-const VALID_STATUSES = new Set<ApplicationStatus>([
-  "new",
-  "reviewed",
-  "interviewing",
-  "offered",
-  "hired",
-  "rejected",
-  "withdrawn",
-]);
+const VALID_KINDS = new Set<StageKind>(STAGE_KINDS);
 
 export interface BulkItemSuccess {
   id: string;
-  prevStatus: ApplicationStatus;
-  nextStatus: ApplicationStatus;
+  prevStageId: string;
+  nextStageId: string;
+  prevKind: StageKind;
+  nextKind: StageKind;
   stageEnteredAt: string;
 }
 
@@ -77,46 +69,60 @@ export interface BulkActionResult {
 /**
  * Hard cap on how many ids a single bulk call can touch. Caps the worst-case
  * RTT for a sequential loop and matches the largest plausible selection on a
- * Growth-tier board (50 active jobs * average column size). The UI also
- * limits selection to visible cards so this is a defense-in-depth ceiling.
+ * Growth-tier board. The UI also limits selection to visible cards so this
+ * is a defense-in-depth ceiling.
  */
 const BULK_CAP = 200;
 
 async function moveOne(
   applicationId: string,
-  nextStatus: ApplicationStatus
+  nextStageId: string,
+  nextKind: StageKind
 ): Promise<
   | { ok: true; row: BulkItemSuccess }
   | { ok: false; error: string }
 > {
   if (!applicationId) return { ok: false, error: "Missing application id" };
-  if (!VALID_STATUSES.has(nextStatus)) {
-    return { ok: false, error: "Invalid status" };
-  }
 
   const supabase = await createSupabaseServerClient();
 
-  // Read the current status first so we can return prevStatus for rollback.
+  // Read the current stage_id + kind so we can return prev info for
+  // rollback. Embed the stage row to grab the kind in one round trip.
   const { data: prev, error: prevErr } = await supabase
     .from("applications")
-    .select("status")
+    .select(
+      "stage_id, stage:dso_pipeline_stages!stage_id(kind)"
+    )
     .eq("id", applicationId)
     .single();
   if (prevErr || !prev) {
     return { ok: false, error: prevErr?.message ?? "Application not found" };
   }
 
-  const prevStatus = prev.status as ApplicationStatus;
+  const prevStageId = (prev as Record<string, unknown>).stage_id as string;
+  const prevStageRel = (prev as Record<string, unknown>).stage as
+    | { kind: string }
+    | Array<{ kind: string }>
+    | null;
+  const prevStageRow = Array.isArray(prevStageRel)
+    ? prevStageRel[0] ?? null
+    : prevStageRel;
+  const prevKindRaw = (prevStageRow?.kind as string | undefined) ?? "open";
+  const prevKind = (VALID_KINDS.has(prevKindRaw as StageKind)
+    ? (prevKindRaw as StageKind)
+    : "open") as StageKind;
 
-  // No-op short-circuit. Fast path so the UI can show "0 changed, 10 already
-  // in stage" rather than failing loudly.
-  if (prevStatus === nextStatus) {
+  // No-op short-circuit. Fast path so the UI can show "0 changed, 10
+  // already in stage" rather than failing loudly.
+  if (prevStageId === nextStageId) {
     return {
       ok: true,
       row: {
         id: applicationId,
-        prevStatus,
-        nextStatus,
+        prevStageId,
+        nextStageId,
+        prevKind,
+        nextKind,
         stageEnteredAt: new Date().toISOString(),
       },
     };
@@ -124,9 +130,9 @@ async function moveOne(
 
   const { data, error } = await supabase
     .from("applications")
-    .update({ status: nextStatus })
+    .update({ stage_id: nextStageId })
     .eq("id", applicationId)
-    .select("id, status, stage_entered_at")
+    .select("id, stage_id, stage_entered_at")
     .single();
 
   // RLS-denied updates return 0 rows with NO error from PostgREST. Surfacing
@@ -143,18 +149,49 @@ async function moveOne(
     ok: true,
     row: {
       id: applicationId,
-      prevStatus,
-      nextStatus: data.status as ApplicationStatus,
-      stageEnteredAt: data.stage_entered_at,
+      prevStageId,
+      nextStageId: data.stage_id as string,
+      prevKind,
+      nextKind,
+      stageEnteredAt: data.stage_entered_at as string,
     },
   };
 }
 
+/**
+ * Resolve a target stage **kind** to the concrete stage_id within a given
+ * DSO. Used as the entry point for kind-driven bulk calls (the kanban
+ * passes kinds, not stage_ids, since the bulk dropdown is keyed by kind).
+ * Returns null when the DSO is missing its default stage for that kind
+ * (shouldn't happen — the seeder creates all 7).
+ */
+async function resolveDefaultStageId(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  dsoId: string,
+  kind: StageKind
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("dso_pipeline_stages")
+    .select("id")
+    .eq("dso_id", dsoId)
+    .eq("kind", kind)
+    .eq("is_default", true)
+    .maybeSingle();
+  if (error) {
+    console.warn(
+      `[bulk-actions] could not resolve default ${kind} stage for ${dsoId}:`,
+      error.message
+    );
+    return null;
+  }
+  return ((data as { id: string } | null)?.id as string | null) ?? null;
+}
+
 export async function bulkMoveApplications(
   applicationIds: string[],
-  nextStatus: ApplicationStatus
+  nextKind: StageKind
 ): Promise<BulkActionResult> {
-  return bulkMoveApplicationsImpl(applicationIds, nextStatus, "move");
+  return bulkMoveApplicationsImpl(applicationIds, nextKind, "move");
 }
 
 /**
@@ -165,7 +202,7 @@ export async function bulkMoveApplications(
  */
 async function bulkMoveApplicationsImpl(
   applicationIds: string[],
-  nextStatus: ApplicationStatus,
+  nextKind: StageKind,
   action: "move" | "reject" | "archive",
   reason?: string
 ): Promise<BulkActionResult> {
@@ -181,12 +218,49 @@ async function bulkMoveApplicationsImpl(
       })),
     };
   }
-  if (!VALID_STATUSES.has(nextStatus)) {
+  if (!VALID_KINDS.has(nextKind)) {
     return {
       succeeded: [],
       failed: applicationIds.map((id) => ({
         id,
-        error: "Invalid target status",
+        error: "Invalid target stage kind",
+      })),
+    };
+  }
+
+  const supabase = await createSupabaseServerClient();
+
+  // Resolve the DSO from the first application's job, then resolve the
+  // default stage row for the requested kind. All selected ids belong to
+  // the same DSO because kanban selection is scoped per-job.
+  const { data: anchor } = await supabase
+    .from("applications")
+    .select("id, jobs:jobs!inner(dso_id)")
+    .eq("id", applicationIds[0])
+    .single();
+  const jobsRecord = (anchor as Record<string, unknown> | null)?.jobs as
+    | { dso_id: string }
+    | Array<{ dso_id: string }>
+    | null;
+  const job = Array.isArray(jobsRecord) ? jobsRecord[0] ?? null : jobsRecord;
+  const dsoId = job?.dso_id ?? null;
+  if (!dsoId) {
+    return {
+      succeeded: [],
+      failed: applicationIds.map((id) => ({
+        id,
+        error: "Could not resolve DSO for selection",
+      })),
+    };
+  }
+
+  const nextStageId = await resolveDefaultStageId(supabase, dsoId, nextKind);
+  if (!nextStageId) {
+    return {
+      succeeded: [],
+      failed: applicationIds.map((id) => ({
+        id,
+        error: `No default ${nextKind} stage on this DSO`,
       })),
     };
   }
@@ -196,7 +270,7 @@ async function bulkMoveApplicationsImpl(
 
   // Sequential loop: see file-level comment for rationale.
   for (const id of applicationIds) {
-    const result = await moveOne(id, nextStatus);
+    const result = await moveOne(id, nextStageId, nextKind);
     if (result.ok) {
       succeeded.push(result.row);
       revalidatePath(`/employer/applications/${id}`);
@@ -210,14 +284,10 @@ async function bulkMoveApplicationsImpl(
     revalidatePath(`/employer/applications`);
   }
 
-  // Audit-log a single summary event per bulk op (Phase 4.5.e completion).
-  // Emitting per-application would 10× the audit volume on a typical bulk —
-  // the summary line is the high-signal one. Per-app traceability lives in
-  // application_status_events (already populated by the BEFORE-UPDATE trigger).
   if (succeeded.length > 0) {
     await emitBulkAuditSummary({
       action,
-      nextStatus,
+      nextKind,
       succeededIds: succeeded.map((s) => s.id),
       failedCount: failed.length,
       reason,
@@ -228,14 +298,14 @@ async function bulkMoveApplicationsImpl(
 }
 
 /**
- * Single audit emit for a bulk operation. Resolves dso_id by reading any one
- * of the just-mutated applications (they're all in the same DSO since RLS
- * scopes them). Fail-open per the audit-log contract — summary failure must
- * not affect the parent bulk op.
+ * Single audit emit for a bulk operation. Resolves dso_id by reading any
+ * one of the just-mutated applications (they're all in the same DSO since
+ * RLS scopes them). Fail-open per the audit-log contract — summary
+ * failure must not affect the parent bulk op.
  */
 async function emitBulkAuditSummary(input: {
   action: "move" | "reject" | "archive";
-  nextStatus: ApplicationStatus;
+  nextKind: StageKind;
   succeededIds: string[];
   failedCount: number;
   reason?: string;
@@ -247,8 +317,6 @@ async function emitBulkAuditSummary(input: {
   } = await supabase.auth.getUser();
   if (!user) return;
 
-  // Pull the dso_id for one application — all bulk-selected items share a job
-  // (the kanban scopes selection per-job), so any one row gives us the DSO.
   const { data: anchor } = await supabase
     .from("applications")
     .select("job_id, jobs:jobs!inner(id, dso_id, title)")
@@ -263,7 +331,7 @@ async function emitBulkAuditSummary(input: {
   const job = Array.isArray(jobsRecord) ? jobsRecord[0] ?? null : jobsRecord;
   if (!job?.dso_id) return;
 
-  const stageLabel = STAGE_LABELS[input.nextStatus] ?? input.nextStatus;
+  const stageLabel = KIND_DEFAULT_LABELS[input.nextKind] ?? input.nextKind;
   const count = input.succeededIds.length;
   const verb =
     input.action === "reject"
@@ -289,7 +357,7 @@ async function emitBulkAuditSummary(input: {
         : summary,
     metadata: {
       action: input.action,
-      next_status: input.nextStatus,
+      next_stage_kind: input.nextKind,
       job_id: job.id,
       job_title: job.title,
       succeeded_count: count,
@@ -304,18 +372,12 @@ async function emitBulkAuditSummary(input: {
  * Bulk-reject + attach recruiter reason to the audit log.
  *
  * Flow per id:
- *   1. moveOne(id, 'rejected') — fires the BEFORE-UPDATE trigger which seeds
- *      a status_events row with note=null and actor_type='employer'.
- *   2. If reason is non-empty, locate the just-seeded event row (the most
- *      recent event for this application with from_status=prevStatus +
- *      to_status='rejected') and patch `note` via the service-role client.
- *      RLS forbids client-side INSERT/UPDATE on application_status_events,
- *      so service-role is the only path.
- *
- * If the note patch fails (e.g., race with another status change), the move
- * itself is still reported as succeeded — we don't want to roll the move back
- * because of an audit-trail blip. We DO log the patch failure so the kanban
- * console picks it up.
+ *   1. moveOne(id, rejectedStageId, 'rejected') — fires the AFTER-UPDATE
+ *      trigger which seeds a status_events row with note=null and
+ *      actor_type='employer'.
+ *   2. If reason is non-empty, locate the just-seeded event row (the
+ *      most recent event for this application with to_stage_kind=
+ *      'rejected') and patch `note` via the service-role client.
  */
 export async function bulkRejectApplications(
   applicationIds: string[],
@@ -332,7 +394,7 @@ export async function bulkRejectApplications(
   if (trimmedReason && result.succeeded.length > 0) {
     await attachStatusEventNote({
       applicationIds: result.succeeded.map((r) => r.id),
-      toStatus: "rejected",
+      toKind: "rejected",
       note: trimmedReason,
     });
   }
@@ -341,13 +403,11 @@ export async function bulkRejectApplications(
 }
 
 /**
- * Bulk-archive — set status to `withdrawn`. See file-level comment for the
- * "no dedicated archived enum yet" rationale; if/when product wants a true
- * "archived but not withdrawn" semantic we'd add an enum value + migration
- * and switch the target here. Recruiter-supplied note is optional but
- * encouraged so the audit log explains why a candidate was archived (no
- * candidate-facing impact since withdrawn already removes them from the
- * active pipeline view).
+ * Bulk-archive — set stage to a `withdrawn`-kind row. Recruiter-driven
+ * archive is a real surface even though `withdrawn` is conventionally
+ * candidate-side; the status_event's actor_type is derived from
+ * auth.uid() so a recruiter-driven withdraw is still logged as
+ * 'employer'.
  */
 export async function bulkArchiveApplications(
   applicationIds: string[],
@@ -364,7 +424,7 @@ export async function bulkArchiveApplications(
   if (trimmedReason && result.succeeded.length > 0) {
     await attachStatusEventNote({
       applicationIds: result.succeeded.map((r) => r.id),
-      toStatus: "withdrawn",
+      toKind: "withdrawn",
       note: trimmedReason,
     });
   }

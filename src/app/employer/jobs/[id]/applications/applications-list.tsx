@@ -7,20 +7,31 @@
  * component is the canonical list row from Day 2 forward.
  *
  * Pure client component. No data fetching — caller passes everything in.
+ *
+ * Post-Track-B: keyed by stage_id + kind (the kind drives the badge color
+ * + fallback label; per-DSO label comes from the passed `stages` list).
  */
 
 "use client";
 
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { STAGE_LABELS, type ApplicationStatus } from "@/lib/applications/stages";
+import {
+  KIND_DEFAULT_LABELS,
+  findStage,
+  type PipelineStage,
+  type StageKind,
+} from "@/lib/applications/stages";
 import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
 
 export interface ApplicationsListItem {
   id: string;
   job_id: string;
   candidate_id: string;
-  status: ApplicationStatus;
+  /** Stage row id (FK to dso_pipeline_stages). */
+  stage_id: string;
+  /** Stage kind snapshot at render time (open/screen/interview/...). */
+  kind: StageKind;
   created_at: string;
   candidate: {
     full_name: string | null;
@@ -35,6 +46,8 @@ export interface ApplicationsListItem {
 
 interface ApplicationsListProps {
   applications: ApplicationsListItem[];
+  /** Full pipeline stage list for the DSO — drives per-DSO labels. */
+  stages: PipelineStage[];
   /**
    * When true, hides the "Applied to {jobTitle}" sub-line because every row
    * is for the same job (per-job view). Defaults to false.
@@ -44,6 +57,7 @@ interface ApplicationsListProps {
 
 export function ApplicationsList({
   applications,
+  stages,
   hideJobTitle = false,
 }: ApplicationsListProps) {
   if (applications.length === 0) {
@@ -63,6 +77,8 @@ export function ApplicationsList({
     <div className="border border-[var(--rule)] bg-white">
       {applications.map((app) => {
         const cand = app.candidate;
+        const row = findStage(stages, app.stage_id);
+        const label = row?.label ?? KIND_DEFAULT_LABELS[app.kind];
         return (
           <Link
             key={app.id}
@@ -76,9 +92,9 @@ export function ApplicationsList({
                     {cand?.full_name ?? "Anonymous candidate"}
                   </div>
                   <span
-                    className={`text-[9px] font-bold tracking-[1.5px] uppercase px-2.5 py-1 ${statusBadgeClass(app.status)}`}
+                    className={`text-[9px] font-bold tracking-[1.5px] uppercase px-2.5 py-1 ${statusBadgeClass(app.kind)}`}
                   >
-                    {STAGE_LABELS[app.status] ?? app.status}
+                    {label}
                   </span>
                   {app.practiceFit && (
                     <PracticeFitChip fit={app.practiceFit} size="sm" />
@@ -111,15 +127,15 @@ export function ApplicationsList({
   );
 }
 
-function statusBadgeClass(status: ApplicationStatus): string {
-  switch (status) {
-    case "new":
+function statusBadgeClass(kind: StageKind): string {
+  switch (kind) {
+    case "open":
       return "bg-cream text-ink";
-    case "reviewed":
+    case "screen":
       return "bg-amber-50 text-amber-900";
-    case "interviewing":
+    case "interview":
       return "bg-blue-50 text-blue-900";
-    case "offered":
+    case "offer":
     case "hired":
       return "bg-emerald-50 text-emerald-900";
     case "rejected":

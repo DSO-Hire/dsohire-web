@@ -53,7 +53,8 @@ export async function getEmployerInboxThreads(
     supabase
       .from("applications")
       .select(
-        `id, candidate_id, job_id, status,
+        `id, candidate_id, job_id,
+         stage:dso_pipeline_stages!stage_id(kind, label),
          jobs:jobs!inner(id, title, dso_id),
          candidate:candidates(id, full_name, avatar_url)`
       )
@@ -147,7 +148,8 @@ export async function getCandidateInboxThreads(
     supabase
       .from("applications")
       .select(
-        `id, candidate_id, job_id, status, affiliation_revealed,
+        `id, candidate_id, job_id, affiliation_revealed,
+         stage:dso_pipeline_stages!stage_id(kind, label),
          jobs:jobs!inner(id, title, dso_id, dso:dsos(id, name, logo_url, affiliation_reveal_policy))`
       )
       .eq("candidate_id", candidateId),
@@ -299,10 +301,18 @@ function composeThreads({
           (candidate?.full_name as string | null) ?? "(name not provided)",
         avatar_url: (candidate?.avatar_url as string | null) ?? null,
       };
-      // applications.status is the canonical pipeline-stage column
-      // (kanban + reject flows write to it). Surfacing as `stage` on
-      // the thread so the rendering layer doesn't have to know.
-      stage = (app.status as string | null) ?? null;
+      // The stage row's kind is the canonical pipeline-stage signal post-
+      // Track-B (applications.status column is gone). Surface as `stage`
+      // on the thread so the rendering layer doesn't have to know which
+      // column we read it from.
+      const stageRel = app.stage as
+        | { kind: string; label: string | null }
+        | Array<{ kind: string; label: string | null }>
+        | null;
+      const stageRow = Array.isArray(stageRel)
+        ? stageRel[0] ?? null
+        : stageRel;
+      stage = (stageRow?.kind as string | null) ?? null;
       const job = app.jobs as Record<string, unknown>;
       jobId = job.id as string;
       jobTitle = job.title as string;
