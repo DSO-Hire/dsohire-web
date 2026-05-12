@@ -197,7 +197,7 @@ const PREVIEW_APPS: CandidateAppPreview[] = [
     daysAgo: 1,
   },
   {
-    dso: "Heartland Family Dentistry",
+    dso: "Sunflower Family Dentistry",
     role: "EFDA",
     city: "Kansas City",
     state: "MO",

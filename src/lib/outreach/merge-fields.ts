@@ -74,6 +74,6 @@ export const SUPPORTED_MERGE_FIELDS = [
   {
     token: "{{dso.name}}",
     label: "DSO name",
-    example: "Heartland Dental",
+    example: "Lakeshore Dental Group",
   },
 ] as const;

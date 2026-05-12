@@ -66,8 +66,8 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
 
   // Affiliation filter (Phase 4.5.b launch-blocker, Q7 + Q4 sandbox).
   // Hide DSOs from this directory if every one of their locations is
-  // private — surfacing "Heartland" in a public list would be the
-  // direct leak Q7 was locked to prevent. The DSO's /companies/[slug]
+  // private — surfacing a fully-private DSO in a public list would be
+  // the direct leak Q7 was locked to prevent. The DSO's /companies/[slug]
   // page itself still renders for them (per Q4 sandbox philosophy);
   // they just don't get listed in the directory until they flip at
   // least one location to public.

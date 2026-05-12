@@ -5,10 +5,10 @@
  * ROLE_OPTIONS in src/app/employer/jobs/job-wizard.tsx) → a recommended
  * starter set of screening questions, organized by category.
  *
- * Sourced from a competitor benchmark pass (DentalPost, iHireDental,
- * Aspen Dental, Heartland Dental, Pacific Dental, Indeed, Workable,
- * Hireology, Glassdoor, dental-practice-management publications) plus
- * dental hiring best practices.
+ * Sourced from a competitor benchmark pass across major dental ATS
+ * platforms, DSO career sites, generalist job boards (Indeed,
+ * Workable, Hireology, Glassdoor), and dental-practice-management
+ * publications, plus dental hiring best practices.
  *
  * The wizard surfaces these above the empty "add a question" UI so
  * employers can one-click add, customize, or skip each one. The panel

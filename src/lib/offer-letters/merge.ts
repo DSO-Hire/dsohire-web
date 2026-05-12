@@ -89,7 +89,7 @@ export const MERGE_FIELDS: ReadonlyArray<MergeFieldDef> = [
     key: "dso.name",
     label: "DSO name",
     category: "dso",
-    example: "Heartland Dental",
+    example: "Lakeshore Dental Group",
   },
 
   // ── Sender-filled per offer
