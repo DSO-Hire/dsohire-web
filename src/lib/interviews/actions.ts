@@ -516,7 +516,10 @@ export async function bookInterviewSlot(
       durationMinutes: propCtx.duration_minutes,
       interviewKind: propCtx.interview_kind,
       jobTitle,
-      dsoName,
+      // Calendar events show both DSO + candidate sides; the
+      // candidate-facing event description should respect the
+      // affiliation policy.
+      dsoName: dsoNameForCandidate,
       locationText: propCtx.location_text,
       candidateAuthUserId: cand?.auth_user_id ?? null,
       candidateName: cand?.full_name ?? null,
