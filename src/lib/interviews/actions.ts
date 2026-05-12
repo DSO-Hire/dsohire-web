@@ -587,7 +587,7 @@ async function pushCalendarsForBooking(input: PushCalendarsInput): Promise<void>
     if (input.candidateAuthUserId) {
       const summary = `${kindLabel} · ${input.jobTitle} · ${input.dsoName}`;
       const description = [
-        `${kindLabel} with ${input.dsoName} for the ${input.jobTitle} role.`,
+        `${kindLabel} with ${input.dsoName} · ${input.jobTitle}`,
         input.locationText ? `Location: ${input.locationText}` : null,
         `Booked via DSO Hire.`,
         `${siteUrl}/candidate/applications/${input.applicationId}`,
@@ -632,7 +632,7 @@ async function pushCalendarsForBooking(input: PushCalendarsInput): Promise<void>
         const description = [
           `${kindLabel} with ${
             input.candidateName ?? "the candidate"
-          } for the ${input.jobTitle} role.`,
+          } · ${input.jobTitle}`,
           input.locationText ? `Location: ${input.locationText}` : null,
           `Booked via DSO Hire.`,
           `${siteUrl}/employer/applications/${input.applicationId}`,
