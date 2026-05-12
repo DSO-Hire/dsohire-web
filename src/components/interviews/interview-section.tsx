@@ -64,9 +64,17 @@ export function EmployerInterviewSection({
   candidateName,
   proposals,
 }: EmployerInterviewSectionProps) {
-  const active = proposals.find(
-    (p) => p.status === "pending" || p.status === "booked"
-  );
+  // Picker priority: most-recent BOOKED beats most-recent PENDING. The
+  // legitimate Reschedule flow cancels the live booking *before* creating
+  // the new pending proposal, so a coexisting booked + pending only
+  // happens when the employer hits "Propose new times" on a confirmed
+  // booking without rescheduling — in which case the confirmed slot is
+  // still the source of truth until they explicitly cancel it. Proposals
+  // arrive sorted created_at DESC so a single .find() per pass picks the
+  // most-recent in each status bucket.
+  const activeBooked = proposals.find((p) => p.status === "booked");
+  const activePending = proposals.find((p) => p.status === "pending");
+  const active = activeBooked ?? activePending ?? null;
 
   return (
     <section className="border border-[var(--rule)] bg-white p-6">

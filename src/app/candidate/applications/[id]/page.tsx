@@ -208,8 +208,13 @@ export default async function CandidateApplicationDetailPage({
     ? null
     : classifyPlaceholderReason(candidateDesiredRoles, job?.role_category);
 
-  // Phase 5A — interview proposals to show the candidate. We surface
-  // the most recent pending or booked proposal at the top of the page.
+  // Phase 5A — interview proposals to show the candidate. Picker
+  // priority: most-recent BOOKED beats most-recent PENDING. If the
+  // employer hits "Propose new times" on a confirmed booking without
+  // rescheduling, a stale pending row coexists with the booking; the
+  // booking is still the candidate's source of truth until cancelled.
+  // We pull up to 5 active rows so the JS picker can pick correctly
+  // regardless of created_at ordering.
   const { data: proposalRows } = await supabase
     .from("interview_proposals")
     .select(
@@ -218,10 +223,14 @@ export default async function CandidateApplicationDetailPage({
     .eq("application_id", app.id)
     .in("status", ["pending", "booked"])
     .order("created_at", { ascending: false })
-    .limit(1);
+    .limit(5);
   let activeProposal: CandidateInterviewProposal | null = null;
   if (proposalRows && proposalRows.length > 0) {
-    const p = proposalRows[0] as unknown as {
+    const pickedRow =
+      proposalRows.find(
+        (row) => (row as { status?: string }).status === "booked"
+      ) ?? proposalRows[0];
+    const p = pickedRow as unknown as {
       id: string;
       status: CandidateInterviewProposal["status"];
       interview_kind: CandidateInterviewProposal["interview_kind"];
