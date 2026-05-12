@@ -73,7 +73,12 @@ export function CandidateInterviewPicker({
   proposal,
 }: CandidateInterviewPickerProps) {
   const router = useRouter();
-  const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
+  // When the employer only proposed one time, default-select it so the
+  // Confirm button is immediately actionable. With multiple options the
+  // candidate has to actively pick — the choice is the meaningful step.
+  const [selectedOptionId, setSelectedOptionId] = useState<string | null>(
+    proposal.options.length === 1 ? proposal.options[0].id : null
+  );
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
