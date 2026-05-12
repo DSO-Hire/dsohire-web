@@ -33,6 +33,7 @@ import {
   History,
   ClipboardList,
   Layers,
+  ShieldCheck,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { EmployerShell } from "@/components/employer/employer-shell";
@@ -59,6 +60,11 @@ import {
   type InitialScorecard,
   type ScorecardReviewer,
 } from "./scorecards-section";
+import {
+  CredentialsSection,
+  type CredentialLicenseRow,
+  type CredentialCertificationRow,
+} from "./credentials-section";
 import {
   getRubricForRole,
   parseAttributeScores,
@@ -607,6 +613,46 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     headerMetaParts.push(ROLE_LABELS[top] ?? top.replace(/_/g, " "));
   }
 
+  // ── Credentials (Phase 5B v1)
+  // RLS on candidate_licenses + candidate_certifications grants DSO members
+  // a SELECT scoped to candidates who applied to one of their jobs, so the
+  // RLS-gated client is enough for the read here. Both selects are fired
+  // in parallel.
+  const [
+    { data: rawLicenses, error: licensesErr },
+    { data: rawCertifications, error: certificationsErr },
+  ] = await Promise.all([
+    supabase
+      .from("candidate_licenses")
+      .select(
+        "id, license_type, license_number, state, issued_date, expires_date, display_number, document_path, verification_status, verified_at"
+      )
+      .eq("candidate_id", app.candidate_id)
+      .order("expires_date", { ascending: true, nullsFirst: false }),
+    supabase
+      .from("candidate_certifications")
+      .select(
+        "id, kind, level, issued_date, expires_date, document_path, verification_status, verified_at"
+      )
+      .eq("candidate_id", app.candidate_id)
+      .order("expires_date", { ascending: true, nullsFirst: false }),
+  ]);
+  if (licensesErr) {
+    console.warn("[applications] candidate_licenses fetch failed", licensesErr);
+  }
+  if (certificationsErr) {
+    console.warn(
+      "[applications] candidate_certifications fetch failed",
+      certificationsErr
+    );
+  }
+  // Cast through unknown — display_number defaults false at the schema
+  // level so a column-missing error would have surfaced above. We honor
+  // display_number in the client component (never render the number
+  // when false).
+  const credentialLicenses = ((rawLicenses ?? []) as unknown) as CredentialLicenseRow[];
+  const credentialCertifications = ((rawCertifications ?? []) as unknown) as CredentialCertificationRow[];
+
   const titleLine = cand?.current_title ?? cand?.headline ?? null;
 
   // Location label for the candidate (preferred over their full address)
@@ -615,7 +661,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
       .filter(Boolean)
       .join(", ") || null;
 
-  // The 10-section table-of-contents drives both the right-rail nav and
+  // The 11-section table-of-contents drives both the right-rail nav and
   // the section-header eyebrow numbers. Keep this list in sync with the
   // section IDs rendered below.
   const SECTIONS: Array<{
@@ -630,10 +676,11 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     { num: "04", id: "snapshot", label: "Candidate snapshot", icon: Briefcase },
     { num: "05", id: "screening", label: "Screening responses", icon: ClipboardList },
     { num: "06", id: "messages", label: "Messages with candidate", icon: MessageSquare },
-    { num: "07", id: "scorecards", label: "Scorecards", icon: Star },
-    { num: "08", id: "comments", label: "Team comments", icon: Users },
-    { num: "09", id: "notes", label: "Internal notes", icon: StickyNote },
-    { num: "10", id: "activity", label: "Activity timeline", icon: History },
+    { num: "07", id: "credentials", label: "Credentials", icon: ShieldCheck },
+    { num: "08", id: "scorecards", label: "Scorecards", icon: Star },
+    { num: "09", id: "comments", label: "Team comments", icon: Users },
+    { num: "10", id: "notes", label: "Internal notes", icon: StickyNote },
+    { num: "11", id: "activity", label: "Activity timeline", icon: History },
   ];
 
   return (
@@ -986,7 +1033,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
           {/* ───── Internal workspace ─────
               Visually differentiated so employers don't accidentally
               treat scorecards / comments / notes as candidate-visible.
-              All sections (07-10) wrap in a heritage-tinted box with a
+              All sections (07-11) wrap in a heritage-tinted box with a
               prominent header pill. v1.7 bumped the wash from /[0.04] to
               /15 per Cam — barely-there tint wasn't reading as "this is
               private" at a glance. The white DetailSection cards inside
@@ -998,18 +1045,35 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 Internal Workspace
               </div>
               <p className="mt-3 text-[12px] text-slate-meta max-w-[480px] mx-auto leading-relaxed">
-                Only your team sees what&apos;s below. Scorecards,
-                comments, and notes never reach the candidate — keep
-                anything candidate-bound in the Messages section above.
+                Only your team sees what&apos;s below. Credentials,
+                scorecards, comments, and notes never reach the
+                candidate — keep anything candidate-bound in the
+                Messages section above.
               </p>
             </div>
 
             <div className="space-y-10">
 
-          {/* 07 · Scorecards */}
+          {/* 07 · Credentials — licenses + certifications with verification + document download */}
+          <DetailSection
+            id="credentials"
+            num="07"
+            title="Credentials"
+            icon={ShieldCheck}
+            tone="internal"
+            subtitle="Licenses + certifications the candidate has added. Mark items verified after reviewing — your action is logged for the audit trail."
+          >
+            <CredentialsSection
+              applicationId={app.id}
+              licenses={credentialLicenses}
+              certifications={credentialCertifications}
+            />
+          </DetailSection>
+
+          {/* 08 · Scorecards */}
           <DetailSection
             id="scorecards"
-            num="07"
+            num="08"
             title="Scorecards"
             icon={Star}
             tone="internal"
@@ -1025,10 +1089,10 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             />
           </DetailSection>
 
-          {/* 08 · Team comments */}
+          {/* 09 · Team comments */}
           <DetailSection
             id="comments"
-            num="08"
+            num="09"
             title="Team comments"
             icon={Users}
             tone="internal"
@@ -1042,10 +1106,10 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             />
           </DetailSection>
 
-          {/* 09 · Internal notes */}
+          {/* 10 · Internal notes */}
           <DetailSection
             id="notes"
-            num="09"
+            num="10"
             title="Internal notes"
             icon={StickyNote}
             tone="internal"
@@ -1057,10 +1121,10 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             />
           </DetailSection>
 
-          {/* 10 · Activity timeline */}
+          {/* 11 · Activity timeline */}
           <DetailSection
             id="activity"
-            num="10"
+            num="11"
             title="Activity timeline"
             icon={History}
             subtitle="Every stage transition captured for this application."
