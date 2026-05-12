@@ -1453,8 +1453,7 @@ function LicenseModal({
       title={entry ? "Edit license" : "Add license"}
       banner={
         <p className="text-xs text-slate-600">
-          DSO Hire never collects DEA registration. License numbers stay
-          private by default; toggle below to display.
+          License numbers stay private by default — toggle below to display.
         </p>
       }
       footerLeft={
@@ -1491,8 +1490,8 @@ function LicenseModal({
           maxLength={2}
         />
         <TextField
-          label="License number"
-          helper="Stays private unless you toggle below."
+          label="State license number"
+          helper="Your state board number only — not DEA, NPI, or federal IDs. Stays private unless you toggle below."
           value={v.license_number ?? ""}
           onChange={(x) =>
             setV((p) => ({ ...p, license_number: x || null }))

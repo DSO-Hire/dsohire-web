@@ -315,7 +315,7 @@ const COMPARE_GROUPS: MatrixGroup[] = [
         values: { starter: false, growth: "H2 2026", enterprise: "H2 2026" },
       },
       {
-        feature: "DEA registration verification",
+        feature: "State board license verification",
         values: { starter: false, growth: false, enterprise: "H2 2026" },
       },
       {

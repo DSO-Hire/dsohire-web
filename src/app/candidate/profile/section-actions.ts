@@ -369,6 +369,24 @@ export async function upsertLicenseEntry(
     return { ok: false, error: "License type is required." };
   }
 
+  // Defense in depth — DSO Hire intentionally does not collect DEA
+  // registrations (memory: feedback_legal_shield_default_posture.md +
+  // privacy policy disclaimer). DEA format is 2 letters + 7 digits.
+  // Reject the input rather than silently storing a fraud-enabling ID
+  // even if a candidate ignores the field label + helper text.
+  if (input.license_number) {
+    const candidate = input.license_number
+      .toUpperCase()
+      .replace(/[\s-]/g, "");
+    if (/^[A-Z]{2}\d{7}$/.test(candidate)) {
+      return {
+        ok: false,
+        error:
+          "That looks like a DEA number — please enter your state board license number instead. DSO Hire doesn't collect DEA registrations.",
+      };
+    }
+  }
+
   const payload = {
     candidate_id: ctx.candidateId,
     license_type: input.license_type.trim(),

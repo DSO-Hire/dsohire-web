@@ -323,12 +323,23 @@ export async function saveParsedResumeAction(
     }
   }
 
+  // DEA-format scrubber — if the resume parser surfaced what looks
+  // like a DEA registration in the license_number field, drop it to
+  // null at import time. Memory: feedback_legal_shield_default_posture.md.
+  // Pattern: 2 letters + 7 digits, ignoring whitespace + dashes.
+  const scrubDeaFormat = (value: string | null): string | null => {
+    if (!value) return null;
+    const normalized = value.toUpperCase().replace(/[\s-]/g, "");
+    if (/^[A-Z]{2}\d{7}$/.test(normalized)) return null;
+    return value;
+  };
+
   const licenseRows = parsed.licenses
     .filter((l) => l.license_type.value)
     .map((l) => ({
       candidate_id: candidate.id,
       license_type: l.license_type.value!,
-      license_number: l.license_number.value,
+      license_number: scrubDeaFormat(l.license_number.value),
       state: l.state.value,
       issued_date: l.issued_date.value
         ? normalizeDate(l.issued_date.value)

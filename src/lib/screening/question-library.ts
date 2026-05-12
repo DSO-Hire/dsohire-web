@@ -222,15 +222,12 @@ const DENTIST_QUESTIONS: RecommendedQuestion[] = [
       "Knockout filter — an unlicensed dentist can't legally see patients on day one.",
     category: "qualification",
   },
-  {
-    id: "dds_dea",
-    prompt: "Do you currently hold an active DEA registration?",
-    kind: "yes_no",
-    required: false,
-    rationale:
-      "Useful for offices that prescribe controlled substances — flags candidates who'll need to apply.",
-    category: "qualification",
-  },
+  // DEA-related screening question intentionally removed 2026-05-12 per
+  // feedback_legal_shield_default_posture.md. DEA registration is
+  // confirmed by the DSO directly at credentialing/onboarding, not at
+  // the apply stage. Asking about it at apply intersects with ADA /
+  // controlled-substance regulatory history concerns and isn't
+  // collected by credible ATS competitors.
   {
     id: "dds_malpractice",
     prompt:
