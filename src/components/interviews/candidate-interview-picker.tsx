@@ -12,7 +12,7 @@
  * server page can show it without the client interactivity.
  */
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   Calendar,
@@ -24,6 +24,11 @@ import {
   X,
 } from "lucide-react";
 import { bookInterviewSlot } from "@/lib/interviews/actions";
+import {
+  US_TIMEZONES,
+  getBrowserTimezone,
+  formatInTimezone,
+} from "@/lib/timezones";
 
 const KIND_LABELS: Record<string, string> = {
   phone: "Phone call",
@@ -52,6 +57,12 @@ interface CandidateInterviewPickerProps {
   proposal: CandidateInterviewProposal;
 }
 
+/**
+ * Legacy formatter — keeps the booked-view rendering identical to what
+ * the candidate saw when picking (uses browser-local TZ). The picker
+ * itself routes through `formatInTimezone` so the candidate can switch
+ * display TZs before confirming.
+ */
 function formatSlot(iso: string): { line1: string; line2: string } {
   const d = new Date(iso);
   return {
@@ -91,6 +102,15 @@ export function CandidateInterviewPicker({
     proposal.options.length === 1 ? proposal.options[0].id : null
   );
   const [notes, setNotes] = useState("");
+  // Display timezone for the slot list. Initialized to a deterministic
+  // default ("America/Chicago" — geographic middle of US-only customer
+  // base) so server and client render the same HTML and avoid a React
+  // hydration warning. useEffect updates to the candidate's actual
+  // browser TZ after mount.
+  const [displayTz, setDisplayTz] = useState<string>("America/Chicago");
+  useEffect(() => {
+    setDisplayTz(getBrowserTimezone());
+  }, []);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -161,12 +181,35 @@ export function CandidateInterviewPicker({
         </div>
       )}
 
-      <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-2">
-        Pick a time
+      <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+        <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta">
+          Pick a time
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] text-slate-meta">Show in</span>
+          <select
+            value={displayTz}
+            onChange={(e) => setDisplayTz(e.target.value)}
+            className="px-2 py-1 bg-white border border-[var(--rule-strong)] text-ink text-[12px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+            aria-label="Display timezone"
+          >
+            {/* If the candidate's browser TZ isn't a standard US zone,
+                surface it as the first option so they don't have to
+                hunt for "their" zone in the list. */}
+            {!US_TIMEZONES.find((t) => t.id === displayTz) && (
+              <option value={displayTz}>{displayTz} (your time)</option>
+            )}
+            {US_TIMEZONES.map((tz) => (
+              <option key={tz.id} value={tz.id} title={tz.description}>
+                {tz.label}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
       <ul className="space-y-2 mb-4">
         {proposal.options.map((opt) => {
-          const { line1, line2 } = formatSlot(opt.start_at);
+          const { line1, line2 } = formatInTimezone(opt.start_at, displayTz);
           const selected = selectedOptionId === opt.id;
           return (
             <li key={opt.id}>

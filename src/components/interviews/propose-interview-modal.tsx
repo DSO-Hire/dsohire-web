@@ -21,6 +21,12 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { proposeInterview } from "@/lib/interviews/actions";
+import {
+  US_TIMEZONES,
+  getBrowserTimezone,
+  parseWallClock,
+  zonedTimeToUtc,
+} from "@/lib/timezones";
 
 interface ProposeInterviewLauncherProps {
   applicationId: string;
@@ -90,6 +96,11 @@ function ProposeInterviewModal({
   const [locationText, setLocationText] = useState("");
   const [message, setMessage] = useState("");
   const [slots, setSlots] = useState<SlotDraft[]>([emptySlot()]);
+  // Timezone the proposer is typing in. Default = browser-detected.
+  // Times below are interpreted in this TZ at submit; if the proposer
+  // is in California scheduling a Texas practice's interview, they can
+  // switch to Central before entering the times.
+  const [timezone, setTimezone] = useState<string>(() => getBrowserTimezone());
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -127,12 +138,21 @@ function ProposeInterviewModal({
         setError("Fill in a date AND time for every proposed slot.");
         return;
       }
-      const iso = new Date(`${s.date}T${s.time}`).toISOString();
-      if (!Number.isFinite(new Date(iso).getTime())) {
+      const wallClock = parseWallClock(s.date, s.time);
+      if (!wallClock) {
+        setError("One of the proposed times isn't a valid date/time.");
+        return;
+      }
+      // Interpret the wall-clock in the selected timezone, not the
+      // proposer's browser TZ. A recruiter in California typing
+      // "1:15 PM" with timezone set to Central Time will send
+      // 18:15 UTC (CDT) — what the Texas practice expects.
+      const utc = zonedTimeToUtc(wallClock, timezone);
+      if (!Number.isFinite(utc.getTime())) {
         setError("One of the proposed times isn't valid.");
         return;
       }
-      isoStarts.push(iso);
+      isoStarts.push(utc.toISOString());
     }
     if (isoStarts.length === 0) {
       setError("Add at least one time option.");
@@ -312,6 +332,31 @@ function ProposeInterviewModal({
                 >
                   <Plus className="h-3 w-3" /> Add slot
                 </button>
+              </div>
+              <div className="mb-2 flex items-center gap-2 px-3 py-2 bg-cream border border-[var(--rule)]">
+                <span className="text-[11px] text-slate-body shrink-0">
+                  Times below are in
+                </span>
+                <select
+                  value={timezone}
+                  onChange={(e) => setTimezone(e.target.value)}
+                  className="flex-1 min-w-0 px-2 py-1 bg-white border border-[var(--rule-strong)] text-ink text-[12px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+                  aria-label="Timezone for proposed times"
+                >
+                  {/* If the browser TZ isn't in our US list, surface it as
+                      a labeled first option so the proposer doesn't have
+                      to scroll past their own zone. */}
+                  {!US_TIMEZONES.find((t) => t.id === timezone) && (
+                    <option value={timezone}>
+                      {timezone} (your browser default)
+                    </option>
+                  )}
+                  {US_TIMEZONES.map((tz) => (
+                    <option key={tz.id} value={tz.id} title={tz.description}>
+                      {tz.label}
+                    </option>
+                  ))}
+                </select>
               </div>
               <ul className="space-y-2">
                 {slots.map((s, i) => (
