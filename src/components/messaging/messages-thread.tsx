@@ -45,6 +45,7 @@ import {
   Inbox,
   X as XIcon,
   Briefcase,
+  Calendar,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -762,6 +763,12 @@ function systemEventIcon(eventKind: string): LucideIcon {
       return XIcon;
     case "job_filled":
       return Briefcase;
+    case "interview_proposed":
+      return Calendar;
+    case "interview_booked":
+      return CheckCircle2;
+    case "interview_cancelled":
+      return XIcon;
     default:
       return Eye;
   }

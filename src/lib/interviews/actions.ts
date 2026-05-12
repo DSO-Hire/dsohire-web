@@ -22,6 +22,7 @@ import {
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/send";
+import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { InterviewProposed } from "@/emails/candidate/InterviewProposed";
 import { InterviewBooked } from "@/emails/InterviewBooked";
@@ -181,6 +182,16 @@ export async function proposeInterview(
     });
   }
 
+  // Drop a system message into the candidate's inbox thread so the
+  // proposal shows up there too, not just in their email. Fire-and-
+  // forget — never block the propose flow on a dispatch failure.
+  void dispatchInboxSystemMessage({
+    applicationId: input.applicationId,
+    eventKind: "interview_proposed",
+    senderRole: "employer",
+    body: `${dsoName} proposed ${input.proposedStarts.length} interview time${input.proposedStarts.length === 1 ? "" : "s"} for ${jobTitle}. Pick the one that works.`,
+  });
+
   await recordAuditEvent({
     dsoId: dsoUser.dso_id as string,
     actorUserId: user.id,
@@ -287,8 +298,16 @@ export async function bookInterviewSlot(
     return { ok: false, error: bErr?.message ?? "Couldn't book the slot." };
   }
 
-  // Flip proposal status.
-  await supabase
+  // Flip proposal status. Use service-role: when a CANDIDATE calls
+  // this action, the RLS-gated client can INSERT a booking row (allowed
+  // by "Interview bookings: candidate or recruiter insert") but the
+  // ONLY update policy on interview_proposals is "recruiter write" —
+  // candidates can't flip status under their own RLS, so the update
+  // silently fails. Same pattern as candidate withdraw → service-role
+  // bypass with app-layer scope check (ownership of the booking row we
+  // just successfully inserted is sufficient gate).
+  const admin = createSupabaseServiceRoleClient();
+  await admin
     .from("interview_proposals")
     .update({ status: "booked" })
     .eq("id", input.proposalId);
@@ -408,6 +427,24 @@ export async function bookInterviewSlot(
           option_id: input.optionId,
           start_at: option.start_at,
         },
+      });
+
+      // Drop a system message into the inbox thread — candidate-side
+      // "speaking" (senderRole='candidate') so the employer's inbox
+      // shows the booking confirmation as an incoming event.
+      const slotIso = option.start_at as string;
+      void dispatchInboxSystemMessage({
+        applicationId: propCtx.application_id,
+        eventKind: "interview_booked",
+        senderRole: "candidate",
+        body: `Interview confirmed for ${new Date(slotIso).toLocaleString("en-US", {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })}.`,
       });
     }
 

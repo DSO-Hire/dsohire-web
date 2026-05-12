@@ -28,7 +28,10 @@ export type InboxEventKind =
   | "stage_changed"
   | "application_received"
   | "application_withdrawn"
-  | "job_filled";
+  | "job_filled"
+  | "interview_proposed"
+  | "interview_booked"
+  | "interview_cancelled";
 
 export interface DispatchSystemMessageInput {
   applicationId: string;
