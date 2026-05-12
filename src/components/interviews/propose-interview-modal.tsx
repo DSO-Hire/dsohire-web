@@ -20,7 +20,10 @@ import {
   Loader2,
   CheckCircle2,
 } from "lucide-react";
-import { proposeInterview } from "@/lib/interviews/actions";
+import {
+  proposeInterview,
+  cancelInterviewBooking,
+} from "@/lib/interviews/actions";
 import {
   US_TIMEZONES,
   getBrowserTimezone,
@@ -60,11 +63,124 @@ export function ProposeInterviewLauncher({
   );
 }
 
+/**
+ * Cancel-interview button — confirms intent, prompts for an optional
+ * reason, and fires cancelInterviewBooking. The action already deletes
+ * any pushed calendar events and flips the proposal back to pending.
+ */
+export interface CancelInterviewButtonProps {
+  bookingId: string;
+}
+
+export function CancelInterviewButton({ bookingId }: CancelInterviewButtonProps) {
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={async () => {
+          if (
+            !window.confirm(
+              "Cancel this booked interview? The candidate will be notified."
+            )
+          ) {
+            return;
+          }
+          const reason =
+            window.prompt("Optional reason (visible in the audit log)") ||
+            null;
+          setError(null);
+          setBusy(true);
+          const res = await cancelInterviewBooking(bookingId, reason);
+          setBusy(false);
+          if (!res.ok) {
+            setError(res.error ?? "Couldn't cancel the interview.");
+            return;
+          }
+          router.refresh();
+        }}
+        disabled={busy}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-red-200 bg-white text-[11px] font-bold tracking-[1.5px] uppercase text-red-700 hover:bg-red-50 disabled:opacity-50"
+      >
+        {busy ? (
+          <Loader2 className="h-3 w-3 animate-spin" />
+        ) : (
+          <X className="h-3 w-3" aria-hidden />
+        )}
+        Cancel interview
+      </button>
+      {error && (
+        <p className="mt-1 text-[11px] text-red-700">{error}</p>
+      )}
+    </>
+  );
+}
+
+/**
+ * Reschedule launcher — opens the propose modal with the previous
+ * proposal's context pre-filled (kind, duration, location, message)
+ * AND a `replacingBookingId` that the modal uses to cancel the live
+ * booking before sending the new proposal. The button itself only
+ * shows on an already-booked interview (BookedView).
+ */
+export interface RescheduleInterviewLauncherProps {
+  applicationId: string;
+  candidateName: string | null;
+  replacingBookingId: string;
+  initialValues: ProposeInitialValues;
+}
+
+export function RescheduleInterviewLauncher({
+  applicationId,
+  candidateName,
+  replacingBookingId,
+  initialValues,
+}: RescheduleInterviewLauncherProps) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-green-300 bg-white text-[11px] font-bold tracking-[1.5px] uppercase text-green-900 hover:bg-green-50"
+      >
+        <Calendar className="h-3 w-3" aria-hidden />
+        Reschedule
+      </button>
+      <ProposeInterviewModal
+        applicationId={applicationId}
+        candidateName={candidateName}
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        replacingBookingId={replacingBookingId}
+        initialValues={initialValues}
+      />
+    </>
+  );
+}
+
+export interface ProposeInitialValues {
+  kind: "phone" | "video" | "in_person" | "other";
+  duration: number;
+  locationText: string;
+  message: string;
+}
+
 interface ProposeInterviewModalProps {
   applicationId: string;
   candidateName: string | null;
   isOpen: boolean;
   onClose: () => void;
+  /**
+   * When set, the modal title + submit button switch into reschedule
+   * mode; on submit, the active booking is cancelled first via
+   * cancelInterviewBooking before the new proposal is sent.
+   */
+  replacingBookingId?: string;
+  /** Pre-fill values — used by the reschedule launcher. */
+  initialValues?: ProposeInitialValues;
 }
 
 interface SlotDraft {
@@ -89,12 +205,19 @@ function ProposeInterviewModal({
   candidateName,
   isOpen,
   onClose,
+  replacingBookingId,
+  initialValues,
 }: ProposeInterviewModalProps) {
   const router = useRouter();
-  const [kind, setKind] = useState<"phone" | "video" | "in_person" | "other">("video");
-  const [duration, setDuration] = useState(30);
-  const [locationText, setLocationText] = useState("");
-  const [message, setMessage] = useState("");
+  const isReschedule = Boolean(replacingBookingId);
+  const [kind, setKind] = useState<"phone" | "video" | "in_person" | "other">(
+    initialValues?.kind ?? "video"
+  );
+  const [duration, setDuration] = useState(initialValues?.duration ?? 30);
+  const [locationText, setLocationText] = useState(
+    initialValues?.locationText ?? ""
+  );
+  const [message, setMessage] = useState(initialValues?.message ?? "");
   const [slots, setSlots] = useState<SlotDraft[]>([emptySlot()]);
   // Timezone the proposer is typing in. Default = browser-detected.
   // Times below are interpreted in this TZ at submit; if the proposer
@@ -160,6 +283,25 @@ function ProposeInterviewModal({
     }
 
     startTransition(async () => {
+      // Reschedule path: cancel the live booking first. The lib's
+      // cancelInterviewBooking nukes any pushed calendar events and
+      // flips the prior proposal back to pending (then cleaned up
+      // implicitly because we send a new proposal right after, which
+      // becomes the new active row). If the cancel fails we still
+      // bail — the candidate would otherwise see two active proposals.
+      if (replacingBookingId) {
+        const cancelRes = await cancelInterviewBooking(
+          replacingBookingId,
+          "Rescheduled by employer"
+        );
+        if (!cancelRes.ok) {
+          setError(
+            cancelRes.error ??
+              "Couldn't cancel the existing booking — try again."
+          );
+          return;
+        }
+      }
       const res = await proposeInterview({
         applicationId,
         interviewKind: kind,
@@ -189,7 +331,9 @@ function ProposeInterviewModal({
       <div className="bg-white border border-[var(--rule)] w-full max-w-2xl shadow-2xl mt-12">
         <header className="px-6 py-4 border-b border-[var(--rule)] flex items-center justify-between">
           <h2 className="text-[14px] font-bold tracking-[-0.2px] text-ink">
-            Propose interview times{candidateName ? ` · ${candidateName}` : ""}
+            {isReschedule
+              ? `Reschedule interview${candidateName ? ` · ${candidateName}` : ""}`
+              : `Propose interview times${candidateName ? ` · ${candidateName}` : ""}`}
           </h2>
           <button
             type="button"
@@ -420,7 +564,7 @@ function ProposeInterviewModal({
                 ) : (
                   <Send className="h-3.5 w-3.5" />
                 )}
-                Send proposal
+                {isReschedule ? "Send new times" : "Send proposal"}
               </button>
             </div>
           </form>

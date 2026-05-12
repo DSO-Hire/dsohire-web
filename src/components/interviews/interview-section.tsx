@@ -8,7 +8,11 @@
  */
 
 import { Calendar, Clock, MapPin, AlertCircle, CheckCircle2 } from "lucide-react";
-import { ProposeInterviewLauncher } from "./propose-interview-modal";
+import {
+  ProposeInterviewLauncher,
+  RescheduleInterviewLauncher,
+  CancelInterviewButton,
+} from "./propose-interview-modal";
 
 const KIND_LABELS: Record<string, string> = {
   phone: "Phone call",
@@ -87,7 +91,11 @@ export function EmployerInterviewSection({
           both get a confirmation email.
         </p>
       ) : active.status === "booked" && active.booking ? (
-        <BookedView proposal={active} />
+        <BookedView
+          proposal={active}
+          applicationId={applicationId}
+          candidateName={candidateName}
+        />
       ) : (
         <PendingView proposal={active} />
       )}
@@ -173,7 +181,15 @@ function PendingView({ proposal }: { proposal: InterviewProposalState }) {
   );
 }
 
-function BookedView({ proposal }: { proposal: InterviewProposalState }) {
+function BookedView({
+  proposal,
+  applicationId,
+  candidateName,
+}: {
+  proposal: InterviewProposalState;
+  applicationId: string;
+  candidateName: string | null;
+}) {
   if (!proposal.booking) return null;
   const opt = proposal.options.find(
     (o) => o.id === proposal.booking?.selected_option_id
@@ -217,6 +233,20 @@ function BookedView({ proposal }: { proposal: InterviewProposalState }) {
             </p>
           </div>
         )}
+      </div>
+      <div className="mt-4 pt-3 border-t border-green-200 flex flex-wrap items-center gap-2">
+        <RescheduleInterviewLauncher
+          applicationId={applicationId}
+          candidateName={candidateName}
+          replacingBookingId={proposal.booking.id}
+          initialValues={{
+            kind: proposal.interview_kind,
+            duration: proposal.duration_minutes,
+            locationText: proposal.location_text ?? "",
+            message: proposal.message_to_candidate ?? "",
+          }}
+        />
+        <CancelInterviewButton bookingId={proposal.booking.id} />
       </div>
     </div>
   );
