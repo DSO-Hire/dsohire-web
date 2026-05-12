@@ -7,7 +7,7 @@
 
 import Link from "next/link";
 import { BrandLockup } from "@/components/marketing/site-shell";
-import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
+import { SALES_EMAIL, SALES_MAILTO } from "@/lib/contact";
 
 export default function PricingLayout({
   children,
@@ -61,8 +61,8 @@ function PricingFooter() {
           <Link href="/legal/terms" className="hover:text-ivory/70 transition-colors">
             Terms
           </Link>
-          <Link href={SUPPORT_MAILTO} className="hover:text-ivory/70 transition-colors">
-            {SUPPORT_EMAIL}
+          <Link href={SALES_MAILTO} className="hover:text-ivory/70 transition-colors">
+            {SALES_EMAIL}
           </Link>
         </div>
       </div>

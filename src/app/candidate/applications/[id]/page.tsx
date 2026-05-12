@@ -220,8 +220,15 @@ export default async function CandidateApplicationDetailPage({
       }>;
     };
     const booking = p.interview_bookings?.[0] ?? null;
+    // Use the page-resolved `otherPartyName` (from getDisplayedDsoName)
+    // rather than the nested embed — embed silently returns empty under
+    // candidate-RLS, so dsoName was always falling back to "the practice".
+    // otherPartyName also honors affiliation-reveal policy so private-DSO
+    // candidates see the practice-level name not the corporate name.
     const dsoName =
-      p.applications?.[0]?.jobs?.[0]?.dsos?.[0]?.name ?? "the practice";
+      otherPartyName ||
+      p.applications?.[0]?.jobs?.[0]?.dsos?.[0]?.name ||
+      "the practice";
     activeProposal = {
       proposal_id: p.id,
       status: p.status,

@@ -69,6 +69,17 @@ function formatSlot(iso: string): { line1: string; line2: string } {
   };
 }
 
+/**
+ * Capitalize the first letter of a string. Defensive against DSO display
+ * names stored in lowercase ("dso hire") so customer-facing copy still
+ * reads cleanly. Mid-sentence DSO names stay verbatim; this only fires
+ * at sentence start where the lowercase is most jarring.
+ */
+function capitalizeFirst(s: string | null | undefined): string {
+  if (!s) return "";
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 export function CandidateInterviewPicker({
   proposal,
 }: CandidateInterviewPickerProps) {
@@ -119,11 +130,16 @@ export function CandidateInterviewPicker({
         />
         <div>
           <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
-            Interview proposed
+            Interview proposed · {kindLabel}
           </div>
           <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink leading-tight mb-1">
-            {proposal.dso_name} wants to schedule a {kindLabel.toLowerCase()}.
+            Schedule your {kindLabel.toLowerCase()}.
           </h2>
+          <p className="text-[13px] text-slate-body leading-relaxed mb-1">
+            {capitalizeFirst(proposal.dso_name)} has proposed
+            {proposal.options.length === 1 ? " a time" : " a few times"} below.
+            Pick the one that works.
+          </p>
           <div className="flex items-center gap-3 text-[12px] text-slate-body">
             <span className="inline-flex items-center gap-1">
               <Clock className="h-3 w-3" />
