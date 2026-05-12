@@ -152,10 +152,24 @@ export async function proposeInterview(
   // Email candidate.
   const candAuth = candidate?.auth_user_id ?? null;
   let candidateEmail: string | null = null;
+  let authLookupError: string | null = null;
   if (candAuth) {
     const admin = createSupabaseServiceRoleClient();
     const res = await admin.auth.admin.getUserById(candAuth);
     candidateEmail = res.data?.user?.email ?? null;
+    authLookupError = res.error?.message ?? null;
+  }
+  // Instrumentation (Track C debugging 2026-05-12) — surface why the
+  // email gets skipped. Remove once the email flow is verified end-
+  // to-end.
+  if (!candidateEmail) {
+    console.warn("[proposeInterview] skipped email", {
+      applicationId: input.applicationId,
+      candidateFound: Boolean(candidate),
+      candidateHasAuth: Boolean(candAuth),
+      authLookupError,
+      candidateEmbedKeys: candidate ? Object.keys(candidate) : null,
+    });
   }
   const dsoName = await dsoNameForAppId(supabase, input.applicationId);
 
