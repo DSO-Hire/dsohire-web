@@ -29,7 +29,10 @@ import {
   getConnection,
   type CalendarProvider,
 } from "@/lib/integrations/connections";
-import { pushInterviewEvent } from "@/lib/integrations/calendar-push";
+import {
+  pushInterviewEvent,
+  deleteInterviewEvent,
+} from "@/lib/integrations/calendar-push";
 
 export interface InterviewActionResult {
   ok: boolean;
@@ -453,6 +456,13 @@ export async function cancelInterviewBooking(
 
   if (!booking) return { ok: false, error: "Booking not found." };
 
+  // Best-effort: delete pushed calendar events BEFORE we delete the
+  // booking row. The interview_calendar_events rows have ON DELETE
+  // CASCADE on booking_id, so once the booking is gone the lookup
+  // returns nothing and the provider event stays orphaned on the user's
+  // calendar. Doing this first preserves the breadcrumb.
+  await cancelCalendarsForBooking(bookingId);
+
   // Delete booking; flip proposal back to pending so another slot can
   // be picked (or the proposal can be cancelled outright).
   const { error } = await supabase
@@ -666,6 +676,49 @@ interface PushForUserInput {
   summary: string;
   description: string;
   locationText: string | null;
+}
+
+/**
+ * Mirror cancellation back to every calendar that received a pushed
+ * event for this booking. Reads from interview_calendar_events directly
+ * because the booking's proposer/candidate user mapping isn't enough on
+ * its own — only the rows in interview_calendar_events know which
+ * provider events actually got persisted (some pushes may have failed
+ * on the original booking).
+ *
+ * Best-effort throughout. The booking deletion is the authoritative
+ * cancel; this is convenience layered on top.
+ */
+async function cancelCalendarsForBooking(bookingId: string): Promise<void> {
+  try {
+    const admin = createSupabaseServiceRoleClient();
+    const { data: events } = await admin
+      .from("interview_calendar_events")
+      .select("auth_user_id, provider")
+      .eq("booking_id", bookingId);
+
+    const rows = (events ?? []) as Array<{
+      auth_user_id: string;
+      provider: CalendarProvider;
+    }>;
+    for (const row of rows) {
+      try {
+        await deleteInterviewEvent({
+          authUserId: row.auth_user_id,
+          provider: row.provider,
+          bookingId,
+        });
+      } catch (err) {
+        console.warn("[interview-cancel] calendar delete failed", {
+          bookingId,
+          provider: row.provider,
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }
+  } catch (err) {
+    console.warn("[interview-cancel] calendar wrapper error", err);
+  }
 }
 
 /**

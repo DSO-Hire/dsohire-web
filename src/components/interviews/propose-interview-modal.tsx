@@ -250,7 +250,11 @@ function ProposeInterviewModal({
 
             <div>
               <label className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
-                Location, Zoom link, or phone number
+                {kind === "phone"
+                  ? "Phone number"
+                  : kind === "in_person"
+                    ? "Address"
+                    : "Location"}
                 <span className="ml-2 text-slate-meta normal-case tracking-normal font-normal">
                   (optional)
                 </span>
@@ -259,10 +263,23 @@ function ProposeInterviewModal({
                 type="text"
                 value={locationText}
                 onChange={(e) => setLocationText(e.target.value)}
-                placeholder="e.g. https://zoom.us/j/123456789  ·  Or: 123 Main St, City, State"
+                placeholder={
+                  kind === "phone"
+                    ? "e.g. +1 555 555 1234"
+                    : kind === "in_person"
+                      ? "e.g. 123 Main St, City, State"
+                      : kind === "video"
+                        ? "Optional — we auto-add a Google Meet / Microsoft Teams link"
+                        : "Where to meet"
+                }
                 maxLength={300}
                 className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
               />
+              {kind === "video" && (
+                <p className="mt-1.5 text-[11px] text-slate-meta leading-relaxed">
+                  Leave blank for a fresh video link on each interview. Both calendars will get a join URL automatically.
+                </p>
+              )}
             </div>
 
             <div>

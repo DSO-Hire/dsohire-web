@@ -158,10 +158,10 @@ export function CandidateInterviewPicker({
                 type="button"
                 onClick={() => setSelectedOptionId(opt.id)}
                 className={
-                  "w-full text-left px-4 py-3 border transition-colors " +
+                  "w-full text-left px-4 py-3 border-2 transition-all " +
                   (selected
-                    ? "border-heritage bg-white ring-2 ring-heritage"
-                    : "border-[var(--rule)] bg-white hover:bg-cream/40")
+                    ? "border-heritage bg-cream ring-2 ring-heritage/30 shadow-sm"
+                    : "border-[var(--rule)] bg-white hover:bg-cream/60 hover:border-heritage/40 cursor-pointer")
                 }
               >
                 <div className="flex items-center justify-between gap-3">
@@ -205,19 +205,31 @@ export function CandidateInterviewPicker({
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={handleBook}
-        disabled={pending || !selectedOptionId}
-        className="inline-flex items-center gap-2 px-6 py-2.5 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft disabled:opacity-60"
-      >
-        {pending ? (
-          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-        ) : (
-          <CheckCircle2 className="h-3.5 w-3.5" />
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={handleBook}
+          disabled={pending || !selectedOptionId}
+          title={
+            !selectedOptionId
+              ? "Pick a time above to enable this button"
+              : undefined
+          }
+          className="inline-flex items-center gap-2 px-6 py-2.5 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-ink"
+        >
+          {pending ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <CheckCircle2 className="h-3.5 w-3.5" />
+          )}
+          Confirm interview
+        </button>
+        {!selectedOptionId && (
+          <span className="text-[12px] text-slate-meta italic">
+            Pick a time above to enable
+          </span>
         )}
-        Confirm interview
-      </button>
+      </div>
     </section>
   );
 }
