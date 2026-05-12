@@ -901,21 +901,21 @@ export default async function EmployerDashboard() {
         <PipelineFunnel
           stageCounts={{
             submitted:
-              stage30dCounts.new +
-              stage30dCounts.reviewed +
-              stage30dCounts.interviewing +
-              stage30dCounts.offered +
+              stage30dCounts.open +
+              stage30dCounts.screen +
+              stage30dCounts.interview +
+              stage30dCounts.offer +
               stage30dCounts.hired,
             reviewed:
-              stage30dCounts.reviewed +
-              stage30dCounts.interviewing +
-              stage30dCounts.offered +
+              stage30dCounts.screen +
+              stage30dCounts.interview +
+              stage30dCounts.offer +
               stage30dCounts.hired,
             interview:
-              stage30dCounts.interviewing +
-              stage30dCounts.offered +
+              stage30dCounts.interview +
+              stage30dCounts.offer +
               stage30dCounts.hired,
-            offer: stage30dCounts.offered + stage30dCounts.hired,
+            offer: stage30dCounts.offer + stage30dCounts.hired,
             hired: stage30dCounts.hired,
           }}
           windowLabel="Last 30 days"
