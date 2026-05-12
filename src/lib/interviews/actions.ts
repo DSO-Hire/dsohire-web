@@ -34,6 +34,7 @@ import {
   pushInterviewEvent,
   deleteInterviewEvent,
 } from "@/lib/integrations/calendar-push";
+import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
 
 export interface InterviewActionResult {
   ok: boolean;
@@ -172,7 +173,17 @@ export async function proposeInterview(
     const res = await admin.auth.admin.getUserById(candAuth);
     candidateEmail = res.data?.user?.email ?? null;
   }
-  const dsoName = await dsoNameForAppId(supabase, input.applicationId);
+  // Resolve the DSO name the CANDIDATE should see. Honors per-DSO
+  // affiliation-reveal policy + per-location private flags — for a
+  // private-affiliation job, the candidate sees the practice name
+  // (e.g., "67 Dental") not the corporate DSO name (e.g., "dso hire").
+  // The previous resolver (dsoNameForAppId) returned the raw corporate
+  // name and leaked the DSO affiliation in proposal emails + inbox.
+  const displayed = await getDisplayedDsoName({
+    jobId: appCtx.job_id,
+    viewer: { role: "candidate", applicationId: input.applicationId },
+  });
+  const dsoName = displayed.name;
 
   if (candidateEmail) {
     void sendEmail({
@@ -331,7 +342,7 @@ export async function bookInterviewSlot(
   const { data: proposal } = await supabase
     .from("interview_proposals")
     .select(
-      "id, application_id, interview_kind, duration_minutes, location_text, message_to_candidate, applications(jobs(title, dso_id), candidates(full_name, auth_user_id))"
+      "id, application_id, interview_kind, duration_minutes, location_text, message_to_candidate, applications(jobs(id, title, dso_id), candidates(full_name, auth_user_id))"
     )
     .eq("id", input.proposalId)
     .maybeSingle();
@@ -343,22 +354,51 @@ export async function bookInterviewSlot(
     .maybeSingle();
 
   if (proposal && option) {
+    // Defensive embed unwrap — PostgREST returns to-one FK embeds as
+    // either an array or a single object depending on hints/version.
+    type JobEmbed = { id: string; title: string; dso_id: string };
+    type CandEmbed = {
+      full_name: string | null;
+      auth_user_id: string | null;
+    };
+    type AppEmbed = {
+      jobs: JobEmbed | Array<JobEmbed> | null;
+      candidates: CandEmbed | Array<CandEmbed> | null;
+    };
     const propCtx = proposal as unknown as {
       application_id: string;
       interview_kind: string;
       duration_minutes: number;
       location_text: string | null;
-      applications: Array<{
-        jobs: Array<{ title: string; dso_id: string }>;
-        candidates: Array<{ full_name: string | null; auth_user_id: string | null }>;
-      }>;
+      applications: AppEmbed | Array<AppEmbed> | null;
     };
-    const app = propCtx.applications?.[0];
-    const job = app?.jobs?.[0];
-    const cand = app?.candidates?.[0];
+    const appField = propCtx.applications;
+    const app = Array.isArray(appField) ? appField[0] ?? null : appField;
+    const jobsField = app?.jobs ?? null;
+    const job = Array.isArray(jobsField) ? jobsField[0] ?? null : jobsField;
+    const candidatesField = app?.candidates ?? null;
+    const cand = Array.isArray(candidatesField)
+      ? candidatesField[0] ?? null
+      : candidatesField;
     const dsoId = job?.dso_id ?? null;
     const jobTitle = job?.title ?? "the role";
-    const dsoName = dsoId ? await dsoNameById(supabase, dsoId) : "the DSO";
+    // Corporate name (for DSO-member emails) vs candidate-displayed
+    // name (for the candidate's email, respects affiliation-reveal).
+    const dsoNameCorporate = dsoId
+      ? await dsoNameById(supabase, dsoId)
+      : "the DSO";
+    const jobIdForViewer = job?.id ?? "";
+    const candidateDisplayed = jobIdForViewer
+      ? await getDisplayedDsoName({
+          jobId: jobIdForViewer,
+          viewer: {
+            role: "candidate",
+            applicationId: propCtx.application_id,
+          },
+        })
+      : null;
+    const dsoNameForCandidate =
+      candidateDisplayed?.name || dsoNameCorporate;
 
     // Email candidate
     if (cand?.auth_user_id) {
@@ -374,7 +414,7 @@ export async function bookInterviewSlot(
           react: InterviewBooked({
             recipientName: cand.full_name?.split(/\s+/)[0] ?? null,
             audience: "candidate",
-            dsoName,
+            dsoName: dsoNameForCandidate,
             jobTitle,
             startAtIso: option.start_at as string,
             durationMinutes: propCtx.duration_minutes,
@@ -413,7 +453,10 @@ export async function bookInterviewSlot(
             react: InterviewBooked({
               recipientName: m.full_name?.split(/\s+/)[0] ?? null,
               audience: "employer",
-              dsoName,
+              // DSO members see the corporate name internally; the
+              // affiliation policy applies to the candidate-facing
+              // email above, not this one.
+              dsoName: dsoNameCorporate,
               jobTitle,
               candidateName: cand?.full_name ?? null,
               startAtIso: option.start_at as string,
