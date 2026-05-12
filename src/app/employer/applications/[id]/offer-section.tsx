@@ -67,8 +67,17 @@ interface OfferSectionProps {
   applicationId: string;
   candidateName: string;
   candidateEmail: string | null;
+  /** Candidate-view DSO name (affiliation-masked). Used in the preview
+   * + subject default so it matches what the candidate will see in
+   * the rendered email. The server action re-resolves this for the
+   * actual send, but the preview needs the same string for parity. */
   dsoName: string;
   jobTitle: string;
+  /** "City, State" — auto-filled from the job's first linked location.
+   * Empty string when unresolvable. */
+  jobLocation: string;
+  /** Humanized employment type label ("Full-time", "Part-time", etc.). */
+  jobEmploymentType: string;
   templates: OfferTemplateOption[];
   sends: OfferSendRow[];
 }
@@ -79,6 +88,8 @@ export function OfferSection({
   candidateEmail,
   dsoName,
   jobTitle,
+  jobLocation,
+  jobEmploymentType,
   templates,
   sends,
 }: OfferSectionProps) {
@@ -139,6 +150,8 @@ export function OfferSection({
           candidateEmail={candidateEmail}
           dsoName={dsoName}
           jobTitle={jobTitle}
+          jobLocation={jobLocation}
+          jobEmploymentType={jobEmploymentType}
           templates={templates}
           onClose={() => setModalOpen(false)}
         />
@@ -304,6 +317,8 @@ function SendOfferModal({
   candidateEmail,
   dsoName,
   jobTitle,
+  jobLocation,
+  jobEmploymentType,
   templates,
   onClose,
 }: {
@@ -312,6 +327,8 @@ function SendOfferModal({
   candidateEmail: string;
   dsoName: string;
   jobTitle: string;
+  jobLocation: string;
+  jobEmploymentType: string;
   templates: OfferTemplateOption[];
   onClose: () => void;
 }) {
@@ -401,6 +418,8 @@ function SendOfferModal({
       "candidate.first_name": candidateName.split(" ")[0] ?? candidateName,
       "candidate.email": candidateEmail,
       "job.title": jobTitle,
+      "job.location": jobLocation,
+      "job.employment_type": jobEmploymentType,
       "dso.name": dsoName,
       ...values,
     };
@@ -412,6 +431,8 @@ function SendOfferModal({
     candidateName,
     candidateEmail,
     jobTitle,
+    jobLocation,
+    jobEmploymentType,
     dsoName,
     values,
   ]);

@@ -27,6 +27,7 @@ import { recordAuditEvent } from "@/lib/audit/record";
 import { sendEmail } from "@/lib/email/send";
 import { renderTemplate } from "@/lib/offer-letters/merge";
 import { OfferLetter as OfferLetterEmail } from "@/emails/employer/OfferLetter";
+import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
 
 export interface SendOfferInput {
   applicationId: string;
@@ -181,15 +182,21 @@ export async function sendOffer(
     }
   }
 
-  // ── DSO name
-  const { data: dsoRow } = await supabase
-    .from("dsos")
-    .select("id, name")
-    .eq("id", jobDsoId)
-    .maybeSingle();
-  const dsoName =
-    ((dsoRow as Record<string, unknown> | null)?.name as string | null) ??
-    "Your DSO";
+  // ── DSO name (CANDIDATE-FACING, affiliation-masked)
+  // The offer letter is sent TO the candidate, so we must honor the
+  // affiliation-reveal policy + per-location private flags. A private-
+  // affiliation job's candidate sees the practice name ("67 Dental"),
+  // not the corporate DSO ("dso hire"). Same posture as
+  // proposeInterview, the reference-request email, and the /r/[token]
+  // public form — every candidate-facing surface routes through
+  // getDisplayedDsoName with viewer='candidate'. Raw dsos.name lookup
+  // was the same affiliation leak we already cleaned out of Tracks
+  // C + D today.
+  const displayedDso = await getDisplayedDsoName({
+    jobId: (appRow as Record<string, unknown>).job_id as string,
+    viewer: { role: "candidate", applicationId },
+  });
+  const dsoName = displayedDso.name || "Your DSO";
 
   // ── Compose full merge values (auto + sender-supplied). Sender values
   // win when both are present (so an employer can override the auto-

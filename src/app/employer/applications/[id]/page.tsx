@@ -75,6 +75,7 @@ import {
   type OfferTemplateOption,
   type OfferSendRow,
 } from "./offer-section";
+import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
 import {
   getRubricForRole,
   parseAttributeScores,
@@ -725,6 +726,14 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const showOfferSection = currentKind === "offer";
   let offerTemplates: OfferTemplateOption[] = [];
   let offerSends: OfferSendRow[] = [];
+  // Candidate-view DSO name (affiliation-masked) + job location + an
+  // employment-type label, used by OfferSection's preview so it
+  // matches what the candidate will actually receive. The server
+  // action re-resolves these for the real send; we duplicate the
+  // resolution here so the preview is honest.
+  let offerSectionDsoName: string = dsoNameForAffiliation;
+  let offerSectionJobLocation: string = "";
+  let offerSectionJobEmploymentType: string = "";
   if (showOfferSection) {
     const [
       { data: rawTemplates, error: templatesErr },
@@ -812,6 +821,49 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
           : null,
       };
     });
+
+    // Resolve the candidate-view DSO name. Honors per-DSO affiliation
+    // reveal policy + per-location private flags so the preview shows
+    // the practice name (e.g. "67 Dental"), not the corporate parent
+    // (e.g. "dso hire") when this job is privately affiliated. Same
+    // posture as proposeInterview + reference flow + /r/[token].
+    try {
+      const displayed = await getDisplayedDsoName({
+        jobId: app.job_id as string,
+        viewer: { role: "candidate", applicationId: app.id },
+      });
+      if (displayed.name) offerSectionDsoName = displayed.name;
+    } catch (e) {
+      console.warn("[offer-section] dso name resolve failed", e);
+    }
+
+    // Job location — "City, State" from the first linked dso_location.
+    const { data: jobLocRow } = await supabase
+      .from("job_locations")
+      .select("dso_locations:dso_locations(city, state)")
+      .eq("job_id", app.job_id as string)
+      .limit(1)
+      .maybeSingle();
+    if (jobLocRow) {
+      const locRel = (jobLocRow as Record<string, unknown>).dso_locations as
+        | Record<string, unknown>
+        | Array<Record<string, unknown>>
+        | null;
+      const loc = Array.isArray(locRel) ? locRel[0] ?? null : locRel;
+      if (loc) {
+        const city = (loc.city as string | null) ?? "";
+        const state = (loc.state as string | null) ?? "";
+        offerSectionJobLocation = [city, state]
+          .filter(Boolean)
+          .join(", ");
+      }
+    }
+
+    // Humanize employment_type ("full_time" → "Full-time").
+    const rawEmp = (job.employment_type as string | null) ?? "";
+    offerSectionJobEmploymentType = rawEmp
+      ? rawEmp.charAt(0).toUpperCase() + rawEmp.slice(1).replace(/_/g, "-")
+      : "";
   }
 
   const titleLine = cand?.current_title ?? cand?.headline ?? null;
@@ -1217,8 +1269,10 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 applicationId={app.id}
                 candidateName={displayName}
                 candidateEmail={candidateEmail}
-                dsoName={dsoNameForAffiliation}
+                dsoName={offerSectionDsoName}
                 jobTitle={String(job.title)}
+                jobLocation={offerSectionJobLocation}
+                jobEmploymentType={offerSectionJobEmploymentType}
                 templates={offerTemplates}
                 sends={offerSends}
               />
