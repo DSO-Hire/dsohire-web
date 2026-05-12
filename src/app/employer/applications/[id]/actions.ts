@@ -160,6 +160,10 @@ export async function moveApplicationStage(
 
   const resolved = await resolveTargetStage(supabase, applicationId, target);
   if (!resolved) {
+    console.warn(
+      "[moveApplicationStage] resolveTargetStage returned null",
+      { applicationId, target }
+    );
     return { ok: false, error: "Stage not found for this DSO." };
   }
 
@@ -235,6 +239,12 @@ export async function moveApplicationStage(
 
   // RLS-denied updates return 0 rows with no error. Treat as failure.
   if (error || !data) {
+    console.warn("[moveApplicationStage] update returned no row", {
+      applicationId,
+      stageId: resolved.stageId,
+      kind: resolved.kind,
+      pgError: error,
+    });
     return {
       ok: false,
       error: error?.message ?? "Update denied or row not found",

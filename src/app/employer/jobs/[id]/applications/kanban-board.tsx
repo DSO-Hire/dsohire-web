@@ -127,6 +127,9 @@ interface ErrorState {
   kind: "network" | "denied";
   candidateName: string;
   stageLabel: string;
+  /** Server-side reason (Track B follow-up — surface the real error
+   *  instead of always rendering "no permission") */
+  reason: string | null;
   pendingMove: {
     applicationId: string;
     nextStageId: string;
@@ -419,6 +422,7 @@ export function KanbanBoard({
             kind: result.networkError ? "network" : "denied",
             candidateName,
             stageLabel: prevLabel,
+            reason: result.error ?? null,
             pendingMove: result.networkError
               ? {
                   applicationId,
@@ -802,9 +806,17 @@ export function KanbanBoard({
               ) : (
                 <>
                   <span className="font-bold">
-                    You don&apos;t have permission to move {error.candidateName}.
+                    Couldn&apos;t move {error.candidateName}.
                   </span>{" "}
                   Status reverted to {error.stageLabel}.
+                  {error.reason && (
+                    <>
+                      {" "}
+                      <span className="block mt-1 text-[12px] text-red-800">
+                        Server said: {error.reason}
+                      </span>
+                    </>
+                  )}
                 </>
               )}
             </div>
