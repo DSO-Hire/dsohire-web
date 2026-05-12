@@ -7,7 +7,7 @@
 
 import Link from "next/link";
 import { BrandLockup } from "@/components/marketing/site-shell";
-import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
+import { INFO_EMAIL as SUPPORT_EMAIL, INFO_MAILTO as SUPPORT_MAILTO } from "@/lib/contact";
 
 export default function LegalLayout({
   children,

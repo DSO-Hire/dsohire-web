@@ -39,9 +39,21 @@
  */
 export const INFO_EMAIL = "info@dsohire.com";
 export const SALES_EMAIL = "sales@dsohire.com";
-/** Legacy: maps to info@ — most existing consumers expect this. */
-export const SUPPORT_EMAIL = "info@dsohire.com";
-/** Real support@ for help/error contexts where the precise alias matters. */
+/**
+ * SUPPORT_EMAIL → support@ as of 2026-05-12 build sweep.
+ *
+ * The constant historically mapped to info@ as a back-compat alias.
+ * Today's polish flip points it at the real support@ alias so every
+ * help/error/restore consumer reads "support@" — the contextually
+ * correct address for those surfaces per `reference_email_aliases.md`.
+ *
+ * Marketing / legal / footer surfaces that should keep reading info@
+ * (general institutional contact) have been migrated to import
+ * INFO_EMAIL directly. Pricing / enterprise / charter surfaces use
+ * SALES_EMAIL.
+ */
+export const SUPPORT_EMAIL = "support@dsohire.com";
+/** Kept for backwards compatibility — same value as SUPPORT_EMAIL. */
 export const HELP_EMAIL = "support@dsohire.com";
 
 /** `mailto:` link helpers so consumers don't repeat the prefix. */

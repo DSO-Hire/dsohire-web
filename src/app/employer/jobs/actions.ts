@@ -103,6 +103,9 @@ export async function createJob(
       hide_stages_from_candidate: parsed.hideStagesFromCandidate,
       specialty: parsed.specialty,
       min_years_experience: parsed.minYearsExperience,
+      schedule_days: parsed.scheduleDays,
+      schedule_evenings: parsed.scheduleEvenings,
+      schedule_weekends: parsed.scheduleWeekends,
       scope: parsed.scope,
       posted_at: parsed.status === "active" ? new Date().toISOString() : null,
       created_by: dsoUser?.id ?? null,
@@ -220,6 +223,9 @@ export async function updateJob(
       hide_stages_from_candidate: parsed.hideStagesFromCandidate,
       specialty: parsed.specialty,
       min_years_experience: parsed.minYearsExperience,
+      schedule_days: parsed.scheduleDays,
+      schedule_evenings: parsed.scheduleEvenings,
+      schedule_weekends: parsed.scheduleWeekends,
       scope: parsed.scope,
       posted_at:
         parsed.status === "active" ? new Date().toISOString() : null,
@@ -527,6 +533,23 @@ export async function updateJobDetailsSection(
     return { ok: false, error: "Min years of experience can't be negative." };
   }
 
+  // Track F — schedule overlap inputs.
+  const validDayKeys = new Set([
+    "mon",
+    "tue",
+    "wed",
+    "thu",
+    "fri",
+    "sat",
+    "sun",
+  ]);
+  const scheduleDays = formData
+    .getAll("schedule_days")
+    .map((v) => String(v).trim().toLowerCase())
+    .filter((v) => validDayKeys.has(v));
+  const scheduleEvenings = formData.get("schedule_evenings") === "on";
+  const scheduleWeekends = formData.get("schedule_weekends") === "on";
+
   const supabase = await createSupabaseServerClient();
   const { error: updateError } = await supabase
     .from("jobs")
@@ -541,6 +564,9 @@ export async function updateJobDetailsSection(
       hide_stages_from_candidate: hideStagesFromCandidate,
       specialty,
       min_years_experience: minYearsExperience,
+      schedule_days: scheduleDays,
+      schedule_evenings: scheduleEvenings,
+      schedule_weekends: scheduleWeekends,
     })
     .eq("id", jobId)
     .eq("dso_id", dsoId);
@@ -867,7 +893,7 @@ export async function cloneJob(formData: FormData): Promise<void> {
   const { data: src, error: srcErr } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, benefits, requirements, hide_stages_from_candidate, scope, specialty, min_years_experience"
+      "id, dso_id, title, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, benefits, requirements, hide_stages_from_candidate, scope, specialty, min_years_experience, schedule_days, schedule_evenings, schedule_weekends"
     )
     .eq("id", jobId)
     .maybeSingle();
@@ -916,6 +942,13 @@ export async function cloneJob(formData: FormData): Promise<void> {
       scope: src.scope,
       specialty: src.specialty,
       min_years_experience: src.min_years_experience,
+      schedule_days: (src as Record<string, unknown>).schedule_days ?? [],
+      schedule_evenings: Boolean(
+        (src as Record<string, unknown>).schedule_evenings
+      ),
+      schedule_weekends: Boolean(
+        (src as Record<string, unknown>).schedule_weekends
+      ),
       posted_at: null,
       created_by: (dsoUser?.id as string | undefined) ?? null,
     })
@@ -1184,6 +1217,23 @@ function parseJobFormData(
     return { error: "Min years of experience can't be negative." };
   }
 
+  // Track F — schedule overlap inputs. Days bounded to canonical keys.
+  const validDayKeys = new Set([
+    "mon",
+    "tue",
+    "wed",
+    "thu",
+    "fri",
+    "sat",
+    "sun",
+  ]);
+  const scheduleDays = formData
+    .getAll("schedule_days")
+    .map((v) => String(v).trim().toLowerCase())
+    .filter((v) => validDayKeys.has(v));
+  const scheduleEvenings = formData.get("schedule_evenings") === "on";
+  const scheduleWeekends = formData.get("schedule_weekends") === "on";
+
   // Screening questions — JSON-encoded array
   const rawQuestions = String(formData.get("screening_questions") ?? "").trim();
   let screeningQuestions: ScreeningQuestionPayload[] = [];
@@ -1278,6 +1328,9 @@ function parseJobFormData(
     scope,
     specialty,
     minYearsExperience,
+    scheduleDays,
+    scheduleEvenings,
+    scheduleWeekends,
   };
 }
 

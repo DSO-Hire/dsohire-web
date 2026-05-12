@@ -131,6 +131,10 @@ export interface EditSectionsInitial {
   // v1.1 — Practice Fit scoring inputs
   specialty: string[];
   min_years_experience: number | null;
+  // Track F — Practice Fit schedule overlap inputs
+  schedule_days: string[];
+  schedule_evenings: boolean;
+  schedule_weekends: boolean;
 }
 
 interface EditSectionsProps {
@@ -182,6 +186,9 @@ export function EditSections({
         initialHideStages={initial.hide_stages_from_candidate}
         initialSpecialty={initial.specialty}
         initialMinYearsExperience={initial.min_years_experience}
+        initialScheduleDays={initial.schedule_days}
+        initialScheduleEvenings={initial.schedule_evenings}
+        initialScheduleWeekends={initial.schedule_weekends}
       />
       <ScreeningSection
         dsoId={dsoId}
@@ -626,6 +633,9 @@ function DetailsSection({
   initialHideStages,
   initialSpecialty,
   initialMinYearsExperience,
+  initialScheduleDays,
+  initialScheduleEvenings,
+  initialScheduleWeekends,
 }: {
   dsoId: string;
   jobId: string;
@@ -640,6 +650,9 @@ function DetailsSection({
   initialHideStages: boolean;
   initialSpecialty: string[];
   initialMinYearsExperience: number | null;
+  initialScheduleDays: string[];
+  initialScheduleEvenings: boolean;
+  initialScheduleWeekends: boolean;
 }) {
   // v1.8 — comp type drives input shape.
   const [compType, setCompType] = useState<
@@ -667,8 +680,19 @@ function DetailsSection({
       ? String(initialMinYearsExperience)
       : ""
   );
+  // Track F — Practice Fit schedule overlap inputs.
+  const [scheduleDays, setScheduleDays] = useState<Set<string>>(
+    new Set(initialScheduleDays)
+  );
+  const [scheduleEvenings, setScheduleEvenings] = useState(
+    initialScheduleEvenings
+  );
+  const [scheduleWeekends, setScheduleWeekends] = useState(
+    initialScheduleWeekends
+  );
 
   const initialSpecialtyKey = [...initialSpecialty].sort().join(",");
+  const initialScheduleDaysKey = [...initialScheduleDays].sort().join(",");
   const initialSnapshot = {
     compType: initialCompType,
     compMin: initialCompMin !== null ? String(initialCompMin) : "",
@@ -686,6 +710,9 @@ function DetailsSection({
       initialMinYearsExperience !== null
         ? String(initialMinYearsExperience)
         : "",
+    scheduleDaysKey: initialScheduleDaysKey,
+    scheduleEvenings: initialScheduleEvenings,
+    scheduleWeekends: initialScheduleWeekends,
   };
   const [snapshot, setSnapshot] = useState(initialSnapshot);
 
@@ -696,6 +723,7 @@ function DetailsSection({
   const specialtyKey = [...specialty].sort().join(",");
   const skillsKey = [...skills].sort().join("|");
   const benefitsKey = [...benefits].sort().join("|");
+  const scheduleDaysKey = [...scheduleDays].sort().join(",");
   const dirty =
     compType !== snapshot.compType ||
     compMin !== snapshot.compMin ||
@@ -707,7 +735,10 @@ function DetailsSection({
     requirements !== snapshot.requirements ||
     hideStages !== snapshot.hideStages ||
     specialtyKey !== snapshot.specialtyKey ||
-    minYearsExperience !== snapshot.minYearsExperience;
+    minYearsExperience !== snapshot.minYearsExperience ||
+    scheduleDaysKey !== snapshot.scheduleDaysKey ||
+    scheduleEvenings !== snapshot.scheduleEvenings ||
+    scheduleWeekends !== snapshot.scheduleWeekends;
 
   const touch = () => setSaved(false);
 
@@ -745,6 +776,9 @@ function DetailsSection({
     fd.set("requirements", requirements);
     for (const sp of specialty) fd.append("specialty", sp);
     fd.set("min_years_experience", minYearsExperience);
+    for (const d of scheduleDays) fd.append("schedule_days", d);
+    if (scheduleEvenings) fd.set("schedule_evenings", "on");
+    if (scheduleWeekends) fd.set("schedule_weekends", "on");
 
     startTransition(async () => {
       const result: JobActionState = await updateJobDetailsSection(
@@ -767,6 +801,9 @@ function DetailsSection({
         hideStages,
         specialtyKey,
         minYearsExperience,
+        scheduleDaysKey,
+        scheduleEvenings,
+        scheduleWeekends,
       });
       setSaved(true);
     });
@@ -942,6 +979,75 @@ function DetailsSection({
             <p className="mt-1 text-[11px] text-slate-meta">
               Leave blank if there&apos;s no minimum. Excluded from the
               score when blank — doesn&apos;t penalize newer candidates.
+            </p>
+          </div>
+          <div className="mt-5">
+            <label className="block text-[12px] font-semibold text-ink mb-2">
+              Staffed days{" "}
+              <span className="text-slate-meta font-normal">(optional)</span>
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { value: "mon", label: "Mon" },
+                { value: "tue", label: "Tue" },
+                { value: "wed", label: "Wed" },
+                { value: "thu", label: "Thu" },
+                { value: "fri", label: "Fri" },
+                { value: "sat", label: "Sat" },
+                { value: "sun", label: "Sun" },
+              ].map((opt) => {
+                const checked = scheduleDays.has(opt.value);
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => {
+                      const next = new Set(scheduleDays);
+                      if (checked) next.delete(opt.value);
+                      else next.add(opt.value);
+                      setScheduleDays(next);
+                      touch();
+                    }}
+                    className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
+                      checked
+                        ? "bg-heritage-deep text-ivory border-heritage-deep"
+                        : "bg-white text-ink border-[var(--rule)] hover:border-heritage"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2">
+              <label className="inline-flex items-start gap-2 text-[12px] text-ink">
+                <input
+                  type="checkbox"
+                  checked={scheduleEvenings}
+                  onChange={(e) => {
+                    setScheduleEvenings(e.target.checked);
+                    touch();
+                  }}
+                  className="mt-1 accent-heritage"
+                />
+                <span>Evening hours (5pm or later)</span>
+              </label>
+              <label className="inline-flex items-start gap-2 text-[12px] text-ink">
+                <input
+                  type="checkbox"
+                  checked={scheduleWeekends}
+                  onChange={(e) => {
+                    setScheduleWeekends(e.target.checked);
+                    touch();
+                  }}
+                  className="mt-1 accent-heritage"
+                />
+                <span>Weekend shifts (Sat/Sun)</span>
+              </label>
+            </div>
+            <p className="mt-2 text-[11px] text-slate-meta">
+              Powers Practice Fit&apos;s schedule overlap dimension. Leave
+              blank if scheduling is flexible.
             </p>
           </div>
         </fieldset>

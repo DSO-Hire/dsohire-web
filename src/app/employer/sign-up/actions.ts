@@ -70,7 +70,14 @@ export async function signUpEmployer(
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const fullName = String(formData.get("full_name") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const dsoName = String(formData.get("dso_name") ?? "").trim();
+  // Normalize the DSO display name to title case at the data layer so
+  // "dso hire" / "DSO HIRE" / "Dso Hire" all land as "Dso Hire" (with
+  // the heuristic preserving common all-caps acronyms like DSO, USA,
+  // PLLC). Polish item per build-day plan. We do this once at signup;
+  // owners can still rename freely later via the DSO profile editor.
+  const dsoName = normalizeDsoDisplayName(
+    String(formData.get("dso_name") ?? "").trim()
+  );
   const headquartersCity = String(formData.get("headquarters_city") ?? "").trim();
   const headquartersState = String(formData.get("headquarters_state") ?? "")
     .trim()
@@ -326,6 +333,80 @@ function makeSlug(name: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .substring(0, 50);
+}
+
+/**
+ * Title-case a DSO display name at the data layer. Preserves common
+ * dental/business acronyms in their original casing (DSO, USA, P.C.,
+ * PLLC, etc.) AND respects already-mixed-case names (someone typing
+ * "MyDentalCorp" gets "MyDentalCorp" back, not "Mydentalcorp"). Polish
+ * pass — keeps storefronts looking professional even when the signup
+ * form is filled in a hurry on mobile.
+ *
+ * Heuristic:
+ *   • If the input has ANY mixed-case (at least one lowercase AND one
+ *     uppercase character beyond the first), assume the user typed it
+ *     intentionally and return as-is (just trimmed).
+ *   • Otherwise normalize: split on whitespace, lowercase each word,
+ *     then capitalize the first letter — UNLESS the word is in the
+ *     preserved-acronym set, in which case keep it uppercase.
+ */
+function normalizeDsoDisplayName(raw: string): string {
+  const trimmed = raw.trim().replace(/\s+/g, " ");
+  if (!trimmed) return trimmed;
+
+  // Mixed-case detection: more than one uppercase or any internal
+  // lowercase + uppercase combination = "user typed it intentionally."
+  const hasLower = /[a-z]/.test(trimmed);
+  const hasUpper = /[A-Z]/.test(trimmed);
+  const allUpper = hasUpper && !hasLower;
+  const allLower = !hasUpper && hasLower;
+  if (hasLower && hasUpper && !allUpper && !allLower) {
+    // Mixed already — trust the input but still collapse spaces.
+    return trimmed;
+  }
+
+  const ACRONYMS = new Set([
+    "DSO",
+    "USA",
+    "US",
+    "UK",
+    "LLC",
+    "PLLC",
+    "PC",
+    "PA",
+    "DDS",
+    "DMD",
+    "MD",
+    "DO",
+    "NW",
+    "NE",
+    "SW",
+    "SE",
+    "N",
+    "S",
+    "E",
+    "W",
+  ]);
+  return trimmed
+    .split(" ")
+    .map((word) => {
+      if (!word) return word;
+      const upper = word.toUpperCase();
+      if (ACRONYMS.has(upper)) return upper;
+      // Handle hyphenated tokens: title-case each hyphen-separated piece.
+      return word
+        .split("-")
+        .map((piece) => {
+          if (!piece) return piece;
+          if (ACRONYMS.has(piece.toUpperCase())) return piece.toUpperCase();
+          return (
+            piece.charAt(0).toUpperCase() + piece.slice(1).toLowerCase()
+          );
+        })
+        .join("-");
+    })
+    .join(" ");
 }
 
 async function resolveAvailableSlug(

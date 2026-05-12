@@ -218,6 +218,7 @@ async function loadJobAndDso(
        compensation_min, compensation_max, compensation_period,
        compensation_type,
        specialty, min_years_experience,
+       schedule_days, schedule_evenings, schedule_weekends,
        job_locations(location:dso_locations(city, state)),
        job_skills(skill)`
     )
@@ -262,6 +263,9 @@ async function loadJobAndDso(
       specialty: ((r.specialty as string[] | null) ?? []) as string[],
       min_years_experience:
         (r.min_years_experience as number | null) ?? null,
+      schedule_days: ((r.schedule_days as string[] | null) ?? []) as string[],
+      schedule_evenings: Boolean(r.schedule_evenings),
+      schedule_weekends: Boolean(r.schedule_weekends),
     },
     dso: {
       location_count: locationCount ?? 0,

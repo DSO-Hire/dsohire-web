@@ -14,6 +14,7 @@ import {
   Briefcase,
   ExternalLink,
   FileText,
+  FileSignature,
   Calendar,
   CheckSquare,
   ListChecks,
@@ -65,6 +66,15 @@ import {
   type CredentialLicenseRow,
   type CredentialCertificationRow,
 } from "./credentials-section";
+import {
+  ReferencesSection,
+  type ReferenceRequestRow,
+} from "./references-section";
+import {
+  OfferSection,
+  type OfferTemplateOption,
+  type OfferSendRow,
+} from "./offer-section";
 import {
   getRubricForRole,
   parseAttributeScores,
@@ -641,6 +651,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const [
     { data: rawLicenses, error: licensesErr },
     { data: rawCertifications, error: certificationsErr },
+    { data: rawReferences, error: referencesErr },
   ] = await Promise.all([
     supabase
       .from("candidate_licenses")
@@ -656,6 +667,13 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
       )
       .eq("candidate_id", app.candidate_id)
       .order("expires_date", { ascending: true, nullsFirst: false }),
+    supabase
+      .from("reference_requests")
+      .select(
+        "id, reference_name, reference_email, reference_role, relationship, status, sent_at, completed_at, response_data, decline_reason, created_at"
+      )
+      .eq("application_id", app.id)
+      .order("created_at", { ascending: false }),
   ]);
   if (licensesErr) {
     console.warn("[applications] candidate_licenses fetch failed", licensesErr);
@@ -666,12 +684,112 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
       certificationsErr
     );
   }
+  if (referencesErr) {
+    console.warn("[applications] reference_requests fetch failed", referencesErr);
+  }
   // Cast through unknown — display_number defaults false at the schema
   // level so a column-missing error would have surfaced above. We honor
   // display_number in the client component (never render the number
   // when false).
   const credentialLicenses = ((rawLicenses ?? []) as unknown) as CredentialLicenseRow[];
   const credentialCertifications = ((rawCertifications ?? []) as unknown) as CredentialCertificationRow[];
+  const referenceRequests = ((rawReferences ?? []) as unknown) as ReferenceRequestRow[];
+
+  // ── Offer letters (Phase 5A Track E)
+  // We only need this data when the section is going to render
+  // (current stage kind is 'offer'), but doing the fetch unconditionally
+  // keeps the gating logic simple — it's two cheap reads.
+  const showOfferSection = currentKind === "offer";
+  let offerTemplates: OfferTemplateOption[] = [];
+  let offerSends: OfferSendRow[] = [];
+  if (showOfferSection) {
+    const [
+      { data: rawTemplates, error: templatesErr },
+      { data: rawSends, error: sendsErr },
+    ] = await Promise.all([
+      supabase
+        .from("dso_offer_letter_templates")
+        .select("id, name, body, is_archived, updated_at")
+        .eq("dso_id", dsoUser.dso_id as string)
+        .eq("is_archived", false)
+        .order("updated_at", { ascending: false }),
+      supabase
+        .from("application_offer_sends")
+        .select(
+          "id, template_id, recipient_email, subject, body_html, merge_values, sent_at, sent_by_user_id, dso_offer_letter_templates:dso_offer_letter_templates(id, name)"
+        )
+        .eq("application_id", app.id)
+        .order("sent_at", { ascending: false }),
+    ]);
+    if (templatesErr) {
+      console.warn("[applications] offer templates fetch failed", templatesErr);
+    }
+    if (sendsErr) {
+      console.warn("[applications] offer sends fetch failed", sendsErr);
+    }
+    offerTemplates = ((rawTemplates ?? []) as Array<{
+      id: string;
+      name: string;
+      body: string;
+    }>).map((t) => ({ id: t.id, name: t.name, body: t.body }));
+
+    // Resolve sender names for the offer-sends list. RLS lets a DSO
+    // member read any dso_users row in their DSO, so this is a single
+    // batch lookup keyed off the auth user ids.
+    type RawSend = {
+      id: string;
+      template_id: string | null;
+      recipient_email: string;
+      subject: string;
+      body_html: string;
+      merge_values: Record<string, string> | null;
+      sent_at: string;
+      sent_by_user_id: string | null;
+      dso_offer_letter_templates:
+        | { id: string; name: string }
+        | Array<{ id: string; name: string }>
+        | null;
+    };
+    const rawSendRows = (rawSends ?? []) as unknown as RawSend[];
+    const senderAuthIds = Array.from(
+      new Set(
+        rawSendRows
+          .map((r) => r.sent_by_user_id)
+          .filter((v): v is string => !!v)
+      )
+    );
+    const senderNameByAuthId = new Map<string, string>();
+    if (senderAuthIds.length > 0) {
+      const { data: senderRows } = await supabase
+        .from("dso_users")
+        .select("auth_user_id, full_name")
+        .in("auth_user_id", senderAuthIds)
+        .eq("dso_id", dsoUser.dso_id as string);
+      for (const row of (senderRows ?? []) as Array<{
+        auth_user_id: string;
+        full_name: string | null;
+      }>) {
+        if (row.full_name) senderNameByAuthId.set(row.auth_user_id, row.full_name);
+      }
+    }
+    offerSends = rawSendRows.map((r) => {
+      const tplRel = r.dso_offer_letter_templates;
+      const tpl = Array.isArray(tplRel) ? tplRel[0] ?? null : tplRel;
+      return {
+        id: r.id,
+        template_id: r.template_id,
+        template_name: tpl?.name ?? null,
+        recipient_email: r.recipient_email,
+        subject: r.subject,
+        body_html: r.body_html,
+        merge_values: (r.merge_values ?? {}) as Record<string, string>,
+        sent_at: r.sent_at,
+        sender_name: r.sent_by_user_id
+          ? senderNameByAuthId.get(r.sent_by_user_id) ?? null
+          : null,
+      };
+    });
+  }
 
   const titleLine = cand?.current_title ?? cand?.headline ?? null;
 
@@ -681,26 +799,33 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
       .filter(Boolean)
       .join(", ") || null;
 
-  // The 11-section table-of-contents drives both the right-rail nav and
-  // the section-header eyebrow numbers. Keep this list in sync with the
-  // section IDs rendered below.
-  const SECTIONS: Array<{
+  // The 13-section table-of-contents drives both the right-rail nav and
+  // the section-header eyebrow numbers. The "Offer" entry (07) is
+  // gated on the application's current stage kind being 'offer' — when
+  // it's not, the section + the TOC entry both disappear, so the
+  // downstream Internal Workspace numbers still read 08-13.
+  type SectionEntry = {
     num: string;
     id: string;
     label: string;
     icon: React.ComponentType<{ className?: string }>;
-  }> = [
+  };
+  const SECTIONS: SectionEntry[] = [
     { num: "01", id: "stage", label: "Pipeline stage", icon: Layers },
     { num: "02", id: "fit", label: "Practice Fit", icon: Sparkles },
     { num: "03", id: "resume", label: "Resume", icon: FileText },
     { num: "04", id: "snapshot", label: "Candidate snapshot", icon: Briefcase },
     { num: "05", id: "screening", label: "Screening responses", icon: ClipboardList },
     { num: "06", id: "messages", label: "Messages with candidate", icon: MessageSquare },
-    { num: "07", id: "credentials", label: "Credentials", icon: ShieldCheck },
-    { num: "08", id: "scorecards", label: "Scorecards", icon: Star },
-    { num: "09", id: "comments", label: "Team comments", icon: Users },
-    { num: "10", id: "notes", label: "Internal notes", icon: StickyNote },
-    { num: "11", id: "activity", label: "Activity timeline", icon: History },
+    ...(showOfferSection
+      ? ([{ num: "07", id: "offer", label: "Offer", icon: FileSignature }] as SectionEntry[])
+      : ([] as SectionEntry[])),
+    { num: showOfferSection ? "08" : "07", id: "credentials", label: "Credentials", icon: ShieldCheck },
+    { num: showOfferSection ? "09" : "08", id: "references", label: "References", icon: Mail },
+    { num: showOfferSection ? "10" : "09", id: "scorecards", label: "Scorecards", icon: Star },
+    { num: showOfferSection ? "11" : "10", id: "comments", label: "Team comments", icon: Users },
+    { num: showOfferSection ? "12" : "11", id: "notes", label: "Internal notes", icon: StickyNote },
+    { num: showOfferSection ? "13" : "12", id: "activity", label: "Activity timeline", icon: History },
   ];
 
   return (
@@ -1052,14 +1177,41 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             />
           </DetailSection>
 
+          {/* 07 · Offer — candidate-facing surface, only renders when
+                the application's current stage kind is 'offer'. The
+                downstream Internal Workspace sections renumber to
+                08-13 when this is visible; otherwise they stay 07-12. */}
+          {showOfferSection && (
+            <DetailSection
+              id="offer"
+              num="07"
+              title="Offer"
+              icon={FileSignature}
+              subtitle={`Send a templated offer letter to ${displayName} via email. Past sends are snapshotted as the legal record.`}
+              tone="candidate"
+            >
+              <OfferSection
+                applicationId={app.id}
+                candidateName={displayName}
+                candidateEmail={candidateEmail}
+                dsoName={dsoNameForAffiliation}
+                jobTitle={String(job.title)}
+                templates={offerTemplates}
+                sends={offerSends}
+              />
+            </DetailSection>
+          )}
+
           {/* ───── Internal workspace ─────
               Visually differentiated so employers don't accidentally
               treat scorecards / comments / notes as candidate-visible.
-              All sections (07-11) wrap in a heritage-tinted box with a
-              prominent header pill. v1.7 bumped the wash from /[0.04] to
-              /15 per Cam — barely-there tint wasn't reading as "this is
-              private" at a glance. The white DetailSection cards inside
-              still pop cleanly against the green wash. */}
+              All workspace sections (07-12, or 08-13 when the
+              candidate-facing Offer section is showing) wrap in a
+              heritage-tinted box with a prominent header pill. v1.7
+              bumped the wash from /[0.04] to /15 per Cam — barely-there
+              tint wasn't reading as "this is private" at a glance. The
+              white DetailSection cards inside still pop cleanly against
+              the green wash. */}
           <div className="-mx-4 sm:-mx-6 mt-10 px-4 sm:px-6 py-8 bg-heritage/15 border-y-2 border-heritage/40">
             <div className="text-center mb-8">
               <div className="inline-flex items-center gap-2 px-5 py-2 bg-heritage-deep text-ivory text-[12px] font-extrabold tracking-[3px] uppercase">
@@ -1068,18 +1220,18 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               </div>
               <p className="mt-3 text-[12px] text-slate-meta max-w-[480px] mx-auto leading-relaxed">
                 Only your team sees what&apos;s below. Credentials,
-                scorecards, comments, and notes never reach the
-                candidate — keep anything candidate-bound in the
+                references, scorecards, comments, and notes never reach
+                the candidate — keep anything candidate-bound in the
                 Messages section above.
               </p>
             </div>
 
             <div className="space-y-10">
 
-          {/* 07 · Credentials — licenses + certifications with verification + document download */}
+          {/* 08 (or 07 when no Offer section) · Credentials — licenses + certifications with verification + document download */}
           <DetailSection
             id="credentials"
-            num="07"
+            num={showOfferSection ? "08" : "07"}
             title="Credentials"
             icon={ShieldCheck}
             tone="internal"
@@ -1092,10 +1244,29 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             />
           </DetailSection>
 
-          {/* 08 · Scorecards */}
+          {/* 09 (or 08) · References — 2-3 professional references requested
+                from the candidate's contacts. Available once past the
+                screen stage; gating handled in the section component. */}
+          <DetailSection
+            id="references"
+            num={showOfferSection ? "09" : "08"}
+            title="References"
+            icon={Mail}
+            tone="internal"
+            subtitle="Email 2-3 professional references a private link to a short 7-question form. Responses appear inline when they finish."
+          >
+            <ReferencesSection
+              applicationId={app.id}
+              candidateName={cand?.full_name ?? null}
+              requests={referenceRequests}
+              currentStageKind={currentKind}
+            />
+          </DetailSection>
+
+          {/* 10 (or 09) · Scorecards */}
           <DetailSection
             id="scorecards"
-            num="08"
+            num={showOfferSection ? "10" : "09"}
             title="Scorecards"
             icon={Star}
             tone="internal"
@@ -1111,10 +1282,10 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             />
           </DetailSection>
 
-          {/* 09 · Team comments */}
+          {/* 11 (or 10) · Team comments */}
           <DetailSection
             id="comments"
-            num="09"
+            num={showOfferSection ? "11" : "10"}
             title="Team comments"
             icon={Users}
             tone="internal"
@@ -1128,10 +1299,10 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             />
           </DetailSection>
 
-          {/* 10 · Internal notes */}
+          {/* 12 (or 11) · Internal notes */}
           <DetailSection
             id="notes"
-            num="10"
+            num={showOfferSection ? "12" : "11"}
             title="Internal notes"
             icon={StickyNote}
             tone="internal"
@@ -1143,10 +1314,10 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             />
           </DetailSection>
 
-          {/* 11 · Activity timeline */}
+          {/* 13 (or 12) · Activity timeline */}
           <DetailSection
             id="activity"
-            num="11"
+            num={showOfferSection ? "13" : "12"}
             title="Activity timeline"
             icon={History}
             subtitle="Every stage transition captured for this application."

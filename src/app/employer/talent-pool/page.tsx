@@ -24,6 +24,8 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { DiscoverFilters } from "./discover-filters";
 import { CandidateResultCard } from "./candidate-result-card";
 import { SavedEntryCard } from "./saved-entry-card";
+import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
+import type { FitBucket } from "@/lib/practice-fit/types";
 
 export const metadata: Metadata = { title: "Talent Pool" };
 export const dynamic = "force-dynamic";
@@ -47,6 +49,12 @@ interface PageProps {
     state?: string;
     license?: string;
     min_years?: string;
+    /**
+     * Polish item (2026-05-12): when set to a job id, the discover
+     * results compute Practice Fit against that job + sort by score
+     * descending. Each card shows a fit chip.
+     */
+    fit_job?: string;
   }>;
 }
 
@@ -132,8 +140,29 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
     availability: string | null;
     saved: boolean;
     saved_entry_id: string | null;
+    fit_score: number | null;
+    fit_bucket: FitBucket | null;
   }> = [];
   let discoverTotal = 0;
+
+  // Fit-job picker: open jobs for the DSO. Always fetched (cheap) so the
+  // job-picker dropdown can render even when fit_job isn't set yet.
+  const { data: jobsForPicker } = await supabase
+    .from("jobs")
+    .select("id, title")
+    .eq("dso_id", dsoUser.dso_id as string)
+    .eq("status", "active")
+    .is("deleted_at", null)
+    .order("posted_at", { ascending: false })
+    .limit(50);
+  const fitJobOptions = (jobsForPicker ?? []) as Array<{
+    id: string;
+    title: string;
+  }>;
+  const fitJobId = (sp.fit_job ?? "").trim();
+  const fitJobSelected = fitJobId
+    ? fitJobOptions.find((j) => j.id === fitJobId) ?? null
+    : null;
   if (tab === "discover") {
     const keyword = (sp.q ?? "").trim();
     const role = (sp.role ?? "").trim();
@@ -213,7 +242,52 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
       ...r,
       saved: savedSet.has(r.id),
       saved_entry_id: savedSet.get(r.id) ?? null,
+      fit_score: null,
+      fit_bucket: null,
     }));
+
+    // Polish item (2026-05-12) — when fit_job is set, compute Practice
+    // Fit for every result candidate against that job, then sort desc
+    // by score. Candidates the score returns null for (role filter mis-
+    // match) go to the bottom but stay visible.
+    if (fitJobSelected) {
+      const fitResults = await Promise.all(
+        discoverResults.map(async (r) => {
+          try {
+            const fit = await getPracticeFit(r.id, fitJobSelected.id);
+            return {
+              candidateId: r.id,
+              score: fit?.score ?? null,
+              bucket: (fit?.bucket as FitBucket | undefined) ?? null,
+            };
+          } catch (err) {
+            console.warn("[talent-pool] getPracticeFit failed", err);
+            return { candidateId: r.id, score: null, bucket: null };
+          }
+        })
+      );
+      const fitByCandidateId = new Map(
+        fitResults.map((f) => [f.candidateId, f])
+      );
+      discoverResults = discoverResults.map((r) => {
+        const f = fitByCandidateId.get(r.id);
+        return {
+          ...r,
+          fit_score: f?.score ?? null,
+          fit_bucket: f?.bucket ?? null,
+        };
+      });
+      // Sort: scored candidates desc, unscored to the tail (preserving
+      // pre-sort order for those — most-recent-updated first).
+      discoverResults.sort((a, b) => {
+        const sa = a.fit_score;
+        const sb = b.fit_score;
+        if (sa == null && sb == null) return 0;
+        if (sa == null) return 1;
+        if (sb == null) return -1;
+        return sb - sa;
+      });
+    }
   }
 
   return (
@@ -256,10 +330,72 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
             roleOptions={ROLE_FILTERS}
           />
 
+          {/* Practice Fit job picker (2026-05-12 polish). Pure GET form
+              so the picker state lives in the URL — bookmark-friendly +
+              shareable with teammates. */}
+          {fitJobOptions.length > 0 && (
+            <form
+              action="/employer/talent-pool"
+              method="get"
+              className="mt-4 mb-2 flex flex-wrap items-center gap-2 text-[12px]"
+            >
+              {/* Persist current filter state so the picker doesn't wipe
+                  active filter selections on submit. */}
+              {sp.q && <input type="hidden" name="q" value={sp.q} />}
+              {sp.role && <input type="hidden" name="role" value={sp.role} />}
+              {sp.state && (
+                <input type="hidden" name="state" value={sp.state} />
+              )}
+              {sp.license && (
+                <input type="hidden" name="license" value={sp.license} />
+              )}
+              {sp.min_years && (
+                <input
+                  type="hidden"
+                  name="min_years"
+                  value={sp.min_years}
+                />
+              )}
+              <label
+                htmlFor="fit_job"
+                className="font-medium text-slate-body"
+              >
+                Rank by Practice Fit against
+              </label>
+              <select
+                id="fit_job"
+                name="fit_job"
+                defaultValue={fitJobId}
+                className="border border-[var(--rule)] bg-white px-2 py-1 text-[12px] text-ink"
+              >
+                <option value="">— pick a job —</option>
+                {fitJobOptions.map((j) => (
+                  <option key={j.id} value={j.id}>
+                    {j.title}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="submit"
+                className="px-3 py-1 bg-ink text-ivory text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft"
+              >
+                Apply
+              </button>
+              {fitJobSelected && (
+                <Link
+                  href="/employer/talent-pool"
+                  className="text-[11px] text-slate-meta hover:text-ink underline"
+                >
+                  Clear ranking
+                </Link>
+              )}
+            </form>
+          )}
+
           <div className="mt-6 mb-4 text-[12px] text-slate-meta">
             {discoverResults.length === 0
               ? "No candidates match these filters."
-              : `${discoverResults.length} candidate${discoverResults.length === 1 ? "" : "s"} shown${discoverTotal > discoverResults.length ? ` of ${discoverTotal} total` : ""}`}
+              : `${discoverResults.length} candidate${discoverResults.length === 1 ? "" : "s"} shown${discoverTotal > discoverResults.length ? ` of ${discoverTotal} total` : ""}${fitJobSelected ? ` · ranked by fit against ${fitJobSelected.title}` : ""}`}
           </div>
 
           {discoverResults.length === 0 ? (
@@ -282,6 +418,8 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
                     availability={r.availability}
                     initiallySaved={r.saved}
                     initialEntryId={r.saved_entry_id}
+                    fitScore={r.fit_score}
+                    fitBucket={r.fit_bucket}
                   />
                 </li>
               ))}

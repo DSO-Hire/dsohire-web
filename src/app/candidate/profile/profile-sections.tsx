@@ -251,6 +251,7 @@ export function ProfileSections({
           data={data.jobPreferences}
           onEdit={() => setOpen({ kind: "jobPreferences" })}
         />
+        <ReferencesPlaceholderCard />
         <PracticeFitCard />
       </div>
 
@@ -2145,6 +2146,22 @@ function PracticeFitCard() {
         is fully usable today without it.
       </div>
     </section>
+  );
+}
+
+/**
+ * References placeholder — surfaces the upcoming workflow so candidates
+ * don't feel a gap. Phase 5A Track D ships the employer-side flow first;
+ * candidate-side upload of reference letters is a follow-up.
+ */
+function ReferencesPlaceholderCard() {
+  return (
+    <SectionCard title="References">
+      <EmptyHint
+        text="Employers request references after you've applied — no need to add anything here yet. Coming soon: upload reference letters in advance."
+        icon={<ShieldCheck className="size-4 text-[#4D7A60]" />}
+      />
+    </SectionCard>
   );
 }
 

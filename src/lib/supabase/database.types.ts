@@ -214,6 +214,60 @@ export type Database = {
           },
         ]
       }
+      application_offer_sends: {
+        Row: {
+          application_id: string
+          body_html: string
+          created_at: string
+          id: string
+          merge_values: Json
+          recipient_email: string
+          sent_at: string
+          sent_by_user_id: string | null
+          subject: string
+          template_id: string | null
+        }
+        Insert: {
+          application_id: string
+          body_html: string
+          created_at?: string
+          id?: string
+          merge_values?: Json
+          recipient_email: string
+          sent_at?: string
+          sent_by_user_id?: string | null
+          subject: string
+          template_id?: string | null
+        }
+        Update: {
+          application_id?: string
+          body_html?: string
+          created_at?: string
+          id?: string
+          merge_values?: Json
+          recipient_email?: string
+          sent_at?: string
+          sent_by_user_id?: string | null
+          subject?: string
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_offer_sends_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_offer_sends_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "dso_offer_letter_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       application_question_answers: {
         Row: {
           answer_choice: string | null
@@ -688,6 +742,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "dso_locations_dso_id_fkey"
+            columns: ["dso_id"]
+            isOneToOne: false
+            referencedRelation: "dsos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dso_offer_letter_templates: {
+        Row: {
+          body: string
+          created_at: string
+          created_by_user_id: string | null
+          dso_id: string
+          id: string
+          is_archived: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by_user_id?: string | null
+          dso_id: string
+          id?: string
+          is_archived?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          dso_id?: string
+          id?: string
+          is_archived?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dso_offer_letter_templates_dso_id_fkey"
             columns: ["dso_id"]
             isOneToOne: false
             referencedRelation: "dsos"
@@ -1287,6 +1382,78 @@ export type Database = {
           used_at?: string | null
         }
         Relationships: []
+      }
+      reference_requests: {
+        Row: {
+          application_id: string
+          candidate_id: string
+          completed_at: string | null
+          created_at: string
+          decline_reason: string | null
+          id: string
+          reference_email: string
+          reference_name: string
+          reference_role: string | null
+          relationship: string | null
+          requested_by_user_id: string | null
+          response_data: Json | null
+          sent_at: string | null
+          status: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          candidate_id: string
+          completed_at?: string | null
+          created_at?: string
+          decline_reason?: string | null
+          id?: string
+          reference_email: string
+          reference_name: string
+          reference_role?: string | null
+          relationship?: string | null
+          requested_by_user_id?: string | null
+          response_data?: Json | null
+          sent_at?: string | null
+          status?: string
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          candidate_id?: string
+          completed_at?: string | null
+          created_at?: string
+          decline_reason?: string | null
+          id?: string
+          reference_email?: string
+          reference_name?: string
+          reference_role?: string | null
+          relationship?: string | null
+          requested_by_user_id?: string | null
+          response_data?: Json | null
+          sent_at?: string | null
+          status?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reference_requests_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reference_requests_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subscriptions: {
         Row: {

@@ -10,7 +10,7 @@
 import Link from "next/link";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { ContactForm } from "./contact-form";
-import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
+import { INFO_EMAIL as SUPPORT_EMAIL, INFO_MAILTO as SUPPORT_MAILTO } from "@/lib/contact";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

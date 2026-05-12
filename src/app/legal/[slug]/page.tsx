@@ -11,7 +11,7 @@ import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { LEGAL_INDEX, loadLegalDoc, listLegalSlugs } from "@/lib/legal/loader";
-import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
+import { INFO_EMAIL as SUPPORT_EMAIL, INFO_MAILTO as SUPPORT_MAILTO } from "@/lib/contact";
 import type { Metadata } from "next";
 
 interface PageProps {

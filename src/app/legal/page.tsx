@@ -5,7 +5,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { LEGAL_INDEX, loadLegalDoc } from "@/lib/legal/loader";
-import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
+import { INFO_EMAIL as SUPPORT_EMAIL, INFO_MAILTO as SUPPORT_MAILTO } from "@/lib/contact";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

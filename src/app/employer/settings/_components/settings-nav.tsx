@@ -35,6 +35,7 @@ import {
   Users,
   MapPin,
   Workflow,
+  FileSignature,
   Bell,
   Mail,
   CreditCard,
@@ -73,9 +74,10 @@ const GROUPS: NavGroup[] = [
   {
     id: "team-access",
     entries: [
+      { id: "pipeline", label: "Pipeline", href: "/employer/settings/pipeline", Icon: Workflow },
+      { id: "offer-letters", label: "Offer letters", href: "/employer/settings/offer-letters", Icon: FileSignature },
       { id: "team", label: "Team", href: "/employer/team", Icon: Users, external: true },
       { id: "locations", label: "Locations", href: "/employer/locations", Icon: MapPin, external: true },
-      { id: "pipeline", label: "Pipeline", href: "/employer/settings/pipeline", Icon: Workflow },
     ],
   },
   {

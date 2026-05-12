@@ -14,7 +14,7 @@
 
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
+import { INFO_EMAIL as SUPPORT_EMAIL, INFO_MAILTO as SUPPORT_MAILTO } from "@/lib/contact";
 import { MobileMenu } from "./mobile-menu";
 
 export function SiteShell({ children }: { children: React.ReactNode }) {

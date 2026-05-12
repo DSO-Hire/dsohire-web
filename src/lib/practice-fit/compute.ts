@@ -34,14 +34,22 @@ import type {
  * to specialty (15) + years_experience (10).
  * ─────────────────────────────────────────────────────────── */
 
+// Track F (2026-05-12) — skills 15→10 to make room for schedule_overlap (5).
+// Skills was already softened in v1.8 (preferred not required), so trimming
+// 5 points keeps it directionally weighted while freeing budget for the
+// new dim. Schedule_overlap is intentionally light: most candidates don't
+// fill schedule preferences and most jobs leave schedule_days empty, so
+// it'll fall out of the denominator on most pairs — but when both sides
+// have data, it's a strong day-1-friction signal.
 const WEIGHTS: Record<FitDimensionKey, number> = {
   compensation: 25,
   location: 20,
   specialty: 15,
-  skills: 15,
+  skills: 10,
   years_experience: 10,
   employment_type: 10,
   dso_size: 5,
+  schedule_overlap: 5,
 };
 
 /* ──────────────────────────────────────────────────────────────
@@ -82,6 +90,7 @@ export function computePracticeFit(inputs: FitInputs): FitResult | null {
     years_experience: scoreYearsExperience(inputs),
     employment_type: scoreEmploymentType(inputs),
     dso_size: scoreDsoSize(inputs),
+    schedule_overlap: scoreScheduleOverlap(inputs),
   };
 
   // Sum scored contributions and scored weights — missing-data dims
@@ -606,6 +615,123 @@ function scoreDsoSize({ candidate, dso }: FitInputs): FitDimension {
 }
 
 /* ──────────────────────────────────────────────────────────────
+ * scoreScheduleOverlap — Track F (2026-05-12)
+ *
+ * Intersects the job's staffed days + evening/weekend flags with the
+ * candidate's schedule preferences. Excluded when either side has no
+ * signal. When both sides have data:
+ *   • Full day-set overlap + matching evening/weekend flags → 100
+ *   • Most days overlap → high score
+ *   • Partial day overlap → mid score
+ *   • Zero day overlap → near-floor (we still score the dim to signal
+ *     the conflict, but only on a single floor; weight is only 5 so the
+ *     impact on the overall score is bounded).
+ * ─────────────────────────────────────────────────────────── */
+
+const DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+type DayKey = (typeof DAY_KEYS)[number];
+
+function scoreScheduleOverlap({ candidate, job }: FitInputs): FitDimension {
+  const jobDays = (job.schedule_days ?? []).filter((d): d is DayKey =>
+    (DAY_KEYS as readonly string[]).includes(d)
+  );
+  const jobHasEvenings = Boolean(job.schedule_evenings);
+  const jobHasWeekends =
+    Boolean(job.schedule_weekends) ||
+    jobDays.includes("sat") ||
+    jobDays.includes("sun");
+  const jobHasSchedule =
+    jobDays.length > 0 || jobHasEvenings || jobHasWeekends;
+
+  if (!jobHasSchedule) {
+    return makeUnscoredDim("schedule_overlap", "Schedule", {
+      detail:
+        "This job didn't post a schedule — schedule fit is excluded from the score.",
+      detail_employer:
+        "Job has no schedule posted — schedule fit excluded from the score.",
+      cta_label: null,
+      cta_href: null,
+    });
+  }
+
+  const candPrefs = candidate.schedule_preferences ?? {};
+  const candDays: DayKey[] = DAY_KEYS.filter(
+    (k) => Boolean((candPrefs as Record<string, unknown>)[k])
+  );
+  const candAcceptsEvenings = Boolean(candPrefs.evenings);
+  const candAcceptsWeekends =
+    Boolean(candPrefs.sat) || Boolean(candPrefs.sun);
+  const candHasSchedulePref =
+    candDays.length > 0 || candAcceptsEvenings || candAcceptsWeekends;
+
+  if (!candHasSchedulePref) {
+    return makeUnscoredDim("schedule_overlap", "Schedule", {
+      detail:
+        "Pick the days you can work to factor schedule fit into your match.",
+      detail_employer:
+        "Candidate hasn't picked schedule preferences — schedule fit excluded from their score.",
+      cta_label: "Set schedule preference",
+      cta_href: "/candidate/profile#section-job-preferences",
+    });
+  }
+
+  // If either side only specified evenings/weekends and no concrete days,
+  // score on the flag overlap alone.
+  let raw: number;
+  let detail: string;
+
+  if (jobDays.length === 0) {
+    // Job only flagged evenings / weekends.
+    const eveningsMatch = !jobHasEvenings || candAcceptsEvenings;
+    const weekendsMatch = !jobHasWeekends || candAcceptsWeekends;
+    if (eveningsMatch && weekendsMatch) {
+      raw = 95;
+      detail = "Your schedule preferences cover the role's evening/weekend hours.";
+    } else if (eveningsMatch || weekendsMatch) {
+      raw = 55;
+      detail =
+        "Partial fit on the role's evening or weekend hours — you'd cover some shifts.";
+    } else {
+      raw = 25;
+      detail =
+        "Role needs evening or weekend coverage that isn't in your preferences.";
+    }
+    return makeScoredDim(
+      "schedule_overlap",
+      "Schedule",
+      raw,
+      detail
+    );
+  }
+
+  // Day-by-day intersection.
+  const overlap = jobDays.filter((d) => candDays.includes(d));
+  const ratio = jobDays.length === 0 ? 0 : overlap.length / jobDays.length;
+
+  // Evening/weekend conflicts are penalty modifiers — clinic asks for
+  // evenings but candidate didn't tick that box: -15 from the day-overlap
+  // score.
+  let modifier = 0;
+  if (jobHasEvenings && !candAcceptsEvenings) modifier -= 15;
+  if (jobHasWeekends && !candAcceptsWeekends) modifier -= 15;
+
+  if (overlap.length === jobDays.length) {
+    raw = Math.max(40, 100 + modifier);
+    detail =
+      modifier === 0
+        ? `You're available every day this role is staffed (${overlap.join(", ")}).`
+        : `Day overlap is complete (${overlap.join(", ")}), but the role's evening/weekend coverage isn't in your preferences.`;
+  } else if (overlap.length === 0) {
+    raw = Math.max(15, 25 + modifier);
+    detail = `Your available days don't overlap with the role's staffed days (${jobDays.join(", ")}).`;
+  } else {
+    raw = Math.max(25, Math.round(ratio * 90) + modifier);
+    detail = `${overlap.length} of ${jobDays.length} staffed days overlap with your availability (${overlap.join(", ")}).`;
+  }
+  return makeScoredDim("schedule_overlap", "Schedule", raw, detail);
+}
+
+/* ──────────────────────────────────────────────────────────────
  * Hashing — input fingerprint for the cache layer
  *
  * v1.1 adds specialty + min_years_experience (job side) and
@@ -649,6 +775,9 @@ export function hashInputs(inputs: FitInputs): string {
       skills: sortedLowercase(inputs.job.skills),
       specialty: sortedLowercase(inputs.job.specialty),
       min_years_experience: inputs.job.min_years_experience ?? null,
+      schedule_days: sortedLowercase(inputs.job.schedule_days),
+      schedule_evenings: Boolean(inputs.job.schedule_evenings),
+      schedule_weekends: Boolean(inputs.job.schedule_weekends),
     },
     dso: {
       location_count: inputs.dso.location_count ?? 0,

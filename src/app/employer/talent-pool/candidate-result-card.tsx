@@ -26,7 +26,33 @@ interface CandidateResultCardProps {
   availability: string | null;
   initiallySaved: boolean;
   initialEntryId: string | null;
+  /** Practice Fit score against the picked job; null when no job picked. */
+  fitScore?: number | null;
+  /** Practice Fit bucket against the picked job; null when no job picked. */
+  fitBucket?:
+    | "excellent"
+    | "strong"
+    | "solid"
+    | "light"
+    | "low"
+    | null;
 }
+
+const FIT_BUCKET_LABEL: Record<string, string> = {
+  excellent: "Excellent fit",
+  strong: "Strong fit",
+  solid: "Solid fit",
+  light: "Light fit",
+  low: "Low fit",
+};
+
+const FIT_BUCKET_COLOR: Record<string, string> = {
+  excellent: "bg-heritage/15 text-heritage-deep ring-heritage/30",
+  strong: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+  solid: "bg-blue-50 text-blue-700 ring-blue-200",
+  light: "bg-amber-50 text-amber-700 ring-amber-200",
+  low: "bg-slate-50 text-slate-600 ring-slate-200",
+};
 
 const AVAILABILITY_LABELS: Record<string, string> = {
   immediate: "Available immediately",
@@ -47,6 +73,8 @@ export function CandidateResultCard({
   availability,
   initiallySaved,
   initialEntryId,
+  fitScore = null,
+  fitBucket = null,
 }: CandidateResultCardProps) {
   const [saved, setSaved] = useState(initiallySaved);
   const [entryId, setEntryId] = useState<string | null>(initialEntryId);
@@ -110,6 +138,19 @@ export function CandidateResultCard({
           </button>
         </div>
 
+        {(fitScore !== null && fitBucket) && (
+          <div className="mb-1.5">
+            <span
+              className={`inline-flex items-center gap-1 rounded-full ring-1 px-2 py-0.5 text-[11px] font-bold tracking-[1px] uppercase ${
+                FIT_BUCKET_COLOR[fitBucket] ?? FIT_BUCKET_COLOR.low
+              }`}
+            >
+              <span>{fitScore}</span>
+              <span aria-hidden>·</span>
+              <span>{FIT_BUCKET_LABEL[fitBucket] ?? "Fit"}</span>
+            </span>
+          </div>
+        )}
         {headline && (
           <div className="text-[13px] text-ink mb-1.5">{headline}</div>
         )}

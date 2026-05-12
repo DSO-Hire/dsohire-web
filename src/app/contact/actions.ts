@@ -8,7 +8,7 @@
  */
 
 import { Resend } from "resend";
-import { SUPPORT_EMAIL } from "@/lib/contact";
+import { INFO_EMAIL as SUPPORT_EMAIL } from "@/lib/contact";
 
 export interface ContactFormState {
   ok: boolean;

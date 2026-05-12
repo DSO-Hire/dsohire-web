@@ -26,7 +26,8 @@ export type FitDimensionKey =
   | "skills"
   | "years_experience"
   | "employment_type"
-  | "dso_size";
+  | "dso_size"
+  | "schedule_overlap";
 
 export interface FitDimension {
   /** Maximum points this dimension can contribute when scored (0 when excluded). */
@@ -167,6 +168,17 @@ export interface JobFitInputs {
   specialty: string[];
   /** v1.1 — null means "no minimum experience requirement"; the dim is excluded. */
   min_years_experience: number | null;
+  /**
+   * Track F (2026-05-12) — days the job is staffed. Subset of
+   * ['mon','tue','wed','thu','fri','sat','sun']. Empty array means
+   * "not specified" → schedule_overlap dim excluded from the score.
+   */
+  schedule_days: string[];
+  /** Track F — true if the role works evenings (≥ 5pm). */
+  schedule_evenings: boolean;
+  /** Track F — true if the role includes Sat/Sun. Sometimes set
+   *  independently of schedule_days when the employer only flags it. */
+  schedule_weekends: boolean;
 }
 
 export interface DsoFitInputs {
