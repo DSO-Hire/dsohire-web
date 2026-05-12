@@ -88,6 +88,31 @@ export const KIND_DEFAULT_LABELS: Record<StageKind, string> = {
   withdrawn: "Withdrawn",
 };
 
+/**
+ * Candidate-friendly labels keyed by stage kind. Used on EVERY
+ * candidate-facing surface (applications list, application detail,
+ * inbox previews, etc.). Per-DSO custom labels are intentionally NOT
+ * surfaced to candidates — they see a canonical funnel regardless of
+ * how each DSO renamed their stages. This protects against leaking
+ * employer hiring-process internals (e.g., "Phone Screening" vs
+ * "On-site Interview" as separate DSO stages of kind=interview both
+ * read as "Interviewing" to the candidate).
+ *
+ * Decision locked 2026-05-12 PM after Cam spotted the inconsistency
+ * between candidate applications list (was rendering DSO labels) and
+ * detail page (was rendering canonical labels). Option A wins:
+ * canonical funnel everywhere on the candidate side.
+ */
+export const CANDIDATE_KIND_LABELS: Record<StageKind, string> = {
+  open: "Submitted",
+  screen: "Reviewed",
+  interview: "Interviewing",
+  offer: "Offer extended",
+  hired: "Hired",
+  rejected: "Not selected",
+  withdrawn: "Withdrawn",
+};
+
 export interface StageColorTriple {
   bg: string;
   ring: string;

@@ -49,6 +49,7 @@ import type { FitResult } from "@/lib/practice-fit/types";
 import { StatusProgress } from "@/components/dashboard/status-progress";
 import {
   KIND_DEFAULT_LABELS,
+  CANDIDATE_KIND_LABELS,
   type StageKind,
 } from "@/lib/applications/stages";
 import { RowActionsMenu } from "./row-actions-menu";
@@ -206,7 +207,10 @@ export default async function CandidateApplicationsPage({
       job_id: row.job_id as string,
       stage_id: row.stage_id as string,
       kind,
-      stageLabel: stage?.label ?? KIND_DEFAULT_LABELS[kind],
+      // Candidate-side surfaces canonical funnel labels, NOT the DSO's
+      // customized label. Privacy + cross-DSO consistency.
+      // (memory: feedback A/B/C decision 2026-05-12 PM, option A locked)
+      stageLabel: CANDIDATE_KIND_LABELS[kind] ?? KIND_DEFAULT_LABELS[kind],
       dsoId: stage?.dsoId ?? null,
       created_at: row.created_at as string,
       updated_at: row.updated_at as string,

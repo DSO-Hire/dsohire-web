@@ -31,6 +31,7 @@ import {
   type CandidateInterviewProposal,
 } from "@/components/interviews/candidate-interview-picker";
 import type { ApplicationMessageRow } from "@/lib/messages/actions";
+import { CANDIDATE_KIND_LABELS } from "@/lib/applications/stages";
 import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
 import { WhyThisMatch } from "@/components/practice-fit/why-this-match";
 import { classifyPlaceholderReason } from "@/components/practice-fit/placeholder";
@@ -42,18 +43,11 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-// Candidate-friendly labels keyed by stage kind (the system category).
-// Per-DSO labels intentionally aren't used here — the candidate sees a
-// canonical funnel regardless of how the DSO renamed their stages.
-const STATUS_LABELS: Record<string, string> = {
-  open: "Submitted",
-  screen: "Reviewed",
-  interview: "Interviewing",
-  offer: "Offer extended",
-  hired: "Hired",
-  rejected: "Not selected",
-  withdrawn: "Withdrawn",
-};
+// Candidate-friendly labels are imported from the shared lib so the
+// list page + detail page + inbox previews all source from one place.
+// See CANDIDATE_KIND_LABELS in @/lib/applications/stages for the
+// canonical funnel-labels intent (Option A locked 2026-05-12 PM).
+const STATUS_LABELS = CANDIDATE_KIND_LABELS;
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;

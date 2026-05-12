@@ -59,11 +59,13 @@ interface MyApplicationStagesProps {
   viewAllHref?: string;
 }
 
+// Candidate-friendly funnel labels (Option A locked 2026-05-12 PM).
+// Keep in sync with CANDIDATE_KIND_LABELS in @/lib/applications/stages.
 const STAGE_COLUMNS = [
   { key: "open" as const, label: "Submitted" },
   { key: "screen" as const, label: "Reviewed" },
-  { key: "interview" as const, label: "Interview" },
-  { key: "offer" as const, label: "Offer" },
+  { key: "interview" as const, label: "Interviewing" },
+  { key: "offer" as const, label: "Offer extended" },
   { key: "hired" as const, label: "Hired" },
 ];
 

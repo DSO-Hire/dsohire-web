@@ -36,11 +36,13 @@ interface StatusProgressProps {
   hideStages?: boolean;
 }
 
+// Candidate-friendly funnel labels (Option A locked 2026-05-12 PM).
+// Keep in sync with CANDIDATE_KIND_LABELS in @/lib/applications/stages.
 const STAGES: { key: string; label: string }[] = [
   { key: "open", label: "Submitted" },
   { key: "screen", label: "Reviewed" },
-  { key: "interview", label: "Interview" },
-  { key: "offer", label: "Offer" },
+  { key: "interview", label: "Interviewing" },
+  { key: "offer", label: "Offer extended" },
   { key: "hired", label: "Hired" },
 ];
 

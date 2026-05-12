@@ -49,6 +49,7 @@ import {
 import {
   KANBAN_KINDS,
   KIND_DEFAULT_LABELS,
+  CANDIDATE_KIND_LABELS,
   isTerminalKind,
   type StageKind,
 } from "@/lib/applications/stages";
@@ -434,20 +435,24 @@ export default async function CandidateDashboardPage() {
   }
 
   const heroStageStrip = [
-    { key: "open", label: KIND_DEFAULT_LABELS.open, count: stageBreakdown.open },
+    {
+      key: "open",
+      label: CANDIDATE_KIND_LABELS.open,
+      count: stageBreakdown.open,
+    },
     {
       key: "screen",
-      label: KIND_DEFAULT_LABELS.screen,
+      label: CANDIDATE_KIND_LABELS.screen,
       count: stageBreakdown.screen,
     },
     {
       key: "interview",
-      label: KIND_DEFAULT_LABELS.interview,
+      label: CANDIDATE_KIND_LABELS.interview,
       count: stageBreakdown.interview,
     },
     {
       key: "offer",
-      label: KIND_DEFAULT_LABELS.offer,
+      label: CANDIDATE_KIND_LABELS.offer,
       count: stageBreakdown.offer,
     },
   ];
@@ -712,7 +717,10 @@ export default async function CandidateDashboardPage() {
             title=""
             events={recentForFeed.map((app): ActivityEvent => {
               const job = jobMap.get(app.job_id);
-              const stageLabel = KIND_DEFAULT_LABELS[app.kind] ?? app.kind;
+              const stageLabel =
+                CANDIDATE_KIND_LABELS[app.kind] ??
+                KIND_DEFAULT_LABELS[app.kind] ??
+                app.kind;
               const isWinning = ["interview", "offer", "hired"].includes(
                 app.kind,
               );

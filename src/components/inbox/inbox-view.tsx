@@ -60,16 +60,27 @@ type Audience = "employer" | "candidate";
 type Tab = "all" | "unread" | "archived";
 
 // Keyed by stage kind (the system category snapshot delivered by the
-// inbox composer). Per-DSO label customizations aren't surfaced in the
-// inbox v0 — the canonical label keeps both sides reading the same
-// vocabulary at a glance.
-const STAGE_LABELS: Record<string, string> = {
+// inbox composer). The candidate-side surface uses CANDIDATE_KIND_LABELS
+// (canonical funnel: "Submitted" / "Interviewing" / "Offer extended")
+// while the employer-side uses KIND_DEFAULT_LABELS ("New" / "Interview"
+// / "Offer"). Pick the right map based on `audience` at render time.
+// Per-DSO label customizations aren't surfaced here either way.
+const EMPLOYER_STAGE_LABELS: Record<string, string> = {
   open: "New",
   screen: "Screening",
   interview: "Interview",
   offer: "Offer",
   hired: "Hired",
   rejected: "Rejected",
+  withdrawn: "Withdrawn",
+};
+const CANDIDATE_STAGE_LABELS: Record<string, string> = {
+  open: "Submitted",
+  screen: "Reviewed",
+  interview: "Interviewing",
+  offer: "Offer extended",
+  hired: "Hired",
+  rejected: "Not selected",
   withdrawn: "Withdrawn",
 };
 
@@ -92,6 +103,12 @@ export function InboxView({
 }: InboxViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // Pick stage label map per audience. Candidate side reads the
+  // canonical funnel ("Interviewing"); employer side reads the
+  // operational labels ("Interview").
+  const STAGE_LABELS =
+    audience === "candidate" ? CANDIDATE_STAGE_LABELS : EMPLOYER_STAGE_LABELS;
 
   const [threads, setThreads] = useState<InboxThread[]>(initialThreads);
   const [activeMessages, setActiveMessages] = useState<ApplicationMessageRow[]>(
