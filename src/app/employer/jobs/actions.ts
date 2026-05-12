@@ -1095,6 +1095,10 @@ interface ParsedJobInput {
   // v1.1 — Practice Fit scoring inputs
   specialty: string[];
   minYearsExperience: number | null;
+  // Track F (2026-05-12) — Practice Fit schedule overlap inputs
+  scheduleDays: string[];
+  scheduleEvenings: boolean;
+  scheduleWeekends: boolean;
 }
 
 const VALID_SCOPES = new Set<"location" | "regional" | "corporate">([
