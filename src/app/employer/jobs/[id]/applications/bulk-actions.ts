@@ -99,8 +99,8 @@ async function moveOne(
     return { ok: false, error: prevErr?.message ?? "Application not found" };
   }
 
-  const prevStageId = (prev as Record<string, unknown>).stage_id as string;
-  const prevStageRel = (prev as Record<string, unknown>).stage as
+  const prevStageId = (prev as unknown as Record<string, unknown>).stage_id as string;
+  const prevStageRel = (prev as unknown as Record<string, unknown>).stage as
     | { kind: string }
     | Array<{ kind: string }>
     | null;

@@ -137,7 +137,9 @@ export async function resolveCandidateApplicationAffiliations(
     console.warn("[affiliation] applications lookup failed", appsErr);
     return out;
   }
-  const apps = ((appRows ?? []) as Array<Record<string, unknown>>).map(
+  const apps = ((appRows ?? []) as unknown as Array<
+    Record<string, unknown>
+  >).map(
     (row) => {
       const rel = row.stage as
         | { kind: string }
@@ -523,15 +525,16 @@ async function maybeFetchApplication(
     .eq("id", viewer.applicationId)
     .maybeSingle();
   if (!data) return undefined;
-  const rel = (data as Record<string, unknown>).stage as
+  const dataRow = data as unknown as Record<string, unknown>;
+  const rel = dataRow.stage as
     | { kind: string }
     | Array<{ kind: string }>
     | null;
   const stageRow = Array.isArray(rel) ? rel[0] ?? null : rel;
   return {
-    id: data.id as string,
+    id: dataRow.id as string,
     status: (stageRow?.kind ?? "open") as string,
-    affiliationRevealed: data.affiliation_revealed as boolean,
+    affiliationRevealed: dataRow.affiliation_revealed as boolean,
   };
 }
 

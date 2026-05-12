@@ -752,19 +752,47 @@ export async function setJobStatus(
   // Phase 4.8 follow-up — broadcast a job_filled inbox message to every
   // active applicant when the status transitions to 'filled'. Skip when
   // the prior status was already 'filled' (idempotent against double-clicks).
+  //
+  // Post-Path-B (Track B pipeline-stages): applications.status is gone.
+  // Resolve the DSO's terminal stage IDs (hired/rejected/withdrawn) so
+  // we can NOT-IN filter on stage_id, then dispatch to everyone else.
   if (newStatus === "filled" && priorStatus !== "filled") {
-    const { data: activeApps } = await supabase
-      .from("applications")
-      .select("id, status")
-      .eq("job_id", jobId)
-      .not("status", "in", '("hired","rejected","withdrawn")');
-    for (const app of (activeApps ?? []) as Array<Record<string, unknown>>) {
-      void dispatchInboxSystemMessage({
-        applicationId: app.id as string,
-        eventKind: "job_filled",
-        senderRole: "employer",
-        body: `${jobTitle} has been filled. Thanks for your interest — we'll let you know about future openings.`,
-      });
+    const { data: jobScope } = await supabase
+      .from("jobs")
+      .select("dso_id")
+      .eq("id", jobId)
+      .maybeSingle();
+    const jobDsoId =
+      (jobScope as Record<string, unknown> | null)?.dso_id as string | null;
+    if (jobDsoId) {
+      const { data: terminalStageRows } = await supabase
+        .from("dso_pipeline_stages")
+        .select("id")
+        .eq("dso_id", jobDsoId)
+        .in("kind", ["hired", "rejected", "withdrawn"]);
+      const terminalStageIds = (
+        (terminalStageRows ?? []) as Array<{ id: string }>
+      ).map((r) => r.id);
+      let appsQuery = supabase
+        .from("applications")
+        .select("id")
+        .eq("job_id", jobId);
+      if (terminalStageIds.length > 0) {
+        appsQuery = appsQuery.not(
+          "stage_id",
+          "in",
+          `(${terminalStageIds.map((id) => `"${id}"`).join(",")})`
+        );
+      }
+      const { data: activeApps } = await appsQuery;
+      for (const app of (activeApps ?? []) as Array<Record<string, unknown>>) {
+        void dispatchInboxSystemMessage({
+          applicationId: app.id as string,
+          eventKind: "job_filled",
+          senderRole: "employer",
+          body: `${jobTitle} has been filled. Thanks for your interest — we'll let you know about future openings.`,
+        });
+      }
     }
   }
 

@@ -77,7 +77,9 @@ export async function getEmployerInboxThreads(
     console.error("[inbox] employer messages query", messagesResult.error);
   }
 
-  const apps = (appsResult.data ?? []) as Array<Record<string, unknown>>;
+  const apps = (appsResult.data ?? []) as unknown as Array<
+    Record<string, unknown>
+  >;
   const messages = (messagesResult.data ?? []) as MessageRowMin[];
   const archivedSet = new Set(
     (archiveResult.data ?? []).map(
@@ -171,7 +173,9 @@ export async function getCandidateInboxThreads(
     console.error("[inbox] candidate messages query", messagesResult.error);
   }
 
-  const apps = (appsResult.data ?? []) as Array<Record<string, unknown>>;
+  const apps = (appsResult.data ?? []) as unknown as Array<
+    Record<string, unknown>
+  >;
   const messages = (messagesResult.data ?? []) as MessageRowMin[];
   const archivedSet = new Set(
     (archiveResult.data ?? []).map(

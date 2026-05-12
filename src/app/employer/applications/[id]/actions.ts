@@ -181,8 +181,8 @@ export async function moveApplicationStage(
     return { ok: false, error: prevErr?.message ?? "Application not found" };
   }
 
-  const prevStageId = (prev as Record<string, unknown>).stage_id as string;
-  const prevStageRel = (prev as Record<string, unknown>).stage as
+  const prevStageId = (prev as unknown as Record<string, unknown>).stage_id as string;
+  const prevStageRel = (prev as unknown as Record<string, unknown>).stage as
     | { kind: string }
     | Array<{ kind: string }>
     | null;
@@ -194,7 +194,7 @@ export async function moveApplicationStage(
     ? prevKindRaw
     : "open";
 
-  const job = (prev as Record<string, unknown>).jobs as
+  const job = (prev as unknown as Record<string, unknown>).jobs as
     | Record<string, unknown>
     | Array<Record<string, unknown>>
     | null;
@@ -202,7 +202,7 @@ export async function moveApplicationStage(
   const hideStagesFromCandidate = Boolean(jobRow?.hide_stages_from_candidate);
   const dsoId = (jobRow?.dso_id as string | null) ?? null;
   const jobTitle = (jobRow?.title as string | null) ?? "the job";
-  const candidateRecord = (prev as Record<string, unknown>).candidates as
+  const candidateRecord = (prev as unknown as Record<string, unknown>).candidates as
     | Record<string, unknown>
     | Array<Record<string, unknown>>
     | null;
