@@ -230,6 +230,16 @@ export default async function CandidateApplicationDetailPage({
       proposalRows.find(
         (row) => (row as { status?: string }).status === "booked"
       ) ?? proposalRows[0];
+    // interview_bookings has UNIQUE(proposal_id) — PostgREST returns
+    // this as an OBJECT (one-to-one), not an array. Accept both shapes
+    // — older Supabase versions and the typed cast both expected
+    // arrays. Same root cause as the employer-side "booked shows as
+    // Waiting on candidate" bug.
+    type CandidateBookingShape = {
+      id: string;
+      selected_option_id: string;
+      candidate_confirmed_at: string;
+    };
     const p = pickedRow as unknown as {
       id: string;
       status: CandidateInterviewProposal["status"];
@@ -242,11 +252,10 @@ export default async function CandidateApplicationDetailPage({
         start_at: string;
         sort_order: number;
       }>;
-      interview_bookings: Array<{
-        id: string;
-        selected_option_id: string;
-        candidate_confirmed_at: string;
-      }>;
+      interview_bookings:
+        | CandidateBookingShape
+        | Array<CandidateBookingShape>
+        | null;
       applications: Array<{
         jobs: Array<{
           dso_id: string;
@@ -254,7 +263,10 @@ export default async function CandidateApplicationDetailPage({
         }>;
       }>;
     };
-    const booking = p.interview_bookings?.[0] ?? null;
+    const bookingRel = p.interview_bookings;
+    const booking: CandidateBookingShape | null = Array.isArray(bookingRel)
+      ? bookingRel[0] ?? null
+      : bookingRel ?? null;
     // Use the page-resolved `otherPartyName` (from getDisplayedDsoName)
     // rather than the nested embed — embed silently returns empty under
     // candidate-RLS, so dsoName was always falling back to "the practice".

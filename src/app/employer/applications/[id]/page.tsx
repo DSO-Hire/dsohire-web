@@ -582,6 +582,18 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     )
     .eq("application_id", app.id)
     .order("created_at", { ascending: false });
+  // interview_bookings has UNIQUE(proposal_id) — PostgREST treats this
+  // as a one-to-one and returns an OBJECT, not an array. Older Supabase
+  // versions returned arrays. Accept both shapes defensively — the
+  // wrong assumption was the root cause of the "booked proposal shows
+  // as Waiting on candidate" bug (active.booking falls to null and the
+  // render falls through to PendingView).
+  type BookingShape = {
+    id: string;
+    selected_option_id: string;
+    candidate_confirmed_at: string;
+    candidate_notes: string | null;
+  };
   const interviewProposals: InterviewProposalState[] = (
     (proposalRows ?? []) as unknown as Array<{
       id: string;
@@ -596,34 +608,37 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
         start_at: string;
         sort_order: number;
       }>;
-      interview_bookings: Array<{
-        id: string;
-        selected_option_id: string;
-        candidate_confirmed_at: string;
-        candidate_notes: string | null;
-      }>;
+      interview_bookings:
+        | BookingShape
+        | Array<BookingShape>
+        | null;
     }>
-  ).map((p) => ({
-    proposal_id: p.id,
-    status: p.status,
-    interview_kind: p.interview_kind,
-    duration_minutes: p.duration_minutes,
-    location_text: p.location_text,
-    message_to_candidate: p.message_to_candidate,
-    created_at: p.created_at,
-    options: (p.interview_proposal_options ?? []).sort(
-      (a, b) => a.sort_order - b.sort_order
-    ),
-    booking: p.interview_bookings?.[0]
-      ? {
-          id: p.interview_bookings[0].id,
-          selected_option_id: p.interview_bookings[0].selected_option_id,
-          candidate_confirmed_at:
-            p.interview_bookings[0].candidate_confirmed_at,
-          candidate_notes: p.interview_bookings[0].candidate_notes,
-        }
-      : null,
-  }));
+  ).map((p) => {
+    const bookingRel = p.interview_bookings;
+    const bookingRow: BookingShape | null = Array.isArray(bookingRel)
+      ? bookingRel[0] ?? null
+      : bookingRel ?? null;
+    return {
+      proposal_id: p.id,
+      status: p.status,
+      interview_kind: p.interview_kind,
+      duration_minutes: p.duration_minutes,
+      location_text: p.location_text,
+      message_to_candidate: p.message_to_candidate,
+      created_at: p.created_at,
+      options: (p.interview_proposal_options ?? []).sort(
+        (a, b) => a.sort_order - b.sort_order
+      ),
+      booking: bookingRow
+        ? {
+            id: bookingRow.id,
+            selected_option_id: bookingRow.selected_option_id,
+            candidate_confirmed_at: bookingRow.candidate_confirmed_at,
+            candidate_notes: bookingRow.candidate_notes,
+          }
+        : null,
+    };
+  });
 
   // Display-name fallback. We have the candidate's auth email here from the
   // service-role lookup above, so prefer the email-username path
