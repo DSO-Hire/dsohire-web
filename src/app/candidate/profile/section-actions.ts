@@ -497,3 +497,181 @@ function normalizeDate(s: string | null | undefined): string | null {
   if (/^\d{4}$/.test(t)) return `${t}-01-01`;
   return null;
 }
+
+// ─────────────────────────────────────────────────────────────────────
+// Credential file uploads (Phase 5B v1)
+//
+// Both candidate_licenses and candidate_certifications carry a
+// `document_path text` column. We host the PDF/image attachment in the
+// `candidate-credentials` private storage bucket, keyed by auth.uid()/
+// rowId/timestamp-filename so each candidate is namespaced and old
+// versions are recoverable until the row is deleted.
+//
+// Three actions, parameterized by `kind`:
+//   • uploadCredentialFile          — multipart FormData → bucket upload
+//                                      + row.document_path patch
+//   • removeCredentialFile          — clears document_path + drops object
+//   • getCredentialFileSignedUrl    — mints a 60s signed URL for download
+//
+// Pattern mirrors src/app/candidate/settings/credentials/ce-actions.ts.
+// ─────────────────────────────────────────────────────────────────────
+
+const CREDENTIAL_BUCKET = "candidate-credentials";
+const CREDENTIAL_MIME = new Set([
+  "application/pdf",
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+]);
+const CREDENTIAL_MAX_BYTES = 10 * 1024 * 1024; // 10 MB
+
+export type CredentialKind = "license" | "certification";
+
+function credentialTable(kind: CredentialKind): string {
+  return kind === "license" ? "candidate_licenses" : "candidate_certifications";
+}
+
+export async function uploadCredentialFile(
+  kind: CredentialKind,
+  rowId: string,
+  formData: FormData
+): Promise<{ ok: true; filePath: string } | { ok: false; error: string }> {
+  const ctx = await getCandidateContext();
+  if (!ctx.ok) return ctx;
+
+  const file = formData.get("file");
+  if (!(file instanceof File)) {
+    return { ok: false, error: "No file provided." };
+  }
+  if (!CREDENTIAL_MIME.has(file.type)) {
+    return {
+      ok: false,
+      error: "Only PDF, PNG, JPEG, or WebP files are allowed.",
+    };
+  }
+  if (file.size > CREDENTIAL_MAX_BYTES) {
+    return { ok: false, error: "File is over the 10MB cap." };
+  }
+
+  const table = credentialTable(kind);
+
+  // Verify the row belongs to the candidate before writing storage.
+  const { data: row } = await ctx.supabase
+    .from(table)
+    .select("id, document_path")
+    .eq("id", rowId)
+    .eq("candidate_id", ctx.candidateId)
+    .maybeSingle();
+  if (!row) {
+    return { ok: false, error: "Credential entry not found." };
+  }
+
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const path = `${ctx.user.id}/${kind}/${rowId}/${Date.now()}-${safeName}`;
+
+  const { error: uploadError } = await ctx.supabase.storage
+    .from(CREDENTIAL_BUCKET)
+    .upload(path, file, {
+      contentType: file.type,
+      upsert: false,
+    });
+  if (uploadError) {
+    console.error("[credentials] uploadCredentialFile storage", uploadError);
+    return { ok: false, error: "Couldn't upload the file." };
+  }
+
+  // Best-effort cleanup of the previous attachment.
+  const oldPath = (row as Record<string, unknown>).document_path as
+    | string
+    | null;
+  if (oldPath && oldPath !== path) {
+    await ctx.supabase.storage.from(CREDENTIAL_BUCKET).remove([oldPath]);
+  }
+
+  const { error: rowError } = await ctx.supabase
+    .from(table)
+    .update({ document_path: path })
+    .eq("id", rowId)
+    .eq("candidate_id", ctx.candidateId);
+  if (rowError) {
+    console.error("[credentials] uploadCredentialFile row", rowError);
+    // Orphan cleanup so the bucket doesn't accumulate unreferenced blobs.
+    await ctx.supabase.storage.from(CREDENTIAL_BUCKET).remove([path]);
+    return {
+      ok: false,
+      error: "Couldn't link the file to your credential.",
+    };
+  }
+
+  revalidatePath("/candidate/profile");
+  return { ok: true, filePath: path };
+}
+
+export async function removeCredentialFile(
+  kind: CredentialKind,
+  rowId: string
+): Promise<Result> {
+  const ctx = await getCandidateContext();
+  if (!ctx.ok) return ctx;
+
+  const table = credentialTable(kind);
+  const { data: row } = await ctx.supabase
+    .from(table)
+    .select("document_path")
+    .eq("id", rowId)
+    .eq("candidate_id", ctx.candidateId)
+    .maybeSingle();
+  if (!row) return { ok: false, error: "Credential entry not found." };
+
+  const path = (row as Record<string, unknown>).document_path as
+    | string
+    | null;
+  if (path) {
+    await ctx.supabase.storage.from(CREDENTIAL_BUCKET).remove([path]);
+  }
+
+  const { error } = await ctx.supabase
+    .from(table)
+    .update({ document_path: null })
+    .eq("id", rowId)
+    .eq("candidate_id", ctx.candidateId);
+
+  if (error) {
+    console.error("[credentials] removeCredentialFile", error);
+    return { ok: false, error: "Couldn't clear the file." };
+  }
+  revalidatePath("/candidate/profile");
+  return { ok: true };
+}
+
+export async function getCredentialFileSignedUrl(
+  kind: CredentialKind,
+  rowId: string
+): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
+  const ctx = await getCandidateContext();
+  if (!ctx.ok) return ctx;
+
+  const table = credentialTable(kind);
+  const { data: row } = await ctx.supabase
+    .from(table)
+    .select("document_path")
+    .eq("id", rowId)
+    .eq("candidate_id", ctx.candidateId)
+    .maybeSingle();
+  if (!row) return { ok: false, error: "Credential entry not found." };
+
+  const path = (row as Record<string, unknown>).document_path as
+    | string
+    | null;
+  if (!path) return { ok: false, error: "No file attached." };
+
+  const { data, error } = await ctx.supabase.storage
+    .from(CREDENTIAL_BUCKET)
+    .createSignedUrl(path, 60);
+
+  if (error || !data?.signedUrl) {
+    console.error("[credentials] getCredentialFileSignedUrl", error);
+    return { ok: false, error: "Couldn't generate a download link." };
+  }
+  return { ok: true, url: data.signedUrl };
+}

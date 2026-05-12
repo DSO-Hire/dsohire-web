@@ -25,7 +25,7 @@
  * meter live above this component on the page.
  */
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   Pencil,
@@ -35,6 +35,11 @@ import {
   Sparkles,
   CheckCircle2,
   AlertCircle,
+  Paperclip,
+  Upload,
+  Eye,
+  X,
+  ShieldCheck,
 } from "lucide-react";
 import {
   EditSheet,
@@ -72,11 +77,15 @@ import {
   deleteLicenseEntry,
   upsertCertificationEntry,
   deleteCertificationEntry,
+  uploadCredentialFile,
+  removeCredentialFile,
+  getCredentialFileSignedUrl,
   type IdentityInput,
   type WorkHistoryInput,
   type EducationInput,
   type LicenseInput,
   type CertificationInput,
+  type CredentialKind,
 } from "./section-actions";
 import { CompletenessMeter } from "./completeness-meter";
 import {
@@ -150,6 +159,8 @@ export interface ProfileData {
     issued_date: string | null;
     expires_date: string | null;
     display_number: boolean;
+    document_path: string | null;
+    verification_status: string;
   }>;
   certifications: Array<{
     id: string;
@@ -157,6 +168,8 @@ export interface ProfileData {
     level: string | null;
     issued_date: string | null;
     expires_date: string | null;
+    document_path: string | null;
+    verification_status: string;
   }>;
 }
 
@@ -1333,41 +1346,49 @@ function LicensesCard({
             return (
               <li
                 key={e.id}
-                className="flex items-start justify-between gap-3 rounded-md border border-slate-200 bg-slate-50/40 p-4"
+                className="rounded-md border border-slate-200 bg-slate-50/40 p-4"
               >
-                <div className="flex-1 text-sm">
-                  <p className="font-semibold text-[#14233F]">{typeLabel}</p>
-                  <p className="text-slate-700">
-                    {e.state ? `Licensed in ${e.state}` : "State not set"}
-                    {e.display_number && e.license_number
-                      ? ` · #${e.license_number}`
-                      : ""}
-                  </p>
-                  <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500">
-                    {e.expires_date ? (
-                      <>
-                        Expires {formatDate(e.expires_date)}
-                      </>
-                    ) : (
-                      "No expiry on file"
-                    )}
-                    {!e.display_number && (
-                      <>
-                        <span aria-hidden>·</span>
-                        <Lock className="size-3" />
-                        Number hidden
-                      </>
-                    )}
-                  </p>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 text-sm">
+                    <p className="font-semibold text-[#14233F]">{typeLabel}</p>
+                    <p className="text-slate-700">
+                      {e.state ? `Licensed in ${e.state}` : "State not set"}
+                      {e.display_number && e.license_number
+                        ? ` · #${e.license_number}`
+                        : ""}
+                    </p>
+                    <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500">
+                      {e.expires_date ? (
+                        <>
+                          Expires {formatDate(e.expires_date)}
+                        </>
+                      ) : (
+                        "No expiry on file"
+                      )}
+                      {!e.display_number && (
+                        <>
+                          <span aria-hidden>·</span>
+                          <Lock className="size-3" />
+                          Number hidden
+                        </>
+                      )}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onEdit(e.id)}
+                    aria-label="Edit license"
+                    className="text-slate-500 hover:text-slate-900"
+                  >
+                    <Pencil className="size-4" />
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => onEdit(e.id)}
-                  aria-label="Edit license"
-                  className="text-slate-500 hover:text-slate-900"
-                >
-                  <Pencil className="size-4" />
-                </button>
+                <CredentialFileControls
+                  kind="license"
+                  rowId={e.id}
+                  hasFile={!!e.document_path}
+                  verificationStatus={e.verification_status}
+                />
               </li>
             );
           })}
@@ -1537,28 +1558,36 @@ function CertificationsCard({
             return (
               <li
                 key={e.id}
-                className="flex items-start justify-between gap-3 rounded-md border border-slate-200 bg-slate-50/40 p-4"
+                className="rounded-md border border-slate-200 bg-slate-50/40 p-4"
               >
-                <div className="flex-1 text-sm">
-                  <p className="font-semibold text-[#14233F]">{kindLabel}</p>
-                  {(e.level || e.expires_date) && (
-                    <p className="text-xs text-slate-500">
-                      {e.level && <span>{e.level}</span>}
-                      {e.level && e.expires_date && " · "}
-                      {e.expires_date && (
-                        <span>Expires {formatDate(e.expires_date)}</span>
-                      )}
-                    </p>
-                  )}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 text-sm">
+                    <p className="font-semibold text-[#14233F]">{kindLabel}</p>
+                    {(e.level || e.expires_date) && (
+                      <p className="text-xs text-slate-500">
+                        {e.level && <span>{e.level}</span>}
+                        {e.level && e.expires_date && " · "}
+                        {e.expires_date && (
+                          <span>Expires {formatDate(e.expires_date)}</span>
+                        )}
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onEdit(e.id)}
+                    aria-label="Edit certification"
+                    className="text-slate-500 hover:text-slate-900"
+                  >
+                    <Pencil className="size-4" />
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => onEdit(e.id)}
-                  aria-label="Edit certification"
-                  className="text-slate-500 hover:text-slate-900"
-                >
-                  <Pencil className="size-4" />
-                </button>
+                <CredentialFileControls
+                  kind="certification"
+                  rowId={e.id}
+                  hasFile={!!e.document_path}
+                  verificationStatus={e.verification_status}
+                />
               </li>
             );
           })}
@@ -1664,6 +1693,176 @@ function CertificationModal({
       <InlineError message={error} />
     </EditSheet>
   );
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Credential file controls (Phase 5B v1)
+//
+// Inline, per-row file management on each license/certification row.
+// Three states:
+//   • No file        → "Upload" button (file picker)
+//   • File present   → "View" (signed URL) + "Replace" + "Remove"
+//   • Pending        → disabled controls with spinner label
+//
+// The signed-URL view opens in a new tab; the bucket is private so we
+// mint a 60s URL on each click rather than caching.
+// ─────────────────────────────────────────────────────────────────────
+
+function CredentialFileControls({
+  kind,
+  rowId,
+  hasFile,
+  verificationStatus,
+}: {
+  kind: CredentialKind;
+  rowId: string;
+  hasFile: boolean;
+  verificationStatus: string;
+}) {
+  const router = useRouter();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handlePick = () => fileRef.current?.click();
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError(null);
+    setBusy(true);
+    const fd = new FormData();
+    fd.append("file", file);
+    const result = await uploadCredentialFile(kind, rowId, fd);
+    setBusy(false);
+    if (fileRef.current) fileRef.current.value = "";
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    router.refresh();
+  };
+
+  const handleView = async () => {
+    setError(null);
+    setBusy(true);
+    const result = await getCredentialFileSignedUrl(kind, rowId);
+    setBusy(false);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    window.open(result.url, "_blank", "noopener,noreferrer");
+  };
+
+  const handleRemove = async () => {
+    if (!confirm("Remove this file?")) return;
+    setError(null);
+    setBusy(true);
+    const result = await removeCredentialFile(kind, rowId);
+    setBusy(false);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    router.refresh();
+  };
+
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+      <input
+        ref={fileRef}
+        type="file"
+        accept="application/pdf,image/png,image/jpeg,image/webp"
+        onChange={handleUpload}
+        className="hidden"
+        aria-hidden
+      />
+      {hasFile ? (
+        <>
+          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-700">
+            <Paperclip className="size-3" />
+            Document on file
+          </span>
+          <button
+            type="button"
+            onClick={handleView}
+            disabled={busy}
+            className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-1 font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+          >
+            <Eye className="size-3" />
+            View
+          </button>
+          <button
+            type="button"
+            onClick={handlePick}
+            disabled={busy}
+            className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-1 font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+          >
+            <Upload className="size-3" />
+            Replace
+          </button>
+          <button
+            type="button"
+            onClick={handleRemove}
+            disabled={busy}
+            className="inline-flex items-center gap-1 rounded-md border border-red-200 bg-white px-2 py-1 font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+          >
+            <X className="size-3" />
+            Remove
+          </button>
+        </>
+      ) : (
+        <button
+          type="button"
+          onClick={handlePick}
+          disabled={busy}
+          className="inline-flex items-center gap-1 rounded-md border border-dashed border-slate-300 bg-white px-2 py-1 font-medium text-slate-600 hover:border-slate-400 hover:bg-slate-50 disabled:opacity-50"
+        >
+          <Upload className="size-3" />
+          Upload document
+        </button>
+      )}
+      <VerificationBadge status={verificationStatus} />
+      {busy && <span className="text-slate-400">Working…</span>}
+      {error && <span className="text-red-700">{error}</span>}
+    </div>
+  );
+}
+
+function VerificationBadge({ status }: { status: string }) {
+  if (status === "verified") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-800">
+        <ShieldCheck className="size-3" />
+        Verified
+      </span>
+    );
+  }
+  if (status === "pending") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-800">
+        Pending review
+      </span>
+    );
+  }
+  if (status === "revoked") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-medium text-red-700">
+        Revoked
+      </span>
+    );
+  }
+  if (status === "expired") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-medium text-red-700">
+        Expired
+      </span>
+    );
+  }
+  // 'unverified' → no chip; the absence reads as the default and avoids
+  // cluttering every new row with a "not yet verified" badge.
+  return null;
 }
 
 // ─────────────────────────────────────────────────────────────────────

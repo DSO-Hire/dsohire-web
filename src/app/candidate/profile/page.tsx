@@ -58,11 +58,11 @@ export default async function CandidateProfilePage() {
       .order("end_year", { ascending: false, nullsFirst: false }),
     supabase
       .from("candidate_licenses")
-      .select("id, license_type, license_number, state, issued_date, expires_date, display_number")
+      .select("id, license_type, license_number, state, issued_date, expires_date, display_number, document_path, verification_status")
       .order("expires_date", { ascending: true, nullsFirst: false }),
     supabase
       .from("candidate_certifications")
-      .select("id, kind, level, issued_date, expires_date")
+      .select("id, kind, level, issued_date, expires_date, document_path, verification_status")
       .order("expires_date", { ascending: true, nullsFirst: false }),
   ]);
 

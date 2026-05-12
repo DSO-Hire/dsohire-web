@@ -102,6 +102,7 @@ export const CERTIFICATION_KINDS: ReadonlyArray<CanonicalOption> = [
   { value: "osha", label: "OSHA" },
   { value: "hipaa", label: "HIPAA" },
   { value: "infection_control", label: "Infection Control" },
+  { value: "malpractice", label: "Malpractice Insurance" },
 ];
 
 // ─────────────────────────────────────────────────────────────────────
