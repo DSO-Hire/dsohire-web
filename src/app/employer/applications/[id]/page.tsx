@@ -719,11 +719,17 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const credentialCertifications = ((rawCertifications ?? []) as unknown) as CredentialCertificationRow[];
   const referenceRequests = ((rawReferences ?? []) as unknown) as ReferenceRequestRow[];
 
-  // ── Offer letters (Phase 5A Track E)
-  // We only need this data when the section is going to render
-  // (current stage kind is 'offer'), but doing the fetch unconditionally
-  // keeps the gating logic simple — it's two cheap reads.
-  const showOfferSection = currentKind === "offer";
+  // ── Offer letters (Phase 5A Track E + Track E completion)
+  //
+  // The section was originally gated on `currentKind === 'offer'` only,
+  // which meant it disappeared the moment a candidate accepted (stage
+  // flips to hired). That dropped the "Accepted by Jordan with typed
+  // name X" indicator off the page entirely. Now we run the fetch
+  // whenever the application *could* show an offer — i.e. on the offer
+  // stage OR if any send rows exist for this application — and surface
+  // the section accordingly. Two cheap indexed reads keep the gate
+  // simple without the extra round trip.
+  const onOfferStage = currentKind === "offer";
   let offerTemplates: OfferTemplateOption[] = [];
   let offerSends: OfferSendRow[] = [];
   // Candidate-view DSO name (affiliation-masked) + job location + an
@@ -734,7 +740,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   let offerSectionDsoName: string = dsoNameForAffiliation;
   let offerSectionJobLocation: string = "";
   let offerSectionJobEmploymentType: string = "";
-  if (showOfferSection) {
+  {
     const [
       { data: rawTemplates, error: templatesErr },
       { data: rawSends, error: sendsErr },
@@ -804,9 +810,39 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
         if (row.full_name) senderNameByAuthId.set(row.auth_user_id, row.full_name);
       }
     }
+    // Pull the candidate's Accept / Decline responses (Track E
+    // completion) so the LatestSendCard can render "Accepted by Jordan
+    // on May 12 at 3:42pm" inline. One response per send, max — the
+    // unique(offer_send_id) constraint guarantees this.
+    type RawResponse = {
+      offer_send_id: string;
+      response: string;
+      responded_at: string;
+      reason: string | null;
+      signed_name: string | null;
+    };
+    const responseByOfferSendId = new Map<string, RawResponse>();
+    const offerSendIds = rawSendRows.map((r) => r.id);
+    if (offerSendIds.length > 0) {
+      const { data: rawResponses, error: responsesErr } = await supabase
+        .from("application_offer_responses")
+        .select("offer_send_id, response, responded_at, reason, signed_name")
+        .in("offer_send_id", offerSendIds);
+      if (responsesErr) {
+        console.warn(
+          "[applications] offer responses fetch failed",
+          responsesErr
+        );
+      }
+      for (const row of (rawResponses ?? []) as RawResponse[]) {
+        responseByOfferSendId.set(row.offer_send_id, row);
+      }
+    }
+
     offerSends = rawSendRows.map((r) => {
       const tplRel = r.dso_offer_letter_templates;
       const tpl = Array.isArray(tplRel) ? tplRel[0] ?? null : tplRel;
+      const resp = responseByOfferSendId.get(r.id) ?? null;
       return {
         id: r.id,
         template_id: r.template_id,
@@ -818,6 +854,14 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
         sent_at: r.sent_at,
         sender_name: r.sent_by_user_id
           ? senderNameByAuthId.get(r.sent_by_user_id) ?? null
+          : null,
+        response: resp
+          ? {
+              kind: resp.response as "accepted" | "declined",
+              responded_at: resp.responded_at,
+              reason: resp.reason,
+              signed_name: resp.signed_name,
+            }
           : null,
       };
     });
@@ -865,6 +909,12 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
       ? rawEmp.charAt(0).toUpperCase() + rawEmp.slice(1).replace(/_/g, "-")
       : "";
   }
+
+  // Section visibility — render the Offer section any time it's
+  // current-stage relevant OR has historical state. The post-acceptance
+  // flow flips stage to 'hired' and we still want the recruiter to
+  // see the response card with the typed-name soft-sig.
+  const showOfferSection = onOfferStage || offerSends.length > 0;
 
   const titleLine = cand?.current_title ?? cand?.headline ?? null;
 

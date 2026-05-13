@@ -214,6 +214,60 @@ export type Database = {
           },
         ]
       }
+      application_offer_responses: {
+        Row: {
+          application_id: string
+          created_at: string
+          id: string
+          ip: string | null
+          offer_send_id: string
+          reason: string | null
+          responded_at: string
+          response: string
+          signed_name: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          id?: string
+          ip?: string | null
+          offer_send_id: string
+          reason?: string | null
+          responded_at?: string
+          response: string
+          signed_name?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          id?: string
+          ip?: string | null
+          offer_send_id?: string
+          reason?: string | null
+          responded_at?: string
+          response?: string
+          signed_name?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_offer_responses_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_offer_responses_offer_send_id_fkey"
+            columns: ["offer_send_id"]
+            isOneToOne: true
+            referencedRelation: "application_offer_sends"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       application_offer_sends: {
         Row: {
           application_id: string
@@ -226,6 +280,7 @@ export type Database = {
           sent_by_user_id: string | null
           subject: string
           template_id: string | null
+          token: string | null
         }
         Insert: {
           application_id: string
@@ -238,6 +293,7 @@ export type Database = {
           sent_by_user_id?: string | null
           subject: string
           template_id?: string | null
+          token?: string | null
         }
         Update: {
           application_id?: string
@@ -250,6 +306,7 @@ export type Database = {
           sent_by_user_id?: string | null
           subject?: string
           template_id?: string | null
+          token?: string | null
         }
         Relationships: [
           {

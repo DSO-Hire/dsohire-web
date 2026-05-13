@@ -61,6 +61,17 @@ export interface OfferSendRow {
   merge_values: Record<string, string>;
   sent_at: string;
   sender_name: string | null;
+  /**
+   * Candidate's response to this offer, if any. One per send max
+   * (UNIQUE(offer_send_id) on application_offer_responses). Track E
+   * completion 2026-05-12.
+   */
+  response: {
+    kind: "accepted" | "declined";
+    responded_at: string;
+    reason: string | null;
+    signed_name: string | null;
+  } | null;
 }
 
 interface OfferSectionProps {
@@ -167,11 +178,21 @@ export function OfferSection({
 function LatestSendCard({ send }: { send: OfferSendRow }) {
   const [open, setOpen] = useState(false);
   const sentAt = new Date(send.sent_at);
+  const resp = send.response;
+  // Color the card by response state. Accepted → emerald (the original
+  // colorway), declined → muted slate (terminal-but-not-celebratory),
+  // pending → amber (action awaited on candidate side).
+  const containerCls =
+    resp?.kind === "accepted"
+      ? "border-emerald-200 bg-emerald-50/60"
+      : resp?.kind === "declined"
+        ? "border-slate-300 bg-slate-50/70"
+        : "border-amber-200 bg-amber-50/40";
   return (
-    <div className="border border-emerald-200 bg-emerald-50/60">
+    <div className={`border ${containerCls}`}>
       <div className="px-4 py-3 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
             <CheckCircle2 className="h-3.5 w-3.5 text-emerald-700 shrink-0" />
             <span className="text-[10px] font-bold tracking-[2px] uppercase text-emerald-800">
               Offer sent
@@ -213,11 +234,68 @@ function LatestSendCard({ send }: { send: OfferSendRow }) {
           )}
         </button>
       </div>
+
+      {/* Response status — renders when the candidate has accepted or
+          declined. Surfaces the typed-name soft-sig + optional decline
+          reason inline so the recruiter has full context without
+          clicking through to the audit log. */}
+      {resp && <OfferResponseStrip response={resp} />}
+
       {open && (
         <div className="border-t border-emerald-200 bg-white">
           <SendBodyFrame html={send.body_html} />
         </div>
       )}
+    </div>
+  );
+}
+
+function OfferResponseStrip({
+  response,
+}: {
+  response: NonNullable<OfferSendRow["response"]>;
+}) {
+  const respondedAt = new Date(response.responded_at);
+  const accepted = response.kind === "accepted";
+  const stripCls = accepted
+    ? "border-emerald-300 bg-white"
+    : "border-slate-300 bg-white";
+  const eyebrowCls = accepted
+    ? "text-emerald-800"
+    : "text-slate-700";
+  const eyebrowLabel = accepted ? "Candidate accepted" : "Candidate declined";
+  return (
+    <div className={`border-t ${stripCls} px-4 py-3`}>
+      <div className="flex items-start gap-2 mb-1">
+        {accepted ? (
+          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-700 shrink-0 mt-0.5" />
+        ) : (
+          <X className="h-3.5 w-3.5 text-slate-600 shrink-0 mt-0.5" />
+        )}
+        <div className="min-w-0">
+          <div className={`text-[10px] font-bold tracking-[2px] uppercase ${eyebrowCls}`}>
+            {eyebrowLabel}
+          </div>
+          <div className="text-[13px] text-ink leading-snug">
+            <strong>{respondedAt.toLocaleDateString()}</strong> at{" "}
+            {respondedAt.toLocaleTimeString([], {
+              hour: "numeric",
+              minute: "2-digit",
+            })}
+          </div>
+          {accepted && response.signed_name && (
+            <div className="text-[12px] text-slate-meta mt-0.5">
+              Typed name on file:{" "}
+              <strong className="text-ink">{response.signed_name}</strong>
+            </div>
+          )}
+          {!accepted && response.reason && (
+            <div className="text-[12px] text-slate-meta mt-1 italic">
+              “{response.reason}”
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

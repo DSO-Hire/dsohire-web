@@ -28,6 +28,12 @@ import { sendEmail } from "@/lib/email/send";
 import { renderTemplate } from "@/lib/offer-letters/merge";
 import { OfferLetter as OfferLetterEmail } from "@/emails/employer/OfferLetter";
 import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
+import {
+  generateOfferResponseToken,
+  offerResponseUrl,
+  offerQuickAcceptUrl,
+  offerQuickDeclineUrl,
+} from "@/lib/offers/tokens";
 
 export interface SendOfferInput {
   applicationId: string;
@@ -222,20 +228,36 @@ export async function sendOffer(
     };
   }
 
+  // ── Generate the response token BEFORE the email send so we can
+  // embed the /o/{token} URL into the body. The token is also written
+  // to the application_offer_sends row below; possession of the token
+  // is what authorizes the candidate's Accept / Decline on /o/[token].
+  const responseToken = generateOfferResponseToken();
+  const responseUrl = offerResponseUrl(responseToken);
+  const quickAcceptUrl = offerQuickAcceptUrl(responseToken);
+  const quickDeclineUrl = offerQuickDeclineUrl(responseToken);
+
   // ── Send the email. The OfferLetter React Email template wraps the
-  // pre-rendered fragment in the brand chrome.
+  // pre-rendered fragment in the brand chrome + adds the tokenized
+  // "Review and respond" CTA + Accept/Decline quick-reply links.
+  // replyTo points at info@dsohire.com (alias-routes to Cam) so the
+  // "questions about anything in the offer" line doesn't bounce.
   const senderName =
     ((dsoUser as Record<string, unknown>).full_name as string | null) ?? null;
   const sendResult = await sendEmail({
     to: candidateEmail,
     subject: subject.trim(),
     template: "employer.offer_letter",
+    replyTo: "info@dsohire.com",
     react: OfferLetterEmail({
       candidateFirstName: firstName(candidateFullName),
       dsoName,
       jobTitle: jobTitle ?? undefined,
       senderName,
       bodyHtml: render.html,
+      responseUrl,
+      quickAcceptUrl,
+      quickDeclineUrl,
     }),
     relatedDsoId: jobDsoId,
     relatedCandidateId: candidateId,
@@ -252,7 +274,9 @@ export async function sendOffer(
 
   // ── Persist the audit row via service-role. RLS doesn't grant INSERT
   // to the authenticated client on application_offer_sends (intentional
-  // — we keep the audit trail immutable from app code).
+  // — we keep the audit trail immutable from app code). The token
+  // column carries the same value embedded in the email above; the
+  // /o/[token] response page resolves it back to this row.
   const admin = createSupabaseServiceRoleClient();
   const { data: inserted, error: insertErr } = await admin
     .from("application_offer_sends")
@@ -264,6 +288,7 @@ export async function sendOffer(
       subject: subject.trim(),
       body_html: render.html,
       merge_values: mergeValues,
+      token: responseToken,
     })
     .select("id")
     .maybeSingle();
