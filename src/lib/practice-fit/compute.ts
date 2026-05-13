@@ -193,11 +193,22 @@ function makeUnscoredDim(
   };
 }
 
+/**
+ * v1.3.1 (2026-05-13) — scored dims need DISTINCT employer-voice copy.
+ * The original v1.1 assumption ("scored dims read identically to both
+ * audiences") was wrong: candidate-side detail uses second-person
+ * ("your minimum", "your preferences"), which leaks to recruiters
+ * verbatim. Per-dim functions now supply both strings explicitly.
+ * If a dim ever forgets, we derive a third-person fallback via simple
+ * regex transforms (your→their, you're→they're, etc.) so the bug is
+ * defense-in-depth-safe.
+ */
 function makeScoredDim(
   key: FitDimensionKey,
   label: string,
   raw: number,
-  detail: string
+  detail: string,
+  detailEmployer?: string
 ): FitDimension {
   const clamped = Math.max(0, Math.min(100, Math.round(raw)));
   const weight = WEIGHTS[key];
@@ -208,11 +219,34 @@ function makeScoredDim(
     scored: true,
     label,
     detail,
-    detail_employer: detail, // scored dims read identically to both audiences
+    detail_employer: detailEmployer ?? derivedEmployerVoice(detail),
     cta_href: null,
     cta_label: null,
     cta_inline: false,
   };
+}
+
+/**
+ * Mechanical second-person → third-person rewrite for scored-dim copy
+ * when an explicit employer-voice string wasn't supplied. Word-boundary-
+ * scoped to avoid e.g. "young" → "thereng". Not infallible, but the
+ * dims that supply explicit strings don't depend on this; this is a
+ * net for anything new that slips through.
+ */
+function derivedEmployerVoice(s: string): string {
+  return s
+    .replace(/\byou're\b/g, "they're")
+    .replace(/\bYou're\b/g, "They're")
+    .replace(/\byou've\b/g, "they've")
+    .replace(/\bYou've\b/g, "They've")
+    .replace(/\byou'd\b/g, "they'd")
+    .replace(/\bYou'd\b/g, "They'd")
+    .replace(/\byour\b/g, "their")
+    .replace(/\bYour\b/g, "Their")
+    .replace(/\byours\b/g, "theirs")
+    .replace(/\bYours\b/g, "Theirs")
+    .replace(/\byou\b/g, "they")
+    .replace(/\bYou\b/g, "They");
 }
 
 function scoreCompensation({ candidate, job }: FitInputs): FitDimension {
@@ -282,25 +316,21 @@ function scoreCompensation({ candidate, job }: FitInputs): FitDimension {
       : (job.compensation_max ?? job.compensation_min ?? 0);
   let raw: number;
   let detail: string;
+  let detailEmployer: string;
+  const jobTopFmt = formatComp(jobTop, job.compensation_period);
+  const candMinFmt = formatComp(candidate.min_salary, candidate.salary_unit);
   if (jobTop >= candidate.min_salary) {
     const ratio = jobTop / candidate.min_salary;
     raw = ratio >= 1.2 ? 100 : 80 + Math.round((ratio - 1) * 100);
-    detail = `Job's range covers your minimum (${formatComp(
-      jobTop,
-      job.compensation_period
-    )}+).`;
+    detail = `Job's range covers your minimum (${jobTopFmt}+).`;
+    detailEmployer = `Job range covers their minimum (${jobTopFmt}+).`;
   } else {
     const shortfall = (candidate.min_salary - jobTop) / candidate.min_salary;
     raw = Math.max(0, Math.round(50 - shortfall * 100));
-    detail = `Job ceiling (${formatComp(
-      jobTop,
-      job.compensation_period
-    )}) below your min (${formatComp(
-      candidate.min_salary,
-      candidate.salary_unit
-    )}).`;
+    detail = `Job ceiling (${jobTopFmt}) below your min (${candMinFmt}).`;
+    detailEmployer = `Job ceiling (${jobTopFmt}) below their minimum (${candMinFmt}).`;
   }
-  return makeScoredDim("compensation", "Compensation", raw, detail);
+  return makeScoredDim("compensation", "Compensation", raw, detail, detailEmployer);
 }
 
 function scoreLocation({ candidate, job }: FitInputs): FitDimension {
@@ -356,24 +386,30 @@ function scoreLocation({ candidate, job }: FitInputs): FitDimension {
 
   let raw: number;
   let detail: string;
+  let detailEmployer: string;
 
   if (stateMatch && cityMatch) {
     raw = 100;
     detail = "Licensed in this state and the city is on your wish list.";
+    detailEmployer = "Licensed in this state and the city is on their wish list.";
   } else if (stateMatch) {
     raw = 80;
     detail = "Licensed in this state.";
+    detailEmployer = "Licensed in this state.";
   } else if (cityMatch) {
     raw = 65;
     detail = "City is on your wish list — confirm licensure for this state.";
+    detailEmployer = "City is on their wish list — licensure for this state not confirmed.";
   } else if (candidate.schedule_preferences?.willing_to_relocate) {
     raw = 40;
     detail = "Outside your states, but you're open to relocation.";
+    detailEmployer = "Outside their licensed states — they're open to relocation.";
   } else {
     raw = 10;
     detail = "Outside your licensed states / desired locations.";
+    detailEmployer = "Outside their licensed states / desired locations.";
   }
-  return makeScoredDim("location", "Location", raw, detail);
+  return makeScoredDim("location", "Location", raw, detail, detailEmployer);
 }
 
 function scoreSpecialty({ candidate, job }: FitInputs): FitDimension {
@@ -407,17 +443,21 @@ function scoreSpecialty({ candidate, job }: FitInputs): FitDimension {
   const overlap = jobSpecs.filter((s) => candSpecs.includes(s));
   let raw: number;
   let detail: string;
+  let detailEmployer: string;
   if (overlap.length === jobSpecs.length) {
     raw = 100;
     detail = `Your specialties cover everything this posting calls for (${overlap.join(", ")}).`;
+    detailEmployer = `Their specialties cover everything this posting calls for (${overlap.join(", ")}).`;
   } else if (overlap.length > 0) {
     raw = Math.round((overlap.length / jobSpecs.length) * 100);
     detail = `${overlap.length} of ${jobSpecs.length} specialties match (${overlap.join(", ")}).`;
+    detailEmployer = detail;
   } else {
     raw = 15;
     detail = `Your specialties (${candSpecs.join(", ")}) don't overlap with this posting (${jobSpecs.join(", ")}).`;
+    detailEmployer = `Their specialties (${candSpecs.join(", ")}) don't overlap with this posting (${jobSpecs.join(", ")}).`;
   }
-  return makeScoredDim("specialty", "Specialty", raw, detail);
+  return makeScoredDim("specialty", "Specialty", raw, detail, detailEmployer);
 }
 
 function scoreSkills({ candidate, job }: FitInputs): FitDimension {
@@ -462,16 +502,19 @@ function scoreSkills({ candidate, job }: FitInputs): FitDimension {
     matched.length === 0
       ? 0
       : Math.max(30, Math.round(ratio * 100));
-  return makeScoredDim(
-    "skills",
-    "Skills",
-    raw,
-    matched.length >= jobSkills.length
-      ? `Every skill on the posting matches yours (${matched.length} of ${jobSkills.length}).`
-      : matched.length > 0
-        ? `${matched.length} of ${jobSkills.length} skills match — preferred, not required.`
-        : `Posting lists ${jobSkills.length} preferred skills; none match your profile yet.`
-  );
+  let detail: string;
+  let detailEmployer: string;
+  if (matched.length >= jobSkills.length) {
+    detail = `Every skill on the posting matches yours (${matched.length} of ${jobSkills.length}).`;
+    detailEmployer = `Every skill on the posting matches theirs (${matched.length} of ${jobSkills.length}).`;
+  } else if (matched.length > 0) {
+    detail = `${matched.length} of ${jobSkills.length} skills match — preferred, not required.`;
+    detailEmployer = detail;
+  } else {
+    detail = `Posting lists ${jobSkills.length} preferred skills; none match your profile yet.`;
+    detailEmployer = `Posting lists ${jobSkills.length} preferred skills; none match their profile yet.`;
+  }
+  return makeScoredDim("skills", "Skills", raw, detail, detailEmployer);
 }
 
 function scoreYearsExperience({
@@ -602,16 +645,19 @@ function scoreDsoSize({ candidate, dso }: FitInputs): FitDimension {
 
   let raw: number;
   let detail: string;
+  let detailEmployer: string;
   if (pref === "any" || pref === actual) {
     raw = 100;
     detail = `${count}-practice DSO matches your preference.`;
+    detailEmployer = `${count}-practice DSO matches their preference.`;
   } else {
     const order = ["small", "mid", "large"];
     const distance = Math.abs(order.indexOf(pref) - order.indexOf(actual));
     raw = distance === 1 ? 60 : 30;
     detail = `You prefer ${pref}-size DSOs — this is ${actual} (${count} practices).`;
+    detailEmployer = `They prefer ${pref}-size DSOs — this is ${actual} (${count} practices).`;
   }
-  return makeScoredDim("dso_size", "DSO size", raw, detail);
+  return makeScoredDim("dso_size", "DSO size", raw, detail, detailEmployer);
 }
 
 /* ──────────────────────────────────────────────────────────────
@@ -679,6 +725,7 @@ function scoreScheduleOverlap({ candidate, job }: FitInputs): FitDimension {
   // score on the flag overlap alone.
   let raw: number;
   let detail: string;
+  let detailEmployer: string;
 
   if (jobDays.length === 0) {
     // Job only flagged evenings / weekends.
@@ -687,20 +734,26 @@ function scoreScheduleOverlap({ candidate, job }: FitInputs): FitDimension {
     if (eveningsMatch && weekendsMatch) {
       raw = 95;
       detail = "Your schedule preferences cover the role's evening/weekend hours.";
+      detailEmployer = "Their schedule preferences cover the role's evening/weekend hours.";
     } else if (eveningsMatch || weekendsMatch) {
       raw = 55;
       detail =
         "Partial fit on the role's evening or weekend hours — you'd cover some shifts.";
+      detailEmployer =
+        "Partial fit on the role's evening or weekend hours — they'd cover some shifts.";
     } else {
       raw = 25;
       detail =
         "Role needs evening or weekend coverage that isn't in your preferences.";
+      detailEmployer =
+        "Role needs evening or weekend coverage that isn't in their preferences.";
     }
     return makeScoredDim(
       "schedule_overlap",
       "Schedule",
       raw,
-      detail
+      detail,
+      detailEmployer
     );
   }
 
@@ -717,18 +770,23 @@ function scoreScheduleOverlap({ candidate, job }: FitInputs): FitDimension {
 
   if (overlap.length === jobDays.length) {
     raw = Math.max(40, 100 + modifier);
-    detail =
-      modifier === 0
-        ? `You're available every day this role is staffed (${overlap.join(", ")}).`
-        : `Day overlap is complete (${overlap.join(", ")}), but the role's evening/weekend coverage isn't in your preferences.`;
+    if (modifier === 0) {
+      detail = `You're available every day this role is staffed (${overlap.join(", ")}).`;
+      detailEmployer = `Available every day this role is staffed (${overlap.join(", ")}).`;
+    } else {
+      detail = `Day overlap is complete (${overlap.join(", ")}), but the role's evening/weekend coverage isn't in your preferences.`;
+      detailEmployer = `Day overlap is complete (${overlap.join(", ")}), but the role's evening/weekend coverage isn't in their preferences.`;
+    }
   } else if (overlap.length === 0) {
     raw = Math.max(15, 25 + modifier);
     detail = `Your available days don't overlap with the role's staffed days (${jobDays.join(", ")}).`;
+    detailEmployer = `Their available days don't overlap with the role's staffed days (${jobDays.join(", ")}).`;
   } else {
     raw = Math.max(25, Math.round(ratio * 90) + modifier);
     detail = `${overlap.length} of ${jobDays.length} staffed days overlap with your availability (${overlap.join(", ")}).`;
+    detailEmployer = `${overlap.length} of ${jobDays.length} staffed days overlap with their availability (${overlap.join(", ")}).`;
   }
-  return makeScoredDim("schedule_overlap", "Schedule", raw, detail);
+  return makeScoredDim("schedule_overlap", "Schedule", raw, detail, detailEmployer);
 }
 
 /* ──────────────────────────────────────────────────────────────
