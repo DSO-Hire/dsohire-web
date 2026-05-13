@@ -2006,10 +2006,17 @@ function QuestionCard({
 
 /**
  * Knockout authoring sub-form. Renders the "Mark as knockout" checkbox and,
- * when checked, a per-kind correct-answer editor. Keep the component local
- * to job-wizard.tsx — it's deeply tied to WizardScreeningQuestion's shape.
+ * when checked, a per-kind correct-answer editor.
+ *
+ * Exported so the edit-page (/employer/jobs/[id]/edit) can render the same
+ * authoring UI inside its sibling QuestionCard. Both surfaces operate on
+ * the same WizardScreeningQuestion shape, so the component is portable;
+ * keeping them in sync via a single import is preferable to maintaining
+ * two copies that drift over time. Cam catch 2026-05-13 PM — toggle was
+ * only wired into the wizard's QuestionCard, not the edit-page's local
+ * copy, so existing jobs couldn't be tagged as knockout.
  */
-function KnockoutAuthoring({
+export function KnockoutAuthoring({
   question,
   onUpdate,
 }: {

@@ -52,6 +52,7 @@ import {
 } from "@/lib/candidate/canonical-lists";
 import {
   SCOPE_OPTIONS,
+  KnockoutAuthoring,
   type LocationOption,
   type WizardScreeningQuestion,
   type ScreeningQuestionKind,
@@ -1332,6 +1333,14 @@ function ScreeningSection({
               : null,
           required: q.required,
           sort_order: idx,
+          // E2.10 — pass knockout fields through to the server. Without
+          // these the server-side validateKnockoutCorrectAnswer never
+          // sees the operator's selection and the toggle round-trips
+          // back as off after Save.
+          knockout: Boolean(q.knockout),
+          knockout_correct_answer: q.knockout
+            ? q.knockout_correct_answer ?? null
+            : null,
         }))
       )
     );
@@ -1574,6 +1583,13 @@ function QuestionCard({
           />
           <span>Required — candidate must answer this to submit.</span>
         </label>
+
+        {/* E2.10 — Soft knockout toggle + per-kind correct-answer authoring.
+            Imported from job-wizard.tsx so the edit-page renders the same
+            UI the new-job wizard does. Cam catch 2026-05-13 — the toggle
+            was missing here because this file has its own local QuestionCard
+            that wasn't kept in sync with the wizard's. */}
+        <KnockoutAuthoring question={question} onUpdate={onUpdate} />
       </div>
     </div>
   );
@@ -1590,6 +1606,12 @@ function snapshotQuestions(qs: WizardScreeningQuestion[]): string {
       options:
         q.options?.map((o) => ({ id: o.id, label: o.label.trim() })) ?? null,
       required: q.required,
+      // E2.10 — track knockout fields so the dirty-state detector enables
+      // Save when the operator toggles knockout / edits the correct-answer
+      // payload. Without this the form looks like it accepted the change
+      // (UI flips) but never lights up the Save button.
+      knockout: Boolean(q.knockout),
+      knockout_correct_answer: q.knockout ? q.knockout_correct_answer ?? null : null,
     }))
   );
 }
