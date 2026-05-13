@@ -20,6 +20,7 @@ import { JobsMap, type JobsMapLocation } from "@/components/jobs-map";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { JobsStateFilter } from "./jobs-state-filter";
 import { normalizeStateInput } from "@/lib/us-states";
+import { CORPORATE_FUNCTIONS } from "@/lib/corporate/functions";
 import { ListSort } from "@/components/ui/list-sort";
 import type { Metadata } from "next";
 
@@ -188,8 +189,25 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
   const corporateJobs = allJobs.filter((j) =>
     corporateScopes.has((j.scope as string) ?? "location")
   );
-  const jobs = activeSurface === "corporate" ? corporateJobs : practiceJobs;
+
+  // 5G.c follow-up — function filter only honored on the Corporate tab.
+  // Bogus slugs fall through to null (no filter applied).
+  const activeFunctionSlug =
+    activeSurface === "corporate" && sp.function && CORPORATE_FUNCTIONS.find((f) => f.slug === sp.function)
+      ? (sp.function as string)
+      : null;
+  const filteredCorporateJobs = activeFunctionSlug
+    ? corporateJobs.filter(
+        (j) => (j.corporate_function as string | null) === activeFunctionSlug
+      )
+    : corporateJobs;
+
+  const jobs =
+    activeSurface === "corporate" ? filteredCorporateJobs : practiceJobs;
   const practiceCount = practiceJobs.length;
+  // Corporate tab count chip in the surface tabs reflects the UNFILTERED
+  // corporate pool so the function-filter doesn't make the tab look
+  // empty when the user just hasn't picked a function yet.
   const corporateCount = corporateJobs.length;
 
   // Map view is Practice-only — corporate jobs may have 0 anchor
@@ -386,8 +404,22 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
   // view toggle / sort change / filter submit. Practice is default, so
   // we only push when explicitly on Corporate.
   if (activeSurface === "corporate") filterParams.push(["surface", "corporate"]);
+  if (activeFunctionSlug) filterParams.push(["function", activeFunctionSlug]);
 
-  /** 5G.b — Build an href that switches to a given surface, preserving filters. */
+  /** Helper used by the posted-within chip strip + surface tabs. Pulls
+      the function filter through whenever we're staying on Corporate. */
+  const carryFunctionParam = (
+    params: Array<[string, string]>,
+    keepFunction: boolean
+  ) => {
+    if (keepFunction && activeFunctionSlug) {
+      params.push(["function", activeFunctionSlug]);
+    }
+    return params;
+  };
+
+  /** 5G.b — Build an href that switches to a given surface, preserving filters.
+      Switching tabs clears the function filter (it only applies on corporate). */
   const buildSurfaceHref = (surface: JobsSurface): string => {
     const params: Array<[string, string]> = [];
     if (sp.q) params.push(["q", sp.q]);
@@ -397,6 +429,21 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
     if (postedFilterValue) params.push(["posted", postedFilterValue]);
     if (sortKey !== "newest") params.push(["sort", sortKey]);
     if (surface === "corporate") params.push(["surface", "corporate"]);
+    // Don't carry the function filter across a surface switch.
+    return buildHref("/jobs", params);
+  };
+
+  /** 5G.c follow-up — Build an href that toggles the corporate function filter. */
+  const buildFunctionHref = (slug: string | null): string => {
+    const params: Array<[string, string]> = [];
+    if (sp.q) params.push(["q", sp.q]);
+    if (sp.state) params.push(["state", sp.state]);
+    if (sp.employment) params.push(["employment", sp.employment]);
+    if (sp.category) params.push(["category", sp.category]);
+    if (postedFilterValue) params.push(["posted", postedFilterValue]);
+    if (sortKey !== "newest") params.push(["sort", sortKey]);
+    params.push(["surface", "corporate"]);
+    if (slug) params.push(["function", slug]);
     return buildHref("/jobs", params);
   };
 
@@ -410,6 +457,9 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
     if (showMap) params.push(["view", "map"]);
     if (sortKey !== "newest") params.push(["sort", sortKey]);
     if (value) params.push(["posted", value]);
+    // 5G.b/c — carry surface + function (function only matters on corporate).
+    if (activeSurface === "corporate") params.push(["surface", "corporate"]);
+    carryFunctionParam(params, activeSurface === "corporate");
     return buildHref("/jobs", params);
   };
   // Sort travels with the list view but is meaningless on the map (which
@@ -481,6 +531,46 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
           })}
         </div>
 
+        {/* 5G.c follow-up — corporate function filter chip strip, only
+            on the Corporate tab. Click a chip to narrow; click "All" or
+            the active chip to clear. Slate-blue accent matches the
+            Corporate tab. Hidden on the Practice tab. */}
+        {activeSurface === "corporate" && (
+          <div className="mt-5 flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mr-2">
+              Function
+            </span>
+            <Link
+              href={buildFunctionHref(null)}
+              className={
+                "px-3 py-1.5 text-[12px] font-semibold border transition-colors " +
+                (activeFunctionSlug === null
+                  ? "bg-[#3D5266] text-ivory border-[#3D5266]"
+                  : "bg-white text-ink border-[var(--rule-strong)] hover:border-[#3D5266]")
+              }
+            >
+              All
+            </Link>
+            {CORPORATE_FUNCTIONS.map((fn) => {
+              const isActive = activeFunctionSlug === fn.slug;
+              return (
+                <Link
+                  key={fn.slug}
+                  href={buildFunctionHref(isActive ? null : fn.slug)}
+                  className={
+                    "px-3 py-1.5 text-[12px] font-semibold border transition-colors " +
+                    (isActive
+                      ? "bg-[#3D5266] text-ivory border-[#3D5266]"
+                      : "bg-white text-ink border-[var(--rule-strong)] hover:border-[#3D5266]")
+                  }
+                >
+                  {fn.label}
+                </Link>
+              );
+            })}
+          </div>
+        )}
+
         {/* Search bar */}
         <form
           method="get"
@@ -498,6 +588,14 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
               the search/filter form. */}
           {activeSurface === "corporate" && (
             <input type="hidden" name="surface" value="corporate" />
+          )}
+          {/* 5G.c follow-up — same trick for the function filter. */}
+          {activeFunctionSlug && (
+            <input
+              type="hidden"
+              name="function"
+              value={activeFunctionSlug}
+            />
           )}
           <SearchField
             label="Keyword"
@@ -707,6 +805,8 @@ interface JobRow {
   posted_at: string | null;
   /** 5G.b — drives Practice vs Corporate surface filter. */
   scope: "location" | "regional" | "corporate";
+  /** 5G.c — corporate function slug, null on non-corporate jobs. */
+  corporate_function: string | null;
 }
 
 function JobCard({

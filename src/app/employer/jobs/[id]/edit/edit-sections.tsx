@@ -45,6 +45,7 @@ import { RecommendedQuestionsPanel } from "../../recommended-questions-panel";
 import { JdGeneratorPanel } from "../../jd-generator-panel";
 import { ChipArrayInput } from "@/app/candidate/profile/edit-sheet";
 import { CORPORATE_FUNCTIONS } from "@/lib/corporate/functions";
+import { ExternalLinksField } from "@/components/external-links-field";
 import {
   getAllDentalSkills,
   BENEFITS,
@@ -138,6 +139,8 @@ export interface EditSectionsInitial {
   schedule_weekends: boolean;
   // 5G.c (2026-05-13) — corporate function slug; only meaningful when scope=corporate.
   corporate_function: string | null;
+  // E1.12 Slice B (2026-05-13) — external links {label,url} pairs.
+  external_links: Array<{ label: string; url: string }>;
 }
 
 interface EditSectionsProps {
@@ -193,6 +196,7 @@ export function EditSections({
         initialScheduleDays={initial.schedule_days}
         initialScheduleEvenings={initial.schedule_evenings}
         initialScheduleWeekends={initial.schedule_weekends}
+        initialExternalLinks={initial.external_links}
       />
       <ScreeningSection
         dsoId={dsoId}
@@ -714,6 +718,7 @@ function DetailsSection({
   initialScheduleDays,
   initialScheduleEvenings,
   initialScheduleWeekends,
+  initialExternalLinks,
 }: {
   dsoId: string;
   jobId: string;
@@ -731,6 +736,7 @@ function DetailsSection({
   initialScheduleDays: string[];
   initialScheduleEvenings: boolean;
   initialScheduleWeekends: boolean;
+  initialExternalLinks: Array<{ label: string; url: string }>;
 }) {
   // v1.8 — comp type drives input shape.
   const [compType, setCompType] = useState<
@@ -768,6 +774,9 @@ function DetailsSection({
   const [scheduleWeekends, setScheduleWeekends] = useState(
     initialScheduleWeekends
   );
+  // E1.12 Slice B — external links state.
+  const [externalLinks, setExternalLinks] =
+    useState<Array<{ label: string; url: string }>>(initialExternalLinks);
 
   const initialSpecialtyKey = [...initialSpecialty].sort().join(",");
   const initialScheduleDaysKey = [...initialScheduleDays].sort().join(",");
@@ -791,6 +800,7 @@ function DetailsSection({
     scheduleDaysKey: initialScheduleDaysKey,
     scheduleEvenings: initialScheduleEvenings,
     scheduleWeekends: initialScheduleWeekends,
+    externalLinksKey: JSON.stringify(initialExternalLinks),
   };
   const [snapshot, setSnapshot] = useState(initialSnapshot);
 
@@ -802,6 +812,7 @@ function DetailsSection({
   const skillsKey = [...skills].sort().join("|");
   const benefitsKey = [...benefits].sort().join("|");
   const scheduleDaysKey = [...scheduleDays].sort().join(",");
+  const externalLinksKey = JSON.stringify(externalLinks);
   const dirty =
     compType !== snapshot.compType ||
     compMin !== snapshot.compMin ||
@@ -816,7 +827,8 @@ function DetailsSection({
     minYearsExperience !== snapshot.minYearsExperience ||
     scheduleDaysKey !== snapshot.scheduleDaysKey ||
     scheduleEvenings !== snapshot.scheduleEvenings ||
-    scheduleWeekends !== snapshot.scheduleWeekends;
+    scheduleWeekends !== snapshot.scheduleWeekends ||
+    externalLinksKey !== snapshot.externalLinksKey;
 
   const touch = () => setSaved(false);
 
@@ -857,6 +869,12 @@ function DetailsSection({
     for (const d of scheduleDays) fd.append("schedule_days", d);
     if (scheduleEvenings) fd.set("schedule_evenings", "on");
     if (scheduleWeekends) fd.set("schedule_weekends", "on");
+    // E1.12 Slice B — external link pair arrays + sentinel.
+    for (const link of externalLinks) {
+      fd.append("external_link_label", link.label);
+      fd.append("external_link_url", link.url);
+    }
+    fd.set("external_links_submitted", "1");
 
     startTransition(async () => {
       const result: JobActionState = await updateJobDetailsSection(
@@ -882,6 +900,7 @@ function DetailsSection({
         scheduleDaysKey,
         scheduleEvenings,
         scheduleWeekends,
+        externalLinksKey,
       });
       setSaved(true);
     });
@@ -1154,6 +1173,17 @@ function DetailsSection({
           placeholder="Search benefits — type and press Enter for custom"
           helper="Standard DSO benefits. Pick what applies."
         />
+
+        {/* E1.12 Slice B — external links recruiter UX, same component as
+            the wizard surface. */}
+        <ExternalLinksField
+          initial={externalLinks}
+          onChange={(next) => {
+            setExternalLinks(next);
+            touch();
+          }}
+        />
+
         <Textarea
           label="Requirements (one per line)"
           rows={4}

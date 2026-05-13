@@ -111,7 +111,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
   const { data: job } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_visible, benefits, requirements, posted_at, status, schedule_days, schedule_evenings, schedule_weekends, scope, external_links"
+      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_visible, benefits, requirements, posted_at, status, schedule_days, schedule_evenings, schedule_weekends, scope, external_links, corporate_function"
     )
     .eq("id", id)
     .maybeSingle();

@@ -228,11 +228,14 @@ export async function updateJob(
       schedule_days: parsed.scheduleDays,
       schedule_evenings: parsed.scheduleEvenings,
       schedule_weekends: parsed.scheduleWeekends,
-      // E1.12 Slice A — don't write external_links on UPDATE until the
-      // wizard UI ships (Slice B). The current wizard doesn't submit
-      // external_link_* fields, so parsed.externalLinks is always []
-      // on this path; writing it would wipe any existing links a user
-      // populated via SQL or future direct-edit UX.
+      // E1.12 Slice B — sentinel-gated write. updateJob only persists
+      // external_links when the form explicitly opted in via the
+      // external_links_submitted=1 flag. Pre-Slice-B callers (and any
+      // server-action route that doesn't surface the new wizard UI)
+      // skip the write, preserving any existing links.
+      ...(parsed.externalLinksSubmitted
+        ? { external_links: parsed.externalLinks }
+        : {}),
       corporate_function: parsed.corporateFunction,
       scope: parsed.scope,
       posted_at:
@@ -1125,6 +1128,11 @@ interface ParsedJobInput {
   scheduleWeekends: boolean;
   // E1.12 (2026-05-13) — external links surfaced on the public job page.
   externalLinks: Array<{ label: string; url: string }>;
+  // E1.12 Slice B sentinel — true when the form explicitly submitted
+  // an external-links section (with the external_links_submitted=1 flag).
+  // updateJob gates the external_links DB write on this so legacy callers
+  // (without the wizard surface) don't wipe existing values.
+  externalLinksSubmitted: boolean;
   // 5G.c (2026-05-13) — corporate function slug. Only meaningful when
   // scope=corporate; null otherwise (also null when scope=corporate but
   // recruiter skipped the optional field). Server-side validated against
@@ -1341,6 +1349,8 @@ function parseJobFormData(
     return { error: linksResult.error };
   }
   const externalLinks = linksResult;
+  const externalLinksSubmitted =
+    String(formData.get("external_links_submitted") ?? "") === "1";
 
   // 5G.c — corporate function. Only meaningful when scope=corporate.
   // Silently ignore the field on non-corporate scopes so toggling scope
@@ -1451,6 +1461,7 @@ function parseJobFormData(
     scheduleEvenings,
     scheduleWeekends,
     externalLinks,
+    externalLinksSubmitted,
     corporateFunction,
   };
 }

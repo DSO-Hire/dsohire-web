@@ -75,7 +75,7 @@ export default async function EditJobPage({ params }: PageProps) {
   const { data: job } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, benefits, requirements, status, posted_at, applications_count, views, hide_stages_from_candidate, scope, specialty, min_years_experience, schedule_days, schedule_evenings, schedule_weekends, corporate_function"
+      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, benefits, requirements, status, posted_at, applications_count, views, hide_stages_from_candidate, scope, specialty, min_years_experience, schedule_days, schedule_evenings, schedule_weekends, corporate_function, external_links"
     )
     .eq("id", jobId)
     .eq("dso_id", dsoUser.dso_id)
@@ -156,6 +156,9 @@ export default async function EditJobPage({ params }: PageProps) {
       ((job as Record<string, unknown>).corporate_function as
         | string
         | null) ?? null,
+    external_links: (((job as Record<string, unknown>).external_links as
+      | Array<{ label: string; url: string }>
+      | null) ?? []) as Array<{ label: string; url: string }>,
   };
 
   // Load attachments + active subscription tier in parallel with the

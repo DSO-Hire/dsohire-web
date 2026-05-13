@@ -39,6 +39,10 @@ import { JdGeneratorPanel } from "./jd-generator-panel";
 import { ChipArrayInput } from "@/app/candidate/profile/edit-sheet";
 import { CORPORATE_FUNCTIONS } from "@/lib/corporate/functions";
 import {
+  ExternalLinksField,
+  type ExternalLinkPair,
+} from "@/components/external-links-field";
+import {
   getAllDentalSkills,
   BENEFITS,
 } from "@/lib/candidate/canonical-lists";
@@ -162,6 +166,8 @@ export interface JobWizardInitial {
   schedule_weekends: boolean;
   // 5G.c (2026-05-13) — corporate function slug; only set when scope=corporate.
   corporate_function: string | null;
+  // E1.12 Slice B (2026-05-13) — external links {label,url} pairs.
+  external_links: Array<{ label: string; url: string }>;
 }
 
 export const SCOPE_OPTIONS: Array<{
@@ -350,6 +356,12 @@ export function JobWizard({
   const [corporateFunction, setCorporateFunction] = useState<string>(
     initial?.corporate_function ?? ""
   );
+  // E1.12 Slice B — external links state. Initialized from edit-mode
+  // initial or empty for new jobs. Submitted via the form's external_link_*
+  // multi-value inputs that ExternalLinksField renders.
+  const [externalLinks, setExternalLinks] = useState<ExternalLinkPair[]>(
+    initial?.external_links ?? []
+  );
   // v1.6 — skills + benefits are now string[] (chip-picker), not the
   // legacy comma-separated string. Existing rows hydrate from initial.skills
   // / initial.benefits arrays directly.
@@ -440,6 +452,8 @@ export function JobWizard({
         scheduleDays: [...scheduleDays],
         scheduleEvenings,
         scheduleWeekends,
+        externalLinks,
+        corporateFunction,
         stepIdx,
       };
       try {
@@ -509,6 +523,18 @@ export function JobWizard({
       setScheduleDays(new Set(((d.scheduleDays as string[]) ?? [])));
       setScheduleEvenings(Boolean(d.scheduleEvenings));
       setScheduleWeekends(Boolean(d.scheduleWeekends));
+      // E1.12 Slice B + 5G.c — restore from draft. Defensive defaults
+      // for older drafts that didn't carry these keys.
+      setExternalLinks(
+        Array.isArray((d as Record<string, unknown>).externalLinks)
+          ? ((d as Record<string, unknown>).externalLinks as ExternalLinkPair[])
+          : []
+      );
+      setCorporateFunction(
+        typeof (d as Record<string, unknown>).corporateFunction === "string"
+          ? ((d as Record<string, unknown>).corporateFunction as string)
+          : ""
+      );
       if (typeof d.stepIdx === "number") setStepIdx(d.stepIdx as number);
     } catch {
       /* noop */
@@ -643,6 +669,19 @@ export function JobWizard({
     if (scope === "corporate" && corporateFunction) {
       formData.set("corporate_function", corporateFunction);
     }
+    // E1.12 Slice B — external_link_label[] + external_link_url[]
+    // paired arrays. Server's parseExternalLinks reads via getAll() and
+    // skips fully-empty rows, so we can submit blanks for partially-
+    // filled rows without leaking validation errors.
+    for (const link of externalLinks) {
+      formData.append("external_link_label", link.label);
+      formData.append("external_link_url", link.url);
+    }
+    // Sentinel — tells the server's updateJob path that the form HAS a
+    // wizard UI for external_links and the parsed value is authoritative.
+    // Without this flag, updateJob skips writing external_links to avoid
+    // wiping pre-Slice-B values. Slice B removes the gate.
+    formData.set("external_links_submitted", "1");
     // v1.6 — multi-value form keys, mirroring specialty. Lets the
     // server action read getAll() and avoid comma-split parsing.
     for (const s of skills) formData.append("skills", s);
@@ -811,6 +850,8 @@ export function JobWizard({
             onScheduleEvenings={setScheduleEvenings}
             scheduleWeekends={scheduleWeekends}
             onScheduleWeekends={setScheduleWeekends}
+            externalLinks={externalLinks}
+            onExternalLinks={setExternalLinks}
           />
         )}
 
@@ -1252,6 +1293,8 @@ function DetailsStep({
   onScheduleEvenings,
   scheduleWeekends,
   onScheduleWeekends,
+  externalLinks,
+  onExternalLinks,
 }: {
   compType: CompensationType;
   onCompType: (v: CompensationType) => void;
@@ -1282,6 +1325,8 @@ function DetailsStep({
   onScheduleEvenings: (v: boolean) => void;
   scheduleWeekends: boolean;
   onScheduleWeekends: (v: boolean) => void;
+  externalLinks: ExternalLinkPair[];
+  onExternalLinks: (v: ExternalLinkPair[]) => void;
 }) {
   return (
     <div className="space-y-7">
@@ -1525,6 +1570,15 @@ function DetailsStep({
         placeholder="Search benefits — type and press Enter for custom"
         helper="Standard DSO benefits package. Pick what applies; the chip-picker keeps phrasing consistent across listings."
       />
+
+      {/* E1.12 Slice B — external links recruiter UX. Surfaces below
+          benefits since the typical use is "here's the benefits PDF" or
+          "here's a video tour" — adjacent context. */}
+      <ExternalLinksField
+        initial={externalLinks}
+        onChange={onExternalLinks}
+      />
+
       <Textarea
         label="Requirements (one per line)"
         rows={4}
