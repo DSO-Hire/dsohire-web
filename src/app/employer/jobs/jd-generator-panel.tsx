@@ -250,8 +250,11 @@ export function JdGeneratorPanel({
         </button>
         {usage && !pending && (
           <span className="text-[10px] text-slate-meta tracking-[0.5px]">
-            Generated in {(usage.elapsed_ms / 1000).toFixed(1)}s · ~$
-            {usage.cost_usd.toFixed(4)}
+            {/* Cost intentionally hidden client-side (Cam 2026-05-13): showing
+                "~$0.0027" undercuts the premium positioning of the AI feature.
+                Server-side ai_usage_events still logs cost for the usage-cap
+                policy and overage billing math. */}
+            Generated in {(usage.elapsed_ms / 1000).toFixed(1)}s
           </span>
         )}
       </div>
