@@ -25,7 +25,11 @@ import { redirect } from "next/navigation";
 import { Info } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { AffiliationPolicyForm } from "./affiliation-policy-form";
-import type { AffiliationRevealPolicy } from "./actions";
+import { CorporateAffiliationPolicyForm } from "./corporate-affiliation-policy-form";
+import type {
+  AffiliationRevealPolicy,
+  CorporateAffiliationPolicy,
+} from "./actions";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Affiliation · Settings" };
@@ -56,7 +60,7 @@ export default async function AffiliationSettingsPage() {
 
   const { data: dso } = await supabase
     .from("dsos")
-    .select("name, affiliation_reveal_policy")
+    .select("name, affiliation_reveal_policy, corporate_affiliation_policy")
     .eq("id", dsoUser.dso_id)
     .maybeSingle();
 
@@ -64,6 +68,10 @@ export default async function AffiliationSettingsPage() {
   const currentPolicy = (dso?.affiliation_reveal_policy as
     | AffiliationRevealPolicy
     | undefined) ?? "never";
+  const currentCorporatePolicy =
+    (dso?.corporate_affiliation_policy as
+      | CorporateAffiliationPolicy
+      | undefined) ?? "strict";
 
   // Per-location stats — useful context: "you have 3 private-affiliation
   // locations" tells the admin whether this policy will affect anyone.
@@ -144,6 +152,36 @@ export default async function AffiliationSettingsPage() {
         currentPolicy={currentPolicy}
         dsoName={dsoName}
       />
+
+      {/* 5G.a addendum (2026-05-13) — corporate-scope job postings have
+          their own orthogonal affiliation policy because they may have
+          0 anchor locations (a DSO HQ / CFO role isn't tied to a
+          specific practice). Sits below the existing policy form with
+          its own header so the two reveal stories don't blur together. */}
+      <div className="mt-14 pt-10 border-t border-[var(--rule)]">
+        <header className="mb-8">
+          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+            Corporate roles
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] leading-[1.15] text-ink">
+            {dsoName} name on corporate-scope job postings
+          </h2>
+          <p className="mt-3 text-[14px] text-slate-body leading-relaxed">
+            DSO-wide roles (CEO, CFO, regional director, etc.) don&apos;t
+            have a specific practice anchor, so the per-location toggle
+            doesn&apos;t apply. This setting decides how the AI job
+            description generator and corporate-job public surfaces
+            resolve your DSO name on those listings.
+          </p>
+        </header>
+
+        <CorporateAffiliationPolicyForm
+          currentPolicy={currentCorporatePolicy}
+          dsoName={dsoName}
+          privateCount={privateCount ?? 0}
+          publicCount={Math.max(0, (totalCount ?? 0) - (privateCount ?? 0))}
+        />
+      </div>
     </section>
   );
 }

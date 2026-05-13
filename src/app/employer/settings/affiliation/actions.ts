@@ -17,6 +17,8 @@ export type AffiliationRevealPolicy =
   | "after_hire"
   | "per_application";
 
+export type CorporateAffiliationPolicy = "strict" | "permissive";
+
 export interface AffiliationActionState {
   ok: boolean;
   error?: string;
@@ -108,5 +110,92 @@ export async function updateAffiliationRevealPolicy(
   revalidatePath("/employer/settings/affiliation");
   revalidatePath("/candidate/applications", "page");
   revalidatePath("/candidate/dashboard");
+  return { ok: true, message: "Saved." };
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// updateCorporateAffiliationPolicy — 5G.a addendum (2026-05-13)
+// ═══════════════════════════════════════════════════════════════════════
+//
+// Controls how the AI JD generator + (future) corporate-scope public
+// surfaces resolve the DSO name when a job has no anchor location.
+// Default 'strict' per legal-shield posture.
+
+const VALID_CORPORATE_POLICIES = new Set<CorporateAffiliationPolicy>([
+  "strict",
+  "permissive",
+]);
+
+const CORPORATE_POLICY_LABEL: Record<CorporateAffiliationPolicy, string> = {
+  strict: "Strict (mask if any location is private)",
+  permissive: "Permissive (expose if any location is public)",
+};
+
+export async function updateCorporateAffiliationPolicy(
+  _prev: AffiliationActionState,
+  formData: FormData
+): Promise<AffiliationActionState> {
+  const policyRaw = String(formData.get("policy") ?? "").trim();
+  if (!VALID_CORPORATE_POLICIES.has(policyRaw as CorporateAffiliationPolicy)) {
+    return {
+      ok: false,
+      error: "Pick a corporate affiliation policy before saving.",
+    };
+  }
+  const policy = policyRaw as CorporateAffiliationPolicy;
+
+  const supabase = await createSupabaseServerClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Sign in required." };
+
+  const { data: dsoUser } = await supabase
+    .from("dso_users")
+    .select("dso_id, role")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+  if (!dsoUser) return { ok: false, error: "No DSO membership." };
+  if (dsoUser.role !== "owner" && dsoUser.role !== "admin") {
+    return {
+      ok: false,
+      error:
+        "Only owners and admins can change the corporate affiliation policy.",
+    };
+  }
+
+  const { data: priorRow } = await supabase
+    .from("dsos")
+    .select("corporate_affiliation_policy")
+    .eq("id", dsoUser.dso_id)
+    .maybeSingle();
+  const priorPolicy =
+    (priorRow?.corporate_affiliation_policy as
+      | CorporateAffiliationPolicy
+      | null) ?? "strict";
+
+  const { error } = await supabase
+    .from("dsos")
+    .update({ corporate_affiliation_policy: policy })
+    .eq("id", dsoUser.dso_id);
+
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  if (priorPolicy !== policy) {
+    void recordAuditEvent({
+      dsoId: dsoUser.dso_id as string,
+      actorUserId: user.id,
+      eventKind: "settings.corporate_affiliation_policy_changed",
+      targetTable: "dsos",
+      targetId: dsoUser.dso_id as string,
+      summary: `Changed corporate affiliation policy from ${CORPORATE_POLICY_LABEL[priorPolicy]} to ${CORPORATE_POLICY_LABEL[policy]}`,
+      metadata: { from: priorPolicy, to: policy },
+    });
+  }
+
+  revalidatePath("/employer/settings/affiliation");
   return { ok: true, message: "Saved." };
 }

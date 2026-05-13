@@ -100,10 +100,13 @@ export async function generateJobDescription(
     };
   }
 
-  // Pull DSO context for personalization.
+  // Pull DSO context for personalization. corporate_affiliation_policy
+  // (5G.a addendum, 2026-05-13) decides how to resolve the 0-location
+  // corporate case: strict masks when any location is private, permissive
+  // exposes when any location is public.
   const { data: dso } = await supabase
     .from("dsos")
-    .select("name, slug")
+    .select("name, slug, corporate_affiliation_policy")
     .eq("id", dsoUser.dso_id)
     .maybeSingle();
 
@@ -150,8 +153,19 @@ export async function generateJobDescription(
     }
   } else {
     // 0 locations selected — typical for corporate-scope jobs. Check the
-    // DSO's full location set so a corporate posting at a fully-private
-    // DSO doesn't leak the corporate parent name.
+    // DSO's full location set so a corporate posting doesn't leak the
+    // corporate parent name when the DSO's posture says it shouldn't.
+    //
+    // The policy split (Cam direction 2026-05-13):
+    //   strict     — mask when ANY location is private. Default per
+    //                legal-shield posture. Most-private-inherits at the
+    //                DSO level.
+    //   permissive — expose when ANY location is public. Recruiter has
+    //                explicitly opted into using the corporate name on
+    //                corporate-scope postings.
+    const policy =
+      (dso?.corporate_affiliation_policy as "strict" | "permissive" | null) ??
+      "strict";
     const { data: allDsoLocs } = await supabase
       .from("dso_locations")
       .select("id, public_dso_affiliation")
@@ -160,14 +174,25 @@ export async function generateJobDescription(
       id: string;
       public_dso_affiliation: boolean;
     }>;
+    const anyPrivate = dsoLocs.some((l) => !l.public_dso_affiliation);
     const anyPublic = dsoLocs.some((l) => l.public_dso_affiliation);
-    if (dsoLocs.length > 0 && !anyPublic) {
-      // Every location is private → treat the DSO as private.
+
+    if (dsoLocs.length === 0) {
+      // Edge case during onboarding — no locations yet. Keep default
+      // (DSO name) regardless of policy; there's nothing to enforce yet.
+    } else if (policy === "strict" && anyPrivate) {
+      // Strict: any private location → mask.
+      useDsoName = false;
+      employerNameForPrompt = "the company";
+    } else if (policy === "permissive" && !anyPublic) {
+      // Permissive: only mask when NO location is public. (If every
+      // location is private under permissive policy, still mask — the
+      // DSO has no public affiliation to fall back on.)
       useDsoName = false;
       employerNameForPrompt = "the company";
     }
-    // If any location is public OR the DSO has no locations yet (edge
-    // case during onboarding), keep the default DSO-name behavior.
+    // Otherwise (strict + all public, OR permissive + any public) keep
+    // the default DSO name.
   }
 
   const systemPrompt = buildSystemPrompt({ useDsoName });
