@@ -15,11 +15,12 @@
  */
 
 import { useState, useTransition } from "react";
-import { Sparkles, RefreshCcw, Check } from "lucide-react";
+import { Sparkles, RefreshCcw, Check, Wand2 } from "lucide-react";
 import {
   generateJobDescription,
   type JdGeneratorOutput,
 } from "./jd-generator-action";
+import { templatesForRole, type JdTemplate } from "@/lib/jd-templates/templates";
 
 interface JdGeneratorPanelProps {
   roleCategory: string;
@@ -163,6 +164,47 @@ export function JdGeneratorPanel({
           </select>
         </div>
       </div>
+
+      {/* E1.3 — Template chips filtered to the selected role_category.
+          Clicking one prefills the brief + (optionally) seeds the title
+          via onApplyTitle. The operator still hits Generate to actually
+          invoke Haiku — templates are a starting point, not a finisher. */}
+      {(() => {
+        const templates: JdTemplate[] = templatesForRole(roleCategory);
+        if (templates.length === 0) return null;
+        return (
+          <div className="mt-4">
+            <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+              Start from a template <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">(optional)</span>
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {templates.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  disabled={pending}
+                  onClick={() => {
+                    setBrief(t.brief);
+                    // Seed the title too so Apply All has a starting
+                    // value. The AI will overwrite during Generate, but
+                    // if the operator skips Generate they still have the
+                    // template's title sitting in the wizard.
+                    onApplyTitle(t.title_seed);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold border border-[var(--rule-strong)] bg-white text-ink hover:border-heritage hover:bg-heritage/[0.06] transition-colors disabled:opacity-50"
+                >
+                  <Wand2 className="h-3 w-3 text-heritage-deep" aria-hidden />
+                  {t.label}
+                </button>
+              ))}
+            </div>
+            <p className="mt-1.5 text-[11px] text-slate-meta leading-relaxed">
+              Drops a starter brief + title into the fields below. Edit
+              freely, then hit Generate to draft the full description.
+            </p>
+          </div>
+        );
+      })()}
 
       <div className="mt-3">
         <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
