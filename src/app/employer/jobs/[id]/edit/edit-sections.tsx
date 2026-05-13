@@ -326,7 +326,10 @@ function BasicsSection({
     setError(null);
     setSaved(false);
     if (!title.trim()) return setError("Add a job title.");
-    if (selectedLocationIds.size === 0)
+    // 5G.a (2026-05-13) — corporate-scope jobs treat locations as an
+    // optional anchor. Mirror the wizard's per-scope validation: location
+    // + regional still require ≥1 practice; corporate can leave blank.
+    if (scope !== "corporate" && selectedLocationIds.size === 0)
       return setError("Pick at least one practice location.");
 
     const fd = new FormData();
@@ -404,7 +407,14 @@ function BasicsSection({
         </div>
         <div>
           <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
-            Practice locations <span className="text-heritage">*</span>
+            {scope === "corporate" ? "Anchor location" : "Practice locations"}{" "}
+            {scope === "corporate" ? (
+              <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
+                (optional)
+              </span>
+            ) : (
+              <span className="text-heritage">*</span>
+            )}
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-[var(--rule)] border border-[var(--rule)]">
             {locations.map((loc) => {
@@ -435,6 +445,13 @@ function BasicsSection({
               );
             })}
           </div>
+          <p className="mt-2 text-[12px] text-slate-meta">
+            {scope === "corporate"
+              ? "Corporate roles are DSO-wide. Pick an anchor practice if the role reports out of one, or leave blank for fully remote / floating roles."
+              : scope === "regional"
+                ? "Tag every practice this regional role covers. Hiring managers at any tagged practice will see this job."
+                : "Tag every location this job is open at. We render separate location-specific listings on the public job board automatically."}
+          </p>
         </div>
 
         <div>
