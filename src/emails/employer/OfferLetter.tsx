@@ -120,7 +120,11 @@ export function OfferLetter({
 
       <Text style={paragraph}>
         Questions about anything in the offer? Reply to this email and{" "}
-        {senderName ? <strong style={strong}>{senderName}</strong> : "the hiring team"}{" "}
+        {senderName ? (
+          <strong style={strong}>{firstNameOf(senderName)}</strong>
+        ) : (
+          "the hiring team"
+        )}{" "}
         will follow up. If you can&apos;t click the button, paste this link
         into your browser:{" "}
         {responseUrl && (
@@ -131,10 +135,20 @@ export function OfferLetter({
       </Text>
 
       <Text style={smallParagraph}>
-        — {senderName ?? `The ${dsoName} team`}
+        —{" "}
+        {senderName
+          ? `${firstNameOf(senderName)} · ${dsoName}`
+          : `The ${dsoName} team`}
       </Text>
     </Layout>
   );
+}
+
+/** First-name extractor that no-ops on already-single-name input. */
+function firstNameOf(name: string): string {
+  const trimmed = name.trim();
+  if (!trimmed) return name;
+  return trimmed.split(/\s+/)[0] ?? trimmed;
 }
 
 export default OfferLetter;

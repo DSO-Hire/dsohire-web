@@ -33,6 +33,22 @@ This Privacy Policy explains how we collect, use, share, and protect personal in
 - Background-check or identity-verification services if a paying employer uses our integration to screen applicants (only with the candidate's separate consent)
 - Analytics and advertising platforms that share aggregated data about audience reach
 
+### 3.4 Information we deliberately do not collect
+
+We design the Services around the principle that data we don't hold can't be exposed, misused, or weaponized in a discrimination claim. We do not ask for the following, and our application forms reject attempts to provide them in free-text fields:
+
+- **Federal identifiers tied to professional licensure** — DEA registration number, NPI, full state license issuance dates beyond what employers typically request, federal tax IDs. Verification of these happens directly between you and the hiring employer at the credentialing or onboarding stage, off-platform.
+- **Government identifiers** — Social Security number, driver's license number, passport number, state ID number. I-9 and E-Verify are completed at the employer's offer stage, not on DSO Hire.
+- **Date of birth** — we don't collect DOB before a hiring decision. Age-related information surfaces only when an employer runs a separate, consented background check at the offer stage through a third-party provider.
+- **Protected-class characteristics** — race, ethnicity, national origin, religion, citizenship status, sex assigned at birth, gender identity, sexual orientation, disability status, pregnancy or family status, genetic information, military status. None of these belong in a hiring-screen surface and we do not ask.
+- **Biometric data** — no fingerprints, voiceprints, facial-geometry data, or retina scans.
+- **Financial account details** — no bank account numbers, routing numbers, or payroll information. Payment-card processing is handled by Stripe; we never see or store full card numbers.
+- **Health information** — no diagnoses, prescriptions, medical-history disclosures, or treatment records.
+- **Spouse, dependent, or family information** — we don't collect names, dates, or relationships of people related to you.
+- **Home address pre-offer** — we use city and state for location matching; we don't ask for street addresses until they are needed for a specific offer-stage step.
+
+If a paying employer needs sensitive information to extend an offer or fulfill a regulatory obligation (e.g., I-9 verification, professional-license credentialing, payroll setup), that exchange happens directly between you and the employer under their own data-handling practices — not through DSO Hire.
+
 ## 4. How we use information
 
 We use personal information to:

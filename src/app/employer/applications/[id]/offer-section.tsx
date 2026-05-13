@@ -105,10 +105,29 @@ export function OfferSection({
   sends,
 }: OfferSectionProps) {
   const [modalOpen, setModalOpen] = useState(false);
+  // When the latest send has been accepted, the primary CTA changes
+  // copy + intent. A fresh send becomes a revised-offer flow and
+  // requires explicit confirmation before opening the modal — guards
+  // against accidental double-fires at someone who's already said yes.
+  const [confirmRevision, setConfirmRevision] = useState(false);
   const hasSends = sends.length > 0;
   const latest = sends[0] ?? null;
   const earlier = sends.slice(1);
   const canSend = templates.length > 0 && !!candidateEmail;
+  const latestAccepted = latest?.response?.kind === "accepted";
+  const ctaLabel = !hasSends
+    ? "Send offer"
+    : latestAccepted
+      ? "Send revised offer"
+      : "Send another";
+
+  function handleCtaClick() {
+    if (latestAccepted) {
+      setConfirmRevision(true);
+      return;
+    }
+    setModalOpen(true);
+  }
 
   return (
     <div className="space-y-4">
@@ -121,11 +140,11 @@ export function OfferSection({
         {canSend && (
           <button
             type="button"
-            onClick={() => setModalOpen(true)}
+            onClick={handleCtaClick}
             className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C] transition-colors"
           >
             <Send className="h-3.5 w-3.5" />
-            {hasSends ? "Send another" : "Send offer"}
+            {ctaLabel}
           </button>
         )}
       </div>
@@ -165,6 +184,18 @@ export function OfferSection({
           jobEmploymentType={jobEmploymentType}
           templates={templates}
           onClose={() => setModalOpen(false)}
+        />
+      )}
+
+      {confirmRevision && (
+        <ConfirmRevisionDialog
+          candidateName={candidateName}
+          jobTitle={jobTitle}
+          onCancel={() => setConfirmRevision(false)}
+          onConfirm={() => {
+            setConfirmRevision(false);
+            setModalOpen(true);
+          }}
         />
       )}
     </div>
@@ -354,6 +385,74 @@ function EarlierSendsAccordion({ sends }: { sends: OfferSendRow[] }) {
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+/* ───────────────────────────────────────────────────────────────
+ * Confirm-revision dialog — gates the "Send revised offer" CTA when
+ * the prior offer is already accepted. Stops a stray click from
+ * firing a fresh offer email at someone who already said yes.
+ * ───────────────────────────────────────────────────────────── */
+
+function ConfirmRevisionDialog({
+  candidateName,
+  jobTitle,
+  onCancel,
+  onConfirm,
+}: {
+  candidateName: string;
+  jobTitle: string;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#14233F]/60 backdrop-blur-sm p-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onCancel();
+      }}
+    >
+      <div className="w-full max-w-[480px] bg-white border border-[var(--rule)] shadow-xl">
+        <header className="p-5 border-b border-[var(--rule)]">
+          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-amber-700 mb-1 inline-flex items-center gap-2">
+            <AlertCircle className="h-3 w-3" />
+            Already accepted
+          </div>
+          <h2 className="text-[17px] font-extrabold tracking-[-0.4px] text-ink">
+            Send a revised offer to {candidateName}?
+          </h2>
+        </header>
+        <div className="p-5 text-[13px] text-slate-body leading-relaxed">
+          <p>
+            {candidateName} already accepted the most recent offer for{" "}
+            <strong className="text-ink">{jobTitle}</strong>. Sending a new
+            offer will fire a second email and start a fresh accept/decline
+            cycle.
+          </p>
+          <p className="mt-3 text-slate-meta">
+            Continue only if the offer terms are intentionally changing —
+            e.g., revised comp, updated start date, or corrected typo.
+          </p>
+        </div>
+        <footer className="flex items-center justify-end gap-2 p-4 border-t border-[var(--rule)] bg-cream/40">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-ink"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C]"
+          >
+            <Send className="h-3.5 w-3.5" />
+            Continue
+          </button>
+        </footer>
+      </div>
     </div>
   );
 }
