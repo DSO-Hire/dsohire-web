@@ -569,6 +569,22 @@ export async function updateJobDetailsSection(
   const scheduleEvenings = formData.get("schedule_evenings") === "on";
   const scheduleWeekends = formData.get("schedule_weekends") === "on";
 
+  // E1.12 Slice B — same validator the create/update parser uses.
+  // Cam catch (2026-05-13): the per-section Compensation save on the
+  // edit page wasn't running this validation, which let an obviously-
+  // bogus "hello testing" URL through to the DB. Apply the same gate
+  // here and on every other section that surfaces external_links.
+  const externalLinksSubmitted =
+    String(formData.get("external_links_submitted") ?? "") === "1";
+  let externalLinksToWrite: Array<{ label: string; url: string }> | null = null;
+  if (externalLinksSubmitted) {
+    const linksResult = parseExternalLinks(formData);
+    if (!Array.isArray(linksResult)) {
+      return { ok: false, error: linksResult.error };
+    }
+    externalLinksToWrite = linksResult;
+  }
+
   const supabase = await createSupabaseServerClient();
   const { error: updateError } = await supabase
     .from("jobs")
@@ -586,6 +602,11 @@ export async function updateJobDetailsSection(
       schedule_days: scheduleDays,
       schedule_evenings: scheduleEvenings,
       schedule_weekends: scheduleWeekends,
+      // Only write external_links when the form opted in via the
+      // sentinel (Slice B pattern). Preserves legacy values otherwise.
+      ...(externalLinksToWrite !== null
+        ? { external_links: externalLinksToWrite }
+        : {}),
     })
     .eq("id", jobId)
     .eq("dso_id", dsoId);
