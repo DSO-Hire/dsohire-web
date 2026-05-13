@@ -381,7 +381,9 @@ export async function updateJobBasicsSection(
 
   if (!title) return { ok: false, error: "Job title is required." };
   if (title.length > 200) return { ok: false, error: "Job title is too long." };
-  if (locationIds.length === 0) {
+  // 5G.a (2026-05-13) — corporate-scope jobs treat locations as an
+  // optional anchor (HQ city) rather than a required practice pick.
+  if (scope !== "corporate" && locationIds.length === 0) {
     return { ok: false, error: "Pick at least one practice location." };
   }
 
@@ -1179,7 +1181,12 @@ function parseJobFormData(
     .map((v) => String(v).trim())
     .filter(Boolean);
 
-  if (locationIds.length === 0) {
+  // 5G.a (2026-05-13) — location-binding rules vary by scope.
+  //   • scope=location: exactly the practice this role sits at (≥1 enforced)
+  //   • scope=regional: multiple practices the role covers (≥1 enforced)
+  //   • scope=corporate: DSO-wide role; locations are an optional anchor
+  //     (HQ city) so we don't force the recruiter to pick a practice.
+  if (scope !== "corporate" && locationIds.length === 0) {
     return { error: "Pick at least one practice location for this job." };
   }
 

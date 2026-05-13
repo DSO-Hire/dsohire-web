@@ -529,7 +529,10 @@ export function JobWizard({
 
     if (stepId === "basics") {
       if (!title.trim()) return setError("Add a job title before continuing.");
-      if (selectedLocationIds.size === 0)
+      // 5G.a — corporate-scope jobs are DSO-wide; the locations multi-select
+      // becomes an optional HQ anchor. Single-practice + regional scopes
+      // still require ≥1 location since the role is tied to a practice list.
+      if (scope !== "corporate" && selectedLocationIds.size === 0)
         return setError("Pick at least one practice location.");
     }
     if (stepId === "description") {
@@ -559,7 +562,9 @@ export function JobWizard({
       setStepIdx(0);
       return setError("Add a job title.");
     }
-    if (selectedLocationIds.size === 0) {
+    // 5G.a — corporate-scope: location is an optional anchor; skip the
+    // required-location check. Other scopes still need ≥1 practice.
+    if (scope !== "corporate" && selectedLocationIds.size === 0) {
       setStepIdx(0);
       return setError("Pick at least one practice location.");
     }
@@ -984,7 +989,14 @@ function BasicsStep({
 
       <div>
         <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
-          Practice locations <span className="text-heritage">*</span>
+          {scope === "corporate" ? "Anchor location" : "Practice locations"}{" "}
+          {scope === "corporate" ? (
+            <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
+              (optional)
+            </span>
+          ) : (
+            <span className="text-heritage">*</span>
+          )}
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-[var(--rule)] border border-[var(--rule)]">
           {locations.map((loc) => {
@@ -1016,8 +1028,11 @@ function BasicsStep({
           })}
         </div>
         <p className="mt-2 text-[12px] text-slate-meta">
-          Tag every location this job is open at. We render separate
-          location-specific listings on the public job board automatically.
+          {scope === "corporate"
+            ? "Corporate roles are DSO-wide. Pick an anchor practice if the role reports out of one, or leave blank for fully remote / floating roles."
+            : scope === "regional"
+              ? "Tag every practice this regional role covers. Hiring managers at any tagged practice will see this job."
+              : "Tag every location this job is open at. We render separate location-specific listings on the public job board automatically."}
         </p>
       </div>
 

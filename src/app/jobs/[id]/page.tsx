@@ -109,7 +109,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
   const { data: job } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_visible, benefits, requirements, posted_at, status, schedule_days, schedule_evenings, schedule_weekends"
+      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_visible, benefits, requirements, posted_at, status, schedule_days, schedule_evenings, schedule_weekends, scope"
     )
     .eq("id", id)
     .maybeSingle();
@@ -169,9 +169,18 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
   const isPublicAffiliated = isPublicAffiliatedRpc === true;
   const singlePracticeName =
     locations.length === 1 ? locations[0]!.name : null;
+  // 5G.a (2026-05-13) — corporate-scope jobs are DSO-wide and may have
+  // 0 or many anchor locations. The label "Multiple locations" reads wrong
+  // for a CFO posting; "Corporate" (or, when public-affiliated, "{DSO}
+  // Corporate") communicates the actual model. Single-anchor corporate
+  // jobs still surface the practice name when private-affiliated.
+  const jobScope = (job.scope as "location" | "regional" | "corporate" | null) ??
+    "location";
   const displayedEmployerName = isPublicAffiliated
     ? dsoName
-    : (singlePracticeName ?? "Multiple locations");
+    : jobScope === "corporate"
+      ? (singlePracticeName ?? "Corporate")
+      : (singlePracticeName ?? "Multiple locations");
 
   // ── Candidate-side state for the SaveJobButton + Practice Fit ──────
   // Anonymous visitors get the button hidden. Authenticated DSO members
