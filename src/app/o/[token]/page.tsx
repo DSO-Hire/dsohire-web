@@ -45,13 +45,13 @@ export default async function PublicOfferResponsePage({
   }
 
   const admin = createSupabaseServiceRoleClient();
+  // Resolve the offer-send row by token. Like the actions file, we
+  // hop applications → jobs in separate queries rather than via a
+  // deeply-embedded relation select — the Supabase TS types can't
+  // resolve the nesting cleanly and degrade to GenericStringError.
   const { data: sendRow, error } = await admin
     .from("application_offer_sends")
-    .select(
-      "id, application_id, subject, body_html, sent_at, " +
-        "applications:applications(id, candidate_id, job_id, " +
-        "jobs:jobs(id, title, dso_id))"
-    )
+    .select("id, application_id, subject, body_html, sent_at")
     .eq("token", token)
     .maybeSingle();
   if (error) {
@@ -62,27 +62,29 @@ export default async function PublicOfferResponsePage({
     notFound();
   }
 
-  const s = sendRow as Record<string, unknown>;
-  const offerSendId = s.id as string;
-  const subject = (s.subject as string | null) ?? null;
-  const bodyHtml = (s.body_html as string | null) ?? "";
-  const sentAt = (s.sent_at as string | null) ?? null;
-  const appRel = s.applications as
-    | Record<string, unknown>
-    | Array<Record<string, unknown>>
-    | null;
-  const appRow = Array.isArray(appRel) ? appRel[0] ?? null : appRel;
+  const offerSendId = sendRow.id as string;
+  const subject = (sendRow.subject as string | null) ?? null;
+  const bodyHtml = (sendRow.body_html as string | null) ?? "";
+  const sentAt = (sendRow.sent_at as string | null) ?? null;
+  const applicationId = sendRow.application_id as string;
+
+  const { data: appRow } = await admin
+    .from("applications")
+    .select("id, candidate_id, job_id")
+    .eq("id", applicationId)
+    .maybeSingle();
   if (!appRow) notFound();
 
-  const applicationId = (appRow.id as string | null) ?? null;
   const candidateId = (appRow.candidate_id as string | null) ?? null;
-  const jobRel = appRow.jobs as
-    | Record<string, unknown>
-    | Array<Record<string, unknown>>
-    | null;
-  const jobRow = Array.isArray(jobRel) ? jobRel[0] ?? null : jobRel;
+  const jobId = (appRow.job_id as string | null) ?? null;
+  if (!jobId) notFound();
+
+  const { data: jobRow } = await admin
+    .from("jobs")
+    .select("id, title, dso_id")
+    .eq("id", jobId)
+    .maybeSingle();
   if (!jobRow) notFound();
-  const jobId = (jobRow.id as string | null) ?? null;
   const jobTitle = (jobRow.title as string | null) ?? "the role";
 
   // Candidate name (greeting).

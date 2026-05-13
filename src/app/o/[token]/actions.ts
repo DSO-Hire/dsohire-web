@@ -305,15 +305,15 @@ async function loadOfferContext(
   admin: ReturnType<typeof createSupabaseServiceRoleClient>,
   token: string
 ): Promise<OfferContextResult> {
-  // Resolve the offer-send row by token. Pull just what we need to
-  // identify the application + assemble notification copy.
+  // Resolve the offer-send row by token. The chain is split into three
+  // separate selects rather than a deep embedded-relation select — the
+  // generated Supabase types can't always resolve the application →
+  // job nesting and degrade to GenericStringError at compile time (per
+  // feedback_supabase_inner_returns_array.md the cast-through-unknown
+  // pattern works, but separate queries are more robust).
   const { data: sendRow, error: sendErr } = await admin
     .from("application_offer_sends")
-    .select(
-      "id, application_id, sent_by_user_id, " +
-        "applications:applications(id, candidate_id, job_id, " +
-        "jobs:jobs(id, title, dso_id))"
-    )
+    .select("id, application_id, sent_by_user_id")
     .eq("token", token)
     .maybeSingle();
   if (sendErr) {
@@ -327,31 +327,39 @@ async function loadOfferContext(
     };
   }
 
-  const s = sendRow as Record<string, unknown>;
-  const offerSendId = s.id as string;
-  const sentByUserId = (s.sent_by_user_id as string | null) ?? null;
-  const appRel = s.applications as
-    | Record<string, unknown>
-    | Array<Record<string, unknown>>
-    | null;
-  const appRow = Array.isArray(appRel) ? appRel[0] ?? null : appRel;
-  if (!appRow) {
+  const offerSendId = sendRow.id as string;
+  const sentByUserId = (sendRow.sent_by_user_id as string | null) ?? null;
+  const applicationId = sendRow.application_id as string;
+
+  // Application → job_id + candidate_id.
+  const { data: appRow, error: appErr } = await admin
+    .from("applications")
+    .select("id, candidate_id, job_id")
+    .eq("id", applicationId)
+    .maybeSingle();
+  if (appErr || !appRow) {
+    console.warn("[offer-response] application lookup failed", appErr);
     return { ok: false, error: "Offer has no application linked." };
   }
-  const applicationId = appRow.id as string;
   const candidateId = (appRow.candidate_id as string | null) ?? null;
-  const jobRel = appRow.jobs as
-    | Record<string, unknown>
-    | Array<Record<string, unknown>>
-    | null;
-  const jobRow = Array.isArray(jobRel) ? jobRel[0] ?? null : jobRel;
-  if (!jobRow) {
+  const jobId = (appRow.job_id as string | null) ?? null;
+  if (!jobId) {
     return { ok: false, error: "Offer has no job linked." };
   }
-  const jobId = (jobRow.id as string | null) ?? null;
+
+  // Job → title + dso_id.
+  const { data: jobRow, error: jobErr } = await admin
+    .from("jobs")
+    .select("id, title, dso_id")
+    .eq("id", jobId)
+    .maybeSingle();
+  if (jobErr || !jobRow) {
+    console.warn("[offer-response] job lookup failed", jobErr);
+    return { ok: false, error: "Offer has no job linked." };
+  }
   const jobTitle = (jobRow.title as string | null) ?? "the role";
   const dsoId = (jobRow.dso_id as string | null) ?? null;
-  if (!dsoId || !jobId) {
+  if (!dsoId) {
     return { ok: false, error: "Offer missing scope context." };
   }
 
