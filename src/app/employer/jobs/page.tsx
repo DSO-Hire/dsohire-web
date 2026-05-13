@@ -515,6 +515,7 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
           lastWeek={topPerformer.velocity.lastWeek}
           totalApps={topPerformer.job.applications_count}
           views={topPerformer.job.views}
+          locations={locationsByJob.get(topPerformer.job.id) ?? []}
         />
       )}
 
@@ -619,6 +620,7 @@ function HeroJobCard({
   lastWeek,
   totalApps,
   views,
+  locations,
 }: {
   jobId: string;
   title: string;
@@ -631,6 +633,8 @@ function HeroJobCard({
   lastWeek: number;
   totalApps: number;
   views: number;
+  /** Same shape as JobRow's locations — first 2 inline + "+N more" overflow. */
+  locations: Array<{ id: string; name: string; city: string | null; state: string | null }>;
 }) {
   const updated = new Date(updatedAt);
   const delta = thisWeek - lastWeek;
@@ -683,6 +687,29 @@ function HeroJobCard({
           <h2 className="text-[24px] font-extrabold tracking-[-0.6px] leading-tight text-ivory mb-1.5">
             {title}
           </h2>
+          {/* Location pills — same shape as JobRow but tuned for the navy hero
+              background. Multi-location DSOs need to scan which practice a
+              top-performer belongs to without clicking through. */}
+          {locations.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1 mb-2.5">
+              <MapPin className="h-3 w-3 text-[#8db8a3]" />
+              {locations.slice(0, 2).map((loc) => (
+                <span
+                  key={loc.id}
+                  className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.3px] text-ivory border border-ivory/20"
+                  style={{ background: "rgba(255,255,255,0.06)" }}
+                >
+                  {loc.name}
+                  {loc.state ? ` · ${loc.state}` : ""}
+                </span>
+              ))}
+              {locations.length > 2 && (
+                <span className="text-[10px] font-semibold tracking-[0.3px] text-ivory/55">
+                  +{locations.length - 2} more
+                </span>
+              )}
+            </div>
+          )}
           <div className="text-[11px] text-ivory/55 tracking-[0.4px] mb-5">
             Updated {updated.toLocaleDateString()}
           </div>

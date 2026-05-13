@@ -19,7 +19,7 @@
 
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
-import { ArrowLeft, Copy, Download, ExternalLink, Pencil, Users } from "lucide-react";
+import { ArrowLeft, Copy, Download, ExternalLink, MapPin, Pencil, Users } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
@@ -270,6 +270,30 @@ export default async function PerJobPipelinePage({
     getSmartPicks(supabase, jobId, job.dso_id as string, 5),
   ]);
 
+  // Job locations — drives the location pill row in the header.
+  // Multi-location DSOs need to see which practice a job belongs to
+  // without having to click through to edit. Same shape as the chips
+  // on /employer/jobs row list.
+  const { data: jobLocRows } = await supabase
+    .from("job_locations")
+    .select("dso_locations:dso_locations(id, name, city, state)")
+    .eq("job_id", jobId);
+  const jobLocations = (
+    ((jobLocRows ?? []) as Array<{
+      dso_locations:
+        | { id: string; name: string; city: string | null; state: string | null }
+        | Array<{ id: string; name: string; city: string | null; state: string | null }>
+        | null;
+    }>)
+      .map((row) =>
+        Array.isArray(row.dso_locations) ? row.dso_locations[0] : row.dso_locations
+      )
+      .filter(
+        (l): l is { id: string; name: string; city: string | null; state: string | null } =>
+          l !== null && l !== undefined
+      )
+  );
+
   return (
     <EmployerShell active="jobs">
       <Link
@@ -295,6 +319,30 @@ export default async function PerJobPipelinePage({
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink">
             {jobTitle}
           </h1>
+          {/* Location pills — same shape as the /employer/jobs row list.
+              Mid-market DSOs juggle 50+ practices; the location anchor on
+              every job page makes "which practice is this?" a glance, not
+              a click-through to edit. Falls through silent on
+              corporate-scope jobs that may have 0 anchor locations. */}
+          {jobLocations.length > 0 && (
+            <div className="mt-3 flex flex-wrap items-center gap-1">
+              <MapPin className="h-3.5 w-3.5 text-slate-meta" />
+              {jobLocations.slice(0, 3).map((loc) => (
+                <span
+                  key={loc.id}
+                  className="inline-flex items-center px-2 py-0.5 bg-cream border border-[var(--rule-strong)] text-[11px] font-semibold tracking-[0.3px] text-ink"
+                >
+                  {loc.name}
+                  {loc.state ? ` · ${loc.state}` : ""}
+                </span>
+              ))}
+              {jobLocations.length > 3 && (
+                <span className="text-[11px] font-semibold tracking-[0.3px] text-slate-meta">
+                  +{jobLocations.length - 3} more
+                </span>
+              )}
+            </div>
+          )}
           <div className="mt-3 flex flex-wrap items-center gap-5 text-[13px] text-slate-body">
             <span className="inline-flex items-center gap-1">
               <Users className="size-3.5 text-slate-meta" />
