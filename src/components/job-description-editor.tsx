@@ -11,6 +11,7 @@
  * Designed for /employer/jobs/new and /employer/jobs/[id]/edit.
  */
 
+import { useEffect } from "react";
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
@@ -75,6 +76,21 @@ export function JobDescriptionEditor({
       onChange?.(editor.getHTML());
     },
   });
+
+  // Tiptap controlled-component gotcha — useEditor only initializes
+  // `content` once. Without this effect, external value updates (e.g. the
+  // AI JD generator's "Apply All" landing a draft into the parent's
+  // description state) don't sync into the editor, leaving the operator
+  // staring at an empty editor below the populated read-only preview.
+  // Passing `false` to setContent skips firing onUpdate so we don't get
+  // a render loop with the parent's onChange.
+  useEffect(() => {
+    if (!editor) return;
+    const current = editor.getHTML();
+    if (value !== current) {
+      editor.commands.setContent(value || "", false);
+    }
+  }, [editor, value]);
 
   if (!editor) return null;
 

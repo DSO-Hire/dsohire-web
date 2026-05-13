@@ -112,22 +112,30 @@ export async function generateJobDescription(
     ROLE_RECOMMENDATIONS[parsed.data.roleCategory]?.label ??
     parsed.data.roleCategory;
 
-  // Resolve the affiliation context for the selected locations (if
-  // any). Mirrors the most-private-inherits rule (Q3): if any of the
-  // selected locations has public_dso_affiliation = false, the whole
-  // job's public surfaces hide the DSO name — so the AI-generated copy
-  // must do the same. Single private location → use that practice's
-  // name. Multiple private locations → "the practice" (we can't
-  // safely pick one). All public OR no locations selected yet →
-  // legacy behavior, use the DSO name.
+  // Resolve the affiliation context. Mirrors the most-private-inherits
+  // rule (Q3): if any selected location is private (public_dso_affiliation
+  // = false), the whole job's public surfaces hide the DSO name — so the
+  // AI-generated copy must do the same.
+  //
+  // 5G.a follow-up (2026-05-13): corporate-scope jobs may have 0 selected
+  // locations (anchor-optional). When that happens, fall back to the DSO's
+  // AGGREGATE location set instead of leaking the raw DSO name. Rule:
+  //   - 0 locations selected → check all DSO locations: if every one is
+  //     private, the DSO is effectively private → use a generic employer
+  //     phrase ("the company"). If any location is public, the DSO has
+  //     opted into corporate-name exposure, so use the DSO name.
+  //   - 1+ locations selected → original logic (any private → mask).
   let useDsoName = true;
   let employerNameForPrompt = dso?.name ?? "the practice";
-  if (parsed.data.locationIds && parsed.data.locationIds.length > 0) {
+
+  const selectedIds = parsed.data.locationIds ?? [];
+
+  if (selectedIds.length > 0) {
     const { data: selectedLocs } = await supabase
       .from("dso_locations")
       .select("id, name, public_dso_affiliation")
       .eq("dso_id", dsoUser.dso_id)
-      .in("id", parsed.data.locationIds);
+      .in("id", selectedIds);
     const locs = (selectedLocs ?? []) as Array<{
       id: string;
       name: string;
@@ -140,6 +148,26 @@ export async function generateJobDescription(
       employerNameForPrompt =
         privateLocs.length === 1 ? privateLocs[0]!.name : "the practice";
     }
+  } else {
+    // 0 locations selected — typical for corporate-scope jobs. Check the
+    // DSO's full location set so a corporate posting at a fully-private
+    // DSO doesn't leak the corporate parent name.
+    const { data: allDsoLocs } = await supabase
+      .from("dso_locations")
+      .select("id, public_dso_affiliation")
+      .eq("dso_id", dsoUser.dso_id);
+    const dsoLocs = (allDsoLocs ?? []) as Array<{
+      id: string;
+      public_dso_affiliation: boolean;
+    }>;
+    const anyPublic = dsoLocs.some((l) => l.public_dso_affiliation);
+    if (dsoLocs.length > 0 && !anyPublic) {
+      // Every location is private → treat the DSO as private.
+      useDsoName = false;
+      employerNameForPrompt = "the company";
+    }
+    // If any location is public OR the DSO has no locations yet (edge
+    // case during onboarding), keep the default DSO-name behavior.
   }
 
   const systemPrompt = buildSystemPrompt({ useDsoName });
