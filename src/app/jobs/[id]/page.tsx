@@ -16,6 +16,7 @@ import {
   Briefcase,
   Clock,
   DollarSign,
+  ExternalLink,
   MapPin,
   Sparkles,
 } from "lucide-react";
@@ -109,7 +110,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
   const { data: job } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_visible, benefits, requirements, posted_at, status, schedule_days, schedule_evenings, schedule_weekends, scope"
+      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_visible, benefits, requirements, posted_at, status, schedule_days, schedule_evenings, schedule_weekends, scope, external_links"
     )
     .eq("id", id)
     .maybeSingle();
@@ -435,6 +436,44 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                 </ul>
               </section>
             )}
+
+            {/* E1.12 (2026-05-13) — External links surfaced below benefits.
+                Renders only when at least one valid {label,url} pair is
+                present. Server-side validation already filtered junk; this
+                is a defensive check in case future migrations land malformed
+                entries. target="_blank" + rel="noopener noreferrer" because
+                these point off-platform. */}
+            {(() => {
+              const links = ((job.external_links as Array<{
+                label: string;
+                url: string;
+              }> | null) ?? []).filter(
+                (l) => l && typeof l.label === "string" && typeof l.url === "string"
+              );
+              if (links.length === 0) return null;
+              return (
+                <section className="mt-10 pt-8 border-t border-[var(--rule)]">
+                  <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink mb-4">
+                    More about this role
+                  </h2>
+                  <ul className="flex flex-wrap gap-2">
+                    {links.map((l, i) => (
+                      <li key={`${i}-${l.url}`}>
+                        <a
+                          href={l.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-cream border border-[var(--rule-strong)] text-[13px] font-semibold text-ink hover:border-heritage hover:bg-heritage/[0.06] transition-colors"
+                        >
+                          <ExternalLink className="h-3 w-3 text-heritage-deep" aria-hidden />
+                          {l.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              );
+            })()}
 
             {skills.length > 0 && (
               <section className="mt-10 pt-8 border-t border-[var(--rule)]">

@@ -106,6 +106,7 @@ export async function createJob(
       schedule_days: parsed.scheduleDays,
       schedule_evenings: parsed.scheduleEvenings,
       schedule_weekends: parsed.scheduleWeekends,
+      external_links: parsed.externalLinks,
       scope: parsed.scope,
       posted_at: parsed.status === "active" ? new Date().toISOString() : null,
       created_by: dsoUser?.id ?? null,
@@ -226,6 +227,11 @@ export async function updateJob(
       schedule_days: parsed.scheduleDays,
       schedule_evenings: parsed.scheduleEvenings,
       schedule_weekends: parsed.scheduleWeekends,
+      // E1.12 Slice A — don't write external_links on UPDATE until the
+      // wizard UI ships (Slice B). The current wizard doesn't submit
+      // external_link_* fields, so parsed.externalLinks is always []
+      // on this path; writing it would wipe any existing links a user
+      // populated via SQL or future direct-edit UX.
       scope: parsed.scope,
       posted_at:
         parsed.status === "active" ? new Date().toISOString() : null,
@@ -895,7 +901,7 @@ export async function cloneJob(formData: FormData): Promise<void> {
   const { data: src, error: srcErr } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, benefits, requirements, hide_stages_from_candidate, scope, specialty, min_years_experience, schedule_days, schedule_evenings, schedule_weekends"
+      "id, dso_id, title, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, benefits, requirements, hide_stages_from_candidate, scope, specialty, min_years_experience, schedule_days, schedule_evenings, schedule_weekends, external_links"
     )
     .eq("id", jobId)
     .maybeSingle();
@@ -951,6 +957,10 @@ export async function cloneJob(formData: FormData): Promise<void> {
       schedule_weekends: Boolean(
         (src as Record<string, unknown>).schedule_weekends
       ),
+      external_links:
+        ((src as Record<string, unknown>).external_links as
+          | Array<{ label: string; url: string }>
+          | null) ?? [],
       posted_at: null,
       created_by: (dsoUser?.id as string | undefined) ?? null,
     })
@@ -1101,6 +1111,48 @@ interface ParsedJobInput {
   scheduleDays: string[];
   scheduleEvenings: boolean;
   scheduleWeekends: boolean;
+  // E1.12 (2026-05-13) — external links surfaced on the public job page.
+  externalLinks: Array<{ label: string; url: string }>;
+}
+
+/**
+ * E1.12 helper — read external_link_label[] + external_link_url[] from
+ * a FormData submission, validate, dedup, cap. Returns null on any
+ * validation error with the error string surfacing in the caller's
+ * error path; returns the parsed array otherwise.
+ */
+function parseExternalLinks(
+  formData: FormData
+): Array<{ label: string; url: string }> | { error: string } {
+  const labels = formData.getAll("external_link_label").map((v) => String(v));
+  const urls = formData.getAll("external_link_url").map((v) => String(v));
+  const pairs: Array<{ label: string; url: string }> = [];
+  const seen = new Set<string>();
+  for (let i = 0; i < Math.max(labels.length, urls.length); i++) {
+    const label = (labels[i] ?? "").trim();
+    const url = (urls[i] ?? "").trim();
+    // Skip fully-empty rows — the wizard may submit blank trailing fields.
+    if (!label && !url) continue;
+    if (!label) return { error: "External link is missing a label." };
+    if (!url) return { error: `External link "${label}" is missing a URL.` };
+    if (label.length > 80) {
+      return { error: `External link label "${label.slice(0, 30)}..." exceeds 80 characters.` };
+    }
+    try {
+      const u = new URL(url);
+      if (u.protocol !== "http:" && u.protocol !== "https:") {
+        return { error: `External link "${label}" must use http or https.` };
+      }
+    } catch {
+      return { error: `External link "${label}" is not a valid URL.` };
+    }
+    const key = url.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    pairs.push({ label, url });
+    if (pairs.length >= 5) break; // hard cap
+  }
+  return pairs;
 }
 
 const VALID_SCOPES = new Set<"location" | "regional" | "corporate">([
@@ -1245,6 +1297,13 @@ function parseJobFormData(
   const scheduleEvenings = formData.get("schedule_evenings") === "on";
   const scheduleWeekends = formData.get("schedule_weekends") === "on";
 
+  // E1.12 — external links
+  const linksResult = parseExternalLinks(formData);
+  if (!Array.isArray(linksResult)) {
+    return { error: linksResult.error };
+  }
+  const externalLinks = linksResult;
+
   // Screening questions — JSON-encoded array
   const rawQuestions = String(formData.get("screening_questions") ?? "").trim();
   let screeningQuestions: ScreeningQuestionPayload[] = [];
@@ -1342,6 +1401,7 @@ function parseJobFormData(
     scheduleDays,
     scheduleEvenings,
     scheduleWeekends,
+    externalLinks,
   };
 }
 
