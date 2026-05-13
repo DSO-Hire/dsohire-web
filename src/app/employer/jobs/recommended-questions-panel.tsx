@@ -2,23 +2,34 @@
 
 /**
  * RecommendedQuestionsPanel — surfaces the curated screening question
- * library above the empty-state of the job posting wizard's screening step.
+ * library above the screening step of the job wizard / edit page.
  *
- * Behavior:
+ * Behavior (Cam UX rework 2026-05-13 PM — "vanish on add" model):
  *   - Looks up recommendations by role_category (from src/lib/screening/question-library.ts).
- *   - "Add" appends the recommended question to the wizard's form state and
- *     marks the card as Added (✓), so the employer sees what's already in.
- *   - "Add and edit" appends + asks the parent to scroll/focus the new
- *     question (via `onFocusQuestion`).
- *   - "Skip" hides this single card for the rest of the session — local
- *     state only, NOT persisted.
+ *   - Cards that are NOT yet in the wizard's questions array render here.
+ *   - "Add" appends to the wizard's form state — the card immediately
+ *     LEAVES this panel. There is no Added/✓ state surfaced here; the
+ *     question is now visible (and editable) below in the QuestionCard
+ *     list. Single source of truth for added questions.
+ *   - "Skip" hides this card for the rest of the session — local state
+ *     only, NOT persisted.
+ *   - When all suggestions are added or skipped, the whole panel hides.
  *
- * Recommendations are ADDITIVE — they share form state with manually-added
- * questions so the existing flow is untouched.
+ * Why the rework: the old "ADDED ✓" treatment + persistent card layout
+ * created visual duplication — same question shown in the panel AND in
+ * the editor list below. Vanishing on add removes the duplication and
+ * makes the panel feel like it's doing work (cards disappear, count
+ * drops, panel eventually clears).
+ *
+ * Dedup matching: a recommended card is considered "already added" if
+ *   (a) this session added it (addedFromRec map), OR
+ *   (b) the prompt text matches a question already in the wizard's
+ *       array (case-insensitive + trimmed). (b) covers edit-page loads
+ *       where the prior session's adds are now persisted DB rows.
  */
 
 import { useMemo, useState } from "react";
-import { Plus, Check, ShieldAlert } from "lucide-react";
+import { Plus, ShieldAlert } from "lucide-react";
 import {
   CATEGORY_LABELS,
   CATEGORY_ORDER,
@@ -53,17 +64,30 @@ export function RecommendedQuestionsPanel({
   onChange,
 }: RecommendedQuestionsPanelProps) {
   const [skipped, setSkipped] = useState<Set<string>>(new Set());
-  const [addedFromRec, setAddedFromRec] = useState<
-    Record<string, string>
-  >({});
 
   const rec = useMemo(
     () => getRecommendationsForRole(roleCategory),
     [roleCategory]
   );
 
-  /** Filter out cards the employer dismissed for this session. */
-  const visible = rec.questions.filter((q) => !skipped.has(q.id));
+  /**
+   * "Vanish on add" filter. A recommended card disappears from the panel
+   * when EITHER:
+   *   - the employer dismissed it this session (skipped set), OR
+   *   - the question is already in the wizard's questions array (matched
+   *     by prompt text, case-insensitive + trimmed). Covers session-adds
+   *     and previously-persisted DB rows on the edit page.
+   *
+   * Computed inline (not memoized against `questions`) because the parent
+   * passes a fresh array on every keystroke; memo would be noise.
+   */
+  const formPrompts = new Set(
+    questions.map((q) => q.prompt.trim().toLowerCase())
+  );
+  const visible = rec.questions.filter(
+    (q) =>
+      !skipped.has(q.id) && !formPrompts.has(q.prompt.trim().toLowerCase())
+  );
 
   /** Bucket the visible questions by category, preserving in-bank order. */
   const byCategory = useMemo(() => {
@@ -111,33 +135,10 @@ export function RecommendedQuestionsPanel({
   function handleAdd(rq: RecommendedQuestion) {
     const wq = buildWizardQuestion(rq, questions.length);
     onChange([...questions, wq]);
-    const newAdded = { ...addedFromRec, [rq.id]: wq.id };
-    setAddedFromRec(newAdded);
-    // v1.7 — auto-scroll the next unadded recommended card into view
-    // so the employer can keep clicking Add without manual scrolling.
-    // The "Add & edit" branch was removed 2026-05-08 PM — it scrolled
-    // away from this panel into the QuestionCard list below, which
-    // disoriented users (they hit browser-back to recover and lost
-    // the wizard's local state). Customization happens AFTER the
-    // recommended-add pass, in the QuestionCards below the panel.
-    const orderedIds: string[] = [];
-    for (const cat of CATEGORY_ORDER) {
-      for (const q of byCategory[cat]) orderedIds.push(q.id);
-    }
-    const idx = orderedIds.indexOf(rq.id);
-    const nextRecId = orderedIds
-      .slice(idx + 1)
-      .find((id) => !newAdded[id]);
-    if (nextRecId) {
-      setTimeout(() => {
-        const el = document.querySelector<HTMLElement>(
-          `[data-recid="${nextRecId}"]`
-        );
-        if (el) {
-          el.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      }, 50);
-    }
+    // Vanish-on-add model — the card leaves the panel on its own once
+    // the new question's prompt enters the wizard's array (see `visible`
+    // filter above). No addedFromRec map needed; no scroll-to-next
+    // dance — the next suggestion just slides up into its place.
   }
 
   function handleSkip(recId: string) {
@@ -148,15 +149,11 @@ export function RecommendedQuestionsPanel({
     });
   }
 
-  // Running tally — count how many recommended cards have been added
-  // (still present in the wizard's questions array) so the header
-  // shows progress at a glance. Doesn't count manually-added questions
-  // since this panel is specifically about the recommended set.
-  const addedCount = Object.entries(addedFromRec).filter(([, qid]) =>
-    questions.some((q) => q.id === qid)
-  ).length;
-  const totalCount = rec.questions.length;
-  const skippedCount = skipped.size;
+  // Simplified tally: only "X suggestions remaining". The prior tally
+  // ("0 added · 14 remaining · 2 skipped") existed because added cards
+  // stayed on screen and we needed to communicate their state. With
+  // vanish-on-add the count itself is the signal.
+  const remainingCount = visible.length;
 
   return (
     <div className="border border-[var(--rule)] bg-cream/40 p-5">
@@ -166,31 +163,17 @@ export function RecommendedQuestionsPanel({
             Recommended for {rec.label}
           </div>
           <p className="text-[13px] text-slate-meta leading-relaxed">
-            We curated these from competitor benchmarks and dental hiring best
-            practices. One click to add — customize from the editable
-            cards below the panel.
+            Curated from competitor benchmarks and dental hiring best
+            practices. Click Add — the question moves into your screening
+            list below, where you can edit it.
           </p>
         </div>
-        {/* Running tally — sits in the header so the user sees their
-            progress at a glance. Updates live as they click Add /
-            Skip. Helps avoid the "did anything happen?" disorientation
-            that pushed users to hit browser-back and lose their work
-            (Cam, 2026-05-08 PM). */}
-        <div className="flex flex-col items-end gap-1 flex-shrink-0">
-          <span
-            className={
-              "inline-flex items-center px-2.5 py-1 text-[10px] font-bold tracking-[1.2px] uppercase " +
-              (addedCount > 0
-                ? "bg-heritage text-ivory"
-                : "bg-cream text-slate-meta border border-[var(--rule-strong)]")
-            }
-          >
-            <Check className="h-3 w-3 mr-1" />
-            {addedCount} added
-          </span>
-          <span className="text-[10px] tracking-[0.5px] text-slate-meta">
-            {totalCount - addedCount - skippedCount} remaining
-            {skippedCount > 0 ? ` · ${skippedCount} skipped` : ""}
+        {/* Remaining-count chip. The panel auto-hides when this hits
+            zero, so the chip never reads "0". Helps the employer see
+            they're making progress as cards vanish. */}
+        <div className="flex-shrink-0">
+          <span className="inline-flex items-center px-2.5 py-1 bg-cream text-slate-meta border border-[var(--rule-strong)] text-[10px] font-bold tracking-[1.2px] uppercase">
+            {remainingCount} suggestion{remainingCount === 1 ? "" : "s"}
           </span>
         </div>
       </div>
@@ -206,33 +189,14 @@ export function RecommendedQuestionsPanel({
                 {CATEGORY_LABELS[category]}
               </div>
               <div className="space-y-2.5">
-                {items.map((rq) => {
-                  const addedId = addedFromRec[rq.id];
-                  const stillInForm =
-                    addedId !== undefined &&
-                    questions.some((q) => q.id === addedId);
-                  // Cam catch 2026-05-13 — also dedup by prompt text so
-                  // library questions already in the wizard (loaded from
-                  // DB on edit, or session-added earlier) read as Added
-                  // even when the session's addedFromRec map doesn't know
-                  // about them. Matches case-insensitively + trimmed so
-                  // light copy edits don't break the dedup.
-                  const normalizedPrompt = rq.prompt.trim().toLowerCase();
-                  const matchByPrompt = questions.some(
-                    (q) => q.prompt.trim().toLowerCase() === normalizedPrompt
-                  );
-                  const isAdded = (!!addedId && stillInForm) || matchByPrompt;
-
-                  return (
-                    <RecommendedCard
-                      key={rq.id}
-                      rq={rq}
-                      added={isAdded}
-                      onAdd={() => handleAdd(rq)}
-                      onSkip={() => handleSkip(rq.id)}
-                    />
-                  );
-                })}
+                {items.map((rq) => (
+                  <RecommendedCard
+                    key={rq.id}
+                    rq={rq}
+                    onAdd={() => handleAdd(rq)}
+                    onSkip={() => handleSkip(rq.id)}
+                  />
+                ))}
               </div>
             </div>
           );
@@ -244,12 +208,10 @@ export function RecommendedQuestionsPanel({
 
 function RecommendedCard({
   rq,
-  added,
   onAdd,
   onSkip,
 }: {
   rq: RecommendedQuestion;
-  added: boolean;
   onAdd: () => void;
   onSkip: () => void;
 }) {
@@ -264,34 +226,21 @@ function RecommendedCard({
   return (
     <div
       data-recid={rq.id}
-      className={
-        "border p-4 transition-colors scroll-mt-24 " +
-        (added
-          ? "border-heritage bg-heritage/[0.06]"
-          : "border-[var(--rule-strong)] bg-white")
-      }
+      className="border border-[var(--rule-strong)] bg-white p-4 transition-colors scroll-mt-24"
     >
-      <div className="flex items-start justify-between gap-3 mb-2">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep px-2 py-0.5 bg-heritage/[0.08]">
-            {KIND_LABELS[rq.kind]}
+      <div className="flex flex-wrap items-center gap-1.5 mb-2">
+        <span className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep px-2 py-0.5 bg-heritage/[0.08]">
+          {KIND_LABELS[rq.kind]}
+        </span>
+        {rq.knockout && (
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[1.5px] uppercase text-red-700 px-2 py-0.5 bg-red-50 border border-red-200">
+            <ShieldAlert className="h-3 w-3" />
+            Knockout
           </span>
-          {rq.knockout && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[1.5px] uppercase text-red-700 px-2 py-0.5 bg-red-50 border border-red-200">
-              <ShieldAlert className="h-3 w-3" />
-              Knockout
-            </span>
-          )}
-          {rq.required && (
-            <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
-              Required
-            </span>
-          )}
-        </div>
-        {added && (
-          <span className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
-            <Check className="h-3 w-3" />
-            Added
+        )}
+        {rq.required && (
+          <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+            Required
           </span>
         )}
       </div>
@@ -312,38 +261,21 @@ function RecommendedCard({
       )}
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        {!added && (
-          <>
-            <button
-              type="button"
-              onClick={onAdd}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors"
-            >
-              <Plus className="h-3 w-3" />
-              Add
-            </button>
-            <span className="text-[11px] text-slate-meta">
-              Customize the prompt and options after the panel — your
-              added questions appear below.
-            </span>
-            <button
-              type="button"
-              onClick={onSkip}
-              className="ml-auto text-[12px] tracking-[0.5px] text-slate-meta hover:text-ink transition-colors"
-            >
-              Skip
-            </button>
-          </>
-        )}
-        {added && (
-          <button
-            type="button"
-            onClick={onSkip}
-            className="ml-auto text-[12px] tracking-[0.5px] text-slate-meta hover:text-ink transition-colors"
-          >
-            Hide
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={onAdd}
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors"
+        >
+          <Plus className="h-3 w-3" />
+          Add
+        </button>
+        <button
+          type="button"
+          onClick={onSkip}
+          className="ml-auto text-[12px] tracking-[0.5px] text-slate-meta hover:text-ink transition-colors"
+        >
+          Skip
+        </button>
       </div>
     </div>
   );
