@@ -511,8 +511,11 @@ function scoreSkills({ candidate, job }: FitInputs): FitDimension {
     detail = `${matched.length} of ${jobSkills.length} skills match — preferred, not required.`;
     detailEmployer = detail;
   } else {
-    detail = `Posting lists ${jobSkills.length} preferred skills; none match your profile yet.`;
-    detailEmployer = `Posting lists ${jobSkills.length} preferred skills; none match their profile yet.`;
+    // Cam polish 2026-05-13 — pluralize "skill" so a 1-skill posting
+    // reads "1 preferred skill" not "1 preferred skills".
+    const noun = jobSkills.length === 1 ? "skill" : "skills";
+    detail = `Posting lists ${jobSkills.length} preferred ${noun}; none match your profile yet.`;
+    detailEmployer = `Posting lists ${jobSkills.length} preferred ${noun}; none match their profile yet.`;
   }
   return makeScoredDim("skills", "Skills", raw, detail, detailEmployer);
 }
