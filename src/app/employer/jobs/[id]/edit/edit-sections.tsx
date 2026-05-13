@@ -398,17 +398,27 @@ function BasicsSection({
             setSaved(false);
           }}
         />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Select
-            label="Role category"
-            required
-            value={roleCategory}
-            onChange={(v) => {
-              setRoleCategory(v);
-              setSaved(false);
-            }}
-            options={ROLE_OPTIONS}
-          />
+        {/* 5G.c follow-up (Cam catch 2026-05-13) — corporate scope hides
+            role_category; corporate_function takes its place. */}
+        <div
+          className={
+            scope === "corporate"
+              ? "grid grid-cols-1 gap-4"
+              : "grid grid-cols-1 sm:grid-cols-2 gap-4"
+          }
+        >
+          {scope !== "corporate" && (
+            <Select
+              label="Role category"
+              required
+              value={roleCategory}
+              onChange={(v) => {
+                setRoleCategory(v);
+                setSaved(false);
+              }}
+              options={ROLE_OPTIONS}
+            />
+          )}
           <Select
             label="Employment type"
             required

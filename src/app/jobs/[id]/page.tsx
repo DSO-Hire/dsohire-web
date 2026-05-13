@@ -39,6 +39,7 @@ import {
 } from "@/components/practice-fit/placeholder";
 import { WhyThisMatch } from "@/components/practice-fit/why-this-match";
 import type { FitResult } from "@/lib/practice-fit/types";
+import { getCorporateFunction } from "@/lib/corporate/functions";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -286,13 +287,63 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
           Back to All Jobs
         </Link>
 
-        {/* Title block */}
+        {/* Title block — eyebrow swaps for corporate scope:
+            CORPORATE · {function label} · {employment} instead of
+            {role_category} · {employment}. role_category is forced to
+            'other' for corporate jobs at the server, so falling through
+            to it would render "OTHER" on the public page. */}
         <header className="pb-8 border-b border-[var(--rule)] mb-10">
-          <div className="flex items-center gap-3 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
-            {ROLE_LABELS[job.role_category as string] ?? job.role_category}
-            <span className="block w-1 h-1 rounded-full bg-heritage-deep" />
-            {EMP_LABELS[job.employment_type as string] ?? job.employment_type}
-          </div>
+          {(() => {
+            const jobScope =
+              (job.scope as "location" | "regional" | "corporate" | null) ??
+              "location";
+            const isCorporate = jobScope === "corporate";
+            const corpFn = isCorporate
+              ? getCorporateFunction(
+                  (job.corporate_function as string | null) ?? ""
+                )
+              : null;
+            // Slate-blue accent on corporate eyebrow + dots matches the
+            // /jobs Corporate tab styling so the surface reads consistent.
+            const eyebrowColor = isCorporate ? "#3D5266" : undefined;
+            const dotBg = isCorporate
+              ? eyebrowColor
+              : "var(--heritage-deep, #3a5e4d)";
+            return (
+              <div
+                className={
+                  isCorporate
+                    ? "flex items-center gap-3 text-[10px] font-bold tracking-[2.5px] uppercase mb-3"
+                    : "flex items-center gap-3 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3"
+                }
+                style={isCorporate ? { color: eyebrowColor } : undefined}
+              >
+                {isCorporate ? (
+                  <>
+                    Corporate
+                    {corpFn && (
+                      <>
+                        <span
+                          className="block w-1 h-1 rounded-full"
+                          style={{ background: dotBg }}
+                        />
+                        {corpFn.label}
+                      </>
+                    )}
+                  </>
+                ) : (
+                  ROLE_LABELS[job.role_category as string] ??
+                  job.role_category
+                )}
+                <span
+                  className="block w-1 h-1 rounded-full"
+                  style={{ background: dotBg }}
+                />
+                {EMP_LABELS[job.employment_type as string] ??
+                  job.employment_type}
+              </div>
+            );
+          })()}
           <h1 className="text-3xl sm:text-6xl font-extrabold tracking-[-1.8px] leading-[1.05] text-ink mb-5">
             {job.title as string}
           </h1>

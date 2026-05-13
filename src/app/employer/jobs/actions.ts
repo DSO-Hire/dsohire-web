@@ -397,11 +397,17 @@ export async function updateJobBasicsSection(
 
   const supabase = await createSupabaseServerClient();
 
+  // 5G.c follow-up — corporate jobs always carry role_category="other";
+  // corporate_function field is the real categorization. Override any
+  // stale value the form may have inherited from a prior non-corporate
+  // scope state on the same edit session.
+  const effectiveRoleCategory = scope === "corporate" ? "other" : roleCategory;
+
   const { error: updateError } = await supabase
     .from("jobs")
     .update({
       title,
-      role_category: roleCategory,
+      role_category: effectiveRoleCategory,
       employment_type: employmentType,
       scope,
     })
@@ -1249,6 +1255,11 @@ function parseJobFormData(
       : "location"
   ) as "location" | "regional" | "corporate";
 
+  // 5G.c follow-up — role_category is hidden in the corporate wizard;
+  // ensure stale values from a prior scope=location selection don't
+  // persist when the recruiter toggled to corporate mid-flight.
+  const effectiveRoleCategory = scope === "corporate" ? "other" : roleCategory;
+
   if (!title) return { error: "Job title is required." };
   if (title.length > 200) return { error: "Job title is too long." };
   if (!description || description === "<p></p>") {
@@ -1418,7 +1429,9 @@ function parseJobFormData(
     title,
     description,
     employmentType,
-    roleCategory,
+    // 5G.c follow-up — corporate jobs always carry role_category="other";
+    // the corporate_function field is the real categorization.
+    roleCategory: effectiveRoleCategory,
     compMin,
     compMax,
     compPeriod: compPeriod || null,

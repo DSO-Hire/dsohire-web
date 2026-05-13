@@ -990,14 +990,26 @@ function BasicsStep({
         onChange={onTitle}
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <Select
-          label="Role category"
-          required
-          value={roleCategory}
-          onChange={onRoleCategory}
-          options={ROLE_OPTIONS}
-        />
+      {/* 5G.c follow-up (Cam catch 2026-05-13) — role_category is a
+          clinical-vertical concept; for scope=corporate the corporate_function
+          field replaces it. Hide the dropdown when on corporate scope so
+          recruiters don't have to pick "Associate Dentist" for a CFO. */}
+      <div
+        className={
+          scope === "corporate"
+            ? "grid grid-cols-1 gap-5"
+            : "grid grid-cols-1 sm:grid-cols-2 gap-5"
+        }
+      >
+        {scope !== "corporate" && (
+          <Select
+            label="Role category"
+            required
+            value={roleCategory}
+            onChange={onRoleCategory}
+            options={ROLE_OPTIONS}
+          />
+        )}
         <Select
           label="Employment type"
           required

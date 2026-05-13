@@ -83,6 +83,8 @@ interface PageProps {
     posted?: string;
     /** 5G.b — "practice" (location + regional) or "corporate". Defaults to "practice". */
     surface?: string;
+    /** 5G.c follow-up — function slug filter, only honored on the Corporate tab. */
+    function?: string;
   }>;
 }
 
