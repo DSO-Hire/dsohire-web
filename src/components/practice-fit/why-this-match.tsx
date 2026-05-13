@@ -233,11 +233,12 @@ export function WhyThisMatch({
             <p className="text-[11px] text-slate-meta leading-relaxed">
               Practice Fit weighs compensation, location/license,
               specialty, skills, years of experience, employment type,
-              and DSO size — normalized over the dimensions we have
-              data on, so missing fields don&apos;t drag the score down.
-              Role match is a pre-filter: pairs where the role doesn&apos;t
-              line up don&apos;t get a chip at all. Score updates
-              automatically when either side changes.
+              DSO size, and schedule overlap — normalized over the
+              dimensions we have data on, so missing fields don&apos;t
+              drag the score down. Role match is a pre-filter: pairs
+              where the role doesn&apos;t line up don&apos;t get a chip
+              at all. Score updates automatically when either side
+              changes.
             </p>
           </li>
         </ul>

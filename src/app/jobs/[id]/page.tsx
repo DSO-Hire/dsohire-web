@@ -109,7 +109,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
   const { data: job } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_visible, benefits, requirements, posted_at, status"
+      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_visible, benefits, requirements, posted_at, status, schedule_days, schedule_evenings, schedule_weekends"
     )
     .eq("id", id)
     .maybeSingle();
@@ -444,6 +444,66 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                 </ul>
               </section>
             )}
+
+            {/* Track F (2026-05-13) — surface schedule when the
+                employer specified one. Powers candidate-side day-1
+                expectations + visually mirrors the Practice Fit
+                schedule_overlap dim's inputs. We only render the
+                section when at least one signal is present — keeps
+                no-schedule postings clean. */}
+            {(() => {
+              const sched = {
+                days: (job.schedule_days as string[] | null) ?? [],
+                evenings: Boolean(job.schedule_evenings),
+                weekends: Boolean(job.schedule_weekends),
+              };
+              const hasAny =
+                sched.days.length > 0 || sched.evenings || sched.weekends;
+              if (!hasAny) return null;
+              const DAY_LABELS: Record<string, string> = {
+                mon: "Mon",
+                tue: "Tue",
+                wed: "Wed",
+                thu: "Thu",
+                fri: "Fri",
+                sat: "Sat",
+                sun: "Sun",
+              };
+              const dayOrder = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+              const orderedDays = [...sched.days].sort(
+                (a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b)
+              );
+              return (
+                <section className="mt-10 pt-8 border-t border-[var(--rule)]">
+                  <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink mb-4">
+                    Schedule
+                  </h2>
+                  {orderedDays.length > 0 && (
+                    <ul className="flex flex-wrap gap-2 mb-3">
+                      {orderedDays.map((d) => (
+                        <li
+                          key={d}
+                          className="px-3 py-1.5 text-[13px] font-semibold text-heritage-deep"
+                          style={{ background: "var(--heritage-tint)" }}
+                        >
+                          {DAY_LABELS[d] ?? d}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {(sched.evenings || sched.weekends) && (
+                    <p className="text-[13px] text-slate-body">
+                      {[
+                        sched.evenings ? "Evening hours (5pm or later)" : null,
+                        sched.weekends ? "Weekend shifts (Sat/Sun)" : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                  )}
+                </section>
+              );
+            })()}
 
             {jobAttachments.length > 0 && (
               <JobAttachmentsPublic attachments={jobAttachments} />
