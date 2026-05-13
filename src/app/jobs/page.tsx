@@ -79,8 +79,19 @@ interface PageProps {
     category?: string;
     view?: string;
     sort?: string;
+    /** C1.10 — "Posted within": 24h | 7d | 14d | 30d. Anything else is ignored. */
+    posted?: string;
   }>;
 }
+
+/** Map URL chip values to integer days for the RPC's posted_within_days arg. */
+const POSTED_FILTER_OPTIONS = [
+  { value: "24h", label: "Last 24h", days: 1 },
+  { value: "7d", label: "Last 7 days", days: 7 },
+  { value: "14d", label: "Last 14 days", days: 14 },
+  { value: "30d", label: "Last 30 days", days: 30 },
+] as const;
+type PostedFilterValue = (typeof POSTED_FILTER_OPTIONS)[number]["value"];
 
 export default async function PublicJobsPage({ searchParams }: PageProps) {
   const sp = await searchParams;
@@ -91,12 +102,22 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
       | JobsSortKey
       | undefined) ?? "newest";
 
+  // C1.10 — resolve the posted-within chip into the integer days the
+  // RPC accepts. Anything unrecognized falls through to null (no filter).
+  const postedFilterValue: PostedFilterValue | null =
+    (POSTED_FILTER_OPTIONS.find((o) => o.value === sp.posted)?.value as
+      | PostedFilterValue
+      | undefined) ?? null;
+  const postedWithinDays =
+    POSTED_FILTER_OPTIONS.find((o) => o.value === postedFilterValue)?.days ??
+    null;
+
   const { data: rawJobs } = await supabase.rpc("search_jobs_public", {
     query_text: sp.q || null,
     state_filter: sp.state || null,
     employment_filter: sp.employment || null,
     category_filter: sp.category || null,
-    posted_within_days: null,
+    posted_within_days: postedWithinDays,
   });
 
   // Apply candidate-side sort. RPC returns a relevance-blended order; for
@@ -290,6 +311,20 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
   if (sp.state) filterParams.push(["state", sp.state]);
   if (sp.employment) filterParams.push(["employment", sp.employment]);
   if (sp.category) filterParams.push(["category", sp.category]);
+  if (postedFilterValue) filterParams.push(["posted", postedFilterValue]);
+
+  /** Build an href that toggles the posted filter chip on or off. */
+  const buildPostedHref = (value: PostedFilterValue | null): string => {
+    const params: Array<[string, string]> = [];
+    if (sp.q) params.push(["q", sp.q]);
+    if (sp.state) params.push(["state", sp.state]);
+    if (sp.employment) params.push(["employment", sp.employment]);
+    if (sp.category) params.push(["category", sp.category]);
+    if (showMap) params.push(["view", "map"]);
+    if (sortKey !== "newest") params.push(["sort", sortKey]);
+    if (value) params.push(["posted", value]);
+    return buildHref("/jobs", params);
+  };
   // Sort travels with the list view but is meaningless on the map (which
   // groups by location), so we deliberately drop it from mapViewHref.
   const listViewParams =
@@ -330,6 +365,12 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
           style={{ boxShadow: "0 10px 30px -16px rgba(7,15,28,0.14)" }}
         >
           {showMap && <input type="hidden" name="view" value="map" />}
+          {/* C1.10 — posted filter is chip-based (below the form). Hidden
+              input here keeps the selection alive when the user re-submits
+              keyword/role/state/employment via the search bar. */}
+          {postedFilterValue && (
+            <input type="hidden" name="posted" value={postedFilterValue} />
+          )}
           <SearchField
             label="Keyword"
             name="q"
@@ -379,6 +420,44 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
             Search
           </button>
         </form>
+
+        {/* C1.10 — Date posted chip filter. Click a chip to apply,
+            click the same chip again (or "All") to clear. Persists
+            through all other filter submissions via the hidden input
+            above. */}
+        <div className="mt-5 flex flex-wrap items-center gap-2">
+          <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mr-2">
+            Posted
+          </span>
+          <Link
+            href={buildPostedHref(null)}
+            className={
+              "px-3 py-1.5 text-[12px] font-semibold border transition-colors " +
+              (postedFilterValue === null
+                ? "bg-heritage-deep text-ivory border-heritage-deep"
+                : "bg-white text-ink border-[var(--rule-strong)] hover:border-heritage")
+            }
+          >
+            All
+          </Link>
+          {POSTED_FILTER_OPTIONS.map((opt) => {
+            const isActive = postedFilterValue === opt.value;
+            return (
+              <Link
+                key={opt.value}
+                href={buildPostedHref(isActive ? null : opt.value)}
+                className={
+                  "px-3 py-1.5 text-[12px] font-semibold border transition-colors " +
+                  (isActive
+                    ? "bg-heritage-deep text-ivory border-heritage-deep"
+                    : "bg-white text-ink border-[var(--rule-strong)] hover:border-heritage")
+                }
+              >
+                {opt.label}
+              </Link>
+            );
+          })}
+        </div>
       </section>
 
       {/* Results */}
