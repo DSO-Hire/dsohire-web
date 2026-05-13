@@ -82,13 +82,14 @@ export function JobDescriptionEditor({
   // AI JD generator's "Apply All" landing a draft into the parent's
   // description state) don't sync into the editor, leaving the operator
   // staring at an empty editor below the populated read-only preview.
-  // Passing `false` to setContent skips firing onUpdate so we don't get
-  // a render loop with the parent's onChange.
+  // emitUpdate: false skips firing onUpdate so we don't get a render
+  // loop with the parent's onChange. (Tiptap v3 signature — third arg
+  // is SetContentOptions, not a plain boolean.)
   useEffect(() => {
     if (!editor) return;
     const current = editor.getHTML();
     if (value !== current) {
-      editor.commands.setContent(value || "", false);
+      editor.commands.setContent(value || "", { emitUpdate: false });
     }
   }, [editor, value]);
 
