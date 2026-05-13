@@ -37,6 +37,7 @@ import {
 import { RecommendedQuestionsPanel } from "./recommended-questions-panel";
 import { JdGeneratorPanel } from "./jd-generator-panel";
 import { ChipArrayInput } from "@/app/candidate/profile/edit-sheet";
+import { CORPORATE_FUNCTIONS } from "@/lib/corporate/functions";
 import {
   getAllDentalSkills,
   BENEFITS,
@@ -159,6 +160,8 @@ export interface JobWizardInitial {
   schedule_days: string[];
   schedule_evenings: boolean;
   schedule_weekends: boolean;
+  // 5G.c (2026-05-13) — corporate function slug; only set when scope=corporate.
+  corporate_function: string | null;
 }
 
 export const SCOPE_OPTIONS: Array<{
@@ -342,6 +345,11 @@ export function JobWizard({
     initial?.hide_stages_from_candidate ?? false
   );
   const [scope, setScope] = useState<JobScope>(initial?.scope ?? "location");
+  // 5G.c — corporate function. Tracked in wizard state regardless of
+  // current scope; serializer only submits it when scope=corporate.
+  const [corporateFunction, setCorporateFunction] = useState<string>(
+    initial?.corporate_function ?? ""
+  );
   // v1.6 — skills + benefits are now string[] (chip-picker), not the
   // legacy comma-separated string. Existing rows hydrate from initial.skills
   // / initial.benefits arrays directly.
@@ -629,6 +637,12 @@ export function JobWizard({
     if (hideStagesFromCandidate)
       formData.set("hide_stages_from_candidate", "on");
     formData.set("scope", scope);
+    // 5G.c — only submit corporate_function on corporate scope. Server
+    // validator already ignores it on other scopes; gating here too keeps
+    // the wire trace clean for debugging.
+    if (scope === "corporate" && corporateFunction) {
+      formData.set("corporate_function", corporateFunction);
+    }
     // v1.6 — multi-value form keys, mirroring specialty. Lets the
     // server action read getAll() and avoid comma-split parsing.
     for (const s of skills) formData.append("skills", s);
@@ -737,6 +751,8 @@ export function JobWizard({
             onEmploymentType={setEmploymentType}
             scope={scope}
             onScope={setScope}
+            corporateFunction={corporateFunction}
+            onCorporateFunction={setCorporateFunction}
             locations={locations}
             selectedLocationIds={selectedLocationIds}
             onToggleLocation={(id) => {
@@ -935,6 +951,8 @@ function BasicsStep({
   onEmploymentType,
   scope,
   onScope,
+  corporateFunction,
+  onCorporateFunction,
   locations,
   selectedLocationIds,
   onToggleLocation,
@@ -947,6 +965,8 @@ function BasicsStep({
   onEmploymentType: (v: string) => void;
   scope: JobScope;
   onScope: (v: JobScope) => void;
+  corporateFunction: string;
+  onCorporateFunction: (v: string) => void;
   locations: LocationOption[];
   selectedLocationIds: Set<string>;
   onToggleLocation: (id: string) => void;
@@ -1075,6 +1095,42 @@ function BasicsStep({
           hiring managers see.
         </p>
       </div>
+
+      {/* 5G.c — corporate function selector. Only surfaces when
+          scope=corporate. Lets the recruiter slot the role into one of
+          12 functions powering the Corporate tab filter + landing pages. */}
+      {scope === "corporate" && (
+        <div>
+          <label
+            htmlFor="corporate_function"
+            className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+          >
+            Corporate function{" "}
+            <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
+              (optional)
+            </span>
+          </label>
+          <select
+            id="corporate_function"
+            value={corporateFunction}
+            onChange={(e) => onCorporateFunction(e.target.value)}
+            className="w-full max-w-[420px] h-[44px] px-3 bg-white border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+          >
+            <option value="">Not specified</option>
+            {CORPORATE_FUNCTIONS.map((f) => (
+              <option key={f.slug} value={f.slug}>
+                {f.label}
+              </option>
+            ))}
+          </select>
+          <p className="mt-2 text-[12px] text-slate-meta">
+            Powers the Corporate Roles tab filter on the public job board
+            and the role-family landing pages. Leave as &ldquo;Not
+            specified&rdquo; if the role doesn&apos;t cleanly fit one
+            function.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

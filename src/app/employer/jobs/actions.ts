@@ -107,6 +107,7 @@ export async function createJob(
       schedule_evenings: parsed.scheduleEvenings,
       schedule_weekends: parsed.scheduleWeekends,
       external_links: parsed.externalLinks,
+      corporate_function: parsed.corporateFunction,
       scope: parsed.scope,
       posted_at: parsed.status === "active" ? new Date().toISOString() : null,
       created_by: dsoUser?.id ?? null,
@@ -232,6 +233,7 @@ export async function updateJob(
       // external_link_* fields, so parsed.externalLinks is always []
       // on this path; writing it would wipe any existing links a user
       // populated via SQL or future direct-edit UX.
+      corporate_function: parsed.corporateFunction,
       scope: parsed.scope,
       posted_at:
         parsed.status === "active" ? new Date().toISOString() : null,
@@ -901,7 +903,7 @@ export async function cloneJob(formData: FormData): Promise<void> {
   const { data: src, error: srcErr } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, benefits, requirements, hide_stages_from_candidate, scope, specialty, min_years_experience, schedule_days, schedule_evenings, schedule_weekends, external_links"
+      "id, dso_id, title, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, benefits, requirements, hide_stages_from_candidate, scope, specialty, min_years_experience, schedule_days, schedule_evenings, schedule_weekends, external_links, corporate_function"
     )
     .eq("id", jobId)
     .maybeSingle();
@@ -961,6 +963,10 @@ export async function cloneJob(formData: FormData): Promise<void> {
         ((src as Record<string, unknown>).external_links as
           | Array<{ label: string; url: string }>
           | null) ?? [],
+      corporate_function:
+        ((src as Record<string, unknown>).corporate_function as
+          | string
+          | null) ?? null,
       posted_at: null,
       created_by: (dsoUser?.id as string | undefined) ?? null,
     })
@@ -1113,7 +1119,28 @@ interface ParsedJobInput {
   scheduleWeekends: boolean;
   // E1.12 (2026-05-13) — external links surfaced on the public job page.
   externalLinks: Array<{ label: string; url: string }>;
+  // 5G.c (2026-05-13) — corporate function slug. Only meaningful when
+  // scope=corporate; null otherwise (also null when scope=corporate but
+  // recruiter skipped the optional field). Server-side validated against
+  // the closed set of 12 function slugs.
+  corporateFunction: string | null;
 }
+
+/** 5G.c — closed set; mirrors CORPORATE_FUNCTION_SLUGS in src/lib/corporate/functions.ts. */
+const VALID_CORPORATE_FUNCTIONS = new Set<string>([
+  "finance-accounting",
+  "marketing",
+  "operations",
+  "hr-recruiting",
+  "it-engineering",
+  "legal-compliance",
+  "real-estate-facilities",
+  "ma-corporate-development",
+  "training-development",
+  "supply-chain-procurement",
+  "clinical-operations",
+  "business-development",
+]);
 
 /**
  * E1.12 helper — read external_link_label[] + external_link_url[] from
@@ -1304,6 +1331,15 @@ function parseJobFormData(
   }
   const externalLinks = linksResult;
 
+  // 5G.c — corporate function. Only meaningful when scope=corporate.
+  // Silently ignore the field on non-corporate scopes so toggling scope
+  // back and forth in the wizard doesn't strand stale values.
+  const rawCorpFn = String(formData.get("corporate_function") ?? "").trim();
+  const corporateFunction =
+    scope === "corporate" && rawCorpFn && VALID_CORPORATE_FUNCTIONS.has(rawCorpFn)
+      ? rawCorpFn
+      : null;
+
   // Screening questions — JSON-encoded array
   const rawQuestions = String(formData.get("screening_questions") ?? "").trim();
   let screeningQuestions: ScreeningQuestionPayload[] = [];
@@ -1402,6 +1438,7 @@ function parseJobFormData(
     scheduleEvenings,
     scheduleWeekends,
     externalLinks,
+    corporateFunction,
   };
 }
 

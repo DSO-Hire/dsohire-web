@@ -44,6 +44,7 @@ import {
 import { RecommendedQuestionsPanel } from "../../recommended-questions-panel";
 import { JdGeneratorPanel } from "../../jd-generator-panel";
 import { ChipArrayInput } from "@/app/candidate/profile/edit-sheet";
+import { CORPORATE_FUNCTIONS } from "@/lib/corporate/functions";
 import {
   getAllDentalSkills,
   BENEFITS,
@@ -135,6 +136,8 @@ export interface EditSectionsInitial {
   schedule_days: string[];
   schedule_evenings: boolean;
   schedule_weekends: boolean;
+  // 5G.c (2026-05-13) — corporate function slug; only meaningful when scope=corporate.
+  corporate_function: string | null;
 }
 
 interface EditSectionsProps {
@@ -161,6 +164,7 @@ export function EditSections({
         initialRoleCategory={initial.role_category}
         initialEmploymentType={initial.employment_type}
         initialScope={initial.scope}
+        initialCorporateFunction={initial.corporate_function}
         initialLocationIds={initial.location_ids}
         locations={locations}
       />
@@ -283,6 +287,7 @@ function BasicsSection({
   initialRoleCategory,
   initialEmploymentType,
   initialScope,
+  initialCorporateFunction,
   initialLocationIds,
   locations,
 }: {
@@ -292,6 +297,7 @@ function BasicsSection({
   initialRoleCategory: string;
   initialEmploymentType: string;
   initialScope: JobScope;
+  initialCorporateFunction: string | null;
   initialLocationIds: string[];
   locations: LocationOption[];
 }) {
@@ -299,6 +305,9 @@ function BasicsSection({
   const [roleCategory, setRoleCategory] = useState(initialRoleCategory);
   const [employmentType, setEmploymentType] = useState(initialEmploymentType);
   const [scope, setScope] = useState<JobScope>(initialScope);
+  const [corporateFunction, setCorporateFunction] = useState<string>(
+    initialCorporateFunction ?? ""
+  );
   const [selectedLocationIds, setSelectedLocationIds] = useState<Set<string>>(
     new Set(initialLocationIds)
   );
@@ -311,6 +320,7 @@ function BasicsSection({
     roleCategory: initialRoleCategory,
     employmentType: initialEmploymentType,
     scope: initialScope,
+    corporateFunction: initialCorporateFunction ?? "",
     locationIds: [...initialLocationIds].sort().join("|"),
   });
 
@@ -320,6 +330,7 @@ function BasicsSection({
     roleCategory !== snapshot.roleCategory ||
     employmentType !== snapshot.employmentType ||
     scope !== snapshot.scope ||
+    corporateFunction !== snapshot.corporateFunction ||
     currentLocationKey !== snapshot.locationIds;
 
   const onSave = () => {
@@ -339,6 +350,9 @@ function BasicsSection({
     fd.set("role_category", roleCategory);
     fd.set("employment_type", employmentType);
     fd.set("scope", scope);
+    if (scope === "corporate" && corporateFunction) {
+      fd.set("corporate_function", corporateFunction);
+    }
     for (const id of selectedLocationIds) fd.append("location_ids", id);
 
     startTransition(async () => {
@@ -352,6 +366,7 @@ function BasicsSection({
         roleCategory,
         employmentType,
         scope,
+        corporateFunction,
         locationIds: currentLocationKey,
       });
       setSaved(true);
@@ -495,6 +510,42 @@ function BasicsSection({
             changes what hiring managers see.
           </p>
         </div>
+
+        {/* 5G.c — corporate function selector. Mirrors the wizard surface.
+            Only renders when scope=corporate. */}
+        {scope === "corporate" && (
+          <div>
+            <label
+              htmlFor="corporate_function_edit"
+              className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+            >
+              Corporate function{" "}
+              <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
+                (optional)
+              </span>
+            </label>
+            <select
+              id="corporate_function_edit"
+              value={corporateFunction}
+              onChange={(e) => {
+                setCorporateFunction(e.target.value);
+                setSaved(false);
+              }}
+              className="w-full max-w-[420px] h-[44px] px-3 bg-white border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+            >
+              <option value="">Not specified</option>
+              {CORPORATE_FUNCTIONS.map((f) => (
+                <option key={f.slug} value={f.slug}>
+                  {f.label}
+                </option>
+              ))}
+            </select>
+            <p className="mt-2 text-[12px] text-slate-meta">
+              Powers the Corporate Roles tab filter on the public job
+              board and the role-family landing pages.
+            </p>
+          </div>
+        )}
       </div>
       <SaveBar
         dirty={dirty}
