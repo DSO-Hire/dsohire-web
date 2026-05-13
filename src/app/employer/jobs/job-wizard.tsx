@@ -1647,6 +1647,22 @@ function ScreeningStep({
   questions: WizardScreeningQuestion[];
   onChange: (qs: WizardScreeningQuestion[]) => void;
 }) {
+  // Cam UX cleanup 2026-05-13 — collapsed-card mode. Expanded set tracks
+  // which question IDs are currently expanded. By default ALL questions
+  // start collapsed (so reopening a job with 14 questions shows a list,
+  // not a wall of forms). Newly-added questions auto-expand so the user
+  // can fill them in without an extra click.
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+
+  const toggleExpand = (id: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   const addQuestion = (kind: ScreeningQuestionKind) => {
     const newQ: WizardScreeningQuestion = {
       id: `tmp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
@@ -1665,6 +1681,12 @@ function ScreeningStep({
       sort_order: questions.length,
     };
     onChange([...questions, newQ]);
+    // Newly-added cards auto-expand.
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      next.add(newQ.id);
+      return next;
+    });
   };
 
   const updateQ = (id: string, patch: Partial<WizardScreeningQuestion>) => {
@@ -1726,6 +1748,8 @@ function ScreeningStep({
           onUpdate={(patch) => updateQ(q.id, patch)}
           onRemove={() => removeQ(q.id)}
           onMove={(dir) => move(q.id, dir)}
+          expanded={expandedIds.has(q.id)}
+          onToggleExpand={() => toggleExpand(q.id)}
         />
       ))}
 
@@ -1767,6 +1791,8 @@ function QuestionCard({
   onUpdate,
   onRemove,
   onMove,
+  expanded,
+  onToggleExpand,
 }: {
   question: WizardScreeningQuestion;
   index: number;
@@ -1774,6 +1800,11 @@ function QuestionCard({
   onUpdate: (patch: Partial<WizardScreeningQuestion>) => void;
   onRemove: () => void;
   onMove: (direction: -1 | 1) => void;
+  /** Cam UX cleanup — collapsed cards show a single-line summary instead
+      of the full editor form. Saves vertical scroll for jobs with many
+      questions. */
+  expanded: boolean;
+  onToggleExpand: () => void;
 }) {
   const isSelect =
     question.kind === "single_select" || question.kind === "multi_select";
@@ -1843,6 +1874,46 @@ function QuestionCard({
         </div>
       </div>
 
+      {/* Cam UX cleanup 2026-05-13 — collapsed-mode summary. One line:
+          prompt + required/knockout chips. Click anywhere or hit Edit to
+          expand into the full editor. Newly-added questions start
+          expanded; previously-existing questions start collapsed. */}
+      {!expanded && (
+        <button
+          type="button"
+          onClick={onToggleExpand}
+          className="w-full text-left -mx-1 px-1 py-1 group rounded hover:bg-cream/50 transition-colors"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0 flex-1 text-[14px] text-ink truncate">
+              {question.prompt.trim() ? (
+                question.prompt
+              ) : (
+                <span className="italic text-slate-meta">
+                  (empty prompt — click Edit to fill in)
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              {question.required && (
+                <span className="text-[9px] font-bold tracking-[1.2px] uppercase text-heritage-deep">
+                  Required
+                </span>
+              )}
+              {question.knockout && (
+                <span className="text-[9px] font-bold tracking-[1.2px] uppercase text-amber-900 bg-amber-100 px-1.5 py-0.5">
+                  Knockout
+                </span>
+              )}
+              <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep group-hover:text-ink transition-colors ml-2">
+                Edit →
+              </span>
+            </div>
+          </div>
+        </button>
+      )}
+
+      {expanded && (
       <div className="space-y-3">
         <Input
           label="Prompt"
@@ -1914,7 +1985,21 @@ function QuestionCard({
             ambiguous to evaluate); for those kinds we render a disabled-
             state explainer rather than the checkbox. */}
         <KnockoutAuthoring question={question} onUpdate={onUpdate} />
+
+        {/* Cam UX cleanup — collapse button at the bottom of the expanded
+            editor so the recruiter can stash the question after editing
+            it without scrolling up. */}
+        <div className="pt-2 border-t border-[var(--rule)] mt-1">
+          <button
+            type="button"
+            onClick={onToggleExpand}
+            className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+          >
+            ↑ Collapse this question
+          </button>
+        </div>
       </div>
+      )}
     </div>
   );
 }

@@ -211,7 +211,17 @@ export function RecommendedQuestionsPanel({
                   const stillInForm =
                     addedId !== undefined &&
                     questions.some((q) => q.id === addedId);
-                  const isAdded = !!addedId && stillInForm;
+                  // Cam catch 2026-05-13 — also dedup by prompt text so
+                  // library questions already in the wizard (loaded from
+                  // DB on edit, or session-added earlier) read as Added
+                  // even when the session's addedFromRec map doesn't know
+                  // about them. Matches case-insensitively + trimmed so
+                  // light copy edits don't break the dedup.
+                  const normalizedPrompt = rq.prompt.trim().toLowerCase();
+                  const matchByPrompt = questions.some(
+                    (q) => q.prompt.trim().toLowerCase() === normalizedPrompt
+                  );
+                  const isAdded = (!!addedId && stillInForm) || matchByPrompt;
 
                   return (
                     <RecommendedCard
