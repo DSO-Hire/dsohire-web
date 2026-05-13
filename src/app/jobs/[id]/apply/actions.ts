@@ -33,6 +33,7 @@ import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
 import { ApplicationReceived } from "@/emails/candidate/ApplicationReceived";
 import { NewApplication } from "@/emails/employer/NewApplication";
 import type { ScreeningQuestion } from "./types";
+import { isKnockoutFailure } from "@/lib/screening/evaluate-knockout";
 
 export interface ApplyState {
   ok: boolean;
@@ -152,9 +153,13 @@ export async function applyToJob(
 
   // Pull screening questions for this job — we need them both to validate
   // required answers and to know how to interpret each form value.
+  // E2.10 (2026-05-13) — also pull knockout flag + correct-answer payload
+  // so we can soft-tag failing applications after answers persist.
   const { data: rawQuestions } = await supabase
     .from("job_screening_questions")
-    .select("id, prompt, helper_text, kind, options, required, sort_order")
+    .select(
+      "id, prompt, helper_text, kind, options, required, sort_order, knockout, knockout_correct_answer"
+    )
     .eq("job_id", jobId);
   const questions = (rawQuestions ?? []) as unknown as ScreeningQuestion[];
 
@@ -291,6 +296,58 @@ export async function applyToJob(
           ok: false,
           error: `Application saved, but we couldn't save your screening answers: ${answersError.message}. Please re-submit.`,
         };
+      }
+    }
+  }
+
+  // ── E2.10 — Soft knockout evaluation ──
+  // Compute which knockout questions the candidate failed and persist
+  // the result on the application row. NEVER auto-reject (per locked
+  // spec); the application stays status='new' and the recruiter sees
+  // the chip in the kanban + a callout on the application detail page.
+  //
+  // Failure detection is fail-soft: any unexpected shape in the
+  // correct-answer payload, or any kind that doesn't support knockout
+  // (short_text/long_text), passes silently. We'd rather miss a
+  // legitimate knockout than over-tag an application with bad data.
+  const knockoutQuestions = questions.filter(
+    (q) => (q as ScreeningQuestion & { knockout?: boolean }).knockout === true
+  );
+  if (knockoutQuestions.length > 0) {
+    const failedPrompts: string[] = [];
+    for (const q of knockoutQuestions) {
+      const correctAnswer = (q as ScreeningQuestion & {
+        knockout_correct_answer?: unknown;
+      }).knockout_correct_answer;
+      const candidateAnswer = answersByQuestion[q.id];
+      if (
+        isKnockoutFailure(correctAnswer, candidateAnswer, q.kind as string)
+      ) {
+        // Truncate at 80 chars to bound the kanban chip width.
+        const truncated =
+          q.prompt.length > 80 ? q.prompt.slice(0, 77) + "..." : q.prompt;
+        failedPrompts.push(truncated);
+      }
+    }
+    if (failedPrompts.length > 0) {
+      // Service-role update — RLS on applications.UPDATE is recruiter-
+      // scoped, but at this point in the apply flow the candidate is the
+      // current user and they wouldn't pass the recruiter check. The
+      // candidate just inserted this row; writing knockout metadata back
+      // is a system-level concern, not a user-permission one.
+      const admin = createSupabaseServiceRoleClient();
+      const { error: koError } = await admin
+        .from("applications")
+        .update({
+          knockout_failed_questions: failedPrompts,
+          knockout_failed_at: new Date().toISOString(),
+        })
+        .eq("id", applicationId);
+      if (koError) {
+        // Non-fatal — the application is in place, the knockout tag just
+        // didn't land. Log for ops; don't surface to the candidate
+        // (per spec: candidates never see knockout state).
+        console.warn("[apply] knockout tag write failed:", koError);
       }
     }
   }

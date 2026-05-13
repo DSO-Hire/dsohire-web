@@ -30,6 +30,7 @@ import { dispatchNotification } from "@/lib/notifications/dispatcher";
 import { ApplicationReceived } from "@/emails/candidate/ApplicationReceived";
 import { NewApplication } from "@/emails/employer/NewApplication";
 import type { ScreeningQuestion } from "../types";
+import { isKnockoutFailure } from "@/lib/screening/evaluate-knockout";
 
 export interface GuestApplyState {
   ok: boolean;
@@ -198,9 +199,13 @@ export async function submitGuestApplication(
   }
 
   // 4. Pull screening questions + validate.
+  // E2.10 — same knockout fields pulled here so the guest apply flow
+  // gets the same soft-knockout tagging.
   const { data: rawQuestions } = await admin
     .from("job_screening_questions")
-    .select("id, prompt, helper_text, kind, options, required, sort_order")
+    .select(
+      "id, prompt, helper_text, kind, options, required, sort_order, knockout, knockout_correct_answer"
+    )
     .eq("job_id", jobId);
   const questions = (rawQuestions ?? []) as unknown as ScreeningQuestion[];
   const answersByQuestion = parseAnswers(questions, formData);
@@ -335,6 +340,43 @@ export async function submitGuestApplication(
   }
   if (answerRows.length > 0) {
     await admin.from("application_screening_answers").insert(answerRows);
+  }
+
+  // E2.10 — soft knockout evaluation (same flow as the auth'd apply path).
+  // Guest applications can also fail knockouts; the recruiter sees the
+  // chip in the kanban regardless of whether the candidate ever claimed
+  // the account. Failures truncated at 80 chars to bound chip width.
+  const knockoutQuestions = questions.filter(
+    (q) =>
+      (q as ScreeningQuestion & { knockout?: boolean }).knockout === true
+  );
+  if (knockoutQuestions.length > 0) {
+    const failedPrompts: string[] = [];
+    for (const q of knockoutQuestions) {
+      const correctAnswer = (q as ScreeningQuestion & {
+        knockout_correct_answer?: unknown;
+      }).knockout_correct_answer;
+      const candidateAnswer = answersByQuestion[q.id];
+      if (
+        isKnockoutFailure(correctAnswer, candidateAnswer, q.kind as string)
+      ) {
+        const truncated =
+          q.prompt.length > 80 ? q.prompt.slice(0, 77) + "..." : q.prompt;
+        failedPrompts.push(truncated);
+      }
+    }
+    if (failedPrompts.length > 0) {
+      const { error: koError } = await admin
+        .from("applications")
+        .update({
+          knockout_failed_questions: failedPrompts,
+          knockout_failed_at: new Date().toISOString(),
+        })
+        .eq("id", applicationId);
+      if (koError) {
+        console.warn("[guest-apply] knockout tag write failed:", koError);
+      }
+    }
   }
 
   // 8. Emails — fire-and-forget. Guest path doesn't have an auth.users

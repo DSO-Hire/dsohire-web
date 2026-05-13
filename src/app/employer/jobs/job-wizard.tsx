@@ -80,6 +80,14 @@ export interface WizardScreeningQuestion {
   options: ScreeningQuestionOption[] | null;
   required: boolean;
   sort_order: number;
+  /** E2.10 — mark this question as a soft knockout. Pairs with knockout_correct_answer. */
+  knockout?: boolean;
+  /**
+   * E2.10 — shape-by-kind correct-answer payload. See evaluate-knockout.ts
+   * for the canonical KnockoutCorrectAnswer union. Null when knockout=false
+   * or when kind doesn't support knockout (short_text / long_text).
+   */
+  knockout_correct_answer?: unknown | null;
 }
 
 export type JobScope = "location" | "regional" | "corporate";
@@ -705,6 +713,13 @@ export function JobWizard({
               : null,
           required: q.required,
           sort_order: idx,
+          // E2.10 — knockout flag + correct-answer payload travel with
+          // each question. Server validates the correct-answer shape per
+          // kind on insert; unsupported kinds null both fields.
+          knockout: Boolean(q.knockout),
+          knockout_correct_answer: q.knockout
+            ? (q.knockout_correct_answer ?? null)
+            : null,
         }))
       )
     );
@@ -1893,7 +1908,223 @@ function QuestionCard({
           />
           <span>Required — candidate must answer this to submit.</span>
         </label>
+
+        {/* E2.10 — Soft knockout toggle + per-kind correct-answer authoring.
+            short_text + long_text don't support knockout (free text is too
+            ambiguous to evaluate); for those kinds we render a disabled-
+            state explainer rather than the checkbox. */}
+        <KnockoutAuthoring question={question} onUpdate={onUpdate} />
       </div>
+    </div>
+  );
+}
+
+/**
+ * Knockout authoring sub-form. Renders the "Mark as knockout" checkbox and,
+ * when checked, a per-kind correct-answer editor. Keep the component local
+ * to job-wizard.tsx — it's deeply tied to WizardScreeningQuestion's shape.
+ */
+function KnockoutAuthoring({
+  question,
+  onUpdate,
+}: {
+  question: WizardScreeningQuestion;
+  onUpdate: (patch: Partial<WizardScreeningQuestion>) => void;
+}) {
+  const kind = question.kind;
+  const supported =
+    kind === "yes_no" ||
+    kind === "single_select" ||
+    kind === "multi_select" ||
+    kind === "number";
+
+  if (!supported) {
+    return (
+      <div className="flex items-start gap-2.5 text-[12px] text-slate-meta pt-1">
+        <span className="mt-0.5">·</span>
+        <span>
+          Knockout filtering isn&apos;t available for free-text questions —
+          there&apos;s no reliable way to auto-evaluate the answer. Use a
+          yes/no, select, or number question if you need knockout behavior.
+        </span>
+      </div>
+    );
+  }
+
+  const checked = Boolean(question.knockout);
+  const ca = (question.knockout_correct_answer ?? {}) as Record<string, unknown>;
+
+  const setKnockout = (next: boolean) => {
+    if (!next) {
+      onUpdate({ knockout: false, knockout_correct_answer: null });
+      return;
+    }
+    // Seed a sensible default correct-answer per kind so the UI doesn't
+    // start in a "no value" state.
+    let seed: Record<string, unknown>;
+    if (kind === "yes_no") seed = { expected: "yes" };
+    else if (kind === "single_select") seed = { expected_option_ids: [] };
+    else if (kind === "multi_select") seed = { must_include_option_ids: [] };
+    else seed = { operator: ">=", value: 0 };
+    onUpdate({ knockout: true, knockout_correct_answer: seed });
+  };
+
+  const patchCorrect = (patch: Record<string, unknown>) => {
+    onUpdate({
+      knockout_correct_answer: { ...ca, ...patch },
+    });
+  };
+
+  const toggleOptionId = (optId: string, field: string) => {
+    const current = Array.isArray(ca[field])
+      ? (ca[field] as string[]).slice()
+      : [];
+    const idx = current.indexOf(optId);
+    if (idx >= 0) current.splice(idx, 1);
+    else current.push(optId);
+    patchCorrect({ [field]: current });
+  };
+
+  return (
+    <div className="pt-1">
+      <label className="flex items-center gap-2.5 text-[14px] text-ink cursor-pointer">
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={(e) => setKnockout(e.target.checked)}
+          className="accent-amber-700"
+        />
+        <span>
+          Mark as <strong className="text-amber-900">knockout</strong> —
+          flag the application when the candidate&apos;s answer doesn&apos;t
+          match.{" "}
+          <span className="text-slate-meta font-normal">
+            (No auto-reject; just a visible flag on your kanban.)
+          </span>
+        </span>
+      </label>
+
+      {checked && (
+        <div className="mt-3 ml-7 border-l-2 border-amber-300 pl-4 py-1">
+          <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-amber-900 mb-2">
+            Correct answer
+          </div>
+
+          {kind === "yes_no" && (
+            <div className="flex items-center gap-4">
+              {(["yes", "no"] as const).map((v) => (
+                <label
+                  key={v}
+                  className="inline-flex items-center gap-2 text-[13px] text-ink cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name={`knockout_yn_${question.id}`}
+                    checked={ca.expected === v}
+                    onChange={() => patchCorrect({ expected: v })}
+                    className="accent-heritage"
+                  />
+                  <span className="capitalize">{v} is correct</span>
+                </label>
+              ))}
+            </div>
+          )}
+
+          {kind === "single_select" && (
+            <div className="space-y-1.5">
+              <p className="text-[11px] text-slate-meta mb-1">
+                Check any option(s) the candidate must pick to pass.
+              </p>
+              {(question.options ?? []).map((opt) => {
+                const isChecked = Array.isArray(ca.expected_option_ids)
+                  ? (ca.expected_option_ids as string[]).includes(opt.id)
+                  : false;
+                return (
+                  <label
+                    key={opt.id}
+                    className="flex items-center gap-2 text-[13px] text-ink cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() =>
+                        toggleOptionId(opt.id, "expected_option_ids")
+                      }
+                      className="accent-heritage"
+                    />
+                    <span>{opt.label || "(empty label)"}</span>
+                  </label>
+                );
+              })}
+              {(question.options ?? []).length === 0 && (
+                <p className="text-[12px] text-slate-meta italic">
+                  Add options above first.
+                </p>
+              )}
+            </div>
+          )}
+
+          {kind === "multi_select" && (
+            <div className="space-y-1.5">
+              <p className="text-[11px] text-slate-meta mb-1">
+                Check option(s) the candidate must include in their selection
+                to pass.
+              </p>
+              {(question.options ?? []).map((opt) => {
+                const isChecked = Array.isArray(ca.must_include_option_ids)
+                  ? (ca.must_include_option_ids as string[]).includes(opt.id)
+                  : false;
+                return (
+                  <label
+                    key={opt.id}
+                    className="flex items-center gap-2 text-[13px] text-ink cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() =>
+                        toggleOptionId(opt.id, "must_include_option_ids")
+                      }
+                      className="accent-heritage"
+                    />
+                    <span>{opt.label || "(empty label)"}</span>
+                  </label>
+                );
+              })}
+              {(question.options ?? []).length === 0 && (
+                <p className="text-[12px] text-slate-meta italic">
+                  Add options above first.
+                </p>
+              )}
+            </div>
+          )}
+
+          {kind === "number" && (
+            <div className="flex items-center gap-2">
+              <select
+                value={String(ca.operator ?? ">=")}
+                onChange={(e) => patchCorrect({ operator: e.target.value })}
+                className="h-[36px] px-2 bg-white border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+              >
+                <option value=">=">≥ at least</option>
+                <option value="<=">≤ at most</option>
+                <option value="=">= exactly</option>
+              </select>
+              <input
+                type="number"
+                value={String(ca.value ?? "")}
+                onChange={(e) => {
+                  const n = Number(e.target.value);
+                  patchCorrect({
+                    value: Number.isFinite(n) ? n : 0,
+                  });
+                }}
+                className="h-[36px] w-32 px-3 bg-white border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+              />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -47,9 +47,69 @@ interface ScreeningQuestionPayload {
   options: Array<{ id: string; label: string }> | null;
   required: boolean;
   sort_order: number;
+  // E2.10 (2026-05-13) — soft knockout authoring.
+  knockout?: boolean;
+  knockout_correct_answer?: unknown | null;
 }
 
 const RESERVED_JOB_SLUGS = new Set(["new", "search", "feed"]);
+
+/**
+ * E2.10 — Validate the wizard's knockout_correct_answer payload against
+ * the question kind + the options the recruiter just authored. Returns
+ * the normalized payload (with string-coerced fields), or null if the
+ * shape is invalid for the kind. Caller treats null as "no knockout"
+ * rather than throwing — knockout is opt-in and a mis-configured payload
+ * shouldn't block the save.
+ */
+function validateKnockoutCorrectAnswer(
+  raw: unknown,
+  kind: string,
+  options: Array<{ id: string; label: string }> | null
+): Record<string, unknown> | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+
+  if (kind === "yes_no") {
+    const expected = String(r.expected ?? "").toLowerCase();
+    if (expected !== "yes" && expected !== "no") return null;
+    return { expected };
+  }
+
+  if (kind === "single_select") {
+    const ids = Array.isArray(r.expected_option_ids)
+      ? (r.expected_option_ids as unknown[]).map((x) => String(x))
+      : [];
+    if (ids.length === 0) return null;
+    // Validate against the question's actual option IDs.
+    const valid = new Set((options ?? []).map((o) => o.id));
+    const filtered = ids.filter((id) => valid.has(id));
+    if (filtered.length === 0) return null;
+    return { expected_option_ids: filtered };
+  }
+
+  if (kind === "multi_select") {
+    const ids = Array.isArray(r.must_include_option_ids)
+      ? (r.must_include_option_ids as unknown[]).map((x) => String(x))
+      : [];
+    if (ids.length === 0) return null;
+    const valid = new Set((options ?? []).map((o) => o.id));
+    const filtered = ids.filter((id) => valid.has(id));
+    if (filtered.length === 0) return null;
+    return { must_include_option_ids: filtered };
+  }
+
+  if (kind === "number") {
+    const op = String(r.operator ?? "");
+    if (op !== ">=" && op !== "<=" && op !== "=") return null;
+    const value =
+      typeof r.value === "number" ? r.value : Number(r.value);
+    if (!Number.isFinite(value)) return null;
+    return { operator: op, value };
+  }
+
+  return null;
+}
 
 /* ───── Create ───── */
 
@@ -152,6 +212,9 @@ export async function createJob(
       options: q.options,
       required: q.required,
       sort_order: q.sort_order,
+      // E2.10
+      knockout: q.knockout ?? false,
+      knockout_correct_answer: q.knockout_correct_answer ?? null,
     }));
     const { error: qError } = await supabase
       .from("job_screening_questions")
@@ -305,6 +368,9 @@ export async function updateJob(
           options: q.options,
           required: q.required,
           sort_order: q.sort_order,
+          // E2.10
+          knockout: q.knockout ?? false,
+          knockout_correct_answer: q.knockout_correct_answer ?? null,
         })
         .eq("id", q.id)
         .eq("job_id", jobId);
@@ -328,6 +394,9 @@ export async function updateJob(
       options: q.options,
       required: q.required,
       sort_order: q.sort_order,
+      // E2.10
+      knockout: q.knockout ?? false,
+      knockout_correct_answer: q.knockout_correct_answer ?? null,
     }));
   if (newRows.length > 0) {
     const { error: insertQErr } = await supabase
@@ -696,6 +765,24 @@ export async function updateJobScreeningSection(
         options.push({ id: optId, label });
       }
     }
+    // E2.10 — knockout flag + correct-answer payload. Server enforces:
+    // (a) free-text kinds null both fields (they can't be evaluated);
+    // (b) the payload shape matches the question kind. Bad shape silently
+    // nulls knockout rather than failing the save — recruiter can re-set
+    // it from the wizard if they care.
+    const koFlag = Boolean(raw.knockout) &&
+      (kind === "yes_no" ||
+       kind === "single_select" ||
+       kind === "multi_select" ||
+       kind === "number");
+    const koAnswer = koFlag
+      ? validateKnockoutCorrectAnswer(
+          raw.knockout_correct_answer,
+          kind,
+          options ?? null
+        )
+      : null;
+
     screening.push({
       id,
       prompt,
@@ -704,6 +791,8 @@ export async function updateJobScreeningSection(
       options,
       required,
       sort_order: i,
+      knockout: koFlag && koAnswer !== null,
+      knockout_correct_answer: koAnswer,
     });
   }
 
@@ -733,6 +822,9 @@ export async function updateJobScreeningSection(
           options: q.options,
           required: q.required,
           sort_order: q.sort_order,
+          // E2.10
+          knockout: q.knockout ?? false,
+          knockout_correct_answer: q.knockout_correct_answer ?? null,
         })
         .eq("id", q.id)
         .eq("job_id", jobId);
@@ -752,6 +844,9 @@ export async function updateJobScreeningSection(
       options: q.options,
       required: q.required,
       sort_order: q.sort_order,
+      // E2.10
+      knockout: q.knockout ?? false,
+      knockout_correct_answer: q.knockout_correct_answer ?? null,
     }));
   if (newRows.length > 0) {
     const { error: insertQErr } = await supabase
@@ -1032,10 +1127,13 @@ export async function cloneJob(formData: FormData): Promise<void> {
     await supabase.from("job_skills").insert(skillRows);
   }
 
-  // 7. Duplicate screening questions (new IDs, same content).
+  // 7. Duplicate screening questions (new IDs, same content). E2.10 —
+  // knockout flag + correct-answer payload also clone forward.
   const { data: srcQs } = await supabase
     .from("job_screening_questions")
-    .select("prompt, helper_text, kind, options, required, sort_order")
+    .select(
+      "prompt, helper_text, kind, options, required, sort_order, knockout, knockout_correct_answer"
+    )
     .eq("job_id", jobId)
     .order("sort_order", { ascending: true });
   const qRows = ((srcQs ?? []) as Array<{
@@ -1045,6 +1143,8 @@ export async function cloneJob(formData: FormData): Promise<void> {
     options: Array<{ id: string; label: string }> | null;
     required: boolean;
     sort_order: number;
+    knockout: boolean | null;
+    knockout_correct_answer: unknown | null;
   }>).map((q) => ({
     job_id: newId,
     prompt: q.prompt,
@@ -1053,6 +1153,8 @@ export async function cloneJob(formData: FormData): Promise<void> {
     options: q.options,
     required: q.required,
     sort_order: q.sort_order,
+    knockout: q.knockout ?? false,
+    knockout_correct_answer: q.knockout_correct_answer ?? null,
   }));
   if (qRows.length > 0) {
     await supabase.from("job_screening_questions").insert(qRows);
@@ -1437,6 +1539,21 @@ function parseJobFormData(
         }
       }
 
+      // E2.10 — knockout flag + correct-answer payload. Same validation
+      // as the per-section save above; see validateKnockoutCorrectAnswer.
+      const koFlag = Boolean(raw.knockout) &&
+        (kind === "yes_no" ||
+         kind === "single_select" ||
+         kind === "multi_select" ||
+         kind === "number");
+      const koAnswer = koFlag
+        ? validateKnockoutCorrectAnswer(
+            raw.knockout_correct_answer,
+            kind,
+            options ?? null
+          )
+        : null;
+
       screeningQuestions.push({
         id,
         prompt,
@@ -1445,6 +1562,8 @@ function parseJobFormData(
         options,
         required,
         sort_order: sortOrder,
+        knockout: koFlag && koAnswer !== null,
+        knockout_correct_answer: koAnswer,
       });
     }
     // Re-number sort_order to match the array order (defensive — the wizard

@@ -147,7 +147,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const { data: rawApp } = await supabase
     .from("applications")
     .select(
-      "id, job_id, candidate_id, stage_id, cover_letter, resume_url, employer_notes, created_at, updated_at, affiliation_revealed, affiliation_revealed_at, affiliation_revealed_by_dso_user_id"
+      "id, job_id, candidate_id, stage_id, cover_letter, resume_url, employer_notes, created_at, updated_at, affiliation_revealed, affiliation_revealed_at, affiliation_revealed_by_dso_user_id, knockout_failed_questions, knockout_failed_at"
     )
     .eq("id", appId)
     .maybeSingle();
@@ -1244,6 +1244,55 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               )}
             </div>
           </DetailSection>
+
+          {/* E2.10 — soft-knockout callout. Renders ONLY when the
+              candidate failed at least one knockout question. Lists the
+              specific prompts so the recruiter can decide if the gap is
+              fixable (license about to clear) vs disqualifying. Per
+              spec: employer-only surface; the candidate never sees this
+              on their own application detail page. */}
+          {((app as Record<string, unknown>)
+            .knockout_failed_questions as string[] | null)?.length ? (
+            <div
+              className="mb-8 border border-amber-300 bg-amber-50/70 px-5 py-4 rounded"
+              role="region"
+              aria-label="Knockout questions failed"
+            >
+              <div className="flex items-start gap-3">
+                <span
+                  className="flex-shrink-0 mt-0.5 text-amber-700"
+                  aria-hidden
+                >
+                  ⚠
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[12px] font-bold tracking-[1.5px] uppercase text-amber-900 mb-1.5">
+                    Knockout flagged · review the candidate&apos;s answers
+                  </div>
+                  <p className="text-[13px] text-amber-900/90 leading-relaxed mb-3">
+                    This candidate didn&apos;t meet the criteria you marked
+                    as knockout questions. They&apos;re not auto-rejected —
+                    review the answers below and decide whether the gap is
+                    fixable (e.g., license-pending) or disqualifying.
+                  </p>
+                  <ul className="space-y-1.5">
+                    {(
+                      ((app as Record<string, unknown>)
+                        .knockout_failed_questions as string[]) ?? []
+                    ).map((prompt, idx) => (
+                      <li
+                        key={idx}
+                        className="text-[13px] text-amber-900 flex items-start gap-2"
+                      >
+                        <span className="text-amber-700 mt-0.5">·</span>
+                        <span className="font-medium">{prompt}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          ) : null}
 
           {/* 05 · Screening responses */}
           <DetailSection

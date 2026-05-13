@@ -166,6 +166,36 @@ export function KanbanCard({
           <PracticeFitChip fit={application.practiceFit} size="sm" />
         </div>
       )}
+      {/* E2.10 — soft-knockout chip(s). Renders the first 2 failed
+          questions truncated; "+N more" overflow when more than 2.
+          Amber tint signals "needs review" without screaming reject. */}
+      {(application.knockoutFailedQuestions ?? []).length > 0 && (
+        <div className="mb-2 flex flex-wrap gap-1">
+          {(application.knockoutFailedQuestions ?? [])
+            .slice(0, 2)
+            .map((prompt, idx) => (
+              <span
+                key={idx}
+                title={`Knockout failed: ${prompt}`}
+                aria-label={`Knockout failed: ${prompt}`}
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-semibold border border-amber-400/60 bg-amber-50 text-amber-900 max-w-full"
+              >
+                <span className="flex-shrink-0">⚠</span>
+                <span className="truncate">
+                  {prompt.length > 32 ? prompt.slice(0, 30) + "…" : prompt}
+                </span>
+              </span>
+            ))}
+          {(application.knockoutFailedQuestions ?? []).length > 2 && (
+            <span
+              className="text-[10px] font-semibold text-amber-900/70 tracking-[0.3px]"
+              title={`${(application.knockoutFailedQuestions ?? []).length - 2} more knockout failures — see application detail`}
+            >
+              +{(application.knockoutFailedQuestions ?? []).length - 2} more
+            </span>
+          )}
+        </div>
+      )}
       <div className="flex items-center justify-between gap-2">
         <span
           className={`text-[9px] font-bold tracking-[1px] uppercase px-1.5 py-0.5 ${heatClasses}`}

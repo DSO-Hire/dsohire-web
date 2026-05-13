@@ -98,7 +98,9 @@ export default async function EditJobPage({ params }: PageProps) {
     supabase.from("job_skills").select("skill").eq("job_id", jobId),
     supabase
       .from("job_screening_questions")
-      .select("id, prompt, helper_text, kind, options, required, sort_order")
+      .select(
+        "id, prompt, helper_text, kind, options, required, sort_order, knockout, knockout_correct_answer"
+      )
       .eq("job_id", jobId)
       .order("sort_order", { ascending: true }),
   ]);
@@ -182,6 +184,8 @@ export default async function EditJobPage({ params }: PageProps) {
       options: Array<{ id: string; label: string }> | null;
       required: boolean;
       sort_order: number;
+      knockout: boolean | null;
+      knockout_correct_answer: unknown | null;
     }>
   ).map((q) => ({
     id: q.id,
@@ -192,6 +196,10 @@ export default async function EditJobPage({ params }: PageProps) {
     options: q.options,
     required: q.required,
     sort_order: q.sort_order,
+    // E2.10 — preload knockout state so the wizard editor pre-fills
+    // when an admin reopens a job to tweak the knockout policy.
+    knockout: q.knockout ?? false,
+    knockout_correct_answer: q.knockout_correct_answer ?? null,
   }));
 
   return (

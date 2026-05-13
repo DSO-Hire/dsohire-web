@@ -114,7 +114,7 @@ export default async function PerJobPipelinePage({
   const { data: rawApps, error: appsErr } = await supabase
     .from("applications")
     .select(
-      "id, job_id, candidate_id, stage_id, created_at, stage_entered_at, pipeline_position"
+      "id, job_id, candidate_id, stage_id, created_at, stage_entered_at, pipeline_position, knockout_failed_questions"
     )
     .eq("job_id", jobId)
     .order("created_at", { ascending: false });
@@ -130,6 +130,7 @@ export default async function PerJobPipelinePage({
     created_at: string;
     stage_entered_at: string;
     pipeline_position: number | null;
+    knockout_failed_questions: string[] | null;
   };
   const apps = (rawApps ?? []) as AppRow[];
 
@@ -256,6 +257,9 @@ export default async function PerJobPipelinePage({
       scorecard_avg: summary?.avg ?? null,
       scorecard_reviewer_count: summary?.reviewers ?? 0,
       practiceFit: fitMap.get(a.candidate_id) ?? null,
+      // E2.10 — soft-knockout chip data. Empty array when the candidate
+      // didn't fail any knockouts.
+      knockoutFailedQuestions: a.knockout_failed_questions ?? [],
     };
   });
 

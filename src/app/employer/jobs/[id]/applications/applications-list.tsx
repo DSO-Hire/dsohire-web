@@ -42,6 +42,11 @@ export interface ApplicationsListItem {
   jobTitle: string;
   /** Practice Fit (Phase 5D) — null when consent off OR not yet computed. */
   practiceFit?: import("@/lib/practice-fit/types").FitResult | null;
+  /**
+   * E2.10 — snapshotted prompts of knockout questions the candidate
+   * failed. Empty array when no failures. Drives the kanban ⚠ chip.
+   */
+  knockoutFailedQuestions?: string[];
 }
 
 interface ApplicationsListProps {
