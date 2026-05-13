@@ -81,8 +81,50 @@ interface PageProps {
     sort?: string;
     /** C1.10 — "Posted within": 24h | 7d | 14d | 30d. Anything else is ignored. */
     posted?: string;
+    /** 5G.b — "practice" (location + regional) or "corporate". Defaults to "practice". */
+    surface?: string;
   }>;
 }
+
+/** 5G.b — surface tab metadata. */
+type JobsSurface = "practice" | "corporate";
+const SURFACE_OPTIONS: Array<{
+  value: JobsSurface;
+  label: string;
+  /** Scopes that belong to this surface. */
+  scopes: ReadonlyArray<"location" | "regional" | "corporate">;
+  /** Heritage on practice; slate-blue on corporate per the locked corporate-roles spec. */
+  activeClasses: string;
+  inactiveClasses: string;
+  chipBgClass: string;
+  emptyHeading: string;
+  emptyBody: string;
+}> = [
+  {
+    value: "practice",
+    label: "Practice Roles",
+    scopes: ["location", "regional"],
+    activeClasses: "bg-heritage-deep text-ivory border-heritage-deep",
+    inactiveClasses: "bg-white text-ink border-[var(--rule-strong)] hover:border-heritage",
+    chipBgClass: "bg-heritage-deep/10 text-heritage-deep",
+    emptyHeading: "No practice roles match these filters.",
+    emptyBody:
+      "Try widening your state, role, or posted-within filters — or browse Corporate Roles for DSO-wide leadership openings.",
+  },
+  {
+    value: "corporate",
+    label: "Corporate Roles",
+    scopes: ["corporate"],
+    // Slate-blue accent per the spec — visually distinct from practice without
+    // departing from the brand palette.
+    activeClasses: "bg-[#3D5266] text-ivory border-[#3D5266]",
+    inactiveClasses: "bg-white text-ink border-[var(--rule-strong)] hover:border-[#3D5266]",
+    chipBgClass: "bg-[#3D5266]/10 text-[#3D5266]",
+    emptyHeading: "No corporate roles open right now.",
+    emptyBody:
+      "DSO-wide leadership openings (CEO, CFO, regional director, etc.) post here. Check back — or browse Practice Roles for chairside + office hires.",
+  },
+];
 
 /** Map URL chip values to integer days for the RPC's posted_within_days arg. */
 const POSTED_FILTER_OPTIONS = [
@@ -123,10 +165,35 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
   // Apply candidate-side sort. RPC returns a relevance-blended order; for
   // anything other than the default we re-sort the slice in memory. Always
   // bound to the top 60 first so the comparator runs over a small set.
-  const jobs = sortJobsList(
+  const allJobs = sortJobsList(
     ((rawJobs ?? []) as JobRow[]).slice(0, 60),
     sortKey
   );
+
+  // 5G.b — split into Practice (scope ∈ location, regional) vs Corporate
+  // (scope = corporate) buckets. Surface counts always reflect the
+  // CURRENT filter state so a candidate widening filters sees the count
+  // bump on both tabs.
+  const activeSurface: JobsSurface =
+    sp.surface === "corporate" ? "corporate" : "practice";
+  const activeSurfaceConfig =
+    SURFACE_OPTIONS.find((s) => s.value === activeSurface) ?? SURFACE_OPTIONS[0]!;
+  const practiceScopes = new Set<string>(SURFACE_OPTIONS[0]!.scopes);
+  const corporateScopes = new Set<string>(SURFACE_OPTIONS[1]!.scopes);
+  const practiceJobs = allJobs.filter((j) =>
+    practiceScopes.has((j.scope as string) ?? "location")
+  );
+  const corporateJobs = allJobs.filter((j) =>
+    corporateScopes.has((j.scope as string) ?? "location")
+  );
+  const jobs = activeSurface === "corporate" ? corporateJobs : practiceJobs;
+  const practiceCount = practiceJobs.length;
+  const corporateCount = corporateJobs.length;
+
+  // Map view is Practice-only — corporate jobs may have 0 anchor
+  // locations and the map is meaningless without coords. Force list view
+  // when on the Corporate tab even if ?view=map is in the URL.
+  const allowMap = activeSurface === "practice";
 
   // Pull DSO names + locations for the cards in one batch
   const dsoIds = Array.from(new Set(jobs.map((j) => j.dso_id)));
@@ -236,7 +303,8 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
   }
 
   const mapLocations = Array.from(dedupedLocations.values());
-  const showMap = sp.view === "map";
+  // 5G.b — map view forced off when on the Corporate tab.
+  const showMap = sp.view === "map" && allowMap;
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? null;
 
   // Resolve each job's displayed employer name for the public viewer
@@ -312,6 +380,23 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
   if (sp.employment) filterParams.push(["employment", sp.employment]);
   if (sp.category) filterParams.push(["category", sp.category]);
   if (postedFilterValue) filterParams.push(["posted", postedFilterValue]);
+  // 5G.b — surface lives in filterParams too so tab state survives any
+  // view toggle / sort change / filter submit. Practice is default, so
+  // we only push when explicitly on Corporate.
+  if (activeSurface === "corporate") filterParams.push(["surface", "corporate"]);
+
+  /** 5G.b — Build an href that switches to a given surface, preserving filters. */
+  const buildSurfaceHref = (surface: JobsSurface): string => {
+    const params: Array<[string, string]> = [];
+    if (sp.q) params.push(["q", sp.q]);
+    if (sp.state) params.push(["state", sp.state]);
+    if (sp.employment) params.push(["employment", sp.employment]);
+    if (sp.category) params.push(["category", sp.category]);
+    if (postedFilterValue) params.push(["posted", postedFilterValue]);
+    if (sortKey !== "newest") params.push(["sort", sortKey]);
+    if (surface === "corporate") params.push(["surface", "corporate"]);
+    return buildHref("/jobs", params);
+  };
 
   /** Build an href that toggles the posted filter chip on or off. */
   const buildPostedHref = (value: PostedFilterValue | null): string => {
@@ -358,10 +443,46 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
           </Link>
         </p>
 
+        {/* 5G.b — Surface tabs: Practice Roles | Corporate Roles. Two tabs
+            with live counts; visual accent (heritage vs slate-blue) makes
+            the two surfaces distinct at-a-glance. Lives above the search
+            form so the candidate picks which world they're shopping
+            before filters apply. */}
+        <div className="mt-12 flex flex-wrap items-center gap-2">
+          {SURFACE_OPTIONS.map((surface) => {
+            const isActive = surface.value === activeSurface;
+            const count =
+              surface.value === "practice" ? practiceCount : corporateCount;
+            return (
+              <Link
+                key={surface.value}
+                href={buildSurfaceHref(surface.value)}
+                aria-current={isActive ? "page" : undefined}
+                className={
+                  "inline-flex items-center gap-2 px-5 py-2.5 text-[13px] font-bold tracking-[1.5px] uppercase border transition-colors " +
+                  (isActive ? surface.activeClasses : surface.inactiveClasses)
+                }
+              >
+                {surface.label}
+                <span
+                  className={
+                    "inline-flex items-center justify-center min-w-[24px] h-[20px] px-1.5 text-[11px] font-extrabold tracking-[0.5px] " +
+                    (isActive
+                      ? "bg-ivory/15 text-ivory"
+                      : surface.chipBgClass)
+                  }
+                >
+                  {count}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+
         {/* Search bar */}
         <form
           method="get"
-          className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_auto] gap-px bg-[var(--rule)] border border-[var(--rule)] bg-white"
+          className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_auto] gap-px bg-[var(--rule)] border border-[var(--rule)] bg-white"
           style={{ boxShadow: "0 10px 30px -16px rgba(7,15,28,0.14)" }}
         >
           {showMap && <input type="hidden" name="view" value="map" />}
@@ -370,6 +491,11 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
               keyword/role/state/employment via the search bar. */}
           {postedFilterValue && (
             <input type="hidden" name="posted" value={postedFilterValue} />
+          )}
+          {/* 5G.b — keep the active surface alive when the user re-submits
+              the search/filter form. */}
+          {activeSurface === "corporate" && (
+            <input type="hidden" name="surface" value="corporate" />
           )}
           <SearchField
             label="Keyword"
@@ -487,33 +613,36 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
               />
             )}
 
-            {/* List/Map toggle */}
-            <div className="inline-flex border border-[var(--rule-strong)]">
+            {/* List/Map toggle — 5G.b: hidden on Corporate tab (map is
+                meaningless without practice coords). */}
+            {allowMap && (
+              <div className="inline-flex border border-[var(--rule-strong)]">
+                <Link
+                  href={listViewHref}
+                className={`inline-flex items-center gap-2 px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors ${
+                  showMap
+                    ? "bg-cream text-slate-body hover:text-ink"
+                    : "bg-ink text-ivory"
+                }`}
+                aria-current={showMap ? undefined : "page"}
+              >
+                <List className="h-3.5 w-3.5" />
+                List
+              </Link>
               <Link
-                href={listViewHref}
-              className={`inline-flex items-center gap-2 px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors ${
-                showMap
-                  ? "bg-cream text-slate-body hover:text-ink"
-                  : "bg-ink text-ivory"
-              }`}
-              aria-current={showMap ? undefined : "page"}
-            >
-              <List className="h-3.5 w-3.5" />
-              List
-            </Link>
-            <Link
-              href={mapViewHref}
-              className={`inline-flex items-center gap-2 px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors border-l border-[var(--rule-strong)] ${
-                showMap
-                  ? "bg-ink text-ivory"
-                  : "bg-cream text-slate-body hover:text-ink"
-              }`}
-              aria-current={showMap ? "page" : undefined}
-            >
-              <MapIcon className="h-3.5 w-3.5" />
-              Map
-            </Link>
-          </div>
+                href={mapViewHref}
+                className={`inline-flex items-center gap-2 px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors border-l border-[var(--rule-strong)] ${
+                  showMap
+                    ? "bg-ink text-ivory"
+                    : "bg-cream text-slate-body hover:text-ink"
+                }`}
+                aria-current={showMap ? "page" : undefined}
+              >
+                <MapIcon className="h-3.5 w-3.5" />
+                Map
+              </Link>
+            </div>
+            )}
           </div>
         </div>
 
@@ -522,12 +651,14 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
           <JobsMap locations={mapLocations} mapboxToken={mapboxToken} />
         ) : /* LIST VIEW */ jobs.length === 0 ? (
           <div className="border border-[var(--rule)] bg-cream p-12 text-center max-w-[640px] mx-auto">
-            <p className="text-[15px] text-ink leading-relaxed mb-4">
-              We don&apos;t have any jobs matching that search yet. The platform
-              is in early launch — verified DSOs are onboarding through summer 2026.
+            <h3 className="text-[18px] font-extrabold tracking-[-0.4px] text-ink mb-2">
+              {activeSurfaceConfig.emptyHeading}
+            </h3>
+            <p className="text-[14px] text-slate-body leading-relaxed mb-4">
+              {activeSurfaceConfig.emptyBody}
             </p>
-            <p className="text-[14px] text-slate-body leading-relaxed">
-              Check back soon, or{" "}
+            <p className="text-[13px] text-slate-meta leading-relaxed">
+              Or{" "}
               <Link
                 href="/candidate/sign-up"
                 className="text-heritage underline underline-offset-2 hover:text-heritage-deep font-semibold"
@@ -572,6 +703,8 @@ interface JobRow {
   compensation_period: string | null;
   compensation_visible: boolean;
   posted_at: string | null;
+  /** 5G.b — drives Practice vs Corporate surface filter. */
+  scope: "location" | "regional" | "corporate";
 }
 
 function JobCard({
