@@ -90,25 +90,33 @@ export default async function EditCorporateJobPage({ params }: PageProps) {
     redirect(`/employer/jobs/${jobId}/edit`);
   }
 
-  const [{ data: locations }, { data: jobLocations }, { data: rawQuestions }] =
-    await Promise.all([
-      supabase
-        .from("dso_locations")
-        .select("id, name, city, state")
-        .eq("dso_id", dsoUser.dso_id)
-        .order("name"),
-      supabase
-        .from("job_locations")
-        .select("location_id")
-        .eq("job_id", jobId),
-      supabase
-        .from("job_screening_questions")
-        .select(
-          "id, prompt, helper_text, kind, options, required, sort_order, knockout, knockout_correct_answer"
-        )
-        .eq("job_id", jobId)
-        .order("sort_order", { ascending: true }),
-    ]);
+  const [
+    { data: locations },
+    { data: jobLocations },
+    { data: rawQuestions },
+    { data: jobVerifications },
+  ] = await Promise.all([
+    supabase
+      .from("dso_locations")
+      .select("id, name, city, state")
+      .eq("dso_id", dsoUser.dso_id)
+      .order("name"),
+    supabase
+      .from("job_locations")
+      .select("location_id")
+      .eq("job_id", jobId),
+    supabase
+      .from("job_screening_questions")
+      .select(
+        "id, prompt, helper_text, kind, options, required, sort_order, knockout, knockout_correct_answer"
+      )
+      .eq("job_id", jobId)
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("job_verification_requirements")
+      .select("verification_type")
+      .eq("job_id", jobId),
+  ]);
 
   const locationOptions: LocationOption[] = (locations ?? []).map((l) => ({
     id: l.id as string,
@@ -173,6 +181,10 @@ export default async function EditCorporateJobPage({ params }: PageProps) {
     bonus_structure: (job.bonus_structure as string | null) ?? null,
     equity_offered: (job.equity_offered as boolean | null) ?? false,
     equity_note: (job.equity_note as string | null) ?? null,
+    // 5G.e Tier 2 — verification requirements.
+    verification_requirements: (
+      (jobVerifications ?? []) as Array<{ verification_type: string }>
+    ).map((v) => v.verification_type),
   };
 
   const initialQuestions: WizardScreeningQuestion[] = (

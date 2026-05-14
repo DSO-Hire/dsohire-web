@@ -20,6 +20,10 @@
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { recordAuditEvent } from "@/lib/audit/record";
+import {
+  VERIFICATION_TYPE_VALUES,
+  type VerificationTypeValue,
+} from "@/lib/verifications/types";
 
 /* ───── Screening-question payload shape ───── */
 
@@ -225,4 +229,50 @@ export async function resolveAvailableJobSlug(
     if (!clash) return candidate;
   }
   return `${baseSlug}-${Math.floor(Math.random() * 100000)}`;
+}
+
+/* ───── Verification requirements (5G.e Tier 2) ───── */
+
+/**
+ * Read the `verification_requirements` multi-value form field and return
+ * only the valid, deduped verification-type slugs. The wizard appends one
+ * entry per ticked checkbox; anything not in the canonical list is dropped.
+ */
+export function parseVerificationRequirements(
+  formData: FormData
+): VerificationTypeValue[] {
+  const raw = formData.getAll("verification_requirements").map((v) => String(v));
+  const out: VerificationTypeValue[] = [];
+  const seen = new Set<string>();
+  for (const v of raw) {
+    if (
+      (VERIFICATION_TYPE_VALUES as ReadonlyArray<string>).includes(v) &&
+      !seen.has(v)
+    ) {
+      seen.add(v);
+      out.push(v as VerificationTypeValue);
+    }
+  }
+  return out;
+}
+
+/**
+ * Replace a job's verification requirements to match `types` — delete-all
+ * then insert, the same sync strategy used for job_locations / job_skills.
+ * Safe to call with an empty array (clears all requirements).
+ */
+export async function syncJobVerificationRequirements(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  jobId: string,
+  types: VerificationTypeValue[]
+): Promise<void> {
+  await supabase
+    .from("job_verification_requirements")
+    .delete()
+    .eq("job_id", jobId);
+  if (types.length > 0) {
+    await supabase.from("job_verification_requirements").insert(
+      types.map((t) => ({ job_id: jobId, verification_type: t }))
+    );
+  }
 }

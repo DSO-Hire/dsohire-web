@@ -79,6 +79,8 @@ import {
 import { JdGeneratorCorporatePanel } from "./jd-generator-corporate-panel";
 import { CorporateRecommendedQuestionsPanel } from "./corporate-recommended-questions-panel";
 import { CompensationSection } from "./compensation-section";
+import { VerificationRequirements } from "./verification-requirements";
+import type { VerificationTypeValue } from "@/lib/verifications/types";
 
 /* ───── Types ───── */
 
@@ -188,6 +190,8 @@ export interface CorporateWizardInitial {
   bonus_structure: string | null;
   equity_offered: boolean;
   equity_note: string | null;
+  // 5G.e Tier 2 — verification requirements (job_verification_requirements).
+  verification_requirements: string[];
 }
 
 interface CorporateWizardProps {
@@ -335,6 +339,20 @@ export function CorporateJobWizard({
   );
   const [equityNote, setEquityNote] = useState(initial?.equity_note ?? "");
 
+  // 5G.e Tier 2 — verification requirements. Held as a Set<string>, mirroring
+  // selectedLocationIds / remoteStates.
+  const [verificationRequirements, setVerificationRequirements] = useState<
+    Set<string>
+  >(new Set(initial?.verification_requirements ?? []));
+  const toggleVerificationRequirement = (value: VerificationTypeValue) => {
+    setVerificationRequirements((prev) => {
+      const next = new Set(prev);
+      if (next.has(value)) next.delete(value);
+      else next.add(value);
+      return next;
+    });
+  };
+
   const [externalLinks, setExternalLinks] = useState<ExternalLinkPair[]>(
     initial?.external_links ?? []
   );
@@ -411,6 +429,7 @@ export function CorporateJobWizard({
         bonusStructure,
         equityOffered,
         equityNote,
+        verificationRequirements: [...verificationRequirements],
         externalLinks,
         requirements,
         hideStagesFromCandidate,
@@ -459,6 +478,7 @@ export function CorporateJobWizard({
     bonusStructure,
     equityOffered,
     equityNote,
+    verificationRequirements,
     externalLinks,
     requirements,
     hideStagesFromCandidate,
@@ -506,6 +526,9 @@ export function CorporateJobWizard({
       setBonusStructure((d.bonusStructure as string) ?? "");
       setEquityOffered(Boolean(d.equityOffered));
       setEquityNote((d.equityNote as string) ?? "");
+      setVerificationRequirements(
+        new Set((d.verificationRequirements as string[]) ?? [])
+      );
       setExternalLinks(
         Array.isArray(d.externalLinks)
           ? (d.externalLinks as ExternalLinkPair[])
@@ -691,6 +714,12 @@ export function CorporateJobWizard({
     formData.set("requirements", requirements);
     if (hideStagesFromCandidate)
       formData.set("hide_stages_from_candidate", "on");
+
+    // 5G.e Tier 2 — verification requirements. One entry per ticked type;
+    // IDENTICAL contract to the practice side.
+    for (const v of verificationRequirements)
+      formData.append("verification_requirements", v);
+
     formData.set("status", status);
     formData.set(
       "screening_questions",
@@ -872,6 +901,8 @@ export function CorporateJobWizard({
             onRequirements={setRequirements}
             hideStagesFromCandidate={hideStagesFromCandidate}
             onHideStagesFromCandidate={setHideStagesFromCandidate}
+            verificationRequirements={verificationRequirements}
+            onToggleVerificationRequirement={toggleVerificationRequirement}
           />
         )}
 
@@ -1310,6 +1341,8 @@ function DetailsStep({
   onRequirements,
   hideStagesFromCandidate,
   onHideStagesFromCandidate,
+  verificationRequirements,
+  onToggleVerificationRequirement,
 }: {
   compType: CompensationType;
   onCompType: (v: CompensationType) => void;
@@ -1367,6 +1400,8 @@ function DetailsStep({
   onRequirements: (v: string) => void;
   hideStagesFromCandidate: boolean;
   onHideStagesFromCandidate: (v: boolean) => void;
+  verificationRequirements: Set<string>;
+  onToggleVerificationRequirement: (value: VerificationTypeValue) => void;
 }) {
   const [reportingOpen, setReportingOpen] = useState(
     Boolean(reportsTo || directReportsBand || indirectReportsBand)
@@ -1748,6 +1783,13 @@ function DetailsStep({
           </div>
         </label>
       </fieldset>
+
+      {/* ── Verification requirements (5G.e Tier 2) ── */}
+      <VerificationRequirements
+        accent="corporate"
+        selected={verificationRequirements}
+        onToggle={onToggleVerificationRequirement}
+      />
     </div>
   );
 }

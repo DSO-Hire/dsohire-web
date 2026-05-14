@@ -76,6 +76,8 @@ import {
 } from "../../../job-wizard";
 import { ExternalLinksField } from "@/components/external-links-field";
 import { CompensationSection } from "../../../compensation-section";
+import { VerificationRequirements } from "../../../verification-requirements";
+import type { VerificationTypeValue } from "@/lib/verifications/types";
 import { CORPORATE_FUNCTIONS } from "@/lib/corporate/functions";
 import {
   WORK_MODES,
@@ -173,6 +175,8 @@ export interface CorporateEditSectionsInitial {
   bonus_structure: string | null;
   equity_offered: boolean;
   equity_note: string | null;
+  // 5G.e Tier 2 — verification requirements.
+  verification_requirements: string[];
 }
 
 interface CorporateEditSectionsProps {
@@ -831,6 +835,11 @@ function DetailsSection({
   const [hideStages, setHideStages] = useState(
     initial.hide_stages_from_candidate
   );
+  // 5G.e Tier 2 — verification requirements. Held as a Set<string>, mirroring
+  // remoteStates.
+  const [verificationRequirements, setVerificationRequirements] = useState<
+    Set<string>
+  >(new Set(initial.verification_requirements));
   const [reportingOpen, setReportingOpen] = useState(
     Boolean(
       initial.reports_to ||
@@ -844,6 +853,9 @@ function DetailsSection({
   const savedWorkMode = initial.work_mode ?? "";
 
   const remoteStatesKey = [...remoteStates].sort().join(",");
+  const verificationRequirementsKey = [...verificationRequirements]
+    .sort()
+    .join(",");
   const initialSnapshot = {
     compType: initial.compensation_type,
     compMin:
@@ -887,6 +899,9 @@ function DetailsSection({
     externalLinksKey: JSON.stringify(initial.external_links),
     requirements: initial.requirements ?? "",
     hideStages: initial.hide_stages_from_candidate,
+    verificationRequirementsKey: [...initial.verification_requirements]
+      .sort()
+      .join(","),
   };
   const [snapshot, setSnapshot] = useState(initialSnapshot);
 
@@ -921,7 +936,8 @@ function DetailsSection({
     equityNote !== snapshot.equityNote ||
     externalLinksKey !== snapshot.externalLinksKey ||
     requirements !== snapshot.requirements ||
-    hideStages !== snapshot.hideStages;
+    hideStages !== snapshot.hideStages ||
+    verificationRequirementsKey !== snapshot.verificationRequirementsKey;
 
   const touch = () => setSaved(false);
 
@@ -994,6 +1010,10 @@ function DetailsSection({
       fd.append("external_link_url", link.url);
     }
     fd.set("external_links_submitted", "1");
+    // 5G.e Tier 2 — verification requirements. One entry per ticked type;
+    // IDENTICAL contract to the practice side + the corporate wizard.
+    for (const v of verificationRequirements)
+      fd.append("verification_requirements", v);
 
     startTransition(async () => {
       const result: JobActionState = await updateCorporateJobDetailsSection(
@@ -1031,6 +1051,7 @@ function DetailsSection({
         externalLinksKey,
         requirements,
         hideStages,
+        verificationRequirementsKey,
       });
       setSaved(true);
     });
@@ -1443,6 +1464,21 @@ function DetailsSection({
             </div>
           </label>
         </fieldset>
+
+        {/* ── Verification requirements (5G.e Tier 2) ── */}
+        <VerificationRequirements
+          accent="corporate"
+          selected={verificationRequirements}
+          onToggle={(value: VerificationTypeValue) => {
+            setVerificationRequirements((prev) => {
+              const next = new Set(prev);
+              if (next.has(value)) next.delete(value);
+              else next.add(value);
+              return next;
+            });
+            touch();
+          }}
+        />
       </div>
       <SaveBar
         dirty={dirty}

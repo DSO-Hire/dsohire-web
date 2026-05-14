@@ -47,6 +47,8 @@ import {
   parseExternalLinks,
   emitJobAuditEvent,
   resolveAvailableJobSlug,
+  parseVerificationRequirements,
+  syncJobVerificationRequirements,
   type ScreeningQuestionPayload,
 } from "./job-shared";
 
@@ -176,6 +178,14 @@ export async function createJob(
       };
     }
   }
+
+  // 5G.e Tier 2 — verification requirements. Delete-all + insert sync,
+  // same strategy as job_locations / job_skills above.
+  await syncJobVerificationRequirements(
+    supabase,
+    job.id as string,
+    parseVerificationRequirements(formData)
+  );
 
   // Audit log (Phase 4.5.e). Must run BEFORE redirect — redirect() throws
   // and would skip the await.
@@ -366,6 +376,14 @@ export async function updateJob(
       };
     }
   }
+
+  // 5G.e Tier 2 — replace verification requirements. Delete-all + insert
+  // sync, same strategy as job_locations / job_skills above.
+  await syncJobVerificationRequirements(
+    supabase,
+    jobId,
+    parseVerificationRequirements(formData)
+  );
 
   // Revalidate the public job page so candidates see the updated questions.
   revalidatePath(`/jobs/${jobId}`);
@@ -686,6 +704,14 @@ export async function updateJobDetailsSection(
       skills.map((skill) => ({ job_id: jobId, skill }))
     );
   }
+
+  // 5G.e Tier 2 — replace verification requirements. Delete-all + insert
+  // sync, same strategy as job_skills above.
+  await syncJobVerificationRequirements(
+    supabase,
+    jobId,
+    parseVerificationRequirements(formData)
+  );
 
   revalidatePath(`/jobs/${jobId}`);
   revalidatePath(`/employer/jobs/${jobId}/edit`);

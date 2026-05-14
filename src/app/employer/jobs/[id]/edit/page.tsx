@@ -96,6 +96,7 @@ export default async function EditJobPage({ params }: PageProps) {
     { data: jobLocations },
     { data: jobSkills },
     { data: rawQuestions },
+    { data: jobVerifications },
   ] = await Promise.all([
     supabase
       .from("dso_locations")
@@ -111,6 +112,11 @@ export default async function EditJobPage({ params }: PageProps) {
       )
       .eq("job_id", jobId)
       .order("sort_order", { ascending: true }),
+    // 5G.e Tier 2 — verification requirements for this job.
+    supabase
+      .from("job_verification_requirements")
+      .select("verification_type")
+      .eq("job_id", jobId),
   ]);
 
   const locationOptions: LocationOption[] = (locations ?? []).map((l) => ({
@@ -181,6 +187,10 @@ export default async function EditJobPage({ params }: PageProps) {
     external_links: (((job as Record<string, unknown>).external_links as
       | Array<{ label: string; url: string }>
       | null) ?? []) as Array<{ label: string; url: string }>,
+    // 5G.e Tier 2 — verification requirements.
+    verification_requirements: (
+      (jobVerifications ?? []) as Array<{ verification_type: string }>
+    ).map((v) => v.verification_type),
   };
 
   // Load attachments + active subscription tier in parallel with the

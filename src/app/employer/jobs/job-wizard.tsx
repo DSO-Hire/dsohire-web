@@ -43,6 +43,8 @@ import {
   type ExternalLinkPair,
 } from "@/components/external-links-field";
 import { CompensationSection } from "./compensation-section";
+import { VerificationRequirements } from "./verification-requirements";
+import type { VerificationTypeValue } from "@/lib/verifications/types";
 import {
   getAllDentalSkills,
   BENEFITS,
@@ -186,6 +188,8 @@ export interface JobWizardInitial {
   bonus_structure: string | null;
   equity_offered: boolean;
   equity_note: string | null;
+  // 5G.e Tier 2 (2026-05-14) — verification requirements the role needs.
+  verification_requirements: string[];
 }
 
 export const SCOPE_OPTIONS: Array<{
@@ -442,6 +446,19 @@ export function JobWizard({
   const [scheduleWeekends, setScheduleWeekends] = useState(
     Boolean(initial?.schedule_weekends)
   );
+  // 5G.e Tier 2 — verification requirements. Held as a Set<string>,
+  // mirroring selectedLocationIds / specialty / scheduleDays.
+  const [verificationRequirements, setVerificationRequirements] = useState<
+    Set<string>
+  >(new Set(initial?.verification_requirements ?? []));
+  function toggleVerificationRequirement(value: VerificationTypeValue) {
+    setVerificationRequirements((prev) => {
+      const next = new Set(prev);
+      if (next.has(value)) next.delete(value);
+      else next.add(value);
+      return next;
+    });
+  }
 
   const [error, setError] = useState<string | null>(null);
 
@@ -508,6 +525,7 @@ export function JobWizard({
         scheduleDays: [...scheduleDays],
         scheduleEvenings,
         scheduleWeekends,
+        verificationRequirements: [...verificationRequirements],
         externalLinks,
         corporateFunction,
         stepIdx,
@@ -552,6 +570,7 @@ export function JobWizard({
     scheduleDays,
     scheduleEvenings,
     scheduleWeekends,
+    verificationRequirements,
     stepIdx,
   ]);
 
@@ -597,6 +616,11 @@ export function JobWizard({
       setScheduleDays(new Set(((d.scheduleDays as string[]) ?? [])));
       setScheduleEvenings(Boolean(d.scheduleEvenings));
       setScheduleWeekends(Boolean(d.scheduleWeekends));
+      // 5G.e Tier 2 — restore verification requirements. Defensive
+      // default for older drafts that didn't carry the key.
+      setVerificationRequirements(
+        new Set(((d.verificationRequirements as string[]) ?? []))
+      );
       // E1.12 Slice B + 5G.c — restore from draft. Defensive defaults
       // for older drafts that didn't carry these keys.
       setExternalLinks(
@@ -771,6 +795,11 @@ export function JobWizard({
     // server action read getAll() and avoid comma-split parsing.
     for (const s of skills) formData.append("skills", s);
     for (const b of benefits) formData.append("benefits", b);
+    // 5G.e Tier 2 — one repeated entry per ticked verification type.
+    // Server's parseVerificationRequirements reads via getAll() + validates.
+    for (const v of verificationRequirements) {
+      formData.append("verification_requirements", v);
+    }
     formData.set("requirements", requirements);
     formData.set("status", status);
     formData.set(
@@ -960,6 +989,8 @@ export function JobWizard({
             onScheduleWeekends={setScheduleWeekends}
             externalLinks={externalLinks}
             onExternalLinks={setExternalLinks}
+            verificationRequirements={verificationRequirements}
+            onToggleVerificationRequirement={toggleVerificationRequirement}
           />
         )}
 
@@ -1419,6 +1450,8 @@ function DetailsStep({
   onScheduleWeekends,
   externalLinks,
   onExternalLinks,
+  verificationRequirements,
+  onToggleVerificationRequirement,
 }: {
   compType: CompensationType;
   onCompType: (v: CompensationType) => void;
@@ -1469,6 +1502,8 @@ function DetailsStep({
   onScheduleWeekends: (v: boolean) => void;
   externalLinks: ExternalLinkPair[];
   onExternalLinks: (v: ExternalLinkPair[]) => void;
+  verificationRequirements: Set<string>;
+  onToggleVerificationRequirement: (v: VerificationTypeValue) => void;
 }) {
   return (
     <div className="space-y-7">
@@ -1667,6 +1702,15 @@ function DetailsStep({
         placeholder={"DDS or DMD\nActive state license\nComfortable with implant cases"}
         value={requirements}
         onChange={onRequirements}
+      />
+
+      {/* 5G.e Tier 2 — verification requirements checklist. Shared
+          component, mounted as its own fieldset after Requirements /
+          external links. */}
+      <VerificationRequirements
+        accent="heritage"
+        selected={verificationRequirements}
+        onToggle={onToggleVerificationRequirement}
       />
 
       {/* Candidate visibility — escape-hatch toggle for sensitive roles. We

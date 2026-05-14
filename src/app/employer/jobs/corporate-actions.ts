@@ -94,6 +94,12 @@
  *   external_link_label            repeated string \ paired by index into
  *   external_link_url              repeated string / { label, url } rows
  *                                    via the shared parseExternalLinks
+ *   verification_requirements      repeated string — one entry per ticked
+ *                                    verification type (5G.e Tier 2);
+ *                                    parsed by the shared
+ *                                    parseVerificationRequirements (invalid
+ *                                    slugs dropped), synced into
+ *                                    job_verification_requirements
  *
  * Sentinel fields:
  *   external_links_submitted       "1" when the form included an external-
@@ -148,6 +154,8 @@ import {
   parseExternalLinks,
   emitJobAuditEvent,
   resolveAvailableJobSlug,
+  parseVerificationRequirements,
+  syncJobVerificationRequirements,
   type ScreeningQuestionPayload,
 } from "./job-shared";
 // Reuse the practice wizard's JobActionState verbatim — the corporate
@@ -698,6 +706,13 @@ export async function createCorporateJob(
     await supabase.from("job_locations").insert(locationRows);
   }
 
+  // 5G.e Tier 2 — verification requirements (delete-all + insert).
+  await syncJobVerificationRequirements(
+    supabase,
+    job.id as string,
+    parseVerificationRequirements(formData)
+  );
+
   // Insert screening questions (create mode — all rows are new).
   if (parsed.screeningQuestions.length > 0) {
     const rows = parsed.screeningQuestions.map((q) => ({
@@ -812,6 +827,13 @@ export async function updateCorporateJob(
       }))
     );
   }
+
+  // 5G.e Tier 2 — replace verification requirements (delete-all + insert).
+  await syncJobVerificationRequirements(
+    supabase,
+    jobId,
+    parseVerificationRequirements(formData)
+  );
 
   // Sync screening questions (same strategy as updateJob).
   await syncScreeningQuestions(supabase, jobId, parsed.screeningQuestions);
@@ -1109,6 +1131,13 @@ export async function updateCorporateJobDetailsSection(
     .eq("id", jobId)
     .eq("dso_id", dsoId);
   if (updateError) return { ok: false, error: updateError.message };
+
+  // 5G.e Tier 2 — replace verification requirements (delete-all + insert).
+  await syncJobVerificationRequirements(
+    supabase,
+    jobId,
+    parseVerificationRequirements(formData)
+  );
 
   revalidatePath(`/jobs/${jobId}`);
   revalidatePath(`/employer/jobs/${jobId}/edit`);

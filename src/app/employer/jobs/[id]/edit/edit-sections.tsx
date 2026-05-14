@@ -47,6 +47,8 @@ import { ChipArrayInput } from "@/app/candidate/profile/edit-sheet";
 import { CORPORATE_FUNCTIONS } from "@/lib/corporate/functions";
 import { ExternalLinksField } from "@/components/external-links-field";
 import { CompensationSection } from "../../compensation-section";
+import { VerificationRequirements } from "../../verification-requirements";
+import type { VerificationTypeValue } from "@/lib/verifications/types";
 import {
   getAllDentalSkills,
   BENEFITS,
@@ -152,6 +154,8 @@ export interface EditSectionsInitial {
   corporate_function: string | null;
   // E1.12 Slice B (2026-05-13) — external links {label,url} pairs.
   external_links: Array<{ label: string; url: string }>;
+  // 5G.e Tier 2 (2026-05-14) — verification requirements the role needs.
+  verification_requirements: string[];
 }
 
 interface EditSectionsProps {
@@ -216,6 +220,7 @@ export function EditSections({
         initialScheduleEvenings={initial.schedule_evenings}
         initialScheduleWeekends={initial.schedule_weekends}
         initialExternalLinks={initial.external_links}
+        initialVerificationRequirements={initial.verification_requirements}
       />
       <ScreeningSection
         dsoId={dsoId}
@@ -746,6 +751,7 @@ function DetailsSection({
   initialScheduleEvenings,
   initialScheduleWeekends,
   initialExternalLinks,
+  initialVerificationRequirements,
 }: {
   dsoId: string;
   jobId: string;
@@ -773,6 +779,7 @@ function DetailsSection({
   initialScheduleEvenings: boolean;
   initialScheduleWeekends: boolean;
   initialExternalLinks: Array<{ label: string; url: string }>;
+  initialVerificationRequirements: string[];
 }) {
   // v1.8 — comp type drives input shape.
   const [compType, setCompType] = useState<
@@ -836,8 +843,16 @@ function DetailsSection({
   // E1.12 Slice B — external links state.
   const [externalLinks, setExternalLinks] =
     useState<Array<{ label: string; url: string }>>(initialExternalLinks);
+  // 5G.e Tier 2 — verification requirements as a Set<string>, mirroring
+  // the specialty / scheduleDays chip-toggle ergonomics.
+  const [verificationRequirements, setVerificationRequirements] = useState<
+    Set<string>
+  >(new Set(initialVerificationRequirements));
 
   const initialSpecialtyKey = [...initialSpecialty].sort().join(",");
+  const initialVerificationKey = [...initialVerificationRequirements]
+    .sort()
+    .join(",");
   const initialScheduleDaysKey = [...initialScheduleDays].sort().join(",");
   const initialSnapshot = {
     compType: initialCompType,
@@ -874,6 +889,7 @@ function DetailsSection({
     scheduleEvenings: initialScheduleEvenings,
     scheduleWeekends: initialScheduleWeekends,
     externalLinksKey: JSON.stringify(initialExternalLinks),
+    verificationKey: initialVerificationKey,
   };
   const [snapshot, setSnapshot] = useState(initialSnapshot);
 
@@ -886,6 +902,7 @@ function DetailsSection({
   const benefitsKey = [...benefits].sort().join("|");
   const scheduleDaysKey = [...scheduleDays].sort().join(",");
   const externalLinksKey = JSON.stringify(externalLinks);
+  const verificationKey = [...verificationRequirements].sort().join(",");
   const dirty =
     compType !== snapshot.compType ||
     compMin !== snapshot.compMin ||
@@ -909,7 +926,8 @@ function DetailsSection({
     scheduleDaysKey !== snapshot.scheduleDaysKey ||
     scheduleEvenings !== snapshot.scheduleEvenings ||
     scheduleWeekends !== snapshot.scheduleWeekends ||
-    externalLinksKey !== snapshot.externalLinksKey;
+    externalLinksKey !== snapshot.externalLinksKey ||
+    verificationKey !== snapshot.verificationKey;
 
   const touch = () => setSaved(false);
 
@@ -968,6 +986,11 @@ function DetailsSection({
       fd.append("external_link_url", link.url);
     }
     fd.set("external_links_submitted", "1");
+    // 5G.e Tier 2 — one repeated entry per ticked verification type.
+    // Same FormData field name + shape the wizard emits.
+    for (const v of verificationRequirements) {
+      fd.append("verification_requirements", v);
+    }
 
     startTransition(async () => {
       const result: JobActionState = await updateJobDetailsSection(
@@ -1002,6 +1025,7 @@ function DetailsSection({
         scheduleEvenings,
         scheduleWeekends,
         externalLinksKey,
+        verificationKey,
       });
       setSaved(true);
     });
@@ -1258,6 +1282,22 @@ function DetailsSection({
           value={requirements}
           onChange={(v) => {
             setRequirements(v);
+            touch();
+          }}
+        />
+
+        {/* 5G.e Tier 2 — verification requirements checklist. Shared
+            component, same surface as the wizard's Details step. */}
+        <VerificationRequirements
+          accent="heritage"
+          selected={verificationRequirements}
+          onToggle={(value: VerificationTypeValue) => {
+            setVerificationRequirements((prev) => {
+              const next = new Set(prev);
+              if (next.has(value)) next.delete(value);
+              else next.add(value);
+              return next;
+            });
             touch();
           }}
         />
