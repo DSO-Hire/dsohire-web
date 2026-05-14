@@ -83,22 +83,48 @@ export interface CandidateCredential {
   label: string;
 }
 
-/** A previously-saved application_verifications row (edit/re-apply rehydration). */
+/** One linked profile credential on a previously-saved verification. */
+export interface ExistingVerificationCredential {
+  source: CandidateCredential["source"];
+  id: string;
+}
+
+/**
+ * A previously-saved application_verifications row (edit/re-apply
+ * rehydration). 5G.e Tier 2 (multi-credential, migration ...004): each
+ * verification carries 0..N linked profile credentials via the
+ * application_verification_credentials join table.
+ */
 export interface ExistingVerification {
   verification_type: string;
   attested: boolean;
-  linked_credential_type: string | null;
-  linked_credential_id: string | null;
+  linkedCredentials: ExistingVerificationCredential[];
   note: string | null;
 }
 
-/** Wizard draft state for one verification requirement. */
+/**
+ * Result of the inline "furnish a credential" action (credential-actions.ts).
+ * 5G.e Tier 2 #2 — a candidate with no matching profile credential can add
+ * one without leaving the apply flow. The new row lands on their own
+ * profile (first-party data); the action never asserts a verification
+ * outcome. Type lives here, not in the "use server" module, so the module
+ * only exports async actions.
+ */
+export type AddCredentialResult =
+  | { ok: true; credential: CandidateCredential }
+  | { ok: false; error: string };
+
+/**
+ * Wizard draft state for one verification requirement.
+ *
+ * `linkedCredentialIds` holds 0..N row ids — all from the verification
+ * type's single `credentialSource` table, so the source doesn't need to
+ * be tracked per id (the server re-derives it from the verification
+ * type). Empty array → attestation only, nothing linked.
+ */
 export interface VerificationValue {
   attested: boolean;
-  /** Source table of the linked credential, or "" when none linked. */
-  linkedCredentialType: "" | CandidateCredential["source"];
-  /** Row id of the linked credential, or "" when none linked. */
-  linkedCredentialId: string;
+  linkedCredentialIds: string[];
   note: string;
 }
 

@@ -336,10 +336,13 @@ export async function applyToJob(
     }
   }
 
-  // ── Persist verification attestations (5G.e Tier 2) ──
+  // ── Persist verification attestations (5G.e Tier 2 — multi-credential) ──
   // Same delete-prior-then-insert strategy as screening answers above —
   // RLS on application_verifications requires the application to be the
   // candidate's own, which the application insert path already enforced.
+  // The delete cascades to application_verification_credentials (ON DELETE
+  // CASCADE), so re-submits start from a clean slate. We re-select the
+  // inserted rows' ids so we can attach 0..N credential links per row.
   if (verificationRequirements.length > 0) {
     await supabase
       .from("application_verifications")
@@ -351,15 +354,15 @@ export async function applyToJob(
       verification_type: r.verification_type,
       attested: r.attested,
       attested_at: r.attested ? new Date().toISOString() : null,
-      linked_credential_type: r.linked_credential_type,
-      linked_credential_id: r.linked_credential_id,
       note: r.note,
     }));
 
     if (verificationInsertRows.length > 0) {
-      const { error: verificationsError } = await supabase
-        .from("application_verifications")
-        .insert(verificationInsertRows);
+      const { data: insertedVerifications, error: verificationsError } =
+        await supabase
+          .from("application_verifications")
+          .insert(verificationInsertRows)
+          .select("id, verification_type");
 
       if (verificationsError) {
         // Mirror the screening-answers failure handling — don't roll the
@@ -372,6 +375,50 @@ export async function applyToJob(
           ok: false,
           error: `Application saved, but we couldn't save your verification confirmations: ${verificationsError.message}. Please re-submit.`,
         };
+      }
+
+      // Build the join-table rows: one per linked credential, keyed back to
+      // the application_verifications row of the same verification type.
+      const verifIdByType = new Map(
+        ((insertedVerifications ?? []) as Array<{
+          id: string;
+          verification_type: string;
+        }>).map((v) => [v.verification_type, v.id])
+      );
+      const credentialLinkRows: Array<{
+        application_verification_id: string;
+        credential_type: string;
+        credential_id: string;
+      }> = [];
+      for (const r of verificationRows) {
+        const avId = verifIdByType.get(r.verification_type);
+        if (!avId) continue;
+        for (const c of r.linkedCredentials) {
+          credentialLinkRows.push({
+            application_verification_id: avId,
+            credential_type: c.credential_type,
+            credential_id: c.credential_id,
+          });
+        }
+      }
+
+      if (credentialLinkRows.length > 0) {
+        const { error: credentialsError } = await supabase
+          .from("application_verification_credentials")
+          .insert(credentialLinkRows);
+
+        if (credentialsError) {
+          // Non-fatal for the application + attestations (those landed) —
+          // surface the error so the candidate can re-submit and re-link.
+          console.error(
+            "[apply] verification credential-link insert failed:",
+            credentialsError
+          );
+          return {
+            ok: false,
+            error: `Application saved, but we couldn't save your linked credentials: ${credentialsError.message}. Please re-submit.`,
+          };
+        }
       }
     }
   }
@@ -570,13 +617,18 @@ function answerToRow(
 }
 
 /* ───────────────────────────────────────────────────────────────
- * Verification parsing (5G.e Tier 2)
+ * Verification parsing (5G.e Tier 2 — multi-credential, migration ...004)
  *
  * FormData shape emitted by the wizard, one set per required type:
- *   v__${type}            — "1" when attested, else absent
- *   v__${type}__cred_type — linked credential source table (optional)
- *   v__${type}__cred_id   — linked credential row id (optional)
- *   v__${type}__note      — free-text note (optional)
+ *   v__${type}          — "1" when attested, else absent
+ *   v__${type}__cred_id — linked credential row id (repeated, 0..N)
+ *   v__${type}__note    — free-text note (optional)
+ *
+ * The credential's *source table* is no longer carried in the form — it's
+ * re-derived from the verification type's `credentialSource` (every linked
+ * credential for a given verification shares one source table). Each
+ * parsed verification carries 0..N {credential_type, credential_id} links,
+ * persisted to the application_verification_credentials join table.
  *
  * Only verification types the job actually requires are considered; any
  * other v__ fields in the form are ignored. Types are re-validated with
@@ -586,8 +638,7 @@ function answerToRow(
 interface ParsedVerification {
   verification_type: string;
   attested: boolean;
-  linked_credential_type: string | null;
-  linked_credential_id: string | null;
+  linkedCredentials: Array<{ credential_type: string; credential_id: string }>;
   note: string | null;
 }
 
@@ -609,24 +660,33 @@ function parseVerifications(
 
     const attested = String(formData.get(`v__${type}`) ?? "").trim() === "1";
 
-    const rawCredType = String(
-      formData.get(`v__${type}__cred_type`) ?? ""
-    ).trim();
-    const rawCredId = String(formData.get(`v__${type}__cred_id`) ?? "").trim();
-    // Only keep a linked credential when both halves are present and the
-    // type is a recognized credential-source table.
-    const hasLinkedCredential =
-      rawCredType !== "" &&
-      rawCredId !== "" &&
-      VALID_CREDENTIAL_TYPES.has(rawCredType);
+    // The source table for every linked credential on this verification is
+    // fixed by the verification type. null source → attestation only; any
+    // stray cred ids in the form are ignored.
+    const credentialType = getVerificationType(type)?.credentialSource ?? null;
+    const linkedCredentials: Array<{
+      credential_type: string;
+      credential_id: string;
+    }> = [];
+    if (credentialType && VALID_CREDENTIAL_TYPES.has(credentialType)) {
+      const seen = new Set<string>();
+      for (const raw of formData.getAll(`v__${type}__cred_id`)) {
+        const id = String(raw ?? "").trim();
+        if (!id || seen.has(id)) continue;
+        seen.add(id);
+        linkedCredentials.push({
+          credential_type: credentialType,
+          credential_id: id,
+        });
+      }
+    }
 
     const rawNote = String(formData.get(`v__${type}__note`) ?? "").trim();
 
     out.push({
       verification_type: type,
       attested,
-      linked_credential_type: hasLinkedCredential ? rawCredType : null,
-      linked_credential_id: hasLinkedCredential ? rawCredId : null,
+      linkedCredentials,
       note: rawNote || null,
     });
   }

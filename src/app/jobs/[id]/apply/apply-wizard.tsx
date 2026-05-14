@@ -23,8 +23,11 @@ import {
   FileUp,
   Pencil,
   ExternalLink,
+  Plus,
+  X,
 } from "lucide-react";
 import { applyToJob } from "./actions";
+import { addInlineCredential } from "./credential-actions";
 import type {
   AnswerValue,
   CandidateCredential,
@@ -37,6 +40,10 @@ import type {
   WizardDraft,
 } from "./types";
 import { getVerificationType } from "@/lib/verifications/types";
+import {
+  LICENSE_TYPES,
+  CERTIFICATION_KINDS,
+} from "@/lib/candidate/canonical-lists";
 
 const AVAILABILITY_LABEL: Record<string, string> = {
   immediate: "Immediately",
@@ -136,6 +143,41 @@ export function ApplyWizard(props: ApplyWizardProps) {
   const [restorePromptOpen, setRestorePromptOpen] = useState(false);
   const [savedDraft, setSavedDraft] = useState<WizardDraft | null>(null);
 
+  // Candidate's linkable profile credentials. Seeded from the server prop,
+  // but mutable: the Verifications step can furnish a new credential inline
+  // (5G.e Tier 2 #2), which appends here so it's immediately pickable.
+  const [credentials, setCredentials] = useState<CandidateCredential[]>(
+    candidateCredentials
+  );
+
+  // A credential furnished inline lands on the candidate's profile, gets
+  // appended to the picker list, and auto-links itself to the verification
+  // it was added for (the candidate still chooses whether to attest).
+  const handleCredentialAdded = (
+    verificationType: string,
+    cred: CandidateCredential
+  ) => {
+    setCredentials((prev) =>
+      prev.some((c) => c.id === cred.id && c.source === cred.source)
+        ? prev
+        : [...prev, cred]
+    );
+    setDraft((d) => {
+      const current = d.verifications[verificationType] ?? emptyVerification();
+      if (current.linkedCredentialIds.includes(cred.id)) return d;
+      return {
+        ...d,
+        verifications: {
+          ...d.verifications,
+          [verificationType]: {
+            ...current,
+            linkedCredentialIds: [...current.linkedCredentialIds, cred.id],
+          },
+        },
+      };
+    });
+  };
+
   // Resume file cannot be serialized — held outside draft.
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [resumeError, setResumeError] = useState<string | null>(null);
@@ -154,7 +196,12 @@ export function ApplyWizard(props: ApplyWizardProps) {
         fullName: parsed.fullName ?? initial.fullName,
         coverLetter: parsed.coverLetter ?? "",
         answers: parsed.answers ?? initial.answers,
-        verifications: parsed.verifications ?? initial.verifications,
+        // Normalize verification values — older drafts (pre migration ...004)
+        // stored a single linkedCredentialType/Id pair; the field shape is
+        // now linkedCredentialIds[]. normalizeVerifications coerces either.
+        verifications: parsed.verifications
+          ? normalizeVerifications(parsed.verifications)
+          : initial.verifications,
         resumeChoice: parsed.resumeChoice ?? initial.resumeChoice,
       };
       // Only show resume prompt if it's actually different from server state
@@ -275,25 +322,21 @@ export function ApplyWizard(props: ApplyWizardProps) {
 
     // Encode verification attestations — see actions.ts for the matching
     // parser. One set of fields per required verification type:
-    //   v__${type}            — "1" when attested, else omitted
-    //   v__${type}__cred_type — linked credential source table (optional)
-    //   v__${type}__cred_id   — linked credential row id (optional)
-    //   v__${type}__note      — free-text note (optional)
+    //   v__${type}          — "1" when attested, else omitted
+    //   v__${type}__cred_id — linked credential row id (repeated, 0..N)
+    //   v__${type}__note    — free-text note (optional)
+    // The credential source table is re-derived server-side from the
+    // verification type, so it isn't carried in the form.
     for (const req of verificationRequirements) {
       const v = draft.verifications[req.verification_type];
       if (!v) continue;
       if (v.attested) {
         formData.set(`v__${req.verification_type}`, "1");
       }
-      if (v.linkedCredentialType && v.linkedCredentialId) {
-        formData.set(
-          `v__${req.verification_type}__cred_type`,
-          v.linkedCredentialType
-        );
-        formData.set(
-          `v__${req.verification_type}__cred_id`,
-          v.linkedCredentialId
-        );
+      for (const credId of v.linkedCredentialIds) {
+        if (credId) {
+          formData.append(`v__${req.verification_type}__cred_id`, credId);
+        }
       }
       if (v.note.trim()) {
         formData.set(`v__${req.verification_type}__note`, v.note.trim());
@@ -415,11 +458,12 @@ export function ApplyWizard(props: ApplyWizardProps) {
         {currentStep.id === "verifications" && (
           <VerificationStep
             requirements={verificationRequirements}
-            credentials={candidateCredentials}
+            credentials={credentials}
             values={draft.verifications}
             onChange={(verifications) =>
               setDraft({ ...draft, verifications })
             }
+            onCredentialAdded={handleCredentialAdded}
           />
         )}
 
@@ -457,7 +501,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
             answers={draft.answers}
             verificationRequirements={verificationRequirements}
             verifications={draft.verifications}
-            credentials={candidateCredentials}
+            credentials={credentials}
             coverLetter={draft.coverLetter}
             resumeChoice={draft.resumeChoice}
             resumeFile={resumeFile}
@@ -857,32 +901,38 @@ function QuestionInput({
 }
 
 /* ───────────────────────────────────────────────────────────────
- * Step — Verifications (5G.e Tier 2)
+ * Step — Verifications (5G.e Tier 2 — multi-credential + inline upload)
  *
  * For each recruiter-set verification requirement: show the
  * candidate-facing hint, an attest checkbox, and — when the type has a
- * credentialSource — a dropdown of the candidate's matching profile
- * credentials to optionally link as proof, plus an optional note.
+ * credentialSource — a checklist of the candidate's matching profile
+ * credentials to optionally link as proof (0..N), an inline "furnish a
+ * credential" form for candidates who have none yet, and an optional note.
  * Mirrors the ScreeningStep structure + styling.
  * ───────────────────────────────────────────────────────────── */
+
+const VERIFICATION_BASE_INPUT =
+  "w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed";
 
 function VerificationStep({
   requirements,
   credentials,
   values,
   onChange,
+  onCredentialAdded,
 }: {
   requirements: JobVerificationRequirement[];
   credentials: CandidateCredential[];
   values: Record<string, VerificationValue>;
   onChange: (values: Record<string, VerificationValue>) => void;
+  onCredentialAdded: (
+    verificationType: string,
+    cred: CandidateCredential
+  ) => void;
 }) {
   const update = (type: string, value: VerificationValue) => {
     onChange({ ...values, [type]: value });
   };
-
-  const baseInput =
-    "w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed";
 
   return (
     <div className="space-y-7">
@@ -895,8 +945,9 @@ function VerificationStep({
         </h2>
         <p className="text-[14px] text-slate-body leading-relaxed mt-2">
           The hiring team asked applicants to confirm the items below. Check
-          each one you can attest to — and, where it helps, link a credential
-          from your profile as proof.
+          each one you can attest to — and, where it helps, link one or more
+          credentials as proof. The hiring team reviews what you provide; we
+          don&apos;t verify it for them.
         </p>
       </div>
 
@@ -908,6 +959,15 @@ function VerificationStep({
         const linkable = vt?.credentialSource
           ? credentials.filter((c) => c.source === vt.credentialSource)
           : [];
+        const toggleCredential = (id: string) => {
+          const next = value.linkedCredentialIds.includes(id)
+            ? value.linkedCredentialIds.filter((x) => x !== id)
+            : [...value.linkedCredentialIds, id];
+          update(req.verification_type, {
+            ...value,
+            linkedCredentialIds: next,
+          });
+        };
 
         return (
           <div
@@ -939,51 +999,58 @@ function VerificationStep({
               </span>
             </label>
 
-            {linkable.length > 0 && (
+            {/* Multi-select credential linking — only for types backed by a
+                profile credential source. */}
+            {vt?.credentialSource && (
               <div>
                 <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
-                  Link a credential as proof{" "}
+                  Link credentials as proof{" "}
                   <span className="text-slate-meta font-medium normal-case tracking-normal text-[11px]">
-                    (optional)
+                    (optional · pick any that apply)
                   </span>
                 </label>
-                <select
-                  value={value.linkedCredentialId}
-                  onChange={(e) => {
-                    const id = e.target.value;
-                    update(req.verification_type, {
-                      ...value,
-                      linkedCredentialId: id,
-                      linkedCredentialType: id
-                        ? (vt!.credentialSource as CandidateCredential["source"])
-                        : "",
-                    });
-                  }}
-                  className={baseInput}
-                >
-                  <option value="">No linked credential</option>
-                  {linkable.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
 
-            {vt?.credentialSource && linkable.length === 0 && (
-              <p className="text-[12px] text-slate-meta leading-relaxed">
-                No matching credential on your profile yet — you can still
-                attest above, or{" "}
-                <Link
-                  href="/candidate/profile"
-                  target="_blank"
-                  className="text-heritage-deep underline underline-offset-2 hover:text-ink font-semibold"
-                >
-                  add one to your profile
-                </Link>
-                .
-              </p>
+                {linkable.length > 0 ? (
+                  <div className="space-y-1.5">
+                    {linkable.map((c) => {
+                      const checked = value.linkedCredentialIds.includes(c.id);
+                      return (
+                        <label
+                          key={c.id}
+                          className={
+                            "flex items-center gap-3 px-4 py-2.5 border cursor-pointer transition-colors " +
+                            (checked
+                              ? "bg-heritage/[0.08] border-heritage"
+                              : "bg-cream border-[var(--rule-strong)] hover:bg-white")
+                          }
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => toggleCredential(c.id)}
+                            className="accent-heritage"
+                          />
+                          <span className="text-[14px] text-ink">
+                            {c.label}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-[12px] text-slate-meta leading-relaxed">
+                    No matching credential on your profile yet — you can still
+                    attest above, or add one below without leaving this page.
+                  </p>
+                )}
+
+                <InlineCredentialForm
+                  credentialSource={vt.credentialSource}
+                  onAdded={(cred) =>
+                    onCredentialAdded(req.verification_type, cred)
+                  }
+                />
+              </div>
             )}
 
             <div>
@@ -1003,12 +1070,342 @@ function VerificationStep({
                   })
                 }
                 placeholder="Anything the hiring team should know about this."
-                className={baseInput}
+                className={VERIFICATION_BASE_INPUT}
               />
             </div>
           </div>
         );
       })}
+    </div>
+  );
+}
+
+/* ───────────────────────────────────────────────────────────────
+ * Inline credential form (5G.e Tier 2 #2)
+ *
+ * Collapsible "+ Add a credential" affordance inside a verification card.
+ * Lets a candidate furnish a credential — license / certification /
+ * education — without leaving the apply flow. On success the new row
+ * lands on their own profile and is appended to the picker + linked.
+ *
+ * Posture: this furnishes the candidate's OWN first-party credential. It
+ * never asserts a verification outcome — the row is created unverified;
+ * only the employer's diligence (or a sanctioned third-party service)
+ * ever flips a verification status.
+ * ───────────────────────────────────────────────────────────── */
+
+function InlineCredentialForm({
+  credentialSource,
+  onAdded,
+}: {
+  credentialSource: NonNullable<CandidateCredential["source"]>;
+  onAdded: (cred: CandidateCredential) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Per-kind field state. Only the subset for the active kind is read on
+  // submit, so a single flat object is fine.
+  const [licenseType, setLicenseType] = useState("");
+  const [licenseState, setLicenseState] = useState("");
+  const [licenseNumber, setLicenseNumber] = useState("");
+  const [certKind, setCertKind] = useState("");
+  const [certLevel, setCertLevel] = useState("");
+  const [schoolName, setSchoolName] = useState("");
+  const [degree, setDegree] = useState("");
+  const [fieldOfStudy, setFieldOfStudy] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const fileRef = useRef<HTMLInputElement | null>(null);
+
+  const kind =
+    credentialSource === "candidate_license"
+      ? "license"
+      : credentialSource === "candidate_certification"
+        ? "certification"
+        : "education";
+  const supportsFile = kind === "license" || kind === "certification";
+
+  const reset = () => {
+    setLicenseType("");
+    setLicenseState("");
+    setLicenseNumber("");
+    setCertKind("");
+    setCertLevel("");
+    setSchoolName("");
+    setDegree("");
+    setFieldOfStudy("");
+    setFile(null);
+    if (fileRef.current) fileRef.current.value = "";
+    setError(null);
+  };
+
+  const addLabel =
+    kind === "license"
+      ? "Add a license"
+      : kind === "certification"
+        ? "Add a certification"
+        : "Add an education entry";
+
+  const handleSubmit = async () => {
+    setError(null);
+
+    // Client-side required-field gate (server re-validates).
+    if (kind === "license" && !licenseType.trim()) {
+      setError("Choose a license type.");
+      return;
+    }
+    if (kind === "certification" && !certKind.trim()) {
+      setError("Choose a certification type.");
+      return;
+    }
+    if (kind === "education" && !schoolName.trim()) {
+      setError("Enter a school name.");
+      return;
+    }
+
+    const fd = new FormData();
+    fd.set("kind", kind);
+    if (kind === "license") {
+      fd.set("license_type", licenseType.trim());
+      fd.set("state", licenseState.trim());
+      fd.set("license_number", licenseNumber.trim());
+    } else if (kind === "certification") {
+      fd.set("cert_kind", certKind.trim());
+      fd.set("cert_level", certLevel.trim());
+    } else {
+      fd.set("school_name", schoolName.trim());
+      fd.set("degree", degree.trim());
+      fd.set("field_of_study", fieldOfStudy.trim());
+    }
+    if (supportsFile && file) fd.set("file", file);
+
+    setSubmitting(true);
+    try {
+      const result = await addInlineCredential(fd);
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      onAdded(result.credential);
+      reset();
+      setOpen(false);
+    } catch {
+      setError("Something went wrong. Please retry.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="mt-2 inline-flex items-center gap-1.5 text-[12px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+      >
+        <Plus className="h-3.5 w-3.5" />
+        {addLabel}
+      </button>
+    );
+  }
+
+  return (
+    <div className="mt-3 border border-heritage/30 bg-heritage/[0.05] p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
+          {addLabel}
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            reset();
+            setOpen(false);
+          }}
+          className="text-slate-meta hover:text-ink transition-colors"
+          aria-label="Cancel"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      {kind === "license" && (
+        <>
+          <div>
+            <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-1.5">
+              License type <span className="text-heritage">*</span>
+            </label>
+            <select
+              value={licenseType}
+              onChange={(e) => setLicenseType(e.target.value)}
+              className={VERIFICATION_BASE_INPUT}
+            >
+              <option value="">Select a license type…</option>
+              {LICENSE_TYPES.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-1.5">
+                State
+              </label>
+              <input
+                type="text"
+                value={licenseState}
+                onChange={(e) => setLicenseState(e.target.value)}
+                maxLength={2}
+                placeholder="KS"
+                className={VERIFICATION_BASE_INPUT}
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-1.5">
+                License number
+              </label>
+              <input
+                type="text"
+                value={licenseNumber}
+                onChange={(e) => setLicenseNumber(e.target.value)}
+                placeholder="Optional"
+                className={VERIFICATION_BASE_INPUT}
+              />
+            </div>
+          </div>
+        </>
+      )}
+
+      {kind === "certification" && (
+        <>
+          <div>
+            <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-1.5">
+              Certification <span className="text-heritage">*</span>
+            </label>
+            <select
+              value={certKind}
+              onChange={(e) => setCertKind(e.target.value)}
+              className={VERIFICATION_BASE_INPUT}
+            >
+              <option value="">Select a certification…</option>
+              {CERTIFICATION_KINDS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-1.5">
+              Level / detail
+            </label>
+            <input
+              type="text"
+              value={certLevel}
+              onChange={(e) => setCertLevel(e.target.value)}
+              placeholder="Optional — e.g. Provider, Instructor"
+              className={VERIFICATION_BASE_INPUT}
+            />
+          </div>
+        </>
+      )}
+
+      {kind === "education" && (
+        <>
+          <div>
+            <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-1.5">
+              School <span className="text-heritage">*</span>
+            </label>
+            <input
+              type="text"
+              value={schoolName}
+              onChange={(e) => setSchoolName(e.target.value)}
+              placeholder="University of Kansas"
+              className={VERIFICATION_BASE_INPUT}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-1.5">
+                Degree
+              </label>
+              <input
+                type="text"
+                value={degree}
+                onChange={(e) => setDegree(e.target.value)}
+                placeholder="Optional — e.g. DDS, BS"
+                className={VERIFICATION_BASE_INPUT}
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-1.5">
+                Field of study
+              </label>
+              <input
+                type="text"
+                value={fieldOfStudy}
+                onChange={(e) => setFieldOfStudy(e.target.value)}
+                placeholder="Optional"
+                className={VERIFICATION_BASE_INPUT}
+              />
+            </div>
+          </div>
+        </>
+      )}
+
+      {supportsFile && (
+        <div>
+          <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-1.5">
+            Supporting document{" "}
+            <span className="text-slate-meta font-medium normal-case tracking-normal text-[11px]">
+              (optional)
+            </span>
+          </label>
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            className="block w-full text-[13px] text-ink file:mr-3 file:px-4 file:py-2 file:border-0 file:text-[10px] file:font-bold file:tracking-[1.5px] file:uppercase file:bg-ink file:text-ivory hover:file:bg-ink-soft file:cursor-pointer file:transition-colors"
+          />
+          <p className="mt-1 text-[11px] text-slate-meta leading-relaxed">
+            PDF, PNG, JPEG, or WebP. Max 10 MB. You can also add this later
+            from your profile.
+          </p>
+        </div>
+      )}
+
+      {error && (
+        <p className="text-[13px] text-red-700 leading-relaxed">{error}</p>
+      )}
+
+      <div className="flex items-center gap-2 pt-1">
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={submitting}
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {submitting ? "Adding…" : "Add credential"}
+          {!submitting && <Check className="h-3.5 w-3.5" />}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            reset();
+            setOpen(false);
+          }}
+          className="px-4 py-2 border border-[var(--rule-strong)] text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
+      <p className="text-[11px] text-slate-meta leading-relaxed">
+        This is saved to your profile as your own credential. The hiring team
+        reviews it — DSO Hire doesn&apos;t verify or score it.
+      </p>
     </div>
   );
 }
@@ -1302,14 +1699,9 @@ function ReviewStep({
             {verificationRequirements.map((req) => {
               const vt = getVerificationType(req.verification_type);
               const v = verifications[req.verification_type];
-              const linkedCred =
-                v?.linkedCredentialId && v?.linkedCredentialType
-                  ? credentials.find(
-                      (c) =>
-                        c.id === v.linkedCredentialId &&
-                        c.source === v.linkedCredentialType
-                    )
-                  : null;
+              const linkedCreds = (v?.linkedCredentialIds ?? [])
+                .map((id) => credentials.find((c) => c.id === id))
+                .filter((c): c is CandidateCredential => Boolean(c));
               return (
                 <li key={req.verification_type}>
                   <div className="text-[12px] font-semibold text-slate-meta mb-0.5">
@@ -1327,9 +1719,10 @@ function ReviewStep({
                       </span>
                     )}
                   </div>
-                  {linkedCred && (
+                  {linkedCreds.length > 0 && (
                     <div className="text-[13px] text-slate-body mt-0.5">
-                      Linked proof: {linkedCred.label}
+                      Linked proof:{" "}
+                      {linkedCreds.map((c) => c.label).join(", ")}
                     </div>
                   )}
                   {v?.note?.trim() && (
@@ -1483,8 +1876,7 @@ function emptyAnswer(q: ScreeningQuestion): AnswerValue {
 function emptyVerification(): VerificationValue {
   return {
     attested: false,
-    linkedCredentialType: "",
-    linkedCredentialId: "",
+    linkedCredentialIds: [],
     note: "",
   };
 }
@@ -1502,17 +1894,44 @@ function seedVerificationsFromExisting(
       out[req.verification_type] = emptyVerification();
       continue;
     }
-    const linkedType = prior.linked_credential_type;
     out[req.verification_type] = {
       attested: prior.attested,
-      linkedCredentialType:
-        linkedType === "candidate_license" ||
-        linkedType === "candidate_certification" ||
-        linkedType === "candidate_education"
-          ? linkedType
-          : "",
-      linkedCredentialId: prior.linked_credential_id ?? "",
+      linkedCredentialIds: prior.linkedCredentials.map((c) => c.id),
       note: prior.note ?? "",
+    };
+  }
+  return out;
+}
+
+/**
+ * Coerce a localStorage-hydrated verifications map into the current
+ * VerificationValue shape. Older drafts (pre migration ...004) stored a
+ * single linkedCredentialType/Id pair; the field is now linkedCredentialIds[].
+ * Anything unrecognized falls back to an empty verification.
+ */
+function normalizeVerifications(
+  raw: Record<string, unknown>
+): Record<string, VerificationValue> {
+  const out: Record<string, VerificationValue> = {};
+  for (const [type, val] of Object.entries(raw ?? {})) {
+    if (!val || typeof val !== "object") {
+      out[type] = emptyVerification();
+      continue;
+    }
+    const v = val as Record<string, unknown>;
+    let ids: string[] = [];
+    if (Array.isArray(v.linkedCredentialIds)) {
+      ids = v.linkedCredentialIds.filter(
+        (x): x is string => typeof x === "string" && x.length > 0
+      );
+    } else if (typeof v.linkedCredentialId === "string" && v.linkedCredentialId) {
+      // Legacy single-credential shape.
+      ids = [v.linkedCredentialId];
+    }
+    out[type] = {
+      attested: v.attested === true,
+      linkedCredentialIds: ids,
+      note: typeof v.note === "string" ? v.note : "",
     };
   }
   return out;

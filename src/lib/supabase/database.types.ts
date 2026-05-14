@@ -489,6 +489,38 @@ export type Database = {
           },
         ]
       }
+      application_verification_credentials: {
+        Row: {
+          application_verification_id: string
+          created_at: string
+          credential_id: string
+          credential_type: string
+          id: string
+        }
+        Insert: {
+          application_verification_id: string
+          created_at?: string
+          credential_id: string
+          credential_type: string
+          id?: string
+        }
+        Update: {
+          application_verification_id?: string
+          created_at?: string
+          credential_id?: string
+          credential_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_verification_crede_application_verification_id_fkey"
+            columns: ["application_verification_id"]
+            isOneToOne: false
+            referencedRelation: "application_verifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       application_verifications: {
         Row: {
           application_id: string
@@ -496,8 +528,6 @@ export type Database = {
           attested_at: string | null
           created_at: string
           id: string
-          linked_credential_id: string | null
-          linked_credential_type: string | null
           note: string | null
           updated_at: string
           verification_type: string
@@ -508,8 +538,6 @@ export type Database = {
           attested_at?: string | null
           created_at?: string
           id?: string
-          linked_credential_id?: string | null
-          linked_credential_type?: string | null
           note?: string | null
           updated_at?: string
           verification_type: string
@@ -520,8 +548,6 @@ export type Database = {
           attested_at?: string | null
           created_at?: string
           id?: string
-          linked_credential_id?: string | null
-          linked_credential_type?: string | null
           note?: string | null
           updated_at?: string
           verification_type?: string

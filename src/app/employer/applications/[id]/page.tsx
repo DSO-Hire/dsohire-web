@@ -777,7 +777,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     supabase
       .from("application_verifications")
       .select(
-        "verification_type, attested, attested_at, linked_credential_type, linked_credential_id, note"
+        "verification_type, attested, attested_at, note, application_verification_credentials(credential_type, credential_id)"
       )
       .eq("application_id", appId),
   ]);
@@ -797,13 +797,17 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     verification_type: string;
     required: boolean;
   }>;
-  const applicationVerifications = (rawAppVerifs ?? []) as Array<{
+  // 5G.e Tier 2 (multi-credential, migration ...004): each
+  // application_verifications row carries 0..N linked credentials via the
+  // application_verification_credentials join table, embedded here.
+  const applicationVerifications = (rawAppVerifs ?? []) as unknown as Array<{
     verification_type: string;
     attested: boolean;
     attested_at: string | null;
-    linked_credential_type: string | null;
-    linked_credential_id: string | null;
     note: string | null;
+    application_verification_credentials:
+      | Array<{ credential_type: string; credential_id: string }>
+      | null;
   }>;
   const appVerifByType = new Map(
     applicationVerifications.map((v) => [v.verification_type, v])
@@ -848,6 +852,21 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     return null;
   }
 
+  // Resolve 0..N linked credentials to human-readable summaries.
+  function resolveLinkedCredentials(
+    creds:
+      | Array<{ credential_type: string; credential_id: string }>
+      | null
+      | undefined
+  ): string[] {
+    if (!creds || creds.length === 0) return [];
+    return creds
+      .map((c) =>
+        resolveLinkedCredential(c.credential_type, c.credential_id)
+      )
+      .filter((s): s is string => s !== null);
+  }
+
   const verificationRows = verificationRequirements.map((req) => {
     const att = appVerifByType.get(req.verification_type) ?? null;
     return {
@@ -861,9 +880,8 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
       required: req.required,
       attested: att?.attested ?? false,
       attestedAt: att?.attested_at ?? null,
-      linkedCredentialSummary: resolveLinkedCredential(
-        att?.linked_credential_type ?? null,
-        att?.linked_credential_id ?? null
+      linkedCredentialSummaries: resolveLinkedCredentials(
+        att?.application_verification_credentials
       ),
       note: att?.note ?? null,
     };
@@ -2006,7 +2024,7 @@ interface VerificationRowData {
   required: boolean;
   attested: boolean;
   attestedAt: string | null;
-  linkedCredentialSummary: string | null;
+  linkedCredentialSummaries: string[];
   note: string | null;
 }
 
@@ -2061,13 +2079,13 @@ function VerificationRow({ row }: { row: VerificationRowData }) {
             )}
           </div>
 
-          {/* Linked credential proof */}
-          {row.linkedCredentialSummary && (
+          {/* Linked credential proof — 0..N (migration ...004) */}
+          {row.linkedCredentialSummaries.length > 0 && (
             <div className="mt-1.5 text-[13px] text-slate-body leading-snug">
               <span className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta mr-2">
                 Linked proof
               </span>
-              {row.linkedCredentialSummary}
+              {row.linkedCredentialSummaries.join("; ")}
             </div>
           )}
 
