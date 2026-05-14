@@ -53,11 +53,13 @@ const PRIMARY_LINKS = [
 export function MobileMenu({
   signInHref,
   signInLabel,
-  postAJobHref,
+  primaryCtaHref,
+  primaryCtaLabel,
 }: {
   signInHref: string;
   signInLabel: string;
-  postAJobHref: string;
+  primaryCtaHref: string;
+  primaryCtaLabel: string;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -163,11 +165,11 @@ export function MobileMenu({
                 {signInLabel}
               </Link>
               <Link
-                href={postAJobHref}
+                href={primaryCtaHref}
                 onClick={close}
                 className="inline-flex items-center justify-center px-5 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
               >
-                Post a Job
+                {primaryCtaLabel}
               </Link>
             </div>
           </div>

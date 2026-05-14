@@ -28,13 +28,15 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * SiteNav is async so the "Post a Job" CTA can be context-aware:
- *   - Logged out → /pricing (marketing surface that explains what posting means)
- *   - Logged in with a DSO membership → /employer/jobs/new (skip the
- *     marketing detour; /employer/jobs/new will internally redirect to
- *     /employer/billing or /employer/onboarding if state isn't fully ready)
- *   - Logged in candidate (no DSO) → /pricing (still the right marketing
- *     surface; the page itself explains who this product is for)
+ * SiteNav is async so the primary CTA can be context-aware:
+ *   - Logged out → "Post a Job" / /pricing (marketing surface that explains
+ *     what posting means; also the monetization funnel for ambiguous visitors)
+ *   - Logged in with a DSO membership → "Post a Job" / /employer/jobs/new
+ *     (skip the marketing detour; /employer/jobs/new will internally redirect
+ *     to /employer/billing or /employer/onboarding if state isn't ready)
+ *   - Logged in candidate (no DSO) → "Browse Jobs" / /jobs. A candidate is a
+ *     job seeker, not an employer — surfacing "Post a Job" to them is wrong
+ *     (Cam, 5G.e stress test). Their primary action is finding roles.
  *
  * Sign-in button gets the same context awareness — once you're signed in,
  * "Sign In" becomes "Dashboard" and routes to your audience-specific home.
@@ -45,7 +47,8 @@ export async function SiteNav() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let postAJobHref = "/pricing";
+  let primaryCtaHref = "/pricing";
+  let primaryCtaLabel = "Post a Job";
   let signInHref: string = "/sign-in";
   let signInLabel: string = "Sign In";
 
@@ -66,13 +69,15 @@ export async function SiteNav() {
     if (dsoUser) {
       // Paid employer (or one in onboarding/billing) — let the destination
       // handle any state-specific redirect.
-      postAJobHref = "/employer/jobs/new";
+      primaryCtaHref = "/employer/jobs/new";
       signInHref = "/employer/dashboard";
       signInLabel = "Dashboard";
     } else if (candidate) {
-      // Signed-in candidate — keep the post-a-job CTA pointed at marketing
-      // (they're not the audience), but the sign-in button becomes their
+      // Signed-in candidate — they're a job seeker. Swap the employer
+      // "Post a Job" CTA for "Browse Jobs", and point Sign In at their
       // own dashboard.
+      primaryCtaHref = "/jobs";
+      primaryCtaLabel = "Browse Jobs";
       signInHref = "/candidate/dashboard";
       signInLabel = "Dashboard";
     }
@@ -100,21 +105,21 @@ export async function SiteNav() {
           {signInLabel}
         </Link>
         <Link
-          href={postAJobHref}
+          href={primaryCtaHref}
           className="px-5 py-2.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors"
         >
-          Post a Job
+          {primaryCtaLabel}
         </Link>
         {/* Hamburger + drawer below md (768px). The drawer holds primary
             links + the For Dental Pros sub-list (hover dropdowns don't work
             on touch) + an audience-aware Sign In/Dashboard link + a
-            duplicate Post a Job CTA so the primary action stays a thumb-tap
-            away when the menu is open. Post a Job stays visible at every
-            breakpoint so the conversion CTA is never obscured. */}
+            duplicate primary CTA so it stays a thumb-tap away when the menu
+            is open. The CTA stays visible at every breakpoint. */}
         <MobileMenu
           signInHref={signInHref}
           signInLabel={signInLabel}
-          postAJobHref={postAJobHref}
+          primaryCtaHref={primaryCtaHref}
+          primaryCtaLabel={primaryCtaLabel}
         />
       </div>
     </nav>
