@@ -770,7 +770,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
               if (rows.length === 0) return null;
 
               return (
-                <section className="mt-10 p-6 sm:p-7 bg-heritage/[0.06] border border-heritage/25">
+                <section className="mt-10 p-6 sm:p-7 bg-[var(--heritage-tint)] border border-heritage/40">
                   <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink mb-4">
                     Role details
                   </h2>
@@ -832,8 +832,8 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
           </div>
 
           {/* Sidebar */}
-          <aside className="bg-ink p-7 h-fit">
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage mb-4">
+          <aside className="bg-ink-3 p-7 h-fit">
+            <div className="text-[11px] font-bold tracking-[2.5px] uppercase text-heritage mb-4">
               At a Glance
             </div>
 
@@ -862,10 +862,10 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                 <ul className="space-y-2 mt-1">
                   {locations.map((loc) => (
                     <li key={loc.id}>
-                      <div className="font-semibold text-ivory text-[14px]">
+                      <div className="font-semibold text-ivory text-[15px]">
                         {loc.name}
                       </div>
-                      <div className="text-[13px] text-ivory/70">
+                      <div className="text-[14px] text-ivory/70">
                         {[loc.city, loc.state].filter(Boolean).join(", ")}
                       </div>
                     </li>
@@ -897,11 +897,11 @@ function Detail({
 }) {
   return (
     <div className="mb-5 pb-5 last:mb-0 last:pb-0 last:border-0 border-b border-ivory/15">
-      <div className="flex items-center gap-2 text-[9px] font-bold tracking-[2px] uppercase text-heritage mb-1.5">
+      <div className="flex items-center gap-2 text-[10px] font-bold tracking-[2px] uppercase text-ivory/55 mb-1.5">
         <Icon className="h-3 w-3" />
         {label}
       </div>
-      <div className="text-[14px] text-ivory">{children}</div>
+      <div className="text-[15px] text-ivory">{children}</div>
     </div>
   );
 }
@@ -983,13 +983,13 @@ function CompensationGlance({ job }: { job: { [k: string]: unknown } }) {
     <div className="space-y-1.5">
       {ote.hasVariable && ote.ote != null ? (
         <>
-          <div className="text-[18px] font-extrabold text-ivory leading-tight">
+          <div className="text-[20px] font-extrabold text-ivory leading-tight">
             ~{formatUsd(ote.ote)}
             <span className="ml-1.5 text-[12px] font-semibold text-heritage">
               OTE / yr
             </span>
           </div>
-          <div className="text-[13px] text-ivory/70">
+          <div className="text-[14px] text-ivory/70">
             {baseLine} base + {formatUsd(ote.variable)} target variable
           </div>
         </>
@@ -998,18 +998,18 @@ function CompensationGlance({ job }: { job: { [k: string]: unknown } }) {
       )}
 
       {variableEnabled && variableStructure && (
-        <div className="text-[13px] text-ivory/70">
+        <div className="text-[14px] text-ivory/70">
           <span className="font-semibold text-ivory">Variable:</span>{" "}
           {variableStructure}
         </div>
       )}
       {bonusEnabled && bonusStructure && (
-        <div className="text-[13px] text-ivory/70">
+        <div className="text-[14px] text-ivory/70">
           <span className="font-semibold text-ivory">Bonus:</span> {bonusStructure}
         </div>
       )}
       {equityOffered && (
-        <div className="text-[13px] text-ivory/70">
+        <div className="text-[14px] text-ivory/70">
           <span className="font-semibold text-ivory">Equity:</span>{" "}
           {equityNote || "Offered"}
         </div>
