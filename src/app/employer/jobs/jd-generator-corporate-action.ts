@@ -42,12 +42,8 @@ import {
   CORPORATE_FUNCTION_SLUGS,
 } from "@/lib/corporate/functions";
 import {
-  AUTHORITY_LEVELS,
   AUTHORITY_LEVEL_LABELS,
-  WORK_MODES,
   WORK_MODE_LABELS,
-  type AuthorityLevel,
-  type WorkMode,
 } from "@/lib/corporate/job-fields";
 // JdGeneratorOutput is owned by the dental action. Imported here for the
 // internal type annotations only — NOT re-exported. Re-exporting a type
@@ -56,14 +52,6 @@ import {
 // corporate panel imports JdGeneratorOutput straight from ./jd-generator-action.
 import type { JdGeneratorOutput } from "./jd-generator-action";
 
-const AUTHORITY_VALUES = AUTHORITY_LEVELS.map((a) => a.value) as [
-  AuthorityLevel,
-  ...AuthorityLevel[],
-];
-const WORK_MODE_VALUES = WORK_MODES.map((w) => w.value) as [
-  WorkMode,
-  ...WorkMode[],
-];
 const FUNCTION_VALUES = CORPORATE_FUNCTION_SLUGS as readonly string[];
 
 const InputSchema = z.object({
@@ -71,9 +59,13 @@ const InputSchema = z.object({
   corporateFunction: z
     .string()
     .refine((s) => FUNCTION_VALUES.includes(s), "Unknown corporate function"),
-  // Closed enums from src/lib/corporate/job-fields.ts.
-  authorityLevel: z.enum(AUTHORITY_VALUES),
-  workMode: z.enum(WORK_MODE_VALUES),
+  // Optional context — NOT required. The JD generator lives on the
+  // wizard's Description step, but work_mode isn't picked until the later
+  // Compensation step, and the panel may pass "" before either is set.
+  // They ground the prompt when present; when absent the prompt omits
+  // them. (Both are still required to *publish* — enforced in the wizard.)
+  authorityLevel: z.string().optional(),
+  workMode: z.string().optional(),
   // Operator-supplied notes, e.g. "owns FP&A, 10+ yrs, equity, PE-backed".
   brief: z.string().max(800),
   tone: z.enum(["professional", "friendly", "concise"]).default("professional"),
@@ -149,11 +141,17 @@ export async function generateCorporateJobDescription(
   const functionLabel =
     getCorporateFunction(parsed.data.corporateFunction)?.label ??
     parsed.data.corporateFunction;
-  const authorityLabel =
-    AUTHORITY_LEVEL_LABELS[parsed.data.authorityLevel] ??
-    parsed.data.authorityLevel;
-  const workModeLabel =
-    WORK_MODE_LABELS[parsed.data.workMode] ?? parsed.data.workMode;
+  // Optional context — label only when a real value came through (the
+  // panel may send "" before the operator has picked one).
+  const authorityLabel = parsed.data.authorityLevel
+    ? (AUTHORITY_LEVEL_LABELS as Record<string, string>)[
+        parsed.data.authorityLevel
+      ] ?? parsed.data.authorityLevel
+    : null;
+  const workModeLabel = parsed.data.workMode
+    ? (WORK_MODE_LABELS as Record<string, string>)[parsed.data.workMode] ??
+      parsed.data.workMode
+    : null;
 
   // Resolve the affiliation context. Reuses the dental generator's logic
   // verbatim: the most-private-inherits rule for 1+ selected locations,
@@ -368,8 +366,8 @@ Use corporate / business vocabulary correctly (P&L, FP&A, EBITDA, integration, d
 function buildUserPrompt(args: {
   functionLabel: string;
   functionSlug: string;
-  authorityLabel: string;
-  workModeLabel: string;
+  authorityLabel: string | null;
+  workModeLabel: string | null;
   brief: string;
   tone: "professional" | "friendly" | "concise";
   employerName: string;
@@ -382,13 +380,21 @@ function buildUserPrompt(args: {
     ? ""
     : `\n\nIMPORTANT: This organization's brand is intentionally not disclosed in this job description. Refer to the employer only as "${args.employerName}" or generic terms like "the organization" / "a growing multi-practice DSO." Do not name any DSO, parent company, or practice brand.`;
 
+  // authority_level / work_mode are optional context — include each line
+  // only when the operator has actually picked a value.
+  const contextLines = [
+    `${employerFieldLabel}: ${args.employerName}`,
+    `Corporate function: ${args.functionLabel} (${args.functionSlug})`,
+    args.authorityLabel ? `Authority level: ${args.authorityLabel}` : null,
+    args.workModeLabel ? `Work mode: ${args.workModeLabel}` : null,
+    `Tone: ${args.tone}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
   return `Write a corporate job posting for a Dental Support Organization:
 
-${employerFieldLabel}: ${args.employerName}
-Corporate function: ${args.functionLabel} (${args.functionSlug})
-Authority level: ${args.authorityLabel}
-Work mode: ${args.workModeLabel}
-Tone: ${args.tone}
+${contextLines}
 
 Operator-supplied brief (use as guidance, not verbatim):
 ${args.brief || "(no specific notes — write a strong default for a corporate role at this function and authority level)"}${privacyReminder}

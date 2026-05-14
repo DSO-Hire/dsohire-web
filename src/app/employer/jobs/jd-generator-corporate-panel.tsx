@@ -186,10 +186,17 @@ export function JdGeneratorCorporatePanel({
           <div className="flex min-h-[44px] items-center px-4 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px]">
             <span>
               {functionLabel}
-              <span className="text-slate-meta">
-                {" "}
-                · {authorityLabel} · {workModeLabel}
-              </span>
+              {/* authority/work-mode are picked across later steps — only
+                  show the parts the operator has actually set, no dangling
+                  separators. */}
+              {[authorityLevel ? authorityLabel : null, workMode ? workModeLabel : null]
+                .filter(Boolean)
+                .map((part) => (
+                  <span key={part as string} className="text-slate-meta">
+                    {" "}
+                    · {part}
+                  </span>
+                ))}
             </span>
           </div>
         </div>
