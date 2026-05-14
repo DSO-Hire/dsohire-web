@@ -52,8 +52,8 @@ import {
   Loader2,
 } from "lucide-react";
 import { JobDescriptionEditor } from "@/components/job-description-editor";
-import { JdGeneratorCorporatePanel } from "../../jd-generator-corporate-panel";
-import { CorporateRecommendedQuestionsPanel } from "../../corporate-recommended-questions-panel";
+import { JdGeneratorCorporatePanel } from "../../../jd-generator-corporate-panel";
+import { CorporateRecommendedQuestionsPanel } from "../../../corporate-recommended-questions-panel";
 import {
   updateJobDescriptionSection,
   setJobStatus,
