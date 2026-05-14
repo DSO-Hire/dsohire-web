@@ -770,7 +770,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
               if (rows.length === 0) return null;
 
               return (
-                <section className="mt-10 pt-8 border-t border-[var(--rule)]">
+                <section className="mt-10 p-6 sm:p-7 bg-heritage/[0.06] border border-heritage/25">
                   <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink mb-4">
                     Role details
                   </h2>
@@ -778,8 +778,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                     {rows.map((row) => (
                       <div
                         key={row.label}
-                        className="border-l-2 pl-3"
-                        style={{ borderColor: "#3D5266" }}
+                        className="border-l-2 border-heritage/70 pl-3"
                       >
                         <dt className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta mb-1">
                           {row.label}
@@ -833,8 +832,8 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
           </div>
 
           {/* Sidebar */}
-          <aside className="bg-cream p-7 border border-[var(--rule)] h-fit">
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
+          <aside className="bg-ink p-7 h-fit">
+            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage mb-4">
               At a Glance
             </div>
 
@@ -863,10 +862,10 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                 <ul className="space-y-2 mt-1">
                   {locations.map((loc) => (
                     <li key={loc.id}>
-                      <div className="font-semibold text-ink text-[14px]">
+                      <div className="font-semibold text-ivory text-[14px]">
                         {loc.name}
                       </div>
-                      <div className="text-[13px] text-slate-body">
+                      <div className="text-[13px] text-ivory/70">
                         {[loc.city, loc.state].filter(Boolean).join(", ")}
                       </div>
                     </li>
@@ -897,12 +896,12 @@ function Detail({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mb-5 pb-5 last:mb-0 last:pb-0 last:border-0 border-b border-[var(--rule)]">
-      <div className="flex items-center gap-2 text-[9px] font-bold tracking-[2px] uppercase text-slate-meta mb-1.5">
+    <div className="mb-5 pb-5 last:mb-0 last:pb-0 last:border-0 border-b border-ivory/15">
+      <div className="flex items-center gap-2 text-[9px] font-bold tracking-[2px] uppercase text-heritage mb-1.5">
         <Icon className="h-3 w-3" />
         {label}
       </div>
-      <div className="text-[14px] text-ink">{children}</div>
+      <div className="text-[14px] text-ivory">{children}</div>
     </div>
   );
 }
@@ -984,34 +983,34 @@ function CompensationGlance({ job }: { job: { [k: string]: unknown } }) {
     <div className="space-y-1.5">
       {ote.hasVariable && ote.ote != null ? (
         <>
-          <div className="text-[18px] font-extrabold text-ink leading-tight">
+          <div className="text-[18px] font-extrabold text-ivory leading-tight">
             ~{formatUsd(ote.ote)}
-            <span className="ml-1.5 text-[12px] font-semibold text-slate-meta">
+            <span className="ml-1.5 text-[12px] font-semibold text-heritage">
               OTE / yr
             </span>
           </div>
-          <div className="text-[13px] text-slate-body">
+          <div className="text-[13px] text-ivory/70">
             {baseLine} base + {formatUsd(ote.variable)} target variable
           </div>
         </>
       ) : (
-        <div className="font-semibold text-ink">{baseLine}</div>
+        <div className="font-semibold text-ivory">{baseLine}</div>
       )}
 
       {variableEnabled && variableStructure && (
-        <div className="text-[13px] text-slate-body">
-          <span className="font-semibold text-ink">Variable:</span>{" "}
+        <div className="text-[13px] text-ivory/70">
+          <span className="font-semibold text-ivory">Variable:</span>{" "}
           {variableStructure}
         </div>
       )}
       {bonusEnabled && bonusStructure && (
-        <div className="text-[13px] text-slate-body">
-          <span className="font-semibold text-ink">Bonus:</span> {bonusStructure}
+        <div className="text-[13px] text-ivory/70">
+          <span className="font-semibold text-ivory">Bonus:</span> {bonusStructure}
         </div>
       )}
       {equityOffered && (
-        <div className="text-[13px] text-slate-body">
-          <span className="font-semibold text-ink">Equity:</span>{" "}
+        <div className="text-[13px] text-ivory/70">
+          <span className="font-semibold text-ivory">Equity:</span>{" "}
           {equityNote || "Offered"}
         </div>
       )}
