@@ -75,6 +75,7 @@ import {
   type CompensationType,
 } from "../../../job-wizard";
 import { ExternalLinksField } from "@/components/external-links-field";
+import { CompensationSection } from "../../../compensation-section";
 import { CORPORATE_FUNCTIONS } from "@/lib/corporate/functions";
 import {
   WORK_MODES,
@@ -164,6 +165,11 @@ export interface CorporateEditSectionsInitial {
   industry_experience: string | null;
   min_years_corporate_experience: number | null;
   max_years_corporate_experience: number | null;
+  variable_comp_enabled: boolean;
+  variable_comp_target: number | null;
+  variable_comp_structure: string | null;
+  bonus_enabled: boolean;
+  bonus_target: number | null;
   bonus_structure: string | null;
   equity_offered: boolean;
   equity_note: string | null;
@@ -794,6 +800,23 @@ function DetailsSection({
       ? String(initial.max_years_corporate_experience)
       : ""
   );
+  // Composable compensation components (migration 20260514000002). Numeric
+  // values are STRINGS in state, mirroring compMin.
+  const [variableCompEnabled, setVariableCompEnabled] = useState(
+    initial.variable_comp_enabled
+  );
+  const [variableCompTarget, setVariableCompTarget] = useState(
+    initial.variable_comp_target !== null
+      ? String(initial.variable_comp_target)
+      : ""
+  );
+  const [variableCompStructure, setVariableCompStructure] = useState(
+    initial.variable_comp_structure ?? ""
+  );
+  const [bonusEnabled, setBonusEnabled] = useState(initial.bonus_enabled);
+  const [bonusTarget, setBonusTarget] = useState(
+    initial.bonus_target !== null ? String(initial.bonus_target) : ""
+  );
   const [bonusStructure, setBonusStructure] = useState(
     initial.bonus_structure ?? ""
   );
@@ -849,6 +872,15 @@ function DetailsSection({
       initial.max_years_corporate_experience !== null
         ? String(initial.max_years_corporate_experience)
         : "",
+    variableCompEnabled: initial.variable_comp_enabled,
+    variableCompTarget:
+      initial.variable_comp_target !== null
+        ? String(initial.variable_comp_target)
+        : "",
+    variableCompStructure: initial.variable_comp_structure ?? "",
+    bonusEnabled: initial.bonus_enabled,
+    bonusTarget:
+      initial.bonus_target !== null ? String(initial.bonus_target) : "",
     bonusStructure: initial.bonus_structure ?? "",
     equityOffered: initial.equity_offered,
     equityNote: initial.equity_note ?? "",
@@ -879,6 +911,11 @@ function DetailsSection({
     industryExperience !== snapshot.industryExperience ||
     minYears !== snapshot.minYears ||
     maxYears !== snapshot.maxYears ||
+    variableCompEnabled !== snapshot.variableCompEnabled ||
+    variableCompTarget !== snapshot.variableCompTarget ||
+    variableCompStructure !== snapshot.variableCompStructure ||
+    bonusEnabled !== snapshot.bonusEnabled ||
+    bonusTarget !== snapshot.bonusTarget ||
     bonusStructure !== snapshot.bonusStructure ||
     equityOffered !== snapshot.equityOffered ||
     equityNote !== snapshot.equityNote ||
@@ -939,10 +976,17 @@ function DetailsSection({
       fd.set("industry_experience", industryExperience);
     fd.set("min_years_corporate_experience", minYears);
     fd.set("max_years_corporate_experience", maxYears);
-    if (bonusStructure.trim())
-      fd.set("bonus_structure", bonusStructure);
+    // Composable compensation components — IDENTICAL contract to the
+    // practice side + the corporate wizard. Enable flags emit "on" only
+    // when enabled; value fields always emitted (may be "").
+    if (variableCompEnabled) fd.set("variable_comp_enabled", "on");
+    fd.set("variable_comp_target", variableCompTarget);
+    fd.set("variable_comp_structure", variableCompStructure);
+    if (bonusEnabled) fd.set("bonus_enabled", "on");
+    fd.set("bonus_target", bonusTarget);
+    fd.set("bonus_structure", bonusStructure);
     if (equityOffered) fd.set("equity_offered", "on");
-    if (equityNote.trim()) fd.set("equity_note", equityNote);
+    fd.set("equity_note", equityNote);
     fd.set("requirements", requirements);
     if (hideStages) fd.set("hide_stages_from_candidate", "on");
     for (const link of externalLinks) {
@@ -976,6 +1020,11 @@ function DetailsSection({
         industryExperience,
         minYears,
         maxYears,
+        variableCompEnabled,
+        variableCompTarget,
+        variableCompStructure,
+        bonusEnabled,
+        bonusTarget,
         bonusStructure,
         equityOffered,
         equityNote,
@@ -993,111 +1042,79 @@ function DetailsSection({
       subtitle="Pay, travel, reporting structure, experience, bonus/equity, and visibility."
     >
       <div className="space-y-6">
-        {/* ── Compensation ── */}
-        <fieldset className="border border-[var(--rule)] p-5 bg-cream/40">
-          <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-[#3D5266]">
-            Compensation
-          </legend>
-          <div className="mt-1 mb-4">
-            <label className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-2">
-              Compensation type
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {(
-                [
-                  { value: "range", label: "Range" },
-                  { value: "starting_at", label: "Starting at" },
-                  { value: "up_to", label: "Up to" },
-                  { value: "exact", label: "Exact" },
-                  { value: "doe", label: "DOE / discussed" },
-                ] as const
-              ).map((opt) => {
-                const checked = compType === opt.value;
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => {
-                      setCompType(opt.value);
-                      touch();
-                    }}
-                    className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
-                      checked
-                        ? "bg-[#3D5266] text-ivory border-[#3D5266]"
-                        : "bg-white text-ink border-[var(--rule)] hover:border-[#3D5266]"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {compType !== "doe" && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {(compType === "range" ||
-                compType === "starting_at" ||
-                compType === "exact") && (
-                <Input
-                  label={
-                    compType === "range"
-                      ? "Minimum"
-                      : compType === "starting_at"
-                        ? "Starting at"
-                        : "Pay"
-                  }
-                  type="number"
-                  value={compMin}
-                  onChange={(v) => {
-                    setCompMin(v);
-                    touch();
-                  }}
-                />
-              )}
-              {(compType === "range" || compType === "up_to") && (
-                <Input
-                  label={compType === "range" ? "Maximum" : "Up to"}
-                  type="number"
-                  value={compMax}
-                  onChange={(v) => {
-                    setCompMax(v);
-                    touch();
-                  }}
-                />
-              )}
-              <Select
-                label="Period"
-                value={compPeriod}
-                onChange={(v) => {
-                  setCompPeriod(v);
-                  touch();
-                }}
-                options={[
-                  { value: "", label: "—" },
-                  { value: "hourly", label: "Per hour" },
-                  { value: "daily", label: "Per day" },
-                  { value: "annual", label: "Per year" },
-                ]}
-              />
-            </div>
-          )}
-          <label className="mt-4 flex items-start gap-2.5 text-[14px] text-ink cursor-pointer">
-            <input
-              type="checkbox"
-              checked={compVisible}
-              onChange={(e) => {
-                setCompVisible(e.target.checked);
-                touch();
-              }}
-              className="mt-1 accent-[#3D5266]"
-            />
-            <span>
-              Show pay publicly. Required in CA, CO, WA, NY, and other states
-              with pay-transparency laws.
-            </span>
-          </label>
-        </fieldset>
+        {/* ── Compensation (unified composable editor) ──
+            Base comp + Commission/variable + Bonus + Equity + live OTE
+            note, all in the ONE shared CompensationSection. The scattered
+            bonus_structure / equity_offered / equity_note fields used to
+            live further down this section — pulled up here. */}
+        <CompensationSection
+          accent="corporate"
+          compType={compType}
+          onCompType={(v) => {
+            setCompType(v);
+            touch();
+          }}
+          compMin={compMin}
+          onCompMin={(v) => {
+            setCompMin(v);
+            touch();
+          }}
+          compMax={compMax}
+          onCompMax={(v) => {
+            setCompMax(v);
+            touch();
+          }}
+          compPeriod={compPeriod}
+          onCompPeriod={(v) => {
+            setCompPeriod(v);
+            touch();
+          }}
+          compVisible={compVisible}
+          onCompVisible={(v) => {
+            setCompVisible(v);
+            touch();
+          }}
+          variableCompEnabled={variableCompEnabled}
+          onVariableCompEnabled={(v) => {
+            setVariableCompEnabled(v);
+            touch();
+          }}
+          variableCompTarget={variableCompTarget}
+          onVariableCompTarget={(v) => {
+            setVariableCompTarget(v);
+            touch();
+          }}
+          variableCompStructure={variableCompStructure}
+          onVariableCompStructure={(v) => {
+            setVariableCompStructure(v);
+            touch();
+          }}
+          bonusEnabled={bonusEnabled}
+          onBonusEnabled={(v) => {
+            setBonusEnabled(v);
+            touch();
+          }}
+          bonusTarget={bonusTarget}
+          onBonusTarget={(v) => {
+            setBonusTarget(v);
+            touch();
+          }}
+          bonusStructure={bonusStructure}
+          onBonusStructure={(v) => {
+            setBonusStructure(v);
+            touch();
+          }}
+          equityOffered={equityOffered}
+          onEquityOffered={(v) => {
+            setEquityOffered(v);
+            touch();
+          }}
+          equityNote={equityNote}
+          onEquityNote={(v) => {
+            setEquityNote(v);
+            touch();
+          }}
+        />
 
         {/* ── Remote state restrictions — only relevant when work mode is
             remote. work_mode itself is edited in the Basics section. ── */}
@@ -1377,53 +1394,7 @@ function DetailsSection({
           </div>
         </fieldset>
 
-        {/* ── Bonus & equity ── */}
-        <fieldset className="border border-[var(--rule)] p-5 bg-cream/40">
-          <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-[#3D5266]">
-            Bonus & equity{" "}
-            <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
-              (optional)
-            </span>
-          </legend>
-          <div className="mt-2">
-            <Textarea
-              label="Bonus structure"
-              rows={2}
-              placeholder="Annual performance bonus up to 20% of base, tied to EBITDA targets."
-              value={bonusStructure}
-              onChange={(v) => {
-                setBonusStructure(v);
-                touch();
-              }}
-            />
-          </div>
-          <label className="mt-4 flex items-start gap-2.5 text-[14px] text-ink cursor-pointer">
-            <input
-              type="checkbox"
-              checked={equityOffered}
-              onChange={(e) => {
-                setEquityOffered(e.target.checked);
-                touch();
-              }}
-              className="mt-1 accent-[#3D5266]"
-            />
-            <span className="font-bold">Equity is part of this package</span>
-          </label>
-          {equityOffered && (
-            <div className="mt-3">
-              <Textarea
-                label="Equity note (optional)"
-                rows={2}
-                placeholder="0.1–0.5% with a 4-year vest, 1-year cliff."
-                value={equityNote}
-                onChange={(v) => {
-                  setEquityNote(v);
-                  touch();
-                }}
-              />
-            </div>
-          )}
-        </fieldset>
+        {/* Bonus & equity fields moved UP into <CompensationSection> above. */}
 
         <ExternalLinksField
           initial={externalLinks}

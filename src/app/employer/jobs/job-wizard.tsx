@@ -42,6 +42,7 @@ import {
   ExternalLinksField,
   type ExternalLinkPair,
 } from "@/components/external-links-field";
+import { CompensationSection } from "./compensation-section";
 import {
   getAllDentalSkills,
   BENEFITS,
@@ -176,6 +177,15 @@ export interface JobWizardInitial {
   corporate_function: string | null;
   // E1.12 Slice B (2026-05-13) — external links {label,url} pairs.
   external_links: Array<{ label: string; url: string }>;
+  // 2026-05-14 — composable compensation components (migration 20260514000001/2).
+  variable_comp_enabled: boolean;
+  variable_comp_target: number | null;
+  variable_comp_structure: string | null;
+  bonus_enabled: boolean;
+  bonus_target: number | null;
+  bonus_structure: string | null;
+  equity_offered: boolean;
+  equity_note: string | null;
 }
 
 export const SCOPE_OPTIONS: Array<{
@@ -355,6 +365,36 @@ export function JobWizard({
   const [compVisible, setCompVisible] = useState(
     initial?.compensation_visible ?? true
   );
+  // 2026-05-14 — composable compensation components. Numeric targets are
+  // STRINGS in wizard state (mirrors compMin/compMax) so the inputs stay
+  // controlled; the server parser does the int coercion.
+  const [variableCompEnabled, setVariableCompEnabled] = useState(
+    initial?.variable_comp_enabled ?? false
+  );
+  const [variableCompTarget, setVariableCompTarget] = useState(
+    initial?.variable_comp_target !== null &&
+      initial?.variable_comp_target !== undefined
+      ? String(initial.variable_comp_target)
+      : ""
+  );
+  const [variableCompStructure, setVariableCompStructure] = useState(
+    initial?.variable_comp_structure ?? ""
+  );
+  const [bonusEnabled, setBonusEnabled] = useState(
+    initial?.bonus_enabled ?? false
+  );
+  const [bonusTarget, setBonusTarget] = useState(
+    initial?.bonus_target !== null && initial?.bonus_target !== undefined
+      ? String(initial.bonus_target)
+      : ""
+  );
+  const [bonusStructure, setBonusStructure] = useState(
+    initial?.bonus_structure ?? ""
+  );
+  const [equityOffered, setEquityOffered] = useState(
+    initial?.equity_offered ?? false
+  );
+  const [equityNote, setEquityNote] = useState(initial?.equity_note ?? "");
   const [hideStagesFromCandidate, setHideStagesFromCandidate] = useState(
     initial?.hide_stages_from_candidate ?? false
   );
@@ -448,6 +488,14 @@ export function JobWizard({
         compMax,
         compPeriod,
         compVisible,
+        variableCompEnabled,
+        variableCompTarget,
+        variableCompStructure,
+        bonusEnabled,
+        bonusTarget,
+        bonusStructure,
+        equityOffered,
+        equityNote,
         scope,
         hideStagesFromCandidate,
         skills,
@@ -484,6 +532,14 @@ export function JobWizard({
     compMax,
     compPeriod,
     compVisible,
+    variableCompEnabled,
+    variableCompTarget,
+    variableCompStructure,
+    bonusEnabled,
+    bonusTarget,
+    bonusStructure,
+    equityOffered,
+    equityNote,
     scope,
     hideStagesFromCandidate,
     skills,
@@ -519,6 +575,16 @@ export function JobWizard({
       setCompMax((d.compMax as string) ?? "");
       setCompPeriod((d.compPeriod as string) ?? "");
       setCompVisible(Boolean(d.compVisible));
+      // 2026-05-14 — composable comp components. Defensive defaults for
+      // older drafts that didn't carry these keys.
+      setVariableCompEnabled(Boolean(d.variableCompEnabled));
+      setVariableCompTarget((d.variableCompTarget as string) ?? "");
+      setVariableCompStructure((d.variableCompStructure as string) ?? "");
+      setBonusEnabled(Boolean(d.bonusEnabled));
+      setBonusTarget((d.bonusTarget as string) ?? "");
+      setBonusStructure((d.bonusStructure as string) ?? "");
+      setEquityOffered(Boolean(d.equityOffered));
+      setEquityNote((d.equityNote as string) ?? "");
       setScope(((d.scope as JobScope) ?? "location") as JobScope);
       setHideStagesFromCandidate(Boolean(d.hideStagesFromCandidate));
       setSkills(((d.skills as string[]) ?? []));
@@ -653,6 +719,17 @@ export function JobWizard({
       formData.set("compensation_max", "");
     }
     formData.set("compensation_period", compType === "doe" ? "" : compPeriod);
+    // 2026-05-14 — composable compensation components. The _enabled flag
+    // is the source of truth: checkbox convention (set "on" only when
+    // enabled, omit when off); target/structure always sent as strings.
+    if (variableCompEnabled) formData.set("variable_comp_enabled", "on");
+    formData.set("variable_comp_target", variableCompTarget);
+    formData.set("variable_comp_structure", variableCompStructure);
+    if (bonusEnabled) formData.set("bonus_enabled", "on");
+    formData.set("bonus_target", bonusTarget);
+    formData.set("bonus_structure", bonusStructure);
+    if (equityOffered) formData.set("equity_offered", "on");
+    formData.set("equity_note", equityNote);
     // v1.1 — repeated `specialty` form entries; min_years_experience is
     // a single optional integer string.
     for (const sp of specialty) {
@@ -847,6 +924,22 @@ export function JobWizard({
             onCompPeriod={setCompPeriod}
             compVisible={compVisible}
             onCompVisible={setCompVisible}
+            variableCompEnabled={variableCompEnabled}
+            onVariableCompEnabled={setVariableCompEnabled}
+            variableCompTarget={variableCompTarget}
+            onVariableCompTarget={setVariableCompTarget}
+            variableCompStructure={variableCompStructure}
+            onVariableCompStructure={setVariableCompStructure}
+            bonusEnabled={bonusEnabled}
+            onBonusEnabled={setBonusEnabled}
+            bonusTarget={bonusTarget}
+            onBonusTarget={setBonusTarget}
+            bonusStructure={bonusStructure}
+            onBonusStructure={setBonusStructure}
+            equityOffered={equityOffered}
+            onEquityOffered={setEquityOffered}
+            equityNote={equityNote}
+            onEquityNote={setEquityNote}
             skills={skills}
             onSkills={setSkills}
             benefits={benefits}
@@ -1290,6 +1383,22 @@ function DetailsStep({
   onCompPeriod,
   compVisible,
   onCompVisible,
+  variableCompEnabled,
+  onVariableCompEnabled,
+  variableCompTarget,
+  onVariableCompTarget,
+  variableCompStructure,
+  onVariableCompStructure,
+  bonusEnabled,
+  onBonusEnabled,
+  bonusTarget,
+  onBonusTarget,
+  bonusStructure,
+  onBonusStructure,
+  equityOffered,
+  onEquityOffered,
+  equityNote,
+  onEquityNote,
   skills,
   onSkills,
   benefits,
@@ -1321,6 +1430,24 @@ function DetailsStep({
   onCompPeriod: (v: string) => void;
   compVisible: boolean;
   onCompVisible: (v: boolean) => void;
+  // 2026-05-14 — composable compensation components. Numeric targets are
+  // strings here (wizard-state convention).
+  variableCompEnabled: boolean;
+  onVariableCompEnabled: (v: boolean) => void;
+  variableCompTarget: string;
+  onVariableCompTarget: (v: string) => void;
+  variableCompStructure: string;
+  onVariableCompStructure: (v: string) => void;
+  bonusEnabled: boolean;
+  onBonusEnabled: (v: boolean) => void;
+  bonusTarget: string;
+  onBonusTarget: (v: string) => void;
+  bonusStructure: string;
+  onBonusStructure: (v: string) => void;
+  equityOffered: boolean;
+  onEquityOffered: (v: boolean) => void;
+  equityNote: string;
+  onEquityNote: (v: string) => void;
   // v1.6 — string[] (canonical chip-picker), not legacy comma-string.
   skills: string[];
   onSkills: (v: string[]) => void;
@@ -1354,99 +1481,39 @@ function DetailsStep({
         </h2>
       </div>
 
-      <fieldset className="border border-[var(--rule)] p-6 bg-cream/40">
-        <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
-          Compensation
-        </legend>
-
-        {/* v1.8 — comp type radio. The dynamic inputs below swap based
-            on this choice so range / starting / up-to / exact / DOE
-            postings all express their intent cleanly. */}
-        <div className="mt-1 mb-4">
-          <label className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-2">
-            Compensation type
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {COMP_TYPE_OPTIONS.map((opt) => {
-              const checked = compType === opt.value;
-              return (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => onCompType(opt.value)}
-                  className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
-                    checked
-                      ? "bg-heritage-deep text-ivory border-heritage-deep"
-                      : "bg-white text-ink border-[var(--rule)] hover:border-heritage"
-                  }`}
-                  title={opt.helper}
-                >
-                  {opt.label}
-                </button>
-              );
-            })}
-          </div>
-          <p className="mt-2 text-[11px] text-slate-meta leading-snug">
-            {COMP_TYPE_OPTIONS.find((o) => o.value === compType)?.helper}
-          </p>
-        </div>
-
-        {/* Dynamic input grid — shape changes by type. */}
-        {compType !== "doe" && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            {(compType === "range" ||
-              compType === "starting_at" ||
-              compType === "exact") && (
-              <Input
-                label={
-                  compType === "range"
-                    ? "Minimum"
-                    : compType === "starting_at"
-                      ? "Starting at"
-                      : "Pay"
-                }
-                type="number"
-                placeholder="190000"
-                value={compMin}
-                onChange={onCompMin}
-              />
-            )}
-            {(compType === "range" || compType === "up_to") && (
-              <Input
-                label={compType === "range" ? "Maximum" : "Up to"}
-                type="number"
-                placeholder="240000"
-                value={compMax}
-                onChange={onCompMax}
-              />
-            )}
-            <Select
-              label="Period"
-              value={compPeriod}
-              onChange={onCompPeriod}
-              options={[
-                { value: "", label: "—" },
-                { value: "hourly", label: "Per hour" },
-                { value: "daily", label: "Per day" },
-                { value: "annual", label: "Per year" },
-              ]}
-            />
-          </div>
-        )}
-
-        <label className="mt-4 flex items-start gap-2.5 text-[14px] text-ink cursor-pointer">
-          <input
-            type="checkbox"
-            checked={compVisible}
-            onChange={(e) => onCompVisible(e.target.checked)}
-            className="mt-1 accent-heritage"
-          />
-          <span>
-            Show pay publicly. Required in CA, CO, WA, NY, and other
-            states with pay-transparency laws.
-          </span>
-        </label>
-      </fieldset>
+      {/* 2026-05-14 — composable compensation editor. Replaces the old
+          inline comp-type / min-max / show-pay fieldset; the shared
+          CompensationSection now OWNS the entire comp UI (base picker +
+          variable/bonus/equity components + OTE note + show-pay toggle). */}
+      <CompensationSection
+        accent="heritage"
+        compType={compType}
+        onCompType={onCompType}
+        compMin={compMin}
+        onCompMin={onCompMin}
+        compMax={compMax}
+        onCompMax={onCompMax}
+        compPeriod={compPeriod}
+        onCompPeriod={onCompPeriod}
+        compVisible={compVisible}
+        onCompVisible={onCompVisible}
+        variableCompEnabled={variableCompEnabled}
+        onVariableCompEnabled={onVariableCompEnabled}
+        variableCompTarget={variableCompTarget}
+        onVariableCompTarget={onVariableCompTarget}
+        variableCompStructure={variableCompStructure}
+        onVariableCompStructure={onVariableCompStructure}
+        bonusEnabled={bonusEnabled}
+        onBonusEnabled={onBonusEnabled}
+        bonusTarget={bonusTarget}
+        onBonusTarget={onBonusTarget}
+        bonusStructure={bonusStructure}
+        onBonusStructure={onBonusStructure}
+        equityOffered={equityOffered}
+        onEquityOffered={onEquityOffered}
+        equityNote={equityNote}
+        onEquityNote={onEquityNote}
+      />
 
       <fieldset className="border border-[var(--rule)] p-6 bg-cream/40">
         <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">

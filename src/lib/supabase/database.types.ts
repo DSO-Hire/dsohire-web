@@ -3,8 +3,8 @@
  *
  * Regenerated 2026-05-14 via the Supabase MCP `generate_typescript_types`
  * tool against project viapivvlhjqvjhoflxmp (dsohire-prod), after migration
- * 20260514000001_jobs_corporate_sandbox (Phase 5G.d — 16 corporate-shaped
- * columns on public.jobs).
+ * 20260514000002_jobs_composable_comp (composable compensation model — 5
+ * new columns on public.jobs).
  *
  * Do not hand-edit; rerun after each migration that touches table shape,
  * enum values, or RPC signatures.
@@ -2424,7 +2424,9 @@ export type Database = {
           applications_count: number
           authority_level: string | null
           benefits: string[] | null
+          bonus_enabled: boolean
           bonus_structure: string | null
+          bonus_target: number | null
           compensation_max: number | null
           compensation_min: number | null
           compensation_period:
@@ -2469,6 +2471,9 @@ export type Database = {
           travel_expectation: string | null
           travel_territory: string | null
           updated_at: string
+          variable_comp_enabled: boolean
+          variable_comp_structure: string | null
+          variable_comp_target: number | null
           views: number
           work_mode: string | null
           work_mode_detail: string | null
@@ -2477,7 +2482,9 @@ export type Database = {
           applications_count?: number
           authority_level?: string | null
           benefits?: string[] | null
+          bonus_enabled?: boolean
           bonus_structure?: string | null
+          bonus_target?: number | null
           compensation_max?: number | null
           compensation_min?: number | null
           compensation_period?:
@@ -2522,6 +2529,9 @@ export type Database = {
           travel_expectation?: string | null
           travel_territory?: string | null
           updated_at?: string
+          variable_comp_enabled?: boolean
+          variable_comp_structure?: string | null
+          variable_comp_target?: number | null
           views?: number
           work_mode?: string | null
           work_mode_detail?: string | null
@@ -2530,7 +2540,9 @@ export type Database = {
           applications_count?: number
           authority_level?: string | null
           benefits?: string[] | null
+          bonus_enabled?: boolean
           bonus_structure?: string | null
+          bonus_target?: number | null
           compensation_max?: number | null
           compensation_min?: number | null
           compensation_period?:
@@ -2575,6 +2587,9 @@ export type Database = {
           travel_expectation?: string | null
           travel_territory?: string | null
           updated_at?: string
+          variable_comp_enabled?: boolean
+          variable_comp_structure?: string | null
+          variable_comp_target?: number | null
           views?: number
           work_mode?: string | null
           work_mode_detail?: string | null
@@ -3097,7 +3112,9 @@ export type Database = {
           applications_count: number
           authority_level: string | null
           benefits: string[] | null
+          bonus_enabled: boolean
           bonus_structure: string | null
+          bonus_target: number | null
           compensation_max: number | null
           compensation_min: number | null
           compensation_period:
@@ -3142,6 +3159,9 @@ export type Database = {
           travel_expectation: string | null
           travel_territory: string | null
           updated_at: string
+          variable_comp_enabled: boolean
+          variable_comp_structure: string | null
+          variable_comp_target: number | null
           views: number
           work_mode: string | null
           work_mode_detail: string | null

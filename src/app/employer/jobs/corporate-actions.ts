@@ -61,8 +61,16 @@
  *   max_years_corporate_experience string int, optional; NaN → error,
  *                                    negative → error; if both present and
  *                                    min > max → error
- *   bonus_structure                string, optional free text
- *   equity_note                    string, optional free text
+ *   variable_comp_target           string int, optional; gated by
+ *                                    variable_comp_enabled; NaN/negative → error
+ *   variable_comp_structure        string, optional free text; gated by
+ *                                    variable_comp_enabled
+ *   bonus_target                   string int, optional; gated by
+ *                                    bonus_enabled; NaN/negative → error
+ *   bonus_structure                string, optional free text; gated by
+ *                                    bonus_enabled
+ *   equity_note                    string, optional free text; gated by
+ *                                    equity_offered
  *   compensation_min               string int, optional; NaN → error
  *   compensation_max               string int, optional; NaN → error
  *   compensation_period            string, optional (e.g. "year", "hour")
@@ -74,7 +82,9 @@
  * Checkbox fields ("on" when checked, absent otherwise):
  *   compensation_visible           checkbox
  *   hide_stages_from_candidate     checkbox
- *   equity_offered                 checkbox
+ *   variable_comp_enabled          checkbox — gates variable_comp_* fields
+ *   bonus_enabled                  checkbox — gates bonus_* fields
+ *   equity_offered                 checkbox — gates equity_note
  *
  * Repeated / multi-value fields (formData.getAll):
  *   location_ids                   repeated string — anchor location IDs;
@@ -187,6 +197,12 @@ interface ParsedCorporateJobInput {
   industryExperience: IndustryExperience | null;
   minYearsCorporateExperience: number | null;
   maxYearsCorporateExperience: number | null;
+  // Composable compensation components (migration 20260514000002).
+  variableCompEnabled: boolean;
+  variableCompTarget: number | null;
+  variableCompStructure: string | null;
+  bonusEnabled: boolean;
+  bonusTarget: number | null;
   bonusStructure: string | null;
   equityOffered: boolean;
   equityNote: string | null;
@@ -302,8 +318,6 @@ export async function parseCorporateJobInput(
   const workModeDetail = optText(formData, "work_mode_detail");
   const travelTerritory = optText(formData, "travel_territory");
   const reportsTo = optText(formData, "reports_to");
-  const bonusStructure = optText(formData, "bonus_structure");
-  const equityNote = optText(formData, "equity_note");
   const requirements = String(formData.get("requirements") ?? "").trim();
 
   // ── remote_state_restrictions — repeated, trimmed, blanks dropped ──
@@ -360,8 +374,48 @@ export async function parseCorporateJobInput(
     };
   }
 
-  // ── equity_offered checkbox + note ──
+  // ── Composable compensation components (migration 20260514000002) ──
+  // IDENTICAL parser rules to the practice side. Each component's value
+  // fields are gated by its enable flag; disabled → null. Negative target
+  // figures fail-friendly even though the DB has CHECKs.
+  const variableCompEnabled =
+    formData.get("variable_comp_enabled") === "on";
+  let variableCompTarget: number | null = null;
+  let variableCompStructure: string | null = null;
+  if (variableCompEnabled) {
+    const raw = String(
+      formData.get("variable_comp_target") ?? ""
+    ).trim();
+    variableCompTarget = raw ? parseInt(raw, 10) : null;
+    if (variableCompTarget !== null && Number.isNaN(variableCompTarget)) {
+      return { error: "Variable pay target must be a number." };
+    }
+    if (variableCompTarget !== null && variableCompTarget < 0) {
+      return { error: "Variable pay target can't be negative." };
+    }
+    variableCompStructure = optText(formData, "variable_comp_structure");
+  }
+
+  const bonusEnabled = formData.get("bonus_enabled") === "on";
+  let bonusTarget: number | null = null;
+  let bonusStructure: string | null = null;
+  if (bonusEnabled) {
+    const raw = String(formData.get("bonus_target") ?? "").trim();
+    bonusTarget = raw ? parseInt(raw, 10) : null;
+    if (bonusTarget !== null && Number.isNaN(bonusTarget)) {
+      return { error: "Bonus target must be a number." };
+    }
+    if (bonusTarget !== null && bonusTarget < 0) {
+      return { error: "Bonus target can't be negative." };
+    }
+    bonusStructure = optText(formData, "bonus_structure");
+  }
+
+  // ── equity_offered checkbox + note (note gated by the checkbox) ──
   const equityOffered = formData.get("equity_offered") === "on";
+  const equityNote = equityOffered
+    ? optText(formData, "equity_note")
+    : null;
 
   // ── Compensation — same machinery as the practice wizard ──
   const compMinRaw = String(formData.get("compensation_min") ?? "").trim();
@@ -522,6 +576,11 @@ export async function parseCorporateJobInput(
     industryExperience,
     minYearsCorporateExperience,
     maxYearsCorporateExperience,
+    variableCompEnabled,
+    variableCompTarget,
+    variableCompStructure,
+    bonusEnabled,
+    bonusTarget,
     bonusStructure,
     equityOffered,
     equityNote,
@@ -547,6 +606,11 @@ function corporateSandboxColumns(parsed: ParsedCorporateJobInput) {
     industry_experience: parsed.industryExperience,
     min_years_corporate_experience: parsed.minYearsCorporateExperience,
     max_years_corporate_experience: parsed.maxYearsCorporateExperience,
+    variable_comp_enabled: parsed.variableCompEnabled,
+    variable_comp_target: parsed.variableCompTarget,
+    variable_comp_structure: parsed.variableCompStructure,
+    bonus_enabled: parsed.bonusEnabled,
+    bonus_target: parsed.bonusTarget,
     bonus_structure: parsed.bonusStructure,
     equity_offered: parsed.equityOffered,
     equity_note: parsed.equityNote,
@@ -1033,6 +1097,11 @@ export async function updateCorporateJobDetailsSection(
       industry_experience: parsed.industryExperience,
       min_years_corporate_experience: parsed.minYearsCorporateExperience,
       max_years_corporate_experience: parsed.maxYearsCorporateExperience,
+      variable_comp_enabled: parsed.variableCompEnabled,
+      variable_comp_target: parsed.variableCompTarget,
+      variable_comp_structure: parsed.variableCompStructure,
+      bonus_enabled: parsed.bonusEnabled,
+      bonus_target: parsed.bonusTarget,
       bonus_structure: parsed.bonusStructure,
       equity_offered: parsed.equityOffered,
       equity_note: parsed.equityNote,

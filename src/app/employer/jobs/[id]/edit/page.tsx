@@ -75,7 +75,7 @@ export default async function EditJobPage({ params }: PageProps) {
   const { data: job } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, benefits, requirements, status, posted_at, applications_count, views, hide_stages_from_candidate, scope, specialty, min_years_experience, schedule_days, schedule_evenings, schedule_weekends, corporate_function, external_links"
+      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, variable_comp_enabled, variable_comp_target, variable_comp_structure, bonus_enabled, bonus_target, bonus_structure, equity_offered, equity_note, benefits, requirements, status, posted_at, applications_count, views, hide_stages_from_candidate, scope, specialty, min_years_experience, schedule_days, schedule_evenings, schedule_weekends, corporate_function, external_links"
     )
     .eq("id", jobId)
     .eq("dso_id", dsoUser.dso_id)
@@ -138,6 +138,18 @@ export default async function EditJobPage({ params }: PageProps) {
         | "doe"
         | null) ?? "range",
     compensation_visible: (job.compensation_visible as boolean) ?? true,
+    // 2026-05-14 — composable compensation components.
+    variable_comp_enabled:
+      (job.variable_comp_enabled as boolean | null) ?? false,
+    variable_comp_target:
+      (job.variable_comp_target as number | null) ?? null,
+    variable_comp_structure:
+      (job.variable_comp_structure as string | null) ?? null,
+    bonus_enabled: (job.bonus_enabled as boolean | null) ?? false,
+    bonus_target: (job.bonus_target as number | null) ?? null,
+    bonus_structure: (job.bonus_structure as string | null) ?? null,
+    equity_offered: (job.equity_offered as boolean | null) ?? false,
+    equity_note: (job.equity_note as string | null) ?? null,
     benefits: ((job.benefits as string[] | null) ?? []) as string[],
     requirements: (job.requirements as string | null) ?? null,
     status: job.status as string,

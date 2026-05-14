@@ -96,6 +96,15 @@ export async function createJob(
       compensation_period: parsed.compPeriod,
       compensation_type: parsed.compType,
       compensation_visible: parsed.compVisible,
+      // 2026-05-14 — composable compensation components.
+      variable_comp_enabled: parsed.variableCompEnabled,
+      variable_comp_target: parsed.variableCompTarget,
+      variable_comp_structure: parsed.variableCompStructure,
+      bonus_enabled: parsed.bonusEnabled,
+      bonus_target: parsed.bonusTarget,
+      bonus_structure: parsed.bonusStructure,
+      equity_offered: parsed.equityOffered,
+      equity_note: parsed.equityNote,
       benefits: parsed.benefits.length > 0 ? parsed.benefits : null,
       requirements: parsed.requirements || null,
       status: parsed.status,
@@ -221,6 +230,15 @@ export async function updateJob(
       compensation_period: parsed.compPeriod,
       compensation_type: parsed.compType,
       compensation_visible: parsed.compVisible,
+      // 2026-05-14 — composable compensation components.
+      variable_comp_enabled: parsed.variableCompEnabled,
+      variable_comp_target: parsed.variableCompTarget,
+      variable_comp_structure: parsed.variableCompStructure,
+      bonus_enabled: parsed.bonusEnabled,
+      bonus_target: parsed.bonusTarget,
+      bonus_structure: parsed.bonusStructure,
+      equity_offered: parsed.equityOffered,
+      equity_note: parsed.equityNote,
       benefits: parsed.benefits.length > 0 ? parsed.benefits : null,
       requirements: parsed.requirements || null,
       status: parsed.status,
@@ -533,6 +551,39 @@ export async function updateJobDetailsSection(
     return { ok: false, error: "Max compensation must be a number." };
   }
 
+  // 2026-05-14 — composable compensation components. Same _enabled-flag-
+  // is-source-of-truth rule as the create/update parser: when a component
+  // is off its target/structure write as null. Negative target → error.
+  const variableCompEnabledEdit =
+    formData.get("variable_comp_enabled") === "on";
+  const bonusEnabledEdit = formData.get("bonus_enabled") === "on";
+  const equityOfferedEdit = formData.get("equity_offered") === "on";
+
+  const variableTargetEdit = parseCompTarget(
+    formData.get("variable_comp_target")
+  );
+  if ("error" in variableTargetEdit) {
+    return { ok: false, error: variableTargetEdit.error };
+  }
+  const bonusTargetEdit = parseCompTarget(formData.get("bonus_target"));
+  if ("error" in bonusTargetEdit) {
+    return { ok: false, error: bonusTargetEdit.error };
+  }
+
+  const variableCompTargetEdit = variableCompEnabledEdit
+    ? variableTargetEdit.value
+    : null;
+  const variableCompStructureEdit = variableCompEnabledEdit
+    ? String(formData.get("variable_comp_structure") ?? "").trim() || null
+    : null;
+  const bonusTargetEditVal = bonusEnabledEdit ? bonusTargetEdit.value : null;
+  const bonusStructureEdit = bonusEnabledEdit
+    ? String(formData.get("bonus_structure") ?? "").trim() || null
+    : null;
+  const equityNoteEdit = equityOfferedEdit
+    ? String(formData.get("equity_note") ?? "").trim() || null
+    : null;
+
   const benefits = benefitsMulti.length > 0 && !benefitsCsv
     ? benefitsMulti
     : benefitsCsv
@@ -602,6 +653,15 @@ export async function updateJobDetailsSection(
       compensation_period: compPeriodRaw || null,
       compensation_type: compTypeEdit,
       compensation_visible: compVisible,
+      // 2026-05-14 — composable compensation components.
+      variable_comp_enabled: variableCompEnabledEdit,
+      variable_comp_target: variableCompTargetEdit,
+      variable_comp_structure: variableCompStructureEdit,
+      bonus_enabled: bonusEnabledEdit,
+      bonus_target: bonusTargetEditVal,
+      bonus_structure: bonusStructureEdit,
+      equity_offered: equityOfferedEdit,
+      equity_note: equityNoteEdit,
       benefits: benefits.length > 0 ? benefits : null,
       requirements: requirements || null,
       hide_stages_from_candidate: hideStagesFromCandidate,
@@ -1173,6 +1233,17 @@ interface ParsedJobInput {
   compPeriod: string | null;
   compType: "range" | "starting_at" | "up_to" | "exact" | "doe";
   compVisible: boolean;
+  // 2026-05-14 — composable compensation components (migration
+  // 20260514000001/2). The _enabled flag is the source of truth: when
+  // off, target/structure persist as null so toggling off cleanly clears.
+  variableCompEnabled: boolean;
+  variableCompTarget: number | null;
+  variableCompStructure: string | null;
+  bonusEnabled: boolean;
+  bonusTarget: number | null;
+  bonusStructure: string | null;
+  equityOffered: boolean;
+  equityNote: string | null;
   benefits: string[];
   requirements: string;
   status: string;
@@ -1221,6 +1292,27 @@ const VALID_CORPORATE_FUNCTIONS = new Set<string>([
 // 5G.d — parseExternalLinks, VALID_SCOPES, VALID_KINDS now live in
 // ./job-shared.ts (imported at the top of this file) so the corporate
 // job actions can reuse them without a parallel copy.
+
+/**
+ * 2026-05-14 — parse a composable-comp target form value into an int (or
+ * null when blank). A negative target is a hard error with a friendly
+ * message; the DB CHECK on variable_comp_target / bonus_target also
+ * guards. Returns { value } on success or { error } on a negative number.
+ * NaN (non-numeric junk) coerces to null rather than erroring — the input
+ * is type=number so the browser already constrains it.
+ */
+function parseCompTarget(
+  raw: FormDataEntryValue | null
+): { value: number | null } | { error: string } {
+  const trimmed = String(raw ?? "").trim();
+  if (!trimmed) return { value: null };
+  const parsed = parseInt(trimmed, 10);
+  if (Number.isNaN(parsed)) return { value: null };
+  if (parsed < 0) {
+    return { error: "Compensation targets can't be negative." };
+  }
+  return { value: parsed };
+}
 
 function parseJobFormData(
   formData: FormData
@@ -1307,6 +1399,42 @@ function parseJobFormData(
   if (compMax !== null && Number.isNaN(compMax)) {
     return { error: "Max compensation must be a number." };
   }
+
+  // 2026-05-14 — composable compensation components. The _enabled flag is
+  // the source of truth: when a component is off, its target/structure
+  // are forced to null so toggling off cleanly clears the columns. A
+  // negative target is an error (the DB CHECK also guards).
+  const variableCompEnabled =
+    formData.get("variable_comp_enabled") === "on";
+  const bonusEnabled = formData.get("bonus_enabled") === "on";
+  const equityOffered = formData.get("equity_offered") === "on";
+
+  const variableTargetParsed = parseCompTarget(
+    formData.get("variable_comp_target")
+  );
+  if (variableTargetParsed && "error" in variableTargetParsed) {
+    return { error: variableTargetParsed.error };
+  }
+  const bonusTargetParsed = parseCompTarget(formData.get("bonus_target"));
+  if (bonusTargetParsed && "error" in bonusTargetParsed) {
+    return { error: bonusTargetParsed.error };
+  }
+
+  const variableCompTarget = variableCompEnabled
+    ? (variableTargetParsed as { value: number | null }).value
+    : null;
+  const variableCompStructure = variableCompEnabled
+    ? String(formData.get("variable_comp_structure") ?? "").trim() || null
+    : null;
+  const bonusTarget = bonusEnabled
+    ? (bonusTargetParsed as { value: number | null }).value
+    : null;
+  const bonusStructure = bonusEnabled
+    ? String(formData.get("bonus_structure") ?? "").trim() || null
+    : null;
+  const equityNote = equityOffered
+    ? String(formData.get("equity_note") ?? "").trim() || null
+    : null;
 
   // Prefer the multi-value chip-picker submissions; fall back to CSV.
   const benefits = benefitsMulti.length > 0 && !benefitsRaw
@@ -1475,6 +1603,14 @@ function parseJobFormData(
     compPeriod: compPeriod || null,
     compType,
     compVisible,
+    variableCompEnabled,
+    variableCompTarget,
+    variableCompStructure,
+    bonusEnabled,
+    bonusTarget,
+    bonusStructure,
+    equityOffered,
+    equityNote,
     benefits,
     requirements,
     status,

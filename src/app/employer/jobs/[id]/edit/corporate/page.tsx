@@ -76,7 +76,7 @@ export default async function EditCorporateJobPage({ params }: PageProps) {
   const { data: job } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, slug, description, employment_type, scope, corporate_function, authority_level, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, requirements, status, hide_stages_from_candidate, external_links, work_mode, work_mode_detail, remote_state_restrictions, travel_expectation, travel_territory, reports_to, direct_reports_band, indirect_reports_band, education_requirement, industry_experience, min_years_corporate_experience, max_years_corporate_experience, bonus_structure, equity_offered, equity_note"
+      "id, dso_id, title, slug, description, employment_type, scope, corporate_function, authority_level, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, requirements, status, hide_stages_from_candidate, external_links, work_mode, work_mode_detail, remote_state_restrictions, travel_expectation, travel_territory, reports_to, direct_reports_band, indirect_reports_band, education_requirement, industry_experience, min_years_corporate_experience, max_years_corporate_experience, variable_comp_enabled, variable_comp_target, variable_comp_structure, bonus_enabled, bonus_target, bonus_structure, equity_offered, equity_note"
     )
     .eq("id", jobId)
     .eq("dso_id", dsoUser.dso_id)
@@ -162,6 +162,14 @@ export default async function EditCorporateJobPage({ params }: PageProps) {
       (job.min_years_corporate_experience as number | null) ?? null,
     max_years_corporate_experience:
       (job.max_years_corporate_experience as number | null) ?? null,
+    variable_comp_enabled:
+      (job.variable_comp_enabled as boolean | null) ?? false,
+    variable_comp_target:
+      (job.variable_comp_target as number | null) ?? null,
+    variable_comp_structure:
+      (job.variable_comp_structure as string | null) ?? null,
+    bonus_enabled: (job.bonus_enabled as boolean | null) ?? false,
+    bonus_target: (job.bonus_target as number | null) ?? null,
     bonus_structure: (job.bonus_structure as string | null) ?? null,
     equity_offered: (job.equity_offered as boolean | null) ?? false,
     equity_note: (job.equity_note as string | null) ?? null,
