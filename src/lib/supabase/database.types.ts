@@ -2,12 +2,9 @@
  * Database type — generated from the live schema.
  *
  * Regenerated 2026-05-14 via the Supabase MCP `generate_typescript_types`
- * tool against project viapivvlhjqvjhoflxmp (dsohire-prod), immediately after
- * the migration-ledger reconciliation (52 backfilled + 25 re-versioned so the
- * ledger matches the repo's supabase/migrations/*.sql filenames 1:1).
- *
- * Prior regen was 2026-05-04 — this file was ~9 migrations stale. It now
- * reflects every column added through 20260513000005 (soft_knockout).
+ * tool against project viapivvlhjqvjhoflxmp (dsohire-prod), after migration
+ * 20260514000001_jobs_corporate_sandbox (Phase 5G.d — 16 corporate-shaped
+ * columns on public.jobs).
  *
  * Do not hand-edit; rerun after each migration that touches table shape,
  * enum values, or RPC signatures.
@@ -2425,7 +2422,9 @@ export type Database = {
       jobs: {
         Row: {
           applications_count: number
+          authority_level: string | null
           benefits: string[] | null
+          bonus_structure: string | null
           compensation_max: number | null
           compensation_min: number | null
           compensation_period:
@@ -2438,14 +2437,24 @@ export type Database = {
           created_by: string | null
           deleted_at: string | null
           description: string
+          direct_reports_band: string | null
           dso_id: string
+          education_requirement: string | null
           employment_type: Database["public"]["Enums"]["employment_type"]
+          equity_note: string | null
+          equity_offered: boolean
           expires_at: string | null
           external_links: Json
           hide_stages_from_candidate: boolean
           id: string
+          indirect_reports_band: string | null
+          industry_experience: string | null
+          max_years_corporate_experience: number | null
+          min_years_corporate_experience: number | null
           min_years_experience: number | null
           posted_at: string | null
+          remote_state_restrictions: string[]
+          reports_to: string | null
           requirements: string | null
           role_category: Database["public"]["Enums"]["role_category"]
           schedule_days: string[]
@@ -2457,12 +2466,18 @@ export type Database = {
           specialty: string[]
           status: Database["public"]["Enums"]["job_status"]
           title: string
+          travel_expectation: string | null
+          travel_territory: string | null
           updated_at: string
           views: number
+          work_mode: string | null
+          work_mode_detail: string | null
         }
         Insert: {
           applications_count?: number
+          authority_level?: string | null
           benefits?: string[] | null
+          bonus_structure?: string | null
           compensation_max?: number | null
           compensation_min?: number | null
           compensation_period?:
@@ -2475,14 +2490,24 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           description?: string
+          direct_reports_band?: string | null
           dso_id: string
+          education_requirement?: string | null
           employment_type?: Database["public"]["Enums"]["employment_type"]
+          equity_note?: string | null
+          equity_offered?: boolean
           expires_at?: string | null
           external_links?: Json
           hide_stages_from_candidate?: boolean
           id?: string
+          indirect_reports_band?: string | null
+          industry_experience?: string | null
+          max_years_corporate_experience?: number | null
+          min_years_corporate_experience?: number | null
           min_years_experience?: number | null
           posted_at?: string | null
+          remote_state_restrictions?: string[]
+          reports_to?: string | null
           requirements?: string | null
           role_category?: Database["public"]["Enums"]["role_category"]
           schedule_days?: string[]
@@ -2494,12 +2519,18 @@ export type Database = {
           specialty?: string[]
           status?: Database["public"]["Enums"]["job_status"]
           title: string
+          travel_expectation?: string | null
+          travel_territory?: string | null
           updated_at?: string
           views?: number
+          work_mode?: string | null
+          work_mode_detail?: string | null
         }
         Update: {
           applications_count?: number
+          authority_level?: string | null
           benefits?: string[] | null
+          bonus_structure?: string | null
           compensation_max?: number | null
           compensation_min?: number | null
           compensation_period?:
@@ -2512,14 +2543,24 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           description?: string
+          direct_reports_band?: string | null
           dso_id?: string
+          education_requirement?: string | null
           employment_type?: Database["public"]["Enums"]["employment_type"]
+          equity_note?: string | null
+          equity_offered?: boolean
           expires_at?: string | null
           external_links?: Json
           hide_stages_from_candidate?: boolean
           id?: string
+          indirect_reports_band?: string | null
+          industry_experience?: string | null
+          max_years_corporate_experience?: number | null
+          min_years_corporate_experience?: number | null
           min_years_experience?: number | null
           posted_at?: string | null
+          remote_state_restrictions?: string[]
+          reports_to?: string | null
           requirements?: string | null
           role_category?: Database["public"]["Enums"]["role_category"]
           schedule_days?: string[]
@@ -2531,8 +2572,12 @@ export type Database = {
           specialty?: string[]
           status?: Database["public"]["Enums"]["job_status"]
           title?: string
+          travel_expectation?: string | null
+          travel_territory?: string | null
           updated_at?: string
           views?: number
+          work_mode?: string | null
+          work_mode_detail?: string | null
         }
         Relationships: [
           {
@@ -3050,7 +3095,9 @@ export type Database = {
         }
         Returns: {
           applications_count: number
+          authority_level: string | null
           benefits: string[] | null
+          bonus_structure: string | null
           compensation_max: number | null
           compensation_min: number | null
           compensation_period:
@@ -3063,14 +3110,24 @@ export type Database = {
           created_by: string | null
           deleted_at: string | null
           description: string
+          direct_reports_band: string | null
           dso_id: string
+          education_requirement: string | null
           employment_type: Database["public"]["Enums"]["employment_type"]
+          equity_note: string | null
+          equity_offered: boolean
           expires_at: string | null
           external_links: Json
           hide_stages_from_candidate: boolean
           id: string
+          indirect_reports_band: string | null
+          industry_experience: string | null
+          max_years_corporate_experience: number | null
+          min_years_corporate_experience: number | null
           min_years_experience: number | null
           posted_at: string | null
+          remote_state_restrictions: string[]
+          reports_to: string | null
           requirements: string | null
           role_category: Database["public"]["Enums"]["role_category"]
           schedule_days: string[]
@@ -3082,8 +3139,12 @@ export type Database = {
           specialty: string[]
           status: Database["public"]["Enums"]["job_status"]
           title: string
+          travel_expectation: string | null
+          travel_territory: string | null
           updated_at: string
           views: number
+          work_mode: string | null
+          work_mode_detail: string | null
         }[]
         SetofOptions: {
           from: "*"
