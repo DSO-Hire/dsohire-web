@@ -34,6 +34,10 @@ import { ApplicationReceived } from "@/emails/candidate/ApplicationReceived";
 import { NewApplication } from "@/emails/employer/NewApplication";
 import type { ScreeningQuestion } from "./types";
 import { isKnockoutFailure } from "@/lib/screening/evaluate-knockout";
+import {
+  isVerificationType,
+  getVerificationType,
+} from "@/lib/verifications/types";
 
 export interface ApplyState {
   ok: boolean;
@@ -163,6 +167,16 @@ export async function applyToJob(
     .eq("job_id", jobId);
   const questions = (rawQuestions ?? []) as unknown as ScreeningQuestion[];
 
+  // 5G.e Tier 2 — verification requirements for this job. Drives which
+  // verification-type rows we accept from the FormData (we only persist
+  // attestations for types the job actually requires).
+  const { data: rawVerificationRequirements } = await supabase
+    .from("job_verification_requirements")
+    .select("verification_type, required")
+    .eq("job_id", jobId);
+  const verificationRequirements = (rawVerificationRequirements ??
+    []) as Array<{ verification_type: string; required: boolean }>;
+
   // Parse + validate answers from formData
   const answersByQuestion = parseAnswers(questions, formData);
   const missingRequired = questions.find(
@@ -175,6 +189,28 @@ export async function applyToJob(
         0,
         80
       )}"`,
+    };
+  }
+
+  // Parse + validate verification attestations from formData. We only
+  // consider verification types the job actually requires; anything else
+  // in the form is ignored.
+  const verificationRows = parseVerifications(
+    verificationRequirements,
+    formData
+  );
+  const missingVerification = verificationRequirements.find(
+    (req) =>
+      req.required &&
+      !verificationRows.some((r) => r.verification_type === req.verification_type && r.attested)
+  );
+  if (missingVerification) {
+    const vt = getVerificationType(missingVerification.verification_type);
+    return {
+      ok: false,
+      error: `Please confirm the required verification: "${
+        vt?.label ?? missingVerification.verification_type
+      }"`,
     };
   }
 
@@ -295,6 +331,46 @@ export async function applyToJob(
         return {
           ok: false,
           error: `Application saved, but we couldn't save your screening answers: ${answersError.message}. Please re-submit.`,
+        };
+      }
+    }
+  }
+
+  // ── Persist verification attestations (5G.e Tier 2) ──
+  // Same delete-prior-then-insert strategy as screening answers above —
+  // RLS on application_verifications requires the application to be the
+  // candidate's own, which the application insert path already enforced.
+  if (verificationRequirements.length > 0) {
+    await supabase
+      .from("application_verifications")
+      .delete()
+      .eq("application_id", applicationId);
+
+    const verificationInsertRows = verificationRows.map((r) => ({
+      application_id: applicationId,
+      verification_type: r.verification_type,
+      attested: r.attested,
+      attested_at: r.attested ? new Date().toISOString() : null,
+      linked_credential_type: r.linked_credential_type,
+      linked_credential_id: r.linked_credential_id,
+      note: r.note,
+    }));
+
+    if (verificationInsertRows.length > 0) {
+      const { error: verificationsError } = await supabase
+        .from("application_verifications")
+        .insert(verificationInsertRows);
+
+      if (verificationsError) {
+        // Mirror the screening-answers failure handling — don't roll the
+        // application back; surface the error so the candidate can re-submit.
+        console.error(
+          "[apply] verification insert failed:",
+          verificationsError
+        );
+        return {
+          ok: false,
+          error: `Application saved, but we couldn't save your verification confirmations: ${verificationsError.message}. Please re-submit.`,
         };
       }
     }
@@ -491,6 +567,70 @@ function answerToRow(
     answer_choices: a.choices,
     answer_number: a.number,
   };
+}
+
+/* ───────────────────────────────────────────────────────────────
+ * Verification parsing (5G.e Tier 2)
+ *
+ * FormData shape emitted by the wizard, one set per required type:
+ *   v__${type}            — "1" when attested, else absent
+ *   v__${type}__cred_type — linked credential source table (optional)
+ *   v__${type}__cred_id   — linked credential row id (optional)
+ *   v__${type}__note      — free-text note (optional)
+ *
+ * Only verification types the job actually requires are considered; any
+ * other v__ fields in the form are ignored. Types are re-validated with
+ * isVerificationType as defense-in-depth.
+ * ───────────────────────────────────────────────────────────── */
+
+interface ParsedVerification {
+  verification_type: string;
+  attested: boolean;
+  linked_credential_type: string | null;
+  linked_credential_id: string | null;
+  note: string | null;
+}
+
+const VALID_CREDENTIAL_TYPES = new Set([
+  "candidate_license",
+  "candidate_certification",
+  "candidate_education",
+]);
+
+function parseVerifications(
+  requirements: Array<{ verification_type: string; required: boolean }>,
+  formData: FormData
+): ParsedVerification[] {
+  const out: ParsedVerification[] = [];
+  for (const req of requirements) {
+    const type = req.verification_type;
+    // Defense-in-depth — skip anything that isn't a known verification slug.
+    if (!isVerificationType(type)) continue;
+
+    const attested = String(formData.get(`v__${type}`) ?? "").trim() === "1";
+
+    const rawCredType = String(
+      formData.get(`v__${type}__cred_type`) ?? ""
+    ).trim();
+    const rawCredId = String(formData.get(`v__${type}__cred_id`) ?? "").trim();
+    // Only keep a linked credential when both halves are present and the
+    // type is a recognized credential-source table.
+    const hasLinkedCredential =
+      rawCredType !== "" &&
+      rawCredId !== "" &&
+      VALID_CREDENTIAL_TYPES.has(rawCredType);
+
+    const rawNote = String(formData.get(`v__${type}__note`) ?? "").trim();
+
+    out.push({
+      verification_type: type,
+      attested,
+      linked_credential_type: hasLinkedCredential ? rawCredType : null,
+      linked_credential_id: hasLinkedCredential ? rawCredId : null,
+      note: rawNote || null,
+    });
+  }
+  return out;
 }
 
 /* ───────────────────────────────────────────────────────────────

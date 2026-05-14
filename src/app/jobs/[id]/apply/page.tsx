@@ -21,7 +21,14 @@ import { ArrowLeft, MapPin, Briefcase } from "lucide-react";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ApplyWizard } from "./apply-wizard";
-import type { ScreeningQuestion, CandidatePrefill, ExistingAnswer } from "./types";
+import type {
+  ScreeningQuestion,
+  CandidatePrefill,
+  ExistingAnswer,
+  JobVerificationRequirement,
+  CandidateCredential,
+  ExistingVerification,
+} from "./types";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -83,11 +90,12 @@ export default async function ApplyPage({ params, searchParams }: PageProps) {
     .maybeSingle();
   if (!job || (job.status as string) !== "active") notFound();
 
-  // DSO + locations + screening questions in parallel
+  // DSO + locations + screening questions + verification requirements in parallel
   const [
     { data: dso },
     { data: rawLocations },
     { data: rawQuestions },
+    { data: rawVerificationRequirements },
   ] = await Promise.all([
     supabase
       .from("dsos")
@@ -105,6 +113,10 @@ export default async function ApplyPage({ params, searchParams }: PageProps) {
       .select("id, prompt, helper_text, kind, options, required, sort_order")
       .eq("job_id", jobId)
       .order("sort_order", { ascending: true }),
+    supabase
+      .from("job_verification_requirements")
+      .select("verification_type, required")
+      .eq("job_id", jobId),
   ]);
 
   const locations = ((rawLocations ?? []) as unknown as Array<{
@@ -133,6 +145,10 @@ export default async function ApplyPage({ params, searchParams }: PageProps) {
 
   const questions = ((rawQuestions ?? []) as unknown as ScreeningQuestion[]) ?? [];
 
+  const verificationRequirements =
+    ((rawVerificationRequirements ?? []) as unknown as JobVerificationRequirement[]) ??
+    [];
+
   // Candidate row
   const { data: rawCandidate } = await supabase
     .from("candidates")
@@ -150,6 +166,73 @@ export default async function ApplyPage({ params, searchParams }: PageProps) {
     id: string;
     resume_url: string | null;
   };
+
+  // Candidate profile credentials — only worth fetching when the job
+  // actually requires verifications. These back the "link a credential
+  // as proof" picker in the wizard's Verifications step.
+  let candidateCredentials: CandidateCredential[] = [];
+  if (verificationRequirements.length > 0) {
+    const [
+      { data: rawLicenses },
+      { data: rawCertifications },
+      { data: rawEducation },
+    ] = await Promise.all([
+      supabase
+        .from("candidate_licenses")
+        .select("id, license_type, state")
+        .eq("candidate_id", candidate.id),
+      supabase
+        .from("candidate_certifications")
+        .select("id, kind, level")
+        .eq("candidate_id", candidate.id),
+      supabase
+        .from("candidate_education")
+        .select("id, degree, field_of_study, school_name")
+        .eq("candidate_id", candidate.id),
+    ]);
+
+    const licenses = (
+      (rawLicenses ?? []) as Array<{
+        id: string;
+        license_type: string;
+        state: string | null;
+      }>
+    ).map<CandidateCredential>((l) => ({
+      source: "candidate_license",
+      id: l.id,
+      label: [l.license_type, l.state].filter(Boolean).join(" · "),
+    }));
+    const certifications = (
+      (rawCertifications ?? []) as Array<{
+        id: string;
+        kind: string;
+        level: string | null;
+      }>
+    ).map<CandidateCredential>((c) => ({
+      source: "candidate_certification",
+      id: c.id,
+      label: [c.kind, c.level].filter(Boolean).join(" · "),
+    }));
+    const education = (
+      (rawEducation ?? []) as Array<{
+        id: string;
+        degree: string | null;
+        field_of_study: string | null;
+        school_name: string;
+      }>
+    ).map<CandidateCredential>((e) => ({
+      source: "candidate_education",
+      id: e.id,
+      label: [
+        [e.degree, e.field_of_study].filter(Boolean).join(", "),
+        e.school_name,
+      ]
+        .filter(Boolean)
+        .join(" — "),
+    }));
+
+    candidateCredentials = [...licenses, ...certifications, ...education];
+  }
 
   // Existing application — block re-apply (Cam 2026-05-08 PM:
   // candidates shouldn't be able to apply twice to the same role).
@@ -174,6 +257,11 @@ export default async function ApplyPage({ params, searchParams }: PageProps) {
   // is always empty by the time we get here. The wizard still gets the
   // prop so its prefill + answer-rehydration code path stays unchanged.
   const existingAnswers: ExistingAnswer[] = [];
+
+  // Likewise always empty here (repeat applies are redirected before this
+  // point) — the wizard still gets the prop so its verification-
+  // rehydration code path stays unchanged, mirroring existingAnswers.
+  const existingVerifications: ExistingVerification[] = [];
 
   const savedResumeUrl = candidate.resume_url ?? null;
   const savedResumeName = savedResumeUrl
@@ -217,6 +305,9 @@ export default async function ApplyPage({ params, searchParams }: PageProps) {
           jobTitle={job.title as string}
           dsoName={displayedEmployerName}
           questions={questions}
+          verificationRequirements={verificationRequirements}
+          candidateCredentials={candidateCredentials}
+          existingVerifications={existingVerifications}
           candidate={{
             id: candidate.id,
             full_name: candidate.full_name,

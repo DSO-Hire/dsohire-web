@@ -19,7 +19,7 @@ import { ArrowLeft, Briefcase, MapPin } from "lucide-react";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { GuestApplyForm } from "./guest-form";
-import type { ScreeningQuestion } from "../types";
+import type { ScreeningQuestion, JobVerificationRequirement } from "../types";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -63,25 +63,33 @@ export default async function GuestApplyPage({ params, searchParams }: PageProps
     notFound();
   }
 
-  const [{ data: dso }, { data: rawLocations }, { data: rawQuestions }] =
-    await Promise.all([
-      supabase
-        .from("dsos")
-        .select("id, name, slug")
-        .eq("id", job.dso_id as string)
-        .maybeSingle(),
-      supabase
-        .from("job_locations")
-        .select(
-          "location:dso_locations(name, city, state, public_dso_affiliation)"
-        )
-        .eq("job_id", jobId),
-      supabase
-        .from("job_screening_questions")
-        .select("id, prompt, helper_text, kind, options, required, sort_order")
-        .eq("job_id", jobId)
-        .order("sort_order", { ascending: true }),
-    ]);
+  const [
+    { data: dso },
+    { data: rawLocations },
+    { data: rawQuestions },
+    { data: rawVerificationRequirements },
+  ] = await Promise.all([
+    supabase
+      .from("dsos")
+      .select("id, name, slug")
+      .eq("id", job.dso_id as string)
+      .maybeSingle(),
+    supabase
+      .from("job_locations")
+      .select(
+        "location:dso_locations(name, city, state, public_dso_affiliation)"
+      )
+      .eq("job_id", jobId),
+    supabase
+      .from("job_screening_questions")
+      .select("id, prompt, helper_text, kind, options, required, sort_order")
+      .eq("job_id", jobId)
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("job_verification_requirements")
+      .select("verification_type, required")
+      .eq("job_id", jobId),
+  ]);
 
   const locations = ((rawLocations ?? []) as unknown as Array<{
     location: {
@@ -103,6 +111,10 @@ export default async function GuestApplyPage({ params, searchParams }: PageProps
     : (singlePracticeName ?? "Multiple locations");
 
   const questions = ((rawQuestions ?? []) as unknown as ScreeningQuestion[]) ?? [];
+
+  const verificationRequirements =
+    ((rawVerificationRequirements ?? []) as unknown as JobVerificationRequirement[]) ??
+    [];
 
   return (
     <SiteShell>
@@ -157,7 +169,12 @@ export default async function GuestApplyPage({ params, searchParams }: PageProps
           </div>
         </header>
 
-        <GuestApplyForm jobId={jobId} questions={questions} sourceTag={sourceTag} />
+        <GuestApplyForm
+          jobId={jobId}
+          questions={questions}
+          verificationRequirements={verificationRequirements}
+          sourceTag={sourceTag}
+        />
       </div>
     </SiteShell>
   );

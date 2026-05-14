@@ -19,18 +19,31 @@ import {
 import type {
   ScreeningQuestion,
   ScreeningQuestionOption,
+  JobVerificationRequirement,
 } from "../types";
+import { getVerificationType } from "@/lib/verifications/types";
 
 const initial: GuestApplyState = { ok: false };
 
 interface GuestApplyFormProps {
   jobId: string;
   questions: ScreeningQuestion[];
+  /**
+   * 5G.e Tier 2 — verification requirements this job carries. Guests have
+   * no profile credentials, so for v1 we render these as a stated FYI list
+   * only; credential-linking + persistence happen after account creation.
+   */
+  verificationRequirements: JobVerificationRequirement[];
   /** Phase 5C — attribution channel from ?source= on the guest apply URL. */
   sourceTag?: string | null;
 }
 
-export function GuestApplyForm({ jobId, questions, sourceTag }: GuestApplyFormProps) {
+export function GuestApplyForm({
+  jobId,
+  questions,
+  verificationRequirements,
+  sourceTag,
+}: GuestApplyFormProps) {
   const [state, submit, submitting] = useActionState(
     submitGuestApplication,
     initial
@@ -174,6 +187,53 @@ export function GuestApplyForm({ jobId, questions, sourceTag }: GuestApplyFormPr
           {questions.map((q) => (
             <ScreeningField key={q.id} question={q} />
           ))}
+        </fieldset>
+      )}
+
+      {/* Verification requirements — FYI only for guests (5G.e Tier 2).
+          Guests have no profile credentials, so v1 just states what the
+          role expects; the candidate confirms these after creating an
+          account. No fields submitted, nothing persisted here. */}
+      {verificationRequirements.length > 0 && (
+        <fieldset className="space-y-3 pt-2 border-t border-[var(--rule)]">
+          <legend className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mt-4 mb-3">
+            What this role requires
+          </legend>
+          <p className="text-[13px] text-slate-body leading-relaxed">
+            The hiring team asks applicants to confirm the items below.
+            You&apos;ll confirm these &mdash; and can link supporting
+            credentials &mdash; after you create an account from the link
+            we email you.
+          </p>
+          <ul className="space-y-2">
+            {verificationRequirements.map((req) => {
+              const vt = getVerificationType(req.verification_type);
+              return (
+                <li
+                  key={req.verification_type}
+                  className="flex items-start gap-2.5 text-[14px] text-ink"
+                >
+                  <span
+                    className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-heritage"
+                    aria-hidden
+                  />
+                  <span>
+                    <span className="font-semibold">
+                      {vt?.label ?? req.verification_type}
+                    </span>
+                    {req.required && (
+                      <span className="text-heritage ml-1">*</span>
+                    )}
+                    {vt?.candidateHint && (
+                      <span className="block text-[13px] text-slate-body leading-relaxed">
+                        {vt.candidateHint}
+                      </span>
+                    )}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
         </fieldset>
       )}
 

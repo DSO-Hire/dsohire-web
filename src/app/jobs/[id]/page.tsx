@@ -19,6 +19,7 @@ import {
   ExternalLink,
   MapPin,
   Sparkles,
+  ShieldCheck,
 } from "lucide-react";
 import { SiteShell } from "@/components/marketing/site-shell";
 import {
@@ -50,6 +51,7 @@ import {
   INDUSTRY_EXPERIENCE_LABELS,
 } from "@/lib/corporate/job-fields";
 import { computeOte, formatUsd } from "@/lib/comp/ote";
+import { VERIFICATION_TYPE_LABELS } from "@/lib/verifications/types";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -133,6 +135,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
     { data: jobLocations },
     { data: jobSkills },
     jobAttachments,
+    { data: jobVerifications },
   ] = await Promise.all([
     supabase
       .from("dsos")
@@ -147,7 +150,16 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
       .eq("job_id", id),
     supabase.from("job_skills").select("skill").eq("job_id", id),
     loadJobAttachmentsWithUrls(supabase, id),
+    // 5G.e Tier 2 — verification requirements stated on the public listing.
+    supabase
+      .from("job_verification_requirements")
+      .select("verification_type")
+      .eq("job_id", id),
   ]);
+
+  const verificationTypes: string[] = (
+    (jobVerifications ?? []) as Array<{ verification_type: string }>
+  ).map((v) => v.verification_type);
 
   const locations = ((jobLocations ?? []) as unknown as Array<{
     location: {
@@ -871,6 +883,23 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                     </li>
                   ))}
                 </ul>
+              </Detail>
+            )}
+
+            {verificationTypes.length > 0 && (
+              <Detail icon={ShieldCheck} label="Verifications">
+                <ul className="space-y-1 mt-1">
+                  {verificationTypes.map((vt) => (
+                    <li key={vt} className="text-[14px] text-ivory/85">
+                      {VERIFICATION_TYPE_LABELS[
+                        vt as keyof typeof VERIFICATION_TYPE_LABELS
+                      ] ?? vt}
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-1.5 text-[12px] text-ivory/55 leading-snug">
+                  Applicants confirm these as part of applying.
+                </p>
               </Detail>
             )}
           </aside>

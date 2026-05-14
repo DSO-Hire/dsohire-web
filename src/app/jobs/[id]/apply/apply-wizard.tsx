@@ -27,11 +27,16 @@ import {
 import { applyToJob } from "./actions";
 import type {
   AnswerValue,
+  CandidateCredential,
   CandidatePrefill,
   ExistingAnswer,
+  ExistingVerification,
+  JobVerificationRequirement,
   ScreeningQuestion,
+  VerificationValue,
   WizardDraft,
 } from "./types";
+import { getVerificationType } from "@/lib/verifications/types";
 
 const AVAILABILITY_LABEL: Record<string, string> = {
   immediate: "Immediately",
@@ -45,6 +50,12 @@ interface ApplyWizardProps {
   jobTitle: string;
   dsoName: string;
   questions: ScreeningQuestion[];
+  /** 5G.e Tier 2 — verification requirements the recruiter set on this job. */
+  verificationRequirements: JobVerificationRequirement[];
+  /** Candidate's profile credentials, normalized for the link-as-proof picker. */
+  candidateCredentials: CandidateCredential[];
+  /** Prior application_verifications rows (edit/re-apply rehydration). */
+  existingVerifications: ExistingVerification[];
   candidate: { id: string } & CandidatePrefill;
   savedResumeUrl: string | null;
   savedResumeName: string | null;
@@ -65,6 +76,9 @@ export function ApplyWizard(props: ApplyWizardProps) {
     jobTitle,
     dsoName,
     questions,
+    verificationRequirements,
+    candidateCredentials,
+    existingVerifications,
     candidate,
     savedResumeUrl,
     savedResumeName,
@@ -74,6 +88,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
   } = props;
 
   const hasScreening = questions.length > 0;
+  const hasVerifications = verificationRequirements.length > 0;
   const hasSavedResume = Boolean(savedResumeUrl);
   const draftKey = `dsohire:apply-draft:${jobId}:${candidate.id}`;
 
@@ -83,11 +98,13 @@ export function ApplyWizard(props: ApplyWizardProps) {
       { id: "intro", label: "Get started" },
     ];
     if (hasScreening) list.push({ id: "screening", label: "Screening" });
+    if (hasVerifications)
+      list.push({ id: "verifications", label: "Verifications" });
     list.push({ id: "resume", label: "Resume" });
     list.push({ id: "cover", label: "Cover letter" });
     list.push({ id: "review", label: "Review" });
     return list;
-  }, [hasScreening]);
+  }, [hasScreening, hasVerifications]);
 
   // ── Draft state seeding ─────────────────────────────────────
   // Priority on first paint: existing application > localStorage > empty.
@@ -98,6 +115,10 @@ export function ApplyWizard(props: ApplyWizardProps) {
       fullName: candidate.full_name ?? "",
       coverLetter: existingApplication?.cover_letter ?? "",
       answers: seedAnswersFromExisting(questions, existingAnswers),
+      verifications: seedVerificationsFromExisting(
+        verificationRequirements,
+        existingVerifications
+      ),
       resumeChoice: hasSavedResume ? "saved" : "upload",
     };
   }, [
@@ -105,6 +126,8 @@ export function ApplyWizard(props: ApplyWizardProps) {
     existingApplication,
     existingAnswers,
     questions,
+    verificationRequirements,
+    existingVerifications,
     hasSavedResume,
   ]);
 
@@ -131,12 +154,15 @@ export function ApplyWizard(props: ApplyWizardProps) {
         fullName: parsed.fullName ?? initial.fullName,
         coverLetter: parsed.coverLetter ?? "",
         answers: parsed.answers ?? initial.answers,
+        verifications: parsed.verifications ?? initial.verifications,
         resumeChoice: parsed.resumeChoice ?? initial.resumeChoice,
       };
       // Only show resume prompt if it's actually different from server state
       const isMeaningfullyDifferent =
         normalized.coverLetter !== initial.coverLetter ||
-        JSON.stringify(normalized.answers) !== JSON.stringify(initial.answers);
+        JSON.stringify(normalized.answers) !== JSON.stringify(initial.answers) ||
+        JSON.stringify(normalized.verifications) !==
+          JSON.stringify(initial.verifications);
       if (isMeaningfullyDifferent) {
         setSavedDraft(normalized);
         setRestorePromptOpen(true);
@@ -198,6 +224,23 @@ export function ApplyWizard(props: ApplyWizardProps) {
       return;
     }
 
+    // Required-verification gate (client-side; server enforces too)
+    const missingVerification = findMissingRequiredVerification(
+      verificationRequirements,
+      draft.verifications
+    );
+    if (missingVerification) {
+      const vt = getVerificationType(missingVerification.verification_type);
+      setSubmitError(
+        `Please confirm the required verification: "${
+          vt?.label ?? missingVerification.verification_type
+        }"`
+      );
+      const verIdx = steps.findIndex((s) => s.id === "verifications");
+      if (verIdx >= 0) setStepIdx(verIdx);
+      return;
+    }
+
     // Resume gate
     if (!hasSavedResume && draft.resumeChoice === "upload" && !resumeFile) {
       setSubmitError("Please upload a resume before submitting.");
@@ -227,6 +270,33 @@ export function ApplyWizard(props: ApplyWizardProps) {
         for (const v of answer.value) formData.append(`q__${q.id}`, v);
       } else if (answer.kind === "number" && answer.value !== "") {
         formData.set(`q__${q.id}`, answer.value);
+      }
+    }
+
+    // Encode verification attestations — see actions.ts for the matching
+    // parser. One set of fields per required verification type:
+    //   v__${type}            — "1" when attested, else omitted
+    //   v__${type}__cred_type — linked credential source table (optional)
+    //   v__${type}__cred_id   — linked credential row id (optional)
+    //   v__${type}__note      — free-text note (optional)
+    for (const req of verificationRequirements) {
+      const v = draft.verifications[req.verification_type];
+      if (!v) continue;
+      if (v.attested) {
+        formData.set(`v__${req.verification_type}`, "1");
+      }
+      if (v.linkedCredentialType && v.linkedCredentialId) {
+        formData.set(
+          `v__${req.verification_type}__cred_type`,
+          v.linkedCredentialType
+        );
+        formData.set(
+          `v__${req.verification_type}__cred_id`,
+          v.linkedCredentialId
+        );
+      }
+      if (v.note.trim()) {
+        formData.set(`v__${req.verification_type}__note`, v.note.trim());
       }
     }
 
@@ -342,6 +412,17 @@ export function ApplyWizard(props: ApplyWizardProps) {
           />
         )}
 
+        {currentStep.id === "verifications" && (
+          <VerificationStep
+            requirements={verificationRequirements}
+            credentials={candidateCredentials}
+            values={draft.verifications}
+            onChange={(verifications) =>
+              setDraft({ ...draft, verifications })
+            }
+          />
+        )}
+
         {currentStep.id === "resume" && (
           <ResumeStep
             hasSavedResume={hasSavedResume}
@@ -374,6 +455,9 @@ export function ApplyWizard(props: ApplyWizardProps) {
             fullName={draft.fullName}
             questions={questions}
             answers={draft.answers}
+            verificationRequirements={verificationRequirements}
+            verifications={draft.verifications}
+            credentials={candidateCredentials}
             coverLetter={draft.coverLetter}
             resumeChoice={draft.resumeChoice}
             resumeFile={resumeFile}
@@ -449,7 +533,13 @@ export function ApplyWizard(props: ApplyWizardProps) {
  * Stepper
  * ───────────────────────────────────────────────────────────── */
 
-type StepId = "intro" | "screening" | "resume" | "cover" | "review";
+type StepId =
+  | "intro"
+  | "screening"
+  | "verifications"
+  | "resume"
+  | "cover"
+  | "review";
 
 function Stepper({
   steps,
@@ -767,6 +857,163 @@ function QuestionInput({
 }
 
 /* ───────────────────────────────────────────────────────────────
+ * Step — Verifications (5G.e Tier 2)
+ *
+ * For each recruiter-set verification requirement: show the
+ * candidate-facing hint, an attest checkbox, and — when the type has a
+ * credentialSource — a dropdown of the candidate's matching profile
+ * credentials to optionally link as proof, plus an optional note.
+ * Mirrors the ScreeningStep structure + styling.
+ * ───────────────────────────────────────────────────────────── */
+
+function VerificationStep({
+  requirements,
+  credentials,
+  values,
+  onChange,
+}: {
+  requirements: JobVerificationRequirement[];
+  credentials: CandidateCredential[];
+  values: Record<string, VerificationValue>;
+  onChange: (values: Record<string, VerificationValue>) => void;
+}) {
+  const update = (type: string, value: VerificationValue) => {
+    onChange({ ...values, [type]: value });
+  };
+
+  const baseInput =
+    "w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed";
+
+  return (
+    <div className="space-y-7">
+      <div>
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+          Verifications
+        </div>
+        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.5px] text-ink leading-tight">
+          Confirm what this role requires.
+        </h2>
+        <p className="text-[14px] text-slate-body leading-relaxed mt-2">
+          The hiring team asked applicants to confirm the items below. Check
+          each one you can attest to — and, where it helps, link a credential
+          from your profile as proof.
+        </p>
+      </div>
+
+      {requirements.map((req, idx) => {
+        const vt = getVerificationType(req.verification_type);
+        const value = values[req.verification_type] ?? emptyVerification();
+        // Filter the candidate's credentials to the source that backs
+        // this verification type (null source → attestation only).
+        const linkable = vt?.credentialSource
+          ? credentials.filter((c) => c.source === vt.credentialSource)
+          : [];
+
+        return (
+          <div
+            key={req.verification_type}
+            className="space-y-3 border border-[var(--rule)] p-5"
+          >
+            <div className="text-[14px] font-semibold text-ink leading-snug">
+              <span className="text-slate-meta font-bold mr-2">
+                {idx + 1}.
+              </span>
+              {vt?.label ?? req.verification_type}
+              {req.required && <span className="text-heritage ml-1">*</span>}
+            </div>
+
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={value.attested}
+                onChange={(e) =>
+                  update(req.verification_type, {
+                    ...value,
+                    attested: e.target.checked,
+                  })
+                }
+                className="mt-0.5 accent-heritage h-4 w-4 flex-shrink-0"
+              />
+              <span className="text-[14px] text-ink leading-relaxed">
+                {vt?.candidateHint ?? "I confirm this requirement."}
+              </span>
+            </label>
+
+            {linkable.length > 0 && (
+              <div>
+                <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+                  Link a credential as proof{" "}
+                  <span className="text-slate-meta font-medium normal-case tracking-normal text-[11px]">
+                    (optional)
+                  </span>
+                </label>
+                <select
+                  value={value.linkedCredentialId}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    update(req.verification_type, {
+                      ...value,
+                      linkedCredentialId: id,
+                      linkedCredentialType: id
+                        ? (vt!.credentialSource as CandidateCredential["source"])
+                        : "",
+                    });
+                  }}
+                  className={baseInput}
+                >
+                  <option value="">No linked credential</option>
+                  {linkable.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {vt?.credentialSource && linkable.length === 0 && (
+              <p className="text-[12px] text-slate-meta leading-relaxed">
+                No matching credential on your profile yet — you can still
+                attest above, or{" "}
+                <Link
+                  href="/candidate/profile"
+                  target="_blank"
+                  className="text-heritage-deep underline underline-offset-2 hover:text-ink font-semibold"
+                >
+                  add one to your profile
+                </Link>
+                .
+              </p>
+            )}
+
+            <div>
+              <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+                Note{" "}
+                <span className="text-slate-meta font-medium normal-case tracking-normal text-[11px]">
+                  (optional)
+                </span>
+              </label>
+              <textarea
+                rows={2}
+                value={value.note}
+                onChange={(e) =>
+                  update(req.verification_type, {
+                    ...value,
+                    note: e.target.value,
+                  })
+                }
+                placeholder="Anything the hiring team should know about this."
+                className={baseInput}
+              />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ───────────────────────────────────────────────────────────────
  * Step 3 — Resume
  * ───────────────────────────────────────────────────────────── */
 
@@ -966,6 +1213,9 @@ function ReviewStep({
   fullName,
   questions,
   answers,
+  verificationRequirements,
+  verifications,
+  credentials,
   coverLetter,
   resumeChoice,
   resumeFile,
@@ -978,6 +1228,9 @@ function ReviewStep({
   fullName: string;
   questions: ScreeningQuestion[];
   answers: Record<string, AnswerValue>;
+  verificationRequirements: JobVerificationRequirement[];
+  verifications: Record<string, VerificationValue>;
+  credentials: CandidateCredential[];
   coverLetter: string;
   resumeChoice: "saved" | "upload";
   resumeFile: File | null;
@@ -1036,6 +1289,57 @@ function ReviewStep({
                 </div>
               </li>
             ))}
+          </ul>
+        </ReviewBlock>
+      )}
+
+      {verificationRequirements.length > 0 && (
+        <ReviewBlock
+          label="Verifications"
+          onEdit={() => onJumpTo("verifications")}
+        >
+          <ul className="space-y-3">
+            {verificationRequirements.map((req) => {
+              const vt = getVerificationType(req.verification_type);
+              const v = verifications[req.verification_type];
+              const linkedCred =
+                v?.linkedCredentialId && v?.linkedCredentialType
+                  ? credentials.find(
+                      (c) =>
+                        c.id === v.linkedCredentialId &&
+                        c.source === v.linkedCredentialType
+                    )
+                  : null;
+              return (
+                <li key={req.verification_type}>
+                  <div className="text-[12px] font-semibold text-slate-meta mb-0.5">
+                    {vt?.label ?? req.verification_type}
+                    {req.required && (
+                      <span className="text-heritage ml-1">*</span>
+                    )}
+                  </div>
+                  <div className="text-[14px] text-ink">
+                    {v?.attested ? (
+                      <>Confirmed</>
+                    ) : (
+                      <span className="text-slate-meta italic">
+                        Not confirmed
+                      </span>
+                    )}
+                  </div>
+                  {linkedCred && (
+                    <div className="text-[13px] text-slate-body mt-0.5">
+                      Linked proof: {linkedCred.label}
+                    </div>
+                  )}
+                  {v?.note?.trim() && (
+                    <div className="text-[13px] text-slate-body mt-0.5 whitespace-pre-wrap">
+                      Note: {v.note.trim()}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </ReviewBlock>
       )}
@@ -1174,6 +1478,56 @@ function emptyAnswer(q: ScreeningQuestion): AnswerValue {
     case "number":
       return { kind: "number", value: "" };
   }
+}
+
+function emptyVerification(): VerificationValue {
+  return {
+    attested: false,
+    linkedCredentialType: "",
+    linkedCredentialId: "",
+    note: "",
+  };
+}
+
+function seedVerificationsFromExisting(
+  requirements: JobVerificationRequirement[],
+  existing: ExistingVerification[]
+): Record<string, VerificationValue> {
+  const out: Record<string, VerificationValue> = {};
+  for (const req of requirements) {
+    const prior = existing.find(
+      (e) => e.verification_type === req.verification_type
+    );
+    if (!prior) {
+      out[req.verification_type] = emptyVerification();
+      continue;
+    }
+    const linkedType = prior.linked_credential_type;
+    out[req.verification_type] = {
+      attested: prior.attested,
+      linkedCredentialType:
+        linkedType === "candidate_license" ||
+        linkedType === "candidate_certification" ||
+        linkedType === "candidate_education"
+          ? linkedType
+          : "",
+      linkedCredentialId: prior.linked_credential_id ?? "",
+      note: prior.note ?? "",
+    };
+  }
+  return out;
+}
+
+function findMissingRequiredVerification(
+  requirements: JobVerificationRequirement[],
+  values: Record<string, VerificationValue>
+): JobVerificationRequirement | null {
+  for (const req of requirements) {
+    if (!req.required) continue;
+    const v = values[req.verification_type];
+    if (!v || !v.attested) return req;
+  }
+  return null;
 }
 
 function findMissingRequired(

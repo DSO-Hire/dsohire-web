@@ -99,7 +99,32 @@ import type {
   ScreeningQuestionOption,
   ExistingAnswer,
 } from "@/app/jobs/[id]/apply/types";
+import {
+  VERIFICATION_TYPE_LABELS,
+  getVerificationType,
+  type VerificationTypeValue,
+} from "@/lib/verifications/types";
+import {
+  LICENSE_TYPES,
+  CERTIFICATION_KINDS,
+  type CanonicalOption,
+} from "@/lib/candidate/canonical-lists";
 import type { Metadata } from "next";
+
+// Label maps for resolving linked-credential summaries in the
+// Verifications block (5G.e Tier 2).
+const LICENSE_LABEL_MAP = new Map<string, string>(
+  LICENSE_TYPES.map((o: CanonicalOption) => [o.value, o.label])
+);
+const CERTIFICATION_LABEL_MAP = new Map<string, string>(
+  CERTIFICATION_KINDS.map((o: CanonicalOption) => [o.value, o.label])
+);
+function licenseLabel(value: string): string {
+  return LICENSE_LABEL_MAP.get(value) ?? value;
+}
+function certificationLabel(value: string): string {
+  return CERTIFICATION_LABEL_MAP.get(value) ?? value;
+}
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -676,6 +701,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     { data: rawLicenses, error: licensesErr },
     { data: rawCertifications, error: certificationsErr },
     { data: rawReferences, error: referencesErr },
+    { data: rawEducation, error: educationErr },
   ] = await Promise.all([
     supabase
       .from("candidate_licenses")
@@ -698,6 +724,12 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
       )
       .eq("application_id", app.id)
       .order("created_at", { ascending: false }),
+    // Education rows — only needed to resolve linked-credential summaries
+    // for the Verifications block below.
+    supabase
+      .from("candidate_education")
+      .select("id, school_name, degree, field_of_study, end_year")
+      .eq("candidate_id", app.candidate_id),
   ]);
   if (licensesErr) {
     console.warn("[applications] candidate_licenses fetch failed", licensesErr);
@@ -711,6 +743,9 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   if (referencesErr) {
     console.warn("[applications] reference_requests fetch failed", referencesErr);
   }
+  if (educationErr) {
+    console.warn("[applications] candidate_education fetch failed", educationErr);
+  }
   // Cast through unknown — display_number defaults false at the schema
   // level so a column-missing error would have surfaced above. We honor
   // display_number in the client component (never render the number
@@ -718,6 +753,121 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const credentialLicenses = ((rawLicenses ?? []) as unknown) as CredentialLicenseRow[];
   const credentialCertifications = ((rawCertifications ?? []) as unknown) as CredentialCertificationRow[];
   const referenceRequests = ((rawReferences ?? []) as unknown) as ReferenceRequestRow[];
+  const educationRows = (rawEducation ?? []) as Array<{
+    id: string;
+    school_name: string;
+    degree: string | null;
+    field_of_study: string | null;
+    end_year: number | null;
+  }>;
+
+  // ── Verifications (5G.e Tier 2)
+  // What the job requires (job_verification_requirements) + what this
+  // candidate self-attested at apply time (application_verifications).
+  // Two parallel selects; if the job lists zero requirements the block
+  // below renders nothing (mirrors the screening block's empty-hide).
+  const [
+    { data: rawVerifReqs, error: verifReqsErr },
+    { data: rawAppVerifs, error: appVerifsErr },
+  ] = await Promise.all([
+    supabase
+      .from("job_verification_requirements")
+      .select("verification_type, required")
+      .eq("job_id", app.job_id),
+    supabase
+      .from("application_verifications")
+      .select(
+        "verification_type, attested, attested_at, linked_credential_type, linked_credential_id, note"
+      )
+      .eq("application_id", appId),
+  ]);
+  if (verifReqsErr) {
+    console.warn(
+      "[applications] job_verification_requirements fetch failed",
+      verifReqsErr
+    );
+  }
+  if (appVerifsErr) {
+    console.warn(
+      "[applications] application_verifications fetch failed",
+      appVerifsErr
+    );
+  }
+  const verificationRequirements = (rawVerifReqs ?? []) as Array<{
+    verification_type: string;
+    required: boolean;
+  }>;
+  const applicationVerifications = (rawAppVerifs ?? []) as Array<{
+    verification_type: string;
+    attested: boolean;
+    attested_at: string | null;
+    linked_credential_type: string | null;
+    linked_credential_id: string | null;
+    note: string | null;
+  }>;
+  const appVerifByType = new Map(
+    applicationVerifications.map((v) => [v.verification_type, v])
+  );
+
+  // Resolve a linked profile credential to a short human-readable summary.
+  // Lightweight in-memory lookup against the rows already fetched above.
+  function resolveLinkedCredential(
+    type: string | null,
+    id: string | null
+  ): string | null {
+    if (!type || !id) return null;
+    if (type === "candidate_license") {
+      const row = credentialLicenses.find((r) => r.id === id);
+      if (!row) return "Linked license (no longer on profile)";
+      const parts = [licenseLabel(row.license_type)];
+      if (row.state) parts.push(row.state);
+      return parts.join(" · ");
+    }
+    if (type === "candidate_certification") {
+      const row = credentialCertifications.find((r) => r.id === id);
+      if (!row) return "Linked certification (no longer on profile)";
+      const parts = [certificationLabel(row.kind)];
+      if (row.level) parts.push(row.level);
+      return parts.join(" · ");
+    }
+    if (type === "candidate_education") {
+      const row = educationRows.find((r) => r.id === id);
+      if (!row) return "Linked education (no longer on profile)";
+      const parts: string[] = [];
+      if (row.degree) parts.push(row.degree);
+      if (row.field_of_study) parts.push(row.field_of_study);
+      const lead = parts.length > 0 ? parts.join(", ") : row.school_name;
+      const tail =
+        parts.length > 0
+          ? row.school_name + (row.end_year ? ` (${row.end_year})` : "")
+          : row.end_year
+            ? `(${row.end_year})`
+            : "";
+      return tail ? `${lead} — ${tail}` : lead;
+    }
+    return null;
+  }
+
+  const verificationRows = verificationRequirements.map((req) => {
+    const att = appVerifByType.get(req.verification_type) ?? null;
+    return {
+      verificationType: req.verification_type,
+      label:
+        VERIFICATION_TYPE_LABELS[
+          req.verification_type as VerificationTypeValue
+        ] ??
+        getVerificationType(req.verification_type)?.label ??
+        req.verification_type,
+      required: req.required,
+      attested: att?.attested ?? false,
+      attestedAt: att?.attested_at ?? null,
+      linkedCredentialSummary: resolveLinkedCredential(
+        att?.linked_credential_type ?? null,
+        att?.linked_credential_id ?? null
+      ),
+      note: att?.note ?? null,
+    };
+  });
 
   // ── Offer letters (Phase 5A Track E + Track E completion)
   //
@@ -1323,6 +1473,25 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             )}
           </DetailSection>
 
+          {/* 05b · Verifications — only renders when the job carries
+                verification requirements (mirrors the screening block's
+                empty-hide). 5G.e Tier 2: attestation-only. */}
+          {verificationRows.length > 0 && (
+            <DetailSection
+              id="verifications"
+              num="05"
+              title="Verifications"
+              icon={ShieldCheck}
+              subtitle={`What this job requires and what ${displayName} self-attested at apply time.`}
+            >
+              <div className="border border-[var(--rule)] bg-white divide-y divide-[var(--rule)]">
+                {verificationRows.map((v) => (
+                  <VerificationRow key={v.verificationType} row={v} />
+                ))}
+              </div>
+            </DetailSection>
+          )}
+
           {/* 06 · Messages with candidate — candidate-facing surface,
                 rendered before the internal-workspace divider. */}
           <DetailSection
@@ -1814,6 +1983,109 @@ function ScreeningResponseRow({
           {missing && question.required && (
             <div className="mt-1.5 text-[12px] font-bold tracking-[1px] uppercase text-red-700">
               Required question — no response
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ───────────────────────────────────────────────────────────────
+ * Verification row (5G.e Tier 2)
+ *
+ * One row per job verification requirement. Mirrors ScreeningResponseRow's
+ * structure + the required-but-blank red-flag treatment: a required
+ * verification the candidate did not attest to gets the same uppercase
+ * red callout.
+ * ───────────────────────────────────────────────────────────── */
+
+interface VerificationRowData {
+  verificationType: string;
+  label: string;
+  required: boolean;
+  attested: boolean;
+  attestedAt: string | null;
+  linkedCredentialSummary: string | null;
+  note: string | null;
+}
+
+function formatAttestedAt(iso: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return null;
+  return d.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function VerificationRow({ row }: { row: VerificationRowData }) {
+  const flagged = row.required && !row.attested;
+  const attestedDate = formatAttestedAt(row.attestedAt);
+
+  return (
+    <div className="p-5">
+      <div className="flex items-start gap-3">
+        <ShieldCheck className="h-4 w-4 text-heritage-deep flex-shrink-0 mt-0.5" />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <div className="text-[14px] font-semibold text-ink leading-snug">
+              {row.label}
+            </div>
+            <span className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta">
+              Verification
+            </span>
+            {row.required && (
+              <span className="text-[9px] font-bold tracking-[2px] uppercase text-heritage-deep">
+                Required
+              </span>
+            )}
+          </div>
+
+          {/* Attestation status */}
+          <div
+            className={`mt-2 text-[14px] leading-relaxed ${
+              row.attested ? "text-ink" : "italic text-slate-meta"
+            }`}
+          >
+            {row.attested ? (
+              <span className="inline-flex items-center gap-1.5">
+                <span className="text-heritage-deep font-bold">✓</span>
+                Candidate attested
+                {attestedDate ? ` · ${attestedDate}` : ""}
+              </span>
+            ) : (
+              "Candidate did not attest"
+            )}
+          </div>
+
+          {/* Linked credential proof */}
+          {row.linkedCredentialSummary && (
+            <div className="mt-1.5 text-[13px] text-slate-body leading-snug">
+              <span className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta mr-2">
+                Linked proof
+              </span>
+              {row.linkedCredentialSummary}
+            </div>
+          )}
+
+          {/* Candidate note */}
+          {row.note && (
+            <div className="mt-1.5 text-[13px] text-slate-body leading-snug whitespace-pre-wrap">
+              <span className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta mr-2">
+                Note
+              </span>
+              {row.note}
+            </div>
+          )}
+
+          {/* Required-but-not-attested red flag — mirrors the screening
+              block's required-blank treatment. */}
+          {flagged && (
+            <div className="mt-1.5 text-[12px] font-bold tracking-[1px] uppercase text-red-700">
+              Required verification — not attested
             </div>
           )}
         </div>
