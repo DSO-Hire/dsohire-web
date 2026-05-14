@@ -49,6 +49,7 @@ import {
   EDUCATION_REQUIREMENT_LABELS,
   INDUSTRY_EXPERIENCE_LABELS,
 } from "@/lib/corporate/job-fields";
+import { computeOte, formatUsd } from "@/lib/comp/ote";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -120,7 +121,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
   const { data: job } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_visible, benefits, requirements, posted_at, status, schedule_days, schedule_evenings, schedule_weekends, scope, external_links, corporate_function, work_mode, work_mode_detail, remote_state_restrictions, travel_expectation, travel_territory, reports_to, direct_reports_band, indirect_reports_band, authority_level, education_requirement, industry_experience, min_years_corporate_experience, max_years_corporate_experience, bonus_structure, equity_offered, equity_note"
+      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, variable_comp_enabled, variable_comp_target, variable_comp_structure, bonus_enabled, bonus_target, benefits, requirements, posted_at, status, schedule_days, schedule_evenings, schedule_weekends, scope, external_links, corporate_function, work_mode, work_mode_detail, remote_state_restrictions, travel_expectation, travel_territory, reports_to, direct_reports_band, indirect_reports_band, authority_level, education_requirement, industry_experience, min_years_corporate_experience, max_years_corporate_experience, bonus_structure, equity_offered, equity_note"
     )
     .eq("id", id)
     .maybeSingle();
@@ -648,11 +649,9 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                 job.min_years_corporate_experience as number | null;
               const maxYears =
                 job.max_years_corporate_experience as number | null;
-              const bonusStructure = (
-                job.bonus_structure as string | null
-              )?.trim();
-              const equityOffered = Boolean(job.equity_offered);
-              const equityNote = (job.equity_note as string | null)?.trim();
+              // Bonus + equity moved into the compensation display (the
+              // composable comp model — they render alongside base + OTE
+              // for both clinical and corporate jobs now).
               const remoteStates = (
                 (job.remote_state_restrictions as string[] | null) ?? []
               ).filter((s) => typeof s === "string" && s.trim().length > 0);
@@ -767,24 +766,6 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                     ] ?? industryExperience,
                 });
               }
-              if (bonusStructure) {
-                rows.push({ label: "Bonus", value: bonusStructure });
-              }
-              if (equityOffered || equityNote) {
-                rows.push({
-                  label: "Equity",
-                  value: (
-                    <>
-                      {equityOffered ? "Offered" : "Not offered"}
-                      {equityNote && (
-                        <span className="block text-[13px] text-slate-body mt-0.5">
-                          {equityNote}
-                        </span>
-                      )}
-                    </>
-                  ),
-                });
-              }
 
               if (rows.length === 0) return null;
 
@@ -862,9 +843,12 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
             </Detail>
 
             {(job.compensation_visible as boolean) &&
-              (job.compensation_min as number | null) !== null && (
+              ((job.compensation_min as number | null) !== null ||
+                Boolean(job.variable_comp_enabled) ||
+                Boolean(job.bonus_enabled) ||
+                Boolean(job.equity_offered)) && (
                 <Detail icon={DollarSign} label="Compensation">
-                  {formatComp(job)}
+                  <CompensationGlance job={job} />
                 </Detail>
               )}
 
@@ -956,6 +940,83 @@ function formatComp(job: { [k: string]: unknown }): string {
     return "Discussed at offer";
   }
   return `${range}${periodLabel}`;
+}
+
+/**
+ * Composable-comp display for the "At a Glance" sidebar. Leads with the
+ * computed On-Target Earnings when the job carries variable comp; falls
+ * back to the plain base figure otherwise. Bonus + equity structure lines
+ * render here too — comp lives in ONE place now (this replaces the
+ * scattered bonus/equity rows the 5G.d Role-details section used to show).
+ * OTE math comes from the shared src/lib/comp/ote.ts helper, so this and
+ * the wizard's <CompensationSection> note always agree.
+ */
+function CompensationGlance({ job }: { job: { [k: string]: unknown } }) {
+  const variableEnabled = Boolean(job.variable_comp_enabled);
+  const bonusEnabled = Boolean(job.bonus_enabled);
+  const equityOffered = Boolean(job.equity_offered);
+
+  const variableStructure = (
+    job.variable_comp_structure as string | null
+  )?.trim();
+  const bonusStructure = (job.bonus_structure as string | null)?.trim();
+  const equityNote = (job.equity_note as string | null)?.trim();
+
+  const ote = computeOte({
+    compensationType:
+      ((job.compensation_type as string | null) ?? "range") as
+        | "range"
+        | "starting_at"
+        | "up_to"
+        | "exact"
+        | "doe",
+    compensationMin: job.compensation_min as number | null,
+    compensationMax: job.compensation_max as number | null,
+    variableCompEnabled: variableEnabled,
+    variableCompTarget: job.variable_comp_target as number | null,
+    bonusEnabled: bonusEnabled,
+    bonusTarget: job.bonus_target as number | null,
+  });
+
+  const baseLine = formatComp(job);
+
+  return (
+    <div className="space-y-1.5">
+      {ote.hasVariable && ote.ote != null ? (
+        <>
+          <div className="text-[18px] font-extrabold text-ink leading-tight">
+            ~{formatUsd(ote.ote)}
+            <span className="ml-1.5 text-[12px] font-semibold text-slate-meta">
+              OTE / yr
+            </span>
+          </div>
+          <div className="text-[13px] text-slate-body">
+            {baseLine} base + {formatUsd(ote.variable)} target variable
+          </div>
+        </>
+      ) : (
+        <div className="font-semibold text-ink">{baseLine}</div>
+      )}
+
+      {variableEnabled && variableStructure && (
+        <div className="text-[13px] text-slate-body">
+          <span className="font-semibold text-ink">Variable:</span>{" "}
+          {variableStructure}
+        </div>
+      )}
+      {bonusEnabled && bonusStructure && (
+        <div className="text-[13px] text-slate-body">
+          <span className="font-semibold text-ink">Bonus:</span> {bonusStructure}
+        </div>
+      )}
+      {equityOffered && (
+        <div className="text-[13px] text-slate-body">
+          <span className="font-semibold text-ink">Equity:</span>{" "}
+          {equityNote || "Offered"}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function timeAgo(date: Date): string {
