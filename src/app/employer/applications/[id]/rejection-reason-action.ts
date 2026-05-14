@@ -129,7 +129,7 @@ export async function suggestRejectionReason(
   // instead of leaking an unrelated DSO's row).
   const { data: appRow } = await supabase
     .from("applications")
-    .select("id, job_id, candidate_id, status, cover_letter")
+    .select("id, job_id, candidate_id, cover_letter")
     .eq("id", parsed.data.applicationId)
     .maybeSingle();
   if (!appRow) return { ok: false, error: "Application not found" };

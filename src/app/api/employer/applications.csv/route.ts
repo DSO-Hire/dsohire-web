@@ -32,20 +32,25 @@ export async function GET() {
     return NextResponse.json({ error: "no dso" }, { status: 403 });
   }
 
+  // `status` (the old enum column) was removed when configurable pipeline
+  // stages shipped — derive the export's status from the application's
+  // current pipeline stage label, with a `withdrawn_at` override.
   const { data: apps } = await supabase
     .from("applications")
     .select(
-      "id, status, source, created_at, hired_at, cover_letter, candidates!inner(full_name, phone, email), jobs!inner(id, title, dso_id)"
+      "id, source, created_at, hired_at, withdrawn_at, cover_letter, candidates!inner(full_name, phone, email), jobs!inner(id, title, dso_id), stage:dso_pipeline_stages(label)"
     )
     .eq("jobs.dso_id", dsoUser.dso_id as string)
     .order("created_at", { ascending: false });
 
+  // The to-one `stage` embed comes back as an object, but type defensively
+  // (feedback_postgrest_one_to_one_embed_shape).
   const rows = (apps ?? []) as unknown as Array<{
     id: string;
-    status: string;
     source: string | null;
     created_at: string;
     hired_at: string | null;
+    withdrawn_at: string | null;
     cover_letter: string | null;
     candidates: Array<{
       full_name: string | null;
@@ -53,11 +58,14 @@ export async function GET() {
       email: string | null;
     }>;
     jobs: Array<{ id: string; title: string }>;
+    stage: { label: string } | Array<{ label: string }> | null;
   }>;
 
   const csvRows = rows.map((r) => {
     const cand = r.candidates?.[0];
     const job = r.jobs?.[0];
+    const stage = Array.isArray(r.stage) ? r.stage[0] : r.stage;
+    const status = r.withdrawn_at ? "Withdrawn" : (stage?.label ?? "");
     const appliedAt = new Date(r.created_at);
     const endAt = r.hired_at ? new Date(r.hired_at) : new Date();
     const daysInPipeline = Math.max(
@@ -73,7 +81,7 @@ export async function GET() {
       candidate_name: cand?.full_name ?? "",
       candidate_email: cand?.email ?? "",
       candidate_phone: cand?.phone ?? "",
-      status: r.status,
+      status,
       source: r.source ?? "",
       applied_at: r.created_at,
       hired_at: r.hired_at ?? "",

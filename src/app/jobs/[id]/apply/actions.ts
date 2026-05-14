@@ -133,14 +133,14 @@ export async function applyToJob(
   // (legacy applications withdrawn before this column existed).
   const { data: priorApp } = await supabase
     .from("applications")
-    .select("id, status, withdrawn_at, updated_at")
+    .select("id, withdrawn_at, updated_at")
     .eq("job_id", jobId)
     .eq("candidate_id", candidate.id as string)
     .maybeSingle();
-  if (
-    priorApp &&
-    (priorApp.status as string) === "withdrawn"
-  ) {
+  // `withdrawn_at` is the source of truth for a withdrawn application —
+  // the old `status` enum column was removed when configurable pipeline
+  // stages shipped (~2026-05-12). A non-null withdrawn_at == withdrawn.
+  if (priorApp && priorApp.withdrawn_at) {
     const withdrawAt = new Date(
       ((priorApp.withdrawn_at as string | null) ??
         (priorApp.updated_at as string)) || Date.now()
@@ -259,10 +259,11 @@ export async function applyToJob(
     }
   }
 
-  // Check for existing application (idempotency)
+  // Check for existing application (idempotency). Any existing row for
+  // this (job, candidate) pair is a hard block — see the branch below.
   const { data: existing } = await supabase
     .from("applications")
-    .select("id, status")
+    .select("id")
     .eq("job_id", jobId)
     .eq("candidate_id", candidate.id as string)
     .maybeSingle();

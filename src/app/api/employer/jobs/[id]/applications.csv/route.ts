@@ -39,28 +39,33 @@ export async function GET(
     return NextResponse.json({ error: "not found" }, { status: 404 });
   }
 
+  // `status` (the old enum column) was removed when configurable pipeline
+  // stages shipped — derive the export's status from the application's
+  // current pipeline stage label, with a `withdrawn_at` override.
   const { data: apps } = await supabase
     .from("applications")
     .select(
-      "id, status, source, created_at, hired_at, cover_letter, candidates!inner(full_name, phone, email)"
+      "id, source, created_at, hired_at, withdrawn_at, cover_letter, candidates!inner(full_name, phone, email), stage:dso_pipeline_stages(label)"
     )
     .eq("job_id", jobId)
     .order("created_at", { ascending: false });
 
   // !inner returns the joined row as an array — see
-  // feedback_supabase_inner_returns_array.
+  // feedback_supabase_inner_returns_array. The to-one `stage` embed comes
+  // back as an object, but type defensively (feedback_postgrest_one_to_one_embed_shape).
   const rows = (apps ?? []) as unknown as Array<{
     id: string;
-    status: string;
     source: string | null;
     created_at: string;
     hired_at: string | null;
+    withdrawn_at: string | null;
     cover_letter: string | null;
     candidates: Array<{
       full_name: string | null;
       phone: string | null;
       email: string | null;
     }>;
+    stage: { label: string } | Array<{ label: string }> | null;
   }>;
 
   // Get auth email for each candidate (candidates.email is the guest
@@ -72,6 +77,8 @@ export async function GET(
 
   const csvRows = rows.map((r) => {
     const cand = r.candidates?.[0];
+    const stage = Array.isArray(r.stage) ? r.stage[0] : r.stage;
+    const status = r.withdrawn_at ? "Withdrawn" : (stage?.label ?? "");
     const appliedAt = new Date(r.created_at);
     const endAt = r.hired_at ? new Date(r.hired_at) : new Date();
     const daysInPipeline = Math.max(
@@ -85,7 +92,7 @@ export async function GET(
       candidate_name: cand?.full_name ?? "",
       candidate_email: cand?.email ?? "",
       candidate_phone: cand?.phone ?? "",
-      status: r.status,
+      status,
       source: r.source ?? "",
       applied_at: r.created_at,
       hired_at: r.hired_at ?? "",

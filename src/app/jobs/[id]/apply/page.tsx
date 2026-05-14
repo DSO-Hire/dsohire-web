@@ -241,7 +241,7 @@ export default async function ApplyPage({ params, searchParams }: PageProps) {
   // The action layer also enforces this server-side (defense in depth).
   const { data: existingApp } = await supabase
     .from("applications")
-    .select("id, cover_letter, resume_url, status")
+    .select("id")
     .eq("job_id", jobId)
     .eq("candidate_id", candidate.id)
     .maybeSingle();
