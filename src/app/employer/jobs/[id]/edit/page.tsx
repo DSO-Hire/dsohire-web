@@ -83,6 +83,14 @@ export default async function EditJobPage({ params }: PageProps) {
 
   if (!job) notFound();
 
+  // 5G.d — corporate-scope jobs use the parallel corporate edit surface,
+  // which renders the 16-column corporate sandbox field set instead of the
+  // clinical one. The corporate edit page reciprocally bounces non-corporate
+  // jobs back here, so the two routes stay scope-correct.
+  if ((job.scope as string | null) === "corporate") {
+    redirect(`/employer/jobs/${jobId}/edit/corporate`);
+  }
+
   const [
     { data: locations },
     { data: jobLocations },

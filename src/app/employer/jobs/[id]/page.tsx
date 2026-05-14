@@ -89,11 +89,17 @@ export default async function PerJobPipelinePage({
 
   const { data: job } = await supabase
     .from("jobs")
-    .select("id, title, dso_id, status, applications_count, views")
+    .select("id, title, dso_id, status, applications_count, views, scope")
     .eq("id", jobId)
     .eq("dso_id", dsoUser.dso_id)
     .maybeSingle();
   if (!job) notFound();
+
+  // 5G.d — corporate jobs edit through the parallel corporate edit surface.
+  const editHref =
+    (job.scope as string | null) === "corporate"
+      ? `/employer/jobs/${jobId}/edit/corporate`
+      : `/employer/jobs/${jobId}/edit`;
 
   // Pull the DSO's pipeline stages once — drives both the kanban columns
   // and the per-application kind lookup. visibleStages() ordering happens
@@ -366,7 +372,7 @@ export default async function PerJobPipelinePage({
 
         <div className="flex flex-wrap items-center gap-2">
           <Link
-            href={`/employer/jobs/${jobId}/edit`}
+            href={editHref}
             className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-ink hover:bg-cream"
           >
             <Pencil className="size-3.5" />

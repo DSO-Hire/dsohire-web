@@ -8,7 +8,7 @@
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight, Briefcase } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getActiveSubscription } from "@/lib/billing/subscription";
@@ -107,6 +107,31 @@ export default async function NewJobPage() {
           need. We render separate location-specific listings automatically.
         </p>
       </header>
+
+      {/* Cross-link banner — over to the corporate job wizard. The reverse
+          banner lives on /employer/jobs/new/corporate. Placed in the route
+          page (not JobWizard) so job-wizard.tsx stays untouched. */}
+      <div className="mb-8 max-w-[820px] border border-[var(--rule)] bg-cream/50 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <Briefcase className="h-5 w-5 text-[#3D5266] flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-[13px] font-bold text-ink mb-0.5">
+              Hiring for a corporate role instead?
+            </p>
+            <p className="text-[12px] text-slate-meta leading-relaxed">
+              DSO-wide leadership and corporate-function roles — finance,
+              ops, marketing, HR — use the corporate job wizard.
+            </p>
+          </div>
+        </div>
+        <Link
+          href="/employer/jobs/new/corporate"
+          className="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 border border-[var(--rule-strong)] text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-white transition-colors"
+        >
+          Corporate job wizard
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </div>
 
       <JobWizard
         dsoId={dsoUser.dso_id}

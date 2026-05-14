@@ -33,83 +33,22 @@ export interface JobActionState {
   error?: string;
 }
 
-interface ScreeningQuestionPayload {
-  id: string | null;
-  prompt: string;
-  helper_text: string | null;
-  kind:
-    | "short_text"
-    | "long_text"
-    | "yes_no"
-    | "single_select"
-    | "multi_select"
-    | "number";
-  options: Array<{ id: string; label: string }> | null;
-  required: boolean;
-  sort_order: number;
-  // E2.10 (2026-05-13) — soft knockout authoring.
-  knockout?: boolean;
-  knockout_correct_answer?: unknown | null;
-}
-
-const RESERVED_JOB_SLUGS = new Set(["new", "search", "feed"]);
-
-/**
- * E2.10 — Validate the wizard's knockout_correct_answer payload against
- * the question kind + the options the recruiter just authored. Returns
- * the normalized payload (with string-coerced fields), or null if the
- * shape is invalid for the kind. Caller treats null as "no knockout"
- * rather than throwing — knockout is opt-in and a mis-configured payload
- * shouldn't block the save.
- */
-function validateKnockoutCorrectAnswer(
-  raw: unknown,
-  kind: string,
-  options: Array<{ id: string; label: string }> | null
-): Record<string, unknown> | null {
-  if (!raw || typeof raw !== "object") return null;
-  const r = raw as Record<string, unknown>;
-
-  if (kind === "yes_no") {
-    const expected = String(r.expected ?? "").toLowerCase();
-    if (expected !== "yes" && expected !== "no") return null;
-    return { expected };
-  }
-
-  if (kind === "single_select") {
-    const ids = Array.isArray(r.expected_option_ids)
-      ? (r.expected_option_ids as unknown[]).map((x) => String(x))
-      : [];
-    if (ids.length === 0) return null;
-    // Validate against the question's actual option IDs.
-    const valid = new Set((options ?? []).map((o) => o.id));
-    const filtered = ids.filter((id) => valid.has(id));
-    if (filtered.length === 0) return null;
-    return { expected_option_ids: filtered };
-  }
-
-  if (kind === "multi_select") {
-    const ids = Array.isArray(r.must_include_option_ids)
-      ? (r.must_include_option_ids as unknown[]).map((x) => String(x))
-      : [];
-    if (ids.length === 0) return null;
-    const valid = new Set((options ?? []).map((o) => o.id));
-    const filtered = ids.filter((id) => valid.has(id));
-    if (filtered.length === 0) return null;
-    return { must_include_option_ids: filtered };
-  }
-
-  if (kind === "number") {
-    const op = String(r.operator ?? "");
-    if (op !== ">=" && op !== "<=" && op !== "=") return null;
-    const value =
-      typeof r.value === "number" ? r.value : Number(r.value);
-    if (!Number.isFinite(value)) return null;
-    return { operator: op, value };
-  }
-
-  return null;
-}
+// 5G.d — pure helpers + closed-enum constants shared with the corporate
+// job actions (./corporate-actions.ts) live in ./job-shared.ts. A
+// "use server" module may only export serializable-arg async actions,
+// so none of these (the sync helpers, the Sets, the Supabase-client-arg
+// helpers) can be re-exported from here. Both action files import them
+// from the shared plain module instead — shared logic in ONE place.
+import {
+  VALID_SCOPES,
+  VALID_KINDS,
+  makeSlug,
+  validateKnockoutCorrectAnswer,
+  parseExternalLinks,
+  emitJobAuditEvent,
+  resolveAvailableJobSlug,
+  type ScreeningQuestionPayload,
+} from "./job-shared";
 
 /* ───── Create ───── */
 
@@ -1279,60 +1218,9 @@ const VALID_CORPORATE_FUNCTIONS = new Set<string>([
   "business-development",
 ]);
 
-/**
- * E1.12 helper — read external_link_label[] + external_link_url[] from
- * a FormData submission, validate, dedup, cap. Returns null on any
- * validation error with the error string surfacing in the caller's
- * error path; returns the parsed array otherwise.
- */
-function parseExternalLinks(
-  formData: FormData
-): Array<{ label: string; url: string }> | { error: string } {
-  const labels = formData.getAll("external_link_label").map((v) => String(v));
-  const urls = formData.getAll("external_link_url").map((v) => String(v));
-  const pairs: Array<{ label: string; url: string }> = [];
-  const seen = new Set<string>();
-  for (let i = 0; i < Math.max(labels.length, urls.length); i++) {
-    const label = (labels[i] ?? "").trim();
-    const url = (urls[i] ?? "").trim();
-    // Skip fully-empty rows — the wizard may submit blank trailing fields.
-    if (!label && !url) continue;
-    if (!label) return { error: "External link is missing a label." };
-    if (!url) return { error: `External link "${label}" is missing a URL.` };
-    if (label.length > 80) {
-      return { error: `External link label "${label.slice(0, 30)}..." exceeds 80 characters.` };
-    }
-    try {
-      const u = new URL(url);
-      if (u.protocol !== "http:" && u.protocol !== "https:") {
-        return { error: `External link "${label}" must use http or https.` };
-      }
-    } catch {
-      return { error: `External link "${label}" is not a valid URL.` };
-    }
-    const key = url.toLowerCase();
-    if (seen.has(key)) continue;
-    seen.add(key);
-    pairs.push({ label, url });
-    if (pairs.length >= 5) break; // hard cap
-  }
-  return pairs;
-}
-
-const VALID_SCOPES = new Set<"location" | "regional" | "corporate">([
-  "location",
-  "regional",
-  "corporate",
-]);
-
-const VALID_KINDS: Set<ScreeningQuestionPayload["kind"]> = new Set([
-  "short_text",
-  "long_text",
-  "yes_no",
-  "single_select",
-  "multi_select",
-  "number",
-]);
+// 5G.d — parseExternalLinks, VALID_SCOPES, VALID_KINDS now live in
+// ./job-shared.ts (imported at the top of this file) so the corporate
+// job actions can reuse them without a parallel copy.
 
 function parseJobFormData(
   formData: FormData
@@ -1606,68 +1494,10 @@ function parseJobFormData(
   };
 }
 
-function makeSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .substring(0, 80);
-}
-
-/**
- * Audit-log helper for job mutations. Wraps recordAuditEvent with the
- * actor-resolution boilerplate so each call site stays a one-liner.
- * Fail-open: errors are swallowed inside recordAuditEvent itself.
- */
-async function emitJobAuditEvent(
-  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
-  dsoId: string,
-  jobId: string,
-  input: {
-    eventKind: string;
-    summary: string;
-    metadata?: Record<string, unknown>;
-  }
-): Promise<void> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return;
-  await recordAuditEvent({
-    dsoId,
-    actorUserId: user.id,
-    eventKind: input.eventKind,
-    targetTable: "jobs",
-    targetId: jobId,
-    summary: input.summary,
-    metadata: input.metadata ?? {},
-  });
-}
-
-async function resolveAvailableJobSlug(
-  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
-  dsoId: string,
-  baseSlug: string
-): Promise<string> {
-  if (RESERVED_JOB_SLUGS.has(baseSlug)) {
-    return resolveAvailableJobSlug(supabase, dsoId, `${baseSlug}-job`);
-  }
-  const { data: existing } = await supabase
-    .from("jobs")
-    .select("id")
-    .eq("dso_id", dsoId)
-    .eq("slug", baseSlug)
-    .maybeSingle();
-  if (!existing) return baseSlug;
-  for (let i = 2; i <= 99; i++) {
-    const candidate = `${baseSlug}-${i}`;
-    const { data: clash } = await supabase
-      .from("jobs")
-      .select("id")
-      .eq("dso_id", dsoId)
-      .eq("slug", candidate)
-      .maybeSingle();
-    if (!clash) return candidate;
-  }
-  return `${baseSlug}-${Math.floor(Math.random() * 100000)}`;
-}
+// 5G.d — makeSlug, emitJobAuditEvent, resolveAvailableJobSlug all moved
+// to ./job-shared.ts (imported at the top of this file). They are NOT
+// server actions — just helpers that happen to take a Supabase client
+// arg — so they cannot be exported from a "use server" module (its
+// exports must be serializable-arg async actions). The shared module is
+// a plain TS module, the correct home for them, and ./corporate-actions.ts
+// imports them from there too. No parallel copies.
