@@ -43,11 +43,10 @@ import {
   Check,
 } from "lucide-react";
 import { JobDescriptionEditor } from "@/components/job-description-editor";
-import {
-  createCorporateJob,
-  updateCorporateJob,
-  type JobActionState,
-} from "./corporate-actions";
+import { createCorporateJob, updateCorporateJob } from "./corporate-actions";
+// JobActionState comes straight from ./actions — never re-exported through a
+// "use server" module (that ReferenceErrors at request time).
+import type { JobActionState } from "./actions";
 import {
   KnockoutAuthoring,
   type LocationOption,

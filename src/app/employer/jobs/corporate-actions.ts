@@ -143,9 +143,12 @@ import {
 // Reuse the practice wizard's JobActionState verbatim — the corporate
 // edit/wizard surfaces are useActionState consumers expecting the same
 // { ok, error } shape.
+//
+// Do NOT re-export this type from here. This is a "use server" module, and
+// re-exporting a type from one makes Next's server-action compiler emit a
+// runtime reference to the (type-only, erased) name → ReferenceError at
+// request time. Consumers import JobActionState directly from ./actions.
 import type { JobActionState } from "./actions";
-
-export type { JobActionState };
 
 /* ───── Parsed shape ───── */
 

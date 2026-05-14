@@ -49,12 +49,12 @@ import {
   type AuthorityLevel,
   type WorkMode,
 } from "@/lib/corporate/job-fields";
+// JdGeneratorOutput is owned by the dental action. Imported here for the
+// internal type annotations only — NOT re-exported. Re-exporting a type
+// from a "use server" module makes Next's action compiler emit a runtime
+// reference to the (erased) name → ReferenceError at request time. The
+// corporate panel imports JdGeneratorOutput straight from ./jd-generator-action.
 import type { JdGeneratorOutput } from "./jd-generator-action";
-
-// Re-export so the corporate panel can import the payload type from a
-// single place alongside the action it calls. The underlying type is
-// owned by the dental action — not redefined here.
-export type { JdGeneratorOutput } from "./jd-generator-action";
 
 const AUTHORITY_VALUES = AUTHORITY_LEVELS.map((a) => a.value) as [
   AuthorityLevel,

@@ -25,10 +25,10 @@
 
 import { useState, useTransition } from "react";
 import { Sparkles, RefreshCcw, Check, Wand2 } from "lucide-react";
-import {
-  generateCorporateJobDescription,
-  type JdGeneratorOutput,
-} from "./jd-generator-corporate-action";
+import { generateCorporateJobDescription } from "./jd-generator-corporate-action";
+// JdGeneratorOutput comes straight from the dental action — never re-exported
+// through a "use server" module (that ReferenceErrors at request time).
+import type { JdGeneratorOutput } from "./jd-generator-action";
 import { getCorporateFunction } from "@/lib/corporate/functions";
 import {
   AUTHORITY_LEVEL_LABELS,

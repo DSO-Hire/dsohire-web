@@ -58,11 +58,13 @@ import {
   updateJobDescriptionSection,
   setJobStatus,
 } from "../../../actions";
+// JobActionState comes straight from ./actions — never re-exported through a
+// "use server" module (that ReferenceErrors at request time).
+import type { JobActionState } from "../../../actions";
 import {
   updateCorporateJobBasicsSection,
   updateCorporateJobDetailsSection,
   updateCorporateJob,
-  type JobActionState,
 } from "../../../corporate-actions";
 import {
   KnockoutAuthoring,
