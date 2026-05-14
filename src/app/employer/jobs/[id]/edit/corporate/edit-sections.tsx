@@ -52,6 +52,8 @@ import {
   Loader2,
 } from "lucide-react";
 import { JobDescriptionEditor } from "@/components/job-description-editor";
+import { JdGeneratorCorporatePanel } from "../../jd-generator-corporate-panel";
+import { CorporateRecommendedQuestionsPanel } from "../../corporate-recommended-questions-panel";
 import {
   updateJobDescriptionSection,
   setJobStatus,
@@ -199,6 +201,10 @@ export function CorporateEditSections({
         jobId={initial.id}
         initialDescription={initial.description}
         initialTitle={initial.title}
+        initialCorporateFunction={initial.corporate_function ?? ""}
+        initialAuthorityLevel={initial.authority_level ?? ""}
+        initialWorkMode={initial.work_mode ?? ""}
+        initialLocationIds={initial.location_ids}
       />
       <DetailsSection
         dsoId={dsoId}
@@ -617,11 +623,19 @@ function DescriptionSection({
   jobId,
   initialDescription,
   initialTitle,
+  initialCorporateFunction,
+  initialAuthorityLevel,
+  initialWorkMode,
+  initialLocationIds,
 }: {
   dsoId: string;
   jobId: string;
   initialDescription: string;
   initialTitle: string;
+  initialCorporateFunction: string;
+  initialAuthorityLevel: string;
+  initialWorkMode: string;
+  initialLocationIds: string[];
 }) {
   const [description, setDescription] = useState(initialDescription);
   const [snapshot, setSnapshot] = useState(initialDescription);
@@ -663,9 +677,27 @@ function DescriptionSection({
       subtitle="The role's scope, what success looks like, and what makes this DSO worth joining."
     >
       <div className="space-y-5">
-        {/* P3: corporate JD generator panel mounts here.
-            Same seam as corporate-wizard.tsx — the dental JdGeneratorPanel
-            carries clinical framing and is deliberately not wired here. */}
+        {/* 5G.d P3 — corporate-tuned AI JD generator. onApplyTitle is a
+            no-op here: the title lives in the Basics section card, and a
+            silent cross-section overwrite would surprise the operator
+            (mirrors the dental edit page's JD panel behavior). */}
+        <JdGeneratorCorporatePanel
+          corporateFunction={initialCorporateFunction}
+          authorityLevel={initialAuthorityLevel}
+          workMode={initialWorkMode}
+          locationIds={initialLocationIds}
+          onApplyTitle={() => {
+            /* intentionally disabled on the edit page — see comment above */
+          }}
+          onApplyDescription={(html) => {
+            setDescription(html);
+            setSaved(false);
+          }}
+          onApplyAll={({ descriptionHtml }) => {
+            setDescription(descriptionHtml);
+            setSaved(false);
+          }}
+        />
         {initialTitle.trim() && (
           <p className="text-[12px] text-slate-meta">
             Editing description for{" "}
@@ -1618,10 +1650,16 @@ function ScreeningSection({
       subtitle="Optional questions candidates answer as part of their application."
     >
       <div className="space-y-5">
-        {/* P3: corporate recommended-question library mounts here.
-            Same seam as corporate-wizard.tsx — the dental
-            RecommendedQuestionsPanel is role_category-keyed and surfaces
-            clinical questions, so it is deliberately not wired here. */}
+        {/* 5G.d P3 — corporate recommended-question library, keyed by
+            corporate_function. Separate from the dental clinical library. */}
+        <CorporateRecommendedQuestionsPanel
+          corporateFunction={savedBasics.corporate_function}
+          questions={questions}
+          onChange={(next) => {
+            setQuestions(next);
+            touch();
+          }}
+        />
 
         {questions.length === 0 && (
           <div className="border border-dashed border-[var(--rule-strong)] p-5 text-center bg-cream/40">

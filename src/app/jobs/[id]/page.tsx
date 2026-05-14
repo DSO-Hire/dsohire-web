@@ -40,6 +40,15 @@ import {
 import { WhyThisMatch } from "@/components/practice-fit/why-this-match";
 import type { FitResult } from "@/lib/practice-fit/types";
 import { getCorporateFunction } from "@/lib/corporate/functions";
+import {
+  WORK_MODE_LABELS,
+  TRAVEL_EXPECTATION_LABELS,
+  DIRECT_REPORTS_BAND_LABELS,
+  INDIRECT_REPORTS_BAND_LABELS,
+  AUTHORITY_LEVEL_LABELS,
+  EDUCATION_REQUIREMENT_LABELS,
+  INDUSTRY_EXPERIENCE_LABELS,
+} from "@/lib/corporate/job-fields";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -111,7 +120,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
   const { data: job } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_visible, benefits, requirements, posted_at, status, schedule_days, schedule_evenings, schedule_weekends, scope, external_links, corporate_function"
+      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_visible, benefits, requirements, posted_at, status, schedule_days, schedule_evenings, schedule_weekends, scope, external_links, corporate_function, work_mode, work_mode_detail, remote_state_restrictions, travel_expectation, travel_territory, reports_to, direct_reports_band, indirect_reports_band, authority_level, education_requirement, industry_experience, min_years_corporate_experience, max_years_corporate_experience, bonus_structure, equity_offered, equity_note"
     )
     .eq("id", id)
     .maybeSingle();
@@ -600,6 +609,206 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                         .join(" · ")}
                     </p>
                   )}
+                </section>
+              );
+            })()}
+
+            {/* 5G.d (2026-05-14) — Role details for corporate-scope jobs.
+                Renders the populated corporate sandbox fields. Whole block
+                gated on scope === 'corporate' so clinical jobs are
+                untouched; each row gated on its own value so a sparsely
+                filled corporate job doesn't show empty rows. Slate-blue
+                accent (#3D5266) matches the rest of the 5G corporate
+                surface. */}
+            {(() => {
+              const isCorporate =
+                ((job.scope as string | null) ?? "location") === "corporate";
+              if (!isCorporate) return null;
+
+              const workMode = job.work_mode as string | null;
+              const workModeDetail = (
+                job.work_mode_detail as string | null
+              )?.trim();
+              const authorityLevel = job.authority_level as string | null;
+              const travelExpectation =
+                job.travel_expectation as string | null;
+              const travelTerritory = (
+                job.travel_territory as string | null
+              )?.trim();
+              const reportsTo = (job.reports_to as string | null)?.trim();
+              const directReportsBand =
+                job.direct_reports_band as string | null;
+              const indirectReportsBand =
+                job.indirect_reports_band as string | null;
+              const educationRequirement =
+                job.education_requirement as string | null;
+              const industryExperience =
+                job.industry_experience as string | null;
+              const minYears =
+                job.min_years_corporate_experience as number | null;
+              const maxYears =
+                job.max_years_corporate_experience as number | null;
+              const bonusStructure = (
+                job.bonus_structure as string | null
+              )?.trim();
+              const equityOffered = Boolean(job.equity_offered);
+              const equityNote = (job.equity_note as string | null)?.trim();
+              const remoteStates = (
+                (job.remote_state_restrictions as string[] | null) ?? []
+              ).filter((s) => typeof s === "string" && s.trim().length > 0);
+
+              // Years-of-experience display string.
+              let yearsText: string | null = null;
+              if (minYears !== null && maxYears !== null) {
+                yearsText =
+                  minYears === maxYears
+                    ? `${minYears} year${minYears === 1 ? "" : "s"}`
+                    : `${minYears}–${maxYears} years`;
+              } else if (minYears !== null) {
+                yearsText = `${minYears}+ years`;
+              } else if (maxYears !== null) {
+                yearsText = `Up to ${maxYears} years`;
+              }
+
+              const rows: Array<{ label: string; value: React.ReactNode }> =
+                [];
+
+              if (workMode) {
+                rows.push({
+                  label: "Work mode",
+                  value: (
+                    <>
+                      {WORK_MODE_LABELS[
+                        workMode as keyof typeof WORK_MODE_LABELS
+                      ] ?? workMode}
+                      {workModeDetail && (
+                        <span className="block text-[13px] text-slate-body mt-0.5">
+                          {workModeDetail}
+                        </span>
+                      )}
+                    </>
+                  ),
+                });
+              }
+              if (remoteStates.length > 0) {
+                rows.push({
+                  label: "Remote — eligible states",
+                  value: remoteStates.join(", "),
+                });
+              }
+              if (authorityLevel) {
+                rows.push({
+                  label: "Authority level",
+                  value:
+                    AUTHORITY_LEVEL_LABELS[
+                      authorityLevel as keyof typeof AUTHORITY_LEVEL_LABELS
+                    ] ?? authorityLevel,
+                });
+              }
+              if (travelExpectation) {
+                rows.push({
+                  label: "Travel",
+                  value: (
+                    <>
+                      {TRAVEL_EXPECTATION_LABELS[
+                        travelExpectation as keyof typeof TRAVEL_EXPECTATION_LABELS
+                      ] ?? travelExpectation}
+                      {travelTerritory && (
+                        <span className="block text-[13px] text-slate-body mt-0.5">
+                          {travelTerritory}
+                        </span>
+                      )}
+                    </>
+                  ),
+                });
+              }
+              if (reportsTo) {
+                rows.push({ label: "Reports to", value: reportsTo });
+              }
+              if (directReportsBand) {
+                rows.push({
+                  label: "Direct reports",
+                  value:
+                    DIRECT_REPORTS_BAND_LABELS[
+                      directReportsBand as keyof typeof DIRECT_REPORTS_BAND_LABELS
+                    ] ?? directReportsBand,
+                });
+              }
+              if (indirectReportsBand) {
+                rows.push({
+                  label: "Indirect reports",
+                  value:
+                    INDIRECT_REPORTS_BAND_LABELS[
+                      indirectReportsBand as keyof typeof INDIRECT_REPORTS_BAND_LABELS
+                    ] ?? indirectReportsBand,
+                });
+              }
+              if (yearsText) {
+                rows.push({
+                  label: "Corporate experience",
+                  value: yearsText,
+                });
+              }
+              if (educationRequirement) {
+                rows.push({
+                  label: "Education",
+                  value:
+                    EDUCATION_REQUIREMENT_LABELS[
+                      educationRequirement as keyof typeof EDUCATION_REQUIREMENT_LABELS
+                    ] ?? educationRequirement,
+                });
+              }
+              if (industryExperience) {
+                rows.push({
+                  label: "Industry experience",
+                  value:
+                    INDUSTRY_EXPERIENCE_LABELS[
+                      industryExperience as keyof typeof INDUSTRY_EXPERIENCE_LABELS
+                    ] ?? industryExperience,
+                });
+              }
+              if (bonusStructure) {
+                rows.push({ label: "Bonus", value: bonusStructure });
+              }
+              if (equityOffered || equityNote) {
+                rows.push({
+                  label: "Equity",
+                  value: (
+                    <>
+                      {equityOffered ? "Offered" : "Not offered"}
+                      {equityNote && (
+                        <span className="block text-[13px] text-slate-body mt-0.5">
+                          {equityNote}
+                        </span>
+                      )}
+                    </>
+                  ),
+                });
+              }
+
+              if (rows.length === 0) return null;
+
+              return (
+                <section className="mt-10 pt-8 border-t border-[var(--rule)]">
+                  <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink mb-4">
+                    Role details
+                  </h2>
+                  <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+                    {rows.map((row) => (
+                      <div
+                        key={row.label}
+                        className="border-l-2 pl-3"
+                        style={{ borderColor: "#3D5266" }}
+                      >
+                        <dt className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta mb-1">
+                          {row.label}
+                        </dt>
+                        <dd className="text-[14px] font-semibold text-ink">
+                          {row.value}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
                 </section>
               );
             })()}

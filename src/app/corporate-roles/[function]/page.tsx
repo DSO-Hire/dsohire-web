@@ -22,6 +22,10 @@ import {
   CORPORATE_FUNCTION_SLUGS,
   getCorporateFunction,
 } from "@/lib/corporate/functions";
+import {
+  WORK_MODE_LABELS,
+  AUTHORITY_LEVEL_LABELS,
+} from "@/lib/corporate/job-fields";
 
 export const dynamic = "force-static";
 export const revalidate = 3600; // 1 hour — jobs don't churn fast on corporate side.
@@ -59,7 +63,7 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
   const { data: rawJobs } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, slug, employment_type, posted_at, compensation_min, compensation_max, compensation_period, compensation_visible"
+      "id, dso_id, title, slug, employment_type, posted_at, compensation_min, compensation_max, compensation_period, compensation_visible, work_mode, authority_level"
     )
     .eq("status", "active")
     .eq("scope", "corporate")
@@ -79,6 +83,8 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
     compensation_max: number | null;
     compensation_period: string | null;
     compensation_visible: boolean;
+    work_mode: string | null;
+    authority_level: string | null;
   }>;
 
   // DSO names for the cards.
@@ -192,6 +198,41 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
                   <div className="text-[13px] text-slate-body mb-3">
                     {dso?.name ?? "—"}
                   </div>
+                  {/* 5G.d (2026-05-14) — work mode + authority level chips,
+                      each rendered only when the field is set. Slate-blue
+                      accent matches the corporate surface. */}
+                  {(job.work_mode || job.authority_level) && (
+                    <div className="flex flex-wrap gap-1.5 mb-3">
+                      {job.work_mode && (
+                        <span
+                          className="px-2 py-0.5 text-[11px] font-semibold border"
+                          style={{
+                            color: "#3D5266",
+                            borderColor: "#3D5266",
+                            background: "rgba(61,82,102,0.06)",
+                          }}
+                        >
+                          {WORK_MODE_LABELS[
+                            job.work_mode as keyof typeof WORK_MODE_LABELS
+                          ] ?? job.work_mode}
+                        </span>
+                      )}
+                      {job.authority_level && (
+                        <span
+                          className="px-2 py-0.5 text-[11px] font-semibold border"
+                          style={{
+                            color: "#3D5266",
+                            borderColor: "#3D5266",
+                            background: "rgba(61,82,102,0.06)",
+                          }}
+                        >
+                          {AUTHORITY_LEVEL_LABELS[
+                            job.authority_level as keyof typeof AUTHORITY_LEVEL_LABELS
+                          ] ?? job.authority_level}
+                        </span>
+                      )}
+                    </div>
+                  )}
                   <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-[12px] text-slate-meta">
                     <span className="inline-flex items-center gap-1">
                       <MapPin className="h-3 w-3" />

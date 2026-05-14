@@ -77,6 +77,8 @@ import {
   EDUCATION_REQUIREMENT_LABELS,
   INDUSTRY_EXPERIENCE_LABELS,
 } from "@/lib/corporate/job-fields";
+import { JdGeneratorCorporatePanel } from "./jd-generator-corporate-panel";
+import { CorporateRecommendedQuestionsPanel } from "./corporate-recommended-questions-panel";
 
 /* ───── Types ───── */
 
@@ -781,6 +783,11 @@ export function CorporateJobWizard({
             description={description}
             onChange={setDescription}
             title={title}
+            onTitle={setTitle}
+            corporateFunction={corporateFunction}
+            authorityLevel={authorityLevel}
+            workMode={workMode}
+            locationIds={Array.from(selectedLocationIds)}
           />
         )}
 
@@ -836,7 +843,11 @@ export function CorporateJobWizard({
         )}
 
         {currentStep.id === "screening" && (
-          <ScreeningStep questions={questions} onChange={setQuestions} />
+          <ScreeningStep
+            questions={questions}
+            onChange={setQuestions}
+            corporateFunction={corporateFunction}
+          />
         )}
 
         {currentStep.id === "preview" && (
@@ -1142,10 +1153,20 @@ function DescriptionStep({
   description,
   onChange,
   title,
+  onTitle,
+  corporateFunction,
+  authorityLevel,
+  workMode,
+  locationIds,
 }: {
   description: string;
   onChange: (v: string) => void;
   title: string;
+  onTitle: (v: string) => void;
+  corporateFunction: string;
+  authorityLevel: string;
+  workMode: string;
+  locationIds: string[];
 }) {
   return (
     <div className="space-y-6">
@@ -1158,12 +1179,21 @@ function DescriptionStep({
         </h2>
       </div>
 
-      {/* P3: corporate JD generator panel mounts here.
-          The existing JdGeneratorPanel carries dental-clinical framing
-          (role_category, clinical specialties) — wiring it here is the
-          exact bug 5G.d exists to fix. The corporate JD generator (P3)
-          will be a separate panel built against the corporate field set
-          (corporate_function + authority_level + work_mode). */}
+      {/* 5G.d P3 — corporate-tuned AI JD generator. Built against the
+          corporate field set (corporate_function + authority_level +
+          work_mode), NOT the dental role_category-keyed generator. */}
+      <JdGeneratorCorporatePanel
+        corporateFunction={corporateFunction}
+        authorityLevel={authorityLevel}
+        workMode={workMode}
+        locationIds={locationIds}
+        onApplyTitle={onTitle}
+        onApplyDescription={onChange}
+        onApplyAll={({ title: t, descriptionHtml }) => {
+          onTitle(t);
+          onChange(descriptionHtml);
+        }}
+      />
 
       {title.trim() && (
         <p className="text-[12px] text-slate-meta">
@@ -1767,9 +1797,11 @@ function DetailsStep({
 function ScreeningStep({
   questions,
   onChange,
+  corporateFunction,
 }: {
   questions: WizardScreeningQuestion[];
   onChange: (qs: WizardScreeningQuestion[]) => void;
+  corporateFunction: string;
 }) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
@@ -1840,11 +1872,13 @@ function ScreeningStep({
         </p>
       </div>
 
-      {/* P3: corporate recommended-question library mounts here.
-          The dental RecommendedQuestionsPanel is role_category-keyed and
-          surfaces clinical questions — not appropriate for corporate
-          roles. The corporate recommended-question library (P3) will be
-          a separate 30-question library keyed by corporate_function. */}
+      {/* 5G.d P3 — corporate recommended-question library, keyed by
+          corporate_function. Separate from the dental clinical library. */}
+      <CorporateRecommendedQuestionsPanel
+        corporateFunction={corporateFunction}
+        questions={questions}
+        onChange={onChange}
+      />
 
       {questions.length === 0 && (
         <div className="border border-dashed border-[var(--rule-strong)] p-6 text-center bg-cream/40">
