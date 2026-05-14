@@ -128,15 +128,25 @@ function sanitizeAttributes(tag: string, raw: string): string {
   return out.length > 0 ? " " + out.join(" ") : "";
 }
 
+// The input to this sanitizer is Tiptap's getHTML() output, whose text is
+// ALREADY entity-encoded. A blunt `&` -> `&amp;` would double-encode an
+// existing "M&amp;A" into "M&amp;amp;A" — which renders as a literal
+// "M&amp;A" on the page. The negative lookahead leaves valid entities
+// alone while still escaping a genuinely-raw "&" (security intact).
+const RAW_AMP = /&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[0-9a-fA-F]+);)/g;
+
 function escapeText(s: string): string {
   return s
-    .replace(/&/g, "&amp;")
+    .replace(RAW_AMP, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 }
 
 function escapeAttr(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+  return s
+    .replace(RAW_AMP, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;");
 }
 
 function decodeEntities(s: string): string {

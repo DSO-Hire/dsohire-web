@@ -433,6 +433,16 @@ function Spinner() {
 function buildDescriptionHtml(jd: JdGeneratorOutput): string {
   const escape = (s: string) =>
     s
+      // The AI's JSON strings are meant to be plain text, but Haiku
+      // sometimes emits HTML entities (e.g. "M&amp;A"). Decode first so we
+      // don't double-encode into "M&amp;amp;A" — which renders as a literal
+      // "M&amp;A" on the page. Decode-then-escape converges both plain text
+      // and already-encoded text to one correct level of escaping.
+      .replace(/&(amp|#38);/g, "&")
+      .replace(/&(lt|#60);/g, "<")
+      .replace(/&(gt|#62);/g, ">")
+      .replace(/&(quot|#34);/g, '"')
+      .replace(/&(apos|#39);/g, "'")
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
