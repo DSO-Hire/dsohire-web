@@ -3,8 +3,8 @@
  *
  * Regenerated 2026-05-14 via the Supabase MCP `generate_typescript_types`
  * tool against project viapivvlhjqvjhoflxmp (dsohire-prod), after migration
- * 20260514000002_jobs_composable_comp (composable compensation model — 5
- * new columns on public.jobs).
+ * 20260514000003_job_verifications (Phase 5G.e Tier 2 — job_verification_
+ * requirements + application_verifications tables).
  *
  * Do not hand-edit; rerun after each migration that touches table shape,
  * enum values, or RPC signatures.
@@ -482,6 +482,53 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "application_status_events_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      application_verifications: {
+        Row: {
+          application_id: string
+          attested: boolean
+          attested_at: string | null
+          created_at: string
+          id: string
+          linked_credential_id: string | null
+          linked_credential_type: string | null
+          note: string | null
+          updated_at: string
+          verification_type: string
+        }
+        Insert: {
+          application_id: string
+          attested?: boolean
+          attested_at?: string | null
+          created_at?: string
+          id?: string
+          linked_credential_id?: string | null
+          linked_credential_type?: string | null
+          note?: string | null
+          updated_at?: string
+          verification_type: string
+        }
+        Update: {
+          application_id?: string
+          attested?: boolean
+          attested_at?: string | null
+          created_at?: string
+          id?: string
+          linked_credential_id?: string | null
+          linked_credential_type?: string | null
+          note?: string | null
+          updated_at?: string
+          verification_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_verifications_application_id_fkey"
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "applications"
@@ -2374,6 +2421,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "job_skills_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_verification_requirements: {
+        Row: {
+          created_at: string
+          id: string
+          job_id: string
+          required: boolean
+          verification_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_id: string
+          required?: boolean
+          verification_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_id?: string
+          required?: boolean
+          verification_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_verification_requirements_job_id_fkey"
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "jobs"
