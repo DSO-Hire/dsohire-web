@@ -852,19 +852,47 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     return null;
   }
 
-  // Resolve 0..N linked credentials to human-readable summaries.
+  // Resolve 0..N linked credentials to human-readable summaries + a
+  // `linkable` flag — true when the credential is a license/certification
+  // that still exists on the candidate's profile, so the Verifications
+  // section can deep-link to its row (document + verify controls) in the
+  // Credentials section below. Education has no Credentials-section row
+  // and no document, so it stays plain text.
   function resolveLinkedCredentials(
     creds:
       | Array<{ credential_type: string; credential_id: string }>
       | null
       | undefined
-  ): string[] {
+  ): Array<{ id: string; type: string; summary: string; linkable: boolean }> {
     if (!creds || creds.length === 0) return [];
-    return creds
-      .map((c) =>
-        resolveLinkedCredential(c.credential_type, c.credential_id)
-      )
-      .filter((s): s is string => s !== null);
+    const out: Array<{
+      id: string;
+      type: string;
+      summary: string;
+      linkable: boolean;
+    }> = [];
+    for (const c of creds) {
+      const summary = resolveLinkedCredential(
+        c.credential_type,
+        c.credential_id
+      );
+      if (summary === null) continue;
+      let linkable = false;
+      if (c.credential_type === "candidate_license") {
+        linkable = credentialLicenses.some((r) => r.id === c.credential_id);
+      } else if (c.credential_type === "candidate_certification") {
+        linkable = credentialCertifications.some(
+          (r) => r.id === c.credential_id
+        );
+      }
+      out.push({
+        id: c.credential_id,
+        type: c.credential_type,
+        summary,
+        linkable,
+      });
+    }
+    return out;
   }
 
   const verificationRows = verificationRequirements.map((req) => {
@@ -880,7 +908,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
       required: req.required,
       attested: att?.attested ?? false,
       attestedAt: att?.attested_at ?? null,
-      linkedCredentialSummaries: resolveLinkedCredentials(
+      linkedCredentials: resolveLinkedCredentials(
         att?.application_verification_credentials
       ),
       note: att?.note ?? null,
@@ -2024,7 +2052,12 @@ interface VerificationRowData {
   required: boolean;
   attested: boolean;
   attestedAt: string | null;
-  linkedCredentialSummaries: string[];
+  linkedCredentials: Array<{
+    id: string;
+    type: string;
+    summary: string;
+    linkable: boolean;
+  }>;
   note: string | null;
 }
 
@@ -2079,13 +2112,30 @@ function VerificationRow({ row }: { row: VerificationRowData }) {
             )}
           </div>
 
-          {/* Linked credential proof — 0..N (migration ...004) */}
-          {row.linkedCredentialSummaries.length > 0 && (
+          {/* Linked credential proof — 0..N (migration ...004). License /
+              certification entries deep-link to their row in the
+              Credentials section below, where the document + verify
+              controls live; education stays plain text. */}
+          {row.linkedCredentials.length > 0 && (
             <div className="mt-1.5 text-[13px] text-slate-body leading-snug">
               <span className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta mr-2">
                 Linked proof
               </span>
-              {row.linkedCredentialSummaries.join("; ")}
+              {row.linkedCredentials.map((c, i) => (
+                <span key={`${c.type}-${c.id}`}>
+                  {i > 0 && "; "}
+                  {c.linkable ? (
+                    <a
+                      href={`#credential-${c.id}`}
+                      className="text-heritage-deep underline underline-offset-2 hover:text-ink"
+                    >
+                      {c.summary}
+                    </a>
+                  ) : (
+                    c.summary
+                  )}
+                </span>
+              ))}
             </div>
           )}
 

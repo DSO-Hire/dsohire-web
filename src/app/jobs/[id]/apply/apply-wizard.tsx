@@ -244,6 +244,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
   const [submitted, setSubmitted] = useState<{
     alreadyApplied: boolean;
     message: string;
+    applicationId?: string;
   } | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -353,6 +354,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
       setSubmitted({
         alreadyApplied: Boolean(result.alreadyApplied),
         message: result.message ?? "Application submitted.",
+        applicationId: result.applicationId,
       });
     });
   };
@@ -369,12 +371,28 @@ export function ApplyWizard(props: ApplyWizardProps) {
             {submitted.message}
           </p>
           <div className="flex flex-wrap gap-3">
+            {submitted.applicationId && (
+              <Link
+                href={`/candidate/applications/${submitted.applicationId}`}
+                className="inline-flex items-center gap-2 px-5 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+              >
+                View Your Application
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            )}
             <Link
               href="/candidate/dashboard"
-              className="inline-flex items-center gap-2 px-5 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+              className={
+                "inline-flex items-center gap-2 px-5 py-3 text-[12px] font-bold tracking-[2px] uppercase transition-colors " +
+                (submitted.applicationId
+                  ? "border border-[var(--rule-strong)] text-ink hover:bg-cream"
+                  : "bg-ink text-ivory hover:bg-ink-soft")
+              }
             >
               View Dashboard
-              <ArrowRight className="h-3.5 w-3.5" />
+              {!submitted.applicationId && (
+                <ArrowRight className="h-3.5 w-3.5" />
+              )}
             </Link>
             <Link
               href="/jobs"

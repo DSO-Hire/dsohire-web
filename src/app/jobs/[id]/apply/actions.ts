@@ -44,6 +44,8 @@ export interface ApplyState {
   error?: string;
   message?: string;
   alreadyApplied?: boolean;
+  /** Set on success — lets the wizard link straight to the new application. */
+  applicationId?: string;
 }
 
 const RESUME_MIME = new Set([
@@ -505,9 +507,10 @@ export async function applyToJob(
   return {
     ok: true,
     alreadyApplied,
+    applicationId,
     message: alreadyApplied
       ? "You'd already applied to this role — we updated your application with the latest answers, cover letter, and resume."
-      : `Application submitted to ${job.title as string}. Track its status on your candidate dashboard.`,
+      : `Application submitted to ${job.title as string}. Track its status from your application page or candidate dashboard.`,
   };
 }
 

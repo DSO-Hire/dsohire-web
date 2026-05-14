@@ -511,7 +511,10 @@ function CredentialRowShell({
   const BadgeIcon = badge?.IconComp ?? ShieldCheck;
 
   return (
-    <div className="p-5">
+    // Anchor target — the Verifications section's "Linked proof" entries
+    // deep-link here via #credential-${rowId}. scroll-mt keeps the row
+    // clear of any sticky chrome when jumped to.
+    <div id={`credential-${rowId}`} className="p-5 scroll-mt-24">
       <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
         <div className="min-w-0 flex-1">
           <div className="text-[14px] font-semibold text-ink leading-snug">
