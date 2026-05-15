@@ -232,7 +232,7 @@ function InterviewProposalCard({
         candidateNotes: null,
       });
       if (!result.ok) {
-        setError(result.error);
+        setError(result.error ?? "Couldn't book that slot. Please try again.");
         setBookingOptionId(null);
         return;
       }
