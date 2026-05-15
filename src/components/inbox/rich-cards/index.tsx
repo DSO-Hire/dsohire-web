@@ -242,11 +242,32 @@ function InterviewProposalCard({
     });
   };
 
+  // Normalize legacy `string[]` slots to the new {option_id, start_at}
+  // shape. Legacy slots have no option_id, so we mark them as such and
+  // suppress in-thread Book buttons — the candidate falls back to the
+  // dashboard. `key` uses index as a stable fallback when option_id is
+  // missing.
+  const normalizedSlots = payload.offered_slots.map((slot, idx) => {
+    if (typeof slot === "string") {
+      return {
+        key: `legacy-${idx}`,
+        option_id: null as string | null,
+        start_at: slot,
+        legacy: true,
+      };
+    }
+    return {
+      key: slot.option_id,
+      option_id: slot.option_id,
+      start_at: slot.start_at,
+      legacy: false,
+    };
+  });
+  const hasLegacySlots = normalizedSlots.some((s) => s.legacy);
+
   const selectedSlot =
     payload.selected_option_id != null
-      ? payload.offered_slots.find(
-          (s) => s.option_id === payload.selected_option_id,
-        )
+      ? normalizedSlots.find((s) => s.option_id === payload.selected_option_id)
       : null;
 
   return (
@@ -279,20 +300,24 @@ function InterviewProposalCard({
         </p>
       )}
 
-      {/* Proposed state — candidate gets per-slot booking buttons */}
-      {payload.status === "proposed" && audience === "candidate" && (
+      {/* Proposed state — candidate gets per-slot booking buttons,
+          UNLESS the payload is legacy (no option_ids), in which case
+          we render read-only + a dashboard fallback link. */}
+      {payload.status === "proposed" && audience === "candidate" && !hasLegacySlots && (
         <div>
           <div className="text-[11px] font-semibold tracking-[1px] uppercase text-slate-meta mb-2">
             Pick a time
           </div>
           <div className="flex flex-col gap-1.5">
-            {payload.offered_slots.map((slot) => {
-              const isBookingThis = pending && bookingOptionId === slot.option_id;
+            {normalizedSlots.map((slot) => {
+              const optId = slot.option_id;
+              if (optId == null) return null; // exhaustiveness — hasLegacySlots already gated this
+              const isBookingThis = pending && bookingOptionId === optId;
               return (
                 <button
-                  key={slot.option_id}
+                  key={slot.key}
                   type="button"
-                  onClick={() => handleBook(slot.option_id)}
+                  onClick={() => handleBook(optId)}
                   disabled={pending}
                   className="inline-flex items-center justify-between gap-2 px-3 py-2 bg-white border border-[var(--rule-strong)] text-[13px] text-ink font-medium text-left hover:bg-cream hover:border-ink transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
@@ -327,6 +352,25 @@ function InterviewProposalCard({
         </div>
       )}
 
+      {/* Legacy candidate fallback — proposal predates the in-thread
+          booking feature, so we can't dispatch optionId. Punt to the
+          dashboard. */}
+      {payload.status === "proposed" && audience === "candidate" && hasLegacySlots && (
+        <div>
+          <div className="text-[11px] font-semibold tracking-[1px] uppercase text-slate-meta mb-1.5">
+            Times offered
+          </div>
+          <ul className="list-none space-y-0.5 text-[13px] text-slate-body">
+            {normalizedSlots.map((slot) => (
+              <li key={slot.key}>{new Date(slot.start_at).toLocaleString()}</li>
+            ))}
+          </ul>
+          <p className="mt-2 text-[12px] text-slate-meta italic">
+            Open this application on your dashboard to pick a slot.
+          </p>
+        </div>
+      )}
+
       {/* Proposed state — employer sees the slots as read-only */}
       {payload.status === "proposed" && audience === "employer" && (
         <div>
@@ -334,10 +378,8 @@ function InterviewProposalCard({
             Times offered
           </div>
           <ul className="list-none space-y-0.5 text-[13px] text-slate-body">
-            {payload.offered_slots.map((slot) => (
-              <li key={slot.option_id}>
-                {new Date(slot.start_at).toLocaleString()}
-              </li>
+            {normalizedSlots.map((slot) => (
+              <li key={slot.key}>{new Date(slot.start_at).toLocaleString()}</li>
             ))}
           </ul>
           <p className="mt-2 text-[12px] text-slate-meta italic">

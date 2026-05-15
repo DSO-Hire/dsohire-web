@@ -31,6 +31,21 @@ export interface OfferLetterCardPayload {
   status: "sent" | "accepted" | "declined";
 }
 
+/**
+ * One offered interview slot.
+ *
+ * NEW shape (post 2026-05-15 fffda24): `{ option_id, start_at }` so the
+ * candidate can book directly from the inbox card.
+ *
+ * LEGACY shape (pre-2026-05-15): bare `string` ISO timestamp. The
+ * renderer detects this and falls back to a read-only display with a
+ * "Pick from your dashboard" link rather than crashing with Invalid
+ * Date / null option_id.
+ */
+export type InterviewProposalSlot =
+  | string
+  | { option_id: string; start_at: string };
+
 /** Interview proposed — sender shared availability with the other side. */
 export interface InterviewProposalCardPayload {
   kind: "interview_proposal";
@@ -38,11 +53,11 @@ export interface InterviewProposalCardPayload {
   proposal_id: string;
   job_title: string | null;
   /**
-   * Offered slots — each carries the interview_proposal_options.id so the
-   * candidate can book a slot directly from the inbox card via
-   * bookInterviewSlot({proposalId, optionId}).
+   * Offered slots — see InterviewProposalSlot for the union. New cards
+   * always emit the object shape; legacy cards (created before the
+   * in-thread booking work) may still contain bare strings.
    */
-  offered_slots: Array<{ option_id: string; start_at: string }>;
+  offered_slots: InterviewProposalSlot[];
   /** Optional message from sender. */
   message: string | null;
   status: "proposed" | "booked" | "withdrawn";
