@@ -42,6 +42,11 @@ function Hero({ config }: { config: RoleConfig }) {
   const accentIndex = hero.headline
     .toLowerCase()
     .indexOf(hero.headlineAccent.toLowerCase());
+  if (accentIndex < 0 && process.env.NODE_ENV !== "production") {
+    console.warn(
+      `[role-page] headlineAccent "${hero.headlineAccent}" not found in headline "${hero.headline}" — accent styling dropped`
+    );
+  }
   const before =
     accentIndex >= 0 ? hero.headline.slice(0, accentIndex) : hero.headline;
   const accent =
@@ -147,7 +152,7 @@ function Advantages({ config }: { config: RoleConfig }) {
           {config.advantages.map((adv, i) => (
             <div
               key={i}
-              className="bg-white p-7 sm:p-8 hover:bg-cream/30 transition-colors"
+              className="bg-card p-7 sm:p-8 hover:bg-cream/30 transition-colors"
             >
               <div className="flex items-start gap-3.5">
                 <div className="h-7 w-7 rounded-full bg-heritage/15 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -255,7 +260,7 @@ function RelatedRoles({ config }: { config: RoleConfig }) {
           <Link
             key={r.slug}
             href={`/for-${r.slug}`}
-            className="group bg-white p-6 hover:bg-cream/40 transition-colors flex items-center gap-4"
+            className="group bg-card p-6 hover:bg-cream/40 transition-colors flex items-center gap-4"
           >
             <div className="h-10 w-10 rounded-full bg-heritage/15 flex items-center justify-center flex-shrink-0 group-hover:bg-heritage/25 transition-colors">
               <r.Icon className="h-4 w-4 text-heritage-deep" />

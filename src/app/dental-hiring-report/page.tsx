@@ -66,7 +66,7 @@ export default async function HiringReportPage() {
           <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
             Dental Hiring Report · 2026
           </div>
-          <h1 className="font-display text-4xl sm:text-6xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-5">
+          <h1 className="text-4xl sm:text-6xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-5">
             How the dental industry is hiring.
           </h1>
           <p className="text-[16px] text-slate-body leading-relaxed mb-3">
@@ -122,7 +122,7 @@ export default async function HiringReportPage() {
           <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
             Compensation · Section 1
           </div>
-          <h2 className="font-display text-3xl font-extrabold tracking-[-0.8px] text-ink mb-3">
+          <h2 className="text-3xl font-extrabold tracking-[-0.8px] text-ink mb-3">
             What dental roles pay.
           </h2>
           <p className="text-[14px] text-slate-body leading-relaxed max-w-[640px] mb-8">
@@ -156,7 +156,7 @@ export default async function HiringReportPage() {
           <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
             Role mix · Section 2
           </div>
-          <h2 className="font-display text-3xl font-extrabold tracking-[-0.8px] text-ink mb-3">
+          <h2 className="text-3xl font-extrabold tracking-[-0.8px] text-ink mb-3">
             What DSOs are hiring most.
           </h2>
           <p className="text-[14px] text-slate-body leading-relaxed max-w-[640px] mb-8">
@@ -177,7 +177,7 @@ export default async function HiringReportPage() {
           <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
             Geography · Section 3
           </div>
-          <h2 className="font-display text-3xl font-extrabold tracking-[-0.8px] text-ink mb-3">
+          <h2 className="text-3xl font-extrabold tracking-[-0.8px] text-ink mb-3">
             Where the hiring is happening.
           </h2>
           <p className="text-[14px] text-slate-body leading-relaxed max-w-[640px] mb-8">
@@ -503,7 +503,7 @@ function CallToActionCard({
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
         {eyebrow}
       </div>
-      <div className="font-display text-xl font-extrabold tracking-[-0.4px] text-ink mb-2">
+      <div className="text-xl font-extrabold tracking-[-0.4px] text-ink mb-2">
         {title}
       </div>
       <p className="text-[13px] text-slate-body leading-relaxed mb-3">

@@ -25,12 +25,13 @@ export default async function AuthErrorPage({
           That sign-in link didn&apos;t work.
         </h1>
         <p className="text-base text-slate-body leading-[1.7] mb-9">
-          The link may have expired (links are single-use and last 15 minutes)
-          or we couldn&apos;t verify the session. Request a fresh sign-in link below.
+          The link may have expired (links are single-use and expire after a
+          short window) or we couldn&apos;t verify the session. Request a fresh
+          sign-in link below.
         </p>
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Link
-            href="/employer/sign-in"
+            href="/sign-in"
             className="inline-flex items-center px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
           >
             Request a New Link

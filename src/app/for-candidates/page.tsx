@@ -212,23 +212,23 @@ const STAGE_DISPLAY: Record<
 > = {
   submitted: {
     label: "Submitted",
-    pill: "bg-slate-100 text-slate-700",
-    dot: "bg-slate-400",
+    pill: "bg-ivory-deep text-slate-body",
+    dot: "bg-slate-meta",
   },
   screening: {
     label: "In review",
-    pill: "bg-amber-50 text-amber-700",
-    dot: "bg-amber-400",
+    pill: "bg-ink/10 text-ink",
+    dot: "bg-ink/40",
   },
   interview: {
     label: "Interview scheduled",
-    pill: "bg-blue-50 text-blue-700",
-    dot: "bg-blue-400",
+    pill: "bg-heritage/15 text-heritage-deep",
+    dot: "bg-heritage",
   },
   offer: {
     label: "Offer received",
-    pill: "bg-emerald-50 text-emerald-700",
-    dot: "bg-emerald-400",
+    pill: "bg-heritage text-ivory",
+    dot: "bg-ivory",
   },
 };
 
@@ -363,7 +363,7 @@ function Promises() {
           {PROMISES.map(({ Icon, title, body }) => (
             <div
               key={title}
-              className="bg-white p-8 sm:p-10 hover:bg-cream/40 transition-colors"
+              className="bg-card p-8 sm:p-10 hover:bg-cream/40 transition-colors"
             >
               <div className="h-10 w-10 rounded-full bg-heritage/15 flex items-center justify-center mb-5">
                 <Icon className="h-5 w-5 text-heritage-deep" />
@@ -479,7 +479,7 @@ function RoleBreakdown() {
           <Link
             key={title}
             href={href}
-            className="group bg-white p-7 sm:p-8 hover:bg-cream/40 transition-colors flex flex-col"
+            className="group bg-card p-7 sm:p-8 hover:bg-cream/40 transition-colors flex flex-col"
           >
             <div className="flex items-center gap-3 mb-4">
               <div className="h-9 w-9 rounded-full bg-heritage/15 flex items-center justify-center flex-shrink-0 group-hover:bg-heritage/25 transition-colors">

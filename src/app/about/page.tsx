@@ -127,13 +127,13 @@ function Principles() {
       </h2>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-px bg-[var(--rule)] border border-[var(--rule)]">
         {PRINCIPLES.map((p, i) => (
-          <div key={i} className="bg-white p-10">
+          <div key={i} className="bg-card p-10">
             <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
               {p.eyebrow}
             </div>
-            <div className="text-[20px] font-extrabold tracking-[-0.5px] leading-tight text-ink mb-3">
+            <h3 className="text-[20px] font-extrabold tracking-[-0.5px] leading-tight text-ink mb-3">
               {p.title}
-            </div>
+            </h3>
             <p className="text-[14px] text-slate-body leading-[1.65]">{p.body}</p>
           </div>
         ))}

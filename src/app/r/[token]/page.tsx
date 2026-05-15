@@ -81,54 +81,61 @@ export default async function PublicReferencePage({ params }: PageProps) {
   }
 
   if (applicationId) {
+    // Resolve application → job → dso in separate single-table hops.
+    // A deeply-embedded relation select (jobs:jobs(... dsos:dsos(...)))
+    // degrades to GenericStringError in the Supabase TS types and
+    // breaks the Vercel build — same reason /o/[token] avoids it.
     const { data: appRow } = await admin
       .from("applications")
-      .select(
-        "id, job_id, jobs:jobs(id, title, dso_id, dsos:dsos(id, name))"
-      )
+      .select("id, job_id")
       .eq("id", applicationId)
       .maybeSingle();
-    if (appRow) {
-      const jobsRel = (appRow as Record<string, unknown>).jobs as
-        | Record<string, unknown>
-        | Array<Record<string, unknown>>
-        | null;
-      const jobRow = Array.isArray(jobsRel) ? jobsRel[0] ?? null : jobsRel;
+    const jobId =
+      ((appRow as Record<string, unknown> | null)?.job_id as
+        | string
+        | null
+        | undefined) ?? null;
+    if (jobId) {
+      const { data: jobRow } = await admin
+        .from("jobs")
+        .select("id, title, dso_id")
+        .eq("id", jobId)
+        .maybeSingle();
       if (jobRow) {
         jobTitle = (jobRow.title as string | null) ?? null;
         // Use the affiliation-aware displayed name so the reference
-        // sees the practice name (e.g. "67 Dental"), not the corporate
-        // parent (e.g. "dso hire"). The reference has no direct
+        // sees the practice name (e.g. "Lakeshore Dental Group"), not
+        // the corporate parent. The reference has no direct
         // relationship with the DSO — they only know the candidate —
         // and shouldn't learn the corporate parent any more than the
         // candidate themselves would. Same posture as the propose-
         // interview + booking-confirmation emails.
-        const jobId = (jobRow.id as string | null) ?? null;
-        if (jobId && applicationId) {
-          try {
-            const displayed = await getDisplayedDsoName({
-              jobId,
-              viewer: { role: "candidate", applicationId },
-            });
-            dsoName = displayed.name ?? null;
-          } catch {
-            dsoName = null;
-          }
+        try {
+          const displayed = await getDisplayedDsoName({
+            jobId,
+            viewer: { role: "candidate", applicationId },
+          });
+          dsoName = displayed.name ?? null;
+        } catch {
+          dsoName = null;
         }
         // Fallback to raw corporate name only if the displayed
         // resolver fails entirely. Keeps the prior behavior on
         // exception paths.
         if (!dsoName) {
-          const dsoRel = (jobRow as Record<string, unknown>).dsos as
-            | Record<string, unknown>
-            | Array<Record<string, unknown>>
-            | null;
-          const dsoRow = Array.isArray(dsoRel) ? dsoRel[0] ?? null : dsoRel;
-          dsoName =
-            ((dsoRow as Record<string, unknown> | null)?.name as
-              | string
-              | null
-              | undefined) ?? null;
+          const dsoId = (jobRow.dso_id as string | null) ?? null;
+          if (dsoId) {
+            const { data: dsoRow } = await admin
+              .from("dsos")
+              .select("id, name")
+              .eq("id", dsoId)
+              .maybeSingle();
+            dsoName =
+              ((dsoRow as Record<string, unknown> | null)?.name as
+                | string
+                | null
+                | undefined) ?? null;
+          }
         }
       }
     }
@@ -162,10 +169,10 @@ export default async function PublicReferencePage({ params }: PageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-[#F7F4ED] py-12 px-4 sm:px-6">
+    <main className="min-h-screen bg-ivory py-12 px-4 sm:px-6">
       <div className="mx-auto max-w-[640px]">
         <PublicHeader />
-        <div className="bg-white border border-[var(--rule)] shadow-sm p-6 sm:p-10">
+        <div className="bg-card border border-[var(--rule)] shadow-sm p-6 sm:p-10">
           {status === "completed" ? (
             <AlreadyCompletedView
               referenceName={referenceName}
@@ -197,11 +204,11 @@ function PublicHeader() {
     <header className="mb-8 text-center">
       <a
         href="https://dsohire.com"
-        className="inline-block text-[#14233F] text-lg font-extrabold tracking-[-0.5px]"
+        className="inline-block text-ink text-lg font-extrabold tracking-[-0.5px]"
       >
         DSO Hire
       </a>
-      <div className="mt-3 text-[10px] font-bold tracking-[3px] uppercase text-[#2F5D4F]">
+      <div className="mt-3 text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep">
         Reference Request
       </div>
     </header>
@@ -210,12 +217,12 @@ function PublicHeader() {
 
 function PublicFooter() {
   return (
-    <footer className="mt-8 text-center text-[12px] text-[#6E8395] leading-relaxed">
+    <footer className="mt-8 text-center text-[12px] text-slate-meta leading-relaxed">
       <p>
         Powered by{" "}
         <a
           href="https://dsohire.com"
-          className="underline hover:text-[#14233F]"
+          className="underline hover:text-ink"
         >
           DSO Hire
         </a>
@@ -225,7 +232,7 @@ function PublicFooter() {
         Questions? Email{" "}
         <a
           href="mailto:support@dsohire.com"
-          className="underline hover:text-[#14233F]"
+          className="underline hover:text-ink"
         >
           support@dsohire.com
         </a>
@@ -255,20 +262,20 @@ function AlreadyCompletedView({
     : null;
   return (
     <div className="text-center py-6">
-      <div className="text-[10px] font-bold tracking-[3px] uppercase text-[#2F5D4F] mb-3">
+      <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
         Already received
       </div>
-      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-[#14233F] mb-3">
+      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink mb-3">
         Thanks, {firstName} — we have your response.
       </h1>
-      <p className="text-[14px] text-[#4A6278] leading-relaxed max-w-[480px] mx-auto">
+      <p className="text-[14px] text-slate-body leading-relaxed max-w-[480px] mx-auto">
         Your reference for{" "}
-        <strong className="text-[#14233F]">
+        <strong className="text-ink">
           {candidateName ?? "the candidate"}
         </strong>{" "}
         was recorded
-        {when ? <> on <strong className="text-[#14233F]">{when}</strong></> : null}
-        {" "}and is in {dsoName ?? "the hiring team"}'s hands. You can close this
+        {when ? <> on <strong className="text-ink">{when}</strong></> : null}
+        {" "}and is in {dsoName ?? "the hiring team"}&apos;s hands. You can close this
         window.
       </p>
     </div>
@@ -278,13 +285,13 @@ function AlreadyCompletedView({
 function WithdrawnView({ dsoName }: { dsoName: string | null }) {
   return (
     <div className="text-center py-6">
-      <div className="text-[10px] font-bold tracking-[3px] uppercase text-[#6E8395] mb-3">
+      <div className="text-[10px] font-bold tracking-[3px] uppercase text-slate-meta mb-3">
         Request withdrawn
       </div>
-      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-[#14233F] mb-3">
+      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink mb-3">
         This reference request was withdrawn.
       </h1>
-      <p className="text-[14px] text-[#4A6278] leading-relaxed max-w-[480px] mx-auto">
+      <p className="text-[14px] text-slate-body leading-relaxed max-w-[480px] mx-auto">
         {dsoName ?? "The hiring team"} no longer needs a response here. You
         don&apos;t need to do anything. If they still want a reference, expect a
         fresh email from them.

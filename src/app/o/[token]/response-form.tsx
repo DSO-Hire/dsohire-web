@@ -139,21 +139,21 @@ export function OfferResponseForm({
 
   return (
     <div>
-      <h1 className="text-2xl sm:text-[28px] font-extrabold tracking-[-0.8px] text-[#14233F] mb-2 leading-tight">
+      <h1 className="text-2xl sm:text-[28px] font-extrabold tracking-[-0.8px] text-ink mb-2 leading-tight">
         {firstName ? `${firstName}, ` : ""}you have an offer from {dsoName}
       </h1>
-      <p className="text-[14px] text-[#4A6278] leading-relaxed mb-1">
-        Role: <strong className="text-[#14233F]">{jobTitle}</strong>
+      <p className="text-[14px] text-slate-body leading-relaxed mb-1">
+        Role: <strong className="text-ink">{jobTitle}</strong>
       </p>
       {sentAtLabel && (
-        <p className="text-[13px] text-[#6E8395] leading-relaxed">
+        <p className="text-[13px] text-slate-meta leading-relaxed">
           Sent {sentAtLabel}
           {subject ? <> · Subject: {subject}</> : null}
         </p>
       )}
 
       <div className="mt-6 mb-7">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-[#2F5D4F] mb-2">
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Offer letter
         </div>
         <OfferBodyFrame html={bodyHtml} />
@@ -193,13 +193,16 @@ export function OfferResponseForm({
       )}
 
       {error && (
-        <div className="mt-4 border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-800 flex items-start gap-2">
+        <div
+          role="alert"
+          className="mt-4 border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-800 flex items-start gap-2"
+        >
           <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
-      <p className="mt-6 text-[12px] text-[#6E8395] leading-relaxed">
+      <p className="mt-6 text-[12px] text-slate-meta leading-relaxed">
         Your response is final once submitted. If you need to change it later,
         reach out to {dsoName} directly.
       </p>
@@ -219,11 +222,11 @@ function ChoicePane({
   onDecline: () => void;
 }) {
   return (
-    <div className="border border-[#ECE7DB] bg-[#FAF7F1] p-5 sm:p-6">
-      <div className="text-[10px] font-bold tracking-[2px] uppercase text-[#2F5D4F] mb-2">
+    <div className="border border-ivory-deep bg-cream p-5 sm:p-6">
+      <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-2">
         Your response
       </div>
-      <p className="text-[14px] text-[#14233F] leading-relaxed mb-4">
+      <p className="text-[14px] text-ink leading-relaxed mb-4">
         When you&apos;re ready, choose how you&apos;d like to respond.
         Acceptance asks you to type your full legal name as
         acknowledgement; declining lets you add an optional reason.
@@ -232,7 +235,7 @@ function ChoicePane({
         <button
           type="button"
           onClick={onAccept}
-          className="inline-flex items-center justify-center gap-2 bg-[#14233F] text-[#F7F4ED] px-5 py-3 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C] transition-colors"
+          className="inline-flex items-center justify-center gap-2 bg-ink text-ivory px-5 py-3 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-ink-1000 transition-colors"
         >
           <CheckCircle2 className="h-3.5 w-3.5" />
           Accept offer
@@ -240,7 +243,7 @@ function ChoicePane({
         <button
           type="button"
           onClick={onDecline}
-          className="inline-flex items-center justify-center gap-2 bg-white text-[#14233F] border border-[#D4CCBB] px-5 py-3 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-[#F7F4ED] transition-colors"
+          className="inline-flex items-center justify-center gap-2 bg-white text-ink border border-[#D4CCBB] px-5 py-3 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-ivory transition-colors"
         >
           <X className="h-3.5 w-3.5" />
           Decline offer
@@ -268,17 +271,17 @@ function AcceptPane({
   pending: boolean;
 }) {
   return (
-    <div className="border border-[#4D7A60] bg-[#F1F6F2] p-5 sm:p-6">
-      <div className="text-[10px] font-bold tracking-[2px] uppercase text-[#2F5D4F] mb-2">
+    <div className="border border-heritage bg-[#F1F6F2] p-5 sm:p-6">
+      <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-2">
         Accept offer
       </div>
-      <p className="text-[14px] text-[#14233F] leading-relaxed mb-4">
+      <p className="text-[14px] text-ink leading-relaxed mb-4">
         Type your full legal name below to acknowledge the offer. We&apos;ll
         record your acceptance with the time and your IP address as a digital
         signature — the same approach DocuSign and HelloSign use.
       </p>
       <label className="block mb-4">
-        <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-[#4A6278] mb-1.5">
+        <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body mb-1.5">
           Your full legal name
         </div>
         <input
@@ -289,7 +292,7 @@ function AcceptPane({
           autoFocus
           placeholder="e.g. Jordan Reyes"
           disabled={pending}
-          className="w-full px-3 py-2.5 bg-white border border-[#D4CCBB] text-[#14233F] text-[15px] focus:outline-none focus:border-[#4D7A60] focus:ring-1 focus:ring-[#4D7A60] disabled:opacity-60"
+          className="w-full px-3 py-2.5 bg-white border border-[#D4CCBB] text-ink text-[15px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage disabled:opacity-60"
         />
       </label>
       <div className="flex flex-col sm:flex-row gap-3">
@@ -297,7 +300,7 @@ function AcceptPane({
           type="button"
           onClick={onSubmit}
           disabled={pending}
-          className="inline-flex items-center justify-center gap-2 bg-[#14233F] text-[#F7F4ED] px-5 py-3 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C] transition-colors disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-2 bg-ink text-ivory px-5 py-3 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-ink-1000 transition-colors disabled:opacity-60"
         >
           {pending ? (
             <>
@@ -316,7 +319,7 @@ function AcceptPane({
           type="button"
           onClick={onCancel}
           disabled={pending}
-          className="inline-flex items-center justify-center gap-2 bg-transparent text-[#4A6278] px-4 py-3 text-[12px] font-bold tracking-[1.5px] uppercase hover:text-[#14233F] disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-2 bg-transparent text-slate-body px-4 py-3 text-[12px] font-bold tracking-[1.5px] uppercase hover:text-ink disabled:opacity-60"
         >
           Back
         </button>
@@ -344,16 +347,16 @@ function DeclinePane({
 }) {
   return (
     <div className="border border-[#D4CCBB] bg-white p-5 sm:p-6">
-      <div className="text-[10px] font-bold tracking-[2px] uppercase text-[#6E8395] mb-2">
+      <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-2">
         Decline offer
       </div>
-      <p className="text-[14px] text-[#14233F] leading-relaxed mb-4">
+      <p className="text-[14px] text-ink leading-relaxed mb-4">
         Letting us know why is optional, but it helps the team improve their
         process. Your reason goes only to the hiring team — not the broader
         DSO Hire community.
       </p>
       <label className="block mb-4">
-        <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-[#4A6278] mb-1.5">
+        <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body mb-1.5">
           Reason (optional)
         </div>
         <textarea
@@ -364,9 +367,9 @@ function DeclinePane({
           autoFocus
           placeholder="e.g. Accepted a different offer · Compensation didn't fit · Location wasn't workable"
           disabled={pending}
-          className="w-full px-3 py-2.5 bg-[#FAF7F1] border border-[#D4CCBB] text-[#14233F] text-[14px] focus:outline-none focus:border-[#4D7A60] focus:ring-1 focus:ring-[#4D7A60] resize-y disabled:opacity-60"
+          className="w-full px-3 py-2.5 bg-cream border border-[#D4CCBB] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage resize-y disabled:opacity-60"
         />
-        <div className="mt-1 text-[11px] text-[#6E8395] text-right">
+        <div className="mt-1 text-[11px] text-slate-meta text-right">
           {reason.length} / 1000
         </div>
       </label>
@@ -375,7 +378,7 @@ function DeclinePane({
           type="button"
           onClick={onSubmit}
           disabled={pending}
-          className="inline-flex items-center justify-center gap-2 bg-[#14233F] text-[#F7F4ED] px-5 py-3 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C] transition-colors disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-2 bg-ink text-ivory px-5 py-3 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-ink-1000 transition-colors disabled:opacity-60"
         >
           {pending ? (
             <>
@@ -393,7 +396,7 @@ function DeclinePane({
           type="button"
           onClick={onCancel}
           disabled={pending}
-          className="inline-flex items-center justify-center gap-2 bg-transparent text-[#4A6278] px-4 py-3 text-[12px] font-bold tracking-[1.5px] uppercase hover:text-[#14233F] disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-2 bg-transparent text-slate-body px-4 py-3 text-[12px] font-bold tracking-[1.5px] uppercase hover:text-ink disabled:opacity-60"
         >
           Back
         </button>
@@ -413,7 +416,7 @@ function OfferBodyFrame({ html }: { html: string }) {
       title="Offer letter"
       srcDoc={shell}
       sandbox=""
-      className="w-full border border-[#ECE7DB]"
+      className="w-full border border-ivory-deep"
       style={{ height: "520px" }}
     />
   );
@@ -453,22 +456,23 @@ function SuccessPane({
       <div
         className="inline-flex items-center justify-center h-12 w-12 rounded-full mb-4"
         style={{
-          backgroundColor: kind === "accepted" ? "#E8F1EC" : "#F7F4ED",
+          backgroundColor:
+            kind === "accepted" ? "#E8F1EC" : "var(--color-ivory)",
         }}
       >
         {kind === "accepted" ? (
-          <CheckCircle2 className="h-6 w-6 text-[#2F5D4F]" />
+          <CheckCircle2 className="h-6 w-6 text-heritage-deep" />
         ) : (
-          <CheckCircle2 className="h-6 w-6 text-[#6E8395]" />
+          <CheckCircle2 className="h-6 w-6 text-slate-meta" />
         )}
       </div>
-      <div className="text-[10px] font-bold tracking-[3px] uppercase text-[#2F5D4F] mb-2">
+      <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
         Response recorded
       </div>
-      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-[#14233F] mb-3">
+      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink mb-3">
         {headline}
       </h1>
-      <p className="text-[14px] text-[#4A6278] leading-relaxed max-w-[520px] mx-auto">
+      <p className="text-[14px] text-slate-body leading-relaxed max-w-[520px] mx-auto">
         {body}
       </p>
     </div>

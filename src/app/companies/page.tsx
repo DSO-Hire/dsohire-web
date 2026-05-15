@@ -54,13 +54,17 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
       | undefined) ?? "name";
   const supabase = await createSupabaseServerClient();
 
-  const { data: rawDsos } = await supabase
+  const { data: rawDsos, error: dsosError } = await supabase
     .from("dsos")
     .select(
       "id, name, slug, description, logo_url, headquarters_city, headquarters_state, practice_count, verified_at"
     )
     .eq("status", "active")
     .order("name", { ascending: true });
+
+  if (dsosError) {
+    console.warn("[companies] dsos query failed", dsosError);
+  }
 
   const allDsos = (rawDsos ?? []) as DsoRow[];
 
@@ -74,11 +78,14 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
   const allDsoIds = allDsos.map((d) => d.id);
   const dsosWithPublicLocation = new Set<string>();
   if (allDsoIds.length > 0) {
-    const { data: pubLocs } = await supabase
+    const { data: pubLocs, error: pubLocsError } = await supabase
       .from("dso_locations")
       .select("dso_id")
       .in("dso_id", allDsoIds)
       .eq("public_dso_affiliation", true);
+    if (pubLocsError) {
+      console.warn("[companies] public locations query failed", pubLocsError);
+    }
     for (const r of (pubLocs ?? []) as Array<{ dso_id: string }>) {
       dsosWithPublicLocation.add(r.dso_id);
     }
@@ -92,12 +99,16 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
   // a single query gives us the raw rows; we group in memory.
   const jobCountByDso = new Map<string, number>();
   if (dsoIds.length > 0) {
-    const { data: jobRows } = await supabase
+    const { data: jobRows, error: jobRowsError } = await supabase
       .from("jobs")
       .select("dso_id")
       .in("dso_id", dsoIds)
       .eq("status", "active")
       .is("deleted_at", null);
+
+    if (jobRowsError) {
+      console.warn("[companies] job count query failed", jobRowsError);
+    }
 
     for (const row of (jobRows ?? []) as Array<{ dso_id: string }>) {
       jobCountByDso.set(row.dso_id, (jobCountByDso.get(row.dso_id) ?? 0) + 1);
@@ -198,9 +209,9 @@ function DsoCard({ dso, openJobs }: { dso: DsoRow; openJobs: number }) {
         Verified DSO
       </div>
 
-      <div className="text-xl font-extrabold tracking-[-0.6px] text-ink mb-1 leading-tight">
+      <h3 className="text-xl font-extrabold tracking-[-0.6px] text-ink mb-1 leading-tight">
         {dso.name}
-      </div>
+      </h3>
 
       {(cityState || dso.practice_count) && (
         <div className="text-[13px] tracking-[0.3px] text-slate-meta mb-4 flex flex-wrap gap-x-3 gap-y-1">

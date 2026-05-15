@@ -42,9 +42,9 @@ export default function LegalIndex() {
               className="group flex items-start justify-between gap-8 py-7 transition-colors hover:bg-cream px-2 -mx-2"
             >
               <div className="flex-1">
-                <div className="text-lg font-extrabold tracking-[-0.4px] text-ink mb-1.5">
+                <h2 className="text-lg font-extrabold tracking-[-0.4px] text-ink mb-1.5">
                   {doc.title}
-                </div>
+                </h2>
                 <div className="text-sm text-slate-body leading-relaxed max-w-[560px]">
                   {doc.blurb}
                 </div>

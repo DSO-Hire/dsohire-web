@@ -18,6 +18,7 @@ import { ArrowLeft, ExternalLink } from "lucide-react";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { setDsoStatus } from "./actions";
+import { ConfirmSubmitButton } from "./confirm-submit-button";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -160,7 +161,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
       </div>
 
       {enriched.length === 0 ? (
-        <div className="border border-[var(--rule)] bg-white p-12 text-center max-w-[680px]">
+        <div className="border border-[var(--rule)] bg-card p-12 text-center max-w-[680px]">
           <p className="text-[15px] text-ink leading-relaxed mb-2">
             No DSOs match this filter.
           </p>
@@ -170,7 +171,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
           </p>
         </div>
       ) : (
-        <div className="border border-[var(--rule)] bg-white">
+        <div className="border border-[var(--rule)] bg-card">
           {enriched.map((dso) => (
             <div
               key={dso.id}
@@ -279,12 +280,12 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
                         name="new_status"
                         value="suspended"
                       />
-                      <button
-                        type="submit"
+                      <ConfirmSubmitButton
+                        confirmMessage={`Suspend ${dso.name}? Their public page and active jobs will be taken down.`}
                         className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 border border-red-300 text-red-700 text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-red-50 transition-colors"
                       >
                         Suspend
-                      </button>
+                      </ConfirmSubmitButton>
                     </form>
                   </>
                 )}
@@ -312,7 +313,13 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
 
 async function activateDsoAction(formData: FormData) {
   "use server";
-  await setDsoStatus({ ok: false }, formData);
+  const result = await setDsoStatus({ ok: false }, formData);
+  if (!result.ok) {
+    // Surface the failure to the Next error boundary rather than
+    // silently swallowing it — an admin needs to know the status
+    // change didn't take.
+    throw new Error(result.error ?? "Failed to update DSO status.");
+  }
 }
 
 function statusBadgeClass(status: string): string {

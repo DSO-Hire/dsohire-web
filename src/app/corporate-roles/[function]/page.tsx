@@ -147,7 +147,7 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
           </div>
           <Link
             href="/jobs?surface=corporate"
-            className="inline-flex items-center gap-1.5 text-[12px] font-bold tracking-[1.5px] uppercase text-ink hover:opacity-75"
+            className="inline-flex items-center gap-1.5 text-[12px] font-bold tracking-[1.5px] uppercase hover:opacity-75"
             style={{ color: "#3D5266" }}
           >
             View all Corporate Roles

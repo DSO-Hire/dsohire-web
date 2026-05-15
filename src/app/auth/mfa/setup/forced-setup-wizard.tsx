@@ -11,7 +11,7 @@
  * Reuses the same server actions as the Account page wizard.
  */
 
-import { useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
@@ -19,12 +19,13 @@ import {
   Copy,
   Download,
   Loader2,
+  RotateCcw,
 } from "lucide-react";
 import { enrollTotp, verifyEnrollment } from "@/app/employer/settings/account/mfa-actions";
 
 export function ForcedSetupWizard() {
   const router = useRouter();
-  const [step, setStep] = useState<"loading" | "qr" | "codes" | "done">(
+  const [step, setStep] = useState<"loading" | "error" | "qr" | "codes" | "done">(
     "loading"
   );
   const [factorId, setFactorId] = useState<string | null>(null);
@@ -35,8 +36,24 @@ export function ForcedSetupWizard() {
   const [recoveryCodes, setRecoveryCodes] = useState<string[] | null>(null);
   const [pending, startTransition] = useTransition();
 
-  // Kick off enrollment on mount via useEffect — calling startTransition
-  // during render isn't reliable in React 19.
+  // Kick off enrollment. Called on mount and from the retry button.
+  // calling startTransition during render isn't reliable in React 19,
+  // so this runs via useEffect / an onClick handler instead.
+  const runEnroll = useCallback(async () => {
+    setError(null);
+    setStep("loading");
+    const result = await enrollTotp();
+    if (!result.ok) {
+      setError(result.error);
+      setStep("error");
+      return;
+    }
+    setFactorId(result.factorId);
+    setQrCode(result.qrCode);
+    setSecret(result.secret);
+    setStep("qr");
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -44,6 +61,7 @@ export function ForcedSetupWizard() {
       if (cancelled) return;
       if (!result.ok) {
         setError(result.error);
+        setStep("error");
         return;
       }
       setFactorId(result.factorId);
@@ -77,10 +95,46 @@ export function ForcedSetupWizard() {
 
   if (step === "loading") {
     return (
-      <div className="flex items-center gap-3 rounded border border-[var(--rule)] bg-cream/40 p-6 text-sm text-slate-body">
+      <div className="flex items-center gap-3 border border-[var(--rule)] bg-cream/40 p-6 text-sm text-slate-body">
         <Loader2 className="size-4 animate-spin" />
         Generating your 2FA setup…
-        {error && <span className="text-red-700 ml-2">{error}</span>}
+      </div>
+    );
+  }
+
+  if (step === "error") {
+    return (
+      <div
+        role="alert"
+        className="border border-red-200 bg-red-50 p-6 space-y-3"
+      >
+        <div className="flex items-start gap-2 text-[13px] text-red-800">
+          <AlertTriangle className="size-4 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-semibold">We couldn&apos;t start your 2FA setup.</p>
+            <p className="mt-0.5 leading-relaxed">
+              {error ?? "Something went wrong. Please try again."}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => startTransition(runEnroll)}
+          disabled={pending}
+          className="inline-flex items-center gap-2 bg-ink px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ivory hover:bg-ink-soft disabled:opacity-40"
+        >
+          {pending ? (
+            <>
+              <Loader2 className="size-3.5 animate-spin" />
+              Retrying…
+            </>
+          ) : (
+            <>
+              <RotateCcw className="size-3.5" />
+              Try again
+            </>
+          )}
+        </button>
       </div>
     );
   }
@@ -98,7 +152,7 @@ export function ForcedSetupWizard() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-[200px_1fr]">
-          <div className="rounded border border-[var(--rule)] bg-white p-3">
+          <div className="border border-[var(--rule)] bg-white p-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={qrCode}
@@ -112,7 +166,7 @@ export function ForcedSetupWizard() {
               Authenticator, etc.) and scan the QR code, or enter this
               setup key manually:
             </p>
-            <div className="rounded border border-[var(--rule)] bg-cream/40 p-3 font-mono text-[12px] text-ink break-all">
+            <div className="border border-[var(--rule)] bg-cream/40 p-3 font-mono text-[12px] text-ink break-all">
               {secret}
             </div>
             <CopyButton value={secret} label="Copy setup key" />
@@ -138,10 +192,13 @@ export function ForcedSetupWizard() {
             }}
             maxLength={6}
             placeholder="123456"
-            className="w-40 rounded border border-[var(--rule-strong)] bg-white px-3 py-2 font-mono text-[18px] tracking-[4px] text-ink focus:border-heritage focus:outline-none"
+            className="w-40 border border-[var(--rule-strong)] bg-white px-3 py-2 font-mono text-[18px] tracking-[4px] text-ink focus:border-heritage focus:outline-none"
           />
           {error && (
-            <p className="text-[12px] text-red-700 inline-flex items-center gap-1.5">
+            <p
+              role="alert"
+              className="text-[12px] text-red-700 inline-flex items-center gap-1.5"
+            >
               <AlertTriangle className="size-3.5" />
               {error}
             </p>
@@ -150,7 +207,7 @@ export function ForcedSetupWizard() {
             type="button"
             onClick={onVerify}
             disabled={pending || code.length !== 6}
-            className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ivory hover:bg-ink-soft disabled:opacity-40"
+            className="inline-flex items-center gap-2 bg-ink px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ivory hover:bg-ink-soft disabled:opacity-40"
           >
             {pending ? (
               <>
@@ -183,7 +240,7 @@ export function ForcedSetupWizard() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 rounded border border-[var(--rule)] bg-cream/40 p-4 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-2 border border-[var(--rule)] bg-cream/40 p-4 sm:grid-cols-2">
           {recoveryCodes.map((c) => (
             <code
               key={c}
@@ -203,7 +260,7 @@ export function ForcedSetupWizard() {
           <button
             type="button"
             onClick={onDone}
-            className="ml-auto inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ivory hover:bg-ink-soft"
+            className="ml-auto inline-flex items-center gap-2 bg-ink px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ivory hover:bg-ink-soft"
           >
             I&apos;ve saved my codes
           </button>
@@ -229,7 +286,7 @@ function CopyButton({ value, label }: { value: string; label: string }) {
           /* select-and-copy fallback */
         }
       }}
-      className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
+      className="inline-flex items-center gap-1.5 border border-[var(--rule-strong)] bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
     >
       {copied ? (
         <>
@@ -267,7 +324,7 @@ function DownloadButton({
         a.remove();
         URL.revokeObjectURL(url);
       }}
-      className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
+      className="inline-flex items-center gap-1.5 border border-[var(--rule-strong)] bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
     >
       <Download className="size-3.5" />
       Download .txt

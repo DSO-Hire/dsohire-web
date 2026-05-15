@@ -188,9 +188,9 @@ function ProblemCard({
 }) {
   return (
     <div className="bg-white p-10">
-      <div className="text-[22px] font-extrabold tracking-[-0.6px] text-ink mb-2">
+      <h3 className="text-[22px] font-extrabold tracking-[-0.6px] text-ink mb-2">
         {heading}
-      </div>
+      </h3>
       <div className="text-[14px] text-slate-body mb-6 leading-snug">
         {tagline}
       </div>
@@ -362,9 +362,9 @@ function FeatureBreakdown() {
               <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
                 {f.eyebrow}
               </div>
-              <div className="text-[20px] font-extrabold tracking-[-0.5px] leading-tight text-ink mb-3">
+              <h3 className="text-[20px] font-extrabold tracking-[-0.5px] leading-tight text-ink mb-3">
                 {f.title}
-              </div>
+              </h3>
               <p className="text-[14px] text-slate-body leading-[1.65]">
                 {f.body}
               </p>

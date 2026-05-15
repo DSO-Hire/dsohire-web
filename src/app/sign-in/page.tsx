@@ -89,7 +89,7 @@ function SignInCard({
   secondaryLabel: string;
 }) {
   return (
-    <div className="bg-white p-9 sm:p-11 flex flex-col">
+    <div className="bg-white p-8 sm:p-10 flex flex-col">
       <div className="mb-5">{icon}</div>
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
         {eyebrow}

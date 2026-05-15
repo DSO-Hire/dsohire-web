@@ -24,7 +24,12 @@ import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
 
 interface PageProps {
-  searchParams: Promise<{ email?: string; next?: string; sent?: string }>;
+  searchParams: Promise<{
+    email?: string;
+    next?: string;
+    sent?: string;
+    error?: string;
+  }>;
 }
 
 export const metadata: Metadata = { title: "Claim your account · DSO Hire" };
@@ -39,7 +44,7 @@ export default async function ClaimPage({ searchParams }: PageProps) {
 
   return (
     <SiteShell>
-      <div className="mx-auto max-w-xl px-6 py-16 sm:py-24">
+      <div className="pt-[140px] pb-24 px-6 sm:px-14 max-w-[640px] mx-auto">
         <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
           Claim your account
         </div>
@@ -70,6 +75,17 @@ export default async function ClaimPage({ searchParams }: PageProps) {
         ) : (
           <form action={sendClaimLink} className="space-y-5">
             <input type="hidden" name="next" value={next} />
+            {sp.error === "1" && (
+              <div
+                role="alert"
+                className="bg-red-50 border-l-4 border-red-500 p-4"
+              >
+                <p className="text-[14px] text-red-900 leading-relaxed">
+                  We couldn&apos;t send your magic link. Check your spam folder
+                  for a recent email, wait a few minutes, or try again.
+                </p>
+              </div>
+            )}
             <div>
               <label
                 htmlFor="claim-email"
@@ -124,13 +140,19 @@ async function sendClaimLink(formData: FormData) {
   // Send OTP magic link. shouldCreateUser=true so an auth.users row is
   // created on first verify; on callback we detect the email match to
   // the guest candidate and promote.
-  await admin.auth.signInWithOtp({
+  const { error } = await admin.auth.signInWithOtp({
     email,
     options: {
       shouldCreateUser: true,
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com"}/auth/callback?next=${encodeURIComponent(next)}`,
     },
   });
+
+  if (error) {
+    redirect(
+      `/candidate/claim?email=${encodeURIComponent(email)}&next=${encodeURIComponent(next)}&error=1`
+    );
+  }
 
   redirect(
     `/candidate/claim?email=${encodeURIComponent(email)}&next=${encodeURIComponent(next)}&sent=1`

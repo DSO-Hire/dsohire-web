@@ -48,7 +48,7 @@ export function RestoreForm({ canRestore }: { canRestore: boolean }) {
           type="button"
           onClick={onRestore}
           disabled={busy !== null}
-          className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2.5 text-sm font-semibold text-ivory hover:bg-ink-soft disabled:opacity-60"
+          className="inline-flex items-center gap-2 bg-ink px-4 py-2.5 text-sm font-semibold text-ivory hover:bg-ink-soft disabled:opacity-60"
         >
           {busy === "restore" ? (
             <>
@@ -67,7 +67,7 @@ export function RestoreForm({ canRestore }: { canRestore: boolean }) {
         type="button"
         onClick={onSignOut}
         disabled={busy !== null}
-        className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+        className="inline-flex items-center gap-2 border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
       >
         {busy === "signout" ? "Signing out…" : "Sign me out"}
       </button>

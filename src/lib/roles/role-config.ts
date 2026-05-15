@@ -248,7 +248,7 @@ export const ROLE_CONFIGS: RoleConfig[] = [
   {
     slug: "dental-assistants",
     label: "Dental Assistants",
-    eyebrow: "DA · EFDA · Expanded Functions",
+    eyebrow: "DA · EFDA",
     Icon: GraduationCap,
     hero: {
       headline: "Dental assisting with a career ladder.",
@@ -360,8 +360,8 @@ export const ROLE_CONFIGS: RoleConfig[] = [
   },
   {
     slug: "office-managers",
-    label: "Office + Regional Managers",
-    eyebrow: "OM · RM · Operations Leadership",
+    label: "Office Managers",
+    eyebrow: "OM · Operations Leadership",
     Icon: TrendingUp,
     hero: {
       headline: "Operations leadership with a playbook.",

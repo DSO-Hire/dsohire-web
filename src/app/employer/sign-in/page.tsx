@@ -16,7 +16,13 @@ export const metadata: Metadata = {
     "Sign in to your DSO Hire employer account with a one-time magic link.",
 };
 
-export default function SignInPage() {
+interface PageProps {
+  searchParams: Promise<{ next?: string }>;
+}
+
+export default async function SignInPage({ searchParams }: PageProps) {
+  const { next } = await searchParams;
+
   return (
     <SiteShell>
       <section className="pt-[140px] pb-24 px-6 sm:px-14 max-w-[640px] mx-auto">
@@ -32,13 +38,17 @@ export default function SignInPage() {
         </p>
 
         <div className="border border-[var(--rule)] bg-white p-8 sm:p-10">
-          <SignInForm />
+          <SignInForm next={next} />
         </div>
 
         <p className="mt-10 text-[14px] text-slate-body leading-relaxed">
           Don&apos;t have an account yet?{" "}
           <Link
-            href="/employer/sign-up"
+            href={
+              next
+                ? `/employer/sign-up?next=${encodeURIComponent(next)}`
+                : "/employer/sign-up"
+            }
             className="text-heritage font-semibold underline underline-offset-2 hover:text-heritage-deep"
           >
             Start a DSO subscription

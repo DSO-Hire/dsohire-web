@@ -83,14 +83,14 @@ export function ReferenceForm({
   if (submitted) {
     return (
       <div className="text-center py-6">
-        <CheckCircle2 className="mx-auto h-10 w-10 text-[#4D7A60] mb-4" />
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-[#2F5D4F] mb-3">
+        <CheckCircle2 className="mx-auto h-10 w-10 text-heritage mb-4" />
+        <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
           Thank you
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-[#14233F] mb-3">
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink mb-3">
           Your reference has been sent.
         </h1>
-        <p className="text-[14px] text-[#4A6278] leading-relaxed max-w-[480px] mx-auto">
+        <p className="text-[14px] text-slate-body leading-relaxed max-w-[480px] mx-auto">
           {dsoName ?? "The hiring team"} has been notified. You can close this
           window — there&apos;s nothing else to do.
         </p>
@@ -100,22 +100,22 @@ export function ReferenceForm({
 
   const safeCandidate = candidateName ?? "the candidate";
   const requesterCopy = requestingUserName ?? "The hiring team";
-  const dsoCopy = dsoName ?? "a DSO Hire employer";
+  const dsoCopy = dsoName ?? "the hiring team";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-7">
       <div>
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-[#2F5D4F] mb-3">
+        <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
           {firstName ? `Hi ${firstName} —` : "Reference form"}
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-[#14233F] mb-3 leading-[1.15]">
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink mb-3 leading-[1.15]">
           Tell {dsoCopy} what it&apos;s like to work with {safeCandidate}.
         </h1>
-        <p className="text-[14px] text-[#4A6278] leading-relaxed">
+        <p className="text-[14px] text-slate-body leading-relaxed">
           {requesterCopy} is considering {safeCandidate}
           {jobTitle ? (
             <>
-              {" "}for a <strong className="text-[#14233F]">{jobTitle}</strong>{" "}
+              {" "}for a <strong className="text-ink">{jobTitle}</strong>{" "}
               role
             </>
           ) : null}
@@ -138,20 +138,23 @@ export function ReferenceForm({
       </div>
 
       {error && (
-        <div className="flex items-start gap-2 border border-red-200 bg-red-50 text-red-800 px-4 py-3 text-[13px]">
+        <div
+          role="alert"
+          className="flex items-start gap-2 border border-red-200 bg-red-50 text-red-800 px-4 py-3 text-[13px]"
+        >
           <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       <div className="pt-2 flex flex-wrap items-center gap-4 justify-between">
-        <p className="text-[12px] text-[#6E8395] leading-relaxed">
+        <p className="text-[12px] text-slate-meta leading-relaxed">
           Your response goes only to {dsoCopy}&apos;s hiring team.
         </p>
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-6 py-3 text-[13px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 bg-ink text-ivory px-6 py-3 text-[13px] font-bold tracking-[1.5px] uppercase hover:bg-ink-1000 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {pending ? (
             <>
@@ -186,34 +189,63 @@ function FieldRow({
 }) {
   const prompt = renderPrompt(field.promptTemplate, candidateName);
 
+  // Button-group inputs (scale_1_5, yes_no_maybe) aren't form controls
+  // a <label> can be associated with — wrap them in a <fieldset> /
+  // <legend> so the prompt labels the whole group for screen readers.
+  // text / long_text stay in a <label> (single associated control).
+  const isButtonGroup =
+    field.kind === "scale_1_5" || field.kind === "yes_no_maybe";
+
+  const header = (
+    <>
+      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 mb-1.5">
+        <span className="text-[14px] font-semibold text-ink leading-snug">
+          {prompt}
+        </span>
+        {field.required ? (
+          <span className="text-[9px] font-bold tracking-[2px] uppercase text-heritage-deep">
+            Required
+          </span>
+        ) : (
+          <span className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta">
+            Optional
+          </span>
+        )}
+      </div>
+      {field.helperText && (
+        <div className="text-[12px] text-slate-meta mb-2 leading-snug">
+          {field.helperText}
+        </div>
+      )}
+    </>
+  );
+
+  const input = (
+    <FieldInput
+      field={field}
+      value={value}
+      onChange={onChange}
+      disabled={disabled}
+    />
+  );
+
+  if (isButtonGroup) {
+    return (
+      <div>
+        {/* reset default fieldset border/margin/padding */}
+        <fieldset className="block border-0 m-0 p-0 min-w-0">
+          <legend className="block p-0 w-full">{header}</legend>
+          {input}
+        </fieldset>
+      </div>
+    );
+  }
+
   return (
     <div>
       <label className="block">
-        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 mb-1.5">
-          <span className="text-[14px] font-semibold text-[#14233F] leading-snug">
-            {prompt}
-          </span>
-          {field.required ? (
-            <span className="text-[9px] font-bold tracking-[2px] uppercase text-[#2F5D4F]">
-              Required
-            </span>
-          ) : (
-            <span className="text-[9px] font-bold tracking-[2px] uppercase text-[#6E8395]">
-              Optional
-            </span>
-          )}
-        </div>
-        {field.helperText && (
-          <div className="text-[12px] text-[#6E8395] mb-2 leading-snug">
-            {field.helperText}
-          </div>
-        )}
-        <FieldInput
-          field={field}
-          value={value}
-          onChange={onChange}
-          disabled={disabled}
-        />
+        {header}
+        {input}
       </label>
     </div>
   );
@@ -239,7 +271,7 @@ function FieldInput({
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
           maxLength={500}
-          className="w-full border border-[var(--rule-strong)] bg-white px-3 py-2.5 text-[14px] text-[#14233F] focus:outline-none focus:ring-2 focus:ring-[#4D7A60]/40 disabled:bg-slate-50 disabled:cursor-not-allowed"
+          className="w-full border border-[var(--rule-strong)] bg-white px-3 py-2.5 text-[14px] text-ink focus:outline-none focus:ring-2 focus:ring-heritage/40 disabled:bg-slate-50 disabled:cursor-not-allowed"
         />
       );
     case "long_text":
@@ -250,7 +282,7 @@ function FieldInput({
           disabled={disabled}
           maxLength={4000}
           rows={field.rows ?? 4}
-          className="w-full border border-[var(--rule-strong)] bg-white px-3 py-2.5 text-[14px] text-[#14233F] leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#4D7A60]/40 disabled:bg-slate-50 disabled:cursor-not-allowed resize-y"
+          className="w-full border border-[var(--rule-strong)] bg-white px-3 py-2.5 text-[14px] text-ink leading-relaxed focus:outline-none focus:ring-2 focus:ring-heritage/40 disabled:bg-slate-50 disabled:cursor-not-allowed resize-y"
         />
       );
     case "scale_1_5":
@@ -266,8 +298,8 @@ function FieldInput({
                 onClick={() => onChange(String(n))}
                 className={`min-w-[44px] h-[40px] border text-[14px] font-bold transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
                   selected
-                    ? "border-[#14233F] bg-[#14233F] text-[#F7F4ED]"
-                    : "border-[var(--rule-strong)] bg-white text-[#14233F] hover:bg-[#FAF7F1]"
+                    ? "border-ink bg-ink text-ivory"
+                    : "border-[var(--rule-strong)] bg-white text-ink hover:bg-cream"
                 }`}
                 aria-pressed={selected}
               >
@@ -275,7 +307,7 @@ function FieldInput({
               </button>
             );
           })}
-          <div className="ml-2 text-[11px] text-[#6E8395]">
+          <div className="ml-2 text-[11px] text-slate-meta">
             1 = Poor · 5 = Excellent
           </div>
         </div>
@@ -297,8 +329,8 @@ function FieldInput({
                 onClick={() => onChange(opt.v)}
                 className={`px-4 py-2 border text-[13px] font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
                   selected
-                    ? "border-[#14233F] bg-[#14233F] text-[#F7F4ED]"
-                    : "border-[var(--rule-strong)] bg-white text-[#14233F] hover:bg-[#FAF7F1]"
+                    ? "border-ink bg-ink text-ivory"
+                    : "border-[var(--rule-strong)] bg-white text-ink hover:bg-cream"
                 }`}
                 aria-pressed={selected}
               >

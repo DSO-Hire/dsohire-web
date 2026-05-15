@@ -76,7 +76,7 @@ export function CandidateSignInForm({ next }: { next?: string }) {
           </div>
 
           {verifyState.error && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-4">
+            <div role="alert" className="bg-red-50 border-l-4 border-red-500 p-4">
               <p className="text-[14px] text-red-900">{verifyState.error}</p>
             </div>
           )}
@@ -146,7 +146,7 @@ export function CandidateSignInForm({ next }: { next?: string }) {
         </div>
 
         {emailState.error && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4">
+          <div role="alert" className="bg-red-50 border-l-4 border-red-500 p-4">
             <p className="text-[14px] text-red-900">{emailState.error}</p>
           </div>
         )}
@@ -220,7 +220,7 @@ export function CandidateSignInForm({ next }: { next?: string }) {
       </div>
 
       {passwordState.error && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-4">
+        <div role="alert" className="bg-red-50 border-l-4 border-red-500 p-4">
           <p className="text-[14px] text-red-900">{passwordState.error}</p>
         </div>
       )}

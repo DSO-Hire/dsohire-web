@@ -114,7 +114,7 @@ export default async function PublicOfferResponsePage({
       if (displayed.name) dsoName = displayed.name;
     } catch {
       // Fall back to the default copy. Worst case the candidate sees
-      // "the hiring team" instead of "67 Dental".
+      // "the hiring team" instead of "Lakeshore Dental Group".
     }
   }
 
@@ -152,10 +152,10 @@ export default async function PublicOfferResponsePage({
         : null;
 
   return (
-    <main className="min-h-screen bg-[#F7F4ED] py-12 px-4 sm:px-6">
+    <main className="min-h-screen bg-ivory py-12 px-4 sm:px-6">
       <div className="mx-auto max-w-[680px]">
         <PublicHeader />
-        <div className="bg-white border border-[#ECE7DB] shadow-sm p-6 sm:p-10">
+        <div className="bg-card border border-ivory-deep shadow-sm p-6 sm:p-10">
           {existingResponse ? (
             <AlreadyRespondedView
               candidateName={candidateName}
@@ -188,11 +188,11 @@ function PublicHeader() {
     <header className="mb-8 text-center">
       <a
         href="https://dsohire.com"
-        className="inline-block text-[#14233F] text-lg font-extrabold tracking-[-0.5px]"
+        className="inline-block text-ink text-lg font-extrabold tracking-[-0.5px]"
       >
         DSO Hire
       </a>
-      <div className="mt-3 text-[10px] font-bold tracking-[3px] uppercase text-[#2F5D4F]">
+      <div className="mt-3 text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep">
         Your offer
       </div>
     </header>
@@ -201,12 +201,12 @@ function PublicHeader() {
 
 function PublicFooter() {
   return (
-    <footer className="mt-8 text-center text-[12px] text-[#6E8395] leading-relaxed">
+    <footer className="mt-8 text-center text-[12px] text-slate-meta leading-relaxed">
       <p>
         Powered by{" "}
         <a
           href="https://dsohire.com"
-          className="underline hover:text-[#14233F]"
+          className="underline hover:text-ink"
         >
           DSO Hire
         </a>
@@ -216,7 +216,7 @@ function PublicFooter() {
         Questions? Email{" "}
         <a
           href="mailto:info@dsohire.com"
-          className="underline hover:text-[#14233F]"
+          className="underline hover:text-ink"
         >
           info@dsohire.com
         </a>
@@ -256,18 +256,18 @@ function AlreadyRespondedView({
       : `${dsoName} has your decision on the ${jobTitle} offer. You can close this window.`;
   return (
     <div className="text-center py-6">
-      <div className="text-[10px] font-bold tracking-[3px] uppercase text-[#2F5D4F] mb-3">
+      <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
         Already responded
       </div>
-      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-[#14233F] mb-3">
+      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink mb-3">
         {firstName === "there" ? headline : `${headline.replace("Thanks", `Thanks, ${firstName}`)}`}
       </h1>
-      <p className="text-[14px] text-[#4A6278] leading-relaxed max-w-[520px] mx-auto">
+      <p className="text-[14px] text-slate-body leading-relaxed max-w-[520px] mx-auto">
         {body}
         {when && (
           <>
             {" "}Recorded on{" "}
-            <strong className="text-[#14233F]">{when}</strong>.
+            <strong className="text-ink">{when}</strong>.
           </>
         )}
       </p>

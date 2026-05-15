@@ -15,7 +15,7 @@ const initialPassword: SignInState = { ok: false, step: "email" };
 
 type Mode = "password" | "code";
 
-export function SignInForm() {
+export function SignInForm({ next }: { next?: string }) {
   const [mode, setMode] = useState<Mode>("password");
 
   const [emailState, sendCode, sendingCode] = useActionState(
@@ -35,6 +35,8 @@ export function SignInForm() {
   const showVerifyStep =
     emailState.ok && emailState.step === "verify" && emailState.email;
   const codeEmail = emailState.email ?? verifyState.email;
+  const carriedNext =
+    emailState.next ?? verifyState.next ?? passwordState.next ?? next;
 
   // ─── OTP code verify step ───────────────────────────────────
   if (mode === "code" && showVerifyStep && codeEmail) {
@@ -51,6 +53,7 @@ export function SignInForm() {
 
         <form action={verify} className="space-y-4">
           <input type="hidden" name="email" value={codeEmail} />
+          {carriedNext && <input type="hidden" name="next" value={carriedNext} />}
 
           <div>
             <label
@@ -75,7 +78,7 @@ export function SignInForm() {
           </div>
 
           {verifyState.error && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-4">
+            <div role="alert" className="bg-red-50 border-l-4 border-red-500 p-4">
               <p className="text-[14px] text-red-900">{verifyState.error}</p>
             </div>
           )}
@@ -101,6 +104,7 @@ export function SignInForm() {
 
           <form action={sendCode}>
             <input type="hidden" name="email" value={codeEmail} />
+            {carriedNext && <input type="hidden" name="next" value={carriedNext} />}
             <button
               type="submit"
               disabled={sendingCode}
@@ -121,6 +125,7 @@ export function SignInForm() {
         <div className="hidden" aria-hidden="true">
           <input type="text" name="website" tabIndex={-1} autoComplete="off" />
         </div>
+        {next && <input type="hidden" name="next" value={next} />}
 
         <div>
           <label
@@ -143,7 +148,7 @@ export function SignInForm() {
         </div>
 
         {emailState.error && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4">
+          <div role="alert" className="bg-red-50 border-l-4 border-red-500 p-4">
             <p className="text-[14px] text-red-900">{emailState.error}</p>
           </div>
         )}
@@ -176,6 +181,7 @@ export function SignInForm() {
       <div className="hidden" aria-hidden="true">
         <input type="text" name="website" tabIndex={-1} autoComplete="off" />
       </div>
+      {next && <input type="hidden" name="next" value={next} />}
 
       <div>
         <label
@@ -216,7 +222,7 @@ export function SignInForm() {
       </div>
 
       {passwordState.error && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-4">
+        <div role="alert" className="bg-red-50 border-l-4 border-red-500 p-4">
           <p className="text-[14px] text-red-900">{passwordState.error}</p>
         </div>
       )}

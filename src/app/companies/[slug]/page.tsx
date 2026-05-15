@@ -142,28 +142,41 @@ export default async function CompanyDetailPage({ params }: PageProps) {
   const brandColor = dsoRow.brand_color || FALLBACK_BRAND_COLOR;
 
   // Pull DSO locations + their active jobs + photos in parallel
-  const [{ data: rawLocations }, { data: rawJobs }, { data: rawPhotos }] =
-    await Promise.all([
-      supabase
-        .from("dso_locations")
-        .select("id, name, city, state, public_dso_affiliation")
-        .eq("dso_id", dsoRow.id)
-        .order("name", { ascending: true }),
-      supabase
-        .from("jobs")
-        .select(
-          "id, title, slug, role_category, employment_type, compensation_min, compensation_max, compensation_period, compensation_visible, posted_at"
-        )
-        .eq("dso_id", dsoRow.id)
-        .eq("status", "active")
-        .is("deleted_at", null)
-        .order("posted_at", { ascending: false, nullsFirst: false }),
-      supabase
-        .from("dso_photos")
-        .select("id, storage_url, caption, sort_order")
-        .eq("dso_id", dsoRow.id)
-        .order("sort_order", { ascending: true }),
-    ]);
+  const [
+    { data: rawLocations, error: locationsError },
+    { data: rawJobs, error: jobsError },
+    { data: rawPhotos, error: photosError },
+  ] = await Promise.all([
+    supabase
+      .from("dso_locations")
+      .select("id, name, city, state, public_dso_affiliation")
+      .eq("dso_id", dsoRow.id)
+      .order("name", { ascending: true }),
+    supabase
+      .from("jobs")
+      .select(
+        "id, title, slug, role_category, employment_type, compensation_min, compensation_max, compensation_period, compensation_visible, posted_at"
+      )
+      .eq("dso_id", dsoRow.id)
+      .eq("status", "active")
+      .is("deleted_at", null)
+      .order("posted_at", { ascending: false, nullsFirst: false }),
+    supabase
+      .from("dso_photos")
+      .select("id, storage_url, caption, sort_order")
+      .eq("dso_id", dsoRow.id)
+      .order("sort_order", { ascending: true }),
+  ]);
+
+  if (locationsError) {
+    console.warn("[company-detail] locations query failed", locationsError);
+  }
+  if (jobsError) {
+    console.warn("[company-detail] jobs query failed", jobsError);
+  }
+  if (photosError) {
+    console.warn("[company-detail] photos query failed", photosError);
+  }
 
   // Affiliation filtering (Phase 4.5.b launch-blocker, Q4 + Q7).
   // Per Cam's locked direction: keep the page rendered even when every
@@ -204,10 +217,14 @@ export default async function CompanyDetailPage({ params }: PageProps) {
     Array<{ city: string | null; state: string | null }>
   >();
   if (allJobIds.length > 0) {
-    const { data: jobLocs } = await supabase
+    const { data: jobLocs, error: jobLocsError } = await supabase
       .from("job_locations")
       .select("job_id, location_id, location:dso_locations(city, state)")
       .in("job_id", allJobIds);
+
+    if (jobLocsError) {
+      console.warn("[company-detail] job_locations query failed", jobLocsError);
+    }
 
     for (const row of (jobLocs ?? []) as unknown as Array<{
       job_id: string;
@@ -283,7 +300,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
           {/* Logo + Name layout */}
           <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:gap-6">
             {dsoRow.logo_url && (
-              <div className="size-20 shrink-0 overflow-hidden rounded-md border border-[var(--rule)] bg-white">
+              <div className="size-20 shrink-0 overflow-hidden border border-[var(--rule)] bg-white">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={dsoRow.logo_url}
@@ -412,7 +429,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
                       className="border-l-[3px] pl-5"
                       style={{ borderColor: brandColor }}
                     >
-                      <h3 className="font-display text-[18px] font-bold text-ink leading-tight mb-2">
+                      <h3 className="text-[18px] font-bold text-ink leading-tight mb-2">
                         {b.title}
                       </h3>
                       <p className="text-[14px] text-slate-body leading-relaxed">
@@ -464,7 +481,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
               <section>
                 <a
                   href={dsoRow.contact_cta_url}
-                  className="inline-flex items-center gap-2 rounded-md px-6 py-3 text-[12px] font-bold uppercase tracking-[1.5px] text-ivory transition-opacity hover:opacity-90"
+                  className="inline-flex items-center gap-2 px-6 py-3 text-[12px] font-bold uppercase tracking-[1.5px] text-ivory transition-opacity hover:opacity-90"
                   style={{ backgroundColor: brandColor }}
                   target={
                     dsoRow.contact_cta_url.startsWith("mailto:") ||
@@ -472,11 +489,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
                       ? undefined
                       : "_blank"
                   }
-                  rel={
-                    dsoRow.contact_cta_url.startsWith("http")
-                      ? "noopener noreferrer"
-                      : undefined
-                  }
+                  rel="noopener noreferrer"
                 >
                   {dsoRow.contact_cta_label}
                   <ArrowRight className="h-4 w-4" />

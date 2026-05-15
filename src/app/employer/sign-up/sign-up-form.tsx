@@ -71,7 +71,7 @@ export function SignUpForm({ initialTier }: { initialTier: PricingTier }) {
           </div>
 
           {verifyState.error && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-4">
+            <div role="alert" className="bg-red-50 border-l-4 border-red-500 p-4">
               <p className="text-[14px] text-red-900">{verifyState.error}</p>
             </div>
           )}
@@ -153,7 +153,7 @@ export function SignUpForm({ initialTier }: { initialTier: PricingTier }) {
         label="DSO name"
         name="dso_name"
         autoComplete="organization"
-        placeholder="SmileBright Dental DSO"
+        placeholder="Lakeshore Dental Group"
         required
         helper="Used as the public name and to generate your dsohire.com URL slug. You can edit either later."
       />
@@ -187,7 +187,7 @@ export function SignUpForm({ initialTier }: { initialTier: PricingTier }) {
       />
 
       {formState.error && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-4">
+        <div role="alert" className="bg-red-50 border-l-4 border-red-500 p-4">
           <p className="text-[14px] text-red-900">{formState.error}</p>
         </div>
       )}

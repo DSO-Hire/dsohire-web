@@ -54,7 +54,7 @@ export default async function AdminOverviewPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-[var(--rule)] border border-[var(--rule)] max-w-[760px]">
         <Link
           href="/admin/dsos?status=pending"
-          className="bg-white p-7 hover:bg-cream transition-colors group"
+          className="bg-card p-7 hover:bg-cream transition-colors group"
         >
           <Building2 className="h-5 w-5 text-heritage-deep mb-4" />
           <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
@@ -74,7 +74,7 @@ export default async function AdminOverviewPage() {
 
         <Link
           href="/admin/dsos?status=active"
-          className="bg-white p-7 hover:bg-cream transition-colors group"
+          className="bg-card p-7 hover:bg-cream transition-colors group"
         >
           <Building2 className="h-5 w-5 text-heritage-deep mb-4" />
           <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">

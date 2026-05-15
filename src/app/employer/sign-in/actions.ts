@@ -18,12 +18,15 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getMfaState } from "@/lib/auth/mfa";
 
+const NEXT_ALLOWLIST = /^\/employer\//;
+
 export interface SignInState {
   ok: boolean;
   step: "email" | "verify";
   error?: string;
   message?: string;
   email?: string;
+  next?: string;
 }
 
 export async function signInEmployer(
@@ -34,12 +37,15 @@ export async function signInEmployer(
     .trim()
     .toLowerCase();
   const honeypot = String(formData.get("website") ?? "").trim();
+  const nextRaw = String(formData.get("next") ?? "").trim();
+  const next = NEXT_ALLOWLIST.test(nextRaw) ? nextRaw : undefined;
 
   if (honeypot) {
     return {
       ok: true,
       step: "verify",
       email,
+      next,
       message: "Sign-in code sent.",
     };
   }
@@ -48,6 +54,7 @@ export async function signInEmployer(
     return {
       ok: false,
       step: "email",
+      next,
       error: "Please enter a valid email address.",
     };
   }
@@ -67,6 +74,7 @@ export async function signInEmployer(
       return {
         ok: false,
         step: "email",
+        next,
         error:
           "Too many sign-in requests in a short time. Check your spam folder for a recent code, or wait a few minutes before trying again.",
       };
@@ -74,6 +82,7 @@ export async function signInEmployer(
     return {
       ok: false,
       step: "email",
+      next,
       error:
         "We couldn't send a sign-in code. Check your spam folder, wait a few minutes, or sign up if you don't have an account yet.",
     };
@@ -83,6 +92,7 @@ export async function signInEmployer(
     ok: true,
     step: "verify",
     email,
+    next,
     message: `We sent a 6-digit code to ${email}. Enter it below — it expires in 15 minutes.`,
   };
 }
@@ -93,12 +103,15 @@ export async function verifySignInEmployer(
 ): Promise<SignInState> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const token = String(formData.get("token") ?? "").trim().replace(/\s+/g, "");
+  const nextRaw = String(formData.get("next") ?? "").trim();
+  const next = NEXT_ALLOWLIST.test(nextRaw) ? nextRaw : undefined;
 
   if (!email || !token) {
     return {
       ok: false,
       step: "verify",
       email,
+      next,
       error: "Enter the 6-digit code from your email.",
     };
   }
@@ -108,6 +121,7 @@ export async function verifySignInEmployer(
       ok: false,
       step: "verify",
       email,
+      next,
       error: "That doesn't look like a valid code. Enter the digits from your email.",
     };
   }
@@ -125,6 +139,7 @@ export async function verifySignInEmployer(
       ok: false,
       step: "verify",
       email,
+      next,
       error: lower.includes("expired")
         ? "That code expired. Click \"Send a new code\" to get a fresh one."
         : "That code didn't match. Check the email and try again, or request a new code.",
@@ -133,7 +148,8 @@ export async function verifySignInEmployer(
 
   // Session is set. If the user has 2FA enabled, step up before routing.
   const mfaState = await getMfaState(supabase);
-  const finalDest = await resolveSignedInDestination(supabase, data.user.id);
+  const finalDest =
+    next ?? (await resolveSignedInDestination(supabase, data.user.id));
   if (mfaState.isEnrolled && mfaState.currentLevel !== "aal2") {
     redirect(`/auth/mfa/challenge?next=${encodeURIComponent(finalDest)}`);
   }
@@ -163,16 +179,18 @@ export async function signInWithPasswordEmployer(
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
   const honeypot = String(formData.get("website") ?? "").trim();
+  const nextRaw = String(formData.get("next") ?? "").trim();
+  const next = NEXT_ALLOWLIST.test(nextRaw) ? nextRaw : undefined;
 
   if (honeypot) {
-    return { ok: true, step: "email", email };
+    return { ok: true, step: "email", email, next };
   }
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return { ok: false, step: "email", error: "Please enter a valid email address." };
+    return { ok: false, step: "email", next, error: "Please enter a valid email address." };
   }
   if (!password) {
-    return { ok: false, step: "email", email, error: "Please enter your password." };
+    return { ok: false, step: "email", email, next, error: "Please enter your password." };
   }
 
   const supabase = await createSupabaseServerClient();
@@ -185,6 +203,7 @@ export async function signInWithPasswordEmployer(
         ok: false,
         step: "email",
         email,
+        next,
         error: "Email or password didn't match. Try again, or sign in with a code instead.",
       };
     }
@@ -193,6 +212,7 @@ export async function signInWithPasswordEmployer(
         ok: false,
         step: "email",
         email,
+        next,
         error: "Verify your email first — sign in with a code below to confirm, then set/use your password.",
       };
     }
@@ -200,12 +220,14 @@ export async function signInWithPasswordEmployer(
       ok: false,
       step: "email",
       email,
+      next,
       error: error?.message ?? "Sign-in failed. Try again or use a code instead.",
     };
   }
 
   const mfaState = await getMfaState(supabase);
-  const finalDest = await resolveSignedInDestination(supabase, data.user.id);
+  const finalDest =
+    next ?? (await resolveSignedInDestination(supabase, data.user.id));
   if (mfaState.isEnrolled && mfaState.currentLevel !== "aal2") {
     redirect(`/auth/mfa/challenge?next=${encodeURIComponent(finalDest)}`);
   }

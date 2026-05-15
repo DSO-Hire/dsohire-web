@@ -75,7 +75,7 @@ export function CandidateSignUpForm({ next }: { next?: string }) {
           </div>
 
           {verifyState.error && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-4">
+            <div role="alert" className="bg-red-50 border-l-4 border-red-500 p-4">
               <p className="text-[14px] text-red-900">{verifyState.error}</p>
             </div>
           )}
@@ -165,7 +165,7 @@ export function CandidateSignUpForm({ next }: { next?: string }) {
       />
 
       {formState.error && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-4">
+        <div role="alert" className="bg-red-50 border-l-4 border-red-500 p-4">
           <p className="text-[14px] text-red-900">{formState.error}</p>
         </div>
       )}
@@ -261,7 +261,7 @@ function SalutationField() {
         htmlFor="csignup-salutation"
         className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
       >
-        Prefix
+        Title
       </label>
       <select
         id="csignup-salutation"
@@ -269,7 +269,7 @@ function SalutationField() {
         defaultValue=""
         className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
       >
-        <option value="">—</option>
+        <option value="">No title</option>
         {SALUTATIONS.map((s) => (
           <option key={s} value={s}>
             {s}
