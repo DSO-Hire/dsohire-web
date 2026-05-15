@@ -237,7 +237,7 @@ export function InboxView({
       const { data, error } = await supabase
         .from("application_messages")
         .select(
-          "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at, event_kind, application_message_attachments(id, message_id, storage_path, file_name, mime_type, size_bytes, created_at)"
+          "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at, event_kind, kind, payload, application_message_attachments(id, message_id, storage_path, file_name, mime_type, size_bytes, created_at)"
         )
         .eq("application_id", applicationId)
         .order("created_at", { ascending: true });
@@ -263,6 +263,8 @@ export function InboxView({
           edited_at: row.edited_at,
           deleted_at: row.deleted_at,
           event_kind: row.event_kind,
+          kind: row.kind,
+          payload: row.payload,
           attachments:
             (row.application_message_attachments as
               | Array<Record<string, unknown>>
