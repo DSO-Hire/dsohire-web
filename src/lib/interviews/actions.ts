@@ -24,6 +24,43 @@ import {
 import { sendEmail } from "@/lib/email/send";
 import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
 import { dispatchInboxRichCard } from "@/lib/inbox/dispatch-rich-card";
+import type { Json } from "@/lib/supabase/database.types";
+
+/**
+ * Flip the inline interview_proposal RichCard's status (and record which
+ * slot won) once a booking lands. Mirrors syncOfferRichCardStatus in
+ * /o/[token]/actions.ts. Best-effort — the booking row + audit are the
+ * source of truth; the card is the friendly UI mirror.
+ */
+async function syncInterviewProposalCardStatus(
+  admin: ReturnType<typeof createSupabaseServiceRoleClient>,
+  proposalId: string,
+  status: "booked" | "withdrawn",
+  selectedOptionId: string | null,
+): Promise<void> {
+  const { data: row, error } = await admin
+    .from("application_messages")
+    .select("id, payload")
+    .eq("kind", "rich_card")
+    .filter("payload->>proposal_id", "eq", proposalId)
+    .maybeSingle();
+  if (error || !row) {
+    if (error) console.warn("[interview] proposal-card lookup failed", error);
+    return;
+  }
+  const next = {
+    ...((row as Record<string, unknown>).payload as Record<string, unknown>),
+    status,
+    selected_option_id: selectedOptionId,
+  };
+  const { error: updErr } = await admin
+    .from("application_messages")
+    .update({ payload: next as unknown as Json })
+    .eq("id", (row as Record<string, unknown>).id as string);
+  if (updErr) {
+    console.warn("[interview] proposal-card status update failed", updErr);
+  }
+}
 import { recordAuditEvent } from "@/lib/audit/record";
 import { InterviewProposed } from "@/emails/candidate/InterviewProposed";
 import { InterviewBooked } from "@/emails/InterviewBooked";
@@ -149,23 +186,33 @@ export async function proposeInterview(
     };
   }
 
-  // Insert options.
+  // Insert options + RETURN ids so the RichCard can offer per-slot
+  // in-thread booking buttons (each calls bookInterviewSlot with the
+  // option's id).
   const optionRows = input.proposedStarts.map((iso, i) => ({
     proposal_id: proposal.id as string,
     start_at: iso,
     sort_order: i,
   }));
-  const { error: oErr } = await supabase
+  const { data: insertedOptions, error: oErr } = await supabase
     .from("interview_proposal_options")
-    .insert(optionRows);
-  if (oErr) {
+    .insert(optionRows)
+    .select("id, start_at, sort_order");
+  if (oErr || !insertedOptions) {
     // Roll back the proposal so we don't orphan it.
     await supabase
       .from("interview_proposals")
       .delete()
       .eq("id", proposal.id as string);
-    return { ok: false, error: oErr.message };
+    return { ok: false, error: oErr?.message ?? "Failed to save slots." };
   }
+  // Sort by sort_order so the card renders in the order the user
+  // typed them, not whatever PostgREST returned by default.
+  const orderedOptions = [...(insertedOptions as Array<{
+    id: string;
+    start_at: string;
+    sort_order: number;
+  }>)].sort((a, b) => a.sort_order - b.sort_order);
 
   // Email candidate.
   const candAuth = candidate?.auth_user_id ?? null;
@@ -240,7 +287,10 @@ export async function proposeInterview(
       kind: "interview_proposal",
       proposal_id: proposal.id as string,
       job_title: jobTitle ?? null,
-      offered_slots: input.proposedStarts,
+      offered_slots: orderedOptions.map((o) => ({
+        option_id: o.id,
+        start_at: o.start_at,
+      })),
       message: input.messageToCandidate ?? null,
       status: "proposed",
     },
@@ -537,6 +587,18 @@ export async function bookInterviewSlot(
           hour12: true,
         })}.`,
       });
+
+      // Flip the inline proposal RichCard's status from 'proposed' →
+      // 'booked' so the per-slot buttons disappear and both audiences
+      // see the chosen slot. Uses service-role since RLS on UPDATE
+      // requires sender_user_id match (proposal card was dispatched by
+      // the recruiter; the candidate booking it isn't the sender).
+      void syncInterviewProposalCardStatus(
+        createSupabaseServiceRoleClient(),
+        input.proposalId,
+        "booked",
+        input.optionId,
+      );
 
       // Rich card with the structured booking — both audiences read
       // the same payload so it renders consistently in either inbox.

@@ -37,11 +37,17 @@ export interface InterviewProposalCardPayload {
   /** interview_proposals.id */
   proposal_id: string;
   job_title: string | null;
-  /** ISO datetimes of the offered slots. */
-  offered_slots: string[];
+  /**
+   * Offered slots — each carries the interview_proposal_options.id so the
+   * candidate can book a slot directly from the inbox card via
+   * bookInterviewSlot({proposalId, optionId}).
+   */
+  offered_slots: Array<{ option_id: string; start_at: string }>;
   /** Optional message from sender. */
   message: string | null;
   status: "proposed" | "booked" | "withdrawn";
+  /** Populated once status flips to 'booked' — which option won. */
+  selected_option_id?: string | null;
 }
 
 /** Interview booked — confirmation of a selected slot. */

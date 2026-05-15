@@ -11,6 +11,8 @@
  * for email + a separate audit page.
  */
 
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   CheckCircle2,
@@ -20,16 +22,17 @@ import {
   CalendarCheck,
   UserCheck,
   Paperclip,
+  Loader2,
 } from "lucide-react";
 import {
   parseRichCardPayload,
-  type RichCardPayload,
   type OfferLetterCardPayload,
   type InterviewProposalCardPayload,
   type InterviewBookedCardPayload,
   type ReferenceCompletedCardPayload,
   type DocumentSharedCardPayload,
 } from "@/lib/inbox/rich-card-types";
+import { bookInterviewSlot } from "@/lib/interviews/actions";
 
 interface RichCardRendererProps {
   /** Raw payload from application_messages.payload — narrowed inside. */
@@ -203,37 +206,140 @@ function InterviewProposalCard({
   payload: InterviewProposalCardPayload;
   audience: "candidate" | "employer";
 }) {
-  const slotsLabel = payload.offered_slots
-    .map((iso) => new Date(iso).toLocaleString())
-    .join(" · ");
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [bookingOptionId, setBookingOptionId] = useState<string | null>(null);
+
   const eyebrow =
     payload.status === "booked"
       ? "Interview slot booked"
       : payload.status === "withdrawn"
         ? "Interview withdrawn"
         : "Interview proposed";
+
+  const handleBook = (optionId: string): void => {
+    if (pending) return;
+    setError(null);
+    setBookingOptionId(optionId);
+    startTransition(async () => {
+      const result = await bookInterviewSlot({
+        proposalId: payload.proposal_id,
+        optionId,
+      });
+      if (!result.ok) {
+        setError(result.error);
+        setBookingOptionId(null);
+        return;
+      }
+      // Server-side syncInterviewProposalCardStatus flips the card to
+      // 'booked'. Refresh so the page picks up the updated payload.
+      router.refresh();
+    });
+  };
+
+  const selectedSlot =
+    payload.selected_option_id != null
+      ? payload.offered_slots.find(
+          (s) => s.option_id === payload.selected_option_id,
+        )
+      : null;
+
   return (
     <CardShell eyebrow={eyebrow} eyebrowIcon={Calendar} accent="ink">
       {payload.job_title && (
-        <div className="text-[14px] font-semibold text-ink mb-1.5">
+        <div className="text-[14px] font-semibold text-ink mb-2">
           {payload.job_title}
         </div>
       )}
-      {payload.offered_slots.length > 0 && (
-        <p className="text-[13px] text-slate-body leading-[1.55] mb-2">
-          <span className="font-semibold text-ink">Times offered:</span>{" "}
-          {slotsLabel}
-        </p>
-      )}
       {payload.message && (
-        <p className="text-[13px] text-slate-body leading-[1.55] mb-2 italic">
+        <p className="text-[13px] text-slate-body leading-[1.55] mb-3 italic">
           &ldquo;{payload.message}&rdquo;
         </p>
       )}
-      {audience === "candidate" && payload.status === "proposed" && (
-        <p className="text-[12px] text-slate-meta">
-          Tap your dashboard to pick a slot.
+
+      {/* Booked state — show the chosen slot with checkmark, regardless of audience. */}
+      {payload.status === "booked" && (
+        <div className="flex items-center gap-2 text-[14px] text-heritage-deep font-semibold">
+          <CheckCircle2 className="size-4 shrink-0" aria-hidden />
+          {selectedSlot
+            ? `Booked: ${new Date(selectedSlot.start_at).toLocaleString()}`
+            : "Slot booked."}
+        </div>
+      )}
+
+      {/* Withdrawn state */}
+      {payload.status === "withdrawn" && (
+        <p className="text-[13px] text-slate-meta italic">
+          The hiring team withdrew this proposal.
         </p>
+      )}
+
+      {/* Proposed state — candidate gets per-slot booking buttons */}
+      {payload.status === "proposed" && audience === "candidate" && (
+        <div>
+          <div className="text-[11px] font-semibold tracking-[1px] uppercase text-slate-meta mb-2">
+            Pick a time
+          </div>
+          <div className="flex flex-col gap-1.5">
+            {payload.offered_slots.map((slot) => {
+              const isBookingThis = pending && bookingOptionId === slot.option_id;
+              return (
+                <button
+                  key={slot.option_id}
+                  type="button"
+                  onClick={() => handleBook(slot.option_id)}
+                  disabled={pending}
+                  className="inline-flex items-center justify-between gap-2 px-3 py-2 bg-white border border-[var(--rule-strong)] text-[13px] text-ink font-medium text-left hover:bg-cream hover:border-ink transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <span>
+                    {new Date(slot.start_at).toLocaleString(undefined, {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                  {isBookingThis ? (
+                    <Loader2 className="size-3.5 animate-spin text-heritage-deep" aria-hidden />
+                  ) : (
+                    <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
+                      Book →
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          {error && (
+            <p
+              role="alert"
+              className="mt-2 text-[12px] text-red-700 leading-snug"
+            >
+              {error}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Proposed state — employer sees the slots as read-only */}
+      {payload.status === "proposed" && audience === "employer" && (
+        <div>
+          <div className="text-[11px] font-semibold tracking-[1px] uppercase text-slate-meta mb-1.5">
+            Times offered
+          </div>
+          <ul className="list-none space-y-0.5 text-[13px] text-slate-body">
+            {payload.offered_slots.map((slot) => (
+              <li key={slot.option_id}>
+                {new Date(slot.start_at).toLocaleString()}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-[12px] text-slate-meta italic">
+            Waiting on the candidate to pick a slot.
+          </p>
+        </div>
       )}
     </CardShell>
   );
