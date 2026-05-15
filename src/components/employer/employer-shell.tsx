@@ -50,6 +50,7 @@ import {
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { BrandLockup } from "@/components/marketing/site-shell";
 import { getUnreadCount, getNewApplicationCount } from "@/lib/inbox/queries";
+import { NavBadgeRealtime } from "@/components/inbox/nav-badge-realtime";
 import { getMfaState } from "@/lib/auth/mfa";
 import { Avatar } from "@/components/ui/avatar";
 import { EmployerMobileNav } from "./employer-mobile-nav";
@@ -212,6 +213,9 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
 
   return (
     <div className="min-h-screen flex bg-ivory">
+      {/* Realtime listener — bumps the Inbox nav badge when a candidate
+          message arrives without requiring navigation. */}
+      <NavBadgeRealtime audience="employer" />
       {/* ── Desktop sidebar ──
            sticky top-0 + h-screen pins the rail to the viewport so the
            Help / Sign-out footer cluster stays in view even when the page

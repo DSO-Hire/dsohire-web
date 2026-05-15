@@ -401,7 +401,11 @@ export function InboxView({
         </h1>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6 min-h-[640px]">
+      {/* Fixed-height window — viewport minus the nav + page padding
+          + section header. Cap at 800px so it doesn't go absurdly tall
+          on huge monitors. MessagesThread + the list pane both scroll
+          internally inside this box (iMessage-style). */}
+      <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6 h-[calc(100vh-220px)] max-h-[800px] min-h-[480px]">
         {/* ─── List pane ─── */}
         <section
           className={`border border-[var(--rule)] bg-white flex flex-col ${

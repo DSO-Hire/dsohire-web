@@ -30,6 +30,7 @@ import { BrandLockup } from "@/components/marketing/site-shell";
 import { Avatar } from "@/components/ui/avatar";
 import { CandidateMobileNav } from "./candidate-mobile-nav";
 import { getUnreadCount } from "@/lib/inbox/queries";
+import { NavBadgeRealtime } from "@/components/inbox/nav-badge-realtime";
 
 interface CandidateShellProps {
   children: React.ReactNode;
@@ -112,6 +113,9 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
 
   return (
     <div className="min-h-screen flex bg-ivory">
+      {/* Realtime listener — bumps the Inbox nav badge when an employer
+          message arrives without requiring navigation. */}
+      <NavBadgeRealtime audience="candidate" />
       {/* ── Desktop sidebar ──
            sticky top-0 + h-screen pins the rail to the viewport so the
            Help / Sign-out footer cluster stays in view even when the page
