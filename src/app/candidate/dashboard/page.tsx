@@ -81,7 +81,7 @@ export default async function CandidateDashboardPage() {
   const { data: candidate } = await supabase
     .from("candidates")
     .select(
-      "id, first_name, full_name, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, desired_specialty, pms_systems, skills, languages, temp_or_perm, schedule_preferences, min_salary, salary_unit, cv_visibility, availability, resume_url, linkedin_url, avatar_url",
+      "id, first_name, last_name, salutation, full_name, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, desired_specialty, pms_systems, skills, languages, temp_or_perm, schedule_preferences, min_salary, salary_unit, cv_visibility, availability, resume_url, linkedin_url, avatar_url",
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
@@ -122,7 +122,9 @@ export default async function CandidateDashboardPage() {
   const c = candidate as Record<string, unknown>;
   const profileData: ProfileData = {
     identity: {
-      full_name: (c.full_name as string | null) ?? "",
+      first_name: (c.first_name as string | null) ?? "",
+      last_name: (c.last_name as string | null) ?? "",
+      salutation: (c.salutation as string | null) ?? null,
       pronouns: (c.pronouns as string | null) ?? null,
       headline: (c.headline as string | null) ?? null,
       summary: (c.summary as string | null) ?? null,
