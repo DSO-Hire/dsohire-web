@@ -180,15 +180,10 @@ function OfferLetterCard({
           {isPending && "Awaiting candidate response."}
           {isAccepted && "The candidate accepted this offer."}
           {isDeclined && "The candidate declined this offer."}
-          {" "}
-          <Link
-            href={responseUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-ink"
-          >
-            View response page →
-          </Link>
+          {/* The full audit (signed name, timestamp, IP/UA) lives on the
+              employer application detail page, reachable via the clickable
+              job title in the thread header. Not linking the candidate
+              splash page (/o/[token]) from here — that's candidate-only. */}
         </div>
       )}
     </CardShell>

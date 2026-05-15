@@ -227,9 +227,34 @@ export function MessagesThread({
           const row = payload.new;
           if (!row?.id) return;
           setMessages((current) => {
-            // Self-echo dedupe by id — optimistic add already swapped to
-            // canonical id once the server action returned.
+            // Self-echo dedupe by id — happens when the server action's
+            // optimistic swap (tempId → canonical id) already finished.
             if (current.some((m) => m.id === row.id)) return current;
+
+            // Race fix (2026-05-15 stress test): realtime can fire BEFORE
+            // the server action returns + swaps, so the pending row still
+            // has tempId and id-match misses. CLAIM the pending row
+            // instead of appending — match by sender + body, which is
+            // unique enough for the brief pending window. Without this
+            // we got two bubbles for messages with attachments.
+            const pending = current.find(
+              (m) =>
+                m.pending &&
+                m.sender_user_id === row.sender_user_id &&
+                m.body === row.body,
+            );
+            if (pending) {
+              return current.map((m) =>
+                m === pending
+                  ? {
+                      ...(row as ThreadMessage),
+                      attachments: m.attachments ?? [],
+                      pending: false,
+                    }
+                  : m,
+              );
+            }
+
             const next = [
               ...current,
               { ...(row as ThreadMessage), attachments: [] },
