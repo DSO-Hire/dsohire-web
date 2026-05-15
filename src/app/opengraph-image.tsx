@@ -14,7 +14,11 @@ import { ImageResponse } from "next/og";
 
 // Next.js metadata file convention — these exports drive the route.
 export const alt = "DSO Hire — Dental hiring, done direct.";
-export const size = { width: 1200, height: 630 };
+// Render at 2x the canonical OG size so any downscale (LinkedIn/Twitter
+// preview cropping, retina displays) stays crisp. LinkedIn recommends
+// >=1200x627; 2400x1260 stays in their accepted range and avoids the
+// soft-text artifact from Google Fonts' subsetted-TTF endpoint.
+export const size = { width: 2400, height: 1260 };
 export const contentType = "image/png";
 
 // Brand tokens — kept in sync with src/app/globals.css.
