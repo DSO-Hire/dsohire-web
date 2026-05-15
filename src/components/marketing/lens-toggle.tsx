@@ -84,9 +84,9 @@ export function LensToggle() {
   const idleSegment = "text-slate-body hover:text-ink hover:bg-cream/60";
 
   return (
-    <li className="relative group">
+    <li>
       <div className="flex items-stretch border border-[var(--rule-strong)]">
-        {/* Left lens — For DSOs */}
+        {/* Left lens — For DSOs. Plain link, NO dropdown. */}
         <Link
           href="/for-dsos"
           aria-current={lens === "dso" ? "true" : undefined}
@@ -98,65 +98,67 @@ export function LensToggle() {
         {/* Divider joining the two segments */}
         <span aria-hidden className="w-px self-stretch bg-[var(--rule-strong)]" />
 
-        {/* Right lens — For Dental Pros. Also the hover trigger for the
-            role dropdown below. */}
-        <Link
-          href="/for-candidates"
-          aria-current={lens === "candidate" ? "true" : undefined}
-          aria-haspopup="menu"
-          className={`${baseSegment} ${lens === "candidate" ? activeSegment : idleSegment}`}
-        >
-          For Dental Pros
-          <svg
-            aria-hidden
-            className="h-2.5 w-2.5 transition-transform group-hover:rotate-180"
-            viewBox="0 0 12 12"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+        {/* Right lens — For Dental Pros. This segment owns its own hover
+            group (group/pros) so the role dropdown fires ONLY from here,
+            not from hovering the "For DSOs" segment. */}
+        <div className="relative group/pros flex">
+          <Link
+            href="/for-candidates"
+            aria-current={lens === "candidate" ? "true" : undefined}
+            aria-haspopup="menu"
+            className={`${baseSegment} ${lens === "candidate" ? activeSegment : idleSegment}`}
           >
-            <path d="M3 4.5l3 3 3-3" />
-          </svg>
-        </Link>
-      </div>
+            For Dental Pros
+            <svg
+              aria-hidden
+              className="h-2.5 w-2.5 transition-transform group-hover/pros:rotate-180"
+              viewBox="0 0 12 12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M3 4.5l3 3 3-3" />
+            </svg>
+          </Link>
 
-      {/* Bridge element — keeps hover state alive when moving the cursor from
-          the trigger to the menu so the dropdown doesn't flicker closed. */}
-      <span aria-hidden className="absolute left-0 right-0 top-full h-3" />
+          {/* Bridge element — keeps hover state alive when moving the cursor
+              from the trigger to the menu so the dropdown doesn't flicker. */}
+          <span aria-hidden className="absolute left-0 right-0 top-full h-3" />
 
-      {/* Role-specific dropdown — revealed on hover of the whole control.
-          Aligned to the right segment so it reads as belonging to "For
-          Dental Pros". Pure CSS group-hover — no Radix or JS framework. */}
-      <div
-        role="menu"
-        className="invisible opacity-0 absolute top-full right-0 mt-3 min-w-[360px] bg-white border border-[var(--rule-strong)] shadow-[0_20px_40px_-20px_rgba(7,15,28,0.20),0_8px_20px_-12px_rgba(7,15,28,0.10)] group-hover:visible group-hover:opacity-100 transition-all duration-150 z-50"
-      >
-        <ul className="list-none p-2">
-          {ROLE_LINKS.map((link, i) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                role="menuitem"
-                className="block px-4 py-2.5 hover:bg-cream/60 transition-colors"
-                style={{
-                  // Subtle separator between the overview and the role list
-                  borderTop: i === 1 ? "1px solid var(--rule)" : undefined,
-                  marginTop: i === 1 ? "4px" : undefined,
-                  paddingTop: i === 1 ? "10px" : undefined,
-                }}
-              >
-                <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-0.5">
-                  {link.eyebrow}
-                </div>
-                <div className="text-[13px] font-semibold tracking-[-0.1px] text-ink">
-                  {link.label}
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+          {/* Role-specific dropdown — revealed only on hover of the "For
+              Dental Pros" segment. Right-aligned to that segment. Pure CSS. */}
+          <div
+            role="menu"
+            className="invisible opacity-0 absolute top-full right-0 mt-3 min-w-[360px] bg-white border border-[var(--rule-strong)] shadow-[0_20px_40px_-20px_rgba(7,15,28,0.20),0_8px_20px_-12px_rgba(7,15,28,0.10)] group-hover/pros:visible group-hover/pros:opacity-100 transition-all duration-150 z-50"
+          >
+            <ul className="list-none p-2">
+              {ROLE_LINKS.map((link, i) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    role="menuitem"
+                    className="block px-4 py-2.5 hover:bg-cream/60 transition-colors"
+                    style={{
+                      // Subtle separator between the overview and the role list
+                      borderTop: i === 1 ? "1px solid var(--rule)" : undefined,
+                      marginTop: i === 1 ? "4px" : undefined,
+                      paddingTop: i === 1 ? "10px" : undefined,
+                    }}
+                  >
+                    <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-0.5">
+                      {link.eyebrow}
+                    </div>
+                    <div className="text-[13px] font-semibold tracking-[-0.1px] text-ink">
+                      {link.label}
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
     </li>
   );

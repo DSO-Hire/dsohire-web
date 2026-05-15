@@ -91,10 +91,9 @@ function Hero() {
           Dental hiring,{" "}
           <em className="not-italic text-heritage-light">done direct.</em>
         </h1>
-        <p className="text-lg sm:text-xl text-slate-body leading-relaxed max-w-[680px] mx-auto mb-12">
-          DSO Hire is the job platform built only for dental. Multi-location
-          support organizations post and hire across every practice; dental
-          professionals find real roles at verified group practices. No
+        <p className="text-lg sm:text-xl text-slate-body leading-relaxed max-w-[620px] mx-auto mb-12">
+          The job platform built only for dental — connecting multi-location
+          support organizations with dental professionals, directly. No
           agencies, no per-listing fees, no middlemen.
         </p>
 
