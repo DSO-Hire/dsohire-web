@@ -14,7 +14,7 @@ import {
   type TierConfig,
   type PricingTier,
 } from "@/lib/stripe/prices";
-import { FaqAccordion } from "./faq-accordion";
+import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import { SALES_EMAIL } from "@/lib/contact";
 import type { Metadata } from "next";
 

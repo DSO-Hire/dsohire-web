@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { getAllTiers, type TierConfig } from "@/lib/stripe/prices";
 import { SiteShell, BrandLockup } from "@/components/marketing/site-shell";
+import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -62,6 +63,7 @@ export default function ForDsosPage() {
       <FeatureShowcase />
       <PricingTeaser />
       <HowItWorks />
+      <FAQ />
       <FinalCta />
     </SiteShell>
   );
@@ -1018,6 +1020,57 @@ function FinalCta() {
             See Pricing
           </Link>
         </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   FAQ — employer-buying questions
+═══════════════════════════════════════════════════════ */
+
+const FAQ_ITEMS = [
+  {
+    q: "What does the subscription actually cover?",
+    a: "Multi-location job postings, the full applicant pipeline with kanban + scorecards + team comments, candidate dashboards, branded company page, EEOC/OFCCP-ready exports, and Stripe-secured billing. Pricing scales with your practice count; features are the same depth at every paid tier. Active-listing caps are tier-based — Starter up to 50 active listings, Growth and Enterprise unlimited.",
+  },
+  {
+    q: "Can I cancel or change tiers anytime?",
+    a: "Yes. Change tiers or cancel from your billing settings — Stripe handles prorated billing automatically, and you keep access through the end of your current billing period. No retention call, no penalty.",
+  },
+  {
+    q: "How does multi-location posting actually work?",
+    a: "Write the job description once and select which of your practices it applies to in a single flow. We render a per-location listing for each, so candidates see the role at the location they're searching for, without you re-entering the same job. Posting to one practice or fifteen takes the same amount of time.",
+  },
+  {
+    q: "Can I add my team — recruiters, regional managers, office managers?",
+    a: "Yes. Starter includes up to 10 admin seats; Growth and Enterprise are unlimited. Hiring managers can be scoped to specific locations so they only see and act on what's relevant to them; admins see the whole DSO. Adding teammates doesn't change your billing — seat counts are bundled into the tier.",
+  },
+  {
+    q: "Do you take a placement fee?",
+    a: "Never. The monthly subscription is the entire cost — we don't take a cut of placements, and we don't charge per listing. Hire whoever applies, keep 100% of their first-year salary.",
+  },
+  {
+    q: "How fast can we get started?",
+    a: "Most DSOs are posting their first role within an hour of signing up. Sign up, pay through Stripe, add your locations, and you're live. No implementation fees, no demo gauntlet, no sales call required.",
+  },
+  {
+    q: "What about Indeed, LinkedIn, and the other major job boards?",
+    a: "Today, every DSO Hire job is searchable on the platform and indexed by Google for Jobs. Cross-posting integrations to Indeed, LinkedIn, and Facebook are on the H2 2026 roadmap — until then, many DSOs cross-post manually using the listing copy we generate.",
+  },
+];
+
+function FAQ() {
+  return (
+    <section className="bg-cream border-y border-[var(--rule)] px-6 sm:px-14 pt-24 pb-24">
+      <div className="max-w-[860px] mx-auto">
+        <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
+          FAQ
+        </div>
+        <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink mb-12">
+          Operator questions, answered straight.
+        </h2>
+        <FaqAccordion items={FAQ_ITEMS} />
       </div>
     </section>
   );

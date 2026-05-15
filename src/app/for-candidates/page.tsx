@@ -47,6 +47,7 @@ import {
   Briefcase,
 } from "lucide-react";
 import { SiteShell } from "@/components/marketing/site-shell";
+import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -78,6 +79,7 @@ export default function ForCandidatesPage() {
       <RoleBreakdown />
       <HonestTake />
       <CandidateBenefits />
+      <FAQ />
       <FinalCta />
     </SiteShell>
   );
@@ -736,6 +738,57 @@ function FinalCta() {
             Create a Free Profile
           </Link>
         </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+   FAQ — candidate-trust questions
+───────────────────────────────────────────────────────── */
+
+const FAQ_ITEMS = [
+  {
+    q: "Is DSO Hire really free for candidates?",
+    a: "Yes — completely free, forever. DSOs pay a flat monthly subscription to post and hire; candidates never pay to apply, never pay to be visible, and never see ads inside the platform. There's no premium candidate tier.",
+  },
+  {
+    q: "Who can see my profile?",
+    a: "Only verified DSOs (employers) can search candidate profiles, and only if your visibility setting allows it. Your default is private. You can mark yourself hidden, recruiters-only, or open-to-work at any time from your settings — and you control which fields are shown.",
+  },
+  {
+    q: "What if I'm currently employed and don't want my employer to find out I'm looking?",
+    a: "Set your visibility to \"hidden\" or \"recruiters only\" — DSOs can't surface your profile in search, and your name and contact info aren't exposed. When you apply to a specific role, only that DSO sees your application; no one else does.",
+  },
+  {
+    q: "What kinds of roles will I find here?",
+    a: "Every role on DSO Hire is at a verified Dental Support Organization — from hygiene, assisting, and front-desk roles to dentist, specialist, and corporate operations roles (regional managers, HR, business development, etc.) at multi-location dental groups. If you work in dental, there's a path here.",
+  },
+  {
+    q: "How is this different from Indeed, ZipRecruiter, or DentalPost?",
+    a: "DSO Hire is dental-only and direct. Every employer is a verified DSO — no staffing-agency reposts, no recruiters skimming, no resume reselling. Generic boards work for every industry, which means they don't work especially well for any one. We don't bury you in unrelated alerts, and we don't have agencies inserting themselves between you and the practice.",
+  },
+  {
+    q: "Do you sell my data or share it with third parties?",
+    a: "Never. We don't sell candidate data, we don't share it with third parties, and we don't resell resumes. Employers see what you choose to share through your profile and applications — that's all.",
+  },
+  {
+    q: "What happens after I apply?",
+    a: "Your application goes directly to the hiring team at the DSO — no recruiter middleman, no agency. You'll see status updates in your candidate dashboard and by email, and you can communicate with the DSO through the platform's messaging once they reach out.",
+  },
+];
+
+function FAQ() {
+  return (
+    <section className="bg-cream border-y border-[var(--rule)] px-6 sm:px-14 pt-24 pb-24">
+      <div className="max-w-[860px] mx-auto">
+        <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
+          FAQ
+        </div>
+        <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink mb-12">
+          The honest answers.
+        </h2>
+        <FaqAccordion items={FAQ_ITEMS} />
       </div>
     </section>
   );

@@ -1,7 +1,8 @@
 "use client";
 
 /**
- * FaqAccordion — interactive FAQ on /pricing.
+ * FaqAccordion — interactive FAQ used on multiple marketing surfaces
+ * (/pricing, /for-dsos, /for-candidates).
  *
  * Click a question to expand its answer; clicking another question closes the
  * previous one (single-open at a time). Smooth height transition uses the
@@ -12,7 +13,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 
-interface FaqItem {
+export interface FaqItem {
   q: string;
   a: string;
 }
