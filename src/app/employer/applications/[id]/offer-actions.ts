@@ -24,6 +24,7 @@ import {
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { dispatchInboxRichCard } from "@/lib/inbox/dispatch-rich-card";
 import { sendEmail } from "@/lib/email/send";
 import { renderTemplate } from "@/lib/offer-letters/merge";
 import { OfferLetter as OfferLetterEmail } from "@/emails/employer/OfferLetter";
@@ -306,6 +307,35 @@ export async function sendOffer(
   }
 
   const sendId = (inserted as Record<string, unknown>).id as string;
+
+  // ── Drop an offer_letter RichCard into the inbox thread so the
+  // candidate can Accept/Decline in-thread instead of relying solely
+  // on the email. The card surfaces /o/[token] (audit-grade response
+  // capture) — never duplicates the write path.
+  const previewSource = render.html
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const preview =
+    previewSource.length > 280
+      ? `${previewSource.slice(0, 277)}…`
+      : previewSource;
+  void dispatchInboxRichCard({
+    applicationId,
+    senderUserId: user.id,
+    senderRole: "employer",
+    senderDsoUserId: (dsoUser as Record<string, unknown>).id as string,
+    fallbackBody: `Offer sent: ${subject.trim()}`,
+    payload: {
+      kind: "offer_letter",
+      offer_send_id: sendId,
+      response_token: responseToken,
+      subject: subject.trim(),
+      preview,
+      sent_at: new Date().toISOString(),
+      status: "sent",
+    },
+  });
 
   void recordAuditEvent({
     dsoId: jobDsoId,

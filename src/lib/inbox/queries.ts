@@ -39,7 +39,7 @@ interface MessageRowMin {
 // `foo:foo(... bar:bar(...))` chains (Vercel build-breaker, see
 // feedback_supabase_nested_embed_generic_string_error.md).
 export const APPLICATION_MESSAGE_SELECT =
-  "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at, event_kind, application_message_attachments(id, message_id, storage_path, file_name, mime_type, size_bytes, created_at)";
+  "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at, event_kind, kind, payload, application_message_attachments(id, message_id, storage_path, file_name, mime_type, size_bytes, created_at)";
 
 /**
  * Project a row returned by APPLICATION_MESSAGE_SELECT into the shape the
@@ -66,6 +66,8 @@ export function projectApplicationMessageRow<
     edited_at: row.edited_at,
     deleted_at: row.deleted_at,
     event_kind: row.event_kind,
+    kind: row.kind,
+    payload: row.payload,
     attachments: atts,
   };
 }

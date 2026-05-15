@@ -53,6 +53,10 @@ export interface ApplicationMessageRow {
   deleted_at: string | null;
   /** Non-NULL marks a system message; renderer uses a banner instead of a bubble. */
   event_kind?: string | null;
+  /** Discriminator: 'text' (default), 'system' (event_kind non-null), 'rich_card' (payload non-null). */
+  kind?: "text" | "system" | "rich_card";
+  /** Structured payload — RichCard data (kind='rich_card') or system event details (kind='system'). */
+  payload?: Record<string, unknown> | null;
   /** 0..N attachments uploaded alongside this message. Empty array when none. */
   attachments?: ApplicationMessageAttachment[];
 }

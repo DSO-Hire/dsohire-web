@@ -67,6 +67,7 @@ import {
   type ApplicationMessageRow,
   type ApplicationMessageAttachment,
 } from "@/lib/messages/actions";
+import { RichCardRenderer } from "@/components/inbox/rich-cards";
 
 const EDIT_WINDOW_MS = 5 * 60 * 1000;
 const MAX_BODY = 5000;
@@ -646,6 +647,50 @@ export function MessagesThread({
                     className="p-4 text-[13px] text-slate-meta italic"
                   >
                     Message deleted.
+                  </li>
+                );
+              }
+              // Day 14 — rich_card messages render as a structured
+              // inline card via the RichCardRenderer registry. kind +
+              // payload are the markers; falls through to text bubble
+              // logic if either is missing.
+              if (m.kind === "rich_card" && m.payload) {
+                const isMine = m.sender_user_id === currentUserId;
+                const senderLabel = isMine ? currentUserName : otherPartyName;
+                return (
+                  <li
+                    key={m.id}
+                    id={`message-${m.id}`}
+                    className="p-4"
+                  >
+                    <div
+                      className={`flex flex-col ${
+                        isMine ? "items-end" : "items-start"
+                      }`}
+                    >
+                      <div
+                        className={`flex items-baseline gap-2 mb-1.5 max-w-full ${
+                          isMine ? "flex-row-reverse" : "flex-row"
+                        }`}
+                      >
+                        <span className="text-[14px] font-bold text-ink truncate">
+                          {senderLabel}
+                        </span>
+                        <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
+                          {roleLabel(m.sender_role)}
+                        </span>
+                        <span
+                          className="text-[12px] text-slate-meta"
+                          title={new Date(m.created_at).toLocaleString()}
+                        >
+                          {relativeTime(m.created_at)}
+                        </span>
+                      </div>
+                      <RichCardRenderer
+                        payload={m.payload}
+                        audience={currentUserRole}
+                      />
+                    </div>
                   </li>
                 );
               }
