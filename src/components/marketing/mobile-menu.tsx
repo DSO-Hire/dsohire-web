@@ -39,11 +39,14 @@ const ROLE_LINKS = [
   { href: "/for-hygienists", label: "For Hygienists" },
   { href: "/for-dental-assistants", label: "For Dental Assistants" },
   { href: "/for-front-desk", label: "For Front Desk + Treatment Coordinators" },
-  { href: "/for-office-managers", label: "For Office + Regional Managers" },
+  { href: "/for-office-managers", label: "For Office Managers" },
 ];
 
+// Secondary nav links — shown below the dual-lens pair. The two lenses
+// ("For DSOs" / "For Dental Pros") are presented separately at the top of
+// the drawer as a deliberate paired choice, mirroring the desktop
+// segmented control.
 const PRIMARY_LINKS = [
-  { href: "/for-dsos", label: "For DSOs" },
   { href: "/jobs", label: "Browse Jobs" },
   { href: "/pricing", label: "Pricing" },
   { href: "/about", label: "About" },
@@ -126,7 +129,54 @@ export function MobileMenu({
             </div>
 
             <nav className="flex-1 overflow-y-auto px-6 py-6">
-              <ul className="list-none flex flex-col gap-1">
+              {/* Dual-lens pair — the two audiences DSO Hire serves,
+                  presented as an obvious paired choice (mirrors the
+                  desktop segmented control). Two bordered panels stacked
+                  with a shared divider so they read as one switch. */}
+              <div className="text-[10px] font-bold tracking-[1.8px] uppercase text-heritage-deep mb-3">
+                Choose your lens
+              </div>
+              <div className="border border-[var(--rule-strong)]">
+                <Link
+                  href="/for-dsos"
+                  onClick={close}
+                  className="block px-4 py-3.5 text-[15px] font-semibold text-ink hover:bg-cream/60 transition-colors"
+                >
+                  For DSOs
+                  <span className="block text-[12px] font-medium tracking-normal text-slate-body normal-case mt-0.5">
+                    Hiring for your practices
+                  </span>
+                </Link>
+                <div className="border-t border-[var(--rule-strong)]">
+                  <Link
+                    href="/for-candidates"
+                    onClick={close}
+                    className="block px-4 py-3.5 text-[15px] font-semibold text-ink hover:bg-cream/60 transition-colors"
+                  >
+                    For Dental Pros
+                    <span className="block text-[12px] font-medium tracking-normal text-slate-body normal-case mt-0.5">
+                      Find your next role
+                    </span>
+                  </Link>
+                  {/* Role-specific pages live under the Dental Pros lens —
+                      indented to read as belonging to it. */}
+                  <ul className="list-none flex flex-col border-t border-[var(--rule)] bg-cream/40">
+                    {ROLE_LINKS.slice(1).map((link) => (
+                      <li key={link.href}>
+                        <Link
+                          href={link.href}
+                          onClick={close}
+                          className="block pl-7 pr-4 py-2.5 text-[13px] font-semibold text-slate-body hover:text-heritage-deep transition-colors"
+                        >
+                          {link.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <ul className="list-none flex flex-col gap-1 mt-7 pt-5 border-t border-[var(--rule)]">
                 {PRIMARY_LINKS.map((link) => (
                   <MobileMenuLink
                     key={link.href}
@@ -137,23 +187,6 @@ export function MobileMenu({
                   </MobileMenuLink>
                 ))}
               </ul>
-
-              <div className="mt-7 pt-5 border-t border-[var(--rule)]">
-                <div className="text-[10px] font-bold tracking-[1.8px] uppercase text-heritage-deep mb-3">
-                  For Dental Pros
-                </div>
-                <ul className="list-none flex flex-col gap-1">
-                  {ROLE_LINKS.map((link) => (
-                    <MobileMenuLink
-                      key={link.href}
-                      href={link.href}
-                      onClose={close}
-                    >
-                      {link.label}
-                    </MobileMenuLink>
-                  ))}
-                </ul>
-              </div>
             </nav>
 
             <div className="px-6 pb-7 pt-4 border-t border-[var(--rule)] flex flex-col gap-3">

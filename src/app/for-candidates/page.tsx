@@ -1,5 +1,12 @@
 /**
- * /for-candidates — long-form pitch page for dental professionals.
+ * /for-candidates — THE candidate-side home for dental professionals.
+ *
+ * Part of the dual-lens website restructure: `/` is a neutral dual-doorway,
+ * and this page is the fully-realized home for job seekers — equal in status
+ * and quality to /for-dsos. Carries the candidate-side search intent (dental
+ * jobs, hygienist jobs, dental assistant jobs, DSO careers). It must open
+ * strong and stand on its own as a destination, not read as a buried
+ * nav-item landing page.
  *
  * Audience: dentists (general + specialty), hygienists, dental assistants,
  * front-desk / treatment coordinators, office + regional managers — anyone
@@ -43,9 +50,24 @@ import { SiteShell } from "@/components/marketing/site-shell";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "For Dental Professionals",
+  title:
+    "Dental Jobs at Multi-Location DSOs — Hygienist, Dentist, Assistant & Front Desk Roles",
   description:
-    "Find your next role at a real, verified dental support organization. Free for candidates forever, no agency middlemen, transparent comp where DSOs share it.",
+    "Find dental jobs at real, verified dental support organizations. Browse open hygienist jobs, dental assistant jobs, associate dentist, specialist, front desk, and office manager roles at multi-location DSOs. Apply direct — no agency middlemen, no placement fees, no resume reselling. Free for candidates forever, with transparent comp wherever DSOs share it. Build a dental career at a real group practice.",
+  keywords: [
+    "dental jobs",
+    "dental careers",
+    "hygienist jobs",
+    "dental hygienist jobs",
+    "dental assistant jobs",
+    "associate dentist jobs",
+    "DSO jobs",
+    "DSO careers",
+    "find dental work",
+    "dental front desk jobs",
+    "dental office manager jobs",
+    "dental specialist jobs",
+  ],
 };
 
 export default function ForCandidatesPage() {
@@ -709,7 +731,7 @@ function FinalCta() {
           </Link>
           <Link
             href="/candidate/sign-up"
-            className="inline-flex items-center px-9 py-[15px] bg-heritage text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
+            className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:border-ink hover:bg-cream transition-colors"
           >
             Create a Free Profile
           </Link>

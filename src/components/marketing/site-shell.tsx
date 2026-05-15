@@ -16,6 +16,7 @@ import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { INFO_EMAIL as SUPPORT_EMAIL, INFO_MAILTO as SUPPORT_MAILTO } from "@/lib/contact";
 import { MobileMenu } from "./mobile-menu";
+import { LensToggle } from "./lens-toggle";
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   return (
@@ -90,8 +91,10 @@ export async function SiteNav() {
         <BrandLockup height={42} />
       </Link>
       <ul className="hidden md:flex items-center gap-7 list-none">
-        <NavLink href="/for-dsos">For DSOs</NavLink>
-        <ForDentalProsDropdown />
+        {/* Dual-lens segmented control — "For DSOs | For Dental Pros".
+            Client island (needs usePathname for active-lens state); the
+            right segment is also the hover trigger for the role dropdown. */}
+        <LensToggle />
         <NavLink href="/jobs">Browse Jobs</NavLink>
         <NavLink href="/pricing">Pricing</NavLink>
         <NavLink href="/about">About</NavLink>
@@ -135,86 +138,6 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
       >
         {children}
       </Link>
-    </li>
-  );
-}
-
-/**
- * ForDentalProsDropdown — hover-revealed nav menu for the candidate-side
- * surface. Shows /for-candidates as the hub plus the six role-specific
- * landing pages. Pure CSS (group-hover) — no Radix or JS framework.
- *
- * The role list here mirrors src/app/for-[role]/role-config.ts. Update
- * both when adding a new role page.
- */
-function ForDentalProsDropdown() {
-  const ROLE_LINKS = [
-    { href: "/for-candidates", label: "For Dental Professionals", eyebrow: "Overview" },
-    { href: "/for-dentists", label: "For Dentists", eyebrow: "DDS / DMD" },
-    { href: "/for-specialists", label: "For Specialists", eyebrow: "Endo · Perio · Pedo · OS · Ortho" },
-    { href: "/for-hygienists", label: "For Hygienists", eyebrow: "RDH" },
-    { href: "/for-dental-assistants", label: "For Dental Assistants", eyebrow: "DA · EFDA" },
-    { href: "/for-front-desk", label: "For Front Desk + Treatment Coordinators", eyebrow: "Patient-facing ops" },
-    { href: "/for-office-managers", label: "For Office + Regional Managers", eyebrow: "OM · RM" },
-  ];
-
-  return (
-    <li className="relative group">
-      <button
-        type="button"
-        className="inline-flex items-center gap-1.5 text-[12px] font-semibold tracking-[1.8px] uppercase text-slate-body hover:text-ink transition-colors"
-        aria-haspopup="menu"
-      >
-        For Dental Pros
-        <svg
-          aria-hidden
-          className="h-2.5 w-2.5 transition-transform group-hover:rotate-180"
-          viewBox="0 0 12 12"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M3 4.5l3 3 3-3" />
-        </svg>
-      </button>
-      {/* Bridge element — keeps hover state alive when moving cursor from
-          trigger to menu so the dropdown doesn't flicker closed. */}
-      <span
-        aria-hidden
-        className="absolute left-0 right-0 top-full h-3"
-      />
-      <div
-        role="menu"
-        className="invisible opacity-0 absolute top-full left-1/2 -translate-x-1/2 mt-3 min-w-[360px] bg-white border border-[var(--rule-strong)] shadow-[0_20px_40px_-20px_rgba(7,15,28,0.20),0_8px_20px_-12px_rgba(7,15,28,0.10)] group-hover:visible group-hover:opacity-100 transition-all duration-150 z-50"
-      >
-        <ul className="list-none p-2">
-          {ROLE_LINKS.map((link, i) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                role="menuitem"
-                className="block px-4 py-2.5 hover:bg-cream/60 transition-colors"
-                style={{
-                  // Subtle separator between the overview and the role list
-                  borderTop:
-                    i === 1 ? "1px solid var(--rule)" : undefined,
-                  marginTop: i === 1 ? "4px" : undefined,
-                  paddingTop: i === 1 ? "10px" : undefined,
-                }}
-              >
-                <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-0.5">
-                  {link.eyebrow}
-                </div>
-                <div className="text-[13px] font-semibold tracking-[-0.1px] text-ink">
-                  {link.label}
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
     </li>
   );
 }
