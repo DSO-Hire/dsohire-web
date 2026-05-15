@@ -228,7 +228,7 @@ export async function sendApplicationMessage({
       body: finalBody,
     })
     .select(
-      "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at, event_kind"
+      "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at, event_kind, kind, payload"
     )
     .single();
 
@@ -440,7 +440,7 @@ export async function editApplicationMessage({
     .update({ body: cleanBody })
     .eq("id", messageId)
     .select(
-      "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at, event_kind"
+      "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at, event_kind, kind, payload"
     )
     .single();
 

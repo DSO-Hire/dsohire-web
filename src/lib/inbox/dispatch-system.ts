@@ -66,6 +66,10 @@ export async function dispatchInboxSystemMessage(
       sender_role: input.senderRole,
       sender_dso_user_id: null,
       body: input.body.trim().slice(0, 5000),
+      // kind='system' required by application_messages_kind_consistency
+      // CHECK (migration 20260515000002). Without it the default 'text'
+      // would collide with the non-null event_kind below.
+      kind: "system",
       event_kind: input.eventKind,
     });
     if (error) {

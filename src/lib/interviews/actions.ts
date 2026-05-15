@@ -23,6 +23,7 @@ import {
 } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/send";
 import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
+import { dispatchInboxRichCard } from "@/lib/inbox/dispatch-rich-card";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { InterviewProposed } from "@/emails/candidate/InterviewProposed";
 import { InterviewBooked } from "@/emails/InterviewBooked";
@@ -224,6 +225,25 @@ export async function proposeInterview(
     eventKind: "interview_proposed",
     senderRole: "employer",
     body: `${dsoName} proposed ${input.proposedStarts.length} interview time${input.proposedStarts.length === 1 ? "" : "s"} for ${jobTitle}. Pick the one that works.`,
+  });
+
+  // Also drop a rich_card so the candidate sees the offered slots
+  // inline. The system message stays as a status-feed banner; the
+  // card adds the actionable preview.
+  void dispatchInboxRichCard({
+    applicationId: input.applicationId,
+    senderUserId: user.id,
+    senderRole: "employer",
+    senderDsoUserId: dsoUser.id as string,
+    fallbackBody: `${dsoName} proposed ${input.proposedStarts.length} interview time${input.proposedStarts.length === 1 ? "" : "s"}.`,
+    payload: {
+      kind: "interview_proposal",
+      proposal_id: proposal.id as string,
+      job_title: jobTitle ?? null,
+      offered_slots: input.proposedStarts,
+      message: input.messageToCandidate ?? null,
+      status: "proposed",
+    },
   });
 
   await recordAuditEvent({
@@ -516,6 +536,24 @@ export async function bookInterviewSlot(
           minute: "2-digit",
           hour12: true,
         })}.`,
+      });
+
+      // Rich card with the structured booking — both audiences read
+      // the same payload so it renders consistently in either inbox.
+      void dispatchInboxRichCard({
+        applicationId: propCtx.application_id,
+        senderUserId: user.id,
+        senderRole: "candidate",
+        senderDsoUserId: null,
+        fallbackBody: `Interview booked for ${new Date(slotIso).toLocaleString()}.`,
+        payload: {
+          kind: "interview_booked",
+          booking_id: booking.id as string,
+          start_at: slotIso,
+          duration_minutes: propCtx.duration_minutes as number,
+          location_text: (propCtx.location_text as string | null) ?? null,
+          interview_kind: propCtx.interview_kind as string,
+        },
       });
     }
 
