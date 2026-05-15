@@ -172,7 +172,7 @@ function DoorwayPanel({
         }`}
         aria-hidden
       >
-        <Icon className="h-5 w-5" strokeWidth={2.25} />
+        <Icon className="h-5 w-5" />
       </span>
 
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-ivory/65 mb-1.5">
@@ -188,14 +188,10 @@ function DoorwayPanel({
         {proof}
       </div>
 
-      {/* CTA — each card wears the other lens's color so both pop */}
-      <span
-        className={`mt-auto inline-flex items-center justify-center gap-2.5 px-6 py-3 text-[12px] font-bold tracking-[1.8px] uppercase transition-colors ${
-          isInk
-            ? "bg-heritage text-ivory group-hover:bg-heritage-light"
-            : "bg-ink text-ivory group-hover:bg-ink-soft"
-        }`}
-      >
+      {/* CTA — ivory on both cards so they pop with high contrast against
+          both the navy and the green backgrounds, and the two CTAs read as
+          a unified pair. */}
+      <span className="mt-auto inline-flex items-center justify-center gap-2.5 px-6 py-3 text-[12px] font-bold tracking-[1.8px] uppercase bg-ivory text-ink group-hover:bg-ivory-deep transition-colors">
         {ctaLabel}
         <ArrowRight className="h-3.5 w-3.5 motion-safe:transition-transform motion-safe:group-hover:translate-x-1" />
       </span>
