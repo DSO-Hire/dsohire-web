@@ -162,9 +162,8 @@ function TierCard({ tier }: { tier: TierConfig }) {
             }`}
           >
             <span
-              className={`font-extrabold flex-shrink-0 ${
-                isFeatured ? "text-heritage-light" : "text-heritage-light"
-              }`}
+              aria-hidden="true"
+              className="font-extrabold flex-shrink-0 text-heritage-light"
             >
               ✓
             </span>
@@ -250,23 +249,23 @@ const COMPARE_GROUPS: MatrixGroup[] = [
       },
       {
         feature: "Kanban / pipeline view",
-        values: { starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
+        values: { starter: true, growth: true, enterprise: true },
       },
       {
         feature: "Bulk actions on applications",
-        values: { starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
+        values: { starter: true, growth: true, enterprise: true },
       },
       {
         feature: "Internal team comments + @mentions",
-        values: { starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
+        values: { starter: true, growth: true, enterprise: true },
       },
       {
         feature: "Candidate scorecards (dental rubrics)",
-        values: { starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
+        values: { starter: true, growth: true, enterprise: true },
       },
       {
         feature: "Cross-job application inbox",
-        values: { starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+        values: { starter: false, growth: true, enterprise: true },
       },
       {
         feature: "Custom approval chains by role/location",
@@ -279,11 +278,11 @@ const COMPARE_GROUPS: MatrixGroup[] = [
     rows: [
       {
         feature: "Calendar integration (Google + Outlook)",
-        values: { starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
+        values: { starter: true, growth: true, enterprise: true },
       },
       {
         feature: "Self-serve candidate booking link",
-        values: { starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
+        values: { starter: true, growth: true, enterprise: true },
       },
       {
         feature: "Panel scheduling (multi-interviewer)",
@@ -299,8 +298,8 @@ const COMPARE_GROUPS: MatrixGroup[] = [
     label: "Verification & credentialing",
     rows: [
       {
-        feature: "State dental license verification",
-        values: { starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+        feature: "License requirements + attestation tracking",
+        values: { starter: false, growth: true, enterprise: true },
       },
       {
         feature: "License expiration alerts (60-day)",
@@ -345,7 +344,7 @@ const COMPARE_GROUPS: MatrixGroup[] = [
       },
       {
         feature: "Offer letter templates + e-signature",
-        values: { starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
+        values: { starter: true, growth: true, enterprise: true },
       },
       {
         feature: "Custom approval chain for offers",
@@ -369,8 +368,8 @@ const COMPARE_GROUPS: MatrixGroup[] = [
         values: { starter: true, growth: true, enterprise: true },
       },
       {
-        feature: "Photos / video / leadership bios",
-        values: { starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
+        feature: "Photos / leadership bios",
+        values: { starter: true, growth: true, enterprise: true },
       },
       {
         feature: "Indeed / LinkedIn / Facebook cross-post",
@@ -395,19 +394,19 @@ const COMPARE_GROUPS: MatrixGroup[] = [
       },
       {
         feature: "Source attribution per candidate",
-        values: { starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
+        values: { starter: true, growth: true, enterprise: true },
       },
       {
         feature: "Funnel report by stage + time-to-fill",
-        values: { starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+        values: { starter: false, growth: true, enterprise: true },
       },
       {
         feature: "Per-location dashboards",
-        values: { starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+        values: { starter: false, growth: true, enterprise: true },
       },
       {
         feature: "Cross-location benchmarking",
-        values: { starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+        values: { starter: false, growth: true, enterprise: true },
       },
       {
         feature: "Anonymized salary benchmarks (per role/state)",
@@ -424,15 +423,15 @@ const COMPARE_GROUPS: MatrixGroup[] = [
     rows: [
       {
         feature: "AI Job Description generator (dental-context)",
-        values: { starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
+        values: { starter: true, growth: true, enterprise: true },
       },
       {
         feature: "AI candidate match-to-job",
-        values: { starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+        values: { starter: false, growth: true, enterprise: true },
       },
       {
         feature: "AI Smart Fit Score (1–100)",
-        values: { starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+        values: { starter: false, growth: true, enterprise: true },
       },
       {
         feature: "AI Interview Assistant (record + summarize)",
@@ -440,7 +439,7 @@ const COMPARE_GROUPS: MatrixGroup[] = [
       },
       {
         feature: "AI rejection-reason suggester",
-        values: { starter: false, growth: "H2 2026", enterprise: "H2 2026" },
+        values: { starter: false, growth: true, enterprise: true },
       },
       {
         feature: "Voice-memo screener answers (novel)",
@@ -498,7 +497,7 @@ const COMPARE_GROUPS: MatrixGroup[] = [
       },
       {
         feature: "Audit log",
-        values: { starter: false, growth: false, enterprise: "H2 2026" },
+        values: { starter: false, growth: false, enterprise: true },
       },
       {
         feature: "SSO / SAML",
@@ -577,7 +576,7 @@ function CompareMatrix({ tiers }: { tiers: TierConfig[] }) {
         comparison tables are primarily a desktop surface.
       */}
       <div className="-mx-6 sm:-mx-14 px-6 sm:px-14 overflow-x-auto lg:overflow-visible">
-        <p className="hidden lg:block text-[13px] text-slate-meta mb-5 max-w-[680px] leading-relaxed">
+        <p className="text-[13px] text-slate-meta mb-5 max-w-[680px] leading-relaxed">
           <strong className="text-ink font-semibold">Reading this matrix:</strong>{" "}
           checkmarks = available today. <span className="font-bold tracking-[1px] uppercase text-[10px]">H2 2026</span> =
           on the active roadmap, ships across the second half of 2026.{" "}
@@ -702,19 +701,24 @@ function MatrixGroupBlock({
               >
                 {typeof value === "boolean" ? (
                   value ? (
-                    <Check
-                      className={`h-4 w-4 ${
-                        isFeatured ? "text-ivory" : "text-heritage"
-                      }`}
-                      strokeWidth={3}
-                    />
+                    <>
+                      <Check
+                        aria-hidden="true"
+                        className={`h-4 w-4 ${
+                          isFeatured ? "text-ivory" : "text-heritage"
+                        }`}
+                        strokeWidth={3}
+                      />
+                      <span className="sr-only">Included</span>
+                    </>
                   ) : (
                     <span
                       className={`text-[18px] leading-none font-light ${
                         isFeatured ? "text-ivory/30" : "text-slate-meta/30"
                       }`}
                     >
-                      —
+                      <span aria-hidden="true">—</span>
+                      <span className="sr-only">Not included</span>
                     </span>
                   )
                 ) : isSoftLabel ? (

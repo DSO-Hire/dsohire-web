@@ -65,9 +65,9 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
     features: [
       "Unlimited listings · unlimited admin seats",
       "Application kanban + bulk actions + scorecards",
-      "State license verification + 60-day alerts",
+      "License requirements + attestation tracking",
       "AI candidate matching + Smart Fit Score",
-      "Per-location dashboards + salary benchmarks",
+      "Per-location dashboards + cross-location benchmarking",
     ],
     stripePriceIdTest: "price_1TS2JY0uFxwSh1FnH7Q4dgKm",
     stripeProductIdTest: "prod_UQu7wAVpO2pFyE",
@@ -82,9 +82,9 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
     monthlyPriceCents: 149900,
     features: [
       "Everything in Growth",
+      "Audit log with indefinite retention",
       "Dedicated CSM + SLA (H2 2026)",
-      "SSO / SAML / audit log (H2 2026)",
-      "REST API + custom integrations (H2 2026)",
+      "SSO / SAML + SOC 2 (H2 2026)",
       "BAA-readiness for HIPAA workflows",
     ],
     stripePriceIdTest: "price_1TS2KN0uFxwSh1FnVWdnRMFC",
