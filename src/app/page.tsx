@@ -19,7 +19,6 @@ import {
   ArrowLeftRight,
   BadgeCheck,
   Building2,
-  Check,
   Hammer,
   Stethoscope,
 } from "lucide-react";
@@ -50,7 +49,7 @@ export default function Home() {
 
 function Hero() {
   return (
-    <section className="relative overflow-hidden pt-[140px] pb-24 px-6 sm:px-14">
+    <section className="relative overflow-hidden pt-[120px] pb-14 px-6 sm:px-14">
       {/* 80px brand grid, masked toward the top-left */}
       <div
         aria-hidden
@@ -75,9 +74,9 @@ function Hero() {
         }}
       />
 
-      <div className="relative z-10 max-w-[1100px] mx-auto text-center">
+      <div className="relative z-10 max-w-[1180px] mx-auto text-center">
         <span
-          className="inline-flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold tracking-[1.8px] uppercase text-ink border border-heritage/35 mb-7"
+          className="inline-flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold tracking-[1.8px] uppercase text-ink border border-heritage/35 mb-5"
           style={{
             background: "var(--heritage-tint)",
             boxShadow: "0 0 0 4px var(--heritage-glow)",
@@ -87,14 +86,14 @@ function Hero() {
           <span>The dental-only hiring platform</span>
         </span>
 
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[-0.025em] leading-[1.02] text-ink mb-6">
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[-0.025em] leading-[1.02] text-ink mb-4">
           Dental hiring,{" "}
           <em className="not-italic text-heritage-light">done direct.</em>
         </h1>
-        <p className="text-lg sm:text-xl text-slate-body leading-relaxed max-w-[620px] mx-auto mb-12">
-          The job platform built only for dental — connecting multi-location
-          support organizations with dental professionals, directly. No
-          agencies, no per-listing fees, no middlemen.
+        <p className="text-base sm:text-lg text-slate-body leading-relaxed max-w-[600px] mx-auto mb-9">
+          The dental-only job platform — connecting multi-location support
+          organizations with dental professionals, directly. No agencies, no
+          per-listing fees, no middlemen.
         </p>
 
         {/* ── The equal-weight dual entry — bold full-color calling cards ── */}
@@ -104,12 +103,8 @@ function Hero() {
             icon={Building2}
             eyebrow="For DSOs"
             title="Hiring across your practices"
-            body="Post unlimited roles for one flat monthly fee and run every applicant through a pipeline built for the way DSOs actually hire."
-            points={[
-              "Unlimited multi-location job postings",
-              "Flat monthly fee — no placement fees, ever",
-              "A real applicant pipeline, built for dental",
-            ]}
+            body="Unlimited roles across every location, one flat monthly fee, an applicant pipeline built for dental."
+            proof="Unlimited postings · Flat monthly fee · No placement charges"
             ctaLabel="Explore DSO Hiring"
             href="/for-dsos"
           />
@@ -118,12 +113,8 @@ function Hero() {
             icon={Stethoscope}
             eyebrow="For Dental Professionals"
             title="Find your next dental role"
-            body="Browse real openings at verified dental support organizations and apply direct — from hygiene, assisting, and front desk to dentist, specialist, and corporate roles."
-            points={[
-              "Real roles at verified DSOs — no agency reposts",
-              "Apply direct — free for dental professionals, forever",
-              "Every employer is a verified DSO — clinical and corporate roles alike",
-            ]}
+            body="Real openings at verified dental support organizations — clinical and corporate, hygiene through specialist."
+            proof="Free forever · Direct apply · Verified DSOs only"
             ctaLabel="Browse Dental Jobs"
             href="/for-candidates"
           />
@@ -139,7 +130,7 @@ function DoorwayPanel({
   eyebrow,
   title,
   body,
-  points,
+  proof,
   ctaLabel,
   href,
 }: {
@@ -149,7 +140,8 @@ function DoorwayPanel({
   eyebrow: string;
   title: string;
   body: string;
-  points: string[];
+  /** Single dot-separated proof line — keeps the panel compact (above the fold). */
+  proof: string;
   ctaLabel: string;
   href: string;
 }) {
@@ -157,45 +149,48 @@ function DoorwayPanel({
   return (
     <Link
       href={href}
-      className={`group relative flex flex-col p-9 sm:p-10 text-ivory motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1 ${
+      className={`group relative flex flex-col p-7 sm:p-8 text-ivory motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1 overflow-hidden ${
         isInk ? "bg-ink hover:bg-ink-soft" : "bg-heritage hover:bg-heritage-deep"
       }`}
-      style={{ boxShadow: "0 26px 50px -26px rgba(7,15,28,0.32)" }}
+      style={{
+        boxShadow:
+          "0 28px 56px -28px rgba(7,15,28,0.40), 0 12px 24px -12px rgba(7,15,28,0.18)",
+      }}
     >
+      {/* Top accent stripe — cross-lens color hint, adds depth to the flat block */}
       <span
-        className="inline-flex items-center justify-center w-12 h-12 mb-6 bg-ivory/15 text-ivory"
+        aria-hidden
+        className={`absolute top-0 inset-x-0 h-[3px] ${
+          isInk ? "bg-heritage" : "bg-ivory"
+        }`}
+      />
+
+      {/* Solid ivory icon square — crisp on the colored bg, color-inverted icon */}
+      <span
+        className={`inline-flex items-center justify-center w-11 h-11 mb-5 bg-ivory ${
+          isInk ? "text-ink" : "text-heritage-deep"
+        }`}
         aria-hidden
       >
-        <Icon className="h-6 w-6" />
+        <Icon className="h-5 w-5" strokeWidth={2.25} />
       </span>
 
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-ivory/65 mb-2.5">
+      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-ivory/65 mb-1.5">
         {eyebrow}
       </div>
-      <div className="text-[26px] sm:text-[30px] font-extrabold tracking-[-0.7px] leading-tight text-ivory mb-3">
+      <div className="text-[24px] sm:text-[28px] font-extrabold tracking-[-0.6px] leading-[1.08] text-ivory mb-2.5">
         {title}
       </div>
-      <p className="text-[14.5px] text-ivory/75 leading-[1.65] mb-6">{body}</p>
+      <p className="text-[14px] text-ivory/80 leading-[1.55] mb-3.5">{body}</p>
 
-      <ul className="list-none border-t border-ivory/15 pt-5 mb-8">
-        {points.map((point) => (
-          <li
-            key={point}
-            className="text-[13.5px] text-ivory/85 py-1.5 flex items-start gap-2.5 leading-snug"
-          >
-            <Check
-              className="h-4 w-4 flex-shrink-0 mt-0.5 text-ivory"
-              strokeWidth={3}
-              aria-hidden
-            />
-            <span>{point}</span>
-          </li>
-        ))}
-      </ul>
+      {/* Single-line proof — dot-separated keyword chips */}
+      <div className="text-[10.5px] font-bold tracking-[1.6px] uppercase text-ivory/55 mb-6">
+        {proof}
+      </div>
 
       {/* CTA — each card wears the other lens's color so both pop */}
       <span
-        className={`mt-auto inline-flex items-center justify-center gap-2.5 px-7 py-3.5 text-[12px] font-bold tracking-[2px] uppercase transition-colors ${
+        className={`mt-auto inline-flex items-center justify-center gap-2.5 px-6 py-3 text-[12px] font-bold tracking-[1.8px] uppercase transition-colors ${
           isInk
             ? "bg-heritage text-ivory group-hover:bg-heritage-light"
             : "bg-ink text-ivory group-hover:bg-ink-soft"
