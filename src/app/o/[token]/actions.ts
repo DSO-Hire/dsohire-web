@@ -49,6 +49,43 @@ export type RecordOfferResponseResult =
   | { ok: true }
   | { ok: false; error: string; alreadyResponded?: boolean };
 
+/**
+ * Mirror the candidate's response onto the inline offer-letter RichCard
+ * sitting in the inbox thread, so the card flips from 'sent' → 'accepted'
+ * or 'declined' (both employer and candidate views read the same payload).
+ * Best-effort — never fails the parent op; the response row + audit
+ * remain the source of truth even if this update misses.
+ */
+async function syncOfferRichCardStatus(
+  admin: ReturnType<typeof createSupabaseServiceRoleClient>,
+  offerSendId: string,
+  status: "accepted" | "declined"
+): Promise<void> {
+  const { data: row, error } = await admin
+    .from("application_messages")
+    .select("id, payload")
+    .eq("kind", "rich_card")
+    .filter("payload->>offer_send_id", "eq", offerSendId)
+    .maybeSingle();
+  if (error || !row) {
+    if (error) {
+      console.warn("[offer-response] rich-card lookup failed", error);
+    }
+    return;
+  }
+  const next = {
+    ...((row as Record<string, unknown>).payload as Record<string, unknown>),
+    status,
+  };
+  const { error: updErr } = await admin
+    .from("application_messages")
+    .update({ payload: next })
+    .eq("id", (row as Record<string, unknown>).id as string);
+  if (updErr) {
+    console.warn("[offer-response] rich-card status update failed", updErr);
+  }
+}
+
 /* ───────────────────────────────────────────────────────────────
  * recordAcceptance
  * ───────────────────────────────────────────────────────────── */
@@ -134,6 +171,10 @@ export async function recordAcceptance(
     senderRole: "candidate",
     body: `${ctx.candidateName} accepted the offer for ${ctx.jobTitle}.`,
   });
+
+  // Flip the inline offer RichCard's status so both audiences see the
+  // accepted state next time they view the thread.
+  void syncOfferRichCardStatus(admin, ctx.offerSendId, "accepted");
 
   void recordAuditEvent({
     dsoId: ctx.dsoId,
@@ -246,6 +287,10 @@ export async function recordDecline(
       ? `${ctx.candidateName} declined the offer for ${ctx.jobTitle}. Reason: ${cleanReason}`
       : `${ctx.candidateName} declined the offer for ${ctx.jobTitle}.`,
   });
+
+  // Flip the inline offer RichCard's status so both audiences see
+  // declined-state on the card next time the thread renders.
+  void syncOfferRichCardStatus(admin, ctx.offerSendId, "declined");
 
   void recordAuditEvent({
     dsoId: ctx.dsoId,
