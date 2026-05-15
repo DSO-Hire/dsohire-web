@@ -26,49 +26,34 @@ const IVORY = "#F7F4ED";
 const SLATE_BODY = "#4A6278";
 
 /**
- * Load a single weight of a Google Font, subsetted to a specific set of
- * glyphs. Returns the raw woff2/ttf bytes Satori needs to embed the font.
+ * Fetch a font binary in a format Satori actually supports.
  *
- * Google serves the CSS-of-CSS that lists woff2 URLs only if the request
- * comes with a UA it considers a modern browser — hence the explicit
- * User-Agent header.
+ * Why not Google Fonts: Google now serves WOFF2 to modern UAs, and Satori
+ * (the renderer behind next/og) explicitly does NOT support WOFF2 — it
+ * throws "Unsupported OpenType signature wOF2" at render time. Satori
+ * supports OTF, TTF, and WOFF (v1).
+ *
+ * Solution: pull straight from the @fontsource v4 CDN on jsDelivr, which
+ * publishes raw .woff files at a stable, versioned URL. Skips the
+ * CSS-of-CSS dance entirely.
  */
-async function loadGoogleFont(family: string, weight: number, text: string) {
-  const params = new URLSearchParams({
-    family: `${family}:wght@${weight}`,
-    text,
-  });
-  const cssRes = await fetch(`https://fonts.googleapis.com/css2?${params}`, {
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    },
-  });
-  if (!cssRes.ok) {
-    throw new Error(`Font CSS fetch failed (${cssRes.status}) for ${family}@${weight}`);
+async function loadFont(url: string): Promise<ArrayBuffer> {
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`Font fetch failed (${res.status}) for ${url}`);
   }
-  const css = await cssRes.text();
-  const match = css.match(
-    /src:\s*url\((https:\/\/[^)]+)\)\s*format\('(?:woff2|truetype|opentype)'\)/,
-  );
-  if (!match) {
-    throw new Error(`Could not parse font URL from CSS for ${family}@${weight}`);
-  }
-  const fontRes = await fetch(match[1]);
-  if (!fontRes.ok) {
-    throw new Error(`Font binary fetch failed (${fontRes.status}) for ${family}@${weight}`);
-  }
-  return fontRes.arrayBuffer();
+  return res.arrayBuffer();
 }
 
-export default async function OpengraphImage() {
-  // Only the glyphs we actually render — Google subsets the font to this set.
-  const glyphPool =
-    "DSO Hire THE DENTAL-ONLY HIRING PLATFORM Dental hiring, done direct. Built for multi-location DSOs and dental professionals. dsohire.com";
+const MANROPE_BOLD =
+  "https://cdn.jsdelivr.net/npm/@fontsource/manrope@4.5.5/files/manrope-latin-700-normal.woff";
+const MANROPE_EXTRABOLD =
+  "https://cdn.jsdelivr.net/npm/@fontsource/manrope@4.5.5/files/manrope-latin-800-normal.woff";
 
+export default async function OpengraphImage() {
   const [manropeBold, manropeExtraBold] = await Promise.all([
-    loadGoogleFont("Manrope", 700, glyphPool),
-    loadGoogleFont("Manrope", 800, glyphPool),
+    loadFont(MANROPE_BOLD),
+    loadFont(MANROPE_EXTRABOLD),
   ]);
 
   return new ImageResponse(
