@@ -57,6 +57,10 @@ import {
 import { MessagesThread } from "@/components/messaging/messages-thread";
 import type { ApplicationMessageRow } from "@/lib/messages/actions";
 import {
+  APPLICATION_MESSAGE_SELECT,
+  projectApplicationMessageRow,
+} from "@/lib/inbox/queries";
+import {
   ScorecardsSection,
   type InitialScorecard,
   type ScorecardReviewer,
@@ -415,33 +419,25 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   // ── Direct candidate ↔ DSO messages thread (separate from internal
   // comments). Server-fetch in chronological order; the client component
   // renders + subscribes to realtime + handles read-receipts.
-  const { data: rawMessages } = await supabase
+  //
+  // Embeds application_message_attachments (single-level hop) so the
+  // composer doesn't have to refetch on first render.
+  const { data: rawMessages, error: rawMessagesError } = await supabase
     .from("application_messages")
-    .select(
-      "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at, event_kind"
-    )
+    .select(APPLICATION_MESSAGE_SELECT)
     .eq("application_id", appId)
     .order("created_at", { ascending: true });
-
-  type MessageRow = {
-    id: string;
-    application_id: string;
-    sender_user_id: string;
-    sender_role: "candidate" | "employer";
-    sender_dso_user_id: string | null;
-    body: string;
-    read_at: string | null;
-    created_at: string;
-    updated_at: string;
-    edited_at: string | null;
-    deleted_at: string | null;
-  };
-  const initialMessages = ((rawMessages ?? []) as MessageRow[]).map(
-    (m): ApplicationMessageRow => ({
-      ...m,
-      sender_role:
-        m.sender_role === "candidate" ? "candidate" : "employer",
-    })
+  if (rawMessagesError) {
+    console.error(
+      "[employer/applications] messages fetch",
+      rawMessagesError
+    );
+  }
+  const initialMessages = (
+    (rawMessages ?? []) as Array<Record<string, unknown>>
+  ).map(
+    (row) =>
+      projectApplicationMessageRow(row) as unknown as ApplicationMessageRow
   );
   // Unread count of messages from the candidate (we only badge inbound).
   const candidateUnreadCount = initialMessages.filter(

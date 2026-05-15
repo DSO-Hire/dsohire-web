@@ -28,6 +28,16 @@ import { dispatchCandidateEmail } from "@/lib/email/templates/dispatch";
 import { MessageReceived } from "@/emails/MessageReceived";
 import { greetingFirstName } from "@/lib/candidate/name";
 
+export interface ApplicationMessageAttachment {
+  id: string;
+  message_id: string;
+  storage_path: string;
+  file_name: string;
+  mime_type: string;
+  size_bytes: number;
+  created_at: string;
+}
+
 export interface ApplicationMessageRow {
   id: string;
   application_id: string;
@@ -43,6 +53,8 @@ export interface ApplicationMessageRow {
   deleted_at: string | null;
   /** Non-NULL marks a system message; renderer uses a banner instead of a bubble. */
   event_kind?: string | null;
+  /** 0..N attachments uploaded alongside this message. Empty array when none. */
+  attachments?: ApplicationMessageAttachment[];
 }
 
 export type SendMessageResult =
@@ -61,9 +73,32 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
 
 const MAX_BODY = 5000;
 
+/** Mirrors the CHECK constraint on application_message_attachments.size_bytes. */
+const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024;
+/** Per-message cap. Server-side guard; the composer also enforces this. */
+const MAX_ATTACHMENTS_PER_MESSAGE = 5;
+const ATTACHMENT_BUCKET = "application-message-attachments";
+
+/** Accepted MIME prefixes/exact values. Mirror the composer accept= list. */
+const ALLOWED_MIME_TYPES = new Set<string>([
+  "application/pdf",
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "text/plain",
+]);
+
 function sanitizeBody(input: unknown): string {
   if (typeof input !== "string") return "";
   return input.trim();
+}
+
+function safeFileName(name: string): string {
+  // Match the pattern used by ce-actions.ts so we keep one canonical
+  // sanitizer across the codebase.
+  return name.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
 /* ───────────────────────────────────────────────────────────────
@@ -73,15 +108,53 @@ function sanitizeBody(input: unknown): string {
 export async function sendApplicationMessage({
   applicationId,
   body,
+  attachments,
 }: {
   applicationId: string;
   body: string;
+  attachments?: File[];
 }): Promise<SendMessageResult> {
   const cleanBody = sanitizeBody(body);
+  const files = (attachments ?? []).filter(
+    (f): f is File => f instanceof File && f.size > 0
+  );
   if (!applicationId) return { ok: false, error: "Missing application id." };
-  if (cleanBody.length < 1) return { ok: false, error: "Message cannot be empty." };
-  if (cleanBody.length > MAX_BODY) {
+
+  // Body fallback: empty body + at least one attachment auto-fills the body
+  // so the NOT NULL CHECK on application_messages.body is satisfied without
+  // forcing the user to type something.
+  let finalBody = cleanBody;
+  if (finalBody.length < 1) {
+    if (files.length > 0) {
+      finalBody = `Sent ${files.length} file${files.length === 1 ? "" : "s"}`;
+    } else {
+      return { ok: false, error: "Message cannot be empty." };
+    }
+  }
+  if (finalBody.length > MAX_BODY) {
     return { ok: false, error: `Message is too long (${MAX_BODY} character max).` };
+  }
+
+  // Per-message attachment cap + per-file validation, BEFORE we hit the DB.
+  if (files.length > MAX_ATTACHMENTS_PER_MESSAGE) {
+    return {
+      ok: false,
+      error: `You can attach up to ${MAX_ATTACHMENTS_PER_MESSAGE} files per message.`,
+    };
+  }
+  for (const file of files) {
+    if (file.size > MAX_ATTACHMENT_BYTES) {
+      return {
+        ok: false,
+        error: `"${file.name}" is larger than the 25 MB limit.`,
+      };
+    }
+    if (file.type && !ALLOWED_MIME_TYPES.has(file.type)) {
+      return {
+        ok: false,
+        error: `"${file.name}" has an unsupported file type.`,
+      };
+    }
   }
 
   const supabase = await createSupabaseServerClient();
@@ -148,7 +221,7 @@ export async function sendApplicationMessage({
       sender_user_id: user.id,
       sender_role: senderRole,
       sender_dso_user_id: senderDsoUserId,
-      body: cleanBody,
+      body: finalBody,
     })
     .select(
       "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at, event_kind"
@@ -164,14 +237,76 @@ export async function sendApplicationMessage({
     };
   }
 
+  const messageId = data.id as string;
+  const insertedAttachments: ApplicationMessageAttachment[] = [];
+
+  if (files.length > 0) {
+    // Track storage paths uploaded so we can best-effort orphan-clean if any
+    // step downstream fails.
+    const uploadedPaths: string[] = [];
+
+    for (const file of files) {
+      const path = `${applicationId}/${messageId}/${Date.now()}-${safeFileName(file.name)}`;
+      const { error: uploadError } = await supabase.storage
+        .from(ATTACHMENT_BUCKET)
+        .upload(path, file, {
+          contentType: file.type || "application/octet-stream",
+          upsert: false,
+        });
+      if (uploadError) {
+        await rollbackAttachmentSend(supabase, messageId, uploadedPaths);
+        return {
+          ok: false,
+          error: `Couldn't upload "${file.name}". ${uploadError.message}`,
+        };
+      }
+      uploadedPaths.push(path);
+
+      const { data: attachRow, error: attachError } = await supabase
+        .from("application_message_attachments")
+        .insert({
+          message_id: messageId,
+          storage_path: path,
+          file_name: file.name,
+          mime_type: file.type || "application/octet-stream",
+          size_bytes: file.size,
+          uploaded_by_user_id: user.id,
+        })
+        .select(
+          "id, message_id, storage_path, file_name, mime_type, size_bytes, created_at"
+        )
+        .single();
+
+      if (attachError || !attachRow) {
+        await rollbackAttachmentSend(supabase, messageId, uploadedPaths);
+        return {
+          ok: false,
+          error:
+            attachError?.message ??
+            `Couldn't record "${file.name}". Please retry.`,
+        };
+      }
+
+      insertedAttachments.push({
+        id: String(attachRow.id),
+        message_id: String(attachRow.message_id),
+        storage_path: String(attachRow.storage_path),
+        file_name: String(attachRow.file_name),
+        mime_type: String(attachRow.mime_type),
+        size_bytes: Number(attachRow.size_bytes ?? 0),
+        created_at: String(attachRow.created_at),
+      });
+    }
+  }
+
   // Fire-and-forget recipient notification.
   void dispatchMessageNotification({
     applicationId: data.application_id as string,
-    messageId: data.id as string,
+    messageId,
     senderRole,
     senderUserId: user.id,
     senderDsoUserId,
-    body: cleanBody,
+    body: finalBody,
   });
 
   revalidatePath(`/employer/applications/${applicationId}`);
@@ -179,8 +314,97 @@ export async function sendApplicationMessage({
 
   return {
     ok: true,
-    message: rowToMessage(data),
+    message: {
+      ...rowToMessage(data),
+      attachments: insertedAttachments,
+    },
   };
+}
+
+/**
+ * Best-effort rollback when an attachment upload or insert fails mid-stream.
+ * Removes any storage objects that landed and soft-deletes the parent message
+ * so the surface doesn't show a half-sent thread. We swallow errors here on
+ * purpose — the user already has a real failure to react to.
+ */
+async function rollbackAttachmentSend(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  messageId: string,
+  uploadedPaths: string[]
+): Promise<void> {
+  if (uploadedPaths.length > 0) {
+    try {
+      await supabase.storage.from(ATTACHMENT_BUCKET).remove(uploadedPaths);
+    } catch (err) {
+      console.warn("[messages] orphan cleanup failed", err);
+    }
+  }
+  try {
+    await supabase
+      .from("application_messages")
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("id", messageId);
+  } catch (err) {
+    console.warn("[messages] message soft-delete on rollback failed", err);
+  }
+}
+
+/* ───────────────────────────────────────────────────────────────
+ * Signed URL for downloading a thread attachment
+ *
+ * RLS-aware: the `select` on application_message_attachments goes
+ * through the user-scoped client, so the table's participant-only
+ * SELECT policy gates access. If the caller isn't a participant on
+ * the parent application, the row read returns null and we bail out
+ * before issuing any signed URL.
+ *
+ * Storage signed URLs themselves are issued by the user-scoped client
+ * as well — storage.objects has a matching participant-scoped read
+ * policy on this bucket.
+ * ───────────────────────────────────────────────────────────── */
+
+export async function getApplicationMessageAttachmentSignedUrl(
+  attachmentId: string
+): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
+  if (!attachmentId) {
+    return { ok: false, error: "Missing attachment id." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Your session expired. Sign in again." };
+
+  const { data: row, error } = await supabase
+    .from("application_message_attachments")
+    .select("id, storage_path, file_name")
+    .eq("id", attachmentId)
+    .maybeSingle();
+
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+  if (!row) {
+    // Either the row doesn't exist or RLS hid it. Same message either way —
+    // don't leak existence to non-participants.
+    return { ok: false, error: "Attachment not found." };
+  }
+
+  const path = (row as Record<string, unknown>).storage_path as string;
+  const fileName = (row as Record<string, unknown>).file_name as string;
+  const { data: signed, error: signedError } = await supabase.storage
+    .from(ATTACHMENT_BUCKET)
+    .createSignedUrl(path, 60, { download: fileName });
+
+  if (signedError || !signed?.signedUrl) {
+    return {
+      ok: false,
+      error: signedError?.message ?? "Couldn't create download link.",
+    };
+  }
+
+  return { ok: true, url: signed.signedUrl };
 }
 
 /* ───────────────────────────────────────────────────────────────

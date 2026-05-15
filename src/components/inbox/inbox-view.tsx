@@ -231,14 +231,45 @@ export function InboxView({
   const fetchActiveMessages = useCallback(
     async (applicationId: string) => {
       const supabase = createSupabaseBrowserClient();
-      const { data } = await supabase
+      // Single-level embed of application_message_attachments — same
+      // shape as APPLICATION_MESSAGE_SELECT in lib/inbox/queries.ts.
+      // Inlined here because that file is server-only.
+      const { data, error } = await supabase
         .from("application_messages")
         .select(
-          "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at, event_kind"
+          "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at, event_kind, application_message_attachments(id, message_id, storage_path, file_name, mime_type, size_bytes, created_at)"
         )
         .eq("application_id", applicationId)
         .order("created_at", { ascending: true });
-      setActiveMessages((data ?? []) as ApplicationMessageRow[]);
+      if (error) {
+        // Don't silently coerce — log so it's visible, then clear the pane
+        // to match prior behavior (an error read shouldn't leave a stale
+        // list on screen for the new thread the user just clicked).
+        console.warn("[inbox] fetchActiveMessages", error);
+        setActiveMessages([]);
+        return;
+      }
+      const projected = ((data ?? []) as Array<Record<string, unknown>>).map(
+        (row) => ({
+          id: row.id,
+          application_id: row.application_id,
+          sender_user_id: row.sender_user_id,
+          sender_role: row.sender_role,
+          sender_dso_user_id: row.sender_dso_user_id,
+          body: row.body,
+          read_at: row.read_at,
+          created_at: row.created_at,
+          updated_at: row.updated_at,
+          edited_at: row.edited_at,
+          deleted_at: row.deleted_at,
+          event_kind: row.event_kind,
+          attachments:
+            (row.application_message_attachments as
+              | Array<Record<string, unknown>>
+              | null) ?? [],
+        })
+      );
+      setActiveMessages(projected as unknown as ApplicationMessageRow[]);
     },
     []
   );

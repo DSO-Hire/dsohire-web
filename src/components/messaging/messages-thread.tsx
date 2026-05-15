@@ -46,6 +46,9 @@ import {
   X as XIcon,
   Briefcase,
   Calendar,
+  Paperclip,
+  FileText,
+  Image as ImageIcon,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -60,11 +63,17 @@ import {
   editApplicationMessage,
   deleteApplicationMessage,
   markApplicationMessageRead,
+  getApplicationMessageAttachmentSignedUrl,
   type ApplicationMessageRow,
+  type ApplicationMessageAttachment,
 } from "@/lib/messages/actions";
 
 const EDIT_WINDOW_MS = 5 * 60 * 1000;
 const MAX_BODY = 5000;
+const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024;
+const MAX_ATTACHMENTS_PER_MESSAGE = 5;
+const ATTACHMENT_ACCEPT =
+  ".pdf,.png,.jpg,.jpeg,.webp,.doc,.docx,.txt";
 
 export type MessagesThreadRole = "candidate" | "employer";
 
@@ -109,6 +118,27 @@ function isWithinEditWindow(createdAtIso: string): boolean {
 
 function roleLabel(role: MessagesThreadRole): string {
   return role === "candidate" ? "Candidate" : "Hiring team";
+}
+
+function formatBytes(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function attachmentIcon(mime: string): LucideIcon {
+  if (mime.startsWith("image/")) return ImageIcon;
+  if (
+    mime === "application/pdf" ||
+    mime === "text/plain" ||
+    mime === "application/msword" ||
+    mime ===
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  ) {
+    return FileText;
+  }
+  return Paperclip;
 }
 
 /* ───────────────────────────────────────────────────────────────
@@ -159,6 +189,8 @@ export function MessagesThread({
   const [composerBody, setComposerBody] = useState("");
   const [composerError, setComposerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [stagedFiles, setStagedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingBody, setEditingBody] = useState("");
@@ -197,7 +229,10 @@ export function MessagesThread({
             // Self-echo dedupe by id — optimistic add already swapped to
             // canonical id once the server action returned.
             if (current.some((m) => m.id === row.id)) return current;
-            const next = [...current, row as ThreadMessage];
+            const next = [
+              ...current,
+              { ...(row as ThreadMessage), attachments: [] },
+            ];
             next.sort(
               (a, b) =>
                 new Date(a.created_at).getTime() -
@@ -205,6 +240,32 @@ export function MessagesThread({
             );
             return next;
           });
+          // Pull any attachments for this incoming message — the parent
+          // realtime channel only watches application_messages, so
+          // attachment rows arrive separately. RLS gates this read to
+          // participants only.
+          void (async () => {
+            const { data, error } = await supabase
+              .from("application_message_attachments")
+              .select(
+                "id, message_id, storage_path, file_name, mime_type, size_bytes, created_at"
+              )
+              .eq("message_id", row.id);
+            if (error) {
+              console.warn(
+                "[messages] realtime attachment fetch failed",
+                error
+              );
+              return;
+            }
+            const atts = (data ?? []) as ApplicationMessageAttachment[];
+            if (atts.length === 0) return;
+            setMessages((current) =>
+              current.map((m) =>
+                m.id === row.id ? { ...m, attachments: atts } : m
+              )
+            );
+          })();
         }
       )
       .on(
@@ -293,7 +354,11 @@ export function MessagesThread({
 
   const handleSubmit = useCallback(async (): Promise<void> => {
     const body = composerBody.trim();
-    if (!body) {
+    const filesToSend = stagedFiles;
+
+    // Allow empty body when there's at least one attachment — the server
+    // synthesizes a fallback body so the NOT NULL CHECK still passes.
+    if (!body && filesToSend.length === 0) {
       setComposerError("Message cannot be empty.");
       return;
     }
@@ -306,36 +371,48 @@ export function MessagesThread({
 
     const tempId = `tmp_${Date.now()}_${Math.random().toString(36).slice(2)}`;
     const nowIso = new Date().toISOString();
+    const optimisticBody =
+      body ||
+      `Sent ${filesToSend.length} file${filesToSend.length === 1 ? "" : "s"}`;
     const optimistic: ThreadMessage = {
       id: tempId,
       application_id: applicationId,
       sender_user_id: currentUserId,
       sender_role: currentUserRole,
       sender_dso_user_id: null,
-      body,
+      body: optimisticBody,
       read_at: null,
       created_at: nowIso,
       updated_at: nowIso,
       edited_at: null,
       deleted_at: null,
       pending: true,
+      attachments: [],
     };
     setMessages((m) => [...m, optimistic]);
     setComposerBody("");
+    setStagedFiles([]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
     wasNearBottomRef.current = true;
 
-    const result = await sendApplicationMessage({ applicationId, body });
+    const result = await sendApplicationMessage({
+      applicationId,
+      body,
+      attachments: filesToSend,
+    });
 
     if (!result.ok) {
       setMessages((m) => m.filter((x) => x.id !== tempId));
       setComposerError(result.error);
       setComposerBody(body);
+      setStagedFiles(filesToSend);
       setSubmitting(false);
       return;
     }
 
     // Swap the optimistic row's id for the canonical one. Realtime INSERT
-    // echo will be deduped by id-match.
+    // echo will be deduped by id-match. Attachments come back from the
+    // server action so we render them immediately without a refetch.
     setMessages((m) =>
       m.map((x) =>
         x.id === tempId
@@ -344,7 +421,60 @@ export function MessagesThread({
       )
     );
     setSubmitting(false);
-  }, [applicationId, composerBody, currentUserId, currentUserRole]);
+  }, [applicationId, composerBody, currentUserId, currentUserRole, stagedFiles]);
+
+  function handleFilesPicked(e: ChangeEvent<HTMLInputElement>): void {
+    const picked = Array.from(e.target.files ?? []);
+    if (picked.length === 0) return;
+
+    setComposerError(null);
+    setStagedFiles((current) => {
+      const next = [...current];
+      for (const file of picked) {
+        if (next.length >= MAX_ATTACHMENTS_PER_MESSAGE) {
+          setComposerError(
+            `You can attach up to ${MAX_ATTACHMENTS_PER_MESSAGE} files per message.`
+          );
+          break;
+        }
+        if (file.size > MAX_ATTACHMENT_BYTES) {
+          setComposerError(`"${file.name}" is larger than the 25 MB limit.`);
+          continue;
+        }
+        // De-dupe by name+size — picking the same file twice is almost
+        // always an accident, never useful.
+        if (
+          next.some(
+            (f) => f.name === file.name && f.size === file.size
+          )
+        ) {
+          continue;
+        }
+        next.push(file);
+      }
+      return next;
+    });
+    // Reset the input so the same file can be re-picked after a remove.
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  function removeStagedFile(index: number): void {
+    setStagedFiles((current) => current.filter((_, i) => i !== index));
+    setComposerError(null);
+  }
+
+  async function handleAttachmentClick(
+    attachment: ApplicationMessageAttachment
+  ): Promise<void> {
+    const result = await getApplicationMessageAttachmentSignedUrl(
+      attachment.id
+    );
+    if (!result.ok) {
+      setComposerError(result.error);
+      return;
+    }
+    window.open(result.url, "_blank", "noopener,noreferrer");
+  }
 
   function startEdit(message: ThreadMessage): void {
     setEditingId(message.id);
@@ -636,6 +766,37 @@ export function MessagesThread({
                         }`}
                       >
                         {m.body}
+                        {(m.attachments?.length ?? 0) > 0 && (
+                          <ul
+                            className={`mt-2 space-y-1 ${
+                              m.body ? "pt-2 border-t border-heritage/25" : ""
+                            }`}
+                          >
+                            {(m.attachments ?? []).map((att) => {
+                              const Icon = attachmentIcon(att.mime_type);
+                              return (
+                                <li key={att.id}>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      void handleAttachmentClick(att)
+                                    }
+                                    className="w-full max-w-full text-left flex items-center gap-2 px-2 py-1.5 rounded-md bg-white/70 hover:bg-white border border-heritage/30 text-ink transition-colors"
+                                    title={`Open ${att.file_name}`}
+                                  >
+                                    <Icon className="h-4 w-4 text-heritage-deep shrink-0" />
+                                    <span className="truncate text-[13px] font-medium">
+                                      {att.file_name}
+                                    </span>
+                                    <span className="ml-auto text-[11px] text-slate-meta shrink-0">
+                                      {formatBytes(att.size_bytes)}
+                                    </span>
+                                  </button>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        )}
                       </div>
                     )}
 
@@ -712,7 +873,60 @@ export function MessagesThread({
           Don&apos;t share medical information here — discuss accommodations
           directly with HR.
         </p>
+        {stagedFiles.length > 0 && (
+          <ul className="flex flex-wrap gap-2 mb-2">
+            {stagedFiles.map((file, i) => {
+              const Icon = attachmentIcon(file.type);
+              return (
+                <li
+                  key={`${file.name}-${file.size}-${i}`}
+                  className="inline-flex items-center gap-2 px-2 py-1 rounded-md bg-white border border-heritage/30 max-w-[260px]"
+                >
+                  <Icon className="h-3.5 w-3.5 text-heritage-deep shrink-0" />
+                  <span className="truncate text-[12px] text-ink font-medium">
+                    {file.name}
+                  </span>
+                  <span className="text-[10px] text-slate-meta shrink-0">
+                    {formatBytes(file.size)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeStagedFile(i)}
+                    aria-label={`Remove ${file.name}`}
+                    className="text-slate-meta hover:text-ink transition-colors shrink-0"
+                  >
+                    <XIcon className="h-3.5 w-3.5" />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
         <div className="flex items-end gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept={ATTACHMENT_ACCEPT}
+            onChange={handleFilesPicked}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={
+              submitting || stagedFiles.length >= MAX_ATTACHMENTS_PER_MESSAGE
+            }
+            aria-label="Attach files"
+            title={
+              stagedFiles.length >= MAX_ATTACHMENTS_PER_MESSAGE
+                ? `Up to ${MAX_ATTACHMENTS_PER_MESSAGE} files per message`
+                : "Attach files (PDF, image, doc, txt — 25 MB max each)"
+            }
+            className="px-2 py-2 bg-white border border-heritage/40 text-heritage-deep hover:text-ink hover:border-heritage transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+          >
+            <Paperclip className="h-4 w-4" />
+          </button>
           <textarea
             ref={composerRef}
             value={composerBody}
@@ -726,7 +940,10 @@ export function MessagesThread({
           <button
             type="button"
             onClick={() => void handleSubmit()}
-            disabled={submitting || composerBody.trim().length === 0}
+            disabled={
+              submitting ||
+              (composerBody.trim().length === 0 && stagedFiles.length === 0)
+            }
             className="px-4 py-2 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed shrink-0"
           >
             {submitting ? "Sending…" : "Send"}
@@ -739,6 +956,11 @@ export function MessagesThread({
           <span className={remainingClass}>
             {remaining} characters left
           </span>
+          {stagedFiles.length > 0 && (
+            <span>
+              {stagedFiles.length}/{MAX_ATTACHMENTS_PER_MESSAGE} attachments
+            </span>
+          )}
           {composerError && (
             <span className="text-[11px] text-red-700">{composerError}</span>
           )}

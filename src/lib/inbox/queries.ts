@@ -33,6 +33,43 @@ interface MessageRowMin {
   event_kind: string | null;
 }
 
+// Selector used by the per-thread message fetches in inbox + detail pages.
+// Single-level embed for application_message_attachments — keep this hop
+// SHALLOW to avoid the GenericStringError trap that fires on multi-level
+// `foo:foo(... bar:bar(...))` chains (Vercel build-breaker, see
+// feedback_supabase_nested_embed_generic_string_error.md).
+export const APPLICATION_MESSAGE_SELECT =
+  "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at, event_kind, application_message_attachments(id, message_id, storage_path, file_name, mime_type, size_bytes, created_at)";
+
+/**
+ * Project a row returned by APPLICATION_MESSAGE_SELECT into the shape the
+ * client component expects. PostgREST returns the embedded relation as an
+ * array (0..N), so we rename it to `attachments` for the consumer.
+ */
+export function projectApplicationMessageRow<
+  T extends Record<string, unknown>
+>(row: T): Record<string, unknown> {
+  const atts = (row.application_message_attachments as
+    | Array<Record<string, unknown>>
+    | null
+    | undefined) ?? [];
+  return {
+    id: row.id,
+    application_id: row.application_id,
+    sender_user_id: row.sender_user_id,
+    sender_role: row.sender_role,
+    sender_dso_user_id: row.sender_dso_user_id,
+    body: row.body,
+    read_at: row.read_at,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+    edited_at: row.edited_at,
+    deleted_at: row.deleted_at,
+    event_kind: row.event_kind,
+    attachments: atts,
+  };
+}
+
 /* ──────────────────────────────────────────────────────────────
  * Employer inbox
  *

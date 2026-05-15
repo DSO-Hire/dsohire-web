@@ -14,7 +14,11 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CandidateShell } from "@/components/candidate/candidate-shell";
-import { getCandidateInboxThreads } from "@/lib/inbox/queries";
+import {
+  getCandidateInboxThreads,
+  APPLICATION_MESSAGE_SELECT,
+  projectApplicationMessageRow,
+} from "@/lib/inbox/queries";
 import { InboxView } from "@/components/inbox/inbox-view";
 import type { ApplicationMessageRow } from "@/lib/messages/actions";
 
@@ -58,14 +62,18 @@ export default async function CandidateInboxPage({ searchParams }: PageProps) {
     );
     if (matchingThread) {
       activeApplicationId = appQuery;
-      const { data: msgRows } = await supabase
+      const { data: msgRows, error: msgErr } = await supabase
         .from("application_messages")
-        .select(
-          "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at, event_kind"
-        )
+        .select(APPLICATION_MESSAGE_SELECT)
         .eq("application_id", appQuery)
         .order("created_at", { ascending: true });
-      activeMessages = (msgRows ?? []) as ApplicationMessageRow[];
+      if (msgErr) {
+        console.error("[inbox] candidate active-thread messages", msgErr);
+      }
+      activeMessages = ((msgRows ?? []) as Array<Record<string, unknown>>).map(
+        (row) =>
+          projectApplicationMessageRow(row) as unknown as ApplicationMessageRow
+      );
     }
   }
 

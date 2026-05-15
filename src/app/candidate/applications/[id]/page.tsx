@@ -32,6 +32,10 @@ import {
 } from "@/components/interviews/candidate-interview-picker";
 import type { ApplicationMessageRow } from "@/lib/messages/actions";
 import {
+  APPLICATION_MESSAGE_SELECT,
+  projectApplicationMessageRow,
+} from "@/lib/inbox/queries";
+import {
   CANDIDATE_KIND_LABELS,
   type StageKind,
 } from "@/lib/applications/stages";
@@ -148,33 +152,24 @@ export default async function CandidateApplicationDetailPage({
   const dso = (rawDso ?? null) as DsoRow | null;
 
   // Messages — RLS already gates by candidate ownership, so we just project.
-  const { data: rawMessages } = await supabase
+  // Embeds application_message_attachments (single-level hop) so the
+  // composer renders bubbles + attachments without a refetch.
+  const { data: rawMessages, error: rawMessagesError } = await supabase
     .from("application_messages")
-    .select(
-      "id, application_id, sender_user_id, sender_role, sender_dso_user_id, body, read_at, created_at, updated_at, edited_at, deleted_at, event_kind"
-    )
+    .select(APPLICATION_MESSAGE_SELECT)
     .eq("application_id", appId)
     .order("created_at", { ascending: true });
-
-  type MessageRow = {
-    id: string;
-    application_id: string;
-    sender_user_id: string;
-    sender_role: "candidate" | "employer";
-    sender_dso_user_id: string | null;
-    body: string;
-    read_at: string | null;
-    created_at: string;
-    updated_at: string;
-    edited_at: string | null;
-    deleted_at: string | null;
-  };
-  const initialMessages = ((rawMessages ?? []) as MessageRow[]).map(
-    (m): ApplicationMessageRow => ({
-      ...m,
-      sender_role:
-        m.sender_role === "candidate" ? "candidate" : "employer",
-    })
+  if (rawMessagesError) {
+    console.error(
+      "[candidate/applications] messages fetch",
+      rawMessagesError
+    );
+  }
+  const initialMessages = (
+    (rawMessages ?? []) as Array<Record<string, unknown>>
+  ).map(
+    (row) =>
+      projectApplicationMessageRow(row) as unknown as ApplicationMessageRow
   );
 
   const submitted = new Date(app.created_at);
