@@ -160,6 +160,47 @@ export type Database = {
           },
         ]
       }
+      application_message_attachments: {
+        Row: {
+          created_at: string
+          file_name: string
+          id: string
+          message_id: string
+          mime_type: string
+          size_bytes: number
+          storage_path: string
+          uploaded_by_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          id?: string
+          message_id: string
+          mime_type: string
+          size_bytes: number
+          storage_path: string
+          uploaded_by_user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          id?: string
+          message_id?: string
+          mime_type?: string
+          size_bytes?: number
+          storage_path?: string
+          uploaded_by_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_message_attachments_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "application_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       application_messages: {
         Row: {
           application_id: string
@@ -169,6 +210,8 @@ export type Database = {
           edited_at: string | null
           event_kind: string | null
           id: string
+          kind: string
+          payload: Json | null
           read_at: string | null
           sender_dso_user_id: string | null
           sender_role: string
@@ -183,6 +226,8 @@ export type Database = {
           edited_at?: string | null
           event_kind?: string | null
           id?: string
+          kind?: string
+          payload?: Json | null
           read_at?: string | null
           sender_dso_user_id?: string | null
           sender_role: string
@@ -197,6 +242,8 @@ export type Database = {
           edited_at?: string | null
           event_kind?: string | null
           id?: string
+          kind?: string
+          payload?: Json | null
           read_at?: string | null
           sender_dso_user_id?: string | null
           sender_role?: string
