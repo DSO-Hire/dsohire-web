@@ -14,11 +14,14 @@ import { ImageResponse } from "next/og";
 
 // Next.js metadata file convention — these exports drive the route.
 export const alt = "DSO Hire — Dental hiring, done direct.";
-// Render at 2x the canonical OG size so any downscale (LinkedIn/Twitter
-// preview cropping, retina displays) stays crisp. LinkedIn recommends
-// >=1200x627; 2400x1260 stays in their accepted range and avoids the
-// soft-text artifact from Google Fonts' subsetted-TTF endpoint.
-export const size = { width: 2400, height: 1260 };
+// Canonical OG size. We tried 2x (2400x1260) on 2026-05-15 hoping it
+// would make downscaled previews crisper, but it actually amplified
+// the soft-text artifact from Google Fonts' subsetted-TTF endpoint —
+// Satori's rasterizer + hinting-stripped subset font + LinkedIn's
+// downscale pipeline compounded badly. Bulletproof next-session fix:
+// commit the full Manrope TTF binaries to /public/fonts/ and read
+// locally (no subsetting, full hinting tables).
+export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 // Brand tokens — kept in sync with src/app/globals.css.
