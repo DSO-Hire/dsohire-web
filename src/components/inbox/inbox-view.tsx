@@ -30,6 +30,7 @@ import {
   useState,
   useTransition,
 } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Inbox as InboxIcon,
@@ -37,6 +38,7 @@ import {
   Archive,
   ArchiveRestore,
   ArrowLeft,
+  ArrowUpRight,
   CheckCheck,
   X,
 } from "lucide-react";
@@ -213,8 +215,15 @@ export function InboxView({
       // Fetch messages for the right pane.
       void fetchActiveMessages(thread.application_id);
 
-      // Mark all incoming messages on this thread read.
-      void markThreadRead(thread.application_id);
+      // Mark all incoming messages on this thread read, then refresh
+      // so the shell-rendered inbox-unread badge picks up the new
+      // count without requiring a navigation. (Cam ask: the inbox
+      // counter was intermittent — the missing piece was that the
+      // shell isn't a client component and doesn't re-fetch on its
+      // own when read_at is updated mid-page.)
+      void markThreadRead(thread.application_id).then(() => {
+        router.refresh();
+      });
     },
     [router, searchParams]
   );
@@ -525,7 +534,17 @@ export function InboxView({
                     {activeThread.peer.display_name}
                   </p>
                   <p className="text-xs text-slate-meta truncate">
-                    {activeThread.job_title}
+                    {/* Cam ask: the application must be a clickable link
+                        from the inbox thread. Title routes to the
+                        audience-correct application detail page. */}
+                    <Link
+                      href={`/${audience}/applications/${activeThread.application_id}`}
+                      className="inline-flex items-center gap-1 text-heritage-deep hover:text-ink underline-offset-2 hover:underline transition-colors"
+                      title="Open this application"
+                    >
+                      {activeThread.job_title}
+                      <ArrowUpRight className="size-3" aria-hidden="true" />
+                    </Link>
                     {activeThread.stage &&
                       ` · ${STAGE_LABELS[activeThread.stage] ?? activeThread.stage}`}
                   </p>

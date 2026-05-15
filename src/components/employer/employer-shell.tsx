@@ -49,7 +49,7 @@ import {
 } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { BrandLockup } from "@/components/marketing/site-shell";
-import { getUnreadCount } from "@/lib/inbox/queries";
+import { getUnreadCount, getNewApplicationCount } from "@/lib/inbox/queries";
 import { getMfaState } from "@/lib/auth/mfa";
 import { Avatar } from "@/components/ui/avatar";
 import { EmployerMobileNav } from "./employer-mobile-nav";
@@ -160,15 +160,22 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
   const role = dsoUser.role as Role;
 
   // Inbox unread badge — counts messages from candidates that this user
-  // (or any DSO teammate) hasn't marked read. RLS handles scoping to
-  // applications in this DSO.
-  const inboxUnread = await getUnreadCount(supabase, "employer");
+  // (or any DSO teammate) hasn't marked read.
+  // Applications new-count badge — Cam's sharpened ask 2026-05-15.
+  // Counts applications currently sitting in an `open`-kind pipeline
+  // stage. Both queries lean on RLS to scope to this DSO.
+  const [inboxUnread, newApplications] = await Promise.all([
+    getUnreadCount(supabase, "employer"),
+    getNewApplicationCount(supabase),
+  ]);
 
   const visibleNav = NAV.filter(
     (item) => !item.hideFromRoles?.includes(role)
-  ).map((item) =>
-    item.id === "inbox" ? { ...item, badge: inboxUnread } : item
-  );
+  ).map((item) => {
+    if (item.id === "inbox") return { ...item, badge: inboxUnread };
+    if (item.id === "applications") return { ...item, badge: newApplications };
+    return item;
+  });
   const groupedNav = GROUP_ORDER.map((g) => ({
     group: g,
     items: visibleNav.filter((item) => item.group === g),

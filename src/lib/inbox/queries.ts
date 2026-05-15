@@ -248,6 +248,31 @@ export async function getUnreadCount(
   return count ?? 0;
 }
 
+/**
+ * Per-new-application counter for the EMPLOYER Applications nav badge.
+ * Counts applications currently sitting in any pipeline stage with
+ * `kind = 'open'` — i.e. ones the recruiter hasn't moved out of the
+ * inbound queue yet. Withdrawn applications are excluded. RLS scopes
+ * to the user's DSO automatically.
+ *
+ * v0 definition: "new" = still in the open kind. A future "viewed by
+ * this specific user" granularity would require a per-(user, app)
+ * tracking column — defer until there's a UX ask for it.
+ */
+export async function getNewApplicationCount(
+  supabase: SupabaseClient
+): Promise<number> {
+  const { count } = await supabase
+    .from("applications")
+    .select("id, stage:dso_pipeline_stages!inner(kind)", {
+      count: "exact",
+      head: true,
+    })
+    .eq("stage.kind", "open")
+    .is("withdrawn_at", null);
+  return count ?? 0;
+}
+
 /* ──────────────────────────────────────────────────────────────
  * Internal: shape rows into InboxThread[]
  * ─────────────────────────────────────────────────────────── */
