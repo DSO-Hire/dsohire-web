@@ -26,6 +26,7 @@
  */
 
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
+import type { Json } from "@/lib/supabase/database.types";
 import type { RichCardPayload } from "./rich-card-types";
 
 export interface DispatchInboxRichCardArgs {
@@ -54,7 +55,7 @@ export async function dispatchInboxRichCard(
       sender_dso_user_id: args.senderDsoUserId ?? null,
       body: args.fallbackBody,
       kind: "rich_card",
-      payload: args.payload as unknown as Record<string, unknown>,
+      payload: args.payload as unknown as Json,
     })
     .select("id")
     .maybeSingle();

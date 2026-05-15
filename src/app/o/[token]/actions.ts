@@ -34,6 +34,7 @@
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
+import type { Json } from "@/lib/supabase/database.types";
 import { looksLikeOfferToken } from "@/lib/offers/tokens";
 import { sendEmail } from "@/lib/email/send";
 import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
@@ -79,7 +80,7 @@ async function syncOfferRichCardStatus(
   };
   const { error: updErr } = await admin
     .from("application_messages")
-    .update({ payload: next })
+    .update({ payload: next as unknown as Json })
     .eq("id", (row as Record<string, unknown>).id as string);
   if (updErr) {
     console.warn("[offer-response] rich-card status update failed", updErr);
