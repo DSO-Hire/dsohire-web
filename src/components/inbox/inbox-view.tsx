@@ -404,11 +404,16 @@ export function InboxView({
       {/* Fixed-height window — viewport minus the nav + page padding
           + section header. Cap at 800px so it doesn't go absurdly tall
           on huge monitors. MessagesThread + the list pane both scroll
-          internally inside this box (iMessage-style). */}
-      <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6 h-[calc(100vh-220px)] max-h-[800px] min-h-[480px]">
+          internally inside this box (iMessage-style).
+          NOTE: overflow-hidden + [grid-template-rows:minmax(0,1fr)] are
+          load-bearing. Without minmax(0,1fr) the grid auto-row expands
+          to fit intrinsic content (long thread → stretched page) even
+          when the container has a fixed height. With overflow-hidden,
+          any rogue child that ignores h-full gets clipped to the box. */}
+      <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6 h-[calc(100svh-200px)] max-h-[820px] min-h-[480px] [grid-template-rows:minmax(0,1fr)] overflow-hidden">
         {/* ─── List pane ─── */}
         <section
-          className={`border border-[var(--rule)] bg-white flex flex-col ${
+          className={`border border-[var(--rule)] bg-white flex-col min-h-0 overflow-hidden ${
             activeId ? "hidden lg:flex" : "flex"
           }`}
         >
@@ -543,9 +548,13 @@ export function InboxView({
           </ul>
         </section>
 
-        {/* ─── Active thread pane ─── */}
+        {/* ─── Active thread pane ───
+            min-h-0 + overflow-hidden are load-bearing here so that the
+            inner flex-1 wrapper can compute its remaining height and
+            MessagesThread's h-full resolves to the bounded section
+            height rather than the intrinsic message-list height. */}
         <section
-          className={`border border-[var(--rule)] bg-white flex-col ${
+          className={`border border-[var(--rule)] bg-white flex-col min-h-0 overflow-hidden ${
             activeId ? "flex" : "hidden lg:flex"
           }`}
         >
