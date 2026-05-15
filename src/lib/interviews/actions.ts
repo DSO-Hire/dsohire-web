@@ -657,14 +657,21 @@ export async function cancelInterviewBooking(
   if (!user) return { ok: false, error: "Not signed in." };
 
   // Snapshot for audit + path revalidation before delete.
-  const { data: booking } = await supabase
+  //
+  // NOTE: prior version embedded `jobs!inner(dso_id)` directly off
+  // interview_proposals — but interview_proposals has no FK to jobs
+  // (the path is proposals → applications → jobs). PostgREST returned
+  // an error which `.maybeSingle()` swallowed via destructure, so
+  // every cancel/reschedule failed with "Booking not found." Now we
+  // grab just the proposal+application_id and look up the dso via
+  // the existing `dsoIdForAppId` helper.
+  const { data: booking, error: bookingErr } = await supabase
     .from("interview_bookings")
-    .select(
-      "id, proposal_id, interview_proposals(application_id, jobs!inner(dso_id))"
-    )
+    .select("id, proposal_id, interview_proposals(application_id)")
     .eq("id", bookingId)
     .maybeSingle();
 
+  if (bookingErr) return { ok: false, error: bookingErr.message };
   if (!booking) return { ok: false, error: "Booking not found." };
 
   // Best-effort: delete pushed calendar events BEFORE we delete the
@@ -687,17 +694,21 @@ export async function cancelInterviewBooking(
     .update({ status: "pending" })
     .eq("id", booking.proposal_id as string);
 
+  // interview_proposals can come back as either object or array
+  // depending on PostgREST version + relationship cardinality — both
+  // shapes happen in this codebase, so we accept either.
   const bCtx = booking as unknown as {
     proposal_id: string;
-    interview_proposals: Array<{
-      application_id: string;
-      jobs?: Array<{ dso_id: string }>;
-    }>;
+    interview_proposals:
+      | { application_id: string }
+      | Array<{ application_id: string }>
+      | null;
   };
-  const appId = bCtx.interview_proposals?.[0]?.application_id ?? null;
-  const dsoId =
-    bCtx.interview_proposals?.[0]?.jobs?.[0]?.dso_id ??
-    (appId ? await dsoIdForAppId(supabase, appId) : null);
+  const ip = bCtx.interview_proposals;
+  const appId = Array.isArray(ip)
+    ? (ip[0]?.application_id ?? null)
+    : (ip?.application_id ?? null);
+  const dsoId = appId ? await dsoIdForAppId(supabase, appId) : null;
 
   if (dsoId && appId) {
     await recordAuditEvent({
