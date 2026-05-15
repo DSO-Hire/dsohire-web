@@ -153,7 +153,7 @@ export default async function ApplyPage({ params, searchParams }: PageProps) {
   const { data: rawCandidate } = await supabase
     .from("candidates")
     .select(
-      "id, full_name, headline, summary, years_experience, current_title, availability, resume_url, linkedin_url, phone"
+      "id, first_name, last_name, full_name, headline, summary, years_experience, current_title, availability, resume_url, linkedin_url, phone"
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
@@ -310,6 +310,8 @@ export default async function ApplyPage({ params, searchParams }: PageProps) {
           existingVerifications={existingVerifications}
           candidate={{
             id: candidate.id,
+            first_name: candidate.first_name,
+            last_name: candidate.last_name,
             full_name: candidate.full_name,
             headline: candidate.headline,
             summary: candidate.summary,

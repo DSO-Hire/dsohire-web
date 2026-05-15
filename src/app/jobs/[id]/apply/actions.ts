@@ -33,6 +33,7 @@ import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
 import { ApplicationReceived } from "@/emails/candidate/ApplicationReceived";
 import { NewApplication } from "@/emails/employer/NewApplication";
 import type { ScreeningQuestion } from "./types";
+import { composeName } from "@/lib/candidate/name";
 import { isKnockoutFailure } from "@/lib/screening/evaluate-knockout";
 import {
   isVerificationType,
@@ -62,7 +63,8 @@ export async function applyToJob(
   formData: FormData
 ): Promise<ApplyState> {
   const jobId = String(formData.get("job_id") ?? "").trim();
-  const fullName = String(formData.get("full_name") ?? "").trim();
+  const firstName = String(formData.get("first_name") ?? "").trim();
+  const lastName = String(formData.get("last_name") ?? "").trim();
   const coverLetter = String(formData.get("cover_letter") ?? "").trim();
   const sourceTag =
     String(formData.get("source") ?? "").trim().slice(0, 64) || null;
@@ -72,10 +74,11 @@ export async function applyToJob(
     return { ok: false, error: "Missing job reference. Please try again." };
   }
 
-  if (!fullName) {
+  if (!firstName || !lastName) {
     return {
       ok: false,
-      error: "Please enter your full name before submitting your application.",
+      error:
+        "Please enter your first and last name before submitting your application.",
     };
   }
 
@@ -94,7 +97,7 @@ export async function applyToJob(
 
   const { data: candidate } = await supabase
     .from("candidates")
-    .select("id, full_name, headline, resume_url")
+    .select("id, first_name, last_name, headline, resume_url")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!candidate) {
@@ -104,16 +107,23 @@ export async function applyToJob(
     };
   }
 
-  // Persist full_name back to the candidate row whenever the wizard's
+  // Persist first/last name back to the candidate row whenever the wizard's
   // submitted name differs from what we have on file. Cheap update, keeps
-  // legacy/imported candidates from staying nameless.
-  if ((candidate.full_name as string | null)?.trim() !== fullName) {
+  // legacy/imported candidates from staying nameless. (full_name is a
+  // generated column — we only write the parts.)
+  if (
+    (candidate.first_name as string | null)?.trim() !== firstName ||
+    (candidate.last_name as string | null)?.trim() !== lastName
+  ) {
     await supabase
       .from("candidates")
-      .update({ full_name: fullName })
+      .update({ first_name: firstName, last_name: lastName })
       .eq("id", candidate.id as string);
   }
-  const candidateName = fullName;
+  const candidateName = composeName({
+    first_name: firstName,
+    last_name: lastName,
+  });
 
   // Verify job is active
   const { data: job } = await supabase
@@ -485,6 +495,7 @@ export async function applyToJob(
     candidateId: candidate.id as string,
     candidateAuthUserId: user.id,
     candidateName,
+    candidateFirstName: firstName,
     candidateHeadline: (candidate.headline as string | null) ?? null,
     dsoId: job.dso_id as string,
     jobTitle: job.title as string,
@@ -707,6 +718,7 @@ interface SendApplicationEmailsParams {
   candidateId: string;
   candidateAuthUserId: string;
   candidateName: string | null;
+  candidateFirstName: string | null;
   candidateHeadline: string | null;
   dsoId: string;
   jobTitle: string;
@@ -791,7 +803,7 @@ async function sendApplicationEmails(
        otherwise falls back to the existing ApplicationReceived component. */
     if (candidateEmail) {
       const firstName =
-        candidateDisplayName.trim().split(/\s+/)[0] || candidateDisplayName;
+        params.candidateFirstName?.trim() || candidateDisplayName;
       void dispatchCandidateEmail({
         kind: "candidate.application_received",
         dsoId: params.dsoId,

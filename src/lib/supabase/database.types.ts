@@ -1151,12 +1151,14 @@ export type Database = {
           desired_specialty: string[]
           dso_size_preference: string | null
           email: string | null
+          first_name: string | null
           full_name: string | null
           headline: string | null
           id: string
           is_guest: boolean
           is_searchable: boolean
           languages: string[]
+          last_name: string | null
           last_parsed_at: string | null
           license_states: string[]
           linkedin_url: string | null
@@ -1169,6 +1171,7 @@ export type Database = {
           resume_url: string | null
           resume_visibility: string
           salary_unit: string | null
+          salutation: string | null
           schedule_preferences: Json
           skills: string[]
           summary: string | null
@@ -1196,12 +1199,13 @@ export type Database = {
           desired_specialty?: string[]
           dso_size_preference?: string | null
           email?: string | null
-          full_name?: string | null
+          first_name?: string | null
           headline?: string | null
           id?: string
           is_guest?: boolean
           is_searchable?: boolean
           languages?: string[]
+          last_name?: string | null
           last_parsed_at?: string | null
           license_states?: string[]
           linkedin_url?: string | null
@@ -1214,6 +1218,7 @@ export type Database = {
           resume_url?: string | null
           resume_visibility?: string
           salary_unit?: string | null
+          salutation?: string | null
           schedule_preferences?: Json
           skills?: string[]
           summary?: string | null
@@ -1241,12 +1246,13 @@ export type Database = {
           desired_specialty?: string[]
           dso_size_preference?: string | null
           email?: string | null
-          full_name?: string | null
+          first_name?: string | null
           headline?: string | null
           id?: string
           is_guest?: boolean
           is_searchable?: boolean
           languages?: string[]
+          last_name?: string | null
           last_parsed_at?: string | null
           license_states?: string[]
           linkedin_url?: string | null
@@ -1259,6 +1265,7 @@ export type Database = {
           resume_url?: string | null
           resume_visibility?: string
           salary_unit?: string | null
+          salutation?: string | null
           schedule_preferences?: Json
           skills?: string[]
           summary?: string | null

@@ -31,6 +31,7 @@ import {
 import { parseResumeWithAI, type ParsedResume } from "@/lib/resume/parse";
 import { getCandidateRecentAiUsage } from "@/lib/ai/usage";
 import { canonicalizeSkill } from "@/lib/candidate/canonical-lists";
+import { splitFullName } from "@/lib/candidate/name";
 
 // ─────────────────────────────────────────────────────────────────────
 // parseResumeAction
@@ -244,8 +245,11 @@ export async function saveParsedResumeAction(
   // empty placeholders to fill.
   const basics = parsed.basics;
   const candidateUpdate: Record<string, unknown> = {};
-  if (basics.full_name.value)
-    candidateUpdate.full_name = basics.full_name.value;
+  if (basics.full_name.value) {
+    const { first_name, last_name } = splitFullName(basics.full_name.value);
+    if (first_name) candidateUpdate.first_name = first_name;
+    if (last_name) candidateUpdate.last_name = last_name;
+  }
   if (basics.phone.value) candidateUpdate.phone = basics.phone.value;
   if (basics.headline.value) candidateUpdate.headline = basics.headline.value;
   if (basics.summary.value) candidateUpdate.summary = basics.summary.value;

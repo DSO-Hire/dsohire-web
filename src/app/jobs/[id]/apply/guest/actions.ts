@@ -31,6 +31,7 @@ import { ApplicationReceived } from "@/emails/candidate/ApplicationReceived";
 import { NewApplication } from "@/emails/employer/NewApplication";
 import type { ScreeningQuestion } from "../types";
 import { isKnockoutFailure } from "@/lib/screening/evaluate-knockout";
+import { composeName } from "@/lib/candidate/name";
 
 export interface GuestApplyState {
   ok: boolean;
@@ -100,7 +101,8 @@ export async function submitGuestApplication(
 ): Promise<GuestApplyState> {
   const jobId = String(formData.get("job_id") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  const fullName = String(formData.get("full_name") ?? "").trim();
+  const firstName = String(formData.get("first_name") ?? "").trim();
+  const lastName = String(formData.get("last_name") ?? "").trim();
   const coverLetter = String(formData.get("cover_letter") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
   const sourceTag =
@@ -116,8 +118,8 @@ export async function submitGuestApplication(
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { ok: false, error: "Please enter a valid email address." };
   }
-  if (!fullName) {
-    return { ok: false, error: "Please enter your full name." };
+  if (!firstName || !lastName) {
+    return { ok: false, error: "Please enter your first and last name." };
   }
 
   const admin = createSupabaseServiceRoleClient();
@@ -168,7 +170,8 @@ export async function submitGuestApplication(
     await admin
       .from("candidates")
       .update({
-        full_name: fullName,
+        first_name: firstName,
+        last_name: lastName,
         phone: phone || null,
         claim_expires_at: new Date(
           Date.now() + CLAIM_TTL_DAYS * 86400 * 1000
@@ -181,7 +184,8 @@ export async function submitGuestApplication(
       .insert({
         auth_user_id: null,
         email,
-        full_name: fullName,
+        first_name: firstName,
+        last_name: lastName,
         phone: phone || null,
         is_guest: true,
         claim_expires_at: new Date(
@@ -399,7 +403,7 @@ export async function submitGuestApplication(
     relatedDsoId: job.dso_id as string,
     relatedCandidateId: candidateId,
     react: ApplicationReceived({
-      candidateName: fullName,
+      candidateName: composeName({ first_name: firstName, last_name: lastName }),
       jobTitle: job.title as string,
       dsoName,
       trackingUrl: claimUrl,
@@ -433,7 +437,7 @@ export async function submitGuestApplication(
               subject: `New application: ${job.title as string} · ${dsoName}`,
               react: NewApplication({
                 recipientName: m.full_name?.split(" ")[0] || "there",
-                candidateName: fullName,
+                candidateName: composeName({ first_name: firstName, last_name: lastName }),
                 candidateEmail: email,
                 jobTitle: job.title as string,
                 applicationUrl: employerApplicationUrl,

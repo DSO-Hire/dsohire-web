@@ -17,6 +17,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/send";
 import { InterviewReminder } from "@/emails/InterviewReminder";
+import { greetingFirstName } from "@/lib/candidate/name";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -65,7 +66,7 @@ export async function GET(request: Request) {
   const { data: bookings, error: bErr } = await admin
     .from("interview_bookings")
     .select(
-      "id, proposal_id, selected_option_id, reminder_24h_sent_at, reminder_1h_sent_at, interview_proposal_options!inner(start_at), interview_proposals!inner(application_id, interview_kind, duration_minutes, location_text, status, applications!inner(candidates(full_name, auth_user_id), jobs(title, dso_id, dsos(name))))"
+      "id, proposal_id, selected_option_id, reminder_24h_sent_at, reminder_1h_sent_at, interview_proposal_options!inner(start_at), interview_proposals!inner(application_id, interview_kind, duration_minutes, location_text, status, applications!inner(candidates(first_name, full_name, auth_user_id), jobs(title, dso_id, dsos(name))))"
     )
     .gte("interview_proposal_options.start_at", now.toISOString())
     .lte("interview_proposal_options.start_at", in25h.toISOString())
@@ -96,6 +97,7 @@ export async function GET(request: Request) {
       status: string;
       applications: Array<{
         candidates: Array<{
+          first_name: string | null;
           full_name: string | null;
           auth_user_id: string | null;
         }>;
@@ -154,7 +156,13 @@ export async function GET(request: Request) {
             relatedDsoId: dsoId,
             react: InterviewReminder({
               recipientName:
-                candidate.full_name?.split(/\s+/)[0] ?? null,
+                greetingFirstName(
+                  {
+                    first_name: candidate.first_name,
+                    full_name: candidate.full_name,
+                  },
+                  "",
+                ) || null,
               audience: "candidate",
               windowLabel,
               dsoName,

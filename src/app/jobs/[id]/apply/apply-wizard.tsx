@@ -44,6 +44,7 @@ import {
   LICENSE_TYPES,
   CERTIFICATION_KINDS,
 } from "@/lib/candidate/canonical-lists";
+import { composeName, splitFullName } from "@/lib/candidate/name";
 
 const AVAILABILITY_LABEL: Record<string, string> = {
   immediate: "Immediately",
@@ -119,7 +120,8 @@ export function ApplyWizard(props: ApplyWizardProps) {
   // by reading from localStorage in a useState initializer.
   const initial = useMemo<WizardDraft>(() => {
     return {
-      fullName: candidate.full_name ?? "",
+      firstName: candidate.first_name ?? "",
+      lastName: candidate.last_name ?? "",
       coverLetter: existingApplication?.cover_letter ?? "",
       answers: seedAnswersFromExisting(questions, existingAnswers),
       verifications: seedVerificationsFromExisting(
@@ -129,7 +131,8 @@ export function ApplyWizard(props: ApplyWizardProps) {
       resumeChoice: hasSavedResume ? "saved" : "upload",
     };
   }, [
-    candidate.full_name,
+    candidate.first_name,
+    candidate.last_name,
     existingApplication,
     existingAnswers,
     questions,
@@ -189,11 +192,16 @@ export function ApplyWizard(props: ApplyWizardProps) {
     try {
       const raw = window.localStorage.getItem(draftKey);
       if (!raw) return;
-      const parsed = JSON.parse(raw) as Partial<WizardDraft>;
-      // Backfill fullName for older drafts written before this field
-      // existed in WizardDraft.
+      const parsed = JSON.parse(raw) as Partial<WizardDraft> & {
+        fullName?: string;
+      };
+      // Backfill first/last for older drafts: pre-split drafts stored a
+      // single `fullName` string — split it; pre-name drafts had neither.
+      const legacyName = parsed.fullName ? splitFullName(parsed.fullName) : null;
       const normalized: WizardDraft = {
-        fullName: parsed.fullName ?? initial.fullName,
+        firstName:
+          parsed.firstName ?? legacyName?.first_name ?? initial.firstName,
+        lastName: parsed.lastName ?? legacyName?.last_name ?? initial.lastName,
         coverLetter: parsed.coverLetter ?? "",
         answers: parsed.answers ?? initial.answers,
         // Normalize verification values — older drafts (pre migration ...004)
@@ -251,11 +259,11 @@ export function ApplyWizard(props: ApplyWizardProps) {
   const handleSubmit = () => {
     setSubmitError(null);
 
-    // Full name gate. Required so the employer never sees an anonymous-looking
+    // Name gate. Required so the employer never sees an anonymous-looking
     // row; server enforces this too.
-    if (!draft.fullName.trim()) {
+    if (!draft.firstName.trim() || !draft.lastName.trim()) {
       setSubmitError(
-        "Please enter your full name on the first step before submitting."
+        "Please enter your first and last name on the first step before submitting."
       );
       setStepIdx(0);
       return;
@@ -299,7 +307,8 @@ export function ApplyWizard(props: ApplyWizardProps) {
 
     const formData = new FormData();
     formData.set("job_id", jobId);
-    formData.set("full_name", draft.fullName.trim());
+    formData.set("first_name", draft.firstName.trim());
+    formData.set("last_name", draft.lastName.trim());
     formData.set("cover_letter", draft.coverLetter);
     if (props.sourceTag) formData.set("source", props.sourceTag);
     if (resumeFile) formData.set("resume", resumeFile);
@@ -460,8 +469,12 @@ export function ApplyWizard(props: ApplyWizardProps) {
             candidate={candidate}
             userEmail={userEmail}
             existingApplication={existingApplication}
-            fullName={draft.fullName}
-            onFullNameChange={(fullName) => setDraft({ ...draft, fullName })}
+            firstName={draft.firstName}
+            lastName={draft.lastName}
+            onFirstNameChange={(firstName) =>
+              setDraft({ ...draft, firstName })
+            }
+            onLastNameChange={(lastName) => setDraft({ ...draft, lastName })}
           />
         )}
 
@@ -514,7 +527,8 @@ export function ApplyWizard(props: ApplyWizardProps) {
             jobTitle={jobTitle}
             dsoName={dsoName}
             candidate={candidate}
-            fullName={draft.fullName}
+            firstName={draft.firstName}
+            lastName={draft.lastName}
             questions={questions}
             answers={draft.answers}
             verificationRequirements={verificationRequirements}
@@ -652,19 +666,30 @@ function IntroStep({
   candidate,
   userEmail,
   existingApplication,
-  fullName,
-  onFullNameChange,
+  firstName,
+  lastName,
+  onFirstNameChange,
+  onLastNameChange,
 }: {
   jobTitle: string;
   dsoName: string;
   candidate: CandidatePrefill;
   userEmail: string | null;
   existingApplication: { status: string } | null;
-  fullName: string;
-  onFullNameChange: (name: string) => void;
+  firstName: string;
+  lastName: string;
+  onFirstNameChange: (name: string) => void;
+  onLastNameChange: (name: string) => void;
 }) {
-  const prefill = buildPrefillSummary({ ...candidate, full_name: fullName || candidate.full_name });
-  const trimmedName = fullName.trim();
+  const composedName = composeName({
+    first_name: firstName,
+    last_name: lastName,
+  });
+  const prefill = buildPrefillSummary({
+    ...candidate,
+    full_name: composedName || candidate.full_name,
+  });
+  const trimmedName = composedName.trim();
   return (
     <div className="space-y-6">
       <div>
@@ -681,25 +706,46 @@ function IntroStep({
         </p>
       </div>
 
-      <div>
-        <label
-          htmlFor="apply-full-name"
-          className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
-        >
-          Your full name <span className="text-heritage">*</span>
-        </label>
-        <input
-          id="apply-full-name"
-          type="text"
-          name="full_name"
-          required
-          autoComplete="name"
-          value={fullName}
-          onChange={(e) => onFullNameChange(e.target.value)}
-          placeholder="Jordan Rivera"
-          className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
-        />
-        <p className="mt-1.5 text-[12px] text-slate-meta leading-relaxed">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label
+            htmlFor="apply-first-name"
+            className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+          >
+            First name <span className="text-heritage">*</span>
+          </label>
+          <input
+            id="apply-first-name"
+            type="text"
+            name="first_name"
+            required
+            autoComplete="given-name"
+            value={firstName}
+            onChange={(e) => onFirstNameChange(e.target.value)}
+            placeholder="Jordan"
+            className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="apply-last-name"
+            className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+          >
+            Last name <span className="text-heritage">*</span>
+          </label>
+          <input
+            id="apply-last-name"
+            type="text"
+            name="last_name"
+            required
+            autoComplete="family-name"
+            value={lastName}
+            onChange={(e) => onLastNameChange(e.target.value)}
+            placeholder="Rivera"
+            className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+          />
+        </div>
+        <p className="sm:col-span-2 -mt-1 text-[12px] text-slate-meta leading-relaxed">
           Required — the hiring team needs a real name on your application.
           We&apos;ll save this back to your profile.
         </p>
@@ -1625,7 +1671,8 @@ function ReviewStep({
   jobTitle,
   dsoName,
   candidate,
-  fullName,
+  firstName,
+  lastName,
   questions,
   answers,
   verificationRequirements,
@@ -1640,7 +1687,8 @@ function ReviewStep({
   jobTitle: string;
   dsoName: string;
   candidate: { id: string } & CandidatePrefill;
-  fullName: string;
+  firstName: string;
+  lastName: string;
   questions: ScreeningQuestion[];
   answers: Record<string, AnswerValue>;
   verificationRequirements: JobVerificationRequirement[];
@@ -1655,11 +1703,15 @@ function ReviewStep({
   // Surface the typed-in name to the completeness widget so it doesn't tell
   // the candidate "your profile is missing your name" after they just typed
   // it on Step 1.
+  const composedName = composeName({
+    first_name: firstName,
+    last_name: lastName,
+  });
   const completeness = computeProfileCompleteness({
     ...candidate,
-    full_name: fullName || candidate.full_name,
+    full_name: composedName || candidate.full_name,
   });
-  const trimmedName = fullName.trim();
+  const trimmedName = composedName.trim();
 
   return (
     <div className="space-y-6">

@@ -16,6 +16,7 @@ import {
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
 import { SUPPORT_EMAIL } from "@/lib/contact";
+import { composeName, parseSalutation } from "@/lib/candidate/name";
 
 const NEXT_ALLOWLIST = /^\/(candidate\/|jobs\/)/;
 
@@ -33,7 +34,9 @@ export async function signUpCandidate(
   formData: FormData
 ): Promise<CandidateSignUpState> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  const fullName = String(formData.get("full_name") ?? "").trim();
+  const firstName = String(formData.get("first_name") ?? "").trim();
+  const lastName = String(formData.get("last_name") ?? "").trim();
+  const salutation = parseSalutation(formData.get("salutation"));
   const password = String(formData.get("password") ?? "");
   const honeypot = String(formData.get("website") ?? "").trim();
   const nextRaw = String(formData.get("next") ?? "").trim();
@@ -46,8 +49,8 @@ export async function signUpCandidate(
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { ok: false, step: "form", next, error: "Please enter a valid email address." };
   }
-  if (!fullName) {
-    return { ok: false, step: "form", next, error: "Please enter your full name." };
+  if (!firstName || !lastName) {
+    return { ok: false, step: "form", next, error: "Please enter your first and last name." };
   }
   if (password && password.length < 8) {
     return {
@@ -66,7 +69,9 @@ export async function signUpCandidate(
       email_confirm: false,
       ...(password ? { password } : {}),
       user_metadata: {
-        full_name: fullName,
+        first_name: firstName,
+        last_name: lastName,
+        full_name: composeName({ first_name: firstName, last_name: lastName }),
         role_during_signup: "candidate",
       },
     });
@@ -93,7 +98,9 @@ export async function signUpCandidate(
 
   const { error: candidateError } = await admin.from("candidates").insert({
     auth_user_id: authUserId,
-    full_name: fullName,
+    first_name: firstName,
+    last_name: lastName,
+    salutation,
     is_searchable: false,
   });
 

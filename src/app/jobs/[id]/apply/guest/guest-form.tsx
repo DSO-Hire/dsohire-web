@@ -90,18 +90,36 @@ export function GuestApplyForm({
 
         <div>
           <label
-            htmlFor="guest-full-name"
+            htmlFor="guest-first-name"
             className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
           >
-            Full name <span className="text-heritage">*</span>
+            First name <span className="text-heritage">*</span>
           </label>
           <input
-            id="guest-full-name"
+            id="guest-first-name"
             type="text"
-            name="full_name"
+            name="first_name"
             required
-            autoComplete="name"
-            placeholder="Jordan Bailey"
+            autoComplete="given-name"
+            placeholder="Jordan"
+            className="w-full px-4 py-3.5 bg-cream border border-[var(--rule-strong)] text-ink text-[15px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="guest-last-name"
+            className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+          >
+            Last name <span className="text-heritage">*</span>
+          </label>
+          <input
+            id="guest-last-name"
+            type="text"
+            name="last_name"
+            required
+            autoComplete="family-name"
+            placeholder="Bailey"
             className="w-full px-4 py-3.5 bg-cream border border-[var(--rule-strong)] text-ink text-[15px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
           />
         </div>

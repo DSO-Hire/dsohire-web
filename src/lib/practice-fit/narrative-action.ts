@@ -57,6 +57,7 @@ import {
 } from "@/lib/ai/anthropic";
 import { logAiUsage } from "@/lib/ai/usage";
 import { extractJson } from "@/lib/ai/extract-json";
+import { greetingFirstName } from "@/lib/candidate/name";
 import type { FitBucket, FitDimensionKey, FitResult } from "./types";
 import type {
   GeneratePracticeFitNarrativeInput,
@@ -348,7 +349,7 @@ async function loadContext(
     admin
       .from("candidates")
       .select(
-        `full_name, current_location_state, license_states,
+        `first_name, full_name, current_location_state, license_states,
          desired_roles, desired_specialty, skills`
       )
       .eq("id", candidateId)
@@ -382,8 +383,14 @@ async function loadContext(
     .select("id", { count: "exact", head: true })
     .eq("dso_id", dsoId);
 
-  const fullName = (candR.full_name as string | null) ?? "";
-  const candidateFirstName = fullName.trim().split(/\s+/)[0] || null;
+  const candidateFirstName =
+    greetingFirstName(
+      {
+        first_name: (candR.first_name as string | null) ?? null,
+        full_name: (candR.full_name as string | null) ?? null,
+      },
+      "",
+    ) || null;
 
   const locationsJoin = (jobR.job_locations ?? []) as Array<{
     location: { city: string | null; state: string | null } | null;

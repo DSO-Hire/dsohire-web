@@ -7,8 +7,11 @@
  * literal (better than silently producing empty strings).
  */
 
+import { greetingFirstName } from "@/lib/candidate/name";
+
 export interface MergeContext {
   candidate: {
+    first_name?: string | null;
     full_name: string | null;
   };
   sender: {
@@ -21,6 +24,11 @@ export interface MergeContext {
 
 const TOKEN_PATTERN = /\{\{\s*([a-z_.]+)\s*\}\}/gi;
 
+/**
+ * First name for a sender (a dso_user — no first_name column, only
+ * full_name). Candidate first names go through greetingFirstName so
+ * the real `first_name` column is preferred.
+ */
 function firstName(full: string | null): string {
   if (!full) return "";
   return full.trim().split(/\s+/)[0] ?? "";
@@ -34,7 +42,15 @@ export function resolveMergeFields(
     const key = String(raw).toLowerCase();
     switch (key) {
       case "candidate.first_name":
-        return firstName(ctx.candidate.full_name) || match;
+        return (
+          greetingFirstName(
+            {
+              first_name: ctx.candidate.first_name ?? null,
+              full_name: ctx.candidate.full_name,
+            },
+            "",
+          ) || match
+        );
       case "candidate.full_name":
         return ctx.candidate.full_name || match;
       case "sender.first_name":

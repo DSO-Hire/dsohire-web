@@ -35,6 +35,7 @@ import {
   deleteInterviewEvent,
 } from "@/lib/integrations/calendar-push";
 import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
+import { greetingFirstName } from "@/lib/candidate/name";
 
 export interface InterviewActionResult {
   ok: boolean;
@@ -97,7 +98,7 @@ export async function proposeInterview(
   const { data: appRow } = await supabase
     .from("applications")
     .select(
-      "id, job_id, candidate_id, jobs(title), candidates(full_name, auth_user_id)"
+      "id, job_id, candidate_id, jobs(title), candidates(first_name, full_name, auth_user_id)"
     )
     .eq("id", input.applicationId)
     .maybeSingle();
@@ -115,8 +116,8 @@ export async function proposeInterview(
       | Array<{ title: string }>
       | null;
     candidates:
-      | { full_name: string | null; auth_user_id: string | null }
-      | Array<{ full_name: string | null; auth_user_id: string | null }>
+      | { first_name: string | null; full_name: string | null; auth_user_id: string | null }
+      | Array<{ first_name: string | null; full_name: string | null; auth_user_id: string | null }>
       | null;
   };
   const jobsRecord = appCtx.jobs;
@@ -194,8 +195,15 @@ export async function proposeInterview(
       relatedDsoId: dsoUser.dso_id as string,
       relatedCandidateId: appCtx.candidate_id,
       react: InterviewProposed({
-        candidateFirstName:
-          candidate?.full_name?.split(/\s+/)[0] ?? null,
+        candidateFirstName: candidate
+          ? greetingFirstName(
+              {
+                first_name: candidate.first_name,
+                full_name: candidate.full_name,
+              },
+              "",
+            ) || null
+          : null,
         dsoName,
         jobTitle,
         kindLabel: KIND_LABELS[input.interviewKind] ?? "Interview",
@@ -342,7 +350,7 @@ export async function bookInterviewSlot(
   const { data: proposal } = await supabase
     .from("interview_proposals")
     .select(
-      "id, application_id, interview_kind, duration_minutes, location_text, message_to_candidate, applications(jobs(id, title, dso_id), candidates(full_name, auth_user_id))"
+      "id, application_id, interview_kind, duration_minutes, location_text, message_to_candidate, applications(jobs(id, title, dso_id), candidates(first_name, full_name, auth_user_id))"
     )
     .eq("id", input.proposalId)
     .maybeSingle();
@@ -358,6 +366,7 @@ export async function bookInterviewSlot(
     // either an array or a single object depending on hints/version.
     type JobEmbed = { id: string; title: string; dso_id: string };
     type CandEmbed = {
+      first_name: string | null;
       full_name: string | null;
       auth_user_id: string | null;
     };
@@ -412,7 +421,11 @@ export async function bookInterviewSlot(
           template: "shared.interview_booked",
           relatedDsoId: dsoId,
           react: InterviewBooked({
-            recipientName: cand.full_name?.split(/\s+/)[0] ?? null,
+            recipientName:
+              greetingFirstName(
+                { first_name: cand.first_name, full_name: cand.full_name },
+                "",
+              ) || null,
             audience: "candidate",
             dsoName: dsoNameForCandidate,
             jobTitle,

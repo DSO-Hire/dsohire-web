@@ -35,6 +35,9 @@ export type CandidateAvailability =
   | null;
 
 export interface CandidatePrefill {
+  first_name: string | null;
+  last_name: string | null;
+  /** Generated column (first + last) — kept for prefill summary + completeness reads. */
   full_name: string | null;
   headline: string | null;
   summary: string | null;
@@ -134,13 +137,14 @@ export interface VerificationValue {
  * remembers whether the candidate intended to upload a fresh resume; on
  * resume the file slot starts empty.
  *
- * `fullName` lives in the draft because legacy/imported candidate rows can
- * be missing it; the IntroStep prompts the candidate to confirm/enter their
- * name before continuing, and we persist it back to candidates.full_name on
- * submit.
+ * `firstName`/`lastName` live in the draft because legacy/imported candidate
+ * rows can be missing them; the IntroStep prompts the candidate to
+ * confirm/enter their name before continuing, and we persist them back to
+ * the candidates row on submit (full_name is a generated column).
  */
 export interface WizardDraft {
-  fullName: string;
+  firstName: string;
+  lastName: string;
   coverLetter: string;
   answers: Record<string, AnswerValue>;
   /** Keyed by verification_type. */

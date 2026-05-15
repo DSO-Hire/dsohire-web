@@ -31,6 +31,7 @@ import { sendEmail } from "@/lib/email/send";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { OutreachMessage } from "@/emails/employer/OutreachMessage";
 import { resolveMergeFields } from "@/lib/outreach/merge-fields";
+import { greetingFirstName } from "@/lib/candidate/name";
 
 export interface SendOutreachResult {
   ok: boolean;
@@ -72,7 +73,7 @@ export async function sendOutreachToCandidate(formData: FormData): Promise<SendO
   // Verify candidate is discoverable.
   const { data: candidate } = await supabase
     .from("candidates")
-    .select("id, full_name, cv_visibility, is_guest, deleted_at, auth_user_id")
+    .select("id, first_name, full_name, cv_visibility, is_guest, deleted_at, auth_user_id")
     .eq("id", candidateId)
     .maybeSingle();
   if (!candidate) {
@@ -121,7 +122,10 @@ export async function sendOutreachToCandidate(formData: FormData): Promise<SendO
   // picked, employers can type tokens directly into the modal — so we
   // always run the resolver, not just on template sends.
   const mergeCtx = {
-    candidate: { full_name: (candidate.full_name as string | null) ?? null },
+    candidate: {
+      first_name: (candidate.first_name as string | null) ?? null,
+      full_name: (candidate.full_name as string | null) ?? null,
+    },
     sender: { full_name: (dsoUser.full_name as string | null) ?? null },
     dso: { name: dsoName },
   };
@@ -156,7 +160,13 @@ export async function sendOutreachToCandidate(formData: FormData): Promise<SendO
     relatedDsoId: dsoUser.dso_id as string,
     relatedCandidateId: candidateId,
     react: OutreachMessage({
-      candidateFirstName: (candidate.full_name as string | null)?.split(/\s+/)[0] ?? null,
+      candidateFirstName: greetingFirstName(
+        {
+          first_name: candidate.first_name as string | null,
+          full_name: candidate.full_name as string | null,
+        },
+        "",
+      ) || null,
       dsoName,
       senderName: (dsoUser.full_name as string | null) ?? null,
       subject: resolvedSubject,

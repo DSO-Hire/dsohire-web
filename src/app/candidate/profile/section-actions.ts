@@ -27,6 +27,7 @@
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { SchedulePreferences } from "@/lib/candidate/canonical-lists";
+import { parseSalutation } from "@/lib/candidate/name";
 
 type Result =
   | { ok: true }
@@ -60,7 +61,9 @@ async function getCandidateContext() {
 // ─────────────────────────────────────────────────────────────────────
 
 export interface IdentityInput {
-  full_name: string;
+  first_name: string;
+  last_name: string;
+  salutation?: string | null;
   pronouns?: string | null;
   headline?: string | null;
   summary?: string | null;
@@ -75,13 +78,18 @@ export async function upsertIdentity(input: IdentityInput): Promise<Result> {
   const ctx = await getCandidateContext();
   if (!ctx.ok) return ctx;
 
-  const fullName = input.full_name.trim();
-  if (!fullName) return { ok: false, error: "Full name is required." };
+  const firstName = input.first_name.trim();
+  const lastName = input.last_name.trim();
+  if (!firstName || !lastName) {
+    return { ok: false, error: "First and last name are required." };
+  }
 
   const { error } = await ctx.supabase
     .from("candidates")
     .update({
-      full_name: fullName,
+      first_name: firstName,
+      last_name: lastName,
+      salutation: parseSalutation(input.salutation),
       pronouns: input.pronouns?.trim() || null,
       headline: input.headline?.trim() || null,
       summary: input.summary?.trim() || null,

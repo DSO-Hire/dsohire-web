@@ -9,6 +9,7 @@ import {
   type CandidateSignUpState,
 } from "./actions";
 import { LinkedInOAuthButton } from "@/components/auth/linkedin-oauth-button";
+import { SALUTATIONS } from "@/lib/candidate/name";
 
 const initialForm: CandidateSignUpState = { ok: false, step: "form" };
 const initialVerify: CandidateSignUpState = { ok: false, step: "verify" };
@@ -129,11 +130,21 @@ export function CandidateSignUpForm({ next }: { next?: string }) {
       </div>
       {next && <input type="hidden" name="next" value={next} />}
 
+      <div className="grid grid-cols-[minmax(0,7rem)_1fr] gap-3">
+        <SalutationField />
+        <Field
+          label="First name"
+          name="first_name"
+          autoComplete="given-name"
+          placeholder="Jordan"
+          required
+        />
+      </div>
       <Field
-        label="Your full name"
-        name="full_name"
-        autoComplete="name"
-        placeholder="Jordan Rivera"
+        label="Last name"
+        name="last_name"
+        autoComplete="family-name"
+        placeholder="Rivera"
         required
       />
       <Field
@@ -239,6 +250,32 @@ function Field({
           {helper}
         </p>
       )}
+    </div>
+  );
+}
+
+function SalutationField() {
+  return (
+    <div>
+      <label
+        htmlFor="csignup-salutation"
+        className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+      >
+        Prefix
+      </label>
+      <select
+        id="csignup-salutation"
+        name="salutation"
+        defaultValue=""
+        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+      >
+        <option value="">—</option>
+        {SALUTATIONS.map((s) => (
+          <option key={s} value={s}>
+            {s}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }

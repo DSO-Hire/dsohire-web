@@ -16,6 +16,7 @@ import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
+import { splitFullName } from "@/lib/candidate/name";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -132,12 +133,14 @@ export async function GET(request: Request) {
         (userMeta.full_name as string | undefined) ??
         (userMeta.name as string | undefined) ??
         (user.email ?? "Candidate").split("@")[0];
+      const { first_name, last_name } = splitFullName(fullName);
       const { error: provisionErr } = await admin
         .from("candidates")
         .insert({
           auth_user_id: user.id,
           email: user.email,
-          full_name: fullName,
+          first_name,
+          last_name,
         });
       if (provisionErr) {
         console.warn(

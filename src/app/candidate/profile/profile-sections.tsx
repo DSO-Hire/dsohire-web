@@ -87,6 +87,7 @@ import {
   type CertificationInput,
   type CredentialKind,
 } from "./section-actions";
+import { composeName, SALUTATIONS } from "@/lib/candidate/name";
 import { CompletenessMeter } from "./completeness-meter";
 import {
   computeCompleteness,
@@ -101,7 +102,9 @@ import type { ProfileContext } from "./ai-write-actions";
 
 export interface ProfileData {
   identity: {
-    full_name: string;
+    first_name: string;
+    last_name: string;
+    salutation: string | null;
     pronouns: string | null;
     headline: string | null;
     summary: string | null;
@@ -419,7 +422,11 @@ function IdentityCard({
     >
       <div className="space-y-1.5 text-sm">
         <p className="text-base font-semibold text-[#14233F]">
-          {data.full_name || (
+          {composeName({
+            salutation: data.salutation,
+            first_name: data.first_name,
+            last_name: data.last_name,
+          }) || (
             <span className="italic text-slate-400">No name set</span>
           )}
           {data.pronouns && (
@@ -478,7 +485,9 @@ function IdentityModal({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [v, setV] = useState<IdentityInput>({
-    full_name: initial.full_name ?? "",
+    first_name: initial.first_name ?? "",
+    last_name: initial.last_name ?? "",
+    salutation: initial.salutation ?? "",
     pronouns: initial.pronouns ?? "",
     headline: initial.headline ?? "",
     summary: initial.summary ?? "",
@@ -513,13 +522,41 @@ function IdentityModal({
       title="Edit identity"
       description="Name, headline, and how to reach you."
     >
-      <TextField
-        label="Full name"
-        required
-        value={v.full_name}
-        onChange={(x) => setV((p) => ({ ...p, full_name: x }))}
-        autoComplete="name"
-      />
+      <div className="grid gap-4 sm:grid-cols-[7rem_1fr_1fr]">
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium text-slate-800">
+            Title
+          </span>
+          <select
+            value={v.salutation ?? ""}
+            onChange={(e) =>
+              setV((p) => ({ ...p, salutation: e.target.value || null }))
+            }
+            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+          >
+            <option value="">—</option>
+            {SALUTATIONS.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </label>
+        <TextField
+          label="First name"
+          required
+          value={v.first_name}
+          onChange={(x) => setV((p) => ({ ...p, first_name: x }))}
+          autoComplete="given-name"
+        />
+        <TextField
+          label="Last name"
+          required
+          value={v.last_name}
+          onChange={(x) => setV((p) => ({ ...p, last_name: x }))}
+          autoComplete="family-name"
+        />
+      </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <TextField
           label="Pronouns"
@@ -2188,7 +2225,11 @@ function formatDateRange(
 function buildAiContext(data: ProfileData): ProfileContext {
   const top = data.workHistory[0] ?? null;
   return {
-    full_name: data.identity.full_name || null,
+    full_name:
+      composeName({
+        first_name: data.identity.first_name,
+        last_name: data.identity.last_name,
+      }) || null,
     current_headline: data.identity.headline,
     current_summary: data.identity.summary,
     pronouns: data.identity.pronouns,

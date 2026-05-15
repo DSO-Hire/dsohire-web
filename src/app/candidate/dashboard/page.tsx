@@ -54,6 +54,7 @@ import {
   type StageKind,
 } from "@/lib/applications/stages";
 import { computeCompleteness } from "@/lib/candidate/completeness";
+import { greetingFirstName } from "@/lib/candidate/name";
 import type { ProfileData } from "@/app/candidate/profile/profile-sections";
 import { CandidateFitSummary } from "@/components/practice-fit/candidate-fit-summary";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
@@ -80,7 +81,7 @@ export default async function CandidateDashboardPage() {
   const { data: candidate } = await supabase
     .from("candidates")
     .select(
-      "id, full_name, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, desired_specialty, pms_systems, skills, languages, temp_or_perm, schedule_preferences, min_salary, salary_unit, cv_visibility, availability, resume_url, linkedin_url, avatar_url",
+      "id, first_name, full_name, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, desired_specialty, pms_systems, skills, languages, temp_or_perm, schedule_preferences, min_salary, salary_unit, cv_visibility, availability, resume_url, linkedin_url, avatar_url",
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
@@ -523,8 +524,8 @@ export default async function CandidateDashboardPage() {
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink">
           {heroMode === "setup"
-            ? `Welcome to DSO Hire, ${candidate.full_name?.split(" ")[0] ?? "there"}.`
-            : `Welcome back, ${candidate.full_name?.split(" ")[0] ?? "there"}.`}
+            ? `Welcome to DSO Hire, ${greetingFirstName({ first_name: candidate.first_name, full_name: candidate.full_name }, "there")}.`
+            : `Welcome back, ${greetingFirstName({ first_name: candidate.first_name, full_name: candidate.full_name }, "there")}.`}
         </h1>
         <p className="mt-3 text-base text-slate-body max-w-[640px]">
           {headerSub}

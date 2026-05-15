@@ -26,6 +26,7 @@ import {
 import { dispatchNotification } from "@/lib/notifications/dispatcher";
 import { dispatchCandidateEmail } from "@/lib/email/templates/dispatch";
 import { MessageReceived } from "@/emails/MessageReceived";
+import { greetingFirstName } from "@/lib/candidate/name";
 
 export interface ApplicationMessageRow {
   id: string;
@@ -401,7 +402,7 @@ async function dispatchMessageNotification(
 
     const { data: cand } = await admin
       .from("candidates")
-      .select("id, auth_user_id, full_name")
+      .select("id, auth_user_id, first_name, full_name")
       .eq("id", appRow.candidate_id as string)
       .maybeSingle();
 
@@ -472,8 +473,13 @@ async function dispatchMessageNotification(
           cand.auth_user_id as string
         );
         recipientEmail = authUser?.user?.email ?? null;
-        recipientName =
-          (candidateFullName ?? "").split(" ")[0].trim() || "there";
+        recipientName = greetingFirstName(
+          {
+            first_name: (cand?.first_name as string | null) ?? null,
+            full_name: (cand?.full_name as string | null) ?? null,
+          },
+          "there",
+        );
       }
       deepLink = `${SITE_URL}/candidate/applications/${appRow.id}#message-${args.messageId}`;
     }
