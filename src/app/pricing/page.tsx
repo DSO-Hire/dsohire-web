@@ -21,7 +21,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Pricing",
   description:
-    "Flat monthly subscription pricing for DSO Hire. Starter $499 · Growth $999 · Enterprise $1,499. Unlimited multi-location postings, no placement fees.",
+    "Flat monthly subscription pricing for DSO Hire. Starter $499 · Growth $999 · Enterprise $1,499. Multi-location dental hiring, no per-listing fees, no placement fees.",
 };
 
 export default function PricingPage() {
@@ -49,7 +49,7 @@ function PricingHero() {
         One flat fee. Sized to your footprint.
       </h1>
       <p className="text-lg text-slate-body leading-[1.7] max-w-[640px]">
-        Pick the tier that matches your practice count. All tiers include unlimited
+        Pick the tier that matches your practice count. All tiers include
         multi-location posting. Cancel or change tiers anytime.
       </p>
     </section>
@@ -67,7 +67,7 @@ function TierGrid({ tiers }: { tiers: TierConfig[] }) {
         ))}
       </div>
       <p className="mt-10 text-[14px] text-slate-body text-center leading-relaxed">
-        All tiers include unlimited multi-location posting, candidate dashboards, and
+        All tiers include multi-location posting, candidate dashboards, and
         Stripe-secured billing.{" "}
         <strong className="text-ink font-bold">
           No per-listing fees. No placement fees. Ever.
@@ -760,7 +760,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Are there per-listing or placement fees on top of the subscription?",
-    a: "No. Post unlimited roles across every practice you operate. We never take a cut of placements, and we never charge per listing.",
+    a: "No. The subscription is the entire cost — we never charge per listing, and we never take a cut of placements. Active-listing caps are tier-based (Starter: up to 50 active; Growth and Enterprise: unlimited).",
   },
   {
     q: "What payment methods do you accept?",

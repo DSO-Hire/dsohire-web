@@ -103,8 +103,8 @@ function Hero() {
             icon={Building2}
             eyebrow="For DSOs"
             title="Hiring across your practices"
-            body="Unlimited roles across every location, one flat monthly fee, an applicant pipeline built for dental."
-            proof="Unlimited postings · Flat monthly fee · No placement charges"
+            body="Post across every practice on one flat monthly subscription, with an applicant pipeline built for the way DSOs hire."
+            proof="Flat monthly fee · No per-listing fees · No placement charges"
             ctaLabel="Explore DSO Hiring"
             href="/for-dsos"
           />

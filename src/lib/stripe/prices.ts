@@ -47,7 +47,7 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
     monthlyPriceCents: 49900,
     features: [
       "Up to 50 active listings · 10 admin seats",
-      "Unlimited multi-location posting",
+      "Multi-location posting in a single flow",
       "AI Job Description generator (dental-context)",
       "Curated dental screening Q library",
       "Branded company page + map view",

@@ -41,13 +41,12 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "DSO Hiring Platform — Flat-Fee Job Board for Multi-Location DSOs",
   description:
-    "DSO Hire is the flat-fee job board built for multi-location dental support organizations. Post unlimited job listings across every practice for one flat monthly fee — no per-listing fees, no 15–25% placement fees, no recruiter middlemen. Multi-location DSO hiring, team accounts, and an applicant pipeline built for the way DSOs actually hire.",
+    "DSO Hire is the flat-fee job board built for multi-location dental support organizations. Post across every practice for one flat monthly fee — no per-listing fees, no 15–25% placement fees, no recruiter middlemen. Multi-location DSO hiring, team accounts, and an applicant pipeline built for the way DSOs actually hire.",
   keywords: [
     "DSO hiring",
     "multi-location dental hiring",
     "dental support organization recruiting",
     "flat-fee dental job board",
-    "unlimited job postings dental",
     "no placement fees dental hiring",
     "dental ATS for DSOs",
   ],
@@ -145,9 +144,10 @@ function Hero() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-12 lg:gap-16 items-start">
           <div>
             <p className="text-lg sm:text-xl text-slate-body leading-relaxed mb-10">
-              Built for multi-location dental support organizations. Post unlimited
-              roles across every location for a flat monthly subscription — no per-listing
-              charges, no 15–25% placement fees, no recruiter middlemen.
+              Built for multi-location dental support organizations. Subscribe
+              once and post across every practice you operate — flat monthly
+              fee, no per-listing charges, no 15–25% placement fees, no
+              recruiter middlemen.
             </p>
 
             <div className="flex flex-wrap items-center gap-3.5 mb-9">
@@ -169,7 +169,7 @@ function Hero() {
             <div className="flex items-center gap-2.5 text-xs text-slate-body tracking-[0.4px]">
               <span className="block w-1.5 h-1.5 bg-heritage rounded-full" />
               <span>
-                Plans from <strong className="text-ink font-bold">$499/mo</strong> · Unlimited multi-location posting
+                Plans from <strong className="text-ink font-bold">$499/mo</strong> · Multi-location native · No placement fees
               </span>
             </div>
           </div>
@@ -406,7 +406,7 @@ function ProofStrip() {
         </div>
         <div className="flex flex-wrap gap-9 items-center">
           <ProofTagline>Multi-Location DSOs</ProofTagline>
-          <ProofTagline>Unlimited Listings</ProofTagline>
+          <ProofTagline>No Per-Listing Fees</ProofTagline>
           <ProofTagline>Flat Monthly Fee</ProofTagline>
           <ProofTagline>No Placement Charges</ProofTagline>
         </div>
@@ -503,8 +503,8 @@ function AnswerCard() {
             A flat-fee job board, built for DSOs.
           </h3>
           <p className="text-[15px] text-ivory/70 leading-[1.7] max-w-[420px]">
-            Subscribe once, post unlimited roles across every practice you
-            operate. One account, no placement fees, cancel anytime.
+            Subscribe once, post across every practice you operate. One
+            account, no per-listing fees, no placement fees, cancel anytime.
           </p>
         </div>
 
@@ -881,7 +881,7 @@ function PricingTeaser() {
         </div>
 
         <p className="mt-10 text-[14px] text-slate-body text-center leading-relaxed">
-          All tiers include unlimited multi-location posting, candidate dashboards, and
+          All tiers include multi-location posting, candidate dashboards, and
           Stripe-secured billing.{" "}
           <strong className="text-ink font-bold">
             No per-listing fees. No placement fees. Ever.
