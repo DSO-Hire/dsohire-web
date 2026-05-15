@@ -57,13 +57,13 @@ async function loadGoogleFontTtf(
     throw new Error(`Font CSS fetch failed (${cssRes.status}) for ${family}@${weight}`);
   }
   const css = await cssRes.text();
-  // Match TTF/OTF only — never WOFF2.
-  const match = css.match(
-    /src:\s*url\((https:\/\/[^)]+)\)\s*format\(['"](?:truetype|opentype)['"]\)/,
-  );
+  // Match any url() in the CSS. With the Firefox 3.6 UA, Google's response
+  // routes through fonts.gstatic.com/l/font?kit=... (subsetted TTF) — there's
+  // no `format(...)` clause, just a bare url. Trust the old-UA contract.
+  const match = css.match(/src:\s*url\((https?:\/\/[^)]+)\)/);
   if (!match) {
     throw new Error(
-      `No TTF/OTF URL in Google Fonts CSS for ${family}@${weight} — got: ${css.slice(0, 300)}`,
+      `No font URL in Google Fonts CSS for ${family}@${weight} — got: ${css.slice(0, 300)}`,
     );
   }
   const fontRes = await fetch(match[1]);
