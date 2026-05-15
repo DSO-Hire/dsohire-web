@@ -226,6 +226,10 @@ function InterviewProposalCard({
       const result = await bookInterviewSlot({
         proposalId: payload.proposal_id,
         optionId,
+        // In-thread booking is a one-click "yes" — the candidate
+        // doesn't get a notes field here. The dashboard booking flow
+        // remains the path for any optional message.
+        candidateNotes: null,
       });
       if (!result.ok) {
         setError(result.error);
