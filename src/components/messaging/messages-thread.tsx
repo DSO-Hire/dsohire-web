@@ -570,24 +570,40 @@ export function MessagesThread({
     }
   }
 
-  /* ── Keyboard shortcuts ── */
+  /* ── Keyboard shortcuts ──
+   *
+   * Chat convention (iMessage / Slack / Teams / LinkedIn / WhatsApp):
+   *   Enter         → send
+   *   Shift+Enter   → newline
+   *   Cmd/Ctrl+Enter → also sends (back-compat for muscle memory from
+   *                    the previous Gmail-style shortcut, and a no-op
+   *                    relative to Enter since both submit).
+   *
+   * We also DO NOT submit if the IME composition is active — that's
+   * the textarea's keyboard-composition state used by CJK input
+   * methods. Sending on the IME's Enter would eat their final commit.
+   */
   function handleComposerKeyDown(
     e: KeyboardEvent<HTMLTextAreaElement>
   ): void {
-    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-      e.preventDefault();
-      void handleSubmit();
-    }
+    if (e.key !== "Enter") return;
+    if (e.shiftKey) return; // newline
+    if (e.nativeEvent.isComposing) return; // IME compose — let it through
+    e.preventDefault();
+    void handleSubmit();
   }
 
   function handleEditKeyDown(e: KeyboardEvent<HTMLTextAreaElement>): void {
-    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-      e.preventDefault();
-      void handleEditSave();
-    } else if (e.key === "Escape") {
+    if (e.key === "Escape") {
       e.preventDefault();
       cancelEdit();
+      return;
     }
+    if (e.key !== "Enter") return;
+    if (e.shiftKey) return;
+    if (e.nativeEvent.isComposing) return;
+    e.preventDefault();
+    void handleEditSave();
   }
 
   /* ── Close ⋯ menu on outside click ── */
@@ -1021,7 +1037,8 @@ export function MessagesThread({
         </div>
         <div className="flex items-center gap-3 mt-1.5 text-[10px] text-slate-meta flex-wrap">
           <span>
-            <span className="font-mono">⌘↩</span> to send
+            <span className="font-mono">↩</span> sends,{" "}
+            <span className="font-mono">Shift+↩</span> for newline
           </span>
           <span className={remainingClass}>
             {remaining} characters left
