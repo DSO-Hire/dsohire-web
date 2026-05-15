@@ -19,6 +19,7 @@ import {
   ArrowLeftRight,
   BadgeCheck,
   Building2,
+  Check,
   Hammer,
   Stethoscope,
 } from "lucide-react";
@@ -97,9 +98,10 @@ function Hero() {
           agencies, no per-listing fees, no middlemen.
         </p>
 
-        {/* ── The equal-weight dual entry ── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[var(--rule)] border border-[var(--rule)] text-left">
+        {/* ── The equal-weight dual entry — bold full-color calling cards ── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-left">
           <DoorwayPanel
+            accent="ink"
             icon={Building2}
             eyebrow="For DSOs"
             title="Hiring across your practices"
@@ -113,14 +115,15 @@ function Hero() {
             href="/for-dsos"
           />
           <DoorwayPanel
+            accent="heritage"
             icon={Stethoscope}
             eyebrow="For Dental Professionals"
             title="Find your next dental role"
-            body="Browse real openings at verified dental support organizations and apply direct — hygiene, assisting, front desk, dentist, and specialist roles."
+            body="Browse real openings at verified dental support organizations and apply direct — from hygiene, assisting, and front desk to dentist, specialist, and corporate roles."
             points={[
               "Real roles at verified DSOs — no agency reposts",
               "Apply direct — free for dental professionals, forever",
-              "Every role is dental; every employer is a real group practice",
+              "Every employer is a verified DSO — clinical and corporate roles alike",
             ]}
             ctaLabel="Browse Dental Jobs"
             href="/for-candidates"
@@ -132,6 +135,7 @@ function Hero() {
 }
 
 function DoorwayPanel({
+  accent,
   icon: Icon,
   eyebrow,
   title,
@@ -140,6 +144,8 @@ function DoorwayPanel({
   ctaLabel,
   href,
 }: {
+  /** "ink" = navy block, "heritage" = green block. Equal weight, distinct identity. */
+  accent: "ink" | "heritage";
   icon: React.ComponentType<{ className?: string }>;
   eyebrow: string;
   title: string;
@@ -148,47 +154,54 @@ function DoorwayPanel({
   ctaLabel: string;
   href: string;
 }) {
+  const isInk = accent === "ink";
   return (
     <Link
       href={href}
-      className="group bg-white p-9 sm:p-10 flex flex-col motion-safe:transition-all motion-safe:duration-200 hover:bg-cream/40"
+      className={`group relative flex flex-col p-9 sm:p-10 text-ivory motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1 ${
+        isInk ? "bg-ink hover:bg-ink-soft" : "bg-heritage hover:bg-heritage-deep"
+      }`}
+      style={{ boxShadow: "0 26px 50px -26px rgba(7,15,28,0.32)" }}
     >
       <span
-        className="inline-flex items-center justify-center w-11 h-11 mb-5 text-heritage-deep"
-        style={{ background: "var(--heritage-tint)" }}
+        className="inline-flex items-center justify-center w-12 h-12 mb-6 bg-ivory/15 text-ivory"
         aria-hidden
       >
-        <Icon className="h-5 w-5" />
+        <Icon className="h-6 w-6" />
       </span>
 
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2.5">
+      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-ivory/65 mb-2.5">
         {eyebrow}
       </div>
-      <div className="text-[24px] sm:text-[26px] font-extrabold tracking-[-0.6px] leading-tight text-ink mb-3">
+      <div className="text-[26px] sm:text-[30px] font-extrabold tracking-[-0.7px] leading-tight text-ivory mb-3">
         {title}
       </div>
-      <p className="text-[14.5px] text-slate-body leading-[1.65] mb-6">
-        {body}
-      </p>
+      <p className="text-[14.5px] text-ivory/75 leading-[1.65] mb-6">{body}</p>
 
-      <ul className="list-none border-t border-[var(--rule)] pt-5 mb-7">
+      <ul className="list-none border-t border-ivory/15 pt-5 mb-8">
         {points.map((point) => (
           <li
             key={point}
-            className="text-[13.5px] text-slate-body py-1.5 flex items-start gap-2.5 leading-snug"
+            className="text-[13.5px] text-ivory/85 py-1.5 flex items-start gap-2.5 leading-snug"
           >
-            <span
+            <Check
+              className="h-4 w-4 flex-shrink-0 mt-0.5 text-ivory"
+              strokeWidth={3}
               aria-hidden
-              className="text-heritage font-extrabold flex-shrink-0"
-            >
-              ✓
-            </span>
+            />
             <span>{point}</span>
           </li>
         ))}
       </ul>
 
-      <span className="mt-auto inline-flex items-center gap-2 text-[12px] font-bold tracking-[1.8px] uppercase text-ink group-hover:text-heritage-deep transition-colors">
+      {/* CTA — each card wears the other lens's color so both pop */}
+      <span
+        className={`mt-auto inline-flex items-center justify-center gap-2.5 px-7 py-3.5 text-[12px] font-bold tracking-[2px] uppercase transition-colors ${
+          isInk
+            ? "bg-heritage text-ivory group-hover:bg-heritage-light"
+            : "bg-ink text-ivory group-hover:bg-ink-soft"
+        }`}
+      >
         {ctaLabel}
         <ArrowRight className="h-3.5 w-3.5 motion-safe:transition-transform motion-safe:group-hover:translate-x-1" />
       </span>
@@ -214,9 +227,10 @@ function MarketplaceBand() {
           DSOs need a steady pipeline of dental talent. Dental professionals
           need real openings at employers worth their time. Generic job boards
           serve neither well — so DSO Hire is dental-only on purpose. Every
-          employer is a verified support organization, every role is a dental
-          role, and both sides connect directly. That&apos;s why each audience
-          gets its own front door — equal weight, built with the same care.
+          employer is a verified dental support organization, the roles run
+          from chairside to the corporate teams behind a growing dental group,
+          and both sides connect directly. That&apos;s why each audience gets
+          its own front door — equal weight, built with the same care.
         </p>
       </div>
     </section>
@@ -231,7 +245,7 @@ const VALUE_PROPS = [
   {
     icon: BadgeCheck,
     title: "Dental-only, on purpose",
-    body: "Not a generic job board with a dental filter. Every employer is a verified dental support organization; every listing is a dental role. Both sides are pre-qualified before anyone says hello.",
+    body: "Not a generic job board with a dental filter. Every employer is a verified dental support organization, and every role — clinical or corporate — sits inside the dental industry. Both sides are pre-qualified before anyone says hello.",
   },
   {
     icon: ArrowLeftRight,
@@ -308,14 +322,14 @@ function ClosingDoorways() {
         <div className="flex flex-col sm:flex-row gap-3.5 justify-center">
           <Link
             href="/for-dsos"
-            className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-heritage text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
+            className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-ivory text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-ivory-deep transition-colors"
           >
             <Building2 className="h-4 w-4" />
             I&apos;m a DSO
           </Link>
           <Link
             href="/for-candidates"
-            className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-ivory text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-ivory-deep transition-colors"
+            className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-heritage text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
           >
             <Stethoscope className="h-4 w-4" />
             I&apos;m a Dental Professional
