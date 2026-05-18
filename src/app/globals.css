@@ -192,22 +192,29 @@ html, body {
 ───────────────────────────────────────── */
 .dso-prose,
 .dso-prose * {
-  /* Disable contextual-alternates substitution at every nesting level.
-     Manrope's "calt" feature otherwise rewrites (c)→©, (r)→®, (tm)→™
-     inside legal copy ("(a)/(b)/(c)" lists, "17 U.S.C. § 512(c)(3)") and
-     in any user-typed Tiptap content.
+  /* Disable EVERY OpenType substitution that rewrites (c)→©, (r)→®,
+     (tm)→™, "..." → "…", etc. in legal copy ("(a)/(b)/(c)" lists,
+     "17 U.S.C. § 512(c)(3)") and in any user-typed Tiptap content.
 
-     We use BOTH the high-level `font-variant-ligatures: no-contextual`
-     (CSS spec way) AND the low-level `font-feature-settings: "calt" 0`
-     (OpenType way) because Tailwind v4's preflight sets
-     `body { font-feature-settings: var(--default-font-feature-settings); }`
-     which can win cascade in some engines despite class specificity.
-     The universal-selector descendant pattern + !important guarantees
-     no <p>/<li> inside the prose wrapper picks up calt from anywhere.
+     Manrope ships the trademark substitutions as DISCRETIONARY
+     LIGATURES (`dlig`), NOT contextual alternates (`calt`) — verified
+     2026-05-18 when disabling calt alone left (c)→© rendering on
+     /legal/privacy in incognito. So we have to flip dlig 0 too.
+     hlig (historical) is killed defensively in case future Manrope
+     versions move the substitution.
+
+     We use BOTH the high-level `font-variant-ligatures` (CSS spec way)
+     AND the low-level `font-feature-settings` (OpenType way) because
+     Tailwind v4's preflight sets `body { font-feature-settings:
+     var(--default-font-feature-settings); }` which can win cascade in
+     some engines despite class specificity. The universal-selector
+     descendant pattern + !important guarantees no <p>/<li> inside the
+     prose wrapper picks up any of these features from anywhere.
 
      Standard ligatures (fi, fl) remain enabled via common-ligatures. */
-  font-variant-ligatures: common-ligatures no-contextual !important;
-  font-feature-settings: "liga" 1, "calt" 0 !important;
+  font-variant-ligatures: common-ligatures no-discretionary-ligatures
+    no-contextual no-historical-ligatures !important;
+  font-feature-settings: "liga" 1, "calt" 0, "dlig" 0, "hlig" 0 !important;
 }
 .dso-prose h2 {
   font-size: 1.25rem;
