@@ -1,6 +1,6 @@
 ---
 title: Terms of Service
-effectiveDate: 2026-04-30
+effectiveDate: 2026-05-17
 ---
 
 ## 1. Acceptance of these Terms
@@ -17,9 +17,20 @@ You must be at least 18 years old and capable of entering into a binding contrac
 
 Some features of the Services require you to register an account. You agree to: (a) provide accurate, current, and complete information; (b) maintain and promptly update your information; (c) keep your password confidential and secure; (d) not share your account with anyone; and (e) notify us immediately of any unauthorized access. You are responsible for all activity under your account.
 
-## 4. Acceptable use
+## 4. Acceptable use and user covenants
 
-Your use of the Services is subject to our Acceptable Use Policy, which is incorporated by reference into these Terms. Violations of the Acceptable Use Policy may result in suspension or termination of your account.
+Your use of the Services is subject to our Acceptable Use Policy, which is incorporated by reference into these Terms. The Acceptable Use Policy describes in detail the conduct and content prohibited on the Services. Without limiting that policy, by accessing or using the Services you specifically agree that you will not, and will not authorize any person acting on your behalf to:
+
+- Post job listings, screening questions, interview prompts, or messaging content that solicits, suggests a preference for, or filters candidates based on a protected characteristic — including race, color, religion, sex, sexual orientation, gender identity, national origin, age (40+), disability, genetic information, marital status, pregnancy or family status, citizenship status, or military or veteran status — or that uses coded language designed to signal such a preference.
+- Solicit or attempt to extract from any candidate the categories of information that DSO Hire deliberately does not collect (see Privacy Policy, Section 3.4), or otherwise circumvent the platform's hiring-data minimization protections.
+- Post fraudulent, misleading, duplicative, or non-existent job listings; misrepresent your organization or affiliation; or impersonate any candidate, employer, or DSO Hire personnel.
+- Harass, threaten, defame, demean, or use abusive or hateful language toward any other user, including candidates, employers, or DSO Hire personnel.
+- Scrape, crawl, harvest, reverse-engineer, or otherwise extract data from the Services through automated means, or circumvent any access, rate-limiting, or security control.
+- Use the Services in violation of any equal-employment-opportunity, wage-and-hour, pay-transparency, anti-discrimination, or other applicable law.
+
+**Violation of any of the above — or of the Acceptable Use Policy more broadly — may result in immediate suspension or termination of your account, removal of any postings or content you have submitted, forfeiture of any prepaid subscription fees (no refund is provided for termination for cause), and referral of the conduct to law enforcement or affected parties where appropriate.** We are not obligated to provide advance warning, supporting evidence, or detailed reasons before acting on a serious violation.
+
+DSO Hire LLC reserves the right, in our sole discretion and at any time, with or without notice, to review any account, posting, or piece of content; to remove or modify any content; and to suspend or terminate any account that we determine, based on whatever evidence we deem sufficient, has violated these Terms, the Acceptable Use Policy, or applicable law, or that poses a risk to other users or to the integrity of the Services.
 
 ## 5. User content
 
@@ -29,7 +40,7 @@ You represent and warrant that: (a) you have the rights necessary to grant the l
 
 ## 6. Our intellectual property
 
-All right, title, and interest in and to the Services (other than User Content), including the source code, design, trademarks, logos, text, graphics, and arrangement of all content, are owned by DSO Hire LLC or its licensors and are protected by copyright, trademark, and other intellectual property laws. Nothing in these Terms grants you any right or license to use any DSO Hire LLC trademark, logo, or branding without our prior written consent. The mark DSO HIRE™ is a trademark of DSO Hire LLC.
+All right, title, and interest in and to the Services (other than User Content), including the source code, design, logos, text, graphics, and arrangement of all content, are owned by DSO Hire LLC or its licensors and are protected by copyright and other intellectual property laws. DSO Hire LLC reserves all rights in the "DSO Hire" name, the DSO Hire logo, and the Services' overall look and feel, including any common-law rights that arise from use in commerce. Nothing in these Terms grants you any right or license to use these brand assets, in whole or in part, without our prior written consent.
 
 ## 7. Third-party services and links
 
@@ -51,7 +62,7 @@ You agree to indemnify, defend, and hold harmless DSO Hire LLC and its members, 
 
 ## 11. Termination
 
-We may suspend or terminate your access to the Services at any time, with or without cause and with or without notice, including for violation of these Terms or the Acceptable Use Policy. You may terminate your account at any time by contacting info@dsohire.com or using the in-product account closure tool. Sections 5 (license grant in User Content), 6, 8, 9, 10, 12, 13, and 14 survive termination.
+We may suspend or terminate your access to the Services at any time, with or without cause and with or without notice, including for any violation of Section 4 (Acceptable Use and User Covenants) or the Acceptable Use Policy. Where we terminate for cause, no refund of any prepaid subscription fee is owed, and you remain liable for any amounts accrued prior to termination. You may terminate your own account at any time by contacting info@dsohire.com or using the in-product account closure tool; voluntary termination does not entitle you to a pro-rated refund of fees already paid for the current billing period. Sections 4 (with respect to content already submitted), 5 (license grant in User Content), 6, 8, 9, 10, 12, 13, and 14 survive termination.
 
 ## 12. Governing law and dispute resolution
 

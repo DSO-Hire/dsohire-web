@@ -1,6 +1,6 @@
 ---
 title: Acceptable Use Policy
-effectiveDate: 2026-04-30
+effectiveDate: 2026-05-17
 ---
 
 ## 1. Purpose
@@ -58,7 +58,7 @@ If you believe a user, posting, or piece of content violates this Acceptable Use
 
 ## 4. Enforcement
 
-We may, in our sole discretion: (a) remove or modify violating content; (b) issue warnings; (c) suspend or terminate accounts; (d) refuse to provide the Services to any individual or entity; and (e) report violations to law enforcement or affected parties. DSO Hire LLC is not obligated to monitor user content but reserves the right to do so.
+We may, in our sole discretion and without prior notice: (a) remove or modify violating content; (b) issue warnings; (c) suspend or terminate accounts, immediately and without refund where the violation is serious; (d) refuse to provide the Services to any individual or entity; (e) report violations to law enforcement, affected candidates, employers, or other parties; and (f) preserve and disclose related records as needed to support enforcement, investigation, or legal process. DSO Hire LLC is not obligated to monitor user content but reserves the right to do so at any time. Our failure to act on any specific violation is not a waiver of our right to act on any other violation, whether earlier, later, or similar.
 
 ## 5. No waiver
 

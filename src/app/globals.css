@@ -190,6 +190,14 @@ html, body {
    Used by both <JobDescriptionEditor /> (preview) and
    <RenderedJobDescription /> (public render). One source of truth.
 ───────────────────────────────────────── */
+.dso-prose {
+  /* Disable contextual-alternates substitution.
+     Manrope's "calt" feature otherwise rewrites (c)→©, (r)→®, (tm)→™
+     inside legal copy ("(a)/(b)/(c)" lists, "17 U.S.C. § 512(c)(3)") and
+     in any user-typed Tiptap content. Standard ligatures (fi, fl)
+     remain enabled via "liga" 1. */
+  font-feature-settings: "liga" 1, "calt" 0;
+}
 .dso-prose h2 {
   font-size: 1.25rem;
   font-weight: 700;
