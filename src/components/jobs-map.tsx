@@ -345,26 +345,29 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
 
       mapRef.current = map;
 
-      // BULLETPROOF SETUP via polling + multi-event fallback, plus
-      // diagnostic console logging while the initial-load bug is
-      // being chased down. When the bug is confirmed fixed, the
-      // [JobsMap] logs can be quietly stripped.
-      console.log("[JobsMap] init: token present, map constructed");
+      // BULLETPROOF SETUP — race-free initial-layer attachment.
+      //
+      // Mapbox 3.10 fires `load` and `style.load` in non-deterministic
+      // order. Aggressive ad blockers (blocking events.mapbox.com)
+      // appear to amplify the race. Three strategies in priority order:
+      //   1. Poll map.loaded() every 50ms — race-free, eventually fires
+      //   2. Multi-event handlers (load + idle + style.load) — first
+      //      one to fire wins; subsequent calls no-op via the
+      //      initialSetupDone guard
+      //   3. style.load fallback — if it fires BEFORE initial setup
+      //      is done (the bug surface), it runs setup INSTEAD OF
+      //      dropping the event
+      //
+      // attachLocationLayers wrapped in try/catch so silent Mapbox
+      // failures surface as console.error instead of swallowing.
+      //
+      // See reference_mapbox_load_event_order.md in memory for the
+      // full investigation history.
       let initialSetupDone = false;
-      let setupAttempts = 0;
 
-      const runSetup = (source: string) => {
-        setupAttempts += 1;
-        console.log(
-          `[JobsMap] runSetup called from ${source}, ` +
-            `cancelled=${cancelled} done=${initialSetupDone} ` +
-            `loaded=${map.loaded?.()} attempt=${setupAttempts}`
-        );
+      const runSetup = () => {
         if (cancelled || initialSetupDone) return;
         const currentMetros = metroGroupsRef.current;
-        console.log(
-          `[JobsMap] attaching layers for ${currentMetros.length} metro(s)`
-        );
         try {
           attachLocationLayers(map, currentMetros);
           wireLayerInteractions(map, {
@@ -387,51 +390,39 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
           }
           initialSetupDone = true;
           setMapReady(true);
-          console.log("[JobsMap] setup complete; pins should be visible");
         } catch (err) {
           console.error("[JobsMap] attachLocationLayers threw:", err);
         }
       };
 
-      // Polling driver — 50ms tick, max ~6 seconds. Stops once
-      // initialSetupDone or cancelled. Race-free regardless of when
-      // events fire.
+      // Polling driver — 50ms tick, ~6s max. Stops once
+      // initialSetupDone, cancelled, or timeout.
       let pollTicks = 0;
       const pollHandle = setInterval(() => {
         pollTicks += 1;
-        if (cancelled || initialSetupDone) {
+        if (cancelled || initialSetupDone || pollTicks > 120) {
           clearInterval(pollHandle);
           return;
         }
         if (map.loaded?.()) {
           clearInterval(pollHandle);
-          runSetup("polling");
-        }
-        if (pollTicks > 120) {
-          console.warn(
-            "[JobsMap] polling gave up after 6s — map.loaded() never returned true"
-          );
-          clearInterval(pollHandle);
+          runSetup();
         }
       }, 50);
 
-      // Belt-and-suspenders event bindings. Whichever fires first
-      // wins; the rest are no-ops due to the initialSetupDone guard.
-      map.on("load", () => runSetup("load event"));
-      map.on("idle", () => runSetup("idle event"));
+      // Belt-and-suspenders event bindings.
+      map.on("load", runSetup);
+      map.on("idle", runSetup);
 
-      // Re-attach after a style swap (user toggles Streets/Satellite).
-      // Mapbox wipes the custom source + layers on setStyle.
+      // Re-attach after a style swap. If initial setup hasn't run
+      // yet (style.load fired first — the bug surface), run setup
+      // from THIS path instead of dropping the event.
       const reattachAfterStyleSwap = () => {
         if (cancelled) return;
         if (!initialSetupDone) {
-          // If initial setup hasn't run yet (race), run it now via
-          // the style.load path. Better than dropping the event.
-          console.log("[JobsMap] style.load fired pre-initial-setup, running setup");
-          runSetup("style.load fallback");
+          runSetup();
           return;
         }
-        console.log("[JobsMap] style.load (swap) — re-attaching layers");
         const currentMetros = metroGroupsRef.current;
         try {
           attachLocationLayers(map, currentMetros);
