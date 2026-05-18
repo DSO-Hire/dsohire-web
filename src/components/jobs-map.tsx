@@ -72,8 +72,41 @@ export interface JobsMapLocation {
     employment_type: string;
     role_category: string;
     dso_id: string;
+    /**
+     * The DISPLAYED employer name — already affiliation-masked
+     * server-side via the `public_dso_affiliation` rule in
+     * src/app/jobs/page.tsx. For jobs at locations marked
+     * public_dso_affiliation: false, this is the practice name
+     * (e.g., "67 Dental"), NEVER the parent DSO name. The drawer
+     * groups by this field so private-affiliation practices appear
+     * as their own sections, not bundled under their parent DSO.
+     */
     dso_name: string;
   }>;
+}
+
+/**
+ * MetroGroup — locations aggregated by city+state into a single map pin.
+ *
+ * Cam direction 2026-05-18 PM: "instead of locations being separate,
+ * each city gets a pin and then all the jobs pop down from that city."
+ * The earlier coordinate-snap fix wasn't aggressive enough: Mission Rd
+ * Fake Dental and 67 Dental + PV FAMily Dent all in Prairie Village
+ * snapped to slightly-different grid cells and rendered as 2-3 pins
+ * for one city. Metro grouping eliminates this entirely by aggregating
+ * at the city+state level regardless of geographic precision.
+ */
+interface MetroGroup {
+  key: string; // city|state
+  city: string;
+  state: string;
+  /** Pin position — average of constituent locations for natural centering. */
+  latitude: number;
+  longitude: number;
+  /** All locations in this metro (1+). */
+  locations: JobsMapLocation[];
+  /** Total open roles across all locations. */
+  jobCount: number;
 }
 
 interface JobsMapProps {
@@ -96,28 +129,16 @@ const STYLE_STORAGE_KEY = "dsohire:map-style";
 
 /* Clustering config.
  *
- * clusterRadius: 65px (slightly above Mapbox default 50) — gives a
- * small overlap tolerance for nearby pins so the visual is "they
- * cluster" rather than "they overlap with neither winning visual
- * priority." Counterbalanced by COORD_SNAP_DECIMALS below.
+ * After the metro-level aggregation rework (2026-05-18), each MetroGroup
+ * already represents a city+state-level pin. Clustering at the Mapbox
+ * level only kicks in at LOW zoom when adjacent metros (e.g., KC + Lee's
+ * Summit) sit close enough on screen to merge into a regional pin.
  *
- * clusterMaxZoom: 12 — beyond this, pins stop clustering. At zoom
- * 12 a typical metro spans ~3-5km, which is right for distinguishing
- * neighborhoods within a city.
- *
- * COORD_SNAP_DECIMALS: 3 — locations are snapped to a ~110m grid
- * before being fed to Mapbox. Two practices both geocoded to a city
- * centroid will land at IDENTICAL coordinates after the snap, even
- * if the geocoder returned slightly-different values for each
- * (e.g. PV FAMily Dent at 38.9891 vs 67 Dental at 38.9888 both
- * become 38.989). Identical coords always cluster, so the visual
- * is one pin with the aggregated role count instead of two
- * overlapping pins. The privacy story doesn't change — we were
- * already at city-centroid precision.
+ * clusterRadius: 65px — generous catchment for the regional-pin case.
+ * clusterMaxZoom: 11 — beyond this, individual metro pins appear.
  */
 const CLUSTER_RADIUS_PX = 65;
-const CLUSTER_MAX_ZOOM = 12;
-const COORD_SNAP_DECIMALS = 3;
+const CLUSTER_MAX_ZOOM = 11;
 
 const ROLE_LABELS: Record<string, string> = {
   dentist: "Dentist",
@@ -143,23 +164,59 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
   const mapRef = useRef<MapboxMap | null>(null);
   const popupRef = useRef<MapboxPopup | null>(null);
   const initialFitDoneRef = useRef(false);
-  /* Latest locations kept in a ref so the style.load handler (attached
-   * once at init) always re-attaches the source + layers with the
-   * freshest data. */
-  const locationsRef = useRef<JobsMapLocation[]>(locations);
-  locationsRef.current = locations;
-  /* Quick lookup by location id — used when expanding a cluster to
-   * the drawer (cluster click returns leaf feature ids, we resolve
-   * back to JobsMapLocation entries). */
-  const locationByIdRef = useRef<Map<string, JobsMapLocation>>(
-    new Map(locations.map((l) => [l.id, l]))
-  );
-  locationByIdRef.current = new Map(locations.map((l) => [l.id, l]));
+  /* Metro-aggregate the raw locations into one MetroGroup per city+state.
+   * Locations without city or state fall back to their own metro keyed
+   * on their id so they don't aggregate with unrelated rows. */
+  const metroGroups = useMemo<MetroGroup[]>(() => {
+    const groups = new Map<string, MetroGroup>();
+    for (const loc of locations) {
+      const cityKey = (loc.city ?? "").trim().toLowerCase();
+      const stateKey = (loc.state ?? "").trim().toUpperCase();
+      // Locations missing city or state get a unique key so they show
+      // as their own pin instead of polluting a metro bucket.
+      const key =
+        cityKey && stateKey ? `${cityKey}|${stateKey}` : `loc:${loc.id}`;
+      const existing = groups.get(key);
+      if (existing) {
+        existing.locations.push(loc);
+        existing.jobCount += loc.jobs.length;
+        // Running mean of lat/lng so the metro pin sits in the middle
+        // of all its constituent practice centroids.
+        const n = existing.locations.length;
+        existing.latitude =
+          existing.latitude + (loc.latitude - existing.latitude) / n;
+        existing.longitude =
+          existing.longitude + (loc.longitude - existing.longitude) / n;
+      } else {
+        groups.set(key, {
+          key,
+          city: loc.city ?? "",
+          state: loc.state ?? "",
+          latitude: loc.latitude,
+          longitude: loc.longitude,
+          locations: [loc],
+          jobCount: loc.jobs.length,
+        });
+      }
+    }
+    return Array.from(groups.values());
+  }, [locations]);
 
-  /* Drawer state holds an ARRAY of locations because a cluster click
-   * at max zoom (same-centroid case) needs to display every location
-   * the user just selected. A single-pin click sets a 1-element array. */
-  const [drawerLocations, setDrawerLocations] = useState<JobsMapLocation[]>([]);
+  /* Latest metro groups kept in a ref so the style.load handler always
+   * re-attaches the source + layers with the freshest data. */
+  const metroGroupsRef = useRef<MetroGroup[]>(metroGroups);
+  metroGroupsRef.current = metroGroups;
+  /* Quick lookup by metro key — used to resolve a clicked pin back to
+   * the underlying locations (we pass the key as the feature property). */
+  const metroByKeyRef = useRef<Map<string, MetroGroup>>(
+    new Map(metroGroups.map((g) => [g.key, g]))
+  );
+  metroByKeyRef.current = new Map(metroGroups.map((g) => [g.key, g]));
+
+  /* Drawer opens for a single METRO group (city+state). The drawer
+   * renders all of the metro's locations, with jobs grouped by their
+   * displayed DSO name (already affiliation-masked server-side). */
+  const [drawerMetro, setDrawerMetro] = useState<MetroGroup | null>(null);
   const [locating, setLocating] = useState(false);
   const [locateError, setLocateError] = useState<string | null>(null);
   const [mapReady, setMapReady] = useState(false);
@@ -174,17 +231,22 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
 
-  const totalDrawerJobs = useMemo(
-    () => drawerLocations.reduce((sum, l) => sum + l.jobs.length, 0),
-    [drawerLocations]
-  );
-
-  /* Group drawer jobs by DSO so cluster expansion clearly shows which
-   * practice each job belongs to. Sort groups by job count desc so the
-   * most-active DSO appears first. */
+  /* Group drawer jobs by their DISPLAYED DSO name.
+   *
+   * 2026-05-18 — privacy leak fix. Grouping by job.dso_id collapsed
+   * private-affiliation practices into their parent DSO bucket, since
+   * dso_id was always the parent. Grouping by job.dso_name uses the
+   * already-affiliation-masked name (e.g., "67 Dental" for private
+   * locations, "dso hire" for public ones), so private practices
+   * appear as their own sections without visual connection to the
+   * parent. This is the load-bearing fix that closes the leak.
+   *
+   * Edge case: two unrelated DSOs with the same displayed name would
+   * collapse into one bucket. We accept that — a strictly more private
+   * outcome than the alternative.
+   */
   const drawerDsoGroups = useMemo(() => {
     type DsoGroup = {
-      dsoId: string;
       dsoName: string;
       jobs: Array<{
         id: string;
@@ -195,9 +257,11 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
       }>;
     };
     const groups = new Map<string, DsoGroup>();
-    for (const loc of drawerLocations) {
+    if (!drawerMetro) return [];
+    for (const loc of drawerMetro.locations) {
       for (const job of loc.jobs) {
-        const existing = groups.get(job.dso_id);
+        const key = job.dso_name; // displayed (masked) name
+        const existing = groups.get(key);
         if (existing) {
           existing.jobs.push({
             id: job.id,
@@ -207,8 +271,7 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
             locationName: loc.name,
           });
         } else {
-          groups.set(job.dso_id, {
-            dsoId: job.dso_id,
+          groups.set(key, {
             dsoName: job.dso_name,
             jobs: [
               {
@@ -226,7 +289,9 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
     return Array.from(groups.values()).sort(
       (a, b) => b.jobs.length - a.jobs.length
     );
-  }, [drawerLocations]);
+  }, [drawerMetro]);
+
+  const totalDrawerJobs = drawerMetro?.jobCount ?? 0;
 
   /* ── Hydrate style preference from localStorage on mount ────── */
   useEffect(() => {
@@ -271,27 +336,50 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
         attributionControl: false,
       });
 
-      // CRITICAL ORDERING — register the style.load handler IMMEDIATELY
-      // after construction. Mapbox loads the initial style asynchronously
-      // but FAST when cached; if we attach controls / refs first, the
-      // initial style.load can fire BEFORE the handler is registered and
-      // we miss the only chance to attach our source + layers (until the
-      // user toggles a style which fires another style.load). That was
-      // the "data only appears after clicking Streets/Satellite" bug.
-      const handleStyleLoad = () => {
-        if (cancelled) return;
-        const currentLocations = locationsRef.current;
-        attachLocationLayers(map, currentLocations);
+      popupRef.current = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        offset: 14,
+        className: "dsohire-map-popup",
+      });
+
+      mapRef.current = map;
+
+      // ROBUST LOAD HANDLING — separates "first-ever setup" from
+      // "re-attach after style swap" so the two paths don't race or
+      // double-fire.
+      //
+      // - `load` fires once when initial style + assets are ready.
+      //   Handles the cold-cache case.
+      // - `map.loaded()` returns true synchronously if the map is
+      //   ALREADY loaded by the time we check. Handles the hot-cache
+      //   case where the load event already fired before we attached
+      //   our listener.
+      // - `style.load` fires on EVERY style load, including swaps.
+      //   We use it to re-attach the source + layers (Mapbox wipes
+      //   them on setStyle).
+      //
+      // The earlier 'style.load only' approach missed the hot-cache
+      // case despite the isStyleLoaded check — likely because the
+      // event had already fired and our `.on()` was too late to bind.
+      // Splitting into `load` (idempotent first-time setup) +
+      // `style.load` (post-init re-attach only) is the textbook fix.
+      let initialSetupDone = false;
+      const initialSetup = () => {
+        if (cancelled || initialSetupDone) return;
+        initialSetupDone = true;
+        const currentMetros = metroGroupsRef.current;
+        attachLocationLayers(map, currentMetros);
         wireLayerInteractions(map, {
-          getLocation: (id: string) => locationByIdRef.current.get(id) ?? null,
-          openDrawer: (locs) => setDrawerLocations(locs),
+          getMetro: (key: string) =>
+            metroByKeyRef.current.get(key) ?? null,
+          openDrawer: (metro) => setDrawerMetro(metro),
           popup: popupRef.current,
         });
-
-        if (!initialFitDoneRef.current && currentLocations.length > 0) {
+        if (!initialFitDoneRef.current && currentMetros.length > 0) {
           const bounds = new mapboxgl.LngLatBounds();
-          for (const loc of currentLocations) {
-            bounds.extend([loc.longitude, loc.latitude]);
+          for (const m of currentMetros) {
+            bounds.extend([m.longitude, m.latitude]);
           }
           map.fitBounds(bounds, {
             padding: { top: 80, bottom: 80, left: 80, right: 80 },
@@ -300,14 +388,33 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
           });
           initialFitDoneRef.current = true;
         }
-
         setMapReady(true);
       };
-      map.on("style.load", handleStyleLoad);
-      // Belt-and-suspenders: if the style is ALREADY loaded by the time
-      // this code path completes (heavily cached scenarios), the event
-      // won't fire again. Trigger the handler manually.
-      if (map.isStyleLoaded?.()) handleStyleLoad();
+
+      const reattachAfterStyleSwap = () => {
+        if (cancelled) return;
+        // Skip the first style.load — that's covered by initialSetup
+        // via the `load` event / loaded() check. Only re-attach on
+        // SUBSEQUENT style swaps.
+        if (!initialSetupDone) return;
+        const currentMetros = metroGroupsRef.current;
+        attachLocationLayers(map, currentMetros);
+        wireLayerInteractions(map, {
+          getMetro: (key: string) =>
+            metroByKeyRef.current.get(key) ?? null,
+          openDrawer: (metro) => setDrawerMetro(metro),
+          popup: popupRef.current,
+        });
+      };
+
+      if (map.loaded?.()) {
+        // Hot cache path: map is already loaded; run setup synchronously.
+        initialSetup();
+      } else {
+        // Cold cache path: wait for the load event.
+        map.once("load", initialSetup);
+      }
+      map.on("style.load", reattachAfterStyleSwap);
 
       map.addControl(
         new mapboxgl.AttributionControl({ compact: true }),
@@ -317,15 +424,6 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
         new mapboxgl.NavigationControl({ showCompass: false }),
         "top-right"
       );
-
-      popupRef.current = new mapboxgl.Popup({
-        closeButton: false,
-        closeOnClick: false,
-        offset: 14,
-        className: "dsohire-map-popup",
-      });
-
-      mapRef.current = map;
     })();
 
     return () => {
@@ -353,15 +451,15 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
     }
   }, [mapStyleId, mapReady]);
 
-  /* ── Refresh data when locations prop changes ──────────────── */
+  /* ── Refresh data when metro groups change ──────────────── */
   useEffect(() => {
     if (!mapReady || !mapRef.current) return;
     const source = mapRef.current.getSource(
       "dsohire-locations"
     ) as GeoJSONSourceWithCluster | undefined;
     if (!source) return;
-    source.setData(buildLocationFeatures(locations));
-  }, [locations, mapReady]);
+    source.setData(buildLocationFeatures(metroGroups));
+  }, [metroGroups, mapReady]);
 
   /* ── Search by location ────────────────────────────────────── */
   const handleSearch = async (e: React.FormEvent) => {
@@ -582,23 +680,19 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
         Pins show role counts at the metro level — never an office address.
       </div>
 
-      {/* Side drawer — renders for either single-location or cluster
-          selection. The cluster case aggregates jobs across every
-          location in the cluster. */}
-      {drawerLocations.length > 0 && (
+      {/* Side drawer — opens for a single metro (city+state group).
+          Renders all locations in the metro with jobs grouped by
+          displayed DSO name (affiliation-masked server-side). */}
+      {drawerMetro && (
         <div
           className="absolute top-0 right-0 bottom-0 w-full sm:w-[420px] bg-white border-l border-[var(--rule)] shadow-lg overflow-y-auto"
           role="dialog"
-          aria-label={
-            drawerLocations.length === 1
-              ? `Jobs at ${drawerLocations[0].name}`
-              : `Jobs across ${drawerLocations.length} practices`
-          }
+          aria-label={`Jobs in ${drawerMetro.city || "this metro"}`}
         >
           <div className="p-6 sm:p-7">
             <button
               type="button"
-              onClick={() => setDrawerLocations([])}
+              onClick={() => setDrawerMetro(null)}
               className="absolute top-4 right-4 p-1.5 text-slate-meta hover:text-ink hover:bg-cream transition-colors"
               aria-label="Close"
             >
@@ -606,31 +700,27 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
             </button>
 
             <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
-              {drawerLocations.length === 1
-                ? "Jobs at this location"
-                : `Jobs across ${drawerLocations.length} practices`}
+              {drawerMetro.locations.length === 1
+                ? "Jobs in this metro"
+                : `Jobs across ${drawerMetro.locations.length} practices`}
             </div>
             <h2 className="text-2xl font-extrabold tracking-[-0.5px] text-ink leading-tight mb-1.5">
-              {drawerLocations.length === 1
-                ? drawerLocations[0].name
-                : metroSummary(drawerLocations)}
+              {[drawerMetro.city, drawerMetro.state]
+                .filter(Boolean)
+                .join(", ") || "This metro"}
             </h2>
             <p className="text-[13px] text-slate-meta tracking-[0.3px] mb-6">
-              {totalDrawerJobs === 1 ? "1 open role" : `${totalDrawerJobs} open roles`}
-              {drawerLocations.length === 1 &&
-                ` · ${[drawerLocations[0].city, drawerLocations[0].state]
-                  .filter(Boolean)
-                  .join(", ")}`}
+              {totalDrawerJobs === 1
+                ? "1 open role"
+                : `${totalDrawerJobs} open roles`}
             </p>
 
             {totalDrawerJobs === 0 ? (
               <p className="text-[14px] text-slate-meta italic">
-                No active jobs at this location right now.
+                No active jobs in this metro right now.
               </p>
             ) : drawerDsoGroups.length === 1 ? (
-              // Single-DSO case (most common — single-location cluster
-              // OR cluster of locations all owned by one DSO). Flat list
-              // without redundant DSO headers since the DSO is implied.
+              // Single-DSO metro — flat list, no redundant DSO header.
               <ul className="space-y-3 list-none">
                 {drawerDsoGroups[0].jobs.map((job) => (
                   <li key={job.id}>
@@ -648,7 +738,8 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
                       <div className="flex items-center justify-between">
                         <span className="text-[13px] text-slate-body">
                           {drawerDsoGroups[0].dsoName}
-                          {drawerLocations.length > 1 && ` · ${job.locationName}`}
+                          {drawerMetro.locations.length > 1 &&
+                            ` · ${job.locationName}`}
                         </span>
                         <ArrowRight className="h-3.5 w-3.5 text-heritage-deep opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
@@ -657,11 +748,13 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
                 ))}
               </ul>
             ) : (
-              // Multi-DSO cluster — group jobs under per-DSO headers so
-              // users instantly see which practice each role belongs to.
+              // Multi-DSO metro — group jobs under per-DSO headers
+              // (using the DISPLAYED dso name; private-affiliation
+              // practices appear as their own sections, never bundled
+              // under their parent DSO).
               <div className="space-y-7">
                 {drawerDsoGroups.map((group) => (
-                  <section key={group.dsoId}>
+                  <section key={group.dsoName}>
                     <header className="flex items-baseline justify-between gap-3 mb-3 pb-2 border-b border-[var(--rule)]">
                       <h3 className="text-[15px] font-extrabold tracking-[-0.2px] text-ink">
                         {group.dsoName}
@@ -710,17 +803,6 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
  * Helpers
  * ───────────────────────────────────────────────────────────── */
 
-/** Human-friendly summary line for a cluster drawer. */
-function metroSummary(locations: JobsMapLocation[]): string {
-  // All locations in a cluster typically share city+state since they
-  // share a centroid. Use the first one as the title; fall back to
-  // a generic header.
-  const first = locations[0];
-  if (!first) return "Jobs at this metro";
-  const cityState = [first.city, first.state].filter(Boolean).join(", ");
-  return cityState || `${locations.length} practices in this metro`;
-}
-
 /* ───────────────────────────────────────────────────────────────
  * GeoJSON feature builder.
  *
@@ -730,34 +812,24 @@ function metroSummary(locations: JobsMapLocation[]): string {
  * jobCount. The old polygon-circle approximation is gone.
  * ───────────────────────────────────────────────────────────── */
 
-function snapCoord(value: number): number {
-  // Round to COORD_SNAP_DECIMALS decimal places via integer math
-  // to avoid floating-point noise. 3 decimals ≈ 110m grid.
-  const factor = Math.pow(10, COORD_SNAP_DECIMALS);
-  return Math.round(value * factor) / factor;
-}
-
-function buildLocationFeatures(locations: JobsMapLocation[]): unknown {
-  const features = locations.map((loc) => ({
+function buildLocationFeatures(metros: MetroGroup[]): unknown {
+  // ONE Point feature per metro (city+state group). The metro's
+  // latitude/longitude is already the mean of its constituent
+  // practice centroids (see metroGroups useMemo). No coordinate
+  // snapping needed at this layer — the metro-level aggregation
+  // makes it unnecessary.
+  const features = metros.map((m) => ({
     type: "Feature" as const,
     geometry: {
       type: "Point" as const,
-      // Snap to a ~110m grid so locations that share a city centroid
-      // but received slightly-different geocoder responses land at
-      // EXACTLY the same coordinates and cluster cleanly. See the
-      // COORD_SNAP_DECIMALS comment above.
-      coordinates: [snapCoord(loc.longitude), snapCoord(loc.latitude)],
+      coordinates: [m.longitude, m.latitude],
     },
     properties: {
-      id: loc.id,
-      jobCount: loc.jobs.length,
-      // Carry city/state through to feature properties so the
-      // single-pin city-name label layer can read them via expressions.
-      // Cluster pins don't carry this since Mapbox clusterProperties
-      // only supports numeric aggregation — clusters get city via the
-      // async leaf-lookup in the hover popup.
-      city: loc.city ?? "",
-      state: loc.state ?? "",
+      key: m.key,
+      jobCount: m.jobCount,
+      practiceCount: m.locations.length,
+      city: m.city,
+      state: m.state,
     },
   }));
   return { type: "FeatureCollection", features };
@@ -779,19 +851,33 @@ function buildLocationFeatures(locations: JobsMapLocation[]): unknown {
 
 function attachLocationLayers(
   map: MapboxMap,
-  locations: JobsMapLocation[]
+  metros: MetroGroup[]
 ): void {
+  // Defensive: if we're re-attaching after a style swap, the source
+  // may still exist. Removing layers first prevents Mapbox throwing
+  // on duplicate-add.
+  for (const id of [
+    "dsohire-clusters",
+    "dsohire-clusters-count",
+    "dsohire-points",
+    "dsohire-points-count",
+    "dsohire-points-city",
+  ]) {
+    if (map.getLayer?.(id)) map.removeLayer(id);
+  }
+  if (map.getSource?.("dsohire-locations")) map.removeSource("dsohire-locations");
+
   map.addSource("dsohire-locations", {
     type: "geojson",
-    data: buildLocationFeatures(locations),
+    data: buildLocationFeatures(metros),
     cluster: true,
     clusterMaxZoom: CLUSTER_MAX_ZOOM,
     clusterRadius: CLUSTER_RADIUS_PX,
-    // Sum the jobCount property across every feature in each cluster
-    // so the cluster pin shows the total role count, not a count of
-    // locations.
+    // Sum the jobCount + practiceCount across features in each cluster
+    // so the cluster pin can show totals across the multi-metro region.
     clusterProperties: {
       jobCount: ["+", ["get", "jobCount"]],
+      practiceCount: ["+", ["get", "practiceCount"]],
     },
   });
 
@@ -908,8 +994,8 @@ function attachLocationLayers(
 }
 
 interface InteractionHandlers {
-  getLocation: (id: string) => JobsMapLocation | null;
-  openDrawer: (locations: JobsMapLocation[]) => void;
+  getMetro: (key: string) => MetroGroup | null;
+  openDrawer: (metro: MetroGroup) => void;
   popup: MapboxPopup | null;
 }
 
@@ -917,10 +1003,9 @@ function wireLayerInteractions(
   map: MapboxMap,
   handlers: InteractionHandlers
 ): void {
-  /* Cluster click — try to expand the cluster by zooming in. If the
-   * expansion zoom is at-or-above clusterMaxZoom (the same-centroid
-   * case where zooming won't break the cluster apart), open the
-   * drawer with every location in the cluster instead. */
+  /* Cluster click — clusters now group MULTIPLE METROS together at
+   * low zoom. Always expansion-zoom on click; metros are always at
+   * different coords so zooming will break them apart. */
   map.on("click", "dsohire-clusters", (e: unknown) => {
     const ev = e as {
       features?: Array<{
@@ -941,59 +1026,49 @@ function wireLayerInteractions(
 
     source.getClusterExpansionZoom(clusterId, (err, expansionZoom) => {
       if (err) return;
-      const currentZoom = map.getZoom();
-      // If the cluster would break apart on zoom, fly there.
-      // Otherwise (same-centroid case), surface the drawer.
-      if (expansionZoom > currentZoom + 0.5) {
-        map.easeTo({ center: coords, zoom: expansionZoom });
-        return;
-      }
-      // Same-centroid (or near-enough) cluster: get every leaf
-      // location and open the drawer aggregating all of them.
-      source.getClusterLeaves(clusterId, 100, 0, (leavesErr, leaves) => {
-        if (leavesErr) return;
-        const locs = leaves
-          .map((l) => handlers.getLocation(l.properties?.id))
-          .filter((l): l is JobsMapLocation => l !== null);
-        if (locs.length > 0) handlers.openDrawer(locs);
-      });
+      map.easeTo({ center: coords, zoom: expansionZoom });
     });
   });
 
-  /* Single-pin click — open the drawer with that single location. */
+  /* Metro pin click — open the drawer for that metro (showing all
+   * locations in the metro, jobs grouped by displayed DSO name). */
   map.on("click", "dsohire-points", (e: unknown) => {
     const ev = e as {
-      features?: Array<{ properties?: { id?: string } }>;
+      features?: Array<{ properties?: { key?: string } }>;
     };
     const feature = ev.features?.[0];
-    const id = feature?.properties?.id;
-    if (!id) return;
-    const loc = handlers.getLocation(id);
-    if (loc) handlers.openDrawer([loc]);
+    const key = feature?.properties?.key;
+    if (!key) return;
+    const metro = handlers.getMetro(key);
+    if (metro) handlers.openDrawer(metro);
   });
 
   /* Hover popup — single pins show metro name + role count. Cluster
    * pins show "N roles across M practices". */
   const popup = handlers.popup;
   if (popup) {
-    const showSinglePopup = (e: unknown) => {
+    const showMetroPopup = (e: unknown) => {
       const ev = e as {
         features?: Array<{
-          properties?: { id?: string };
+          properties?: { key?: string };
           geometry?: { coordinates?: [number, number] };
         }>;
       };
       const feature = ev.features?.[0];
-      const id = feature?.properties?.id;
+      const key = feature?.properties?.key;
       const coords = feature?.geometry?.coordinates;
-      if (!id || !coords) return;
-      const loc = handlers.getLocation(id);
-      if (!loc) return;
-      const locality = [loc.city, loc.state].filter(Boolean).join(", ");
+      if (!key || !coords) return;
+      const metro = handlers.getMetro(key);
+      if (!metro) return;
+      const locality = [metro.city, metro.state].filter(Boolean).join(", ");
+      const practicesLine =
+        metro.locations.length === 1
+          ? `${metro.jobCount} role${metro.jobCount === 1 ? "" : "s"}`
+          : `${metro.jobCount} role${metro.jobCount === 1 ? "" : "s"} across ${metro.locations.length} practices`;
       const html = `
         <div class="dsohire-map-popup-card">
-          <div class="dsohire-map-popup-label">${escapeHtml(loc.name)}</div>
-          <div class="dsohire-map-popup-meta">${escapeHtml(locality)} · ${loc.jobs.length} role${loc.jobs.length === 1 ? "" : "s"}</div>
+          <div class="dsohire-map-popup-label">${escapeHtml(locality || "Metro")}</div>
+          <div class="dsohire-map-popup-meta">${practicesLine}</div>
         </div>
       `;
       popup.setLngLat(coords).setHTML(html).addTo(map);
@@ -1001,71 +1076,36 @@ function wireLayerInteractions(
     const showClusterPopup = (e: unknown) => {
       const ev = e as {
         features?: Array<{
-          properties?: { point_count?: number; jobCount?: number; cluster_id?: number };
+          properties?: {
+            point_count?: number;
+            jobCount?: number;
+            practiceCount?: number;
+          };
           geometry?: { coordinates?: [number, number] };
         }>;
       };
       const feature = ev.features?.[0];
       const coords = feature?.geometry?.coordinates;
-      const count = feature?.properties?.point_count;
+      const metroCount = feature?.properties?.point_count;
       const jobCount = feature?.properties?.jobCount;
-      const clusterId = feature?.properties?.cluster_id;
-      if (!coords || count === undefined || jobCount === undefined) return;
-
-      // Render initial popup with role/practice counts. We'll upgrade
-      // with metro name + DSO breakdown async via getClusterLeaves.
-      const baseHtml = (metroLine: string, dsoLine: string) => `
+      const practiceCount = feature?.properties?.practiceCount;
+      if (!coords || metroCount === undefined || jobCount === undefined) return;
+      const html = `
         <div class="dsohire-map-popup-card">
-          <div class="dsohire-map-popup-label">${jobCount} role${jobCount === 1 ? "" : "s"} · ${count} practice${count === 1 ? "" : "s"}</div>
-          ${metroLine ? `<div class="dsohire-map-popup-meta">${metroLine}</div>` : ""}
-          ${dsoLine ? `<div class="dsohire-map-popup-meta">${dsoLine}</div>` : ""}
+          <div class="dsohire-map-popup-label">${jobCount} role${jobCount === 1 ? "" : "s"}</div>
+          <div class="dsohire-map-popup-meta">across ${metroCount} metro${metroCount === 1 ? "" : "s"}${
+            practiceCount && practiceCount !== metroCount
+              ? ` · ${practiceCount} practices`
+              : ""
+          }</div>
+          <div class="dsohire-map-popup-meta" style="margin-top:4px;color:var(--color-slate-meta);font-size:10px;">Click to zoom in</div>
         </div>
       `;
-      popup.setLngLat(coords).setHTML(baseHtml("", "")).addTo(map);
-
-      // Async upgrade — fetch the cluster's leaves and surface metro
-      // city + DSO names. Mapbox getClusterLeaves is callback-based.
-      if (clusterId === undefined) return;
-      const source = map.getSource(
-        "dsohire-locations"
-      ) as GeoJSONSourceWithCluster | undefined;
-      if (!source) return;
-      source.getClusterLeaves(
-        clusterId,
-        50,
-        0,
-        (
-          err: unknown,
-          leaves: Array<{ properties: { id: string } }>
-        ) => {
-          if (err) return;
-          const locs = leaves
-            .map((l) => handlers.getLocation(l.properties.id))
-            .filter((l): l is JobsMapLocation => l !== null);
-          if (locs.length === 0) return;
-          const firstLoc = locs[0];
-          const locality = [firstLoc.city, firstLoc.state]
-            .filter(Boolean)
-            .join(", ");
-          // Unique DSO names across all clustered locations
-          const dsoNames = Array.from(
-            new Set(
-              locs.flatMap((l) => l.jobs.map((j) => j.dso_name))
-            )
-          );
-          const dsoLine =
-            dsoNames.length === 0
-              ? ""
-              : dsoNames.length <= 2
-                ? `at ${escapeHtml(dsoNames.join(" + "))}`
-                : `at ${escapeHtml(dsoNames.slice(0, 2).join(", "))} + ${dsoNames.length - 2} more`;
-          popup.setHTML(baseHtml(escapeHtml(locality), dsoLine));
-        }
-      );
+      popup.setLngLat(coords).setHTML(html).addTo(map);
     };
     const hide = () => popup.remove();
 
-    map.on("mouseenter", "dsohire-points", showSinglePopup);
+    map.on("mouseenter", "dsohire-points", showMetroPopup);
     map.on("mouseleave", "dsohire-points", hide);
     map.on("mouseenter", "dsohire-clusters", showClusterPopup);
     map.on("mouseleave", "dsohire-clusters", hide);
