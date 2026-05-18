@@ -18,7 +18,7 @@ export default function ComplianceSettingsPage() {
       bullets={[
         "CE status & renewals — track every team member's continuing-ed hours against state requirements",
         "EEO/OFCCP toggle — one-click voluntary self-ID disclosure on the apply form",
-        "Practice Fit configuration — calibrate the DISC-derived match weights to your culture (lands with Phase 5D)",
+        "Practice Fit configuration — calibrate the AI-derived match weights to your culture (lands with Phase 5D)",
         "Audit pack PDF — one-click export of every hiring-related event for a date range",
       ]}
     />

@@ -481,7 +481,7 @@ const COMPARE_GROUPS: MatrixGroup[] = [
     rows: [
       {
         feature: "EEOC self-ID / OFCCP exports",
-        values: { starter: true, growth: true, enterprise: true },
+        values: { starter: "H2 2026", growth: "H2 2026", enterprise: "H2 2026" },
       },
       {
         feature: "GDPR / CCPA tooling",
