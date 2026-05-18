@@ -473,7 +473,17 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
     }
   }, [mapStyleId, mapReady]);
 
-  /* ── Refresh data when metro groups change ──────────────── */
+  /* ── Refresh data when metro groups change ────────────────
+   *
+   * Two things happen on metro change:
+   *   1. setData reloads the source with new features (pins update)
+   *   2. Live filter sync — if the SET of metros changed meaningfully
+   *      (e.g. user filtered to "Hygienist" and the metros went from
+   *      10 to 2), animate to the new bounds so the view stays useful.
+   *      Skips the very first run since runSetup already did the
+   *      initial fit (jump, not animated).
+   */
+  const lastMetroKeysRef = useRef<string | null>(null);
   useEffect(() => {
     if (!mapReady || !mapRef.current) return;
     const source = mapRef.current.getSource(
@@ -481,6 +491,36 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
     ) as GeoJSONSourceWithCluster | undefined;
     if (!source) return;
     source.setData(buildLocationFeatures(metroGroups));
+
+    // Live filter sync — recompute the metro keys signature and
+    // animate-fit if it changed since the last render. Skip the
+    // first run (runSetup's initial fit is the source of truth then).
+    const currentKeys = metroGroups
+      .map((m) => m.key)
+      .sort()
+      .join(",");
+    const previousKeys = lastMetroKeysRef.current;
+    lastMetroKeysRef.current = currentKeys;
+    if (previousKeys === null) return; // first render → skip animated fit
+    if (currentKeys === previousKeys) return; // same set → no refit needed
+    if (metroGroups.length === 0) return; // nothing to fit to
+
+    // Lazy-import the Mapbox bounds class — we already have mapbox-gl
+    // loaded since the map exists.
+    void (async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mapboxgl: any = (await import("mapbox-gl")).default;
+      if (!mapRef.current) return;
+      const bounds = new mapboxgl.LngLatBounds();
+      for (const m of metroGroups) {
+        bounds.extend([m.longitude, m.latitude]);
+      }
+      mapRef.current.fitBounds(bounds, {
+        padding: { top: 80, bottom: 80, left: 80, right: 80 },
+        maxZoom: 9,
+        duration: 800, // smooth animation, not a jarring jump
+      });
+    })();
   }, [metroGroups, mapReady]);
 
   /* ── Search by location ────────────────────────────────────── */
