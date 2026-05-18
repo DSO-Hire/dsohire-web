@@ -35,7 +35,7 @@
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Locate, X, MapPin } from "lucide-react";
+import { ArrowRight, Locate, X, MapPin, Search, Loader2 } from "lucide-react";
 
 /* mapbox-gl is dynamically imported. Loose runtime typings inside the
  * effect — we only touch a narrow surface (Map, sources, layers, click
@@ -94,12 +94,30 @@ type MapStyleId = (typeof MAP_STYLES)[number]["id"];
 const DEFAULT_STYLE_ID: MapStyleId = "streets";
 const STYLE_STORAGE_KEY = "dsohire:map-style";
 
-/* Clustering config — same-centroid locations always cluster (they
- * share lat/lng), nearby-but-not-identical locations cluster up to
- * zoom 12 then break apart. clusterRadius 50px is the Mapbox default
- * and produces sensible groupings at typical zoom levels. */
-const CLUSTER_RADIUS_PX = 50;
+/* Clustering config.
+ *
+ * clusterRadius: 65px (slightly above Mapbox default 50) — gives a
+ * small overlap tolerance for nearby pins so the visual is "they
+ * cluster" rather than "they overlap with neither winning visual
+ * priority." Counterbalanced by COORD_SNAP_DECIMALS below.
+ *
+ * clusterMaxZoom: 12 — beyond this, pins stop clustering. At zoom
+ * 12 a typical metro spans ~3-5km, which is right for distinguishing
+ * neighborhoods within a city.
+ *
+ * COORD_SNAP_DECIMALS: 3 — locations are snapped to a ~110m grid
+ * before being fed to Mapbox. Two practices both geocoded to a city
+ * centroid will land at IDENTICAL coordinates after the snap, even
+ * if the geocoder returned slightly-different values for each
+ * (e.g. PV FAMily Dent at 38.9891 vs 67 Dental at 38.9888 both
+ * become 38.989). Identical coords always cluster, so the visual
+ * is one pin with the aggregated role count instead of two
+ * overlapping pins. The privacy story doesn't change — we were
+ * already at city-centroid precision.
+ */
+const CLUSTER_RADIUS_PX = 65;
 const CLUSTER_MAX_ZOOM = 12;
+const COORD_SNAP_DECIMALS = 3;
 
 const ROLE_LABELS: Record<string, string> = {
   dentist: "Dentist",
@@ -147,6 +165,14 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
   const [mapReady, setMapReady] = useState(false);
   const [mapStyleId, setMapStyleId] =
     useState<MapStyleId>(DEFAULT_STYLE_ID);
+
+  // Search-by-location state. We hit the Mapbox Geocoding API directly
+  // (using the public NEXT_PUBLIC_MAPBOX_TOKEN already in scope) and
+  // flyTo the first result. No autocomplete in v1 — type + Enter is the
+  // shipping pattern; can add autocomplete later if it's felt-gap.
+  const [searchInput, setSearchInput] = useState("");
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   const totalDrawerJobs = useMemo(
     () => drawerLocations.reduce((sum, l) => sum + l.jobs.length, 0),
@@ -279,6 +305,65 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
     source.setData(buildLocationFeatures(locations));
   }, [locations, mapReady]);
 
+  /* ── Search by location ────────────────────────────────────── */
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const query = searchInput.trim();
+    if (!query) return;
+    if (!mapboxToken) return;
+    setSearchError(null);
+    setSearching(true);
+    try {
+      // Mapbox Geocoding API — filter to US places, postcodes, regions,
+      // localities so we match "Denver", "66208", "Kansas", "Overland Park"
+      // cleanly without surfacing street-level addresses.
+      const url =
+        "https://api.mapbox.com/geocoding/v5/mapbox.places/" +
+        encodeURIComponent(query) +
+        ".json?" +
+        new URLSearchParams({
+          access_token: mapboxToken,
+          country: "us",
+          types: "place,postcode,region,locality,district",
+          limit: "1",
+          autocomplete: "false",
+        }).toString();
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Search failed");
+      const data = (await res.json()) as {
+        features?: Array<{
+          center?: [number, number];
+          place_name?: string;
+          place_type?: string[];
+        }>;
+      };
+      const first = data.features?.[0];
+      if (!first?.center) {
+        setSearchError("No match. Try a city, ZIP, or state.");
+        return;
+      }
+      const [lng, lat] = first.center;
+      // Zoom level by result type — ZIPs zoom in tight, states stay
+      // pulled out, cities land in the middle.
+      const placeType = first.place_type?.[0];
+      const zoom =
+        placeType === "postcode"
+          ? 11
+          : placeType === "region"
+            ? 6
+            : placeType === "district"
+              ? 8
+              : 9; // place, locality, default
+      if (mapRef.current) {
+        mapRef.current.flyTo({ center: [lng, lat], zoom, duration: 1100 });
+      }
+    } catch {
+      setSearchError("Couldn't reach the geocoder. Try again.");
+    } finally {
+      setSearching(false);
+    }
+  };
+
   /* ── Use my location ───────────────────────────────────────── */
   const handleLocateMe = () => {
     setLocateError(null);
@@ -348,8 +433,47 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
         style={{ borderRadius: 0 }}
       />
 
-      {/* Top-left controls — locate + style picker */}
-      <div className="absolute top-4 left-4 flex flex-col gap-2 items-start">
+      {/* Top-left controls — search + locate + style picker */}
+      <div className="absolute top-4 left-4 flex flex-col gap-2 items-start max-w-[calc(100%-32px)] sm:max-w-[340px]">
+        {/* Search-by-location input — primary action, biggest control */}
+        <form
+          onSubmit={handleSearch}
+          className="flex items-stretch border border-[var(--rule-strong)] bg-ivory shadow-sm w-full sm:w-[300px]"
+          role="search"
+          aria-label="Search by city, ZIP, or state"
+        >
+          <div className="flex items-center pl-3 pr-1 text-slate-meta">
+            <Search className="h-4 w-4" aria-hidden />
+          </div>
+          <input
+            type="search"
+            value={searchInput}
+            onChange={(e) => {
+              setSearchInput(e.target.value);
+              if (searchError) setSearchError(null);
+            }}
+            placeholder="City, ZIP, or state"
+            className="flex-1 min-w-0 px-2 py-2.5 bg-transparent text-[13px] text-ink placeholder:text-slate-meta focus:outline-none"
+            aria-label="Search by city, ZIP, or state"
+          />
+          <button
+            type="submit"
+            disabled={searching || !searchInput.trim()}
+            className="px-3 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 flex items-center gap-1.5"
+          >
+            {searching ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              "Go"
+            )}
+          </button>
+        </form>
+        {searchError && (
+          <div className="bg-red-50 border-l-2 border-red-500 px-3 py-2 text-[12px] text-red-900 max-w-[300px] shadow-sm">
+            {searchError}
+          </div>
+        )}
+
         <button
           type="button"
           onClick={handleLocateMe}
@@ -505,12 +629,23 @@ function metroSummary(locations: JobsMapLocation[]): string {
  * jobCount. The old polygon-circle approximation is gone.
  * ───────────────────────────────────────────────────────────── */
 
+function snapCoord(value: number): number {
+  // Round to COORD_SNAP_DECIMALS decimal places via integer math
+  // to avoid floating-point noise. 3 decimals ≈ 110m grid.
+  const factor = Math.pow(10, COORD_SNAP_DECIMALS);
+  return Math.round(value * factor) / factor;
+}
+
 function buildLocationFeatures(locations: JobsMapLocation[]): unknown {
   const features = locations.map((loc) => ({
     type: "Feature" as const,
     geometry: {
       type: "Point" as const,
-      coordinates: [loc.longitude, loc.latitude],
+      // Snap to a ~110m grid so locations that share a city centroid
+      // but received slightly-different geocoder responses land at
+      // EXACTLY the same coordinates and cluster cleanly. See the
+      // COORD_SNAP_DECIMALS comment above.
+      coordinates: [snapCoord(loc.longitude), snapCoord(loc.latitude)],
     },
     properties: {
       id: loc.id,
