@@ -27,6 +27,10 @@ import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
 import { requireActiveSubscriptionError } from "@/lib/billing/subscription";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { SUPPORT_EMAIL } from "@/lib/contact";
+import {
+  scanScreeningQuestionForBias,
+  formatBiasError,
+} from "@/lib/screening/discrimination-filter";
 
 export interface JobActionState {
   ok: boolean;
@@ -807,6 +811,17 @@ export async function updateJobScreeningSection(
           options ?? null
         )
       : null;
+
+    // Discrimination filter — same pre-launch safety net applied in
+    // parseJobFormData. Block protected-attribute language before save.
+    const biasScan = scanScreeningQuestionForBias({
+      prompt,
+      helper_text: helperText,
+      options,
+    });
+    if (!biasScan.ok) {
+      return { ok: false, error: formatBiasError(i + 1, biasScan) };
+    }
 
     screening.push({
       id,
@@ -1595,6 +1610,20 @@ function parseJobFormData(
             options ?? null
           )
         : null;
+
+      // Discrimination filter — block protected-attribute language in the
+      // employer-authored prompt, helper text, and option labels. Pre-launch
+      // safety net (sensitive-data sweep item 8, locked 2026-05-18). The
+      // helper returns a constructive error naming the category and a
+      // suggestion the recruiter can act on.
+      const biasScan = scanScreeningQuestionForBias({
+        prompt,
+        helper_text: helperText,
+        options,
+      });
+      if (!biasScan.ok) {
+        return { error: formatBiasError(i + 1, biasScan) };
+      }
 
       screeningQuestions.push({
         id,

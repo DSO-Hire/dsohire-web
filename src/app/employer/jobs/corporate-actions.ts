@@ -131,6 +131,10 @@ import { recordAuditEvent } from "@/lib/audit/record";
 import { SUPPORT_EMAIL } from "@/lib/contact";
 import { CORPORATE_FUNCTION_SLUGS } from "@/lib/corporate/functions";
 import {
+  scanScreeningQuestionForBias,
+  formatBiasError,
+} from "@/lib/screening/discrimination-filter";
+import {
   WORK_MODES,
   TRAVEL_EXPECTATIONS,
   DIRECT_REPORTS_BANDS,
@@ -534,6 +538,19 @@ export async function parseCorporateJobInput(
             options ?? null
           )
         : null;
+
+      // Discrimination filter — same pre-launch safety net applied in the
+      // practice-job parser. Block protected-attribute language in the
+      // prompt, helper text, and option labels before save (sensitive-data
+      // sweep item 8, locked 2026-05-18).
+      const biasScan = scanScreeningQuestionForBias({
+        prompt,
+        helper_text: helperText,
+        options,
+      });
+      if (!biasScan.ok) {
+        return { error: formatBiasError(i + 1, biasScan) };
+      }
 
       screeningQuestions.push({
         id,
