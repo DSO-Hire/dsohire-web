@@ -1,23 +1,35 @@
 "use client";
 
 /**
- * JobsMap — privacy-preserving map view of open roles for the public /jobs page.
+ * JobsMap — metro-pin map view of open roles for the public /jobs page.
  *
- * Privacy contract: every dso_location renders as a translucent ~9-mile circle
- * (heritage-green fill, navy outline) at the city centroid we geocoded.
- * Coordinates are derived from city + state ONLY — never from a street address.
- * The actual office is "somewhere inside the circle" and our DB never stores
- * precise coordinates.
+ * REWORKED 2026-05-18 from the original 9-mile-circle approach (see
+ * project_map_view_pin_rework_2026_05_18.md). The circle paradigm caused
+ * a visual blob when multiple DSO locations shared a city centroid:
+ * eight circles drawn at the same coordinates rendered as one
+ * overlapping mass. The pin approach handles same-centroid locations
+ * cleanly via Mapbox's native clustering (which uses supercluster under
+ * the hood) and shifts the privacy framing from "spatial fuzz" to
+ * "metro-level aggregation."
+ *
+ * Privacy contract (UNCHANGED): every location's lat/lng comes from a
+ * city + state geocode only — never a street address. The DB never
+ * stores precise office coordinates. Pin position = city centroid.
  *
  * UX:
- *   - "Use my location" CTA → recenters the map on the user's coords (not stored)
- *   - Click a circle → opens a side drawer listing the jobs at that location
- *   - Drawer cards link to /jobs/[id]
+ *   - Brand-colored pins (heritage fill, navy text + halo) with the
+ *     role count inline. Zillow-style.
+ *   - Multiple locations at the same centroid auto-cluster into one pin
+ *     showing the TOTAL roles across all of them.
+ *   - Hover → preview popup with metro + role count.
+ *   - Click an unclustered pin → drawer with that location's roles.
+ *   - Click a cluster → if it'll break apart on zoom, fly to that zoom;
+ *     if it's at max-cluster-zoom (same-centroid case), open the drawer
+ *     with EVERY location in the cluster.
+ *   - "Use my location" CTA recenters the map.
+ *   - Two map styles (Streets / Satellite), localStorage-persisted.
  *
- * mapbox-gl is browser-only (it touches window/document at import time). We
- * dynamic-import the JS inside a useEffect so it only runs in the browser.
- * The CSS is statically imported at the top so Next bundles it into the
- * client CSS chunk.
+ * mapbox-gl is browser-only; dynamic-imported inside an effect.
  */
 
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -25,26 +37,23 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Locate, X, MapPin } from "lucide-react";
 
-/* mapbox-gl is dynamically imported in the effect (browser-only). We avoid
- * a static type import here so this file compiles in environments where
- * @types/mapbox-gl hasn't been resolved yet (e.g. mid-install). The runtime
- * surface we use (Map, GeoJSONSource, LngLatBounds) is narrow enough that
- * the loose typings inside the effect are fine. */
-type MapboxMap = {
-  remove(): void;
-  on(event: string, handler: (e: unknown) => void): void;
-  on(event: string, layerId: string, handler: (e: unknown) => void): void;
-  addControl(control: unknown, position?: string): void;
-  addLayer(layer: unknown): void;
-  addSource(id: string, source: unknown): void;
-  getSource(id: string): unknown;
-  getCanvas(): { style: { cursor: string } };
-  fitBounds(bounds: unknown, options?: unknown): void;
-  flyTo(options: unknown): void;
-  setStyle(style: string): void;
-};
-type GeoJSONSourceLike = {
+/* mapbox-gl is dynamically imported. Loose runtime typings inside the
+ * effect — we only touch a narrow surface (Map, sources, layers, click
+ * + hover handlers). @types/mapbox-gl resolution is unstable in our
+ * local node_modules state; Vercel's clean build gets real types. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type MapboxMap = any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type MapboxPopup = any;
+type GeoJSONSourceWithCluster = {
   setData(data: unknown): void;
+  getClusterExpansionZoom(clusterId: number, cb: (err: unknown, zoom: number) => void): void;
+  getClusterLeaves(
+    clusterId: number,
+    limit: number,
+    offset: number,
+    cb: (err: unknown, features: Array<{ properties: { id: string } }>) => void
+  ): void;
 };
 
 export interface JobsMapLocation {
@@ -72,15 +81,7 @@ interface JobsMapProps {
   mapboxToken: string | null;
 }
 
-/* Approx 9 miles in meters — 14,484 m. The radius circle is rendered as a
- * GeoJSON polygon approximation so we don't need a turf.js dependency. */
-const RADIUS_METERS = 14_484;
-const CIRCLE_VERTICES = 64;
-
-/* Available Mapbox styles — picker UI lets the user toggle. Privacy is
- * preserved across both because the ~9-mile circle dwarfs any individual
- * building even at high zoom. Cam settled on Streets + Satellite as the
- * two options after testing the full set 2026-05-01. */
+/* Map style picker — same two options Cam locked 2026-05-01. */
 const MAP_STYLES = [
   { id: "streets", label: "Streets", url: "mapbox://styles/mapbox/streets-v12" },
   {
@@ -92,6 +93,13 @@ const MAP_STYLES = [
 type MapStyleId = (typeof MAP_STYLES)[number]["id"];
 const DEFAULT_STYLE_ID: MapStyleId = "streets";
 const STYLE_STORAGE_KEY = "dsohire:map-style";
+
+/* Clustering config — same-centroid locations always cluster (they
+ * share lat/lng), nearby-but-not-identical locations cluster up to
+ * zoom 12 then break apart. clusterRadius 50px is the Mapbox default
+ * and produces sensible groupings at typical zoom levels. */
+const CLUSTER_RADIUS_PX = 50;
+const CLUSTER_MAX_ZOOM = 12;
 
 const ROLE_LABELS: Record<string, string> = {
   dentist: "Dentist",
@@ -115,24 +123,34 @@ const EMP_LABELS: Record<string, string> = {
 export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapboxMap | null>(null);
+  const popupRef = useRef<MapboxPopup | null>(null);
   const initialFitDoneRef = useRef(false);
-  /* Latest locations kept in a ref so the style.load handler (attached once
-   * at init) always re-attaches layers using the freshest data. */
+  /* Latest locations kept in a ref so the style.load handler (attached
+   * once at init) always re-attaches the source + layers with the
+   * freshest data. */
   const locationsRef = useRef<JobsMapLocation[]>(locations);
   locationsRef.current = locations;
-
-  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
-    null
+  /* Quick lookup by location id — used when expanding a cluster to
+   * the drawer (cluster click returns leaf feature ids, we resolve
+   * back to JobsMapLocation entries). */
+  const locationByIdRef = useRef<Map<string, JobsMapLocation>>(
+    new Map(locations.map((l) => [l.id, l]))
   );
+  locationByIdRef.current = new Map(locations.map((l) => [l.id, l]));
+
+  /* Drawer state holds an ARRAY of locations because a cluster click
+   * at max zoom (same-centroid case) needs to display every location
+   * the user just selected. A single-pin click sets a 1-element array. */
+  const [drawerLocations, setDrawerLocations] = useState<JobsMapLocation[]>([]);
   const [locating, setLocating] = useState(false);
   const [locateError, setLocateError] = useState<string | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const [mapStyleId, setMapStyleId] =
     useState<MapStyleId>(DEFAULT_STYLE_ID);
 
-  const selectedLocation = useMemo(
-    () => locations.find((l) => l.id === selectedLocationId) ?? null,
-    [locations, selectedLocationId]
+  const totalDrawerJobs = useMemo(
+    () => drawerLocations.reduce((sum, l) => sum + l.jobs.length, 0),
+    [drawerLocations]
   );
 
   /* ── Hydrate style preference from localStorage on mount ────── */
@@ -157,10 +175,9 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
     let cancelled = false;
 
     (async () => {
-      // Browser-only library — dynamic import so the bundle only loads
-      // client-side. Typed as `any` because @types/mapbox-gl resolution is
-      // unstable in our local node_modules state; Vercel's clean install
-      // gets real types.
+      // Browser-only library — dynamic import. Typed loose because
+      // @types/mapbox-gl resolution is unstable in our local
+      // node_modules state; Vercel's clean install gets real types.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mapboxgl: any = (await import("mapbox-gl")).default;
 
@@ -171,8 +188,6 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
       const initialStyleUrl =
         MAP_STYLES.find((s) => s.id === mapStyleId)?.url ?? MAP_STYLES[0].url;
 
-      // Default to a US-wide view; auto-fit to the location bounds once data
-      // is loaded below.
       const map = new mapboxgl.Map({
         container: containerRef.current,
         style: initialStyleUrl,
@@ -190,20 +205,28 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
         "top-right"
       );
 
+      popupRef.current = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        offset: 14,
+        className: "dsohire-map-popup",
+      });
+
       mapRef.current = map;
 
-      // style.load fires on every style load, including the initial one and
-      // every subsequent setStyle() call. We re-attach our source + layers
-      // here because Mapbox wipes them on style change. Read locations from
-      // the ref so the handler always sees the latest prop value.
+      // style.load fires on every style load (initial + every setStyle
+      // call). Re-attach source + layers from the ref so the handler
+      // always sees the freshest locations.
       map.on("style.load", () => {
         if (cancelled) return;
         const currentLocations = locationsRef.current;
         attachLocationLayers(map, currentLocations);
-        wireLayerInteractions(map, setSelectedLocationId);
+        wireLayerInteractions(map, {
+          getLocation: (id: string) => locationByIdRef.current.get(id) ?? null,
+          openDrawer: (locs) => setDrawerLocations(locs),
+          popup: popupRef.current,
+        });
 
-        // Initial auto-fit only — subsequent style changes preserve the
-        // user's zoom / pan.
         if (!initialFitDoneRef.current && currentLocations.length > 0) {
           const bounds = new mapboxgl.LngLatBounds();
           for (const loc of currentLocations) {
@@ -223,6 +246,8 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
 
     return () => {
       cancelled = true;
+      popupRef.current?.remove();
+      popupRef.current = null;
       mapRef.current?.remove();
       mapRef.current = null;
     };
@@ -235,7 +260,6 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
     const url = MAP_STYLES.find((s) => s.id === mapStyleId)?.url;
     if (!url) return;
     mapRef.current.setStyle(url);
-    // Persist preference
     if (typeof window !== "undefined") {
       try {
         window.localStorage.setItem(STYLE_STORAGE_KEY, mapStyleId);
@@ -250,9 +274,7 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
     if (!mapReady || !mapRef.current) return;
     const source = mapRef.current.getSource(
       "dsohire-locations"
-    ) as GeoJSONSourceLike | undefined;
-    /* Source may not exist during a style swap — the next style.load will
-     * re-attach with fresh locations from locationsRef, so it's safe to skip. */
+    ) as GeoJSONSourceWithCluster | undefined;
     if (!source) return;
     source.setData(buildLocationFeatures(locations));
   }, [locations, mapReady]);
@@ -369,23 +391,32 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
         </div>
       </div>
 
-      {/* Privacy footnote — overlay bottom-left */}
-      <div className="absolute bottom-4 left-4 bg-ivory/90 backdrop-blur-sm border border-[var(--rule)] px-3 py-2 max-w-[320px] text-[10px] text-slate-body leading-snug">
-        <span className="font-bold text-ink">Privacy:</span> circles are ~9
-        miles wide and centered on the city, not the office address.
+      {/* Privacy chip — reframed 2026-05-18 from spatial-fuzz to
+          aggregation-level. More prominent than the old footnote. */}
+      <div className="absolute top-4 right-[60px] sm:right-4 sm:top-4 sm:bottom-auto bottom-4 left-4 sm:left-auto bg-ivory/95 backdrop-blur-sm border border-[var(--rule)] px-3 py-2 max-w-[320px] sm:max-w-[260px] text-[11px] text-slate-body leading-snug shadow-sm">
+        <span className="font-bold text-ink uppercase tracking-[1.5px] text-[10px] block mb-0.5">
+          Metro view
+        </span>
+        Pins show role counts at the metro level — never an office address.
       </div>
 
-      {/* Side drawer */}
-      {selectedLocation && (
+      {/* Side drawer — renders for either single-location or cluster
+          selection. The cluster case aggregates jobs across every
+          location in the cluster. */}
+      {drawerLocations.length > 0 && (
         <div
-          className="absolute top-0 right-0 bottom-0 w-full sm:w-[400px] bg-white border-l border-[var(--rule)] shadow-lg overflow-y-auto"
+          className="absolute top-0 right-0 bottom-0 w-full sm:w-[420px] bg-white border-l border-[var(--rule)] shadow-lg overflow-y-auto"
           role="dialog"
-          aria-label={`Jobs at ${selectedLocation.name}`}
+          aria-label={
+            drawerLocations.length === 1
+              ? `Jobs at ${drawerLocations[0].name}`
+              : `Jobs across ${drawerLocations.length} practices`
+          }
         >
           <div className="p-6 sm:p-7">
             <button
               type="button"
-              onClick={() => setSelectedLocationId(null)}
+              onClick={() => setDrawerLocations([])}
               className="absolute top-4 right-4 p-1.5 text-slate-meta hover:text-ink hover:bg-cream transition-colors"
               aria-label="Close"
             >
@@ -393,45 +424,54 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
             </button>
 
             <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
-              Jobs at this location
+              {drawerLocations.length === 1
+                ? "Jobs at this location"
+                : `Jobs across ${drawerLocations.length} practices`}
             </div>
             <h2 className="text-2xl font-extrabold tracking-[-0.5px] text-ink leading-tight mb-1.5">
-              {selectedLocation.name}
+              {drawerLocations.length === 1
+                ? drawerLocations[0].name
+                : metroSummary(drawerLocations)}
             </h2>
             <p className="text-[13px] text-slate-meta tracking-[0.3px] mb-6">
-              {[selectedLocation.city, selectedLocation.state]
-                .filter(Boolean)
-                .join(", ") || "Location unavailable"}
+              {totalDrawerJobs === 1 ? "1 open role" : `${totalDrawerJobs} open roles`}
+              {drawerLocations.length === 1 &&
+                ` · ${[drawerLocations[0].city, drawerLocations[0].state]
+                  .filter(Boolean)
+                  .join(", ")}`}
             </p>
 
-            {selectedLocation.jobs.length === 0 ? (
+            {totalDrawerJobs === 0 ? (
               <p className="text-[14px] text-slate-meta italic">
                 No active jobs at this location right now.
               </p>
             ) : (
               <ul className="space-y-3 list-none">
-                {selectedLocation.jobs.map((job) => (
-                  <li key={job.id}>
-                    <Link
-                      href={`/jobs/${job.id}`}
-                      className="block p-4 border border-[var(--rule)] hover:border-heritage hover:bg-cream/50 transition-colors group"
-                    >
-                      <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
-                        {ROLE_LABELS[job.role_category] ?? job.role_category} ·{" "}
-                        {EMP_LABELS[job.employment_type] ?? job.employment_type}
-                      </div>
-                      <div className="text-[15px] font-semibold text-ink leading-snug mb-1">
-                        {job.title}
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[13px] text-slate-body">
-                          {job.dso_name}
-                        </span>
-                        <ArrowRight className="h-3.5 w-3.5 text-heritage-deep opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </div>
-                    </Link>
-                  </li>
-                ))}
+                {drawerLocations.flatMap((loc) =>
+                  loc.jobs.map((job) => (
+                    <li key={`${loc.id}:${job.id}`}>
+                      <Link
+                        href={`/jobs/${job.id}`}
+                        className="block p-4 border border-[var(--rule)] hover:border-heritage hover:bg-cream/50 transition-colors group"
+                      >
+                        <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
+                          {ROLE_LABELS[job.role_category] ?? job.role_category} ·{" "}
+                          {EMP_LABELS[job.employment_type] ?? job.employment_type}
+                        </div>
+                        <div className="text-[15px] font-semibold text-ink leading-snug mb-1">
+                          {job.title}
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[13px] text-slate-body">
+                            {job.dso_name}
+                            {drawerLocations.length > 1 && ` · ${loc.name}`}
+                          </span>
+                          <ArrowRight className="h-3.5 w-3.5 text-heritage-deep opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </Link>
+                    </li>
+                  ))
+                )}
               </ul>
             )}
           </div>
@@ -442,44 +482,57 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
 }
 
 /* ───────────────────────────────────────────────────────────────
- * Source + layer attachment.
+ * Helpers
+ * ───────────────────────────────────────────────────────────── */
+
+/** Human-friendly summary line for a cluster drawer. */
+function metroSummary(locations: JobsMapLocation[]): string {
+  // All locations in a cluster typically share city+state since they
+  // share a centroid. Use the first one as the title; fall back to
+  // a generic header.
+  const first = locations[0];
+  if (!first) return "Jobs at this metro";
+  const cityState = [first.city, first.state].filter(Boolean).join(", ");
+  return cityState || `${locations.length} practices in this metro`;
+}
+
+/* ───────────────────────────────────────────────────────────────
+ * GeoJSON feature builder.
  *
- * Called from the `style.load` event so it runs both on initial map
- * creation AND every time the user switches styles (Mapbox wipes custom
- * sources/layers on setStyle, so we re-add them here).
+ * Each location becomes a single Point feature carrying the location id
+ * + role count. Mapbox's native clustering (powered by supercluster
+ * under the hood) aggregates same-centroid points cleanly with summed
+ * jobCount. The old polygon-circle approximation is gone.
  * ───────────────────────────────────────────────────────────── */
 
 function buildLocationFeatures(locations: JobsMapLocation[]): unknown {
-  const features = locations.flatMap((loc) => [
-    {
-      type: "Feature" as const,
-      geometry: {
-        type: "Polygon" as const,
-        coordinates: [buildCircle(loc.longitude, loc.latitude, RADIUS_METERS)],
-      },
-      properties: {
-        kind: "circle",
-        id: loc.id,
-        jobCount: loc.jobs.length,
-      },
+  const features = locations.map((loc) => ({
+    type: "Feature" as const,
+    geometry: {
+      type: "Point" as const,
+      coordinates: [loc.longitude, loc.latitude],
     },
-    {
-      type: "Feature" as const,
-      geometry: {
-        type: "Point" as const,
-        coordinates: [loc.longitude, loc.latitude],
-      },
-      properties: {
-        kind: "label",
-        id: loc.id,
-        jobCount: loc.jobs.length,
-        label:
-          loc.jobs.length === 1 ? "1 role" : `${loc.jobs.length} roles`,
-      },
+    properties: {
+      id: loc.id,
+      jobCount: loc.jobs.length,
     },
-  ]);
+  }));
   return { type: "FeatureCollection", features };
 }
+
+/* ───────────────────────────────────────────────────────────────
+ * Source + layer attachment.
+ *
+ * Called from style.load so it runs on initial creation AND after every
+ * setStyle (Mapbox wipes custom sources/layers on style change).
+ *
+ * Pin design:
+ *   - Single-location pin: heritage-green fill, navy outline, role
+ *     count rendered as a white-haloed label inside.
+ *   - Cluster pin: same colors, slightly larger radius, navy outline
+ *     thickens, role count inside reflects the SUM across all locations
+ *     in the cluster (Mapbox's clusterProperties feature).
+ * ───────────────────────────────────────────────────────────── */
 
 function attachLocationLayers(
   map: MapboxMap,
@@ -488,97 +541,234 @@ function attachLocationLayers(
   map.addSource("dsohire-locations", {
     type: "geojson",
     data: buildLocationFeatures(locations),
+    cluster: true,
+    clusterMaxZoom: CLUSTER_MAX_ZOOM,
+    clusterRadius: CLUSTER_RADIUS_PX,
+    // Sum the jobCount property across every feature in each cluster
+    // so the cluster pin shows the total role count, not a count of
+    // locations.
+    clusterProperties: {
+      jobCount: ["+", ["get", "jobCount"]],
+    },
   });
 
-  // Heritage-green fill
+  // Cluster pin — circle layer
   map.addLayer({
-    id: "dsohire-locations-fill",
-    type: "fill",
+    id: "dsohire-clusters",
+    type: "circle",
     source: "dsohire-locations",
-    filter: ["==", ["get", "kind"], "circle"],
+    filter: ["has", "point_count"],
     paint: {
-      "fill-color": "#4D7A60",
-      "fill-opacity": 0.22,
+      "circle-color": "#4D7A60", // heritage
+      "circle-stroke-color": "#14233F", // navy
+      "circle-stroke-width": 2,
+      "circle-radius": [
+        "step",
+        ["get", "jobCount"],
+        20, // base radius
+        5, 24, // 5+ roles
+        15, 28, // 15+ roles
+        40, 32, // 40+ roles
+      ],
+      "circle-opacity": 0.92,
     },
   });
-  // Navy outline
+
+  // Cluster count label
   map.addLayer({
-    id: "dsohire-locations-line",
-    type: "line",
-    source: "dsohire-locations",
-    filter: ["==", ["get", "kind"], "circle"],
-    paint: {
-      "line-color": "#14233F",
-      "line-width": 1.5,
-      "line-opacity": 0.65,
-    },
-  });
-  // Job-count label at center
-  map.addLayer({
-    id: "dsohire-locations-label",
+    id: "dsohire-clusters-count",
     type: "symbol",
     source: "dsohire-locations",
-    filter: ["==", ["get", "kind"], "label"],
+    filter: ["has", "point_count"],
     layout: {
-      "text-field": ["get", "label"],
+      "text-field": ["get", "jobCount"],
       "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
-      "text-size": 12,
-      "text-allow-overlap": false,
+      "text-size": 14,
+      "text-allow-overlap": true,
+      "text-ignore-placement": true,
     },
     paint: {
-      "text-color": "#14233F",
-      "text-halo-color": "#F7F4ED",
-      "text-halo-width": 2,
+      "text-color": "#F7F4ED", // ivory
+      "text-halo-color": "#14233F", // navy halo for contrast on heritage
+      "text-halo-width": 0,
     },
   });
+
+  // Single-location pin — circle layer
+  map.addLayer({
+    id: "dsohire-points",
+    type: "circle",
+    source: "dsohire-locations",
+    filter: ["!", ["has", "point_count"]],
+    paint: {
+      "circle-color": "#4D7A60", // heritage
+      "circle-stroke-color": "#14233F", // navy
+      "circle-stroke-width": 1.5,
+      "circle-radius": [
+        "step",
+        ["get", "jobCount"],
+        16, // base — 1 role
+        3, 18, // 3+
+        6, 20, // 6+
+      ],
+      "circle-opacity": 0.92,
+    },
+  });
+
+  // Single-location count label
+  map.addLayer({
+    id: "dsohire-points-count",
+    type: "symbol",
+    source: "dsohire-locations",
+    filter: ["!", ["has", "point_count"]],
+    layout: {
+      "text-field": ["get", "jobCount"],
+      "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+      "text-size": 12,
+      "text-allow-overlap": true,
+      "text-ignore-placement": true,
+    },
+    paint: {
+      "text-color": "#F7F4ED", // ivory
+    },
+  });
+}
+
+interface InteractionHandlers {
+  getLocation: (id: string) => JobsMapLocation | null;
+  openDrawer: (locations: JobsMapLocation[]) => void;
+  popup: MapboxPopup | null;
 }
 
 function wireLayerInteractions(
   map: MapboxMap,
-  setSelectedLocationId: (id: string | null) => void
+  handlers: InteractionHandlers
 ): void {
-  map.on("click", "dsohire-locations-fill", (e: unknown) => {
-    const feature = (
-      e as { features?: Array<{ properties?: { id?: string } }> }
-    ).features?.[0];
+  /* Cluster click — try to expand the cluster by zooming in. If the
+   * expansion zoom is at-or-above clusterMaxZoom (the same-centroid
+   * case where zooming won't break the cluster apart), open the
+   * drawer with every location in the cluster instead. */
+  map.on("click", "dsohire-clusters", (e: unknown) => {
+    const ev = e as {
+      features?: Array<{
+        properties?: { cluster_id?: number };
+        geometry?: { coordinates?: [number, number] };
+      }>;
+    };
+    const feature = ev.features?.[0];
     if (!feature) return;
-    const id = feature.properties?.id;
-    if (id) setSelectedLocationId(id);
+    const clusterId = feature.properties?.cluster_id;
+    const coords = feature.geometry?.coordinates;
+    if (clusterId === undefined || !coords) return;
+
+    const source = map.getSource(
+      "dsohire-locations"
+    ) as GeoJSONSourceWithCluster | undefined;
+    if (!source) return;
+
+    source.getClusterExpansionZoom(clusterId, (err, expansionZoom) => {
+      if (err) return;
+      const currentZoom = map.getZoom();
+      // If the cluster would break apart on zoom, fly there.
+      // Otherwise (same-centroid case), surface the drawer.
+      if (expansionZoom > currentZoom + 0.5) {
+        map.easeTo({ center: coords, zoom: expansionZoom });
+        return;
+      }
+      // Same-centroid (or near-enough) cluster: get every leaf
+      // location and open the drawer aggregating all of them.
+      source.getClusterLeaves(clusterId, 100, 0, (leavesErr, leaves) => {
+        if (leavesErr) return;
+        const locs = leaves
+          .map((l) => handlers.getLocation(l.properties?.id))
+          .filter((l): l is JobsMapLocation => l !== null);
+        if (locs.length > 0) handlers.openDrawer(locs);
+      });
+    });
   });
-  map.on("mouseenter", "dsohire-locations-fill", () => {
-    map.getCanvas().style.cursor = "pointer";
+
+  /* Single-pin click — open the drawer with that single location. */
+  map.on("click", "dsohire-points", (e: unknown) => {
+    const ev = e as {
+      features?: Array<{ properties?: { id?: string } }>;
+    };
+    const feature = ev.features?.[0];
+    const id = feature?.properties?.id;
+    if (!id) return;
+    const loc = handlers.getLocation(id);
+    if (loc) handlers.openDrawer([loc]);
   });
-  map.on("mouseleave", "dsohire-locations-fill", () => {
-    map.getCanvas().style.cursor = "";
-  });
+
+  /* Hover popup — single pins show metro name + role count. Cluster
+   * pins show "N roles across M practices". */
+  const popup = handlers.popup;
+  if (popup) {
+    const showSinglePopup = (e: unknown) => {
+      const ev = e as {
+        features?: Array<{
+          properties?: { id?: string };
+          geometry?: { coordinates?: [number, number] };
+        }>;
+      };
+      const feature = ev.features?.[0];
+      const id = feature?.properties?.id;
+      const coords = feature?.geometry?.coordinates;
+      if (!id || !coords) return;
+      const loc = handlers.getLocation(id);
+      if (!loc) return;
+      const locality = [loc.city, loc.state].filter(Boolean).join(", ");
+      const html = `
+        <div class="dsohire-map-popup-card">
+          <div class="dsohire-map-popup-label">${escapeHtml(loc.name)}</div>
+          <div class="dsohire-map-popup-meta">${escapeHtml(locality)} · ${loc.jobs.length} role${loc.jobs.length === 1 ? "" : "s"}</div>
+        </div>
+      `;
+      popup.setLngLat(coords).setHTML(html).addTo(map);
+    };
+    const showClusterPopup = (e: unknown) => {
+      const ev = e as {
+        features?: Array<{
+          properties?: { point_count?: number; jobCount?: number };
+          geometry?: { coordinates?: [number, number] };
+        }>;
+      };
+      const feature = ev.features?.[0];
+      const coords = feature?.geometry?.coordinates;
+      const count = feature?.properties?.point_count;
+      const jobCount = feature?.properties?.jobCount;
+      if (!coords || count === undefined || jobCount === undefined) return;
+      const html = `
+        <div class="dsohire-map-popup-card">
+          <div class="dsohire-map-popup-label">${jobCount} role${jobCount === 1 ? "" : "s"}</div>
+          <div class="dsohire-map-popup-meta">across ${count} practice${count === 1 ? "" : "s"}</div>
+        </div>
+      `;
+      popup.setLngLat(coords).setHTML(html).addTo(map);
+    };
+    const hide = () => popup.remove();
+
+    map.on("mouseenter", "dsohire-points", showSinglePopup);
+    map.on("mouseleave", "dsohire-points", hide);
+    map.on("mouseenter", "dsohire-clusters", showClusterPopup);
+    map.on("mouseleave", "dsohire-clusters", hide);
+  }
+
+  /* Cursor affordance — pointer over any clickable layer. */
+  for (const layer of ["dsohire-clusters", "dsohire-points"]) {
+    map.on("mouseenter", layer, () => {
+      map.getCanvas().style.cursor = "pointer";
+    });
+    map.on("mouseleave", layer, () => {
+      map.getCanvas().style.cursor = "";
+    });
+  }
 }
 
-/* ───────────────────────────────────────────────────────────────
- * Approximate a circle on a sphere as a closed polygon.
- *
- * For radii under ~50 miles in continental US latitudes, a flat-earth
- * approximation with a latitude-aware longitude scale is accurate to
- * within a few percent — well inside the privacy "fuzz" we want. We use
- * 64 vertices for visually smooth circles.
- * ───────────────────────────────────────────────────────────── */
-
-function buildCircle(
-  lng: number,
-  lat: number,
-  radiusMeters: number
-): Array<[number, number]> {
-  const earthRadius = 6_378_137; // meters (WGS84)
-  const latRad = (lat * Math.PI) / 180;
-  const dLatDeg = (radiusMeters / earthRadius) * (180 / Math.PI);
-  const dLngDeg =
-    (radiusMeters / (earthRadius * Math.cos(latRad))) * (180 / Math.PI);
-
-  const ring: Array<[number, number]> = [];
-  for (let i = 0; i <= CIRCLE_VERTICES; i++) {
-    const theta = (i / CIRCLE_VERTICES) * 2 * Math.PI;
-    const dx = Math.cos(theta) * dLngDeg;
-    const dy = Math.sin(theta) * dLatDeg;
-    ring.push([lng + dx, lat + dy]);
-  }
-  return ring;
+/** Minimal HTML-escape for popup content. */
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }

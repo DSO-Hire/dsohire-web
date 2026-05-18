@@ -275,3 +275,36 @@ html, body {
   height: 0;
   pointer-events: none;
 }
+
+/* ─────────────────────────────────────────
+   Mapbox popup — hover preview for /jobs map metro pins (2026-05-18).
+   Overrides Mapbox's default popup chrome to match DSO Hire's brand.
+───────────────────────────────────────── */
+.dsohire-map-popup .mapboxgl-popup-content {
+  padding: 0;
+  border-radius: 0;
+  box-shadow: 0 4px 14px rgba(7, 15, 28, 0.18);
+  background: #FAF7F1; /* cream */
+  border: 1px solid rgba(20, 35, 63, 0.14);
+}
+.dsohire-map-popup .mapboxgl-popup-tip {
+  border-top-color: #FAF7F1;
+}
+.dsohire-map-popup-card {
+  padding: 10px 14px;
+  min-width: 160px;
+  max-width: 260px;
+  font-family: var(--font-manrope), system-ui, sans-serif;
+}
+.dsohire-map-popup-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-ink);
+  line-height: 1.25;
+  margin-bottom: 2px;
+}
+.dsohire-map-popup-meta {
+  font-size: 11px;
+  color: var(--color-slate-body);
+  line-height: 1.35;
+}
