@@ -243,6 +243,14 @@ export async function saveParsedResumeAction(
   // Only write fields the user actually has values for; null fields
   // stay null on the row so the existing profile editor still shows
   // empty placeholders to fill.
+  //
+  // 2026-05-18 — added persistence for current_location_city/state,
+  // pronouns, skills, languages, desired_specialty, and a pms_systems
+  // rollup from work_history. Erica's testing pass surfaced that the
+  // resume parser extracted these correctly but `saveParsedResumeAction`
+  // silently dropped them, leaving the post-import profile incomplete
+  // (city missing, "Add at least 3 skills"/"Add at least one language"
+  // / "Set your job preferences" still flagged on the completeness meter).
   const basics = parsed.basics;
   const candidateUpdate: Record<string, unknown> = {};
   if (basics.full_name.value) {
@@ -253,6 +261,11 @@ export async function saveParsedResumeAction(
   if (basics.phone.value) candidateUpdate.phone = basics.phone.value;
   if (basics.headline.value) candidateUpdate.headline = basics.headline.value;
   if (basics.summary.value) candidateUpdate.summary = basics.summary.value;
+  if (basics.pronouns.value) candidateUpdate.pronouns = basics.pronouns.value;
+  if (basics.current_location_city.value)
+    candidateUpdate.current_location_city = basics.current_location_city.value;
+  if (basics.current_location_state.value)
+    candidateUpdate.current_location_state = basics.current_location_state.value;
   if (basics.years_experience_dental.value !== null) {
     candidateUpdate.years_experience = basics.years_experience_dental.value;
   }
@@ -260,6 +273,22 @@ export async function saveParsedResumeAction(
     candidateUpdate.linkedin_url = basics.linkedin_url.value;
   if (parsed.desired_roles.length > 0)
     candidateUpdate.desired_roles = parsed.desired_roles;
+  if (parsed.desired_specialty.length > 0)
+    candidateUpdate.desired_specialty = parsed.desired_specialty;
+  if (parsed.skills.length > 0) candidateUpdate.skills = parsed.skills;
+  if (parsed.languages.length > 0) candidateUpdate.languages = parsed.languages;
+
+  // PMS rollup — every work_history entry can list pms_systems_used;
+  // the candidates.pms_systems column is the deduplicated top-level
+  // view used by Practice Fit + matching. Aggregate unique values
+  // across all parsed work entries.
+  const pmsSet = new Set<string>();
+  for (const work of parsed.work_history) {
+    for (const sys of work.pms_systems_used.value ?? []) {
+      if (sys && sys.trim()) pmsSet.add(sys.trim());
+    }
+  }
+  if (pmsSet.size > 0) candidateUpdate.pms_systems = Array.from(pmsSet);
 
   if (Object.keys(candidateUpdate).length > 0) {
     const { error } = await supabase
