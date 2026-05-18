@@ -192,29 +192,32 @@ html, body {
 ───────────────────────────────────────── */
 .dso-prose,
 .dso-prose * {
-  /* Disable EVERY OpenType substitution that rewrites (c)→©, (r)→®,
-     (tm)→™, "..." → "…", etc. in legal copy ("(a)/(b)/(c)" lists,
-     "17 U.S.C. § 512(c)(3)") and in any user-typed Tiptap content.
+  /* Nuclear option — disable EVERY OpenType ligature/substitution
+     feature in the .dso-prose subtree to kill (c)→©, (r)→®, (tm)→™
+     glyph substitution from Manrope, regardless of which OpenType
+     feature table the font uses to ship them.
 
-     Manrope ships the trademark substitutions as DISCRETIONARY
-     LIGATURES (`dlig`), NOT contextual alternates (`calt`) — verified
-     2026-05-18 when disabling calt alone left (c)→© rendering on
-     /legal/privacy in incognito. So we have to flip dlig 0 too.
-     hlig (historical) is killed defensively in case future Manrope
-     versions move the substitution.
+     Investigation history (2026-05-18):
+       1. `font-feature-settings: "calt" 0` alone — © still rendered.
+       2. Added `dlig` 0 + `hlig` 0 + font-variant-ligatures spec — still
+          rendered in incognito. Manrope appears to ship the trademark
+          substitutions outside the standard four ligature feature
+          categories (possibly via a stylistic set `ssXX` we'd have to
+          enumerate).
+       3. This rule: `font-variant-ligatures: none` is the CSS spec's
+          all-off switch. It explicitly disables all four ligature
+          categories (common, contextual, discretionary, historical) in
+          one keyword. Paired with `font-feature-settings: normal`
+          (resets the OpenType-level overrides to UA default) and
+          `!important` to win Tailwind v4's preflight on body.
 
-     We use BOTH the high-level `font-variant-ligatures` (CSS spec way)
-     AND the low-level `font-feature-settings` (OpenType way) because
-     Tailwind v4's preflight sets `body { font-feature-settings:
-     var(--default-font-feature-settings); }` which can win cascade in
-     some engines despite class specificity. The universal-selector
-     descendant pattern + !important guarantees no <p>/<li> inside the
-     prose wrapper picks up any of these features from anywhere.
-
-     Standard ligatures (fi, fl) remain enabled via common-ligatures. */
-  font-variant-ligatures: common-ligatures no-discretionary-ligatures
-    no-contextual no-historical-ligatures !important;
-  font-feature-settings: "liga" 1, "calt" 0, "dlig" 0, "hlig" 0 !important;
+     Trade-off: this disables fi/fl common ligatures too. In legal
+     copy + Tiptap content this is invisible — the affected character
+     pairs render correctly without the ligature glyph, just slightly
+     less typographically polished. Acceptable for the .dso-prose
+     subtree only; the rest of the app keeps Manrope's defaults. */
+  font-variant-ligatures: none !important;
+  font-feature-settings: normal !important;
 }
 .dso-prose h2 {
   font-size: 1.25rem;
