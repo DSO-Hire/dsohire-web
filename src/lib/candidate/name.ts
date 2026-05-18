@@ -27,6 +27,25 @@ export function parseSalutation(raw: unknown): Salutation | null {
 }
 
 // ─────────────────────────────────────────────────────────────────────
+// Pronouns — fixed dropdown added 2026-05-18 after Erica's testing pass
+// flagged the free-text pronouns input as a typo/inconsistency risk.
+// Common combinations cover ~95% of candidate selections; "Prefer not
+// to say" preserves the choice not to disclose without forcing a value;
+// the profile keeps a free-text fallback if a candidate's pronouns
+// aren't in the list (legacy custom values render as a "(current)"
+// option so they don't silently disappear from the picker).
+// ─────────────────────────────────────────────────────────────────────
+
+export const PRONOUN_OPTIONS = [
+  "she/her",
+  "he/him",
+  "they/them",
+  "she/they",
+  "he/they",
+  "Prefer not to say",
+] as const;
+
+// ─────────────────────────────────────────────────────────────────────
 // Split / compose
 // ─────────────────────────────────────────────────────────────────────
 

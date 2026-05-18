@@ -166,7 +166,7 @@ export function TextField(props: {
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
-  type?: "text" | "tel" | "url" | "number";
+  type?: "text" | "tel" | "url" | "number" | "date";
   required?: boolean;
   helper?: string;
   maxLength?: number;

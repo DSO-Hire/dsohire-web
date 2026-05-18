@@ -164,11 +164,15 @@ export default async function CandidateProfilePage() {
           </a>
         </div>
       ) : (
+        // 2026-05-18 — bold solid-heritage panel after Erica's testing
+        // pass: the previous heritage-deep/30 border on ivory blended
+        // into the page background and got scrolled past. High-contrast
+        // solid fill ensures candidates SEE the CTA on first load.
         <a
           href="/candidate/profile/import"
-          className="mb-6 flex max-w-[820px] items-start gap-4 rounded-lg border border-heritage-deep/30 bg-[#F7F4ED] p-5 transition hover:border-heritage-deep hover:bg-[#F7F4ED]/70 sm:items-center"
+          className="mb-6 flex max-w-[820px] items-start gap-4 rounded-lg bg-heritage-deep p-5 text-ivory shadow-sm transition hover:bg-[#2A5346] sm:items-center"
         >
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-heritage-deep/10">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-ivory/20">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="20"
@@ -179,7 +183,7 @@ export default async function CandidateProfilePage() {
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="text-heritage-deep"
+              className="text-ivory"
               aria-hidden="true"
             >
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -189,15 +193,15 @@ export default async function CandidateProfilePage() {
             </svg>
           </div>
           <div className="flex-1">
-            <p className="font-display text-base font-semibold text-ink">
+            <p className="font-display text-base font-semibold text-ivory">
               Import from your resume
             </p>
-            <p className="mt-0.5 text-sm text-slate-body">
+            <p className="mt-0.5 text-sm text-ivory/85">
               Upload a PDF or DOCX — we&apos;ll fill in every section below in
               seconds. You review before anything saves.
             </p>
           </div>
-          <span className="hidden text-sm font-medium text-heritage-deep sm:block">
+          <span className="hidden text-sm font-semibold text-ivory sm:block">
             Start →
           </span>
         </a>

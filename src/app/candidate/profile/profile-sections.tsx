@@ -49,6 +49,7 @@ import {
   ComboboxField,
   InlineError,
 } from "./edit-sheet";
+import { PRONOUN_OPTIONS } from "@/lib/candidate/name";
 import {
   ROLE_CATEGORIES,
   SPECIALTIES,
@@ -558,12 +559,32 @@ function IdentityModal({
         />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
-        <TextField
-          label="Pronouns"
-          placeholder="she/her"
-          value={v.pronouns ?? ""}
-          onChange={(x) => setV((p) => ({ ...p, pronouns: x }))}
-        />
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium text-slate-800">
+            Pronouns
+          </span>
+          <select
+            value={v.pronouns ?? ""}
+            onChange={(e) =>
+              setV((p) => ({ ...p, pronouns: e.target.value || null }))
+            }
+            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+          >
+            <option value="">—</option>
+            {PRONOUN_OPTIONS.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+            {/* Legacy custom pronoun value preserved as a current
+                selection so a candidate's existing choice never silently
+                disappears from the picker. */}
+            {v.pronouns &&
+              !(PRONOUN_OPTIONS as readonly string[]).includes(v.pronouns) && (
+                <option value={v.pronouns}>{v.pronouns} (current)</option>
+              )}
+          </select>
+        </label>
         <TextField
           label="Phone"
           type="tel"
@@ -1538,12 +1559,14 @@ function LicenseModal({
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <TextField
-          label="Issued (YYYY-MM-DD)"
+          label="Issued"
+          type="date"
           value={v.issued_date ?? ""}
           onChange={(x) => setV((p) => ({ ...p, issued_date: x || null }))}
         />
         <TextField
-          label="Expires (YYYY-MM-DD)"
+          label="Expires"
+          type="date"
           value={v.expires_date ?? ""}
           onChange={(x) =>
             setV((p) => ({ ...p, expires_date: x || null }))
@@ -1713,14 +1736,16 @@ function CertificationModal({
       />
       <div className="grid gap-4 sm:grid-cols-2">
         <TextField
-          label="Issued (YYYY-MM-DD)"
+          label="Issued"
+          type="date"
           value={v.issued_date ?? ""}
           onChange={(x) =>
             setV((p) => ({ ...p, issued_date: x || null }))
           }
         />
         <TextField
-          label="Expires (YYYY-MM-DD)"
+          label="Expires"
+          type="date"
           value={v.expires_date ?? ""}
           onChange={(x) =>
             setV((p) => ({ ...p, expires_date: x || null }))
