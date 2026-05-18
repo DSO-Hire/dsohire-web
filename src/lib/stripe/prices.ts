@@ -41,8 +41,8 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
   starter: {
     id: "starter",
     name: "Starter",
-    tagline: "Built for DSOs with 10–20 practices",
-    description: "DSOs with 10–20 practices, up to 50 active listings",
+    tagline: "Built for DSOs of 10+ practices",
+    description: "DSOs of 10+ practices, up to 50 active listings",
     monthlyPrice: 499,
     monthlyPriceCents: 49900,
     features: [
@@ -58,8 +58,8 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
   growth: {
     id: "growth",
     name: "Growth",
-    tagline: "Built for DSOs with 20–35 practices",
-    description: "DSOs with 20–35 practices, unlimited listings, full hiring platform",
+    tagline: "Built for multi-location DSOs",
+    description: "Multi-location DSOs with unlimited listings and the full hiring platform",
     monthlyPrice: 999,
     monthlyPriceCents: 99900,
     features: [

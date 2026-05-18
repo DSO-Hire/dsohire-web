@@ -158,7 +158,7 @@ export const ROLE_CONFIGS: RoleConfig[] = [
       },
       {
         title: "Production-based compensation",
-        body: "Most DSO specialist comp is structured as a percentage of collections, sometimes with a base guarantee. Your specialty premium gets recognized — high-production specialists routinely clear $400K+ at DSOs that take their model seriously.",
+        body: "Most DSO specialist comp is structured as a percentage of collections, sometimes with a base guarantee. Your specialty premium gets recognized — comp scales with your case volume, and DSOs with strong referral pipelines from sister GP practices give specialty production a meaningful platform.",
       },
       {
         title: "Peer specialist learning",

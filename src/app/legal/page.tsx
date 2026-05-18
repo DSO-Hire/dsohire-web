@@ -30,8 +30,8 @@ export default function LegalIndex() {
       </h1>
       <p className="text-base text-slate-body leading-[1.7] max-w-[640px] mb-12">
         These documents govern how DSO Hire LLC operates, what we promise users,
-        and what we ask in return. Templates current as of April 30, 2026 — final
-        attorney review pending before launch.
+        and what we ask in return. Each policy lists its effective date below and
+        is reviewed periodically as the platform evolves.
       </p>
 
       <ul className="border-t border-[var(--rule)] list-none">

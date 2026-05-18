@@ -38,7 +38,7 @@ const FAQS: FaqEntry[] = [
   },
   {
     q: "What's the difference between Starter, Growth, and Enterprise?",
-    a: "See the full feature matrix at /pricing. Quick version: Starter (10–20 practices) is the job-board basics. Growth (20–35) adds the kanban, scorecards, AI matching, and per-location analytics. Enterprise (35+) layers on dedicated CSM, SSO, audit log, and API access.",
+    a: "See the full feature matrix at /pricing. Quick version: Starter (10+ practices) is the job-board basics. Growth (multi-location DSOs) adds the kanban, scorecards, AI matching, and per-location analytics. Enterprise (35+ practices) layers on dedicated CSM, SSO, audit log, and API access.",
   },
 ];
 

@@ -1032,7 +1032,7 @@ function FinalCta() {
 const FAQ_ITEMS = [
   {
     q: "What does the subscription actually cover?",
-    a: "Multi-location job postings, the full applicant pipeline with kanban + scorecards + team comments, candidate dashboards, branded company page, EEOC/OFCCP-ready exports, and Stripe-secured billing. Pricing scales with your practice count; features are the same depth at every paid tier. Active-listing caps are tier-based — Starter up to 50 active listings, Growth and Enterprise unlimited.",
+    a: "Multi-location job postings, the full applicant pipeline with kanban + scorecards + team comments, candidate dashboards, branded company page, application + candidate data exports for your HR records, and Stripe-secured billing. Pricing scales with your practice count; features are the same depth at every paid tier. Active-listing caps are tier-based — Starter up to 50 active listings, Growth and Enterprise unlimited.",
   },
   {
     q: "Can I cancel or change tiers anytime?",
