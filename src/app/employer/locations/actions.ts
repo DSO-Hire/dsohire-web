@@ -19,7 +19,7 @@ import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
-import { geocodeCityState } from "@/lib/geocoding/mapbox";
+import { geocodeCityState, geocodeStreetAddress } from "@/lib/geocoding/mapbox";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { SUPPORT_EMAIL } from "@/lib/contact";
 
@@ -159,9 +159,20 @@ export async function createLocation(
     };
   }
 
-  // Fire-and-forget city+state geocoding so the map view picks up the
-  // location without blocking the form submit. Failures are swallowed.
+  // Fire-and-forget geocoding so the map view picks up the location
+  // without blocking the form submit. Failures are swallowed.
+  //   * Public city-centroid coords → drives candidate-facing /jobs map
+  //   * Precise street coords (if address_line1 present) → drives the
+  //     employer-facing precise-pin map (Map Phase C, 2026-05-18)
   void geocodeAndStore(inserted.id as string, fields.city, fields.state);
+  if (fields.addressLine1) {
+    void geocodePreciseAndStore(inserted.id as string, {
+      line1: fields.addressLine1,
+      city: fields.city,
+      state: fields.state,
+      postal: fields.postalCode || null,
+    });
+  }
 
   revalidatePath("/employer/locations");
   revalidatePath("/employer/dashboard");
@@ -191,7 +202,9 @@ export async function updateLocation(
   // detect an affiliation toggle for audit logging.
   const { data: prior } = await supabase
     .from("dso_locations")
-    .select("city, state, latitude, longitude, name, public_dso_affiliation")
+    .select(
+      "address_line1, city, state, postal_code, latitude, longitude, precise_latitude, precise_longitude, name, public_dso_affiliation"
+    )
     .eq("id", locationId)
     .eq("dso_id", fields.dsoId)
     .maybeSingle();
@@ -248,9 +261,10 @@ export async function updateLocation(
     };
   }
 
-  // Re-geocode if city/state changed, OR if the row has no coords yet
-  // (handles backfill recovery — saving a location without changes will
-  // trigger a fresh geocode if the prior write hadn't populated coords).
+  // Re-geocode the PUBLIC city-centroid coords if city/state changed,
+  // OR if the row has no coords yet (handles backfill recovery —
+  // saving a location without changes will trigger a fresh geocode if
+  // the prior write hadn't populated coords).
   const cityChanged =
     (prior?.city as string | null | undefined) !== fields.city;
   const stateChanged =
@@ -260,6 +274,35 @@ export async function updateLocation(
     (prior?.longitude as number | null | undefined) === null;
   if (cityChanged || stateChanged || missingCoords) {
     void geocodeAndStore(locationId, fields.city, fields.state);
+  }
+
+  // Re-geocode the PRECISE street coords if any of (line1, city, state,
+  // postal) changed, OR if the row has line1 but no precise coords yet
+  // (backfill recovery). Skip entirely when there's no street address —
+  // employer map will fall back to the public city centroid in that case.
+  const priorLine1 =
+    (prior?.address_line1 as string | null | undefined) ?? "";
+  const priorPostal =
+    (prior?.postal_code as string | null | undefined) ?? "";
+  const line1Changed = priorLine1 !== fields.addressLine1;
+  const postalChanged = priorPostal !== fields.postalCode;
+  const missingPreciseCoords =
+    (prior?.precise_latitude as number | null | undefined) === null ||
+    (prior?.precise_longitude as number | null | undefined) === null;
+  if (
+    fields.addressLine1 &&
+    (line1Changed ||
+      cityChanged ||
+      stateChanged ||
+      postalChanged ||
+      missingPreciseCoords)
+  ) {
+    void geocodePreciseAndStore(locationId, {
+      line1: fields.addressLine1,
+      city: fields.city,
+      state: fields.state,
+      postal: fields.postalCode || null,
+    });
   }
 
   // Audit log (Phase 4.5.e) — record only when public_dso_affiliation
@@ -411,5 +454,59 @@ async function geocodeAndStore(
     revalidatePath("/jobs");
   } catch (err) {
     console.warn("[locations] geocodeAndStore unexpected error", err);
+  }
+}
+
+/**
+ * Same pattern as geocodeAndStore, but writes the PRECISE street-address
+ * coordinates into the precise_* columns. Used for the employer-facing
+ * map view — never rendered to candidate-facing surfaces.
+ *
+ * Returns silently on any failure; the location row already saved with
+ * its public city-centroid coords, so the employer map just falls back
+ * to those if precise coords aren't available.
+ */
+async function geocodePreciseAndStore(
+  locationId: string,
+  address: {
+    line1: string;
+    city: string;
+    state: string;
+    postal: string | null;
+  }
+): Promise<void> {
+  try {
+    const result = await geocodeStreetAddress({
+      line1: address.line1,
+      city: address.city,
+      state: address.state,
+      postal: address.postal,
+    });
+    if (!result) return;
+
+    const admin = createSupabaseServiceRoleClient();
+    const { error } = await admin
+      .from("dso_locations")
+      .update({
+        precise_latitude: result.lat,
+        precise_longitude: result.lng,
+        precise_geocoded_at: new Date().toISOString(),
+      })
+      .eq("id", locationId);
+
+    if (error) {
+      console.warn("[locations] precise geocode write failed", error);
+      return;
+    }
+
+    // No /jobs revalidate here — precise coords never render publicly.
+    // Only the employer dashboard / locations surfaces depend on these.
+    revalidatePath("/employer/locations");
+    revalidatePath(`/employer/locations/${locationId}`);
+  } catch (err) {
+    console.warn(
+      "[locations] geocodePreciseAndStore unexpected error",
+      err
+    );
   }
 }

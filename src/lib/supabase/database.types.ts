@@ -1452,6 +1452,9 @@ export type Database = {
           longitude: number | null
           name: string
           postal_code: string | null
+          precise_geocoded_at: string | null
+          precise_latitude: number | null
+          precise_longitude: number | null
           public_dso_affiliation: boolean
           state: string | null
           updated_at: string
@@ -1471,6 +1474,9 @@ export type Database = {
           longitude?: number | null
           name: string
           postal_code?: string | null
+          precise_geocoded_at?: string | null
+          precise_latitude?: number | null
+          precise_longitude?: number | null
           public_dso_affiliation?: boolean
           state?: string | null
           updated_at?: string
@@ -1490,6 +1496,9 @@ export type Database = {
           longitude?: number | null
           name?: string
           postal_code?: string | null
+          precise_geocoded_at?: string | null
+          precise_latitude?: number | null
+          precise_longitude?: number | null
           public_dso_affiliation?: boolean
           state?: string | null
           updated_at?: string
