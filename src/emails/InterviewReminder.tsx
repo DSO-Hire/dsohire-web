@@ -21,17 +21,29 @@ export interface InterviewReminderProps {
   kindLabel: string;
   locationText: string | null;
   detailUrl: string;
+  /**
+   * IANA timezone the recipient prefers (e.g. "America/Chicago"). Used to
+   * render the reminder time in the recipient's TZ instead of falling
+   * back to the Vercel Node runtime's UTC. Defaults to America/Chicago —
+   * matches the column default added in migration 20260518000001.
+   */
+  recipientTimezone?: string;
 }
 
-function formatStart(iso: string): { line1: string; line2: string } {
+function formatStart(
+  iso: string,
+  timezone: string
+): { line1: string; line2: string } {
   const d = new Date(iso);
   return {
     line1: d.toLocaleString("en-US", {
+      timeZone: timezone,
       weekday: "long",
       month: "long",
       day: "numeric",
     }),
     line2: d.toLocaleString("en-US", {
+      timeZone: timezone,
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
@@ -52,9 +64,10 @@ export function InterviewReminder({
   kindLabel,
   locationText,
   detailUrl,
+  recipientTimezone = "America/Chicago",
 }: InterviewReminderProps) {
   const greeting = recipientName ? `Hi ${recipientName} —` : "Hi —";
-  const { line1, line2 } = formatStart(startAtIso);
+  const { line1, line2 } = formatStart(startAtIso, recipientTimezone);
   const eyebrowText =
     windowLabel === "tomorrow"
       ? "Interview tomorrow"

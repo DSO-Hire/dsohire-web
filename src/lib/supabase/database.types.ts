@@ -1214,6 +1214,7 @@ export type Database = {
           phone: string | null
           pms_systems: string[]
           practice_fit_consent: string
+          preferred_timezone: string
           pronouns: string | null
           resume_url: string | null
           resume_visibility: string
@@ -1261,6 +1262,7 @@ export type Database = {
           phone?: string | null
           pms_systems?: string[]
           practice_fit_consent?: string
+          preferred_timezone?: string
           pronouns?: string | null
           resume_url?: string | null
           resume_visibility?: string
@@ -1308,6 +1310,7 @@ export type Database = {
           phone?: string | null
           pms_systems?: string[]
           practice_fit_consent?: string
+          preferred_timezone?: string
           pronouns?: string | null
           resume_url?: string | null
           resume_visibility?: string
@@ -1871,6 +1874,7 @@ export type Database = {
           full_name: string | null
           id: string
           phone: string | null
+          preferred_timezone: string
           role: Database["public"]["Enums"]["dso_user_role"]
           updated_at: string
         }
@@ -1882,6 +1886,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          preferred_timezone?: string
           role?: Database["public"]["Enums"]["dso_user_role"]
           updated_at?: string
         }
@@ -1893,6 +1898,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          preferred_timezone?: string
           role?: Database["public"]["Enums"]["dso_user_role"]
           updated_at?: string
         }

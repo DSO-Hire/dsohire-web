@@ -18,6 +18,8 @@ import {
   PhoneForm,
   LanguageStub,
 } from "./account-form";
+import { TimezoneCard } from "@/components/settings/timezone-card";
+import { updatePreferredTimezone } from "./actions";
 
 export const metadata: Metadata = { title: "Account · Settings" };
 
@@ -31,7 +33,7 @@ export default async function CandidateSettingsAccountPage() {
   const [{ data: candidate }, { data: pendingRows }] = await Promise.all([
     supabase
       .from("candidates")
-      .select("phone")
+      .select("phone, preferred_timezone")
       .eq("auth_user_id", user.id)
       .maybeSingle(),
     supabase
@@ -46,6 +48,8 @@ export default async function CandidateSettingsAccountPage() {
   ]);
 
   const phone = (candidate?.phone as string | null) ?? null;
+  const preferredTimezone =
+    (candidate?.preferred_timezone as string | null) ?? "America/Chicago";
   const pendingRow = (pendingRows?.[0] ?? null) as
     | {
         id: string;
@@ -63,6 +67,10 @@ export default async function CandidateSettingsAccountPage() {
         initialPending={pendingRow}
       />
       <PhoneForm initialPhone={phone} />
+      <TimezoneCard
+        initialTimezone={preferredTimezone}
+        action={updatePreferredTimezone}
+      />
       <LanguageStub />
 
       <section className="border border-[var(--rule)] bg-cream p-7">

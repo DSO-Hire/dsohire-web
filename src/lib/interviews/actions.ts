@@ -132,11 +132,14 @@ export async function proposeInterview(
     .maybeSingle();
   if (!dsoUser) return { ok: false, error: "No DSO context." };
 
-  // Read the application context for the emails + audit.
+  // Read the application context for the emails + audit. Pulls the
+  // candidate's `preferred_timezone` (migration 20260518000001) so the
+  // proposal email renders slot times in the candidate's TZ instead of
+  // falling back to the Vercel Node runtime's UTC.
   const { data: appRow } = await supabase
     .from("applications")
     .select(
-      "id, job_id, candidate_id, jobs(title), candidates(first_name, full_name, auth_user_id)"
+      "id, job_id, candidate_id, jobs(title), candidates(first_name, full_name, auth_user_id, preferred_timezone)"
     )
     .eq("id", input.applicationId)
     .maybeSingle();
@@ -154,8 +157,18 @@ export async function proposeInterview(
       | Array<{ title: string }>
       | null;
     candidates:
-      | { first_name: string | null; full_name: string | null; auth_user_id: string | null }
-      | Array<{ first_name: string | null; full_name: string | null; auth_user_id: string | null }>
+      | {
+          first_name: string | null;
+          full_name: string | null;
+          auth_user_id: string | null;
+          preferred_timezone: string | null;
+        }
+      | Array<{
+          first_name: string | null;
+          full_name: string | null;
+          auth_user_id: string | null;
+          preferred_timezone: string | null;
+        }>
       | null;
   };
   const jobsRecord = appCtx.jobs;
@@ -260,6 +273,8 @@ export async function proposeInterview(
         locationText: input.locationText,
         proposedStartsIso: input.proposedStarts,
         pickUrl: `${SITE_URL}/candidate/applications/${input.applicationId}`,
+        recipientTimezone:
+          candidate?.preferred_timezone ?? "America/Chicago",
       }),
     });
   }
@@ -416,11 +431,13 @@ export async function bookInterviewSlot(
     .update({ status: "booked" })
     .eq("id", input.proposalId);
 
-  // Fetch context for emails + audit.
+  // Fetch context for emails + audit. Pulls candidates.preferred_timezone
+  // (migration 20260518153211) so the confirmation email renders the
+  // booked time in the candidate's TZ instead of falling back to UTC.
   const { data: proposal } = await supabase
     .from("interview_proposals")
     .select(
-      "id, application_id, interview_kind, duration_minutes, location_text, message_to_candidate, applications(jobs(id, title, dso_id), candidates(first_name, full_name, auth_user_id))"
+      "id, application_id, interview_kind, duration_minutes, location_text, message_to_candidate, applications(jobs(id, title, dso_id), candidates(first_name, full_name, auth_user_id, preferred_timezone))"
     )
     .eq("id", input.proposalId)
     .maybeSingle();
@@ -439,6 +456,7 @@ export async function bookInterviewSlot(
       first_name: string | null;
       full_name: string | null;
       auth_user_id: string | null;
+      preferred_timezone: string | null;
     };
     type AppEmbed = {
       jobs: JobEmbed | Array<JobEmbed> | null;
@@ -504,23 +522,28 @@ export async function bookInterviewSlot(
             kindLabel: KIND_LABELS[propCtx.interview_kind] ?? "Interview",
             locationText: propCtx.location_text,
             detailUrl: `${SITE_URL}/candidate/applications/${propCtx.application_id}`,
+            recipientTimezone:
+              cand.preferred_timezone ?? "America/Chicago",
           }),
         });
       }
     }
 
-    // Email DSO members
+    // Email DSO members. Each member has their own preferred_timezone
+    // (migration 20260518153211) — pull it in the select so the emailed
+    // interview time renders in each member's TZ rather than UTC.
     if (dsoId) {
       const admin = createSupabaseServiceRoleClient();
       const { data: members } = await admin
         .from("dso_users")
-        .select("auth_user_id, full_name, role")
+        .select("auth_user_id, full_name, role, preferred_timezone")
         .eq("dso_id", dsoId)
         .in("role", ["owner", "admin", "recruiter", "hiring_manager"]);
       for (const m of (members ?? []) as Array<{
         auth_user_id: string;
         full_name: string | null;
         role: string;
+        preferred_timezone: string | null;
       }>) {
         try {
           const r = await admin.auth.admin.getUserById(m.auth_user_id);
@@ -547,6 +570,8 @@ export async function bookInterviewSlot(
               kindLabel: KIND_LABELS[propCtx.interview_kind] ?? "Interview",
               locationText: propCtx.location_text,
               detailUrl: `${SITE_URL}/employer/applications/${propCtx.application_id}`,
+              recipientTimezone:
+                m.preferred_timezone ?? "America/Chicago",
             }),
           });
         } catch (err) {

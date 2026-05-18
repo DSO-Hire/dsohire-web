@@ -305,3 +305,37 @@ export async function updatePhone(phone: string): Promise<Result> {
   revalidatePath("/candidate/profile");
   return { ok: true };
 }
+
+/* ──────────────────────────────────────────────────────────────
+ * 5. Update preferred timezone (migration 20260518153211)
+ *
+ *   Writes candidates.preferred_timezone. Validated against the
+ *   US_TIMEZONES allowlist server-side so a hostile client can't store
+ *   garbage that would later crash `Intl.DateTimeFormat` when an email
+ *   tries to render. Allowlist lives in src/lib/timezones.ts.
+ * ─────────────────────────────────────────────────────────── */
+
+export async function updatePreferredTimezone(
+  timezone: string
+): Promise<Result> {
+  const { US_TIMEZONES } = await import("@/lib/timezones");
+  const allowed = US_TIMEZONES.some((t) => t.id === timezone);
+  if (!allowed) {
+    return { ok: false, error: "Pick a timezone from the list." };
+  }
+
+  const ctx = await getAuthedUser();
+  if (!ctx.ok) return ctx;
+
+  const { error } = await ctx.supabase
+    .from("candidates")
+    .update({ preferred_timezone: timezone })
+    .eq("auth_user_id", ctx.user.id);
+
+  if (error) {
+    console.error("[settings/account] updatePreferredTimezone", error);
+    return { ok: false, error: "Couldn't save your timezone." };
+  }
+  revalidatePath("/candidate/settings/account");
+  return { ok: true };
+}

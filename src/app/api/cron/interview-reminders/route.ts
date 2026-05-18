@@ -66,7 +66,7 @@ export async function GET(request: Request) {
   const { data: bookings, error: bErr } = await admin
     .from("interview_bookings")
     .select(
-      "id, proposal_id, selected_option_id, reminder_24h_sent_at, reminder_1h_sent_at, interview_proposal_options!inner(start_at), interview_proposals!inner(application_id, interview_kind, duration_minutes, location_text, status, applications!inner(candidates(first_name, full_name, auth_user_id), jobs(title, dso_id, dsos(name))))"
+      "id, proposal_id, selected_option_id, reminder_24h_sent_at, reminder_1h_sent_at, interview_proposal_options!inner(start_at), interview_proposals!inner(application_id, interview_kind, duration_minutes, location_text, status, applications!inner(candidates(first_name, full_name, auth_user_id, preferred_timezone), jobs(title, dso_id, dsos(name))))"
     )
     .gte("interview_proposal_options.start_at", now.toISOString())
     .lte("interview_proposal_options.start_at", in25h.toISOString())
@@ -100,6 +100,7 @@ export async function GET(request: Request) {
           first_name: string | null;
           full_name: string | null;
           auth_user_id: string | null;
+          preferred_timezone: string | null;
         }>;
         jobs: Array<{
           title: string;
@@ -172,20 +173,25 @@ export async function GET(request: Request) {
               kindLabel,
               locationText: proposal.location_text,
               detailUrl: detailUrlCandidate,
+              recipientTimezone:
+                candidate.preferred_timezone ?? "America/Chicago",
             }),
           });
         }
       }
 
-      // Employer reminders — every owner/admin/recruiter/HM on the DSO
+      // Employer reminders — every owner/admin/recruiter/HM on the DSO.
+      // Pull preferred_timezone so each member's email renders the
+      // reminder time in their TZ rather than UTC.
       const { data: members } = await admin
         .from("dso_users")
-        .select("auth_user_id, full_name")
+        .select("auth_user_id, full_name, preferred_timezone")
         .eq("dso_id", dsoId)
         .in("role", ["owner", "admin", "recruiter", "hiring_manager"]);
       for (const m of (members ?? []) as Array<{
         auth_user_id: string;
         full_name: string | null;
+        preferred_timezone: string | null;
       }>) {
         try {
           const r = await admin.auth.admin.getUserById(m.auth_user_id);
@@ -211,6 +217,8 @@ export async function GET(request: Request) {
               kindLabel,
               locationText: proposal.location_text,
               detailUrl: detailUrlEmployer,
+              recipientTimezone:
+                m.preferred_timezone ?? "America/Chicago",
             }),
           });
         } catch (err) {

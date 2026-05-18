@@ -21,11 +21,20 @@ export interface InterviewProposedProps {
   locationText?: string | null;
   proposedStartsIso?: string[];
   pickUrl?: string;
+  /**
+   * IANA timezone the recipient prefers (e.g. "America/Chicago"). Used to
+   * render proposed slots in the candidate's TZ instead of falling back to
+   * the Vercel Node runtime's UTC. Defaults to the US-centric
+   * America/Chicago — matches the candidates.preferred_timezone default
+   * added in migration 20260518000001.
+   */
+  recipientTimezone?: string;
 }
 
-function formatSlot(iso: string): string {
+function formatSlot(iso: string, timezone: string): string {
   const d = new Date(iso);
   return d.toLocaleString("en-US", {
+    timeZone: timezone,
     weekday: "short",
     month: "short",
     day: "numeric",
@@ -46,6 +55,7 @@ export function InterviewProposed({
   locationText = null,
   proposedStartsIso = [],
   pickUrl = "https://dsohire.com/candidate/dashboard",
+  recipientTimezone = "America/Chicago",
 }: InterviewProposedProps) {
   const greeting = candidateFirstName
     ? `Hi ${candidateFirstName} —`
@@ -72,7 +82,7 @@ export function InterviewProposed({
         <Text style={cardLabel}>Pick a time that works</Text>
         {proposedStartsIso.map((iso) => (
           <Text key={iso} style={slotRow}>
-            {formatSlot(iso)}
+            {formatSlot(iso, recipientTimezone)}
           </Text>
         ))}
         {locationText && (

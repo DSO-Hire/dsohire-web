@@ -18,6 +18,8 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { PasswordForm } from "../password-form";
 import { MfaSection } from "./mfa-section";
+import { TimezoneCard } from "@/components/settings/timezone-card";
+import { updatePreferredTimezone } from "./actions";
 import { createSupabaseServerClient, createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { getActiveSubscription } from "@/lib/billing/subscription";
 import { getMfaState } from "@/lib/auth/mfa";
@@ -41,6 +43,7 @@ export default async function AccountSettingsPage() {
   let isOwner = false;
   let isEnterprise = false;
   let initialRequireMfa = false;
+  let preferredTimezone = "America/Chicago";
 
   if (user) {
     const mfaState = await getMfaState(supabase);
@@ -58,11 +61,13 @@ export default async function AccountSettingsPage() {
 
     const { data: dsoUser } = await supabase
       .from("dso_users")
-      .select("dso_id, role")
+      .select("dso_id, role, preferred_timezone")
       .eq("auth_user_id", user.id)
       .maybeSingle();
     if (dsoUser) {
       isOwner = (dsoUser.role as string) === "owner";
+      preferredTimezone =
+        (dsoUser.preferred_timezone as string | null) ?? "America/Chicago";
       const sub = await getActiveSubscription(
         supabase,
         dsoUser.dso_id as string
@@ -101,6 +106,11 @@ export default async function AccountSettingsPage() {
         isOwner={isOwner}
         isEnterprise={isEnterprise}
         initialRequireMfa={initialRequireMfa}
+      />
+
+      <TimezoneCard
+        initialTimezone={preferredTimezone}
+        action={updatePreferredTimezone}
       />
 
       <Link

@@ -22,18 +22,31 @@ export interface InterviewBookedProps {
   kindLabel: string;
   locationText: string | null;
   detailUrl: string;
+  /**
+   * IANA timezone the recipient prefers (e.g. "America/Chicago"). Threaded
+   * through `formatStart` so the email renders the interview time in the
+   * viewer's TZ instead of falling back to the Vercel Node runtime's UTC.
+   * Default is the US-centric America/Chicago — matches the column default
+   * added in migration 20260518000001.
+   */
+  recipientTimezone?: string;
 }
 
-function formatStart(iso: string): { line1: string; line2: string } {
+function formatStart(
+  iso: string,
+  timezone: string
+): { line1: string; line2: string } {
   const d = new Date(iso);
   return {
     line1: d.toLocaleString("en-US", {
+      timeZone: timezone,
       weekday: "long",
       month: "long",
       day: "numeric",
       year: "numeric",
     }),
     line2: d.toLocaleString("en-US", {
+      timeZone: timezone,
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
@@ -53,9 +66,10 @@ export function InterviewBooked({
   kindLabel,
   locationText,
   detailUrl,
+  recipientTimezone = "America/Chicago",
 }: InterviewBookedProps) {
   const greeting = recipientName ? `Hi ${recipientName} —` : "Hi —";
-  const { line1, line2 } = formatStart(startAtIso);
+  const { line1, line2 } = formatStart(startAtIso, recipientTimezone);
 
   const headlineText =
     audience === "candidate"
