@@ -345,73 +345,105 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
 
       mapRef.current = map;
 
-      // BULLETPROOF SETUP via polling — every event-based approach
-      // I tried (style.load + isStyleLoaded check; load + loaded()
-      // check; load + style.load split) failed to fire initialSetup
-      // on the first map load even though the same code paths worked
-      // after a Streets/Satellite toggle. Polling map.loaded() every
-      // 50ms eliminates every event-timing race: when the map is
-      // ready, we run setup ONCE and stop polling. The cost is a
-      // handful of cheap function calls during the ~100-300ms before
-      // the map is interactive — invisible to the user.
+      // BULLETPROOF SETUP via polling + multi-event fallback, plus
+      // diagnostic console logging while the initial-load bug is
+      // being chased down. When the bug is confirmed fixed, the
+      // [JobsMap] logs can be quietly stripped.
+      console.log("[JobsMap] init: token present, map constructed");
       let initialSetupDone = false;
-      const runSetup = () => {
+      let setupAttempts = 0;
+
+      const runSetup = (source: string) => {
+        setupAttempts += 1;
+        console.log(
+          `[JobsMap] runSetup called from ${source}, ` +
+            `cancelled=${cancelled} done=${initialSetupDone} ` +
+            `loaded=${map.loaded?.()} attempt=${setupAttempts}`
+        );
         if (cancelled || initialSetupDone) return;
         const currentMetros = metroGroupsRef.current;
-        attachLocationLayers(map, currentMetros);
-        wireLayerInteractions(map, {
-          getMetro: (key: string) =>
-            metroByKeyRef.current.get(key) ?? null,
-          openDrawer: (metro) => setDrawerMetro(metro),
-          popup: popupRef.current,
-        });
-        if (!initialFitDoneRef.current && currentMetros.length > 0) {
-          const bounds = new mapboxgl.LngLatBounds();
-          for (const m of currentMetros) {
-            bounds.extend([m.longitude, m.latitude]);
-          }
-          map.fitBounds(bounds, {
-            padding: { top: 80, bottom: 80, left: 80, right: 80 },
-            maxZoom: 9,
-            duration: 0,
+        console.log(
+          `[JobsMap] attaching layers for ${currentMetros.length} metro(s)`
+        );
+        try {
+          attachLocationLayers(map, currentMetros);
+          wireLayerInteractions(map, {
+            getMetro: (key: string) =>
+              metroByKeyRef.current.get(key) ?? null,
+            openDrawer: (metro) => setDrawerMetro(metro),
+            popup: popupRef.current,
           });
-          initialFitDoneRef.current = true;
+          if (!initialFitDoneRef.current && currentMetros.length > 0) {
+            const bounds = new mapboxgl.LngLatBounds();
+            for (const m of currentMetros) {
+              bounds.extend([m.longitude, m.latitude]);
+            }
+            map.fitBounds(bounds, {
+              padding: { top: 80, bottom: 80, left: 80, right: 80 },
+              maxZoom: 9,
+              duration: 0,
+            });
+            initialFitDoneRef.current = true;
+          }
+          initialSetupDone = true;
+          setMapReady(true);
+          console.log("[JobsMap] setup complete; pins should be visible");
+        } catch (err) {
+          console.error("[JobsMap] attachLocationLayers threw:", err);
         }
-        initialSetupDone = true;
-        setMapReady(true);
       };
 
-      // Polling driver — 50ms tick. Stops once initialSetupDone or
-      // cancelled. Belt-and-suspenders: also bind to 'load' and
-      // 'idle' in case Mapbox's events DO fire before polling
-      // catches the loaded state.
+      // Polling driver — 50ms tick, max ~6 seconds. Stops once
+      // initialSetupDone or cancelled. Race-free regardless of when
+      // events fire.
+      let pollTicks = 0;
       const pollHandle = setInterval(() => {
+        pollTicks += 1;
         if (cancelled || initialSetupDone) {
           clearInterval(pollHandle);
           return;
         }
         if (map.loaded?.()) {
           clearInterval(pollHandle);
-          runSetup();
+          runSetup("polling");
+        }
+        if (pollTicks > 120) {
+          console.warn(
+            "[JobsMap] polling gave up after 6s — map.loaded() never returned true"
+          );
+          clearInterval(pollHandle);
         }
       }, 50);
-      map.on("load", runSetup);
-      map.on("idle", runSetup);
+
+      // Belt-and-suspenders event bindings. Whichever fires first
+      // wins; the rest are no-ops due to the initialSetupDone guard.
+      map.on("load", () => runSetup("load event"));
+      map.on("idle", () => runSetup("idle event"));
 
       // Re-attach after a style swap (user toggles Streets/Satellite).
-      // Mapbox wipes the custom source + layers on setStyle so we
-      // must add them again. Guard skips the initial style.load,
-      // which is covered by runSetup above.
+      // Mapbox wipes the custom source + layers on setStyle.
       const reattachAfterStyleSwap = () => {
-        if (cancelled || !initialSetupDone) return;
+        if (cancelled) return;
+        if (!initialSetupDone) {
+          // If initial setup hasn't run yet (race), run it now via
+          // the style.load path. Better than dropping the event.
+          console.log("[JobsMap] style.load fired pre-initial-setup, running setup");
+          runSetup("style.load fallback");
+          return;
+        }
+        console.log("[JobsMap] style.load (swap) — re-attaching layers");
         const currentMetros = metroGroupsRef.current;
-        attachLocationLayers(map, currentMetros);
-        wireLayerInteractions(map, {
-          getMetro: (key: string) =>
-            metroByKeyRef.current.get(key) ?? null,
-          openDrawer: (metro) => setDrawerMetro(metro),
-          popup: popupRef.current,
-        });
+        try {
+          attachLocationLayers(map, currentMetros);
+          wireLayerInteractions(map, {
+            getMetro: (key: string) =>
+              metroByKeyRef.current.get(key) ?? null,
+            openDrawer: (metro) => setDrawerMetro(metro),
+            popup: popupRef.current,
+          });
+        } catch (err) {
+          console.error("[JobsMap] re-attach after style swap threw:", err);
+        }
       };
       map.on("style.load", reattachAfterStyleSwap);
 
