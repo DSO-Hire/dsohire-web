@@ -47,6 +47,7 @@ import { VerificationRequirements } from "./verification-requirements";
 import type { VerificationTypeValue } from "@/lib/verifications/types";
 import {
   getAllDentalSkills,
+  getAllDentalSkillsPrioritized,
   BENEFITS,
 } from "@/lib/candidate/canonical-lists";
 
@@ -943,6 +944,7 @@ export function JobWizard({
 
         {currentStep.id === "details" && (
           <DetailsStep
+            roleCategory={roleCategory}
             compType={compType}
             onCompType={setCompType}
             compMin={compMin}
@@ -1404,6 +1406,7 @@ function DescriptionStep({
 /* ───── Step 3 — Compensation & details ───── */
 
 function DetailsStep({
+  roleCategory,
   compType,
   onCompType,
   compMin,
@@ -1453,6 +1456,7 @@ function DetailsStep({
   verificationRequirements,
   onToggleVerificationRequirement,
 }: {
+  roleCategory: string;
   compType: CompensationType;
   onCompType: (v: CompensationType) => void;
   compMin: string;
@@ -1675,7 +1679,11 @@ function DetailsStep({
         label="Preferred skills"
         values={skills}
         onChange={onSkills}
-        options={getAllDentalSkills()}
+        // Role-aware ordering: skills tied to the selected role surface
+        // first in the quick-add chips (capped at 12), then universal
+        // skills, then everything else alphabetically. Falls back to the
+        // alphabetical flat list when role is unknown.
+        options={getAllDentalSkillsPrioritized(roleCategory)}
         placeholder="Search skills — type and press Enter for custom"
         helper="Skills you'd like to see in candidates — not a hard filter. Practice Fit rewards candidates who match a few of these; missing skills don't disqualify anyone."
       />

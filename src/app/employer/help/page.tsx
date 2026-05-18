@@ -7,6 +7,7 @@
  */
 
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { ArrowRight, Mail, MessageSquare, BookOpen } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
@@ -16,7 +17,9 @@ export const metadata: Metadata = { title: "Help & Support" };
 
 interface FaqEntry {
   q: string;
-  a: string;
+  // ReactNode so answers can embed clickable <Link> chips — most are
+  // plain strings, the tier-difference entry links /pricing inline.
+  a: ReactNode;
 }
 
 const FAQS: FaqEntry[] = [
@@ -38,7 +41,21 @@ const FAQS: FaqEntry[] = [
   },
   {
     q: "What's the difference between Starter, Growth, and Enterprise?",
-    a: "See the full feature matrix at /pricing. Quick version: Starter (10+ practices) is the job-board basics. Growth (multi-location DSOs) adds the kanban, scorecards, AI matching, and per-location analytics. Enterprise (35+ practices) layers on dedicated CSM, SSO, audit log, and API access.",
+    a: (
+      <>
+        See the full feature matrix on the{" "}
+        <Link
+          href="/pricing"
+          className="text-heritage-deep font-semibold underline underline-offset-2 hover:text-ink"
+        >
+          pricing page
+        </Link>
+        . Quick version: Starter (10+ practices) is the job-board basics.
+        Growth (multi-location DSOs) adds the kanban, scorecards, AI matching,
+        and per-location analytics. Enterprise (35+ practices) layers on
+        dedicated CSM, SSO, audit log, and API access.
+      </>
+    ),
   },
 ];
 

@@ -319,6 +319,54 @@ export function getAllDentalSkills(): ReadonlyArray<CanonicalOption> {
 }
 
 /**
+ * Same as getAllDentalSkills but front-loads skills for a specific role
+ * category. Returns role-specific options first (in declaration order),
+ * then UNIVERSAL_DENTAL_SKILLS, then every other skill alphabetically.
+ *
+ * Used by the JOB wizard's preferred-skills picker so the employer's
+ * quick-add chips surface role-relevant suggestions before everything
+ * else, without losing access to any skill from the full canonical pool.
+ *
+ * If `role` is null/undefined or unknown, falls back to getAllDentalSkills.
+ */
+export function getAllDentalSkillsPrioritized(
+  role: string | null | undefined
+): ReadonlyArray<CanonicalOption> {
+  const roleList = role ? SKILLS_BY_ROLE[role] : undefined;
+  if (!roleList) return getAllDentalSkills();
+
+  const seen = new Set<string>();
+  const head: CanonicalOption[] = [];
+  const tail: CanonicalOption[] = [];
+
+  const appendInto = (
+    list: ReadonlyArray<CanonicalOption>,
+    target: CanonicalOption[]
+  ) => {
+    for (const opt of list) {
+      if (!seen.has(opt.value)) {
+        seen.add(opt.value);
+        target.push(opt);
+      }
+    }
+  };
+
+  // 1. Role-specific skills first (declaration order — typically ordered
+  //    most-essential first by the canonical-list author)
+  appendInto(roleList, head);
+  // 2. Universal skills next — relevant across roles
+  appendInto(UNIVERSAL_DENTAL_SKILLS, head);
+  // 3. Everything else, alphabetically sorted in the tail
+  for (const [otherRole, list] of Object.entries(SKILLS_BY_ROLE)) {
+    if (otherRole === role) continue;
+    appendInto(list, tail);
+  }
+  tail.sort((a, b) => a.label.localeCompare(b.label));
+
+  return [...head, ...tail];
+}
+
+/**
  * Canonical synonym → canonical-value table for skill normalization
  * (resume parser + free-text fallbacks). Lowercase keys, canonical
  * value matches the canonical SKILLS list exactly.

@@ -51,6 +51,7 @@ import { VerificationRequirements } from "../../verification-requirements";
 import type { VerificationTypeValue } from "@/lib/verifications/types";
 import {
   getAllDentalSkills,
+  getAllDentalSkillsPrioritized,
   BENEFITS,
 } from "@/lib/candidate/canonical-lists";
 import {
@@ -197,6 +198,7 @@ export function EditSections({
       <DetailsSection
         dsoId={dsoId}
         jobId={initial.id}
+        roleCategory={initial.role_category}
         initialCompType={initial.compensation_type}
         initialCompMin={initial.compensation_min}
         initialCompMax={initial.compensation_max}
@@ -728,6 +730,7 @@ function DescriptionSection({
 function DetailsSection({
   dsoId,
   jobId,
+  roleCategory,
   initialCompType,
   initialCompMin,
   initialCompMax,
@@ -755,6 +758,7 @@ function DetailsSection({
 }: {
   dsoId: string;
   jobId: string;
+  roleCategory: string;
   initialCompType: "range" | "starting_at" | "up_to" | "exact" | "doe";
   initialCompMin: number | null;
   initialCompMax: number | null;
@@ -1249,7 +1253,11 @@ function DetailsSection({
             setSkills(next);
             touch();
           }}
-          options={getAllDentalSkills()}
+          // Role-aware ordering: role-specific skills surface first in
+          // the quick-add chips (capped at 12), then universal, then
+          // everything else alphabetically. Mirror of the new-wizard
+          // change so create + edit experiences match.
+          options={getAllDentalSkillsPrioritized(roleCategory)}
           placeholder="Search skills — type and press Enter for custom"
           helper="Skills you'd like to see in candidates — not a hard filter. Custom entries allowed; canonical picks match candidate vocab best."
         />
