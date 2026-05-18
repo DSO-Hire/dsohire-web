@@ -114,8 +114,18 @@ interface JobsMapProps {
   mapboxToken: string | null;
 }
 
-/* Map style picker — same two options Cam locked 2026-05-01. */
+/* Map style picker. The "DSO Hire" style is the custom navy-monochrome
+ * basemap Cam built in Mapbox Studio 2026-05-18 PM (Phase B of the map
+ * polish run) — Mapbox Standard with Monochrome color theme, Manrope
+ * typography, brand-token color overrides on land/water/labels/roads.
+ * Default style for the candidate-facing /jobs map. Streets + Satellite
+ * remain as alternates in the picker for users who prefer them. */
 const MAP_STYLES = [
+  {
+    id: "dsohire",
+    label: "DSO Hire",
+    url: "mapbox://styles/dsohire/cmpbmqakg002q01ryd5vj3sgs",
+  },
   { id: "streets", label: "Streets", url: "mapbox://styles/mapbox/streets-v12" },
   {
     id: "satellite-streets",
@@ -124,7 +134,7 @@ const MAP_STYLES = [
   },
 ] as const;
 type MapStyleId = (typeof MAP_STYLES)[number]["id"];
-const DEFAULT_STYLE_ID: MapStyleId = "streets";
+const DEFAULT_STYLE_ID: MapStyleId = "dsohire";
 const STYLE_STORAGE_KEY = "dsohire:map-style";
 
 /* Clustering config.
