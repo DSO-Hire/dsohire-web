@@ -179,6 +179,55 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
     [drawerLocations]
   );
 
+  /* Group drawer jobs by DSO so cluster expansion clearly shows which
+   * practice each job belongs to. Sort groups by job count desc so the
+   * most-active DSO appears first. */
+  const drawerDsoGroups = useMemo(() => {
+    type DsoGroup = {
+      dsoId: string;
+      dsoName: string;
+      jobs: Array<{
+        id: string;
+        title: string;
+        employment_type: string;
+        role_category: string;
+        locationName: string;
+      }>;
+    };
+    const groups = new Map<string, DsoGroup>();
+    for (const loc of drawerLocations) {
+      for (const job of loc.jobs) {
+        const existing = groups.get(job.dso_id);
+        if (existing) {
+          existing.jobs.push({
+            id: job.id,
+            title: job.title,
+            employment_type: job.employment_type,
+            role_category: job.role_category,
+            locationName: loc.name,
+          });
+        } else {
+          groups.set(job.dso_id, {
+            dsoId: job.dso_id,
+            dsoName: job.dso_name,
+            jobs: [
+              {
+                id: job.id,
+                title: job.title,
+                employment_type: job.employment_type,
+                role_category: job.role_category,
+                locationName: loc.name,
+              },
+            ],
+          });
+        }
+      }
+    }
+    return Array.from(groups.values()).sort(
+      (a, b) => b.jobs.length - a.jobs.length
+    );
+  }, [drawerLocations]);
+
   /* ── Hydrate style preference from localStorage on mount ────── */
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -222,28 +271,14 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
         attributionControl: false,
       });
 
-      map.addControl(
-        new mapboxgl.AttributionControl({ compact: true }),
-        "bottom-right"
-      );
-      map.addControl(
-        new mapboxgl.NavigationControl({ showCompass: false }),
-        "top-right"
-      );
-
-      popupRef.current = new mapboxgl.Popup({
-        closeButton: false,
-        closeOnClick: false,
-        offset: 14,
-        className: "dsohire-map-popup",
-      });
-
-      mapRef.current = map;
-
-      // style.load fires on every style load (initial + every setStyle
-      // call). Re-attach source + layers from the ref so the handler
-      // always sees the freshest locations.
-      map.on("style.load", () => {
+      // CRITICAL ORDERING — register the style.load handler IMMEDIATELY
+      // after construction. Mapbox loads the initial style asynchronously
+      // but FAST when cached; if we attach controls / refs first, the
+      // initial style.load can fire BEFORE the handler is registered and
+      // we miss the only chance to attach our source + layers (until the
+      // user toggles a style which fires another style.load). That was
+      // the "data only appears after clicking Streets/Satellite" bug.
+      const handleStyleLoad = () => {
         if (cancelled) return;
         const currentLocations = locationsRef.current;
         attachLocationLayers(map, currentLocations);
@@ -267,7 +302,30 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
         }
 
         setMapReady(true);
+      };
+      map.on("style.load", handleStyleLoad);
+      // Belt-and-suspenders: if the style is ALREADY loaded by the time
+      // this code path completes (heavily cached scenarios), the event
+      // won't fire again. Trigger the handler manually.
+      if (map.isStyleLoaded?.()) handleStyleLoad();
+
+      map.addControl(
+        new mapboxgl.AttributionControl({ compact: true }),
+        "bottom-right"
+      );
+      map.addControl(
+        new mapboxgl.NavigationControl({ showCompass: false }),
+        "top-right"
+      );
+
+      popupRef.current = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        offset: 14,
+        className: "dsohire-map-popup",
       });
+
+      mapRef.current = map;
     })();
 
     return () => {
@@ -569,34 +627,77 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
               <p className="text-[14px] text-slate-meta italic">
                 No active jobs at this location right now.
               </p>
-            ) : (
+            ) : drawerDsoGroups.length === 1 ? (
+              // Single-DSO case (most common — single-location cluster
+              // OR cluster of locations all owned by one DSO). Flat list
+              // without redundant DSO headers since the DSO is implied.
               <ul className="space-y-3 list-none">
-                {drawerLocations.flatMap((loc) =>
-                  loc.jobs.map((job) => (
-                    <li key={`${loc.id}:${job.id}`}>
-                      <Link
-                        href={`/jobs/${job.id}`}
-                        className="block p-4 border border-[var(--rule)] hover:border-heritage hover:bg-cream/50 transition-colors group"
-                      >
-                        <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
-                          {ROLE_LABELS[job.role_category] ?? job.role_category} ·{" "}
-                          {EMP_LABELS[job.employment_type] ?? job.employment_type}
-                        </div>
-                        <div className="text-[15px] font-semibold text-ink leading-snug mb-1">
-                          {job.title}
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-[13px] text-slate-body">
-                            {job.dso_name}
-                            {drawerLocations.length > 1 && ` · ${loc.name}`}
-                          </span>
-                          <ArrowRight className="h-3.5 w-3.5 text-heritage-deep opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                      </Link>
-                    </li>
-                  ))
-                )}
+                {drawerDsoGroups[0].jobs.map((job) => (
+                  <li key={job.id}>
+                    <Link
+                      href={`/jobs/${job.id}`}
+                      className="block p-4 border border-[var(--rule)] hover:border-heritage hover:bg-cream/50 transition-colors group"
+                    >
+                      <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
+                        {ROLE_LABELS[job.role_category] ?? job.role_category} ·{" "}
+                        {EMP_LABELS[job.employment_type] ?? job.employment_type}
+                      </div>
+                      <div className="text-[15px] font-semibold text-ink leading-snug mb-1">
+                        {job.title}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[13px] text-slate-body">
+                          {drawerDsoGroups[0].dsoName}
+                          {drawerLocations.length > 1 && ` · ${job.locationName}`}
+                        </span>
+                        <ArrowRight className="h-3.5 w-3.5 text-heritage-deep opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                    </Link>
+                  </li>
+                ))}
               </ul>
+            ) : (
+              // Multi-DSO cluster — group jobs under per-DSO headers so
+              // users instantly see which practice each role belongs to.
+              <div className="space-y-7">
+                {drawerDsoGroups.map((group) => (
+                  <section key={group.dsoId}>
+                    <header className="flex items-baseline justify-between gap-3 mb-3 pb-2 border-b border-[var(--rule)]">
+                      <h3 className="text-[15px] font-extrabold tracking-[-0.2px] text-ink">
+                        {group.dsoName}
+                      </h3>
+                      <span className="text-[11px] font-semibold tracking-[1.5px] uppercase text-heritage-deep shrink-0">
+                        {group.jobs.length} role
+                        {group.jobs.length === 1 ? "" : "s"}
+                      </span>
+                    </header>
+                    <ul className="space-y-3 list-none">
+                      {group.jobs.map((job) => (
+                        <li key={job.id}>
+                          <Link
+                            href={`/jobs/${job.id}`}
+                            className="block p-4 border border-[var(--rule)] hover:border-heritage hover:bg-cream/50 transition-colors group"
+                          >
+                            <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
+                              {ROLE_LABELS[job.role_category] ?? job.role_category} ·{" "}
+                              {EMP_LABELS[job.employment_type] ?? job.employment_type}
+                            </div>
+                            <div className="text-[15px] font-semibold text-ink leading-snug mb-1">
+                              {job.title}
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-[13px] text-slate-body">
+                                {job.locationName}
+                              </span>
+                              <ArrowRight className="h-3.5 w-3.5 text-heritage-deep opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </div>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                ))}
+              </div>
             )}
           </div>
         </div>
@@ -650,6 +751,13 @@ function buildLocationFeatures(locations: JobsMapLocation[]): unknown {
     properties: {
       id: loc.id,
       jobCount: loc.jobs.length,
+      // Carry city/state through to feature properties so the
+      // single-pin city-name label layer can read them via expressions.
+      // Cluster pins don't carry this since Mapbox clusterProperties
+      // only supports numeric aggregation — clusters get city via the
+      // async leaf-lookup in the hover popup.
+      city: loc.city ?? "",
+      state: loc.state ?? "",
     },
   }));
   return { type: "FeatureCollection", features };
@@ -750,7 +858,7 @@ function attachLocationLayers(
     },
   });
 
-  // Single-location count label
+  // Single-location count label (inside the pin)
   map.addLayer({
     id: "dsohire-points-count",
     type: "symbol",
@@ -767,6 +875,36 @@ function attachLocationLayers(
       "text-color": "#F7F4ED", // ivory
     },
   });
+
+  // Single-location CITY LABEL — sits below the pin so users instantly
+  // know what metro they're looking at without having to hover or
+  // click. Added 2026-05-18 after the metro-pin rework left pins
+  // visually anonymous ("10" with no metro context).
+  map.addLayer({
+    id: "dsohire-points-city",
+    type: "symbol",
+    source: "dsohire-locations",
+    filter: ["!", ["has", "point_count"]],
+    layout: {
+      "text-field": ["get", "city"],
+      "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+      "text-size": 11,
+      "text-anchor": "top",
+      "text-offset": [0, 1.6],
+      "text-allow-overlap": false,
+      "text-optional": true,
+    },
+    paint: {
+      "text-color": "#14233F", // navy
+      "text-halo-color": "#F7F4ED", // ivory halo for legibility on busy basemaps
+      "text-halo-width": 1.5,
+    },
+  });
+
+  // Cluster CITY LABEL — clusters can't carry city via Mapbox's
+  // clusterProperties (numeric-only), so we DON'T render a static
+  // text-field here. The hover popup does the async leaf-lookup
+  // for the cluster's metro name (see wireLayerInteractions).
 }
 
 interface InteractionHandlers {
@@ -863,7 +1001,7 @@ function wireLayerInteractions(
     const showClusterPopup = (e: unknown) => {
       const ev = e as {
         features?: Array<{
-          properties?: { point_count?: number; jobCount?: number };
+          properties?: { point_count?: number; jobCount?: number; cluster_id?: number };
           geometry?: { coordinates?: [number, number] };
         }>;
       };
@@ -871,14 +1009,59 @@ function wireLayerInteractions(
       const coords = feature?.geometry?.coordinates;
       const count = feature?.properties?.point_count;
       const jobCount = feature?.properties?.jobCount;
+      const clusterId = feature?.properties?.cluster_id;
       if (!coords || count === undefined || jobCount === undefined) return;
-      const html = `
+
+      // Render initial popup with role/practice counts. We'll upgrade
+      // with metro name + DSO breakdown async via getClusterLeaves.
+      const baseHtml = (metroLine: string, dsoLine: string) => `
         <div class="dsohire-map-popup-card">
-          <div class="dsohire-map-popup-label">${jobCount} role${jobCount === 1 ? "" : "s"}</div>
-          <div class="dsohire-map-popup-meta">across ${count} practice${count === 1 ? "" : "s"}</div>
+          <div class="dsohire-map-popup-label">${jobCount} role${jobCount === 1 ? "" : "s"} · ${count} practice${count === 1 ? "" : "s"}</div>
+          ${metroLine ? `<div class="dsohire-map-popup-meta">${metroLine}</div>` : ""}
+          ${dsoLine ? `<div class="dsohire-map-popup-meta">${dsoLine}</div>` : ""}
         </div>
       `;
-      popup.setLngLat(coords).setHTML(html).addTo(map);
+      popup.setLngLat(coords).setHTML(baseHtml("", "")).addTo(map);
+
+      // Async upgrade — fetch the cluster's leaves and surface metro
+      // city + DSO names. Mapbox getClusterLeaves is callback-based.
+      if (clusterId === undefined) return;
+      const source = map.getSource(
+        "dsohire-locations"
+      ) as GeoJSONSourceWithCluster | undefined;
+      if (!source) return;
+      source.getClusterLeaves(
+        clusterId,
+        50,
+        0,
+        (
+          err: unknown,
+          leaves: Array<{ properties: { id: string } }>
+        ) => {
+          if (err) return;
+          const locs = leaves
+            .map((l) => handlers.getLocation(l.properties.id))
+            .filter((l): l is JobsMapLocation => l !== null);
+          if (locs.length === 0) return;
+          const firstLoc = locs[0];
+          const locality = [firstLoc.city, firstLoc.state]
+            .filter(Boolean)
+            .join(", ");
+          // Unique DSO names across all clustered locations
+          const dsoNames = Array.from(
+            new Set(
+              locs.flatMap((l) => l.jobs.map((j) => j.dso_name))
+            )
+          );
+          const dsoLine =
+            dsoNames.length === 0
+              ? ""
+              : dsoNames.length <= 2
+                ? `at ${escapeHtml(dsoNames.join(" + "))}`
+                : `at ${escapeHtml(dsoNames.slice(0, 2).join(", "))} + ${dsoNames.length - 2} more`;
+          popup.setHTML(baseHtml(escapeHtml(locality), dsoLine));
+        }
+      );
     };
     const hide = () => popup.remove();
 
