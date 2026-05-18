@@ -345,29 +345,18 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
 
       mapRef.current = map;
 
-      // ROBUST LOAD HANDLING — separates "first-ever setup" from
-      // "re-attach after style swap" so the two paths don't race or
-      // double-fire.
-      //
-      // - `load` fires once when initial style + assets are ready.
-      //   Handles the cold-cache case.
-      // - `map.loaded()` returns true synchronously if the map is
-      //   ALREADY loaded by the time we check. Handles the hot-cache
-      //   case where the load event already fired before we attached
-      //   our listener.
-      // - `style.load` fires on EVERY style load, including swaps.
-      //   We use it to re-attach the source + layers (Mapbox wipes
-      //   them on setStyle).
-      //
-      // The earlier 'style.load only' approach missed the hot-cache
-      // case despite the isStyleLoaded check — likely because the
-      // event had already fired and our `.on()` was too late to bind.
-      // Splitting into `load` (idempotent first-time setup) +
-      // `style.load` (post-init re-attach only) is the textbook fix.
+      // BULLETPROOF SETUP via polling — every event-based approach
+      // I tried (style.load + isStyleLoaded check; load + loaded()
+      // check; load + style.load split) failed to fire initialSetup
+      // on the first map load even though the same code paths worked
+      // after a Streets/Satellite toggle. Polling map.loaded() every
+      // 50ms eliminates every event-timing race: when the map is
+      // ready, we run setup ONCE and stop polling. The cost is a
+      // handful of cheap function calls during the ~100-300ms before
+      // the map is interactive — invisible to the user.
       let initialSetupDone = false;
-      const initialSetup = () => {
+      const runSetup = () => {
         if (cancelled || initialSetupDone) return;
-        initialSetupDone = true;
         const currentMetros = metroGroupsRef.current;
         attachLocationLayers(map, currentMetros);
         wireLayerInteractions(map, {
@@ -388,15 +377,33 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
           });
           initialFitDoneRef.current = true;
         }
+        initialSetupDone = true;
         setMapReady(true);
       };
 
+      // Polling driver — 50ms tick. Stops once initialSetupDone or
+      // cancelled. Belt-and-suspenders: also bind to 'load' and
+      // 'idle' in case Mapbox's events DO fire before polling
+      // catches the loaded state.
+      const pollHandle = setInterval(() => {
+        if (cancelled || initialSetupDone) {
+          clearInterval(pollHandle);
+          return;
+        }
+        if (map.loaded?.()) {
+          clearInterval(pollHandle);
+          runSetup();
+        }
+      }, 50);
+      map.on("load", runSetup);
+      map.on("idle", runSetup);
+
+      // Re-attach after a style swap (user toggles Streets/Satellite).
+      // Mapbox wipes the custom source + layers on setStyle so we
+      // must add them again. Guard skips the initial style.load,
+      // which is covered by runSetup above.
       const reattachAfterStyleSwap = () => {
-        if (cancelled) return;
-        // Skip the first style.load — that's covered by initialSetup
-        // via the `load` event / loaded() check. Only re-attach on
-        // SUBSEQUENT style swaps.
-        if (!initialSetupDone) return;
+        if (cancelled || !initialSetupDone) return;
         const currentMetros = metroGroupsRef.current;
         attachLocationLayers(map, currentMetros);
         wireLayerInteractions(map, {
@@ -406,14 +413,6 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
           popup: popupRef.current,
         });
       };
-
-      if (map.loaded?.()) {
-        // Hot cache path: map is already loaded; run setup synchronously.
-        initialSetup();
-      } else {
-        // Cold cache path: wait for the load event.
-        map.once("load", initialSetup);
-      }
       map.on("style.load", reattachAfterStyleSwap);
 
       map.addControl(
