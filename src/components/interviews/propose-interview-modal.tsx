@@ -323,12 +323,18 @@ function ProposeInterviewModal({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-start justify-center p-4 sm:p-8 bg-black/40"
+      // 2026-05-18 — `overflow-y-auto` + smaller mobile top padding
+      // added after Erica's testing pass: on mobile the modal content
+      // overflowed the viewport with no way to reach the Send button
+      // (had to click screen edges). The outer wrapper now scrolls the
+      // entire dialog including the card, and mt-4 on mobile shrinks
+      // the top breathing room so more content sits above the fold.
+      className="fixed inset-0 z-50 flex items-start justify-center p-4 sm:p-8 bg-black/40 overflow-y-auto overscroll-contain"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget && !pending) onClose();
       }}
     >
-      <div className="bg-white border border-[var(--rule)] w-full max-w-2xl shadow-2xl mt-12">
+      <div className="bg-white border border-[var(--rule)] w-full max-w-2xl shadow-2xl mt-4 mb-4 sm:mt-12 sm:mb-12">
         <header className="px-6 py-4 border-b border-[var(--rule)] flex items-center justify-between">
           <h2 className="text-[14px] font-bold tracking-[-0.2px] text-ink">
             {isReschedule
