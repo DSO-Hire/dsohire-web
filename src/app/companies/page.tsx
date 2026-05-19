@@ -40,6 +40,7 @@ interface DsoRow {
   slug: string;
   description: string | null;
   logo_url: string | null;
+  brand_color: string | null;
   headquarters_city: string | null;
   headquarters_state: string | null;
   practice_count: number | null;
@@ -57,7 +58,7 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
   const { data: rawDsos, error: dsosError } = await supabase
     .from("dsos")
     .select(
-      "id, name, slug, description, logo_url, headquarters_city, headquarters_state, practice_count, verified_at"
+      "id, name, slug, description, logo_url, brand_color, headquarters_city, headquarters_state, practice_count, verified_at"
     )
     .eq("status", "active")
     .order("name", { ascending: true });
@@ -199,14 +200,68 @@ function DsoCard({ dso, openJobs }: { dso: DsoRow; openJobs: number }) {
     .filter(Boolean)
     .join(", ");
 
+  // Per-DSO brand color, validated as a 6-digit hex so we never inline
+  // arbitrary CSS from the DB into a style attribute. Fallback to the
+  // platform heritage-deep when null or malformed — keeps every card
+  // visually consistent and on-brand even when the DSO hasn't set one.
+  const validHex =
+    dso.brand_color && /^#[0-9A-Fa-f]{6}$/.test(dso.brand_color)
+      ? dso.brand_color
+      : null;
+  const accentColor = validHex ?? "#2F5D4F"; // heritage-deep fallback
+
+  // Some DSO descriptions arrive with HTML tags (rich-text editors paste
+  // <p>…</p> wrappers). Strip tags + collapse whitespace before rendering
+  // as plain text so the card never shows raw markup. The full /companies/[slug]
+  // page can render rich HTML safely; the directory card only ever shows a
+  // clamp-3 plain-text snippet.
+  const descriptionText = dso.description
+    ? dso.description.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
+    : null;
+
   return (
     <Link
       href={`/companies/${dso.slug}`}
-      className="group block bg-white p-7 hover:bg-cream motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-14px_rgba(7,15,28,0.18)] flex flex-col"
+      className="group relative block bg-white p-7 pl-8 hover:bg-cream motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-14px_rgba(7,15,28,0.18)] flex flex-col"
+      style={{ ["--card-accent" as string]: accentColor }}
     >
-      <div className="flex items-center gap-3 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
-        <Building2 className="h-3.5 w-3.5" />
-        DSO Hire Member
+      {/* Left-edge brand accent strip — full card height, 4px wide.
+          Sits flush to the card's left border so each card reads as
+          "owned" by the DSO instead of looking like a generic listing. */}
+      <span
+        aria-hidden
+        className="absolute left-0 top-0 bottom-0 w-1"
+        style={{ background: "var(--card-accent)" }}
+      />
+
+      {/* Top row: logo (or branded mark fallback) + member chip */}
+      <div className="flex items-start justify-between gap-3 mb-4">
+        {dso.logo_url ? (
+          <div className="size-12 shrink-0 overflow-hidden border border-[var(--rule)] bg-white flex items-center justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={dso.logo_url}
+              alt={`${dso.name} logo`}
+              className="max-h-full max-w-full object-contain"
+            />
+          </div>
+        ) : (
+          <div
+            className="size-12 shrink-0 flex items-center justify-center text-white"
+            style={{ background: "var(--card-accent)" }}
+          >
+            <Building2 className="h-5 w-5" />
+          </div>
+        )}
+
+        <div
+          className="text-[9px] font-bold tracking-[2px] uppercase mt-1.5 text-right leading-tight"
+          style={{ color: "var(--card-accent)" }}
+        >
+          DSO Hire
+          <br />
+          Member
+        </div>
       </div>
 
       <h3 className="text-xl font-extrabold tracking-[-0.6px] text-ink mb-1 leading-tight">
@@ -230,22 +285,31 @@ function DsoCard({ dso, openJobs }: { dso: DsoRow; openJobs: number }) {
         </div>
       )}
 
-      {dso.description && (
+      {descriptionText && (
         <p className="text-[14px] text-slate-body leading-relaxed line-clamp-3 mb-4">
-          {dso.description}
+          {descriptionText}
         </p>
       )}
 
       <div className="mt-auto pt-4 border-t border-[var(--rule)] flex justify-between items-center">
         <div>
-          <div className="text-[16px] font-extrabold text-ink leading-none">
+          <div
+            className="text-[18px] font-extrabold leading-none"
+            style={{ color: "var(--card-accent)" }}
+          >
             {openJobs}
           </div>
           <div className="text-[9px] font-semibold tracking-[1.5px] uppercase text-slate-meta mt-1.5">
             {openJobs === 1 ? "Open role" : "Open roles"}
           </div>
         </div>
-        <div className="w-7 h-7 border border-[var(--rule-strong)] flex items-center justify-center text-heritage-light group-hover:bg-ink group-hover:text-heritage group-hover:border-ink transition-colors">
+        <div
+          className="w-7 h-7 border flex items-center justify-center transition-colors group-hover:bg-[var(--card-accent)] group-hover:text-white"
+          style={{
+            color: "var(--card-accent)",
+            borderColor: "var(--card-accent)",
+          }}
+        >
           <ArrowRight className="h-3.5 w-3.5" />
         </div>
       </div>
