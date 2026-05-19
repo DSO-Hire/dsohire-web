@@ -201,16 +201,29 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
     ? await geocodeCityState(nearParsed!.city, nearParsed!.state)
     : null;
 
-  const { data: rawJobs } = await supabase.rpc("search_jobs_public", {
+  // RPC args. Radius args are only spread in when an active geocoded
+  // radius filter is in play — keeps the named-args call backward-compatible
+  // with the pre-E7.4 RPC signature so a deploy ahead of the migration
+  // doesn't hide every job on /jobs (PostgREST rejects unknown named args
+  // outright, so always-including the new params would break the entire
+  // page until the DB schema catches up).
+  const rpcArgs: Record<string, unknown> = {
     query_text: sp.q || null,
     state_filter: sp.state || null,
     employment_filter: sp.employment || null,
     category_filter: sp.category || null,
     posted_within_days: postedWithinDays,
-    near_lat: nearGeo?.lat ?? null,
-    near_lng: nearGeo?.lng ?? null,
-    within_miles: nearGeo ? withinMilesParsed : null,
-  });
+  };
+  if (nearGeo && withinMilesParsed !== null) {
+    rpcArgs.near_lat = nearGeo.lat;
+    rpcArgs.near_lng = nearGeo.lng;
+    rpcArgs.within_miles = withinMilesParsed;
+  }
+  const { data: rawJobs } = await supabase.rpc(
+    "search_jobs_public",
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    rpcArgs as any
+  );
 
   // Apply candidate-side sort. RPC returns a relevance-blended order; for
   // anything other than the default we re-sort the slice in memory. Always
