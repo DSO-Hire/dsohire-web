@@ -558,8 +558,17 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
             Open Roles at Multi-Location DSOs
           </span>
         </div>
-        <h1 className="text-4xl sm:text-7xl font-extrabold tracking-[-2px] leading-[1.02] text-ink mb-5 max-w-[820px]">
-          Find your next dental role. Directly with dental groups.
+        <h1 className="text-4xl sm:text-7xl font-extrabold tracking-[-2px] leading-[1.02] text-ink mb-5 max-w-[1080px]">
+          Find your next dental role.{" "}
+          <br className="hidden sm:inline" />
+          <em className="not-italic relative text-heritage-light">
+            Directly with dental groups.
+            <span
+              aria-hidden
+              className="hidden lg:block absolute left-0 right-0 bottom-1.5 h-2 -z-10"
+              style={{ background: "var(--heritage-tint)" }}
+            />
+          </em>
         </h1>
         <p className="text-base sm:text-lg text-slate-body leading-relaxed max-w-[640px]">
           Every employer on DSO Hire agrees to our Acceptable Use Policy —

@@ -115,29 +115,40 @@ function Hero() {
         }}
       />
 
-      <div className="relative z-10 max-w-[1240px] mx-auto grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-16 lg:gap-20 items-center">
+      {/* Headline band — full-width so the wrapping headline never
+          squeezes the right-column preview off-screen. Cam 2026-05-19:
+          previous two-column layout pushed the dashboard mock to the
+          far right when the new "Find your next dental role. Directly
+          with dental groups." h1 grew longer than the old copy. */}
+      <div className="relative z-10 max-w-[1240px] mx-auto">
+        <div className="flex items-center gap-3.5 mb-8">
+          <span className="block w-7 h-px bg-heritage" />
+          <span className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep">
+            For Dental Professionals
+          </span>
+        </div>
+
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[-1.6px] leading-[1.04] text-ink mb-10 max-w-[1080px]">
+          Find your next dental role.{" "}
+          <br className="hidden sm:inline" />
+          <em className="not-italic relative text-heritage-light">
+            Directly with dental groups.
+            <span
+              aria-hidden
+              className="hidden lg:block absolute left-0 right-0 bottom-1.5 h-2 -z-10"
+              style={{ background: "var(--heritage-tint)" }}
+            />
+          </em>
+        </h1>
+      </div>
+
+      {/* Body band — copy + CTAs on the left, dashboard mock on the right.
+          items-start so the preview sits flush with the top of the body
+          paragraph (rather than vertically centered against the much
+          taller left column), keeping the whole hero tighter to the fold. */}
+      <div className="relative z-10 max-w-[1240px] mx-auto mt-2 grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-12 lg:gap-16 items-start">
         {/* Left column */}
         <div>
-          <div className="flex items-center gap-3.5 mb-8">
-            <span className="block w-7 h-px bg-heritage" />
-            <span className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep">
-              For Dental Professionals
-            </span>
-          </div>
-
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[-1.6px] leading-[1.04] text-ink mb-7">
-            Find your next dental role.{" "}
-            <br className="hidden sm:inline" />
-            <em className="not-italic relative lg:whitespace-nowrap text-heritage-light">
-              Directly with dental groups.
-              <span
-                aria-hidden
-                className="hidden lg:block absolute left-0 right-0 bottom-1.5 h-2 -z-10"
-                style={{ background: "var(--heritage-tint)" }}
-              />
-            </em>
-          </h1>
-
           <p className="text-lg sm:text-xl text-slate-body leading-[1.65] max-w-[560px] mb-10">
             DSO Hire is the hiring platform built for dental professionals
             applying to multi-location practices. You apply direct — no
