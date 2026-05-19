@@ -24,15 +24,25 @@ export const metadata: Metadata = {
     "Flat monthly subscription pricing for DSO Hire. Starter $499 · Growth $999 · Enterprise $1,499. Multi-location dental hiring, no per-listing fees, no placement fees.",
 };
 
-export default function PricingPage() {
+interface PricingPageProps {
+  // `next` is propagated from /employer/sign-in when a deep-link redirect
+  // bounced an unauthenticated user here first. We carry it through the
+  // tier-card sign-up CTAs so the post-signup redirect returns them to
+  // wherever they were trying to go.
+  searchParams: Promise<{ next?: string }>;
+}
+
+export default async function PricingPage({ searchParams }: PricingPageProps) {
+  const sp = await searchParams;
   const tiers = getAllTiers();
+  const nextParam = sp.next?.trim() || null;
   return (
     <div>
       <PricingHero />
-      <TierGrid tiers={tiers} />
+      <TierGrid tiers={tiers} nextParam={nextParam} />
       <CompareMatrix tiers={tiers} />
       <FAQ />
-      <FinalCta />
+      <FinalCta nextParam={nextParam} />
     </div>
   );
 }
@@ -58,12 +68,18 @@ function PricingHero() {
 
 /* ───────── Tier grid ───────── */
 
-function TierGrid({ tiers }: { tiers: TierConfig[] }) {
+function TierGrid({
+  tiers,
+  nextParam,
+}: {
+  tiers: TierConfig[];
+  nextParam: string | null;
+}) {
   return (
     <section className="px-6 sm:px-14 max-w-[1240px] mx-auto">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-[var(--rule)] border border-[var(--rule)]">
         {tiers.map((tier) => (
-          <TierCard key={tier.id} tier={tier} />
+          <TierCard key={tier.id} tier={tier} nextParam={nextParam} />
         ))}
       </div>
       <p className="mt-10 text-[14px] text-slate-body text-center leading-relaxed">
@@ -77,7 +93,13 @@ function TierGrid({ tiers }: { tiers: TierConfig[] }) {
   );
 }
 
-function TierCard({ tier }: { tier: TierConfig }) {
+function TierCard({
+  tier,
+  nextParam,
+}: {
+  tier: TierConfig;
+  nextParam: string | null;
+}) {
   const isFeatured = tier.badge === "Most popular";
   return (
     <div
@@ -137,7 +159,7 @@ function TierCard({ tier }: { tier: TierConfig }) {
       </div>
 
       <Link
-        href={`/employer/sign-up?tier=${tier.id}`}
+        href={`/employer/sign-up?tier=${tier.id}${nextParam ? `&next=${encodeURIComponent(nextParam)}` : ""}`}
         className={`block text-center px-4 py-3.5 text-[12px] font-bold tracking-[1.5px] uppercase mb-6 transition-colors border ${
           isFeatured
             ? "bg-heritage text-ivory border-heritage hover:bg-heritage-deep hover:border-heritage-deep"
@@ -794,7 +816,7 @@ function FAQ() {
 
 /* ───────── Final CTA ───────── */
 
-function FinalCta() {
+function FinalCta({ nextParam }: { nextParam: string | null }) {
   return (
     <section className="bg-ivory px-6 sm:px-14 py-24 text-center">
       <div className="max-w-[680px] mx-auto">
@@ -808,7 +830,11 @@ function FinalCta() {
         </p>
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Link
-            href="/employer/sign-up"
+            href={
+              nextParam
+                ? `/employer/sign-up?next=${encodeURIComponent(nextParam)}`
+                : "/employer/sign-up"
+            }
             className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
           >
             Sign Up

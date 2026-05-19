@@ -46,12 +46,12 @@ export default async function SignInPage({ searchParams }: PageProps) {
           <Link
             href={
               next
-                ? `/employer/sign-up?next=${encodeURIComponent(next)}`
-                : "/employer/sign-up"
+                ? `/pricing?next=${encodeURIComponent(next)}`
+                : "/pricing"
             }
             className="text-heritage font-semibold underline underline-offset-2 hover:text-heritage-deep"
           >
-            Start a DSO subscription
+            View DSO pricing
           </Link>
         </p>
         <p className="mt-3 text-[14px] text-slate-body leading-relaxed">
