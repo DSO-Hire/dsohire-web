@@ -686,15 +686,20 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
             maxzoom: 9,
             paint: {
               // Per-point weight: more roles at a metro = brighter spot.
-              // 1 job = small weight, 10+ jobs = max weight.
+              // Scaled to current data distribution (max ~3 jobs per
+               // metro) so the hottest metros actually reach the navy
+              // end of the color ramp. When listings grow into the
+              // hundreds-per-metro range, rescale the upper anchor
+              // (e.g. 1->0.2, 5->0.5, 20->0.85, 50->1.0) so we don't
+              // saturate the heatmap with single-digit metros.
               "heatmap-weight": [
                 "interpolate",
                 ["linear"],
                 ["get", "jobCount"],
                 0, 0,
-                1, 0.35,
-                5, 0.7,
-                10, 1.0,
+                1, 0.45,
+                2, 0.75,
+                3, 1.0,
               ],
               // Intensity scales the density at higher zoom so blobs
               // stay punchy as the user zooms in (before pin handoff).
