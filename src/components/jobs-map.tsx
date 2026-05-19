@@ -112,12 +112,15 @@ interface MetroGroup {
 interface JobsMapProps {
   locations: JobsMapLocation[];
   mapboxToken: string | null;
-  /** Phase D heatmap overlay. Day 2 ships the deck.gl integration
-   *  behind this flag so the production map keeps rendering pins only
-   *  until Day 4 wires the heatmap into the style picker. Pass `true`
-   *  from /jobs/page.tsx when `?heatmap=1` is in the URL. */
+  /** Initial value for the in-component heatmap toggle. Comes from
+   *  the URL (?heatmap=1) for shareable / pre-marketing links;
+   *  user toggle inside the picker overrides + persists via
+   *  localStorage. Defaults to false so first-time users get the
+   *  familiar metro-pin view. */
   heatmapEnabled?: boolean;
 }
+
+const HEATMAP_STORAGE_KEY = "dsohire:map-heatmap";
 
 /* Map style picker. The "DSO Hire" style is the custom navy-monochrome
  * basemap Cam built in Mapbox Studio 2026-05-18 PM (Phase B of the map
@@ -238,6 +241,16 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
   const [mapStyleId, setMapStyleId] =
     useState<MapStyleId>(DEFAULT_STYLE_ID);
 
+  // Heatmap toggle. Initial value: URL prop (heatmapEnabled) wins for
+  // preview/shareable links. After mount, localStorage takes over so the
+  // user's last-used choice survives page reloads. Toggling off via the
+  // UI clears the URL preference for this session.
+  const [heatmapOn, setHeatmapOn] = useState<boolean>(heatmapEnabled);
+  // True while the heatmap layer is "warming up" — between toggle-on and
+  // the first map.isStyleLoaded() tick where attachHeatmap actually runs.
+  // Drives a brief loading pill so the user knows the toggle took effect.
+  const [heatmapLoading, setHeatmapLoading] = useState(false);
+
   // Search-by-location state. We hit the Mapbox Geocoding API directly
   // (using the public NEXT_PUBLIC_MAPBOX_TOKEN already in scope) and
   // flyTo the first result. No autocomplete in v1 — type + Enter is the
@@ -320,6 +333,35 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
       /* ignore */
     }
   }, []);
+
+  /* ── Hydrate heatmap preference from localStorage on mount ────
+   *
+   * URL ?heatmap=1 (passed via props) wins on first paint for shareable
+   * links. After that, localStorage is the source of truth so the user's
+   * toggle survives reloads. Skip hydration if the URL forced heatmap on
+   * — preserves the link-share intent for that visit. */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (heatmapEnabled) return; // URL param wins on first paint
+    try {
+      const stored = window.localStorage.getItem(HEATMAP_STORAGE_KEY);
+      if (stored === "1") setHeatmapOn(true);
+      else if (stored === "0") setHeatmapOn(false);
+    } catch {
+      /* ignore */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /* ── Persist heatmap preference on every toggle ─────────────── */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(HEATMAP_STORAGE_KEY, heatmapOn ? "1" : "0");
+    } catch {
+      /* ignore */
+    }
+  }, [heatmapOn]);
 
   /* ── Initialize map ────────────────────────────────────────── */
   useEffect(() => {
@@ -596,10 +638,20 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
    *   - zoom 6.8 → 7.2 → linear crossfade
    *   - zoom >= 7.2 → heatmap hidden, pins opaque (metro view)
    *
-   * Still gated behind heatmapEnabled (?heatmap=1 URL param) until
-   * proper style-picker integration. */
+   * Toggleable via the picker UI (heatmapOn state). Initial value
+   * seeds from the ?heatmap=1 URL param OR the user's last localStorage
+   * choice; either is overridden by clicking the toggle. */
   useEffect(() => {
-    if (!mapReady || !mapRef.current || !heatmapEnabled) return;
+    if (!mapReady || !mapRef.current || !heatmapOn) {
+      // Toggle just turned off (or mount with heatmap off) — make sure
+      // the loading pill isn't stuck on.
+      setHeatmapLoading(false);
+      return;
+    }
+    // Show loading pill while we attach the heatmap source/layer. Cleared
+    // synchronously below once the attach completes (Mapbox heatmap is
+    // sync-paint after the source binds, so this is a very short window).
+    setHeatmapLoading(true);
 
     const map = mapRef.current;
     let cancelled = false;
@@ -793,6 +845,11 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
     // source/layers exist (so our beforeId target resolves).
     attachHeatmap();
     applyCrossfade(map.getZoom?.() ?? 3.6);
+    // Heatmap painted — dismiss the loading pill on the next frame
+    // (gives Mapbox one tick to actually paint the WebGL surface).
+    requestAnimationFrame(() => {
+      if (!cancelled) setHeatmapLoading(false);
+    });
 
     zoomListener = () => applyCrossfade(map.getZoom?.() ?? 3.6);
     map.on("zoom", zoomListener);
@@ -877,7 +934,7 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
         }
       }
     };
-  }, [mapReady, heatmapEnabled]);
+  }, [mapReady, heatmapOn]);
 
   /* ── Refresh data when metro groups change ────────────────
    *
@@ -1137,16 +1194,66 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
             </button>
           ))}
         </div>
+
+        {/* Heatmap toggle — separate from basemap picker because heatmap
+            is an overlay, not a basemap. Independent on/off so users can
+            combine the smooth-density view with whichever basemap they
+            prefer (DSO Hire / Streets / Satellite). */}
+        <div
+          className="inline-flex border border-[var(--rule-strong)] bg-ivory shadow-sm"
+          role="group"
+          aria-label="Heatmap overlay"
+        >
+          <button
+            type="button"
+            onClick={() => setHeatmapOn((on) => !on)}
+            aria-pressed={heatmapOn}
+            className={
+              "px-3 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors flex items-center gap-1.5 " +
+              (heatmapOn
+                ? "bg-heritage-deep text-ivory"
+                : "text-slate-body hover:text-ink hover:bg-cream")
+            }
+          >
+            {/* Tiny gradient dot as the visual cue for "density" */}
+            <span
+              className="inline-block w-2.5 h-2.5 rounded-full"
+              style={{
+                background: heatmapOn
+                  ? "radial-gradient(circle, #F7F4ED 0%, #4D7A60 60%, #14233F 100%)"
+                  : "radial-gradient(circle, #D0DED5 0%, #4D7A60 60%, #2F5D4F 100%)",
+              }}
+              aria-hidden="true"
+            />
+            Heatmap
+          </button>
+        </div>
       </div>
 
-      {/* Privacy chip — reframed 2026-05-18 from spatial-fuzz to
-          aggregation-level. More prominent than the old footnote. */}
+      {/* Privacy chip — copy is contextual to the active view. With
+          heatmap on, "Heat" replaces "Pins" so users understand the
+          aggregation-level privacy guarantee applies to both. */}
       <div className="absolute top-4 right-[60px] sm:right-4 sm:top-4 sm:bottom-auto bottom-4 left-4 sm:left-auto bg-ivory/95 backdrop-blur-sm border border-[var(--rule)] px-3 py-2 max-w-[320px] sm:max-w-[260px] text-[11px] text-slate-body leading-snug shadow-sm">
         <span className="font-bold text-ink uppercase tracking-[1.5px] text-[10px] block mb-0.5">
-          Metro view
+          {heatmapOn ? "Hiring density" : "Metro view"}
         </span>
-        Pins show role counts at the metro level — never an office address.
+        {heatmapOn
+          ? "Heat and pins reflect roles per metro — never tied to a specific office."
+          : "Pins show role counts at the metro level — never an office address."}
       </div>
+
+      {/* Heatmap loading pill — brief flash between toggle-on and the
+          first paint. Only renders while data is binding so it doesn't
+          stick around as visual noise once the layer is up. */}
+      {heatmapLoading && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase px-3 py-2 shadow-sm flex items-center gap-2 z-10">
+          <span
+            className="inline-block w-1.5 h-1.5 rounded-full bg-ivory animate-pulse"
+            aria-hidden="true"
+          />
+          Loading hiring density
+        </div>
+      )}
 
       {/* Side drawer — opens for a single metro (city+state group).
           Renders all locations in the metro with jobs grouped by
