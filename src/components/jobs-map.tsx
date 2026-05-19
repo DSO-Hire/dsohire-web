@@ -380,39 +380,22 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
       // full investigation history.
       let initialSetupDone = false;
 
-      const runSetup = (triggeredBy: string) => {
-        if (cancelled || initialSetupDone) {
-          return;
-        }
+      const runSetup = (_triggeredBy: string) => {
+        if (cancelled || initialSetupDone) return;
         const currentMetros = metroGroupsRef.current;
-        const styleLoaded = !!map.isStyleLoaded?.();
-        console.log(
-          `[JobsMap] runSetup START (trigger=${triggeredBy}, metroCount=${currentMetros.length}, isStyleLoaded=${styleLoaded}, loaded=${map.loaded?.()})`
-        );
 
-        // GUARD: don't mark setup-done with empty data — keeps polling
+        // GUARD 1: don't mark setup-done with empty data — keeps polling
         // until metroGroupsRef populates from the locations prop.
-        if (currentMetros.length === 0) {
-          console.warn(
-            "[JobsMap] runSetup aborted — metroGroupsRef is empty, will retry"
-          );
-          return;
-        }
+        if (currentMetros.length === 0) return;
 
-        // GUARD: don't attach during a style transition. Diagnostic
-        // logs proved this is THE root cause of the recurring race:
-        // style.load event fires WHILE isStyleLoaded() still returns
-        // false (Mapbox is mid-transition). attachLocationLayers
-        // succeeds without throwing but the source/layers don't
-        // actually paint because Mapbox is about to finalize a new
-        // style that wipes them. By the time load/idle fires,
-        // isStyleLoaded is true and the attach paints correctly.
-        if (!styleLoaded) {
-          console.warn(
-            `[JobsMap] runSetup deferred — style transitioning (trigger=${triggeredBy}), will retry on next stable trigger`
-          );
-          return;
-        }
+        // GUARD 2: don't attach during a style transition. style.load
+        // fires WHILE isStyleLoaded() still returns false; attach
+        // "succeeds" but the source/layers never paint because Mapbox
+        // is about to finalize a new style that wipes them. By load
+        // or idle, isStyleLoaded is true and the attach paints
+        // correctly. See reference_mapbox_load_event_order.md for
+        // the full investigation history.
+        if (!map.isStyleLoaded?.()) return;
 
         try {
           attachLocationLayers(map, currentMetros);
@@ -436,11 +419,8 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
           }
           initialSetupDone = true;
           setMapReady(true);
-          console.log(
-            `[JobsMap] runSetup SUCCESS — attached ${currentMetros.length} metros`
-          );
         } catch (err) {
-          console.error("[JobsMap] runSetup THREW (will retry):", err);
+          console.error("[JobsMap] runSetup threw (will retry):", err);
         }
       };
 
@@ -496,15 +476,15 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
       // manually by clicking Streets then DSO Hire). This makes that
       // manual workaround automatic without requiring user action.
       const fallbackTimer = setTimeout(() => {
-        if (cancelled || !mapRef.current) return;
-        if (initialSetupDone) {
-          console.log(
-            "[JobsMap] auto-fallback skipped — initialSetupDone already true"
-          );
-          return;
-        }
+        if (cancelled || !mapRef.current || initialSetupDone) return;
+        // If setup hasn't completed after 1.5s, force a setStyle to
+        // the same URL. Mapbox doesn't no-op same-URL setStyle calls —
+        // it tears down and rebuilds, firing style.load, which
+        // routes through reattachAfterStyleSwap → runSetup. Should
+        // rarely fire after the isStyleLoaded guard + mapStyleId
+        // skip-first fixes; left as a safety net.
         console.warn(
-          `[JobsMap] auto-fallback FIRING (metros=${metroGroupsRef.current.length}, isStyleLoaded=${mapRef.current.isStyleLoaded?.()}, loaded=${mapRef.current.loaded?.()})`
+          "[JobsMap] auto-fallback firing — setup did not complete in 1.5s"
         );
         try {
           mapRef.current.setStyle(initialStyleUrl);
@@ -525,9 +505,6 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
       // from THIS path instead of dropping the event.
       const reattachAfterStyleSwap = () => {
         if (cancelled) return;
-        console.log(
-          `[JobsMap] style.load fired (initialSetupDone=${initialSetupDone}, metroCount=${metroGroupsRef.current.length})`
-        );
         if (!initialSetupDone) {
           runSetup("style.load-event");
           return;
@@ -541,9 +518,6 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
             openDrawer: (metro) => setDrawerMetro(metro),
             popup: popupRef.current,
           });
-          console.log(
-            `[JobsMap] re-attach after style swap SUCCESS (metros=${currentMetros.length})`
-          );
         } catch (err) {
           console.error("[JobsMap] re-attach after style swap threw:", err);
         }
@@ -604,36 +578,87 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
     }
   }, [mapStyleId, mapReady]);
 
-  /* ── Phase D Day 2: heatmap overlay ──────────────────────────
+  /* ── Phase D: heatmap overlay + zoom-driven crossfade ────────
    *
-   * Attaches a deck.gl GeoJsonLayer of H3 hexes (data from the
-   * /api/jobs/heatmap.json route, aggregated server-side per
-   * Day 1) on top of the existing Mapbox canvas via MapboxOverlay.
+   * Days 2-3 work. Attaches a deck.gl GeoJsonLayer of H3 hexes
+   * (data from /api/jobs/heatmap.json), enables hover + click
+   * (Day 3), and binds a zoom listener that crossfades hex vs.
+   * metro-pin visibility:
+   *   - zoom <= 6.8 → hex opaque, pins hidden (country view)
+   *   - zoom 6.8 → 7.2 → linear crossfade
+   *   - zoom >= 7.2 → hex hidden, pins opaque (metro view)
    *
-   * Gated behind the heatmapEnabled prop (currently driven by the
-   * ?heatmap=1 URL param) so the production map keeps rendering
-   * pins-only until Day 4 wires the heatmap into the style picker.
-   *
-   * Day 3 will: turn pickable on, wire hover + click handlers,
-   * crossfade with the metro-pin layer at zoom 6.8-7.2.
-   * Day 4 will: replace the heatmapEnabled prop with proper
-   * style-picker mode tracking. */
+   * The whole subsystem stays gated behind heatmapEnabled
+   * (?heatmap=1 URL param) until Day 4 retires the flag in
+   * favor of proper style-picker integration. */
   useEffect(() => {
     if (!mapReady || !mapRef.current || !heatmapEnabled) return;
 
+    const map = mapRef.current;
     let handle: import("./jobs-map-heatmap-overlay").HeatmapOverlayHandle | null =
       null;
     let cancelled = false;
+    let zoomListener: (() => void) | null = null;
+
+    const PIN_LAYER_IDS = [
+      "dsohire-clusters",
+      "dsohire-clusters-count",
+      "dsohire-points",
+      "dsohire-points-count",
+      "dsohire-points-city",
+    ] as const;
+    const PIN_BASE_OPACITY: Record<string, number> = {
+      "dsohire-clusters": 0.92,
+      "dsohire-clusters-count": 1,
+      "dsohire-points": 0.92,
+      "dsohire-points-count": 1,
+      "dsohire-points-city": 1,
+    };
+
+    const computeCrossfade = (zoom: number) => {
+      if (zoom <= 6.8) return { heatmap: 1, pin: 0 };
+      if (zoom >= 7.2) return { heatmap: 0, pin: 1 };
+      const t = (zoom - 6.8) / (7.2 - 6.8);
+      return { heatmap: 1 - t, pin: t };
+    };
+
+    const applyCrossfade = (zoom: number) => {
+      const { heatmap, pin } = computeCrossfade(zoom);
+      handle?.setOpacity(heatmap);
+      for (const id of PIN_LAYER_IDS) {
+        if (!map.getLayer?.(id)) continue;
+        const base = PIN_BASE_OPACITY[id] ?? 1;
+        const finalOpacity = pin * base;
+        const paintProp = id.endsWith("count") || id.endsWith("city")
+          ? "text-opacity"
+          : "circle-opacity";
+        try {
+          map.setPaintProperty(id, paintProp, finalOpacity);
+        } catch {
+          /* layer may have been wiped mid-style-swap; next idle fixes it */
+        }
+      }
+    };
 
     (async () => {
       try {
         const mod = await import("./jobs-map-heatmap-overlay");
         if (cancelled || !mapRef.current) return;
-        handle = await mod.attachHeatmapOverlay(mapRef.current);
+        handle = await mod.attachHeatmapOverlay(mapRef.current, {
+          popup: popupRef.current,
+        });
         if (cancelled) {
           handle?.destroy();
           handle = null;
+          return;
         }
+
+        // Apply crossfade immediately at current zoom, then on every
+        // zoom change. Mapbox fires `zoom` frequently during pinch +
+        // wheel — handle.setOpacity dedupes internally so cheap.
+        applyCrossfade(map.getZoom?.() ?? 3.6);
+        zoomListener = () => applyCrossfade(map.getZoom?.() ?? 3.6);
+        map.on("zoom", zoomListener);
       } catch (err) {
         console.warn("[JobsMap] heatmap overlay attach failed", err);
       }
@@ -641,6 +666,21 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
 
     return () => {
       cancelled = true;
+      // Restore pin layer opacities to their static defaults so
+      // toggling heatmap off (or unmounting) leaves the map clean.
+      for (const id of PIN_LAYER_IDS) {
+        if (!map.getLayer?.(id)) continue;
+        const base = PIN_BASE_OPACITY[id] ?? 1;
+        const paintProp = id.endsWith("count") || id.endsWith("city")
+          ? "text-opacity"
+          : "circle-opacity";
+        try {
+          map.setPaintProperty(id, paintProp, base);
+        } catch {
+          /* ignore */
+        }
+      }
+      if (zoomListener) map.off("zoom", zoomListener);
       handle?.destroy();
       handle = null;
     };

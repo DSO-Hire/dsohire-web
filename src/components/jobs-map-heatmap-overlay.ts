@@ -1,27 +1,32 @@
 /**
- * Heatmap overlay helper for JobsMap — Phase D Day 2 deck.gl integration.
+ * Heatmap overlay helper for JobsMap — Phase D deck.gl integration.
  *
  * Fetches the pre-aggregated GeoJSON from /api/jobs/heatmap.json,
  * constructs a deck.gl GeoJsonLayer with a 6-step quantile color ramp
  * (heritage tints) and mounts it on top of the existing Mapbox canvas
  * via MapboxOverlay.
  *
- * Day 2 scope (this file):
- *   • Mount the layer + render hexes on the map
- *   • Color ramp + opacity
- *   • Lifecycle hooks (setup, teardown, refresh)
+ * Day 2 scope (foundational):
+ *   • Mount the layer + render hexes
+ *   • Color ramp + alpha
+ *   • Lifecycle hooks
  *
- * Day 3 follow-up (deferred, NOT in this file):
- *   • Zoom-driven visibility crossfade (hex ↔ metro pins)
- *   • Hover popup
- *   • Click → flyTo center at zoom 9
+ * Day 3 additions (this file):
+ *   • setOpacity(0-1) on the handle for zoom-driven crossfade
+ *   • pickable=true + onHover handler that drives a Mapbox popup
+ *     (passed in by the caller — JobsMap owns the popup instance)
+ *   • onClick handler that flies the map to the hex center at zoom 9
+ *     so the user transitions into the metro-pin view smoothly
  *
  * Day 4 follow-up:
- *   • Style picker entry for "Heatmap" mode (currently always-on
- *     when initialized; Day 2 deliberately keeps it simple)
+ *   • Wire into the style picker proper (replace ?heatmap=1 flag)
+ *   • Update privacy footnote copy
  */
 
-import type { HeatmapFeatureCollection, HeatmapHexFeature } from "@/lib/geocoding/h3-aggregate";
+import type {
+  HeatmapFeatureCollection,
+  HeatmapHexFeature,
+} from "@/lib/geocoding/h3-aggregate";
 
 /** Brand-aligned 6-step ramp: ivory-deep → heritage-light → heritage-deep.
  *  Alpha kept at 0.9 so the basemap shows through subtly. */
@@ -34,9 +39,6 @@ const RAMP_COLORS: Array<[number, number, number, number]> = [
   [47, 93, 79, 230], // #2F5D4F — heritage-deep (densest)
 ];
 
-/** Compute quantile-bucket thresholds for the count distribution.
- *  Returns an array of 5 boundary values; a count is in bucket `i` if
- *  it's <= thresholds[i], or bucket 5 if greater than thresholds[4]. */
 function quantileThresholds(counts: number[]): number[] {
   if (counts.length === 0) return [0, 0, 0, 0, 0];
   const sorted = [...counts].sort((a, b) => a - b);
@@ -47,7 +49,6 @@ function quantileThresholds(counts: number[]): number[] {
   });
 }
 
-/** Lookup a color for a given count using precomputed thresholds. */
 function colorForCount(
   count: number,
   thresholds: number[]
@@ -58,33 +59,47 @@ function colorForCount(
   return RAMP_COLORS[RAMP_COLORS.length - 1]!;
 }
 
+/** Compute polygon centroid from boundary coords. Used to anchor
+ *  the popup and to compute the flyTo target on click. */
+function polygonCentroid(ring: number[][]): [number, number] {
+  let lngSum = 0;
+  let latSum = 0;
+  // First vertex is duplicated at the end of GeoJSON polygon rings —
+  // skip the last entry to avoid double-counting it in the centroid.
+  const n = ring.length - 1;
+  for (let i = 0; i < n; i++) {
+    lngSum += ring[i]![0]!;
+    latSum += ring[i]![1]!;
+  }
+  return [lngSum / n, latSum / n];
+}
+
 export interface HeatmapOverlayHandle {
-  /** Re-fetch the heatmap data + rebuild the layer (e.g., after a
-   *  cache-bust or a filter change once we wire filter-sync in Day 3+). */
+  /** Re-fetch the heatmap data + rebuild the layer. */
   refresh: () => Promise<void>;
+  /** Update the layer's opacity (0-1) for the zoom-driven crossfade.
+   *  Skips the rebuild if overlay isn't initialized yet. */
+  setOpacity: (opacity: number) => void;
   /** Remove the overlay from the map and release its resources. */
   destroy: () => void;
 }
 
+export interface AttachOpts {
+  /** Mapbox popup instance owned by JobsMap. The overlay drives it
+   *  on hex hover (set HTML + lngLat + addTo); JobsMap is responsible
+   *  for popup lifecycle (creation + final removal on unmount). */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  popup?: any;
+}
+
 /**
  * Attach the heatmap overlay to an initialized Mapbox map.
- *
- * Idempotent on re-mount within a single Map instance — calling
- * twice will tear down the old overlay before adding the new one.
- *
- * Returns a handle for refresh/destroy. Caller is responsible for
- * calling destroy() when the map unmounts (typically inside the
- * JobsMap useEffect cleanup function).
  */
 export async function attachHeatmapOverlay(
-  // Mapbox map instance — typed loose because the JobsMap dynamic
-  // import returns `any` for the same reasons (see jobs-map.tsx).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  map: any
+  map: any,
+  opts: AttachOpts = {}
 ): Promise<HeatmapOverlayHandle> {
-  // Dynamic imports — both libraries are browser-only and we don't
-  // want them in any SSR bundle. Keep them out of the JobsMap module
-  // graph until the heatmap is actually being rendered.
   const [{ GeoJsonLayer }, { MapboxOverlay }] = await Promise.all([
     import("@deck.gl/layers"),
     import("@deck.gl/mapbox"),
@@ -92,6 +107,7 @@ export async function attachHeatmapOverlay(
 
   let collection: HeatmapFeatureCollection | null = null;
   let thresholds: number[] = [0, 0, 0, 0, 0];
+  let currentOpacity = 1;
 
   const fetchCollection = async (): Promise<HeatmapFeatureCollection> => {
     const res = await fetch("/api/jobs/heatmap.json", { cache: "default" });
@@ -103,33 +119,73 @@ export async function attachHeatmapOverlay(
     return (await res.json()) as HeatmapFeatureCollection;
   };
 
+  const onHover = (info: {
+    object?: HeatmapHexFeature | null;
+    x?: number;
+    y?: number;
+  }) => {
+    const popup = opts.popup;
+    if (!popup) return;
+    const f = info.object;
+    if (!f || !f.properties) {
+      popup.remove();
+      return;
+    }
+    const ring = f.geometry.coordinates[0]!;
+    const centroid = polygonCentroid(ring);
+    const { count, metros } = f.properties;
+    const metroLine =
+      metros.length === 0
+        ? "Multiple metros"
+        : metros.length <= 3
+          ? metros.join(", ")
+          : `${metros.slice(0, 3).join(", ")} +${metros.length - 3} more`;
+    const html =
+      `<div style="font-family: var(--font-manrope, system-ui); padding: 4px 2px;">` +
+      `<div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #2F5D4F; margin-bottom: 4px;">Hiring density</div>` +
+      `<div style="font-size: 16px; font-weight: 800; color: #14233F; margin-bottom: 2px;">${count} open ${count === 1 ? "role" : "roles"}</div>` +
+      `<div style="font-size: 12px; color: #4A6278;">${metroLine}</div>` +
+      `</div>`;
+    popup.setLngLat(centroid).setHTML(html).addTo(map);
+  };
+
+  const onClick = (info: { object?: HeatmapHexFeature | null }) => {
+    const f = info.object;
+    if (!f || !f.geometry) return;
+    const ring = f.geometry.coordinates[0]!;
+    const centroid = polygonCentroid(ring);
+    // FlyTo zoom 9 transitions the user into metro-pin view via the
+    // zoom-driven crossfade — they pan in, the hex fades out, the
+    // metro pin underneath becomes legible.
+    map.flyTo({
+      center: centroid,
+      zoom: 9,
+      duration: 1000,
+    });
+  };
+
   const buildLayer = () => {
     if (!collection) return null;
-    // Z-order note: not setting beforeId means the hex layer renders
-    // on TOP of all Mapbox layers (including labels). That's a polish
-    // concern Day 5 will revisit by discovering a real label layer id
-    // from the active style and binding beforeId to it. Earlier
-    // attempt with beforeId:"place-label" caused MapboxOverlay to
-    // silently drop the layer entirely on custom Mapbox Studio styles
-    // that don't expose that exact layer id — visible-and-imperfect
-    // is the right tradeoff for the Day 2 preview.
     return new GeoJsonLayer<HeatmapHexFeature["properties"]>({
       id: "dsohire-heatmap",
       data: collection.features,
-      pickable: false, // Day 3 turns this on for hover/click
+      pickable: true,
       stroked: true,
       filled: true,
+      opacity: currentOpacity,
       lineWidthMinPixels: 1,
       getLineWidth: 1,
       getLineColor: [47, 93, 79, 80],
       getFillColor: (f) =>
-        colorForCount((f.properties as { count: number }).count, thresholds),
+        colorForCount(
+          (f.properties as { count: number }).count,
+          thresholds
+        ),
+      onHover,
+      onClick,
     });
   };
 
-  // MapboxOverlay is the bridge between deck.gl layers and the
-  // existing Mapbox canvas — both render to the same context, so
-  // pins + hexes coexist visually without canvas-stacking issues.
   const overlay = new MapboxOverlay({
     interleaved: true,
     layers: [],
@@ -152,11 +208,22 @@ export async function attachHeatmapOverlay(
     }
   };
 
-  // Initial load.
+  const setOpacity = (opacity: number) => {
+    // Clamp + dedupe — many zoom events fire per drag; only rebuild
+    // when the opacity actually changes meaningfully.
+    const clamped = Math.max(0, Math.min(1, opacity));
+    if (Math.abs(clamped - currentOpacity) < 0.01) return;
+    currentOpacity = clamped;
+    if (!collection) return;
+    const layer = buildLayer();
+    overlay.setProps({ layers: layer ? [layer] : [] });
+  };
+
   await refresh();
 
   return {
     refresh,
+    setOpacity,
     destroy: () => {
       try {
         map.removeControl(overlay);
