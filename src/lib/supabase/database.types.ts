@@ -3278,9 +3278,12 @@ export type Database = {
         Args: {
           category_filter?: Database["public"]["Enums"]["role_category"]
           employment_filter?: Database["public"]["Enums"]["employment_type"]
+          near_lat?: number | null
+          near_lng?: number | null
           posted_within_days?: number
           query_text?: string
           state_filter?: string
+          within_miles?: number | null
         }
         Returns: {
           applications_count: number

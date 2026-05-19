@@ -22,7 +22,30 @@ import { JobsStateFilter } from "./jobs-state-filter";
 import { normalizeStateInput } from "@/lib/us-states";
 import { CORPORATE_FUNCTIONS } from "@/lib/corporate/functions";
 import { ListSort } from "@/components/ui/list-sort";
+import { geocodeCityState } from "@/lib/geocoding/mapbox";
 import type { Metadata } from "next";
+
+/** E7.4 — Allowed radius values for the Near-me filter. Anything else
+ *  in the URL (?within=foo or ?within=999) gets dropped to null. */
+const WITHIN_MILES_OPTIONS = [10, 25, 50, 100] as const;
+type WithinMilesOption = (typeof WITHIN_MILES_OPTIONS)[number];
+
+/** Parse a "City, ST" string into its parts. Returns null if the comma form
+ *  isn't present or either side is empty. Strict on purpose — we don't want
+ *  to pass a single token to Mapbox and get a fuzzy match back. */
+function parseNearInput(
+  raw: string | undefined | null
+): { city: string; state: string } | null {
+  if (!raw) return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  const commaIdx = trimmed.indexOf(",");
+  if (commaIdx === -1) return null;
+  const city = trimmed.slice(0, commaIdx).trim();
+  const state = trimmed.slice(commaIdx + 1).trim();
+  if (!city || !state) return null;
+  return { city, state };
+}
 
 export const metadata: Metadata = {
   title: "Browse Dental Jobs",
@@ -86,6 +109,10 @@ interface PageProps {
     surface?: string;
     /** 5G.c follow-up — function slug filter, only honored on the Corporate tab. */
     function?: string;
+    /** E7.4 — "Near": free-text "City, ST" input. Geocoded server-side. */
+    near?: string;
+    /** E7.4 — "Within": radius in miles. Must be one of WITHIN_MILES_OPTIONS. */
+    within?: string;
   }>;
 }
 
@@ -157,12 +184,32 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
     POSTED_FILTER_OPTIONS.find((o) => o.value === postedFilterValue)?.days ??
     null;
 
+  // E7.4 — radius filter. Parse "City, ST" + within-miles, geocode to lat/lng.
+  // Geocode is async + cached at the edge (24h revalidate) so re-renders for
+  // the same locality are cheap. If parsing or geocoding fails, the filter is
+  // silently a no-op (we don't surface an error to the candidate — the page
+  // just renders un-radius-filtered jobs, which is the right fallback).
+  const nearParsed = parseNearInput(sp.near);
+  const withinMilesParsed: WithinMilesOption | null = (() => {
+    const n = Number(sp.within);
+    return (WITHIN_MILES_OPTIONS as readonly number[]).includes(n)
+      ? (n as WithinMilesOption)
+      : null;
+  })();
+  const radiusActive = nearParsed !== null && withinMilesParsed !== null;
+  const nearGeo = radiusActive
+    ? await geocodeCityState(nearParsed!.city, nearParsed!.state)
+    : null;
+
   const { data: rawJobs } = await supabase.rpc("search_jobs_public", {
     query_text: sp.q || null,
     state_filter: sp.state || null,
     employment_filter: sp.employment || null,
     category_filter: sp.category || null,
     posted_within_days: postedWithinDays,
+    near_lat: nearGeo?.lat ?? null,
+    near_lng: nearGeo?.lng ?? null,
+    within_miles: nearGeo ? withinMilesParsed : null,
   });
 
   // Apply candidate-side sort. RPC returns a relevance-blended order; for
@@ -405,6 +452,12 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
   // we only push when explicitly on Corporate.
   if (activeSurface === "corporate") filterParams.push(["surface", "corporate"]);
   if (activeFunctionSlug) filterParams.push(["function", activeFunctionSlug]);
+  // E7.4 — radius filter survives any other filter change. Only carry
+  // through when BOTH near + within are present (valid pairing).
+  if (nearParsed && withinMilesParsed !== null) {
+    filterParams.push(["near", `${nearParsed.city}, ${nearParsed.state}`]);
+    filterParams.push(["within", String(withinMilesParsed)]);
+  }
 
   /** Helper used by the posted-within chip strip + surface tabs. Pulls
       the function filter through whenever we're staying on Corporate. */
@@ -418,6 +471,15 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
     return params;
   };
 
+  /** E7.4 — helper: append the active near + within params to any carry-through
+      list when both are present. Keeps the build helpers below DRY. */
+  const pushNearWithin = (params: Array<[string, string]>) => {
+    if (nearParsed && withinMilesParsed !== null) {
+      params.push(["near", `${nearParsed.city}, ${nearParsed.state}`]);
+      params.push(["within", String(withinMilesParsed)]);
+    }
+  };
+
   /** 5G.b — Build an href that switches to a given surface, preserving filters.
       Switching tabs clears the function filter (it only applies on corporate). */
   const buildSurfaceHref = (surface: JobsSurface): string => {
@@ -429,6 +491,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
     if (postedFilterValue) params.push(["posted", postedFilterValue]);
     if (sortKey !== "newest") params.push(["sort", sortKey]);
     if (surface === "corporate") params.push(["surface", "corporate"]);
+    pushNearWithin(params);
     // Don't carry the function filter across a surface switch.
     return buildHref("/jobs", params);
   };
@@ -444,6 +507,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
     if (sortKey !== "newest") params.push(["sort", sortKey]);
     params.push(["surface", "corporate"]);
     if (slug) params.push(["function", slug]);
+    pushNearWithin(params);
     return buildHref("/jobs", params);
   };
 
@@ -457,6 +521,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
     if (showMap) params.push(["view", "map"]);
     if (sortKey !== "newest") params.push(["sort", sortKey]);
     if (value) params.push(["posted", value]);
+    pushNearWithin(params);
     // 5G.b/c — carry surface + function (function only matters on corporate).
     if (activeSurface === "corporate") params.push(["surface", "corporate"]);
     carryFunctionParam(params, activeSurface === "corporate");
@@ -597,6 +662,23 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
               value={activeFunctionSlug}
             />
           )}
+          {/* E7.4 — keep radius filter alive across keyword/role/etc.
+              re-submits. Both must be present or the filter is a no-op,
+              so only emit the pair (no half-states in the URL). */}
+          {nearParsed && withinMilesParsed !== null && (
+            <>
+              <input
+                type="hidden"
+                name="near"
+                value={`${nearParsed.city}, ${nearParsed.state}`}
+              />
+              <input
+                type="hidden"
+                name="within"
+                value={String(withinMilesParsed)}
+              />
+            </>
+          )}
           <SearchField
             label="Keyword"
             name="q"
@@ -684,6 +766,89 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
             );
           })}
         </div>
+
+        {/* E7.4 — Near filter. Plain GET form so it's server-rendered
+            (no client island) and the URL stays the source of truth.
+            Hidden inputs carry every OTHER active filter through so the
+            user doesn't lose their context when narrowing by radius. */}
+        <form
+          method="get"
+          action="/jobs"
+          className="mt-3 flex flex-wrap items-center gap-2"
+        >
+          {sp.q && <input type="hidden" name="q" value={sp.q} />}
+          {sp.state && <input type="hidden" name="state" value={sp.state} />}
+          {sp.employment && (
+            <input type="hidden" name="employment" value={sp.employment} />
+          )}
+          {sp.category && (
+            <input type="hidden" name="category" value={sp.category} />
+          )}
+          {postedFilterValue && (
+            <input type="hidden" name="posted" value={postedFilterValue} />
+          )}
+          {activeSurface === "corporate" && (
+            <input type="hidden" name="surface" value="corporate" />
+          )}
+          {activeFunctionSlug && (
+            <input type="hidden" name="function" value={activeFunctionSlug} />
+          )}
+          {sortKey !== "newest" && (
+            <input type="hidden" name="sort" value={sortKey} />
+          )}
+          {showMap && <input type="hidden" name="view" value="map" />}
+
+          <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mr-2">
+            Near
+          </span>
+          <input
+            type="text"
+            name="near"
+            placeholder="City, State (e.g. Austin, TX)"
+            defaultValue={
+              nearParsed ? `${nearParsed.city}, ${nearParsed.state}` : ""
+            }
+            className="px-3 py-1.5 text-[12px] border border-[var(--rule-strong)] bg-white text-ink min-w-[220px] focus:outline-none focus:border-heritage"
+          />
+          <select
+            name="within"
+            defaultValue={
+              withinMilesParsed !== null ? String(withinMilesParsed) : "25"
+            }
+            className="px-3 py-1.5 text-[12px] border border-[var(--rule-strong)] bg-white text-ink focus:outline-none focus:border-heritage"
+          >
+            {WITHIN_MILES_OPTIONS.map((m) => (
+              <option key={m} value={String(m)}>
+                {m} mi
+              </option>
+            ))}
+          </select>
+          <button
+            type="submit"
+            className="px-3 py-1.5 text-[12px] font-semibold bg-ink text-ivory hover:bg-ink-soft transition-colors"
+          >
+            Apply
+          </button>
+          {radiusActive && (
+            <Link
+              href={buildHref(
+                "/jobs",
+                filterParams.filter(([k]) => k !== "near" && k !== "within")
+              )}
+              className="px-3 py-1.5 text-[12px] font-semibold border border-[var(--rule-strong)] text-slate-body bg-white hover:border-heritage transition-colors"
+            >
+              Clear
+            </Link>
+          )}
+          {/* Geocoder failed (Mapbox returned no match for the city/state).
+              Surface a quiet hint instead of silently showing un-filtered
+              results — otherwise the user thinks the filter is active. */}
+          {radiusActive && nearGeo === null && (
+            <span className="text-[11px] text-slate-meta italic ml-1">
+              Couldn&apos;t find that location — showing all results.
+            </span>
+          )}
+        </form>
       </section>
 
       {/* Results */}
