@@ -105,7 +105,13 @@ export async function attachHeatmapOverlay(
 
   const buildLayer = () => {
     if (!collection) return null;
-    return new GeoJsonLayer<HeatmapHexFeature["properties"]>({
+    // beforeId is a MapboxOverlay-interleaved-mode prop that deck.gl's
+    // typed GeoJsonLayer constructor doesn't expose publicly (it's
+    // consumed by the Mapbox bridge, not the layer itself). Spread it
+    // in via a type-erasing intermediate so tsc accepts it while the
+    // runtime continues to honor the z-order intent (hexes render
+    // BELOW Mapbox label layers so city/state names stay legible).
+    const baseProps = {
       id: "dsohire-heatmap",
       data: collection.features,
       pickable: false, // Day 3 turns this on for hover/click
@@ -113,19 +119,18 @@ export async function attachHeatmapOverlay(
       filled: true,
       lineWidthMinPixels: 1,
       getLineWidth: 1,
-      getLineColor: [47, 93, 79, 80], // heritage-deep, low alpha
-      getFillColor: (f) =>
-        colorForCount(
-          (f.properties as { count: number }).count,
-          thresholds
-        ),
-      // Render below Mapbox label layers so city/state labels stay
-      // legible on top of the heat. Mapbox styles typically place
-      // labels in a layer whose id starts with "label" or contains
-      // "place" — beforeId="place-label" is a defensive default
-      // that works on streets-v12 and our custom DSO Hire style.
+      getLineColor: [47, 93, 79, 80] as [number, number, number, number],
+      getFillColor: (f: HeatmapHexFeature) =>
+        colorForCount(f.properties.count, thresholds),
+    };
+    const extendedProps = {
+      ...baseProps,
       beforeId: "place-label",
-    });
+    };
+    return new GeoJsonLayer<HeatmapHexFeature["properties"]>(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      extendedProps as any
+    );
   };
 
   // MapboxOverlay is the bridge between deck.gl layers and the
