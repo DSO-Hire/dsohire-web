@@ -380,9 +380,31 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
       // full investigation history.
       let initialSetupDone = false;
 
-      const runSetup = () => {
-        if (cancelled || initialSetupDone) return;
+      const runSetup = (triggeredBy: string) => {
+        if (cancelled || initialSetupDone) {
+          console.log(
+            `[JobsMap] runSetup skipped (trigger=${triggeredBy}, cancelled=${cancelled}, alreadyDone=${initialSetupDone})`
+          );
+          return;
+        }
         const currentMetros = metroGroupsRef.current;
+        console.log(
+          `[JobsMap] runSetup START (trigger=${triggeredBy}, metroCount=${currentMetros.length}, isStyleLoaded=${map.isStyleLoaded?.()}, loaded=${map.loaded?.()})`
+        );
+
+        // GUARD: don't mark setup-done if we have no data to attach.
+        // Calling attachLocationLayers with empty metros creates an
+        // empty source, then marking initialSetupDone=true prevents
+        // any future re-attach attempt — leaving the map permanently
+        // empty until the user manually swaps styles. Better to keep
+        // polling until we have actual data.
+        if (currentMetros.length === 0) {
+          console.warn(
+            "[JobsMap] runSetup aborted — metroGroupsRef is empty, will retry"
+          );
+          return;
+        }
+
         try {
           attachLocationLayers(map, currentMetros);
           wireLayerInteractions(map, {
@@ -405,8 +427,11 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
           }
           initialSetupDone = true;
           setMapReady(true);
+          console.log(
+            `[JobsMap] runSetup SUCCESS — attached ${currentMetros.length} metros`
+          );
         } catch (err) {
-          console.error("[JobsMap] attachLocationLayers threw:", err);
+          console.error("[JobsMap] runSetup THREW (will retry):", err);
         }
       };
 
@@ -426,16 +451,16 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
       // could be style-loaded before our useEffect even runs — the
       // setInterval would then wait 100ms for nothing before
       // catching it. Sync check eliminates that gap.
-      const tryRunSetup = () => {
+      const tryRunSetup = (trigger: string) => {
         if (cancelled || initialSetupDone) return false;
         if (map.isStyleLoaded?.() || map.loaded?.()) {
-          runSetup();
-          return true;
+          runSetup(trigger);
+          return initialSetupDone; // only counts as resolved if setup ACTUALLY completed
         }
         return false;
       };
 
-      tryRunSetup(); // sync first check
+      tryRunSetup("sync-first-check"); // sync first check
 
       let pollTicks = 0;
       const pollHandle = setInterval(() => {
@@ -444,14 +469,14 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
           clearInterval(pollHandle);
           return;
         }
-        if (tryRunSetup()) {
+        if (tryRunSetup(`poll-${pollTicks}`)) {
           clearInterval(pollHandle);
         }
       }, 100);
 
       // Belt-and-suspenders event bindings.
-      map.on("load", runSetup);
-      map.on("idle", runSetup);
+      map.on("load", () => runSetup("load-event"));
+      map.on("idle", () => runSetup("idle-event"));
 
       // Last-resort automation. If 1.5s after init nothing has fired
       // runSetup to completion, force a setStyle to the SAME URL.
@@ -462,11 +487,17 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
       // manually by clicking Streets then DSO Hire). This makes that
       // manual workaround automatic without requiring user action.
       const fallbackTimer = setTimeout(() => {
-        if (cancelled || initialSetupDone || !mapRef.current) return;
-        try {
-          console.warn(
-            "[JobsMap] auto-fallback: setStyle re-trigger after 1.5s without initial setup"
+        if (cancelled || !mapRef.current) return;
+        if (initialSetupDone) {
+          console.log(
+            "[JobsMap] auto-fallback skipped — initialSetupDone already true"
           );
+          return;
+        }
+        console.warn(
+          `[JobsMap] auto-fallback FIRING (metros=${metroGroupsRef.current.length}, isStyleLoaded=${mapRef.current.isStyleLoaded?.()}, loaded=${mapRef.current.loaded?.()})`
+        );
+        try {
           mapRef.current.setStyle(initialStyleUrl);
         } catch (err) {
           console.warn("[JobsMap] fallback setStyle threw:", err);
@@ -485,8 +516,11 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
       // from THIS path instead of dropping the event.
       const reattachAfterStyleSwap = () => {
         if (cancelled) return;
+        console.log(
+          `[JobsMap] style.load fired (initialSetupDone=${initialSetupDone}, metroCount=${metroGroupsRef.current.length})`
+        );
         if (!initialSetupDone) {
-          runSetup();
+          runSetup("style.load-event");
           return;
         }
         const currentMetros = metroGroupsRef.current;
@@ -498,6 +532,9 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
             openDrawer: (metro) => setDrawerMetro(metro),
             popup: popupRef.current,
           });
+          console.log(
+            `[JobsMap] re-attach after style swap SUCCESS (metros=${currentMetros.length})`
+          );
         } catch (err) {
           console.error("[JobsMap] re-attach after style swap threw:", err);
         }
