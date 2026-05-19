@@ -605,6 +605,11 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
     let cancelled = false;
     let zoomListener: (() => void) | null = null;
     let styleListener: (() => void) | null = null;
+    // Track pending re-attach timer so cleanup can cancel it. Without
+    // this, a style.load fired during component unmount would queue a
+    // 50ms re-attach that runs AFTER the map is destroyed → throws
+    // inside Mapbox internals and Chrome shows the page-failed screen.
+    let pendingStyleTimer: ReturnType<typeof setTimeout> | null = null;
 
     const HEATMAP_LAYER_ID = "dsohire-heatmap";
     const HEATMAP_SOURCE_ID = "dsohire-heat-source";
@@ -797,32 +802,70 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
     // heatmap layer here. Then re-apply crossfade so the fresh layer
     // doesn't paint at full opacity when zoom says it should be hidden.
     styleListener = () => {
-      setTimeout(() => {
+      // Cancel any prior pending timer first so rapid-fire style.load
+      // events don't pile up timers.
+      if (pendingStyleTimer) clearTimeout(pendingStyleTimer);
+      pendingStyleTimer = setTimeout(() => {
+        pendingStyleTimer = null;
         if (cancelled) return;
-        attachHeatmap();
-        applyCrossfade(map.getZoom?.() ?? 3.6);
+        try {
+          attachHeatmap();
+          applyCrossfade(map.getZoom?.() ?? 3.6);
+        } catch {
+          /* map mid-teardown; cleanup handles the rest */
+        }
       }, 50);
     };
-    map.on("style.load", styleListener);
+    try {
+      map.on("style.load", styleListener);
+    } catch {
+      /* defensive — map.on can throw on a destroyed map */
+    }
 
     return () => {
+      // Set cancellation FIRST so any in-flight async (pending timer,
+      // queued attach) bails out before touching the map.
       cancelled = true;
-      if (zoomListener) map.off("zoom", zoomListener);
-      if (styleListener) map.off("style.load", styleListener);
 
-      // Restore pin opacities + remove the heatmap layer/source so
-      // toggling heatmap off (or unmounting) leaves the map clean.
+      // Cancel pending re-attach timer so it can't fire post-unmount
+      // against a destroyed map.
+      if (pendingStyleTimer) {
+        clearTimeout(pendingStyleTimer);
+        pendingStyleTimer = null;
+      }
+
+      // Remove listeners SECOND so they can't fire mid-cleanup. Wrap
+      // each in try/catch — map.off throws on a destroyed map, which
+      // would propagate and crash the unmount (Chrome's "this page
+      // couldn't load" screen on subsequent navigation).
+      try {
+        if (zoomListener) map.off("zoom", zoomListener);
+      } catch {
+        /* map already torn down */
+      }
+      try {
+        if (styleListener) map.off("style.load", styleListener);
+      } catch {
+        /* map already torn down */
+      }
+
+      // Remove the heatmap layer/source. Best-effort; the main map
+      // effect's cleanup runs after ours and does map.remove() which
+      // wipes everything anyway, so failures here are not load-bearing.
       try {
         if (map.getLayer?.(HEATMAP_LAYER_ID)) map.removeLayer(HEATMAP_LAYER_ID);
         if (map.getSource?.(HEATMAP_SOURCE_ID)) map.removeSource(HEATMAP_SOURCE_ID);
       } catch {
         /* map may already be torn down */
       }
+
+      // Restore pin opacities so toggling heatmap off (or unmounting
+      // and re-mounting via React Strict Mode) leaves the map clean.
       for (const id of PIN_LAYER_IDS) {
-        if (!map.getLayer?.(id)) continue;
-        const base = PIN_BASE_OPACITY[id] ?? 1;
-        const isSymbol = id.endsWith("count") || id.endsWith("city");
         try {
+          if (!map.getLayer?.(id)) continue;
+          const base = PIN_BASE_OPACITY[id] ?? 1;
+          const isSymbol = id.endsWith("count") || id.endsWith("city");
           if (isSymbol) {
             map.setPaintProperty(id, "text-opacity", base);
           } else {
@@ -830,7 +873,7 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
             map.setPaintProperty(id, "circle-stroke-opacity", 1);
           }
         } catch {
-          /* ignore */
+          /* layer wiped or map gone — main cleanup handles it */
         }
       }
     };
