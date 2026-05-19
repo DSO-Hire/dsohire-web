@@ -8,11 +8,15 @@
  * `metros` property listing the metros aggregated into that hex (used
  * by the hover popup on the map).
  *
- * Resolution choice: r5 (~252 km² per hex, ~9km edge) reads cleanly at
- * country zoom and roughly matches major-metro scale. r4 (~1770 km²)
- * would group too aggressively (state-ish); r6 (~36 km²) would fragment
- * mid-sized metros across multiple hexes. r5 is the sweet spot per the
- * Phase D build plan, subject to a visual review against real data.
+ * Resolution choice: r4 (~1,770 km² per hex, ~22km edge). The original
+ * plan called for r5 (~252 km²) but the visual review against real data
+ * (Day 3 deploy 2026-05-19) showed r5 hexes rendered as ~2px specks at
+ * country zoom — invisible. The heatmap is country-scale by design (it
+ * crossfades into metro pins at zoom 7+), so the hex size needs to match
+ * country-scale legibility. r4 hexes are ~30km across and read as proper
+ * polygons at zoom 3-7 while still being granular enough to show
+ * regional concentration (cluster differences between metros stay
+ * visible). r3 (~12k km²) would group state-wide and lose all signal.
  *
  * H3 docs: https://h3geo.org/docs/core-library/restable
  * h3-js: https://github.com/uber/h3-js
@@ -58,8 +62,9 @@ export interface HeatmapFeatureCollection {
   point_count: number;
 }
 
-/** Default H3 resolution for Phase D heatmap. Tunable per locked plan. */
-export const DEFAULT_HEATMAP_RESOLUTION = 5;
+/** Default H3 resolution for Phase D heatmap. Bumped from r5 to r4 on
+ *  2026-05-19 after visual review — see file header for rationale. */
+export const DEFAULT_HEATMAP_RESOLUTION = 4;
 
 /**
  * Aggregate raw points into a GeoJSON FeatureCollection of H3 hexagons.
