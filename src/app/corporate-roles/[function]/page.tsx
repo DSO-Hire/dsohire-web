@@ -3,7 +3,7 @@
  *
  * SEO play. Each of the 12 corporate functions gets its own URL with
  * a hero, sub-role list, and a live feed of open corporate jobs at any
- * verified DSO matching that function. Static path generation means
+ * DSO matching that function. Static path generation means
  * the routes pre-render at build time and serve fast.
  *
  * The slate-blue accent matches the Corporate Roles tab on /jobs?surface=corporate
@@ -110,7 +110,7 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
           </span>
         </div>
         <h1 className="text-4xl sm:text-7xl font-extrabold tracking-[-2px] leading-[1.02] text-ink mb-5 max-w-[820px]">
-          {fn.label} jobs at verified DSOs.
+          {fn.label} jobs at multi-location DSOs.
         </h1>
         <p className="text-base sm:text-lg text-slate-body leading-relaxed max-w-[760px]">
           {fn.blurb}

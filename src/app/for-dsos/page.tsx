@@ -713,8 +713,8 @@ const SHOWCASE_BOTTOM: ShowcaseFeature[] = [
   },
   {
     icon: BadgeCheck,
-    title: "Verified DSO employers",
-    body: "Every job is posted by an active dental support organization running 10+ practices. No staffing agencies, no recruiters, no solo practices padding the listings.",
+    title: "Multi-location DSO employers",
+    body: "Every job is posted by an active dental support organization running multiple practices. No staffing agencies, no recruiters, no solo practices padding the listings — prohibited by our Acceptable Use Policy.",
     status: "now",
   },
 ];

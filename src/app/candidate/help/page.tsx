@@ -33,7 +33,7 @@ const FAQS: FaqEntry[] = [
   },
   {
     q: "Who can see my profile?",
-    a: "By default your profile is set to 'Recruiters only' — visible to verified DSO members but not indexed by Google or visible to unauthenticated visitors. You can change this any time on Settings → Privacy & visibility. We never sell candidate data; we never share with staffing agencies or data brokers.",
+    a: "By default your profile is set to 'Recruiters only' — visible to DSO Hire employer members but not indexed by Google or visible to unauthenticated visitors. You can change this any time on Settings → Privacy & visibility. We never sell candidate data; we never share with staffing agencies or data brokers.",
   },
   {
     q: "How do I hide my profile from my current employer?",

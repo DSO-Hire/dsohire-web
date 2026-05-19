@@ -150,9 +150,9 @@ function FinalCta() {
           Hiring DSOs nationwide.
         </h2>
         <p className="text-base text-ivory/70 leading-[1.7] mb-9">
-          DSO Hire is a US-hosted, US-operated platform. Every job posting
-          comes from a verified dental support organization — not a recruiter,
-          staffing agency, or solo practice.
+          DSO Hire is a US-hosted, US-operated platform. Every employer
+          agrees to our Acceptable Use Policy — staffing agencies, recruiter
+          reposts, and solo-practice reposts are prohibited.
         </p>
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Link

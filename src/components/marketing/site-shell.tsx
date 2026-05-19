@@ -150,9 +150,9 @@ export function SiteFooter() {
           <div>
             <BrandLockup dark height={56} />
             <p className="text-[14px] text-ivory/55 leading-[1.7] mt-5 max-w-[280px]">
-              The job board built for dental support organizations. One flat
-              monthly fee. Unlimited multi-location postings. Made by operators,
-              for operators.
+              Dental hiring, done direct. The hiring platform built for
+              multi-location DSOs. One flat monthly fee, unlimited postings.
+              Made by operators, for operators.
             </p>
           </div>
 

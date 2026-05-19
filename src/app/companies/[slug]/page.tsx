@@ -30,7 +30,6 @@ import {
   Building2,
   ExternalLink,
   MapPin,
-  ShieldCheck,
 } from "lucide-react";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -293,8 +292,8 @@ export default async function CompanyDetailPage({ params }: PageProps) {
             className="flex items-center gap-2.5 text-[10px] font-bold tracking-[2.5px] uppercase mb-3"
             style={{ color: brandColor }}
           >
-            <ShieldCheck className="h-3.5 w-3.5" />
-            Verified DSO
+            <Building2 className="h-3.5 w-3.5" />
+            DSO Hire Member
           </div>
 
           {/* Logo + Name layout */}

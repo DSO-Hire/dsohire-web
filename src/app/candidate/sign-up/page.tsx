@@ -17,7 +17,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Create a Candidate Account",
   description:
-    "Create a free DSO Hire candidate account to apply to jobs at verified dental support organizations.",
+    "Create a free DSO Hire candidate account to apply to jobs at multi-location dental support organizations.",
 };
 
 interface PageProps {
@@ -34,7 +34,7 @@ export default async function CandidateSignUpPage({ searchParams }: PageProps) {
           Candidate Sign-Up
         </div>
         <h1 className="text-4xl sm:text-6xl font-extrabold tracking-[-1.8px] leading-[1.05] text-ink mb-6 max-w-[820px]">
-          Apply to verified DSO jobs in one click.
+          Apply to dental jobs in one click.
         </h1>
         <p className="text-base sm:text-lg text-slate-body leading-relaxed max-w-[640px] mb-12">
           Free for life. Your profile carries from job to job — no re-typing,

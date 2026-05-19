@@ -1,5 +1,5 @@
 /**
- * /companies — public directory of verified DSOs.
+ * /companies — public directory of DSOs on DSO Hire.
  *
  * Lists every DSO with status = 'active' alphabetically. Each card shows
  * headquarters, practice count, and a count of currently open jobs.
@@ -17,16 +17,16 @@ import { ListSort } from "@/components/ui/list-sort";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Verified Dental Support Organizations",
+  title: "Dental Support Organizations on DSO Hire",
   description:
-    "Browse the dental support organizations hiring through DSO Hire — verified, mid-market dental groups operating 10+ practices across the U.S.",
+    "Browse the dental support organizations hiring through DSO Hire — mid-market dental groups operating multiple practices across the U.S.",
 };
 
 const COMPANIES_SORT_OPTIONS = [
   { value: "name", label: "Name (A→Z)" },
   { value: "practices", label: "Most practices" },
   { value: "jobs", label: "Most open jobs" },
-  { value: "newest", label: "Recently verified" },
+  { value: "newest", label: "Recently joined" },
 ] as const;
 type CompaniesSortKey = (typeof COMPANIES_SORT_OPTIONS)[number]["value"];
 
@@ -144,16 +144,16 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
         <div className="flex items-center gap-3.5 mb-6">
           <span className="block w-7 h-px bg-heritage" />
           <span className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep">
-            Verified Dental Support Organizations
+            Dental Support Organizations on DSO Hire
           </span>
         </div>
         <h1 className="text-4xl sm:text-7xl font-extrabold tracking-[-2px] leading-[1.02] text-ink mb-5 max-w-[820px]">
           The DSOs hiring on DSO Hire.
         </h1>
         <p className="text-base sm:text-lg text-slate-body leading-relaxed max-w-[640px]">
-          Every organization listed here operates multiple practices and has
-          been verified by our team. Browse to learn more, or jump straight to
-          an open role.
+          Every organization listed here operates multiple practices and is
+          a DSO Hire employer member. Browse to learn more, or jump straight
+          to an open role.
         </p>
       </section>
 
@@ -163,8 +163,8 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
             {dsos.length === 0
               ? "No DSOs listed yet"
               : dsos.length === 1
-                ? "1 verified DSO"
-                : `${dsos.length} verified DSOs`}
+                ? "1 DSO listed"
+                : `${dsos.length} DSOs listed`}
           </div>
           {dsos.length > 1 && (
             <ListSort
@@ -206,7 +206,7 @@ function DsoCard({ dso, openJobs }: { dso: DsoRow; openJobs: number }) {
     >
       <div className="flex items-center gap-3 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
         <Building2 className="h-3.5 w-3.5" />
-        Verified DSO
+        DSO Hire Member
       </div>
 
       <h3 className="text-xl font-extrabold tracking-[-0.6px] text-ink mb-1 leading-tight">
@@ -258,10 +258,10 @@ function EmptyState() {
     <div className="border border-[var(--rule)] bg-cream p-12 text-center max-w-[640px] mx-auto">
       <Building2 className="h-10 w-10 text-slate-meta mx-auto mb-5" />
       <h2 className="text-2xl font-extrabold tracking-[-0.5px] text-ink mb-3">
-        No verified DSOs yet.
+        No DSOs listed yet.
       </h2>
       <p className="text-[14px] text-slate-body leading-relaxed max-w-[440px] mx-auto">
-        DSO Hire is in early launch — verified DSOs are onboarding through
+        DSO Hire is in early launch — DSOs are onboarding through
         summer 2026. Check back soon, or{" "}
         <Link
           href="/jobs"

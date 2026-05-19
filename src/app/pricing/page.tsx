@@ -325,10 +325,6 @@ const COMPARE_GROUPS: MatrixGroup[] = [
         feature: "CE compliance reporting (employer-side)",
         values: { starter: false, growth: "H2 2026", enterprise: "H2 2026" },
       },
-      {
-        feature: "Verified-candidate badge",
-        values: { starter: false, growth: "H2 2026", enterprise: "H2 2026" },
-      },
     ],
   },
   {
@@ -521,7 +517,7 @@ const COMPARE_GROUPS: MatrixGroup[] = [
         values: { starter: true, growth: true, enterprise: true },
       },
       {
-        feature: "Verified DSO Hire employer trust badge",
+        feature: "DSO Hire employer profile badge",
         values: { starter: true, growth: true, enterprise: true },
       },
       {

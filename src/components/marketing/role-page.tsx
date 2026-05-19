@@ -319,7 +319,7 @@ function FinalCta({ config }: { config: RoleConfig }) {
           Ready to see what&apos;s open?
         </h2>
         <p className="text-[15px] sm:text-[16px] text-slate-body leading-[1.7] mb-9 max-w-[560px] mx-auto">
-          Browse current {config.label.toLowerCase()} roles at verified DSOs,
+          Browse current {config.label.toLowerCase()} roles at multi-location DSOs,
           or create a free profile so the right openings find you.
         </p>
         <div className="flex flex-wrap gap-3.5 justify-center">

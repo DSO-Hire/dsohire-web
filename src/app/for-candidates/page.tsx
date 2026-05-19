@@ -54,7 +54,7 @@ export const metadata: Metadata = {
   title:
     "Dental Jobs at Multi-Location DSOs — Hygienist, Dentist, Assistant & Front Desk Roles",
   description:
-    "Find dental jobs at real, verified dental support organizations. Browse open hygienist jobs, dental assistant jobs, associate dentist, specialist, front desk, and office manager roles at multi-location DSOs. Apply direct — no agency middlemen, no placement fees, no resume reselling. Free for candidates forever, with transparent comp wherever DSOs share it. Build a dental career at a real group practice.",
+    "Find dental jobs at real, multi-location dental support organizations. Browse open hygienist jobs, dental assistant jobs, associate dentist, specialist, front desk, and office manager roles at DSOs on DSO Hire. Apply direct — no agency middlemen, no placement fees, no resume reselling. Free for candidates forever, with transparent comp wherever DSOs share it. Build a dental career at a real group practice.",
   keywords: [
     "dental jobs",
     "dental careers",
@@ -139,11 +139,10 @@ function Hero() {
           </h1>
 
           <p className="text-lg sm:text-xl text-slate-body leading-[1.65] max-w-[560px] mb-10">
-            DSO Hire is the job board built for dental professionals
-            applying to multi-location practices. Every employer is
-            verified. You apply direct — no agency middleman, no resume
-            reselling, no placement fee skimmed off your offer. Free for
-            life.
+            DSO Hire is the hiring platform built for dental professionals
+            applying to multi-location practices. You apply direct — no
+            agency middleman, no resume reselling, no placement fee skimmed
+            off your offer. Free for life.
           </p>
 
           <div className="flex flex-wrap items-center gap-3.5 mb-9">
@@ -346,8 +345,8 @@ function CandidateApplicationsPreview() {
 const PROMISES = [
   {
     Icon: ShieldCheck,
-    title: "Every employer is a verified DSO",
-    body: "We verify every dental support organization before they post. No staffing-agency middlemen masquerading as employers. No solo practices listed as 'group practice.' Every job comes from a real DSO running multiple practices.",
+    title: "Every employer is a multi-location DSO",
+    body: "Every employer on DSO Hire is a Dental Support Organization that subscribes to the platform and agrees to our Acceptable Use Policy — staffing-agency middlemen, recruiter reposts, and solo-practice reposts are prohibited. We monitor the community and remove anyone in violation.",
   },
   {
     Icon: Send,
@@ -754,7 +753,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Who can see my profile?",
-    a: "Only verified DSOs (employers) can search candidate profiles, and only if your visibility setting allows it. Your default is private. You can mark yourself hidden, recruiters-only, or open-to-work at any time from your settings — and you control which fields are shown.",
+    a: "Only DSO Hire employer members can search candidate profiles, and only if your visibility setting allows it. Your default is private. You can mark yourself hidden, recruiters-only, or open-to-work at any time from your settings — and you control which fields are shown.",
   },
   {
     q: "What if I'm currently employed and don't want my employer to find out I'm looking?",
@@ -762,11 +761,11 @@ const FAQ_ITEMS = [
   },
   {
     q: "What kinds of roles will I find here?",
-    a: "Every role on DSO Hire is at a verified Dental Support Organization — from hygiene, assisting, and front-desk roles to dentist, specialist, and corporate operations roles (regional managers, HR, business development, etc.) at multi-location dental groups. If you work in dental, there's a path here.",
+    a: "Every role on DSO Hire is at a multi-location Dental Support Organization — from hygiene, assisting, and front-desk roles to dentist, specialist, and corporate operations roles (regional managers, HR, business development, etc.) at multi-location dental groups. If you work in dental, there's a path here.",
   },
   {
     q: "How is this different from Indeed, ZipRecruiter, or DentalPost?",
-    a: "DSO Hire is dental-only and direct. Every employer is a verified DSO — no staffing-agency reposts, no recruiters skimming, no resume reselling. Generic boards work for every industry, which means they don't work especially well for any one. We don't bury you in unrelated alerts, and we don't have agencies inserting themselves between you and the practice.",
+    a: "DSO Hire is dental-only and direct. Every employer is a multi-location DSO that agrees to our Acceptable Use Policy — staffing-agency reposts, recruiter skimming, and resume reselling are prohibited. Generic boards work for every industry, which means they don't work especially well for any one. We don't bury you in unrelated alerts, and we don't have agencies inserting themselves between you and the practice.",
   },
   {
     q: "Do you sell my data or share it with third parties?",

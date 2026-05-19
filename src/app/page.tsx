@@ -114,8 +114,8 @@ function Hero() {
             icon={Stethoscope}
             eyebrow="For Dental Professionals"
             title="Find your next dental role"
-            body="Real openings at verified dental support organizations — clinical and corporate, hygiene through specialist."
-            proof="Free forever · Direct apply · Verified DSOs only"
+            body="Real openings at multi-location dental support organizations — clinical and corporate, hygiene through specialist."
+            proof="Free forever · Direct apply · Multi-location DSOs only"
             ctaLabel="Browse Dental Jobs"
             href="/for-candidates"
           />
@@ -218,10 +218,10 @@ function MarketplaceBand() {
           DSOs need a steady pipeline of dental talent. Dental professionals
           need real openings at employers worth their time. Generic job boards
           serve neither well — so DSO Hire is dental-only on purpose. Every
-          employer is a verified dental support organization, the roles run
-          from chairside to the corporate teams behind a growing dental group,
-          and both sides connect directly. That&apos;s why each audience gets
-          its own front door — equal weight, built with the same care.
+          employer is a multi-location dental support organization, the roles
+          run from chairside to the corporate teams behind a growing dental
+          group, and both sides connect directly. That&apos;s why each audience
+          gets its own front door — equal weight, built with the same care.
         </p>
       </div>
     </section>
@@ -236,7 +236,7 @@ const VALUE_PROPS = [
   {
     icon: BadgeCheck,
     title: "Dental-only, on purpose",
-    body: "Not a generic job board with a dental filter. Every employer is a verified dental support organization, and every role — clinical or corporate — sits inside the dental industry. Both sides are pre-qualified before anyone says hello.",
+    body: "Not a generic job board with a dental filter. Every employer is a multi-location dental support organization, and every role — clinical or corporate — sits inside the dental industry. Both sides show up because they belong here.",
   },
   {
     icon: ArrowLeftRight,

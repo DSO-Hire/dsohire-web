@@ -58,8 +58,8 @@ const RESUME_VISIBILITY_OPTIONS: ReadonlyArray<{
   },
   {
     value: "verified_dso_only",
-    label: "Verified DSO members",
-    description: "Any signed-in DSO member can download your resume.",
+    label: "DSO Hire employer members",
+    description: "Any signed-in DSO Hire employer member can download your resume.",
   },
   {
     value: "public",
@@ -88,7 +88,7 @@ const CONTACT_VISIBILITY_OPTIONS: ReadonlyArray<{
     value: "always",
     label: "Always",
     description:
-      "Email + phone visible to any verified DSO member who finds your profile.",
+      "Email + phone visible to any DSO Hire employer member who finds your profile.",
   },
 ];
 
@@ -552,7 +552,7 @@ function DataSharingCard() {
               parser ignores them.
             </li>
             <li>
-              Verified DSO members can find your profile per your
+              DSO Hire employer members can find your profile per your
               visibility settings above. Unauthenticated visitors and
               search engines never see your name + contact unless you
               explicitly publish a public profile.

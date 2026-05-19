@@ -215,7 +215,7 @@ export default async function CandidateJobsPage() {
             Jobs
           </div>
           <h1 className="font-display text-3xl font-extrabold tracking-[-0.8px] text-ink leading-tight">
-            Recently posted at verified DSOs.
+            Recently posted at multi-location DSOs.
           </h1>
           <p className="text-sm text-slate-body leading-relaxed max-w-[640px]">
             Twenty most-recent active roles. Use the full board for state

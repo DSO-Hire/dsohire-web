@@ -300,7 +300,7 @@ export const ROLE_CONFIGS: RoleConfig[] = [
       { slug: "office-managers", label: "Office Managers" },
     ],
     metaDescription:
-      "Dental assistant jobs at multi-location DSOs. Structured EFDA training with reimbursement, multi-doctor variety, real benefits, and a career ladder from chair-side to operations. Browse open DA and EFDA roles at verified DSOs.",
+      "Dental assistant jobs at multi-location DSOs. Structured EFDA training with reimbursement, multi-doctor variety, real benefits, and a career ladder from chair-side to operations. Browse open DA and EFDA roles on DSO Hire.",
   },
   {
     slug: "front-desk",
@@ -356,7 +356,7 @@ export const ROLE_CONFIGS: RoleConfig[] = [
       { slug: "dental-assistants", label: "Dental Assistants" },
     ],
     metaDescription:
-      "Front desk and treatment coordinator jobs at multi-location DSOs. Real systems training, defined career path to office manager, performance-based bonuses, and predictable hours. Browse open front-desk and TC roles at verified DSOs.",
+      "Front desk and treatment coordinator jobs at multi-location DSOs. Real systems training, defined career path to office manager, performance-based bonuses, and predictable hours. Browse open front-desk and TC roles on DSO Hire.",
   },
   {
     slug: "office-managers",

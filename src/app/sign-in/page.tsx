@@ -57,7 +57,7 @@ export default function SignInPickerPage() {
             icon={<UserCircle className="h-6 w-6 text-heritage-deep" />}
             eyebrow="For Candidates"
             title="Sign in as a Candidate"
-            blurb="Track your applications, update your profile + resume, and apply to verified DSO jobs in one click."
+            blurb="Track your applications, update your profile + resume, and apply to dental jobs in one click."
             primaryHref="/candidate/sign-in"
             primaryLabel="Sign in to candidate account"
             secondaryHref="/candidate/sign-up"
