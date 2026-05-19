@@ -3273,6 +3273,15 @@ export type Database = {
         Args: { p_job_id: string }
         Returns: boolean
       }
+      get_heatmap_points: {
+        Args: Record<string, never>
+        Returns: {
+          latitude: number
+          longitude: number
+          job_count: number
+          metro: string | null
+        }[]
+      }
       job_is_publicly_dso_affiliated: {
         Args: { p_job_id: string }
         Returns: boolean
