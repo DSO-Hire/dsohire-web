@@ -410,24 +410,54 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
         }
       };
 
-      // Polling driver — 50ms tick, ~6s max. Stops once
+      // Polling driver — 100ms tick, ~30s max. Stops once
       // initialSetupDone, cancelled, or timeout.
+      //
+      // Previously checked map.loaded() (which only returns true after
+      // ALL tiles render — network-dependent + can take 10+ seconds
+      // on slow connections). Now also accepts map.isStyleLoaded()
+      // which fires as soon as the style is parsed and we can add
+      // layers — the actual prerequisite for attachLocationLayers.
+      // This dramatically shortens the time-to-first-paint for the
+      // pin layer on cold loads.
+      //
+      // Also: synchronous first-check BEFORE the interval kicks in.
+      // If the basemap was already cached (instant load), the map
+      // could be style-loaded before our useEffect even runs — the
+      // setInterval would then wait 100ms for nothing before
+      // catching it. Sync check eliminates that gap.
+      const tryRunSetup = () => {
+        if (cancelled || initialSetupDone) return false;
+        if (map.isStyleLoaded?.() || map.loaded?.()) {
+          runSetup();
+          return true;
+        }
+        return false;
+      };
+
+      tryRunSetup(); // sync first check
+
       let pollTicks = 0;
       const pollHandle = setInterval(() => {
         pollTicks += 1;
-        if (cancelled || initialSetupDone || pollTicks > 120) {
+        if (cancelled || initialSetupDone || pollTicks > 300) {
           clearInterval(pollHandle);
           return;
         }
-        if (map.loaded?.()) {
+        if (tryRunSetup()) {
           clearInterval(pollHandle);
-          runSetup();
         }
-      }, 50);
+      }, 100);
 
       // Belt-and-suspenders event bindings.
       map.on("load", runSetup);
       map.on("idle", runSetup);
+      // styledata fires repeatedly as style chunks load — checking
+      // isStyleLoaded() inside the handler is the fast path for the
+      // common "style parses before tiles" case.
+      map.on("styledata", () => {
+        if (map.isStyleLoaded?.()) runSetup();
+      });
 
       // Re-attach after a style swap. If initial setup hasn't run
       // yet (style.load fired first — the bug surface), run setup
