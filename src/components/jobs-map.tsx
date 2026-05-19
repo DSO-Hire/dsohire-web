@@ -452,12 +452,33 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
       // Belt-and-suspenders event bindings.
       map.on("load", runSetup);
       map.on("idle", runSetup);
-      // styledata fires repeatedly as style chunks load — checking
-      // isStyleLoaded() inside the handler is the fast path for the
-      // common "style parses before tiles" case.
-      map.on("styledata", () => {
-        if (map.isStyleLoaded?.()) runSetup();
-      });
+
+      // Last-resort automation. If 1.5s after init nothing has fired
+      // runSetup to completion, force a setStyle to the SAME URL.
+      // Mapbox doesn't no-op same-URL setStyle calls — it tears down
+      // and rebuilds, firing style.load on the way. style.load is
+      // wired through reattachAfterStyleSwap which has been the
+      // reliably-working path all along (Cam can reproduce the fix
+      // manually by clicking Streets then DSO Hire). This makes that
+      // manual workaround automatic without requiring user action.
+      const fallbackTimer = setTimeout(() => {
+        if (cancelled || initialSetupDone || !mapRef.current) return;
+        try {
+          console.warn(
+            "[JobsMap] auto-fallback: setStyle re-trigger after 1.5s without initial setup"
+          );
+          mapRef.current.setStyle(initialStyleUrl);
+        } catch (err) {
+          console.warn("[JobsMap] fallback setStyle threw:", err);
+        }
+      }, 1500);
+
+      // Belt cleanup — clear the fallback timer if setup completes
+      // through any other path so it doesn't fire unnecessarily.
+      const clearFallbackOnSetup = () => {
+        if (initialSetupDone) clearTimeout(fallbackTimer);
+      };
+      map.on("idle", clearFallbackOnSetup);
 
       // Re-attach after a style swap. If initial setup hasn't run
       // yet (style.load fired first — the bug surface), run setup
