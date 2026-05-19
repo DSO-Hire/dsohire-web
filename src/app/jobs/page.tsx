@@ -231,9 +231,14 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
 
   // Apply candidate-side sort. RPC returns a relevance-blended order; for
   // anything other than the default we re-sort the slice in memory. Always
-  // bound to the top 60 first so the comparator runs over a small set.
+  // bound first so the comparator runs over a small set. Cap raised from
+  // 60 to 150 on 2026-05-19 after a single 48-job seed wave (Bridgeway
+  // national) buried older Prairie Village jobs at ranks 73-82. 150 is
+  // safe for current scale (Supabase + Vercel costs essentially flat at
+  // this size); proper pagination is the right move once we hit hundreds
+  // of paying DSOs producing real volume.
   const allJobs = sortJobsList(
-    ((rawJobs ?? []) as JobRow[]).slice(0, 60),
+    ((rawJobs ?? []) as JobRow[]).slice(0, 150),
     sortKey
   );
 
