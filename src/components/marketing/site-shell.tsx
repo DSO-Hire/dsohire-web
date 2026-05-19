@@ -159,7 +159,7 @@ export function SiteFooter() {
           <FooterCol title="For DSOs">
             <FooterLink href="/pricing">Pricing</FooterLink>
             <FooterLink href="/for-dsos">For DSOs</FooterLink>
-            <FooterLink href="/employer/sign-up">Post a Job</FooterLink>
+            <FooterLink href="/pricing">Post a Job</FooterLink>
             <FooterLink href="/employer/sign-in">Sign In</FooterLink>
           </FooterCol>
 

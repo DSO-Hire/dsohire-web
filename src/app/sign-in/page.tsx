@@ -48,8 +48,8 @@ export default function SignInPickerPage() {
             blurb="Post jobs across your locations, manage applications, and access your subscription."
             primaryHref="/employer/sign-in"
             primaryLabel="Sign in to DSO account"
-            secondaryHref="/employer/sign-up"
-            secondaryLabel="Don't have a DSO subscription? Start one"
+            secondaryHref="/pricing"
+            secondaryLabel="Don't have a DSO subscription? View pricing"
           />
 
           {/* Candidate card */}

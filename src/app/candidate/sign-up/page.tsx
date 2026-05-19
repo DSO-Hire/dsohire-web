@@ -91,10 +91,10 @@ export default async function CandidateSignUpPage({ searchParams }: PageProps) {
         <p className="mt-3 text-[14px] text-slate-body leading-relaxed">
           Are you a DSO?{" "}
           <Link
-            href="/employer/sign-up"
+            href="/pricing"
             className="text-heritage font-semibold underline underline-offset-2 hover:text-heritage-deep"
           >
-            Start a DSO subscription
+            View DSO pricing
           </Link>
         </p>
       </section>
