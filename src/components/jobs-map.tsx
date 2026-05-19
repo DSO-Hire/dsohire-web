@@ -570,9 +570,28 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapboxToken]);
 
-  /* ── Apply style changes after init ────────────────────────── */
+  /* ── Apply style changes after init ──────────────────────────
+   *
+   * Critical: skip the FIRST time this effect runs. mapReady becomes
+   * true inside runSetup as soon as we successfully attach the metro
+   * pin layers, which then synchronously triggers this effect (since
+   * mapReady is in its deps). On that first run, mapStyleId is still
+   * the initial value — the same URL the map was constructed with —
+   * so calling setStyle does nothing useful and a LOT harmful: it
+   * tells Mapbox to wipe + reload the style, which destroys the
+   * layers we JUST attached. The next attach (from reattachAfterStyleSwap)
+   * fires in another in-flux state and may not paint. Net effect:
+   * pins disappear immediately after attaching.
+   *
+   * The skip ref ensures setStyle only fires on actual user-driven
+   * style picker changes, not on the initial mapReady→true transition. */
+  const skipFirstStyleEffectRef = useRef(true);
   useEffect(() => {
     if (!mapReady || !mapRef.current) return;
+    if (skipFirstStyleEffectRef.current) {
+      skipFirstStyleEffectRef.current = false;
+      return;
+    }
     const url = MAP_STYLES.find((s) => s.id === mapStyleId)?.url;
     if (!url) return;
     mapRef.current.setStyle(url);
