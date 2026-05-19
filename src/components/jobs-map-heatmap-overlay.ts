@@ -28,20 +28,34 @@ import type {
   HeatmapHexFeature,
 } from "@/lib/geocoding/h3-aggregate";
 
-/** Brand-aligned 6-step ramp: muted heritage-tint → heritage-deep.
- *  Earlier version started from #ECE7DB (ivory-deep) which read as
- *  invisible against the cream basemap — even the densest hexes
- *  looked like empty outlines because all the visual weight was in
- *  the stroke. New ramp starts from a saturated heritage-tint so the
- *  lowest bucket still contrasts cleanly against ivory/cream. */
+/** Brand-aligned 6-step ramp with WIDE contrast — pale tinted-ivory at
+ *  the sparsest bucket, near-black heritage at the densest. Paired with
+ *  hex-size scaling (see HEX_SCALE_RANGE below), each bucket gets TWO
+ *  visual cues — color + size — so the heatmap reads instantly at a
+ *  glance instead of requiring careful color comparison.
+ *
+ *  Iteration history:
+ *    - v1: started #ECE7DB ivory-deep → invisible on cream basemap
+ *    - v2: started #B1C6BB muted tint → visible but all hexes looked
+ *      similar; user couldn't tell hot from cold metros
+ *    - v3 (current): wide pale-to-near-black range so a 1-job hex and
+ *      an 8-job hex differ dramatically in both lightness and size */
 const RAMP_COLORS: Array<[number, number, number, number]> = [
-  [177, 198, 187, 220], // muted heritage-tint (sparsest, still visible)
-  [142, 178, 161, 225],
-  [108, 158, 136, 230],
-  [77, 122, 96, 235],  // #4D7A60 — heritage
-  [62, 102, 80, 240],
-  [47, 93, 79, 245],   // #2F5D4F — heritage-deep (densest)
+  [220, 230, 222, 200], // very pale tinted ivory (sparsest)
+  [180, 210, 190, 215],
+  [130, 175, 150, 230],
+  [80, 135, 105, 240],  // #4D7A60 family — heritage mid
+  [50, 95, 75, 250],
+  [20, 55, 40, 255],    // near-black heritage-deep (densest)
 ];
+
+/** Hex shrink range: bucket 0 (sparsest) renders at 0.50x cell size,
+ *  bucket 5 (densest) fills the full cell. Visual: "size = density"
+ *  is a more universal cue than color alone, especially for users with
+ *  green-color-blindness or on glare-prone displays. The 0.50 floor
+ *  keeps sparse hexes hoverable (the picking area shrinks with size). */
+const HEX_SCALE_MIN = 0.5;
+const HEX_SCALE_MAX = 1.0;
 
 function quantileThresholds(counts: number[]): number[] {
   if (counts.length === 0) return [0, 0, 0, 0, 0];
@@ -53,14 +67,48 @@ function quantileThresholds(counts: number[]): number[] {
   });
 }
 
-function colorForCount(
-  count: number,
-  thresholds: number[]
-): [number, number, number, number] {
+/** Map a count to a bucket index 0-5. Bucket 0 = sparsest, 5 = densest.
+ *  Used by both the color ramp and the hex-size scale so the two cues
+ *  stay in lockstep. */
+function bucketForCount(count: number, thresholds: number[]): number {
   for (let i = 0; i < thresholds.length; i++) {
-    if (count <= thresholds[i]!) return RAMP_COLORS[i]!;
+    if (count <= thresholds[i]!) return i;
   }
-  return RAMP_COLORS[RAMP_COLORS.length - 1]!;
+  return RAMP_COLORS.length - 1;
+}
+
+function colorForBucket(bucket: number): [number, number, number, number] {
+  return RAMP_COLORS[Math.min(bucket, RAMP_COLORS.length - 1)]!;
+}
+
+/** Shrink a polygon ring toward its centroid by `scale`. scale=1.0
+ *  returns the ring unchanged; scale=0.5 returns a half-size hex
+ *  centered on the original cell. Used to render small "size = low
+ *  density" cues for sparse buckets — see HEX_SCALE_MIN. */
+function shrinkRing(ring: number[][], scale: number): number[][] {
+  if (scale >= 0.999) return ring;
+  // First vertex is duplicated at the end of GeoJSON polygon rings —
+  // skip the last when computing centroid, then preserve closure.
+  const n = ring.length - 1;
+  let lngSum = 0;
+  let latSum = 0;
+  for (let i = 0; i < n; i++) {
+    lngSum += ring[i]![0]!;
+    latSum += ring[i]![1]!;
+  }
+  const cLng = lngSum / n;
+  const cLat = latSum / n;
+  return ring.map(([lng, lat]) => [
+    cLng + (lng! - cLng) * scale,
+    cLat + (lat! - cLat) * scale,
+  ]);
+}
+
+/** Map a bucket index to the hex shrink scale. Bucket 0 = HEX_SCALE_MIN,
+ *  top bucket = HEX_SCALE_MAX. Linear interpolation. */
+function scaleForBucket(bucket: number): number {
+  const t = bucket / (RAMP_COLORS.length - 1);
+  return HEX_SCALE_MIN + (HEX_SCALE_MAX - HEX_SCALE_MIN) * t;
 }
 
 /** Compute polygon centroid from boundary coords. Used to anchor
@@ -183,11 +231,13 @@ export async function attachHeatmapOverlay(
       // against the basemap so even sparse-bucket fills read as
       // intentional polygons, not pale blobs.
       getLineColor: [47, 93, 79, 200],
-      getFillColor: (f) =>
-        colorForCount(
+      getFillColor: (f) => {
+        const bucket = bucketForCount(
           (f.properties as { count: number }).count,
           thresholds
-        ),
+        );
+        return colorForBucket(bucket);
+      },
       onHover,
       onClick,
     });
@@ -213,6 +263,17 @@ export async function attachHeatmapOverlay(
         (f) => (f.properties as { count: number }).count
       );
       thresholds = quantileThresholds(counts);
+      // Pre-shrink each hex ring based on its bucket so the rendered
+      // polygon size = density signal. Mutates each feature's geometry
+      // in place — fine because refresh() always starts from a fresh
+      // server fetch, so we never re-shrink an already-shrunken ring.
+      for (const f of collection.features) {
+        const count = (f.properties as { count: number }).count;
+        const bucket = bucketForCount(count, thresholds);
+        const scale = scaleForBucket(bucket);
+        const originalRing = f.geometry.coordinates[0]!;
+        f.geometry.coordinates = [shrinkRing(originalRing, scale)];
+      }
       const layer = buildLayer();
       overlay.setProps({ layers: layer ? [layer] : [] });
     } catch (err) {
