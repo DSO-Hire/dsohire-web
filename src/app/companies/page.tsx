@@ -30,8 +30,24 @@ const COMPANIES_SORT_OPTIONS = [
 ] as const;
 type CompaniesSortKey = (typeof COMPANIES_SORT_OPTIONS)[number]["value"];
 
+// Practice-count tiers for the directory filter strip. Lower bound only —
+// "50+" means "50 or more". Picked thresholds at meaningful DSO scale
+// breakpoints (mid-market starts around 10-15; enterprise around 35-50).
+const PRACTICE_TIER_OPTIONS = [
+  { value: "10", label: "10+ practices", min: 10 },
+  { value: "25", label: "25+ practices", min: 25 },
+  { value: "50", label: "50+ practices", min: 50 },
+] as const;
+type PracticeTierValue = (typeof PRACTICE_TIER_OPTIONS)[number]["value"];
+
 interface PageProps {
-  searchParams: Promise<{ sort?: string }>;
+  searchParams: Promise<{
+    sort?: string;
+    /** 2-letter state code filter (matches against dso_locations.state). */
+    state?: string;
+    /** Practice-count lower bound. One of PRACTICE_TIER_OPTIONS values. */
+    min_practices?: string;
+  }>;
 }
 
 interface DsoRow {
@@ -40,11 +56,13 @@ interface DsoRow {
   slug: string;
   description: string | null;
   logo_url: string | null;
+  banner_url: string | null;
   brand_color: string | null;
   headquarters_city: string | null;
   headquarters_state: string | null;
   practice_count: number | null;
   verified_at: string | null;
+  featured_until: string | null;
 }
 
 export default async function CompaniesPage({ searchParams }: PageProps) {
@@ -58,7 +76,7 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
   const { data: rawDsos, error: dsosError } = await supabase
     .from("dsos")
     .select(
-      "id, name, slug, description, logo_url, brand_color, headquarters_city, headquarters_state, practice_count, verified_at"
+      "id, name, slug, description, logo_url, banner_url, brand_color, headquarters_city, headquarters_state, practice_count, verified_at, featured_until"
     )
     .eq("status", "active")
     .order("name", { ascending: true });
@@ -145,14 +163,98 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
     }
   }
 
+  // Recent jobs per DSO for the hover-expand preview. Pull title + posted_at
+  // ordered desc, group in app code, keep top 3 per DSO. No LIMIT on the
+  // query because we need all candidates before partitioning — but the
+  // result set stays small (only active jobs across visible DSOs).
+  const recentJobsByDso = new Map<
+    string,
+    Array<{ title: string; posted_at: string | null }>
+  >();
+  if (dsoIds.length > 0) {
+    const { data: recentJobRows } = await supabase
+      .from("jobs")
+      .select("dso_id, title, posted_at")
+      .in("dso_id", dsoIds)
+      .eq("status", "active")
+      .is("deleted_at", null)
+      .order("posted_at", { ascending: false, nullsFirst: false });
+
+    for (const row of (recentJobRows ?? []) as Array<{
+      dso_id: string;
+      title: string;
+      posted_at: string | null;
+    }>) {
+      const arr = recentJobsByDso.get(row.dso_id) ?? [];
+      if (arr.length < 3) {
+        arr.push({ title: row.title, posted_at: row.posted_at });
+        recentJobsByDso.set(row.dso_id, arr);
+      }
+    }
+  }
+
   // Directory should only show DSOs that are ACTIVELY hiring. A card with
   // "0 OPEN ROLES" is dead weight on a candidate-facing surface — they
   // click it and find an empty list. The DSO's own /companies/[slug] page
   // still renders for direct links (so SEO and outbound-marketing links
   // don't 404), but it falls off the directory until they post a role.
-  const visibleDsos = filteredDsos.filter(
+  let visibleDsos = filteredDsos.filter(
     (d) => (jobCountByDso.get(d.id) ?? 0) > 0
   );
+
+  // Filter strip: state + practice-count tier. Both URL-param-driven so
+  // the filtered URL is shareable and the back button works naturally.
+  const stateFilterRaw = (sp.state ?? "").trim().toUpperCase();
+  const stateFilter = /^[A-Z]{2}$/.test(stateFilterRaw) ? stateFilterRaw : null;
+  const practiceTierFilter: PracticeTierValue | null =
+    (PRACTICE_TIER_OPTIONS.find((t) => t.value === sp.min_practices)?.value as
+      | PracticeTierValue
+      | undefined) ?? null;
+  const practiceTierMin =
+    PRACTICE_TIER_OPTIONS.find((t) => t.value === practiceTierFilter)?.min ?? 0;
+
+  if (stateFilter) {
+    visibleDsos = visibleDsos.filter((d) =>
+      statesByDso.get(d.id)?.has(stateFilter)
+    );
+  }
+  if (practiceTierMin > 0) {
+    visibleDsos = visibleDsos.filter(
+      (d) => (d.practice_count ?? 0) >= practiceTierMin
+    );
+  }
+
+  // Compute the union of states actually represented across visible DSOs
+  // BEFORE the state filter is applied — so the dropdown always shows
+  // every available state, not just the one currently selected. Computed
+  // from filteredDsos (pre-filter) so swapping states works naturally.
+  const availableStates = new Set<string>();
+  for (const d of filteredDsos) {
+    if ((jobCountByDso.get(d.id) ?? 0) === 0) continue;
+    const stateSet = statesByDso.get(d.id);
+    if (!stateSet) continue;
+    for (const s of stateSet) availableStates.add(s);
+  }
+  const availableStatesList = Array.from(availableStates).sort();
+
+  // Featured DSO — the one with featured_until in the future. If multiple
+  // are active (shouldn't happen via the admin UI, but defend anyway),
+  // pick the one expiring soonest (closest expiration = most recently
+  // committed window, intuitive priority). Pull the featured DSO OUT of
+  // the regular grid list so it doesn't double-render.
+  const now = Date.now();
+  const featuredDso = visibleDsos
+    .filter((d) =>
+      d.featured_until ? new Date(d.featured_until).getTime() > now : false
+    )
+    .sort(
+      (a, b) =>
+        new Date(a.featured_until!).getTime() -
+        new Date(b.featured_until!).getTime()
+    )[0] ?? null;
+  if (featuredDso) {
+    visibleDsos = visibleDsos.filter((d) => d.id !== featuredDso.id);
+  }
 
   // Apply sort (operates on the actively-hiring set so sort positions
   // reflect what the candidate can actually see).
@@ -198,10 +300,19 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
       </section>
 
       <section className="px-6 sm:px-14 pb-24 max-w-[1240px] mx-auto">
+        {/* Filter strip — state + practice-count tier. Both URL-driven so
+            the filtered view is shareable and back-button-friendly. */}
+        <CompaniesFilters
+          activeState={stateFilter}
+          activePracticeTier={practiceTierFilter}
+          activeSort={sortKey}
+          availableStates={availableStatesList}
+        />
+
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
           <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta">
             {dsos.length === 0
-              ? "No DSOs listed yet"
+              ? "No DSOs match these filters"
               : dsos.length === 1
                 ? "1 DSO listed"
                 : `${dsos.length} DSOs listed`}
@@ -216,9 +327,22 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
           )}
         </div>
 
-        {dsos.length === 0 ? (
+        {/* Featured DSO spotlight — single full-width card sitting above
+            the regular grid. Honors the active filters (state, practice
+            tier) so a featured Kansas DSO doesn't surface when the
+            candidate has filtered to Texas. */}
+        {featuredDso && (
+          <FeaturedDsoSpotlight
+            dso={featuredDso}
+            openJobs={jobCountByDso.get(featuredDso.id) ?? 0}
+            states={statesByDso.get(featuredDso.id) ?? new Set()}
+            roleMix={roleMixByDso.get(featuredDso.id) ?? new Map()}
+          />
+        )}
+
+        {dsos.length === 0 && !featuredDso ? (
           <EmptyState />
-        ) : (
+        ) : dsos.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[var(--rule)] border border-[var(--rule)]">
             {dsos.map((dso) => (
               <DsoCard
@@ -227,10 +351,11 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
                 openJobs={jobCountByDso.get(dso.id) ?? 0}
                 states={statesByDso.get(dso.id) ?? new Set()}
                 roleMix={roleMixByDso.get(dso.id) ?? new Map()}
+                recentJobs={recentJobsByDso.get(dso.id) ?? []}
               />
             ))}
           </div>
-        )}
+        ) : null}
       </section>
     </SiteShell>
   );
@@ -250,16 +375,30 @@ const ROLE_LABELS: Record<string, string> = {
   other: "Other",
 };
 
+// Render a "posted N {time} ago" relative-time label for the hover-preview
+// recent-jobs list. Falls back to "—" when posted_at is missing.
+function relativePostedAt(iso: string | null): string {
+  if (!iso) return "—";
+  const ms = Date.now() - new Date(iso).getTime();
+  const days = Math.floor(ms / (24 * 60 * 60 * 1000));
+  if (days < 1) return "today";
+  if (days < 7) return `${days}d ago`;
+  if (days < 30) return `${Math.floor(days / 7)}w ago`;
+  return `${Math.floor(days / 30)}mo ago`;
+}
+
 function DsoCard({
   dso,
   openJobs,
   states,
   roleMix,
+  recentJobs,
 }: {
   dso: DsoRow;
   openJobs: number;
   states: Set<string>;
   roleMix: Map<string, number>;
+  recentJobs: Array<{ title: string; posted_at: string | null }>;
 }) {
   const cityState = [dso.headquarters_city, dso.headquarters_state]
     .filter(Boolean)
@@ -306,17 +445,38 @@ function DsoCard({
   return (
     <Link
       href={`/companies/${dso.slug}`}
-      className="group relative block bg-white p-7 pl-8 hover:bg-cream motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-14px_rgba(7,15,28,0.18)] flex flex-col"
+      className="group relative block bg-white overflow-hidden hover:bg-cream motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-14px_rgba(7,15,28,0.18)] flex flex-col"
       style={{ ["--card-accent" as string]: accentColor }}
     >
       {/* Left-edge brand accent strip — full card height, 4px wide.
           Sits flush to the card's left border so each card reads as
-          "owned" by the DSO instead of looking like a generic listing. */}
+          "owned" by the DSO instead of looking like a generic listing.
+          z-10 keeps it above the banner image when present. */}
       <span
         aria-hidden
-        className="absolute left-0 top-0 bottom-0 w-1"
+        className="absolute left-0 top-0 bottom-0 w-1 z-10"
         style={{ background: "var(--card-accent)" }}
       />
+
+      {/* Banner strip (edge-to-edge) — only when the DSO has uploaded
+          one. Cream fallback BG inside the wrapper means a slow-loading
+          image doesn't flash white. Aspect ratio is fixed via fixed
+          height so cards in the grid stay aligned regardless of
+          original image dimensions. */}
+      {dso.banner_url && (
+        <div className="w-full h-20 overflow-hidden bg-cream">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={dso.banner_url}
+            alt=""
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
+
+      {/* Content body — padded. Inner div carries flex-1 so the bottom
+          row's mt-auto pushes correctly even with the banner above. */}
+      <div className="p-7 pl-8 flex flex-col flex-1">
 
       {/* Top row: logo (or branded mark fallback) + member pill chip */}
       <div className="flex items-start justify-between gap-3 mb-4">
@@ -405,6 +565,41 @@ function DsoCard({
         </div>
       )}
 
+      {/* Hover-reveal panel — slides up from bottom on desktop hover.
+          Shows up to 3 most recent role titles + relative post date so
+          a candidate can evaluate fit without clicking. Hidden entirely
+          on touch devices via the @media(hover:hover) guard so a tap
+          doesn't accidentally trigger it. */}
+      {recentJobs.length > 0 && (
+        <div
+          aria-hidden
+          className="absolute left-1 right-0 bottom-[72px] bg-white border-t-2 px-7 py-4 opacity-0 translate-y-2 transition-all duration-200 ease-out pointer-events-none [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:translate-y-0 shadow-[0_-8px_24px_-12px_rgba(7,15,28,0.15)]"
+          style={{ borderTopColor: accentColor }}
+        >
+          <div
+            className="text-[9px] font-bold tracking-[1.5px] uppercase mb-2.5"
+            style={{ color: accentColor }}
+          >
+            Recent openings
+          </div>
+          <ul className="space-y-1.5 list-none">
+            {recentJobs.map((job, i) => (
+              <li
+                key={i}
+                className="flex items-baseline justify-between gap-3 text-[12px]"
+              >
+                <span className="text-ink font-semibold truncate">
+                  {job.title}
+                </span>
+                <span className="text-slate-meta text-[10px] shrink-0">
+                  {relativePostedAt(job.posted_at)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div className="mt-auto pt-4 border-t border-[var(--rule)] flex justify-between items-center">
         <div className="flex items-center gap-2">
           <div
@@ -436,7 +631,276 @@ function DsoCard({
           <ArrowRight className="h-3.5 w-3.5" />
         </div>
       </div>
+      </div>{/* end inner content wrapper */}
     </Link>
+  );
+}
+
+/* ───────── Featured DSO spotlight ───────── */
+
+function FeaturedDsoSpotlight({
+  dso,
+  openJobs,
+  states,
+  roleMix,
+}: {
+  dso: DsoRow;
+  openJobs: number;
+  states: Set<string>;
+  roleMix: Map<string, number>;
+}) {
+  const cityState = [dso.headquarters_city, dso.headquarters_state]
+    .filter(Boolean)
+    .join(", ");
+  const validHex =
+    dso.brand_color && /^#[0-9A-Fa-f]{6}$/.test(dso.brand_color)
+      ? dso.brand_color
+      : null;
+  const accentColor = validHex ?? "#2F5D4F";
+  const descriptionText = dso.description
+    ? dso.description.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
+    : null;
+  const stateList = Array.from(states).sort();
+  const topRoles = Array.from(roleMix.entries())
+    .filter(([k]) => k !== "other" && ROLE_LABELS[k])
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4)
+    .map(([k]) => ROLE_LABELS[k]);
+
+  return (
+    <Link
+      href={`/companies/${dso.slug}`}
+      className="group relative block bg-white overflow-hidden hover:bg-cream motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-18px_rgba(7,15,28,0.25)] border border-[var(--rule)] mb-6"
+      style={{ ["--card-accent" as string]: accentColor }}
+    >
+      {/* Left accent strip — wider (6px) than the regular grid cards to
+          underscore the spotlight treatment. */}
+      <span
+        aria-hidden
+        className="absolute left-0 top-0 bottom-0 w-1.5 z-10"
+        style={{ background: "var(--card-accent)" }}
+      />
+
+      {/* Featured tag — top-right corner, sits over the banner */}
+      <span
+        className="absolute top-4 right-4 z-20 inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold tracking-[2px] uppercase rounded-full text-white"
+        style={{ background: accentColor }}
+      >
+        <span className="text-[11px]">★</span> Featured Member
+      </span>
+
+      {/* Banner (when set) — taller than regular cards to emphasize the
+          spotlight. Fallback to a tinted brand-color gradient when null. */}
+      <div className="w-full h-36 overflow-hidden bg-cream">
+        {dso.banner_url ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={dso.banner_url}
+            alt=""
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div
+            className="w-full h-full"
+            style={{
+              background: `linear-gradient(135deg, ${accentColor} 0%, color-mix(in srgb, ${accentColor} 60%, transparent) 100%)`,
+            }}
+          />
+        )}
+      </div>
+
+      {/* Horizontal split: left = identity + description, right = stats */}
+      <div className="p-8 pl-10 grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-8 items-start">
+        <div>
+          <div className="flex items-start gap-5 mb-5">
+            {dso.logo_url ? (
+              <div className="size-16 shrink-0 overflow-hidden border border-[var(--rule)] bg-white flex items-center justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={dso.logo_url}
+                  alt={`${dso.name} logo`}
+                  className="max-h-full max-w-full object-contain"
+                />
+              </div>
+            ) : (
+              <div
+                className="size-16 shrink-0 flex items-center justify-center text-white"
+                style={{ background: "var(--card-accent)" }}
+              >
+                <Building2 className="h-7 w-7" />
+              </div>
+            )}
+            <div>
+              <h3 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink mb-1.5 leading-tight">
+                {dso.name}
+              </h3>
+              <div className="text-[13px] tracking-[0.3px] text-slate-meta flex flex-wrap gap-x-3 gap-y-1">
+                {cityState && (
+                  <span className="inline-flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {cityState}
+                  </span>
+                )}
+                {dso.practice_count !== null && dso.practice_count > 0 && (
+                  <span>
+                    {dso.practice_count}{" "}
+                    {dso.practice_count === 1 ? "practice" : "practices"}
+                  </span>
+                )}
+                {stateList.length >= 2 && (
+                  <span style={{ color: accentColor, fontWeight: 600 }}>
+                    Active in {stateList.length} states
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {descriptionText && (
+            <p className="text-[15px] text-slate-body leading-relaxed line-clamp-3 mb-5 max-w-[640px]">
+              {descriptionText}
+            </p>
+          )}
+
+          {topRoles.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {topRoles.map((label) => (
+                <span
+                  key={label}
+                  className="inline-flex items-center px-2.5 py-1 text-[11px] font-semibold tracking-[0.5px] bg-cream text-slate-body border border-[var(--rule)]"
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Right column: stats + CTA */}
+        <div className="lg:border-l lg:border-[var(--rule)] lg:pl-8 flex flex-col gap-4 lg:min-w-[200px]">
+          <div>
+            <div
+              className="text-[40px] font-extrabold leading-none"
+              style={{ color: "var(--card-accent)" }}
+            >
+              {openJobs}
+            </div>
+            <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mt-2">
+              {openJobs === 1 ? "Open role" : "Open roles"}
+            </div>
+            <div className="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[1px] uppercase mt-1.5" style={{ color: accentColor }}>
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ background: accentColor }} />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full" style={{ background: accentColor }} />
+              </span>
+              Hiring now
+            </div>
+          </div>
+          <div
+            className="inline-flex items-center gap-2 px-5 py-3 text-[11px] font-bold tracking-[1.5px] uppercase border transition-colors group-hover:bg-[var(--card-accent)] group-hover:text-white w-fit"
+            style={{
+              color: "var(--card-accent)",
+              borderColor: "var(--card-accent)",
+            }}
+          >
+            View profile
+            <ArrowRight className="h-3.5 w-3.5" />
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+/* ───────── Filter strip ───────── */
+
+function CompaniesFilters({
+  activeState,
+  activePracticeTier,
+  activeSort,
+  availableStates,
+}: {
+  activeState: string | null;
+  activePracticeTier: PracticeTierValue | null;
+  activeSort: CompaniesSortKey;
+  availableStates: string[];
+}) {
+  // Build a URL with the given state + practice tier (either may be null to
+  // clear). Sort is preserved across filter toggles when non-default.
+  const buildHref = (
+    nextState: string | null,
+    nextTier: PracticeTierValue | null
+  ): string => {
+    const params: Array<[string, string]> = [];
+    if (nextState) params.push(["state", nextState]);
+    if (nextTier) params.push(["min_practices", nextTier]);
+    if (activeSort !== "name") params.push(["sort", activeSort]);
+    if (params.length === 0) return "/companies";
+    return `/companies?${new URLSearchParams(params).toString()}`;
+  };
+
+  const chipBaseClass =
+    "px-3 py-1.5 text-[12px] font-semibold border transition-colors whitespace-nowrap";
+  const chipActiveClass =
+    "bg-heritage-deep text-ivory border-heritage-deep";
+  const chipInactiveClass =
+    "bg-white text-ink border-[var(--rule-strong)] hover:border-heritage";
+
+  return (
+    <div className="mb-6 space-y-3">
+      {/* Practice-count tier */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mr-2 shrink-0">
+          Size
+        </span>
+        <Link
+          href={buildHref(activeState, null)}
+          className={`${chipBaseClass} ${activePracticeTier === null ? chipActiveClass : chipInactiveClass}`}
+        >
+          All
+        </Link>
+        {PRACTICE_TIER_OPTIONS.map((opt) => {
+          const isActive = activePracticeTier === opt.value;
+          return (
+            <Link
+              key={opt.value}
+              href={buildHref(activeState, isActive ? null : opt.value)}
+              className={`${chipBaseClass} ${isActive ? chipActiveClass : chipInactiveClass}`}
+            >
+              {opt.label}
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* State coverage — only render the strip when we have 2+ states to
+          choose between; with 0-1 the filter is meaningless. */}
+      {availableStates.length >= 2 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mr-2 shrink-0">
+            State
+          </span>
+          <Link
+            href={buildHref(null, activePracticeTier)}
+            className={`${chipBaseClass} ${activeState === null ? chipActiveClass : chipInactiveClass}`}
+          >
+            All
+          </Link>
+          {availableStates.map((st) => {
+            const isActive = activeState === st;
+            return (
+              <Link
+                key={st}
+                href={buildHref(isActive ? null : st, activePracticeTier)}
+                className={`${chipBaseClass} ${isActive ? chipActiveClass : chipInactiveClass}`}
+              >
+                {st}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
 

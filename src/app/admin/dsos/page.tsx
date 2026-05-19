@@ -17,7 +17,7 @@ import Link from "next/link";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
-import { setDsoStatus } from "./actions";
+import { setDsoStatus, setDsoFeaturedUntil } from "./actions";
 import { ConfirmSubmitButton } from "./confirm-submit-button";
 import type { Metadata } from "next";
 
@@ -49,7 +49,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
 
   let query = admin
     .from("dsos")
-    .select("id, name, slug, status, created_at")
+    .select("id, name, slug, status, created_at, featured_until")
     .order("created_at", { ascending: false });
 
   if (statusFilter !== "all") {
@@ -64,6 +64,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
     slug: string;
     status: string;
     created_at: string;
+    featured_until: string | null;
   };
   const dsos = (rawDsos ?? []) as DsoRow[];
 
@@ -263,6 +264,72 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
 
                 {dso.status === "active" && (
                   <>
+                    {(() => {
+                      // Featured-spotlight controls — only on active DSOs.
+                      // When already featured, show the expiration + a clear
+                      // button. Otherwise offer 30 or 90 day windows.
+                      const isFeatured =
+                        dso.featured_until !== null &&
+                        new Date(dso.featured_until).getTime() > Date.now();
+                      if (isFeatured) {
+                        return (
+                          <div className="border border-amber-300 bg-amber-50/60 px-3 py-2 flex flex-col gap-2">
+                            <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-amber-900">
+                              ★ Featured until{" "}
+                              {new Date(
+                                dso.featured_until!
+                              ).toLocaleDateString()}
+                            </div>
+                            <form action={featureDsoAction}>
+                              <input
+                                type="hidden"
+                                name="dso_id"
+                                value={dso.id}
+                              />
+                              <input type="hidden" name="action" value="clear" />
+                              <button
+                                type="submit"
+                                className="w-full inline-flex items-center justify-center px-3 py-1.5 border border-amber-400 text-amber-900 text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-amber-100 transition-colors"
+                              >
+                                Remove from Spotlight
+                              </button>
+                            </form>
+                          </div>
+                        );
+                      }
+                      return (
+                        <div className="flex gap-2">
+                          <form action={featureDsoAction} className="flex-1">
+                            <input
+                              type="hidden"
+                              name="dso_id"
+                              value={dso.id}
+                            />
+                            <input type="hidden" name="action" value="+30d" />
+                            <button
+                              type="submit"
+                              className="w-full inline-flex items-center justify-center px-3 py-1.5 border border-[var(--rule-strong)] text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
+                            >
+                              ★ Feature 30d
+                            </button>
+                          </form>
+                          <form action={featureDsoAction} className="flex-1">
+                            <input
+                              type="hidden"
+                              name="dso_id"
+                              value={dso.id}
+                            />
+                            <input type="hidden" name="action" value="+90d" />
+                            <button
+                              type="submit"
+                              className="w-full inline-flex items-center justify-center px-3 py-1.5 border border-[var(--rule-strong)] text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
+                            >
+                              ★ Feature 90d
+                            </button>
+                          </form>
+                        </div>
+                      );
+                    })()}
                     <form action={activateDsoAction}>
                       <input type="hidden" name="dso_id" value={dso.id} />
                       <input type="hidden" name="new_status" value="pending" />
@@ -319,6 +386,14 @@ async function activateDsoAction(formData: FormData) {
     // silently swallowing it — an admin needs to know the status
     // change didn't take.
     throw new Error(result.error ?? "Failed to update DSO status.");
+  }
+}
+
+async function featureDsoAction(formData: FormData) {
+  "use server";
+  const result = await setDsoFeaturedUntil({ ok: false }, formData);
+  if (!result.ok) {
+    throw new Error(result.error ?? "Failed to update spotlight status.");
   }
 }
 

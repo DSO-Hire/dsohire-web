@@ -1933,6 +1933,7 @@ export type Database = {
           culture_chips: string[]
           deleted_at: string | null
           description: string | null
+          featured_until: string | null
           headquarters_city: string | null
           headquarters_state: string | null
           id: string
@@ -1960,6 +1961,7 @@ export type Database = {
           culture_chips?: string[]
           deleted_at?: string | null
           description?: string | null
+          featured_until?: string | null
           headquarters_city?: string | null
           headquarters_state?: string | null
           id?: string
@@ -1987,6 +1989,7 @@ export type Database = {
           culture_chips?: string[]
           deleted_at?: string | null
           description?: string | null
+          featured_until?: string | null
           headquarters_city?: string | null
           headquarters_state?: string | null
           id?: string
