@@ -76,19 +76,34 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
   // page itself still renders for them (per Q4 sandbox philosophy);
   // they just don't get listed in the directory until they flip at
   // least one location to public.
+  // Pull public locations in one shot. Two outputs from this single query:
+  //   1. Set of DSO IDs with at least one public location (the existing
+  //      affiliation filter — fully-private DSOs stay out of the directory).
+  //   2. Map of dso_id → unique states list (powers the multi-state coverage
+  //      badge on each card). Only public locations are folded in so we
+  //      never leak a state inferred from a private location.
   const allDsoIds = allDsos.map((d) => d.id);
   const dsosWithPublicLocation = new Set<string>();
+  const statesByDso = new Map<string, Set<string>>();
   if (allDsoIds.length > 0) {
     const { data: pubLocs, error: pubLocsError } = await supabase
       .from("dso_locations")
-      .select("dso_id")
+      .select("dso_id, state")
       .in("dso_id", allDsoIds)
       .eq("public_dso_affiliation", true);
     if (pubLocsError) {
       console.warn("[companies] public locations query failed", pubLocsError);
     }
-    for (const r of (pubLocs ?? []) as Array<{ dso_id: string }>) {
+    for (const r of (pubLocs ?? []) as Array<{
+      dso_id: string;
+      state: string | null;
+    }>) {
       dsosWithPublicLocation.add(r.dso_id);
+      if (r.state) {
+        const existing = statesByDso.get(r.dso_id) ?? new Set<string>();
+        existing.add(r.state);
+        statesByDso.set(r.dso_id, existing);
+      }
     }
   }
   const filteredDsos = allDsos.filter((d) =>
@@ -96,13 +111,16 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
   );
   const dsoIds = filteredDsos.map((d) => d.id);
 
-  // Count active jobs per DSO. RLS already filters to active+non-deleted, so
-  // a single query gives us the raw rows; we group in memory.
+  // Count active jobs + collect role-category mix per DSO. RLS already
+  // filters to active+non-deleted, so a single query gives us the raw rows;
+  // we group in memory. The role-mix chips on each card show the top 3
+  // distinct categories the DSO is currently hiring for.
   const jobCountByDso = new Map<string, number>();
+  const roleMixByDso = new Map<string, Map<string, number>>();
   if (dsoIds.length > 0) {
     const { data: jobRows, error: jobRowsError } = await supabase
       .from("jobs")
-      .select("dso_id")
+      .select("dso_id, role_category")
       .in("dso_id", dsoIds)
       .eq("status", "active")
       .is("deleted_at", null);
@@ -111,14 +129,35 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
       console.warn("[companies] job count query failed", jobRowsError);
     }
 
-    for (const row of (jobRows ?? []) as Array<{ dso_id: string }>) {
+    for (const row of (jobRows ?? []) as Array<{
+      dso_id: string;
+      role_category: string | null;
+    }>) {
       jobCountByDso.set(row.dso_id, (jobCountByDso.get(row.dso_id) ?? 0) + 1);
+      if (row.role_category) {
+        const inner = roleMixByDso.get(row.dso_id) ?? new Map<string, number>();
+        inner.set(
+          row.role_category,
+          (inner.get(row.role_category) ?? 0) + 1
+        );
+        roleMixByDso.set(row.dso_id, inner);
+      }
     }
   }
 
-  // Apply sort
+  // Directory should only show DSOs that are ACTIVELY hiring. A card with
+  // "0 OPEN ROLES" is dead weight on a candidate-facing surface — they
+  // click it and find an empty list. The DSO's own /companies/[slug] page
+  // still renders for direct links (so SEO and outbound-marketing links
+  // don't 404), but it falls off the directory until they post a role.
+  const visibleDsos = filteredDsos.filter(
+    (d) => (jobCountByDso.get(d.id) ?? 0) > 0
+  );
+
+  // Apply sort (operates on the actively-hiring set so sort positions
+  // reflect what the candidate can actually see).
   const dsos = (() => {
-    const sorted = [...filteredDsos];
+    const sorted = [...visibleDsos];
     if (sortKey === "practices") {
       sorted.sort(
         (a, b) => (b.practice_count ?? 0) - (a.practice_count ?? 0)
@@ -186,6 +225,8 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
                 key={dso.id}
                 dso={dso}
                 openJobs={jobCountByDso.get(dso.id) ?? 0}
+                states={statesByDso.get(dso.id) ?? new Set()}
+                roleMix={roleMixByDso.get(dso.id) ?? new Map()}
               />
             ))}
           </div>
@@ -195,10 +236,53 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
   );
 }
 
-function DsoCard({ dso, openJobs }: { dso: DsoRow; openJobs: number }) {
+// Short role-category labels for the per-card role-mix chips. Kept inline
+// (rather than imported) because /jobs has its own copy with a slightly
+// different display order; the labels match but the contexts differ.
+const ROLE_LABELS: Record<string, string> = {
+  dentist: "Dentist",
+  dental_hygienist: "Hygienist",
+  dental_assistant: "Dental Assistant",
+  front_office: "Front Office",
+  office_manager: "Office Manager",
+  regional_manager: "Regional Mgr",
+  specialist: "Specialist",
+  other: "Other",
+};
+
+function DsoCard({
+  dso,
+  openJobs,
+  states,
+  roleMix,
+}: {
+  dso: DsoRow;
+  openJobs: number;
+  states: Set<string>;
+  roleMix: Map<string, number>;
+}) {
   const cityState = [dso.headquarters_city, dso.headquarters_state]
     .filter(Boolean)
     .join(", ");
+
+  // Multi-state badge — only render when the DSO has locations in more
+  // than one state. Single-state DSOs don't get this signal (it's the
+  // multi-location moat we want to surface).
+  const stateList = Array.from(states).sort();
+  const showStateCoverage = stateList.length >= 2;
+  const stateCoverageLabel =
+    stateList.length <= 4
+      ? stateList.join(" · ")
+      : `${stateList.slice(0, 3).join(" · ")} · +${stateList.length - 3} more`;
+
+  // Top 3 role categories by current active-job count. Sorted desc so the
+  // DSO's most-hiring role lands first. Falls back to nothing when the DSO
+  // has only "other" or untagged jobs.
+  const topRoles = Array.from(roleMix.entries())
+    .filter(([k]) => k !== "other" && ROLE_LABELS[k])
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([k]) => ROLE_LABELS[k]);
 
   // Per-DSO brand color, validated as a 6-digit hex so we never inline
   // arbitrary CSS from the DB into a style attribute. Fallback to the
@@ -234,7 +318,7 @@ function DsoCard({ dso, openJobs }: { dso: DsoRow; openJobs: number }) {
         style={{ background: "var(--card-accent)" }}
       />
 
-      {/* Top row: logo (or branded mark fallback) + member chip */}
+      {/* Top row: logo (or branded mark fallback) + member pill chip */}
       <div className="flex items-start justify-between gap-3 mb-4">
         {dso.logo_url ? (
           <div className="size-12 shrink-0 overflow-hidden border border-[var(--rule)] bg-white flex items-center justify-center">
@@ -254,14 +338,17 @@ function DsoCard({ dso, openJobs }: { dso: DsoRow; openJobs: number }) {
           </div>
         )}
 
-        <div
-          className="text-[9px] font-bold tracking-[2px] uppercase mt-1.5 text-right leading-tight"
-          style={{ color: "var(--card-accent)" }}
+        {/* Brand-tinted pill — single-line, modern, ditches the awkward
+            two-line "DSO Hire / Member" stack the narrow column forced. */}
+        <span
+          className="inline-flex items-center px-2.5 py-1 text-[9px] font-bold tracking-[1.8px] uppercase rounded-full whitespace-nowrap"
+          style={{
+            background: `color-mix(in srgb, ${accentColor} 12%, transparent)`,
+            color: accentColor,
+          }}
         >
-          DSO Hire
-          <br />
-          Member
-        </div>
+          DSO Hire Member
+        </span>
       </div>
 
       <h3 className="text-xl font-extrabold tracking-[-0.6px] text-ink mb-1 leading-tight">
@@ -269,7 +356,7 @@ function DsoCard({ dso, openJobs }: { dso: DsoRow; openJobs: number }) {
       </h3>
 
       {(cityState || dso.practice_count) && (
-        <div className="text-[13px] tracking-[0.3px] text-slate-meta mb-4 flex flex-wrap gap-x-3 gap-y-1">
+        <div className="text-[13px] tracking-[0.3px] text-slate-meta mb-2 flex flex-wrap gap-x-3 gap-y-1">
           {cityState && (
             <span className="inline-flex items-center gap-1">
               <MapPin className="h-3 w-3" />
@@ -285,22 +372,58 @@ function DsoCard({ dso, openJobs }: { dso: DsoRow; openJobs: number }) {
         </div>
       )}
 
+      {/* Multi-state coverage — only when 2+ states. Single-state DSOs
+          don't get this signal; it's the multi-location scale moat. */}
+      {showStateCoverage && (
+        <div className="text-[11px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-4">
+          Active in {stateList.length} states
+          <span className="ml-2 font-normal tracking-normal normal-case text-slate-body">
+            {stateCoverageLabel}
+          </span>
+        </div>
+      )}
+
       {descriptionText && (
         <p className="text-[14px] text-slate-body leading-relaxed line-clamp-3 mb-4">
           {descriptionText}
         </p>
       )}
 
+      {/* Role-mix chips — top 3 distinct role categories the DSO is
+          currently hiring for. Helps a candidate evaluate fit at a glance
+          without clicking through. */}
+      {topRoles.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {topRoles.map((label) => (
+            <span
+              key={label}
+              className="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold tracking-[0.5px] bg-cream text-slate-body border border-[var(--rule)]"
+            >
+              {label}
+            </span>
+          ))}
+        </div>
+      )}
+
       <div className="mt-auto pt-4 border-t border-[var(--rule)] flex justify-between items-center">
-        <div>
+        <div className="flex items-center gap-2">
           <div
             className="text-[18px] font-extrabold leading-none"
             style={{ color: "var(--card-accent)" }}
           >
             {openJobs}
           </div>
-          <div className="text-[9px] font-semibold tracking-[1.5px] uppercase text-slate-meta mt-1.5">
-            {openJobs === 1 ? "Open role" : "Open roles"}
+          <div className="flex flex-col">
+            <div className="text-[9px] font-semibold tracking-[1.5px] uppercase text-slate-meta leading-tight">
+              {openJobs === 1 ? "Open role" : "Open roles"}
+            </div>
+            <div className="inline-flex items-center gap-1 text-[9px] font-bold tracking-[1px] uppercase mt-0.5" style={{ color: accentColor }}>
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ background: accentColor }} />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full" style={{ background: accentColor }} />
+              </span>
+              Hiring now
+            </div>
           </div>
         </div>
         <div
