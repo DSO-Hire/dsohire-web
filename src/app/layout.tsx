@@ -14,7 +14,7 @@ const manrope = Manrope({
 
 export const metadata: Metadata = {
   title: {
-    default: "DSO Hire — Multi-location hiring, one flat fee.",
+    default: "DSO Hire — Dental hiring, done direct.",
     template: "%s · DSO Hire",
   },
   description:

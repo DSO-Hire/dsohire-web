@@ -126,16 +126,16 @@ function Hero() {
           </div>
 
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[-1.6px] leading-[1.04] text-ink mb-7">
-            Find your next role at a{" "}
-            <em className="not-italic relative whitespace-nowrap text-heritage-light">
-              real dental group
+            Find your next dental role.{" "}
+            <br className="hidden sm:inline" />
+            <em className="not-italic relative lg:whitespace-nowrap text-heritage-light">
+              Directly with dental groups.
               <span
                 aria-hidden
-                className="absolute left-0 right-0 bottom-1.5 h-2 -z-10"
+                className="hidden lg:block absolute left-0 right-0 bottom-1.5 h-2 -z-10"
                 style={{ background: "var(--heritage-tint)" }}
               />
             </em>
-            .
           </h1>
 
           <p className="text-lg sm:text-xl text-slate-body leading-[1.65] max-w-[560px] mb-10">

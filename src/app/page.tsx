@@ -26,8 +26,9 @@ import { SiteShell } from "@/components/marketing/site-shell";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title:
-    "DSO Hire — Dental Hiring, Built for Multi-Location DSOs and Dental Professionals",
+  title: {
+    absolute: "DSO Hire — Dental hiring, done direct.",
+  },
   description:
     "DSO Hire is the dental-only job platform connecting multi-location dental support organizations with dental professionals — directly. No per-listing fees, no placement fees, no agency middlemen. Whether you're hiring across your practices or looking for your next dental role, start here.",
 };

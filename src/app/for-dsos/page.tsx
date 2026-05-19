@@ -127,10 +127,10 @@ function Hero() {
               lg+ for the same reason — `absolute` positioning on a wrapped
               inline element only sits under the last line and looks broken. */}
         <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-[80px] font-extrabold tracking-[-0.025em] leading-[0.98] text-ink mb-12">
-          Hire across every practice{" "}
+          Hire across every practice.{" "}
           <br className="hidden sm:inline" />
           <em className="not-italic relative lg:whitespace-nowrap text-heritage-light">
-            without per-listing pricing.
+            One flat monthly fee.
             <span
               aria-hidden
               className="hidden lg:block absolute left-0 right-0 bottom-1.5 h-2 -z-10"
