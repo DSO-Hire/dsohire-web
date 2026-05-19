@@ -105,13 +105,15 @@ export async function attachHeatmapOverlay(
 
   const buildLayer = () => {
     if (!collection) return null;
-    // beforeId is a MapboxOverlay-interleaved-mode prop that deck.gl's
-    // typed GeoJsonLayer constructor doesn't expose publicly (it's
-    // consumed by the Mapbox bridge, not the layer itself). Spread it
-    // in via a type-erasing intermediate so tsc accepts it while the
-    // runtime continues to honor the z-order intent (hexes render
-    // BELOW Mapbox label layers so city/state names stay legible).
-    const baseProps = {
+    // Z-order note: not setting beforeId means the hex layer renders
+    // on TOP of all Mapbox layers (including labels). That's a polish
+    // concern Day 5 will revisit by discovering a real label layer id
+    // from the active style and binding beforeId to it. Earlier
+    // attempt with beforeId:"place-label" caused MapboxOverlay to
+    // silently drop the layer entirely on custom Mapbox Studio styles
+    // that don't expose that exact layer id — visible-and-imperfect
+    // is the right tradeoff for the Day 2 preview.
+    return new GeoJsonLayer<HeatmapHexFeature["properties"]>({
       id: "dsohire-heatmap",
       data: collection.features,
       pickable: false, // Day 3 turns this on for hover/click
@@ -119,18 +121,10 @@ export async function attachHeatmapOverlay(
       filled: true,
       lineWidthMinPixels: 1,
       getLineWidth: 1,
-      getLineColor: [47, 93, 79, 80] as [number, number, number, number],
-      getFillColor: (f: HeatmapHexFeature) =>
-        colorForCount(f.properties.count, thresholds),
-    };
-    const extendedProps = {
-      ...baseProps,
-      beforeId: "place-label",
-    };
-    return new GeoJsonLayer<HeatmapHexFeature["properties"]>(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      extendedProps as any
-    );
+      getLineColor: [47, 93, 79, 80],
+      getFillColor: (f) =>
+        colorForCount((f.properties as { count: number }).count, thresholds),
+    });
   };
 
   // MapboxOverlay is the bridge between deck.gl layers and the
