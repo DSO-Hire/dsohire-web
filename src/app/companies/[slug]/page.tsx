@@ -257,26 +257,35 @@ export default async function CompanyDetailPage({ params }: PageProps) {
 
   return (
     <SiteShell>
-      {/* Banner — full-bleed hero, only renders when set */}
-      {dsoRow.banner_url && (
-        <div className="relative w-full overflow-hidden bg-cream pt-[80px]">
+      {/* Banner hero — always renders, smaller aspect ratio (6:1 ~ 200px
+          at 1200vw) so it sets brand tone without dominating the fold.
+          When the DSO has uploaded their own banner, render the photo.
+          Otherwise fall back to a brand-color diagonal gradient — looks
+          intentional + on-brand, never bare. Cam 2026-05-19: the
+          previous aspect-[3/1] was way too tall and badly-cropped photos
+          looked uncomfortable. */}
+      <div className="relative w-full overflow-hidden bg-cream pt-[80px]">
+        {dsoRow.banner_url ? (
           <div
-            className="aspect-[3/1] w-full bg-cover bg-center"
+            className="aspect-[6/1] w-full bg-cover bg-center min-h-[140px]"
             style={{ backgroundImage: `url(${dsoRow.banner_url})` }}
             aria-label={`${dsoRow.name} banner`}
             role="img"
           />
-          {/* Subtle bottom fade for legibility of any overlay copy */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-b from-transparent to-black/10" />
-        </div>
-      )}
+        ) : (
+          <div
+            className="aspect-[6/1] w-full min-h-[140px]"
+            style={{
+              background: `linear-gradient(135deg, ${brandColor} 0%, color-mix(in srgb, ${brandColor} 55%, transparent) 100%)`,
+            }}
+            aria-hidden
+          />
+        )}
+        {/* Subtle bottom fade for legibility of any overlay copy */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-b from-transparent to-black/10" />
+      </div>
 
-      <article
-        className={
-          "px-6 sm:px-14 max-w-[1100px] mx-auto " +
-          (dsoRow.banner_url ? "pt-12 pb-24" : "pt-[140px] pb-24")
-        }
-      >
+      <article className="px-6 sm:px-14 max-w-[1100px] mx-auto pt-12 pb-24">
         <Link
           href="/companies"
           className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase hover:text-ink transition-colors mb-8"

@@ -193,14 +193,14 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
     }
   }
 
-  // Directory should only show DSOs that are ACTIVELY hiring. A card with
-  // "0 OPEN ROLES" is dead weight on a candidate-facing surface — they
-  // click it and find an empty list. The DSO's own /companies/[slug] page
-  // still renders for direct links (so SEO and outbound-marketing links
-  // don't 404), but it falls off the directory until they post a role.
-  let visibleDsos = filteredDsos.filter(
-    (d) => (jobCountByDso.get(d.id) ?? 0) > 0
-  );
+  // Every active + public DSO appears in the directory — Cam 2026-05-19
+  // reverted the hide-zero-roles rule. Rationale: a paying DSO member
+  // paid for the listing; pulling them off the directory when they
+  // happen to be between job posts undercuts the visibility they paid
+  // for. The "Hiring now" pulse + role-mix chips on the card already
+  // signal whether they have active roles right now — the candidate
+  // can read that without needing the platform to gatekeep.
+  let visibleDsos = [...filteredDsos];
 
   // Filter strip: state + practice-count tier. Both URL-param-driven so
   // the filtered URL is shareable and the back button works naturally.
@@ -230,22 +230,25 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
   // from filteredDsos (pre-filter) so swapping states works naturally.
   const availableStates = new Set<string>();
   for (const d of filteredDsos) {
-    if ((jobCountByDso.get(d.id) ?? 0) === 0) continue;
     const stateSet = statesByDso.get(d.id);
     if (!stateSet) continue;
     for (const s of stateSet) availableStates.add(s);
   }
   const availableStatesList = Array.from(availableStates).sort();
 
-  // Featured DSO — the one with featured_until in the future. If multiple
-  // are active (shouldn't happen via the admin UI, but defend anyway),
-  // pick the one expiring soonest (closest expiration = most recently
-  // committed window, intuitive priority). Pull the featured DSO OUT of
-  // the regular grid list so it doesn't double-render.
+  // Featured DSO — the one with featured_until in the future AND at
+  // least one active job. Spotlight position is reserved for active
+  // hiring activity; promoting a DSO with 0 openings is misleading and
+  // pushes the "Hiring now" promise badge into incoherence. If they
+  // need brand visibility without hiring activity, the regular grid
+  // card still surfaces them.
   const now = Date.now();
   const featuredDso = visibleDsos
-    .filter((d) =>
-      d.featured_until ? new Date(d.featured_until).getTime() > now : false
+    .filter(
+      (d) =>
+        d.featured_until !== null &&
+        new Date(d.featured_until).getTime() > now &&
+        (jobCountByDso.get(d.id) ?? 0) > 0
     )
     .sort(
       (a, b) =>
@@ -458,24 +461,17 @@ function DsoCard({
         style={{ background: "var(--card-accent)" }}
       />
 
-      {/* Banner strip (edge-to-edge) — only when the DSO has uploaded
-          one. Cream fallback BG inside the wrapper means a slow-loading
-          image doesn't flash white. Aspect ratio is fixed via fixed
-          height so cards in the grid stay aligned regardless of
-          original image dimensions. */}
-      {dso.banner_url && (
-        <div className="w-full h-20 overflow-hidden bg-cream">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={dso.banner_url}
-            alt=""
-            className="w-full h-full object-cover"
-          />
-        </div>
-      )}
+      {/* Banner intentionally removed from the regular grid card
+          (Cam 2026-05-19 feedback) — at 80px height, even good banner
+          images cropped uncomfortably under object-cover. The
+          brand-color left accent strip + logo + brand-color pill +
+          brand-color count already give each card strong per-DSO
+          identity without competing for the small footprint. The
+          spotlight card below the directory still renders banners at
+          a more generous height where the crop math works out. */}
 
       {/* Content body — padded. Inner div carries flex-1 so the bottom
-          row's mt-auto pushes correctly even with the banner above. */}
+          row's mt-auto pushes correctly. */}
       <div className="p-7 pl-8 flex flex-col flex-1">
 
       {/* Top row: logo (or branded mark fallback) + member pill chip */}
@@ -612,13 +608,22 @@ function DsoCard({
             <div className="text-[9px] font-semibold tracking-[1.5px] uppercase text-slate-meta leading-tight">
               {openJobs === 1 ? "Open role" : "Open roles"}
             </div>
-            <div className="inline-flex items-center gap-1 text-[9px] font-bold tracking-[1px] uppercase mt-0.5" style={{ color: accentColor }}>
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ background: accentColor }} />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full" style={{ background: accentColor }} />
-              </span>
-              Hiring now
-            </div>
+            {/* Hiring-now pulse only renders when there's actual hiring
+                activity. Cards with 0 roles (paying members between
+                postings) stay visible but without the misleading badge. */}
+            {openJobs > 0 ? (
+              <div className="inline-flex items-center gap-1 text-[9px] font-bold tracking-[1px] uppercase mt-0.5" style={{ color: accentColor }}>
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ background: accentColor }} />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full" style={{ background: accentColor }} />
+                </span>
+                Hiring now
+              </div>
+            ) : (
+              <div className="text-[9px] font-semibold tracking-[1px] uppercase text-slate-meta mt-0.5">
+                Not hiring now
+              </div>
+            )}
           </div>
         </div>
         <div
