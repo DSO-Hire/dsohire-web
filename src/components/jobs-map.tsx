@@ -382,25 +382,34 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
 
       const runSetup = (triggeredBy: string) => {
         if (cancelled || initialSetupDone) {
-          console.log(
-            `[JobsMap] runSetup skipped (trigger=${triggeredBy}, cancelled=${cancelled}, alreadyDone=${initialSetupDone})`
-          );
           return;
         }
         const currentMetros = metroGroupsRef.current;
+        const styleLoaded = !!map.isStyleLoaded?.();
         console.log(
-          `[JobsMap] runSetup START (trigger=${triggeredBy}, metroCount=${currentMetros.length}, isStyleLoaded=${map.isStyleLoaded?.()}, loaded=${map.loaded?.()})`
+          `[JobsMap] runSetup START (trigger=${triggeredBy}, metroCount=${currentMetros.length}, isStyleLoaded=${styleLoaded}, loaded=${map.loaded?.()})`
         );
 
-        // GUARD: don't mark setup-done if we have no data to attach.
-        // Calling attachLocationLayers with empty metros creates an
-        // empty source, then marking initialSetupDone=true prevents
-        // any future re-attach attempt — leaving the map permanently
-        // empty until the user manually swaps styles. Better to keep
-        // polling until we have actual data.
+        // GUARD: don't mark setup-done with empty data — keeps polling
+        // until metroGroupsRef populates from the locations prop.
         if (currentMetros.length === 0) {
           console.warn(
             "[JobsMap] runSetup aborted — metroGroupsRef is empty, will retry"
+          );
+          return;
+        }
+
+        // GUARD: don't attach during a style transition. Diagnostic
+        // logs proved this is THE root cause of the recurring race:
+        // style.load event fires WHILE isStyleLoaded() still returns
+        // false (Mapbox is mid-transition). attachLocationLayers
+        // succeeds without throwing but the source/layers don't
+        // actually paint because Mapbox is about to finalize a new
+        // style that wipes them. By the time load/idle fires,
+        // isStyleLoaded is true and the attach paints correctly.
+        if (!styleLoaded) {
+          console.warn(
+            `[JobsMap] runSetup deferred — style transitioning (trigger=${triggeredBy}), will retry on next stable trigger`
           );
           return;
         }
