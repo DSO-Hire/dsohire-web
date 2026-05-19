@@ -578,28 +578,36 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
     }
   }, [mapStyleId, mapReady]);
 
-  /* ── Phase D: heatmap overlay + zoom-driven crossfade ────────
+  /* ── Phase D: native Mapbox heatmap layer + zoom-driven crossfade ──
    *
-   * Days 2-3 work. Attaches a deck.gl GeoJsonLayer of H3 hexes
-   * (data from /api/jobs/heatmap.json), enables hover + click
-   * (Day 3), and binds a zoom listener that crossfades hex vs.
-   * metro-pin visibility:
-   *   - zoom <= 6.8 → hex opaque, pins hidden (country view)
+   * Day 4 pivot (2026-05-19): replaced the deck.gl GeoJsonLayer of
+   * H3 hex bins with a native Mapbox heatmap layer. The hex approach
+   * was honest-but-sparse — only colored where data exists, leaving
+   * vast empty stretches between metros. Mapbox's heatmap layer
+   * produces the canonical smooth-gaussian-blob heatmap that users
+   * expect to see when they hear "heatmap" (and that matched the
+   * reference Cam pulled from a Google image search).
+   *
+   * Source is built in-effect from the metros prop — no separate
+   * fetch needed. One Point feature per metro, weighted by jobCount.
+   *
+   * Crossfade thresholds unchanged:
+   *   - zoom <= 6.8 → heatmap opaque, pins hidden (country view)
    *   - zoom 6.8 → 7.2 → linear crossfade
-   *   - zoom >= 7.2 → hex hidden, pins opaque (metro view)
+   *   - zoom >= 7.2 → heatmap hidden, pins opaque (metro view)
    *
-   * The whole subsystem stays gated behind heatmapEnabled
-   * (?heatmap=1 URL param) until Day 4 retires the flag in
-   * favor of proper style-picker integration. */
+   * Still gated behind heatmapEnabled (?heatmap=1 URL param) until
+   * proper style-picker integration. */
   useEffect(() => {
     if (!mapReady || !mapRef.current || !heatmapEnabled) return;
 
     const map = mapRef.current;
-    let handle: import("./jobs-map-heatmap-overlay").HeatmapOverlayHandle | null =
-      null;
     let cancelled = false;
     let zoomListener: (() => void) | null = null;
     let styleListener: (() => void) | null = null;
+
+    const HEATMAP_LAYER_ID = "dsohire-heatmap";
+    const HEATMAP_SOURCE_ID = "dsohire-heat-source";
 
     const PIN_LAYER_IDS = [
       "dsohire-clusters",
@@ -623,9 +631,132 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
       return { heatmap: 1 - t, pin: t };
     };
 
+    /** Build the heatmap source data from the current metros — one Point
+     *  feature per metro, weighted by jobCount. The native Mapbox
+     *  heatmap layer interpolates a smooth gaussian density surface
+     *  from these weighted points, which is the canonical "heatmap"
+     *  visualization (vs. the prior deck.gl hex bins which couldn't
+     *  fill the inter-metro space). */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const buildHeatSource = (): any => {
+      const metros = metroGroupsRef.current;
+      return {
+        type: "FeatureCollection",
+        features: metros.map((m) => ({
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: [m.longitude, m.latitude],
+          },
+          properties: {
+            jobCount: m.jobCount,
+          },
+        })),
+      };
+    };
+
+    /** Attach (or re-attach after a style swap) the native heatmap
+     *  layer. Brand-aligned color ramp goes transparent → pale heritage
+     *  tint → heritage → heritage-deep → navy at the hottest. Reads
+     *  like a heatmap to anyone familiar with the convention while
+     *  using only DSO brand palette colors. */
+    const attachHeatmap = () => {
+      try {
+        if (map.getLayer?.(HEATMAP_LAYER_ID)) map.removeLayer(HEATMAP_LAYER_ID);
+        if (map.getSource?.(HEATMAP_SOURCE_ID)) map.removeSource(HEATMAP_SOURCE_ID);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        map.addSource(HEATMAP_SOURCE_ID, {
+          type: "geojson",
+          data: buildHeatSource(),
+        } as any);
+
+        // Insert the heatmap BELOW the pin layers so pins paint on top
+        // during the crossfade band. beforeId="dsohire-clusters" places
+        // it just under the cluster pin layer.
+        const beforeId = map.getLayer?.("dsohire-clusters")
+          ? "dsohire-clusters"
+          : undefined;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        map.addLayer(
+          {
+            id: HEATMAP_LAYER_ID,
+            type: "heatmap",
+            source: HEATMAP_SOURCE_ID,
+            maxzoom: 9,
+            paint: {
+              // Per-point weight: more roles at a metro = brighter spot.
+              // 1 job = small weight, 10+ jobs = max weight.
+              "heatmap-weight": [
+                "interpolate",
+                ["linear"],
+                ["get", "jobCount"],
+                0, 0,
+                1, 0.35,
+                5, 0.7,
+                10, 1.0,
+              ],
+              // Intensity scales the density at higher zoom so blobs
+              // stay punchy as the user zooms in (before pin handoff).
+              "heatmap-intensity": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                0, 1,
+                7, 3,
+              ],
+              // Brand-aligned color ramp: transparent (no data) →
+              // pale heritage tint → heritage → heritage-deep → navy.
+              // navy at the hottest reads as "intense" because it's
+              // the deepest color in the DSO brand palette.
+              "heatmap-color": [
+                "interpolate",
+                ["linear"],
+                ["heatmap-density"],
+                0, "rgba(247, 244, 237, 0)",       // ivory transparent
+                0.15, "rgba(208, 222, 213, 0.35)", // very pale tint
+                0.35, "rgba(142, 178, 161, 0.55)", // muted heritage
+                0.55, "rgba(77, 122, 96, 0.72)",   // #4D7A60 heritage
+                0.75, "rgba(47, 93, 79, 0.85)",    // heritage-deep
+                1.0, "rgba(20, 35, 63, 0.95)",     // navy (hottest)
+              ],
+              // Blob radius scales with zoom — wider blobs at country
+              // view so neighboring metros blend into regional heat
+              // zones (matches the reference image's continuous feel);
+              // tighter blobs as user zooms in so individual metros
+              // become distinguishable before the pin crossfade.
+              "heatmap-radius": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                3, 50,
+                5, 70,
+                7, 100,
+              ],
+              "heatmap-opacity": 1,
+            },
+          },
+          beforeId
+        );
+      } catch (err) {
+        console.warn("[JobsMap] heatmap attach failed", err);
+      }
+    };
+
     const applyCrossfade = (zoom: number) => {
       const { heatmap, pin } = computeCrossfade(zoom);
-      handle?.setOpacity(heatmap);
+
+      // Drive the native Mapbox heatmap layer opacity. Wrapped in
+      // try/catch because the layer may be momentarily absent during
+      // a style swap (attachHeatmap re-adds it after style.load).
+      try {
+        if (map.getLayer?.(HEATMAP_LAYER_ID)) {
+          map.setPaintProperty(HEATMAP_LAYER_ID, "heatmap-opacity", heatmap);
+        }
+      } catch {
+        /* noop — next style.load handler re-attaches and fades */
+      }
+
       for (const id of PIN_LAYER_IDS) {
         if (!map.getLayer?.(id)) continue;
         const base = PIN_BASE_OPACITY[id] ?? 1;
@@ -637,7 +768,7 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
           } else {
             // Circle layers need BOTH fill and stroke opacity faded —
             // otherwise the navy strokes stay visible as empty rings
-            // when pin should be fully hidden under the heatmap.
+            // when pins should be fully hidden under the heatmap.
             map.setPaintProperty(id, "circle-opacity", finalOpacity);
             map.setPaintProperty(id, "circle-stroke-opacity", pin);
           }
@@ -647,44 +778,41 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
       }
     };
 
-    (async () => {
-      try {
-        const mod = await import("./jobs-map-heatmap-overlay");
-        if (cancelled || !mapRef.current) return;
-        handle = await mod.attachHeatmapOverlay(mapRef.current, {
-          popup: popupRef.current,
-        });
-        if (cancelled) {
-          handle?.destroy();
-          handle = null;
-          return;
-        }
+    // Initial attach + crossfade. attachHeatmap is safe to call now
+    // because mapReady === true means runSetup completed and the pin
+    // source/layers exist (so our beforeId target resolves).
+    attachHeatmap();
+    applyCrossfade(map.getZoom?.() ?? 3.6);
 
-        // Apply crossfade immediately at current zoom, then on every
-        // zoom change. Mapbox fires `zoom` frequently during pinch +
-        // wheel — handle.setOpacity dedupes internally so cheap.
+    zoomListener = () => applyCrossfade(map.getZoom?.() ?? 3.6);
+    map.on("zoom", zoomListener);
+
+    // Mapbox wipes all custom sources/layers on style swap. runSetup's
+    // reattachAfterStyleSwap handles the pin layers; we handle the
+    // heatmap layer here. Then re-apply crossfade so the fresh layer
+    // doesn't paint at full opacity when zoom says it should be hidden.
+    styleListener = () => {
+      setTimeout(() => {
+        if (cancelled) return;
+        attachHeatmap();
         applyCrossfade(map.getZoom?.() ?? 3.6);
-        zoomListener = () => applyCrossfade(map.getZoom?.() ?? 3.6);
-        map.on("zoom", zoomListener);
-        // After a style swap, runSetup re-attaches pin layers at their
-        // DEFAULT opacities — without this listener, switching from
-        // DSO Hire to Streets/Satellite (and back) would leave pins at
-        // full opacity even when zoom says they should be hidden.
-        styleListener = () => {
-          // Wait one frame for runSetup to finish re-attaching layers,
-          // then re-apply the fade for the current zoom.
-          setTimeout(() => applyCrossfade(map.getZoom?.() ?? 3.6), 50);
-        };
-        map.on("style.load", styleListener);
-      } catch (err) {
-        console.warn("[JobsMap] heatmap overlay attach failed", err);
-      }
-    })();
+      }, 50);
+    };
+    map.on("style.load", styleListener);
 
     return () => {
       cancelled = true;
-      // Restore pin layer opacities to their static defaults so
+      if (zoomListener) map.off("zoom", zoomListener);
+      if (styleListener) map.off("style.load", styleListener);
+
+      // Restore pin opacities + remove the heatmap layer/source so
       // toggling heatmap off (or unmounting) leaves the map clean.
+      try {
+        if (map.getLayer?.(HEATMAP_LAYER_ID)) map.removeLayer(HEATMAP_LAYER_ID);
+        if (map.getSource?.(HEATMAP_SOURCE_ID)) map.removeSource(HEATMAP_SOURCE_ID);
+      } catch {
+        /* map may already be torn down */
+      }
       for (const id of PIN_LAYER_IDS) {
         if (!map.getLayer?.(id)) continue;
         const base = PIN_BASE_OPACITY[id] ?? 1;
@@ -700,10 +828,6 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
           /* ignore */
         }
       }
-      if (zoomListener) map.off("zoom", zoomListener);
-      if (styleListener) map.off("style.load", styleListener);
-      handle?.destroy();
-      handle = null;
     };
   }, [mapReady, heatmapEnabled]);
 
