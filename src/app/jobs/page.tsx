@@ -113,6 +113,10 @@ interface PageProps {
     near?: string;
     /** E7.4 — "Within": radius in miles. Must be one of WITHIN_MILES_OPTIONS. */
     within?: string;
+    /** Phase D Day 2 — preview flag for the deck.gl heatmap overlay.
+     *  Hidden behind ?heatmap=1 so production users keep the pin-only
+     *  map until Day 4 wires this into the style picker. */
+    heatmap?: string;
   }>;
 }
 
@@ -935,7 +939,11 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
 
         {/* MAP VIEW */}
         {showMap ? (
-          <JobsMap locations={mapLocations} mapboxToken={mapboxToken} />
+          <JobsMap
+            locations={mapLocations}
+            mapboxToken={mapboxToken}
+            heatmapEnabled={sp.heatmap === "1"}
+          />
         ) : /* LIST VIEW */ jobs.length === 0 ? (
           <div className="border border-[var(--rule)] bg-cream p-12 text-center max-w-[640px] mx-auto">
             <h3 className="text-[18px] font-extrabold tracking-[-0.4px] text-ink mb-2">

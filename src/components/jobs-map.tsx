@@ -112,6 +112,11 @@ interface MetroGroup {
 interface JobsMapProps {
   locations: JobsMapLocation[];
   mapboxToken: string | null;
+  /** Phase D heatmap overlay. Day 2 ships the deck.gl integration
+   *  behind this flag so the production map keeps rendering pins only
+   *  until Day 4 wires the heatmap into the style picker. Pass `true`
+   *  from /jobs/page.tsx when `?heatmap=1` is in the URL. */
+  heatmapEnabled?: boolean;
 }
 
 /* Map style picker. The "DSO Hire" style is the custom navy-monochrome
@@ -169,7 +174,7 @@ const EMP_LABELS: Record<string, string> = {
   locum: "Locum",
 };
 
-export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
+export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: JobsMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapboxMap | null>(null);
   const popupRef = useRef<MapboxPopup | null>(null);
@@ -482,6 +487,48 @@ export function JobsMap({ locations, mapboxToken }: JobsMapProps) {
       }
     }
   }, [mapStyleId, mapReady]);
+
+  /* ── Phase D Day 2: heatmap overlay ──────────────────────────
+   *
+   * Attaches a deck.gl GeoJsonLayer of H3 hexes (data from the
+   * /api/jobs/heatmap.json route, aggregated server-side per
+   * Day 1) on top of the existing Mapbox canvas via MapboxOverlay.
+   *
+   * Gated behind the heatmapEnabled prop (currently driven by the
+   * ?heatmap=1 URL param) so the production map keeps rendering
+   * pins-only until Day 4 wires the heatmap into the style picker.
+   *
+   * Day 3 will: turn pickable on, wire hover + click handlers,
+   * crossfade with the metro-pin layer at zoom 6.8-7.2.
+   * Day 4 will: replace the heatmapEnabled prop with proper
+   * style-picker mode tracking. */
+  useEffect(() => {
+    if (!mapReady || !mapRef.current || !heatmapEnabled) return;
+
+    let handle: import("./jobs-map-heatmap-overlay").HeatmapOverlayHandle | null =
+      null;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const mod = await import("./jobs-map-heatmap-overlay");
+        if (cancelled || !mapRef.current) return;
+        handle = await mod.attachHeatmapOverlay(mapRef.current);
+        if (cancelled) {
+          handle?.destroy();
+          handle = null;
+        }
+      } catch (err) {
+        console.warn("[JobsMap] heatmap overlay attach failed", err);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      handle?.destroy();
+      handle = null;
+    };
+  }, [mapReady, heatmapEnabled]);
 
   /* ── Refresh data when metro groups change ────────────────
    *
