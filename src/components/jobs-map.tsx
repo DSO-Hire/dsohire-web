@@ -599,6 +599,7 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
       null;
     let cancelled = false;
     let zoomListener: (() => void) | null = null;
+    let styleListener: (() => void) | null = null;
 
     const PIN_LAYER_IDS = [
       "dsohire-clusters",
@@ -665,6 +666,16 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
         applyCrossfade(map.getZoom?.() ?? 3.6);
         zoomListener = () => applyCrossfade(map.getZoom?.() ?? 3.6);
         map.on("zoom", zoomListener);
+        // After a style swap, runSetup re-attaches pin layers at their
+        // DEFAULT opacities — without this listener, switching from
+        // DSO Hire to Streets/Satellite (and back) would leave pins at
+        // full opacity even when zoom says they should be hidden.
+        styleListener = () => {
+          // Wait one frame for runSetup to finish re-attaching layers,
+          // then re-apply the fade for the current zoom.
+          setTimeout(() => applyCrossfade(map.getZoom?.() ?? 3.6), 50);
+        };
+        map.on("style.load", styleListener);
       } catch (err) {
         console.warn("[JobsMap] heatmap overlay attach failed", err);
       }
@@ -690,6 +701,7 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
         }
       }
       if (zoomListener) map.off("zoom", zoomListener);
+      if (styleListener) map.off("style.load", styleListener);
       handle?.destroy();
       handle = null;
     };

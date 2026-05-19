@@ -193,8 +193,14 @@ export async function attachHeatmapOverlay(
     });
   };
 
+  // interleaved:false renders deck.gl as a top-of-stack overlay canvas
+  // independent of the Mapbox layer order. With interleaved:true on the
+  // custom "DSO Hire" Studio style, layers were silently dropped because
+  // the style doesn't expose deck.gl-compatible insertion points. The
+  // overlay tradeoff: deck.gl always paints over Mapbox labels, which
+  // is fine here since hexes obscure labels at heatmap zoom anyway.
   const overlay = new MapboxOverlay({
-    interleaved: true,
+    interleaved: false,
     layers: [],
   });
 
