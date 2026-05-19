@@ -28,15 +28,19 @@ import type {
   HeatmapHexFeature,
 } from "@/lib/geocoding/h3-aggregate";
 
-/** Brand-aligned 6-step ramp: ivory-deep → heritage-light → heritage-deep.
- *  Alpha kept at 0.9 so the basemap shows through subtly. */
+/** Brand-aligned 6-step ramp: muted heritage-tint → heritage-deep.
+ *  Earlier version started from #ECE7DB (ivory-deep) which read as
+ *  invisible against the cream basemap — even the densest hexes
+ *  looked like empty outlines because all the visual weight was in
+ *  the stroke. New ramp starts from a saturated heritage-tint so the
+ *  lowest bucket still contrasts cleanly against ivory/cream. */
 const RAMP_COLORS: Array<[number, number, number, number]> = [
-  [236, 231, 219, 230], // #ECE7DB — ivory-deep (sparsest)
-  [214, 218, 200, 230], // blend
-  [185, 204, 192, 230], // #B9CCC0 — heritage-light
-  [143, 179, 160, 230], // blend
-  [95, 137, 117, 230], // blend
-  [47, 93, 79, 230], // #2F5D4F — heritage-deep (densest)
+  [177, 198, 187, 220], // muted heritage-tint (sparsest, still visible)
+  [142, 178, 161, 225],
+  [108, 158, 136, 230],
+  [77, 122, 96, 235],  // #4D7A60 — heritage
+  [62, 102, 80, 240],
+  [47, 93, 79, 245],   // #2F5D4F — heritage-deep (densest)
 ];
 
 function quantileThresholds(counts: number[]): number[] {
@@ -173,9 +177,12 @@ export async function attachHeatmapOverlay(
       stroked: true,
       filled: true,
       opacity: currentOpacity,
-      lineWidthMinPixels: 1,
-      getLineWidth: 1,
-      getLineColor: [47, 93, 79, 80],
+      lineWidthMinPixels: 1.5,
+      getLineWidth: 1.5,
+      // Heritage-deep stroke at higher alpha — frames each hex clearly
+      // against the basemap so even sparse-bucket fills read as
+      // intentional polygons, not pale blobs.
+      getLineColor: [47, 93, 79, 200],
       getFillColor: (f) =>
         colorForCount(
           (f.properties as { count: number }).count,

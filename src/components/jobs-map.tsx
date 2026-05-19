@@ -629,11 +629,17 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
         if (!map.getLayer?.(id)) continue;
         const base = PIN_BASE_OPACITY[id] ?? 1;
         const finalOpacity = pin * base;
-        const paintProp = id.endsWith("count") || id.endsWith("city")
-          ? "text-opacity"
-          : "circle-opacity";
+        const isSymbol = id.endsWith("count") || id.endsWith("city");
         try {
-          map.setPaintProperty(id, paintProp, finalOpacity);
+          if (isSymbol) {
+            map.setPaintProperty(id, "text-opacity", finalOpacity);
+          } else {
+            // Circle layers need BOTH fill and stroke opacity faded —
+            // otherwise the navy strokes stay visible as empty rings
+            // when pin should be fully hidden under the heatmap.
+            map.setPaintProperty(id, "circle-opacity", finalOpacity);
+            map.setPaintProperty(id, "circle-stroke-opacity", pin);
+          }
         } catch {
           /* layer may have been wiped mid-style-swap; next idle fixes it */
         }
@@ -671,11 +677,14 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
       for (const id of PIN_LAYER_IDS) {
         if (!map.getLayer?.(id)) continue;
         const base = PIN_BASE_OPACITY[id] ?? 1;
-        const paintProp = id.endsWith("count") || id.endsWith("city")
-          ? "text-opacity"
-          : "circle-opacity";
+        const isSymbol = id.endsWith("count") || id.endsWith("city");
         try {
-          map.setPaintProperty(id, paintProp, base);
+          if (isSymbol) {
+            map.setPaintProperty(id, "text-opacity", base);
+          } else {
+            map.setPaintProperty(id, "circle-opacity", base);
+            map.setPaintProperty(id, "circle-stroke-opacity", 1);
+          }
         } catch {
           /* ignore */
         }
