@@ -24,6 +24,7 @@
 
 import type { ReactElement } from "react";
 import { sendEmail } from "@/lib/email/send";
+import { listUnsubscribeUrlForEvent } from "./unsubscribe";
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import {
   NOTIFICATION_DEFAULTS,
@@ -171,6 +172,13 @@ export async function dispatchNotification(
     };
   }
 
+  // Commercial mail (digests, product updates, job alerts, newsletter, …)
+  // carries a one-click unsubscribe header; transactional mail gets null.
+  const listUnsubscribeUrl = listUnsubscribeUrlForEvent(
+    input.userId,
+    input.eventKind
+  );
+
   // Hand off to the existing email helper. It already writes to email_log
   // for the legacy audit; we ALSO write to notification_dispatch_log for
   // the new orchestration audit. Both tables coexist for v1.
@@ -185,6 +193,7 @@ export async function dispatchNotification(
     from: input.email.from,
     relatedDsoId: input.relatedDsoId ?? null,
     relatedCandidateId: input.relatedCandidateId ?? null,
+    listUnsubscribeUrl,
   });
 
   if (!sendResult.ok) {

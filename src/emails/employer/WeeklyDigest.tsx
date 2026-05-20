@@ -39,6 +39,13 @@ export interface WeeklyDigestProps {
   topJobs?: WeeklyDigestTopJob[];
   staleCandidates?: WeeklyDigestStaleCandidate[];
   dashboardUrl?: string;
+  /**
+   * Tokenized one-click unsubscribe URL for the "Performance summaries"
+   * category (no login). Built per-recipient via
+   * unsubscribePageUrlForEvent(userId, "employer.weekly_digest"). When omitted
+   * (e.g. in preview), we fall back to the logged-in settings link.
+   */
+  unsubscribeUrl?: string;
 }
 
 export function WeeklyDigest({
@@ -52,6 +59,7 @@ export function WeeklyDigest({
   topJobs = [],
   staleCandidates = [],
   dashboardUrl = "https://dsohire.com/employer/reports",
+  unsubscribeUrl,
 }: WeeklyDigestProps) {
   const delta = applicationsThisWeek - applicationsLastWeek;
   const deltaLabel =
@@ -135,12 +143,34 @@ export function WeeklyDigest({
       </Section>
 
       <Text style={smallParagraph}>
-        You&apos;re receiving this because you&apos;re an owner or admin
-        on {dsoName}. To unsubscribe from weekly digests, update your{" "}
-        <a href={`${brand.siteUrl}/employer/settings/notifications`} style={inlineLink}>
-          notification preferences
-        </a>
-        .
+        You&apos;re receiving this because you&apos;re an owner or admin on{" "}
+        {dsoName}.{" "}
+        {unsubscribeUrl ? (
+          <>
+            <a href={unsubscribeUrl} style={inlineLink}>
+              Unsubscribe from weekly digests
+            </a>{" "}
+            or manage all{" "}
+            <a
+              href={`${brand.siteUrl}/employer/settings/notifications`}
+              style={inlineLink}
+            >
+              notification preferences
+            </a>
+            .
+          </>
+        ) : (
+          <>
+            To unsubscribe from weekly digests, update your{" "}
+            <a
+              href={`${brand.siteUrl}/employer/settings/notifications`}
+              style={inlineLink}
+            >
+              notification preferences
+            </a>
+            .
+          </>
+        )}
       </Text>
     </Layout>
   );

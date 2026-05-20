@@ -49,6 +49,13 @@ export interface SendEmailParams {
   from?: string;
   relatedDsoId?: string | null;
   relatedCandidateId?: string | null;
+  /**
+   * One-click unsubscribe URL for commercial mail. When set, we attach the
+   * RFC 8058 List-Unsubscribe + List-Unsubscribe-Post headers so Gmail/Yahoo
+   * render their native one-click "Unsubscribe" control. Omit for transactional
+   * mail (which carries no hard unsubscribe). Set by the dispatcher.
+   */
+  listUnsubscribeUrl?: string | null;
 }
 
 export interface SendEmailResult {
@@ -69,6 +76,7 @@ export async function sendEmail(params: SendEmailParams): Promise<SendEmailResul
     from = FROM_DEFAULT,
     relatedDsoId = null,
     relatedCandidateId = null,
+    listUnsubscribeUrl = null,
   } = params;
 
   if (!process.env.RESEND_API_KEY) {
@@ -89,6 +97,13 @@ export async function sendEmail(params: SendEmailParams): Promise<SendEmailResul
   try {
     const client = getResend();
     type EmailSendParams = Parameters<typeof client.emails.send>[0];
+    // RFC 8058 one-click unsubscribe headers (commercial mail only).
+    const unsubHeaders = listUnsubscribeUrl
+      ? {
+          "List-Unsubscribe": `<${listUnsubscribeUrl}>`,
+          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        }
+      : undefined;
     const payload: EmailSendParams = {
       from,
       to: Array.isArray(to) ? to : [to],
@@ -97,6 +112,7 @@ export async function sendEmail(params: SendEmailParams): Promise<SendEmailResul
       ...(text ? { text } : {}),
       ...(html ? { html } : {}),
       ...(replyTo ? { replyTo } : {}),
+      ...(unsubHeaders ? { headers: unsubHeaders } : {}),
     } as EmailSendParams;
 
     const { data, error } = await client.emails.send(payload);
