@@ -64,8 +64,8 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
   solo: {
     id: "solo",
     name: "Solo",
-    tagline: "Single practices & small dental groups",
-    description: "Single-location practices and small groups, up to 5 active listings",
+    tagline: "Privately-owned groups, 2–5 locations",
+    description: "Privately-owned dental groups of 2–5 locations, up to 5 active listings",
     monthlyPrice: 399,
     monthlyPriceCents: 39900,
     annualPrice: 4308,

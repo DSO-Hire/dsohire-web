@@ -950,7 +950,7 @@ function PricingTier({ tier }: { tier: TierConfig }) {
           isFeatured ? "text-ivory/55" : "text-slate-meta"
         }`}
       >
-        {tier.id === "solo" && "For single & small group practices"}
+        {tier.id === "solo" && "For privately-owned 2–5 location groups"}
         {tier.id === "growth" && "Most chosen for growing groups"}
         {tier.id === "scale" && "Unlimited listings + per-location analytics"}
         {tier.id === "enterprise" && "Account management included"}

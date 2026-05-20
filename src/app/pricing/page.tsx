@@ -131,7 +131,7 @@ function TierCard({
     enterprise: "Contact Sales",
   };
   const monthlyDescriptor: Record<PricingTier, string> = {
-    solo: "For single & small group practices",
+    solo: "For privately-owned 2–5 location groups",
     growth: "Most chosen for growing groups",
     scale: "Unlimited listings + per-location analytics",
     enterprise: "Account management included",
