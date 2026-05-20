@@ -50,6 +50,7 @@ import {
 import { AffiliationCard } from "./affiliation-card";
 import { NotesEditor } from "./notes-editor";
 import { TagsSection } from "./tags-section";
+import { MoveCopyCard } from "./move-copy-card";
 import {
   isTagColor,
   type ApplicationTag,
@@ -1689,6 +1690,11 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
           {/* Candidate tags (E3.22) — team-level labels, chips also show on the kanban card */}
           <div id="tags" className="mb-12 scroll-mt-24">
             <TagsSection applicationId={app.id} initialTags={initialTags} />
+          </div>
+
+          {/* Move/copy candidate to another job (E3.21) */}
+          <div className="mb-12">
+            <MoveCopyCard applicationId={app.id} />
           </div>
 
           {/* 11 (or 10) · Team comments */}

@@ -691,6 +691,7 @@ export type Database = {
           job_id: string
           knockout_failed_at: string | null
           knockout_failed_questions: string[]
+          moved_from_application_id: string | null
           pipeline_position: number | null
           resume_url: string | null
           self_reported_status: string | null
@@ -714,6 +715,7 @@ export type Database = {
           job_id: string
           knockout_failed_at?: string | null
           knockout_failed_questions?: string[]
+          moved_from_application_id?: string | null
           pipeline_position?: number | null
           resume_url?: string | null
           self_reported_status?: string | null
@@ -737,6 +739,7 @@ export type Database = {
           job_id?: string
           knockout_failed_at?: string | null
           knockout_failed_questions?: string[]
+          moved_from_application_id?: string | null
           pipeline_position?: number | null
           resume_url?: string | null
           self_reported_status?: string | null
