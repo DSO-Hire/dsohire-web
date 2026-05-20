@@ -37,7 +37,7 @@ export default async function SignUpPage({ searchParams }: PageProps) {
   const requestedTier = isPricingTier(tierParam) ? tierParam : "solo";
   const period: BillingPeriod = isBillingPeriod(periodParam)
     ? periodParam
-    : "monthly";
+    : "annual";
   const selectedTier = PRICING_TIERS[requestedTier];
   const isAnnual = period === "annual";
   const headlinePrice = isAnnual

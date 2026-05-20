@@ -24,15 +24,13 @@
  * `Business Plan & Strategy/Pricing_Repositioning_Memo.md`.
  *
  * ─────────────────────────────────────────────────────────────────────────
- * STRIPE PRICE IDs — ACTION REQUIRED
+ * STRIPE PRICE IDs
  * ─────────────────────────────────────────────────────────────────────────
- * The amounts below changed, so the old test-mode Price IDs are stale (Stripe
- * prices are immutable — a new amount requires a new Price object). Eight new
- * test-mode prices must be created in the Stripe dashboard (4 tiers × monthly
- * + annual) and pasted into the *_REPLACE placeholders below. Until then,
- * /pricing renders correctly (display reads the amounts, not the IDs) but
- * Checkout will error. Live IDs get added at soft-launch (set STRIPE_LIVE_MODE
- * = "1" in Vercel Production once populated).
+ * Test-mode Price IDs were created in the "DSO Hire sandbox" on 2026-05-20 and
+ * are populated below — Checkout resolves both monthly + annual. Stripe prices
+ * are immutable, so a future amount change needs a brand-new Price object (not
+ * an edit). Live IDs get added at soft-launch (set STRIPE_LIVE_MODE = "1" in
+ * Vercel Production once the live-mode prices are populated).
  */
 
 export type PricingTier = "solo" | "growth" | "scale" | "enterprise";
@@ -80,8 +78,8 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
       "AI Job Description generator (dental-context)",
       "Branded company page + map view",
     ],
-    stripePriceIdTest: "price_test_solo_monthly_REPLACE",
-    stripePriceIdTestAnnual: "price_test_solo_annual_REPLACE",
+    stripePriceIdTest: "price_1TZCQh0uFxwSh1FnO9cRurPI",
+    stripePriceIdTestAnnual: "price_1TZCRL0uFxwSh1FnqaMDm06C",
   },
   growth: {
     id: "growth",
@@ -100,8 +98,8 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
       "License requirements + attestation tracking",
       "Funnel reports + AI rejection suggester + priority support",
     ],
-    stripePriceIdTest: "price_test_growth_monthly_REPLACE",
-    stripePriceIdTestAnnual: "price_test_growth_annual_REPLACE",
+    stripePriceIdTest: "price_1TZCRe0uFxwSh1FnqKatGAUP",
+    stripePriceIdTestAnnual: "price_1TZCS20uFxwSh1Fnt8Gsc0Y2",
     badge: "Most popular",
   },
   scale: {
@@ -121,8 +119,8 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
       "Cross-location benchmarking",
       "Custom approval chains (H2 2026)",
     ],
-    stripePriceIdTest: "price_test_scale_monthly_REPLACE",
-    stripePriceIdTestAnnual: "price_test_scale_annual_REPLACE",
+    stripePriceIdTest: "price_1TZCSO0uFxwSh1FnGSO3OoJR",
+    stripePriceIdTestAnnual: "price_1TZCSj0uFxwSh1FnkuUbRajm",
   },
   enterprise: {
     id: "enterprise",
@@ -141,8 +139,8 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
       "SSO / SAML + SOC 2 (H2 2026)",
       "BAA-readiness for HIPAA workflows",
     ],
-    stripePriceIdTest: "price_test_enterprise_monthly_REPLACE",
-    stripePriceIdTestAnnual: "price_test_enterprise_annual_REPLACE",
+    stripePriceIdTest: "price_1TZCT70uFxwSh1FnIQNZziqE",
+    stripePriceIdTestAnnual: "price_1TZCTQ0uFxwSh1Fn3FCyRSvk",
   },
 };
 

@@ -43,7 +43,8 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
   const sp = await searchParams;
   const tiers = getAllTiers();
   const nextParam = sp.next?.trim() || null;
-  const period: BillingPeriod = isBillingPeriod(sp.period) ? sp.period : "monthly";
+  // Default to annual — retention-first. Monthly stays one toggle-click away.
+  const period: BillingPeriod = isBillingPeriod(sp.period) ? sp.period : "annual";
   return (
     <div>
       <PricingHero />
@@ -135,8 +136,9 @@ function TierCard({
     scale: "Unlimited listings + per-location analytics",
     enterprise: "Account management included",
   };
-  const params = new URLSearchParams({ tier: tier.id });
-  if (period === "annual") params.set("period", "annual");
+  // Always carry the explicit period so the user's choice survives into
+  // sign-up/checkout regardless of those pages' own defaults.
+  const params = new URLSearchParams({ tier: tier.id, period });
   if (nextParam) params.set("next", nextParam);
   return (
     <div

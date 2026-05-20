@@ -19,9 +19,11 @@ export function BillingPeriodToggle({ period }: { period: BillingPeriod }) {
 
   function setPeriod(next: BillingPeriod) {
     if (next === period) return;
+    // Annual is the default view, so it's the clean no-param state; monthly
+    // is the explicit opt-out via ?period=monthly.
     const params = new URLSearchParams(searchParams.toString());
-    if (next === "monthly") params.delete("period");
-    else params.set("period", next);
+    if (next === "annual") params.delete("period");
+    else params.set("period", "monthly");
     const qs = params.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   }
