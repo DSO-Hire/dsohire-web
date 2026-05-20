@@ -23,6 +23,7 @@ import {
 import { BillingPeriodToggle } from "./billing-period-toggle";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import { SALES_EMAIL } from "@/lib/contact";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -45,15 +46,58 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
   const nextParam = sp.next?.trim() || null;
   // Default to annual — retention-first. Monthly stays one toggle-click away.
   const period: BillingPeriod = isBillingPeriod(sp.period) ? sp.period : "annual";
+  // Is this an already-authenticated employer who still needs a plan? If so,
+  // the tier card they click *is* their choice — route it straight into
+  // checkout instead of bouncing them back through the sign-up funnel. We only
+  // do this when they have no live subscription, so we never push an active
+  // customer into a second checkout (tier changes on an active plan run through
+  // the billing portal).
+  const authedNeedsCheckout = await employerNeedsCheckout();
   return (
     <div>
       <PricingHero />
-      <TierGrid tiers={tiers} nextParam={nextParam} period={period} />
+      <TierGrid
+        tiers={tiers}
+        nextParam={nextParam}
+        period={period}
+        authedNeedsCheckout={authedNeedsCheckout}
+      />
       <CompareMatrix tiers={tiers} period={period} />
       <FAQ />
       <FinalCta nextParam={nextParam} />
     </div>
   );
+}
+
+/**
+ * True when the visitor is a signed-in employer (has a dso_users row) who does
+ * not yet have a live subscription — i.e. someone who should land in checkout,
+ * not the sign-up form, when they pick a tier. Anonymous visitors short-circuit
+ * on the cookie check (no DB round-trip).
+ */
+async function employerNeedsCheckout(): Promise<boolean> {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  const { data: dsoUser } = await supabase
+    .from("dso_users")
+    .select("dso_id")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+  if (!dsoUser) return false;
+
+  const { data: sub } = await supabase
+    .from("subscriptions")
+    .select("status")
+    .eq("dso_id", dsoUser.dso_id)
+    .maybeSingle();
+
+  // No subscription at all, or one that never finished checkout, means they
+  // still need to pick + pay.
+  return !sub || (sub.status as string) === "incomplete";
 }
 
 /* ───────── Hero ───────── */
@@ -81,10 +125,12 @@ function TierGrid({
   tiers,
   nextParam,
   period,
+  authedNeedsCheckout,
 }: {
   tiers: TierConfig[];
   nextParam: string | null;
   period: BillingPeriod;
+  authedNeedsCheckout: boolean;
 }) {
   return (
     <section className="px-6 sm:px-14 max-w-[1240px] mx-auto">
@@ -98,6 +144,7 @@ function TierGrid({
             tier={tier}
             nextParam={nextParam}
             period={period}
+            authedNeedsCheckout={authedNeedsCheckout}
           />
         ))}
       </div>
@@ -116,10 +163,12 @@ function TierCard({
   tier,
   nextParam,
   period,
+  authedNeedsCheckout,
 }: {
   tier: TierConfig;
   nextParam: string | null;
   period: BillingPeriod;
+  authedNeedsCheckout: boolean;
 }) {
   const isFeatured = tier.badge === "Most popular";
   const isAnnual = period === "annual";
@@ -140,6 +189,12 @@ function TierCard({
   // sign-up/checkout regardless of those pages' own defaults.
   const params = new URLSearchParams({ tier: tier.id, period });
   if (nextParam) params.set("next", nextParam);
+  // A signed-in employer without a live plan goes straight to checkout with the
+  // tier they just clicked — that click is the choice. New visitors keep the
+  // sign-up funnel (they need an account first).
+  const ctaHref = authedNeedsCheckout
+    ? `/employer/checkout?${params.toString()}`
+    : `/employer/sign-up?${params.toString()}`;
   return (
     <div
       className={`relative p-9 flex flex-col motion-safe:transition-all motion-safe:duration-200 ${
@@ -198,7 +253,7 @@ function TierCard({
       </div>
 
       <Link
-        href={`/employer/sign-up?${params.toString()}`}
+        href={ctaHref}
         className={`block text-center px-4 py-3.5 text-[12px] font-bold tracking-[1.5px] uppercase mb-6 transition-colors border ${
           isFeatured
             ? "bg-heritage text-ivory border-heritage hover:bg-heritage-deep hover:border-heritage-deep"

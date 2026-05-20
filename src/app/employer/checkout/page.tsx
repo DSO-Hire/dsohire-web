@@ -67,14 +67,20 @@ export default async function CheckoutPage({ searchParams }: PageProps) {
     redirect("/employer/dashboard");
   }
 
-  // Resolve the tier they picked at sign-up.
+  // Resolve the tier the consumer explicitly chose. Query param (the most
+  // recent click) wins, else the tier they picked at sign-up (user_metadata).
+  // We never *guess* a tier: if neither names one, send them to /pricing to
+  // choose rather than silently defaulting. (Defaulting to Solo trapped
+  // manually-seeded accounts — and a price is a purchase decision, so it must
+  // always be the consumer's pick, never ours.)
   const metadataTier = (user.user_metadata?.requested_tier as string) ?? "";
   const queryTier = (sp.tier as string) ?? "";
-  const tier = isPricingTier(queryTier)
+  const tier: PricingTier | null = isPricingTier(queryTier)
     ? queryTier
     : isPricingTier(metadataTier)
       ? metadataTier
-      : "solo";
+      : null;
+  if (!tier) redirect("/pricing");
 
   // Resolve the billing period (query wins, else sign-up metadata, else monthly).
   const metadataPeriod =
