@@ -8,13 +8,19 @@ import {
   resendSignUpCode,
   type SignUpState,
 } from "./actions";
-import type { PricingTier } from "@/lib/stripe/prices";
+import type { PricingTier, BillingPeriod } from "@/lib/stripe/prices";
 
 const initialForm: SignUpState = { ok: false, step: "form" };
 const initialVerify: SignUpState = { ok: false, step: "verify" };
 const initialResend: SignUpState = { ok: false, step: "verify" };
 
-export function SignUpForm({ initialTier }: { initialTier: PricingTier }) {
+export function SignUpForm({
+  initialTier,
+  initialPeriod,
+}: {
+  initialTier: PricingTier;
+  initialPeriod: BillingPeriod;
+}) {
   const [formState, submitForm, submittingForm] = useActionState(
     signUpEmployer,
     initialForm
@@ -122,6 +128,7 @@ export function SignUpForm({ initialTier }: { initialTier: PricingTier }) {
         <input type="text" name="website" tabIndex={-1} autoComplete="off" />
       </div>
       <input type="hidden" name="tier" value={initialTier} />
+      <input type="hidden" name="period" value={initialPeriod} />
 
       <Field
         label="Your full name"

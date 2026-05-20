@@ -18,8 +18,11 @@ import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
-import type { PricingTier } from "@/lib/stripe/prices";
-import { PRICING_TIERS } from "@/lib/stripe/prices";
+import {
+  PRICING_TIERS,
+  isPricingTier,
+  isBillingPeriod,
+} from "@/lib/stripe/prices";
 import { SUPPORT_EMAIL } from "@/lib/contact";
 
 export interface SignUpState {
@@ -83,7 +86,8 @@ export async function signUpEmployer(
     .trim()
     .toUpperCase();
   const practiceCountRaw = String(formData.get("practice_count") ?? "").trim();
-  const tierParam = String(formData.get("tier") ?? "starter").trim();
+  const tierParam = String(formData.get("tier") ?? "solo").trim();
+  const periodParam = String(formData.get("period") ?? "monthly").trim();
   const honeypot = String(formData.get("website") ?? "").trim();
 
   if (honeypot) {
@@ -122,7 +126,8 @@ export async function signUpEmployer(
       error: "If you're setting a password, it needs to be at least 8 characters. Or leave it blank — you can sign in via emailed code.",
     };
   }
-  const tier = isPricingTier(tierParam) ? tierParam : "starter";
+  const tier = isPricingTier(tierParam) ? tierParam : "solo";
+  const billingPeriod = isBillingPeriod(periodParam) ? periodParam : "monthly";
 
   const baseSlug = makeSlug(dsoName);
   if (!baseSlug) {
@@ -212,7 +217,11 @@ export async function signUpEmployer(
       full_name: fullName,
       role_during_signup: "employer",
       requested_tier: tier,
-      requested_tier_price_cents: PRICING_TIERS[tier].monthlyPriceCents,
+      requested_billing_period: billingPeriod,
+      requested_tier_price_cents:
+        billingPeriod === "annual"
+          ? PRICING_TIERS[tier].annualPriceCents
+          : PRICING_TIERS[tier].monthlyPriceCents,
     },
   });
 
@@ -322,10 +331,6 @@ export async function resendSignUpCode(
 }
 
 /* ───── helpers ───── */
-
-function isPricingTier(v: string): v is PricingTier {
-  return v === "starter" || v === "growth" || v === "enterprise";
-}
 
 function makeSlug(name: string): string {
   return name

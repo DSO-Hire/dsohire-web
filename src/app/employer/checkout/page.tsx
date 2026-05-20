@@ -22,7 +22,10 @@ import { getStripe } from "@/lib/stripe/server";
 import {
   PRICING_TIERS,
   getStripePriceId,
+  isPricingTier,
+  isBillingPeriod,
   type PricingTier,
+  type BillingPeriod,
 } from "@/lib/stripe/prices";
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
 import type { Metadata } from "next";
@@ -32,14 +35,10 @@ export const metadata: Metadata = {
 };
 
 interface PageProps {
-  searchParams: Promise<{ canceled?: string; tier?: string }>;
+  searchParams: Promise<{ canceled?: string; tier?: string; period?: string }>;
 }
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
-
-function isPricingTier(v: string): v is PricingTier {
-  return v === "starter" || v === "growth" || v === "enterprise";
-}
 
 export default async function CheckoutPage({ searchParams }: PageProps) {
   const sp = await searchParams;
@@ -75,9 +74,23 @@ export default async function CheckoutPage({ searchParams }: PageProps) {
     ? queryTier
     : isPricingTier(metadataTier)
       ? metadataTier
-      : "starter";
+      : "solo";
+
+  // Resolve the billing period (query wins, else sign-up metadata, else monthly).
+  const metadataPeriod =
+    (user.user_metadata?.requested_billing_period as string) ?? "";
+  const queryPeriod = (sp.period as string) ?? "";
+  const period: BillingPeriod = isBillingPeriod(queryPeriod)
+    ? queryPeriod
+    : isBillingPeriod(metadataPeriod)
+      ? metadataPeriod
+      : "monthly";
 
   const tierConfig = PRICING_TIERS[tier];
+  const isAnnual = period === "annual";
+  const displayPrice = isAnnual
+    ? tierConfig.annualMonthlyEquivalent
+    : tierConfig.monthlyPrice;
 
   // If user came back here via Stripe's cancel_url, render a re-entry screen
   // rather than auto-redirecting them into another Checkout session.
@@ -104,11 +117,13 @@ export default async function CheckoutPage({ searchParams }: PageProps) {
               {tierConfig.name}
             </div>
             <div className="text-[14px] text-slate-body mt-1">
-              ${tierConfig.monthlyPrice}/month · {tierConfig.tagline}
+              ${displayPrice.toLocaleString()}/month
+              {isAnnual ? " (billed annually)" : ""} · {tierConfig.tagline}
             </div>
           </div>
           <form action={createCheckoutSession} className="mt-6">
             <input type="hidden" name="tier" value={tier} />
+            <input type="hidden" name="period" value={period} />
             <button
               type="submit"
               className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
@@ -142,6 +157,7 @@ export default async function CheckoutPage({ searchParams }: PageProps) {
   // Default path: create session + redirect
   const sessionUrl = await buildCheckoutUrl({
     tier,
+    period,
     dsoId: dsoUser.dso_id,
     userId: user.id,
     userEmail: user.email ?? "",
@@ -180,8 +196,12 @@ export default async function CheckoutPage({ searchParams }: PageProps) {
 
 async function createCheckoutSession(formData: FormData) {
   "use server";
-  const tierParam = String(formData.get("tier") ?? "starter");
-  const tier: PricingTier = isPricingTier(tierParam) ? tierParam : "starter";
+  const tierParam = String(formData.get("tier") ?? "solo");
+  const tier: PricingTier = isPricingTier(tierParam) ? tierParam : "solo";
+  const periodParam = String(formData.get("period") ?? "monthly");
+  const period: BillingPeriod = isBillingPeriod(periodParam)
+    ? periodParam
+    : "monthly";
 
   const supabase = await createSupabaseServerClient();
   const {
@@ -198,6 +218,7 @@ async function createCheckoutSession(formData: FormData) {
 
   const url = await buildCheckoutUrl({
     tier,
+    period,
     dsoId: dsoUser.dso_id,
     userId: user.id,
     userEmail: user.email ?? "",
@@ -205,7 +226,7 @@ async function createCheckoutSession(formData: FormData) {
   });
 
   if (!url) {
-    redirect(`/employer/checkout?canceled=1&tier=${tier}`);
+    redirect(`/employer/checkout?canceled=1&tier=${tier}&period=${period}`);
   }
 
   redirect(url);
@@ -217,6 +238,7 @@ async function createCheckoutSession(formData: FormData) {
 
 interface BuildCheckoutParams {
   tier: PricingTier;
+  period: BillingPeriod;
   dsoId: string;
   userId: string;
   userEmail: string;
@@ -226,7 +248,7 @@ interface BuildCheckoutParams {
 async function buildCheckoutUrl(params: BuildCheckoutParams): Promise<string | null> {
   try {
     const stripe = getStripe();
-    const priceId = getStripePriceId(params.tier);
+    const priceId = getStripePriceId(params.tier, params.period);
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
@@ -239,16 +261,18 @@ async function buildCheckoutUrl(params: BuildCheckoutParams): Promise<string | n
         dso_id: params.dsoId,
         auth_user_id: params.userId,
         tier: params.tier,
+        billing_period: params.period,
       },
       subscription_data: {
         metadata: {
           dso_id: params.dsoId,
           auth_user_id: params.userId,
           tier: params.tier,
+          billing_period: params.period,
         },
       },
       success_url: `${SITE_URL}/employer/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${SITE_URL}/employer/checkout?canceled=1&tier=${params.tier}`,
+      cancel_url: `${SITE_URL}/employer/checkout?canceled=1&tier=${params.tier}&period=${params.period}`,
       allow_promotion_codes: true,
       billing_address_collection: "auto",
     });

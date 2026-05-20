@@ -27,7 +27,11 @@ import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getStripe } from "@/lib/stripe/server";
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
-import { tierFromStripePriceId, type PricingTier } from "@/lib/stripe/prices";
+import {
+  tierFromStripePriceId,
+  isPricingTier,
+  type PricingTier,
+} from "@/lib/stripe/prices";
 
 // Raw body required for signature verification — opt out of any parsing.
 export const dynamic = "force-dynamic";
@@ -299,15 +303,11 @@ function resolveTier(
   // Fall back to metadata (set at checkout creation) — useful for the rare
   // case where the price ID isn't recognized (e.g. a one-off promo price).
   const metaTier = subscription.metadata?.tier;
-  if (
-    metaTier === "starter" ||
-    metaTier === "growth" ||
-    metaTier === "enterprise"
-  ) {
+  if (isPricingTier(metaTier)) {
     return metaTier;
   }
-  // Last resort — Starter is the default tier
-  return "starter";
+  // Last resort — Solo is the default (lowest) tier
+  return "solo";
 }
 
 function tsToIso(ts: number | null | undefined): string | null {

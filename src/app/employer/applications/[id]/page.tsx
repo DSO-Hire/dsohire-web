@@ -587,7 +587,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const aiSuggesterAvailable =
     subStatus !== null &&
     (subStatus === "active" || subStatus === "trialing") &&
-    (subTier === "growth" || subTier === "enterprise");
+    (subTier === "growth" || subTier === "scale" || subTier === "enterprise");
   // Whether the application has enough signal to make AI suggestions
   // useful (≥1 screening answer OR ≥1 submitted scorecard).
   const aiSuggesterHasContext =

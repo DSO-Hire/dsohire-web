@@ -14,7 +14,12 @@
 import Link from "next/link";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { SignUpForm } from "./sign-up-form";
-import { PRICING_TIERS, type PricingTier } from "@/lib/stripe/prices";
+import {
+  PRICING_TIERS,
+  isPricingTier,
+  isBillingPeriod,
+  type BillingPeriod,
+} from "@/lib/stripe/prices";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -24,13 +29,20 @@ export const metadata: Metadata = {
 };
 
 interface PageProps {
-  searchParams: Promise<{ tier?: string }>;
+  searchParams: Promise<{ tier?: string; period?: string }>;
 }
 
 export default async function SignUpPage({ searchParams }: PageProps) {
-  const { tier: tierParam } = await searchParams;
-  const requestedTier = isPricingTier(tierParam) ? tierParam : "starter";
+  const { tier: tierParam, period: periodParam } = await searchParams;
+  const requestedTier = isPricingTier(tierParam) ? tierParam : "solo";
+  const period: BillingPeriod = isBillingPeriod(periodParam)
+    ? periodParam
+    : "monthly";
   const selectedTier = PRICING_TIERS[requestedTier];
+  const isAnnual = period === "annual";
+  const headlinePrice = isAnnual
+    ? selectedTier.annualMonthlyEquivalent
+    : selectedTier.monthlyPrice;
 
   return (
     <SiteShell>
@@ -50,7 +62,7 @@ export default async function SignUpPage({ searchParams }: PageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-px bg-[var(--rule)] border border-[var(--rule)]">
           {/* Form */}
           <div className="bg-white p-8 sm:p-10">
-            <SignUpForm initialTier={requestedTier} />
+            <SignUpForm initialTier={requestedTier} initialPeriod={period} />
           </div>
 
           {/* Tier sidebar */}
@@ -64,11 +76,18 @@ export default async function SignUpPage({ searchParams }: PageProps) {
             <div className="text-[14px] text-slate-body mb-5 leading-snug">
               {selectedTier.tagline}
             </div>
-            <div className="flex items-baseline gap-1.5 mb-6 pb-6 border-b border-[var(--rule)]">
-              <div className="text-4xl font-extrabold tracking-[-1px] text-ink">
-                ${selectedTier.monthlyPrice.toLocaleString()}
+            <div className="mb-6 pb-6 border-b border-[var(--rule)]">
+              <div className="flex items-baseline gap-1.5">
+                <div className="text-4xl font-extrabold tracking-[-1px] text-ink">
+                  ${headlinePrice.toLocaleString()}
+                </div>
+                <div className="text-[14px] text-slate-body font-medium">/ month</div>
               </div>
-              <div className="text-[14px] text-slate-body font-medium">/ month</div>
+              {isAnnual && (
+                <div className="mt-1 text-[12px] text-slate-meta">
+                  Billed annually · ${selectedTier.annualPrice.toLocaleString()}/yr
+                </div>
+              )}
             </div>
 
             <ul className="list-none space-y-2.5">
@@ -112,13 +131,5 @@ export default async function SignUpPage({ searchParams }: PageProps) {
         </p>
       </section>
     </SiteShell>
-  );
-}
-
-function isPricingTier(value: string | undefined): value is PricingTier {
-  return (
-    value === "starter" ||
-    value === "growth" ||
-    value === "enterprise"
   );
 }

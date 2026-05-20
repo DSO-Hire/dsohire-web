@@ -17,8 +17,10 @@ const BUCKET = "job-attachments";
 const SIGNED_URL_TTL_SECONDS = 60 * 60; // 1 hour
 
 export const JOB_ATTACHMENT_TIER_CAPS: Record<string, number> = {
-  starter: 2,
+  solo: 5,
+  starter: 2, // legacy tier, retained for old subscriptions
   growth: 20,
+  scale: 50,
   enterprise: 50,
   founding: 20,
   pro: 20,

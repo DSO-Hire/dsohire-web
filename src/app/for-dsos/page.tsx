@@ -876,7 +876,7 @@ function PricingTeaser() {
           Pick the tier that matches your practice count. Cancel or change tiers anytime.
         </SectionSub>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-[var(--rule)] border border-[var(--rule)] mt-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-[var(--rule)] border border-[var(--rule)] mt-10">
           {tiers.map((tier) => (
             <PricingTier key={tier.id} tier={tier} />
           ))}
@@ -950,8 +950,9 @@ function PricingTier({ tier }: { tier: TierConfig }) {
           isFeatured ? "text-ivory/55" : "text-slate-meta"
         }`}
       >
-        {tier.id === "starter" && "Most chosen for sub-20 location operators"}
-        {tier.id === "growth" && "Unlimited listings unlocked"}
+        {tier.id === "solo" && "For single & small group practices"}
+        {tier.id === "growth" && "Most chosen for growing groups"}
+        {tier.id === "scale" && "Unlimited listings + per-location analytics"}
         {tier.id === "enterprise" && "Account management included"}
       </div>
 
@@ -963,8 +964,9 @@ function PricingTier({ tier }: { tier: TierConfig }) {
             : "bg-ivory text-ink border-[var(--rule-strong)] hover:bg-ink hover:text-ivory hover:border-ink"
         }`}
       >
-        {tier.id === "starter" && "Start with Starter"}
+        {tier.id === "solo" && "Start with Solo"}
         {tier.id === "growth" && "Choose Growth"}
+        {tier.id === "scale" && "Choose Scale"}
         {tier.id === "enterprise" && "Contact Sales"}
       </Link>
 

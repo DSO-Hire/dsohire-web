@@ -15,7 +15,7 @@ export type PipelineActionResult =
   | { ok: false; error: string };
 
 /** Subscription tiers that unlock CRUD on pipeline stages. */
-export const PIPELINE_CRUD_TIERS = new Set(["growth", "enterprise"]);
+export const PIPELINE_CRUD_TIERS = new Set(["growth", "scale", "enterprise"]);
 
 /** Cap copy lives alongside MAX_STAGES_PER_DSO in stages.ts. */
 export const PIPELINE_KIND_HELP: Record<StageKind, string> = {

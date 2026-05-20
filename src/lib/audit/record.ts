@@ -111,7 +111,9 @@ export async function recordAuditEvent(
  * by the audit list page. Encoded in days; 0 means indefinite.
  */
 export const AUDIT_RETENTION_DAYS: Record<string, number> = {
-  starter: 7,
+  solo: 7,
+  starter: 7, // legacy tier, retained for old subscriptions
   growth: 30,
+  scale: 30,
   enterprise: 0,
 };

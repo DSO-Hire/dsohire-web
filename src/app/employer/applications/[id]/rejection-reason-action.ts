@@ -65,11 +65,12 @@ export type SuggestRejectionResult =
   | { ok: false; error: string };
 
 /**
- * Tiers that get the rejection-reason suggester. Starter is intentionally
- * excluded — this is a Growth+ feature per the locked tier matrix (R106).
+ * Tiers that get the rejection-reason suggester. Solo is intentionally
+ * excluded — this is a Growth-and-above feature per the locked tier matrix.
  */
 const ALLOWED_TIERS: ReadonlySet<PricingTier> = new Set<PricingTier>([
   "growth",
+  "scale",
   "enterprise",
 ]);
 

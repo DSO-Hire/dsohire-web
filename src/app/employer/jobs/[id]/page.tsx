@@ -215,7 +215,7 @@ export default async function PerJobPipelinePage({
   const _subTier = (subTierRow?.tier as string | undefined) ?? null;
   const aiSuggesterAvailable =
     (_subStatus === "active" || _subStatus === "trialing") &&
-    (_subTier === "growth" || _subTier === "enterprise");
+    (_subTier === "growth" || _subTier === "scale" || _subTier === "enterprise");
 
   type ScorecardSummaryRow = {
     application_id: string | null;

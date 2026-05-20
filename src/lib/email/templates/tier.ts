@@ -1,7 +1,7 @@
 /**
  * Tier-gating helper for the email templates feature (Phase 4.5.f).
  *
- * Custom email templates are a Growth + Enterprise feature. Starter
+ * Custom email templates are a Growth / Scale / Enterprise feature. Solo
  * subscribers see the editor as a Pro+ feature with a padlock state, and
  * the dispatch-path lookup short-circuits for them — the system falls
  * back to the default React Email component as if nothing changed.
@@ -16,7 +16,7 @@ import { getActiveSubscription } from "@/lib/billing/subscription";
 type SupabaseClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
 
 /** Tiers that unlock custom email templates. */
-const CUSTOM_TEMPLATE_TIERS = new Set(["growth", "enterprise"]);
+const CUSTOM_TEMPLATE_TIERS = new Set(["growth", "scale", "enterprise"]);
 
 /**
  * Returns true iff the DSO has an active subscription on Growth or Enterprise.

@@ -200,9 +200,9 @@ export default async function EditJobPage({ params }: PageProps) {
     loadJobAttachments(supabase, jobId),
     getActiveSubscription(supabase, dsoUser.dso_id as string),
   ]);
-  const subTier = sub?.tier ?? "starter";
+  const subTier = sub?.tier ?? "solo";
   const attachmentTierCap =
-    JOB_ATTACHMENT_TIER_CAPS[subTier] ?? JOB_ATTACHMENT_TIER_CAPS.starter;
+    JOB_ATTACHMENT_TIER_CAPS[subTier] ?? JOB_ATTACHMENT_TIER_CAPS.solo;
   const attachmentTierLabel = tierLabel(subTier);
 
   const initialQuestions: WizardScreeningQuestion[] = (

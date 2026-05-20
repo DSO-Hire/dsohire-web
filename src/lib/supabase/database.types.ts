@@ -3419,7 +3419,7 @@ export type Database = {
         | "incomplete"
         | "incomplete_expired"
         | "unpaid"
-      subscription_tier: "starter" | "growth" | "enterprise"
+      subscription_tier: "starter" | "growth" | "enterprise" | "solo" | "scale"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3599,7 +3599,7 @@ export const Constants = {
         "incomplete_expired",
         "unpaid",
       ],
-      subscription_tier: ["starter", "growth", "enterprise"],
+      subscription_tier: ["starter", "growth", "enterprise", "solo", "scale"],
     },
   },
 } as const

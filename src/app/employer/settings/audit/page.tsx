@@ -197,7 +197,7 @@ export default async function AuditSettingsPage({ searchParams }: PageProps) {
           <History className="h-3 w-3" />
           {tierRetentionDays === 0
             ? "Retention: indefinite (Enterprise)"
-            : `Retention: ${tierRetentionDays} days (${tier === "starter" ? "Starter" : "Growth"} tier)`}
+            : `Retention: ${tierRetentionDays} days (${tier.charAt(0).toUpperCase() + tier.slice(1)} tier)`}
         </div>
       </header>
 

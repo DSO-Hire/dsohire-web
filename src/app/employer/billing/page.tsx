@@ -22,7 +22,8 @@ import {
 } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { PRICING_TIERS } from "@/lib/stripe/prices";
+import { PRICING_TIERS, periodFromStripePriceId } from "@/lib/stripe/prices";
+import { getStripe } from "@/lib/stripe/server";
 import { SUPPORT_EMAIL } from "@/lib/contact";
 import { openCustomerPortal } from "./actions";
 import type { Metadata } from "next";
@@ -55,7 +56,7 @@ export default async function EmployerBillingPage({ searchParams }: PageProps) {
   const { data: sub } = await supabase
     .from("subscriptions")
     .select(
-      "id, tier, status, current_period_start, current_period_end, cancel_at_period_end, stripe_customer_id"
+      "id, tier, status, current_period_start, current_period_end, cancel_at_period_end, stripe_customer_id, stripe_price_id"
     )
     .eq("dso_id", dsoUser.dso_id)
     .maybeSingle();
@@ -84,6 +85,10 @@ export default async function EmployerBillingPage({ searchParams }: PageProps) {
   const subscription = sub as SubscriptionRow;
   const invoices = (rawInvoices ?? []) as InvoiceRow[];
   const tierConfig = PRICING_TIERS[subscription.tier as keyof typeof PRICING_TIERS] ?? null;
+  const billingPeriod = subscription.stripe_price_id
+    ? periodFromStripePriceId(subscription.stripe_price_id)
+    : null;
+  const card = await getCardSnapshot(subscription.stripe_customer_id);
 
   return (
     <EmployerShell active="billing">
@@ -126,7 +131,14 @@ export default async function EmployerBillingPage({ searchParams }: PageProps) {
               </div>
               {tierConfig && (
                 <div className="text-[14px] text-slate-body">
-                  ${tierConfig.monthlyPrice}/month · {tierConfig.tagline}
+                  $
+                  {(billingPeriod === "annual"
+                    ? tierConfig.annualMonthlyEquivalent
+                    : tierConfig.monthlyPrice
+                  ).toLocaleString()}
+                  /month
+                  {billingPeriod === "annual" ? " · billed annually" : ""} ·{" "}
+                  {tierConfig.tagline}
                 </div>
               )}
             </div>
@@ -149,6 +161,26 @@ export default async function EmployerBillingPage({ searchParams }: PageProps) {
                   : subscription.current_period_end
                     ? `Renews ${formatDate(subscription.current_period_end)}`
                     : "—"
+              }
+            />
+            <Field
+              label="Billing"
+              value={
+                billingPeriod === "annual"
+                  ? "Annual"
+                  : billingPeriod === "monthly"
+                    ? "Monthly"
+                    : "—"
+              }
+            />
+            <Field
+              label="Payment method"
+              value={
+                card
+                  ? `${formatCardBrand(card.brand)} ending ${card.last4} · exp ${String(
+                      card.expMonth
+                    ).padStart(2, "0")}/${card.expYear}`
+                  : "No card on file"
               }
             />
           </dl>
@@ -202,6 +234,14 @@ interface SubscriptionRow {
   current_period_end: string | null;
   cancel_at_period_end: boolean;
   stripe_customer_id: string | null;
+  stripe_price_id: string | null;
+}
+
+interface CardSnapshot {
+  brand: string;
+  last4: string;
+  expMonth: number;
+  expYear: number;
 }
 
 interface InvoiceRow {
@@ -375,4 +415,50 @@ function formatCurrency(cents: number, currency: string): string {
     minimumFractionDigits: 2,
   });
   return formatter.format(cents / 100);
+}
+
+/* ───── Stripe payment-method snapshot (E11.4) ───── */
+
+/**
+ * Read-only snapshot of the customer's card for the in-app billing page —
+ * a trust marker so owners can confirm which card is on file without leaving
+ * for the Stripe portal. Card changes still happen in the portal. Best-effort:
+ * any Stripe failure resolves to null and the page shows "No card on file".
+ */
+async function getCardSnapshot(
+  stripeCustomerId: string | null
+): Promise<CardSnapshot | null> {
+  if (!stripeCustomerId) return null;
+  try {
+    const stripe = getStripe();
+    const list = await stripe.paymentMethods.list({
+      customer: stripeCustomerId,
+      type: "card",
+      limit: 1,
+    });
+    const cardPm = list.data[0]?.card;
+    if (!cardPm) return null;
+    return {
+      brand: cardPm.brand,
+      last4: cardPm.last4,
+      expMonth: cardPm.exp_month,
+      expYear: cardPm.exp_year,
+    };
+  } catch (err) {
+    console.warn("[billing] card snapshot fetch failed:", err);
+    return null;
+  }
+}
+
+function formatCardBrand(brand: string): string {
+  const map: Record<string, string> = {
+    visa: "Visa",
+    mastercard: "Mastercard",
+    amex: "American Express",
+    discover: "Discover",
+    diners: "Diners Club",
+    jcb: "JCB",
+    unionpay: "UnionPay",
+  };
+  return map[brand] ?? brand.charAt(0).toUpperCase() + brand.slice(1);
 }
