@@ -71,7 +71,9 @@ export async function signUpEmployer(
   formData: FormData
 ): Promise<SignUpState> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  const fullName = String(formData.get("full_name") ?? "").trim();
+  const firstName = String(formData.get("first_name") ?? "").trim();
+  const lastName = String(formData.get("last_name") ?? "").trim();
+  const fullName = [firstName, lastName].filter(Boolean).join(" ");
   const password = String(formData.get("password") ?? "");
   // Normalize the DSO display name to title case at the data layer so
   // "dso hire" / "DSO HIRE" / "Dso Hire" all land as "Dso Hire" (with
@@ -98,8 +100,12 @@ export async function signUpEmployer(
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { ok: false, step: "form", error: "Please enter a valid email address." };
   }
-  if (!fullName) {
-    return { ok: false, step: "form", error: "Please enter your full name." };
+  if (!firstName || !lastName) {
+    return {
+      ok: false,
+      step: "form",
+      error: "Please enter your first and last name.",
+    };
   }
   if (!dsoName) {
     return { ok: false, step: "form", error: "Please enter your DSO name." };
@@ -198,7 +204,8 @@ export async function signUpEmployer(
     auth_user_id: authUserId,
     dso_id: dso.id,
     role: "owner",
-    full_name: fullName,
+    first_name: firstName,
+    last_name: lastName,
   });
 
   if (dsoUserError) {

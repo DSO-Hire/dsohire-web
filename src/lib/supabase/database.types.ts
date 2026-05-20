@@ -1915,8 +1915,10 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           dso_id: string
+          first_name: string | null
           full_name: string | null
           id: string
+          last_name: string | null
           phone: string | null
           preferred_timezone: string
           role: Database["public"]["Enums"]["dso_user_role"]
@@ -1927,8 +1929,9 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           dso_id: string
-          full_name?: string | null
+          first_name?: string | null
           id?: string
+          last_name?: string | null
           phone?: string | null
           preferred_timezone?: string
           role?: Database["public"]["Enums"]["dso_user_role"]
@@ -1939,8 +1942,9 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           dso_id?: string
-          full_name?: string | null
+          first_name?: string | null
           id?: string
+          last_name?: string | null
           phone?: string | null
           preferred_timezone?: string
           role?: Database["public"]["Enums"]["dso_user_role"]

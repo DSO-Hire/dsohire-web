@@ -130,13 +130,22 @@ export function SignUpForm({
       <input type="hidden" name="tier" value={initialTier} />
       <input type="hidden" name="period" value={initialPeriod} />
 
-      <Field
-        label="Your full name"
-        name="full_name"
-        autoComplete="name"
-        placeholder="Your full name"
-        required
-      />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Field
+          label="First name"
+          name="first_name"
+          autoComplete="given-name"
+          placeholder="First name"
+          required
+        />
+        <Field
+          label="Last name"
+          name="last_name"
+          autoComplete="family-name"
+          placeholder="Last name"
+          required
+        />
+      </div>
       <Field
         label="Work email"
         name="email"

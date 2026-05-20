@@ -71,11 +71,27 @@ export async function acceptInvitation(formData: FormData): Promise<void> {
     redirect(`/employer/invite/${token}`); // page renders the "other DSO" message
   }
 
-  // Pull the user's display name from auth user metadata if present
-  const fullName =
+  // Pull the user's display name from auth metadata, then split into
+  // first/last to match the dso_users schema (full_name is now a generated
+  // column). Single-token names land entirely in first_name.
+  const rawName = (
     (user.user_metadata?.full_name as string | undefined) ??
     (user.user_metadata?.name as string | undefined) ??
-    null;
+    ""
+  )
+    .trim()
+    .replace(/\s+/g, " ");
+  let firstName: string | null = null;
+  let lastName: string | null = null;
+  if (rawName) {
+    const idx = rawName.lastIndexOf(" ");
+    if (idx === -1) {
+      firstName = rawName;
+    } else {
+      firstName = rawName.slice(0, idx);
+      lastName = rawName.slice(idx + 1);
+    }
+  }
 
   // Insert the dso_users row + mark the invitation accepted (service-role
   // bypasses RLS — needed because the invitee isn't a member yet).
@@ -85,7 +101,8 @@ export async function acceptInvitation(formData: FormData): Promise<void> {
       auth_user_id: user.id,
       dso_id: invitation.dso_id as string,
       role: invitation.role as string,
-      full_name: fullName,
+      first_name: firstName,
+      last_name: lastName,
     })
     .select("id")
     .single();
