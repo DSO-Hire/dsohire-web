@@ -2052,10 +2052,18 @@ export type Database = {
       }
       email_log: {
         Row: {
+          bounce_kind: string | null
+          bounced_at: string | null
+          clicked_at: string | null
+          complained_at: string | null
           created_at: string
+          delivered_at: string | null
           error: string | null
           from_email: string | null
           id: string
+          last_event: string | null
+          last_event_at: string | null
+          opened_at: string | null
           related_candidate_id: string | null
           related_dso_id: string | null
           resend_message_id: string | null
@@ -2065,10 +2073,18 @@ export type Database = {
           to_email: string
         }
         Insert: {
+          bounce_kind?: string | null
+          bounced_at?: string | null
+          clicked_at?: string | null
+          complained_at?: string | null
           created_at?: string
+          delivered_at?: string | null
           error?: string | null
           from_email?: string | null
           id?: string
+          last_event?: string | null
+          last_event_at?: string | null
+          opened_at?: string | null
           related_candidate_id?: string | null
           related_dso_id?: string | null
           resend_message_id?: string | null
@@ -2078,10 +2094,18 @@ export type Database = {
           to_email: string
         }
         Update: {
+          bounce_kind?: string | null
+          bounced_at?: string | null
+          clicked_at?: string | null
+          complained_at?: string | null
           created_at?: string
+          delivered_at?: string | null
           error?: string | null
           from_email?: string | null
           id?: string
+          last_event?: string | null
+          last_event_at?: string | null
+          opened_at?: string | null
           related_candidate_id?: string | null
           related_dso_id?: string | null
           resend_message_id?: string | null
