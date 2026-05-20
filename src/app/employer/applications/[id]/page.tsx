@@ -1567,17 +1567,21 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             }
             tone="candidate"
           >
-            <MessagesThread
-              applicationId={app.id}
-              currentUserId={user.id}
-              currentUserRole="employer"
-              currentUserName={
-                dsoUsersRows.find((u) => u.auth_user_id === user.id)
-                  ?.full_name ?? "You"
-              }
-              otherPartyName={displayName}
-              initialMessages={initialMessages}
-            />
+            {/* Bounded height so the thread's internal overflow-y-auto engages
+                — a concise scroll window instead of growing to the full thread. */}
+            <div className="h-[560px]">
+              <MessagesThread
+                applicationId={app.id}
+                currentUserId={user.id}
+                currentUserRole="employer"
+                currentUserName={
+                  dsoUsersRows.find((u) => u.auth_user_id === user.id)
+                    ?.full_name ?? "You"
+                }
+                otherPartyName={displayName}
+                initialMessages={initialMessages}
+              />
+            </div>
           </DetailSection>
 
           {/* 07 · Offer — candidate-facing surface, only renders when
@@ -1855,12 +1859,12 @@ function DetailSection({
     <section id={id} className="scroll-mt-6">
       <header className="mb-4">
         <div
-          className={`flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-bold tracking-[2.5px] uppercase ${eyebrowColor}`}
+          className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] font-bold tracking-[2.5px] uppercase ${eyebrowColor} mb-1.5`}
         >
-          <span className="inline-flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5">
             {tone === "internal" && <Lock className="h-3 w-3" />}
             <Icon className="h-3.5 w-3.5" />
-            <span>{num} · {title}</span>
+            <span>{num}</span>
           </span>
           {badge && (
             <span className="text-[9px] font-bold tracking-[1.5px] uppercase px-2 py-0.5 bg-heritage/15 text-heritage-deep">
@@ -1868,6 +1872,9 @@ function DetailSection({
             </span>
           )}
         </div>
+        <h2 className="text-xl sm:text-2xl font-extrabold tracking-[-0.6px] text-ink leading-tight">
+          {title}
+        </h2>
         {subtitle && (
           <p className="text-[13px] text-slate-meta mt-2 leading-relaxed">
             {subtitle}

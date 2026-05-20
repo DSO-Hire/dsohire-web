@@ -254,10 +254,16 @@ export function WhyThisMatch({
  */
 function NarrativeSkeleton() {
   return (
-    <div className="space-y-2 animate-pulse" aria-hidden>
-      <div className="h-3 bg-slate-200/70 w-[92%] rounded-sm" />
-      <div className="h-3 bg-slate-200/70 w-[88%] rounded-sm" />
-      <div className="h-3 bg-slate-200/70 w-[60%] rounded-sm" />
+    <div aria-hidden>
+      <div className="flex items-center gap-1.5 mb-2 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+        <Sparkles className="h-3 w-3" />
+        Summarizing the match…
+      </div>
+      <div className="space-y-2 animate-pulse">
+        <div className="h-3 bg-slate-200/70 w-[92%] rounded-sm" />
+        <div className="h-3 bg-slate-200/70 w-[88%] rounded-sm" />
+        <div className="h-3 bg-slate-200/70 w-[60%] rounded-sm" />
+      </div>
     </div>
   );
 }
