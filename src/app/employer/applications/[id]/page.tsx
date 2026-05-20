@@ -1337,6 +1337,13 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             </div>
           </DetailSection>
 
+          {/* Quick actions — candidate tags (E3.22) + move/copy (E3.21),
+              surfaced at the top of the page for discoverability. */}
+          <div id="tags" className="scroll-mt-6">
+            <TagsSection applicationId={app.id} initialTags={initialTags} />
+          </div>
+          <MoveCopyCard applicationId={app.id} />
+
           {/* 02 · Practice Fit (Phase 5D v0 — structured-feature scoring) */}
           <DetailSection
             id="fit"
@@ -1690,16 +1697,6 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               initialOtherScorecards={initialOtherScorecards}
             />
           </DetailSection>
-
-          {/* Candidate tags (E3.22) — team-level labels, chips also show on the kanban card */}
-          <div id="tags" className="mb-12 scroll-mt-24">
-            <TagsSection applicationId={app.id} initialTags={initialTags} />
-          </div>
-
-          {/* Move/copy candidate to another job (E3.21) */}
-          <div className="mb-12">
-            <MoveCopyCard applicationId={app.id} />
-          </div>
 
           {/* 11 (or 10) · Team comments */}
           <DetailSection
