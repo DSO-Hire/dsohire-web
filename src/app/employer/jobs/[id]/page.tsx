@@ -27,6 +27,11 @@ import {
   type BoardView,
 } from "./applications/applications-board";
 import type { KanbanApplication } from "./applications/kanban-board";
+import {
+  isTagColor,
+  type ApplicationTag,
+  type TagColor,
+} from "@/lib/applications/tags";
 import type { PipelineStage, StageKind } from "@/lib/applications/stages";
 import { getPracticeFitForJob } from "@/lib/practice-fit/get-or-compute";
 import type { FitResult } from "@/lib/practice-fit/types";
@@ -176,6 +181,30 @@ export default async function PerJobPipelinePage({
     }
   }
 
+  // E3.22 — candidate tags for the kanban card chips.
+  const { data: rawTagRows } = appIds.length
+    ? await supabase
+        .from("application_tags")
+        .select("id, application_id, label, color")
+        .in("application_id", appIds)
+        .order("created_at", { ascending: true })
+    : { data: [] };
+  const tagsByApp = new Map<string, ApplicationTag[]>();
+  for (const row of (rawTagRows ?? []) as Array<{
+    id: string;
+    application_id: string;
+    label: string;
+    color: string;
+  }>) {
+    const list = tagsByApp.get(row.application_id) ?? [];
+    list.push({
+      id: row.id,
+      label: row.label,
+      color: isTagColor(row.color) ? (row.color as TagColor) : "slate",
+    });
+    tagsByApp.set(row.application_id, list);
+  }
+
   const { data: rawScorecardSummaries } = appIds.length
     ? await supabase
         .from("application_scorecard_summaries")
@@ -260,6 +289,7 @@ export default async function PerJobPipelinePage({
       candidate: candMap.get(a.candidate_id) ?? null,
       jobTitle,
       comment_count: countMap.get(a.id) ?? 0,
+      tags: tagsByApp.get(a.id) ?? [],
       scorecard_avg: summary?.avg ?? null,
       scorecard_reviewer_count: summary?.reviewers ?? 0,
       practiceFit: fitMap.get(a.candidate_id) ?? null,

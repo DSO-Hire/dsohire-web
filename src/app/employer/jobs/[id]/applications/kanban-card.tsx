@@ -32,6 +32,7 @@ import {
   STAGE_HEAT_CLASSES,
 } from "@/lib/applications/stages";
 import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
+import { TAG_COLOR_CLASSES } from "@/lib/applications/tags";
 import type { KanbanApplication } from "./kanban-board";
 
 interface KanbanCardProps {
@@ -161,6 +162,18 @@ export function KanbanCard({
       <div className="text-[12px] text-slate-body truncate mb-2">
         {cand?.current_title || cand?.headline || "Profile minimal"}
       </div>
+      {application.tags.length > 0 && (
+        <div className="mb-2 flex flex-wrap gap-1">
+          {application.tags.map((tag) => (
+            <span
+              key={tag.id}
+              className={`inline-flex items-center px-1.5 py-0.5 text-[10px] font-semibold border ${TAG_COLOR_CLASSES[tag.color]}`}
+            >
+              {tag.label}
+            </span>
+          ))}
+        </div>
+      )}
       {application.practiceFit && (
         <div className="mb-2">
           <PracticeFitChip fit={application.practiceFit} size="sm" />

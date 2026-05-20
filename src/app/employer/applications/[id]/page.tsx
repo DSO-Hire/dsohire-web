@@ -49,6 +49,12 @@ import {
 } from "@/components/interviews/interview-section";
 import { AffiliationCard } from "./affiliation-card";
 import { NotesEditor } from "./notes-editor";
+import { TagsSection } from "./tags-section";
+import {
+  isTagColor,
+  type ApplicationTag,
+  type TagColor,
+} from "@/lib/applications/tags";
 import {
   CommentsThread,
   type CommentDsoUser,
@@ -446,6 +452,17 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
       !m.read_at &&
       m.sender_role === "candidate"
   ).length;
+
+  const { data: rawTags } = await supabase
+    .from("application_tags")
+    .select("id, label, color")
+    .eq("application_id", appId)
+    .order("created_at", { ascending: true });
+  const initialTags: ApplicationTag[] = (rawTags ?? []).map((t) => ({
+    id: t.id as string,
+    label: t.label as string,
+    color: (isTagColor(t.color as string) ? (t.color as TagColor) : "slate"),
+  }));
 
   const { data: rawComments } = await supabase
     .from("application_comments")
@@ -1668,6 +1685,11 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               initialOtherScorecards={initialOtherScorecards}
             />
           </DetailSection>
+
+          {/* Candidate tags (E3.22) — team-level labels, chips also show on the kanban card */}
+          <div id="tags" className="mb-12 scroll-mt-24">
+            <TagsSection applicationId={app.id} initialTags={initialTags} />
+          </div>
 
           {/* 11 (or 10) · Team comments */}
           <DetailSection

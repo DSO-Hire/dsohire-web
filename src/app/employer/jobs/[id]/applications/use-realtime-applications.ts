@@ -184,6 +184,7 @@ export function useRealtimeApplications({
             comment_count: 0,
             scorecard_avg: null,
             scorecard_reviewer_count: 0,
+            tags: [],
           });
         }
       }

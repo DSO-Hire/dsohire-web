@@ -93,6 +93,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { RejectReasonAiSuggester } from "@/app/employer/applications/[id]/reject-reason-ai-suggester";
+import type { ApplicationTag } from "@/lib/applications/tags";
 
 export interface KanbanApplication extends ApplicationsListItem {
   stage_entered_at: string;
@@ -100,6 +101,7 @@ export interface KanbanApplication extends ApplicationsListItem {
   comment_count: number;
   scorecard_avg: number | null;
   scorecard_reviewer_count: number;
+  tags: ApplicationTag[];
 }
 
 interface KanbanBoardProps {
