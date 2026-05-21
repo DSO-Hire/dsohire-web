@@ -1033,6 +1033,71 @@ export async function setJobStatus(
 }
 
 /**
+ * E1.22 — Set a job's visibility (public ↔ internal_only).
+ *
+ * Internal-only jobs are hidden from every public discovery surface (job
+ * board, map, company pages, public counts, JobPosting JSON-LD) but the
+ * canonical /jobs/[id] page still renders so recruiters can share a
+ * direct link. RLS on jobs.UPDATE enforces recruiter+ scope.
+ */
+export async function setJobVisibility(
+  _prev: JobActionState,
+  formData: FormData
+): Promise<JobActionState> {
+  const jobId = String(formData.get("job_id") ?? "").trim();
+  const newVisibility = String(formData.get("new_visibility") ?? "").trim();
+
+  if (!jobId) return { ok: false, error: "Missing job." };
+  if (newVisibility !== "public" && newVisibility !== "internal_only") {
+    return { ok: false, error: "Invalid visibility." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+
+  // Snapshot title + dso_id for the audit log + the public-page revalidate.
+  const { data: priorJob } = await supabase
+    .from("jobs")
+    .select("dso_id, title, slug, visibility")
+    .eq("id", jobId)
+    .maybeSingle();
+  const priorVisibility =
+    (priorJob as Record<string, unknown> | null)?.visibility as string | null;
+  const jobTitle =
+    ((priorJob as Record<string, unknown> | null)?.title as string | null) ??
+    "the job";
+  const dsoId =
+    (priorJob as Record<string, unknown> | null)?.dso_id as string | null;
+
+  const { error } = await supabase
+    .from("jobs")
+    .update({ visibility: newVisibility })
+    .eq("id", jobId);
+  if (error) return { ok: false, error: error.message };
+
+  if (dsoId && priorVisibility !== newVisibility) {
+    void emitJobAuditEvent(supabase, dsoId, jobId, {
+      eventKind: "job.visibility_changed",
+      summary:
+        newVisibility === "internal_only"
+          ? `Made "${jobTitle}" internal-only`
+          : `Made "${jobTitle}" public`,
+      metadata: {
+        job_id: jobId,
+        title: jobTitle,
+        from_visibility: priorVisibility,
+        to_visibility: newVisibility,
+      },
+    });
+  }
+
+  // Refresh the management surface + the public posting + discovery pages.
+  revalidatePath(`/employer/jobs/${jobId}`);
+  revalidatePath(`/jobs/${jobId}`);
+  revalidatePath(`/jobs`);
+  return { ok: true };
+}
+
+/**
  * Clone an existing job (E1.15 / Cam re-audit 2026-05-11).
  *
  * Universal ATS pattern absent from the dental cluster — saves the

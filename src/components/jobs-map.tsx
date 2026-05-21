@@ -1110,7 +1110,7 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
       {/* Map canvas */}
       <div
         ref={containerRef}
-        className="w-full h-[640px] border border-[var(--rule)] bg-cream"
+        className="w-full h-[68vh] min-h-[420px] sm:h-[640px] border border-[var(--rule)] bg-cream"
         style={{ borderRadius: 0 }}
       />
 

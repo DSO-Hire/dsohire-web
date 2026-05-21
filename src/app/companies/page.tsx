@@ -141,6 +141,7 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
       .select("dso_id, role_category")
       .in("dso_id", dsoIds)
       .eq("status", "active")
+      .eq("visibility", "public") // E1.22 — internal-only jobs never count toward public totals
       .is("deleted_at", null);
 
     if (jobRowsError) {

@@ -20,6 +20,7 @@ import {
   ArrowRight,
   Briefcase,
   ChevronRight,
+  Lock,
   Mail,
   MapPin,
   Plus,
@@ -119,7 +120,7 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
   let jobsQuery = supabase
     .from("jobs")
     .select(
-      "id, title, slug, status, employment_type, role_category, posted_at, applications_count, views, updated_at",
+      "id, title, slug, status, employment_type, role_category, posted_at, applications_count, views, updated_at, visibility",
     )
     .eq("dso_id", dsoUser.dso_id)
     .is("deleted_at", null);
@@ -147,6 +148,7 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
     applications_count: number;
     views: number;
     updated_at: string;
+    visibility: string;
   };
   const allJobs = (allJobsRaw ?? []) as AllJobRow[];
 
@@ -828,6 +830,7 @@ interface JobRowData {
   applications_count: number;
   views: number;
   updated_at: string;
+  visibility: string;
 }
 
 function JobRow({
@@ -874,9 +877,15 @@ function JobRow({
     >
       <StatusBadge status={job.status} />
       <div className="min-w-0">
-        <div className="flex gap-3 mb-1.5 text-[10px] font-bold tracking-[1.4px] uppercase text-slate-meta">
+        <div className="flex flex-wrap items-center gap-3 mb-1.5 text-[10px] font-bold tracking-[1.4px] uppercase text-slate-meta">
           <span>{humanRoleCategory(job.role_category)}</span>
           <span>{humanEmploymentType(job.employment_type)}</span>
+          {job.visibility === "internal_only" && (
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 border border-[var(--rule-strong)] text-ink">
+              <Lock className="h-2.5 w-2.5" />
+              Internal
+            </span>
+          )}
         </div>
         <div className="text-[16px] font-extrabold tracking-[-0.2px] leading-tight text-ink truncate mb-1">
           {job.title}

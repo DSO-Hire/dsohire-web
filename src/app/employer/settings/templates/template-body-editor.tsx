@@ -247,7 +247,7 @@ function InsertVariableMenu({
             className="fixed inset-0 z-40 cursor-default bg-transparent"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute left-0 top-full z-50 mt-1 w-[280px] max-h-[360px] overflow-y-auto border border-[var(--rule-strong)] bg-white shadow-lg">
+          <div className="absolute left-0 top-full z-50 mt-1 w-[280px] max-w-[calc(100vw-2rem)] max-h-[360px] overflow-y-auto border border-[var(--rule-strong)] bg-white shadow-lg">
             {groups.map((group) => (
               <div key={group.id}>
                 <div className="border-b border-t border-[var(--rule)] bg-cream/50 px-3 py-1.5 text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep">

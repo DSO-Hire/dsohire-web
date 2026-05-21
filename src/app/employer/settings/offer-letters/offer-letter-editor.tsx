@@ -546,7 +546,7 @@ function InsertMergeFieldDropdown({
       {open && (
         <div
           role="menu"
-          className="absolute right-0 mt-1 z-30 w-[320px] max-h-[400px] overflow-y-auto border border-[var(--rule-strong)] bg-white shadow-lg"
+          className="absolute right-0 mt-1 z-30 w-[320px] max-w-[calc(100vw-2rem)] max-h-[400px] overflow-y-auto border border-[var(--rule-strong)] bg-white shadow-lg"
         >
           {grouped.map((g) => (
             <div key={g.id}>

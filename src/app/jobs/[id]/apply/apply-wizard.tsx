@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { applyToJob } from "./actions";
 import { addInlineCredential } from "./credential-actions";
+import { EeoSelfId } from "./eeo-self-id";
 import type {
   AnswerValue,
   CandidateCredential,
@@ -411,6 +412,10 @@ export function ApplyWizard(props: ApplyWizardProps) {
             </Link>
           </div>
         </div>
+        {/* E2.17 — voluntary EEO self-ID, post-application (success screen only). */}
+        {submitted.applicationId && !submitted.alreadyApplied && (
+          <EeoSelfId applicationId={submitted.applicationId} />
+        )}
       </div>
     );
   }

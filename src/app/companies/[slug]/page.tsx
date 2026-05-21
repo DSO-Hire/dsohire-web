@@ -158,6 +158,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
       )
       .eq("dso_id", dsoRow.id)
       .eq("status", "active")
+      .eq("visibility", "public") // E1.22 — internal-only jobs are hidden from public company pages
       .is("deleted_at", null)
       .order("posted_at", { ascending: false, nullsFirst: false }),
     supabase

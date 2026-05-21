@@ -19,7 +19,7 @@
 
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
-import { ArrowLeft, Copy, Download, ExternalLink, MapPin, Pencil, Users } from "lucide-react";
+import { ArrowLeft, Copy, Download, ExternalLink, Lock, MapPin, Pencil, Users } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
@@ -35,7 +35,7 @@ import {
 import type { PipelineStage, StageKind } from "@/lib/applications/stages";
 import { getPracticeFitForJob } from "@/lib/practice-fit/get-or-compute";
 import type { FitResult } from "@/lib/practice-fit/types";
-import { JobStatusActions } from "./status-actions";
+import { JobStatusActions, JobVisibilityToggle } from "./status-actions";
 import { cloneJob } from "../actions";
 import {
   getPerJobAnalytics,
@@ -94,7 +94,7 @@ export default async function PerJobPipelinePage({
 
   const { data: job } = await supabase
     .from("jobs")
-    .select("id, title, dso_id, status, applications_count, views, scope")
+    .select("id, title, dso_id, status, applications_count, views, scope, visibility")
     .eq("id", jobId)
     .eq("dso_id", dsoUser.dso_id)
     .maybeSingle();
@@ -301,6 +301,8 @@ export default async function PerJobPipelinePage({
 
   const initialView: BoardView = sp.view === "list" ? "list" : "kanban";
   const status = job.status as string;
+  const visibility = (job.visibility as string) ?? "public";
+  const isInternalOnly = visibility === "internal_only";
 
   // Phase 5C analytics + funnel + stage dwell + Phase 5D Smart Picks.
   const [analytics, funnel, stageDwell, smartPicks] = await Promise.all([
@@ -356,6 +358,12 @@ export default async function PerJobPipelinePage({
                   ? "Closed Job"
                   : status}
           </div>
+          {isInternalOnly && (
+            <span className="mb-2 inline-flex items-center gap-1.5 border border-[var(--rule-strong)] bg-cream px-2.5 py-1 text-[10px] font-bold uppercase tracking-[1.5px] text-ink">
+              <Lock className="h-3 w-3" />
+              Internal-only · hidden from public
+            </span>
+          )}
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink">
             {jobTitle}
           </h1>
@@ -439,6 +447,7 @@ export default async function PerJobPipelinePage({
             Export CSV
           </a>
           <JobStatusActions jobId={jobId} currentStatus={status} />
+          <JobVisibilityToggle jobId={jobId} currentVisibility={visibility} />
         </div>
       </header>
 

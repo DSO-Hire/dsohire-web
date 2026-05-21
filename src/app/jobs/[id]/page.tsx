@@ -123,7 +123,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
   const { data: job } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, variable_comp_enabled, variable_comp_target, variable_comp_structure, bonus_enabled, bonus_target, benefits, requirements, posted_at, status, schedule_days, schedule_evenings, schedule_weekends, scope, external_links, corporate_function, work_mode, work_mode_detail, remote_state_restrictions, travel_expectation, travel_territory, reports_to, direct_reports_band, indirect_reports_band, authority_level, education_requirement, industry_experience, min_years_corporate_experience, max_years_corporate_experience, bonus_structure, equity_offered, equity_note"
+      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, variable_comp_enabled, variable_comp_target, variable_comp_structure, bonus_enabled, bonus_target, benefits, requirements, posted_at, status, schedule_days, schedule_evenings, schedule_weekends, scope, external_links, corporate_function, work_mode, work_mode_detail, remote_state_restrictions, travel_expectation, travel_territory, reports_to, direct_reports_band, indirect_reports_band, authority_level, education_requirement, industry_experience, min_years_corporate_experience, max_years_corporate_experience, bonus_structure, equity_offered, equity_note, visibility"
     )
     .eq("id", id)
     .maybeSingle();
@@ -906,11 +906,16 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
         </div>
       </article>
 
-      {/* JSON-LD JobPosting for Google for Jobs */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      {/* JSON-LD JobPosting for Google for Jobs. E1.22 — internal-only jobs
+          are reachable by direct link but are NOT public postings, so we
+          suppress the structured data (this is also the hook the future
+          Google for Jobs feed uses to exclude internal roles). */}
+      {(job.visibility as string) !== "internal_only" && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
     </SiteShell>
   );
 }

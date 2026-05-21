@@ -123,7 +123,7 @@ export function JobsListControls({
                 onClick={() => setLocOpen(false)}
                 className="fixed inset-0 z-20"
               />
-              <div className="absolute right-0 top-full mt-1 z-30 w-[280px] max-h-[360px] overflow-y-auto bg-white border border-[var(--rule-strong)] shadow-[0_8px_24px_-8px_rgba(7,15,28,0.15)]">
+              <div className="absolute right-0 top-full mt-1 z-30 w-[280px] max-w-[calc(100vw-2rem)] max-h-[360px] overflow-y-auto bg-white border border-[var(--rule-strong)] shadow-[0_8px_24px_-8px_rgba(7,15,28,0.15)]">
                 <div className="px-3 py-2 border-b border-[var(--rule)] flex items-center justify-between">
                   <span className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
                     Filter by location

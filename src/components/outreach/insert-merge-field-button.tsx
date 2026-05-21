@@ -99,7 +99,7 @@ export function InsertMergeFieldButton({
       {open && (
         <div
           role="menu"
-          className="absolute right-0 mt-1 z-30 min-w-[260px] border border-[var(--rule-strong)] bg-white shadow-lg"
+          className="absolute right-0 mt-1 z-30 min-w-[260px] max-w-[calc(100vw-2rem)] border border-[var(--rule-strong)] bg-white shadow-lg"
         >
           <ul className="py-1">
             {SUPPORTED_MERGE_FIELDS.map((f) => (

@@ -413,6 +413,47 @@ export type Database = {
           },
         ]
       }
+      application_eeo_responses: {
+        Row: {
+          application_id: string
+          disability_status: string | null
+          gender: string | null
+          id: string
+          race_ethnicity: string | null
+          submitted_at: string
+          updated_at: string
+          veteran_status: string | null
+        }
+        Insert: {
+          application_id: string
+          disability_status?: string | null
+          gender?: string | null
+          id?: string
+          race_ethnicity?: string | null
+          submitted_at?: string
+          updated_at?: string
+          veteran_status?: string | null
+        }
+        Update: {
+          application_id?: string
+          disability_status?: string | null
+          gender?: string | null
+          id?: string
+          race_ethnicity?: string | null
+          submitted_at?: string
+          updated_at?: string
+          veteran_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_eeo_responses_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: true
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       application_question_answers: {
         Row: {
           answer_choice: string | null
@@ -2706,6 +2747,7 @@ export type Database = {
           schedule_evenings: boolean
           schedule_weekends: boolean
           scope: Database["public"]["Enums"]["job_scope"]
+          visibility: Database["public"]["Enums"]["job_visibility"]
           search_vector: unknown
           slug: string
           specialty: string[]
@@ -2764,6 +2806,7 @@ export type Database = {
           schedule_evenings?: boolean
           schedule_weekends?: boolean
           scope?: Database["public"]["Enums"]["job_scope"]
+          visibility?: Database["public"]["Enums"]["job_visibility"]
           search_vector?: unknown
           slug: string
           specialty?: string[]
@@ -2822,6 +2865,7 @@ export type Database = {
           schedule_evenings?: boolean
           schedule_weekends?: boolean
           scope?: Database["public"]["Enums"]["job_scope"]
+          visibility?: Database["public"]["Enums"]["job_visibility"]
           search_vector?: unknown
           slug?: string
           specialty?: string[]
@@ -3397,6 +3441,7 @@ export type Database = {
           schedule_evenings: boolean
           schedule_weekends: boolean
           scope: Database["public"]["Enums"]["job_scope"]
+          visibility: Database["public"]["Enums"]["job_visibility"]
           search_vector: unknown
           slug: string
           specialty: string[]
@@ -3454,6 +3499,7 @@ export type Database = {
       interview_kind: "phone" | "video" | "in_person" | "other"
       interview_proposal_status: "pending" | "booked" | "cancelled" | "expired"
       job_scope: "location" | "regional" | "corporate"
+      job_visibility: "public" | "internal_only"
       job_status:
         | "draft"
         | "active"
@@ -3630,6 +3676,7 @@ export const Constants = {
       interview_kind: ["phone", "video", "in_person", "other"],
       interview_proposal_status: ["pending", "booked", "cancelled", "expired"],
       job_scope: ["location", "regional", "corporate"],
+      job_visibility: ["public", "internal_only"],
       job_status: [
         "draft",
         "active",
