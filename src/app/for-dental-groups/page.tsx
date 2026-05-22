@@ -1044,7 +1044,7 @@ function FinalCta() {
 const FAQ_ITEMS = [
   {
     q: "What does the subscription actually cover?",
-    a: "Multi-location job postings, the full applicant pipeline with kanban + scorecards + team comments, candidate dashboards, branded company page, application + candidate data exports for your HR records, and Stripe-secured billing. Pricing scales with your practice count; features are the same depth at every paid tier. Active-listing caps are tier-based — Starter up to 50 active listings, Growth and Enterprise unlimited.",
+    a: "Multi-location job postings, the full applicant pipeline with kanban + scorecards + team comments, candidate dashboards, branded company page, application + candidate data exports for your HR records, and Stripe-secured billing. Pricing scales with your practice count; features are the same depth at every paid tier. Active-listing caps are tier-based — Solo up to 5, Growth up to 20, Scale and Enterprise unlimited.",
   },
   {
     q: "Can I cancel or change tiers anytime?",
@@ -1056,7 +1056,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Can I add my team — recruiters, regional managers, office managers?",
-    a: "Yes. Starter includes up to 10 admin seats; Growth and Enterprise are unlimited. Hiring managers can be scoped to specific locations so they only see and act on what's relevant to them; admins see the whole DSO. Adding teammates doesn't change your billing — seat counts are bundled into the tier.",
+    a: "Yes. Solo includes 3 admin seats and Growth includes 10; Scale and Enterprise are unlimited. Hiring managers can be scoped to specific locations so they only see and act on what's relevant to them; admins see the whole group. Adding teammates doesn't change your billing — seat counts are bundled into the tier.",
   },
   {
     q: "Do you take a placement fee?",
