@@ -407,10 +407,10 @@ function ProofStrip() {
       <div className="max-w-[1240px] mx-auto flex flex-wrap items-center justify-between gap-10">
         <div className="text-[12px] font-bold tracking-[2.5px] uppercase text-slate-body">
           Designed With{" "}
-          <strong className="text-ink">Mid-Market DSO Operators</strong>
+          <strong className="text-ink">Mid-Market Dental Group Operators</strong>
         </div>
         <div className="flex flex-wrap gap-9 items-center">
-          <ProofTagline>Multi-Location DSOs</ProofTagline>
+          <ProofTagline>Multi-Location Dental Groups</ProofTagline>
           <ProofTagline>No Per-Listing Fees</ProofTagline>
           <ProofTagline>Flat Monthly Fee</ProofTagline>
           <ProofTagline>No Placement Charges</ProofTagline>
@@ -716,8 +716,8 @@ const SHOWCASE_BOTTOM: ShowcaseFeature[] = [
   },
   {
     icon: BadgeCheck,
-    title: "Multi-location DSO employers",
-    body: "Every job is posted by an active dental support organization running multiple practices. No staffing agencies, no recruiters, no solo practices padding the listings — prohibited by our Acceptable Use Policy.",
+    title: "Multi-location dental group employers",
+    body: "Every job is posted by an active dental group running multiple practices. No staffing agencies, no recruiters, no solo practices padding the listings — prohibited by our Acceptable Use Policy.",
     status: "now",
   },
 ];
@@ -825,7 +825,7 @@ function HowItWorks() {
           From subscription to staffed in three steps.
         </h2>
         <p className="text-base text-ivory/60 max-w-[620px] leading-[1.7] mb-14">
-          Most DSOs are posting their first role within an hour of signing up.
+          Most dental groups are posting their first role within an hour of signing up.
         </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mt-6">
@@ -1057,11 +1057,11 @@ const FAQ_ITEMS = [
   },
   {
     q: "How fast can we get started?",
-    a: "Most DSOs are posting their first role within an hour of signing up. Sign up, pay through Stripe, add your locations, and you're live. No implementation fees, no demo gauntlet, no sales call required.",
+    a: "Most dental groups are posting their first role within an hour of signing up. Sign up, pay through Stripe, add your locations, and you're live. No implementation fees, no demo gauntlet, no sales call required.",
   },
   {
     q: "What about Indeed, LinkedIn, and the other major job boards?",
-    a: "Today, every DSO Hire job is searchable on the platform and indexed by Google for Jobs. Cross-posting integrations to Indeed, LinkedIn, and Facebook are on the H2 2026 roadmap — until then, many DSOs cross-post manually using the listing copy we generate.",
+    a: "Today, every DSO Hire job is searchable on the platform and indexed by Google for Jobs. Cross-posting integrations to Indeed, LinkedIn, and Facebook are on the H2 2026 roadmap — until then, many dental groups cross-post manually using the listing copy we generate.",
   },
 ];
 

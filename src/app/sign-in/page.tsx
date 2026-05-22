@@ -35,7 +35,7 @@ export default function SignInPickerPage() {
         </h1>
         <p className="text-base sm:text-lg text-slate-body leading-relaxed max-w-[640px] mb-14">
           Two account types — pick the one that matches you. If you post jobs
-          for a dental support organization, you&apos;re a DSO. If you&apos;re
+          for a dental group, you&apos;re an employer. If you&apos;re
           looking for one, you&apos;re a candidate.
         </p>
 

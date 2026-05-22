@@ -158,7 +158,7 @@ export default function CandidateHelpPage() {
           <ul className="list-disc space-y-1 pl-5 text-[13px] text-slate-body leading-relaxed">
             <li>
               We never sell candidate data — not to data brokers, not to
-              staffing agencies, not to anyone outside the DSOs you choose
+              staffing agencies, not to anyone outside the dental groups you choose
               to interact with.
             </li>
             <li>

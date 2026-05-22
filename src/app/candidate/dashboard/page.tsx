@@ -616,7 +616,7 @@ export default async function CandidateDashboardPage() {
               ? "Set your target roles in your profile to get matched jobs."
               : jobMatchCount === 0
                 ? "No matches yet. Try widening your role preferences."
-                : "Across multi-location DSOs in your area."
+                : "Across multi-location dental groups in your area."
           }
           href={desiredRoles.length > 0 ? "/candidate/jobs?match=1" : "/candidate/jobs"}
           routeLabel={desiredRoles.length > 0 ? "Browse matches" : "Browse jobs"}
@@ -705,7 +705,7 @@ export default async function CandidateDashboardPage() {
               You haven&apos;t applied to any jobs yet.
             </p>
             <p className="text-[14px] text-slate-body leading-relaxed mb-6">
-              Browse open roles at multi-location dental support organizations.
+              Browse open roles at multi-location dental groups.
             </p>
             <Link
               href="/candidate/jobs"

@@ -14,7 +14,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "DSO Hire is the job board built specifically for multi-location dental support organizations. Operator-led, dental-focused, no placement fees ever.",
+    "DSO Hire is the job board built specifically for multi-location dental groups (DSOs). Operator-led, dental-focused, no placement fees ever.",
 };
 
 export default function AboutPage() {
@@ -63,13 +63,13 @@ function Story() {
 
         <div className="space-y-7 text-[16px] sm:text-[17px] text-ink leading-[1.7]">
           <p>
-            Across DSOs of every size, the pattern is the same. Clinical work
+            Across dental groups of every size, the pattern is the same. Clinical work
             has gotten better every year. The back office has stayed stuck on
             tooling designed for solo practices.
           </p>
           <p>
             Hiring is the most expensive version of that gap. Multi-location
-            DSOs spend tens of thousands a year on per-listing fees and agency
+            dental groups spend tens of thousands a year on per-listing fees and agency
             placement charges, then hand the work to recruiters who re-enter
             the same job description into half a dozen platforms. The tools
             were never built for the operating model — they were built for
@@ -80,12 +80,12 @@ function Story() {
             locations from day one. One subscription, one team account,
             unlimited postings across every practice, no placement fees ever.
             What sounds like a small change unlocks a different relationship
-            with hiring — DSOs start posting routine roles they would have
+            with hiring — dental groups start posting routine roles they would have
             skipped because the per-listing math didn&apos;t pencil.
           </p>
           <p>
             If that&apos;s the kind of vendor relationship that fits how you
-            run your DSO, we&apos;d like to talk.
+            run your dental group, we&apos;d like to talk.
           </p>
         </div>
       </div>
@@ -97,7 +97,7 @@ const PRINCIPLES = [
   {
     eyebrow: "Operator-led",
     title: "Decisions get made by people who have actually hired in this industry.",
-    body: "Every product choice runs through one filter: would a real DSO recruiter pick this up and use it tomorrow without a 30-minute training session? If the answer is no, we keep iterating.",
+    body: "Every product choice runs through one filter: would a real recruiter at a dental group pick this up and use it tomorrow without a 30-minute training session? If the answer is no, we keep iterating.",
   },
   {
     eyebrow: "No placement fees",
@@ -106,13 +106,13 @@ const PRINCIPLES = [
   },
   {
     eyebrow: "Privacy by default",
-    title: "Candidates own their resumes. DSOs own their pipeline data.",
-    body: "We don't sell candidate data. We don't broker candidates to recruiters who didn't post the job. The platform exists to deliver applications to the DSO that posted, full stop.",
+    title: "Candidates own their resumes. Dental groups own their pipeline data.",
+    body: "We don't sell candidate data. We don't broker candidates to recruiters who didn't post the job. The platform exists to deliver applications to the dental group that posted, full stop.",
   },
   {
     eyebrow: "Built to last",
     title: "The platform you sign with today is the platform you'll have in five years.",
-    body: "The dental industry has been burned by VC-backed platforms that sprinted, raised, and disappeared. DSO Hire is independent and dental-only — no pivot pressure, no acquisition fire-sale, no quarterly growth math forcing a roadmap to chase whatever's hot. Multi-location DSO hiring is the entire mission, and the platform is built to still be running it five years from now.",
+    body: "The dental industry has been burned by VC-backed platforms that sprinted, raised, and disappeared. DSO Hire is independent and dental-only — no pivot pressure, no acquisition fire-sale, no quarterly growth math forcing a roadmap to chase whatever's hot. Multi-location dental group hiring is the entire mission, and the platform is built to still be running it five years from now.",
   },
 ];
 
@@ -147,7 +147,7 @@ function FinalCta() {
     <section className="bg-ink text-ivory px-6 sm:px-14 py-24 text-center">
       <div className="max-w-[680px] mx-auto">
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ivory mb-5">
-          Hiring DSOs nationwide.
+          Hiring dental groups nationwide.
         </h2>
         <p className="text-base text-ivory/70 leading-[1.7] mb-9">
           DSO Hire is a US-hosted, US-operated platform. Every employer

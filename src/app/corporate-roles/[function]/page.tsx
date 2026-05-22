@@ -45,7 +45,7 @@ export async function generateMetadata({
   const fn = getCorporateFunction(slug);
   if (!fn) return { title: "Corporate roles · DSO Hire" };
   return {
-    title: `${fn.label} jobs at DSOs · DSO Hire`,
+    title: `${fn.label} jobs at dental groups · DSO Hire`,
     description: fn.blurb,
     alternates: { canonical: `/corporate-roles/${fn.slug}` },
   };
@@ -110,7 +110,7 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
           </span>
         </div>
         <h1 className="text-4xl sm:text-7xl font-extrabold tracking-[-2px] leading-[1.02] text-ink mb-5 max-w-[820px]">
-          {fn.label} jobs at multi-location DSOs.
+          {fn.label} jobs at multi-location dental groups.
         </h1>
         <p className="text-base sm:text-lg text-slate-body leading-relaxed max-w-[760px]">
           {fn.blurb}
@@ -161,7 +161,7 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
               No {fn.label} roles open right now.
             </h3>
             <p className="text-[14px] text-slate-body leading-relaxed mb-4">
-              Corporate roles at multi-practice DSOs don&apos;t open as
+              Corporate roles at multi-practice dental groups don&apos;t open as
               often as practice-side hires. Check back, or browse all
               currently-open corporate roles.
             </p>

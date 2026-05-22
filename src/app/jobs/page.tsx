@@ -50,7 +50,7 @@ function parseNearInput(
 export const metadata: Metadata = {
   title: "Browse Dental Jobs",
   description:
-    "Browse jobs at multi-location dental support organizations. Hygienist, associate dentist, office manager, and specialist roles posted by DSOs on DSO Hire.",
+    "Browse jobs at multi-location dental groups (DSOs). Hygienist, associate dentist, office manager, and specialist roles posted directly on DSO Hire.",
 };
 
 const ROLE_LABELS: Record<string, string> = {
@@ -564,7 +564,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
         <div className="flex items-center gap-3.5 mb-6">
           <span className="block w-7 h-px bg-heritage" />
           <span className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep">
-            Open Roles at Multi-Location DSOs
+            Open Roles at Multi-Location Dental Groups
           </span>
         </div>
         <h1 className="text-4xl sm:text-7xl font-extrabold tracking-[-2px] leading-[1.02] text-ink mb-5 max-w-[1080px]">
@@ -587,7 +587,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
             href="/companies"
             className="text-heritage hover:text-heritage-deep underline underline-offset-2 font-semibold"
           >
-            Browse DSOs →
+            Browse dental groups →
           </Link>
         </p>
 

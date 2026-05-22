@@ -215,7 +215,7 @@ export default async function CandidateJobsPage() {
             Jobs
           </div>
           <h1 className="font-display text-3xl font-extrabold tracking-[-0.8px] text-ink leading-tight">
-            Recently posted at multi-location DSOs.
+            Recently posted at multi-location dental groups.
           </h1>
           <p className="text-sm text-slate-body leading-relaxed max-w-[640px]">
             Twenty most-recent active roles. Use the full board for state
@@ -252,7 +252,7 @@ export default async function CandidateJobsPage() {
             <div className="border border-[var(--rule)] bg-cream p-8 text-center">
               <Briefcase className="h-7 w-7 text-slate-meta mx-auto mb-3" />
               <p className="text-[14px] text-slate-body leading-relaxed">
-                No active jobs right now. Check back soon — DSOs post
+                No active jobs right now. Check back soon — dental groups post
                 throughout the week.
               </p>
             </div>

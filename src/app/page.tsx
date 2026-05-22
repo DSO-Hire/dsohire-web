@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     absolute: "DSO Hire — Dental hiring, done direct.",
   },
   description:
-    "DSO Hire is the dental-only job platform connecting multi-location dental support organizations with dental professionals — directly. No per-listing fees, no placement fees, no agency middlemen. Whether you're hiring across your practices or looking for your next dental role, start here.",
+    "DSO Hire is the dental-only job platform connecting multi-location dental groups (DSOs) with dental professionals — directly. No per-listing fees, no placement fees, no agency middlemen. Whether you're hiring across your practices or looking for your next dental role, start here.",
 };
 
 export default function Home() {
@@ -92,9 +92,9 @@ function Hero() {
           <em className="not-italic text-heritage-light">done direct.</em>
         </h1>
         <p className="text-base sm:text-lg text-slate-body leading-relaxed max-w-[600px] mx-auto mb-9">
-          The dental-only job platform — connecting multi-location support
-          organizations with dental professionals, directly. No agencies, no
-          per-listing fees, no middlemen.
+          The dental-only job platform — connecting multi-location dental groups
+          with dental professionals, directly. No agencies, no per-listing fees,
+          no middlemen.
         </p>
 
         {/* ── The equal-weight dual entry — bold full-color calling cards ── */}
@@ -104,9 +104,9 @@ function Hero() {
             icon={Building2}
             eyebrow="Dental Groups"
             title="Hiring across your practices"
-            body="Post across every practice on one flat monthly subscription, with an applicant pipeline built for the way DSOs hire."
+            body="Post across every practice on one flat monthly subscription, with an applicant pipeline built for the way dental groups hire."
             proof="Flat monthly fee · No per-listing fees · No placement charges"
-            ctaLabel="Explore DSO Hiring"
+            ctaLabel="Explore Dental Group Hiring"
             href="/for-dental-groups"
           />
           <DoorwayPanel
@@ -114,8 +114,8 @@ function Hero() {
             icon={Stethoscope}
             eyebrow="Job Candidates"
             title="Find your next dental role"
-            body="Real openings at multi-location dental support organizations — clinical and corporate, hygiene through specialist."
-            proof="Free forever · Direct apply · Multi-location DSOs only"
+            body="Real openings at multi-location dental groups — clinical and corporate, hygiene through specialist."
+            proof="Free forever · Direct apply · Multi-location dental groups only"
             ctaLabel="Browse Dental Jobs"
             href="/for-candidates"
           />
@@ -215,11 +215,12 @@ function MarketplaceBand() {
           A job board only works when both sides show up.
         </h2>
         <p className="text-base sm:text-lg text-slate-body leading-[1.7]">
-          DSOs need a steady pipeline of dental talent. Dental professionals
-          need real openings at employers worth their time. Generic job boards
-          serve neither well — so DSO Hire is dental-only on purpose. Every
-          employer is a multi-location dental support organization, the roles
-          run from chairside to the corporate teams behind a growing dental
+          Dental groups need a steady pipeline of dental talent. Dental
+          professionals need real openings at employers worth their time.
+          Generic job boards serve neither well — so DSO Hire is dental-only on
+          purpose. Every employer is a multi-location dental group — from
+          established DSOs to independent owners running a handful of practices —
+          with roles from chairside to the corporate teams behind a growing
           group, and both sides connect directly. That&apos;s why each audience
           gets its own front door — equal weight, built with the same care.
         </p>
@@ -236,12 +237,12 @@ const VALUE_PROPS = [
   {
     icon: BadgeCheck,
     title: "Dental-only, on purpose",
-    body: "Not a generic job board with a dental filter. Every employer is a multi-location dental support organization, and every role — clinical or corporate — sits inside the dental industry. Both sides show up because they belong here.",
+    body: "Not a generic job board with a dental filter. Every employer is a multi-location dental group, and every role — clinical or corporate — sits inside the dental industry. Both sides show up because they belong here.",
   },
   {
     icon: ArrowLeftRight,
     title: "Direct — no middlemen",
-    body: "DSOs and dental professionals connect straight through the platform. No staffing agencies skimming placement fees, no recruiters gatekeeping the pipeline, no resume reselling.",
+    body: "Dental groups and dental professionals connect straight through the platform. No staffing agencies skimming placement fees, no recruiters gatekeeping the pipeline, no resume reselling.",
   },
   {
     icon: Hammer,
@@ -316,7 +317,7 @@ function ClosingDoorways() {
             className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-ivory text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-ivory-deep transition-colors"
           >
             <Building2 className="h-4 w-4" />
-            I&apos;m a DSO
+            I&apos;m a Dental Group
           </Link>
           <Link
             href="/for-candidates"

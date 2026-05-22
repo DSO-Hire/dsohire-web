@@ -367,7 +367,7 @@ const PROMISES = [
   {
     Icon: Heart,
     title: "Free for candidates, forever",
-    body: "DSOs pay a flat monthly subscription so you don't have to. No premium memberships, no resume highlights, no 'unlock contact info' upcharges, no annual renewals. Free really means free.",
+    body: "Dental groups pay a flat monthly subscription so you don't have to. No premium memberships, no resume highlights, no 'unlock contact info' upcharges, no annual renewals. Free really means free.",
   },
   {
     Icon: Sparkles,
@@ -427,7 +427,7 @@ const ROLES = [
     advantages: [
       "Real benefits package — 401(k) match, group health, malpractice, paid CE allowance",
       "Mentorship + peer learning across multi-doc practices",
-      "Career path clarity — associate → senior → partner track at some DSOs",
+      "Career path clarity — associate → senior → partner track at some dental groups",
       "Modern equipment (CBCT, digital scanners, CAD/CAM) at scale",
     ],
   },
@@ -438,7 +438,7 @@ const ROLES = [
     href: "/for-specialists",
     advantages: [
       "Built-in referral pipeline from sister GP practices",
-      "Equipment + facility investments DSOs make at scale",
+      "Equipment + facility investments dental groups make at scale",
       "Travel-between-locations roles for high-demand specialties",
       "Production-based comp models that reward your specialization",
     ],
@@ -474,9 +474,9 @@ const ROLES = [
     href: "/for-front-desk",
     advantages: [
       "Real systems training (PMS, insurance verification, financing tools)",
-      "Defined career path to OM is well-traveled at most DSOs",
+      "Defined career path to OM is well-traveled at most dental groups",
       "Backup coverage — vacations don't crash the schedule",
-      "Performance-based bonus structures common across DSOs",
+      "Performance-based bonus structures common across dental groups",
     ],
   },
   {
@@ -644,7 +644,7 @@ function HonestTake() {
           </p>
           <p>
             What&apos;s changed: industry data and candidate sentiment under
-            35 increasingly point the other way. DSOs in 2026 hire faster, pay
+            35 increasingly point the other way. dental groups in 2026 hire faster, pay
             benefits solo practices struggle to match, invest in equipment at
             scale, and offer career paths that don&apos;t end at &quot;become
             an owner or stay an associate forever.&quot; The DSO model in 2026
@@ -703,7 +703,7 @@ const CANDIDATE_PERKS = [
   },
   {
     Icon: DollarSign,
-    title: "Transparent comp where DSOs share it",
+    title: "Transparent comp where dental groups share it",
     body: "When a DSO shares the salary range for a role, we show it on every listing. When they don't, we tell you that too — no fake 'competitive pay' filler. Some practices share, some don't. Either way, no surprises.",
   },
 ];
@@ -782,7 +782,7 @@ function FinalCta() {
         <p className="text-[15px] sm:text-[16px] text-slate-body leading-[1.7] mb-9 max-w-[560px] mx-auto">
           Free profile takes a couple minutes. Browse without an account if
           you&apos;d rather. No upsells, no premium tier, no agency calls —
-          just dental jobs at real DSOs.
+          just dental jobs at real dental groups.
         </p>
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Link
@@ -811,7 +811,7 @@ function FinalCta() {
 const FAQ_ITEMS = [
   {
     q: "Is DSO Hire really free for candidates?",
-    a: "Yes — completely free, forever. DSOs pay a flat monthly subscription to post and hire; candidates never pay to apply, never pay to be visible, and never see ads inside the platform. There's no premium candidate tier.",
+    a: "Yes — completely free, forever. Dental groups pay a flat monthly subscription to post and hire; candidates never pay to apply, never pay to be visible, and never see ads inside the platform. There's no premium candidate tier.",
   },
   {
     q: "Who can see my profile?",
@@ -819,7 +819,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "What if I'm currently employed and don't want my employer to find out I'm looking?",
-    a: "Set your visibility to \"hidden\" or \"recruiters only\" — DSOs can't surface your profile in search, and your name and contact info aren't exposed. When you apply to a specific role, only that DSO sees your application; no one else does.",
+    a: "Set your visibility to \"hidden\" or \"recruiters only\" — dental groups can't surface your profile in search, and your name and contact info aren't exposed. When you apply to a specific role, only that dental group sees your application; no one else does.",
   },
   {
     q: "What kinds of roles will I find here?",

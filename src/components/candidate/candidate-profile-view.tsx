@@ -27,8 +27,10 @@ import {
   FileText,
   CheckCircle2,
 } from "lucide-react";
+import { ROLE_CATEGORIES } from "@/lib/candidate/canonical-lists";
 
 const ROLE_LABELS: Record<string, string> = {
+  // Job-side role_category enum values…
   dentist: "Dentist",
   dental_hygienist: "Dental Hygienist",
   dental_assistant: "Dental Assistant",
@@ -37,6 +39,11 @@ const ROLE_LABELS: Record<string, string> = {
   regional_manager: "Regional Manager",
   specialist: "Specialist",
   other: "Other",
+  // …merged with the candidate-side ROLE_CATEGORIES vocabulary (associate_dentist,
+  // hygienist, assistant, front_desk, dso_corporate, …). Candidate desired_roles
+  // use THESE values, so without the merge the "Open to" chips rendered raw
+  // ("assistant" instead of "Dental Assistant"). Fixed 2026-05-22.
+  ...Object.fromEntries(ROLE_CATEGORIES.map((o) => [o.value, o.label])),
 };
 
 const AVAILABILITY_LABELS: Record<string, string> = {

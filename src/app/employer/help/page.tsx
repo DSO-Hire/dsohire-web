@@ -52,7 +52,7 @@ const FAQS: FaqEntry[] = [
           pricing page
         </Link>
         . Quick version: Solo is for smaller groups getting started; Growth adds
-        the tools multi-location DSOs lean on day to day; Scale fits larger,
+        the tools multi-location dental groups lean on day to day; Scale fits larger,
         multi-region operations; and Enterprise layers on dedicated support,
         SSO, audit log, and API access for the largest, most complex groups.
         Every paying tier gets every feature in its plan — there&apos;s no

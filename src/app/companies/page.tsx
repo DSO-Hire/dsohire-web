@@ -17,9 +17,9 @@ import { ListSort } from "@/components/ui/list-sort";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Dental Support Organizations on DSO Hire",
+  title: "Dental Groups & DSOs on DSO Hire",
   description:
-    "Browse the dental support organizations hiring through DSO Hire — mid-market dental groups operating multiple practices across the U.S.",
+    "Browse the dental groups hiring through DSO Hire — multi-location practices and DSOs operating across the U.S.",
 };
 
 const COMPANIES_SORT_OPTIONS = [
@@ -290,11 +290,11 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
         <div className="flex items-center gap-3.5 mb-6">
           <span className="block w-7 h-px bg-heritage" />
           <span className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep">
-            Dental Support Organizations on DSO Hire
+            Dental Groups on DSO Hire
           </span>
         </div>
         <h1 className="text-4xl sm:text-7xl font-extrabold tracking-[-2px] leading-[1.02] text-ink mb-5 max-w-[820px]">
-          The DSOs hiring on DSO Hire.
+          The dental groups hiring on DSO Hire.
         </h1>
         <p className="text-base sm:text-lg text-slate-body leading-relaxed max-w-[640px]">
           Every organization listed here operates multiple practices and is
@@ -316,10 +316,10 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
           <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta">
             {dsos.length === 0
-              ? "No DSOs match these filters"
+              ? "No dental groups match these filters"
               : dsos.length === 1
-                ? "1 DSO listed"
-                : `${dsos.length} DSOs listed`}
+                ? "1 dental group listed"
+                : `${dsos.length} dental groups listed`}
           </div>
           {dsos.length > 1 && (
             <ListSort
@@ -915,10 +915,10 @@ function EmptyState() {
     <div className="border border-[var(--rule)] bg-cream p-12 text-center max-w-[640px] mx-auto">
       <Building2 className="h-10 w-10 text-slate-meta mx-auto mb-5" />
       <h2 className="text-2xl font-extrabold tracking-[-0.5px] text-ink mb-3">
-        No DSOs listed yet.
+        No dental groups listed yet.
       </h2>
       <p className="text-[14px] text-slate-body leading-relaxed max-w-[440px] mx-auto">
-        DSO Hire is in early launch — DSOs are onboarding through
+        DSO Hire is in early launch — dental groups are onboarding through
         summer 2026. Check back soon, or{" "}
         <Link
           href="/jobs"

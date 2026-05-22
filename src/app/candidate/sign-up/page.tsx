@@ -17,7 +17,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Create a Candidate Account",
   description:
-    "Create a free DSO Hire candidate account to apply to jobs at multi-location dental support organizations.",
+    "Create a free DSO Hire candidate account to apply to jobs at multi-location dental groups.",
 };
 
 interface PageProps {
@@ -61,7 +61,7 @@ export default async function CandidateSignUpPage({ searchParams }: PageProps) {
               {[
                 "Apply to any job in one click",
                 "Save profile + resume once, reuse forever",
-                "Only verified mid-market DSOs — no recruiter spam",
+                "Only verified mid-market dental groups — no recruiter spam",
                 "Track every application's status in one dashboard",
                 "Email confirmation the moment your application is sent",
               ].map((f, i) => (

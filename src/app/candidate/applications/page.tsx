@@ -894,7 +894,7 @@ function EmptyState({
           You haven&apos;t applied to any jobs yet.
         </p>
         <p className="mb-6 text-[14px] text-slate-body">
-          Browse open roles at multi-location dental support organizations.
+          Browse open roles at multi-location dental groups.
         </p>
         <Link
           href="/jobs"

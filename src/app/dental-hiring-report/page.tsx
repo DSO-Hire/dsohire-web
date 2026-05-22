@@ -71,7 +71,7 @@ export default async function HiringReportPage() {
           </h1>
           <p className="text-[16px] text-slate-body leading-relaxed mb-3">
             Real compensation bands, role mix, and hiring velocity drawn
-            from the DSO Hire platform. Continuously updated as DSOs post
+            from the DSO Hire platform. Continuously updated as dental groups post
             jobs and candidates apply — refreshed every six hours.
           </p>
           <p className="text-[12px] text-slate-meta uppercase tracking-wide">
@@ -98,7 +98,7 @@ export default async function HiringReportPage() {
           />
           <HeadlineTile
             icon={Building2}
-            label="Participating DSOs"
+            label="Participating dental groups"
             value={snapshot.participating_dsos.toLocaleString()}
           />
           <HeadlineTile
@@ -157,7 +157,7 @@ export default async function HiringReportPage() {
             Role mix · Section 2
           </div>
           <h2 className="text-3xl font-extrabold tracking-[-0.8px] text-ink mb-3">
-            What DSOs are hiring most.
+            What dental groups are hiring most.
           </h2>
           <p className="text-[14px] text-slate-body leading-relaxed max-w-[640px] mb-8">
             Open jobs and application volume by role category.
@@ -476,7 +476,7 @@ function DataAccruingNotice() {
   return (
     <div className="border border-[var(--rule)] bg-cream/40 p-5 text-[13px] text-slate-body italic leading-relaxed">
       Sample size below threshold ({MIN_REPORT_SAMPLE_SIZE}) for this
-      section. Data will populate as more DSOs and candidates join the
+      section. Data will populate as more dental groups and candidates join the
       platform.
     </div>
   );

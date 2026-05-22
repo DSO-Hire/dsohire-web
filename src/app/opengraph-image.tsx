@@ -84,7 +84,7 @@ export default async function OpengraphImage() {
   // Only the glyphs we actually render — Google subsets the font to this set,
   // keeping the binary tiny (~5 KB per weight vs ~80 KB full).
   const glyphPool =
-    "DSO Hire THE DENTAL-ONLY HIRING PLATFORM Dental hiring, done direct. Built for multi-location DSOs and dental professionals. dsohire.com";
+    "DSO Hire THE DENTAL-ONLY HIRING PLATFORM Dental hiring, done direct. Built for multi-location dental groups and dental professionals. dsohire.com";
 
   const [manropeBold, manropeExtraBold] = await Promise.all([
     loadGoogleFontTtf("Manrope", 700, glyphPool),
@@ -231,7 +231,7 @@ export default async function OpengraphImage() {
               maxWidth: 820,
             }}
           >
-            Built for multi-location DSOs and dental professionals.
+            Built for multi-location dental groups and dental professionals.
           </div>
           <div
             style={{
