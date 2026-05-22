@@ -19,6 +19,7 @@ import { HelpDrawer } from "@/components/help/help-drawer";
 import { Coachmark } from "@/components/help/coachmark";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CandidateAvatarUpload } from "./avatar-upload";
+import { AccentColorPicker } from "./accent-color-picker";
 import {
   ProfileSections,
   type ProfileData,
@@ -43,7 +44,7 @@ export default async function CandidateProfilePage() {
     supabase
       .from("candidates")
       .select(
-        "id, full_name, first_name, last_name, salutation, phone, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, availability, linkedin_url, resume_url, is_searchable, avatar_url, desired_specialty, pms_systems, skills, languages, temp_or_perm, schedule_preferences, min_salary, salary_unit, cv_visibility, last_parsed_at"
+        "id, full_name, first_name, last_name, salutation, phone, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, availability, linkedin_url, resume_url, is_searchable, avatar_url, desired_specialty, pms_systems, skills, languages, temp_or_perm, schedule_preferences, min_salary, salary_unit, cv_visibility, last_parsed_at, profile_accent_color"
       )
       .eq("auth_user_id", user.id)
       .maybeSingle(),
@@ -232,12 +233,18 @@ export default async function CandidateProfilePage() {
         className="mb-6 max-w-[820px] scroll-mt-24 border border-[var(--rule)] bg-white p-7 transition-shadow sm:p-10"
       >
         <h2 className="mb-1 font-display text-lg font-bold text-ink">
-          Profile photo
+          Profile photo &amp; header
         </h2>
         <p className="mb-5 text-sm text-slate-body">
           Optional, but DSO recruiters tell us photos make a real difference.
         </p>
         <CandidateAvatarUpload initialUrl={avatarUrl} />
+
+        <div className="mt-7 border-t border-[var(--rule)] pt-6">
+          <AccentColorPicker
+            initial={(c.profile_accent_color as string | null) ?? null}
+          />
+        </div>
       </div>
 
       {/* Section cards (Completeness meter renders inside, before the

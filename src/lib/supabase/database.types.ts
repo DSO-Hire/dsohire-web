@@ -1290,6 +1290,7 @@ export type Database = {
           linkedin_url: string | null
           min_salary: number | null
           parsed_resume_json: Json | null
+          profile_accent_color: string | null
           phone: string | null
           pms_systems: string[]
           practice_fit_consent: string
@@ -1338,6 +1339,7 @@ export type Database = {
           linkedin_url?: string | null
           min_salary?: number | null
           parsed_resume_json?: Json | null
+          profile_accent_color?: string | null
           phone?: string | null
           pms_systems?: string[]
           practice_fit_consent?: string
@@ -1386,6 +1388,7 @@ export type Database = {
           linkedin_url?: string | null
           min_salary?: number | null
           parsed_resume_json?: Json | null
+          profile_accent_color?: string | null
           phone?: string | null
           pms_systems?: string[]
           practice_fit_consent?: string

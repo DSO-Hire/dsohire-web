@@ -92,6 +92,8 @@ export interface CPVData {
   years_experience: number | null;
   years_experience_dental: number | null;
   avatar_url: string | null;
+  /** Candidate-chosen 6-digit hex for the header band; null = heritage green. */
+  accent_color: string | null;
   license_states: string[] | null;
   current_location_city: string | null;
   current_location_state: string | null;
@@ -135,6 +137,11 @@ export function CandidateProfileView({
     .map((r) => ROLE_LABELS[r] ?? r)
     .filter(Boolean);
   const openToWork = openToWorkLabel(data.availability);
+  // Candidate-chosen header color, validated; fall back to heritage green.
+  const accent =
+    data.accent_color && /^#[0-9a-fA-F]{6}$/.test(data.accent_color)
+      ? data.accent_color
+      : "#4D7A60";
 
   return (
     <div>
@@ -143,8 +150,7 @@ export function CandidateProfileView({
         <div
           className="h-16 w-full sm:h-20"
           style={{
-            background:
-              "linear-gradient(135deg, var(--heritage-deep, #4D7A60) 0%, color-mix(in srgb, var(--heritage-deep, #4D7A60) 55%, transparent) 100%)",
+            background: `linear-gradient(135deg, ${accent} 0%, color-mix(in srgb, ${accent} 55%, transparent) 100%)`,
           }}
           aria-hidden
         />

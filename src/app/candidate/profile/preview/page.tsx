@@ -42,7 +42,7 @@ export default async function CandidateProfilePreviewPage() {
     supabase
       .from("candidates")
       .select(
-        "id, full_name, headline, summary, current_title, years_experience, years_experience_dental, avatar_url, license_states, current_location_city, current_location_state, desired_roles, desired_locations, availability, skills, pms_systems, languages, schedule_preferences, linkedin_url, resume_url"
+        "id, full_name, headline, summary, current_title, years_experience, years_experience_dental, avatar_url, profile_accent_color, license_states, current_location_city, current_location_state, desired_roles, desired_locations, availability, skills, pms_systems, languages, schedule_preferences, linkedin_url, resume_url"
       )
       .eq("auth_user_id", user.id)
       .maybeSingle(),
@@ -151,6 +151,7 @@ export default async function CandidateProfilePreviewPage() {
           years_experience_dental:
             (c.years_experience_dental as number | null) ?? null,
           avatar_url: (c.avatar_url as string | null) ?? null,
+          accent_color: (c.profile_accent_color as string | null) ?? null,
           license_states: (c.license_states as string[] | null) ?? null,
           current_location_city:
             (c.current_location_city as string | null) ?? null,

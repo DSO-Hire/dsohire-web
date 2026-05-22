@@ -37,3 +37,42 @@ export async function setCandidateAvatarUrl(
   revalidatePath("/candidate/dashboard");
   return { ok: true };
 }
+
+const ACCENT_HEX_RE = /^#[0-9a-fA-F]{6}$/;
+
+/**
+ * Persist the candidate's chosen profile header accent color (2026-05-22).
+ * Null clears it back to the default heritage green. Validated as a 6-digit
+ * hex here AND by a DB CHECK constraint (candidates_profile_accent_color_hex_chk).
+ */
+export async function setCandidateProfileAccentColor(
+  hex: string | null
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Please sign in." };
+
+  const value = hex && hex.trim() ? hex.trim().toLowerCase() : null;
+  if (value !== null && !ACCENT_HEX_RE.test(value)) {
+    return { ok: false, error: "Pick a valid 6-digit hex color." };
+  }
+
+  const { error } = await supabase
+    .from("candidates")
+    .update({ profile_accent_color: value })
+    .eq("auth_user_id", user.id);
+
+  if (error) {
+    console.error(
+      "[candidate/profile] setCandidateProfileAccentColor failed",
+      error
+    );
+    return { ok: false, error: "Couldn't save your header color." };
+  }
+
+  revalidatePath("/candidate/profile");
+  revalidatePath("/candidate/profile/preview");
+  return { ok: true };
+}

@@ -73,7 +73,7 @@ export default async function CandidateDetailPage({ params }: PageProps) {
   const { data: candidate } = await supabase
     .from("candidates")
     .select(
-      "id, full_name, headline, summary, current_title, years_experience, years_experience_dental, avatar_url, license_states, current_location_city, current_location_state, desired_roles, desired_locations, availability, skills, pms_systems, languages, schedule_preferences, linkedin_url, resume_url, is_searchable"
+      "id, full_name, headline, summary, current_title, years_experience, years_experience_dental, avatar_url, profile_accent_color, license_states, current_location_city, current_location_state, desired_roles, desired_locations, availability, skills, pms_systems, languages, schedule_preferences, linkedin_url, resume_url, is_searchable"
     )
     .eq("id", id)
     .is("deleted_at", null)
@@ -181,6 +181,7 @@ export default async function CandidateDetailPage({ params }: PageProps) {
     years_experience: number | null;
     years_experience_dental: number | null;
     avatar_url: string | null;
+    profile_accent_color: string | null;
     license_states: string[] | null;
     current_location_city: string | null;
     current_location_state: string | null;
@@ -216,6 +217,7 @@ export default async function CandidateDetailPage({ params }: PageProps) {
           years_experience: c.years_experience,
           years_experience_dental: c.years_experience_dental,
           avatar_url: c.avatar_url,
+          accent_color: c.profile_accent_color,
           license_states: c.license_states,
           current_location_city: c.current_location_city,
           current_location_state: c.current_location_state,
