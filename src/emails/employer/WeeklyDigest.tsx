@@ -79,7 +79,7 @@ export function WeeklyDigest({
       </Heading>
       <Text style={paragraph}>
         Hi {recipientFirstName} — here&apos;s how hiring moved at{" "}
-        <strong style={strong}>{dsoName}</strong> over the past 7 days.
+        <strong style={strong}>{dsoName}</strong>{" "}over the past 7 days.
       </Text>
 
       <Section style={tilesRow}>

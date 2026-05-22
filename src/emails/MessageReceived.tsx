@@ -61,14 +61,14 @@ export function MessageReceived({
   const leadIn =
     senderRole === "candidate" ? (
       <>
-        <strong style={strong}>{senderName}</strong> sent you a message about
+        <strong style={strong}>{senderName}</strong>{" "}sent you a message about
         their application for{" "}
         <strong style={strong}>{jobTitle}</strong>.
       </>
     ) : (
       <>
         <strong style={strong}>{senderName}</strong> at{" "}
-        <strong style={strong}>{dsoName}</strong> sent you a message about
+        <strong style={strong}>{dsoName}</strong>{" "}sent you a message about
         your application for <strong style={strong}>{jobTitle}</strong>.
       </>
     );

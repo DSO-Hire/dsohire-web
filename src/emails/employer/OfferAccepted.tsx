@@ -44,7 +44,7 @@ export function OfferAccepted({
       <Text style={eyebrow}>Offer · Accepted</Text>
       <Heading style={heading}>{greeting}</Heading>
       <Text style={paragraph}>
-        <strong style={strong}>{candidateName}</strong> just accepted the
+        <strong style={strong}>{candidateName}</strong>{" "}just accepted the
         offer for the <strong style={strong}>{jobTitle}</strong> role at{" "}
         {dsoName}.
       </Text>
@@ -57,7 +57,7 @@ export function OfferAccepted({
           </Text>
         )}
         <Text style={cardMeta}>
-          We&apos;ve also flipped the application to <strong>Hired</strong> on
+          We&apos;ve also flipped the application to <strong>Hired</strong>{" "}on
           your kanban so the rest of the team sees the update.
         </Text>
       </Section>

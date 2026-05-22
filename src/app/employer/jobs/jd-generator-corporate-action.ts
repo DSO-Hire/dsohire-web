@@ -34,7 +34,7 @@ import {
   HAIKU_MODEL,
   estimateHaikuCostUsd,
 } from "@/lib/ai/anthropic";
-import { logAiUsage } from "@/lib/ai/usage";
+import { logAiUsage, checkAiRateLimit } from "@/lib/ai/usage";
 import { extractJson } from "@/lib/ai/extract-json";
 import { getActiveSubscription } from "@/lib/billing/subscription";
 import {
@@ -125,6 +125,12 @@ export async function generateCorporateJobDescription(
       error:
         "An active subscription is required to use the AI Job Description generator.",
     };
+  }
+
+  // AI abuse guard — cooldown + rolling daily cap before the model call.
+  const rate = await checkAiRateLimit(user.id, "jd_generator");
+  if (!rate.allowed) {
+    return { ok: false, error: rate.message ?? "Please try again shortly." };
   }
 
   // Pull DSO context for personalization. corporate_affiliation_policy

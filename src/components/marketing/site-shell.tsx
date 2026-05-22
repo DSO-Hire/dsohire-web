@@ -91,7 +91,7 @@ export async function SiteNav() {
         <BrandLockup height={42} />
       </Link>
       <ul className="hidden md:flex items-center gap-7 list-none">
-        {/* Dual-lens segmented control — "For DSOs | For Dental Pros".
+        {/* Dual-lens segmented control — "For DSOs | Job Candidates".
             Client island (needs usePathname for active-lens state); the
             right segment is also the hover trigger for the role dropdown. */}
         <LensToggle />
@@ -114,7 +114,7 @@ export async function SiteNav() {
           {primaryCtaLabel}
         </Link>
         {/* Hamburger + drawer below md (768px). The drawer holds primary
-            links + the For Dental Pros sub-list (hover dropdowns don't work
+            links + the Job Candidates sub-list (hover dropdowns don't work
             on touch) + an audience-aware Sign In/Dashboard link + a
             duplicate primary CTA so it stays a thumb-tap away when the menu
             is open. The CTA stays visible at every breakpoint. */}
@@ -165,7 +165,7 @@ export function SiteFooter() {
 
           <FooterCol title="For Candidates">
             <FooterLink href="/jobs">Browse Jobs</FooterLink>
-            <FooterLink href="/for-candidates">For Dental Pros</FooterLink>
+            <FooterLink href="/for-candidates">Job Candidates</FooterLink>
             <FooterLink href="/for-dentists">For Dentists</FooterLink>
             <FooterLink href="/for-hygienists">For Hygienists</FooterLink>
             <FooterLink href="/for-office-managers">For Office Managers</FooterLink>

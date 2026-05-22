@@ -1125,7 +1125,7 @@ function BasicsStep({
       </p>
 
       <div>
-        <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+        <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
           Authority level <span className="text-[#3D5266]">*</span>
         </label>
         <div className="space-y-2">
@@ -1159,7 +1159,7 @@ function BasicsStep({
       </div>
 
       <div>
-        <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
+        <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
           Anchor location{" "}
           <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
             (optional)
@@ -1503,7 +1503,7 @@ function DetailsStep({
 
         {workMode === "remote" && (
           <div className="mt-4">
-            <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+            <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
               State restrictions{" "}
               <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
                 (optional)
@@ -1908,7 +1908,7 @@ function ScreeningStep({
       ))}
 
       <div>
-        <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
+        <div className="text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
           Add a question
         </div>
         <div className="flex flex-wrap gap-2">
@@ -2078,7 +2078,7 @@ function QuestionCard({
 
           {isSelect && (
             <div>
-              <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+              <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
                 Options <span className="text-[#3D5266]">*</span>
               </label>
               <div className="space-y-2">
@@ -2417,7 +2417,7 @@ function PreviewStep({
       </ReviewBlock>
 
       <div className="border border-[var(--rule)] p-5 bg-cream/40">
-        <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
+        <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
           Publish status
         </label>
         <div className="space-y-2">
@@ -2464,7 +2464,7 @@ function ReviewBlock({
   return (
     <div className="border border-[var(--rule)] p-5">
       <div className="flex items-center justify-between mb-3">
-        <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-body">
+        <div className="text-[13px] font-bold tracking-[2px] uppercase text-slate-body">
           {label}
         </div>
         <button
@@ -2555,7 +2555,7 @@ function Input({
 }) {
   return (
     <div>
-      <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+      <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
         {label} {required && <span className="text-[#3D5266]">*</span>}
       </label>
       <input
@@ -2586,7 +2586,7 @@ function Textarea({
 }) {
   return (
     <div>
-      <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+      <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
         {label} {required && <span className="text-[#3D5266]">*</span>}
       </label>
       <textarea
@@ -2615,7 +2615,7 @@ function Select({
 }) {
   return (
     <div>
-      <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+      <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
         {label} {required && <span className="text-[#3D5266]">*</span>}
       </label>
       <select

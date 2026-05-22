@@ -110,6 +110,15 @@ export function JdGeneratorPanel({
       }
       setResult(res.jd);
       setUsage({ cost_usd: res.usage.cost_usd, elapsed_ms: elapsed });
+      // Note 2 (Dave's call, 2026-05-22) — auto-apply the draft straight
+      // into the wizard fields; no separate "Apply all" step required. The
+      // preview below stays as a read-only record + granular re-apply.
+      onApplyAll({
+        title: res.jd.title,
+        descriptionHtml: buildDescriptionHtml(res.jd),
+      });
+      setAppliedFlash("all");
+      window.setTimeout(() => setAppliedFlash(null), 3500);
     });
   }
 
@@ -131,8 +140,9 @@ export function JdGeneratorPanel({
           </h3>
           <p className="mt-1 text-[13px] text-slate-meta leading-relaxed">
             Available on every paid tier. Drop a few notes about the role
-            and we&apos;ll write a clean structured posting. You stay in
-            control — apply each section individually or accept it all.
+            and we&apos;ll write a clean structured posting. The draft drops
+            straight into your editor below — tweak freely, re-apply any
+            section, or regenerate anytime.
           </p>
         </div>
       </div>
@@ -322,7 +332,7 @@ function ResultCard({
     <div className="mt-5 border border-[var(--rule-strong)] bg-white p-5">
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[var(--rule)]">
         <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
-          AI draft preview · read-only
+          AI draft · applied to your editor below
         </div>
         <button
           type="button"
@@ -330,7 +340,7 @@ function ResultCard({
           className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-heritage text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-heritage-deep transition-colors"
         >
           <Check className="h-3 w-3" />
-          {appliedFlash === "all" ? "Applied ✓" : "Apply all"}
+          {appliedFlash === "all" ? "Applied ✓" : "Re-apply all"}
         </button>
       </div>
 

@@ -140,6 +140,14 @@ export function JdGeneratorCorporatePanel({
       }
       setResult(res.jd);
       setUsage({ cost_usd: res.usage.cost_usd, elapsed_ms: elapsed });
+      // Note 2 (Dave's call, 2026-05-22) — auto-apply the draft straight
+      // into the wizard fields; no separate "Apply all" step required.
+      onApplyAll({
+        title: res.jd.title,
+        descriptionHtml: buildDescriptionHtml(res.jd),
+      });
+      setAppliedFlash("all");
+      window.setTimeout(() => setAppliedFlash(null), 3500);
     });
   }
 
@@ -387,7 +395,7 @@ function ResultCard({
           className="text-[10px] font-bold tracking-[2px] uppercase"
           style={{ color: CORP_ACCENT }}
         >
-          AI draft preview · read-only
+          AI draft · applied to your editor below
         </div>
         <button
           type="button"
@@ -396,7 +404,7 @@ function ResultCard({
           style={{ backgroundColor: CORP_ACCENT }}
         >
           <Check className="h-3 w-3" />
-          {appliedFlash === "all" ? "Applied ✓" : "Apply all"}
+          {appliedFlash === "all" ? "Applied ✓" : "Re-apply all"}
         </button>
       </div>
 

@@ -94,7 +94,7 @@ export default function NotFound() {
                 <Stethoscope className="h-4 w-4" />
               </span>
               <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-ivory/65 mb-1">
-                For Dental Professionals
+                Job Candidates
               </div>
               <div className="text-[18px] font-extrabold tracking-[-0.4px] leading-tight text-ivory mb-4">
                 Find your next dental role

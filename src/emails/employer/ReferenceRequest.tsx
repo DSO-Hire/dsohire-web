@@ -55,7 +55,7 @@ export function ReferenceRequest({
 
       <Text style={paragraph}>
         {requestingUserName} at {dsoName} is considering {candidateName} for a{" "}
-        <strong style={strong}>{jobTitle}</strong> role and asked you for a quick
+        <strong style={strong}>{jobTitle}</strong>{" "}role and asked you for a quick
         professional reference.
       </Text>
 

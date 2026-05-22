@@ -69,7 +69,7 @@ export function InterviewProposed({
       <Text style={paragraph}>
         <strong style={strong}>{dsoName}</strong> proposed{" "}
         {proposedStartsIso.length === 1 ? "an interview time" : "interview times"}{" "}
-        for the <strong style={strong}>{jobTitle}</strong> role.
+        for the <strong style={strong}>{jobTitle}</strong>{" "}role.
       </Text>
 
       {message && (

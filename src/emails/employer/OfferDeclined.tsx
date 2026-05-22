@@ -41,7 +41,7 @@ export function OfferDeclined({
       <Text style={eyebrow}>Offer · Declined</Text>
       <Heading style={heading}>{greeting}</Heading>
       <Text style={paragraph}>
-        <strong style={strong}>{candidateName}</strong> declined the offer
+        <strong style={strong}>{candidateName}</strong>{" "}declined the offer
         for the <strong style={strong}>{jobTitle}</strong> role at {dsoName}.
       </Text>
 
@@ -53,7 +53,7 @@ export function OfferDeclined({
       )}
 
       <Text style={paragraph}>
-        The application has been moved to <strong>Withdrawn</strong> on your
+        The application has been moved to <strong>Withdrawn</strong>{" "}on your
         kanban. If you&apos;d like to reopen it (or send a revised offer),
         open the application page below.
       </Text>

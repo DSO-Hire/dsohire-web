@@ -109,6 +109,98 @@ export async function getCandidateRecentAiUsage(
   };
 }
 
+/* ───────────────────────────────────────────────────────────────
+ * AI abuse guard (2026-05-22, per Dave's call).
+ *
+ * A lightweight per-user rate limit layered on the existing
+ * ai_usage_events log: a short cooldown between calls + a rolling 24h
+ * cap per feature. This is NOT the full overage-billing cap policy
+ * (that waits for real usage curves) — it's a floor that stops a bot,
+ * a stuck client, or a frustrated user from hammering an AI endpoint
+ * and running up cost.
+ *
+ * Counts come from logged (completed) events, so a burst of truly
+ * concurrent requests could slip past the cooldown — but the rolling
+ * daily cap still bounds total spend/abuse per user per feature.
+ * ───────────────────────────────────────────────────────────── */
+
+export interface AiRateLimitConfig {
+  perDayPerUser: number;
+  cooldownSeconds: number;
+}
+
+export const AI_RATE_LIMITS: Record<AiFeature, AiRateLimitConfig> = {
+  jd_generator: { perDayPerUser: 40, cooldownSeconds: 8 },
+  rejection_reason: { perDayPerUser: 60, cooldownSeconds: 6 },
+  resume_parse: { perDayPerUser: 5, cooldownSeconds: 30 },
+  profile_headline: { perDayPerUser: 25, cooldownSeconds: 8 },
+  profile_summary: { perDayPerUser: 25, cooldownSeconds: 8 },
+  practice_fit_narrative: { perDayPerUser: 100, cooldownSeconds: 3 },
+};
+
+export interface AiRateLimitResult {
+  allowed: boolean;
+  reason?: "cooldown" | "daily_cap";
+  retryAfterSeconds?: number;
+  message?: string;
+}
+
+/**
+ * Check whether `userId` may invoke `feature` right now. Call this at the
+ * top of an AI server action, before the model call; if `allowed` is
+ * false, return the `message` to the user instead of generating.
+ *
+ * Fails OPEN on any read error — we never block a legitimate user because
+ * the usage table hiccuped.
+ */
+export async function checkAiRateLimit(
+  userId: string,
+  feature: AiFeature
+): Promise<AiRateLimitResult> {
+  const cfg = AI_RATE_LIMITS[feature];
+  if (!cfg || !userId) return { allowed: true };
+
+  const admin = createSupabaseServiceRoleClient();
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { data, error } = await admin
+    .from("ai_usage_events")
+    .select("created_at")
+    .eq("user_id", userId)
+    .eq("feature", feature)
+    .eq("succeeded", true)
+    .gte("created_at", since)
+    .order("created_at", { ascending: false });
+
+  if (error || !data) return { allowed: true };
+
+  if (data.length >= cfg.perDayPerUser) {
+    return {
+      allowed: false,
+      reason: "daily_cap",
+      message:
+        "You've reached today's limit for this AI feature. It resets within 24 hours.",
+    };
+  }
+
+  const lastAtMs = data[0]?.created_at
+    ? new Date(data[0].created_at).getTime()
+    : 0;
+  if (lastAtMs) {
+    const elapsedSeconds = (Date.now() - lastAtMs) / 1000;
+    if (elapsedSeconds < cfg.cooldownSeconds) {
+      const retry = Math.max(1, Math.ceil(cfg.cooldownSeconds - elapsedSeconds));
+      return {
+        allowed: false,
+        reason: "cooldown",
+        retryAfterSeconds: retry,
+        message: `Please wait ${retry} second${retry === 1 ? "" : "s"} before generating again.`,
+      };
+    }
+  }
+
+  return { allowed: true };
+}
+
 export async function getDsoMonthToDateAiUsage(
   dsoId: string,
   feature: AiFeature

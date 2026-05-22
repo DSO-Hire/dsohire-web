@@ -35,7 +35,7 @@ export function ApplicationReceived({
       <Heading style={heading}>Hi {candidateName} —</Heading>
       <Text style={paragraph}>
         Your application for <strong style={strong}>{jobTitle}</strong> at{" "}
-        <strong style={strong}>{dsoName}</strong> was successfully submitted.
+        <strong style={strong}>{dsoName}</strong>{" "}was successfully submitted.
         We&apos;ll email you when the hiring team reviews it or moves it forward.
       </Text>
 

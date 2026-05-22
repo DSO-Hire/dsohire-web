@@ -1,27 +1,28 @@
 "use client";
 
 /**
- * LensToggle — the segmented "For DSOs | For Dental Pros" control in the
- * marketing nav. DSO Hire is a dual-lens site (employers vs. dental
- * professionals); this control makes switching lenses an obvious, deliberate
- * action rather than two loose nav items.
+ * LensToggle — the segmented "For DSOs | Job Candidates" control in the
+ * marketing nav. DSO Hire is a dual-lens site (employers vs. job candidates);
+ * this control makes switching lenses an obvious, deliberate action rather
+ * than two loose nav items.
  *
  * Structure:
  *   - One bordered container holding two segments joined by a vertical divider.
- *   - Left segment "For DSOs" → /for-dsos (plain link).
- *   - Right segment "For Dental Pros" → /for-candidates, AND acts as the
- *     hover trigger for the role-specific dropdown (pure CSS group-hover,
- *     same mechanism as the old ForDentalProsDropdown).
+ *   - Left segment "For DSOs" → /for-dsos, AND a hover trigger for the
+ *     size→tier guidance dropdown (which tier fits a group of your size).
+ *   - Right segment "Job Candidates" → /for-candidates, AND a hover trigger
+ *     for the role-specific dropdown. (Renamed from "For Dental Pros" on
+ *     2026-05-22 — "dental pros" excluded corporate/non-clinical seekers.)
  *
- * Active-lens state: reads the current path via usePathname() and highlights
- * whichever lens the visitor is currently in. Neutral paths (/, /about,
- * /contact, /legal) highlight neither.
+ * Both dropdowns are pure CSS group-hover. Active-lens state reads the current
+ * path via usePathname() and highlights whichever lens the visitor is in.
+ * Neutral paths (/, /about, /contact, /legal) highlight neither.
  *
- * This is a client island (needs usePathname) — it's rendered by the async
- * server component SiteNav, never the other way around.
+ * This is a client island (needs usePathname) — rendered by the async server
+ * component SiteNav, never the other way around.
  *
- * The ROLE_LINKS list mirrors src/app/for-[role]/role-config.ts and the
- * mobile drawer's copy. Update all when adding a role page.
+ * ROLE_LINKS mirrors src/app/for-[role]/role-config.ts and the mobile drawer's
+ * copy (plus the corporate-roles entry). Update all when adding a role page.
  */
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -34,6 +35,22 @@ const ROLE_LINKS = [
   { href: "/for-dental-assistants", label: "For Dental Assistants", eyebrow: "DA · EFDA" },
   { href: "/for-front-desk", label: "For Front Desk + Treatment Coordinators", eyebrow: "Patient-facing ops" },
   { href: "/for-office-managers", label: "For Office Managers", eyebrow: "OM · Operations Leadership" },
+  // Corporate / non-clinical seekers — the rename to "Job Candidates"
+  // (2026-05-22) is partly to include these roles; give them a home here.
+  { href: "/jobs?surface=corporate", label: "Corporate & Administrative Roles", eyebrow: "Non-clinical · DSO support center" },
+];
+
+/**
+ * Left-lens "For DSOs" menu — maps DSO size to the tier that fits. Open-ended
+ * at the top (no practice-count ceiling, per the brand copy rule). Size rows
+ * link to /pricing; the overview links to /for-dsos.
+ */
+const DSO_SIZE_LINKS = [
+  { href: "/for-dsos", label: "Why DSO Hire", eyebrow: "Overview" },
+  { href: "/pricing", label: "Solo plan", eyebrow: "Solo practice · 2–5 locations" },
+  { href: "/pricing", label: "Growth plan", eyebrow: "Midsize group" },
+  { href: "/pricing", label: "Scale plan", eyebrow: "Larger · multi-region" },
+  { href: "/pricing", label: "Enterprise plan", eyebrow: "Largest · most complex" },
 ];
 
 /**
@@ -74,6 +91,59 @@ function resolveLens(pathname: string): "dso" | "candidate" | "neutral" {
   return "neutral";
 }
 
+const MENU_SHADOW =
+  "shadow-[0_20px_40px_-20px_rgba(7,15,28,0.20),0_8px_20px_-12px_rgba(7,15,28,0.10)]";
+
+function Chevron({ group }: { group: string }) {
+  return (
+    <svg
+      aria-hidden
+      className={`h-2.5 w-2.5 transition-transform ${group}`}
+      viewBox="0 0 12 12"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 4.5l3 3 3-3" />
+    </svg>
+  );
+}
+
+function MenuList({
+  links,
+}: {
+  links: ReadonlyArray<{ href: string; label: string; eyebrow: string }>;
+}) {
+  return (
+    <ul className="list-none p-2">
+      {links.map((link, i) => (
+        <li key={`${link.href}-${link.label}`}>
+          <Link
+            href={link.href}
+            role="menuitem"
+            className="block px-4 py-2.5 hover:bg-cream/60 transition-colors"
+            style={{
+              // Subtle separator between the overview and the rest of the list.
+              borderTop: i === 1 ? "1px solid var(--rule)" : undefined,
+              marginTop: i === 1 ? "4px" : undefined,
+              paddingTop: i === 1 ? "10px" : undefined,
+            }}
+          >
+            <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-0.5">
+              {link.eyebrow}
+            </div>
+            <div className="text-[13px] font-semibold tracking-[-0.1px] text-ink">
+              {link.label}
+            </div>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function LensToggle() {
   const pathname = usePathname() ?? "/";
   const lens = resolveLens(pathname);
@@ -86,21 +156,35 @@ export function LensToggle() {
   return (
     <li>
       <div className="flex items-stretch border border-[var(--rule-strong)]">
-        {/* Left lens — For DSOs. Plain link, NO dropdown. */}
-        <Link
-          href="/for-dsos"
-          aria-current={lens === "dso" ? "true" : undefined}
-          className={`${baseSegment} ${lens === "dso" ? activeSegment : idleSegment}`}
-        >
-          For DSOs
-        </Link>
+        {/* Left lens — For DSOs. Owns its own hover group (group/dsos) so the
+            size→tier dropdown fires only from here. */}
+        <div className="relative group/dsos flex">
+          <Link
+            href="/for-dsos"
+            aria-current={lens === "dso" ? "true" : undefined}
+            aria-haspopup="menu"
+            className={`${baseSegment} ${lens === "dso" ? activeSegment : idleSegment}`}
+          >
+            For DSOs
+            <Chevron group="group-hover/dsos:rotate-180" />
+          </Link>
+
+          {/* Hover bridge so moving the cursor to the menu doesn't drop it. */}
+          <span aria-hidden className="absolute left-0 right-0 top-full h-3" />
+
+          <div
+            role="menu"
+            className={`invisible opacity-0 absolute top-full left-0 mt-3 min-w-[320px] max-w-[calc(100vw-2rem)] bg-white border border-[var(--rule-strong)] ${MENU_SHADOW} group-hover/dsos:visible group-hover/dsos:opacity-100 transition-all duration-150 z-50`}
+          >
+            <MenuList links={DSO_SIZE_LINKS} />
+          </div>
+        </div>
 
         {/* Divider joining the two segments */}
         <span aria-hidden className="w-px self-stretch bg-[var(--rule-strong)]" />
 
-        {/* Right lens — For Dental Pros. This segment owns its own hover
-            group (group/pros) so the role dropdown fires ONLY from here,
-            not from hovering the "For DSOs" segment. */}
+        {/* Right lens — Job Candidates. Owns its own hover group (group/pros)
+            so the role dropdown fires only from here. */}
         <div className="relative group/pros flex">
           <Link
             href="/for-candidates"
@@ -108,55 +192,17 @@ export function LensToggle() {
             aria-haspopup="menu"
             className={`${baseSegment} ${lens === "candidate" ? activeSegment : idleSegment}`}
           >
-            For Dental Pros
-            <svg
-              aria-hidden
-              className="h-2.5 w-2.5 transition-transform group-hover/pros:rotate-180"
-              viewBox="0 0 12 12"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M3 4.5l3 3 3-3" />
-            </svg>
+            Job Candidates
+            <Chevron group="group-hover/pros:rotate-180" />
           </Link>
 
-          {/* Bridge element — keeps hover state alive when moving the cursor
-              from the trigger to the menu so the dropdown doesn't flicker. */}
           <span aria-hidden className="absolute left-0 right-0 top-full h-3" />
 
-          {/* Role-specific dropdown — revealed only on hover of the "For
-              Dental Pros" segment. Right-aligned to that segment. Pure CSS. */}
           <div
             role="menu"
-            className="invisible opacity-0 absolute top-full right-0 mt-3 min-w-[360px] bg-white border border-[var(--rule-strong)] shadow-[0_20px_40px_-20px_rgba(7,15,28,0.20),0_8px_20px_-12px_rgba(7,15,28,0.10)] group-hover/pros:visible group-hover/pros:opacity-100 transition-all duration-150 z-50"
+            className={`invisible opacity-0 absolute top-full right-0 mt-3 min-w-[360px] max-w-[calc(100vw-2rem)] bg-white border border-[var(--rule-strong)] ${MENU_SHADOW} group-hover/pros:visible group-hover/pros:opacity-100 transition-all duration-150 z-50`}
           >
-            <ul className="list-none p-2">
-              {ROLE_LINKS.map((link, i) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    role="menuitem"
-                    className="block px-4 py-2.5 hover:bg-cream/60 transition-colors"
-                    style={{
-                      // Subtle separator between the overview and the role list
-                      borderTop: i === 1 ? "1px solid var(--rule)" : undefined,
-                      marginTop: i === 1 ? "4px" : undefined,
-                      paddingTop: i === 1 ? "10px" : undefined,
-                    }}
-                  >
-                    <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-0.5">
-                      {link.eyebrow}
-                    </div>
-                    <div className="text-[13px] font-semibold tracking-[-0.1px] text-ink">
-                      {link.label}
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <MenuList links={ROLE_LINKS} />
           </div>
         </div>
       </div>

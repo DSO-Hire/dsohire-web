@@ -112,7 +112,7 @@ function Hero() {
           <DoorwayPanel
             accent="heritage"
             icon={Stethoscope}
-            eyebrow="For Dental Professionals"
+            eyebrow="Job Candidates"
             title="Find your next dental role"
             body="Real openings at multi-location dental support organizations — clinical and corporate, hygiene through specialist."
             proof="Free forever · Direct apply · Multi-location DSOs only"

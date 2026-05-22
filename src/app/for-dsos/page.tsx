@@ -600,12 +600,12 @@ function RoiMath() {
           label="What DSO Hire costs"
           accent="heritage"
           rows={[
-            { item: "Growth tier subscription", value: "$999 / mo" },
+            { item: "Growth tier subscription", value: "$699 / mo" },
             { item: "Per-listing fees", value: "$0" },
             { item: "Placement fees", value: "$0" },
           ]}
-          total="$999 / mo"
-          totalLabel="Annual: $11,988"
+          total="$699 / mo"
+          totalLabel="Annual: $8,388"
         />
       </div>
 

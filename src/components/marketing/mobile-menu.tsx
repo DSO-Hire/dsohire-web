@@ -40,10 +40,20 @@ const ROLE_LINKS = [
   { href: "/for-dental-assistants", label: "For Dental Assistants" },
   { href: "/for-front-desk", label: "For Front Desk + Treatment Coordinators" },
   { href: "/for-office-managers", label: "For Office Managers" },
+  { href: "/jobs?surface=corporate", label: "Corporate & Administrative Roles" },
+];
+
+// Size→tier guidance under the "For DSOs" lens (mirrors the desktop dropdown).
+// Open-ended at the top — no practice-count ceiling, per the brand copy rule.
+const DSO_SIZE_LINKS = [
+  { href: "/pricing", label: "Solo · 2–5 locations" },
+  { href: "/pricing", label: "Growth · midsize group" },
+  { href: "/pricing", label: "Scale · larger, multi-region" },
+  { href: "/pricing", label: "Enterprise · largest, most complex" },
 ];
 
 // Secondary nav links — shown below the dual-lens pair. The two lenses
-// ("For DSOs" / "For Dental Pros") are presented separately at the top of
+// ("For DSOs" / "Job Candidates") are presented separately at the top of
 // the drawer as a deliberate paired choice, mirroring the desktop
 // segmented control.
 const PRIMARY_LINKS = [
@@ -147,18 +157,33 @@ export function MobileMenu({
                     Hiring for your practices
                   </span>
                 </Link>
+                {/* Size→tier guidance — indented to read as belonging to the
+                    For DSOs lens (mirrors the desktop dropdown). */}
+                <ul className="list-none flex flex-col border-t border-[var(--rule)] bg-cream/40">
+                  {DSO_SIZE_LINKS.map((link) => (
+                    <li key={link.label}>
+                      <Link
+                        href={link.href}
+                        onClick={close}
+                        className="block pl-7 pr-4 py-2.5 text-[13px] font-semibold text-slate-body hover:text-heritage-deep transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
                 <div className="border-t border-[var(--rule-strong)]">
                   <Link
                     href="/for-candidates"
                     onClick={close}
                     className="block px-4 py-3.5 text-[15px] font-semibold text-ink hover:bg-cream/60 transition-colors"
                   >
-                    For Dental Pros
+                    Job Candidates
                     <span className="block text-[12px] font-medium tracking-normal text-slate-body normal-case mt-0.5">
                       Find your next role
                     </span>
                   </Link>
-                  {/* Role-specific pages live under the Dental Pros lens —
+                  {/* Role-specific pages live under the Job Candidates lens —
                       indented to read as belonging to it. */}
                   <ul className="list-none flex flex-col border-t border-[var(--rule)] bg-cream/40">
                     {ROLE_LINKS.slice(1).map((link) => (

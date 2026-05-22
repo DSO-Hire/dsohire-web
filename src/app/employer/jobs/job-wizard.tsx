@@ -1202,7 +1202,7 @@ function BasicsStep({
       </div>
 
       <div>
-        <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
+        <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
           {scope === "corporate" ? "Anchor location" : "Practice locations"}{" "}
           {scope === "corporate" ? (
             <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
@@ -1251,7 +1251,7 @@ function BasicsStep({
       </div>
 
       <div>
-        <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
+        <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
           Job scope
         </label>
         <div className="space-y-2">
@@ -1297,7 +1297,7 @@ function BasicsStep({
         <div>
           <label
             htmlFor="corporate_function"
-            className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+            className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
           >
             Corporate function{" "}
             <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
@@ -1555,7 +1555,7 @@ function DetailsStep({
       />
 
       <fieldset className="border border-[var(--rule)] p-6 bg-cream/40">
-        <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
+        <legend className="px-2 text-[13px] font-bold tracking-[2px] uppercase text-heritage-deep">
           Match scoring
         </legend>
         <p className="mt-1 text-[12px] text-slate-meta leading-relaxed">
@@ -1727,7 +1727,7 @@ function DetailsStep({
           where the employer wants minimal stage visibility on the candidate
           side. */}
       <fieldset className="border border-[var(--rule)] p-6 bg-cream/40">
-        <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
+        <legend className="px-2 text-[13px] font-bold tracking-[2px] uppercase text-heritage-deep">
           Candidate visibility
         </legend>
         <label className="mt-2 flex items-start gap-2.5 text-[14px] text-ink cursor-pointer">
@@ -1873,7 +1873,7 @@ function ScreeningStep({
       ))}
 
       <div>
-        <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
+        <div className="text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
           Add a question
         </div>
         <div className="flex flex-wrap gap-2">
@@ -1959,7 +1959,7 @@ function QuestionCard({
           <span className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta">
             Q{index + 1}
           </span>
-          <span className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep px-2 py-1 bg-heritage/[0.08]">
+          <span className="text-[13px] font-bold tracking-[2px] uppercase text-heritage-deep px-2 py-1 bg-heritage/[0.08]">
             {KIND_LABELS[question.kind]}
           </span>
         </div>
@@ -2050,7 +2050,7 @@ function QuestionCard({
 
         {isSelect && (
           <div>
-            <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+            <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
               Options <span className="text-heritage">*</span>
             </label>
             <div className="space-y-2">
@@ -2487,7 +2487,7 @@ function PreviewStep({
       </ReviewBlock>
 
       <div className="border border-[var(--rule)] p-5 bg-cream/40">
-        <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
+        <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
           Publish status
         </label>
         <div className="space-y-2">
@@ -2534,7 +2534,7 @@ function ReviewBlock({
   return (
     <div className="border border-[var(--rule)] p-5">
       <div className="flex items-center justify-between mb-3">
-        <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-body">
+        <div className="text-[13px] font-bold tracking-[2px] uppercase text-slate-body">
           {label}
         </div>
         <button
@@ -2618,7 +2618,7 @@ function Input({
 }) {
   return (
     <div>
-      <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+      <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
         {label} {required && <span className="text-heritage">*</span>}
       </label>
       <input
@@ -2649,7 +2649,7 @@ function Textarea({
 }) {
   return (
     <div>
-      <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+      <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
         {label} {required && <span className="text-heritage">*</span>}
       </label>
       <textarea
@@ -2678,7 +2678,7 @@ function Select({
 }) {
   return (
     <div>
-      <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+      <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
         {label} {required && <span className="text-heritage">*</span>}
       </label>
       <select

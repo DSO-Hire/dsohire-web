@@ -55,7 +55,7 @@ import {
   HAIKU_MODEL,
   estimateHaikuCostUsd,
 } from "@/lib/ai/anthropic";
-import { logAiUsage } from "@/lib/ai/usage";
+import { logAiUsage, checkAiRateLimit } from "@/lib/ai/usage";
 import { extractJson } from "@/lib/ai/extract-json";
 import { greetingFirstName } from "@/lib/candidate/name";
 import type { FitBucket, FitDimensionKey, FitResult } from "./types";
@@ -85,6 +85,12 @@ export async function generatePracticeFitNarrative(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Please sign in." };
+
+  // AI abuse guard — cooldown + rolling daily cap before the model call.
+  const rate = await checkAiRateLimit(user.id, "practice_fit_narrative");
+  if (!rate.allowed) {
+    return { ok: false, error: rate.message ?? "Please try again shortly." };
+  }
 
   // RLS-scoped read of the existing fit row. If RLS blocks us, we
   // never proceed to the prompt — protects against fishing for

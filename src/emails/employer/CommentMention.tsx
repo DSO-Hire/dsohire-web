@@ -50,7 +50,7 @@ export function CommentMention({
       <Text style={eyebrow}>You were mentioned</Text>
       <Heading style={heading}>Hi {recipientName} —</Heading>
       <Text style={paragraph}>
-        <strong style={strong}>{authorName}</strong> mentioned you in a
+        <strong style={strong}>{authorName}</strong>{" "}mentioned you in a
         comment on{" "}
         <strong style={strong}>{candidateName}</strong>&apos;s application.
       </Text>

@@ -28,7 +28,7 @@ import {
   HAIKU_MODEL,
   estimateHaikuCostUsd,
 } from "@/lib/ai/anthropic";
-import { logAiUsage, type AiFeature } from "@/lib/ai/usage";
+import { logAiUsage, checkAiRateLimit, type AiFeature } from "@/lib/ai/usage";
 import { extractJson } from "@/lib/ai/extract-json";
 import {
   ROLE_CATEGORIES,
@@ -117,6 +117,12 @@ async function runWriteAction(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Please sign in." };
+
+  // AI abuse guard — cooldown + rolling daily cap before the model call.
+  const rate = await checkAiRateLimit(user.id, input.feature);
+  if (!rate.allowed) {
+    return { ok: false, error: rate.message ?? "Please try again shortly." };
+  }
 
   let response: Anthropic.Messages.Message;
   try {

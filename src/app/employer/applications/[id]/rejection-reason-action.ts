@@ -33,7 +33,7 @@ import {
   HAIKU_MODEL,
   estimateHaikuCostUsd,
 } from "@/lib/ai/anthropic";
-import { logAiUsage } from "@/lib/ai/usage";
+import { logAiUsage, checkAiRateLimit } from "@/lib/ai/usage";
 import { extractJson } from "@/lib/ai/extract-json";
 import { getRubricForRole } from "@/lib/scorecards/rubric-library";
 import type { PricingTier } from "@/lib/stripe/prices";
@@ -123,6 +123,12 @@ export async function suggestRejectionReason(
   }
   if (!subTier || !ALLOWED_TIERS.has(subTier)) {
     return { ok: false, error: TIER_GATE_MESSAGE };
+  }
+
+  // AI abuse guard — cooldown + rolling daily cap before the model call.
+  const rate = await checkAiRateLimit(user.id, "rejection_reason");
+  if (!rate.allowed) {
+    return { ok: false, error: rate.message ?? "Please try again shortly." };
   }
 
   // ── Application + job (DSO membership check is RLS-enforced; we also do
