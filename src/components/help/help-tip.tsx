@@ -73,7 +73,7 @@ export function HelpTip({
         onKeyDown={(e) => {
           if (e.key === "Escape") setOpen(false);
         }}
-        className="inline-flex h-4 w-4 items-center justify-center rounded-full text-slate-meta hover:text-heritage-deep focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage/40 transition-colors"
+        className="inline-flex items-center justify-center rounded-full p-1.5 -m-1.5 text-slate-meta hover:text-heritage-deep focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage/40 transition-colors"
       >
         <Info className="h-3.5 w-3.5" aria-hidden />
       </button>

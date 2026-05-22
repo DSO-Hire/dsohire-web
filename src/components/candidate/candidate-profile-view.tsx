@@ -534,9 +534,9 @@ function Section({
 }) {
   return (
     <section>
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+      <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
         {title}
-      </div>
+      </h2>
       {children}
     </section>
   );
@@ -551,9 +551,9 @@ function SidebarCard({
 }) {
   return (
     <section className="border border-[var(--rule)] bg-white p-4">
-      <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-2">
+      <h2 className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-2">
         {title}
-      </div>
+      </h2>
       {children}
     </section>
   );
