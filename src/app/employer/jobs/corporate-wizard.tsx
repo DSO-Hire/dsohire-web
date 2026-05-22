@@ -81,6 +81,8 @@ import { CorporateRecommendedQuestionsPanel } from "./corporate-recommended-ques
 import { CompensationSection } from "./compensation-section";
 import { VerificationRequirements } from "./verification-requirements";
 import type { VerificationTypeValue } from "@/lib/verifications/types";
+import { ChipArrayInput } from "@/app/candidate/profile/edit-sheet";
+import { getJobRequirementsPrioritized } from "@/lib/candidate/canonical-lists";
 
 /* ───── Types ───── */
 
@@ -1749,12 +1751,21 @@ function DetailsStep({
       {/* ── External links ── */}
       <ExternalLinksField initial={externalLinks} onChange={onExternalLinks} />
 
-      <Textarea
-        label="Requirements (one per line)"
-        rows={4}
-        placeholder={"CPA or MBA preferred\n10+ years multi-site finance leadership\nPrior DSO or healthcare experience"}
-        value={requirements}
-        onChange={onRequirements}
+      {/* Note 6 (Dave 2026-05-21) — role-aware Requirements chip picker, same
+          pattern as the clinical wizard. Corporate jobs are role_category
+          "other" → seeded with the DSO-corporate requirement set. Stored value
+          stays a newline-joined string (text column unchanged; listing renders
+          whitespace-pre-wrap). Custom typing still allowed (Enter to add). */}
+      <ChipArrayInput
+        label="Requirements"
+        values={requirements
+          .split("\n")
+          .map((s) => s.trim())
+          .filter(Boolean)}
+        onChange={(vals) => onRequirements(vals.join("\n"))}
+        options={getJobRequirementsPrioritized("dso_corporate")}
+        placeholder="Search requirements — type and press Enter for custom"
+        helper="Must-haves for the role — education, experience, credentials. Pick from suggestions or type your own; each becomes one line on the listing."
       />
 
       {/* ── Candidate visibility ── */}
@@ -2564,37 +2575,6 @@ function Input({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-[#3D5266] focus:ring-1 focus:ring-[#3D5266] transition-colors"
-      />
-    </div>
-  );
-}
-
-function Textarea({
-  label,
-  required,
-  rows = 4,
-  placeholder,
-  value,
-  onChange,
-}: {
-  label: string;
-  required?: boolean;
-  rows?: number;
-  placeholder?: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div>
-      <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
-        {label} {required && <span className="text-[#3D5266]">*</span>}
-      </label>
-      <textarea
-        rows={rows}
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-[#3D5266] focus:ring-1 focus:ring-[#3D5266] transition-colors resize-vertical"
       />
     </div>
   );

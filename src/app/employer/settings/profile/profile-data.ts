@@ -38,6 +38,14 @@ export interface ProfileData {
   contact_cta_label: string | null;
   contact_cta_url: string | null;
 
+  /** Company details (website + HQ + size). Columns already existed and
+   *  render on the public profile; the editor exposes them as of 2026-05-22
+   *  (Dave call Note 7 — DSOs need a place to add their website + info). */
+  website: string | null;
+  headquarters_city: string | null;
+  headquarters_state: string | null;
+  practice_count: number | null;
+
   /** Photo gallery (separate table) */
   photos: ProfilePhoto[];
 }
@@ -50,4 +58,8 @@ export const PROFILE_LIMITS = {
   WHY_BLOCKS_MAX: 6,
   CTA_LABEL_MAX: 80,
   PHOTOS_MAX: 6,
+  WEBSITE_MAX: 200,
+  HQ_CITY_MAX: 80,
+  HQ_STATE_MAX: 60,
+  PRACTICE_COUNT_MAX: 100000,
 } as const;

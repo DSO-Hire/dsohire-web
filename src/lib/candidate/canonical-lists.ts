@@ -329,10 +329,31 @@ export function getAllDentalSkills(): ReadonlyArray<CanonicalOption> {
  *
  * If `role` is null/undefined or unknown, falls back to getAllDentalSkills.
  */
+/**
+ * Maps a job `role_category` enum value to its SKILLS_BY_ROLE key. The two
+ * vocabularies diverged (e.g. role_category "dentist" vs skills key
+ * "associate_dentist"), which silently dropped role prioritization for most
+ * roles — the picker fell back to the full alphabetical pool. Fixed 2026-05-22.
+ */
+export const ROLE_CATEGORY_TO_SKILLS_KEY: Record<string, string> = {
+  dentist: "associate_dentist",
+  specialist: "specialist_dentist",
+  dental_hygienist: "hygienist",
+  dental_assistant: "assistant",
+  front_office: "front_desk",
+  office_manager: "office_manager",
+  regional_manager: "regional_manager",
+  other: "dso_corporate", // corporate-scope jobs carry role_category="other"
+};
+
 export function getAllDentalSkillsPrioritized(
   role: string | null | undefined
 ): ReadonlyArray<CanonicalOption> {
-  const roleList = role ? SKILLS_BY_ROLE[role] : undefined;
+  // Normalize role_category → skills key; also accept a direct skills key.
+  const skillsKey = role
+    ? (ROLE_CATEGORY_TO_SKILLS_KEY[role] ?? role)
+    : undefined;
+  const roleList = skillsKey ? SKILLS_BY_ROLE[skillsKey] : undefined;
   if (!roleList) return getAllDentalSkills();
 
   const seen = new Set<string>();
@@ -358,12 +379,183 @@ export function getAllDentalSkillsPrioritized(
   appendInto(UNIVERSAL_DENTAL_SKILLS, head);
   // 3. Everything else, alphabetically sorted in the tail
   for (const [otherRole, list] of Object.entries(SKILLS_BY_ROLE)) {
-    if (otherRole === role) continue;
+    if (otherRole === skillsKey) continue;
     appendInto(list, tail);
   }
   tail.sort((a, b) => a.label.localeCompare(b.label));
 
   return [...head, ...tail];
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Job requirements (employer JD wizard) — role-specific curated lists
+// ─────────────────────────────────────────────────────────────────────
+// Note 6 (Dave call 2026-05-21): the wizard's Requirements field was a raw
+// free-text textarea. Cam wants a role-specific chooser (chips) with custom
+// typing still allowed — "the less we have free type for them, the cleaner
+// everything will be." These mirror SKILLS_BY_ROLE: keyed by the same role
+// keys, normalized from a job's role_category via ROLE_CATEGORY_TO_SKILLS_KEY.
+// The wizard joins selected chips with newlines so jobs.requirements stays a
+// plain text column (no migration; the listing already renders it as
+// whitespace-pre-wrap, so newline-joined chips display one-per-line exactly
+// as the old textarea did). For requirements the canonical value IS the full
+// sentence (it's shown verbatim on the listing), so value === label.
+
+const req = (s: string): CanonicalOption => ({ value: s, label: s });
+
+/** Requirements that apply across essentially every dental role. */
+export const UNIVERSAL_JOB_REQUIREMENTS: ReadonlyArray<CanonicalOption> = [
+  req("Authorized to work in the United States"),
+  req("Reliable, punctual, and team-oriented"),
+  req("Strong communication and patient-service skills"),
+  req("Commitment to patient-centered, compassionate care"),
+  req("Background check upon offer"),
+];
+
+const ASSOCIATE_DENTIST_REQUIREMENTS: ReadonlyArray<CanonicalOption> = [
+  req("DDS or DMD from an accredited dental school"),
+  req("Active state dental license (or license-eligible)"),
+  req("Current DEA registration (or eligibility to obtain)"),
+  req("BLS / CPR certification"),
+  req("Malpractice insurance (or eligibility to obtain)"),
+  req("Comfortable with restorative, crown & bridge, and extractions"),
+  req("1+ years of clinical experience (new graduates welcome)"),
+];
+
+const SPECIALIST_DENTIST_REQUIREMENTS: ReadonlyArray<CanonicalOption> = [
+  req("DDS or DMD plus an accredited specialty residency"),
+  req("Active state dental license"),
+  req("Board-certified or board-eligible in specialty"),
+  req("Current DEA registration"),
+  req("BLS / CPR certification (ACLS for sedation cases)"),
+  req("Malpractice insurance (or eligibility to obtain)"),
+  req("Demonstrated experience with specialty case load"),
+];
+
+const HYGIENIST_REQUIREMENTS: ReadonlyArray<CanonicalOption> = [
+  req("Associate or Bachelor's degree in Dental Hygiene"),
+  req("Active state dental hygiene license (RDH)"),
+  req("Local anesthesia / nitrous certification (state-dependent)"),
+  req("BLS / CPR certification"),
+  req("Experience with scaling, root planing, and periodontal therapy"),
+  req("Comfortable with digital radiography and intraoral imaging"),
+  req("1+ years of clinical hygiene experience (new graduates welcome)"),
+];
+
+const ASSISTANT_REQUIREMENTS: ReadonlyArray<CanonicalOption> = [
+  req("High school diploma or equivalent"),
+  req("Dental Assisting certificate or equivalent on-the-job training"),
+  req("Radiology / X-ray certification (state-dependent)"),
+  req("Expanded Functions certification a plus (state-dependent)"),
+  req("BLS / CPR certification"),
+  req("Chairside assisting experience"),
+  req("Familiar with sterilization and OSHA protocols"),
+];
+
+const FRONT_DESK_REQUIREMENTS: ReadonlyArray<CanonicalOption> = [
+  req("High school diploma or equivalent"),
+  req("1+ years front office or customer service experience"),
+  req("Experience with dental practice management software"),
+  req("Insurance verification and claims familiarity"),
+  req("Strong phone, scheduling, and organizational skills"),
+  req("Professional, welcoming demeanor"),
+];
+
+const OFFICE_MANAGER_REQUIREMENTS: ReadonlyArray<CanonicalOption> = [
+  req("3+ years dental office experience, including a lead role"),
+  req("Proficiency with practice management software"),
+  req("Experience with insurance, billing, and AR management"),
+  req("Team scheduling and staff supervision experience"),
+  req("Strong organizational and conflict-resolution skills"),
+  req("Working knowledge of OSHA / HIPAA compliance"),
+];
+
+const REGIONAL_MANAGER_REQUIREMENTS: ReadonlyArray<CanonicalOption> = [
+  req("5+ years multi-site dental or healthcare operations experience"),
+  req("Proven P&L and budget management"),
+  req("Experience developing office managers across locations"),
+  req("Willingness to travel between practices"),
+  req("Strong analytical and reporting skills"),
+  req("Bachelor's degree preferred"),
+];
+
+const DSO_CORPORATE_REQUIREMENTS: ReadonlyArray<CanonicalOption> = [
+  req("Bachelor's degree or equivalent experience in a relevant field"),
+  req("Experience in a DSO, healthcare, or multi-site environment"),
+  req("Strong cross-functional collaboration skills"),
+  req("Comfort with data, reporting, and KPIs"),
+  req("Excellent written and verbal communication"),
+];
+
+/** Map keyed by the same role keys as SKILLS_BY_ROLE. */
+export const REQUIREMENTS_BY_ROLE: Record<
+  string,
+  ReadonlyArray<CanonicalOption>
+> = {
+  associate_dentist: ASSOCIATE_DENTIST_REQUIREMENTS,
+  specialist_dentist: SPECIALIST_DENTIST_REQUIREMENTS,
+  hygienist: HYGIENIST_REQUIREMENTS,
+  assistant: ASSISTANT_REQUIREMENTS,
+  front_desk: FRONT_DESK_REQUIREMENTS,
+  office_manager: OFFICE_MANAGER_REQUIREMENTS,
+  regional_manager: REGIONAL_MANAGER_REQUIREMENTS,
+  dso_corporate: DSO_CORPORATE_REQUIREMENTS,
+};
+
+/**
+ * Flat, deduped list of every canonical requirement + universals,
+ * alphabetical. Used when the job's role is unknown so the picker still
+ * has a sensible quick-add pool. Custom typing always remains available.
+ */
+export function getAllJobRequirements(): ReadonlyArray<CanonicalOption> {
+  const seen = new Set<string>();
+  const out: CanonicalOption[] = [];
+  const append = (list: ReadonlyArray<CanonicalOption>) => {
+    for (const opt of list) {
+      if (!seen.has(opt.value)) {
+        seen.add(opt.value);
+        out.push(opt);
+      }
+    }
+  };
+  for (const list of Object.values(REQUIREMENTS_BY_ROLE)) append(list);
+  append(UNIVERSAL_JOB_REQUIREMENTS);
+  return [...out].sort((a, b) => a.label.localeCompare(b.label));
+}
+
+/**
+ * Role-aware requirement suggestions for the JD wizard's Requirements
+ * picker. Returns role-specific requirements first (declaration order —
+ * authored most-essential first: license, education, then competencies),
+ * then UNIVERSAL_JOB_REQUIREMENTS. Unlike skills, requirements are
+ * role-bound (a hygienist license has no business surfacing on a front-desk
+ * job), so we deliberately DON'T append other roles' requirements — the
+ * custom-type escape hatch covers anything missing.
+ *
+ * Accepts a job role_category enum value (normalized via
+ * ROLE_CATEGORY_TO_SKILLS_KEY) or a direct REQUIREMENTS_BY_ROLE key.
+ * Falls back to the full alphabetical pool when role is unknown.
+ */
+export function getJobRequirementsPrioritized(
+  role: string | null | undefined
+): ReadonlyArray<CanonicalOption> {
+  const key = role ? (ROLE_CATEGORY_TO_SKILLS_KEY[role] ?? role) : undefined;
+  const roleList = key ? REQUIREMENTS_BY_ROLE[key] : undefined;
+  if (!roleList) return getAllJobRequirements();
+
+  const seen = new Set<string>();
+  const out: CanonicalOption[] = [];
+  const append = (list: ReadonlyArray<CanonicalOption>) => {
+    for (const opt of list) {
+      if (!seen.has(opt.value)) {
+        seen.add(opt.value);
+        out.push(opt);
+      }
+    }
+  };
+  append(roleList);
+  append(UNIVERSAL_JOB_REQUIREMENTS);
+  return out;
 }
 
 /**

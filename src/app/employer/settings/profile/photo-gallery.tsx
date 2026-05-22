@@ -136,7 +136,7 @@ export function ProfilePhotoGallery({
     <section className="border border-[var(--rule)] bg-white p-6 sm:p-8">
       <header className="mb-5">
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1.5">
-          04 — Photo gallery
+          05 — Photo gallery
         </div>
         <h2 className="font-display text-lg font-bold text-ink">
           Up to {PROFILE_LIMITS.PHOTOS_MAX} photos of your practices

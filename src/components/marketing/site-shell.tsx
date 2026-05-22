@@ -96,6 +96,11 @@ export async function SiteNav() {
             right segment is also the hover trigger for the role dropdown. */}
         <LensToggle />
         <NavLink href="/jobs">Browse Jobs</NavLink>
+        {/* Note 7 (Dave 2026-05-22) — surface the public DSO directory in the
+            top nav. Sits next to Browse Jobs as the other candidate-facing
+            "browse" action. Label kept inclusive ("Companies") to align with
+            the Dental Groups rebrand rather than "Browse DSOs". */}
+        <NavLink href="/companies">Companies</NavLink>
         <NavLink href="/pricing">Pricing</NavLink>
         <NavLink href="/about">About</NavLink>
         <NavLink href="/contact">Contact</NavLink>

@@ -470,6 +470,104 @@ export async function upsertBrandAndCulture(input: {
 }
 
 /* ──────────────────────────────────────────────────────────────
+ * Company details — website + headquarters + practice count
+ *
+ * Dave call Note 7 (2026-05-22): DSOs needed a place to add their
+ * website + basic info. These columns already existed on `dsos` and
+ * already render on /companies/[slug]; this action just lets the
+ * owner/admin populate them from the profile editor. No migration.
+ * ─────────────────────────────────────────────────────────── */
+
+const MAX_WEBSITE = 200;
+const MAX_HQ_CITY = 80;
+const MAX_HQ_STATE = 60;
+const MAX_PRACTICE_COUNT = 100000;
+
+export async function upsertCompanyDetails(input: {
+  website: string | null;
+  headquarters_city: string | null;
+  headquarters_state: string | null;
+  practice_count: number | null;
+}): Promise<Result> {
+  const ctx = await getDsoAdminContext();
+  if (!ctx.ok) return ctx;
+
+  // Website — optional. Normalize a bare domain to https:// so DSOs can
+  // type "yourdso.com" without thinking about the scheme.
+  let website = input.website?.trim() || null;
+  if (website) {
+    if (!/^https?:\/\//i.test(website)) {
+      website = `https://${website}`;
+    }
+    if (website.length > MAX_WEBSITE) {
+      return {
+        ok: false,
+        error: `Website URL must be ${MAX_WEBSITE} characters or fewer.`,
+      };
+    }
+    // Loose shape check — a scheme plus a dotted host. We're lenient on
+    // purpose; this is a display link, not an auth-critical field.
+    if (!/^https?:\/\/[^\s.]+\.[^\s]+$/i.test(website)) {
+      return {
+        ok: false,
+        error: "Enter a valid website like https://yourdso.com.",
+      };
+    }
+  }
+
+  const headquarters_city = input.headquarters_city?.trim() || null;
+  const headquarters_state = input.headquarters_state?.trim() || null;
+  if (headquarters_city && headquarters_city.length > MAX_HQ_CITY) {
+    return { ok: false, error: `City must be ${MAX_HQ_CITY} characters or fewer.` };
+  }
+  if (headquarters_state && headquarters_state.length > MAX_HQ_STATE) {
+    return {
+      ok: false,
+      error: `State must be ${MAX_HQ_STATE} characters or fewer.`,
+    };
+  }
+
+  // Practice count — optional non-negative integer.
+  let practice_count = input.practice_count;
+  if (practice_count !== null && practice_count !== undefined) {
+    if (!Number.isFinite(practice_count) || !Number.isInteger(practice_count)) {
+      return { ok: false, error: "Number of practices must be a whole number." };
+    }
+    if (practice_count < 0) {
+      return { ok: false, error: "Number of practices can't be negative." };
+    }
+    if (practice_count > MAX_PRACTICE_COUNT) {
+      return { ok: false, error: "That number of practices looks too high." };
+    }
+    if (practice_count === 0) {
+      // Treat 0 as "unset" so the public-page stat strip (which hides on
+      // null/0) stays clean rather than rendering "0 practices".
+      practice_count = null;
+    }
+  } else {
+    practice_count = null;
+  }
+
+  const { error } = await ctx.supabase
+    .from("dsos")
+    .update({
+      website,
+      headquarters_city,
+      headquarters_state,
+      practice_count,
+    })
+    .eq("id", ctx.dsoId);
+
+  if (error) {
+    console.error("[profile/upsertCompanyDetails]", error);
+    return { ok: false, error: "Couldn't save company details." };
+  }
+
+  await revalidateProfileSurfaces(ctx.supabase, ctx.dsoId);
+  return { ok: true };
+}
+
+/* ──────────────────────────────────────────────────────────────
  * Contact CTA — label + URL pair
  * ─────────────────────────────────────────────────────────── */
 

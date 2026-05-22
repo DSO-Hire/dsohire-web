@@ -36,6 +36,7 @@ import {
   upsertWhyJoinUs,
   upsertBrandAndCulture,
   upsertContactCta,
+  upsertCompanyDetails,
 } from "./actions";
 import {
   type ProfileData,
@@ -71,6 +72,13 @@ export function ProfileEditor({ initial, canEdit }: ProfileEditorProps) {
         canEdit={canEdit}
         name={initial.name}
         initialSlug={initial.slug}
+      />
+      <CompanyDetailsSection
+        canEdit={canEdit}
+        initialWebsite={initial.website}
+        initialCity={initial.headquarters_city}
+        initialState={initial.headquarters_state}
+        initialPracticeCount={initial.practice_count}
       />
       <AboutSection
         canEdit={canEdit}
@@ -346,7 +354,207 @@ function SlugChangeConfirm({
   );
 }
 
-/* ───────── 2. About (mission + Tiptap description) ───────── */
+/* ───────── 2. Company details (website + HQ + size) ───────── */
+
+function CompanyDetailsSection({
+  canEdit,
+  initialWebsite,
+  initialCity,
+  initialState,
+  initialPracticeCount,
+}: {
+  canEdit: boolean;
+  initialWebsite: string | null;
+  initialCity: string | null;
+  initialState: string | null;
+  initialPracticeCount: number | null;
+}) {
+  const [website, setWebsite] = useState(initialWebsite ?? "");
+  const [city, setCity] = useState(initialCity ?? "");
+  const [stateField, setStateField] = useState(initialState ?? "");
+  // Practice count is held as a string for clean typing; parsed on save.
+  const [practiceCount, setPracticeCount] = useState(
+    initialPracticeCount != null ? String(initialPracticeCount) : ""
+  );
+  const [snapshot, setSnapshot] = useState({
+    website: initialWebsite ?? "",
+    city: initialCity ?? "",
+    state: initialState ?? "",
+    practiceCount: initialPracticeCount != null ? String(initialPracticeCount) : "",
+  });
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  const dirty =
+    website !== snapshot.website ||
+    city !== snapshot.city ||
+    stateField !== snapshot.state ||
+    practiceCount !== snapshot.practiceCount;
+
+  const clearFlags = () => {
+    setSaved(false);
+    setError(null);
+  };
+
+  const onSave = () => {
+    setError(null);
+    setSaved(false);
+
+    let parsedCount: number | null = null;
+    const trimmedCount = practiceCount.trim();
+    if (trimmedCount !== "") {
+      const n = Number(trimmedCount);
+      if (!Number.isInteger(n) || n < 0) {
+        setError("Number of practices must be a whole number (0 or more).");
+        return;
+      }
+      parsedCount = n;
+    }
+
+    startTransition(async () => {
+      const result = await upsertCompanyDetails({
+        website: website.trim() || null,
+        headquarters_city: city.trim() || null,
+        headquarters_state: stateField.trim() || null,
+        practice_count: parsedCount,
+      });
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      // The action normalizes the URL (adds https://) and coerces 0 → null,
+      // so re-snapshot from what the user typed; a no-op diff is fine.
+      setSnapshot({
+        website,
+        city,
+        state: stateField,
+        practiceCount,
+      });
+      setSaved(true);
+    });
+  };
+
+  return (
+    <SectionShell
+      eyebrow="02 — Company details"
+      title="Website, headquarters, and size"
+      subtitle="These show on your public profile's header — your website link, the city you're based in, and how many practices you run. All optional."
+    >
+      <div className="space-y-5">
+        <div>
+          <label
+            htmlFor="dso-website"
+            className="mb-1.5 block text-[12px] font-semibold text-ink"
+          >
+            Website
+          </label>
+          <input
+            id="dso-website"
+            type="text"
+            value={website}
+            disabled={!canEdit}
+            onChange={(e) => {
+              clearFlags();
+              setWebsite(e.target.value);
+            }}
+            maxLength={PROFILE_LIMITS.WEBSITE_MAX}
+            placeholder="yourdso.com"
+            className="w-full rounded border border-[var(--rule-strong)] bg-white px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
+          />
+          <p className="mt-1.5 text-xs text-slate-meta">
+            We&apos;ll add <code className="font-mono">https://</code> for you if
+            you leave it off.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_140px]">
+          <div>
+            <label
+              htmlFor="dso-hq-city"
+              className="mb-1.5 block text-[12px] font-semibold text-ink"
+            >
+              Headquarters city
+            </label>
+            <input
+              id="dso-hq-city"
+              type="text"
+              value={city}
+              disabled={!canEdit}
+              onChange={(e) => {
+                clearFlags();
+                setCity(e.target.value);
+              }}
+              maxLength={PROFILE_LIMITS.HQ_CITY_MAX}
+              placeholder="e.g. Kansas City"
+              className="w-full rounded border border-[var(--rule-strong)] bg-white px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="dso-hq-state"
+              className="mb-1.5 block text-[12px] font-semibold text-ink"
+            >
+              State
+            </label>
+            <input
+              id="dso-hq-state"
+              type="text"
+              value={stateField}
+              disabled={!canEdit}
+              onChange={(e) => {
+                clearFlags();
+                setStateField(e.target.value);
+              }}
+              maxLength={PROFILE_LIMITS.HQ_STATE_MAX}
+              placeholder="e.g. MO"
+              className="w-full rounded border border-[var(--rule-strong)] bg-white px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label
+            htmlFor="dso-practice-count"
+            className="mb-1.5 block text-[12px] font-semibold text-ink"
+          >
+            Number of practices
+          </label>
+          <input
+            id="dso-practice-count"
+            type="number"
+            min={0}
+            step={1}
+            value={practiceCount}
+            disabled={!canEdit}
+            onChange={(e) => {
+              clearFlags();
+              setPracticeCount(e.target.value);
+            }}
+            placeholder="e.g. 12"
+            className="w-40 rounded border border-[var(--rule-strong)] bg-white px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
+          />
+          <p className="mt-1.5 text-xs text-slate-meta">
+            Leave blank to hide. Shows as &ldquo;X practices&rdquo; on your
+            profile.
+          </p>
+        </div>
+
+        <SaveBar
+          dirty={dirty}
+          saving={pending}
+          saved={saved}
+          error={error}
+          onSave={onSave}
+          saveLabel="Save company details"
+          disabled={!canEdit}
+        />
+      </div>
+    </SectionShell>
+  );
+}
+
+/* ───────── 3. About (mission + Tiptap description) ───────── */
 
 function AboutSection({
   canEdit,
@@ -397,7 +605,7 @@ function AboutSection({
 
   return (
     <SectionShell
-      eyebrow="02 — About"
+      eyebrow="03 — About"
       title="Your story in your own words"
       subtitle="Mission is the one-sentence positioning. Description is the long-form About page candidates land on after clicking your DSO name."
     >
@@ -456,7 +664,7 @@ function AboutSection({
   );
 }
 
-/* ───────── 3. Brand visuals (logo + banner) ───────── */
+/* ───────── 4. Brand visuals (logo + banner) ───────── */
 
 function BrandVisualsSection({
   canEdit,
@@ -501,7 +709,7 @@ function BrandVisualsSection({
 
   return (
     <SectionShell
-      eyebrow="03 — Brand visuals"
+      eyebrow="04 — Brand visuals"
       title="Logo and banner"
       subtitle="Logo shows in the header of every email and the avatar slot across the platform. Banner is the full-width image on your public profile."
     >
@@ -575,7 +783,7 @@ function flashMessage(
   setTimeout(() => set(null), ms);
 }
 
-/* ───────── 5. Why Join Us blocks ───────── */
+/* ───────── 6. Why Join Us blocks ───────── */
 
 function WhyJoinUsSection({
   canEdit,
@@ -647,7 +855,7 @@ function WhyJoinUsSection({
 
   return (
     <SectionShell
-      eyebrow="05 — Why join us"
+      eyebrow="06 — Why join us"
       title="3–6 reasons your DSO stands out"
       subtitle="Short blocks that read like a talent-marketing pitch. Things like 'Mentorship that actually scales' or 'Quality dentistry, supported.'"
     >
@@ -786,7 +994,7 @@ function blocksEqual(a: WhyJoinUsBlock[], b: WhyJoinUsBlock[]): boolean {
   return true;
 }
 
-/* ───────── 6. Culture chips + brand color ───────── */
+/* ───────── 7. Culture chips + brand color ───────── */
 
 function CultureSection({
   canEdit,
@@ -851,7 +1059,7 @@ function CultureSection({
 
   return (
     <SectionShell
-      eyebrow="06 — Brand & culture"
+      eyebrow="07 — Brand & culture"
       title="Pick the chips that match — add an accent color"
       subtitle={`Up to ${MAX_CULTURE_CHIPS} chips. Brand color tints section eyebrows on your public profile (falls back to our default heritage green).`}
     >
@@ -951,7 +1159,7 @@ function CultureSection({
   );
 }
 
-/* ───────── 7. Contact CTA ───────── */
+/* ───────── 8. Contact CTA ───────── */
 
 function ContactCtaSection({
   canEdit,
@@ -993,7 +1201,7 @@ function ContactCtaSection({
 
   return (
     <SectionShell
-      eyebrow="07 — Contact CTA"
+      eyebrow="08 — Contact CTA"
       title="One direct line on your public profile"
       subtitle="Optional. Adds a button below your About section so candidates can reach a real human if your roles don't fit them today."
     >

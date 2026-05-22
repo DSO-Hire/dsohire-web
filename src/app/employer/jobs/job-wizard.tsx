@@ -48,6 +48,7 @@ import type { VerificationTypeValue } from "@/lib/verifications/types";
 import {
   getAllDentalSkills,
   getAllDentalSkillsPrioritized,
+  getJobRequirementsPrioritized,
   BENEFITS,
 } from "@/lib/candidate/canonical-lists";
 
@@ -1704,12 +1705,22 @@ function DetailsStep({
         onChange={onExternalLinks}
       />
 
-      <Textarea
-        label="Requirements (one per line)"
-        rows={4}
-        placeholder={"DDS or DMD\nActive state license\nComfortable with implant cases"}
-        value={requirements}
-        onChange={onRequirements}
+      {/* Note 6 (Dave 2026-05-21) — Requirements moved from a raw free-text
+          textarea to a role-aware chip picker. Stored value stays a newline-
+          joined string (jobs.requirements text column unchanged; the listing
+          renders it whitespace-pre-wrap, so each chip lands on its own line
+          exactly as before). Custom typing is still allowed (Enter to add) so
+          nothing is lost — there's just less free-typing by default. */}
+      <ChipArrayInput
+        label="Requirements"
+        values={requirements
+          .split("\n")
+          .map((s) => s.trim())
+          .filter(Boolean)}
+        onChange={(vals) => onRequirements(vals.join("\n"))}
+        options={getJobRequirementsPrioritized(roleCategory)}
+        placeholder="Search requirements — type and press Enter for custom"
+        helper="Must-haves for the role — license, education, experience. Pick from role-specific suggestions or type your own; each becomes one line on the listing."
       />
 
       {/* 5G.e Tier 2 — verification requirements checklist. Shared
@@ -2627,37 +2638,6 @@ function Input({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
-      />
-    </div>
-  );
-}
-
-function Textarea({
-  label,
-  required,
-  rows = 4,
-  placeholder,
-  value,
-  onChange,
-}: {
-  label: string;
-  required?: boolean;
-  rows?: number;
-  placeholder?: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div>
-      <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
-        {label} {required && <span className="text-heritage">*</span>}
-      </label>
-      <textarea
-        rows={rows}
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors resize-vertical"
       />
     </div>
   );

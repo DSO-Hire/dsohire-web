@@ -84,7 +84,7 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     Icon: Smile,
     hero: {
       headline: "Practice dentistry without owning the building.",
-      headlineAccent: "without owning the building",
+      headlineAccent: "without owning the building.",
       sub: "Multi-location DSOs offer the clinical autonomy you trained for, the benefits package solo practice can't match, and a career path that doesn't end at 'become an owner.' Find a role that fits how you actually want to practice.",
     },
     advantages: [
@@ -141,7 +141,7 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     Icon: Sparkles,
     hero: {
       headline: "Specialty practice with built-in referrals.",
-      headlineAccent: "built-in referrals",
+      headlineAccent: "built-in referrals.",
       sub: "Get the case volume your specialty needs without building the referral network from scratch. Multi-location DSOs feed referrals from sister GP practices, so your day looks like patient care — not lunch-and-learns and golf with referring offices.",
     },
     advantages: [
@@ -197,7 +197,7 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     Icon: Heart,
     hero: {
       headline: "Hygiene work that respects your time.",
-      headlineAccent: "respects your time",
+      headlineAccent: "respects your time.",
       sub: "Defined PTO, real CE allowance, predictable schedules, and no 'double up' expectations on slow days. The DSO model treats hygiene as critical care, not as flex labor when the schedule lightens.",
     },
     advantages: [
@@ -253,7 +253,7 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     Icon: GraduationCap,
     hero: {
       headline: "Dental assisting with a career ladder.",
-      headlineAccent: "with a career ladder",
+      headlineAccent: "with a career ladder.",
       sub: "Structured EFDA training, certification reimbursement, multi-doctor variety, and a real path from chair-side to operations. The DSO model treats DAs as long-term team members, not entry-level placeholders.",
     },
     advantages: [
@@ -366,7 +366,7 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     Icon: TrendingUp,
     hero: {
       headline: "Operations leadership with a playbook.",
-      headlineAccent: "with a playbook",
+      headlineAccent: "with a playbook.",
       sub: "Real P&L responsibility, KPI scorecards, peer OM networks across the DSO, and operating playbooks instead of solo-practice trial-and-error. If you want to run dental practices at scale, this is where the work actually lives.",
     },
     advantages: [
