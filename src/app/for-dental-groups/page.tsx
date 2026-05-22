@@ -6,7 +6,7 @@
  * the SEO role the old homepage held for employer-intent searches.
  *
  * Audience: COO / VP HR / Director of Recruiting at multi-location DSOs,
- * currently using DentalPost or staffing agencies.
+ * currently using per-listing job boards or staffing agencies.
  *
  * Goal: convert from "browsing" to "Start Posting Jobs" or "Contact Sales".
  *
@@ -25,14 +25,14 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  BadgeCheck,
-  BookOpen,
   Check,
   Columns3,
   MessageCircle,
   Minus,
+  Search,
   Sparkles,
   Star,
+  Target,
 } from "lucide-react";
 import { getAllTiers, type TierConfig } from "@/lib/stripe/prices";
 import { SiteShell, BrandLockup } from "@/components/marketing/site-shell";
@@ -42,7 +42,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Dental Group Hiring Platform — Flat-Fee Job Board for Multi-Location Practices",
   description:
-    "DSO Hire is the flat-fee job board built for multi-location dental groups — DSOs and independent multi-practice owners alike. Post across every location for one flat monthly fee — no per-listing fees, no 15–25% placement fees, no recruiter middlemen. Team accounts and an applicant pipeline built for the way dental groups actually hire.",
+    "DSO Hire is the flat-fee dental hiring platform built for multi-location dental groups — DSOs and independent multi-practice owners alike. Post across every location for one flat monthly fee — no per-listing fees, no 15–25% placement fees, no recruiter middlemen. Team accounts and an applicant pipeline built for the way dental groups actually hire.",
   keywords: [
     "dental group hiring",
     "DSO hiring",
@@ -449,12 +449,12 @@ function ProblemSection() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-px bg-[var(--rule)] border border-[var(--rule)]">
           <ProblemCard
-            heading="DentalPost"
+            heading="Per-listing job boards"
             tagline="Built for solo practices. Priced per listing."
             points={[
-              "Per-listing pricing means a 30-location DSO posting an associate role at three offices pays three times",
-              "No native multi-location job posting — recruiters re-enter the same job over and over",
-              "No team-based employer accounts. Office managers and regional directors all need separate logins",
+              "Per-listing pricing means a 30-location group posting an associate role at three offices pays three times",
+              "Typically no native multi-location posting — recruiters re-enter the same job over and over",
+              "Rarely built for teams — office managers and regional directors each need their own login",
               "Designed around individual practice owners, not multi-site operators",
             ]}
           />
@@ -465,7 +465,7 @@ function ProblemSection() {
               "15–25% of first-year salary per placement. A $200K associate dentist costs you $30–50K in placement fees alone",
               "Routine roles (hygienists, dental assistants, office managers) move slowly through agency pipelines",
               "Limited visibility into the candidate pipeline — you see who they choose to share",
-              "No leverage as your hiring volume grows. Hiring 10 people doesn&apos;t get you a discount",
+              "No leverage as your hiring volume grows. Hiring 10 people doesn't get you a discount",
             ]}
           />
           <AnswerCard />
@@ -505,7 +505,7 @@ function AnswerCard() {
         <div>
           <BrandLockup dark height={42} />
           <h3 className="text-[26px] sm:text-[32px] font-extrabold tracking-[-0.8px] leading-tight mt-8 mb-4">
-            A flat-fee job board, built for dental groups.
+            A flat-fee hiring platform, built for dental groups.
           </h3>
           <p className="text-[15px] text-ivory/70 leading-[1.7] max-w-[420px]">
             Subscribe once, post across every practice you operate. One
@@ -592,7 +592,7 @@ function RoiMath() {
           label="What you spend today"
           accent="slate"
           rows={[
-            { item: "DentalPost listings (15 active × $99/mo)", value: "$1,485 / mo" },
+            { item: "Per-listing job boards (15 active × ~$99/mo)", value: "$1,485 / mo" },
             { item: "1 staffing-agency hire/quarter ($30K avg fee)", value: "$10,000 / mo" },
             { item: "Recruiter time re-entering jobs across listings", value: "Hidden" },
           ]}
@@ -689,35 +689,41 @@ interface ShowcaseFeature {
 const SHOWCASE_TOP: ShowcaseFeature[] = [
   {
     icon: Sparkles,
-    title: "AI Job Description generator",
-    body: "Type a brief, get a dental-specific posting in seconds. Knows DDS, RDH, EFDA, DEA, perio, and the rest of the vocabulary. Three tones, regenerate as often as you want, included at every tier.",
+    title: "AI job description generator",
+    body: "Type a brief, get a dental-specific posting in seconds. Knows DDS, RDH, EFDA, DEA, perio, and the rest of the vocabulary. Three tones, regenerate as often as you want.",
     status: "now",
   },
   {
     icon: Columns3,
     title: "Pipeline kanban with real-time team sync",
-    body: "Drag candidates through New → Screening → Interview → Offer → Hired. When one recruiter moves a card, every teammate sees it within half a second. No refresh, no email chains.",
+    body: "Drag candidates through New → Screening → Interview → Offer → Hired. When one teammate moves a card, everyone sees it within half a second. No refresh, no email chains.",
+    status: "now",
+  },
+  {
+    icon: Target,
+    title: "Practice Fit matching",
+    body: "Our proprietary fit score ranks applicants against each role on skills, schedule, and stated preferences — so your strongest matches surface first, not just your most recent applicants.",
     status: "now",
   },
 ];
 
 const SHOWCASE_BOTTOM: ShowcaseFeature[] = [
   {
+    icon: MessageCircle,
+    title: "Inbox — interviews and offers in one thread",
+    body: "Message candidates, propose interview times, and send offers without leaving the platform. Booked interviews land on your connected Google or Outlook calendar; offers are accepted on a secure link and move the candidate's stage automatically.",
+    status: "now",
+  },
+  {
+    icon: Search,
+    title: "Talent Pool sourcing",
+    body: "Search opt-in candidates and reach out before they apply. Save the best to your group's pool and rank them by Practice Fit against any open role.",
+    status: "now",
+  },
+  {
     icon: Star,
-    title: "Dental scorecards by role",
-    body: "Multi-reviewer evaluations with role-specific rubrics. Your dentists score clinical fit; your office manager scores chairside. Aggregate scores roll up automatically.",
-    status: "now",
-  },
-  {
-    icon: BookOpen,
-    title: "102-question screening library",
-    body: "Curated dental questions for 7 role categories — Dentist, Specialist, Hygienist, Dental Assistant, Front Desk, Office Manager, Regional Manager. One click adds the recommended set.",
-    status: "now",
-  },
-  {
-    icon: BadgeCheck,
-    title: "Multi-location dental group employers",
-    body: "Every job is posted by an active dental group running multiple practices. No staffing agencies, no recruiters, no solo practices padding the listings — prohibited by our Acceptable Use Policy.",
+    title: "Screening library + role scorecards",
+    body: "100+ curated screening questions across all 7 role categories — one click adds the recommended set. Then score finalists with multi-reviewer, role-specific scorecards that roll up automatically.",
     status: "now",
   },
 ];
@@ -731,12 +737,13 @@ function FeatureShowcase() {
           Built for how dental hiring actually works.
         </SectionHeadline>
         <SectionSub>
-          Vertical software with the depth competitors gate behind their
-          $1,500/month tiers — included at every paid tier.
+          A full dental hiring platform — applicant pipeline, candidate
+          sourcing, matching, and dental-specific tooling — with the same
+          feature depth at every paid tier.
         </SectionSub>
 
-        {/* Top row — 2 columns, the most-visual features */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+        {/* Top row — 3 columns, the headline features */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
           {SHOWCASE_TOP.map((f) => (
             <FeatureCard key={f.title} feature={f} />
           ))}

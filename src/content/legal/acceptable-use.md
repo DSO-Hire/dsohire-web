@@ -5,7 +5,7 @@ effectiveDate: 2026-05-17
 
 ## 1. Purpose
 
-DSO Hire LLC operates a B2B job board for the dental industry. To keep the Services trustworthy and lawful, we require all users — whether employers posting jobs, job seekers applying, or visitors browsing — to follow this Acceptable Use Policy.
+DSO Hire LLC operates a B2B dental hiring platform for the dental industry. To keep the Services trustworthy and lawful, we require all users — whether employers posting jobs, job seekers applying, or visitors browsing — to follow this Acceptable Use Policy.
 
 ## 2. Prohibited content and conduct
 

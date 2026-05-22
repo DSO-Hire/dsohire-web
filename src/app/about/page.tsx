@@ -14,7 +14,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "DSO Hire is the job board built specifically for multi-location dental groups (DSOs). Operator-led, dental-focused, no placement fees ever.",
+    "DSO Hire is the dental hiring platform built specifically for multi-location dental groups (DSOs). Operator-led, dental-focused, no placement fees ever.",
 };
 
 export default function AboutPage() {
@@ -41,8 +41,8 @@ function Hero() {
         Built by operators, for operators.
       </h1>
       <p className="text-lg sm:text-xl text-slate-body leading-relaxed">
-        DSO Hire is the job board purpose-built for multi-location dental
-        support organizations. Every product decision starts from one question:
+        DSO Hire is the dental hiring platform purpose-built for multi-location
+        dental groups. Every product decision starts from one question:
         does this make a real DSO recruiter&apos;s day shorter, or does it just
         add another tool to learn?
       </p>

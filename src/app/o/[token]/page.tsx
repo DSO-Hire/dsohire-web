@@ -210,7 +210,7 @@ function PublicFooter() {
         >
           DSO Hire
         </a>
-        {" — the job board for dental groups."}
+        {" — the dental hiring platform for dental groups."}
       </p>
       <p className="mt-1">
         Questions? Email{" "}

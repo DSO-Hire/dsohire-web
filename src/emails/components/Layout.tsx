@@ -63,7 +63,7 @@ export function Layout({ previewText, children }: LayoutProps) {
           <Container style={footerContainer}>
             <Hr style={footerRule} />
             <Text style={footerText}>
-              DSO Hire · The job board built for mid-market Dental Support Organizations.
+              DSO Hire · The dental hiring platform built for mid-market dental groups.
             </Text>
             <Text style={footerSmall}>
               <Link href={brand.siteUrl} style={footerLink}>

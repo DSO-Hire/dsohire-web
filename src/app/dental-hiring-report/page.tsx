@@ -2,8 +2,8 @@
  * /dental-hiring-report — public Annual Hiring Report (Phase 5C / E6.15).
  *
  * SEO-indexable trend report drawing on aggregate platform data.
- * Designed as the dental-vertical answer to DentalPost's annual salary
- * report: compensation bands by role + period, role volume mix, top
+ * Designed as the dental-vertical answer to the generic annual salary
+ * surveys: compensation bands by role + period, role volume mix, top
  * states by hiring activity, platform-wide time-to-fill.
  *
  * Sample-size gated: any aggregate with fewer than 5 rows is omitted

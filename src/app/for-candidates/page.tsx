@@ -826,8 +826,8 @@ const FAQ_ITEMS = [
     a: "Every role on DSO Hire is at a multi-location Dental Support Organization — from hygiene, assisting, and front-desk roles to dentist, specialist, and corporate operations roles (regional managers, HR, business development, etc.) at multi-location dental groups. If you work in dental, there's a path here.",
   },
   {
-    q: "How is this different from Indeed, ZipRecruiter, or DentalPost?",
-    a: "DSO Hire is dental-only and direct. Every employer is a multi-location DSO that agrees to our Acceptable Use Policy — staffing-agency reposts, recruiter skimming, and resume reselling are prohibited. Generic boards work for every industry, which means they don't work especially well for any one. We don't bury you in unrelated alerts, and we don't have agencies inserting themselves between you and the practice.",
+    q: "How is this different from Indeed, ZipRecruiter, or other dental job boards?",
+    a: "DSO Hire is dental-only and direct. Every employer is a multi-location dental group that agrees to our Acceptable Use Policy — staffing-agency reposts, recruiter skimming, and resume reselling are prohibited. Generic boards work for every industry, which means they don't work especially well for any one. We don't bury you in unrelated alerts, and we don't have agencies inserting themselves between you and the practice.",
   },
   {
     q: "Do you sell my data or share it with third parties?",

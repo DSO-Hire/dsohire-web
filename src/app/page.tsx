@@ -212,7 +212,7 @@ function MarketplaceBand() {
           Why Two Doors
         </div>
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink mb-6">
-          A job board only works when both sides show up.
+          A hiring platform only works when both sides show up.
         </h2>
         <p className="text-base sm:text-lg text-slate-body leading-[1.7]">
           Dental groups need a steady pipeline of dental talent. Dental
