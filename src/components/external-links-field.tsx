@@ -63,7 +63,7 @@ export function ExternalLinksField({
 
   return (
     <div>
-      <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+      <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
         External links{" "}
         <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
           (optional · up to {maxLinks})

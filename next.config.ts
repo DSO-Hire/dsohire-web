@@ -10,6 +10,17 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "12mb",
     },
   },
+  async redirects() {
+    return [
+      {
+        // 2026-05-22 — employer lens renamed "For DSOs" → "Dental Groups";
+        // the page moved to /for-dental-groups. Keep the old URL alive.
+        source: "/for-dsos",
+        destination: "/for-dental-groups",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

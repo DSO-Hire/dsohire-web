@@ -33,7 +33,7 @@ interface SitemapRoute {
 const ROUTES: SitemapRoute[] = [
   // Top-level marketing
   { path: "/", priority: 1.0, changeFrequency: "weekly" },
-  { path: "/for-dsos", priority: 0.9, changeFrequency: "weekly" },
+  { path: "/for-dental-groups", priority: 0.9, changeFrequency: "weekly" },
   { path: "/for-candidates", priority: 0.9, changeFrequency: "weekly" },
   { path: "/pricing", priority: 0.8, changeFrequency: "weekly" },
   { path: "/jobs", priority: 0.9, changeFrequency: "daily" },

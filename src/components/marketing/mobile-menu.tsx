@@ -4,7 +4,7 @@
  * MobileMenu — hamburger + slide-out drawer for the public site nav.
  *
  * Below md (768px) the desktop `<ul>` of nav links is hidden in SiteNav, so
- * mobile users had no way to reach /pricing, /for-dsos, /for-candidates, etc.
+ * mobile users had no way to reach /pricing, /for-dental-groups, /for-candidates, etc.
  * This component renders:
  *   - A 3-line hamburger button visible below md (sits in the right-side
  *     cluster of SiteNav, next to the "Post a Job" CTA which stays visible).
@@ -40,16 +40,16 @@ const ROLE_LINKS = [
   { href: "/for-dental-assistants", label: "For Dental Assistants" },
   { href: "/for-front-desk", label: "For Front Desk + Treatment Coordinators" },
   { href: "/for-office-managers", label: "For Office Managers" },
-  { href: "/jobs?surface=corporate", label: "Corporate & Administrative Roles" },
+  { href: "/for-corporate", label: "Corporate & Administrative Roles" },
 ];
 
 // Size→tier guidance under the "For DSOs" lens (mirrors the desktop dropdown).
 // Open-ended at the top — no practice-count ceiling, per the brand copy rule.
 const DSO_SIZE_LINKS = [
-  { href: "/pricing", label: "Solo · 2–5 locations" },
-  { href: "/pricing", label: "Growth · midsize group" },
-  { href: "/pricing", label: "Scale · larger, multi-region" },
-  { href: "/pricing", label: "Enterprise · largest, most complex" },
+  { href: "/pricing/solo", label: "Solo · 2–5 locations" },
+  { href: "/pricing/growth", label: "Growth · midsize group" },
+  { href: "/pricing/scale", label: "Scale · larger, multi-region" },
+  { href: "/pricing/enterprise", label: "Enterprise · largest, most complex" },
 ];
 
 // Secondary nav links — shown below the dual-lens pair. The two lenses
@@ -148,11 +148,11 @@ export function MobileMenu({
               </div>
               <div className="border border-[var(--rule-strong)]">
                 <Link
-                  href="/for-dsos"
+                  href="/for-dental-groups"
                   onClick={close}
                   className="block px-4 py-3.5 text-[15px] font-semibold text-ink hover:bg-cream/60 transition-colors"
                 >
-                  For DSOs
+                  Dental Groups
                   <span className="block text-[12px] font-medium tracking-normal text-slate-body normal-case mt-0.5">
                     Hiring for your practices
                   </span>

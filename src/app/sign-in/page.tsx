@@ -43,7 +43,7 @@ export default function SignInPickerPage() {
           {/* DSO card */}
           <SignInCard
             icon={<Briefcase className="h-6 w-6 text-heritage-deep" />}
-            eyebrow="For DSOs"
+            eyebrow="Dental Groups"
             title="Sign in as a DSO"
             blurb="Post jobs across your locations, manage applications, and access your subscription."
             primaryHref="/employer/sign-in"

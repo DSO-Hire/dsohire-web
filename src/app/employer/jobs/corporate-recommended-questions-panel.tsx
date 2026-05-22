@@ -185,7 +185,7 @@ export function CorporateRecommendedQuestionsPanel({
 
           return (
             <div key={category}>
-              <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-2.5 pb-1.5 border-b border-[var(--rule)]">
+              <div className="text-[13px] font-bold tracking-[2px] uppercase text-slate-meta mb-2.5 pb-1.5 border-b border-[var(--rule)]">
                 {CORPORATE_CATEGORY_LABELS[category]}
               </div>
               <div className="space-y-2.5">
@@ -230,7 +230,7 @@ function CorporateRecommendedCard({
     >
       <div className="flex flex-wrap items-center gap-1.5 mb-2">
         <span
-          className="text-[10px] font-bold tracking-[2px] uppercase px-2 py-0.5"
+          className="text-[13px] font-bold tracking-[2px] uppercase px-2 py-0.5"
           style={{ color: CORP_ACCENT, backgroundColor: "rgba(61,82,102,0.08)" }}
         >
           {KIND_LABELS[rq.kind]}

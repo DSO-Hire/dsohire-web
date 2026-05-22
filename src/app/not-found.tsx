@@ -62,7 +62,7 @@ export default function NotFound() {
           {/* Dual-lens funnel — mirrors the homepage doorways in mini */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
             <Link
-              href="/for-dsos"
+              href="/for-dental-groups"
               className="group bg-ink hover:bg-ink-soft text-ivory p-6 motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1"
               style={{
                 boxShadow: "0 18px 36px -18px rgba(7,15,28,0.30)",
@@ -72,13 +72,13 @@ export default function NotFound() {
                 <Building2 className="h-4 w-4" />
               </span>
               <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-ivory/65 mb-1">
-                For DSOs
+                Dental Groups
               </div>
               <div className="text-[18px] font-extrabold tracking-[-0.4px] leading-tight text-ivory mb-4">
                 Hiring across your practices
               </div>
               <span className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[1.8px] uppercase text-ivory/85 group-hover:text-ivory transition-colors">
-                Go to /for-dsos
+                Go to /for-dental-groups
                 <ArrowRight className="h-3.5 w-3.5 motion-safe:transition-transform motion-safe:group-hover:translate-x-1" />
               </span>
             </Link>

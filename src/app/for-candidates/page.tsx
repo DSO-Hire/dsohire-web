@@ -3,7 +3,7 @@
  *
  * Part of the dual-lens website restructure: `/` is a neutral dual-doorway,
  * and this page is the fully-realized home for job seekers — equal in status
- * and quality to /for-dsos. Carries the candidate-side search intent (dental
+ * and quality to /for-dental-groups. Carries the candidate-side search intent (dental
  * jobs, hygienist jobs, dental assistant jobs, DSO careers). It must open
  * strong and stand on its own as a destination, not read as a buried
  * nav-item landing page.
@@ -12,12 +12,12 @@
  * front-desk / treatment coordinators, office + regional managers — anyone
  * looking for a role at a multi-location DSO.
  *
- * Tone (per Cam's lock 2026-05-05): warmer than /for-dsos. Plain-spoken.
+ * Tone (per Cam's lock 2026-05-05): warmer than /for-dental-groups. Plain-spoken.
  * "You / your" liberally. Acknowledge candidate feelings (the academic-
  * dentistry "DSOs are corporate dentistry" narrative) without dunking on
  * private practice. Real, fair, helpful.
  *
- * Visual direction: lighter than /for-dsos. More cream backgrounds, more
+ * Visual direction: lighter than /for-dental-groups. More cream backgrounds, more
  * heritage-glow accents, less navy-block treatment. Stylized "Your
  * applications" mock card in hero (mirrors landing's kanban illustration
  * but candidate-side). Lucide icons + abstract decoration, no stock photos.
@@ -90,7 +90,7 @@ export default function ForCandidatesPage() {
 function Hero() {
   return (
     <section className="relative overflow-hidden pt-[140px] pb-24 px-6 sm:px-14">
-      {/* Heritage glow — soft, lighter than /for-dsos */}
+      {/* Heritage glow — soft, lighter than /for-dental-groups */}
       <div
         aria-hidden
         className="absolute -top-[10%] -right-[15%] w-[60vw] h-[60vw] pointer-events-none"

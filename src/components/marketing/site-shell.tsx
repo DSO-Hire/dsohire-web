@@ -1,6 +1,6 @@
 /**
  * SiteShell — shared marketing nav + footer used by every public page
- * (landing, /pricing, /legal, /for-dsos, /about, /contact).
+ * (landing, /pricing, /legal, /for-dental-groups, /about, /contact).
  *
  * Use as a wrapper inside a page or a route layout:
  *
@@ -156,9 +156,9 @@ export function SiteFooter() {
             </p>
           </div>
 
-          <FooterCol title="For DSOs">
+          <FooterCol title="Dental Groups">
             <FooterLink href="/pricing">Pricing</FooterLink>
-            <FooterLink href="/for-dsos">For DSOs</FooterLink>
+            <FooterLink href="/for-dental-groups">Why DSO Hire</FooterLink>
             <FooterLink href="/pricing">Post a Job</FooterLink>
             <FooterLink href="/employer/sign-in">Sign In</FooterLink>
           </FooterCol>

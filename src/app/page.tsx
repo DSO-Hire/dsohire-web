@@ -4,7 +4,7 @@
  * Part of the dual-lens website restructure. DSO Hire is a two-sided
  * marketplace; this page is deliberately NEUTRAL — it doesn't pitch either
  * side in depth, it routes. The two fully-realized side homes are:
- *   - /for-dsos        — the employer home (kanban, pricing, ROI, etc.)
+ *   - /for-dental-groups        — the employer home (kanban, pricing, ROI, etc.)
  *   - /for-candidates  — the dental-professional home (jobs, roles, etc.)
  *
  * SEO posture: `/` is the highest-authority URL, so it stays a substantive
@@ -102,12 +102,12 @@ function Hero() {
           <DoorwayPanel
             accent="ink"
             icon={Building2}
-            eyebrow="For DSOs"
+            eyebrow="Dental Groups"
             title="Hiring across your practices"
             body="Post across every practice on one flat monthly subscription, with an applicant pipeline built for the way DSOs hire."
             proof="Flat monthly fee · No per-listing fees · No placement charges"
             ctaLabel="Explore DSO Hiring"
-            href="/for-dsos"
+            href="/for-dental-groups"
           />
           <DoorwayPanel
             accent="heritage"
@@ -312,7 +312,7 @@ function ClosingDoorways() {
         </p>
         <div className="flex flex-col sm:flex-row gap-3.5 justify-center">
           <Link
-            href="/for-dsos"
+            href="/for-dental-groups"
             className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-ivory text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-ivory-deep transition-colors"
           >
             <Building2 className="h-4 w-4" />

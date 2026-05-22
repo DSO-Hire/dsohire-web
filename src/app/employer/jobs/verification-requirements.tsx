@@ -62,7 +62,7 @@ export function VerificationRequirements({
   return (
     <fieldset className="border border-[var(--rule)] p-6 bg-cream/40">
       <legend
-        className={`px-2 text-[10px] font-bold tracking-[2px] uppercase ${a.text}`}
+        className={`px-2 text-[13px] font-bold tracking-[2px] uppercase ${a.text}`}
       >
         Verification requirements
       </legend>

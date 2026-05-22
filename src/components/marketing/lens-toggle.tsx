@@ -8,7 +8,7 @@
  *
  * Structure:
  *   - One bordered container holding two segments joined by a vertical divider.
- *   - Left segment "For DSOs" → /for-dsos, AND a hover trigger for the
+ *   - Left segment "For DSOs" → /for-dental-groups, AND a hover trigger for the
  *     size→tier guidance dropdown (which tier fits a group of your size).
  *   - Right segment "Job Candidates" → /for-candidates, AND a hover trigger
  *     for the role-specific dropdown. (Renamed from "For Dental Pros" on
@@ -37,33 +37,33 @@ const ROLE_LINKS = [
   { href: "/for-office-managers", label: "For Office Managers", eyebrow: "OM · Operations Leadership" },
   // Corporate / non-clinical seekers — the rename to "Job Candidates"
   // (2026-05-22) is partly to include these roles; give them a home here.
-  { href: "/jobs?surface=corporate", label: "Corporate & Administrative Roles", eyebrow: "Non-clinical · DSO support center" },
+  { href: "/for-corporate", label: "Corporate & Administrative Roles", eyebrow: "Non-clinical · DSO support center" },
 ];
 
 /**
  * Left-lens "For DSOs" menu — maps DSO size to the tier that fits. Open-ended
  * at the top (no practice-count ceiling, per the brand copy rule). Size rows
- * link to /pricing; the overview links to /for-dsos.
+ * link to /pricing; the overview links to /for-dental-groups.
  */
 const DSO_SIZE_LINKS = [
-  { href: "/for-dsos", label: "Why DSO Hire", eyebrow: "Overview" },
-  { href: "/pricing", label: "Solo plan", eyebrow: "Solo practice · 2–5 locations" },
-  { href: "/pricing", label: "Growth plan", eyebrow: "Midsize group" },
-  { href: "/pricing", label: "Scale plan", eyebrow: "Larger · multi-region" },
-  { href: "/pricing", label: "Enterprise plan", eyebrow: "Largest · most complex" },
+  { href: "/for-dental-groups", label: "Why DSO Hire", eyebrow: "Overview" },
+  { href: "/pricing/solo", label: "Solo plan", eyebrow: "Solo practice · 2–5 locations" },
+  { href: "/pricing/growth", label: "Growth plan", eyebrow: "Midsize group" },
+  { href: "/pricing/scale", label: "Scale plan", eyebrow: "Larger · multi-region" },
+  { href: "/pricing/enterprise", label: "Enterprise plan", eyebrow: "Largest · most complex" },
 ];
 
 /**
  * Which lens does this path belong to?
- *   - "dso"       → /for-dsos, /employer/*, /pricing
+ *   - "dso"       → /for-dental-groups, /employer/*, /pricing
  *   - "candidate" → /for-candidates, /for-* role pages, /jobs, /candidate/*,
  *                   /companies
  *   - "neutral"   → everything else (/, /about, /contact, /legal)
  */
 function resolveLens(pathname: string): "dso" | "candidate" | "neutral" {
   if (
-    pathname === "/for-dsos" ||
-    pathname.startsWith("/for-dsos/") ||
+    pathname === "/for-dental-groups" ||
+    pathname.startsWith("/for-dental-groups/") ||
     pathname === "/employer" ||
     pathname.startsWith("/employer/") ||
     pathname === "/pricing" ||
@@ -75,7 +75,7 @@ function resolveLens(pathname: string): "dso" | "candidate" | "neutral" {
   if (
     pathname === "/for-candidates" ||
     pathname.startsWith("/for-candidates/") ||
-    // /for-* role pages (dentists, hygienists, etc.) — but NOT /for-dsos,
+    // /for-* role pages (dentists, hygienists, etc.) — but NOT /for-dental-groups,
     // which is handled above and would have returned already.
     pathname.startsWith("/for-") ||
     pathname === "/jobs" ||
@@ -160,12 +160,12 @@ export function LensToggle() {
             size→tier dropdown fires only from here. */}
         <div className="relative group/dsos flex">
           <Link
-            href="/for-dsos"
+            href="/for-dental-groups"
             aria-current={lens === "dso" ? "true" : undefined}
             aria-haspopup="menu"
             className={`${baseSegment} ${lens === "dso" ? activeSegment : idleSegment}`}
           >
-            For DSOs
+            Dental Groups
             <Chevron group="group-hover/dsos:rotate-180" />
           </Link>
 

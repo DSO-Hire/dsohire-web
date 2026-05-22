@@ -185,7 +185,7 @@ export function RecommendedQuestionsPanel({
 
           return (
             <div key={category}>
-              <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-2.5 pb-1.5 border-b border-[var(--rule)]">
+              <div className="text-[13px] font-bold tracking-[2px] uppercase text-slate-meta mb-2.5 pb-1.5 border-b border-[var(--rule)]">
                 {CATEGORY_LABELS[category]}
               </div>
               <div className="space-y-2.5">
@@ -229,7 +229,7 @@ function RecommendedCard({
       className="border border-[var(--rule-strong)] bg-white p-4 transition-colors scroll-mt-24"
     >
       <div className="flex flex-wrap items-center gap-1.5 mb-2">
-        <span className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep px-2 py-0.5 bg-heritage/[0.08]">
+        <span className="text-[13px] font-bold tracking-[2px] uppercase text-heritage-deep px-2 py-0.5 bg-heritage/[0.08]">
           {KIND_LABELS[rq.kind]}
         </span>
         {rq.knockout && (

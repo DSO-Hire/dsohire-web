@@ -202,7 +202,7 @@ export function CompensationSection(props: CompensationSectionProps) {
   return (
     <fieldset className="border border-[var(--rule)] p-6 bg-cream/40">
       <legend
-        className={`px-2 text-[10px] font-bold tracking-[2px] uppercase ${a.text}`}
+        className={`px-2 text-[13px] font-bold tracking-[2px] uppercase ${a.text}`}
       >
         Compensation
       </legend>
@@ -390,7 +390,7 @@ export function CompensationSection(props: CompensationSectionProps) {
         >
           {ote.ote != null ? (
             <>
-              <div className={`text-[10px] font-bold tracking-[2px] uppercase ${a.text}`}>
+              <div className={`text-[13px] font-bold tracking-[2px] uppercase ${a.text}`}>
                 On-Target Earnings
               </div>
               <div className="mt-0.5 text-[20px] font-extrabold text-ink">

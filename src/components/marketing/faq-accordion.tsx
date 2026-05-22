@@ -2,7 +2,7 @@
 
 /**
  * FaqAccordion — interactive FAQ used on multiple marketing surfaces
- * (/pricing, /for-dsos, /for-candidates).
+ * (/pricing, /for-dental-groups, /for-candidates).
  *
  * Click a question to expand its answer; clicking another question closes the
  * previous one (single-open at a time). Smooth height transition uses the

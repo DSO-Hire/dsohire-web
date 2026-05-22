@@ -1,5 +1,5 @@
 /**
- * /for-dsos — the consolidated employer home for DSO Hire.
+ * /for-dental-groups — the consolidated employer home for DSO Hire.
  *
  * Part of the dual-lens website restructure: `/` is now a neutral dual
  * doorway, and this page is THE fully-realized employer home. It inherits
@@ -11,15 +11,15 @@
  * Goal: convert from "browsing" to "Start Posting Jobs" or "Contact Sales".
  *
  * Section order (sourced from both the old homepage and the prior
- * /for-dsos long-form pitch, deduplicated):
+ * /for-dental-groups long-form pitch, deduplicated):
  *   1. Hero — old homepage's kanban-preview hero (CTAs re-pointed)
  *   2. ProofStrip — old homepage
- *   3. ProblemSection — prior /for-dsos
- *   4. RoiMath — prior /for-dsos
+ *   3. ProblemSection — prior /for-dental-groups
+ *   4. RoiMath — prior /for-dental-groups
  *   5. FeatureShowcase — old homepage
  *   6. PricingTeaser — old homepage (id="pricing", hero CTA anchor)
  *   7. HowItWorks — old homepage
- *   8. FinalCta — prior /for-dsos (operator-voiced)
+ *   8. FinalCta — prior /for-dental-groups (operator-voiced)
  */
 
 import Link from "next/link";
@@ -40,16 +40,18 @@ import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "DSO Hiring Platform — Flat-Fee Job Board for Multi-Location DSOs",
+  title: "Dental Group Hiring Platform — Flat-Fee Job Board for Multi-Location Practices",
   description:
-    "DSO Hire is the flat-fee job board built for multi-location dental support organizations. Post across every practice for one flat monthly fee — no per-listing fees, no 15–25% placement fees, no recruiter middlemen. Multi-location DSO hiring, team accounts, and an applicant pipeline built for the way DSOs actually hire.",
+    "DSO Hire is the flat-fee job board built for multi-location dental groups — DSOs and independent multi-practice owners alike. Post across every location for one flat monthly fee — no per-listing fees, no 15–25% placement fees, no recruiter middlemen. Team accounts and an applicant pipeline built for the way dental groups actually hire.",
   keywords: [
+    "dental group hiring",
     "DSO hiring",
     "multi-location dental hiring",
+    "multi-practice dental recruiting",
     "dental support organization recruiting",
     "flat-fee dental job board",
     "no placement fees dental hiring",
-    "dental ATS for DSOs",
+    "dental ATS for groups and DSOs",
   ],
 };
 
@@ -111,9 +113,9 @@ function Hero() {
             }}
           >
             <span className="text-heritage-deep">★</span>
-            <span>Built for DSOs</span>
+            <span>Built for dental groups</span>
             <span className="text-heritage-deep">·</span>
-            <span>10+ practices</span>
+            <span>Multi-location</span>
             <span className="text-heritage-deep">·</span>
             <span>Flat monthly fee</span>
           </span>
@@ -146,10 +148,11 @@ function Hero() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-12 lg:gap-16 items-start">
           <div>
             <p className="text-lg sm:text-xl text-slate-body leading-relaxed mb-10">
-              Built for multi-location dental support organizations. Subscribe
-              once and post across every practice you operate — flat monthly
-              fee, no per-listing charges, no 15–25% placement fees, no
-              recruiter middlemen.
+              Built for multi-location dental groups — from DSOs to independent
+              owners running a handful of practices. Subscribe once and post
+              across every location you operate — flat monthly fee, no
+              per-listing charges, no 15–25% placement fees, no recruiter
+              middlemen.
             </p>
 
             <div className="flex flex-wrap items-center gap-3.5 mb-9">
@@ -502,7 +505,7 @@ function AnswerCard() {
         <div>
           <BrandLockup dark height={42} />
           <h3 className="text-[26px] sm:text-[32px] font-extrabold tracking-[-0.8px] leading-tight mt-8 mb-4">
-            A flat-fee job board, built for DSOs.
+            A flat-fee job board, built for dental groups.
           </h3>
           <p className="text-[15px] text-ivory/70 leading-[1.7] max-w-[420px]">
             Subscribe once, post across every practice you operate. One

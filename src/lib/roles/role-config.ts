@@ -21,6 +21,7 @@ import {
   GraduationCap,
   Users,
   TrendingUp,
+  Briefcase,
 } from "lucide-react";
 
 export interface RoleAdvantage {
@@ -413,6 +414,62 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     ],
     metaDescription:
       "Office manager and regional manager jobs at multi-location DSOs. Real P&L responsibility, operating playbooks, peer OM networks, standardized comp with KPI bonuses, and a clear path to regional and VP-level operations roles. Browse open OM and RM roles.",
+  },
+  {
+    slug: "corporate",
+    label: "Corporate & Administrative Roles",
+    eyebrow: "Non-clinical · Support-Center Careers",
+    Icon: Briefcase,
+    hero: {
+      headline: "Build a career in dental — without the clinical license.",
+      headlineAccent: "without the clinical license",
+      sub: "Dental groups and DSOs run like real companies: finance, marketing, operations, people, IT, revenue cycle, and business development all live at the support-center level. If you want mission-driven work with healthcare-company scale, the corporate side of dental is hiring.",
+    },
+    advantages: [
+      {
+        title: "A real corporate function",
+        body: "Multi-location dental groups centralize finance & accounting, FP&A, marketing & growth, HR / people, recruiting, IT & data, compliance, revenue cycle, and business development at a support center. The roles look like any growth-stage healthcare company — not 'help out at the front desk.'",
+      },
+      {
+        title: "Healthcare scale without hospital bureaucracy",
+        body: "Mid-market groups are big enough to have specialized roles and a real budget, but small enough that you can see your impact and move fast. You're not employee #40,000 in a hospital system — your work visibly moves the business.",
+      },
+      {
+        title: "Business development is a growth engine",
+        body: "Dental is consolidating from a fragmented market, so corporate development / M&A teams that source, evaluate, and integrate practice acquisitions are some of the highest-leverage roles in the industry. If you like deals and integration work, dental is one of the most active spaces in healthcare right now.",
+      },
+      {
+        title: "Recession-resilient industry",
+        body: "Dental demand is durable across economic cycles, and groups keep growing support-function headcount as they add practices. Corporate dental roles offer stability that a lot of higher-flying sectors can't promise.",
+      },
+      {
+        title: "Cross-functional visibility",
+        body: "At a multi-practice operator you sit close to operations, finance, clinical leadership, and the field. Analysts and managers get exposure that would take years to earn at a larger, more siloed company — and that breadth accelerates the path to director and VP roles.",
+      },
+      {
+        title: "Hybrid and remote are common",
+        body: "Because these are headquarters functions rather than chairside roles, many corporate dental positions are hybrid or fully remote — especially in finance, marketing, RCM, data, and recruiting. You get the mission of healthcare without being tied to one operatory.",
+      },
+    ],
+    careerPath: {
+      title: "What growth looks like",
+      paragraphs: [
+        "Corporate roles span the functions you'd find at any growth-stage company — finance & accounting, FP&A, revenue cycle management, marketing & growth, people / HR, recruiting, IT & data, compliance, and business development. Most people enter at the coordinator / analyst / manager level inside one function and grow within it: analyst → senior analyst → manager → director → VP.",
+        "The distinctive dental path is business / corporate development — sourcing, underwriting, and integrating practice acquisitions as groups consolidate the market. Operations leadership (regional and above) and revenue cycle leadership are the other two areas where dental-specific experience compounds quickly into senior roles. Many of the people running large groups today came up through ops, finance, or BD on the corporate side.",
+      ],
+    },
+    compensation: {
+      title: "How comp works for corporate roles",
+      structure: "Salary + performance bonus (function-dependent)",
+      notes: "Corporate dental comp mirrors the broader market for each function — finance, marketing, operations, people, IT — with a base salary plus a performance or company-target bonus. Business development / corporate development roles often layer in deal- or pipeline-linked incentives. Senior operations and finance roles may include an EBITDA-linked bonus, and a handful of groups offer equity or carry at the leadership level. Geographic and seniority variance is significant; specific comp shows up on each listing when the employer chooses to share it.",
+    },
+    jobsFilterHref: "/jobs?surface=corporate",
+    relatedRoles: [
+      { slug: "office-managers", label: "Office Managers" },
+      { slug: "dentists", label: "Dentists" },
+    ],
+    metaDescription:
+      "Corporate and administrative jobs at dental groups and DSOs — finance, marketing, operations, people/HR, IT, revenue cycle, and business development. Build a career in dental without a clinical license. Browse open corporate roles on DSO Hire.",
   },
 ];
 
