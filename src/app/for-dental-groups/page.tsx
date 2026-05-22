@@ -128,7 +128,7 @@ function Hero() {
               the viewport. The heritage-tint underline is only rendered at
               lg+ for the same reason — `absolute` positioning on a wrapped
               inline element only sits under the last line and looks broken. */}
-        <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-[80px] font-extrabold tracking-[-0.025em] leading-[0.98] text-ink mb-12">
+        <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-[80px] font-extrabold tracking-[-0.025em] leading-[1.05] text-ink mb-12">
           Hire across every practice.{" "}
           <br className="hidden sm:inline" />
           <em className="not-italic relative lg:whitespace-nowrap text-heritage-light">

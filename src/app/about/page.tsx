@@ -38,7 +38,8 @@ function Hero() {
         </span>
       </div>
       <h1 className="text-4xl sm:text-7xl font-extrabold tracking-[-2px] leading-[1.02] text-ink mb-7">
-        Built by operators, for operators.
+        Built by operators,{" "}
+        <em className="not-italic text-heritage-light">for operators.</em>
       </h1>
       <p className="text-lg sm:text-xl text-slate-body leading-relaxed">
         DSO Hire is the dental hiring platform purpose-built for multi-location
@@ -52,7 +53,10 @@ function Hero() {
 
 function Story() {
   return (
-    <section className="bg-cream border-y border-[var(--rule)] px-6 sm:px-14 py-24">
+    <section
+      className="border-y border-[var(--rule)] px-6 sm:px-14 py-24"
+      style={{ background: "var(--heritage-tint)" }}
+    >
       <div className="max-w-[760px] mx-auto">
         <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
           Why DSO Hire exists

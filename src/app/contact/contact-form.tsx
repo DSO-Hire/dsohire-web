@@ -39,7 +39,7 @@ export function ContactForm() {
 
       <Field label="Name" name="name" required />
       <Field label="Email" name="email" type="email" required />
-      <Field label="Company / DSO (optional)" name="company" />
+      <Field label="Company / dental group (optional)" name="company" />
       <Field label="Subject (optional)" name="subject" />
 
       <div>

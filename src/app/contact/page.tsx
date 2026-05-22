@@ -32,8 +32,9 @@ export default function ContactPage() {
           Get in touch.
         </h1>
         <p className="text-lg sm:text-xl text-slate-body leading-relaxed max-w-[640px] mb-14">
-          The fastest way to get a real answer is to email us directly. The
-          form below routes to the same inbox.
+          The fastest way to get a real answer is to email us directly — we
+          reply to every message, usually within one business day. The form
+          below routes to the same inbox.
         </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-px bg-[var(--rule)] border border-[var(--rule)]">
