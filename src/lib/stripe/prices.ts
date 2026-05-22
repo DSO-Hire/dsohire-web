@@ -84,7 +84,7 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
   growth: {
     id: "growth",
     name: "Growth",
-    tagline: "Growing DSOs & dental groups",
+    tagline: "Growing dental groups & DSOs",
     description: "Growing dental groups with up to 20 active listings and the full hiring platform",
     monthlyPrice: 699,
     monthlyPriceCents: 69900,

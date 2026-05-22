@@ -68,7 +68,7 @@ export function NewApplication({
       </Section>
 
       <Text style={smallParagraph}>
-        Top DSOs respond to strong candidates within 24 hours. The longer an
+        Top dental groups respond to strong candidates within 24 hours. The longer an
         application sits, the more likely the candidate signs elsewhere.
       </Text>
 
