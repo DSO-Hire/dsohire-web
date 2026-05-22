@@ -21,6 +21,7 @@ import {
   Settings,
 } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
+import { HelpDisclosure } from "@/components/help/help-disclosure";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { PRICING_TIERS, periodFromStripePriceId } from "@/lib/stripe/prices";
 import { getStripe } from "@/lib/stripe/server";
@@ -94,6 +95,8 @@ export default async function EmployerBillingPage({ searchParams }: PageProps) {
     <EmployerShell active="billing">
       <Header />
       {sp.portal_error === "1" && <PortalErrorBanner />}
+
+      <HelpDisclosure helpKey="billing.tiers" className="mb-6" />
 
       {/* Status warnings (past-due, canceling) */}
       {subscription.status === "past_due" && (

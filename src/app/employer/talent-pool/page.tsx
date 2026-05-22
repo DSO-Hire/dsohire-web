@@ -20,6 +20,7 @@ import { redirect } from "next/navigation";
 import { Users, Bookmark, Search } from "lucide-react";
 import type { Metadata } from "next";
 import { EmployerShell } from "@/components/employer/employer-shell";
+import { HelpDisclosure } from "@/components/help/help-disclosure";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { DiscoverFilters } from "./discover-filters";
 import { CandidateResultCard } from "./candidate-result-card";
@@ -306,6 +307,8 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
           Discover.
         </p>
       </header>
+
+      <HelpDisclosure helpKey="talent.overview" className="mb-6" />
 
       {/* Tab bar */}
       <div className="mb-6 border-b border-[var(--rule)] flex gap-6">

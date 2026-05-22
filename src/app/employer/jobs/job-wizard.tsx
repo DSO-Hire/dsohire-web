@@ -51,6 +51,10 @@ import {
   getJobRequirementsPrioritized,
   BENEFITS,
 } from "@/lib/candidate/canonical-lists";
+import { HelpDrawer } from "@/components/help/help-drawer";
+import { HelpTip } from "@/components/help/help-tip";
+import { HelpDisclosure } from "@/components/help/help-disclosure";
+import { Coachmark } from "@/components/help/coachmark";
 
 /* ───── Types ───── */
 
@@ -900,6 +904,17 @@ export function JobWizard({
           </div>
         </div>
       )}
+      {/* Note 5 — contextual help. First-run nudge (create only) + a
+          walkthrough drawer that's always one tap away. */}
+      {mode !== "edit" && (
+        <Coachmark
+          id="wizard"
+          message="First time posting a job? Tap any ⓘ for a quick explanation of a field — or open “How posting works” for the full walkthrough."
+        />
+      )}
+      <div className="flex items-center justify-end">
+        <HelpDrawer helpKey="jd.overview" triggerLabel="How posting works" />
+      </div>
       <Stepper currentIdx={stepIdx} />
 
       <div className="border border-[var(--rule)] bg-white p-8 sm:p-10">
@@ -1740,6 +1755,7 @@ function DetailsStep({
       <fieldset className="border border-[var(--rule)] p-6 bg-cream/40">
         <legend className="px-2 text-[13px] font-bold tracking-[2px] uppercase text-heritage-deep">
           Candidate visibility
+          <HelpTip helpKey="jd.visibility" className="ml-1.5" />
         </legend>
         <label className="mt-2 flex items-start gap-2.5 text-[14px] text-ink cursor-pointer">
           <input
@@ -1851,6 +1867,8 @@ function ScreeningStep({
           the ones that actually filter. You can add more later.
         </p>
       </div>
+
+      <HelpDisclosure helpKey="jd.screening" />
 
       <RecommendedQuestionsPanel
         roleCategory={roleCategory}

@@ -10,6 +10,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { PrivacyForm } from "./privacy-form";
+import { HelpDisclosure } from "@/components/help/help-disclosure";
 import type { BlockedEmployer } from "./actions";
 
 export const metadata: Metadata = { title: "Privacy & visibility · Settings" };
@@ -107,6 +108,7 @@ export default async function CandidatePrivacyPage() {
           you don&apos;t lose changes elsewhere if you save one section.
         </p>
       </header>
+      <HelpDisclosure helpKey="cand.privacy" className="mb-6" />
       <PrivacyForm initial={initial} blocked={blocked} />
     </div>
   );

@@ -15,6 +15,8 @@
 
 import type { Metadata } from "next";
 import { CandidateShell } from "@/components/candidate/candidate-shell";
+import { HelpDrawer } from "@/components/help/help-drawer";
+import { Coachmark } from "@/components/help/coachmark";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CandidateAvatarUpload } from "./avatar-upload";
 import {
@@ -145,6 +147,16 @@ export default async function CandidateProfilePage() {
           publish button to remember.
         </p>
       </header>
+
+      {/* Note 5 — candidate first-run nudge + a short getting-started tour. */}
+      <Coachmark
+        id="candidate-profile"
+        message="Welcome! A fuller profile means better matches. Tap any ⓘ for help, or open “Getting started” for a 60-second tour."
+        className="mb-6 max-w-[820px]"
+      />
+      <div className="mb-4 flex max-w-[820px] items-center justify-end">
+        <HelpDrawer helpKey="cand.onboarding" triggerLabel="Getting started" />
+      </div>
 
       {/* Resume import CTA — first-time hero panel for candidates who
           haven't imported yet; thin "Re-import" link once they have.

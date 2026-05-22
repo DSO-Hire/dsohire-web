@@ -14,6 +14,7 @@ import Link from "next/link";
 import { ArrowRight, Mail, MessageSquare, BookOpen } from "lucide-react";
 import { CandidateShell } from "@/components/candidate/candidate-shell";
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
+import { HELP_CONTENT } from "@/lib/help/help-content";
 
 export const metadata: Metadata = { title: "Help & Support" };
 
@@ -123,6 +124,31 @@ export default function CandidateHelpPage() {
               </li>
             ))}
           </ul>
+        </section>
+
+        {/* Quick reference — pulled from the contextual-help registry so this
+            page and the inline ⓘ tips stay in sync (Note 5). */}
+        <section>
+          <h2 className="font-display text-xl font-bold text-ink mb-2 inline-flex items-center gap-2">
+            <BookOpen className="size-4 text-heritage-deep" />
+            Quick reference
+          </h2>
+          <p className="text-[13px] text-slate-body leading-relaxed mb-4">
+            Short explanations for the things you&apos;ll run into most. You&apos;ll
+            also see the ⓘ icon next to these as you go.
+          </p>
+          <dl className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
+            {Object.entries(HELP_CONTENT)
+              .filter(([, e]) => e.lens === "candidate" || e.lens === "both")
+              .map(([key, e]) => (
+                <div key={key}>
+                  <dt className="text-[13px] font-bold text-ink">{e.title}</dt>
+                  <dd className="mt-0.5 text-[12.5px] text-slate-body leading-relaxed">
+                    {e.tip}
+                  </dd>
+                </div>
+              ))}
+          </dl>
         </section>
 
         <section className="border border-[var(--rule)] bg-cream/60 p-6">

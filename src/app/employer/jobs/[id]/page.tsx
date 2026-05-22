@@ -47,6 +47,9 @@ import { FunnelChart } from "@/components/analytics/funnel-chart";
 import { StageDwellCard } from "@/components/analytics/stage-dwell-card";
 import { getSmartPicks } from "@/lib/talent-pool/smart-picks";
 import { SmartPicksCard } from "@/components/talent-pool/smart-picks-card";
+import { HelpDrawer } from "@/components/help/help-drawer";
+import { HelpDisclosure } from "@/components/help/help-disclosure";
+import { Coachmark } from "@/components/help/coachmark";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -450,6 +453,21 @@ export default async function PerJobPipelinePage({
           <JobVisibilityToggle jobId={jobId} currentVisibility={visibility} />
         </div>
       </header>
+
+      {/* Note 5 — pipeline contextual help. First-run nudge + walkthrough
+          drawer, plus a Practice Fit explainer for the scores on the board. */}
+      <Coachmark
+        id="pipeline"
+        message="This is your hiring pipeline. Drag candidates between stage columns to move them — and tap any ⓘ for help."
+        className="mb-6"
+      />
+      <div className="mb-4 flex flex-wrap items-center justify-end gap-4">
+        <HelpDrawer
+          helpKey="pipeline.overview"
+          triggerLabel="How the pipeline works"
+        />
+      </div>
+      <HelpDisclosure helpKey="pipeline.practice_fit" className="mb-6" />
 
       <PerJobAnalyticsCard metrics={analytics} />
 

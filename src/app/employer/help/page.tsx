@@ -12,6 +12,7 @@ import Link from "next/link";
 import { ArrowRight, Mail, MessageSquare, BookOpen } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
+import { HELP_CONTENT } from "@/lib/help/help-content";
 
 export const metadata: Metadata = { title: "Help & Support" };
 
@@ -25,7 +26,7 @@ interface FaqEntry {
 const FAQS: FaqEntry[] = [
   {
     q: "How do I post a job?",
-    a: "From the Dashboard or the Jobs page, click 'Post a job'. The wizard walks you through Basics, Description (with the AI JD generator on Founding+), Compensation, Screening Questions, and Status. You can save as Draft and finish later.",
+    a: "From the Dashboard or the Jobs page, click 'Post a job'. The wizard walks you through Basics, Description (with the AI JD generator on Growth+), Compensation, Screening Questions, and Status. You can save as Draft and finish later.",
   },
   {
     q: "What does the kanban view do?",
@@ -40,7 +41,7 @@ const FAQS: FaqEntry[] = [
     a: "Team page → Invite teammate. Choose a role (Owner / Admin / Recruiter / Hiring Manager) and, for Hiring Managers, scope to specific locations. They get an invite email; their access starts the moment they accept.",
   },
   {
-    q: "What's the difference between Starter, Growth, and Enterprise?",
+    q: "What's the difference between Solo, Growth, Scale, and Enterprise?",
     a: (
       <>
         See the full feature matrix on the{" "}
@@ -50,10 +51,12 @@ const FAQS: FaqEntry[] = [
         >
           pricing page
         </Link>
-        . Quick version: Starter (10+ practices) is the job-board basics.
-        Growth (multi-location DSOs) adds the kanban, scorecards, AI matching,
-        and per-location analytics. Enterprise (35+ practices) layers on
-        dedicated CSM, SSO, audit log, and API access.
+        . Quick version: Solo is for smaller groups getting started; Growth adds
+        the tools multi-location DSOs lean on day to day; Scale fits larger,
+        multi-region operations; and Enterprise layers on dedicated support,
+        SSO, audit log, and API access for the largest, most complex groups.
+        Every paying tier gets every feature in its plan — there&apos;s no
+        feature gating beyond the tier you&apos;re on.
       </>
     ),
   },
@@ -129,6 +132,31 @@ export default function HelpPage() {
               </li>
             ))}
           </ul>
+        </section>
+
+        {/* Quick reference — pulled straight from the contextual-help registry
+            so this page and the inline ⓘ tips never drift (Note 5). */}
+        <section>
+          <h2 className="font-display text-xl font-bold text-ink mb-2 inline-flex items-center gap-2">
+            <BookOpen className="size-4 text-heritage-deep" />
+            Quick reference
+          </h2>
+          <p className="text-[13px] text-slate-body leading-relaxed mb-4">
+            Short explanations for the features you&apos;ll touch most. You&apos;ll
+            also see the ⓘ icon next to these throughout the app.
+          </p>
+          <dl className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
+            {Object.entries(HELP_CONTENT)
+              .filter(([, e]) => e.lens === "employer" || e.lens === "both")
+              .map(([key, e]) => (
+                <div key={key}>
+                  <dt className="text-[13px] font-bold text-ink">{e.title}</dt>
+                  <dd className="mt-0.5 text-[12.5px] text-slate-body leading-relaxed">
+                    {e.tip}
+                  </dd>
+                </div>
+              ))}
+          </dl>
         </section>
       </div>
     </EmployerShell>
