@@ -421,8 +421,8 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     eyebrow: "Non-clinical · Support-Center Careers",
     Icon: Briefcase,
     hero: {
-      headline: "Build a career in dental — without the clinical license.",
-      headlineAccent: "without the clinical license",
+      headline: "Build a career in dental. Without the clinical license.",
+      headlineAccent: "Without the clinical license.",
       sub: "Dental groups and DSOs run like real companies: finance, marketing, operations, people, IT, revenue cycle, and business development all live at the support-center level. If you want mission-driven work with healthcare-company scale, the corporate side of dental is hiring.",
     },
     advantages: [

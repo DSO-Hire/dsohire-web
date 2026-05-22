@@ -80,7 +80,7 @@ export default async function TierPage({ params }: PageProps) {
         </p>
 
         {/* Price block */}
-        <div className="flex flex-wrap items-end gap-x-8 gap-y-2 border-y border-[var(--rule)] py-5 mb-8">
+        <div className="flex flex-wrap items-start gap-x-8 gap-y-2 border-y border-[var(--rule)] py-5 mb-8">
           <div>
             <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-1">
               Monthly

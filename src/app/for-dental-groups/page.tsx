@@ -174,7 +174,7 @@ function Hero() {
             <div className="flex items-center gap-2.5 text-xs text-slate-body tracking-[0.4px]">
               <span className="block w-1.5 h-1.5 bg-heritage rounded-full" />
               <span>
-                Plans from <strong className="text-ink font-bold">$499/mo</strong> · Multi-location native · No placement fees
+                Plans from <strong className="text-ink font-bold">$399/mo</strong> · Multi-location native · No placement fees
               </span>
             </div>
           </div>
