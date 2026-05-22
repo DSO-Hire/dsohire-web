@@ -255,7 +255,11 @@ export function ProfileSections({
           data={data.jobPreferences}
           onEdit={() => setOpen({ kind: "jobPreferences" })}
         />
-        <ReferencesPlaceholderCard />
+        {/* References intentionally NOT surfaced candidate-side (2026-05-22).
+            Per ATS norms (Greenhouse/Lever/Workday) references are an
+            employer-initiated, consent-based, late-stage step — not something
+            candidates pre-store. Keeps us off a third-party-PII surface
+            (legal-first). The employer-side reference-check flow remains. */}
         <PracticeFitCard />
       </div>
 
@@ -2205,22 +2209,6 @@ function PracticeFitCard() {
         later.
       </div>
     </section>
-  );
-}
-
-/**
- * References placeholder — surfaces the upcoming workflow so candidates
- * don't feel a gap. Phase 5A Track D ships the employer-side flow first;
- * candidate-side upload of reference letters is a follow-up.
- */
-function ReferencesPlaceholderCard() {
-  return (
-    <SectionCard title="References">
-      <EmptyHint
-        text="Employers request references after you've applied — no need to add anything here yet. Coming soon: upload reference letters in advance."
-        icon={<ShieldCheck className="size-4 text-[#4D7A60]" />}
-      />
-    </SectionCard>
   );
 }
 
