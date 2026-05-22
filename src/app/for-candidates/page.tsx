@@ -550,6 +550,57 @@ function RoleBreakdown() {
             </div>
           </Link>
         ))}
+
+        {/* Corporate roles — the non-clinical seventh card, spanning the full
+            width below the six clinical/ops roles. Links to the dedicated
+            Corporate & Administrative Roles page like the others. */}
+        <Link
+          href="/for-corporate"
+          className="group bg-card p-7 sm:p-8 hover:bg-cream/40 transition-colors flex flex-col sm:col-span-2 lg:col-span-3"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-9 w-9 rounded-full bg-heritage/15 flex items-center justify-center flex-shrink-0 group-hover:bg-heritage/25 transition-colors">
+              <Briefcase className="h-4 w-4 text-heritage-deep" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
+                Finance · HR · Marketing · Ops · Business Development
+              </div>
+              <h3 className="text-[16px] font-extrabold tracking-[-0.3px] text-ink leading-tight">
+                Corporate &amp; Administrative Roles
+              </h3>
+            </div>
+          </div>
+          <p className="text-[13.5px] text-slate-body leading-[1.6] mb-4 max-w-[760px]">
+            The non-clinical side of a growing DSO — build a career in dental
+            without the clinical license.
+          </p>
+          <ul className="list-none grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-2 mt-1 mb-4">
+            {[
+              "12 functions — finance, HR, marketing, IT, operations, BD, and more",
+              "Mission-driven work supporting dozens of practices at once",
+              "Clear advancement inside a scaling organization",
+              "Competitive comp + full benefits, no clinical license required",
+            ].map((adv, i) => (
+              <li
+                key={i}
+                className="text-[13px] text-ink leading-[1.55] flex items-start gap-2"
+              >
+                <span
+                  aria-hidden
+                  className="text-heritage-light font-extrabold flex-shrink-0 mt-0.5"
+                >
+                  ✓
+                </span>
+                <span>{adv}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-auto pt-3 border-t border-[var(--rule)] inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep group-hover:text-ink transition-colors">
+            Learn more
+            <ArrowRight className="h-3 w-3" />
+          </div>
+        </Link>
       </div>
     </section>
   );
