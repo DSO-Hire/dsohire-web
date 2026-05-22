@@ -10,17 +10,11 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "12mb",
     },
   },
-  async redirects() {
-    return [
-      {
-        // 2026-05-22 — employer lens renamed "For DSOs" → "Dental Groups";
-        // the page moved to /for-dental-groups. Keep the old URL alive.
-        source: "/for-dsos",
-        destination: "/for-dental-groups",
-        permanent: true,
-      },
-    ];
-  },
+  // NOTE: a config-level redirects() for /for-dsos -> /for-dental-groups was
+  // removed 2026-05-22 while isolating a Vercel build failure at the
+  // "Applying modifyConfig" step (which processes redirects). If the build
+  // goes green without it, re-add the old-URL redirect as a page-level stub
+  // (src/app/for-dsos/page.tsx calling redirect()) instead of via config.
 };
 
 export default nextConfig;
