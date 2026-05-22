@@ -82,15 +82,17 @@ export function SavedEntryCard({
   }
 
   return (
-    <div className="border border-[var(--rule)] bg-white p-4 flex items-start gap-4">
+    <div className="relative border border-[var(--rule)] bg-white p-4 flex items-start gap-4 transition-colors hover:border-heritage/50 hover:bg-cream/30">
       <Avatar fullName={fullName} avatarUrl={avatarUrl} />
 
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-3 mb-1">
           <div>
+            {/* Overlay link — whole card clickable; the remove button and the
+                notes editor below carry `relative z-10` to stay above it. */}
             <Link
               href={`/employer/candidates/${candidateId}`}
-              className="text-[14px] font-bold text-ink hover:text-heritage-deep"
+              className="text-[14px] font-bold text-ink hover:text-heritage-deep after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-heritage/40"
             >
               {fullName ?? "Unnamed candidate"}
             </Link>
@@ -102,7 +104,7 @@ export function SavedEntryCard({
             type="button"
             onClick={handleRemove}
             disabled={pending}
-            className="rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
+            className="relative z-10 rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
             aria-label="Remove from pool"
           >
             {pending ? (
@@ -139,7 +141,7 @@ export function SavedEntryCard({
           </div>
         )}
 
-        <div className="mt-2 border-t border-[var(--rule)] pt-3">
+        <div className="relative z-10 mt-2 border-t border-[var(--rule)] pt-3">
           <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
             Notes
           </div>

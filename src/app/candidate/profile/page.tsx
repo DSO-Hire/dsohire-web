@@ -154,7 +154,13 @@ export default async function CandidateProfilePage() {
         message="Welcome! A fuller profile means better matches. Tap any ⓘ for help, or open “Getting started” for a 60-second tour."
         className="mb-6 max-w-[820px]"
       />
-      <div className="mb-4 flex max-w-[820px] items-center justify-end">
+      <div className="mb-4 flex max-w-[820px] flex-wrap items-center justify-end gap-x-5 gap-y-2">
+        <a
+          href="/candidate/profile/preview"
+          className="inline-flex items-center gap-1.5 text-[12px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+        >
+          Preview as employers see you →
+        </a>
         <HelpDrawer helpKey="cand.onboarding" triggerLabel="Getting started" />
       </div>
 

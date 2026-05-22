@@ -105,14 +105,16 @@ export function CandidateResultCard({
   }
 
   return (
-    <div className="border border-[var(--rule)] bg-white p-4 flex items-start gap-4">
+    <div className="relative border border-[var(--rule)] bg-white p-4 flex items-start gap-4 transition-colors hover:border-heritage/50 hover:bg-cream/30">
       <Avatar fullName={fullName} avatarUrl={avatarUrl} />
 
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-3 mb-1">
+          {/* Overlay link — makes the whole card clickable. Interactive
+              controls below carry `relative z-10` to stay above it. */}
           <Link
             href={`/employer/candidates/${candidateId}`}
-            className="text-[14px] font-bold text-ink hover:text-heritage-deep truncate"
+            className="text-[14px] font-bold text-ink hover:text-heritage-deep truncate after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-heritage/40"
           >
             {fullName ?? "Unnamed candidate"}
           </Link>
@@ -121,7 +123,7 @@ export function CandidateResultCard({
             onClick={handleToggle}
             disabled={pending}
             className={
-              "inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold tracking-[1.5px] uppercase border transition-colors shrink-0 disabled:opacity-60 " +
+              "relative z-10 inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold tracking-[1.5px] uppercase border transition-colors shrink-0 disabled:opacity-60 " +
               (saved
                 ? "bg-heritage text-ivory border-heritage hover:bg-heritage-deep"
                 : "bg-white text-ink border-slate-300 hover:bg-cream")

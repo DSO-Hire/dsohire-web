@@ -1,55 +1,45 @@
 /**
- * /employer/candidates/[id] — read-only candidate profile (Phase 5D, shipped 2026-05-11).
+ * /employer/candidates/[id] — read-only candidate profile (Phase 5D; 2026-05-22
+ * polished to a shared LinkedIn-style view).
  *
- * Reachable from the talent-pool result cards + saved-entry cards.
- * RLS gates the read: DSO members can see searchable candidates OR
- * candidates who've applied to one of their jobs.
+ * Reachable from the talent-pool result cards + saved-entry cards (whole card
+ * is clickable). RLS gates the read: DSO members can see searchable candidates
+ * OR candidates who've applied to one of their jobs.
  *
- * Email is intentionally hidden — outbound contact goes through the
- * in-app outreach flow (Phase 5D Day 2). Resume download is gated to
- * candidates who've explicitly opted into searchability (the same
- * gate that surfaced them in Discover).
+ * Email is intentionally hidden — outbound contact goes through the in-app
+ * outreach flow. Resume download is gated to candidates who've opted into
+ * searchability.
+ *
+ * Presentation lives in the shared <CandidateProfileView> so this page and the
+ * candidate's own /candidate/profile/preview can never diverge. NOTE: the
+ * structured Experience / Education / Licenses sections come from per-table
+ * RLS that only grants DSO read for candidates who APPLIED to one of their
+ * jobs — for browse-only searchable candidates those tables read empty and the
+ * sections gracefully omit (deliberate privacy boundary; widening it to all
+ * searchable candidates would be a separate, deliberate decision).
  */
 
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
-import {
-  ArrowLeft,
-  MapPin,
-  Briefcase,
-  Award,
-  Clock,
-  FileText,
-} from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { TalentPoolSaveButton } from "./talent-pool-save-button";
 import { OutreachLauncher } from "./outreach-modal";
+import {
+  CandidateProfileView,
+  type CPVWorkEntry,
+  type CPVEducation,
+  type CPVLicense,
+  type CPVCertification,
+} from "@/components/candidate/candidate-profile-view";
 
 export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
-
-const ROLE_LABELS: Record<string, string> = {
-  dentist: "Dentist",
-  dental_hygienist: "Dental Hygienist",
-  dental_assistant: "Dental Assistant",
-  front_office: "Front Office",
-  office_manager: "Office Manager",
-  regional_manager: "Regional Manager",
-  specialist: "Specialist",
-  other: "Other",
-};
-
-const AVAILABILITY_LABELS: Record<string, string> = {
-  immediate: "Available immediately",
-  "2_weeks": "Two-week notice",
-  "1_month": "One-month notice",
-  passive: "Passive — open to fits",
-};
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
@@ -138,6 +128,50 @@ export default async function CandidateDetailPage({ params }: PageProps) {
     sender_name: r.dso_users?.[0]?.full_name ?? null,
   }));
 
+  // Structured profile detail — Experience / Education / Licenses / Certs.
+  // RLS only grants these for candidates who applied to one of our jobs; for
+  // browse-only searchable candidates they read empty (sections omit). Errors
+  // are swallowed to [] so a blocked read never breaks the page.
+  const [
+    { data: workRows },
+    { data: eduRows },
+    { data: licenseRows },
+    { data: certRows },
+  ] = await Promise.all([
+    supabase
+      .from("candidate_work_history")
+      .select(
+        "id, title, company_name, is_dso, start_date, end_date, is_current, description"
+      )
+      .eq("candidate_id", id)
+      .order("is_current", { ascending: false })
+      .order("start_date", { ascending: false, nullsFirst: false }),
+    supabase
+      .from("candidate_education")
+      .select(
+        "id, school_name, degree, field_of_study, start_year, end_year, description"
+      )
+      .eq("candidate_id", id)
+      .order("end_year", { ascending: false, nullsFirst: false }),
+    supabase
+      .from("candidate_licenses")
+      .select(
+        "id, license_type, state, display_number, expires_date, verification_status"
+      )
+      .eq("candidate_id", id)
+      .order("expires_date", { ascending: true, nullsFirst: false }),
+    supabase
+      .from("candidate_certifications")
+      .select("id, kind, level, expires_date, verification_status")
+      .eq("candidate_id", id)
+      .order("expires_date", { ascending: true, nullsFirst: false }),
+  ]);
+
+  const work = (workRows ?? []) as unknown as CPVWorkEntry[];
+  const education = (eduRows ?? []) as unknown as CPVEducation[];
+  const licenses = (licenseRows ?? []) as unknown as CPVLicense[];
+  const certifications = (certRows ?? []) as unknown as CPVCertification[];
+
   const c = candidate as {
     id: string;
     full_name: string | null;
@@ -162,13 +196,6 @@ export default async function CandidateDetailPage({ params }: PageProps) {
     is_searchable: boolean;
   };
 
-  const cityState = [c.current_location_city, c.current_location_state]
-    .filter(Boolean)
-    .join(", ");
-  const desiredRoleLabels = (c.desired_roles ?? [])
-    .map((r) => ROLE_LABELS[r] ?? r)
-    .filter(Boolean);
-
   return (
     <EmployerShell active="talent-pool">
       <Link
@@ -179,90 +206,52 @@ export default async function CandidateDetailPage({ params }: PageProps) {
         Back to Talent Pool
       </Link>
 
-      <header className="mb-8 flex flex-wrap items-start justify-between gap-6">
-        <div className="flex items-start gap-5 min-w-0">
-          <Avatar fullName={c.full_name} avatarUrl={c.avatar_url} size="lg" />
-          <div className="min-w-0">
-            <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
-              Candidate profile
-            </div>
-            <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-[-1px] leading-[1.05] text-ink mb-2">
-              {c.full_name ?? "Unnamed candidate"}
-            </h1>
-            {c.headline && (
-              <p className="text-[15px] text-slate-body leading-relaxed max-w-[640px] mb-2">
-                {c.headline}
-              </p>
-            )}
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-slate-meta">
-              {c.current_title && (
-                <span className="inline-flex items-center gap-1.5">
-                  <Briefcase className="h-3 w-3" /> {c.current_title}
-                </span>
-              )}
-              {cityState && (
-                <span className="inline-flex items-center gap-1.5">
-                  <MapPin className="h-3 w-3" /> {cityState}
-                </span>
-              )}
-              {c.availability && AVAILABILITY_LABELS[c.availability] && (
-                <span className="inline-flex items-center gap-1.5 text-heritage-deep font-semibold">
-                  <Clock className="h-3 w-3" />{" "}
-                  {AVAILABILITY_LABELS[c.availability]}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-        <div className="flex flex-col items-end gap-2 shrink-0">
-          <OutreachLauncher
-            candidateId={c.id}
-            candidateName={c.full_name}
-            templates={outreachTemplates}
-          />
-          <TalentPoolSaveButton
-            candidateId={c.id}
-            initialEntryId={(poolEntry?.id as string | undefined) ?? null}
-          />
-        </div>
-      </header>
-
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10">
-        <div className="space-y-8">
-          {c.summary && (
-            <Section title="Summary">
-              <p className="text-[14px] text-ink leading-relaxed whitespace-pre-wrap">
-                {c.summary}
-              </p>
-            </Section>
-          )}
-
-          {(c.skills ?? []).length > 0 && (
-            <Section title="Skills">
-              <ChipList items={c.skills ?? []} />
-            </Section>
-          )}
-
-          {(c.pms_systems ?? []).length > 0 && (
-            <Section title="Practice management systems">
-              <ChipList items={c.pms_systems ?? []} />
-            </Section>
-          )}
-
-          {(c.languages ?? []).length > 0 && (
-            <Section title="Languages">
-              <ChipList items={c.languages ?? []} />
-            </Section>
-          )}
-
-          {(c.schedule_preferences ?? []).length > 0 && (
-            <Section title="Schedule preferences">
-              <ChipList items={c.schedule_preferences ?? []} />
-            </Section>
-          )}
-
-          {outreachHistory.length > 0 && (
-            <Section title={`Outreach history (${outreachHistory.length})`}>
+      <CandidateProfileView
+        viewer="employer"
+        data={{
+          full_name: c.full_name,
+          headline: c.headline,
+          summary: c.summary,
+          current_title: c.current_title,
+          years_experience: c.years_experience,
+          years_experience_dental: c.years_experience_dental,
+          avatar_url: c.avatar_url,
+          license_states: c.license_states,
+          current_location_city: c.current_location_city,
+          current_location_state: c.current_location_state,
+          desired_roles: c.desired_roles,
+          desired_locations: c.desired_locations,
+          availability: c.availability,
+          skills: c.skills,
+          pms_systems: c.pms_systems,
+          languages: c.languages,
+          schedule_preferences: c.schedule_preferences,
+          linkedin_url: c.linkedin_url,
+          resume_url: c.resume_url,
+        }}
+        work={work}
+        education={education}
+        licenses={licenses}
+        certifications={certifications}
+        headerActions={
+          <>
+            <OutreachLauncher
+              candidateId={c.id}
+              candidateName={c.full_name}
+              templates={outreachTemplates}
+            />
+            <TalentPoolSaveButton
+              candidateId={c.id}
+              initialEntryId={(poolEntry?.id as string | undefined) ?? null}
+            />
+          </>
+        }
+        footerSections={
+          outreachHistory.length > 0 ? (
+            <section>
+              <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+                Outreach history ({outreachHistory.length})
+              </div>
               <ul className="space-y-3">
                 {outreachHistory.map((m) => (
                   <li
@@ -294,182 +283,10 @@ export default async function CandidateDetailPage({ params }: PageProps) {
                   </li>
                 ))}
               </ul>
-            </Section>
-          )}
-        </div>
-
-        <aside className="space-y-6">
-          <SidebarCard title="Experience">
-            <SidebarRow
-              label="Total experience"
-              value={
-                c.years_experience !== null
-                  ? `${c.years_experience} yr${c.years_experience === 1 ? "" : "s"}`
-                  : "—"
-              }
-            />
-            {c.years_experience_dental !== null && (
-              <SidebarRow
-                label="Dental experience"
-                value={`${c.years_experience_dental} yr${c.years_experience_dental === 1 ? "" : "s"}`}
-              />
-            )}
-          </SidebarCard>
-
-          {(c.license_states ?? []).length > 0 && (
-            <SidebarCard title="Licensed in">
-              <div className="flex flex-wrap gap-1.5">
-                {(c.license_states ?? []).map((s) => (
-                  <span
-                    key={s}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-bold text-heritage-deep border border-[var(--rule)] bg-cream/60"
-                  >
-                    <Award className="h-2.5 w-2.5" aria-hidden />
-                    {s}
-                  </span>
-                ))}
-              </div>
-            </SidebarCard>
-          )}
-
-          {desiredRoleLabels.length > 0 && (
-            <SidebarCard title="Open to">
-              <ChipList items={desiredRoleLabels} small />
-            </SidebarCard>
-          )}
-
-          {(c.desired_locations ?? []).length > 0 && (
-            <SidebarCard title="Desired locations">
-              <ChipList items={c.desired_locations ?? []} small />
-            </SidebarCard>
-          )}
-
-          {c.linkedin_url && (
-            <SidebarCard title="Links">
-              <a
-                href={c.linkedin_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[13px] text-heritage-deep hover:text-ink underline underline-offset-2 break-all"
-              >
-                LinkedIn profile
-              </a>
-            </SidebarCard>
-          )}
-
-          {c.resume_url && (
-            <SidebarCard title="Resume">
-              <div className="inline-flex items-center gap-1.5 text-[12px] text-slate-body">
-                <FileText className="h-3.5 w-3.5" />
-                Resume on file. Available after first outreach.
-              </div>
-            </SidebarCard>
-          )}
-        </aside>
-      </div>
-    </EmployerShell>
-  );
-}
-
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section>
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
-        {title}
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function SidebarCard({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="border border-[var(--rule)] bg-white p-4">
-      <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-2">
-        {title}
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function SidebarRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-baseline justify-between gap-3 text-[13px] mb-1.5 last:mb-0">
-      <span className="text-slate-body">{label}</span>
-      <span className="tabular-nums font-bold text-ink">{value}</span>
-    </div>
-  );
-}
-
-function ChipList({
-  items,
-  small = false,
-}: {
-  items: string[];
-  small?: boolean;
-}) {
-  return (
-    <ul className="flex flex-wrap gap-1.5">
-      {items.map((it) => (
-        <li
-          key={it}
-          className={
-            "inline-flex items-center px-2.5 py-1 font-semibold text-ink bg-cream border border-[var(--rule)] " +
-            (small ? "text-[11px]" : "text-[12px]")
-          }
-        >
-          {it}
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function Avatar({
-  fullName,
-  avatarUrl,
-  size = "md",
-}: {
-  fullName: string | null;
-  avatarUrl: string | null;
-  size?: "md" | "lg";
-}) {
-  const cls =
-    size === "lg" ? "h-20 w-20 text-[22px]" : "h-12 w-12 text-[14px]";
-  if (avatarUrl) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={avatarUrl}
-        alt=""
-        className={`rounded-full object-cover bg-cream shrink-0 ${cls}`}
+            </section>
+          ) : null
+        }
       />
-    );
-  }
-  const initials = (fullName ?? "?")
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((s) => s[0]?.toUpperCase())
-    .join("");
-  return (
-    <div
-      className={`rounded-full bg-heritage text-ivory flex items-center justify-center font-bold shrink-0 ${cls}`}
-    >
-      {initials || "?"}
-    </div>
+    </EmployerShell>
   );
 }
