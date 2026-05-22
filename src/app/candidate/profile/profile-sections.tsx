@@ -2187,25 +2187,22 @@ function JobPreferencesModal({
 function PracticeFitCard() {
   return (
     <section className="border border-slate-200 bg-[#F7F4ED] p-6 sm:p-8">
-      <header className="mb-3 flex items-start justify-between gap-3">
-        <div>
-          <h2 className="font-display text-lg font-bold text-[#14233F]">
-            Practice Fit
-            <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs font-medium text-slate-500">
-              <Lock className="size-3" /> Coming soon
-            </span>
-          </h2>
-          <p className="mt-0.5 text-sm text-slate-600">
-            A short, in-house assessment that helps employers see whether the
-            day-to-day style of a practice matches yours. Ships in a future
-            update; nothing to do here yet.
-          </p>
-        </div>
+      <header className="mb-3">
+        <h2 className="font-display text-lg font-bold text-[#14233F]">
+          Practice Fit
+        </h2>
+        <p className="mt-0.5 text-sm text-slate-600">
+          Employers already see how well you match their open roles — Practice
+          Fit is scored automatically from your profile (your role, skills,
+          schedule, and preferences). The more complete your profile, the
+          sharper your matches.
+        </p>
       </header>
       <div className="flex items-center gap-2 rounded-md bg-white px-4 py-3 text-xs text-slate-500">
         <AlertCircle className="size-4 text-[#4D7A60]" />
-        Practice Fit is an upcoming proprietary matching feature. Your profile
-        is fully usable today without it.
+        Nothing to fill in here — keep your profile up to date and Practice Fit
+        follows. An optional work-style assessment to fine-tune it is coming
+        later.
       </div>
     </section>
   );

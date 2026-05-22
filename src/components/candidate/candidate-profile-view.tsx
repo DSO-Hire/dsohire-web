@@ -141,7 +141,7 @@ export function CandidateProfileView({
       {/* Header card — cover band + overlapping avatar, LinkedIn-style */}
       <div className="border border-[var(--rule)] bg-white overflow-hidden">
         <div
-          className="h-24 w-full sm:h-28"
+          className="h-16 w-full sm:h-20"
           style={{
             background:
               "linear-gradient(135deg, var(--heritage-deep, #4D7A60) 0%, color-mix(in srgb, var(--heritage-deep, #4D7A60) 55%, transparent) 100%)",
@@ -149,10 +149,13 @@ export function CandidateProfileView({
           aria-hidden
         />
         <div className="px-5 pb-5 sm:px-8 sm:pb-7">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div className="flex items-end gap-4 min-w-0 -mt-10 sm:-mt-12">
-              <Avatar fullName={data.full_name} avatarUrl={data.avatar_url} />
-              <div className="min-w-0 pb-1">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex items-end gap-4 min-w-0">
+              {/* Avatar overlaps up into the band; the name sits below it. */}
+              <div className="-mt-12 shrink-0 sm:-mt-14">
+                <Avatar fullName={data.full_name} avatarUrl={data.avatar_url} />
+              </div>
+              <div className="min-w-0 pt-3">
                 <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] leading-[1.05] text-ink">
                   {data.full_name ?? "Unnamed candidate"}
                 </h1>
@@ -163,8 +166,9 @@ export function CandidateProfileView({
                 )}
               </div>
             </div>
+            {/* Actions clear the band via pt-4 so they never touch it. */}
             {headerActions && (
-              <div className="flex flex-col items-end gap-2 shrink-0 pb-1">
+              <div className="flex flex-col items-end gap-2 shrink-0 pt-4">
                 {headerActions}
               </div>
             )}
