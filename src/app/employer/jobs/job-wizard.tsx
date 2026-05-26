@@ -992,11 +992,14 @@ export function JobWizard({
             skills={skills}
             benefits={benefits}
             requirements={requirements}
-            scheduleDays={scheduleDays}
+            // scheduleDays + specialty live in Set<string> on the wizard
+            // (multi-select state); convert here to the array/string shape
+            // the JD generator expects.
+            scheduleDays={Array.from(scheduleDays)}
             scheduleEvenings={scheduleEvenings}
             scheduleWeekends={scheduleWeekends}
             minYearsExperience={minYearsExperience}
-            specialty={specialty}
+            specialty={Array.from(specialty).join(", ")}
             employmentType={employmentType}
           />
         )}
