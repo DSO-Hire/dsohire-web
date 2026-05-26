@@ -100,7 +100,6 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
     ],
     stripePriceIdTest: "price_1TZCRe0uFxwSh1FnqKatGAUP",
     stripePriceIdTestAnnual: "price_1TZCS20uFxwSh1Fnt8Gsc0Y2",
-    badge: "Most popular",
   },
   scale: {
     id: "scale",
@@ -121,6 +120,7 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
     ],
     stripePriceIdTest: "price_1TZCSO0uFxwSh1FnGSO3OoJR",
     stripePriceIdTestAnnual: "price_1TZCSj0uFxwSh1FnkuUbRajm",
+    badge: "Most popular",
   },
   enterprise: {
     id: "enterprise",

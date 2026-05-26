@@ -298,10 +298,16 @@ const STATUS_OPTIONS_EDIT: Array<{ value: string; label: string }> = [
   { value: "filled", label: "Filled" },
 ];
 
+// 2026-05-26 — Step re-sequence per Cam direction. Details now runs BEFORE
+// Description so the AI JD generator has real comp / skills / benefits /
+// requirements / verification context to ground its draft, instead of
+// guessing from role + brief alone. The wizard's draft persistence keys by
+// dsoId only, so in-flight drafts get their stored stepIdx clamped to a
+// safe range on restore (see restoreDraft).
 const STEPS = [
   { id: "basics", label: "Basics" },
-  { id: "description", label: "Description" },
   { id: "details", label: "Compensation & details" },
+  { id: "description", label: "Description" },
   { id: "screening", label: "Screening" },
   { id: "preview", label: "Preview & publish" },
 ] as const;
@@ -639,7 +645,17 @@ export function JobWizard({
           ? ((d as Record<string, unknown>).corporateFunction as string)
           : ""
       );
-      if (typeof d.stepIdx === "number") setStepIdx(d.stepIdx as number);
+      if (typeof d.stepIdx === "number") {
+        // Clamp to STEPS bounds — protects against drafts saved under a
+        // different step ordering (e.g. the 2026-05-26 Details/Description
+        // swap). Old drafts pointing at an out-of-range index land safely
+        // on the last step instead of crashing the wizard.
+        const clamped = Math.min(
+          STEPS.length - 1,
+          Math.max(0, d.stepIdx as number)
+        );
+        setStepIdx(clamped);
+      }
     } catch {
       /* noop */
     } finally {
@@ -958,6 +974,30 @@ export function JobWizard({
             title={title}
             onTitle={setTitle}
             locationIds={Array.from(selectedLocationIds)}
+            // 2026-05-26 — Details context threaded to the AI JD generator
+            // so the draft references the recruiter's actual choices
+            // (pay, skills, benefits, requirements, schedule) instead of
+            // guessing.
+            compType={compType}
+            compMin={compMin}
+            compMax={compMax}
+            compPeriod={compPeriod}
+            variableCompEnabled={variableCompEnabled}
+            variableCompTarget={variableCompTarget}
+            variableCompStructure={variableCompStructure}
+            bonusEnabled={bonusEnabled}
+            bonusTarget={bonusTarget}
+            bonusStructure={bonusStructure}
+            equityOffered={equityOffered}
+            skills={skills}
+            benefits={benefits}
+            requirements={requirements}
+            scheduleDays={scheduleDays}
+            scheduleEvenings={scheduleEvenings}
+            scheduleWeekends={scheduleWeekends}
+            minYearsExperience={minYearsExperience}
+            specialty={specialty}
+            employmentType={employmentType}
           />
         )}
 
@@ -1390,6 +1430,26 @@ function DescriptionStep({
   title,
   onTitle,
   locationIds,
+  compType,
+  compMin,
+  compMax,
+  compPeriod,
+  variableCompEnabled,
+  variableCompTarget,
+  variableCompStructure,
+  bonusEnabled,
+  bonusTarget,
+  bonusStructure,
+  equityOffered,
+  skills,
+  benefits,
+  requirements,
+  scheduleDays,
+  scheduleEvenings,
+  scheduleWeekends,
+  minYearsExperience,
+  specialty,
+  employmentType,
 }: {
   description: string;
   onChange: (v: string) => void;
@@ -1403,6 +1463,28 @@ function DescriptionStep({
    * (Phase 4.5.b launch-blocker).
    */
   locationIds: string[];
+  // 2026-05-26 — Details-step context forwarded to the AI JD generator so
+  // the draft references the recruiter's real choices instead of guessing.
+  compType: CompensationType;
+  compMin: string;
+  compMax: string;
+  compPeriod: string;
+  variableCompEnabled: boolean;
+  variableCompTarget: string;
+  variableCompStructure: string;
+  bonusEnabled: boolean;
+  bonusTarget: string;
+  bonusStructure: string;
+  equityOffered: boolean;
+  skills: string[];
+  benefits: string[];
+  requirements: string;
+  scheduleDays: ReadonlyArray<string>;
+  scheduleEvenings: boolean;
+  scheduleWeekends: boolean;
+  minYearsExperience: string;
+  specialty: string;
+  employmentType: string;
 }) {
   return (
     <div className="space-y-6">
@@ -1413,12 +1495,39 @@ function DescriptionStep({
         <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.5px] text-ink leading-tight">
           Tell candidates about the role.
         </h2>
+        <p className="mt-2 text-[13px] text-slate-meta leading-relaxed">
+          The AI draft below uses the comp, skills, benefits, and schedule you
+          set on the previous step — so the result is grounded in your actual
+          job, not a generic template.
+        </p>
       </div>
 
       <JdGeneratorPanel
         roleCategory={roleCategory}
         roleLabel={roleLabel}
         locationIds={locationIds}
+        details={{
+          compType,
+          compMin,
+          compMax,
+          compPeriod,
+          variableCompEnabled,
+          variableCompTarget,
+          variableCompStructure,
+          bonusEnabled,
+          bonusTarget,
+          bonusStructure,
+          equityOffered,
+          skills,
+          benefits,
+          requirements,
+          scheduleDays: [...scheduleDays],
+          scheduleEvenings,
+          scheduleWeekends,
+          minYearsExperience,
+          specialty,
+          employmentType,
+        }}
         onApplyTitle={(t) => onTitle(t)}
         onApplyDescription={(html) => onChange(html)}
         onApplyAll={({ title: t, descriptionHtml }) => {

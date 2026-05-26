@@ -29,6 +29,36 @@ import { extractJson } from "@/lib/ai/extract-json";
 import { ROLE_RECOMMENDATIONS } from "@/lib/screening/question-library";
 import { getActiveSubscription } from "@/lib/billing/subscription";
 
+// 2026-05-26 — Details-step context, threaded in after the wizard re-sequence
+// (Details now runs before Description). All optional so the action stays
+// back-compat with callers that don't supply it (corporate wizard + edit
+// pages, until they're updated). When present, the generator grounds the
+// draft in the recruiter's actual choices instead of inventing them.
+const DetailsContextSchema = z
+  .object({
+    compType: z.string().optional(),
+    compMin: z.string().optional(),
+    compMax: z.string().optional(),
+    compPeriod: z.string().optional(),
+    variableCompEnabled: z.boolean().optional(),
+    variableCompTarget: z.string().optional(),
+    variableCompStructure: z.string().optional(),
+    bonusEnabled: z.boolean().optional(),
+    bonusTarget: z.string().optional(),
+    bonusStructure: z.string().optional(),
+    equityOffered: z.boolean().optional(),
+    skills: z.array(z.string()).optional(),
+    benefits: z.array(z.string()).optional(),
+    requirements: z.string().optional(),
+    scheduleDays: z.array(z.string()).optional(),
+    scheduleEvenings: z.boolean().optional(),
+    scheduleWeekends: z.boolean().optional(),
+    minYearsExperience: z.string().optional(),
+    specialty: z.string().optional(),
+    employmentType: z.string().optional(),
+  })
+  .optional();
+
 const InputSchema = z.object({
   roleCategory: z.string(),
   // Operator-supplied notes, e.g. "5+ years GP, implant focus, weekend coverage".
@@ -45,6 +75,7 @@ const InputSchema = z.object({
   // can't, e.g. the role chooser before locations are picked) still
   // work — they fall through to the legacy behavior.
   locationIds: z.array(z.string()).optional(),
+  details: DetailsContextSchema,
 });
 
 const OutputSchema = z.object({
@@ -210,6 +241,7 @@ export async function generateJobDescription(
     tone: parsed.data.tone,
     employerName: employerNameForPrompt,
     useDsoName,
+    details: parsed.data.details,
   });
 
   let response: Anthropic.Messages.Message;
@@ -344,6 +376,7 @@ function buildUserPrompt(args: {
   tone: "professional" | "friendly" | "concise";
   employerName: string;
   useDsoName: boolean;
+  details?: z.infer<typeof DetailsContextSchema>;
 }): string {
   // Label the employer field correctly for the model — when affiliation
   // is private, signal that this is the public-facing practice name,
@@ -353,6 +386,14 @@ function buildUserPrompt(args: {
     ? ""
     : `\n\nIMPORTANT: This practice presents publicly as a standalone brand. The corporate ownership is intentionally not disclosed in this job description. Refer to the employer only as "${args.employerName}" or generic terms like "our practice." Do not mention any DSO, corporate parent, or multi-location operator.`;
 
+  // 2026-05-26 — Job-specific context block. Built from the Details step
+  // (now Step 2 of the wizard). When the recruiter has already locked in
+  // pay, skills, benefits, schedule, etc., the AI grounds the draft in
+  // those facts instead of inventing them. When absent (legacy / edit
+  // surfaces / corporate wizard), the section is omitted entirely and the
+  // generator falls back to brief-only.
+  const contextBlock = buildJobContextBlock(args.details);
+
   return `Write a job posting for:
 
 ${employerFieldLabel}: ${args.employerName}
@@ -360,9 +401,138 @@ Role: ${args.roleLabel} (${args.roleCategory})
 Tone: ${args.tone}
 
 Operator-supplied brief (use as guidance, not verbatim):
-${args.brief || "(no specific notes — write a strong default for this role)"}${privacyReminder}
+${args.brief || "(no specific notes — write a strong default for this role)"}${contextBlock}${privacyReminder}
 
 Return only the JSON object specified in the system prompt.`;
+}
+
+/**
+ * Render the Details-step context into a structured prompt block so the
+ * model treats it as ground truth instead of inferring. Returns an empty
+ * string when no context was supplied (back-compat with edit surfaces +
+ * the corporate wizard, which run their own generator).
+ *
+ * Hard rule baked into the block: the model uses what's here verbatim —
+ * it doesn't invent comp figures, swap units, or contradict the schedule.
+ * When a field is blank, the model is told to skip it rather than
+ * hallucinate a placeholder.
+ */
+function buildJobContextBlock(
+  details: z.infer<typeof DetailsContextSchema>
+): string {
+  if (!details) return "";
+  const lines: string[] = [];
+
+  // Compensation — text-format so the model sees the recruiter's intent
+  // (range vs. hourly vs. salary, with optional variable / bonus / equity
+  // overlays). Skip the block entirely if no comp data was filled.
+  const compType = details.compType || "range";
+  const compMin = (details.compMin || "").trim();
+  const compMax = (details.compMax || "").trim();
+  const compPeriod = (details.compPeriod || "").trim();
+  if (compMin || compMax) {
+    const periodLabel = compPeriod === "hour" ? "/hr" : compPeriod === "year" ? "/yr" : compPeriod ? `/${compPeriod}` : "";
+    let compLine: string;
+    if (compType === "exact" && compMin) {
+      compLine = `${formatDollars(compMin)}${periodLabel}`;
+    } else if (compMin && compMax) {
+      compLine = `${formatDollars(compMin)}–${formatDollars(compMax)}${periodLabel}`;
+    } else {
+      compLine = `${formatDollars(compMin || compMax)}${periodLabel}`;
+    }
+    lines.push(`- Base compensation: ${compLine}`);
+  }
+  if (details.variableCompEnabled) {
+    const target = (details.variableCompTarget || "").trim();
+    const structure = (details.variableCompStructure || "").trim();
+    const parts = [
+      target ? `target ${formatDollars(target)}` : null,
+      structure || null,
+    ].filter(Boolean);
+    if (parts.length) {
+      lines.push(`- Variable compensation: ${parts.join(" — ")}`);
+    } else {
+      lines.push(`- Variable compensation: offered (terms negotiable)`);
+    }
+  }
+  if (details.bonusEnabled) {
+    const target = (details.bonusTarget || "").trim();
+    const structure = (details.bonusStructure || "").trim();
+    const parts = [
+      target ? `target ${formatDollars(target)}` : null,
+      structure || null,
+    ].filter(Boolean);
+    if (parts.length) {
+      lines.push(`- Bonus: ${parts.join(" — ")}`);
+    } else {
+      lines.push(`- Bonus: offered (terms negotiable)`);
+    }
+  }
+  if (details.equityOffered) {
+    lines.push(`- Equity / ownership: offered`);
+  }
+
+  if (details.employmentType) {
+    const map: Record<string, string> = {
+      full_time: "Full-time",
+      part_time: "Part-time",
+      contract: "Contract / 1099",
+      per_diem: "Per diem",
+      locum: "Locum tenens",
+      temporary: "Temporary",
+    };
+    lines.push(`- Employment type: ${map[details.employmentType] ?? details.employmentType}`);
+  }
+
+  const schedDays = (details.scheduleDays ?? []).filter(Boolean);
+  if (schedDays.length || details.scheduleEvenings || details.scheduleWeekends) {
+    const parts: string[] = [];
+    if (schedDays.length) parts.push(schedDays.join(" / "));
+    if (details.scheduleEvenings) parts.push("evening shifts");
+    if (details.scheduleWeekends) parts.push("weekend shifts (Sat/Sun)");
+    lines.push(`- Schedule: ${parts.join(", ")}`);
+  }
+
+  if ((details.minYearsExperience || "").trim()) {
+    lines.push(`- Minimum experience: ${details.minYearsExperience!.trim()}+ years`);
+  }
+
+  if ((details.specialty || "").trim()) {
+    lines.push(`- Specialty / focus area: ${details.specialty!.trim()}`);
+  }
+
+  const skills = (details.skills ?? []).filter(Boolean);
+  if (skills.length) {
+    lines.push(`- Preferred skills (use these verbatim where they fit): ${skills.join(", ")}`);
+  }
+
+  const benefits = (details.benefits ?? []).filter(Boolean);
+  if (benefits.length) {
+    lines.push(`- Benefits offered (work into whatWeOffer): ${benefits.join(", ")}`);
+  }
+
+  const requirements = (details.requirements || "").trim();
+  if (requirements) {
+    lines.push(
+      `- Hard requirements (must appear in qualifications, one per line):\n${requirements
+        .split("\n")
+        .map((r) => `    • ${r.trim()}`)
+        .filter((r) => r.trim() !== "•")
+        .join("\n")}`
+    );
+  }
+
+  if (lines.length === 0) return "";
+
+  return `\n\nJob-specific context (TREAT AS GROUND TRUTH — do not invent comp figures, swap units, or contradict the schedule. Reflect these facts in the draft):
+${lines.join("\n")}`;
+}
+
+/** Format a numeric-string dollar amount with thousands separators. */
+function formatDollars(raw: string): string {
+  const n = parseInt(raw.replace(/[^0-9]/g, ""), 10);
+  if (!Number.isFinite(n)) return `$${raw}`;
+  return `$${n.toLocaleString()}`;
 }
 
 // extractJson moved to src/lib/ai/extract-json.ts (shared parser).

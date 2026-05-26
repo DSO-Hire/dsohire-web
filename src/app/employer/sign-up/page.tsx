@@ -14,6 +14,7 @@
 import Link from "next/link";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { SignUpForm } from "./sign-up-form";
+import { BillingPeriodToggle } from "@/app/pricing/billing-period-toggle";
 import {
   PRICING_TIERS,
   isPricingTier,
@@ -75,6 +76,14 @@ export default async function SignUpPage({ searchParams }: PageProps) {
             </div>
             <div className="text-[14px] text-slate-body mb-5 leading-snug">
               {selectedTier.tagline}
+            </div>
+            {/* Period toggle on sign-up — 2026-05-26 — so a visitor who picked
+                monthly on /pricing can flip to annual (or vice versa) without
+                bouncing back through the pricing page. Updates the ?period=
+                URL param; server re-reads it + re-renders the sidebar + form
+                hidden inputs. */}
+            <div className="mb-5">
+              <BillingPeriodToggle period={period} />
             </div>
             <div className="mb-6 pb-6 border-b border-[var(--rule)]">
               <div className="flex items-baseline gap-1.5">

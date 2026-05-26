@@ -22,6 +22,37 @@ import {
 } from "./jd-generator-action";
 import { templatesForRole, type JdTemplate } from "@/lib/jd-templates/templates";
 
+/**
+ * Details-step context forwarded into the AI prompt. 2026-05-26 wizard
+ * re-sequence: Details now runs BEFORE Description, so the generator has
+ * the recruiter's actual choices (pay, skills, benefits, schedule,
+ * requirements) to ground the draft. All fields optional — generator
+ * falls back to the legacy role+brief-only path if absent (e.g. on edit
+ * pages that haven't been updated to pass context yet).
+ */
+export interface JdGeneratorDetailsContext {
+  compType?: string;
+  compMin?: string;
+  compMax?: string;
+  compPeriod?: string;
+  variableCompEnabled?: boolean;
+  variableCompTarget?: string;
+  variableCompStructure?: string;
+  bonusEnabled?: boolean;
+  bonusTarget?: string;
+  bonusStructure?: string;
+  equityOffered?: boolean;
+  skills?: string[];
+  benefits?: string[];
+  requirements?: string;
+  scheduleDays?: string[];
+  scheduleEvenings?: boolean;
+  scheduleWeekends?: boolean;
+  minYearsExperience?: string;
+  specialty?: string;
+  employmentType?: string;
+}
+
 interface JdGeneratorPanelProps {
   roleCategory: string;
   roleLabel: string;
@@ -33,6 +64,8 @@ interface JdGeneratorPanelProps {
    * practice name only.
    */
   locationIds?: string[];
+  /** Details-step context (post 2026-05-26 wizard re-sequence). */
+  details?: JdGeneratorDetailsContext;
   /** Called when the operator clicks "Use this" for the title. */
   onApplyTitle: (title: string) => void;
   /** Called when the operator applies any prose body — Tiptap HTML. */
@@ -53,6 +86,7 @@ export function JdGeneratorPanel({
   roleCategory,
   roleLabel,
   locationIds,
+  details,
   onApplyTitle,
   onApplyDescription,
   onApplyAll,
@@ -100,6 +134,7 @@ export function JdGeneratorPanel({
         brief,
         tone,
         locationIds,
+        details,
       });
       const elapsed = Date.now() - startedAt;
       if (!res.ok) {

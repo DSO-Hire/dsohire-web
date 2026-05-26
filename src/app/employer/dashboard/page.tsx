@@ -735,25 +735,43 @@ export default async function EmployerDashboard() {
   return (
     <EmployerShell active="dashboard">
       <header className="mb-10">
-        <div className="flex items-center gap-3.5 mb-2 flex-wrap">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full rounded-full bg-heritage opacity-75 animate-ping" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-heritage" />
-          </span>
-          <span className="text-[10px] font-extrabold tracking-[3px] uppercase text-heritage-deep">
-            {dso?.status === "active" ? "Active" : "Onboarding"}
-          </span>
-          <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta border-l border-rule pl-3.5">
-            {dateLabel}
-          </span>
+        {/* 2026-05-26 — Top-right Post a job CTA per Cam direction. The
+            existing quick-action strip below stays; this duplicates the action
+            in a high-visibility position recruiters expect (top-right is the
+            primary-action slot in most ATS UIs). Hidden for hiring managers,
+            same as the quick-action strip. */}
+        <div className="flex items-start justify-between gap-6 flex-wrap">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-3.5 mb-2 flex-wrap">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-heritage opacity-75 animate-ping" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-heritage" />
+              </span>
+              <span className="text-[10px] font-extrabold tracking-[3px] uppercase text-heritage-deep">
+                {dso?.status === "active" ? "Active" : "Onboarding"}
+              </span>
+              <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta border-l border-rule pl-3.5">
+                {dateLabel}
+              </span>
+            </div>
+            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.1] text-ink">
+              Welcome back, {dsoUser?.full_name?.split(" ")[0] ?? "there"}.
+            </h1>
+            <p className="mt-3 text-base text-slate-body max-w-[640px]">
+              Here&apos;s where things stand at{" "}
+              <strong className="text-ink font-bold">{dso?.name}</strong>.
+            </p>
+          </div>
+          {dsoUser?.role !== "hiring_manager" && (
+            <Link
+              href="/employer/jobs/new"
+              className="inline-flex items-center gap-2 px-5 py-3 bg-heritage text-ivory text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-heritage-deep transition-colors shrink-0 mt-1"
+            >
+              <Plus className="size-4" strokeWidth={2.5} />
+              Post a job
+            </Link>
+          )}
         </div>
-        <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.1] text-ink">
-          Welcome back, {dsoUser?.full_name?.split(" ")[0] ?? "there"}.
-        </h1>
-        <p className="mt-3 text-base text-slate-body max-w-[640px]">
-          Here&apos;s where things stand at{" "}
-          <strong className="text-ink font-bold">{dso?.name}</strong>.
-        </p>
       </header>
 
       {dsoUser?.role === "hiring_manager" && (

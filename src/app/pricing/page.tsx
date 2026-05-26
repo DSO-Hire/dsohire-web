@@ -145,26 +145,28 @@ function TierGrid({
   const dsoTiers = tiers.filter((t) => t.id !== "solo");
   return (
     <section className="px-6 sm:px-14 max-w-[1240px] mx-auto">
-      <div className="mb-9">
-        <BillingPeriodToggle period={period} />
-      </div>
-
-      {/* ── Solo standout (audience = solo dentist / small private group) ── */}
+      {/* ── Solo standout (audience = multi-location owner-operator) ── */}
       {soloTier && (
         <div className="mb-14">
-          <div className="text-center max-w-[640px] mx-auto mb-7">
+          <div className="text-center max-w-[680px] mx-auto mb-7">
             <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
-              Solo dentist or small group?
+              Multi-location owner-operator?
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink leading-[1.15] mb-3">
-              Pricing built for owner-operators.
+              Solo — for groups of 2 to 5 locations.
             </h2>
             <p className="text-[15px] text-slate-body leading-[1.65]">
-              If you own a practice or run a small private group, Solo gives
-              you the full hiring platform — Practice Fit, the candidate
-              pipeline, multi-location posting — at a price scoped to your
-              footprint.
+              If you&apos;re running multiple practices under one ownership,
+              Solo gives you the full hiring platform at owner pricing. DSO
+              Hire is built for multi-location operators — single-practice
+              dentists won&apos;t get full value from the multi-location
+              backbone yet, but the door&apos;s open whenever you grow.
             </p>
+          </div>
+          {/* Period toggle sits directly above the Solo card so it controls
+              the price the visitor is staring at without scrolling. */}
+          <div className="flex justify-center mb-6">
+            <BillingPeriodToggle period={period} />
           </div>
           <SoloStandoutCard
             tier={soloTier}
@@ -189,6 +191,11 @@ function TierGrid({
             per-location analytics, and governance the bigger you get. Cancel
             or change tiers anytime.
           </p>
+        </div>
+        {/* Second period toggle — also controls ?period= URL param, so the
+            user's choice persists whether they clicked it above Solo or here. */}
+        <div className="flex justify-center mb-6">
+          <BillingPeriodToggle period={period} />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-[var(--rule)] border border-[var(--rule)]">
           {dsoTiers.map((tier) => (
@@ -243,8 +250,11 @@ function SoloStandoutCard({
   return (
     <div className="max-w-[920px] mx-auto border-2 border-heritage/40 bg-white shadow-[0_4px_24px_-12px_rgba(7,15,28,0.12)]">
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
-        {/* ── Left: tier name + price + CTA on heritage-tinted band ── */}
-        <div className="bg-cream/60 p-9 flex flex-col">
+        {/* ── Left: tier name + price + CTA on heritage-tinted band ──
+            Heritage-green tint (8% opacity) per Cam direction 2026-05-26 —
+            visually distinguishes Solo from the navy-featured DSO tier below
+            without competing with it. */}
+        <div className="bg-heritage/[0.08] p-9 flex flex-col">
           <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
             {tier.name}
           </div>
@@ -317,11 +327,15 @@ function TierCard({
   const isFeatured = tier.badge === "Most popular";
   const isAnnual = period === "annual";
   const headlinePrice = isAnnual ? tier.annualMonthlyEquivalent : tier.monthlyPrice;
+  // 2026-05-26 — CTA verbs scale energy with the tier (start → step → power →
+  // build). Enterprise reads as design-your-own rather than transactional
+  // "Contact Sales", which felt like a deflection. Solo's stays "Start with"
+  // since it's the literal entry point.
   const ctaLabel: Record<PricingTier, string> = {
     solo: "Start with Solo",
-    growth: "Choose Growth",
-    scale: "Choose Scale",
-    enterprise: "Contact Sales",
+    growth: "Step up to Growth",
+    scale: "Power up with Scale",
+    enterprise: "Build your Enterprise",
   };
   const monthlyDescriptor: Record<PricingTier, string> = {
     solo: "For privately-owned 2–5 location groups",
