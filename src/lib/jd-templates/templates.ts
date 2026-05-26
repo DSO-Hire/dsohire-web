@@ -15,6 +15,25 @@
  *
  * Adding a new template: append a row to TEMPLATES. The role_category
  * must match a value from ROLE_OPTIONS in job-wizard.tsx.
+ *
+ * ─────────────────────────────────────────────────────────────────────
+ * 2026-05-26 brief rewrite — Cam direction after wizard step re-sequence.
+ * The brief field no longer carries hardcoded comp ($180K–$240K), hourly
+ * rates ($42–$55/hr), employment-type ("Full-time"), specific day counts
+ * ("4–5 days/week"), or specific experience-year requirements
+ * ("2+ years"). Reason: those facts now flow into the AI prompt via the
+ * Details-step structured context block, which is authoritative. Having
+ * them ALSO in the brief was creating two problems:
+ *   1. Recruiters saw a comp range in the brief textarea that contradicted
+ *      what they'd entered in Details on the previous step, before the AI
+ *      reconciled them on Generate — confusing UX.
+ *   2. The AI sometimes deferred to the brief's stale number over the
+ *      Details ground truth on the edges.
+ * Briefs now focus on what the Details step does NOT carry: clinical
+ * scope, technology stack, culture/staffing notes, and role personality.
+ * The AI generator combines this with the recruiter's Details inputs to
+ * produce a draft that's grounded in their actual choices.
+ * ─────────────────────────────────────────────────────────────────────
  */
 
 export interface JdTemplate {
@@ -33,7 +52,7 @@ export const JD_TEMPLATES: JdTemplate[] = [
     label: "Associate · GP, full-time",
     title_seed: "Associate Dentist",
     brief:
-      "Full-time associate. General dentistry — restorative, prophy, simple extractions. 2+ years experience preferred. Comp range $180K–$240K plus production bonus. Mentor on staff for complex cases.",
+      "General dentistry — restorative, prophy, simple extractions. Mentor on staff for complex cases. Newer grads welcome with a structured ramp.",
   },
   {
     id: "dentist_gp_part_time",
@@ -41,7 +60,7 @@ export const JD_TEMPLATES: JdTemplate[] = [
     label: "Associate · GP, part-time",
     title_seed: "Associate Dentist (Part-Time)",
     brief:
-      "Part-time associate, 2–3 days/week. General dentistry. Newer grads welcome with mentor support. Daily guarantee $750 or 30% of collections, whichever higher.",
+      "General dentistry. Newer grads welcome with mentor support. Mix of restorative and hygiene check-outs.",
   },
 
   // Specialist (pedo, ortho, endo, perio, OMS, prostho, public health,
@@ -54,7 +73,7 @@ export const JD_TEMPLATES: JdTemplate[] = [
     label: "Pediatric specialist",
     title_seed: "Pediatric Dentist",
     brief:
-      "Board-eligible or board-certified pediatric dentist. Mix of primary care + sedation cases. Full-time preferred but 3-day schedule negotiable. High pediatric volume — 25–35 patients/day.",
+      "Board-eligible or board-certified pediatric dentist. Mix of primary care and sedation cases. High pediatric volume — 25–35 patients/day.",
   },
   {
     id: "specialist_endo",
@@ -62,7 +81,7 @@ export const JD_TEMPLATES: JdTemplate[] = [
     label: "Endodontist",
     title_seed: "Endodontist",
     brief:
-      "Endodontist for 1–2 days/week of referrals. Operating microscope + CBCT in-office. Per-diem or per-procedure comp model — open to negotiation.",
+      "Endodontist handling referrals from sister GP practices. Operating microscope and CBCT in-office.",
   },
   {
     id: "specialist_orthodontist",
@@ -70,7 +89,7 @@ export const JD_TEMPLATES: JdTemplate[] = [
     label: "Orthodontist",
     title_seed: "Orthodontist",
     brief:
-      "Board-eligible or board-certified orthodontist. Mix of clear aligner therapy (Invisalign / SureSmile) and traditional brackets; in-house Phase I program for pediatric patients. CBCT + Dolphin Imaging on site. Full-time or 3–4 day rotating-practices schedule both open. Production-based comp with monthly guarantee.",
+      "Board-eligible or board-certified orthodontist. Mix of clear aligner therapy (Invisalign / SureSmile) and traditional brackets; in-house Phase I program for pediatric patients. CBCT and Dolphin Imaging on site.",
   },
   {
     id: "specialist_periodontist",
@@ -78,7 +97,7 @@ export const JD_TEMPLATES: JdTemplate[] = [
     label: "Periodontist",
     title_seed: "Periodontist",
     brief:
-      "Periodontist for 1–2 days/week of referrals from sister GP practices — implants, soft tissue grafts, regenerative therapy, and complex perio cases. In-house CBCT + surgical suite. Per-diem or percentage-of-collections comp model.",
+      "Periodontist handling referrals from sister GP practices — implants, soft tissue grafts, regenerative therapy, and complex perio cases. In-house CBCT and surgical suite.",
   },
   {
     id: "specialist_oms",
@@ -86,7 +105,7 @@ export const JD_TEMPLATES: JdTemplate[] = [
     label: "Oral & Maxillofacial Surgeon",
     title_seed: "Oral Surgeon",
     brief:
-      "Oral & maxillofacial surgeon for full-arch implant placement, third molars, and surgical extractions. Active state DDA / sedation permit required. IV sedation suite and CBCT in-office. Per-diem comp at 35–40% of collections, sometimes with a base guarantee.",
+      "Oral and maxillofacial surgeon for full-arch implant placement, third molars, and surgical extractions. Active state DDA / sedation permit required. IV sedation suite and CBCT in-office.",
   },
   {
     id: "specialist_prosthodontist",
@@ -94,7 +113,7 @@ export const JD_TEMPLATES: JdTemplate[] = [
     label: "Prosthodontist",
     title_seed: "Prosthodontist",
     brief:
-      "Prosthodontist focused on full-arch restorative cases, complex crown & bridge, and removable prosthodontics. Partners with our in-house OMS / periodontist team on the surgical side. Full digital workflow — intraoral scanners + chairside milling. Comp open to discussion.",
+      "Prosthodontist focused on full-arch restorative cases, complex crown & bridge, and removable prosthodontics. Partners with our in-house OMS / periodontist team on the surgical side. Full digital workflow — intraoral scanners and chairside milling.",
   },
   {
     id: "specialist_public_health",
@@ -102,7 +121,7 @@ export const JD_TEMPLATES: JdTemplate[] = [
     label: "Public Health Dentist",
     title_seed: "Public Health Dentist",
     brief:
-      "Public health dentist for our community-access program — sliding-scale clinics and outreach partnerships with local schools and health centers. Strong preventive + restorative skills, comfortable with diverse patient populations. Some travel between sites. Salaried with benefits + CE allowance.",
+      "Public health dentist for our community-access program — sliding-scale clinics and outreach partnerships with local schools and health centers. Strong preventive and restorative skills, comfortable with diverse patient populations. Some travel between sites.",
   },
   {
     id: "specialist_anesthesiology",
@@ -110,7 +129,7 @@ export const JD_TEMPLATES: JdTemplate[] = [
     label: "Dental Anesthesiologist",
     title_seed: "Dental Anesthesiologist",
     brief:
-      "Dental anesthesiologist providing in-office IV sedation and general anesthesia for special-needs and high-anxiety patients. Travel between our practices for scheduled sedation days. Per-diem comp model with travel reimbursement.",
+      "Dental anesthesiologist providing in-office IV sedation and general anesthesia for special-needs and high-anxiety patients. Travels between our practices for scheduled sedation days.",
   },
 
   // Hygienist — 2 variants
@@ -120,7 +139,7 @@ export const JD_TEMPLATES: JdTemplate[] = [
     label: "Hygienist · full-time",
     title_seed: "Dental Hygienist",
     brief:
-      "Full-time dental hygienist, 4–5 days/week. Active state license required. Mix of perio and prophy. $42–$55/hr DOE plus benefits + CE allowance.",
+      "Dental hygienist. Active state license required. Mix of perio and prophy patients on a digital-imaging-equipped operatory.",
   },
   {
     id: "hygienist_temp",
@@ -128,7 +147,7 @@ export const JD_TEMPLATES: JdTemplate[] = [
     label: "Hygienist · temp/PRN",
     title_seed: "Dental Hygienist (PRN)",
     brief:
-      "Per-diem hygienist for coverage 1–2 days/week. Flexible scheduling — pick up shifts as they fit your calendar. $55–$70/hr DOE.",
+      "Per-diem hygienist for coverage shifts. Flexible scheduling — pick up shifts as they fit your calendar.",
   },
 
   // Dental Assistant — 2 variants
@@ -138,7 +157,7 @@ export const JD_TEMPLATES: JdTemplate[] = [
     label: "Chairside assistant",
     title_seed: "Dental Assistant",
     brief:
-      "Chairside dental assistant. State radiology certification required. Experience with 4-handed dentistry and basic restorative assist. $22–$30/hr DOE.",
+      "Chairside dental assistant. State radiology certification required. Experience with 4-handed dentistry and basic restorative assist.",
   },
   {
     id: "da_expanded_function",
@@ -146,7 +165,7 @@ export const JD_TEMPLATES: JdTemplate[] = [
     label: "Expanded function (EFDA)",
     title_seed: "Expanded Function Dental Assistant",
     brief:
-      "EFDA with active state certification. Will be placing restorations under doctor supervision plus full chairside duties. $28–$38/hr DOE.",
+      "EFDA with active state certification. Placing restorations under doctor supervision in addition to full chairside duties.",
   },
 
   // Front Office — 2 variants
@@ -156,7 +175,7 @@ export const JD_TEMPLATES: JdTemplate[] = [
     label: "Receptionist",
     title_seed: "Front Desk Receptionist",
     brief:
-      "Front desk receptionist for a busy multi-doctor practice. Scheduling, patient check-in/out, insurance verification. Practice-management software experience required (Dentrix / Eaglesoft / Open Dental). $18–$24/hr.",
+      "Front desk receptionist for a busy multi-doctor practice. Scheduling, patient check-in/out, insurance verification. Practice-management software experience required (Dentrix / Eaglesoft / Open Dental).",
   },
   {
     id: "front_desk_insurance_coordinator",
@@ -164,7 +183,7 @@ export const JD_TEMPLATES: JdTemplate[] = [
     label: "Insurance coordinator",
     title_seed: "Insurance Coordinator",
     brief:
-      "Insurance coordinator handling claim submission, follow-up on aging A/R, pre-authorizations, and patient billing questions. 1+ year dental insurance experience preferred. $22–$28/hr.",
+      "Insurance coordinator handling claim submission, follow-up on aging A/R, pre-authorizations, and patient billing questions. Dental insurance experience preferred.",
   },
 
   // Office Manager — 2 variants (single + multi-location)
@@ -174,7 +193,7 @@ export const JD_TEMPLATES: JdTemplate[] = [
     label: "Office Manager · Single practice",
     title_seed: "Office Manager",
     brief:
-      "Office manager for a single-location practice. Overseeing front office staff, scheduling, KPIs (production, collections, no-show rate). 3+ years dental management experience required. $65K–$85K plus performance bonus.",
+      "Office manager for a single-location practice. Overseeing front office staff, scheduling, and KPIs (production, collections, no-show rate). Dental management experience required.",
   },
   {
     id: "office_manager_multi_location",
@@ -182,7 +201,7 @@ export const JD_TEMPLATES: JdTemplate[] = [
     label: "Office Manager · 2–3 practices",
     title_seed: "Multi-Location Office Manager",
     brief:
-      "Office manager overseeing 2–3 practices in close geographic proximity. Travels between sites weekly; partners with the regional manager on staffing, scheduling, and KPI rollups. 4+ years dental ops experience, ideally multi-location. $75K–$95K plus performance bonus + mileage reimbursement.",
+      "Office manager overseeing 2–3 practices in close geographic proximity. Travels between sites weekly; partners with the regional manager on staffing, scheduling, and KPI rollups. Multi-location dental ops experience preferred.",
   },
 
   // Regional Manager — 2 variants (smaller + larger scope)
@@ -192,7 +211,7 @@ export const JD_TEMPLATES: JdTemplate[] = [
     label: "Regional Manager · 4–8 practices",
     title_seed: "Regional Manager",
     brief:
-      "Regional manager covering 4–8 practices. Operational support to office managers, KPI tracking, staff development, P&L responsibility. 5+ years dental ops experience required. $95K–$130K plus regional performance bonus + travel reimbursement.",
+      "Regional manager covering 4–8 practices. Operational support to office managers, KPI tracking, staff development, and P&L responsibility. Dental ops experience required.",
   },
   {
     id: "regional_manager_8_to_15_practices",
@@ -200,7 +219,7 @@ export const JD_TEMPLATES: JdTemplate[] = [
     label: "Regional Manager · 8–15 practices",
     title_seed: "Senior Regional Manager",
     brief:
-      "Senior regional manager with full P&L responsibility for 8–15 practices across a multi-state region. Coaches office managers, owns integration of newly acquired practices, and partners with HQ ops on the operating model. 7+ years multi-site dental ops leadership required. $130K–$170K plus regional performance bonus + travel.",
+      "Senior regional manager with full P&L responsibility for 8–15 practices across a multi-state region. Coaches office managers, owns integration of newly acquired practices, and partners with HQ ops on the operating model. Multi-site dental ops leadership required.",
   },
 
   // Treatment Coordinator (front-office adjacent, but worth its own row)
@@ -210,7 +229,7 @@ export const JD_TEMPLATES: JdTemplate[] = [
     label: "Treatment Coordinator",
     title_seed: "Treatment Coordinator",
     brief:
-      "Treatment coordinator owning case presentation, treatment plan financing conversations, and patient follow-through from consult to scheduled. Strong communication + comfort with insurance terminology and OrthoBanc / CareCredit / in-house financing programs. $24–$32/hr DOE.",
+      "Treatment coordinator owning case presentation, treatment plan financing conversations, and patient follow-through from consult to scheduled. Strong communication and comfort with insurance terminology and OrthoBanc / CareCredit / in-house financing programs.",
   },
 ];
 
