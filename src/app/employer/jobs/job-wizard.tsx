@@ -940,6 +940,9 @@ export function JobWizard({
                 return next;
               });
             }}
+            onSetAllLocations={(ids) => {
+              setSelectedLocationIds(new Set(ids));
+            }}
           />
         )}
 
@@ -1154,6 +1157,7 @@ function BasicsStep({
   locations,
   selectedLocationIds,
   onToggleLocation,
+  onSetAllLocations,
 }: {
   title: string;
   onTitle: (v: string) => void;
@@ -1168,6 +1172,8 @@ function BasicsStep({
   locations: LocationOption[];
   selectedLocationIds: Set<string>;
   onToggleLocation: (id: string) => void;
+  /** Bulk setter — pass full id list to select all, empty array to clear. */
+  onSetAllLocations: (ids: string[]) => void;
 }) {
   return (
     <div className="space-y-7">
@@ -1218,16 +1224,45 @@ function BasicsStep({
       </div>
 
       <div>
-        <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
-          {scope === "corporate" ? "Anchor location" : "Practice locations"}{" "}
-          {scope === "corporate" ? (
-            <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
-              (optional)
-            </span>
-          ) : (
-            <span className="text-heritage">*</span>
+        <div className="flex items-baseline justify-between mb-3 gap-3 flex-wrap">
+          <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body">
+            {scope === "corporate" ? "Anchor location" : "Practice locations"}{" "}
+            {scope === "corporate" ? (
+              <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
+                (optional)
+              </span>
+            ) : (
+              <span className="text-heritage">*</span>
+            )}
+          </label>
+          {/* 2026-05-26 — Select all / Clear all bulk actions for multi-location
+              DSOs. Hidden in corporate scope (single anchor) and when there's
+              only one location to pick (no value-add). */}
+          {scope !== "corporate" && locations.length >= 2 && (
+            <div className="flex items-center gap-3 text-[12px]">
+              <button
+                type="button"
+                onClick={() => onSetAllLocations(locations.map((l) => l.id))}
+                disabled={selectedLocationIds.size === locations.length}
+                className="text-heritage hover:text-heritage-deep font-semibold uppercase tracking-[1.5px] disabled:text-slate-meta disabled:cursor-not-allowed"
+              >
+                Select all
+              </button>
+              <span className="text-slate-meta">·</span>
+              <button
+                type="button"
+                onClick={() => onSetAllLocations([])}
+                disabled={selectedLocationIds.size === 0}
+                className="text-slate-body hover:text-ink font-semibold uppercase tracking-[1.5px] disabled:text-slate-meta disabled:cursor-not-allowed"
+              >
+                Clear all
+              </button>
+              <span className="text-slate-meta normal-case tracking-normal">
+                ({selectedLocationIds.size}/{locations.length})
+              </span>
+            </div>
           )}
-        </label>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-[var(--rule)] border border-[var(--rule)]">
           {locations.map((loc) => {
             const checked = selectedLocationIds.has(loc.id);

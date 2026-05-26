@@ -119,7 +119,16 @@ function PricingHero() {
   );
 }
 
-/* ───────── Tier grid ───────── */
+/* ───────── Tier grid ─────────
+ *
+ * 2026-05-26 — Restructured per Cam direction (mom walkthrough). Solo and the
+ * DSO tiers serve two different audiences (owner-operator dentists vs.
+ * scaling dental groups); rendering them side-by-side in a 4-up confused both.
+ * Solo now sits in its own standout section above, with explicit audience
+ * framing, and Growth / Scale / Enterprise live as a 3-up DSO grid below.
+ * The compare matrix downstream still shows all four columns for full
+ * apples-to-apples comparison.
+ */
 
 function TierGrid({
   tiers,
@@ -132,30 +141,165 @@ function TierGrid({
   period: BillingPeriod;
   authedNeedsCheckout: boolean;
 }) {
+  const soloTier = tiers.find((t) => t.id === "solo");
+  const dsoTiers = tiers.filter((t) => t.id !== "solo");
   return (
     <section className="px-6 sm:px-14 max-w-[1240px] mx-auto">
       <div className="mb-9">
         <BillingPeriodToggle period={period} />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-[var(--rule)] border border-[var(--rule)]">
-        {tiers.map((tier) => (
-          <TierCard
-            key={tier.id}
-            tier={tier}
+
+      {/* ── Solo standout (audience = solo dentist / small private group) ── */}
+      {soloTier && (
+        <div className="mb-14">
+          <div className="text-center max-w-[640px] mx-auto mb-7">
+            <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
+              Solo dentist or small group?
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink leading-[1.15] mb-3">
+              Pricing built for owner-operators.
+            </h2>
+            <p className="text-[15px] text-slate-body leading-[1.65]">
+              If you own a practice or run a small private group, Solo gives
+              you the full hiring platform — Practice Fit, the candidate
+              pipeline, multi-location posting — at a price scoped to your
+              footprint.
+            </p>
+          </div>
+          <SoloStandoutCard
+            tier={soloTier}
             nextParam={nextParam}
             period={period}
             authedNeedsCheckout={authedNeedsCheckout}
           />
-        ))}
+        </div>
+      )}
+
+      {/* ── DSO 3-up (audience = multi-practice dental groups / DSOs) ── */}
+      <div className="pt-12 border-t border-[var(--rule)]">
+        <div className="text-center max-w-[640px] mx-auto mb-7">
+          <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
+            Scaling beyond a few practices?
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink leading-[1.15] mb-3">
+            Pick the tier that matches your footprint.
+          </h2>
+          <p className="text-[15px] text-slate-body leading-[1.65]">
+            Growth, Scale, and Enterprise unlock deeper pipeline tooling,
+            per-location analytics, and governance the bigger you get. Cancel
+            or change tiers anytime.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-[var(--rule)] border border-[var(--rule)]">
+          {dsoTiers.map((tier) => (
+            <TierCard
+              key={tier.id}
+              tier={tier}
+              nextParam={nextParam}
+              period={period}
+              authedNeedsCheckout={authedNeedsCheckout}
+            />
+          ))}
+        </div>
       </div>
+
       <p className="mt-10 text-[14px] text-slate-body text-center leading-relaxed">
-        All tiers include multi-location posting, Practice Fit, candidate
+        Every tier includes multi-location posting, Practice Fit, candidate
         dashboards, and Stripe-secured billing.{" "}
         <strong className="text-ink font-bold">
           No per-listing fees. No placement fees. Ever.
         </strong>
       </p>
     </section>
+  );
+}
+
+/**
+ * Solo-tier standout card — wider, framed differently from the 3-up DSO grid
+ * so the solo-dentist audience reads it as their card, not a downscale DSO
+ * option. Two-column on lg+ (audience/price on left, features on right),
+ * stacks on mobile. Reuses the same checkout/sign-up routing logic as TierCard.
+ */
+function SoloStandoutCard({
+  tier,
+  nextParam,
+  period,
+  authedNeedsCheckout,
+}: {
+  tier: TierConfig;
+  nextParam: string | null;
+  period: BillingPeriod;
+  authedNeedsCheckout: boolean;
+}) {
+  const isAnnual = period === "annual";
+  const headlinePrice = isAnnual
+    ? tier.annualMonthlyEquivalent
+    : tier.monthlyPrice;
+  const params = new URLSearchParams({ tier: tier.id, period });
+  if (nextParam) params.set("next", nextParam);
+  const ctaHref = authedNeedsCheckout
+    ? `/employer/checkout?${params.toString()}`
+    : `/employer/sign-up?${params.toString()}`;
+  return (
+    <div className="max-w-[920px] mx-auto border-2 border-heritage/40 bg-white shadow-[0_4px_24px_-12px_rgba(7,15,28,0.12)]">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+        {/* ── Left: tier name + price + CTA on heritage-tinted band ── */}
+        <div className="bg-cream/60 p-9 flex flex-col">
+          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+            {tier.name}
+          </div>
+          <div className="text-[14px] text-slate-body mb-7 leading-snug">
+            {tier.tagline}
+          </div>
+          <div className="flex items-baseline gap-1.5 mb-1.5">
+            <div className="text-[44px] font-extrabold tracking-[-1.5px] leading-none text-ink">
+              ${headlinePrice.toLocaleString()}
+            </div>
+            <div className="text-[14px] font-medium text-slate-body">
+              / month
+            </div>
+          </div>
+          <div className="text-[12px] tracking-[0.4px] mb-7 leading-[1.45] text-slate-meta min-h-[18px]">
+            {isAnnual
+              ? `Billed annually · $${tier.annualPrice.toLocaleString()}/yr`
+              : "Billed monthly · cancel anytime"}
+          </div>
+          <Link
+            href={ctaHref}
+            className="block text-center px-4 py-3.5 text-[12px] font-bold tracking-[1.5px] uppercase bg-ink text-ivory border border-ink hover:bg-heritage hover:border-heritage transition-colors"
+          >
+            Start with Solo
+          </Link>
+          <p className="mt-4 text-[11.5px] text-slate-meta leading-relaxed">
+            Up to 5 active listings · 3 admin seats · unlimited hiring
+            managers and applications.
+          </p>
+        </div>
+
+        {/* ── Right: feature list ── */}
+        <div className="p-9 lg:border-l border-[var(--rule)]">
+          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-body mb-4">
+            What&apos;s included
+          </div>
+          <ul className="list-none grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+            {tier.features.map((feature, i) => (
+              <li
+                key={i}
+                className="text-[13.5px] text-ink py-1 flex items-start gap-2 leading-snug"
+              >
+                <span
+                  aria-hidden="true"
+                  className="font-extrabold flex-shrink-0 text-heritage"
+                >
+                  ✓
+                </span>
+                <span>{feature}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
   );
 }
 

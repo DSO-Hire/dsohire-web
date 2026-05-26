@@ -319,17 +319,6 @@ export function getAllDentalSkills(): ReadonlyArray<CanonicalOption> {
 }
 
 /**
- * Same as getAllDentalSkills but front-loads skills for a specific role
- * category. Returns role-specific options first (in declaration order),
- * then UNIVERSAL_DENTAL_SKILLS, then every other skill alphabetically.
- *
- * Used by the JOB wizard's preferred-skills picker so the employer's
- * quick-add chips surface role-relevant suggestions before everything
- * else, without losing access to any skill from the full canonical pool.
- *
- * If `role` is null/undefined or unknown, falls back to getAllDentalSkills.
- */
-/**
  * Maps a job `role_category` enum value to its SKILLS_BY_ROLE key. The two
  * vocabularies diverged (e.g. role_category "dentist" vs skills key
  * "associate_dentist"), which silently dropped role prioritization for most
@@ -346,6 +335,23 @@ export const ROLE_CATEGORY_TO_SKILLS_KEY: Record<string, string> = {
   other: "dso_corporate", // corporate-scope jobs carry role_category="other"
 };
 
+/**
+ * Role-aware skill suggestions for the JD wizard's Preferred-skills picker.
+ * Returns role-specific skills first (declaration order — typically ordered
+ * most-essential first by the canonical-list author), then
+ * UNIVERSAL_DENTAL_SKILLS.
+ *
+ * Strict scoping (2026-05-26 fix): we DELIBERATELY do NOT append other
+ * roles' skills. Previously the tail appended every other role's skills
+ * alphabetically, which surfaced things like "Office manager development"
+ * (a Regional Manager skill) on every other role's picker — confusing and
+ * off-spec. This now mirrors `getJobRequirementsPrioritized` which has
+ * always been strict-scoped for the same reason. Custom typing (Enter to
+ * add) remains the escape hatch for any cross-role skill a recruiter wants.
+ *
+ * If `role` is null/undefined or unknown, falls back to getAllDentalSkills
+ * (full alphabetical pool) so the picker still works when role isn't set yet.
+ */
 export function getAllDentalSkillsPrioritized(
   role: string | null | undefined
 ): ReadonlyArray<CanonicalOption> {
@@ -357,34 +363,24 @@ export function getAllDentalSkillsPrioritized(
   if (!roleList) return getAllDentalSkills();
 
   const seen = new Set<string>();
-  const head: CanonicalOption[] = [];
-  const tail: CanonicalOption[] = [];
+  const out: CanonicalOption[] = [];
 
-  const appendInto = (
-    list: ReadonlyArray<CanonicalOption>,
-    target: CanonicalOption[]
-  ) => {
+  const append = (list: ReadonlyArray<CanonicalOption>) => {
     for (const opt of list) {
       if (!seen.has(opt.value)) {
         seen.add(opt.value);
-        target.push(opt);
+        out.push(opt);
       }
     }
   };
 
   // 1. Role-specific skills first (declaration order — typically ordered
   //    most-essential first by the canonical-list author)
-  appendInto(roleList, head);
+  append(roleList);
   // 2. Universal skills next — relevant across roles
-  appendInto(UNIVERSAL_DENTAL_SKILLS, head);
-  // 3. Everything else, alphabetically sorted in the tail
-  for (const [otherRole, list] of Object.entries(SKILLS_BY_ROLE)) {
-    if (otherRole === skillsKey) continue;
-    appendInto(list, tail);
-  }
-  tail.sort((a, b) => a.label.localeCompare(b.label));
+  append(UNIVERSAL_DENTAL_SKILLS);
 
-  return [...head, ...tail];
+  return out;
 }
 
 // ─────────────────────────────────────────────────────────────────────
