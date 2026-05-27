@@ -169,6 +169,8 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
       city: string | null;
       state: string | null;
       postal_code: string | null;
+      website: string | null;
+      public_dso_affiliation: boolean | null;
     } | null;
   }>)
     .map((row) => row.location)
