@@ -155,14 +155,18 @@ export async function POST(request: Request) {
     );
   }
 
-  // Fire-and-forget email to the support inbox. Failures here are
-  // logged but don't fail the API call — the row is saved either way
-  // and Cam can see it in the support inbox later.
+  // AWAIT the email send (not void) — Vercel serverless terminates the
+  // function the moment we return, killing fire-and-forget promises
+  // mid-flight. The first prod test of this route logged an email_log
+  // failure with "Unable to fetch data. The request could not be
+  // resolved" — that's the symptom of an interrupted unawaited Resend
+  // call. ~500ms added to the response is the right tradeoff vs. lost
+  // emails. If latency ever matters, switch to next/after().
   const subject = dsoName
     ? `[Support] ${dsoName} (${tierSnapshot ?? "no sub"}) — ${truncate(body, 60)}`
     : `[Support] Candidate — ${truncate(body, 60)}`;
 
-  void sendEmail({
+  const emailResult = await sendEmail({
     to: SUPPORT_INBOX,
     subject,
     template: "support.request_received",
@@ -187,6 +191,23 @@ export async function POST(request: Request) {
     }),
     relatedDsoId: dsoId,
   });
+
+  // Email failure is non-fatal — the support_requests row is already
+  // saved so Cam can pull it from the DB or the admin surface later.
+  // Surface a friendlier success-with-caveat to the user so they don't
+  // think their message vanished silently.
+  if (!emailResult.ok) {
+    console.error("[support/send] email delivery failed", {
+      requestId: insertedRow.id,
+      error: emailResult.error,
+    });
+    return NextResponse.json({
+      ok: true,
+      requestId: insertedRow.id,
+      warning:
+        "Your message is saved, but the notification email to support didn't go through. We'll see it in the support queue — no action needed on your end.",
+    });
+  }
 
   return NextResponse.json({
     ok: true,
