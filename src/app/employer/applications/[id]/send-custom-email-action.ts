@@ -94,47 +94,46 @@ export async function sendCustomTemplateEmail(input: {
     return { ok: false, error: "This template has been archived." };
   }
 
-  // Load application + candidate + job in one round trip. RLS scopes the
-  // application to this DSO's jobs so an attacker can't smuggle a foreign
-  // applicationId past the action.
+  // Load application first — RLS scopes it to this DSO's jobs so an
+  // attacker can't smuggle a foreign applicationId past the action.
+  // Candidate + job are pulled as separate hops (per the codebase rule:
+  // multi-aliased embed chains in one select blow up Vercel's type-check
+  // with a GenericStringError).
   const { data: appRow, error: appErr } = await supabase
     .from("applications")
-    .select(
-      "id, candidate_id, job_id, " +
-        "candidates:candidates!inner(first_name, full_name, auth_user_id), " +
-        "jobs:jobs!inner(id, title, dso_id)"
-    )
+    .select("id, candidate_id, job_id")
     .eq("id", input.applicationId)
     .maybeSingle();
   if (appErr || !appRow) {
     return { ok: false, error: "Application not found." };
   }
 
-  const jobRel = (appRow as Record<string, unknown>).jobs as
-    | { id: string; title: string | null; dso_id: string }
-    | Array<{ id: string; title: string | null; dso_id: string }>
-    | null;
-  const job = Array.isArray(jobRel) ? jobRel[0] ?? null : jobRel;
-  if (!job || job.dso_id !== dsoId) {
+  const [{ data: jobRow }, { data: candRow }] = await Promise.all([
+    supabase
+      .from("jobs")
+      .select("id, title, dso_id")
+      .eq("id", (appRow as { job_id: string }).job_id)
+      .maybeSingle(),
+    supabase
+      .from("candidates")
+      .select("first_name, full_name, auth_user_id")
+      .eq("id", (appRow as { candidate_id: string }).candidate_id)
+      .maybeSingle(),
+  ]);
+
+  if (!jobRow || (jobRow as { dso_id: string }).dso_id !== dsoId) {
     return { ok: false, error: "Application is not on one of your jobs." };
   }
+  const job = jobRow as { id: string; title: string | null; dso_id: string };
 
-  const candRel = (appRow as Record<string, unknown>).candidates as
-    | {
-        first_name: string | null;
-        full_name: string | null;
-        auth_user_id: string | null;
-      }
-    | Array<{
-        first_name: string | null;
-        full_name: string | null;
-        auth_user_id: string | null;
-      }>
-    | null;
-  const cand = Array.isArray(candRel) ? candRel[0] ?? null : candRel;
-  if (!cand) {
+  if (!candRow) {
     return { ok: false, error: "Candidate not found." };
   }
+  const cand = candRow as {
+    first_name: string | null;
+    full_name: string | null;
+    auth_user_id: string | null;
+  };
   if (!cand.auth_user_id) {
     return {
       ok: false,
