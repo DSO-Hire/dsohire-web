@@ -1,23 +1,33 @@
 /**
- * Email template renderer (Phase 4.5.f).
+ * Email template renderer.
  *
  * Substitutes {{var.path}} tokens in a subject or body string using the
- * provided context object. Two safety properties:
+ * provided context object. Three safety properties:
  *
  *   1. Allowlist — only tokens registered for the template's kind are
- *      substituted. Unknown tokens render as a visible warning marker
- *      (`mode = "preview"`) or as the literal text (`mode = "send"` so
- *      the customer's recipient never sees a broken token).
+ *      substituted. For predefined kinds the allowlist is the kind's
+ *      manifest groups; for custom (user-defined) kinds the allowlist is
+ *      the CUSTOM_TEMPLATE_GROUPS shared set. Unknown tokens render as a
+ *      visible warning marker (`mode = "preview"`) or as the literal text
+ *      ("html" / "subject") so the recipient never sees a broken token.
  *
- *   2. HTML escaping — when rendering body_html (`mode = "send"` /
+ *   2. HTML escaping — when rendering body_html (`mode = "html"` /
  *      "preview"), substituted values are HTML-escaped to prevent stray
  *      injection. For subjects (`mode = "subject"`), no HTML escaping.
+ *
+ *   3. Kind-agnostic — the renderer accepts any string `kind` and routes
+ *      through the manifest's `tokensForKind` / `groupsForKind` helpers.
+ *      Predefined and custom kinds use the same code path.
  *
  * The same renderer is used both server-side (dispatch) and inside the
  * editor's live-preview pane.
  */
 
-import { TEMPLATE_META, type EmailTemplateKind } from "./manifest";
+import {
+  groupsForKind,
+  tokensForKind,
+  type EmailTemplateKind,
+} from "./manifest";
 
 export type RenderMode = "html" | "subject" | "preview";
 
@@ -77,10 +87,7 @@ interface RenderOptions {
  */
 export function renderTemplate(opts: RenderOptions): RenderResult {
   const { kind, template, context, mode } = opts;
-  const meta = TEMPLATE_META[kind];
-  const allowedTokens = new Set(
-    meta.groups.flatMap((g) => g.fields.map((f) => f.token))
-  );
+  const allowedTokens = tokensForKind(kind);
 
   const unknownTokens: string[] = [];
   const missingValues: string[] = [];
@@ -117,15 +124,16 @@ export function renderTemplate(opts: RenderOptions): RenderResult {
 
 /**
  * Build a sample context object for the editor's live preview. Pulls
- * example values from the template's manifest groups so what the DSO
- * sees in preview matches the dropdown's example column exactly.
+ * example values from the kind's groups (predefined-meta groups for
+ * known kinds, the shared custom-template groups otherwise) so what the
+ * DSO sees in preview matches the dropdown's example column exactly.
  */
 export function buildSampleContext(
   kind: EmailTemplateKind
 ): Record<string, unknown> {
-  const meta = TEMPLATE_META[kind];
+  const groups = groupsForKind(kind);
   const ctx: Record<string, Record<string, string>> = {};
-  for (const group of meta.groups) {
+  for (const group of groups) {
     ctx[group.id] = {};
     for (const field of group.fields) {
       ctx[group.id][field.token.split(".")[1]] = field.example;

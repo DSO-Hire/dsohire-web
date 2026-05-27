@@ -12,14 +12,14 @@
  * editor can show "this is what the system sends today, edit to taste."
  */
 
-import type { EmailTemplateKind } from "./manifest";
+import type { PredefinedTemplateKind } from "./manifest";
 
 export interface DefaultTemplate {
   subject: string;
   body_html: string;
 }
 
-export const DEFAULT_TEMPLATES: Record<EmailTemplateKind, DefaultTemplate> = {
+export const DEFAULT_TEMPLATES: Record<PredefinedTemplateKind, DefaultTemplate> = {
   "candidate.application_received": {
     subject:
       "Your application for {{job.title}} at {{dso.name}} was received",

@@ -23,6 +23,7 @@ import {
   type StageKind,
 } from "@/lib/applications/stages";
 import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
+import { dispatchStageChangedEmail } from "@/lib/email/templates/stage-changed-dispatch";
 import { recordAuditEvent } from "@/lib/audit/record";
 
 export interface ActionState {
@@ -251,9 +252,10 @@ export async function moveApplicationStage(
     };
   }
 
-  // Drop a system message into the candidate's inbox thread. Skip when
-  // stages are hidden from the candidate per their employer's setting.
-  // Fire-and-forget — never block the stage move on a dispatch failure.
+  // Drop a system message into the candidate's inbox thread + fire the
+  // candidate.stage_changed email. Both skip when stages are hidden from
+  // the candidate per the employer's setting. Fire-and-forget — never
+  // block the stage move on a dispatch failure.
   if (!hideStagesFromCandidate && prevKind !== resolved.kind) {
     const fromLabel = KIND_DEFAULT_LABELS[prevKind] ?? prevKind;
     const toLabel = KIND_DEFAULT_LABELS[resolved.kind] ?? resolved.kind;
@@ -263,6 +265,21 @@ export async function moveApplicationStage(
       senderRole: "employer",
       body: `Your application moved from ${fromLabel} to ${toLabel}.`,
     });
+    if (dsoId) {
+      const candidateId = (prev as unknown as Record<string, unknown>)
+        .candidate_id as string | null;
+      if (candidateId) {
+        void dispatchStageChangedEmail({
+          applicationId,
+          candidateId,
+          jobId: (jobRow?.id as string | undefined) ?? "",
+          jobTitle,
+          dsoId,
+          fromStageLabel: fromLabel,
+          toStageLabel: toLabel,
+        });
+      }
+    }
   }
 
   // Audit log (Phase 4.5.e). Fire-and-forget.

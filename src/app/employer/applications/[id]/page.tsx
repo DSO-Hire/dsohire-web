@@ -44,6 +44,10 @@ import {
 } from "@/lib/supabase/server";
 import { StageSelector } from "./stage-selector";
 import {
+  SendCustomEmailButton,
+  type CustomTemplateOption,
+} from "./send-custom-email-button";
+import {
   EmployerInterviewSection,
   type InterviewProposalState,
 } from "@/components/interviews/interview-section";
@@ -606,6 +610,36 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     subStatus !== null &&
     (subStatus === "active" || subStatus === "trialing") &&
     (subTier === "growth" || subTier === "scale" || subTier === "enterprise");
+
+  // Same Growth+ gate unlocks the "Send custom email" button next to the
+  // StageSelector. When unlocked, pull all the DSO's custom + non-archived
+  // templates so the button's dialog has them ready (no client-side fetch).
+  const canSendCustomEmail = aiSuggesterAvailable;
+  let customTemplateOptions: CustomTemplateOption[] = [];
+  if (canSendCustomEmail) {
+    const { data: tplRows } = await supabase
+      .from("email_templates")
+      .select("id, kind, name, description, subject, body_html")
+      .eq("dso_id", dsoUser.dso_id as string)
+      .eq("is_custom", true)
+      .eq("is_archived", false)
+      .order("name", { ascending: true });
+    customTemplateOptions = ((tplRows ?? []) as Array<{
+      id: string;
+      kind: string;
+      name: string | null;
+      description: string | null;
+      subject: string;
+      body_html: string;
+    }>).map((row) => ({
+      id: row.id,
+      kind: row.kind,
+      name: row.name ?? "(unnamed)",
+      description: row.description,
+      subject: row.subject,
+      body_html: row.body_html,
+    }));
+  }
   // Whether the application has enough signal to make AI suggestions
   // useful (≥1 screening answer OR ≥1 submitted scorecard).
   const aiSuggesterHasContext =
@@ -1327,6 +1361,16 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               aiSuggesterAvailable={aiSuggesterAvailable}
               aiSuggesterHasContext={aiSuggesterHasContext}
             />
+
+            {canSendCustomEmail && (
+              <div className="mt-4">
+                <SendCustomEmailButton
+                  applicationId={app.id}
+                  candidateDisplayName={displayName}
+                  templates={customTemplateOptions}
+                />
+              </div>
+            )}
 
             <div className="mt-6">
               <EmployerInterviewSection

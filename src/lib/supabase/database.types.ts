@@ -2179,9 +2179,13 @@ export type Database = {
         Row: {
           body_html: string
           created_at: string
+          description: string | null
           dso_id: string
           id: string
-          kind: Database["public"]["Enums"]["email_template_kind"]
+          is_archived: boolean
+          is_custom: boolean
+          kind: string
+          name: string | null
           subject: string
           updated_at: string
           updated_by: string | null
@@ -2189,9 +2193,13 @@ export type Database = {
         Insert: {
           body_html: string
           created_at?: string
+          description?: string | null
           dso_id: string
           id?: string
-          kind: Database["public"]["Enums"]["email_template_kind"]
+          is_archived?: boolean
+          is_custom?: boolean
+          kind: string
+          name?: string | null
           subject: string
           updated_at?: string
           updated_by?: string | null
@@ -2199,9 +2207,13 @@ export type Database = {
         Update: {
           body_html?: string
           created_at?: string
+          description?: string | null
           dso_id?: string
           id?: string
-          kind?: Database["public"]["Enums"]["email_template_kind"]
+          is_archived?: boolean
+          is_custom?: boolean
+          kind?: string
+          name?: string | null
           subject?: string
           updated_at?: string
           updated_by?: string | null

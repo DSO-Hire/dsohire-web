@@ -12,7 +12,7 @@
  */
 
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
-import type { EmailTemplateKind } from "./manifest";
+import type { PredefinedTemplateKind } from "./manifest";
 import { dsoCanUseCustomTemplates } from "./tier";
 
 export interface LoadedTemplate {
@@ -22,7 +22,7 @@ export interface LoadedTemplate {
 
 export async function loadCustomTemplate(
   dsoId: string,
-  kind: EmailTemplateKind
+  kind: PredefinedTemplateKind
 ): Promise<LoadedTemplate | null> {
   const supabase = createSupabaseServiceRoleClient();
 

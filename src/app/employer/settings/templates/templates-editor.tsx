@@ -35,7 +35,7 @@ import {
 import { TemplateBodyEditor } from "./template-body-editor";
 import { upsertTemplate, revertTemplate } from "./actions";
 import {
-  type EmailTemplateKind,
+  type PredefinedTemplateKind,
   type TemplateMeta,
   type MergefieldGroup,
 } from "@/lib/email/templates/manifest";
@@ -49,7 +49,7 @@ import type { TemplateInitial } from "./templates-data";
 interface TemplatesEditorProps {
   initial: TemplateInitial[];
   canEdit: boolean;
-  templateMeta: Record<EmailTemplateKind, TemplateMeta>;
+  templateMeta: Record<PredefinedTemplateKind, TemplateMeta>;
 }
 
 export function TemplatesEditor({
@@ -390,7 +390,7 @@ function PreviewPane({
   subject,
   bodyHtml,
 }: {
-  kind: EmailTemplateKind;
+  kind: PredefinedTemplateKind;
   subject: string;
   bodyHtml: string;
 }) {

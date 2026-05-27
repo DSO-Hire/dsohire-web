@@ -5,10 +5,10 @@
  * async functions (per feedback_use_server_only_async.md).
  */
 
-import type { EmailTemplateKind } from "@/lib/email/templates/manifest";
+import type { PredefinedTemplateKind } from "@/lib/email/templates/manifest";
 
 export interface TemplateInitial {
-  kind: EmailTemplateKind;
+  kind: PredefinedTemplateKind;
   /** True when a custom row exists in email_templates for this DSO + kind. */
   isCustom: boolean;
   subject: string;

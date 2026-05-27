@@ -27,7 +27,7 @@ import { sanitizeTiptapHtml, htmlToPlainText } from "@/lib/html/sanitize-tiptap"
 import { loadCustomTemplate } from "./loader";
 import { renderTemplate } from "./renderer";
 import { CustomTemplate } from "@/emails/CustomTemplate";
-import type { EmailTemplateKind } from "./manifest";
+import type { PredefinedTemplateKind } from "./manifest";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
@@ -46,7 +46,7 @@ export interface JobMergeContext {
 }
 
 export interface CandidateEmailDispatchInput {
-  kind: EmailTemplateKind;
+  kind: PredefinedTemplateKind;
   dsoId: string;
   recipientUserId: string;
   recipientEmail: string;
