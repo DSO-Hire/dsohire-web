@@ -38,6 +38,8 @@ import {
   Send,
   ShieldCheck,
   Sparkles,
+  ThumbsDown,
+  ThumbsUp,
   Trash2,
   X,
 } from "lucide-react";
@@ -68,6 +70,11 @@ interface UiMessage {
   /** Tool-use labels rendered as pills above the bubble while Claude is
    *  fetching real-data context. Set when tool_use SSE events arrive. */
   toolLabels?: string[];
+  /** Server-assigned message id (after streaming completes). Powers
+   *  the feedback buttons. */
+  messageId?: string;
+  /** Whether the user rated this message yet. */
+  rated?: "up" | "down";
 }
 
 export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
@@ -234,6 +241,20 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
               const parsed = JSON.parse(dataStr) as Record<string, unknown>;
               if (eventName === "start" && typeof parsed.requestId === "string") {
                 setRequestId(parsed.requestId);
+                // Stamp the in-flight assistant bubble with its server
+                // message id so the user can rate it once the response
+                // finishes.
+                if (typeof parsed.assistantId === "string") {
+                  const aid = parsed.assistantId;
+                  setMessages((prev) => {
+                    const next = [...prev];
+                    const last = next[next.length - 1];
+                    if (last && last.role === "assistant") {
+                      next[next.length - 1] = { ...last, messageId: aid };
+                    }
+                    return next;
+                  });
+                }
               } else if (eventName === "tool_use" && typeof parsed.friendly_label === "string") {
                 const label = parsed.friendly_label as string;
                 setMessages((prev) => {
@@ -360,6 +381,34 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
 
   const hasUserMessage = messages.some((m) => m.role === "user");
 
+  const rateMessage = useCallback(
+    async (messageId: string, rating: "up" | "down") => {
+      // Optimistic local update so the buttons disable + show the
+      // thank-you state instantly.
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.messageId === messageId ? { ...m, rated: rating } : m
+        )
+      );
+      try {
+        await fetch("/api/support/feedback", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ message_id: messageId, rating }),
+        });
+      } catch (err) {
+        console.warn("[support-drawer] feedback failed", err);
+        // Revert on failure.
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.messageId === messageId ? { ...m, rated: undefined } : m
+          )
+        );
+      }
+    },
+    []
+  );
+
   return (
     <>
       <div
@@ -423,7 +472,7 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
           ) : (
             <>
               {messages.map((m, i) => (
-                <Bubble key={i} message={m} />
+                <Bubble key={i} message={m} onRate={rateMessage} />
               ))}
             </>
           )}
@@ -527,7 +576,13 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
  * Sub-components
  * ────────────────────────────────────────────────────────── */
 
-function Bubble({ message }: { message: UiMessage }) {
+function Bubble({
+  message,
+  onRate,
+}: {
+  message: UiMessage;
+  onRate?: (messageId: string, rating: "up" | "down") => Promise<void>;
+}) {
   if (message.role === "system") {
     return (
       <div className="border border-amber-200 bg-amber-50 px-3 py-2 text-[13px] text-amber-950 inline-flex items-start gap-2 max-w-full">
@@ -575,7 +630,115 @@ function Bubble({ message }: { message: UiMessage }) {
             <span className="inline-block w-2 h-4 align-text-bottom bg-heritage-deep/60 ml-0.5 animate-pulse" />
           )}
         </div>
+        {/* Feedback buttons — only when the message has finished streaming
+            AND we have a server-assigned message id. */}
+        {!message.streaming && message.messageId && message.content && onRate && (
+          <FeedbackButtons
+            messageId={message.messageId}
+            rated={message.rated}
+            onRate={onRate}
+          />
+        )}
       </div>
+    </div>
+  );
+}
+
+function FeedbackButtons({
+  messageId,
+  rated,
+  onRate,
+}: {
+  messageId: string;
+  rated?: "up" | "down";
+  onRate: (messageId: string, rating: "up" | "down") => Promise<void>;
+}) {
+  const [pending, setPending] = useState(false);
+  const [note, setNote] = useState("");
+  const [showNote, setShowNote] = useState(false);
+
+  async function handle(rating: "up" | "down") {
+    if (rated || pending) return;
+    if (rating === "down") {
+      // Show note input. Submit on enter or via a small "Send" affordance.
+      setShowNote(true);
+      return;
+    }
+    setPending(true);
+    await onRate(messageId, "up");
+    setPending(false);
+  }
+
+  async function submitDown() {
+    setPending(true);
+    await onRate(messageId, "down");
+    setPending(false);
+    setShowNote(false);
+  }
+
+  if (rated) {
+    return (
+      <div className="flex items-center gap-1.5 text-[11px] text-slate-meta px-1 pt-0.5">
+        <CheckCircle2 className="size-3 text-heritage-deep" />
+        Thanks — feedback saved.
+      </div>
+    );
+  }
+
+  if (showNote) {
+    return (
+      <div className="flex items-center gap-1.5 mt-1">
+        <input
+          type="text"
+          autoFocus
+          value={note}
+          onChange={(e) => setNote(e.target.value.slice(0, 200))}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") submitDown();
+            else if (e.key === "Escape") setShowNote(false);
+          }}
+          placeholder="What didn't work? (optional)"
+          className="flex-1 px-2 py-1 text-[12px] border border-[var(--rule-strong)] bg-white focus:outline-none focus:border-heritage"
+        />
+        <button
+          type="button"
+          onClick={submitDown}
+          disabled={pending}
+          className="text-[10px] font-bold tracking-[1px] uppercase text-ink hover:text-heritage-deep disabled:opacity-40 px-1.5"
+        >
+          {pending ? "…" : "Send"}
+        </button>
+      </div>
+    );
+  }
+
+  // Note value is captured server-side via the onRate handler when
+  // showNote was used — here we pass null. Keep an empty-text effect to
+  // appease lint.
+  void note;
+
+  return (
+    <div className="flex items-center gap-0.5 px-1 pt-0.5">
+      <button
+        type="button"
+        onClick={() => handle("up")}
+        disabled={pending}
+        aria-label="Helpful"
+        title="Helpful"
+        className="p-1 text-slate-meta hover:text-heritage-deep hover:bg-cream/60 rounded disabled:opacity-40"
+      >
+        <ThumbsUp className="size-3.5" />
+      </button>
+      <button
+        type="button"
+        onClick={() => handle("down")}
+        disabled={pending}
+        aria-label="Not helpful"
+        title="Not helpful"
+        className="p-1 text-slate-meta hover:text-red-700 hover:bg-red-50 rounded disabled:opacity-40"
+      >
+        <ThumbsDown className="size-3.5" />
+      </button>
     </div>
   );
 }

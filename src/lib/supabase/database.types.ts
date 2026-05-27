@@ -3302,6 +3302,36 @@ export type Database = {
         }
         Relationships: []
       }
+      support_chat_feedback: {
+        Row: {
+          auth_user_id: string
+          created_at: string
+          id: string
+          message_id: string
+          note: string | null
+          rating: string
+          request_id: string
+        }
+        Insert: {
+          auth_user_id: string
+          created_at?: string
+          id?: string
+          message_id: string
+          note?: string | null
+          rating: string
+          request_id: string
+        }
+        Update: {
+          auth_user_id?: string
+          created_at?: string
+          id?: string
+          message_id?: string
+          note?: string | null
+          rating?: string
+          request_id?: string
+        }
+        Relationships: []
+      }
       support_chat_messages: {
         Row: {
           cache_hit: boolean | null
@@ -3389,6 +3419,7 @@ export type Database = {
       support_requests: {
         Row: {
           auth_user_id: string
+          auto_flag_reason: string | null
           body: string
           created_at: string
           dso_id: string | null
@@ -3399,12 +3430,17 @@ export type Database = {
           resolution_notes: string | null
           resolved_at: string | null
           resolved_by: string | null
+          review_status: Database["public"]["Enums"]["support_review_status"]
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
           status: Database["public"]["Enums"]["support_request_status"]
           tier_snapshot: string | null
           updated_at: string
         }
         Insert: {
           auth_user_id: string
+          auto_flag_reason?: string | null
           body: string
           created_at?: string
           dso_id?: string | null
@@ -3415,12 +3451,17 @@ export type Database = {
           resolution_notes?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
+          review_status?: Database["public"]["Enums"]["support_review_status"]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
           status?: Database["public"]["Enums"]["support_request_status"]
           tier_snapshot?: string | null
           updated_at?: string
         }
         Update: {
           auth_user_id?: string
+          auto_flag_reason?: string | null
           body?: string
           created_at?: string
           dso_id?: string | null
@@ -3431,6 +3472,10 @@ export type Database = {
           resolution_notes?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
+          review_status?: Database["public"]["Enums"]["support_review_status"]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
           status?: Database["public"]["Enums"]["support_request_status"]
           tier_snapshot?: string | null
           updated_at?: string
@@ -3729,6 +3774,7 @@ export type Database = {
       subscription_tier: "starter" | "growth" | "enterprise" | "solo" | "scale"
       support_chat_role: "user" | "assistant" | "system" | "tool"
       support_request_status: "new" | "in_progress" | "resolved" | "closed"
+      support_review_status: "unreviewed" | "reviewed" | "flagged_bad"
     }
     CompositeTypes: {
       [_ in never]: never

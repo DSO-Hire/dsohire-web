@@ -44,6 +44,7 @@ import { notifyKillSwitchTripped } from "@/lib/support/kill-switch-alert";
 import { formatHelpForPrompt, retrieveRelevantHelp } from "@/lib/support/rag";
 import { allToolSchemas, dispatchTool } from "@/lib/support/tools/dispatcher";
 import type { ToolContext } from "@/lib/support/tools/types";
+import { autoFlagReason, isFirstHundredMode } from "@/lib/support/auto-flag";
 
 interface ChatBody {
   message: string;
@@ -417,12 +418,30 @@ export async function POST(request: Request) {
   const capturedRequestId = requestId;
   const capturedToolEvents = toolEventBuffer;
 
+  // Insert the assistant message FIRST so we have an id to attach
+  // user feedback to. Update it with the streamed content + usage
+  // after the stream completes. Insert with empty content; client
+  // gets the id via the 'start' SSE event so the 👍/👎 buttons can
+  // reference it.
+  const { data: assistantRow } = await admin
+    .from("support_chat_messages")
+    .insert({
+      request_id: capturedRequestId,
+      role: "assistant",
+      content: "",
+      model: HAIKU_MODEL,
+    })
+    .select("id")
+    .single();
+  const assistantMessageId =
+    (assistantRow?.id as string | undefined) ?? assistantId;
+
   const sseStream = new ReadableStream({
     async start(controller) {
       controller.enqueue(
         encoder.encode(
           `event: start\ndata: ${JSON.stringify({
-            assistantId,
+            assistantId: assistantMessageId,
             requestId: capturedRequestId,
           })}\n\n`
         )
@@ -467,15 +486,18 @@ export async function POST(request: Request) {
         });
       }
 
-      await admin.from("support_chat_messages").insert({
-        request_id: capturedRequestId,
-        role: "assistant",
-        content: finalTextRef,
-        model: HAIKU_MODEL,
-        input_tokens: finalUsage.input_tokens,
-        output_tokens: finalUsage.output_tokens,
-        cached_input_tokens: finalUsage.cached_input_tokens,
-      });
+      // Update the assistant message row we pre-inserted with the
+      // final content + usage metrics so the id stays stable for
+      // feedback references.
+      await admin
+        .from("support_chat_messages")
+        .update({
+          content: finalTextRef,
+          input_tokens: finalUsage.input_tokens,
+          output_tokens: finalUsage.output_tokens,
+          cached_input_tokens: finalUsage.cached_input_tokens,
+        })
+        .eq("id", assistantMessageId);
 
       await logUsage({
         authUserId: user.id,
@@ -488,10 +510,35 @@ export async function POST(request: Request) {
         requestId: capturedRequestId,
       });
 
+      // ── Auto-flag heuristic ──
+      // Tier 2 Phase D: surface conversations where Claude expressed
+      // uncertainty / refused / a tool errored. Also auto-mark every
+      // conversation 'unreviewed' while first-100 mode is on so they
+      // all land in Cam's review queue.
+      const toolErrors = capturedToolEvents.filter((t) => {
+        const out = t.output as { error?: unknown } | null;
+        return out !== null && typeof out === "object" && "error" in out;
+      }).length;
+      const flagReason = autoFlagReason({
+        assistantText: finalTextRef,
+        toolErrors,
+      });
+      const inFirst100 = isFirstHundredMode();
+
+      if (flagReason || inFirst100) {
+        await admin
+          .from("support_requests")
+          .update({
+            review_status: flagReason ? "flagged_bad" : "unreviewed",
+            auto_flag_reason: flagReason,
+          })
+          .eq("id", capturedRequestId);
+      }
+
       controller.enqueue(
         encoder.encode(
           `event: done\ndata: ${JSON.stringify({
-            assistantId,
+            assistantId: assistantMessageId,
             inputTokens: finalUsage.input_tokens,
             outputTokens: finalUsage.output_tokens,
             toolCalls: capturedToolEvents.length,
