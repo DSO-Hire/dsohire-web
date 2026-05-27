@@ -32,6 +32,7 @@
  */
 
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import {
   LayoutDashboard,
@@ -52,6 +53,7 @@ import { BrandLockup } from "@/components/marketing/site-shell";
 import { getUnreadCount, getNewApplicationCount } from "@/lib/inbox/queries";
 import { NavBadgeRealtime } from "@/components/inbox/nav-badge-realtime";
 import { getMfaState } from "@/lib/auth/mfa";
+import { readMfaTrustCookie } from "@/lib/auth/mfa-trust";
 import { Avatar } from "@/components/ui/avatar";
 import { EmployerMobileNav } from "./employer-mobile-nav";
 import { LocationSwitcher } from "./location-switcher";
@@ -148,22 +150,25 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
     redirect("/employer/restore");
   }
 
-  // ── MFA enforcement ──
-  // Day 21 (2026-05-27): widened from per-DSO-toggle (dso.require_mfa,
-  // originally an Enterprise-tier opt-in) to platform-wide enforcement
-  // for ALL employer roles (owner / admin / recruiter). Per the
-  // Security_Breach_Diagnostic memo P0 #1, every account that can read
-  // candidate PII gets MFA. The dso.require_mfa column is preserved for
-  // back-compat / future role expansion (e.g. require for hiring_manager
-  // when that role lands) but is no longer the gate.
-  //
-  // Step-up: enrolled users must reach aal2 before the dashboard renders.
-  // Onboard: unenrolled employer-side users get pushed to /auth/mfa/setup.
+  // ── MFA enforcement (Phase 4.5.d, refined Day 21) ──
+  // Per-DSO opt-in via dso.require_mfa. Enrolled users step up to aal2
+  // on each page hit UNLESS a valid 30-day trust-this-device cookie is
+  // present (mfa-trust.ts) — matches industry standard (Stripe / GitHub /
+  // Salesforce all do this). Sensitive actions still re-check via
+  // userNeedsMfaChallenge regardless of trust.
   const mfaState = await getMfaState(supabase);
+  const dsoRequiresMfa = (dso?.require_mfa as boolean | null) === true;
   if (mfaState.isEnrolled && mfaState.currentLevel !== "aal2") {
-    redirect("/auth/mfa/challenge?next=/employer/dashboard");
+    const cookieStore = await cookies();
+    const trusted = readMfaTrustCookie(cookieStore, {
+      authUserId: user.id,
+      verifiedFactorId: mfaState.verifiedFactorId,
+    });
+    if (!trusted) {
+      redirect("/auth/mfa/challenge?next=/employer/dashboard");
+    }
   }
-  if (!mfaState.isEnrolled) {
+  if (dsoRequiresMfa && !mfaState.isEnrolled) {
     redirect("/auth/mfa/setup");
   }
 

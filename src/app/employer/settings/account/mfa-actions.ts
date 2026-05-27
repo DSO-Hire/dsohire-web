@@ -366,15 +366,9 @@ export async function setOrgRequireMfa(input: {
     return { ok: false, error: "Only the DSO owner can change this." };
   }
 
-  // Enterprise tier gate.
-  const sub = await getActiveSubscription(ctx.supabase, dsoUser.dso_id as string);
-  if (!sub || sub.tier !== "enterprise") {
-    return {
-      ok: false,
-      error:
-        "Org-wide MFA enforcement is an Enterprise feature. Contact us to upgrade.",
-    };
-  }
+  // Day 21 (2026-05-27): dropped the Enterprise-tier gate. Mandating
+  // 2FA for your team is a security best practice, not a billing
+  // feature — available to any owner on any paid plan.
 
   // If turning ON, the owner must already have MFA on themselves so they
   // don't lock themselves out at the next sign-in.

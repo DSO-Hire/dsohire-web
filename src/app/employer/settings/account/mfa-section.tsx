@@ -658,11 +658,15 @@ function RegenerateDialog({
 }
 
 /* ──────────────────────────────────────────────────────────────
- * Org-wide enforcement toggle (Enterprise + owner)
+ * Org-wide enforcement toggle (owner only — all paid tiers)
+ *
+ * Day 21 (2026-05-27): Enterprise gate dropped. Security best practice
+ * for any DSO that wants its team mandated to enroll. The `isEnterprise`
+ * prop is still threaded through for back-compat (parent server
+ * component still computes it) but no longer drives UI behavior.
  * ─────────────────────────────────────────────────────────── */
 
 function OrgRequireMfaToggle({
-  isEnterprise,
   initialEnabled,
   ownerEnrolled,
 }: {
@@ -676,12 +680,6 @@ function OrgRequireMfaToggle({
   const [flash, setFlash] = useState<string | null>(null);
 
   const onToggle = () => {
-    if (!isEnterprise) {
-      setError(
-        "Org-wide MFA enforcement is an Enterprise feature. Contact us to upgrade."
-      );
-      return;
-    }
     if (!enabled && !ownerEnrolled) {
       setError("Enable 2FA on your own account first, then turn this on.");
       return;
@@ -714,23 +712,17 @@ function OrgRequireMfaToggle({
             Require 2FA for the whole DSO
           </h3>
           <p className="mt-1 text-[13px] text-slate-body leading-relaxed">
-            Enterprise tier. When on, every member of your DSO must enable
-            2FA before they can use the app. Existing sessions are forced
-            through enrollment at next sign-in.
+            When on, every member of your DSO must enable 2FA before they
+            can use the app. Existing sessions are forced through enrollment
+            at next sign-in. You can flip this off at any time.
           </p>
-          {!isEnterprise && (
-            <p className="mt-2 inline-flex items-center gap-1.5 text-[12px] text-amber-700">
-              <Lock className="size-3" />
-              Available on Enterprise.
-            </p>
-          )}
         </div>
         <button
           type="button"
           role="switch"
           aria-checked={enabled}
           onClick={onToggle}
-          disabled={pending || !isEnterprise}
+          disabled={pending}
           className={
             "relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-40 " +
             (enabled ? "bg-heritage-deep" : "bg-slate-300")

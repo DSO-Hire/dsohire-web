@@ -14,9 +14,11 @@
  *   the user has a dso_users row.
  */
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getMfaState } from "@/lib/auth/mfa";
+import { readMfaTrustCookie } from "@/lib/auth/mfa-trust";
 
 const NEXT_ALLOWLIST = /^\/employer\//;
 
@@ -146,12 +148,20 @@ export async function verifySignInEmployer(
     };
   }
 
-  // Session is set. If the user has 2FA enabled, step up before routing.
+  // Session is set. If the user has 2FA enabled, step up before routing
+  // unless this browser holds a valid trust-this-device cookie.
   const mfaState = await getMfaState(supabase);
   const finalDest =
     next ?? (await resolveSignedInDestination(supabase, data.user.id));
   if (mfaState.isEnrolled && mfaState.currentLevel !== "aal2") {
-    redirect(`/auth/mfa/challenge?next=${encodeURIComponent(finalDest)}`);
+    const cookieStore = await cookies();
+    const trusted = readMfaTrustCookie(cookieStore, {
+      authUserId: data.user.id,
+      verifiedFactorId: mfaState.verifiedFactorId,
+    });
+    if (!trusted) {
+      redirect(`/auth/mfa/challenge?next=${encodeURIComponent(finalDest)}`);
+    }
   }
   redirect(finalDest);
 }
@@ -229,7 +239,14 @@ export async function signInWithPasswordEmployer(
   const finalDest =
     next ?? (await resolveSignedInDestination(supabase, data.user.id));
   if (mfaState.isEnrolled && mfaState.currentLevel !== "aal2") {
-    redirect(`/auth/mfa/challenge?next=${encodeURIComponent(finalDest)}`);
+    const cookieStore = await cookies();
+    const trusted = readMfaTrustCookie(cookieStore, {
+      authUserId: data.user.id,
+      verifiedFactorId: mfaState.verifiedFactorId,
+    });
+    if (!trusted) {
+      redirect(`/auth/mfa/challenge?next=${encodeURIComponent(finalDest)}`);
+    }
   }
   redirect(finalDest);
 }

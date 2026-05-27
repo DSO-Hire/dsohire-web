@@ -62,6 +62,22 @@ export function ChallengeForm({ next }: { next: string | null }) {
         </p>
       )}
 
+      <label className="flex items-start gap-2.5 cursor-pointer text-[13px] text-slate-body">
+        <input
+          type="checkbox"
+          name="trust_device"
+          defaultChecked
+          className="mt-0.5 size-4 rounded border-[var(--rule-strong)] text-heritage focus:ring-heritage"
+        />
+        <span className="leading-snug">
+          <span className="font-semibold text-ink">Trust this device for 30 days.</span>{" "}
+          <span className="text-slate-meta">
+            Skip the code on this browser next time. Sensitive actions
+            (billing, role changes, data export) still require it.
+          </span>
+        </span>
+      </label>
+
       <button
         type="submit"
         disabled={pending}

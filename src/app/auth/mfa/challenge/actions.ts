@@ -21,6 +21,7 @@
  *   • Service-role lookups go through createSupabaseServiceRoleClient.
  */
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import {
   createSupabaseServerClient,
@@ -30,6 +31,7 @@ import {
   hashRecoveryCode,
   looksLikeRecoveryCode,
 } from "@/lib/auth/mfa";
+import { setMfaTrustCookie } from "@/lib/auth/mfa-trust";
 
 export interface ChallengeState {
   ok: boolean;
@@ -47,6 +49,11 @@ export async function submitChallenge(
   const raw = String(formData.get("code") ?? "").trim();
   const next = String(formData.get("next") ?? "").trim();
   const safeNext = isSafeNext(next) ? next : null;
+  // Checkbox value — present + "on" means the user opted into trusting
+  // the device for 30 days. Only honored on a successful TOTP verify
+  // (NOT on a recovery-code consumption — at that point the factor is
+  // being deleted, so a trust cookie tied to its id would be useless).
+  const trustDevice = String(formData.get("trust_device") ?? "") === "on";
 
   if (!raw) {
     return { ok: false, error: "Enter a code to continue." };
@@ -91,7 +98,16 @@ export async function submitChallenge(
       code,
     });
     if (!vErr) {
-      // AAL upgraded — proceed.
+      // AAL upgraded — set the trust-this-device cookie if the user
+      // opted in, then proceed. Cookie auto-no-ops in dev when
+      // MFA_TRUST_SECRET is unset.
+      if (trustDevice) {
+        const cookieStore = await cookies();
+        setMfaTrustCookie(cookieStore, {
+          authUserId: user.id,
+          factorId: verifiedFactor.id,
+        });
+      }
       redirect(safeNext ?? "/employer/dashboard");
     }
     // Fall through to recovery-code path if it ALSO looks like a recovery

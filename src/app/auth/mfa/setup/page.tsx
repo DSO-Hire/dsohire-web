@@ -1,23 +1,19 @@
 /**
- * /auth/mfa/setup — forced 2FA enrollment.
+ * /auth/mfa/setup — forced 2FA enrollment (Phase 4.5.d).
  *
- * Reached when an employer-side user (any role: owner / admin / recruiter)
- * doesn't yet have a verified TOTP factor. EmployerShell's guard pushes
- * them here on every dashboard hit until enrolled.
- *
- * Day 21 (2026-05-27): widened from per-DSO opt-in (`dso.require_mfa`) to
- * platform-wide requirement for every employer role. Candidate accounts
- * are not gated — candidates can still enroll voluntarily through their
- * own settings surface. Per the Security_Breach_Diagnostic memo P0 #1.
+ * Reached when a DSO has `require_mfa = true` and the team member doesn't
+ * have a verified factor yet. EmployerShell's guard pushes them here.
  *
  * Server-side guard:
  *   - Not signed in → /employer/sign-in
- *   - Not a dso_user (candidate or mid-invite) → /employer/onboarding
- *     (or dashboard if already enrolled — candidates can use voluntary
- *     enrollment from their own surface).
- *   - Already enrolled + aal2 → /employer/dashboard
- *   - Already enrolled + aal1 → /auth/mfa/challenge
- *   - Otherwise → render the forced wizard
+ *   - Already has a verified factor → /employer/dashboard (or /challenge if
+ *     the session is still aal1)
+ *   - DSO does NOT require MFA → /employer/dashboard (the user can enroll
+ *     voluntarily from Settings → Account; this forced page is only for
+ *     mandated cases)
+ *
+ * The page renders a slim, no-cancel version of the same setup wizard
+ * the Account page uses. After completion, the user is sent to dashboard.
  */
 
 import type { Metadata } from "next";
@@ -48,19 +44,23 @@ export default async function ForcedMfaSetupPage() {
     redirect("/auth/mfa/challenge?next=/employer/dashboard");
   }
 
-  // Only employer-side users land here. Candidates without a dso_users
-  // row are bounced to their own dashboard — voluntary enrollment lives
-  // on the candidate settings surface.
+  // Confirm the DSO actually requires MFA — if not, kick to dashboard.
+  // (Voluntary enrollment lives on /employer/settings/account.)
   const { data: dsoUser } = await supabase
     .from("dso_users")
     .select("dso_id")
     .eq("auth_user_id", user.id)
     .maybeSingle();
-  if (!dsoUser) {
-    // No DSO membership — could be a candidate, a mid-invite admin, or
-    // someone who just signed up. Send to onboarding which itself routes
-    // candidates to /candidate/dashboard if appropriate.
-    redirect("/employer/onboarding");
+  if (!dsoUser) redirect("/employer/onboarding");
+
+  const { data: dso } = await supabase
+    .from("dsos")
+    .select("name, require_mfa")
+    .eq("id", dsoUser.dso_id as string)
+    .maybeSingle();
+  const requireMfa = (dso?.require_mfa as boolean | null) === true;
+  if (!requireMfa) {
+    redirect("/employer/dashboard");
   }
 
   return (
@@ -71,15 +71,12 @@ export default async function ForcedMfaSetupPage() {
           Two-factor required
         </div>
         <h1 className="font-display text-2xl font-extrabold tracking-[-0.5px] text-ink mb-2 leading-tight">
-          Set up two-factor authentication.
+          {(dso?.name as string | undefined) ?? "Your DSO"} requires 2FA.
         </h1>
         <p className="text-[14px] text-slate-body leading-relaxed mb-8">
-          DSO Hire requires two-factor authentication for every employer
-          account — candidate applications and contact details are sensitive,
-          and a single password isn&apos;t enough to keep them safe.
-          You&apos;ll also get 10 one-time recovery codes in case you lose
-          access to your device. This is a one-time setup — future sign-ins
-          just need your code.
+          Set up an authenticator app to continue. You&apos;ll also get 10
+          one-time recovery codes in case you lose access to your device.
+          This is a one-time setup — future sign-ins just need your code.
         </p>
         <ForcedSetupWizard />
       </div>

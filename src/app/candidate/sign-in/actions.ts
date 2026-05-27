@@ -8,9 +8,11 @@
  * (/candidate/* or /jobs/*) — otherwise we default to /candidate/dashboard.
  */
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getMfaState } from "@/lib/auth/mfa";
+import { readMfaTrustCookie } from "@/lib/auth/mfa-trust";
 
 const NEXT_ALLOWLIST = /^\/(candidate\/|jobs\/)/;
 
@@ -113,10 +115,17 @@ export async function verifySignInCandidate(
     };
   }
 
-  // Step up to aal2 if 2FA is enrolled.
+  // Step up to aal2 if 2FA is enrolled — unless trust-this-device is valid.
   const mfaState = await getMfaState(supabase);
   if (mfaState.isEnrolled && mfaState.currentLevel !== "aal2") {
-    redirect(`/auth/mfa/challenge?next=${encodeURIComponent(next)}`);
+    const cookieStore = await cookies();
+    const trusted = readMfaTrustCookie(cookieStore, {
+      authUserId: data.user.id,
+      verifiedFactorId: mfaState.verifiedFactorId,
+    });
+    if (!trusted) {
+      redirect(`/auth/mfa/challenge?next=${encodeURIComponent(next)}`);
+    }
   }
   redirect(next);
 }
@@ -177,10 +186,17 @@ export async function signInWithPasswordCandidate(
     };
   }
 
-  // Step up to aal2 if 2FA is enrolled.
+  // Step up to aal2 if 2FA is enrolled — unless trust-this-device is valid.
   const mfaState = await getMfaState(supabase);
   if (mfaState.isEnrolled && mfaState.currentLevel !== "aal2") {
-    redirect(`/auth/mfa/challenge?next=${encodeURIComponent(next)}`);
+    const cookieStore = await cookies();
+    const trusted = readMfaTrustCookie(cookieStore, {
+      authUserId: data.user.id,
+      verifiedFactorId: mfaState.verifiedFactorId,
+    });
+    if (!trusted) {
+      redirect(`/auth/mfa/challenge?next=${encodeURIComponent(next)}`);
+    }
   }
   redirect(next);
 }
