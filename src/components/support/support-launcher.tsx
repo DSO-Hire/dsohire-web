@@ -18,9 +18,12 @@ import { SupportDrawer } from "./support-drawer";
 
 interface Props {
   audience: "employer" | "candidate" | "both";
+  /** Threaded from the auth-gated shell. Null = signed-out; drawer
+   *  shows a sign-in prompt instead of the chat surface. */
+  authUserId: string | null;
 }
 
-export function SupportLauncher({ audience }: Props) {
+export function SupportLauncher({ audience, authUserId }: Props) {
   const [open, setOpen] = useState(false);
 
   // Global "?" shortcut. Skip when the user is typing.
@@ -62,6 +65,7 @@ export function SupportLauncher({ audience }: Props) {
         open={open}
         onClose={() => setOpen(false)}
         audience={audience}
+        authUserId={authUserId}
       />
     </>
   );

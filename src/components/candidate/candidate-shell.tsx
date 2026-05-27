@@ -203,8 +203,8 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
         <main className="flex-1 px-6 sm:px-10 py-10">{children}</main>
       </div>
 
-      {/* Floating "?" support launcher (Tier 1 in-app support, Day 21). */}
-      <SupportLauncher audience="candidate" />
+      {/* Floating "?" support launcher (Tier 2 chat surface, Day 21 Phase C). */}
+      <SupportLauncher audience="candidate" authUserId={user.id} />
     </div>
   );
 }
