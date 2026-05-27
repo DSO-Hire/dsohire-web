@@ -27,6 +27,7 @@
 
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
+import type Anthropic from "@anthropic-ai/sdk";
 import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
@@ -284,19 +285,11 @@ export async function POST(request: Request) {
       "(No directly relevant articles found — answer from general knowledge of the platform if the question is general; offer to escalate otherwise.)",
   ].join("\n");
 
-  // Messages array we mutate across tool-use turns. Anthropic content
-  // can be a string (for user/assistant text) OR an array of typed
-  // blocks (when we need tool_result blocks).
-  type MessageContent = string | Array<{
-    type: string;
-    [key: string]: unknown;
-  }>;
-  interface ConversationMessage {
-    role: "user" | "assistant";
-    content: MessageContent;
-  }
-
-  const claudeMessages: ConversationMessage[] = [];
+  // Messages array we mutate across tool-use turns. Use Anthropic's
+  // MessageParam type directly so the SDK accepts both string content
+  // (plain text turns) and ContentBlockParam arrays (assistant tool_use
+  // responses + user tool_result responses).
+  const claudeMessages: Anthropic.MessageParam[] = [];
   for (const m of priorMessages ?? []) {
     const msg = m as { role: string; content: string | null };
     if ((msg.role === "user" || msg.role === "assistant") && msg.content) {
@@ -365,7 +358,13 @@ export async function POST(request: Request) {
 
     // Tool calls present. Append the assistant's tool_use response,
     // execute each tool, append tool_result blocks, loop.
-    claudeMessages.push({ role: "assistant", content: blocks });
+    // Cast through the SDK's own response shape — the blocks array is
+    // exactly what Anthropic returned so it's structurally compatible
+    // with the Param variant the next call expects.
+    claudeMessages.push({
+      role: "assistant",
+      content: response.content as unknown as Anthropic.ContentBlockParam[],
+    });
 
     const toolUseBlocks = blocks.filter(
       (b) => b.type === "tool_use"
