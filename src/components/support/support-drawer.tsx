@@ -65,6 +65,9 @@ interface UiMessage {
   content: string;
   /** Streaming state for the in-flight assistant message. */
   streaming?: boolean;
+  /** Tool-use labels rendered as pills above the bubble while Claude is
+   *  fetching real-data context. Set when tool_use SSE events arrive. */
+  toolLabels?: string[];
 }
 
 export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
@@ -231,6 +234,19 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
               const parsed = JSON.parse(dataStr) as Record<string, unknown>;
               if (eventName === "start" && typeof parsed.requestId === "string") {
                 setRequestId(parsed.requestId);
+              } else if (eventName === "tool_use" && typeof parsed.friendly_label === "string") {
+                const label = parsed.friendly_label as string;
+                setMessages((prev) => {
+                  const next = [...prev];
+                  const last = next[next.length - 1];
+                  if (last && last.role === "assistant") {
+                    next[next.length - 1] = {
+                      ...last,
+                      toolLabels: [...(last.toolLabels ?? []), label],
+                    };
+                  }
+                  return next;
+                });
               } else if (eventName === "token" && typeof parsed.chunk === "string") {
                 assistantText += parsed.chunk;
                 setMessages((prev) => {
@@ -534,16 +550,31 @@ function Bubble({ message }: { message: UiMessage }) {
   // assistant
   return (
     <div className="flex justify-start">
-      <div className="max-w-[90%] bg-cream/40 border border-[var(--rule)] px-3.5 py-2.5 text-[14px] leading-relaxed whitespace-pre-wrap rounded">
-        {message.content || (
-          <span className="inline-flex items-center gap-2 text-slate-meta italic">
-            <Loader2 className="size-3 animate-spin" />
-            Thinking…
-          </span>
+      <div className="max-w-[90%] space-y-1.5">
+        {message.toolLabels && message.toolLabels.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {message.toolLabels.map((label, i) => (
+              <span
+                key={i}
+                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-heritage-deep bg-heritage/[0.08] border border-heritage/20 px-2 py-0.5 rounded"
+              >
+                <Sparkles className="size-2.5" />
+                {label}
+              </span>
+            ))}
+          </div>
         )}
-        {message.streaming && message.content && (
-          <span className="inline-block w-2 h-4 align-text-bottom bg-heritage-deep/60 ml-0.5 animate-pulse" />
-        )}
+        <div className="bg-cream/40 border border-[var(--rule)] px-3.5 py-2.5 text-[14px] leading-relaxed whitespace-pre-wrap rounded">
+          {message.content || (
+            <span className="inline-flex items-center gap-2 text-slate-meta italic">
+              <Loader2 className="size-3 animate-spin" />
+              Thinking…
+            </span>
+          )}
+          {message.streaming && message.content && (
+            <span className="inline-block w-2 h-4 align-text-bottom bg-heritage-deep/60 ml-0.5 animate-pulse" />
+          )}
+        </div>
       </div>
     </div>
   );

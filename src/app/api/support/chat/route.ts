@@ -1,32 +1,28 @@
 /**
- * POST /api/support/chat — Tier 2 in-app support Claude streaming endpoint.
+ * POST /api/support/chat — Tier 2 in-app support Claude endpoint.
  *
- * Foundation built in Phase A.1 (schema + cost-logging + rate-limit +
- * kill-switch helpers) and A.2 (Voyage RAG + this endpoint).
+ * Phase A: pure-RAG-grounded streaming (no tools). Phase B (here):
+ * adds tool-use loop. Claude can now call 8 read-only tools to ground
+ * answers in the user's actual app state.
  *
- * Flow on every user message:
- *   1. Auth — resolve user, DSO membership, role, subscription tier
- *   2. Kill switch check (per-DSO daily $ + global daily $) — frozen?
- *      return a "frozen, email support directly" message
- *   3. Quota check (per-user-daily count + per-DSO-monthly count) — over?
- *      return a "quota hit, email support directly" message
- *   4. Resolve or create the conversation root (support_requests row)
- *   5. Load conversation history (messages so far in this conversation)
- *   6. RAG: embed user message via Voyage, retrieve top-5 help entries
- *   7. Build the system prompt: persona + behavior rules + RAG slice +
- *      user-context block (DSO/role/tier/page)
- *   8. Call Anthropic Haiku 4.5 with streaming enabled
- *   9. Stream the response as Server-Sent Events back to the client
- *  10. After stream completes: log usage, persist user + assistant
- *      messages to support_chat_messages
+ * Locked posture: tool-shy. System prompt instructs Claude to default
+ * to RAG-only answers and call tools only when the question explicitly
+ * needs user-specific data.
  *
- * Locked posture (per Tier 2 spec doc Day 21 walkthrough):
- *   - Tool-shy at launch: NO tool calls in this version. Registry RAG
- *     + user-context block is the entire grounding. Tools land Phase B.
- *   - Haiku-default, no auto-escalation to Sonnet at launch. Instrument
- *     and revisit after first 100 conversations.
- *   - 24h conversation persistence (enforced by archiving cron later;
- *     for now the request_id passed by the client controls continuity).
+ * Flow:
+ *   1. Auth → kill switch → quota → conversation root → history → RAG
+ *   2. First Anthropic call with tools enabled. NOT streamed — tool
+ *      calls happen mid-stream which makes parsing complex; we do
+ *      blocking turns 1..N-1 to handle tool dispatch, then stream
+ *      ONLY the final assistant text.
+ *   3. If stop_reason='tool_use': execute every tool_use block in
+ *      parallel (they're read-only so order doesn't matter), append
+ *      tool_result blocks to messages, re-call Anthropic, loop.
+ *   4. When stop_reason='end_turn' AND we have an assistant text
+ *      response: stream it as SSE for that natural typing-cursor feel.
+ *      (If the response is small, just send it as a single chunk.)
+ *   5. After stream completes: log usage (sum across all turns),
+ *      persist user + tool + assistant messages to support_chat_messages.
  */
 
 import { NextResponse } from "next/server";
@@ -45,47 +41,65 @@ import {
 import { logUsage } from "@/lib/support/claude-usage";
 import { notifyKillSwitchTripped } from "@/lib/support/kill-switch-alert";
 import { formatHelpForPrompt, retrieveRelevantHelp } from "@/lib/support/rag";
+import { allToolSchemas, dispatchTool } from "@/lib/support/tools/dispatcher";
+import type { ToolContext } from "@/lib/support/tools/types";
 
 interface ChatBody {
   message: string;
-  /** When null/missing, we create a fresh conversation root. */
   request_id?: string | null;
-  /** Current page URL — for the user-context block in the system prompt. */
   page_url?: string;
-  /** Page title hint (document.title) — same purpose. */
   page_title?: string;
 }
 
-const SYSTEM_PROMPT_BASE = `You are DSO Hire's in-app support assistant. You help DSO admins, \
-recruiters, and candidates with questions about the DSO Hire platform — \
-a dental hiring platform built for mid-market dental groups.
+const SYSTEM_PROMPT_BASE = `You are DSO Hire's in-app support assistant. \
+You help DSO admins, recruiters, and candidates with questions about \
+the DSO Hire platform — a dental hiring platform built for mid-market \
+dental groups.
 
 Behavior rules:
 
-1. Answer from the help registry first. The registry articles relevant \
-to this question are included below under "Relevant help articles." \
-Cite the article you used by linking its slug — e.g. "See [Bulk add \
-locations](/help/locations-bulk-import) for the full walkthrough."
+1. Answer from the help registry FIRST. Relevant articles are included \
+below under "Relevant help articles." Cite the article you used by \
+linking its slug — e.g. "See [Bulk add locations](/help/locations-\
+bulk-import) for the full walkthrough." Keep answers tight: 1-3 short \
+paragraphs in most cases.
 
-2. Use the user-context block below to personalize your answers. \
-Reference the user's specific DSO, role, and tier where relevant. \
-Don't repeat the context block back at them — use it.
+2. You have access to read-only tools for looking up the asking user's \
+actual data. Use them ONLY when the question explicitly needs user- \
+specific information ("why didn't Sarah get my email", "what stage is \
+application X on", "am I on the Growth plan"). DEFAULT to registry \
+answers when the question is general ("how do I post a job"). Never \
+use a tool to confirm something the user just stated as fact.
 
-3. Keep answers tight: 1-3 short paragraphs in most cases. Lists when \
-helpful. Don't pad.
+3. Use the user-context block below to personalize your answers without \
+repeating it back at them.
 
-4. If the registry doesn't cover the question, OR you're not confident \
-in the answer, say so honestly and offer to escalate to a human: \
-"I don't have docs that cover this — want me to pass this to the team?" \
-Don't invent details. Don't speculate about features that might exist.
+4. If the registry + tools don't cover the question, OR you're not \
+confident, say so honestly and offer escalation: "I don't have a \
+confident answer on that — want me to pass this to the team?" Don't \
+invent details or speculate about features that might exist.
 
-5. You CANNOT take actions on behalf of the user in this version. If \
-they ask you to do something (send an email, change a setting, etc.), \
-walk them through how to do it themselves. Action-taking is a future \
-phase.
+5. You CANNOT take actions on the user's behalf in this version. If \
+they ask you to do something (send an email, change a setting), walk \
+them through how to do it themselves. Action-taking is a future phase.
 
-6. Be warm but concise. Match the platform's voice: direct, expert, \
-no fluff. Never use emojis.`;
+6. Be warm but concise. Direct, expert, no fluff. Never use emojis.`;
+
+const MAX_TOOL_TURNS = 4; // Anthropic best practice — bounds the loop.
+
+interface AnthropicTextBlock {
+  type: "text";
+  text: string;
+}
+
+interface AnthropicToolUseBlock {
+  type: "tool_use";
+  id: string;
+  name: string;
+  input: Record<string, unknown>;
+}
+
+type AnthropicResponseBlock = AnthropicTextBlock | AnthropicToolUseBlock;
 
 export async function POST(request: Request) {
   let body: ChatBody;
@@ -159,14 +173,11 @@ export async function POST(request: Request) {
     dsoName = (dsoRow?.name as string | undefined) ?? null;
   }
 
-  // ── Kill switch (hard freeze) ──
+  // ── Kill switch ──
   const kill = await checkKillSwitch({ authUserId: user.id, dsoId });
   if (kill.frozen) {
-    // Fire the alert (15-min throttled per-scope). Await per the
-    // Vercel serverless gotcha rule.
     await notifyKillSwitchTripped({
-      scope:
-        kill.perDsoCentsToday >= 1500 ? "per_dso" : "global",
+      scope: kill.perDsoCentsToday >= 1500 ? "per_dso" : "global",
       dsoId,
       perDsoCents: kill.perDsoCentsToday,
       globalCents: kill.globalCentsToday,
@@ -179,12 +190,8 @@ export async function POST(request: Request) {
     });
   }
 
-  // ── Quota check (soft cap) ──
-  const quota = await checkQuota({
-    authUserId: user.id,
-    dsoId,
-    tier,
-  });
+  // ── Quota check ──
+  const quota = await checkQuota({ authUserId: user.id, dsoId, tier });
   if (!quota.allowed) {
     return NextResponse.json({
       ok: false,
@@ -194,7 +201,7 @@ export async function POST(request: Request) {
     });
   }
 
-  // ── Resolve or create the conversation root ──
+  // ── Conversation root ──
   const admin = createSupabaseServiceRoleClient();
   let requestId = body.request_id ?? null;
   if (!requestId) {
@@ -221,23 +228,23 @@ export async function POST(request: Request) {
     requestId = created.id as string;
   }
 
-  // ── Load conversation history so far ──
+  // ── Conversation history ──
   const { data: priorMessages } = await admin
     .from("support_chat_messages")
     .select("role, content")
     .eq("request_id", requestId)
     .order("created_at", { ascending: true });
 
-  // ── RAG: embed user message, retrieve top-5 relevant help entries ──
+  // ── RAG retrieval ──
   let helpSlice = "";
   try {
     const retrieved = await retrieveRelevantHelp(userMessage, 5, 0.3);
     helpSlice = formatHelpForPrompt(retrieved);
   } catch (err) {
-    console.warn("[support/chat] RAG retrieval failed — proceeding without help slice", err);
+    console.warn("[support/chat] RAG retrieval failed", err);
   }
 
-  // ── Build the system prompt + message list ──
+  // ── Build system prompt + initial message list ──
   const userContextBlock = buildUserContextBlock({
     dsoName,
     role,
@@ -263,100 +270,198 @@ export async function POST(request: Request) {
       "(No directly relevant articles found — answer from general knowledge of the platform if the question is general; offer to escalate otherwise.)",
   ].join("\n");
 
-  const claudeMessages: Array<{
+  // Messages array we mutate across tool-use turns. Anthropic content
+  // can be a string (for user/assistant text) OR an array of typed
+  // blocks (when we need tool_result blocks).
+  type MessageContent = string | Array<{
+    type: string;
+    [key: string]: unknown;
+  }>;
+  interface ConversationMessage {
     role: "user" | "assistant";
-    content: string;
-  }> = [];
+    content: MessageContent;
+  }
+
+  const claudeMessages: ConversationMessage[] = [];
   for (const m of priorMessages ?? []) {
     const msg = m as { role: string; content: string | null };
-    if (msg.role === "user" || msg.role === "assistant") {
-      if (msg.content) {
-        claudeMessages.push({
-          role: msg.role,
-          content: msg.content,
-        });
-      }
+    if ((msg.role === "user" || msg.role === "assistant") && msg.content) {
+      claudeMessages.push({ role: msg.role, content: msg.content });
     }
   }
   claudeMessages.push({ role: "user", content: userMessage });
 
-  // ── Insert the user's message NOW so it persists even if the stream fails ──
+  // ── Persist user message NOW (survives a stream failure) ──
   await admin.from("support_chat_messages").insert({
     request_id: requestId,
     role: "user",
     content: userMessage,
   });
 
-  // ── Call Anthropic with streaming ──
-  const anthropic = getAnthropic();
-  const stream = await anthropic.messages.stream({
-    model: HAIKU_MODEL,
-    max_tokens: 1024,
-    system: systemPrompt,
-    messages: claudeMessages,
-  });
+  // ── Build tool context for tool dispatch ──
+  const toolCtx: ToolContext = {
+    authUserId: user.id,
+    dsoUserId,
+    dsoId,
+    role,
+    supabase,
+    admin,
+  };
 
-  // ── Stream response as Server-Sent Events ──
+  const tools = allToolSchemas();
+  const anthropic = getAnthropic();
+
+  // Cumulative usage across all turns.
+  let totalInput = 0;
+  let totalOutput = 0;
+  let totalCachedInput = 0;
+
+  // ── Tool-use loop — bounded by MAX_TOOL_TURNS ──
+  let finalText = "";
+  let toolEventBuffer: Array<{
+    tool_use_id: string;
+    name: string;
+    input: Record<string, unknown>;
+    output: unknown;
+  }> = [];
+
+  for (let turn = 0; turn < MAX_TOOL_TURNS; turn++) {
+    const response = await anthropic.messages.create({
+      model: HAIKU_MODEL,
+      max_tokens: 1024,
+      system: systemPrompt,
+      tools,
+      messages: claudeMessages,
+    });
+
+    totalInput += response.usage.input_tokens;
+    totalOutput += response.usage.output_tokens;
+    totalCachedInput += response.usage.cache_read_input_tokens ?? 0;
+
+    const blocks = response.content as AnthropicResponseBlock[];
+
+    // Stop if no tool calls — we have our final assistant message.
+    if (response.stop_reason !== "tool_use") {
+      const textBlock = blocks.find((b) => b.type === "text") as
+        | AnthropicTextBlock
+        | undefined;
+      finalText = textBlock?.text ?? "";
+      break;
+    }
+
+    // Tool calls present. Append the assistant's tool_use response,
+    // execute each tool, append tool_result blocks, loop.
+    claudeMessages.push({ role: "assistant", content: blocks });
+
+    const toolUseBlocks = blocks.filter(
+      (b) => b.type === "tool_use"
+    ) as AnthropicToolUseBlock[];
+
+    // Execute tools in parallel (read-only, order-independent).
+    const results = await Promise.all(
+      toolUseBlocks.map(async (tu) => {
+        const output = await dispatchTool(tu.name, tu.input, toolCtx);
+        toolEventBuffer.push({
+          tool_use_id: tu.id,
+          name: tu.name,
+          input: tu.input,
+          output,
+        });
+        return {
+          type: "tool_result" as const,
+          tool_use_id: tu.id,
+          content: JSON.stringify(output),
+        };
+      })
+    );
+
+    claudeMessages.push({ role: "user", content: results });
+
+    // Safety: if we've made MAX_TOOL_TURNS calls and still got tool_use,
+    // bail with whatever text we have (likely empty). The next iteration's
+    // break-condition won't fire so we explicitly handle the final iteration.
+    if (turn === MAX_TOOL_TURNS - 1) {
+      finalText =
+        "I needed more tool calls than I'm allowed to make for one question. Try breaking the question into smaller pieces, or escalate to a human via the button below.";
+      break;
+    }
+  }
+
+  if (!finalText) {
+    finalText =
+      "I couldn't form a complete answer. Try rephrasing, or escalate to a human via the button below.";
+  }
+
+  // ── Stream final text to client as SSE ──
   const encoder = new TextEncoder();
   const assistantId = randomUUID();
-  let assistantText = "";
+  const finalTextRef = finalText;
+  const finalUsage = {
+    input_tokens: totalInput,
+    output_tokens: totalOutput,
+    cached_input_tokens: totalCachedInput,
+  };
+  const capturedRequestId = requestId;
+  const capturedToolEvents = toolEventBuffer;
 
   const sseStream = new ReadableStream({
     async start(controller) {
-      // Send the assistant message id up front so the client can render
-      // a placeholder bubble and stream tokens into it.
       controller.enqueue(
         encoder.encode(
           `event: start\ndata: ${JSON.stringify({
             assistantId,
-            requestId,
+            requestId: capturedRequestId,
           })}\n\n`
         )
       );
 
-      try {
-        for await (const event of stream) {
-          if (
-            event.type === "content_block_delta" &&
-            event.delta.type === "text_delta"
-          ) {
-            const chunk = event.delta.text;
-            assistantText += chunk;
-            controller.enqueue(
-              encoder.encode(
-                `event: token\ndata: ${JSON.stringify({ chunk })}\n\n`
-              )
-            );
-          }
-        }
-      } catch (err) {
-        console.error("[support/chat] stream error", err);
+      // Emit tool events FIRST so the UI can render progress pills
+      // even though the actual tool calls already completed.
+      for (const t of capturedToolEvents) {
         controller.enqueue(
           encoder.encode(
-            `event: error\ndata: ${JSON.stringify({
-              message: "Stream interrupted — try again.",
+            `event: tool_use\ndata: ${JSON.stringify({
+              name: t.name,
+              friendly_label: friendlyToolLabel(t.name),
             })}\n\n`
           )
         );
       }
 
-      // Final usage from the SDK after the stream completes.
-      const finalMessage = await stream.finalMessage();
-      const inputTokens = finalMessage.usage.input_tokens;
-      const outputTokens = finalMessage.usage.output_tokens;
-      const cachedInputTokens =
-        finalMessage.usage.cache_read_input_tokens ?? 0;
+      // Chunk the final text into ~30-char windows for a natural
+      // streaming feel (we already have the full text — no point in
+      // making the user wait for nothing).
+      const chunks = chunkText(finalTextRef, 30);
+      for (const chunk of chunks) {
+        controller.enqueue(
+          encoder.encode(
+            `event: token\ndata: ${JSON.stringify({ chunk })}\n\n`
+          )
+        );
+        // Tiny delay so it feels live, not pasted.
+        await new Promise((r) => setTimeout(r, 12));
+      }
 
-      // Persist assistant message + log usage. AWAIT both per the
-      // Vercel serverless gotcha rule.
+      // Persist tool messages + assistant message + log usage.
+      // AWAIT all per the Vercel serverless gotcha rule.
+      for (const t of capturedToolEvents) {
+        await admin.from("support_chat_messages").insert({
+          request_id: capturedRequestId,
+          role: "tool",
+          tool_name: t.name,
+          tool_input: t.input as never,
+          tool_output: t.output as never,
+        });
+      }
+
       await admin.from("support_chat_messages").insert({
-        request_id: requestId,
+        request_id: capturedRequestId,
         role: "assistant",
-        content: assistantText,
+        content: finalTextRef,
         model: HAIKU_MODEL,
-        input_tokens: inputTokens,
-        output_tokens: outputTokens,
-        cached_input_tokens: cachedInputTokens,
+        input_tokens: finalUsage.input_tokens,
+        output_tokens: finalUsage.output_tokens,
+        cached_input_tokens: finalUsage.cached_input_tokens,
       });
 
       await logUsage({
@@ -364,18 +469,19 @@ export async function POST(request: Request) {
         dsoId,
         surface: "support_chat",
         model: HAIKU_MODEL,
-        inputTokens,
-        outputTokens,
-        cachedInputTokens,
-        requestId: requestId,
+        inputTokens: finalUsage.input_tokens,
+        outputTokens: finalUsage.output_tokens,
+        cachedInputTokens: finalUsage.cached_input_tokens,
+        requestId: capturedRequestId,
       });
 
       controller.enqueue(
         encoder.encode(
           `event: done\ndata: ${JSON.stringify({
             assistantId,
-            inputTokens,
-            outputTokens,
+            inputTokens: finalUsage.input_tokens,
+            outputTokens: finalUsage.output_tokens,
+            toolCalls: capturedToolEvents.length,
           })}\n\n`
         )
       );
@@ -410,4 +516,36 @@ function buildUserContextBlock(args: {
     lines.push(`  - URL: ${args.pageUrl}`);
   }
   return lines.join("\n");
+}
+
+/** Split a string into chunks of ~size chars at word boundaries when possible. */
+function chunkText(text: string, size: number): string[] {
+  if (text.length <= size) return [text];
+  const out: string[] = [];
+  let i = 0;
+  while (i < text.length) {
+    let end = Math.min(i + size, text.length);
+    // Try to break on a space within the next 10 chars for natural chunks.
+    if (end < text.length) {
+      const space = text.lastIndexOf(" ", end + 10);
+      if (space > i) end = space + 1;
+    }
+    out.push(text.slice(i, end));
+    i = end;
+  }
+  return out;
+}
+
+function friendlyToolLabel(name: string): string {
+  const map: Record<string, string> = {
+    lookup_user_recent_actions: "Checking your recent activity",
+    lookup_application_status: "Looking up that application",
+    lookup_candidate_email_history: "Checking the candidate's email history",
+    lookup_job_details: "Pulling job details",
+    lookup_dso_members: "Looking at your team",
+    lookup_subscription_status: "Checking your plan",
+    lookup_help_article: "Pulling a help article",
+    search_help_articles: "Searching help docs",
+  };
+  return map[name] ?? `Running ${name}`;
 }
