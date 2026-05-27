@@ -34,11 +34,34 @@ export const listActiveJobs: ToolHandler = {
     if (!ctx.dsoId) {
       return { error: "Only signed-in DSO members can list jobs." };
     }
-    const status = String(input.status ?? "active").trim();
+    const rawStatus = String(input.status ?? "active").trim().toLowerCase();
     const limit = Math.min(
       Math.max(1, Number(input.limit ?? 25) | 0),
       50
     );
+
+    // Validate against the job_status enum so the supabase-js type
+    // narrowing on .eq('status', X) accepts the value. Anything that
+    // isn't a known enum (or 'all' meaning no filter) is treated as
+    // 'all' so we don't error on a bad LLM-generated value.
+    const ALLOWED_STATUSES = [
+      "active",
+      "draft",
+      "paused",
+      "expired",
+      "filled",
+      "archived",
+    ] as const;
+    type JobStatus = (typeof ALLOWED_STATUSES)[number];
+    const isJobStatus = (s: string): s is JobStatus =>
+      (ALLOWED_STATUSES as readonly string[]).includes(s);
+
+    const status: JobStatus | "all" =
+      rawStatus === "all" || !isJobStatus(rawStatus)
+        ? rawStatus === "all"
+          ? "all"
+          : "all"
+        : rawStatus;
 
     let q = ctx.supabase
       .from("jobs")
@@ -49,7 +72,7 @@ export const listActiveJobs: ToolHandler = {
       .order("created_at", { ascending: false })
       .limit(limit);
 
-    if (status && status !== "all") {
+    if (status !== "all") {
       q = q.eq("status", status);
     }
 
