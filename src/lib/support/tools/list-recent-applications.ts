@@ -42,14 +42,11 @@ export const listRecentApplications: ToolHandler = {
     );
     const days = Math.max(0, Number(input.days ?? 14) | 0);
 
+    // Step 1: base application rows (no embeds — avoids the multi-
+    // aliased GenericStringError trap). RLS scopes to DSO's jobs.
     let q = ctx.supabase
       .from("applications")
-      .select(
-        "id, candidate_id, job_id, stage_id, created_at, " +
-          "candidate:candidates(full_name), " +
-          "job:jobs(title), " +
-          "stage:dso_pipeline_stages(label, kind)"
-      )
+      .select("id, candidate_id, job_id, stage_id, created_at")
       .order("created_at", { ascending: false })
       .limit(limit);
 
@@ -61,31 +58,67 @@ export const listRecentApplications: ToolHandler = {
     const { data, error } = await q;
     if (error) return { error: error.message };
 
-    type Row = {
+    type AppRow = {
       id: string;
       candidate_id: string;
       job_id: string;
       stage_id: string;
       created_at: string;
-      candidate: { full_name: string | null } | Array<{ full_name: string | null }> | null;
-      job: { title: string | null } | Array<{ title: string | null }> | null;
-      stage: { label: string | null; kind: string | null } | Array<{ label: string | null; kind: string | null }> | null;
     };
-    const rows = (data as Row[] | null) ?? [];
+    const rows = (data as AppRow[] | null) ?? [];
+    if (rows.length === 0) {
+      return { count: 0, filter: { limit, days }, applications: [] };
+    }
+
+    // Step 2: batch-fetch candidates + jobs + stages in parallel.
+    const candidateIds = Array.from(new Set(rows.map((r) => r.candidate_id)));
+    const jobIds = Array.from(new Set(rows.map((r) => r.job_id)));
+    const stageIds = Array.from(new Set(rows.map((r) => r.stage_id)));
+
+    const [{ data: cands }, { data: jobs }, { data: stages }] =
+      await Promise.all([
+        ctx.admin
+          .from("candidates")
+          .select("id, full_name")
+          .in("id", candidateIds),
+        ctx.supabase.from("jobs").select("id, title").in("id", jobIds),
+        ctx.supabase
+          .from("dso_pipeline_stages")
+          .select("id, label, kind")
+          .in("id", stageIds),
+      ]);
+
+    const candById = new Map<string, string | null>();
+    for (const c of (cands as Array<{ id: string; full_name: string | null }> | null) ?? []) {
+      candById.set(c.id, c.full_name);
+    }
+    const jobById = new Map<string, string | null>();
+    for (const j of (jobs as Array<{ id: string; title: string | null }> | null) ?? []) {
+      jobById.set(j.id, j.title);
+    }
+    const stageById = new Map<
+      string,
+      { label: string | null; kind: string | null }
+    >();
+    for (const s of (stages as Array<{
+      id: string;
+      label: string | null;
+      kind: string | null;
+    }> | null) ?? []) {
+      stageById.set(s.id, { label: s.label, kind: s.kind });
+    }
 
     return {
       count: rows.length,
       filter: { limit, days },
       applications: rows.map((r) => {
-        const cand = Array.isArray(r.candidate) ? r.candidate[0] : r.candidate;
-        const job = Array.isArray(r.job) ? r.job[0] : r.job;
-        const stage = Array.isArray(r.stage) ? r.stage[0] : r.stage;
+        const stage = stageById.get(r.stage_id);
         return {
           application_id: r.id,
           candidate_id: r.candidate_id,
-          candidate_name: cand?.full_name ?? "(unknown)",
+          candidate_name: candById.get(r.candidate_id) ?? "(unknown)",
           job_id: r.job_id,
-          job_title: job?.title ?? "(unknown)",
+          job_title: jobById.get(r.job_id) ?? "(unknown)",
           stage: stage?.label ?? stage?.kind ?? null,
           applied_at: r.created_at,
         };

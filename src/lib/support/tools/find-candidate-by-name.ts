@@ -46,37 +46,63 @@ export const findCandidateByName: ToolHandler = {
       10
     );
 
-    // Pull DSO's applications with candidate names, filtered fuzzy by name.
-    // RLS scopes applications to DSO-owned jobs so the candidate set is
-    // intrinsically scoped — no cross-DSO leakage.
-    const { data, error } = await ctx.supabase
+    // Step 1: fuzzy-match candidates by name (no embed — clean cast shape).
+    // RLS on candidates is permissive (candidates are visible across DSOs
+    // once they apply), so we scope via the application join in step 2.
+    const { data: candMatches, error: candErr } = await ctx.admin
+      .from("candidates")
+      .select("id, full_name, first_name, last_name")
+      .ilike("full_name", `%${name}%`)
+      .limit(50);
+    if (candErr) return { error: candErr.message };
+
+    const candidateById = new Map<
+      string,
+      { id: string; full_name: string | null }
+    >();
+    for (const c of (candMatches as Array<{
+      id: string;
+      full_name: string | null;
+      first_name: string | null;
+      last_name: string | null;
+    }> | null) ?? []) {
+      candidateById.set(c.id, { id: c.id, full_name: c.full_name });
+    }
+    const candidateIds = Array.from(candidateById.keys());
+    if (candidateIds.length === 0) {
+      return { count: 0, query: name, candidates: [] };
+    }
+
+    // Step 2: scope to applications on THIS DSO's jobs only — RLS does
+    // the filtering. Single-table select, no aliased embeds.
+    const { data: apps, error: appsErr } = await ctx.supabase
       .from("applications")
-      .select(
-        "id, candidate_id, created_at, " +
-          "candidate:candidates!inner(full_name, first_name, last_name), " +
-          "job:jobs(title)"
-      )
-      .ilike("candidate.full_name", `%${name}%`)
+      .select("id, candidate_id, job_id, created_at")
+      .in("candidate_id", candidateIds)
       .order("created_at", { ascending: false })
-      .limit(50); // Pull more, dedupe by candidate_id below.
+      .limit(100);
+    if (appsErr) return { error: appsErr.message };
 
-    if (error) return { error: error.message };
-
-    type Row = {
+    type AppRow = {
       id: string;
       candidate_id: string;
+      job_id: string;
       created_at: string;
-      candidate: {
-        full_name: string | null;
-        first_name: string | null;
-        last_name: string | null;
-      } | Array<{
-        full_name: string | null;
-        first_name: string | null;
-        last_name: string | null;
-      }> | null;
-      job: { title: string | null } | Array<{ title: string | null }> | null;
     };
+    const appRows = (apps as AppRow[] | null) ?? [];
+
+    // Step 3: pull job titles in one batch.
+    const jobIds = Array.from(new Set(appRows.map((a) => a.job_id)));
+    const jobTitleById = new Map<string, string | null>();
+    if (jobIds.length > 0) {
+      const { data: jobs } = await ctx.supabase
+        .from("jobs")
+        .select("id, title")
+        .in("id", jobIds);
+      for (const j of (jobs as Array<{ id: string; title: string | null }> | null) ?? []) {
+        jobTitleById.set(j.id, j.title);
+      }
+    }
 
     // Dedupe by candidate_id; count applications per candidate.
     const byCandidate = new Map<
@@ -89,9 +115,8 @@ export const findCandidateByName: ToolHandler = {
         most_recent_application_id: string;
       }
     >();
-    for (const row of (data as Row[] | null) ?? []) {
-      const cand = Array.isArray(row.candidate) ? row.candidate[0] : row.candidate;
-      const job = Array.isArray(row.job) ? row.job[0] : row.job;
+    for (const row of appRows) {
+      const cand = candidateById.get(row.candidate_id);
       if (!cand) continue;
       const existing = byCandidate.get(row.candidate_id);
       if (existing) {
@@ -101,7 +126,7 @@ export const findCandidateByName: ToolHandler = {
           candidate_id: row.candidate_id,
           full_name: cand.full_name ?? "(unknown)",
           application_count: 1,
-          most_recent_job_title: job?.title ?? null,
+          most_recent_job_title: jobTitleById.get(row.job_id) ?? null,
           most_recent_application_id: row.id,
         });
       }

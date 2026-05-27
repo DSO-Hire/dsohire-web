@@ -622,6 +622,11 @@ function friendlyToolLabel(name: string): string {
     lookup_subscription_status: "Checking your plan",
     lookup_help_article: "Pulling a help article",
     search_help_articles: "Searching help docs",
+    list_active_jobs: "Listing your active jobs",
+    list_recent_applications: "Pulling recent applicants",
+    find_candidate_by_name: "Looking up that candidate",
+    find_job_by_title: "Finding that job",
+    count_applications_by_stage: "Counting your pipeline",
   };
   return map[name] ?? `Running ${name}`;
 }
