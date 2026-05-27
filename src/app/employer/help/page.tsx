@@ -34,7 +34,68 @@ const FAQS: FaqEntry[] = [
   },
   {
     q: "Can I customize the emails candidates receive?",
-    a: "Yes — Settings → Email templates. Growth+ tier unlocks subject + body customization for the apply confirmation, message-received, and stage-moved emails with mergefields like {{candidate.first_name}} and {{job.title}}.",
+    a: (
+      <>
+        Two tiers of customization, both at{" "}
+        <Link
+          href="/employer/settings/templates"
+          className="text-heritage-deep font-semibold underline underline-offset-2 hover:text-ink"
+        >
+          Settings → Email templates
+        </Link>
+        . The 3 <strong>automatic emails</strong> (apply confirmation,
+        message-received, stage-moved) are editable on every paid tier
+        including Solo — change the subject and body, use mergefields
+        like {"{{candidate.first_name}}"} and {"{{job.title}}"}. On
+        Growth+, you also get <strong>unlimited custom templates</strong>{" "}
+        you author yourself (interview prep, offer follow-ups, no-show
+        outreach) and send on demand from any candidate&apos;s profile.
+      </>
+    ),
+  },
+  {
+    q: "How do I send a one-off email to a specific candidate?",
+    a: "Growth+ feature. Open the candidate's application detail page → click 'Send email' next to the Pipeline stage → pick one of your custom templates → preview the rendered version with merge fields filled in → send. The send writes to the audit log and the email log so you have a record.",
+  },
+  {
+    q: "Can I add a bunch of locations at once from a spreadsheet?",
+    a: (
+      <>
+        Yes —{" "}
+        <Link
+          href="/employer/locations/bulk"
+          className="text-heritage-deep font-semibold underline underline-offset-2 hover:text-ink"
+        >
+          Locations → Bulk Import
+        </Link>
+        . Upload a CSV or Excel file with one row per practice. Required
+        columns: name, city, state (2-letter code). Optional: street
+        address, suite/unit, ZIP, practice website. Download the sample
+        CSV from the page if you want a template to start from. Caps:
+        1,000 rows / 5 MB per upload, split larger batches.
+      </>
+    ),
+  },
+  {
+    q: "How do I set up two-factor authentication?",
+    a: (
+      <>
+        Optional security upgrade —{" "}
+        <Link
+          href="/employer/settings/account"
+          className="text-heritage-deep font-semibold underline underline-offset-2 hover:text-ink"
+        >
+          Settings → Account → Two-factor authentication
+        </Link>
+        . Scan the QR code with 1Password, Authy, Apple Passwords, or
+        Google Authenticator, enter a 6-digit code to verify, and save
+        the 10 recovery codes somewhere safe. On future sign-ins, leave
+        &quot;Trust this device for 30 days&quot; checked and you won&apos;t
+        be prompted again on that browser until the cookie expires.
+        Owners can also flip &quot;Require 2FA for the whole DSO&quot;
+        on the same page to mandate it across your team.
+      </>
+    ),
   },
   {
     q: "How do I add team members?",

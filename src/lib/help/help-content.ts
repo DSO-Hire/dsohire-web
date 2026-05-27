@@ -319,9 +319,70 @@ const SETTINGS: Record<string, HelpEntry> = {
   },
   "settings.templates": {
     title: "Email templates",
-    tip: "On Growth+, customize the subject and body of candidate emails with mergefields like {{candidate.first_name}} and {{job.title}}.",
+    tip: "Customize the 3 automatic candidate emails (apply confirmation, message-received, stage-moved) on any paid tier. Growth+ also unlocks unlimited custom templates you can send on demand from a candidate's profile.",
+    format: "disclosure",
+    lens: "employer",
+    bullets: [
+      "Predefined templates (3 of them) edit the subject + body of emails the platform sends on candidate events — available on every paid tier including Solo.",
+      "Custom templates (Growth+) are reusable templates you author yourself — interview prep, offer follow-ups, no-show outreach — and send on demand from any candidate's profile.",
+      "Both surfaces use mergefields like {{candidate.first_name}} and {{job.title}}. Preview pane shows the rendered email before you save or send.",
+    ],
+  },
+  "settings.custom_templates_send": {
+    title: "Send a custom email to one candidate",
+    tip: "On Growth+, open any candidate's application detail and click 'Send email' next to the Pipeline stage. Pick one of your custom templates, preview the rendered version, and send.",
     format: "tip",
     lens: "employer",
+  },
+  "settings.mfa": {
+    title: "Two-factor authentication (2FA)",
+    tip: "Optional security upgrade — adds a 6-digit code from an authenticator app to your sign-in. Trusted devices skip the code prompt for 30 days, so it stays low-friction.",
+    format: "drawer",
+    lens: "employer",
+    videoId: null,
+    steps: [
+      {
+        heading: "Set it up",
+        body: "Settings → Account → Two-factor authentication. Scan the QR code with 1Password / Authy / Apple Passwords / Google Authenticator, enter the 6-digit code, and save the 10 recovery codes somewhere safe.",
+      },
+      {
+        heading: "Trust this device",
+        body: "On the next sign-in, leave 'Trust this device for 30 days' checked. You won't be prompted for the code again on that browser for 30 days unless you clear cookies, switch networks, or disable + re-enroll MFA.",
+      },
+      {
+        heading: "Require it for your whole team",
+        body: "DSO owners can flip 'Require 2FA for the whole DSO' on the same settings page. Every team member is then forced to enroll at their next sign-in. Available on any paid tier.",
+      },
+      {
+        heading: "Lost your device?",
+        body: "Use one of the 10 recovery codes from setup — each works once and reveals the option to re-enroll a fresh authenticator. If you've used them all, email support and we'll verify your identity to reset.",
+      },
+    ],
+  },
+  "locations.bulk_import": {
+    title: "Bulk add locations from a spreadsheet",
+    tip: "Upload a CSV or Excel file with one row per practice. We'll validate each row, insert the valid ones, and geocode them in the background. Up to 1000 rows / 5 MB per upload.",
+    format: "drawer",
+    lens: "employer",
+    videoId: null,
+    steps: [
+      {
+        heading: "Download the sample",
+        body: "Locations → Bulk Import → Download sample CSV. Three example rows showing exactly the columns we expect — replace them with your own data and save.",
+      },
+      {
+        heading: "Required vs optional columns",
+        body: "Required: name, city, state (2-letter code like KS or MO). Optional: address_line1, address_line2, postal_code, website. Header aliases work — 'zip' → postal_code, 'practice name' → name, 'street' → address_line1, etc.",
+      },
+      {
+        heading: "Upload",
+        body: "Drag the file onto the dropzone (or click to pick), then click Import. Per-row validation surfaces inline — a deliberately broken row gives you a row number + the specific error so you can fix and re-upload just the failures.",
+      },
+      {
+        heading: "After import",
+        body: "Locations show up immediately. Geocoding fans out in the background (concurrency cap of 6 to stay nice to Mapbox); map view updates within a minute. Each location respects the same Public Branding toggle as the single-add path.",
+      },
+    ],
   },
   "settings.pipeline": {
     title: "Pipeline settings",
