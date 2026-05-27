@@ -3260,6 +3260,57 @@ export type Database = {
           },
         ]
       }
+      support_requests: {
+        Row: {
+          auth_user_id: string
+          body: string
+          created_at: string
+          dso_id: string | null
+          dso_user_id: string | null
+          id: string
+          page_title: string | null
+          page_url: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: Database["public"]["Enums"]["support_request_status"]
+          tier_snapshot: string | null
+          updated_at: string
+        }
+        Insert: {
+          auth_user_id: string
+          body: string
+          created_at?: string
+          dso_id?: string | null
+          dso_user_id?: string | null
+          id?: string
+          page_title?: string | null
+          page_url?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["support_request_status"]
+          tier_snapshot?: string | null
+          updated_at?: string
+        }
+        Update: {
+          auth_user_id?: string
+          body?: string
+          created_at?: string
+          dso_id?: string | null
+          dso_user_id?: string | null
+          id?: string
+          page_title?: string | null
+          page_url?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["support_request_status"]
+          tier_snapshot?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           cancel_at_period_end: boolean
@@ -3550,6 +3601,7 @@ export type Database = {
         | "incomplete_expired"
         | "unpaid"
       subscription_tier: "starter" | "growth" | "enterprise" | "solo" | "scale"
+      support_request_status: "new" | "in_progress" | "resolved" | "closed"
     }
     CompositeTypes: {
       [_ in never]: never

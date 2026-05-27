@@ -1,0 +1,68 @@
+"use client";
+
+/**
+ * SupportLauncher — floating bottom-right "?" button that opens the
+ * SupportDrawer. Mount once per shell (EmployerShell / CandidateShell /
+ * public SiteShell when we surface it there too).
+ *
+ * Hides itself when the drawer is open so the close affordance is the
+ * drawer's own X button, not a duplicate trigger.
+ *
+ * Keyboard: ? key (shift+/) globally to open. Avoid hijacking when
+ * the user is typing into an input/textarea/contenteditable.
+ */
+
+import { useEffect, useState } from "react";
+import { HelpCircle } from "lucide-react";
+import { SupportDrawer } from "./support-drawer";
+
+interface Props {
+  audience: "employer" | "candidate" | "both";
+}
+
+export function SupportLauncher({ audience }: Props) {
+  const [open, setOpen] = useState(false);
+
+  // Global "?" shortcut. Skip when the user is typing.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== "?" || open) return;
+      const t = e.target as HTMLElement | null;
+      if (!t) return;
+      const tag = t.tagName;
+      if (
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        tag === "SELECT" ||
+        t.isContentEditable
+      ) {
+        return;
+      }
+      e.preventDefault();
+      setOpen(true);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  return (
+    <>
+      {!open && (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label="Open support"
+          title="Get help — press ?"
+          className="fixed bottom-5 right-5 z-30 size-12 rounded-full bg-ink text-ivory shadow-lg hover:bg-ink-soft transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2 flex items-center justify-center"
+        >
+          <HelpCircle className="size-5" />
+        </button>
+      )}
+      <SupportDrawer
+        open={open}
+        onClose={() => setOpen(false)}
+        audience={audience}
+      />
+    </>
+  );
+}

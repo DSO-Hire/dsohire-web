@@ -59,6 +59,7 @@ import { EmployerMobileNav } from "./employer-mobile-nav";
 import { LocationSwitcher } from "./location-switcher";
 import { getActiveLocationId } from "@/lib/employer/active-location";
 import { CommandPaletteTrigger } from "./command-palette";
+import { SupportLauncher } from "@/components/support/support-launcher";
 
 interface EmployerShellProps {
   children: React.ReactNode;
@@ -356,6 +357,9 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
 
         <main className="flex-1 px-6 sm:px-10 py-10">{children}</main>
       </div>
+
+      {/* Floating "?" support launcher (Tier 1 in-app support, Day 21). */}
+      <SupportLauncher audience="employer" />
     </div>
   );
 }

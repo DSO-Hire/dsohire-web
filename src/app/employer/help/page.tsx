@@ -13,6 +13,7 @@ import { ArrowRight, Mail, MessageSquare, BookOpen } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
 import { HELP_CONTENT } from "@/lib/help/help-content";
+import { OpenSupportButton } from "./open-support-button";
 
 export const metadata: Metadata = { title: "Help & Support" };
 
@@ -156,14 +157,19 @@ export default function HelpPage() {
             </span>
           </Link>
 
-          <div className="border border-[var(--rule)] bg-cream/40 p-6">
-            <MessageSquare className="size-5 text-slate-meta mb-3" />
+          <div className="border border-[var(--rule)] bg-white p-6">
+            <MessageSquare className="size-5 text-heritage-deep mb-3" />
             <h2 className="font-display text-lg font-bold text-ink mb-1">
               In-app support
             </h2>
-            <p className="text-[13px] text-slate-body leading-relaxed">
-              Coming with the broader Help &amp; Support refresh. For now,
-              email is the fastest path.
+            <p className="text-[13px] text-slate-body leading-relaxed mb-3">
+              Open the support drawer right here. We auto-attach the page
+              you&apos;re on, your role + plan, and your last 5 actions
+              so triage is fast.
+            </p>
+            <OpenSupportButton />
+            <p className="mt-2 text-[11px] text-slate-meta">
+              Tip: press <kbd className="px-1 py-0.5 rounded border border-[var(--rule)] bg-cream/60 font-mono text-[10px]">?</kbd> anywhere to open it.
             </p>
           </div>
         </section>
