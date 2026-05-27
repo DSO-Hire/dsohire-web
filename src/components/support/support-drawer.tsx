@@ -634,9 +634,9 @@ function EscalatedSuccess({ onClose }: { onClose: () => void }) {
         Handed off to a human.
       </h3>
       <p className="text-[13px] text-slate-body leading-relaxed max-w-[320px] mx-auto mb-6">
-        Cam (or someone on the team) will reply directly to your email
+        Someone from the DSO Hire team will reply directly to your email
         within one business day. Your conversation is saved and attached
-        so they have the full context.
+        so we have the full context.
       </p>
       <button
         type="button"
