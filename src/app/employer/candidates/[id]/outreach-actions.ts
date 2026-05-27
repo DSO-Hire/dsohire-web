@@ -220,13 +220,17 @@ export async function sendOutreachToCandidate(formData: FormData): Promise<SendO
     eventKind: "talent_pool.outreach_sent",
     targetTable: "candidates",
     targetId: candidateId,
+    // Use the RESOLVED subject in the audit summary so the timeline
+    // reflects what the candidate actually saw (not the recruiter's
+    // raw template with unresolved mergefields like {{dso.name}}).
     summary: `Sent outreach to ${
       (candidate.full_name as string | null) ?? "a candidate"
-    }: "${subject.slice(0, 60)}${subject.length > 60 ? "…" : ""}"`,
+    }: "${resolvedSubject.slice(0, 60)}${resolvedSubject.length > 60 ? "…" : ""}"`,
     metadata: {
       candidate_id: candidateId,
       message_id: row.id,
-      subject,
+      subject: resolvedSubject,
+      subject_template: subject,  // keep the raw for forensics
     },
   });
 
