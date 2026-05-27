@@ -22,6 +22,7 @@ import {
 import { geocodeCityState, geocodeStreetAddress } from "@/lib/geocoding/mapbox";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { SUPPORT_EMAIL } from "@/lib/contact";
+import { normalizeWebsite } from "@/lib/url/normalize-website";
 
 export interface LocationActionState {
   ok: boolean;
@@ -81,6 +82,7 @@ function parseFormFields(formData: FormData) {
     .trim()
     .toUpperCase();
   const postalCode = String(formData.get("postal_code") ?? "").trim();
+  const websiteRaw = String(formData.get("website") ?? "").trim();
 
   // Per-location DSO-affiliation toggle (Phase 4.5.b). Hidden input
   // carries "true" or "false" — only present in edit mode. Default
@@ -103,6 +105,7 @@ function parseFormFields(formData: FormData) {
     state,
     postalCode,
     publicDsoAffiliation,
+    websiteRaw,
   };
 }
 
@@ -134,6 +137,20 @@ export async function createLocation(
   const validationError = validate(fields);
   if (validationError) return { ok: false, error: validationError };
 
+  // Normalize website (prepend https:// if missing, validate shape).
+  // Returns null on empty input; throws on unparseable non-empty input.
+  let website: string | null = null;
+  if (fields.websiteRaw) {
+    try {
+      website = normalizeWebsite(fields.websiteRaw);
+    } catch (err) {
+      return {
+        ok: false,
+        error: err instanceof Error ? err.message : "Website URL is invalid.",
+      };
+    }
+  }
+
   const supabase = await createSupabaseServerClient();
 
   const { data: inserted, error } = await supabase
@@ -146,6 +163,7 @@ export async function createLocation(
       city: fields.city,
       state: fields.state,
       postal_code: fields.postalCode || null,
+      website,
     })
     .select("id")
     .single();
@@ -209,6 +227,19 @@ export async function updateLocation(
     .eq("dso_id", fields.dsoId)
     .maybeSingle();
 
+  // Normalize website (same path as create).
+  let website: string | null = null;
+  if (fields.websiteRaw) {
+    try {
+      website = normalizeWebsite(fields.websiteRaw);
+    } catch (err) {
+      return {
+        ok: false,
+        error: err instanceof Error ? err.message : "Website URL is invalid.",
+      };
+    }
+  }
+
   // Build the update payload — only include public_dso_affiliation
   // when the form actually posted a value (edit form does, create
   // doesn't). This keeps the create flow on the DB default of true.
@@ -219,6 +250,7 @@ export async function updateLocation(
     city: string;
     state: string;
     postal_code: string | null;
+    website: string | null;
     public_dso_affiliation?: boolean;
   } = {
     name: fields.name,
@@ -227,6 +259,7 @@ export async function updateLocation(
     city: fields.city,
     state: fields.state,
     postal_code: fields.postalCode || null,
+    website,
   };
   if (fields.publicDsoAffiliation !== null) {
     updatePayload.public_dso_affiliation = fields.publicDsoAffiliation;

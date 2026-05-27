@@ -32,6 +32,7 @@ import {
 } from "@/lib/supabase/server";
 import { geocodeCityState, geocodeStreetAddress } from "@/lib/geocoding/mapbox";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { normalizeWebsite } from "@/lib/url/normalize-website";
 
 const MAX_ROWS = 1000;
 const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 MB
@@ -51,6 +52,7 @@ const COLUMN_ALIASES: Record<string, string> = {
   city: "city",
   state: "state",
   postal_code: "postal_code",
+  website: "website",
   // aliases
   "location name": "name",
   "practice name": "name",
@@ -67,6 +69,10 @@ const COLUMN_ALIASES: Record<string, string> = {
   zipcode: "postal_code",
   "zip code": "postal_code",
   postal: "postal_code",
+  "practice website": "website",
+  url: "website",
+  "practice url": "website",
+  "website url": "website",
 };
 
 interface ParsedRow {
@@ -78,6 +84,8 @@ interface ParsedRow {
   city: string;
   state: string;
   postal_code: string;
+  /** Normalized URL string or null. Empty input → null. */
+  website: string | null;
 }
 
 export interface BulkRowFailure {
@@ -149,6 +157,7 @@ function validateRow(
   const city = (raw.city ?? "").toString().trim();
   const state = (raw.state ?? "").toString().trim().toUpperCase();
   const postal_code = (raw.postal_code ?? "").toString().trim();
+  const websiteRaw = (raw.website ?? "").toString().trim();
 
   const fail = (error: string): { ok: false; failure: BulkRowFailure } => ({
     ok: false,
@@ -165,6 +174,15 @@ function validateRow(
     );
   }
 
+  let website: string | null = null;
+  if (websiteRaw) {
+    try {
+      website = normalizeWebsite(websiteRaw);
+    } catch (err) {
+      return fail(err instanceof Error ? err.message : "Website URL is invalid.");
+    }
+  }
+
   return {
     ok: true,
     row: {
@@ -175,6 +193,7 @@ function validateRow(
       city,
       state,
       postal_code,
+      website,
     },
   };
 }
@@ -279,6 +298,7 @@ export async function bulkAddLocations(
         city: row.city,
         state: row.state,
         postal_code: row.postal_code || null,
+        website: row.website,
       })
       .select("id")
       .single();

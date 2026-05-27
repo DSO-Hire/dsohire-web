@@ -145,7 +145,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
     supabase
       .from("job_locations")
       .select(
-        "location:dso_locations(id, name, address_line1, city, state, postal_code)"
+        "location:dso_locations(id, name, address_line1, city, state, postal_code, website, public_dso_affiliation)"
       )
       .eq("job_id", id),
     supabase.from("job_skills").select("skill").eq("job_id", id),
@@ -872,16 +872,35 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
             {locations.length > 0 && (
               <Detail icon={MapPin} label="Locations">
                 <ul className="space-y-2 mt-1">
-                  {locations.map((loc) => (
-                    <li key={loc.id}>
-                      <div className="font-semibold text-ivory text-[15px]">
-                        {loc.name}
-                      </div>
-                      <div className="text-[14px] text-ivory/70">
-                        {[loc.city, loc.state].filter(Boolean).join(", ")}
-                      </div>
-                    </li>
-                  ))}
+                  {locations.map((loc) => {
+                    // Per-location website is shown only when this
+                    // location is publicly affiliated. Private-affiliation
+                    // locations might leak the DSO connection through a
+                    // website footer, so we hide the link entirely.
+                    const showWebsite =
+                      Boolean(loc.website) &&
+                      (loc.public_dso_affiliation ?? true) === true;
+                    return (
+                      <li key={loc.id}>
+                        <div className="font-semibold text-ivory text-[15px]">
+                          {loc.name}
+                        </div>
+                        <div className="text-[14px] text-ivory/70">
+                          {[loc.city, loc.state].filter(Boolean).join(", ")}
+                        </div>
+                        {showWebsite && (
+                          <a
+                            href={loc.website as string}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-0.5 inline-block text-[13px] text-heritage hover:text-heritage-deep underline-offset-2 hover:underline"
+                          >
+                            Practice website →
+                          </a>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               </Detail>
             )}

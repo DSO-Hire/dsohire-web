@@ -34,10 +34,10 @@ import {
   type BulkRowFailure,
 } from "../bulk-actions";
 
-const SAMPLE_CSV = `name,address_line1,address_line2,city,state,postal_code
-Lakeshore Dental — Downtown,123 Main St,Suite 200,Indianapolis,IN,46204
-Lakeshore Dental — Northside,4500 N Meridian St,,Indianapolis,IN,46208
-Lakeshore Dental — Greenwood,1100 N Madison Ave,,Greenwood,IN,46142
+const SAMPLE_CSV = `name,address_line1,address_line2,city,state,postal_code,website
+Lakeshore Dental — Downtown,123 Main St,Suite 200,Indianapolis,IN,46204,https://lakeshore-downtown.example.com
+Lakeshore Dental — Northside,4500 N Meridian St,,Indianapolis,IN,46208,https://lakeshore-northside.example.com
+Lakeshore Dental — Greenwood,1100 N Madison Ave,,Greenwood,IN,46142,
 `;
 
 export function BulkLocationsUploader() {

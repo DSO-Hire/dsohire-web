@@ -37,6 +37,11 @@ export interface LocationFormInitial {
    * their original brand publicly.
    */
   public_dso_affiliation: boolean;
+  /**
+   * Per-location practice website URL. Optional. Surfaced on candidate-
+   * facing job listings only when public_dso_affiliation is true.
+   */
+  website: string | null;
 }
 
 interface LocationFormProps {
@@ -148,6 +153,16 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
           optional
         />
       </div>
+
+      <Field
+        label="Practice website"
+        name="website"
+        autoComplete="url"
+        placeholder="https://lakeshoredentalkc.com"
+        defaultValue={initial?.website ?? ""}
+        optional
+        helper="Shown on the candidate-facing job listing — but only when this location is set to public (see Public Branding below). Leave blank to hide."
+      />
 
       {/* Per-location DSO-affiliation toggle. Edit mode only — the
           create flow defaults to public; admins can flip after creation

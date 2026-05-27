@@ -1540,6 +1540,7 @@ export type Database = {
           public_dso_affiliation: boolean
           state: string | null
           updated_at: string
+          website: string | null
         }
         Insert: {
           address_line1?: string | null
@@ -1562,6 +1563,7 @@ export type Database = {
           public_dso_affiliation?: boolean
           state?: string | null
           updated_at?: string
+          website?: string | null
         }
         Update: {
           address_line1?: string | null
@@ -1584,6 +1586,7 @@ export type Database = {
           public_dso_affiliation?: boolean
           state?: string | null
           updated_at?: string
+          website?: string | null
         }
         Relationships: [
           {
