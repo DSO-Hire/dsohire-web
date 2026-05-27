@@ -19,6 +19,11 @@ import { lookupDsoMembers } from "./lookup-dso-members";
 import { lookupSubscriptionStatus } from "./lookup-subscription-status";
 import { lookupHelpArticle } from "./lookup-help-article";
 import { searchHelpArticles } from "./search-help-articles";
+import { listActiveJobs } from "./list-active-jobs";
+import { listRecentApplications } from "./list-recent-applications";
+import { findCandidateByName } from "./find-candidate-by-name";
+import { findJobByTitle } from "./find-job-by-title";
+import { countApplicationsByStage } from "./count-applications-by-stage";
 import type { ToolContext, ToolHandler, ToolSchema } from "./types";
 
 const HANDLERS: Record<string, ToolHandler> = {
@@ -30,6 +35,11 @@ const HANDLERS: Record<string, ToolHandler> = {
   lookup_subscription_status: lookupSubscriptionStatus,
   lookup_help_article: lookupHelpArticle,
   search_help_articles: searchHelpArticles,
+  list_active_jobs: listActiveJobs,
+  list_recent_applications: listRecentApplications,
+  find_candidate_by_name: findCandidateByName,
+  find_job_by_title: findJobByTitle,
+  count_applications_by_stage: countApplicationsByStage,
 };
 
 /** All tool schemas — passed to Anthropic so Claude knows what to call. */

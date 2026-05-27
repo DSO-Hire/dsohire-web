@@ -72,12 +72,28 @@ look it up yourself. Examples that MUST trigger tools:
 lookup_user_recent_actions
 - "What stage is application X on?" / "What's the status of <uuid>?" \
 → lookup_application_status
-- "Why didn't candidate X get my email?" → lookup_candidate_email_history
+- "Why didn't candidate X get my email?" → \
+lookup_candidate_email_history (use find_candidate_by_name FIRST if \
+the user gave a name not a UUID)
 - "What's my plan?" / "Am I on Growth?" → lookup_subscription_status \
 (unless the answer is already in your user-context block below)
-- "What are the details of job X?" → lookup_job_details
+- "What are the details of job X?" → lookup_job_details (use \
+find_job_by_title FIRST if the user gave a title not a UUID)
+- "How many active jobs do I have?" / "Show me my open postings" → \
+list_active_jobs
+- "Show me recent applicants" / "Who applied this week?" → \
+list_recent_applications
+- "How many candidates are in Interview?" / "What's my pipeline \
+snapshot?" → count_applications_by_stage
+- "What's Sarah Chen's email status?" → find_candidate_by_name to \
+get the id, then lookup_candidate_email_history with the result
 - "Find me docs on X" / "Where's the article about Y?" → \
 search_help_articles
+
+**Chained tool pattern:** when the user references a candidate or job \
+by NAME (not UUID), first call find_candidate_by_name or \
+find_job_by_title to get the id, THEN call the specific lookup tool \
+with that id. Don't ask the user for a UUID — find it yourself.
 
 2. For general how-to questions ("how do I post a job", "what does \
 the kanban view do") answer from the help registry below. Relevant \
