@@ -3260,6 +3260,132 @@ export type Database = {
           },
         ]
       }
+      claude_usage_log: {
+        Row: {
+          auth_user_id: string
+          cached_input_tokens: number
+          cost_cents: number
+          created_at: string
+          dso_id: string | null
+          id: string
+          input_tokens: number
+          model: string
+          output_tokens: number
+          request_id: string | null
+          surface: string
+        }
+        Insert: {
+          auth_user_id: string
+          cached_input_tokens?: number
+          cost_cents?: number
+          created_at?: string
+          dso_id?: string | null
+          id?: string
+          input_tokens?: number
+          model: string
+          output_tokens?: number
+          request_id?: string | null
+          surface: string
+        }
+        Update: {
+          auth_user_id?: string
+          cached_input_tokens?: number
+          cost_cents?: number
+          created_at?: string
+          dso_id?: string | null
+          id?: string
+          input_tokens?: number
+          model?: string
+          output_tokens?: number
+          request_id?: string | null
+          surface?: string
+        }
+        Relationships: []
+      }
+      support_chat_messages: {
+        Row: {
+          cache_hit: boolean | null
+          cached_input_tokens: number | null
+          confidence: number | null
+          content: string | null
+          created_at: string
+          escalated: boolean | null
+          id: string
+          input_tokens: number | null
+          model: string | null
+          output_tokens: number | null
+          request_id: string
+          role: Database["public"]["Enums"]["support_chat_role"]
+          tool_input: Json | null
+          tool_name: string | null
+          tool_output: Json | null
+        }
+        Insert: {
+          cache_hit?: boolean | null
+          cached_input_tokens?: number | null
+          confidence?: number | null
+          content?: string | null
+          created_at?: string
+          escalated?: boolean | null
+          id?: string
+          input_tokens?: number | null
+          model?: string | null
+          output_tokens?: number | null
+          request_id: string
+          role: Database["public"]["Enums"]["support_chat_role"]
+          tool_input?: Json | null
+          tool_name?: string | null
+          tool_output?: Json | null
+        }
+        Update: {
+          cache_hit?: boolean | null
+          cached_input_tokens?: number | null
+          confidence?: number | null
+          content?: string | null
+          created_at?: string
+          escalated?: boolean | null
+          id?: string
+          input_tokens?: number | null
+          model?: string | null
+          output_tokens?: number | null
+          request_id?: string
+          role?: Database["public"]["Enums"]["support_chat_role"]
+          tool_input?: Json | null
+          tool_name?: string | null
+          tool_output?: Json | null
+        }
+        Relationships: []
+      }
+      support_response_cache: {
+        Row: {
+          cache_key: string
+          created_at: string
+          expires_at: string
+          hit_count: number
+          id: string
+          question: string
+          response: string
+        }
+        Insert: {
+          cache_key: string
+          created_at?: string
+          expires_at: string
+          hit_count?: number
+          id?: string
+          question: string
+          response: string
+        }
+        Update: {
+          cache_key?: string
+          created_at?: string
+          expires_at?: string
+          hit_count?: number
+          id?: string
+          question?: string
+          response?: string
+        }
+        Relationships: []
+      }
       support_requests: {
         Row: {
           auth_user_id: string
@@ -3601,6 +3727,7 @@ export type Database = {
         | "incomplete_expired"
         | "unpaid"
       subscription_tier: "starter" | "growth" | "enterprise" | "solo" | "scale"
+      support_chat_role: "user" | "assistant" | "system" | "tool"
       support_request_status: "new" | "in_progress" | "resolved" | "closed"
     }
     CompositeTypes: {
