@@ -80,7 +80,8 @@ const BULK_CAP = 200;
 async function moveOne(
   applicationId: string,
   nextStageId: string,
-  nextKind: StageKind
+  nextKind: StageKind,
+  nextStageLabel: string
 ): Promise<
   | { ok: true; row: BulkItemSuccess }
   | { ok: false; error: string }
@@ -89,18 +90,21 @@ async function moveOne(
 
   const supabase = await createSupabaseServerClient();
 
-  // Read the current stage_id + kind so we can return prev info for
-  // rollback. Embed the stage row to grab the kind in one round trip.
+  // Read the current stage_id + kind + label so we can return prev info for
+  // rollback AND build candidate-facing dispatch copy with the actual user-
+  // visible stage labels (not the kind's default label — those collapse
+  // when a DSO has multiple stages of the same kind, e.g. "Phone Screening"
+  // and "Interview" both kind=interview).
+  //
   // Also pull the bits needed to fire stage_changed dispatches (candidate
   // id, job hide-stages flag, dso_id, job title/id) so we don't need a
-  // second round trip after the update lands. Mirrors the SELECT in the
-  // canonical single-move action at /employer/applications/[id]/actions.ts.
+  // second round trip after the update lands.
   const { data: prev, error: prevErr } = await supabase
     .from("applications")
     .select(
       "stage_id, candidate_id, " +
         "jobs:jobs!inner(id, dso_id, hide_stages_from_candidate, title), " +
-        "stage:dso_pipeline_stages!stage_id(kind)"
+        "stage:dso_pipeline_stages!stage_id(kind, label)"
     )
     .eq("id", applicationId)
     .single();
@@ -110,8 +114,8 @@ async function moveOne(
 
   const prevStageId = (prev as unknown as Record<string, unknown>).stage_id as string;
   const prevStageRel = (prev as unknown as Record<string, unknown>).stage as
-    | { kind: string }
-    | Array<{ kind: string }>
+    | { kind: string; label: string }
+    | Array<{ kind: string; label: string }>
     | null;
   const prevStageRow = Array.isArray(prevStageRel)
     ? prevStageRel[0] ?? null
@@ -120,6 +124,10 @@ async function moveOne(
   const prevKind = (VALID_KINDS.has(prevKindRaw as StageKind)
     ? (prevKindRaw as StageKind)
     : "open") as StageKind;
+  const prevStageLabel =
+    (prevStageRow?.label as string | undefined) ??
+    KIND_DEFAULT_LABELS[prevKind] ??
+    prevKind;
 
   // Pull dispatch-context fields off the embedded relations. Supabase
   // !inner returns arrays at runtime even for to-one FKs, so peel
@@ -172,26 +180,31 @@ async function moveOne(
   }
 
   // Fire the same dispatches the single-move path fires: inbox system
-  // message + candidate.stage_changed email. Both gate on the job's
-  // hide-stages flag and on a real kind change. (Closes the pre-existing
-  // gap flagged in project_custom_email_templates_v1.md — bulk moves
-  // previously skipped these dispatches entirely, so custom email
-  // templates keyed to candidate.stage_changed wouldn't fire from the
-  // kanban bulk-move surface.)
+  // message + candidate.stage_changed email. Gate on the job's
+  // hide-stages flag only. (Closes the pre-existing gap flagged in
+  // project_custom_email_templates_v1.md — bulk moves previously
+  // skipped these dispatches entirely.)
+  //
+  // Why no kind-change check: the candidate-facing copy renders the
+  // FROM_LABEL / TO_LABEL pair (e.g. "Interview → Phone Screening")
+  // and a DSO can have multiple stages of the same kind. The original
+  // `prevKind !== nextKind` gate dropped emails on every intra-kind
+  // move, even when the user-visible stage label changed. We only
+  // reach this code when prevStageId !== nextStageId (no-op short-
+  // circuit returned early above), so any move that gets here is a
+  // real user-visible move and deserves the dispatch.
   //
   // Use next/after() instead of `void` so the dispatches run AFTER the
   // bulk response ships but are still guaranteed to complete on Vercel
   // — per feedback_vercel_serverless_fire_and_forget.md, bare `void` in
   // serverless gets killed mid-flight. after() callbacks are honored.
-  if (!hideStagesFromCandidate && prevKind !== nextKind) {
-    const fromLabel = KIND_DEFAULT_LABELS[prevKind] ?? prevKind;
-    const toLabel = KIND_DEFAULT_LABELS[nextKind] ?? nextKind;
+  if (!hideStagesFromCandidate) {
     after(async () => {
       await dispatchInboxSystemMessage({
         applicationId,
         eventKind: "stage_changed",
         senderRole: "employer",
-        body: `Your application moved from ${fromLabel} to ${toLabel}.`,
+        body: `Your application moved from ${prevStageLabel} to ${nextStageLabel}.`,
       });
     });
     if (dsoId && candidateId) {
@@ -202,8 +215,8 @@ async function moveOne(
           jobId: jobId ?? "",
           jobTitle,
           dsoId,
-          fromStageLabel: fromLabel,
-          toStageLabel: toLabel,
+          fromStageLabel: prevStageLabel,
+          toStageLabel: nextStageLabel,
         });
       });
     }
@@ -336,18 +349,19 @@ async function bulkMoveApplicationsImpl(
     };
   }
 
-  // Resolve the concrete nextStageId + nextKind from the target. For
-  // explicit stageId moves (kanban bulk dropdown / drag-drop bulk) we
-  // validate the stage belongs to the DSO and read its kind from the
-  // stage row — never collapse to a default. For kind-driven calls
-  // (reject / archive) we still resolve to the DSO's default stage of
-  // the requested kind.
+  // Resolve the concrete nextStageId + nextKind + nextStageLabel from
+  // the target. For explicit stageId moves (kanban bulk dropdown / drag-
+  // drop bulk) we validate the stage belongs to the DSO and read its
+  // kind + label from the stage row — never collapse to a default. For
+  // kind-driven calls (reject / archive) we still resolve to the DSO's
+  // default stage of the requested kind.
   let nextStageId: string;
   let nextKind: StageKind;
+  let nextStageLabel: string;
   if ("stageId" in target) {
     const { data: stageRow, error: stageErr } = await supabase
       .from("dso_pipeline_stages")
-      .select("id, kind, dso_id")
+      .select("id, kind, label, dso_id")
       .eq("id", target.stageId)
       .maybeSingle();
     if (stageErr || !stageRow) {
@@ -380,6 +394,10 @@ async function bulkMoveApplicationsImpl(
     }
     nextStageId = (stageRow as { id: string }).id;
     nextKind = kindRaw as StageKind;
+    nextStageLabel =
+      (stageRow as { label: string }).label ??
+      KIND_DEFAULT_LABELS[nextKind] ??
+      nextKind;
   } else {
     const resolved = await resolveDefaultStageId(supabase, dsoId, target.kind);
     if (!resolved) {
@@ -393,6 +411,19 @@ async function bulkMoveApplicationsImpl(
     }
     nextStageId = resolved;
     nextKind = target.kind;
+    // For kind-driven (reject/archive) paths we don't have the row in
+    // hand. Look up the label so candidate-facing copy uses the actual
+    // stage name the DSO configured (which might be "Did not advance"
+    // rather than the kind default "Rejected").
+    const { data: labelRow } = await supabase
+      .from("dso_pipeline_stages")
+      .select("label")
+      .eq("id", nextStageId)
+      .maybeSingle();
+    nextStageLabel =
+      ((labelRow as { label: string } | null)?.label as string | undefined) ??
+      KIND_DEFAULT_LABELS[nextKind] ??
+      nextKind;
   }
 
   const succeeded: BulkItemSuccess[] = [];
@@ -400,7 +431,7 @@ async function bulkMoveApplicationsImpl(
 
   // Sequential loop: see file-level comment for rationale.
   for (const id of applicationIds) {
-    const result = await moveOne(id, nextStageId, nextKind);
+    const result = await moveOne(id, nextStageId, nextKind, nextStageLabel);
     if (result.ok) {
       succeeded.push(result.row);
       revalidatePath(`/employer/applications/${id}`);
@@ -418,6 +449,7 @@ async function bulkMoveApplicationsImpl(
     await emitBulkAuditSummary({
       action,
       nextKind,
+      nextStageLabel,
       succeededIds: succeeded.map((s) => s.id),
       failedCount: failed.length,
       reason,
@@ -436,6 +468,10 @@ async function bulkMoveApplicationsImpl(
 async function emitBulkAuditSummary(input: {
   action: "move" | "reject" | "archive";
   nextKind: StageKind;
+  /** Actual stage label (e.g. "Phone Screening" or DSO-customized
+   * "Did not advance") rather than the kind default. Keeps the audit
+   * trail human-readable when DSOs rename or duplicate stages. */
+  nextStageLabel: string;
   succeededIds: string[];
   failedCount: number;
   reason?: string;
@@ -461,7 +497,7 @@ async function emitBulkAuditSummary(input: {
   const job = Array.isArray(jobsRecord) ? jobsRecord[0] ?? null : jobsRecord;
   if (!job?.dso_id) return;
 
-  const stageLabel = KIND_DEFAULT_LABELS[input.nextKind] ?? input.nextKind;
+  const stageLabel = input.nextStageLabel;
   const count = input.succeededIds.length;
   const verb =
     input.action === "reject"

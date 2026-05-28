@@ -80,6 +80,10 @@ export async function updateApplicationStatus(
 interface ResolvedTarget {
   stageId: string;
   kind: StageKind;
+  /** Actual stage label from the row — used in candidate-facing
+   * dispatch copy. Falls back to KIND_DEFAULT_LABELS[kind] only when
+   * the row's label column is unexpectedly empty. */
+  label: string;
 }
 
 /**
@@ -112,28 +116,41 @@ async function resolveTargetStage(
   if ("stageId" in target) {
     const { data: row, error } = await supabase
       .from("dso_pipeline_stages")
-      .select("id, kind, dso_id")
+      .select("id, kind, label, dso_id")
       .eq("id", target.stageId)
       .maybeSingle();
     if (error || !row) return null;
     if ((row as { dso_id: string }).dso_id !== dsoId) return null;
     const kindValue = (row as { kind: string }).kind;
     if (!isStageKind(kindValue)) return null;
-    return { stageId: (row as { id: string }).id, kind: kindValue };
+    const labelValue =
+      ((row as { label: string }).label as string | undefined) ??
+      KIND_DEFAULT_LABELS[kindValue] ??
+      kindValue;
+    return {
+      stageId: (row as { id: string }).id,
+      kind: kindValue,
+      label: labelValue,
+    };
   }
 
   // Resolve by kind → DSO's default stage row of that kind.
   const { data: row, error } = await supabase
     .from("dso_pipeline_stages")
-    .select("id, kind")
+    .select("id, kind, label")
     .eq("dso_id", dsoId)
     .eq("kind", target.kind)
     .eq("is_default", true)
     .maybeSingle();
   if (error || !row) return null;
+  const labelValue =
+    ((row as { label: string }).label as string | undefined) ??
+    KIND_DEFAULT_LABELS[target.kind] ??
+    target.kind;
   return {
     stageId: (row as { id: string }).id,
     kind: target.kind,
+    label: labelValue,
   };
 }
 
@@ -178,7 +195,7 @@ export async function moveApplicationStage(
       "stage_id, candidate_id, " +
         "candidates:candidates(full_name), " +
         "jobs:jobs!inner(id, dso_id, hide_stages_from_candidate, title), " +
-        "stage:dso_pipeline_stages!stage_id(kind)"
+        "stage:dso_pipeline_stages!stage_id(kind, label)"
     )
     .eq("id", applicationId)
     .single();
@@ -188,8 +205,8 @@ export async function moveApplicationStage(
 
   const prevStageId = (prev as unknown as Record<string, unknown>).stage_id as string;
   const prevStageRel = (prev as unknown as Record<string, unknown>).stage as
-    | { kind: string }
-    | Array<{ kind: string }>
+    | { kind: string; label: string }
+    | Array<{ kind: string; label: string }>
     | null;
   const prevStageRow = Array.isArray(prevStageRel)
     ? prevStageRel[0] ?? null
@@ -198,6 +215,10 @@ export async function moveApplicationStage(
   const prevKind: StageKind = isStageKind(prevKindRaw)
     ? prevKindRaw
     : "open";
+  const prevStageLabel =
+    (prevStageRow?.label as string | undefined) ??
+    KIND_DEFAULT_LABELS[prevKind] ??
+    prevKind;
 
   const job = (prev as unknown as Record<string, unknown>).jobs as
     | Record<string, unknown>
@@ -253,17 +274,21 @@ export async function moveApplicationStage(
   }
 
   // Drop a system message into the candidate's inbox thread + fire the
-  // candidate.stage_changed email. Both skip when stages are hidden from
-  // the candidate per the employer's setting. Fire-and-forget — never
-  // block the stage move on a dispatch failure.
-  if (!hideStagesFromCandidate && prevKind !== resolved.kind) {
-    const fromLabel = KIND_DEFAULT_LABELS[prevKind] ?? prevKind;
-    const toLabel = KIND_DEFAULT_LABELS[resolved.kind] ?? resolved.kind;
+  // candidate.stage_changed email. Skip only when stages are hidden from
+  // the candidate per the employer's setting. (Drop the older prevKind
+  // !== resolved.kind gate — it incorrectly suppressed dispatches on
+  // intra-kind moves like "Phone Screening" → "Interview" where the
+  // user-facing label changed but both stages share kind=interview.
+  // The no-op short-circuit above already returns when stage_ids match,
+  // so reaching here means the stage actually changed.)
+  //
+  // Fire-and-forget — never block the stage move on a dispatch failure.
+  if (!hideStagesFromCandidate) {
     void dispatchInboxSystemMessage({
       applicationId,
       eventKind: "stage_changed",
       senderRole: "employer",
-      body: `Your application moved from ${fromLabel} to ${toLabel}.`,
+      body: `Your application moved from ${prevStageLabel} to ${resolved.label}.`,
     });
     if (dsoId) {
       const candidateId = (prev as unknown as Record<string, unknown>)
@@ -275,21 +300,24 @@ export async function moveApplicationStage(
           jobId: (jobRow?.id as string | undefined) ?? "",
           jobTitle,
           dsoId,
-          fromStageLabel: fromLabel,
-          toStageLabel: toLabel,
+          fromStageLabel: prevStageLabel,
+          toStageLabel: resolved.label,
         });
       }
     }
   }
 
   // Audit log (Phase 4.5.e). Fire-and-forget.
-  if (dsoId && prevKind !== resolved.kind) {
+  // Audit on ANY stage change (intra-kind included) — same reasoning as
+  // the dispatch gate above. The no-op short-circuit already returned
+  // if prevStageId === resolved.stageId.
+  if (dsoId) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
     if (user) {
-      const fromLabel = KIND_DEFAULT_LABELS[prevKind] ?? prevKind;
-      const toLabel = KIND_DEFAULT_LABELS[resolved.kind] ?? resolved.kind;
+      const fromLabel = prevStageLabel;
+      const toLabel = resolved.label;
       void recordAuditEvent({
         dsoId,
         actorUserId: user.id,
