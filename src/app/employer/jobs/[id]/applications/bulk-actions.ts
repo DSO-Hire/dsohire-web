@@ -251,22 +251,41 @@ async function resolveDefaultStageId(
   return ((data as { id: string } | null)?.id as string | null) ?? null;
 }
 
+/**
+ * Move N applications to a specific stage by **stage_id**.
+ *
+ * Pre-fix this took `nextKind` and resolved to the DSO's default stage of
+ * that kind via `resolveDefaultStageId`. That broke whenever a DSO had
+ * more than one stage sharing a kind (e.g. a custom "Phone Screening"
+ * column alongside the default "Interview" column — both kind=interview).
+ * The user's clicked column was silently ignored; the move resolved to
+ * the default for the kind, which often equaled the source stage and
+ * silently no-op'd into a bounce-back. Diagnosed Day 22 via DB
+ * `updated_at` showing no row was mutated despite a success toast.
+ *
+ * The kind is still needed for: (a) inbox/email dispatch gating on
+ * kind change, (b) audit-summary labels. We resolve it from the
+ * stage row server-side after validating the stage belongs to the
+ * application's DSO.
+ */
 export async function bulkMoveApplications(
   applicationIds: string[],
-  nextKind: StageKind
+  nextStageId: string
 ): Promise<BulkActionResult> {
-  return bulkMoveApplicationsImpl(applicationIds, nextKind, "move");
+  return bulkMoveApplicationsImpl(applicationIds, { stageId: nextStageId }, "move");
 }
 
 /**
  * Internal worker. The exported `bulkMoveApplications` calls this with
- * `action: "move"`; the reject/archive wrappers call it with their own
- * label so the audit summary reads correctly. Reason note is passed
- * through to the audit metadata.
+ * `action: "move"` + an explicit stageId; reject/archive wrappers pass
+ * a kind so the resolver still picks the DSO's default rejected /
+ * withdrawn stage. Reason note is passed through to the audit metadata.
  */
+type BulkTarget = { stageId: string } | { kind: StageKind };
+
 async function bulkMoveApplicationsImpl(
   applicationIds: string[],
-  nextKind: StageKind,
+  target: BulkTarget,
   action: "move" | "reject" | "archive",
   reason?: string
 ): Promise<BulkActionResult> {
@@ -282,7 +301,7 @@ async function bulkMoveApplicationsImpl(
       })),
     };
   }
-  if (!VALID_KINDS.has(nextKind)) {
+  if ("kind" in target && !VALID_KINDS.has(target.kind)) {
     return {
       succeeded: [],
       failed: applicationIds.map((id) => ({
@@ -294,9 +313,8 @@ async function bulkMoveApplicationsImpl(
 
   const supabase = await createSupabaseServerClient();
 
-  // Resolve the DSO from the first application's job, then resolve the
-  // default stage row for the requested kind. All selected ids belong to
-  // the same DSO because kanban selection is scoped per-job.
+  // Resolve the DSO from the first application's job. All selected ids
+  // belong to the same DSO because kanban selection is scoped per-job.
   const { data: anchor } = await supabase
     .from("applications")
     .select("id, jobs:jobs!inner(dso_id)")
@@ -318,15 +336,63 @@ async function bulkMoveApplicationsImpl(
     };
   }
 
-  const nextStageId = await resolveDefaultStageId(supabase, dsoId, nextKind);
-  if (!nextStageId) {
-    return {
-      succeeded: [],
-      failed: applicationIds.map((id) => ({
-        id,
-        error: `No default ${nextKind} stage on this DSO`,
-      })),
-    };
+  // Resolve the concrete nextStageId + nextKind from the target. For
+  // explicit stageId moves (kanban bulk dropdown / drag-drop bulk) we
+  // validate the stage belongs to the DSO and read its kind from the
+  // stage row — never collapse to a default. For kind-driven calls
+  // (reject / archive) we still resolve to the DSO's default stage of
+  // the requested kind.
+  let nextStageId: string;
+  let nextKind: StageKind;
+  if ("stageId" in target) {
+    const { data: stageRow, error: stageErr } = await supabase
+      .from("dso_pipeline_stages")
+      .select("id, kind, dso_id")
+      .eq("id", target.stageId)
+      .maybeSingle();
+    if (stageErr || !stageRow) {
+      return {
+        succeeded: [],
+        failed: applicationIds.map((id) => ({
+          id,
+          error: "Target stage not found",
+        })),
+      };
+    }
+    if ((stageRow as { dso_id: string }).dso_id !== dsoId) {
+      return {
+        succeeded: [],
+        failed: applicationIds.map((id) => ({
+          id,
+          error: "Target stage does not belong to this DSO",
+        })),
+      };
+    }
+    const kindRaw = (stageRow as { kind: string }).kind;
+    if (!VALID_KINDS.has(kindRaw as StageKind)) {
+      return {
+        succeeded: [],
+        failed: applicationIds.map((id) => ({
+          id,
+          error: `Target stage has unknown kind "${kindRaw}"`,
+        })),
+      };
+    }
+    nextStageId = (stageRow as { id: string }).id;
+    nextKind = kindRaw as StageKind;
+  } else {
+    const resolved = await resolveDefaultStageId(supabase, dsoId, target.kind);
+    if (!resolved) {
+      return {
+        succeeded: [],
+        failed: applicationIds.map((id) => ({
+          id,
+          error: `No default ${target.kind} stage on this DSO`,
+        })),
+      };
+    }
+    nextStageId = resolved;
+    nextKind = target.kind;
   }
 
   const succeeded: BulkItemSuccess[] = [];
@@ -450,7 +516,7 @@ export async function bulkRejectApplications(
   const trimmedReason = (reason ?? "").trim().slice(0, 1000);
   const result = await bulkMoveApplicationsImpl(
     applicationIds,
-    "rejected",
+    { kind: "rejected" },
     "reject",
     trimmedReason || undefined
   );
@@ -480,7 +546,7 @@ export async function bulkArchiveApplications(
   const trimmedReason = (reason ?? "").trim().slice(0, 1000);
   const result = await bulkMoveApplicationsImpl(
     applicationIds,
-    "withdrawn",
+    { kind: "withdrawn" },
     "archive",
     trimmedReason || undefined
   );

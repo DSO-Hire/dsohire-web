@@ -152,6 +152,10 @@ interface BulkResultBanner {
   actionLabel: string; // "Moved", "Rejected", "Archived"
   destinationLabel: string;
   destinationKind: StageKind | null;
+  /** Exact destination stage_id — preserved so a Retry routes to the
+   * same column the user originally clicked, not just any stage of the
+   * same kind. Null for Reject/Archive paths which resolve server-side. */
+  destinationStageId: string | null;
   failures: Array<{ id: string; candidateName: string; error: string }>;
 }
 
@@ -525,6 +529,7 @@ export function KanbanBoard({
             actionLabel,
             destinationLabel,
             destinationKind: nextKind,
+            destinationStageId: nextStageId,
             failures: ids.map((id) => ({
               id,
               candidateName:
@@ -570,6 +575,7 @@ export function KanbanBoard({
           actionLabel,
           destinationLabel,
           destinationKind: nextKind,
+          destinationStageId: nextStageId,
           failures,
         });
 
@@ -599,7 +605,12 @@ export function KanbanBoard({
   function handleBulkMove(stage: PipelineStage) {
     setMoveMenuOpen(false);
     runBulkAction(
-      () => bulkMoveApplications(selectedIdsArray, stage.kind),
+      // Pass the exact stage.id — the bulk API used to take kind and
+      // collapse to the DSO's default stage of that kind, which silently
+      // no-op'd when the user clicked a non-default column sharing a
+      // kind with the default (e.g. Phone Screening + Interview both
+      // kind=interview). See bulk-actions.ts header for the diagnosis.
+      () => bulkMoveApplications(selectedIdsArray, stage.id),
       {
         nextStageId: stage.id,
         nextKind: stage.kind,
@@ -900,14 +911,19 @@ export function KanbanBoard({
               const ids = bulkBanner.failures.map((f) => f.id);
               const banner = bulkBanner;
               setBulkBanner(null);
-              if (banner.actionLabel === "Moved" && banner.destinationKind) {
-                // Find the kanban stage row matching the kind.
+              if (banner.actionLabel === "Moved" && banner.destinationStageId) {
+                // Retry against the EXACT stage the user originally clicked
+                // — look up by stage_id, not kind. Pre-fix this routed
+                // through `s.kind === banner.destinationKind` which would
+                // pick whichever stage of that kind sat first in the list
+                // (typically the default), losing the user's choice when
+                // multiple stages shared a kind.
                 const stage = kanbanStages.find(
-                  (s) => s.kind === banner.destinationKind
+                  (s) => s.id === banner.destinationStageId
                 );
                 if (!stage) return;
                 runBulkAction(
-                  () => bulkMoveApplications(ids, stage.kind),
+                  () => bulkMoveApplications(ids, stage.id),
                   {
                     nextStageId: stage.id,
                     nextKind: stage.kind,
