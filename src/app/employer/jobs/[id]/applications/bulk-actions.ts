@@ -36,6 +36,7 @@
  */
 
 import { revalidatePath, revalidateTag } from "next/cache";
+import { after } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { attachStatusEventNote } from "@/lib/applications/status-event-notes";
 import {
@@ -44,6 +45,8 @@ import {
   type StageKind,
 } from "@/lib/applications/stages";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
+import { dispatchStageChangedEmail } from "@/lib/email/templates/stage-changed-dispatch";
 
 const VALID_KINDS = new Set<StageKind>(STAGE_KINDS);
 
@@ -88,10 +91,16 @@ async function moveOne(
 
   // Read the current stage_id + kind so we can return prev info for
   // rollback. Embed the stage row to grab the kind in one round trip.
+  // Also pull the bits needed to fire stage_changed dispatches (candidate
+  // id, job hide-stages flag, dso_id, job title/id) so we don't need a
+  // second round trip after the update lands. Mirrors the SELECT in the
+  // canonical single-move action at /employer/applications/[id]/actions.ts.
   const { data: prev, error: prevErr } = await supabase
     .from("applications")
     .select(
-      "stage_id, stage:dso_pipeline_stages!stage_id(kind)"
+      "stage_id, candidate_id, " +
+        "jobs:jobs!inner(id, dso_id, hide_stages_from_candidate, title), " +
+        "stage:dso_pipeline_stages!stage_id(kind)"
     )
     .eq("id", applicationId)
     .single();
@@ -112,8 +121,25 @@ async function moveOne(
     ? (prevKindRaw as StageKind)
     : "open") as StageKind;
 
+  // Pull dispatch-context fields off the embedded relations. Supabase
+  // !inner returns arrays at runtime even for to-one FKs, so peel
+  // defensively (same pattern as the single-move path).
+  const candidateId = (prev as unknown as Record<string, unknown>)
+    .candidate_id as string | null;
+  const jobsRel = (prev as unknown as Record<string, unknown>).jobs as
+    | Record<string, unknown>
+    | Array<Record<string, unknown>>
+    | null;
+  const jobRow = Array.isArray(jobsRel) ? jobsRel[0] ?? null : jobsRel;
+  const dsoId = (jobRow?.dso_id as string | null) ?? null;
+  const jobId = (jobRow?.id as string | null) ?? null;
+  const jobTitle = (jobRow?.title as string | null) ?? "the job";
+  const hideStagesFromCandidate = Boolean(
+    jobRow?.hide_stages_from_candidate
+  );
+
   // No-op short-circuit. Fast path so the UI can show "0 changed, 10
-  // already in stage" rather than failing loudly.
+  // already in stage" rather than failing loudly. No dispatch — same stage.
   if (prevStageId === nextStageId) {
     return {
       ok: true,
@@ -143,6 +169,44 @@ async function moveOne(
       ok: false,
       error: error?.message ?? "Update denied or row not found",
     };
+  }
+
+  // Fire the same dispatches the single-move path fires: inbox system
+  // message + candidate.stage_changed email. Both gate on the job's
+  // hide-stages flag and on a real kind change. (Closes the pre-existing
+  // gap flagged in project_custom_email_templates_v1.md — bulk moves
+  // previously skipped these dispatches entirely, so custom email
+  // templates keyed to candidate.stage_changed wouldn't fire from the
+  // kanban bulk-move surface.)
+  //
+  // Use next/after() instead of `void` so the dispatches run AFTER the
+  // bulk response ships but are still guaranteed to complete on Vercel
+  // — per feedback_vercel_serverless_fire_and_forget.md, bare `void` in
+  // serverless gets killed mid-flight. after() callbacks are honored.
+  if (!hideStagesFromCandidate && prevKind !== nextKind) {
+    const fromLabel = KIND_DEFAULT_LABELS[prevKind] ?? prevKind;
+    const toLabel = KIND_DEFAULT_LABELS[nextKind] ?? nextKind;
+    after(async () => {
+      await dispatchInboxSystemMessage({
+        applicationId,
+        eventKind: "stage_changed",
+        senderRole: "employer",
+        body: `Your application moved from ${fromLabel} to ${toLabel}.`,
+      });
+    });
+    if (dsoId && candidateId) {
+      after(async () => {
+        await dispatchStageChangedEmail({
+          applicationId,
+          candidateId,
+          jobId: jobId ?? "",
+          jobTitle,
+          dsoId,
+          fromStageLabel: fromLabel,
+          toStageLabel: toLabel,
+        });
+      });
+    }
   }
 
   return {
