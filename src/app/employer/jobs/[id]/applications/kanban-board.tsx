@@ -178,6 +178,11 @@ export function KanbanBoard({
 }: KanbanBoardProps) {
   const [closedExpanded, setClosedExpanded] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
+  // Set on drag start when the active card is part of a multi-select.
+  // Frozen for the duration of the drag so the move uses the exact
+  // selection at pickup time even if the user changes selection mid-drag.
+  // Null when the drag is a normal single-card move.
+  const [bulkDragIds, setBulkDragIds] = useState<string[] | null>(null);
   const [error, setError] = useState<ErrorState | null>(null);
   const [remoteToast, setRemoteToast] = useState<RemoteToast | null>(null);
   const [bulkBanner, setBulkBanner] = useState<BulkResultBanner | null>(null);
@@ -348,7 +353,17 @@ export function KanbanBoard({
       : null;
 
   function handleDragStart(event: DragStartEvent) {
-    setActiveId(String(event.active.id));
+    const id = String(event.active.id);
+    setActiveId(id);
+    // If the dragged card is currently selected AND the selection has
+    // more than one card, treat this as a bulk drag. Freeze the id list
+    // here so the move uses what was selected at pickup, even if the
+    // user toggles selection mid-drag.
+    if (selection.selected.has(id) && selection.selected.size > 1) {
+      setBulkDragIds(Array.from(selection.selected));
+    } else {
+      setBulkDragIds(null);
+    }
   }
 
   const runMove = useCallback(
@@ -655,7 +670,11 @@ export function KanbanBoard({
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
+    // Capture bulk state before clearing — handleDragCancel / state
+    // resets fire synchronously below.
+    const bulkIds = bulkDragIds;
     setActiveId(null);
+    setBulkDragIds(null);
     if (!over) return;
 
     // Resolve target stage. Drop targets are either `column:<stage_id>`
@@ -673,6 +692,30 @@ export function KanbanBoard({
     }
     if (!nextStage) return;
 
+    // Bulk-drag path — drop the whole selection on the target column.
+    // Filters out cards that are already in the destination so the
+    // bulk impl's no-op short-circuit doesn't double-count them in
+    // the "moved N" banner.
+    if (bulkIds && bulkIds.length > 1) {
+      const movingIds = bulkIds.filter((id) => {
+        const a = optimisticApps.find((x) => x.id === id);
+        return a && a.stage_id !== nextStage!.id;
+      });
+      if (movingIds.length === 0) return;
+      runBulkAction(
+        () => bulkMoveApplications(movingIds, nextStage!.id),
+        {
+          nextStageId: nextStage.id,
+          nextKind: nextStage.kind,
+          actionLabel: "Moved",
+          destinationLabel: `to ${nextStage.label}`,
+          ids: movingIds,
+        }
+      );
+      return;
+    }
+
+    // Single-card path.
     const applicationId = String(active.id);
     const app = optimisticApps.find((a) => a.id === applicationId);
     if (!app) return;
@@ -702,6 +745,7 @@ export function KanbanBoard({
 
   function handleDragCancel() {
     setActiveId(null);
+    setBulkDragIds(null);
   }
 
   // Track start stage for SR announcements.
@@ -730,6 +774,19 @@ export function KanbanBoard({
             KIND_DEFAULT_LABELS[app.kind]
           : "the board";
         dragStartStageRef.current = app?.stage_id ?? null;
+        // Bulk: the active card is in a multi-select. State already
+        // computed in handleDragStart; mirror the size check here so SR
+        // copy matches what'll actually happen on drop.
+        const isBulk =
+          selection.selected.has(String(active.id)) &&
+          selection.selected.size > 1;
+        if (isBulk) {
+          return (
+            `Picked up ${selection.selected.size} candidates from ${stageLabel}. ` +
+            `Use arrow keys to move between columns. ` +
+            `Press Space to drop. Press Escape to cancel.`
+          );
+        }
         return (
           `Picked up ${name} from ${stageLabel}. ` +
           `Use arrow keys to move between columns. ` +
@@ -743,6 +800,12 @@ export function KanbanBoard({
         const app = optimisticApps.find((a) => a.id === active.id);
         const name = app?.candidate?.full_name ?? "Card";
         const startStageId = dragStartStageRef.current;
+        const isBulk =
+          selection.selected.has(String(active.id)) &&
+          selection.selected.size > 1;
+        if (isBulk) {
+          return `Drop ${selection.selected.size} candidates on ${targetLabel}?`;
+        }
         if (
           startStageId &&
           (String(over.id) === `column:${startStageId}` ||
@@ -757,27 +820,44 @@ export function KanbanBoard({
         const app = optimisticApps.find((a) => a.id === active.id);
         const name = app?.candidate?.full_name ?? "Card";
         const startStageId = dragStartStageRef.current;
+        const isBulk =
+          selection.selected.has(String(active.id)) &&
+          selection.selected.size > 1;
+        const bulkCount = selection.selected.size;
         dragStartStageRef.current = null;
         if (!over) {
           const homeLabel = startStageId
             ? stageById.get(startStageId)?.label ?? "its column"
             : "its column";
-          return `Cancelled. ${name} returned to ${homeLabel}.`;
+          return isBulk
+            ? `Cancelled. ${bulkCount} candidates returned to their columns.`
+            : `Cancelled. ${name} returned to ${homeLabel}.`;
         }
         const targetLabel = labelForDroppable(String(over.id));
         if (!targetLabel) {
           const homeLabel = startStageId
             ? stageById.get(startStageId)?.label ?? "its column"
             : "its column";
-          return `Cancelled. ${name} returned to ${homeLabel}.`;
+          return isBulk
+            ? `Cancelled. ${bulkCount} candidates returned to their columns.`
+            : `Cancelled. ${name} returned to ${homeLabel}.`;
         }
-        return `Moved ${name} to ${targetLabel}.`;
+        return isBulk
+          ? `Moved ${bulkCount} candidates to ${targetLabel}.`
+          : `Moved ${name} to ${targetLabel}.`;
       },
       onDragCancel({ active }) {
         const app = optimisticApps.find((a) => a.id === active.id);
         const name = app?.candidate?.full_name ?? "Card";
         const startStageId = dragStartStageRef.current;
+        const isBulk =
+          selection.selected.has(String(active.id)) &&
+          selection.selected.size > 1;
+        const bulkCount = selection.selected.size;
         dragStartStageRef.current = null;
+        if (isBulk) {
+          return `Cancelled. ${bulkCount} candidates returned to their columns.`;
+        }
         const homeLabel = startStageId
           ? stageById.get(startStageId)?.label ?? "its column"
           : app
@@ -787,7 +867,7 @@ export function KanbanBoard({
       },
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [optimisticApps, stageById, rejectedStage?.label]
+    [optimisticApps, stageById, rejectedStage?.label, selection.selected]
   );
 
   return (
@@ -1029,11 +1109,15 @@ export function KanbanBoard({
 
       <DragOverlay dropAnimation={DROP_ANIMATION}>
         {activeApp ? (
-          <KanbanCard
-            application={activeApp}
-            isOverlay
-            selected={selection.selected.has(activeApp.id)}
-          />
+          bulkDragIds && bulkDragIds.length > 1 ? (
+            <BulkDragPreview activeApp={activeApp} count={bulkDragIds.length} />
+          ) : (
+            <KanbanCard
+              application={activeApp}
+              isOverlay
+              selected={selection.selected.has(activeApp.id)}
+            />
+          )
         ) : null}
       </DragOverlay>
     </DndContext>
@@ -1501,5 +1585,49 @@ function WithdrawnRow({ application }: { application: KanbanApplication }) {
       </div>
       <ChevronRight className="h-3.5 w-3.5 text-slate-meta flex-shrink-0" />
     </Link>
+  );
+}
+
+/**
+ * BulkDragPreview — DragOverlay content when the user is dragging a
+ * multi-card selection. Two offset "shadow" cards sit behind the active
+ * card to convey stacking, plus a count badge in the top-right.
+ *
+ * Keeps a single source of truth for the active card's appearance by
+ * delegating to <KanbanCard isOverlay /> for the front card. The shadow
+ * cards behind are simple sized panels (not real KanbanCards) so we don't
+ * pay the cost of rendering full cards just to be visually hinted at.
+ */
+function BulkDragPreview({
+  activeApp,
+  count,
+}: {
+  activeApp: KanbanApplication;
+  count: number;
+}) {
+  return (
+    <div className="relative">
+      {/* Back shadow card — offset further */}
+      <div
+        aria-hidden
+        className="absolute inset-0 translate-x-2 translate-y-2 rounded-md border border-[var(--rule)] bg-white shadow-sm opacity-70"
+      />
+      {/* Middle shadow card — offset less */}
+      <div
+        aria-hidden
+        className="absolute inset-0 translate-x-1 translate-y-1 rounded-md border border-[var(--rule)] bg-white shadow-sm opacity-90"
+      />
+      {/* Front: the actual active card */}
+      <div className="relative">
+        <KanbanCard application={activeApp} isOverlay selected />
+        {/* Count badge — top-right corner */}
+        <div
+          className="absolute -top-2 -right-2 z-10 inline-flex items-center justify-center rounded-full bg-heritage-deep px-2 min-w-[24px] h-6 text-[11px] font-bold text-white shadow-md ring-2 ring-white"
+          aria-hidden
+        >
+          {count}
+        </div>
+      </div>
+    </div>
   );
 }
