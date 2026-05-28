@@ -257,11 +257,69 @@ const INBOX: Record<string, HelpEntry> = {
     format: "tip",
     lens: "employer",
   },
+  "interviews.workflow": {
+    title: "Booking interviews end-to-end",
+    tip: "Propose times in the candidate's thread, the candidate picks one, the meeting lands on both calendars with a Meet or Teams link. Rescheduling and cancellation propagate to both sides.",
+    format: "drawer",
+    lens: "employer",
+    videoId: null,
+    steps: [
+      {
+        heading: "1 · Connect your calendar (one-time setup)",
+        body: "Settings → Integrations → Connect Google or Microsoft. You'll grant calendar access; we use it to write the event and the video link. You can disconnect anytime.",
+      },
+      {
+        heading: "2 · Propose times",
+        body: "From a candidate thread, click Propose interview. Pick three to five time windows; the candidate sees them as a single card and picks one. No back-and-forth email.",
+      },
+      {
+        heading: "3 · The booking",
+        body: "When the candidate picks a slot, the event auto-creates on your calendar with a Google Meet or Microsoft Teams link baked in. The candidate gets the same invite at the same time.",
+      },
+      {
+        heading: "4 · Reschedule or cancel",
+        body: "Either side can reschedule from the original card or thread. The event updates on both calendars and a fresh card with new times posts in the thread. Cancellation removes the event from both calendars and notes it in the thread.",
+      },
+      {
+        heading: "5 · Reminders",
+        body: "We send the candidate an automated email reminder ahead of the interview. Your calendar handles your own reminders the way you've already configured them.",
+      },
+    ],
+  },
   "inbox.offer": {
     title: "Send an offer",
     tip: "Send an offer card in-thread. The candidate accepts or declines on a secure tokenized page, and the pipeline stage flips for you automatically.",
     format: "tip",
     lens: "employer",
+  },
+  "offers.workflow": {
+    title: "Sending and tracking offers",
+    tip: "Compose an offer from your library or from scratch, send it in the candidate's thread, and track Accept / Decline in real time. The pipeline stage flips for you when the candidate responds.",
+    format: "drawer",
+    lens: "employer",
+    videoId: null,
+    steps: [
+      {
+        heading: "1 · Compose",
+        body: "From a candidate's profile or thread, click Send offer. Pick a template from your offer letter library or start blank. Mergefields like {{candidate.first_name}} and {{job.title}} fill automatically.",
+      },
+      {
+        heading: "2 · Review and send",
+        body: "Preview shows the candidate's exact view, including the secure Accept / Decline buttons. Click Send — the candidate gets an email plus a card in their inbox thread.",
+      },
+      {
+        heading: "3 · Candidate responds",
+        body: "The candidate opens a secure tokenized page, reads the offer, and accepts or declines with a typed-name soft signature. We capture IP and timestamp for your records.",
+      },
+      {
+        heading: "4 · Auto stage move",
+        body: "An accepted offer moves the candidate to Hired automatically. A declined offer moves them to Rejected with the decline reason if the candidate added one. You're notified by email either way.",
+      },
+      {
+        heading: "5 · Revise an offer",
+        body: "If you need to send a revised offer, do it from the same thread — the new offer supersedes the old one and the candidate sees both for context.",
+      },
+    ],
   },
   "talent.overview": {
     title: "Talent Pool",
@@ -304,6 +362,35 @@ const SETTINGS: Record<string, HelpEntry> = {
     tip: "Pay annually for roughly 10% off versus monthly. Same features either way.",
     format: "tip",
     lens: "employer",
+  },
+  "billing.manage": {
+    title: "Upgrade, downgrade, or cancel",
+    tip: "Subscription changes go through your secure billing portal — upgrade for proration credit on the unused part of your current plan, downgrade or cancel at any time.",
+    format: "drawer",
+    lens: "employer",
+    videoId: null,
+    steps: [
+      {
+        heading: "Open your billing portal",
+        body: "Settings → Billing → Manage subscription. The portal opens in a new window — it's hosted by Stripe so your card details never touch DSO Hire.",
+      },
+      {
+        heading: "Change your plan",
+        body: "Pick a new tier and confirm. Upgrades take effect immediately and prorate the difference against the rest of your billing period. Downgrades take effect at the end of the current period so you keep what you paid for.",
+      },
+      {
+        heading: "Switch monthly ↔ annual",
+        body: "Same portal. Switching to annual saves roughly 10%; the proration is calculated and shown before you confirm.",
+      },
+      {
+        heading: "Cancel",
+        body: "Cancellation takes effect at the end of your current billing period — you keep access until then and aren't charged again. Your data stays put if you come back later.",
+      },
+      {
+        heading: "Update your card or invoice email",
+        body: "Same portal. Card and billing email changes apply to the next invoice.",
+      },
+    ],
   },
   "locations.overview": {
     title: "Practice locations",
@@ -387,6 +474,99 @@ const SETTINGS: Record<string, HelpEntry> = {
   "settings.pipeline": {
     title: "Pipeline settings",
     tip: "Rename and reorder your hiring stages here. Changes apply across all your jobs — existing candidates keep their current stage.",
+    format: "tip",
+    lens: "employer",
+  },
+  "applications.review": {
+    title: "Reviewing applications",
+    tip: "Open any application to see the candidate's profile, resume, screening answers, knockout flags, and Practice Fit score side-by-side. Leave structured scorecard feedback and @mention teammates without leaving the page.",
+    format: "drawer",
+    lens: "employer",
+    videoId: null,
+    steps: [
+      {
+        heading: "1 · Find applications",
+        body: "Applications tab shows everything across your jobs. The per-job pipeline at /employer/jobs/[id]/applications shows just that role's candidates as a drag-and-drop kanban.",
+      },
+      {
+        heading: "2 · Open the detail page",
+        body: "Click any candidate to see profile, resume, screening question answers, knockout flags (with the exact failed question), Practice Fit score breakdown, and your team's notes — all on one page.",
+      },
+      {
+        heading: "3 · Move stages",
+        body: "Use the Stage selector at the top of the detail page, drag the card on the kanban, or bulk-select multiple candidates and move them at once. Candidate email notifications follow your per-action settings.",
+      },
+      {
+        heading: "4 · Leave a scorecard",
+        body: "Structured interview feedback attached to the candidate — your team sees consistent, comparable input rather than scattered notes. Scorecards roll up on the candidate card so a hiring manager can scan the whole panel at a glance.",
+      },
+      {
+        heading: "5 · Comment and @mention",
+        body: "Drop a comment on the candidate card and @mention a teammate. They get an email + an in-app notification with a deep link straight back to the thread.",
+      },
+      {
+        heading: "6 · Send a custom email (Growth+)",
+        body: "From any candidate's detail page, click Send email next to the stage selector. Pick one of your custom templates (interview prep, no-show outreach, etc.), preview the rendered version, and send.",
+      },
+    ],
+  },
+  "reports.overview": {
+    title: "What's in Reports",
+    tip: "A DSO-wide view of your hiring funnel, top-performing roles, and time-to-fill metrics. Built from the application data you're already capturing — no extra logging required.",
+    format: "drawer",
+    lens: "employer",
+    videoId: null,
+    steps: [
+      {
+        heading: "Headline tiles",
+        body: "Open roles, applications received in the last 30 days, hires this quarter, and your average time-to-fill in days. Quick read at the top of the page.",
+      },
+      {
+        heading: "Pipeline funnel",
+        body: "Visual breakdown of where candidates are across all your jobs — how many in New, Reviewed, Interviewed, Offered, Hired, Rejected. Click any stage for the candidate list at that stage.",
+      },
+      {
+        heading: "Top jobs leaderboard",
+        body: "Your roles ranked by application volume and conversion rate. Useful for spotting which listings are pulling and which need a refresh.",
+      },
+      {
+        heading: "Cross-location stats",
+        body: "Compare hiring activity, fill rate, and time-to-fill across your practice locations. Helpful for multi-location groups to see which markets are running hot and which need attention.",
+      },
+      {
+        heading: "Export to CSV",
+        body: "Every applications list — DSO-wide, per-job, per-stage — has a Download CSV link. Bring the data into Excel, your BI tool, or wherever else it needs to go.",
+      },
+    ],
+  },
+  "integrations.calendar": {
+    title: "Connecting your calendar",
+    tip: "Connect Google or Microsoft once and we'll auto-create interview events with Meet or Teams links baked in. Disconnect anytime — no calendar data leaves your control.",
+    format: "drawer",
+    lens: "employer",
+    videoId: null,
+    steps: [
+      {
+        heading: "Where to connect",
+        body: "Settings → Integrations → Calendar. One click per provider. You'll be sent through Google or Microsoft's standard OAuth screen to grant calendar access.",
+      },
+      {
+        heading: "What we use it for",
+        body: "Writing interview events to your calendar when a candidate books one, generating the Meet or Teams link, and pushing reschedules or cancellations through. We don't read your existing events.",
+      },
+      {
+        heading: "Per-user, not per-DSO",
+        body: "Each team member connects their own calendar so events land on the right person's schedule. If a hiring manager hasn't connected theirs, you'll see a one-click prompt the first time they propose an interview.",
+      },
+      {
+        heading: "Disconnect anytime",
+        body: "Settings → Integrations → Disconnect. Existing events stay on your calendar — we just stop writing new ones for that user. You can also revoke access from Google or Microsoft's account dashboard.",
+      },
+    ],
+  },
+  "locations.public_website": {
+    title: "Per-location practice website",
+    tip: "Each location gets a public listing page at /location/[slug] showing your branding, address, current open roles, and a careers CTA. Indexed by search engines once your site is out of pre-launch lockdown.",
     format: "tip",
     lens: "employer",
   },
