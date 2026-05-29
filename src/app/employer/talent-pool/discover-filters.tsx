@@ -76,7 +76,8 @@ export function DiscoverFilters({ initial, roleOptions }: DiscoverFiltersProps) 
             type="text"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Name, headline, current title…"
+            placeholder={`Skills, title, name — try: hygienist AND invisalign`}
+            aria-describedby="discover-search-hint"
             className="w-full pl-9 pr-3 py-2.5 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
           />
         </div>
@@ -92,6 +93,18 @@ export function DiscoverFilters({ initial, roleOptions }: DiscoverFiltersProps) 
           ))}
         </select>
       </div>
+      <p
+        id="discover-search-hint"
+        className="-mt-1 text-[11px] leading-relaxed text-slate-meta"
+      >
+        Boolean search:{" "}
+        <code className="text-ink">AND</code>,{" "}
+        <code className="text-ink">OR</code>,{" "}
+        <code className="text-ink">-exclude</code>, and{" "}
+        <code className="text-ink">&quot;exact phrase&quot;</code> — e.g.{" "}
+        <span className="text-ink">dentist OR hygienist -pediatric</span>.
+        Searches names, titles, skills, specialties, and PMS systems.
+      </p>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <FilterField
           label="Current state"

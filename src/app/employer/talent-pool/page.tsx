@@ -184,11 +184,25 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
       .limit(40);
 
     if (keyword) {
-      const safe = keyword.replace(/[%,]/g, " ").trim();
-      if (safe.length > 0) {
-        q = q.or(
-          `full_name.ilike.%${safe}%,headline.ilike.%${safe}%,current_title.ilike.%${safe}%`
-        );
+      // E7.7 boolean search over candidates.search_doc (generated FTS
+      // vector spanning name/headline/title/summary/city + skills/
+      // specialty/PMS arrays). A single bare token uses to_tsquery prefix
+      // matching (`token:*`) so partial typing still resolves ("hygien" ->
+      // hygienist). Anything with whitespace, a quote, a leading "-", or an
+      // OR operator is handed to websearch_to_tsquery, which safely parses
+      // AND / OR / NOT / "phrases" from raw user input and never throws on
+      // malformed syntax (unlike to_tsquery).
+      const isBooleanQuery = /\s|["]|(^|\s)-|\bOR\b/.test(keyword);
+      if (isBooleanQuery) {
+        q = q.textSearch("search_doc", keyword, {
+          type: "websearch",
+          config: "english",
+        });
+      } else {
+        const token = keyword.replace(/[^a-zA-Z0-9]/g, "");
+        if (token.length > 0) {
+          q = q.textSearch("search_doc", `${token}:*`, { config: "english" });
+        }
       }
     }
     if (role) {
