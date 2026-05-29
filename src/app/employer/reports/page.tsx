@@ -30,9 +30,11 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   getDsoAnalytics,
   getDsoCrossLocationStats,
+  getRecruiterProductivity,
 } from "@/lib/analytics/metrics";
 import { FunnelChart } from "@/components/analytics/funnel-chart";
 import { CrossLocationTable } from "@/components/analytics/cross-location-table";
+import { RecruiterProductivityTable } from "@/components/analytics/recruiter-productivity-table";
 
 export const metadata: Metadata = { title: "Reports" };
 export const dynamic = "force-dynamic";
@@ -53,9 +55,10 @@ export default async function ReportsPage() {
   if (!dsoUser) redirect("/employer/onboarding");
 
   const dsoId = dsoUser.dso_id as string;
-  const [analytics, crossLocationRows] = await Promise.all([
+  const [analytics, crossLocationRows, recruiterRows] = await Promise.all([
     getDsoAnalytics(supabase, dsoId),
     getDsoCrossLocationStats(supabase, dsoId),
+    getRecruiterProductivity(supabase, dsoId, 30),
   ]);
 
   // Top jobs by application count.
@@ -200,6 +203,12 @@ export default async function ReportsPage() {
       {crossLocationRows.length >= 2 && (
         <div className="mb-10">
           <CrossLocationTable rows={crossLocationRows} />
+        </div>
+      )}
+
+      {recruiterRows.length >= 1 && (
+        <div className="mb-10">
+          <RecruiterProductivityTable rows={recruiterRows} windowDays={30} />
         </div>
       )}
 

@@ -700,6 +700,116 @@ export async function getDsoCrossLocationStats(
 }
 
 // ─────────────────────────────────────────────────────────────
+// Recruiter productivity (E6.16)
+// ─────────────────────────────────────────────────────────────
+
+export interface RecruiterProductivityRow {
+  /** auth.users id of the recruiter. */
+  user_id: string;
+  name: string;
+  role: string;
+  /** Pipeline moves they made — single moves + bulk succeeded counts. */
+  candidates_moved: number;
+  /** Of those moves, how many landed a candidate in a hired-kind stage. */
+  hires_made: number;
+  /** Most recent attributed action in the window (ISO), or null. */
+  last_active: string | null;
+}
+
+/**
+ * Per-recruiter activity rollup for DSO Reports (E6.16).
+ *
+ * Attribution comes from `audit_events.actor_user_id` (NOT
+ * application_status_events — that table only records actor_type, not the
+ * specific user). We already write `application.stage_moved` (single) and
+ * `bulk_action.applied` (bulk) audit rows with the acting user + a
+ * metadata snapshot, so this is a pure read over existing data — no new
+ * instrumentation. Names resolve via dso_users (name-split first/last).
+ *
+ * Sorted by candidates_moved desc. Returns [] when no attributed activity
+ * in the window; caller decides whether to render (multi-recruiter DSOs
+ * get the most value).
+ */
+export async function getRecruiterProductivity(
+  supabase: SupabaseClient,
+  dsoId: string,
+  days = 30
+): Promise<RecruiterProductivityRow[]> {
+  const since = daysAgoIso(days);
+
+  const { data: events } = await supabase
+    .from("audit_events")
+    .select("actor_user_id, event_kind, metadata, created_at")
+    .eq("dso_id", dsoId)
+    .gte("created_at", since)
+    .in("event_kind", ["application.stage_moved", "bulk_action.applied"]);
+
+  const agg = new Map<
+    string,
+    { moves: number; hires: number; lastMs: number }
+  >();
+  for (const e of (events ?? []) as Array<{
+    actor_user_id: string | null;
+    event_kind: string;
+    metadata: Record<string, unknown> | null;
+    created_at: string;
+  }>) {
+    const uid = e.actor_user_id;
+    if (!uid) continue;
+    const meta = (e.metadata ?? {}) as Record<string, unknown>;
+    const a = agg.get(uid) ?? { moves: 0, hires: 0, lastMs: 0 };
+    const t = new Date(e.created_at).getTime();
+    if (t > a.lastMs) a.lastMs = t;
+    if (e.event_kind === "application.stage_moved") {
+      a.moves += 1;
+      if (meta.to_stage_kind === "hired") a.hires += 1;
+    } else {
+      // bulk_action.applied — credit the succeeded count.
+      const n = Number(meta.succeeded_count ?? 0) || 0;
+      a.moves += n;
+      if (meta.next_stage_kind === "hired") a.hires += n;
+    }
+    agg.set(uid, a);
+  }
+
+  const uids = Array.from(agg.keys());
+  if (uids.length === 0) return [];
+
+  const { data: members } = await supabase
+    .from("dso_users")
+    .select("auth_user_id, first_name, last_name, role")
+    .eq("dso_id", dsoId)
+    .in("auth_user_id", uids);
+  const nameById = new Map<string, { name: string; role: string }>();
+  for (const m of (members ?? []) as Array<{
+    auth_user_id: string;
+    first_name: string | null;
+    last_name: string | null;
+    role: string | null;
+  }>) {
+    const name =
+      [m.first_name, m.last_name].filter(Boolean).join(" ").trim() ||
+      "Teammate";
+    nameById.set(m.auth_user_id, { name, role: m.role ?? "member" });
+  }
+
+  return uids
+    .map((uid) => {
+      const a = agg.get(uid)!;
+      const info = nameById.get(uid);
+      return {
+        user_id: uid,
+        name: info?.name ?? "Teammate",
+        role: info?.role ?? "member",
+        candidates_moved: a.moves,
+        hires_made: a.hires,
+        last_active: a.lastMs > 0 ? new Date(a.lastMs).toISOString() : null,
+      };
+    })
+    .sort((x, y) => y.candidates_moved - x.candidates_moved);
+}
+
+// ─────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────
 
