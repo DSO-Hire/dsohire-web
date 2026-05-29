@@ -63,8 +63,8 @@ export function StageChanged({
       </Section>
 
       <Text style={smallParagraph}>
-        The hiring team at {dsoName} will reach out when there&apos;s a next
-        step. You can track this application from your dashboard.
+        The hiring team at {dsoName}{" "}will reach out when there&apos;s a
+        next step. You can track this application from your dashboard.
       </Text>
     </Layout>
   );
