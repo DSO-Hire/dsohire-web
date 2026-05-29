@@ -49,6 +49,7 @@ import {
   type ActivityEvent,
 } from "@/components/dashboard/activity-feed";
 import { StuckAlert } from "@/components/dashboard/stuck-alert";
+import { StalePipelineAlert } from "@/components/dashboard/stale-pipeline-alert";
 import { PipelineFunnel } from "@/components/dashboard/pipeline-funnel";
 import {
   JobLeaderboard,
@@ -64,6 +65,11 @@ export const metadata: Metadata = {
 // SLA threshold for stuck-candidate alerts. Pulled out as a constant so
 // future config UI can override it per-DSO without touching the page.
 const STUCK_SLA_DAYS = 5;
+
+// E3.24 — days a candidate can sit in a mid-pipeline stage (screen /
+// interview / offer) before the dashboard flags them as stale. Matches
+// the weekly-digest threshold so the two surfaces agree.
+const STALE_STAGE_DAYS = 14;
 
 export default async function EmployerDashboard() {
   // Snapshot the request timestamp once. Server-component-safe and gives
@@ -149,6 +155,15 @@ export default async function EmployerDashboard() {
   };
   let stuckCandidates: StuckCandidateRow[] = [];
   let stuckTotalCount = 0;
+
+  // ── E3.24 stale-in-pipeline scaffolding ────────────────────────────
+  // Distinct from "stuck" (un-reviewed NEW apps, by created_at). "Stale"
+  // = candidates parked in a mid-pipeline stage (screen/interview/offer)
+  // past STALE_STAGE_DAYS, keyed on stage_entered_at. Mirrors the weekly
+  // digest's stale logic but surfaces it live in-app.
+  type StaleCandidateRow = StuckCandidateRow & { stageLabel: string };
+  let staleCandidates: StaleCandidateRow[] = [];
+  let staleTotalCount = 0;
 
   // ── Pipeline funnel scaffolding (counts of CURRENT stage kind, last 30
   // days of submissions). v1: kind-snapshot funnel. A flow-based funnel
@@ -257,6 +272,27 @@ export default async function EmployerDashboard() {
       const openStageIdsForFilter =
         openStageIds.length > 0 ? openStageIds : ["__none__"];
 
+      // E3.24 — resolve mid-pipeline stage ids + labels for the stale
+      // lookup. We surface the actual per-DSO label (e.g. "Phone Screening")
+      // so the alert reads in the customer's own pipeline vocabulary.
+      const { data: midStageRows } = await supabase
+        .from("dso_pipeline_stages")
+        .select("id, kind, label")
+        .eq("dso_id", dsoId)
+        .in("kind", ["screen", "interview", "offer"]);
+      const midStageIds = ((midStageRows ?? []) as Array<{ id: string }>).map(
+        (r) => r.id
+      );
+      const midStageIdsForFilter =
+        midStageIds.length > 0 ? midStageIds : ["__none__"];
+      const midStageLabelById = new Map<string, string>(
+        ((midStageRows ?? []) as Array<{
+          id: string;
+          kind: string;
+          label: string | null;
+        }>).map((r) => [r.id, r.label ?? r.kind])
+      );
+
       // ── Date math ──────────────────────────────────────────────────
       const now = new Date();
       const dayOfWeek = now.getUTCDay();
@@ -302,6 +338,7 @@ export default async function EmployerDashboard() {
         recentAppsRes,
         last14DaysRes,
         stuckRes,
+        staleRes,
         funnel30dRes,
         leaderboard14dRes,
       ] = await Promise.all([
@@ -353,6 +390,21 @@ export default async function EmployerDashboard() {
             ).toISOString(),
           )
           .order("created_at", { ascending: true }),
+        // E3.24 — stale-in-pipeline: candidates in a mid-pipeline stage
+        // whose stage_entered_at is older than STALE_STAGE_DAYS. Keyed on
+        // stage_entered_at (when they LANDED in the stage), not created_at.
+        supabase
+          .from("applications")
+          .select(
+            "id, job_id, stage_id, stage_entered_at, candidate_id, candidate:candidates(full_name)"
+          )
+          .in("job_id", jobIds)
+          .in("stage_id", midStageIdsForFilter)
+          .lte(
+            "stage_entered_at",
+            new Date(nowMs - STALE_STAGE_DAYS * 86400000).toISOString()
+          )
+          .order("stage_entered_at", { ascending: true }),
         // Funnel: applications submitted in the last 30 days, by current kind.
         supabase
           .from("applications")
@@ -454,6 +506,43 @@ export default async function EmployerDashboard() {
           jobTitle: job?.title ?? "Unknown role",
           locationName: null, // location wiring is in a follow-up — see job_locations notes
           daysWaiting: days,
+        };
+      });
+
+      // ── E3.24 stale-in-pipeline candidates ───────────────────────
+      type StaleRow = {
+        id: string;
+        job_id: string;
+        stage_id: string;
+        stage_entered_at: string | null;
+        candidate_id: string;
+        candidate:
+          | Array<{ full_name: string | null }>
+          | { full_name: string | null }
+          | null;
+      };
+      const staleRaw = (staleRes.data ?? []) as unknown as StaleRow[];
+      staleTotalCount = staleRaw.length;
+      staleCandidates = staleRaw.slice(0, 3).map((row) => {
+        const job = recentJobMap.get(row.job_id);
+        const enteredMs = row.stage_entered_at
+          ? new Date(row.stage_entered_at).getTime()
+          : nowMs;
+        const days = Math.max(0, Math.floor((nowMs - enteredMs) / 86400000));
+        const candidateRel = Array.isArray(row.candidate)
+          ? row.candidate[0]
+          : row.candidate;
+        const name = candidateDisplayName({
+          fullName: candidateRel?.full_name ?? null,
+          candidateId: row.candidate_id,
+        });
+        return {
+          applicationId: row.id,
+          candidateName: name,
+          jobTitle: job?.title ?? "Unknown role",
+          locationName: null,
+          daysWaiting: days,
+          stageLabel: midStageLabelById.get(row.stage_id) ?? "in pipeline",
         };
       });
 
@@ -860,6 +949,15 @@ export default async function EmployerDashboard() {
         totalCount={stuckTotalCount}
         slaDays={STUCK_SLA_DAYS}
         reviewAllHref="/employer/applications?stuck=1"
+      />
+
+      {/* E3.24 — stale mid-pipeline candidates (distinct from the new-app
+          SLA above). Renders only when something is stale. */}
+      <StalePipelineAlert
+        candidates={staleCandidates}
+        totalCount={staleTotalCount}
+        thresholdDays={STALE_STAGE_DAYS}
+        reviewAllHref="/employer/applications?stale=1"
       />
 
       {/* Onboarding nudge — only when no locations on file. */}
