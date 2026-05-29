@@ -36,6 +36,7 @@ import type { PipelineStage, StageKind } from "@/lib/applications/stages";
 import { getPracticeFitForJob } from "@/lib/practice-fit/get-or-compute";
 import type { FitResult } from "@/lib/practice-fit/types";
 import { JobStatusActions, JobVisibilityToggle } from "./status-actions";
+import { ShareToLinkedIn } from "@/components/share-to-linkedin";
 import { cloneJob } from "../actions";
 import {
   getPerJobAnalytics,
@@ -440,6 +441,12 @@ export default async function PerJobPipelinePage({
               <ExternalLink className="size-3.5" />
               View public posting
             </Link>
+          )}
+          {status === "active" && (
+            <ShareToLinkedIn
+              url={`${process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com"}/jobs/${jobId}`}
+              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-ink hover:bg-cream"
+            />
           )}
           <a
             href={`/api/employer/jobs/${jobId}/applications.csv`}

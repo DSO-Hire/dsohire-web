@@ -28,6 +28,7 @@ import {
 } from "@/components/rendered-job-description";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { SaveJobButton } from "@/lib/saved-jobs/save-job-button";
+import { ShareToLinkedIn } from "@/components/share-to-linkedin";
 import { loadJobAttachmentsWithUrls } from "@/lib/jobs/attachments";
 import { JobAttachmentsPublic } from "@/components/job-attachments-public";
 import { recordJobView } from "@/lib/analytics/record-view";
@@ -430,6 +431,9 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
               initialSaved={initialSaved}
               candidateAuthed={candidateAuthed}
               variant="label"
+            />
+            <ShareToLinkedIn
+              url={`${process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com"}/jobs/${job.id as string}`}
             />
           </div>
         </header>
