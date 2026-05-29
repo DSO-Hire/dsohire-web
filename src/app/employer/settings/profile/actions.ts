@@ -27,6 +27,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { recordAuditEvent } from "@/lib/audit/record";
 import {
   ALL_CULTURE_CHIPS,
   MAX_CULTURE_CHIPS,
@@ -131,6 +132,69 @@ const RESERVED_SLUGS = new Set([
   "locations",
   "applications",
 ]);
+
+/* ──────────────────────────────────────────────────────────────
+ * DSO name (owner/admin only — see getDsoAdminContext)
+ * ─────────────────────────────────────────────────────────── */
+
+const DSO_NAME_MAX = 100;
+
+/**
+ * Edit the DSO's display name. Previously fixed at sign-up, which stranded
+ * any typo / wrong casing entered during onboarding (it renders live in
+ * every candidate email, the public careers page, and company listings).
+ * Owner/admin only (getDsoAdminContext); decoupled from the slug so a name
+ * fix never breaks shared careers-page URLs. Audited.
+ */
+export async function updateDsoName(input: { name: string }): Promise<Result> {
+  const ctx = await getDsoAdminContext();
+  if (!ctx.ok) return ctx;
+
+  const name = input.name.trim().replace(/\s+/g, " ");
+  if (name.length < 2) {
+    return { ok: false, error: "Enter your DSO's name (at least 2 characters)." };
+  }
+  if (name.length > DSO_NAME_MAX) {
+    return {
+      ok: false,
+      error: `Name is too long (${DSO_NAME_MAX} character max).`,
+    };
+  }
+
+  // Snapshot the prior name for the audit trail + no-op short-circuit.
+  const { data: prior } = await ctx.supabase
+    .from("dsos")
+    .select("name")
+    .eq("id", ctx.dsoId)
+    .maybeSingle();
+  const priorName = (prior?.name as string | null) ?? null;
+  if (priorName === name) return { ok: true };
+
+  const { error } = await ctx.supabase
+    .from("dsos")
+    .update({ name })
+    .eq("id", ctx.dsoId);
+  if (error) {
+    console.error("[profile/updateDsoName]", error);
+    return { ok: false, error: "Couldn't save the name." };
+  }
+
+  // Awaited (not void) so the audit reliably lands on Vercel.
+  await recordAuditEvent({
+    dsoId: ctx.dsoId,
+    actorUserId: ctx.user.id,
+    eventKind: "dso.name_changed",
+    targetTable: "dsos",
+    targetId: ctx.dsoId,
+    summary: priorName
+      ? `Renamed DSO from "${priorName}" to "${name}"`
+      : `Set DSO name to "${name}"`,
+    metadata: { from: priorName, to: name },
+  });
+
+  await revalidateProfileSurfaces(ctx.supabase, ctx.dsoId);
+  return { ok: true };
+}
 
 export async function upsertSlug(input: { slug: string }): Promise<Result> {
   const ctx = await getDsoAdminContext();

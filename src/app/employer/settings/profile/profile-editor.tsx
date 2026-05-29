@@ -31,6 +31,7 @@ import { JobDescriptionEditor } from "@/components/job-description-editor";
 import { setDsoLogoUrl } from "../actions";
 import {
   upsertSlug,
+  updateDsoName,
   upsertAbout,
   setDsoBannerUrl,
   upsertWhyJoinUs,
@@ -70,7 +71,7 @@ export function ProfileEditor({ initial, canEdit }: ProfileEditorProps) {
     <div className="space-y-5">
       <IdentitySection
         canEdit={canEdit}
-        name={initial.name}
+        initialName={initial.name}
         initialSlug={initial.slug}
       />
       <CompanyDetailsSection
@@ -196,13 +197,43 @@ function SaveBar({
 
 function IdentitySection({
   canEdit,
-  name,
+  initialName,
   initialSlug,
 }: {
   canEdit: boolean;
-  name: string;
+  initialName: string;
   initialSlug: string;
 }) {
+  // ── DSO name (editable; owner/admin gated server-side) ──
+  const [name, setName] = useState(initialName);
+  const [nameSnapshot, setNameSnapshot] = useState(initialName);
+  const [namePending, startNameTransition] = useTransition();
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [nameSaved, setNameSaved] = useState(false);
+  const nameDirty = name.trim() !== nameSnapshot.trim();
+
+  const onSaveName = () => {
+    if (!nameDirty) return;
+    const trimmed = name.trim().replace(/\s+/g, " ");
+    if (trimmed.length < 2) {
+      setNameError("Enter your DSO's name (at least 2 characters).");
+      return;
+    }
+    setNameError(null);
+    setNameSaved(false);
+    startNameTransition(async () => {
+      const result = await updateDsoName({ name: trimmed });
+      if (!result.ok) {
+        setNameError(result.error);
+        return;
+      }
+      setName(trimmed);
+      setNameSnapshot(trimmed);
+      setNameSaved(true);
+    });
+  };
+
+  // ── Slug ──
   const [slug, setSlug] = useState(initialSlug);
   const [snapshot, setSnapshot] = useState(initialSlug);
   const [pending, startTransition] = useTransition();
@@ -242,16 +273,44 @@ function IdentitySection({
   return (
     <SectionShell
       eyebrow="01 — Identity"
-      title="Public URL"
-      subtitle="Your DSO's name is fixed at sign-up. The URL slug is editable; old URLs keep redirecting forever."
+      title="Name & public URL"
+      subtitle="Your DSO's name shows on every candidate email, your careers page, and company listings. The URL slug is editable separately and old URLs keep redirecting forever."
     >
       <div className="space-y-5">
         <div>
-          <label className="mb-1.5 block text-[12px] font-semibold text-ink">
+          <label
+            htmlFor="dso-name"
+            className="mb-1.5 block text-[12px] font-semibold text-ink"
+          >
             DSO name
           </label>
-          <div className="rounded border border-[var(--rule)] bg-cream/50 px-3 py-2 text-sm text-slate-body">
-            {name}
+          <input
+            id="dso-name"
+            type="text"
+            value={name}
+            disabled={!canEdit}
+            onChange={(e) => {
+              setNameSaved(false);
+              setNameError(null);
+              setName(e.target.value);
+            }}
+            maxLength={100}
+            className="w-full rounded border border-[var(--rule-strong)] bg-white px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
+          />
+          <p className="mt-1.5 text-xs text-slate-meta">
+            Fix typos or casing here — changes apply everywhere candidates see
+            you. Doesn&apos;t change your URL slug below.
+          </p>
+          <div className="mt-3">
+            <SaveBar
+              dirty={nameDirty}
+              saving={namePending}
+              saved={nameSaved}
+              error={nameError}
+              onSave={onSaveName}
+              saveLabel="Update name"
+              disabled={!canEdit}
+            />
           </div>
         </div>
 
