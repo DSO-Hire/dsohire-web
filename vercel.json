@@ -7,10 +7,6 @@
     {
       "path": "/api/cron/weekly-digest",
       "schedule": "0 13 * * 1"
-    },
-    {
-      "path": "/api/cron/job-lifecycle",
-      "schedule": "0 * * * *"
     }
   ]
 }
