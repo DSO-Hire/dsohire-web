@@ -70,6 +70,7 @@ import {
   bulkArchiveApplications,
   type BulkActionResult,
 } from "./bulk-actions";
+import { bulkMessageApplications } from "@/lib/messages/actions";
 import type { ApplicationsListItem } from "./applications-list";
 import { KanbanColumn } from "./kanban-column";
 import { KanbanCard } from "./kanban-card";
@@ -190,6 +191,10 @@ export function KanbanBoard({
   const [moveMenuOpen, setMoveMenuOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
+  const [messageDialogOpen, setMessageDialogOpen] = useState(false);
+  // Last broadcast body — lets the result banner's Retry resend to the
+  // failed subset without re-opening the compose dialog.
+  const lastBulkMessageBodyRef = useRef<string>("");
   const [, startTransition] = useTransition();
 
   // pendingMovesRef tracks {applicationId -> expectedStageId}.
@@ -668,6 +673,62 @@ export function KanbanBoard({
     );
   }
 
+  function runBulkMessage(ids: string[], body: string) {
+    if (ids.length === 0 || bulkInFlight) return;
+    lastBulkMessageBodyRef.current = body;
+    const nameById = new Map<string, string>();
+    for (const id of ids) {
+      const app = optimisticApps.find((a) => a.id === id);
+      nameById.set(id, app?.candidate?.full_name ?? "Anonymous candidate");
+    }
+    setBulkInFlight(true);
+    setBulkBanner(null);
+    setError(null);
+    startTransition(async () => {
+      let result: { succeeded: string[]; failed: { id: string; error: string }[] };
+      try {
+        result = await bulkMessageApplications(ids, body);
+      } catch (err) {
+        if (!isMountedRef.current) return;
+        const message = err instanceof Error ? err.message : "Unexpected error";
+        setBulkBanner({
+          succeededCount: 0,
+          actionLabel: "Messaged",
+          destinationLabel: "",
+          destinationKind: null,
+          destinationStageId: null,
+          failures: ids.map((id) => ({
+            id,
+            candidateName: nameById.get(id) ?? "Anonymous candidate",
+            error: message,
+          })),
+        });
+        setBulkInFlight(false);
+        return;
+      }
+      if (!isMountedRef.current) return;
+      setBulkBanner({
+        succeededCount: result.succeeded.length,
+        actionLabel: "Messaged",
+        destinationLabel: "",
+        destinationKind: null,
+        destinationStageId: null,
+        failures: result.failed.map((f) => ({
+          id: f.id,
+          candidateName: nameById.get(f.id) ?? "Anonymous candidate",
+          error: f.error,
+        })),
+      });
+      if (result.succeeded.length > 0) selection.clear();
+      setBulkInFlight(false);
+    });
+  }
+
+  function handleBulkMessage(body: string) {
+    setMessageDialogOpen(false);
+    runBulkMessage(selectedIdsArray, body);
+  }
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     // Capture bulk state before clearing — handleDragCancel / state
@@ -977,6 +1038,7 @@ export function KanbanBoard({
             onMoveMenuOpenChange={setMoveMenuOpen}
             moveStages={kanbanStages}
             onMove={handleBulkMove}
+            onOpenMessage={() => setMessageDialogOpen(true)}
             onOpenReject={() => setRejectDialogOpen(true)}
             onOpenArchive={() => setArchiveDialogOpen(true)}
           />
@@ -1038,6 +1100,9 @@ export function KanbanBoard({
                     ids,
                   }
                 );
+              } else if (banner.actionLabel === "Messaged") {
+                // Resend the same broadcast body to just the failed ids.
+                runBulkMessage(ids, lastBulkMessageBodyRef.current);
               }
             }}
           />
@@ -1074,6 +1139,13 @@ export function KanbanBoard({
           confirmLabel="Archive"
           reasonHelper="Archiving moves these candidates out of the active pipeline. Visible to your team only."
           onConfirm={handleBulkArchive}
+        />
+
+        <BulkMessageDialog
+          open={messageDialogOpen}
+          onOpenChange={setMessageDialogOpen}
+          count={selection.count}
+          onConfirm={handleBulkMessage}
         />
 
 
@@ -1159,6 +1231,7 @@ function SelectionToolbar({
   onMoveMenuOpenChange,
   moveStages,
   onMove,
+  onOpenMessage,
   onOpenReject,
   onOpenArchive,
 }: {
@@ -1169,6 +1242,7 @@ function SelectionToolbar({
   onMoveMenuOpenChange: (open: boolean) => void;
   moveStages: PipelineStage[];
   onMove: (stage: PipelineStage) => void;
+  onOpenMessage: () => void;
   onOpenReject: () => void;
   onOpenArchive: () => void;
 }) {
@@ -1209,6 +1283,14 @@ function SelectionToolbar({
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+        <button
+          type="button"
+          onClick={onOpenMessage}
+          disabled={disabled}
+          className={`${baseBtn} border-heritage/30 text-heritage-deep bg-white hover:bg-heritage/10`}
+        >
+          Message…
+        </button>
         <button
           type="button"
           onClick={onOpenReject}
@@ -1326,6 +1408,76 @@ function BulkConfirmDialog({
   );
 }
 
+function BulkMessageDialog({
+  open,
+  onOpenChange,
+  count,
+  onConfirm,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  count: number;
+  onConfirm: (body: string) => void;
+}) {
+  const MAX = 5000;
+  const [body, setBody] = useState("");
+  useEffect(() => {
+    if (open) setBody("");
+  }, [open]);
+  const trimmed = body.trim();
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Message candidates</DialogTitle>
+          <DialogDescription>
+            {count} candidate{count === 1 ? "" : "s"} selected. Each receives
+            this in their application inbox and by email.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-2">
+          <label
+            htmlFor="bulk-message"
+            className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body"
+          >
+            Message
+          </label>
+          <textarea
+            id="bulk-message"
+            value={body}
+            onChange={(e) => setBody(e.target.value.slice(0, MAX))}
+            rows={5}
+            placeholder="Write the message your selected candidates will receive…"
+            className="w-full resize-y border border-[var(--rule-strong)] bg-white px-3 py-2 text-[14px] text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
+          />
+          <p className="text-[12px] text-slate-meta">
+            Sent individually — candidates can&apos;t see who else received it.{" "}
+            {body.length}/{MAX}
+          </p>
+        </div>
+        <DialogFooter>
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            className="inline-flex items-center justify-center px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] bg-white text-slate-body hover:bg-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            disabled={trimmed.length === 0}
+            onClick={() => onConfirm(trimmed)}
+            className="inline-flex items-center justify-center px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase bg-heritage text-white hover:bg-heritage-deep focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Send to {count}
+          </button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function BulkResultDisplay({
   banner,
   onDismiss,
@@ -1362,7 +1514,9 @@ function BulkResultDisplay({
       ? "move"
       : banner.actionLabel === "Rejected"
         ? "reject"
-        : "archive";
+        : banner.actionLabel === "Messaged"
+          ? "message"
+          : "archive";
 
   const summary = allSucceeded
     ? `${banner.actionLabel} ${succeeded} candidate${succeeded === 1 ? "" : "s"}${banner.destinationLabel ? ` ${banner.destinationLabel}` : ""}.`

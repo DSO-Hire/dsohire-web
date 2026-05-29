@@ -19,10 +19,12 @@
  */
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
+import { recordAuditEvent } from "@/lib/audit/record";
 import { dispatchNotification } from "@/lib/notifications/dispatcher";
 import { dispatchCandidateEmail } from "@/lib/email/templates/dispatch";
 import { MessageReceived } from "@/emails/MessageReceived";
@@ -322,6 +324,185 @@ export async function sendApplicationMessage({
       ...rowToMessage(data),
       attachments: insertedAttachments,
     },
+  };
+}
+
+const BULK_MESSAGE_CAP = 200;
+
+export interface BulkMessageResult {
+  /** application_ids that received the message. */
+  succeeded: string[];
+  failed: { id: string; error: string }[];
+}
+
+/**
+ * E3.6 / E8.8 — broadcast one message to many applications at once
+ * (employer → candidates), from the kanban selection toolbar.
+ *
+ * One application_messages row per application (employer sender), then the
+ * candidate notification (inbox unread + candidate.message_received email)
+ * fires per message via next/after() so the dispatches reliably complete
+ * on Vercel rather than being killed after the response ships (the
+ * fire-and-forget gotcha — same reason the single-move path moved to
+ * after()). Employer-only: sender side derives from dso_users membership +
+ * per-application DSO ownership, with RLS as the backstop. Capped at
+ * BULK_MESSAGE_CAP. text-only (no attachments) — the per-thread composer
+ * remains the path for attachments.
+ */
+export async function bulkMessageApplications(
+  applicationIds: string[],
+  body: string
+): Promise<BulkMessageResult> {
+  const clean = sanitizeBody(body);
+  if (clean.length < 1) {
+    return {
+      succeeded: [],
+      failed: applicationIds.map((id) => ({
+        id,
+        error: "Message cannot be empty.",
+      })),
+    };
+  }
+  if (clean.length > MAX_BODY) {
+    return {
+      succeeded: [],
+      failed: applicationIds.map((id) => ({
+        id,
+        error: `Message is too long (${MAX_BODY} character max).`,
+      })),
+    };
+  }
+  if (!Array.isArray(applicationIds) || applicationIds.length === 0) {
+    return { succeeded: [], failed: [] };
+  }
+  if (applicationIds.length > BULK_MESSAGE_CAP) {
+    return {
+      succeeded: [],
+      failed: applicationIds.map((id) => ({
+        id,
+        error: `Selection exceeds the ${BULK_MESSAGE_CAP}-message limit.`,
+      })),
+    };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return {
+      succeeded: [],
+      failed: applicationIds.map((id) => ({
+        id,
+        error: "Your session expired. Sign in again.",
+      })),
+    };
+  }
+
+  const { data: dsoUser } = await supabase
+    .from("dso_users")
+    .select("id, dso_id")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+  if (!dsoUser) {
+    return {
+      succeeded: [],
+      failed: applicationIds.map((id) => ({
+        id,
+        error: "You don't have employer access.",
+      })),
+    };
+  }
+  const dsoId = dsoUser.dso_id as string;
+  const senderDsoUserId = dsoUser.id as string;
+
+  // Which of the requested applications belong to a job in this DSO? RLS
+  // would also enforce this on insert, but pre-filtering lets us report a
+  // clean per-row failure instead of failing the whole batch.
+  const { data: ownRows } = await supabase
+    .from("applications")
+    .select("id, jobs!inner(dso_id)")
+    .in("id", applicationIds)
+    .eq("jobs.dso_id", dsoId);
+  const validIds = new Set(
+    ((ownRows ?? []) as Array<{ id: string }>).map((r) => r.id)
+  );
+
+  const failed: { id: string; error: string }[] = applicationIds
+    .filter((id) => !validIds.has(id))
+    .map((id) => ({ id, error: "Not found or no access." }));
+  const toSend = applicationIds.filter((id) => validIds.has(id));
+  if (toSend.length === 0) return { succeeded: [], failed };
+
+  const rows = toSend.map((id) => ({
+    application_id: id,
+    sender_user_id: user.id,
+    sender_role: "employer" as const,
+    sender_dso_user_id: senderDsoUserId,
+    body: clean,
+  }));
+
+  const { data: inserted, error: insErr } = await supabase
+    .from("application_messages")
+    .insert(rows)
+    .select("id, application_id");
+
+  if (insErr || !inserted) {
+    return {
+      succeeded: [],
+      failed: [
+        ...failed,
+        ...toSend.map((id) => ({
+          id,
+          error: insErr?.message ?? "Couldn't send. Please retry.",
+        })),
+      ],
+    };
+  }
+
+  const insertedRows = inserted as Array<{ id: string; application_id: string }>;
+
+  // Fire candidate notifications (inbox unread + email) AFTER the response
+  // ships, but guaranteed to run — bare void gets killed mid-flight on
+  // Vercel serverless.
+  for (const row of insertedRows) {
+    after(async () => {
+      await dispatchMessageNotification({
+        applicationId: row.application_id,
+        messageId: row.id,
+        senderRole: "employer",
+        senderUserId: user.id,
+        senderDsoUserId,
+        body: clean,
+      });
+    });
+    revalidatePath(`/employer/applications/${row.application_id}`);
+    revalidatePath(`/candidate/applications/${row.application_id}`);
+  }
+
+  // Single audit summary for the broadcast.
+  after(async () => {
+    await recordAuditEvent({
+      dsoId,
+      actorUserId: user.id,
+      eventKind: "bulk_action.applied",
+      targetTable: "applications",
+      targetId: insertedRows[0].application_id,
+      summary: `Messaged ${insertedRows.length} candidate${
+        insertedRows.length === 1 ? "" : "s"
+      }`,
+      metadata: {
+        action: "message",
+        succeeded_count: insertedRows.length,
+        failed_count: failed.length,
+        application_ids: insertedRows.map((r) => r.application_id),
+      },
+    });
+  });
+
+  return {
+    succeeded: insertedRows.map((r) => r.application_id),
+    failed,
   };
 }
 
