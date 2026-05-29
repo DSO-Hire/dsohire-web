@@ -30,9 +30,9 @@ const ROLE_GUIDE: Array<{
     id: "owner",
     Icon: Crown,
     label: "Owner",
-    oneLiner: "The DSO's primary account holder. Set once at sign-up.",
+    oneLiner: "The account holder — full control, including billing and ownership.",
     whoFitsThisRole:
-      "The CEO, Managing Partner, or sole proprietor whose name is on the DSO Hire account. Owner can transfer ownership, but only one owner exists per DSO.",
+      "Whoever owns your DSO Hire account and budget. At a smaller group that's often the practice owner or managing partner; at a larger DSO it's usually the VP of HR, CPO, or Director of Talent who owns the platform relationship — not the CEO, who typically delegates this. Only one owner exists per DSO, and ownership can be transferred.",
     canDo: [
       "Everything Admin can do",
       "Transfer ownership to another teammate",
@@ -46,7 +46,7 @@ const ROLE_GUIDE: Array<{
     label: "Admin",
     oneLiner: "Full operational access. Trusted with the entire DSO.",
     whoFitsThisRole:
-      "VP of HR, Director of Recruiting, Chief Operating Officer, Head of People — anyone who needs visibility across every practice and the authority to make hiring decisions DSO-wide.",
+      "Your other senior People or Recruiting leaders who need full DSO-wide access but don't hold the billing or account ownership — a Director of Recruiting, COO, Head of People, or a second HR leader working alongside the owner. Full visibility across every practice and authority to make hiring decisions DSO-wide.",
     canDo: [
       "Post and edit jobs at any location",
       "Review and manage applications across the DSO",
