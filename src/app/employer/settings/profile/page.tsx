@@ -23,6 +23,8 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ProfileEditor } from "./profile-editor";
 import type { ProfileData, ProfilePhoto, WhyJoinUsBlock } from "./profile-data";
 
+import { CareersPageShare } from "./careers-page-share";
+
 export const metadata: Metadata = { title: "Public profile · Settings" };
 
 // Force dynamic — auth-protected route, must read live cookies.
@@ -128,6 +130,10 @@ export default async function PublicProfileSettingsPage({
           the moment you save it.
         </p>
       </header>
+
+      <CareersPageShare
+        url={`${process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com"}/companies/${data.slug}`}
+      />
 
       {/* Edit / Preview tabs — LinkedIn-style */}
       <EditPreviewTabs activeView={view} slug={data.slug} />
