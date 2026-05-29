@@ -16,6 +16,7 @@
  */
 
 import { revalidatePath, revalidateTag } from "next/cache";
+import { after } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   KIND_DEFAULT_LABELS,
@@ -282,26 +283,35 @@ export async function moveApplicationStage(
   // The no-op short-circuit above already returns when stage_ids match,
   // so reaching here means the stage actually changed.)
   //
-  // Fire-and-forget — never block the stage move on a dispatch failure.
+  // Use next/after() instead of bare `void` so the dispatches run AFTER the
+  // response ships but are still guaranteed to complete on Vercel. Per
+  // feedback_vercel_serverless_fire_and_forget.md, bare `void` in a
+  // serverless route gets killed mid-flight — symptom is silently-dropped
+  // stage_changed emails on the single-move path. The bulk path (Day 22,
+  // 1f0f33c) already moved to after(); this closes the single-move holdout.
   if (!hideStagesFromCandidate) {
-    void dispatchInboxSystemMessage({
-      applicationId,
-      eventKind: "stage_changed",
-      senderRole: "employer",
-      body: `Your application moved from ${prevStageLabel} to ${resolved.label}.`,
+    after(async () => {
+      await dispatchInboxSystemMessage({
+        applicationId,
+        eventKind: "stage_changed",
+        senderRole: "employer",
+        body: `Your application moved from ${prevStageLabel} to ${resolved.label}.`,
+      });
     });
     if (dsoId) {
       const candidateId = (prev as unknown as Record<string, unknown>)
         .candidate_id as string | null;
       if (candidateId) {
-        void dispatchStageChangedEmail({
-          applicationId,
-          candidateId,
-          jobId: (jobRow?.id as string | undefined) ?? "",
-          jobTitle,
-          dsoId,
-          fromStageLabel: prevStageLabel,
-          toStageLabel: resolved.label,
+        after(async () => {
+          await dispatchStageChangedEmail({
+            applicationId,
+            candidateId,
+            jobId: (jobRow?.id as string | undefined) ?? "",
+            jobTitle,
+            dsoId,
+            fromStageLabel: prevStageLabel,
+            toStageLabel: resolved.label,
+          });
         });
       }
     }
@@ -318,22 +328,25 @@ export async function moveApplicationStage(
     if (user) {
       const fromLabel = prevStageLabel;
       const toLabel = resolved.label;
-      void recordAuditEvent({
-        dsoId,
-        actorUserId: user.id,
-        eventKind: "application.stage_moved",
-        targetTable: "applications",
-        targetId: applicationId,
-        summary: `Moved ${candidateName}'s application for ${jobTitle} from ${fromLabel} to ${toLabel}`,
-        metadata: {
-          application_id: applicationId,
-          from_stage_kind: prevKind,
-          to_stage_kind: resolved.kind,
-          from_stage_id: prevStageId,
-          to_stage_id: resolved.stageId,
-          candidate_name: candidateName,
-          job_title: jobTitle,
-        },
+      const actorUserId = user.id;
+      after(async () => {
+        await recordAuditEvent({
+          dsoId,
+          actorUserId,
+          eventKind: "application.stage_moved",
+          targetTable: "applications",
+          targetId: applicationId,
+          summary: `Moved ${candidateName}'s application for ${jobTitle} from ${fromLabel} to ${toLabel}`,
+          metadata: {
+            application_id: applicationId,
+            from_stage_kind: prevKind,
+            to_stage_kind: resolved.kind,
+            from_stage_id: prevStageId,
+            to_stage_id: resolved.stageId,
+            candidate_name: candidateName,
+            job_title: jobTitle,
+          },
+        });
       });
     }
   }
