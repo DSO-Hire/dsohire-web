@@ -39,6 +39,7 @@ import {
   updateJobDetailsSection,
   updateJobScreeningSection,
   setJobStatus,
+  updateJobSchedule,
   type JobActionState,
 } from "../../actions";
 import { RecommendedQuestionsPanel } from "../../recommended-questions-panel";
@@ -141,6 +142,9 @@ export interface EditSectionsInitial {
   benefits: string[];
   requirements: string | null;
   status: string;
+  // E1.18 — posting schedule (auto-expire + scheduled publish).
+  expires_at: string | null;
+  scheduled_publish_at: string | null;
   location_ids: string[];
   skills: string[];
   hide_stages_from_candidate: boolean;
@@ -230,6 +234,12 @@ export function EditSections({
         jobId={initial.id}
         roleCategory={initial.role_category}
         initialQuestions={initialQuestions}
+      />
+      <ScheduleSection
+        jobId={initial.id}
+        status={initial.status}
+        initialExpiresAt={initial.expires_at}
+        initialScheduledPublishAt={initial.scheduled_publish_at}
       />
       <StatusSection jobId={initial.id} initialStatus={initial.status} />
     </div>
@@ -1844,6 +1854,159 @@ function validateQuestions(qs: WizardScreeningQuestion[]): string | null {
 }
 
 /* ───── Section 5 — Status ───── */
+
+/**
+ * Format a stored ISO instant into the "YYYY-MM-DD" a <input type="date">
+ * expects, using LOCAL date parts so it matches the day the recruiter
+ * picked (expiry is stored at 23:59:59, scheduled publish at 00:00:00, so
+ * the local calendar day round-trips cleanly).
+ */
+function isoToDateInput(iso: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function ScheduleSection({
+  jobId,
+  status,
+  initialExpiresAt,
+  initialScheduledPublishAt,
+}: {
+  jobId: string;
+  status: string;
+  initialExpiresAt: string | null;
+  initialScheduledPublishAt: string | null;
+}) {
+  const isDraft = status === "draft";
+  const [expires, setExpires] = useState(isoToDateInput(initialExpiresAt));
+  const [scheduled, setScheduled] = useState(
+    isoToDateInput(initialScheduledPublishAt)
+  );
+  const [snapExpires, setSnapExpires] = useState(expires);
+  const [snapScheduled, setSnapScheduled] = useState(scheduled);
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  const dirty =
+    expires !== snapExpires || (isDraft && scheduled !== snapScheduled);
+  const today = isoToDateInput(new Date().toISOString());
+
+  const onSave = () => {
+    setError(null);
+    setSaved(false);
+    const fd = new FormData();
+    fd.set("job_id", jobId);
+    fd.set("expires_at", expires);
+    // Scheduled publish only applies to drafts; the action ignores it for
+    // non-drafts, but don't even send it so the intent is unambiguous.
+    fd.set("scheduled_publish_at", isDraft ? scheduled : "");
+    startTransition(async () => {
+      const result: JobActionState = await updateJobSchedule({ ok: false }, fd);
+      if (!result.ok) {
+        setError(result.error ?? "Couldn't save.");
+        return;
+      }
+      setSnapExpires(expires);
+      setSnapScheduled(scheduled);
+      setSaved(true);
+    });
+  };
+
+  return (
+    <SectionShell
+      title="Posting schedule"
+      subtitle="Auto-expire the listing on a date, and (for drafts) schedule it to publish automatically."
+    >
+      <div className="space-y-5">
+        {isDraft && (
+          <div>
+            <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+              Schedule publish for
+            </label>
+            <div className="flex items-center gap-3">
+              <input
+                type="date"
+                min={today}
+                value={scheduled}
+                onChange={(e) => {
+                  setScheduled(e.target.value);
+                  setSaved(false);
+                }}
+                className="px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+              />
+              {scheduled && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setScheduled("");
+                    setSaved(false);
+                  }}
+                  className="text-[12px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <p className="mt-2 text-[12px] text-slate-meta leading-relaxed">
+              {scheduled
+                ? "This draft will go live automatically at the start of that day. Leave it as a draft until then."
+                : "Leave empty to keep this as a manual draft. Set a date to have it publish itself."}
+            </p>
+          </div>
+        )}
+
+        <div>
+          <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+            Auto-expire on
+          </label>
+          <div className="flex items-center gap-3">
+            <input
+              type="date"
+              min={today}
+              value={expires}
+              onChange={(e) => {
+                setExpires(e.target.value);
+                setSaved(false);
+              }}
+              className="px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+            />
+            {expires && (
+              <button
+                type="button"
+                onClick={() => {
+                  setExpires("");
+                  setSaved(false);
+                }}
+                className="text-[12px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          <p className="mt-2 text-[12px] text-slate-meta leading-relaxed">
+            {expires
+              ? "The listing stays live through this day, then closes itself and drops off the public job board."
+              : "Leave empty for no expiration — the listing stays live until you pause or fill it."}
+          </p>
+        </div>
+      </div>
+      <SaveBar
+        dirty={dirty}
+        saving={pending}
+        saved={saved}
+        error={error}
+        onSave={onSave}
+        saveLabel="Save schedule"
+      />
+    </SectionShell>
+  );
+}
 
 function StatusSection({
   jobId,

@@ -75,7 +75,7 @@ export default async function EditJobPage({ params }: PageProps) {
   const { data: job } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, variable_comp_enabled, variable_comp_target, variable_comp_structure, bonus_enabled, bonus_target, bonus_structure, equity_offered, equity_note, benefits, requirements, status, posted_at, applications_count, views, hide_stages_from_candidate, scope, specialty, min_years_experience, schedule_days, schedule_evenings, schedule_weekends, corporate_function, external_links"
+      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, variable_comp_enabled, variable_comp_target, variable_comp_structure, bonus_enabled, bonus_target, bonus_structure, equity_offered, equity_note, benefits, requirements, status, posted_at, expires_at, scheduled_publish_at, applications_count, views, hide_stages_from_candidate, scope, specialty, min_years_experience, schedule_days, schedule_evenings, schedule_weekends, corporate_function, external_links"
     )
     .eq("id", jobId)
     .eq("dso_id", dsoUser.dso_id)
@@ -159,6 +159,11 @@ export default async function EditJobPage({ params }: PageProps) {
     benefits: ((job.benefits as string[] | null) ?? []) as string[],
     requirements: (job.requirements as string | null) ?? null,
     status: job.status as string,
+    expires_at: (job.expires_at as string | null) ?? null,
+    scheduled_publish_at:
+      ((job as Record<string, unknown>).scheduled_publish_at as
+        | string
+        | null) ?? null,
     location_ids: ((jobLocations ?? []) as Array<{ location_id: string }>).map(
       (jl) => jl.location_id
     ),

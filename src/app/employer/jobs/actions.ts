@@ -945,7 +945,13 @@ export async function setJobStatus(
     "the job";
 
   const update: Record<string, unknown> = { status: newStatus };
-  if (newStatus === "active") update.posted_at = new Date().toISOString();
+  if (newStatus === "active") {
+    update.posted_at = new Date().toISOString();
+    // E1.18 — a manual "Activate" is a publish-now action, so it
+    // supersedes any pending scheduled publish. Clear it so the job
+    // doesn't carry a stale schedule + so the "Scheduled" badge clears.
+    update.scheduled_publish_at = null;
+  }
 
   const { error } = await supabase.from("jobs").update(update).eq("id", jobId);
   if (error) return { ok: false, error: error.message };
@@ -1029,6 +1035,133 @@ export async function setJobStatus(
     }
   }
 
+  return { ok: true };
+}
+
+/* ───── E1.18 — posting schedule (auto-expire + scheduled publish) ───── */
+
+/**
+ * Parse a `<input type="date">` value ("YYYY-MM-DD") into an ISO instant,
+ * or null when empty/invalid. `boundary` controls the time-of-day so the
+ * window is inclusive in the way a recruiter expects:
+ *   - "end"   -> 23:59:59 local-ish (expiry: the job stays live through
+ *                the chosen day)
+ *   - "start" -> 00:00:00 (scheduled publish: goes live at the start of
+ *                the chosen day)
+ * We append the time to the date string and let the runtime parse it in
+ * the server's zone; hourly cron granularity makes sub-day precision moot.
+ */
+function parseScheduleDate(
+  raw: unknown,
+  boundary: "start" | "end"
+): { ok: true; iso: string | null } | { ok: false; error: string } {
+  const s = String(raw ?? "").trim();
+  if (!s) return { ok: true, iso: null };
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    return { ok: false, error: "Enter a valid date." };
+  }
+  const time = boundary === "end" ? "T23:59:59" : "T00:00:00";
+  const d = new Date(`${s}${time}`);
+  if (Number.isNaN(d.getTime())) {
+    return { ok: false, error: "Enter a valid date." };
+  }
+  return { ok: true, iso: d.toISOString() };
+}
+
+/**
+ * Set/clear a job's expiration date and (for drafts) its scheduled-publish
+ * date. The /api/cron/job-lifecycle cron is the engine that actually flips
+ * status; this action only records the timestamps. A draft carrying a
+ * future scheduled_publish_at is the "scheduled" state — it stays a
+ * private draft until the cron promotes it. RLS scopes the UPDATE to
+ * recruiters in the owning DSO; we also pin dso_id defensively.
+ */
+export async function updateJobSchedule(
+  _prev: JobActionState,
+  formData: FormData
+): Promise<JobActionState> {
+  const jobId = String(formData.get("job_id") ?? "").trim();
+  if (!jobId) return { ok: false, error: "Missing job." };
+
+  const expiresParsed = parseScheduleDate(formData.get("expires_at"), "end");
+  if (!expiresParsed.ok) return { ok: false, error: expiresParsed.error };
+  const scheduledParsed = parseScheduleDate(
+    formData.get("scheduled_publish_at"),
+    "start"
+  );
+  if (!scheduledParsed.ok) return { ok: false, error: scheduledParsed.error };
+
+  const expiresAt = expiresParsed.iso;
+  const scheduledPublishAt = scheduledParsed.iso;
+  const nowMs = Date.now();
+
+  if (expiresAt && new Date(expiresAt).getTime() < nowMs) {
+    return { ok: false, error: "Expiration date must be in the future." };
+  }
+  if (
+    expiresAt &&
+    scheduledPublishAt &&
+    new Date(expiresAt).getTime() <= new Date(scheduledPublishAt).getTime()
+  ) {
+    return {
+      ok: false,
+      error: "Expiration must be after the scheduled publish date.",
+    };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Sign in required." };
+
+  const { data: dsoUser } = await supabase
+    .from("dso_users")
+    .select("dso_id")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+  const dsoId = (dsoUser as { dso_id: string } | null)?.dso_id ?? null;
+  if (!dsoId) return { ok: false, error: "No DSO membership." };
+
+  const { data: jobRow } = await supabase
+    .from("jobs")
+    .select("status, title")
+    .eq("id", jobId)
+    .eq("dso_id", dsoId)
+    .maybeSingle();
+  if (!jobRow) return { ok: false, error: "Job not found." };
+  const jobStatus = (jobRow as { status: string }).status;
+  const jobTitle = (jobRow as { title: string | null }).title ?? "the job";
+
+  // Scheduled publish only applies to drafts (the held-until-live state).
+  // For any non-draft job, ignore an incoming publish date so we can't
+  // accidentally un-publish a live role.
+  const effectiveScheduled = jobStatus === "draft" ? scheduledPublishAt : null;
+
+  const { error } = await supabase
+    .from("jobs")
+    .update({
+      expires_at: expiresAt,
+      scheduled_publish_at: effectiveScheduled,
+    })
+    .eq("id", jobId)
+    .eq("dso_id", dsoId);
+  if (error) return { ok: false, error: error.message };
+
+  void emitJobAuditEvent(supabase, dsoId, jobId, {
+    eventKind: "job.schedule_updated",
+    summary: `Updated posting schedule for "${jobTitle}"`,
+    metadata: {
+      job_id: jobId,
+      title: jobTitle,
+      expires_at: expiresAt,
+      scheduled_publish_at: effectiveScheduled,
+    },
+  });
+
+  revalidatePath(`/employer/jobs/${jobId}`);
+  revalidatePath(`/employer/jobs/${jobId}/edit`);
+  revalidatePath(`/employer/jobs`);
   return { ok: true };
 }
 

@@ -1301,6 +1301,7 @@ export type Database = {
           salary_unit: string | null
           salutation: string | null
           schedule_preferences: Json
+          search_doc: unknown
           skills: string[]
           summary: string | null
           temp_or_perm: string | null
@@ -2748,6 +2749,7 @@ export type Database = {
           equity_note: string | null
           equity_offered: boolean
           expires_at: string | null
+          scheduled_publish_at: string | null
           external_links: Json
           hide_stages_from_candidate: boolean
           id: string
@@ -2807,6 +2809,7 @@ export type Database = {
           equity_note?: string | null
           equity_offered?: boolean
           expires_at?: string | null
+          scheduled_publish_at?: string | null
           external_links?: Json
           hide_stages_from_candidate?: boolean
           id?: string
@@ -2866,6 +2869,7 @@ export type Database = {
           equity_note?: string | null
           equity_offered?: boolean
           expires_at?: string | null
+          scheduled_publish_at?: string | null
           external_links?: Json
           hide_stages_from_candidate?: boolean
           id?: string
@@ -3664,6 +3668,7 @@ export type Database = {
           equity_note: string | null
           equity_offered: boolean
           expires_at: string | null
+          scheduled_publish_at: string | null
           external_links: Json
           hide_stages_from_candidate: boolean
           id: string

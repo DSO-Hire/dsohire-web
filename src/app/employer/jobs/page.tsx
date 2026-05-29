@@ -120,7 +120,7 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
   let jobsQuery = supabase
     .from("jobs")
     .select(
-      "id, title, slug, status, employment_type, role_category, posted_at, applications_count, views, updated_at, visibility",
+      "id, title, slug, status, employment_type, role_category, posted_at, scheduled_publish_at, applications_count, views, updated_at, visibility",
     )
     .eq("dso_id", dsoUser.dso_id)
     .is("deleted_at", null);
@@ -145,6 +145,7 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
     employment_type: string;
     role_category: string;
     posted_at: string | null;
+    scheduled_publish_at: string | null;
     applications_count: number;
     views: number;
     updated_at: string;
@@ -827,6 +828,7 @@ interface JobRowData {
   status: string;
   employment_type: string;
   role_category: string;
+  scheduled_publish_at: string | null;
   applications_count: number;
   views: number;
   updated_at: string;
@@ -875,7 +877,10 @@ function JobRow({
         isLast ? "" : "border-b border-[var(--rule)]"
       }`}
     >
-      <StatusBadge status={job.status} />
+      <StatusBadge
+        status={job.status}
+        scheduledPublishAt={job.scheduled_publish_at}
+      />
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-3 mb-1.5 text-[10px] font-bold tracking-[1.4px] uppercase text-slate-meta">
           <span>{humanRoleCategory(job.role_category)}</span>
@@ -964,7 +969,26 @@ function JobRow({
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({
+  status,
+  scheduledPublishAt = null,
+}: {
+  status: string;
+  scheduledPublishAt?: string | null;
+}) {
+  // E1.18 — a draft holding a future scheduled-publish date is "Scheduled",
+  // not a plain draft. The lifecycle cron flips it to active at that time.
+  if (
+    status === "draft" &&
+    scheduledPublishAt &&
+    new Date(scheduledPublishAt).getTime() > Date.now()
+  ) {
+    return (
+      <span className="inline-flex items-center px-2 py-0.5 text-[9px] font-bold tracking-[1.5px] uppercase bg-heritage/15 text-heritage-deep border border-heritage/40">
+        Scheduled
+      </span>
+    );
+  }
   const map: Record<string, { label: string; cls: string }> = {
     active: { label: "Active", cls: "bg-heritage text-ivory" },
     draft: { label: "Draft", cls: "bg-ivory-deep text-ink" },
