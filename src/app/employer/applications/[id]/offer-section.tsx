@@ -34,6 +34,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { sendOffer } from "./offer-actions";
+import { PayBenchmarkHint } from "../../jobs/pay-benchmark-hint";
 import {
   OFFER_FIELDS,
   REQUIRED_OFFER_FIELDS,
@@ -89,6 +90,9 @@ interface OfferSectionProps {
   jobLocation: string;
   /** Humanized employment type label ("Full-time", "Part-time", etc.). */
   jobEmploymentType: string;
+  /** Job role + state — drive the market-pay reference by the comp field (N4). */
+  roleCategory: string;
+  benchmarkState: string | null;
   templates: OfferTemplateOption[];
   sends: OfferSendRow[];
 }
@@ -101,6 +105,8 @@ export function OfferSection({
   jobTitle,
   jobLocation,
   jobEmploymentType,
+  roleCategory,
+  benchmarkState,
   templates,
   sends,
 }: OfferSectionProps) {
@@ -182,6 +188,8 @@ export function OfferSection({
           jobTitle={jobTitle}
           jobLocation={jobLocation}
           jobEmploymentType={jobEmploymentType}
+          roleCategory={roleCategory}
+          benchmarkState={benchmarkState}
           templates={templates}
           onClose={() => setModalOpen(false)}
         />
@@ -496,6 +504,8 @@ function SendOfferModal({
   jobTitle,
   jobLocation,
   jobEmploymentType,
+  roleCategory,
+  benchmarkState,
   templates,
   onClose,
 }: {
@@ -506,6 +516,8 @@ function SendOfferModal({
   jobTitle: string;
   jobLocation: string;
   jobEmploymentType: string;
+  roleCategory: string;
+  benchmarkState: string | null;
   templates: OfferTemplateOption[];
   onClose: () => void;
 }) {
@@ -666,6 +678,8 @@ function SendOfferModal({
               template={selectedTemplate}
               values={values}
               onChange={setValues}
+              roleCategory={roleCategory}
+              benchmarkState={benchmarkState}
             />
           )}
           {step === 3 && (
@@ -804,10 +818,14 @@ function Step2FillFields({
   template,
   values,
   onChange,
+  roleCategory,
+  benchmarkState,
 }: {
   template: OfferTemplateOption;
   values: Record<string, string>;
   onChange: (next: Record<string, string>) => void;
+  roleCategory: string;
+  benchmarkState: string | null;
 }) {
   // Only ask for offer.* fields the template actually references. If a
   // template doesn't use offer.signing_bonus, we don't need to ask the
@@ -834,6 +852,16 @@ function Step2FillFields({
       <p className="text-[13px] text-slate-body leading-relaxed">
         Fill in the values that change per offer. Required fields are marked.
       </p>
+      {usedFields.some((f) => f.key === "offer.compensation") && (
+        <PayBenchmarkHint
+          roleCategory={roleCategory}
+          state={benchmarkState}
+          compMin=""
+          compMax=""
+          compPeriod=""
+          accentText="text-heritage-deep"
+        />
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {usedFields.map((f) => (
           <OfferField

@@ -983,6 +983,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   // resolution here so the preview is honest.
   let offerSectionDsoName: string = dsoNameForAffiliation;
   let offerSectionJobLocation: string = "";
+  let offerSectionState: string | null = null;
   let offerSectionJobEmploymentType: string = "";
   {
     const [
@@ -1141,6 +1142,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
       if (loc) {
         const city = (loc.city as string | null) ?? "";
         const state = (loc.state as string | null) ?? "";
+        offerSectionState = state || null;
         offerSectionJobLocation = [city, state]
           .filter(Boolean)
           .join(", ");
@@ -1178,6 +1180,9 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     id: string;
     label: string;
     icon: React.ComponentType<{ className?: string }>;
+    /** Marks the first item of the internal-only workspace — the TOC draws a
+     *  labeled divider above it, mirroring the body's candidate/internal split. */
+    startsInternal?: boolean;
   };
   const SECTIONS: SectionEntry[] = [
     { num: "01", id: "stage", label: "Pipeline stage", icon: Layers },
@@ -1189,7 +1194,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     ...(showOfferSection
       ? ([{ num: "07", id: "offer", label: "Offer", icon: FileSignature }] as SectionEntry[])
       : ([] as SectionEntry[])),
-    { num: showOfferSection ? "08" : "07", id: "credentials", label: "Credentials", icon: ShieldCheck },
+    { num: showOfferSection ? "08" : "07", id: "credentials", label: "Credentials", icon: ShieldCheck, startsInternal: true },
     { num: showOfferSection ? "09" : "08", id: "references", label: "References", icon: Mail },
     { num: showOfferSection ? "10" : "09", id: "scorecards", label: "Scorecards", icon: Star },
     { num: showOfferSection ? "11" : "10", id: "comments", label: "Team comments", icon: Users },
@@ -1656,6 +1661,8 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 jobTitle={String(job.title)}
                 jobLocation={offerSectionJobLocation}
                 jobEmploymentType={offerSectionJobEmploymentType}
+                roleCategory={String(job.role_category)}
+                benchmarkState={offerSectionState}
                 templates={offerTemplates}
                 sends={offerSends}
               />
@@ -1842,6 +1849,17 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 const Icon = s.icon;
                 return (
                   <li key={s.id}>
+                    {s.startsInternal && (
+                      <div className="pt-3 mt-2 mb-1 border-t border-[var(--rule-strong)]">
+                        <div className="flex items-center gap-1.5 text-[9px] font-bold tracking-[2px] uppercase text-ink/70">
+                          <Lock className="h-3 w-3" />
+                          Internal workspace
+                        </div>
+                        <div className="mt-0.5 text-[10px] text-slate-meta leading-snug">
+                          Only your team sees these.
+                        </div>
+                      </div>
+                    )}
                     <a
                       href={`#${s.id}`}
                       className="group flex items-center gap-2.5 py-1.5 px-2 -mx-2 rounded text-[13px] text-slate-body hover:bg-cream hover:text-ink transition-colors"

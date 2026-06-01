@@ -1105,6 +1105,8 @@ function DetailsSection({
             lights up the Save button. */}
         <CompensationSection
           accent="heritage"
+          roleCategory={roleCategory}
+          benchmarkState={jobLocations.find((l) => l.state)?.state ?? null}
           enforcement={
             payTransparency
               ? {

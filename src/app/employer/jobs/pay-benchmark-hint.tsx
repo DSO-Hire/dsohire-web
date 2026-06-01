@@ -26,6 +26,12 @@ function money(n: number): string {
   return n.toLocaleString("en-US", { maximumFractionDigits: 0 });
 }
 
+/** Prettify the stored source slug for display (e.g. "bls_oews" → "BLS OEWS"). */
+function formatSource(raw: string): string {
+  if (raw.toLowerCase() === "bls_oews") return "BLS OEWS";
+  return raw.replace(/_/g, " ").toUpperCase();
+}
+
 export function PayBenchmarkHint({
   roleCategory,
   state,
@@ -113,7 +119,7 @@ export function PayBenchmarkHint({
         </p>
       )}
       <p className="mt-1.5 text-[10px] text-slate-meta leading-snug">
-        {bench.source} · {bench.vintage}. Guidance only — set pay using your own judgment.
+        {formatSource(bench.source)} · {bench.vintage}. Guidance only — set pay using your own judgment.
       </p>
     </div>
   );
