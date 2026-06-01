@@ -13,6 +13,11 @@ import {
   saveCandidateToPool,
   removeCandidateFromPool,
 } from "./actions";
+import { CERTIFICATION_KINDS } from "@/lib/candidate/canonical-lists";
+
+const CERT_LABEL: Record<string, string> = Object.fromEntries(
+  CERTIFICATION_KINDS.map((c) => [c.value, c.label])
+);
 
 interface CandidateResultCardProps {
   candidateId: string;
@@ -26,6 +31,10 @@ interface CandidateResultCardProps {
   availability: string | null;
   initiallySaved: boolean;
   initialEntryId: string | null;
+  /** PMS systems the candidate has experience with (dental facet). */
+  pmsSystems?: string[] | null;
+  /** Certification kinds the candidate has furnished (dental facet). */
+  certKinds?: string[];
   /** Practice Fit score against the picked job; null when no job picked. */
   fitScore?: number | null;
   /** Practice Fit bucket against the picked job; null when no job picked. */
@@ -73,6 +82,8 @@ export function CandidateResultCard({
   availability,
   initiallySaved,
   initialEntryId,
+  pmsSystems = null,
+  certKinds = [],
   fitScore = null,
   fitBucket = null,
 }: CandidateResultCardProps) {
@@ -176,6 +187,27 @@ export function CandidateResultCard({
             </span>
           )}
         </div>
+
+        {((pmsSystems && pmsSystems.length > 0) || certKinds.length > 0) && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {(pmsSystems ?? []).slice(0, 4).map((p) => (
+              <span
+                key={`pms-${p}`}
+                className="inline-flex items-center px-2 py-0.5 bg-cream border border-[var(--rule-strong)] text-[10px] font-semibold tracking-[0.3px] text-ink"
+              >
+                {p}
+              </span>
+            ))}
+            {certKinds.slice(0, 5).map((k) => (
+              <span
+                key={`cert-${k}`}
+                className="inline-flex items-center px-2 py-0.5 bg-heritage/10 border border-heritage/30 text-[10px] font-semibold tracking-[0.3px] text-heritage-deep"
+              >
+                {CERT_LABEL[k] ?? k}
+              </span>
+            ))}
+          </div>
+        )}
 
         {error && (
           <div className="mt-2 text-[12px] text-red-700">{error}</div>

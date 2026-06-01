@@ -5,11 +5,19 @@
  *
  * Single GET form — submitting updates the URL with the active filters
  * so they're shareable / bookmarkable / refresh-survivable.
+ *
+ * Dental facets (2026-06-01, gap N2/N3): first-class PMS-system and
+ * certification (expanded-function) multi-selects. PMS was previously
+ * only reachable through the free-text boolean query; certifications had
+ * no filter at all despite candidates furnishing structured
+ * candidate_certifications. Both serialize as comma-joined URL params
+ * (pms=Dentrix,Eaglesoft / cert=radiology,anesthesia_local).
  */
 
 import { Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { PMS_SYSTEMS, CERTIFICATION_KINDS } from "@/lib/candidate/canonical-lists";
 
 interface DiscoverFiltersProps {
   initial: {
@@ -18,8 +26,17 @@ interface DiscoverFiltersProps {
     state: string;
     license: string;
     min_years: string;
+    pms: string; // comma-joined
+    cert: string; // comma-joined
   };
   roleOptions: ReadonlyArray<{ value: string; label: string }>;
+}
+
+function splitCsv(v: string): string[] {
+  return v
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
 }
 
 export function DiscoverFilters({ initial, roleOptions }: DiscoverFiltersProps) {
@@ -30,9 +47,27 @@ export function DiscoverFilters({ initial, roleOptions }: DiscoverFiltersProps) 
   const [stateCode, setStateCode] = useState(initial.state);
   const [licenseCode, setLicenseCode] = useState(initial.license);
   const [minYears, setMinYears] = useState(initial.min_years);
+  const [pmsSel, setPmsSel] = useState<string[]>(splitCsv(initial.pms));
+  const [certSel, setCertSel] = useState<string[]>(splitCsv(initial.cert));
 
   const hasAnyFilter =
-    q || role || stateCode || licenseCode || minYears;
+    q ||
+    role ||
+    stateCode ||
+    licenseCode ||
+    minYears ||
+    pmsSel.length > 0 ||
+    certSel.length > 0;
+
+  const toggle = (
+    list: string[],
+    setList: (v: string[]) => void,
+    value: string
+  ) => {
+    setList(
+      list.includes(value) ? list.filter((v) => v !== value) : [...list, value]
+    );
+  };
 
   function buildHref() {
     const params = new URLSearchParams();
@@ -43,6 +78,8 @@ export function DiscoverFilters({ initial, roleOptions }: DiscoverFiltersProps) 
     if (licenseCode.trim())
       params.set("license", licenseCode.trim().toUpperCase());
     if (minYears.trim()) params.set("min_years", minYears.trim());
+    if (pmsSel.length) params.set("pms", pmsSel.join(","));
+    if (certSel.length) params.set("cert", certSel.join(","));
     const qs = params.toString();
     return qs ? `/employer/talent-pool?${qs}` : "/employer/talent-pool";
   }
@@ -58,6 +95,8 @@ export function DiscoverFilters({ initial, roleOptions }: DiscoverFiltersProps) 
     setStateCode("");
     setLicenseCode("");
     setMinYears("");
+    setPmsSel([]);
+    setCertSel([]);
     router.push("/employer/talent-pool");
   }
 
@@ -128,6 +167,23 @@ export function DiscoverFilters({ initial, roleOptions }: DiscoverFiltersProps) 
           type="number"
         />
       </div>
+
+      {/* Dental facets — PMS experience + certifications */}
+      <ChipGroup
+        label="PMS experience"
+        hint="Match candidates who've worked in your practice-management system."
+        options={PMS_SYSTEMS}
+        selected={pmsSel}
+        onToggle={(v) => toggle(pmsSel, setPmsSel, v)}
+      />
+      <ChipGroup
+        label="Certifications / expanded functions"
+        hint="Filter by furnished credentials — e.g. radiology, local anesthesia, nitrous."
+        options={CERTIFICATION_KINDS}
+        selected={certSel}
+        onToggle={(v) => toggle(certSel, setCertSel, v)}
+      />
+
       <div className="flex items-center gap-3 pt-1">
         <button
           type="submit"
@@ -148,6 +204,57 @@ export function DiscoverFilters({ initial, roleOptions }: DiscoverFiltersProps) 
         )}
       </div>
     </form>
+  );
+}
+
+function ChipGroup({
+  label,
+  hint,
+  options,
+  selected,
+  onToggle,
+}: {
+  label: string;
+  hint: string;
+  options: ReadonlyArray<{ value: string; label: string }>;
+  selected: string[];
+  onToggle: (value: string) => void;
+}) {
+  return (
+    <div>
+      <div className="flex items-baseline gap-2 mb-1.5">
+        <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+          {label}
+        </span>
+        {selected.length > 0 && (
+          <span className="text-[10px] font-semibold text-heritage-deep">
+            {selected.length} selected
+          </span>
+        )}
+      </div>
+      <p className="text-[11px] text-slate-meta mb-2">{hint}</p>
+      <div className="flex flex-wrap gap-1.5">
+        {options.map((opt) => {
+          const on = selected.includes(opt.value);
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => onToggle(opt.value)}
+              aria-pressed={on}
+              className={
+                "px-2.5 py-1 text-[12px] border transition-colors " +
+                (on
+                  ? "bg-heritage text-ivory border-heritage"
+                  : "bg-cream text-ink border-[var(--rule-strong)] hover:border-heritage")
+              }
+            >
+              {opt.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 

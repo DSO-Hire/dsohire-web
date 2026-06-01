@@ -50,6 +50,8 @@ interface PageProps {
     state?: string;
     license?: string;
     min_years?: string;
+    pms?: string;
+    cert?: string;
     /**
      * Polish item (2026-05-12): when set to a job id, the discover
      * results compute Practice Fit against that job + sort by score
@@ -139,6 +141,8 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
     current_location_city: string | null;
     current_location_state: string | null;
     availability: string | null;
+    pms_systems: string[] | null;
+    cert_kinds: string[];
     saved: boolean;
     saved_entry_id: string | null;
     fit_score: number | null;
@@ -170,11 +174,43 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
     const stateFilter = (sp.state ?? "").trim().toUpperCase();
     const licenseFilter = (sp.license ?? "").trim().toUpperCase();
     const minYears = Number.parseInt(sp.min_years ?? "", 10);
+    const pmsFilter = (sp.pms ?? "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const certFilter = (sp.cert ?? "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    // Certification facet (N3): certs live in the candidate_certifications
+    // table, not an array on candidates. Resolve the matching candidate ids
+    // first, then constrain the main query with .in(). A DSO asking for
+    // multiple certs wants candidates holding ALL of them, so we intersect.
+    let certCandidateIds: string[] | null = null;
+    if (certFilter.length > 0) {
+      const { data: certRows } = await supabase
+        .from("candidate_certifications")
+        .select("candidate_id, kind")
+        .in("kind", certFilter);
+      const kindsByCand = new Map<string, Set<string>>();
+      for (const r of (certRows ?? []) as Array<{
+        candidate_id: string;
+        kind: string;
+      }>) {
+        const set = kindsByCand.get(r.candidate_id) ?? new Set<string>();
+        set.add(r.kind);
+        kindsByCand.set(r.candidate_id, set);
+      }
+      certCandidateIds = [...kindsByCand.entries()]
+        .filter(([, kinds]) => certFilter.every((k) => kinds.has(k)))
+        .map(([cid]) => cid);
+    }
 
     let q = supabase
       .from("candidates")
       .select(
-        "id, full_name, headline, current_title, years_experience, avatar_url, license_states, current_location_city, current_location_state, availability, desired_roles, cv_visibility, deleted_at",
+        "id, full_name, headline, current_title, years_experience, avatar_url, license_states, current_location_city, current_location_state, availability, pms_systems, desired_roles, cv_visibility, deleted_at",
         { count: "exact" }
       )
       .in("cv_visibility", ["open_to_work", "recruiters_only"])
@@ -217,6 +253,20 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
     if (Number.isFinite(minYears) && minYears > 0) {
       q = q.gte("years_experience", minYears);
     }
+    if (pmsFilter.length > 0) {
+      // text[] overlap — candidate has experience in ANY selected PMS.
+      q = q.overlaps("pms_systems", pmsFilter);
+    }
+    if (certCandidateIds !== null) {
+      // Cert facet active: constrain to the candidates holding all selected
+      // certs. Empty match list => a sentinel id so the query returns none.
+      q = q.in(
+        "id",
+        certCandidateIds.length > 0
+          ? certCandidateIds
+          : ["00000000-0000-0000-0000-000000000000"]
+      );
+    }
 
     const { data, count, error } = await q;
     if (error) {
@@ -233,6 +283,7 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
       current_location_city: string | null;
       current_location_state: string | null;
       availability: string | null;
+      pms_systems: string[] | null;
     }>;
     discoverTotal = count ?? rows.length;
 
@@ -253,8 +304,27 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
         savedSet.set(e.candidate_id, e.id);
       }
     }
+    // Pull each shown candidate's cert kinds so result cards can render
+    // the matched credentials (and the dental edge is visible at a glance).
+    const certKindsByCand = new Map<string, string[]>();
+    if (ids.length > 0) {
+      const { data: certs } = await supabase
+        .from("candidate_certifications")
+        .select("candidate_id, kind")
+        .in("candidate_id", ids);
+      for (const c of (certs ?? []) as Array<{
+        candidate_id: string;
+        kind: string;
+      }>) {
+        const list = certKindsByCand.get(c.candidate_id) ?? [];
+        if (!list.includes(c.kind)) list.push(c.kind);
+        certKindsByCand.set(c.candidate_id, list);
+      }
+    }
+
     discoverResults = rows.map((r) => ({
       ...r,
+      cert_kinds: certKindsByCand.get(r.id) ?? [],
       saved: savedSet.has(r.id),
       saved_entry_id: savedSet.get(r.id) ?? null,
       fit_score: null,
@@ -343,6 +413,8 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
               state: sp.state ?? "",
               license: sp.license ?? "",
               min_years: sp.min_years ?? "",
+              pms: sp.pms ?? "",
+              cert: sp.cert ?? "",
             }}
             roleOptions={ROLE_FILTERS}
           />
@@ -373,6 +445,8 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
                   value={sp.min_years}
                 />
               )}
+              {sp.pms && <input type="hidden" name="pms" value={sp.pms} />}
+              {sp.cert && <input type="hidden" name="cert" value={sp.cert} />}
               <label
                 htmlFor="fit_job"
                 className="font-medium text-slate-body"
@@ -433,6 +507,8 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
                       .filter(Boolean)
                       .join(", ")}
                     availability={r.availability}
+                    pmsSystems={r.pms_systems}
+                    certKinds={r.cert_kinds}
                     initiallySaved={r.saved}
                     initialEntryId={r.saved_entry_id}
                     fitScore={r.fit_score}
