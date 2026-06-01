@@ -1497,6 +1497,72 @@ export type Database = {
           },
         ]
       }
+      dm_conversations: {
+        Row: {
+          id: string
+          dso_id: string
+          created_by: string | null
+          created_at: string
+          last_message_at: string
+        }
+        Insert: {
+          id?: string
+          dso_id: string
+          created_by?: string | null
+          created_at?: string
+          last_message_at?: string
+        }
+        Update: {
+          id?: string
+          dso_id?: string
+          created_by?: string | null
+          created_at?: string
+          last_message_at?: string
+        }
+        Relationships: []
+      }
+      dm_messages: {
+        Row: {
+          id: string
+          conversation_id: string
+          sender_dso_user_id: string
+          body: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          conversation_id: string
+          sender_dso_user_id: string
+          body: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          conversation_id?: string
+          sender_dso_user_id?: string
+          body?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      dm_participants: {
+        Row: {
+          conversation_id: string
+          dso_user_id: string
+          last_read_at: string
+        }
+        Insert: {
+          conversation_id: string
+          dso_user_id: string
+          last_read_at?: string
+        }
+        Update: {
+          conversation_id?: string
+          dso_user_id?: string
+          last_read_at?: string
+        }
+        Relationships: []
+      }
       dso_invitations: {
         Row: {
           accepted_at: string | null

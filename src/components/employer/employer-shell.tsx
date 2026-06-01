@@ -60,6 +60,7 @@ import { LocationSwitcher } from "./location-switcher";
 import { getActiveLocationId } from "@/lib/employer/active-location";
 import { CommandPaletteTrigger } from "./command-palette";
 import { SupportLauncher } from "@/components/support/support-launcher";
+import { ChatWidget } from "@/components/chat/chat-widget";
 
 interface EmployerShellProps {
   children: React.ReactNode;
@@ -360,6 +361,9 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
 
       {/* Floating "?" support launcher (Tier 2 chat surface, Day 21 Phase C). */}
       <SupportLauncher audience="employer" authUserId={user.id} />
+
+      {/* Pop-up team + candidate chat (Day 24) — stacked above the support button. */}
+      <ChatWidget dsoId={dsoUser.dso_id as string} authId={user.id} />
     </div>
   );
 }
