@@ -744,6 +744,15 @@ export function JobWizard({
     benefits,
   ]);
 
+  // Primary state for the pay benchmark (gap N4) — first selected location's
+  // state. Null for corporate/remote with no location (hint falls to national).
+  const benchmarkState = useMemo(() => {
+    for (const l of locations) {
+      if (selectedLocationIds.has(l.id) && l.state) return l.state;
+    }
+    return null;
+  }, [locations, selectedLocationIds]);
+
   const payTransparency = useMemo(() => {
     if (payAssessment.covered.length === 0) return null;
     return {
@@ -1071,6 +1080,7 @@ export function JobWizard({
         {currentStep.id === "details" && (
           <DetailsStep
             roleCategory={roleCategory}
+            benchmarkState={benchmarkState}
             compType={compType}
             onCompType={setCompType}
             compMin={compMin}
@@ -1667,6 +1677,7 @@ function DescriptionStep({
 
 function DetailsStep({
   roleCategory,
+  benchmarkState,
   compType,
   onCompType,
   compMin,
@@ -1720,6 +1731,7 @@ function DetailsStep({
   onPayExempt,
 }: {
   roleCategory: string;
+  benchmarkState: string | null;
   compType: CompensationType;
   onCompType: (v: CompensationType) => void;
   compMin: string;
@@ -1799,6 +1811,8 @@ function DetailsStep({
           variable/bonus/equity components + OTE note + show-pay toggle). */}
       <CompensationSection
         accent="heritage"
+        roleCategory={roleCategory}
+        benchmarkState={benchmarkState}
         enforcement={
           payTransparency
             ? { ...payTransparency, exempt: payExempt, onExempt: onPayExempt }

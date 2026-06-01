@@ -29,6 +29,7 @@
 import { useEffect } from "react";
 import { computeOte, formatUsd, type CompensationType } from "@/lib/comp/ote";
 import { PAY_TRANSPARENCY_DISCLAIMER } from "@/lib/compliance/pay-transparency";
+import { PayBenchmarkHint } from "./pay-benchmark-hint";
 
 /**
  * Pay-transparency enforcement, computed by the wizard from the job's
@@ -129,6 +130,14 @@ export interface CompensationSectionProps {
 
   /** Day 24 — pay-transparency enforcement (omit when not applicable). */
   enforcement?: PayTransparencyEnforcement;
+
+  /**
+   * Day 24 (gap N4) — market pay benchmark context. When a benchmarkable
+   * role + (optional) state are passed, a read-only BLS OEWS median line +
+   * below-market nudge renders under the comp inputs. Omit to hide.
+   */
+  roleCategory?: string | null;
+  benchmarkState?: string | null;
 
   // Base
   compType: CompensationType;
@@ -395,6 +404,18 @@ export function CompensationSection(props: CompensationSectionProps) {
             </select>
           </div>
         </div>
+      )}
+
+      {/* Market pay benchmark (gap N4) — read-only guidance. */}
+      {props.roleCategory && (
+        <PayBenchmarkHint
+          roleCategory={props.roleCategory}
+          state={props.benchmarkState ?? null}
+          compMin={props.compMin}
+          compMax={props.compMax}
+          compPeriod={props.compPeriod}
+          accentText={a.text}
+        />
       )}
 
       <label
