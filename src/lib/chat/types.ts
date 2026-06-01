@@ -26,6 +26,8 @@ export interface ChatThread {
   last_at: string | null;
   unread: number;
   initials: string;
+  /** Headshot URL (teammate avatar or candidate photo) — preferred over initials. */
+  avatar_url?: string | null;
   /** the other teammate's auth id (dm only) — drives presence. */
   other_auth_id?: string | null;
 }

@@ -198,11 +198,14 @@ export async function listChatThreads(): Promise<ChatThread[]> {
         otherByConv.set(r.conversation_id, r.dso_user_id);
     }
     const otherIds = [...new Set([...otherByConv.values()])];
-    const nameById = new Map<string, { name: string; role: string; auth: string | null }>();
+    const nameById = new Map<
+      string,
+      { name: string; role: string; auth: string | null; avatar_url: string | null }
+    >();
     if (otherIds.length > 0) {
       const { data: us } = await supabase
         .from("dso_users")
-        .select("id, first_name, last_name, role, auth_user_id")
+        .select("id, first_name, last_name, role, auth_user_id, avatar_url")
         .in("id", otherIds);
       for (const u of (us ?? []) as Array<{
         id: string;
@@ -210,11 +213,17 @@ export async function listChatThreads(): Promise<ChatThread[]> {
         last_name: string | null;
         role: string | null;
         auth_user_id: string | null;
+        avatar_url: string | null;
       }>) {
         const name =
           [u.first_name, u.last_name].filter(Boolean).join(" ").trim() ||
           "Teammate";
-        nameById.set(u.id, { name, role: u.role ?? "member", auth: u.auth_user_id });
+        nameById.set(u.id, {
+          name,
+          role: u.role ?? "member",
+          auth: u.auth_user_id,
+          avatar_url: u.avatar_url ?? null,
+        });
       }
     }
     // Messages for these conversations (recent slice).
@@ -257,6 +266,7 @@ export async function listChatThreads(): Promise<ChatThread[]> {
         last_at: last?.at ?? null,
         unread: unreadByConv.get(cid) ?? 0,
         initials: initialsOf(info?.name ?? "Teammate"),
+        avatar_url: info?.avatar_url ?? null,
         other_auth_id: info?.auth ?? null,
       });
     }
@@ -291,11 +301,14 @@ export async function listChatThreads(): Promise<ChatThread[]> {
   if (appIds.length > 0) {
     const { data: apps } = await supabase
       .from("applications")
-      .select("id, candidate:candidates(full_name), job:jobs(title)")
+      .select("id, candidate:candidates(full_name, avatar_url), job:jobs(title)")
       .in("id", appIds);
     for (const a of (apps ?? []) as unknown as Array<{
       id: string;
-      candidate: { full_name: string | null } | Array<{ full_name: string | null }> | null;
+      candidate:
+        | { full_name: string | null; avatar_url: string | null }
+        | Array<{ full_name: string | null; avatar_url: string | null }>
+        | null;
       job: { title: string | null } | Array<{ title: string | null }> | null;
     }>) {
       const cand = Array.isArray(a.candidate) ? a.candidate[0] : a.candidate;
@@ -311,6 +324,7 @@ export async function listChatThreads(): Promise<ChatThread[]> {
         last_at: last?.at ?? null,
         unread: unreadByApp.get(a.id) ?? 0,
         initials: initialsOf(name),
+        avatar_url: cand?.avatar_url ?? null,
       });
     }
   }

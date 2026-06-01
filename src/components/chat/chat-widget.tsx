@@ -146,7 +146,8 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
     const t: ChatThread = {
       kind: "dm", id: res.conversationId, title: mate.name,
       subtitle: mate.role, last_message: null, last_at: null, unread: 0,
-      initials: mate.initials, other_auth_id: mate.auth_user_id,
+      initials: mate.initials, avatar_url: mate.avatar_url,
+      other_auth_id: mate.auth_user_id,
     };
     await loadThreads();
     openThread(t);
@@ -332,7 +333,7 @@ function ThreadGroup({
       {items.map((t) => (
         <button key={`${t.kind}-${t.id}`} onClick={() => onOpen(t)}
           className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-cream/60 text-left">
-          <Avatar initials={t.initials}
+          <Avatar initials={t.initials} imageUrl={t.avatar_url}
             online={t.kind === "dm" && !!t.other_auth_id && online.has(t.other_auth_id)} />
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
