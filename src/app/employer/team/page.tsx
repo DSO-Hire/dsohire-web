@@ -29,6 +29,7 @@ import { RoleHelp } from "./role-help";
 import { HmRescopeButton } from "./hm-rescope-button";
 import { removeTeammate, revokeInvitation } from "./actions";
 import { ListSort } from "@/components/ui/list-sort";
+import { RoleFilter } from "./role-filter";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Team" };
@@ -243,26 +244,7 @@ export default async function TeamPage({ searchParams }: PageProps) {
                 activeValue={sortKey}
                 defaultValue="name"
               />
-              <form method="get" className="inline-flex items-center gap-2">
-                <label className="text-[10px] font-bold tracking-[2px] uppercase text-slate-body">
-                  Role
-                </label>
-                <select
-                  name="role"
-                  defaultValue={roleFilter}
-                  onChange={(e) => e.currentTarget.form?.submit()}
-                  className="text-[12px] px-2.5 py-1.5 bg-white border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage"
-                >
-                  <option value="">All roles</option>
-                  <option value="owner">Owner</option>
-                  <option value="admin">Admin</option>
-                  <option value="recruiter">Recruiter</option>
-                  <option value="hiring_manager">Hiring Manager</option>
-                </select>
-                {sortKey !== "name" && (
-                  <input type="hidden" name="sort" value={sortKey} />
-                )}
-              </form>
+              <RoleFilter basePath="/employer/team" activeValue={roleFilter} />
             </div>
           )}
         </div>

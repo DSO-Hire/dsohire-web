@@ -261,7 +261,25 @@ async function upsertSubscription(params: UpsertParams): Promise<void> {
 
   const item = subscription.items.data[0];
   const priceId = item?.price?.id ?? null;
-  const tier = resolveTier(subscription, priceId);
+  let tier = resolveTier(subscription, priceId);
+  if (tier === null) {
+    // Price isn't in our map and no metadata tier — e.g. a legacy/grandfathered
+    // price object left behind after a repricing (the 2026-05-20 ladder swap
+    // orphaned the old "TS2" price IDs). NEVER silently default such a row to
+    // Solo: that would strip a paying customer's feature access on their next
+    // renewal webhook. Preserve whatever tier the existing row already has;
+    // only fall to Solo for a genuinely new subscription with nothing to keep.
+    const { data: existing } = await admin
+      .from("subscriptions")
+      .select("tier")
+      .eq("dso_id", dsoId)
+      .maybeSingle();
+    tier = (isPricingTier(existing?.tier) ? existing?.tier : "solo") as PricingTier;
+    console.warn(
+      `[stripe-webhook] unrecognized price ${priceId ?? "(none)"} for dso ${dsoId}; ` +
+        `preserved tier="${tier}" instead of downgrading.`
+    );
+  }
   const periodStart = tsToIso(item?.current_period_start ?? null);
   const periodEnd = tsToIso(item?.current_period_end ?? null);
 
@@ -289,7 +307,7 @@ async function upsertSubscription(params: UpsertParams): Promise<void> {
 function resolveTier(
   subscription: Stripe.Subscription,
   priceId: string | null
-): PricingTier {
+): PricingTier | null {
   // Price ID is the authoritative source — it's what actually determines
   // billing in Stripe. Customer Portal plan switches update price but NOT
   // metadata, so trusting metadata first caused upgraded subscriptions to
@@ -306,8 +324,11 @@ function resolveTier(
   if (isPricingTier(metaTier)) {
     return metaTier;
   }
-  // Last resort — Solo is the default (lowest) tier
-  return "solo";
+  // Unresolved — return null so the caller can preserve the existing tier
+  // rather than blindly downgrading to Solo. (Previously this defaulted to
+  // "solo", which silently stripped feature access from any subscription on
+  // an orphaned price after a repricing — caught 2026-06-01.)
+  return null;
 }
 
 function tsToIso(ts: number | null | undefined): string | null {
