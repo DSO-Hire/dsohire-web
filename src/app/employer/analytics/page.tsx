@@ -32,6 +32,7 @@ import { TrendChart } from "@/components/analytics/hub/trend-chart";
 import { LocationFilter } from "@/components/analytics/hub/location-filter";
 import { PortfolioTable } from "@/components/analytics/hub/portfolio-table";
 import { BulletBar } from "@/components/analytics/hub/bullet-bar";
+import { AnalyticsNarrative } from "@/components/analytics/hub/analytics-narrative";
 import {
   getPayBenchmarks,
   getVacancyCost,
@@ -145,14 +146,24 @@ export default async function AnalyticsHubPage({ searchParams }: PageProps) {
             candidates apply and move through the pipeline.
           </p>
         </div>
-        <a
-          href="/api/employer/applications.csv"
-          className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-ink hover:bg-cream shrink-0"
-          title="Download all applications as CSV"
-        >
-          <Download className="size-3.5" />
-          Export CSV
-        </a>
+        <div className="flex items-center gap-2 shrink-0">
+          <a
+            href="/api/employer/analytics.csv"
+            className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-ink hover:bg-cream"
+            title="Download per-practice analytics as CSV"
+          >
+            <Download className="size-3.5" />
+            Practices CSV
+          </a>
+          <a
+            href="/api/employer/applications.csv"
+            className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-ink hover:bg-cream"
+            title="Download all applications as CSV"
+          >
+            <Download className="size-3.5" />
+            Applications CSV
+          </a>
+        </div>
       </header>
 
       {/* Tab bar + window selector */}
@@ -227,11 +238,14 @@ export default async function AnalyticsHubPage({ searchParams }: PageProps) {
       )}
 
       {tab === "overview" && (
-        <OverviewTab
-          overview={overview}
-          funnel={overview.funnel}
-          recruiterRows={recruiterRows}
-        />
+        <>
+          <AnalyticsNarrative windowDays={win.days} loc={loc || null} />
+          <OverviewTab
+            overview={overview}
+            funnel={overview.funnel}
+            recruiterRows={recruiterRows}
+          />
+        </>
       )}
       {tab === "funnel" && (
         <FunnelTab overview={overview} funnel={overview.funnel} />

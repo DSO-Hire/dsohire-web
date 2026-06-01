@@ -34,7 +34,9 @@ export type AiFeature =
   | "profile_summary"
   // Audience-agnostic (Phase 5D v1) — logged with whichever side
   // triggered the first-expand; dsoId optional.
-  | "practice_fit_narrative";
+  | "practice_fit_narrative"
+  // Analytics hub "what changed and why" summary (Phase 4).
+  | "analytics_narrative";
 
 const CANDIDATE_SIDE_FEATURES: ReadonlySet<AiFeature> = new Set<AiFeature>([
   "resume_parse",
@@ -136,6 +138,7 @@ export const AI_RATE_LIMITS: Record<AiFeature, AiRateLimitConfig> = {
   profile_headline: { perDayPerUser: 25, cooldownSeconds: 8 },
   profile_summary: { perDayPerUser: 25, cooldownSeconds: 8 },
   practice_fit_narrative: { perDayPerUser: 100, cooldownSeconds: 3 },
+  analytics_narrative: { perDayPerUser: 30, cooldownSeconds: 6 },
 };
 
 export interface AiRateLimitResult {
