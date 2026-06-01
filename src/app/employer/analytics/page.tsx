@@ -1,18 +1,18 @@
 /**
- * /employer/analytics — the Analytics Hub (Phase 0 overview).
+ * /employer/analytics — the Analytics Hub.
  *
- * Absorbs the former /employer/reports (which now redirects here). This is
- * the standalone analytics destination; the dashboard stays the high-level
- * "what needs me now" launchpad and links in here for depth.
+ * Absorbs the former /employer/reports. Standalone analytics destination;
+ * the dashboard stays the high-level launchpad and links in here.
  *
- * Phase 0 ships the Overview: headline KPI cards from the new hub-metrics
- * bundle (time-to-fill + time-to-hire, offer acceptance, pipeline coverage,
- * req aging, interview conversion) over the existing funnel, source, cross-
- * location, and recruiter surfaces. Phase 1 layers in tabs + drill-down.
+ * Phase 1: tabbed IA (Overview / Funnel & velocity / Sources / Offers /
+ * Locations) over a date-window filter (?window=30|90|365). Each tab reads
+ * the location-scopable hub-metrics bundle. Drill-down + export + the
+ * remaining tabs (Benchmarks, Compliance) land in later phases.
  *
  * Server component — RLS-gated reads via the authenticated client.
  */
 
+import type { ComponentProps } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRight, Download } from "lucide-react";
@@ -24,7 +24,10 @@ import {
   getDsoCrossLocationStats,
   getRecruiterProductivity,
 } from "@/lib/analytics/metrics";
-import { getAnalyticsOverview } from "@/lib/analytics/hub-metrics";
+import {
+  getAnalyticsOverview,
+  type AnalyticsOverview,
+} from "@/lib/analytics/hub-metrics";
 import { StatCard } from "@/components/analytics/hub/stat-card";
 import { FunnelChart } from "@/components/analytics/funnel-chart";
 import { CrossLocationTable } from "@/components/analytics/cross-location-table";
@@ -32,6 +35,21 @@ import { RecruiterProductivityTable } from "@/components/analytics/recruiter-pro
 
 export const metadata: Metadata = { title: "Analytics" };
 export const dynamic = "force-dynamic";
+
+type TabId = "overview" | "funnel" | "sources" | "offers" | "locations";
+const TABS: Array<{ id: TabId; label: string }> = [
+  { id: "overview", label: "Overview" },
+  { id: "funnel", label: "Funnel & velocity" },
+  { id: "sources", label: "Sources" },
+  { id: "offers", label: "Offers" },
+  { id: "locations", label: "Locations" },
+];
+
+const WINDOWS: Array<{ value: string; days: number; label: string }> = [
+  { value: "30", days: 30, label: "30 days" },
+  { value: "90", days: 90, label: "90 days" },
+  { value: "365", days: 365, label: "12 months" },
+];
 
 function fmtDays(n: number | null): string {
   return n === null ? "—" : Math.round(n).toLocaleString("en-US");
@@ -43,9 +61,17 @@ function fmtRatio(n: number | null): string {
   return n === null ? "—" : n.toFixed(1);
 }
 
-export default async function AnalyticsHubPage() {
-  const supabase = await createSupabaseServerClient();
+interface PageProps {
+  searchParams: Promise<{ tab?: string; window?: string }>;
+}
 
+export default async function AnalyticsHubPage({ searchParams }: PageProps) {
+  const sp = await searchParams;
+  const tab: TabId =
+    (TABS.find((t) => t.id === sp.tab)?.id as TabId) ?? "overview";
+  const win = WINDOWS.find((w) => w.value === sp.window) ?? WINDOWS[1];
+
+  const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -62,22 +88,18 @@ export default async function AnalyticsHubPage() {
 
   const [overview, analytics, crossLocationRows, recruiterRows] =
     await Promise.all([
-      getAnalyticsOverview(supabase, dsoId, { windowDays: 90 }),
+      getAnalyticsOverview(supabase, dsoId, { windowDays: win.days }),
       getDsoAnalytics(supabase, dsoId),
       getDsoCrossLocationStats(supabase, dsoId),
       getRecruiterProductivity(supabase, dsoId, 30),
     ]);
 
-  const ttf = overview.time_to_hire_fill.time_to_fill_median_days;
-  const tth = overview.time_to_hire_fill.time_to_hire_median_days;
-  const oar = overview.offers.acceptance_rate;
-  const coverage = overview.pipeline_coverage.ratio;
-  const bookRate = overview.interviews.booking_rate;
-  const aging = overview.req_aging;
+  const hrefFor = (t: TabId) => `/employer/analytics?tab=${t}&window=${win.value}`;
+  const winHref = (w: string) => `/employer/analytics?tab=${tab}&window=${w}`;
 
   return (
     <EmployerShell active="reports">
-      <header className="mb-8 flex flex-wrap items-start justify-between gap-6">
+      <header className="mb-6 flex flex-wrap items-start justify-between gap-6">
         <div className="max-w-[820px]">
           <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
             Analytics
@@ -87,8 +109,7 @@ export default async function AnalyticsHubPage() {
           </h1>
           <p className="text-[14px] text-slate-body leading-relaxed">
             Every metric across your jobs, locations, and recruiters — live as
-            candidates apply and move through the pipeline. Last 90 days unless
-            noted.
+            candidates apply and move through the pipeline.
           </p>
         </div>
         <a
@@ -101,140 +122,335 @@ export default async function AnalyticsHubPage() {
         </a>
       </header>
 
-      {/* Headline KPI grid — leading indicators first. */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-[var(--rule)] border border-[var(--rule)] mb-4">
-        <div className="bg-white">
-          <StatCard
-            label="Pipeline coverage"
-            value={fmtRatio(coverage)}
-            unit={coverage !== null ? "× per open req" : undefined}
-            hint={`${overview.pipeline_coverage.active_candidates} active · ${overview.pipeline_coverage.open_reqs} open reqs`}
-          />
+      {/* Tab bar + window selector */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--rule)]">
+        <nav className="flex flex-wrap -mb-px">
+          {TABS.map((t) => {
+            const active = t.id === tab;
+            return (
+              <Link
+                key={t.id}
+                href={hrefFor(t.id)}
+                className={
+                  "px-4 py-3 text-[12px] font-bold tracking-[0.5px] border-b-2 transition-colors " +
+                  (active
+                    ? "border-heritage text-ink"
+                    : "border-transparent text-slate-meta hover:text-ink hover:border-[var(--rule-strong)]")
+                }
+              >
+                {t.label}
+              </Link>
+            );
+          })}
+        </nav>
+        <div className="flex items-center gap-1 pb-2">
+          {WINDOWS.map((w) => {
+            const active = w.value === win.value;
+            return (
+              <Link
+                key={w.value}
+                href={winHref(w.value)}
+                className={
+                  "px-3 py-1.5 text-[11px] font-semibold border transition-colors " +
+                  (active
+                    ? "bg-ink text-ivory border-ink"
+                    : "bg-white text-slate-body border-[var(--rule-strong)] hover:border-ink")
+                }
+              >
+                {w.label}
+              </Link>
+            );
+          })}
         </div>
-        <div className="bg-white">
-          <StatCard
-            label="Open reqs · aging"
-            value={aging.open_reqs.toLocaleString()}
-            hint={
-              aging.buckets.d90_plus > 0
-                ? `${aging.buckets.d90_plus} aging past 90 days`
-                : aging.oldest_days !== null
-                  ? `oldest ${Math.round(aging.oldest_days)}d open`
-                  : "no open reqs"
-            }
-          />
+      </div>
+
+      {tab === "overview" && (
+        <OverviewTab
+          overview={overview}
+          funnel={analytics.funnel}
+          recruiterRows={recruiterRows}
+        />
+      )}
+      {tab === "funnel" && (
+        <FunnelTab overview={overview} funnel={analytics.funnel} />
+      )}
+      {tab === "sources" && <SourcesTab overview={overview} />}
+      {tab === "offers" && <OffersTab overview={overview} />}
+      {tab === "locations" && (
+        <LocationsTab rows={crossLocationRows} />
+      )}
+    </EmployerShell>
+  );
+}
+
+/* ───────────────────────── Tabs ───────────────────────── */
+
+function KpiGrid({ overview }: { overview: AnalyticsOverview }) {
+  const ttf = overview.time_to_hire_fill.time_to_fill_median_days;
+  const tth = overview.time_to_hire_fill.time_to_hire_median_days;
+  const oar = overview.offers.acceptance_rate;
+  const coverage = overview.pipeline_coverage.ratio;
+  const bookRate = overview.interviews.booking_rate;
+  const aging = overview.req_aging;
+  return (
+    <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <StatCard
+        label="Pipeline coverage"
+        value={fmtRatio(coverage)}
+        unit={coverage !== null ? "× per open req" : undefined}
+        hint={`${overview.pipeline_coverage.active_candidates} active · ${overview.pipeline_coverage.open_reqs} open reqs`}
+      />
+      <StatCard
+        label="Open reqs · aging"
+        value={aging.open_reqs.toLocaleString()}
+        hint={
+          aging.buckets.d90_plus > 0
+            ? `${aging.buckets.d90_plus} aging past 90 days`
+            : aging.oldest_days !== null
+              ? `oldest ${Math.round(aging.oldest_days)}d open`
+              : "no open reqs"
+        }
+      />
+      <StatCard
+        label="Interview booking rate"
+        value={fmtPct(bookRate)}
+        unit={bookRate !== null ? "%" : undefined}
+        hint={`${overview.interviews.booked} booked · ${overview.interviews.proposals} proposed`}
+      />
+      <StatCard
+        label="Offer acceptance"
+        value={fmtPct(oar)}
+        unit={oar !== null ? "%" : undefined}
+        hint={`${overview.offers.accepted} of ${overview.offers.sent} offers`}
+        benchmark="Strong: 80–90%"
+      />
+      <StatCard
+        label="Time to fill"
+        value={fmtDays(ttf)}
+        unit={ttf !== null ? "days" : undefined}
+        hint="posted → hired (median)"
+        benchmark="Industry ~60d"
+      />
+      <StatCard
+        label="Time to hire"
+        value={fmtDays(tth)}
+        unit={tth !== null ? "days" : undefined}
+        hint="applied → hired (median)"
+      />
+      <StatCard
+        label="Applications"
+        value={overview.applications.toLocaleString()}
+        hint={`last ${overview.window_days} days`}
+      />
+      <StatCard
+        label="Hires"
+        value={overview.hires.toLocaleString()}
+        hint={`last ${overview.window_days} days`}
+      />
+    </section>
+  );
+}
+
+function OverviewTab({
+  overview,
+  funnel,
+  recruiterRows,
+}: {
+  overview: AnalyticsOverview;
+  funnel: ComponentProps<typeof FunnelChart>["rows"];
+  recruiterRows: ComponentProps<typeof RecruiterProductivityTable>["rows"];
+}) {
+  return (
+    <>
+      <KpiGrid overview={overview} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <FunnelChart rows={funnel} title="Pipeline funnel · all jobs" />
+        <SourcePerformance rows={overview.sources} />
+      </div>
+      {recruiterRows.length >= 1 && (
+        <div className="mb-6">
+          <RecruiterProductivityTable rows={recruiterRows} windowDays={30} />
         </div>
+      )}
+      <PublicReportCallout />
+    </>
+  );
+}
+
+function FunnelTab({
+  overview,
+  funnel,
+}: {
+  overview: AnalyticsOverview;
+  funnel: ComponentProps<typeof FunnelChart>["rows"];
+}) {
+  const t = overview.time_to_hire_fill;
+  return (
+    <>
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-[var(--rule)] border border-[var(--rule)] mb-6">
         <div className="bg-white">
           <StatCard
-            label="Interview booking rate"
-            value={fmtPct(bookRate)}
-            unit={bookRate !== null ? "%" : undefined}
-            hint={`${overview.interviews.booked} booked · ${overview.interviews.proposals} proposed`}
-          />
-        </div>
-        <div className="bg-white">
-          <StatCard
-            label="Offer acceptance"
-            value={fmtPct(oar)}
-            unit={oar !== null ? "%" : undefined}
-            hint={`${overview.offers.accepted} of ${overview.offers.sent} offers`}
-            benchmark="Strong: 80–90%"
-          />
-        </div>
-        <div className="bg-white">
-          <StatCard
-            label="Time to fill"
-            value={fmtDays(ttf)}
-            unit={ttf !== null ? "days" : undefined}
-            hint="posted → hired (median)"
+            label="Time to fill · median"
+            value={fmtDays(t.time_to_fill_median_days)}
+            unit={t.time_to_fill_median_days !== null ? "days" : undefined}
+            hint={`mean ${fmtDays(t.time_to_fill_avg_days)}d · posted → hired`}
             benchmark="Industry ~60d"
           />
         </div>
         <div className="bg-white">
           <StatCard
-            label="Time to hire"
-            value={fmtDays(tth)}
-            unit={tth !== null ? "days" : undefined}
-            hint="applied → hired (median)"
+            label="Time to hire · median"
+            value={fmtDays(t.time_to_hire_median_days)}
+            unit={t.time_to_hire_median_days !== null ? "days" : undefined}
+            hint={`mean ${fmtDays(t.time_to_hire_avg_days)}d · applied → hired`}
           />
         </div>
         <div className="bg-white">
           <StatCard
-            label="Applications"
-            value={overview.applications.toLocaleString()}
-            hint="last 90 days"
+            label="Pipeline coverage"
+            value={fmtRatio(overview.pipeline_coverage.ratio)}
+            unit={overview.pipeline_coverage.ratio !== null ? "×" : undefined}
+            hint={`${overview.pipeline_coverage.active_candidates} active candidates`}
           />
         </div>
         <div className="bg-white">
           <StatCard
             label="Hires"
             value={overview.hires.toLocaleString()}
-            hint="last 90 days"
+            hint={`last ${overview.window_days} days`}
           />
         </div>
       </section>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <FunnelChart rows={analytics.funnel} title="Pipeline funnel · all jobs" />
-        <SourcePerformance rows={overview.sources} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <FunnelChart rows={funnel} title="Pipeline funnel · all jobs" />
+        <ReqAgingCard aging={overview.req_aging} />
       </div>
-
-      <div className="mb-6">
-        <OfferBreakdown offers={overview.offers} />
-      </div>
-
-      {crossLocationRows.length >= 2 && (
-        <div className="mb-6">
-          <CrossLocationTable rows={crossLocationRows} />
-        </div>
-      )}
-
-      {recruiterRows.length >= 1 && (
-        <div className="mb-6">
-          <RecruiterProductivityTable rows={recruiterRows} windowDays={30} />
-        </div>
-      )}
-
-      <section className="border border-[var(--rule)] bg-cream/40 p-6">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
-          Public report
-        </div>
-        <h2 className="text-lg font-extrabold tracking-[-0.3px] text-ink mb-2">
-          Dental Hiring Report · 2026
-        </h2>
-        <p className="text-[13px] text-slate-body leading-relaxed max-w-[560px] mb-3">
-          Anonymized, continuously-updated industry trend report drawn from the
-          DSO Hire platform: compensation bands by role, role mix, top states,
-          time-to-fill. Public-facing and SEO-indexed.
-        </p>
-        <Link
-          href="/dental-hiring-report"
-          className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink"
-        >
-          View the report <ArrowRight className="h-3 w-3" />
-        </Link>
-      </section>
-    </EmployerShell>
+    </>
   );
 }
 
-/* ───── Source performance table ───── */
+function SourcesTab({ overview }: { overview: AnalyticsOverview }) {
+  return (
+    <div className="max-w-[760px]">
+      <SourcePerformance rows={overview.sources} showAll />
+    </div>
+  );
+}
 
-function SourcePerformance({
+function OffersTab({ overview }: { overview: AnalyticsOverview }) {
+  return (
+    <div className="max-w-[760px]">
+      <OfferBreakdown offers={overview.offers} />
+    </div>
+  );
+}
+
+function LocationsTab({
   rows,
 }: {
-  rows: Array<{
-    source: string;
-    applications: number;
-    hires: number;
-    apps_per_hire: number | null;
-    hire_rate: number | null;
-  }>;
+  rows: ComponentProps<typeof CrossLocationTable>["rows"];
 }) {
+  if (rows.length < 2) {
+    return (
+      <p className="text-[13px] text-slate-meta italic">
+        Location comparison appears once you have jobs across two or more
+        practices. Richer per-practice drill-down lands soon.
+      </p>
+    );
+  }
+  return <CrossLocationTable rows={rows} />;
+}
+
+/* ───────────────────────── Pieces ───────────────────────── */
+
+function ReqAgingCard({
+  aging,
+}: {
+  aging: AnalyticsOverview["req_aging"];
+}) {
+  const b = aging.buckets;
+  const total = b.d0_30 + b.d31_60 + b.d61_90 + b.d90_plus;
+  const segs = [
+    { label: "0–30d", n: b.d0_30, color: "var(--color-heritage, #4D7A60)" },
+    { label: "31–60d", n: b.d31_60, color: "#8db8a3" },
+    { label: "61–90d", n: b.d61_90, color: "#EF9F27" },
+    { label: "90+d", n: b.d90_plus, color: "#D85A30" },
+  ];
   return (
     <section className="border border-[var(--rule)] bg-white p-6">
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
-        Source performance · last 90 days
+        Open requisitions by age
+      </div>
+      {total === 0 ? (
+        <p className="text-[13px] text-slate-meta italic">No open reqs.</p>
+      ) : (
+        <>
+          <div className="flex h-3 w-full overflow-hidden mb-4 border border-[var(--rule)]">
+            {segs.map(
+              (s) =>
+                s.n > 0 && (
+                  <div
+                    key={s.label}
+                    style={{
+                      width: `${(s.n / total) * 100}%`,
+                      background: s.color,
+                    }}
+                    title={`${s.label}: ${s.n}`}
+                  />
+                )
+            )}
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {segs.map((s) => (
+              <div key={s.label}>
+                <div className="flex items-center gap-1.5 text-[10px] font-bold tracking-[1px] uppercase text-slate-meta mb-1">
+                  <span
+                    className="inline-block h-2 w-2"
+                    style={{ background: s.color }}
+                  />
+                  {s.label}
+                </div>
+                <div className="text-[20px] font-extrabold tabular-nums text-ink leading-none">
+                  {s.n}
+                </div>
+              </div>
+            ))}
+          </div>
+          {aging.oldest_days !== null && (
+            <p className="mt-4 text-[12px] text-slate-body">
+              Oldest open req:{" "}
+              <span className="font-bold text-ink">
+                {Math.round(aging.oldest_days)} days
+              </span>
+              {aging.avg_age_days !== null && (
+                <>
+                  {" "}
+                  · average{" "}
+                  <span className="font-bold text-ink">
+                    {Math.round(aging.avg_age_days)} days
+                  </span>
+                </>
+              )}
+            </p>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
+
+function SourcePerformance({
+  rows,
+  showAll = false,
+}: {
+  rows: AnalyticsOverview["sources"];
+  showAll?: boolean;
+}) {
+  const display = showAll ? rows : rows.slice(0, 8);
+  return (
+    <section className="border border-[var(--rule)] bg-white p-6">
+      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
+        Source performance
       </div>
       {rows.length === 0 ? (
         <p className="text-[13px] text-slate-meta italic">
@@ -251,9 +467,12 @@ function SourcePerformance({
             </tr>
           </thead>
           <tbody>
-            {rows.slice(0, 8).map((r) => (
-              <tr key={r.source} className="border-b border-[var(--rule)] last:border-0">
-                <td className="py-2 text-ink font-medium truncate max-w-[180px]">
+            {display.map((r) => (
+              <tr
+                key={r.source}
+                className="border-b border-[var(--rule)] last:border-0"
+              >
+                <td className="py-2 text-ink font-medium truncate max-w-[200px]">
                   {r.source}
                 </td>
                 <td className="py-2 text-right tabular-nums text-ink">
@@ -274,25 +493,15 @@ function SourcePerformance({
   );
 }
 
-/* ───── Offer breakdown ───── */
-
 function OfferBreakdown({
   offers,
 }: {
-  offers: {
-    sent: number;
-    accepted: number;
-    declined: number;
-    pending: number;
-    acceptance_rate: number | null;
-    avg_days_to_response: number | null;
-    decline_reasons: Array<{ reason: string; count: number }>;
-  };
+  offers: AnalyticsOverview["offers"];
 }) {
   return (
     <section className="border border-[var(--rule)] bg-white p-6">
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
-        Offers · last 90 days
+        Offers
       </div>
       {offers.sent === 0 ? (
         <p className="text-[13px] text-slate-meta italic">
@@ -300,10 +509,10 @@ function OfferBreakdown({
         </p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <Stat label="Sent" value={offers.sent} />
-          <Stat label="Accepted" value={offers.accepted} />
-          <Stat label="Declined" value={offers.declined} />
-          <Stat
+          <MiniStat label="Sent" value={offers.sent} />
+          <MiniStat label="Accepted" value={offers.accepted} />
+          <MiniStat label="Declined" value={offers.declined} />
+          <MiniStat
             label="Avg response"
             value={
               offers.avg_days_to_response !== null
@@ -337,7 +546,7 @@ function OfferBreakdown({
   );
 }
 
-function Stat({ label, value }: { label: string; value: string | number }) {
+function MiniStat({ label, value }: { label: string; value: string | number }) {
   return (
     <div>
       <div className="text-[10px] font-bold tracking-[1px] uppercase text-slate-meta mb-1">
@@ -347,5 +556,29 @@ function Stat({ label, value }: { label: string; value: string | number }) {
         {typeof value === "number" ? value.toLocaleString("en-US") : value}
       </div>
     </div>
+  );
+}
+
+function PublicReportCallout() {
+  return (
+    <section className="border border-[var(--rule)] bg-cream/40 p-6">
+      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+        Public report
+      </div>
+      <h2 className="text-lg font-extrabold tracking-[-0.3px] text-ink mb-2">
+        Dental Hiring Report · 2026
+      </h2>
+      <p className="text-[13px] text-slate-body leading-relaxed max-w-[560px] mb-3">
+        Anonymized, continuously-updated industry trend report drawn from the
+        DSO Hire platform: compensation bands by role, role mix, top states,
+        time-to-fill. Public-facing and SEO-indexed.
+      </p>
+      <Link
+        href="/dental-hiring-report"
+        className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink"
+      >
+        View the report <ArrowRight className="h-3 w-3" />
+      </Link>
+    </section>
   );
 }
