@@ -74,6 +74,7 @@ export type NavId =
   | "jobs"
   | "applications"
   | "talent-pool"
+  | "referrals"
   | "inbox"
   | "reports"
   | "locations"
