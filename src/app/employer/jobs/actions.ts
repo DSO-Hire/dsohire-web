@@ -25,6 +25,11 @@ import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
 import { requireActiveSubscriptionError } from "@/lib/billing/subscription";
+import {
+  guardNewJobPublish,
+  guardExistingJobPublish,
+  guardJobUpdatePublish,
+} from "@/lib/compliance/pay-transparency-guard";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { SUPPORT_EMAIL } from "@/lib/contact";
 import {
@@ -71,6 +76,24 @@ export async function createJob(
   // Feature gate — block job creation behind an active subscription.
   const billingError = await requireActiveSubscriptionError(supabase, dsoId);
   if (billingError) return { ok: false, error: billingError };
+
+  // Pay-transparency enforcement — only gate a job going LIVE (drafts can be
+  // saved non-compliant). The employer can self-certify exempt; we never
+  // assert coverage ourselves. See lib/compliance/pay-transparency.ts.
+  if (parsed.status === "active") {
+    const ptError = await guardNewJobPublish(supabase, {
+      locationIds: parsed.locationIds,
+      workMode: String(formData.get("work_mode") ?? "") || null,
+      remoteStates: formData.getAll("remote_state_restrictions").map(String),
+      compType: parsed.compType,
+      compMin: parsed.compMin,
+      compMax: parsed.compMax,
+      compVisible: parsed.compVisible,
+      hasBenefits: parsed.benefits.length > 0,
+      exemptAck: formData.get("pay_transparency_exempt") === "on",
+    });
+    if (ptError) return { ok: false, error: ptError };
+  }
 
   const baseSlug = makeSlug(parsed.title);
   if (!baseSlug) return { ok: false, error: "Couldn't generate a URL slug." };
@@ -231,6 +254,22 @@ export async function updateJob(
   if ("error" in parsed) return { ok: false, error: parsed.error };
 
   const supabase = await createSupabaseServerClient();
+
+  // Pay-transparency — re-validate when the edit keeps/sets the job live.
+  if (parsed.status === "active") {
+    const ptError = await guardNewJobPublish(supabase, {
+      locationIds: parsed.locationIds,
+      workMode: String(formData.get("work_mode") ?? "") || null,
+      remoteStates: formData.getAll("remote_state_restrictions").map(String),
+      compType: parsed.compType,
+      compMin: parsed.compMin,
+      compMax: parsed.compMax,
+      compVisible: parsed.compVisible,
+      hasBenefits: parsed.benefits.length > 0,
+      exemptAck: formData.get("pay_transparency_exempt") === "on",
+    });
+    if (ptError) return { ok: false, error: ptError };
+  }
 
   const { error: updateError } = await supabase
     .from("jobs")
@@ -667,6 +706,23 @@ export async function updateJobDetailsSection(
   }
 
   const supabase = await createSupabaseServerClient();
+
+  // Pay-transparency — block hiding pay / dropping the range / removing
+  // benefits on a LIVE covered posting. No-op for drafts + non-covered jobs.
+  const ptError = await guardJobUpdatePublish(
+    supabase,
+    jobId,
+    {
+      compType: compTypeEdit,
+      compMin,
+      compMax,
+      compVisible,
+      hasBenefits: benefits.length > 0,
+    },
+    formData.get("pay_transparency_exempt") === "on"
+  );
+  if (ptError) return { ok: false, error: ptError };
+
   const { error: updateError } = await supabase
     .from("jobs")
     .update({
@@ -943,6 +999,18 @@ export async function setJobStatus(
   const jobTitle =
     ((priorJob as Record<string, unknown> | null)?.title as string | null) ??
     "the job";
+
+  // Pay-transparency enforcement on the draft → active (and re-activate)
+  // transition. Loads the persisted job + locations; employer can self-certify
+  // exempt via the same hidden field the wizard uses.
+  if (newStatus === "active") {
+    const ptError = await guardExistingJobPublish(
+      supabase,
+      jobId,
+      formData.get("pay_transparency_exempt") === "on"
+    );
+    if (ptError) return { ok: false, error: ptError };
+  }
 
   const update: Record<string, unknown> = { status: newStatus };
   if (newStatus === "active") {

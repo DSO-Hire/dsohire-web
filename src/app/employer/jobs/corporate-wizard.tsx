@@ -31,7 +31,7 @@
  * the existing pattern rather than exporting a shared primitive set mid-5G.d).
  */
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import {
   ArrowRight,
   ArrowLeft,
@@ -82,7 +82,15 @@ import { CompensationSection } from "./compensation-section";
 import { VerificationRequirements } from "./verification-requirements";
 import type { VerificationTypeValue } from "@/lib/verifications/types";
 import { ChipArrayInput } from "@/app/candidate/profile/edit-sheet";
-import { getJobRequirementsPrioritized } from "@/lib/candidate/canonical-lists";
+import {
+  getJobRequirementsPrioritized,
+  BENEFITS,
+} from "@/lib/candidate/canonical-lists";
+import {
+  evaluateJobPosting,
+  describeRequirement,
+  describeJurisdictions,
+} from "@/lib/compliance/pay-transparency";
 
 /* ───── Types ───── */
 
@@ -340,6 +348,55 @@ export function CorporateJobWizard({
     initial?.equity_offered ?? false
   );
   const [equityNote, setEquityNote] = useState(initial?.equity_note ?? "");
+  // Day 24 — benefits chip list + pay-transparency exemption self-cert.
+  const [benefits, setBenefits] = useState<string[]>(
+    (initial as { benefits?: string[] } | undefined)?.benefits ?? []
+  );
+  const [payExempt, setPayExempt] = useState(false);
+
+  // Day 24 — pay-transparency. Corporate roles are often remote/multi-state,
+  // so workMode + remoteStates drive most coverage here (plus any anchor
+  // locations). Mirrors the server guard.
+  const payAssessment = useMemo(() => {
+    const locs = locations
+      .filter((l) => selectedLocationIds.has(l.id))
+      .map((l) => ({ state: l.state, city: l.city }));
+    return evaluateJobPosting({
+      locations: locs,
+      workMode,
+      remoteStates: Array.from(remoteStates),
+      compType,
+      compMin: compMin.trim() ? Number(compMin) : null,
+      compMax: compMax.trim() ? Number(compMax) : null,
+      compVisible,
+      hasBenefits: benefits.length > 0,
+    });
+  }, [
+    locations,
+    selectedLocationIds,
+    workMode,
+    remoteStates,
+    compType,
+    compMin,
+    compMax,
+    compVisible,
+    benefits,
+  ]);
+  const payTransparency = useMemo(() => {
+    if (payAssessment.covered.length === 0) return null;
+    return {
+      requiresRange: payAssessment.requiresRange,
+      requiresBenefits: payAssessment.requiresBenefits,
+      coveredLabel: describeJurisdictions(
+        payAssessment.rangeDrivers.length
+          ? payAssessment.rangeDrivers
+          : payAssessment.benefitsDrivers
+      ),
+      message: describeRequirement(payAssessment) ?? "",
+      remoteRisk: payAssessment.remoteRisk,
+      remoteRiskLabel: describeJurisdictions(payAssessment.remoteRiskStates),
+    };
+  }, [payAssessment]);
 
   // 5G.e Tier 2 — verification requirements. Held as a Set<string>, mirroring
   // selectedLocationIds / remoteStates.
@@ -668,7 +725,10 @@ export function CorporateJobWizard({
       formData.set("compensation_max", "");
     }
     formData.set("compensation_period", compType === "doe" ? "" : compPeriod);
-    if (compVisible) formData.set("compensation_visible", "on");
+    if (compVisible || (payTransparency?.requiresRange && !payExempt))
+      formData.set("compensation_visible", "on");
+    if (payExempt) formData.set("pay_transparency_exempt", "on");
+    for (const b of benefits) formData.append("benefits", b);
 
     // 16-column corporate sandbox.
     formData.set("work_mode", workMode);
@@ -905,6 +965,11 @@ export function CorporateJobWizard({
             onHideStagesFromCandidate={setHideStagesFromCandidate}
             verificationRequirements={verificationRequirements}
             onToggleVerificationRequirement={toggleVerificationRequirement}
+            benefits={benefits}
+            onBenefits={setBenefits}
+            payTransparency={payTransparency}
+            payExempt={payExempt}
+            onPayExempt={setPayExempt}
           />
         )}
 
@@ -1345,6 +1410,11 @@ function DetailsStep({
   onHideStagesFromCandidate,
   verificationRequirements,
   onToggleVerificationRequirement,
+  benefits,
+  onBenefits,
+  payTransparency,
+  payExempt,
+  onPayExempt,
 }: {
   compType: CompensationType;
   onCompType: (v: CompensationType) => void;
@@ -1404,6 +1474,18 @@ function DetailsStep({
   onHideStagesFromCandidate: (v: boolean) => void;
   verificationRequirements: Set<string>;
   onToggleVerificationRequirement: (value: VerificationTypeValue) => void;
+  benefits: string[];
+  onBenefits: (v: string[]) => void;
+  payTransparency: {
+    requiresRange: boolean;
+    requiresBenefits: boolean;
+    coveredLabel: string;
+    message: string;
+    remoteRisk: boolean;
+    remoteRiskLabel: string;
+  } | null;
+  payExempt: boolean;
+  onPayExempt: (v: boolean) => void;
 }) {
   const [reportingOpen, setReportingOpen] = useState(
     Boolean(reportsTo || directReportsBand || indirectReportsBand)
@@ -1427,6 +1509,11 @@ function DetailsStep({
           live further down this step — they've been pulled up here. */}
       <CompensationSection
         accent="corporate"
+        enforcement={
+          payTransparency
+            ? { ...payTransparency, exempt: payExempt, onExempt: onPayExempt }
+            : undefined
+        }
         compType={compType}
         onCompType={onCompType}
         compMin={compMin}
@@ -1453,6 +1540,18 @@ function DetailsStep({
         onEquityOffered={onEquityOffered}
         equityNote={equityNote}
         onEquityNote={onEquityNote}
+      />
+
+      {/* Day 24 — Benefits chip picker. Several pay-transparency states
+          (CO, WA, IL, MN, MD, NJ, VT) require a general benefits description
+          on covered postings, so corporate jobs need this field too. */}
+      <ChipArrayInput
+        label="Benefits"
+        values={benefits}
+        onChange={onBenefits}
+        options={BENEFITS}
+        placeholder="Search benefits — type and press Enter for custom"
+        helper="Health, retirement, PTO, and other perks. Several states (CO, WA, IL, MN, MD, NJ, VT) require a general benefits description on covered job posts."
       />
 
       {/* ── Work mode ── */}

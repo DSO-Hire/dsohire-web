@@ -17,7 +17,7 @@
  * which parses + syncs `job_screening_questions`.
  */
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import {
   ArrowRight,
   ArrowLeft,
@@ -43,6 +43,11 @@ import {
   type ExternalLinkPair,
 } from "@/components/external-links-field";
 import { CompensationSection } from "./compensation-section";
+import {
+  evaluateJobPosting,
+  describeRequirement,
+  describeJurisdictions,
+} from "@/lib/compliance/pay-transparency";
 import { VerificationRequirements } from "./verification-requirements";
 import type { VerificationTypeValue } from "@/lib/verifications/types";
 import {
@@ -381,6 +386,10 @@ export function JobWizard({
   const [compVisible, setCompVisible] = useState(
     initial?.compensation_visible ?? true
   );
+  // Day 24 — pay-transparency: employer self-certifies an exemption (under
+  // the size threshold) rather than us asserting coverage. Drives the hidden
+  // pay_transparency_exempt field the server guard reads.
+  const [payExempt, setPayExempt] = useState(false);
   // 2026-05-14 — composable compensation components. Numeric targets are
   // STRINGS in wizard state (mirrors compMin/compMax) so the inputs stay
   // controlled; the server parser does the int coercion.
@@ -706,6 +715,51 @@ export function JobWizard({
     setStepIdx((i) => Math.max(0, i - 1));
   }
 
+  /* ───── Pay-transparency assessment (Day 24) ───── */
+  // Pure, client-side mirror of the server guard so the comp step can
+  // auto-adapt (require a range, force-show pay, prompt benefits) before the
+  // employer hits Publish. Base wizard = onsite practice roles, so coverage
+  // is driven by the selected locations' states.
+  const payAssessment = useMemo(() => {
+    const locs = locations
+      .filter((l) => selectedLocationIds.has(l.id))
+      .map((l) => ({ state: l.state, city: l.city }));
+    return evaluateJobPosting({
+      locations: locs,
+      workMode: null,
+      remoteStates: [],
+      compType,
+      compMin: compMin.trim() ? Number(compMin) : null,
+      compMax: compMax.trim() ? Number(compMax) : null,
+      compVisible,
+      hasBenefits: benefits.length > 0,
+    });
+  }, [
+    locations,
+    selectedLocationIds,
+    compType,
+    compMin,
+    compMax,
+    compVisible,
+    benefits,
+  ]);
+
+  const payTransparency = useMemo(() => {
+    if (payAssessment.covered.length === 0) return null;
+    return {
+      requiresRange: payAssessment.requiresRange,
+      requiresBenefits: payAssessment.requiresBenefits,
+      coveredLabel: describeJurisdictions(
+        payAssessment.rangeDrivers.length
+          ? payAssessment.rangeDrivers
+          : payAssessment.benefitsDrivers
+      ),
+      message: describeRequirement(payAssessment) ?? "",
+      remoteRisk: payAssessment.remoteRisk,
+      remoteRiskLabel: describeJurisdictions(payAssessment.remoteRiskStates),
+    };
+  }, [payAssessment]);
+
   /* ───── Submit ───── */
 
   function handleSubmit() {
@@ -790,7 +844,11 @@ export function JobWizard({
     }
     if (scheduleEvenings) formData.set("schedule_evenings", "on");
     if (scheduleWeekends) formData.set("schedule_weekends", "on");
-    if (compVisible) formData.set("compensation_visible", "on");
+    // Auto-adapt: a covered, non-exempt posting force-shows pay (mirrors the
+    // locked checkbox in the comp step).
+    if (compVisible || (payTransparency?.requiresRange && !payExempt))
+      formData.set("compensation_visible", "on");
+    if (payExempt) formData.set("pay_transparency_exempt", "on");
     if (hideStagesFromCandidate)
       formData.set("hide_stages_from_candidate", "on");
     formData.set("scope", scope);
@@ -1055,6 +1113,9 @@ export function JobWizard({
             onExternalLinks={setExternalLinks}
             verificationRequirements={verificationRequirements}
             onToggleVerificationRequirement={toggleVerificationRequirement}
+            payTransparency={payTransparency}
+            payExempt={payExempt}
+            onPayExempt={setPayExempt}
           />
         )}
 
@@ -1618,6 +1679,9 @@ function DetailsStep({
   onExternalLinks,
   verificationRequirements,
   onToggleVerificationRequirement,
+  payTransparency,
+  payExempt,
+  onPayExempt,
 }: {
   roleCategory: string;
   compType: CompensationType;
@@ -1671,6 +1735,16 @@ function DetailsStep({
   onExternalLinks: (v: ExternalLinkPair[]) => void;
   verificationRequirements: Set<string>;
   onToggleVerificationRequirement: (v: VerificationTypeValue) => void;
+  payTransparency: {
+    requiresRange: boolean;
+    requiresBenefits: boolean;
+    coveredLabel: string;
+    message: string;
+    remoteRisk: boolean;
+    remoteRiskLabel: string;
+  } | null;
+  payExempt: boolean;
+  onPayExempt: (v: boolean) => void;
 }) {
   return (
     <div className="space-y-7">
@@ -1689,6 +1763,11 @@ function DetailsStep({
           variable/bonus/equity components + OTE note + show-pay toggle). */}
       <CompensationSection
         accent="heritage"
+        enforcement={
+          payTransparency
+            ? { ...payTransparency, exempt: payExempt, onExempt: onPayExempt }
+            : undefined
+        }
         compType={compType}
         onCompType={onCompType}
         compMin={compMin}

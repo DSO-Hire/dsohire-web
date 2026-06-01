@@ -26,7 +26,30 @@
  * vs "corporate" (slate-blue #3D5266, the 5G.d corporate wizard).
  */
 
+import { useEffect } from "react";
 import { computeOte, formatUsd, type CompensationType } from "@/lib/comp/ote";
+import { PAY_TRANSPARENCY_DISCLAIMER } from "@/lib/compliance/pay-transparency";
+
+/**
+ * Pay-transparency enforcement, computed by the wizard from the job's
+ * locality + comp. When present and not exempt, the comp UI auto-adapts:
+ * the range becomes required, "Show pay publicly" force-checks + locks, and
+ * the DOE option disappears. The employer can self-certify an exemption.
+ */
+export interface PayTransparencyEnforcement {
+  requiresRange: boolean;
+  requiresBenefits: boolean;
+  /** "California and Colorado" — the jurisdictions driving the requirement. */
+  coveredLabel: string;
+  /** One-line plain-English requirement summary. */
+  message: string;
+  /** Remote/open posting that broad-reach states (CO/WA) could capture. */
+  remoteRisk: boolean;
+  remoteRiskLabel: string;
+  /** Employer self-certified exemption (relaxes enforcement). */
+  exempt: boolean;
+  onExempt: (v: boolean) => void;
+}
 
 /* ───── Comp-type vocabulary (mirrors the SQL check on jobs.compensation_type) ───── */
 
@@ -103,6 +126,9 @@ const ACCENT: Record<
 
 export interface CompensationSectionProps {
   accent: Accent;
+
+  /** Day 24 — pay-transparency enforcement (omit when not applicable). */
+  enforcement?: PayTransparencyEnforcement;
 
   // Base
   compType: CompensationType;
@@ -189,6 +215,22 @@ function MoneyInput({
 export function CompensationSection(props: CompensationSectionProps) {
   const a = ACCENT[props.accent];
 
+  const enf = props.enforcement;
+  const enforcing = !!enf && !enf.exempt;
+  const lockPay = enforcing && !!enf?.requiresRange;
+
+  // Auto-adapt: a covered, non-exempt posting can't use DOE and must show pay.
+  useEffect(() => {
+    if (!lockPay) return;
+    if (props.compType === "doe") props.onCompType("range");
+    if (!props.compVisible) props.onCompVisible(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lockPay, props.compType, props.compVisible]);
+
+  const compTypeOptions = lockPay
+    ? COMP_TYPE_OPTIONS.filter((o) => o.value !== "doe")
+    : COMP_TYPE_OPTIONS;
+
   const ote = computeOte({
     compensationType: props.compType,
     compensationMin: numOrNull(props.compMin),
@@ -207,11 +249,79 @@ export function CompensationSection(props: CompensationSectionProps) {
         Compensation
       </legend>
 
+      {/* ── Pay-transparency banner (Day 24) ── */}
+      {enf && (
+        <div
+          className={`mt-1 mb-5 border p-4 ${
+            enforcing
+              ? `${a.tintBorder} ${a.tintBg}`
+              : "border-[var(--rule)] bg-cream/60"
+          }`}
+          aria-live="polite"
+        >
+          {enforcing ? (
+            <>
+              <div
+                className={`text-[11px] font-bold tracking-[1.5px] uppercase ${a.text}`}
+              >
+                Pay transparency · {enf.coveredLabel}
+              </div>
+              <p className="mt-1 text-[13px] text-ink leading-snug">
+                {enf.message} We&apos;ve made the range required and pay public
+                below.
+              </p>
+              {enf.requiresBenefits && (
+                <p className="mt-1.5 text-[12px] text-slate-body leading-snug">
+                  These states also require a general description of benefits
+                  and other compensation — add benefits in the next section.
+                </p>
+              )}
+              {enf.remoteRisk && (
+                <p className="mt-1.5 text-[12px] text-slate-body leading-snug">
+                  <span className="font-semibold text-ink">Remote role:</span>{" "}
+                  {enf.remoteRiskLabel || "Colorado and Washington"} read their
+                  laws to cover any remote job performable in-state — and
+                  disregard “no applicants from X” language. The safe move is to
+                  post a range regardless.
+                </p>
+              )}
+              <p className="mt-2 text-[11px] text-slate-meta leading-snug">
+                {PAY_TRANSPARENCY_DISCLAIMER}
+              </p>
+              <label className="mt-2.5 flex items-start gap-2 text-[12px] text-slate-body cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={false}
+                  onChange={() => enf.onExempt(true)}
+                  className={`mt-0.5 ${a.check}`}
+                />
+                <span>
+                  Our organization is below the size threshold for these laws —
+                  mark this posting exempt.
+                </span>
+              </label>
+            </>
+          ) : (
+            <p className="text-[12px] text-slate-body leading-snug">
+              Marked <span className="font-semibold text-ink">exempt</span> from
+              pay-transparency rules in {enf.coveredLabel}.{" "}
+              <button
+                type="button"
+                onClick={() => enf.onExempt(false)}
+                className={`underline font-semibold ${a.text}`}
+              >
+                Undo
+              </button>
+            </p>
+          )}
+        </div>
+      )}
+
       {/* ── Base ── */}
       <div className="mt-1 mb-4">
         <FieldLabel>Base compensation</FieldLabel>
         <div className="flex flex-wrap gap-2">
-          {COMP_TYPE_OPTIONS.map((opt) => {
+          {compTypeOptions.map((opt) => {
             const checked = props.compType === opt.value;
             return (
               <button
@@ -277,16 +387,33 @@ export function CompensationSection(props: CompensationSectionProps) {
         </div>
       )}
 
-      <label className="mt-4 flex items-start gap-2.5 text-[14px] text-ink cursor-pointer">
+      <label
+        className={`mt-4 flex items-start gap-2.5 text-[14px] text-ink ${
+          lockPay ? "cursor-not-allowed" : "cursor-pointer"
+        }`}
+      >
         <input
           type="checkbox"
-          checked={props.compVisible}
+          checked={lockPay ? true : props.compVisible}
+          disabled={lockPay}
           onChange={(e) => props.onCompVisible(e.target.checked)}
-          className={`mt-1 ${a.check}`}
+          className={`mt-1 ${a.check} ${lockPay ? "opacity-60" : ""}`}
         />
         <span>
-          Show pay publicly. Required in CA, CO, WA, NY, and other states
-          with pay-transparency laws.
+          {lockPay ? (
+            <>
+              Pay is shown publicly — required in {enf?.coveredLabel} for this
+              posting.{" "}
+              <span className="text-slate-meta">
+                (Mark the posting exempt above to change this.)
+              </span>
+            </>
+          ) : (
+            <>
+              Show pay publicly. Required in CA, CO, WA, NY, and other states
+              with pay-transparency laws.
+            </>
+          )}
         </span>
       </label>
 

@@ -22,7 +22,7 @@
  * already learned on the pipeline page header.
  */
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import {
   Plus,
   Trash2,
@@ -48,6 +48,11 @@ import { ChipArrayInput } from "@/app/candidate/profile/edit-sheet";
 import { CORPORATE_FUNCTIONS } from "@/lib/corporate/functions";
 import { ExternalLinksField } from "@/components/external-links-field";
 import { CompensationSection } from "../../compensation-section";
+import {
+  evaluateJobPosting,
+  describeRequirement,
+  describeJurisdictions,
+} from "@/lib/compliance/pay-transparency";
 import { VerificationRequirements } from "../../verification-requirements";
 import type { VerificationTypeValue } from "@/lib/verifications/types";
 import {
@@ -204,6 +209,9 @@ export function EditSections({
         dsoId={dsoId}
         jobId={initial.id}
         roleCategory={initial.role_category}
+        jobLocations={locations
+          .filter((l) => initial.location_ids.includes(l.id))
+          .map((l) => ({ state: l.state, city: l.city }))}
         initialCompType={initial.compensation_type}
         initialCompMin={initial.compensation_min}
         initialCompMax={initial.compensation_max}
@@ -742,6 +750,7 @@ function DetailsSection({
   dsoId,
   jobId,
   roleCategory,
+  jobLocations,
   initialCompType,
   initialCompMin,
   initialCompMax,
@@ -770,6 +779,7 @@ function DetailsSection({
   dsoId: string;
   jobId: string;
   roleCategory: string;
+  jobLocations: Array<{ state: string | null; city: string | null }>;
   initialCompType: "range" | "starting_at" | "up_to" | "exact" | "doe";
   initialCompMin: number | null;
   initialCompMax: number | null;
@@ -808,6 +818,8 @@ function DetailsSection({
   );
   const [compPeriod, setCompPeriod] = useState(initialCompPeriod);
   const [compVisible, setCompVisible] = useState(initialCompVisible);
+  // Day 24 — pay-transparency exemption self-cert on the edit page.
+  const [payExempt, setPayExempt] = useState(false);
   // 2026-05-14 — composable compensation components. Numeric targets are
   // STRINGS in section state (mirrors compMin/compMax); the server parser
   // coerces to int. The _enabled flag is the source of truth.
@@ -946,6 +958,38 @@ function DetailsSection({
 
   const touch = () => setSaved(false);
 
+  // Pay-transparency — same client mirror as the wizard, scoped to the job's
+  // saved locations. Drives the adaptive comp UI on the edit page.
+  const payAssessment = useMemo(
+    () =>
+      evaluateJobPosting({
+        locations: jobLocations,
+        workMode: null,
+        remoteStates: [],
+        compType,
+        compMin: compMin.trim() ? Number(compMin) : null,
+        compMax: compMax.trim() ? Number(compMax) : null,
+        compVisible,
+        hasBenefits: benefits.length > 0,
+      }),
+    [jobLocations, compType, compMin, compMax, compVisible, benefits]
+  );
+  const payTransparency = useMemo(() => {
+    if (payAssessment.covered.length === 0) return null;
+    return {
+      requiresRange: payAssessment.requiresRange,
+      requiresBenefits: payAssessment.requiresBenefits,
+      coveredLabel: describeJurisdictions(
+        payAssessment.rangeDrivers.length
+          ? payAssessment.rangeDrivers
+          : payAssessment.benefitsDrivers
+      ),
+      message: describeRequirement(payAssessment) ?? "",
+      remoteRisk: payAssessment.remoteRisk,
+      remoteRiskLabel: describeJurisdictions(payAssessment.remoteRiskStates),
+    };
+  }, [payAssessment]);
+
   const onSave = () => {
     setError(null);
     setSaved(false);
@@ -972,7 +1016,9 @@ function DetailsSection({
       fd.set("compensation_max", "");
     }
     fd.set("compensation_period", compType === "doe" ? "" : compPeriod);
-    if (compVisible) fd.set("compensation_visible", "on");
+    if (compVisible || (payTransparency?.requiresRange && !payExempt))
+      fd.set("compensation_visible", "on");
+    if (payExempt) fd.set("pay_transparency_exempt", "on");
     // 2026-05-14 — composable compensation components. Checkbox convention:
     // _enabled set "on" only when enabled, omitted when off. Targets +
     // structures always sent as strings (may be ""). Identical contract to
@@ -1059,6 +1105,18 @@ function DetailsSection({
             lights up the Save button. */}
         <CompensationSection
           accent="heritage"
+          enforcement={
+            payTransparency
+              ? {
+                  ...payTransparency,
+                  exempt: payExempt,
+                  onExempt: (v) => {
+                    setPayExempt(v);
+                    touch();
+                  },
+                }
+              : undefined
+          }
           compType={compType}
           onCompType={(v) => {
             setCompType(v);

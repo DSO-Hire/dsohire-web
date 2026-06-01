@@ -127,6 +127,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireActiveSubscriptionError } from "@/lib/billing/subscription";
+import { guardNewJobPublish } from "@/lib/compliance/pay-transparency-guard";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { SUPPORT_EMAIL } from "@/lib/contact";
 import { CORPORATE_FUNCTION_SLUGS } from "@/lib/corporate/functions";
@@ -187,6 +188,8 @@ interface ParsedCorporateJobInput {
   compPeriod: string | null;
   compType: "range" | "starting_at" | "up_to" | "exact" | "doe";
   compVisible: boolean;
+  // Day 24 — benefits chip list (pay-transparency: CO/WA/IL/MN/MD/NJ/VT need it).
+  benefits: string[];
   requirements: string;
   hideStagesFromCandidate: boolean;
   // Anchor locations — OPTIONAL for corporate (0/1/N all valid).
@@ -444,6 +447,24 @@ export async function parseCorporateJobInput(
   const hideStagesFromCandidate =
     formData.get("hide_stages_from_candidate") === "on";
 
+  // Day 24 — benefits chip list (multi-value form key with CSV fallback,
+  // mirroring the practice wizard parser).
+  const benefitsMulti = formData
+    .getAll("benefits")
+    .map((v) => String(v).trim())
+    .filter(Boolean);
+  const benefitsCsv =
+    benefitsMulti.length === 1 && benefitsMulti[0].includes(",")
+      ? benefitsMulti[0]
+      : "";
+  const benefits =
+    benefitsMulti.length > 0 && !benefitsCsv
+      ? benefitsMulti
+      : benefitsCsv
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
+
   const compMin = compMinRaw ? parseInt(compMinRaw, 10) : null;
   const compMax = compMaxRaw ? parseInt(compMaxRaw, 10) : null;
   if (compMin !== null && Number.isNaN(compMin)) {
@@ -582,6 +603,7 @@ export async function parseCorporateJobInput(
     compPeriod: compPeriod || null,
     compType,
     compVisible,
+    benefits,
     requirements,
     hideStagesFromCandidate,
     locationIds,
@@ -658,6 +680,24 @@ export async function createCorporateJob(
   const billingError = await requireActiveSubscriptionError(supabase, dsoId);
   if (billingError) return { ok: false, error: billingError };
 
+  // Pay-transparency enforcement on going live. Corporate roles are often
+  // remote / multi-state, so remote_state_restrictions + work_mode drive most
+  // of the coverage here. Exempt self-cert escapes. See pay-transparency.ts.
+  if (parsed.status === "active") {
+    const ptError = await guardNewJobPublish(supabase, {
+      locationIds: parsed.locationIds,
+      workMode: parsed.workMode,
+      remoteStates: parsed.remoteStateRestrictions,
+      compType: parsed.compType,
+      compMin: parsed.compMin,
+      compMax: parsed.compMax,
+      compVisible: parsed.compVisible,
+      hasBenefits: parsed.benefits.length > 0,
+      exemptAck: formData.get("pay_transparency_exempt") === "on",
+    });
+    if (ptError) return { ok: false, error: ptError };
+  }
+
   const baseSlug = makeSlug(parsed.title);
   if (!baseSlug) return { ok: false, error: "Couldn't generate a URL slug." };
   const slug = await resolveAvailableJobSlug(supabase, dsoId, baseSlug);
@@ -692,6 +732,7 @@ export async function createCorporateJob(
       compensation_period: parsed.compPeriod,
       compensation_type: parsed.compType,
       compensation_visible: parsed.compVisible,
+      benefits: parsed.benefits.length > 0 ? parsed.benefits : null,
       requirements: parsed.requirements || null,
       status: parsed.status,
       hide_stages_from_candidate: parsed.hideStagesFromCandidate,
@@ -797,6 +838,22 @@ export async function updateCorporateJob(
 
   const supabase = await createSupabaseServerClient();
 
+  // Pay-transparency — re-validate when the edit keeps/sets the job live.
+  if (parsed.status === "active") {
+    const ptError = await guardNewJobPublish(supabase, {
+      locationIds: parsed.locationIds,
+      workMode: parsed.workMode,
+      remoteStates: parsed.remoteStateRestrictions,
+      compType: parsed.compType,
+      compMin: parsed.compMin,
+      compMax: parsed.compMax,
+      compVisible: parsed.compVisible,
+      hasBenefits: parsed.benefits.length > 0,
+      exemptAck: formData.get("pay_transparency_exempt") === "on",
+    });
+    if (ptError) return { ok: false, error: ptError };
+  }
+
   const { error: updateError } = await supabase
     .from("jobs")
     .update({
@@ -811,6 +868,7 @@ export async function updateCorporateJob(
       compensation_period: parsed.compPeriod,
       compensation_type: parsed.compType,
       compensation_visible: parsed.compVisible,
+      benefits: parsed.benefits.length > 0 ? parsed.benefits : null,
       requirements: parsed.requirements || null,
       status: parsed.status,
       hide_stages_from_candidate: parsed.hideStagesFromCandidate,
