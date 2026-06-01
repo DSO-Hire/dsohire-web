@@ -1504,6 +1504,8 @@ export type Database = {
           created_by: string | null
           created_at: string
           last_message_at: string
+          title: string | null
+          is_group: boolean
         }
         Insert: {
           id?: string
@@ -1511,6 +1513,8 @@ export type Database = {
           created_by?: string | null
           created_at?: string
           last_message_at?: string
+          title?: string | null
+          is_group?: boolean
         }
         Update: {
           id?: string
@@ -1518,6 +1522,8 @@ export type Database = {
           created_by?: string | null
           created_at?: string
           last_message_at?: string
+          title?: string | null
+          is_group?: boolean
         }
         Relationships: []
       }

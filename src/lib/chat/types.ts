@@ -30,6 +30,8 @@ export interface ChatThread {
   avatar_url?: string | null;
   /** the other teammate's auth id (dm only) — drives presence. */
   other_auth_id?: string | null;
+  /** True for internal multi-teammate group chats. Drives group avatar + per-message sender labels. */
+  is_group?: boolean;
 }
 
 export interface ChatMessage {
@@ -39,4 +41,8 @@ export interface ChatMessage {
   /** true if the current user sent it. */
   mine: boolean;
   sender_name: string;
+  /** Sender's dso_user id (dm) — lets the UI group consecutive messages. */
+  sender_id?: string | null;
+  /** Sender headshot, for per-message avatars in multi-party threads. */
+  sender_avatar_url?: string | null;
 }

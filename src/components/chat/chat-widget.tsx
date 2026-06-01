@@ -13,7 +13,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  MessageCircle, X, ChevronLeft, ChevronUp, Search, Plus, Send, Loader2,
+  MessageCircle, X, ChevronLeft, ChevronUp, Search, Plus, Send, Loader2, Users, Check,
 } from "lucide-react";
 import {
   REALTIME_LISTEN_TYPES,
@@ -24,6 +24,7 @@ import { sendApplicationMessage } from "@/lib/messages/actions";
 import {
   listChatThreads, listTeammates, findOrCreateDmConversation,
   getDmThreadMessages, getCandidateThreadMessages, sendDmMessage, markDmRead,
+  createGroupConversation,
 } from "@/lib/chat/actions";
 import type { ChatThread, ChatMessage, ChatTeammate } from "@/lib/chat/types";
 
@@ -54,6 +55,11 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
   const [sending, setSending] = useState(false);
   const [loadingMsgs, setLoadingMsgs] = useState(false);
   const [query, setQuery] = useState("");
+  // New-chat composer: "direct" taps a teammate to 1:1; "group" multi-selects.
+  const [newMode, setNewMode] = useState<"direct" | "group">("direct");
+  const [groupSel, setGroupSel] = useState<string[]>([]);
+  const [groupName, setGroupName] = useState("");
+  const [creatingGroup, setCreatingGroup] = useState(false);
 
   const activeRef = useRef<ChatThread | null>(null);
   activeRef.current = active;
@@ -137,7 +143,39 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
 
   const openNew = async () => {
     setView("new");
+    setNewMode("direct");
+    setGroupSel([]);
+    setGroupName("");
     if (teammates.length === 0) setTeammates(await listTeammates());
+  };
+
+  const toggleGroupMember = (id: string) => {
+    setGroupSel((sel) =>
+      sel.includes(id) ? sel.filter((x) => x !== id) : [...sel, id]
+    );
+  };
+
+  const startGroup = async () => {
+    if (groupSel.length < 2 || creatingGroup) return;
+    setCreatingGroup(true);
+    const res = await createGroupConversation(groupSel, groupName);
+    setCreatingGroup(false);
+    if (!res.ok) return;
+    await loadThreads();
+    const memberNames = teammates
+      .filter((t) => groupSel.includes(t.dso_user_id))
+      .map((t) => t.name.split(" ")[0]);
+    const title =
+      groupName.trim() ||
+      (memberNames.length > 3
+        ? `${memberNames.slice(0, 3).join(", ")} +${memberNames.length - 3}`
+        : memberNames.join(", "));
+    openThread({
+      kind: "dm", id: res.conversationId, title,
+      subtitle: `${groupSel.length + 1} members`, last_message: null,
+      last_at: null, unread: 0, initials: "", avatar_url: null,
+      other_auth_id: null, is_group: true,
+    });
   };
 
   const startDm = async (mate: ChatTeammate) => {
@@ -242,22 +280,86 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
           )}
 
           {view === "new" && (
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto flex flex-col">
+              {/* Direct vs Group toggle */}
+              <div className="flex gap-1 p-2 border-b border-[var(--rule)]">
+                {(["direct", "group"] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setNewMode(m)}
+                    className={
+                      "flex-1 py-1.5 text-[11px] font-bold tracking-[1px] uppercase rounded transition-colors " +
+                      (newMode === m
+                        ? "bg-ink text-ivory"
+                        : "bg-cream text-slate-body hover:text-ink")
+                    }
+                  >
+                    {m === "direct" ? "Direct" : "Group"}
+                  </button>
+                ))}
+              </div>
+
+              {newMode === "group" && (
+                <div className="p-3 border-b border-[var(--rule)] space-y-2">
+                  <input
+                    value={groupName}
+                    onChange={(e) => setGroupName(e.target.value)}
+                    placeholder="Group name (optional)"
+                    maxLength={80}
+                    className="w-full h-8 px-3 bg-cream border border-[var(--rule)] text-[13px] text-ink focus:outline-none focus:border-heritage"
+                  />
+                  <button
+                    onClick={startGroup}
+                    disabled={groupSel.length < 2 || creatingGroup}
+                    className="w-full py-2 bg-heritage text-ivory text-[12px] font-bold tracking-[1px] uppercase rounded disabled:opacity-50 hover:bg-heritage-deep transition-colors"
+                  >
+                    {creatingGroup
+                      ? "Creating…"
+                      : `Create group${groupSel.length ? ` (${groupSel.length})` : ""}`}
+                  </button>
+                  {groupSel.length === 1 && (
+                    <p className="text-[11px] text-slate-meta">Pick at least two teammates.</p>
+                  )}
+                </div>
+              )}
+
               <div className="px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
-                Your team
+                {newMode === "group" ? "Add teammates" : "Your team"}
               </div>
               {teammates.length === 0 ? (
                 <div className="p-6 text-center text-[13px] text-slate-meta">No teammates yet.</div>
-              ) : teammates.map((mate) => (
-                <button key={mate.dso_user_id} onClick={() => startDm(mate)}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-cream/60 text-left">
-                  <Avatar initials={mate.initials} imageUrl={mate.avatar_url} online={!!mate.auth_user_id && online.has(mate.auth_user_id)} />
-                  <div className="min-w-0">
-                    <div className="text-[13px] font-semibold text-ink truncate">{mate.name}</div>
-                    <div className="text-[11px] text-slate-meta truncate">{mate.title || mate.role}</div>
-                  </div>
-                </button>
-              ))}
+              ) : teammates.map((mate) => {
+                const picked = groupSel.includes(mate.dso_user_id);
+                return (
+                  <button
+                    key={mate.dso_user_id}
+                    onClick={() =>
+                      newMode === "group"
+                        ? toggleGroupMember(mate.dso_user_id)
+                        : startDm(mate)
+                    }
+                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-cream/60 text-left"
+                  >
+                    <Avatar initials={mate.initials} imageUrl={mate.avatar_url} online={!!mate.auth_user_id && online.has(mate.auth_user_id)} />
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[13px] font-semibold text-ink truncate">{mate.name}</div>
+                      <div className="text-[11px] text-slate-meta truncate">{mate.title || mate.role}</div>
+                    </div>
+                    {newMode === "group" && (
+                      <span
+                        className={
+                          "shrink-0 h-5 w-5 rounded-full border flex items-center justify-center " +
+                          (picked
+                            ? "bg-heritage border-heritage text-ivory"
+                            : "border-[var(--rule-strong)]")
+                        }
+                      >
+                        {picked && <Check className="h-3 w-3" />}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           )}
 
@@ -270,17 +372,38 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
                   <div className="text-center text-[12px] text-slate-meta py-6">
                     No messages yet. Say hello.
                   </div>
-                ) : messages.map((m) => (
-                  <div key={m.id} className={"flex " + (m.mine ? "justify-end" : "justify-start")}>
-                    <div className={"max-w-[78%] px-3 py-2 text-[13px] leading-snug " +
-                      (m.mine ? "bg-heritage text-ivory" : "bg-white border border-[var(--rule)] text-ink")}>
-                      {m.body}
-                      <div className={"mt-0.5 text-[9px] " + (m.mine ? "text-ivory/60" : "text-slate-meta")}>
-                        {relTime(m.created_at)}
+                ) : messages.map((m) => {
+                  // Multi-party threads (group DMs + candidate threads) show a
+                  // small avatar + sender name on incoming messages so it's
+                  // easy to follow who's talking. 1:1 DMs stay clean.
+                  const multiParty =
+                    !!active.is_group || active.kind === "candidate";
+                  const showSender = multiParty && !m.mine;
+                  return (
+                    <div key={m.id} className={"flex items-end gap-2 " + (m.mine ? "justify-end" : "justify-start")}>
+                      {showSender && (
+                        <MsgAvatar
+                          name={m.sender_name}
+                          imageUrl={m.sender_avatar_url ?? null}
+                        />
+                      )}
+                      <div className="max-w-[78%]">
+                        {showSender && (
+                          <div className="text-[10px] font-semibold text-slate-meta mb-0.5 ml-0.5">
+                            {m.sender_name.split(" ")[0]}
+                          </div>
+                        )}
+                        <div className={"px-3 py-2 text-[13px] leading-snug " +
+                          (m.mine ? "bg-heritage text-ivory" : "bg-white border border-[var(--rule)] text-ink")}>
+                          {m.body}
+                          <div className={"mt-0.5 text-[9px] " + (m.mine ? "text-ivory/60" : "text-slate-meta")}>
+                            {relTime(m.created_at)}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               <div className="border-t border-[var(--rule)] p-2 flex items-end gap-2 shrink-0">
                 <textarea value={draft} onChange={(e) => setDraft(e.target.value)}
@@ -333,7 +456,7 @@ function ThreadGroup({
       {items.map((t) => (
         <button key={`${t.kind}-${t.id}`} onClick={() => onOpen(t)}
           className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-cream/60 text-left">
-          <Avatar initials={t.initials} imageUrl={t.avatar_url}
+          <Avatar initials={t.initials} imageUrl={t.avatar_url} isGroup={t.is_group}
             online={t.kind === "dm" && !!t.other_auth_id && online.has(t.other_auth_id)} />
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
@@ -363,14 +486,20 @@ function Avatar({
   initials,
   online,
   imageUrl,
+  isGroup = false,
 }: {
   initials: string;
   online: boolean;
   imageUrl?: string | null;
+  isGroup?: boolean;
 }) {
   return (
     <div className="relative shrink-0">
-      {imageUrl ? (
+      {isGroup ? (
+        <div className="h-9 w-9 rounded-full bg-heritage-deep text-ivory flex items-center justify-center">
+          <Users className="h-4 w-4" />
+        </div>
+      ) : imageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={imageUrl}
@@ -385,6 +514,33 @@ function Avatar({
       {online && (
         <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-[var(--heritage-bright,#8db8a3)] border-2 border-white" />
       )}
+    </div>
+  );
+}
+
+/** Small avatar shown beside an incoming message in multi-party threads. */
+function MsgAvatar({
+  name,
+  imageUrl,
+}: {
+  name: string;
+  imageUrl: string | null;
+}) {
+  if (imageUrl) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={imageUrl} alt="" className="h-6 w-6 rounded-full object-cover shrink-0" />
+    );
+  }
+  const initials = name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((s) => s[0]?.toUpperCase() ?? "")
+    .join("");
+  return (
+    <div className="h-6 w-6 rounded-full bg-ink text-ivory flex items-center justify-center text-[9px] font-bold shrink-0">
+      {initials || "?"}
     </div>
   );
 }

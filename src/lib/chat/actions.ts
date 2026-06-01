@@ -159,6 +159,64 @@ export async function findOrCreateDmConversation(
   return { ok: true, conversationId: cid };
 }
 
+/**
+ * Create an internal group chat (teammates only). Always creates a fresh
+ * conversation — groups aren't deduped the way 1:1s are, since the same
+ * set of people may want distinct group threads. Every member id is
+ * validated to belong to the caller's DSO; candidates can never be added
+ * (this only touches dso_users + dm_participants).
+ */
+export async function createGroupConversation(
+  memberDsoUserIds: string[],
+  title: string
+): Promise<{ ok: true; conversationId: string } | { ok: false; error: string }> {
+  const supabase = await createSupabaseServerClient();
+  const cur = await currentChatUser(supabase);
+  if (!cur) return { ok: false, error: "Not signed in." };
+
+  // Dedupe, drop self (added separately), keep only real ids.
+  const others = [...new Set(memberDsoUserIds)].filter(
+    (id) => id && id !== cur.dsoUserId
+  );
+  if (others.length < 2) {
+    return { ok: false, error: "Pick at least two teammates for a group." };
+  }
+
+  const admin = createSupabaseServiceRoleClient();
+  // Validate every member is a teammate in the caller's DSO.
+  const { data: members } = await admin
+    .from("dso_users")
+    .select("id, dso_id")
+    .in("id", others);
+  const validIds = ((members ?? []) as Array<{ id: string; dso_id: string }>)
+    .filter((m) => m.dso_id === cur.dsoId)
+    .map((m) => m.id);
+  if (validIds.length !== others.length) {
+    return { ok: false, error: "Some teammates aren't in your organization." };
+  }
+
+  const cleanTitle = title.trim().slice(0, 80) || "Group chat";
+  const { data: conv, error: convErr } = await admin
+    .from("dm_conversations")
+    .insert({
+      dso_id: cur.dsoId,
+      created_by: cur.dsoUserId,
+      is_group: true,
+      title: cleanTitle,
+    })
+    .select("id")
+    .single();
+  if (convErr || !conv) return { ok: false, error: "Couldn't start the group." };
+  const cid = conv.id as string;
+
+  const rows = [cur.dsoUserId, ...validIds].map((uid) => ({
+    conversation_id: cid,
+    dso_user_id: uid,
+  }));
+  await admin.from("dm_participants").insert(rows);
+  return { ok: true, conversationId: cid };
+}
+
 /* ───────────────────────── Unified thread list ───────────────────────── */
 
 export async function listChatThreads(): Promise<ChatThread[]> {
@@ -183,21 +241,45 @@ export async function listChatThreads(): Promise<ChatThread[]> {
   );
 
   if (convIds.length > 0) {
-    // Other participant per conversation.
+    // Conversation metadata — group flag + optional title.
+    const { data: convMeta } = await supabase
+      .from("dm_conversations")
+      .select("id, is_group, title")
+      .in("id", convIds);
+    const metaById = new Map<
+      string,
+      { is_group: boolean; title: string | null }
+    >();
+    for (const c of (convMeta ?? []) as Array<{
+      id: string;
+      is_group: boolean | null;
+      title: string | null;
+    }>) {
+      metaById.set(c.id, {
+        is_group: c.is_group ?? false,
+        title: c.title ?? null,
+      });
+    }
+
+    // All other participants per conversation (groups have many).
     const { data: others } = await supabase
       .from("dm_participants")
       .select("conversation_id, dso_user_id")
       .in("conversation_id", convIds)
       .neq("dso_user_id", cur.dsoUserId);
-    const otherByConv = new Map<string, string>();
+    const otherByConv = new Map<string, string>(); // first other (1:1 naming)
+    const othersByConv = new Map<string, string[]>(); // all others (group)
     for (const r of (others ?? []) as Array<{
       conversation_id: string;
       dso_user_id: string;
     }>) {
       if (!otherByConv.has(r.conversation_id))
         otherByConv.set(r.conversation_id, r.dso_user_id);
+      const list = othersByConv.get(r.conversation_id) ?? [];
+      list.push(r.dso_user_id);
+      othersByConv.set(r.conversation_id, list);
     }
-    const otherIds = [...new Set([...otherByConv.values()])];
+    const otherIds = [...new Set([...othersByConv.values()].flat())];
     const nameById = new Map<
       string,
       { name: string; role: string; auth: string | null; avatar_url: string | null }
@@ -254,9 +336,45 @@ export async function listChatThreads(): Promise<ChatThread[]> {
       }
     }
     for (const cid of convIds) {
+      const last = lastByConv.get(cid);
+      const meta = metaById.get(cid);
+      const memberIds = othersByConv.get(cid) ?? [];
+
+      if (meta?.is_group) {
+        // Group: title from the conversation name, else the members' first
+        // names; subtitle = member count (including the current user).
+        const names = memberIds
+          .map((id) => nameById.get(id)?.name)
+          .filter(Boolean) as string[];
+        const derived = names
+          .map((n) => n.split(" ")[0])
+          .slice(0, 3)
+          .join(", ");
+        const title =
+          meta.title ||
+          (derived
+            ? names.length > 3
+              ? `${derived} +${names.length - 3}`
+              : derived
+            : "Group chat");
+        threads.push({
+          kind: "dm",
+          id: cid,
+          title,
+          subtitle: `${memberIds.length + 1} members`,
+          last_message: last?.body ?? null,
+          last_at: last?.at ?? null,
+          unread: unreadByConv.get(cid) ?? 0,
+          initials: initialsOf(title),
+          avatar_url: null,
+          other_auth_id: null,
+          is_group: true,
+        });
+        continue;
+      }
+
       const otherId = otherByConv.get(cid);
       const info = otherId ? nameById.get(otherId) : null;
-      const last = lastByConv.get(cid);
       threads.push({
         kind: "dm",
         id: cid,
@@ -268,6 +386,7 @@ export async function listChatThreads(): Promise<ChatThread[]> {
         initials: initialsOf(info?.name ?? "Teammate"),
         avatar_url: info?.avatar_url ?? null,
         other_auth_id: info?.auth ?? null,
+        is_group: false,
       });
     }
   }
@@ -361,18 +480,53 @@ export async function getDmThreadMessages(
     .eq("conversation_id", conversationId)
     .order("created_at", { ascending: true })
     .limit(200);
-  return ((data ?? []) as Array<{
+  const rows = (data ?? []) as Array<{
     id: string;
     sender_dso_user_id: string;
     body: string;
     created_at: string;
-  }>).map((m) => ({
-    id: m.id,
-    body: m.body,
-    created_at: m.created_at,
-    mine: m.sender_dso_user_id === cur.dsoUserId,
-    sender_name: m.sender_dso_user_id === cur.dsoUserId ? cur.name : "Teammate",
-  }));
+  }>;
+
+  // Resolve every distinct sender's name + avatar so group threads can
+  // label each message. (1:1 threads only ever have two senders.)
+  const senderIds = [...new Set(rows.map((r) => r.sender_dso_user_id))];
+  const senderById = new Map<
+    string,
+    { name: string; avatar_url: string | null }
+  >();
+  if (senderIds.length > 0) {
+    const { data: us } = await supabase
+      .from("dso_users")
+      .select("id, first_name, last_name, avatar_url")
+      .in("id", senderIds);
+    for (const u of (us ?? []) as Array<{
+      id: string;
+      first_name: string | null;
+      last_name: string | null;
+      avatar_url: string | null;
+    }>) {
+      senderById.set(u.id, {
+        name:
+          [u.first_name, u.last_name].filter(Boolean).join(" ").trim() ||
+          "Teammate",
+        avatar_url: u.avatar_url ?? null,
+      });
+    }
+  }
+
+  return rows.map((m) => {
+    const mine = m.sender_dso_user_id === cur.dsoUserId;
+    const info = senderById.get(m.sender_dso_user_id);
+    return {
+      id: m.id,
+      body: m.body,
+      created_at: m.created_at,
+      mine,
+      sender_name: mine ? cur.name : info?.name ?? "Teammate",
+      sender_id: m.sender_dso_user_id,
+      sender_avatar_url: info?.avatar_url ?? null,
+    };
+  });
 }
 
 export async function sendDmMessage(
@@ -430,23 +584,90 @@ export async function getCandidateThreadMessages(
   if (!cur) return [];
   const { data } = await supabase
     .from("application_messages")
-    .select("id, sender_role, body, created_at")
+    .select("id, sender_role, sender_dso_user_id, body, created_at")
     .eq("application_id", applicationId)
     .is("deleted_at", null)
     .order("created_at", { ascending: true })
     .limit(200);
-  return ((data ?? []) as Array<{
+  const rows = ((data ?? []) as Array<{
     id: string;
     sender_role: string;
+    sender_dso_user_id: string | null;
     body: string | null;
     created_at: string;
-  }>)
-    .filter((m) => m.body)
-    .map((m) => ({
+  }>).filter((m) => m.body);
+
+  // Candidate identity (their side of the thread).
+  const { data: appRow } = await supabase
+    .from("applications")
+    .select("candidate:candidates(full_name, avatar_url)")
+    .eq("id", applicationId)
+    .maybeSingle();
+  const candRaw = (appRow as { candidate: unknown } | null)?.candidate;
+  const cand = (Array.isArray(candRaw) ? candRaw[0] : candRaw) as
+    | { full_name: string | null; avatar_url: string | null }
+    | undefined;
+  const candName = cand?.full_name?.trim() || "Candidate";
+  const candAvatar = cand?.avatar_url ?? null;
+
+  // Resolve each teammate who posted, so the employer side shows WHO sent
+  // each message (multiple teammates collaborate on one candidate thread).
+  const teammateIds = [
+    ...new Set(
+      rows
+        .filter((m) => m.sender_role === "employer" && m.sender_dso_user_id)
+        .map((m) => m.sender_dso_user_id as string)
+    ),
+  ];
+  const teammateById = new Map<
+    string,
+    { name: string; avatar_url: string | null }
+  >();
+  if (teammateIds.length > 0) {
+    const { data: us } = await supabase
+      .from("dso_users")
+      .select("id, first_name, last_name, avatar_url")
+      .in("id", teammateIds);
+    for (const u of (us ?? []) as Array<{
+      id: string;
+      first_name: string | null;
+      last_name: string | null;
+      avatar_url: string | null;
+    }>) {
+      teammateById.set(u.id, {
+        name:
+          [u.first_name, u.last_name].filter(Boolean).join(" ").trim() ||
+          "Teammate",
+        avatar_url: u.avatar_url ?? null,
+      });
+    }
+  }
+
+  return rows.map((m) => {
+    if (m.sender_role !== "employer") {
+      // Candidate message.
+      return {
+        id: m.id,
+        body: m.body as string,
+        created_at: m.created_at,
+        mine: false,
+        sender_name: candName,
+        sender_id: null,
+        sender_avatar_url: candAvatar,
+      };
+    }
+    const info = m.sender_dso_user_id
+      ? teammateById.get(m.sender_dso_user_id)
+      : null;
+    const mine = m.sender_dso_user_id === cur.dsoUserId;
+    return {
       id: m.id,
       body: m.body as string,
       created_at: m.created_at,
-      mine: m.sender_role === "employer",
-      sender_name: m.sender_role === "employer" ? "Your team" : "Candidate",
-    }));
+      mine,
+      sender_name: mine ? cur.name : info?.name ?? "Your team",
+      sender_id: m.sender_dso_user_id ?? null,
+      sender_avatar_url: info?.avatar_url ?? null,
+    };
+  });
 }
