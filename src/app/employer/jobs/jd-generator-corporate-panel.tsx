@@ -57,6 +57,20 @@ interface JdGeneratorCorporatePanelProps {
    * affiliation masking via corporate_affiliation_policy in that case.
    */
   locationIds?: string[];
+  /**
+   * Day 24 — comp + role context, collected on the (now-earlier) Compensation
+   * step so the AI can ground the draft in this job's actual pay/role data.
+   */
+  compMin?: number | null;
+  compMax?: number | null;
+  compPeriod?: string;
+  benefits?: string[];
+  reportsTo?: string;
+  educationRequirement?: string;
+  industryExperience?: string;
+  minYears?: number | null;
+  maxYears?: number | null;
+  travelExpectation?: string;
   /** Called when the operator clicks "Use this" for the title. */
   onApplyTitle: (title: string) => void;
   /** Called when the operator applies any prose body — Tiptap HTML. */
@@ -78,6 +92,16 @@ export function JdGeneratorCorporatePanel({
   authorityLevel,
   workMode,
   locationIds,
+  compMin,
+  compMax,
+  compPeriod,
+  benefits,
+  reportsTo,
+  educationRequirement,
+  industryExperience,
+  minYears,
+  maxYears,
+  travelExpectation,
   onApplyTitle,
   onApplyDescription,
   onApplyAll,
@@ -130,6 +154,16 @@ export function JdGeneratorCorporatePanel({
         brief,
         tone,
         locationIds,
+        compMin: compMin ?? null,
+        compMax: compMax ?? null,
+        compPeriod,
+        benefits,
+        reportsTo,
+        educationRequirement,
+        industryExperience,
+        minYears: minYears ?? null,
+        maxYears: maxYears ?? null,
+        travelExpectation,
       });
       const elapsed = Date.now() - startedAt;
       if (!res.ok) {

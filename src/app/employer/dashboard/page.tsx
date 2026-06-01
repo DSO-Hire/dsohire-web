@@ -805,12 +805,29 @@ export default async function EmployerDashboard() {
   );
 
   // Hint for the hero tile — adapts based on whether anything is awaiting.
+  // The oldest-waiting detail now lives in the SLA chip next to the value, so
+  // the hint no longer repeats the day count.
   const heroHint =
     awaitingReviewCount === 0
       ? "Inbox is clear. New applications will appear here in real time as candidates apply."
-      : oldestAwaitingDays !== null && oldestAwaitingDays > 0
-        ? `Oldest unreviewed has been waiting ${oldestAwaitingDays} day${oldestAwaitingDays === 1 ? "" : "s"}. Move candidates forward to keep momentum.`
-        : "New applications since you last logged in. Click in to start the review.";
+      : "Clear the queue to keep candidates moving — each one is a real applicant waiting on you.";
+
+  // SLA chip — the queue's decision-driving secondary stat. Replaces the old
+  // applications-volume sparkline (which plotted a different metric than the
+  // count and so misled). Tone flips to "breach" once the oldest item is past
+  // the same SLA the StuckAlert uses.
+  const heroSlaChip:
+    | { label: string; tone: "ok" | "breach" }
+    | undefined =
+    awaitingReviewCount > 0 && oldestAwaitingDays !== null
+      ? {
+          label:
+            oldestAwaitingDays >= STUCK_SLA_DAYS
+              ? `oldest waiting ${oldestAwaitingDays}d · past ${STUCK_SLA_DAYS}d SLA`
+              : `oldest waiting ${oldestAwaitingDays}d`,
+          tone: oldestAwaitingDays >= STUCK_SLA_DAYS ? "breach" : "ok",
+        }
+      : undefined;
 
   // Today's date stamp for the eyebrow row.
   const today = new Date();
@@ -879,7 +896,7 @@ export default async function EmployerDashboard() {
             value={String(awaitingReviewCount)}
             live={awaitingReviewCount > 0}
             hint={heroHint}
-            spark={appsLast7Days.some((v) => v > 0) ? appsLast7Days : undefined}
+            slaChip={heroSlaChip}
             stageStrip={stageStripCounts}
             stageStripMax={stageStripMax}
             href="/employer/applications?stage=new"

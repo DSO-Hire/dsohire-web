@@ -149,11 +149,14 @@ const US_STATES: string[] = [
 ];
 
 const STEPS = [
-  { id: "basics", label: "Basics" },
-  { id: "description", label: "Description" },
-  { id: "details", label: "Compensation & sandbox" },
-  { id: "screening", label: "Screening" },
-  { id: "preview", label: "Preview & publish" },
+  { id: "basics", label: "Basics", short: "Basics" },
+  // Comp + role details BEFORE description so the AI JD generator can use the
+  // job's actual pay/role data to influence the copy (mirrors the practice
+  // wizard order).
+  { id: "details", label: "Compensation & sandbox", short: "Pay & role" },
+  { id: "description", label: "Description", short: "Description" },
+  { id: "screening", label: "Screening", short: "Screening" },
+  { id: "preview", label: "Preview & publish", short: "Review" },
 ] as const;
 
 type StepId = (typeof STEPS)[number]["id"];
@@ -866,7 +869,13 @@ export function CorporateJobWizard({
           </div>
         </div>
       )}
-      <Stepper currentIdx={stepIdx} />
+      <Stepper
+        currentIdx={stepIdx}
+        onJump={(i) => {
+          setError(null);
+          setStepIdx(i);
+        }}
+      />
 
       <div className="border border-[var(--rule)] bg-white p-8 sm:p-10">
         {currentStep.id === "basics" && (
@@ -902,6 +911,16 @@ export function CorporateJobWizard({
             authorityLevel={authorityLevel}
             workMode={workMode}
             locationIds={Array.from(selectedLocationIds)}
+            compMin={compMin}
+            compMax={compMax}
+            compPeriod={compPeriod}
+            benefits={benefits}
+            reportsTo={reportsTo}
+            educationRequirement={educationRequirement}
+            industryExperience={industryExperience}
+            minYears={minYears}
+            maxYears={maxYears}
+            travelExpectation={travelExpectation}
           />
         )}
 
@@ -1081,7 +1100,13 @@ export function CorporateJobWizard({
 
 /* ───── Stepper ───── */
 
-function Stepper({ currentIdx }: { currentIdx: number }) {
+function Stepper({
+  currentIdx,
+  onJump,
+}: {
+  currentIdx: number;
+  onJump?: (idx: number) => void;
+}) {
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
@@ -1095,19 +1120,39 @@ function Stepper({ currentIdx }: { currentIdx: number }) {
           {STEPS[currentIdx].label}
         </span>
       </div>
+      {/* Clickable step nav — jump straight to any step instead of clicking
+          Back through each page. */}
       <div className="flex gap-1.5">
         {STEPS.map((s, i) => (
-          <div
+          <button
             key={s.id}
-            className={
-              "h-1 flex-1 transition-colors " +
-              (i < currentIdx
-                ? "bg-[#3D5266]"
-                : i === currentIdx
-                ? "bg-ink"
-                : "bg-[var(--rule-strong)]")
-            }
-          />
+            type="button"
+            onClick={() => onJump?.(i)}
+            aria-label={`Go to step ${i + 1}: ${s.label}`}
+            aria-current={i === currentIdx ? "step" : undefined}
+            className="group flex-1 text-left focus:outline-none focus-visible:ring-1 focus-visible:ring-[#3D5266]"
+          >
+            <span
+              className={
+                "block h-1 transition-colors " +
+                (i < currentIdx
+                  ? "bg-[#3D5266]"
+                  : i === currentIdx
+                    ? "bg-ink"
+                    : "bg-[var(--rule-strong)] group-hover:bg-slate-meta")
+              }
+            />
+            <span
+              className={
+                "mt-1.5 block text-[9px] font-bold tracking-[1px] uppercase truncate transition-colors " +
+                (i === currentIdx
+                  ? "text-ink"
+                  : "text-slate-meta group-hover:text-[#3D5266]")
+              }
+            >
+              {s.short}
+            </span>
+          </button>
         ))}
       </div>
     </div>
@@ -1289,6 +1334,16 @@ function DescriptionStep({
   authorityLevel,
   workMode,
   locationIds,
+  compMin,
+  compMax,
+  compPeriod,
+  benefits,
+  reportsTo,
+  educationRequirement,
+  industryExperience,
+  minYears,
+  maxYears,
+  travelExpectation,
 }: {
   description: string;
   onChange: (v: string) => void;
@@ -1298,6 +1353,16 @@ function DescriptionStep({
   authorityLevel: string;
   workMode: string;
   locationIds: string[];
+  compMin: string;
+  compMax: string;
+  compPeriod: string;
+  benefits: string[];
+  reportsTo: string;
+  educationRequirement: string;
+  industryExperience: string;
+  minYears: string;
+  maxYears: string;
+  travelExpectation: string;
 }) {
   return (
     <div className="space-y-6">
@@ -1318,6 +1383,16 @@ function DescriptionStep({
         authorityLevel={authorityLevel}
         workMode={workMode}
         locationIds={locationIds}
+        compMin={compMin.trim() ? Number(compMin) : null}
+        compMax={compMax.trim() ? Number(compMax) : null}
+        compPeriod={compPeriod}
+        benefits={benefits}
+        reportsTo={reportsTo}
+        educationRequirement={educationRequirement}
+        industryExperience={industryExperience}
+        minYears={minYears.trim() ? Number(minYears) : null}
+        maxYears={maxYears.trim() ? Number(maxYears) : null}
+        travelExpectation={travelExpectation}
         onApplyTitle={onTitle}
         onApplyDescription={onChange}
         onApplyAll={({ title: t, descriptionHtml }) => {

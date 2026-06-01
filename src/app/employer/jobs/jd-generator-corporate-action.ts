@@ -74,6 +74,19 @@ const InputSchema = z.object({
   // block below handles that via corporate_affiliation_policy. Optional
   // so surfaces that can't pass it still work.
   locationIds: z.array(z.string()).optional(),
+  // Day 24 — comp + role context. The corporate wizard now collects these
+  // BEFORE the Description step, so the generator can ground the JD in the
+  // actual pay/role data. All optional — the prompt omits any that are blank.
+  compMin: z.number().nullable().optional(),
+  compMax: z.number().nullable().optional(),
+  compPeriod: z.string().optional(),
+  benefits: z.array(z.string()).optional(),
+  reportsTo: z.string().optional(),
+  educationRequirement: z.string().optional(),
+  industryExperience: z.string().optional(),
+  minYears: z.number().nullable().optional(),
+  maxYears: z.number().nullable().optional(),
+  travelExpectation: z.string().optional(),
 });
 
 const OutputSchema = z.object({
@@ -221,6 +234,33 @@ export async function generateCorporateJobDescription(
     // the default DSO name.
   }
 
+  // Day 24 — derive human-readable comp/role context for the prompt.
+  const fmtUsd = (n: number) => `$${Math.round(n).toLocaleString()}`;
+  const perSuffix = parsed.data.compPeriod
+    ? `/${parsed.data.compPeriod}`
+    : "";
+  const payLabel = (() => {
+    const lo = parsed.data.compMin;
+    const hi = parsed.data.compMax;
+    if (lo != null && hi != null && lo !== hi)
+      return `${fmtUsd(lo)}–${fmtUsd(hi)}${perSuffix}`;
+    if (lo != null && hi != null) return `${fmtUsd(lo)}${perSuffix}`;
+    if (lo != null) return `from ${fmtUsd(lo)}${perSuffix}`;
+    if (hi != null) return `up to ${fmtUsd(hi)}${perSuffix}`;
+    return null;
+  })();
+  const experienceLabel = (() => {
+    const lo = parsed.data.minYears;
+    const hi = parsed.data.maxYears;
+    if (lo != null && hi != null) return `${lo}–${hi} years`;
+    if (lo != null) return `${lo}+ years`;
+    return null;
+  })();
+  const benefitsLabel =
+    (parsed.data.benefits ?? []).length > 0
+      ? parsed.data.benefits!.join(", ")
+      : null;
+
   const systemPrompt = buildSystemPrompt({ useDsoName });
   const userPrompt = buildUserPrompt({
     functionLabel,
@@ -231,6 +271,15 @@ export async function generateCorporateJobDescription(
     tone: parsed.data.tone,
     employerName: employerNameForPrompt,
     useDsoName,
+    roleContext: {
+      payLabel,
+      benefitsLabel,
+      reportsTo: parsed.data.reportsTo || null,
+      educationRequirement: parsed.data.educationRequirement || null,
+      industryExperience: parsed.data.industryExperience || null,
+      experienceLabel,
+      travelExpectation: parsed.data.travelExpectation || null,
+    },
   });
 
   let response: Anthropic.Messages.Message;
@@ -378,6 +427,15 @@ function buildUserPrompt(args: {
   tone: "professional" | "friendly" | "concise";
   employerName: string;
   useDsoName: boolean;
+  roleContext?: {
+    payLabel: string | null;
+    benefitsLabel: string | null;
+    reportsTo: string | null;
+    educationRequirement: string | null;
+    industryExperience: string | null;
+    experienceLabel: string | null;
+    travelExpectation: string | null;
+  };
 }): string {
   const employerFieldLabel = args.useDsoName
     ? "DSO (employer)"
@@ -388,11 +446,21 @@ function buildUserPrompt(args: {
 
   // authority_level / work_mode are optional context — include each line
   // only when the operator has actually picked a value.
+  const rc = args.roleContext;
   const contextLines = [
     `${employerFieldLabel}: ${args.employerName}`,
     `Corporate function: ${args.functionLabel} (${args.functionSlug})`,
     args.authorityLabel ? `Authority level: ${args.authorityLabel}` : null,
     args.workModeLabel ? `Work mode: ${args.workModeLabel}` : null,
+    rc?.reportsTo ? `Reports to: ${rc.reportsTo}` : null,
+    rc?.experienceLabel ? `Experience required: ${rc.experienceLabel}` : null,
+    rc?.educationRequirement ? `Education: ${rc.educationRequirement}` : null,
+    rc?.industryExperience
+      ? `Industry background: ${rc.industryExperience}`
+      : null,
+    rc?.travelExpectation ? `Travel: ${rc.travelExpectation}` : null,
+    rc?.payLabel ? `Compensation range: ${rc.payLabel}` : null,
+    rc?.benefitsLabel ? `Benefits offered: ${rc.benefitsLabel}` : null,
     `Tone: ${args.tone}`,
   ]
     .filter(Boolean)

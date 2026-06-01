@@ -310,11 +310,11 @@ const STATUS_OPTIONS_EDIT: Array<{ value: string; label: string }> = [
 // dsoId only, so in-flight drafts get their stored stepIdx clamped to a
 // safe range on restore (see restoreDraft).
 const STEPS = [
-  { id: "basics", label: "Basics" },
-  { id: "details", label: "Compensation & details" },
-  { id: "description", label: "Description" },
-  { id: "screening", label: "Screening" },
-  { id: "preview", label: "Preview & publish" },
+  { id: "basics", label: "Basics", short: "Basics" },
+  { id: "details", label: "Compensation & details", short: "Pay & details" },
+  { id: "description", label: "Description", short: "Description" },
+  { id: "screening", label: "Screening", short: "Screening" },
+  { id: "preview", label: "Preview & publish", short: "Review" },
 ] as const;
 
 type StepId = (typeof STEPS)[number]["id"];
@@ -989,7 +989,13 @@ export function JobWizard({
       <div className="flex items-center justify-end">
         <HelpDrawer helpKey="jd.overview" triggerLabel="How posting works" />
       </div>
-      <Stepper currentIdx={stepIdx} />
+      <Stepper
+        currentIdx={stepIdx}
+        onJump={(i) => {
+          setError(null);
+          setStepIdx(i);
+        }}
+      />
 
       <div className="border border-[var(--rule)] bg-white p-8 sm:p-10">
         {currentStep.id === "basics" && (
@@ -1212,7 +1218,13 @@ export function JobWizard({
 
 /* ───── Stepper ───── */
 
-function Stepper({ currentIdx }: { currentIdx: number }) {
+function Stepper({
+  currentIdx,
+  onJump,
+}: {
+  currentIdx: number;
+  onJump?: (idx: number) => void;
+}) {
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
@@ -1226,19 +1238,40 @@ function Stepper({ currentIdx }: { currentIdx: number }) {
           {STEPS[currentIdx].label}
         </span>
       </div>
+      {/* Clickable step nav — jump straight to any step (e.g. back to
+          Compensation to fix a blocked publish) instead of clicking Back
+          through each page. */}
       <div className="flex gap-1.5">
         {STEPS.map((s, i) => (
-          <div
+          <button
             key={s.id}
-            className={
-              "h-1 flex-1 transition-colors " +
-              (i < currentIdx
-                ? "bg-heritage"
-                : i === currentIdx
-                ? "bg-ink"
-                : "bg-[var(--rule-strong)]")
-            }
-          />
+            type="button"
+            onClick={() => onJump?.(i)}
+            aria-label={`Go to step ${i + 1}: ${s.label}`}
+            aria-current={i === currentIdx ? "step" : undefined}
+            className="group flex-1 text-left focus:outline-none focus-visible:ring-1 focus-visible:ring-heritage"
+          >
+            <span
+              className={
+                "block h-1 transition-colors " +
+                (i < currentIdx
+                  ? "bg-heritage"
+                  : i === currentIdx
+                    ? "bg-ink"
+                    : "bg-[var(--rule-strong)] group-hover:bg-slate-meta")
+              }
+            />
+            <span
+              className={
+                "mt-1.5 block text-[9px] font-bold tracking-[1px] uppercase truncate transition-colors " +
+                (i === currentIdx
+                  ? "text-ink"
+                  : "text-slate-meta group-hover:text-heritage-deep")
+              }
+            >
+              {s.short}
+            </span>
+          </button>
         ))}
       </div>
     </div>

@@ -51,8 +51,13 @@ interface HeroKpiTileProps {
   hint?: string;
   /** When true, renders the small "Live" pulse tag above the value. */
   live?: boolean;
-  /** Optional sparkline data. Renders if present. */
-  spark?: number[];
+  /**
+   * SLA status chip rendered next to the value — the queue's decision-driving
+   * secondary stat (oldest item waiting + whether it's past SLA). Replaced the
+   * old applications-volume sparkline, which measured a different metric than
+   * the hero count and so misled (Day 24).
+   */
+  slaChip?: { label: string; tone: "ok" | "breach" };
   /** Optional stage distribution strip. */
   stageStrip?: StageBucket[];
   /** Stage strip max — used to scale bar widths. Defaults to max count. */
@@ -68,14 +73,12 @@ export function HeroKpiTile({
   deltaSince,
   hint,
   live = false,
-  spark,
+  slaChip,
   stageStrip,
   stageStripMax,
   href,
   ctaLabel,
 }: HeroKpiTileProps) {
-  const showSpark = Array.isArray(spark) && spark.length > 1;
-
   return (
     <Link
       href={href}
@@ -117,11 +120,23 @@ export function HeroKpiTile({
         </div>
       )}
 
-      {/* Giant value + optional delta-since pill */}
+      {/* Giant value + SLA / delta pill */}
       <div className="flex items-baseline gap-3 flex-wrap mb-3">
         <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-ivory">
           {value}
         </div>
+        {slaChip && (
+          <span
+            className="px-2 py-1 text-[12px] font-bold tracking-[0.4px]"
+            style={
+              slaChip.tone === "breach"
+                ? { background: "rgba(216,90,48,0.20)", color: "#f0997b" }
+                : { background: "rgba(141,184,163,0.16)", color: "#8db8a3" }
+            }
+          >
+            {slaChip.label}
+          </span>
+        )}
         {deltaSince && (
           <span
             className="px-2 py-1 text-[12px] font-bold tracking-[0.4px] text-[var(--heritage-bright,#8db8a3)]"
@@ -139,16 +154,15 @@ export function HeroKpiTile({
         </div>
       )}
 
-      {/* Sparkline */}
-      {showSpark && (
-        <div className="my-5">
-          <HeroSparkline data={spark as number[]} />
-        </div>
-      )}
-
-      {/* Stage strip */}
+      {/* Stage strip — labeled so it's clearly the 30-day pipeline snapshot,
+          not a trend of the queue count above. */}
       {stageStrip && stageStrip.length > 0 && (
-        <StageStrip stages={stageStrip} explicitMax={stageStripMax} />
+        <div className="mt-5">
+          <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-ivory/45">
+            Where your pipeline stands · last 30 days
+          </div>
+          <StageStrip stages={stageStrip} explicitMax={stageStripMax} />
+        </div>
       )}
 
       {/* CTA */}
@@ -159,64 +173,6 @@ export function HeroKpiTile({
         <ArrowRight className="h-3.5 w-3.5 mt-5 group-hover:translate-x-1 transition-transform" />
       </div>
     </Link>
-  );
-}
-
-/* ───── Hero sparkline (bigger sibling of the standard Sparkline) ───── */
-
-function HeroSparkline({ data }: { data: number[] }) {
-  // Inline SVG sparkline tuned for the hero tile's ~64px height. Uses the
-  // heritage-bright palette over a translucent fill area.
-  if (data.length < 2) return null;
-  const width = 400;
-  const height = 64;
-  const padding = 4;
-  const innerW = width - padding * 2;
-  const innerH = height - padding * 2;
-  const min = Math.min(...data);
-  const max = Math.max(...data);
-  const range = max - min || 1;
-  const stepX = innerW / (data.length - 1);
-  const points = data.map((v, i) => ({
-    x: padding + i * stepX,
-    y: padding + innerH - ((v - min) / range) * innerH,
-  }));
-  const linePath = points
-    .map(
-      (p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`,
-    )
-    .join(" ");
-  const areaPath = `${linePath} L ${points[points.length - 1].x.toFixed(
-    2,
-  )} ${(height - padding).toFixed(2)} L ${points[0].x.toFixed(2)} ${(
-    height - padding
-  ).toFixed(2)} Z`;
-  const last = points[points.length - 1];
-
-  return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      width="100%"
-      height={height}
-      preserveAspectRatio="none"
-    >
-      <defs>
-        <linearGradient id="heroSparkFill" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor="#8db8a3" stopOpacity="0.35" />
-          <stop offset="100%" stopColor="#8db8a3" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d={areaPath} fill="url(#heroSparkFill)" />
-      <path
-        d={linePath}
-        fill="none"
-        stroke="#8db8a3"
-        strokeWidth={1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx={last.x} cy={last.y} r={3.5} fill="#8db8a3" />
-    </svg>
   );
 }
 
