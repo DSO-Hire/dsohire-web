@@ -1249,7 +1249,7 @@ function Stepper({
             onClick={() => onJump?.(i)}
             aria-label={`Go to step ${i + 1}: ${s.label}`}
             aria-current={i === currentIdx ? "step" : undefined}
-            className="group flex-1 text-left focus:outline-none focus-visible:ring-1 focus-visible:ring-heritage"
+            className="group flex-1 cursor-pointer text-left focus:outline-none focus-visible:ring-1 focus-visible:ring-heritage"
           >
             <span
               className={
@@ -1258,21 +1258,24 @@ function Stepper({
                   ? "bg-heritage"
                   : i === currentIdx
                     ? "bg-ink"
-                    : "bg-[var(--rule-strong)] group-hover:bg-slate-meta")
+                    : "bg-[var(--rule-strong)] group-hover:bg-heritage")
               }
             />
             <span
               className={
-                "mt-1.5 block text-[9px] font-bold tracking-[1px] uppercase truncate transition-colors " +
+                "mt-1.5 flex items-center gap-1 text-[9px] font-bold tracking-[1px] uppercase truncate transition-colors " +
                 (i === currentIdx
                   ? "text-ink"
-                  : "text-slate-meta group-hover:text-heritage-deep")
+                  : "text-slate-meta group-hover:text-heritage-deep group-hover:underline")
               }
             >
               {s.short}
             </span>
           </button>
         ))}
+      </div>
+      <div className="mt-2 flex items-center gap-1 text-[10px] text-slate-meta">
+        <span aria-hidden>↔</span> Tap any step to jump.
       </div>
     </div>
   );
@@ -2858,9 +2861,14 @@ function formatComp(min: string, max: string, period: string): string {
     annual: "/yr",
   };
   const suffix = period ? periodLabel[period] ?? "" : "";
-  if (!max) return `$${min}+${suffix}`;
-  if (!min) return `up to $${max}${suffix}`;
-  return `$${min}–$${max}${suffix}`;
+  // Format with thousands separators ($190,000) — state holds raw digits.
+  const fmt = (s: string) => {
+    const d = s.replace(/[^\d]/g, "");
+    return d ? Number(d).toLocaleString("en-US") : s;
+  };
+  if (!max) return `$${fmt(min)}+${suffix}`;
+  if (!min) return `up to $${fmt(max)}${suffix}`;
+  return `$${fmt(min)}–$${fmt(max)}${suffix}`;
 }
 
 /* ───── Validation ───── */

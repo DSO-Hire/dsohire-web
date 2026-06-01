@@ -185,6 +185,16 @@ const UNIVERSAL_CORPORATE_QUESTIONS: RecommendedQuestion[] = [
     category: "logistics",
   },
   {
+    id: "corp_univ_travel",
+    prompt: "How much travel are you open to for this role?",
+    kind: "single_select",
+    options: TRAVEL_OPTIONS,
+    required: false,
+    rationale:
+      "Multi-site DSO corporate roles often carry travel — surface tolerance before the first screen.",
+    category: "logistics",
+  },
+  {
     id: "corp_univ_why_dso",
     prompt:
       "Why are you interested in a corporate role at a dental support organization specifically?",
@@ -546,6 +556,438 @@ const MARKETING_QUESTIONS: RecommendedQuestion[] = [
 ];
 
 /* ─────────────────────────────────────────────────────────────────
+ * Shared scale option sets reused across the newer banks
+ * ────────────────────────────────────────────────────────────────*/
+
+const SITE_SCALE_OPTIONS: RecommendedOption[] = [
+  { id: "site_1_5", label: "1–5 locations" },
+  { id: "site_6_25", label: "6–25 locations" },
+  { id: "site_26_75", label: "26–75 locations" },
+  { id: "site_75_200", label: "75–200 locations" },
+  { id: "site_200p", label: "200+ locations" },
+];
+
+const SPEND_SCALE_OPTIONS: RecommendedOption[] = [
+  { id: "spend_lt5m", label: "Under $5M" },
+  { id: "spend_5_25m", label: "$5M–$25M" },
+  { id: "spend_25_100m", label: "$25M–$100M" },
+  { id: "spend_100mp", label: "$100M+" },
+];
+
+/* ─────────────────────────────────────────────────────────────────
+ * Bank 7 — Legal & Compliance
+ * ────────────────────────────────────────────────────────────────*/
+
+const LEGAL_QUESTIONS: RecommendedQuestion[] = [
+  {
+    id: "corp_legal_licensed",
+    prompt: "Are you a licensed attorney (bar admission in good standing)?",
+    helper_text: "Not required for every compliance role — answer honestly.",
+    kind: "yes_no",
+    required: false,
+    rationale:
+      "Some seats (GC, corporate counsel) require a JD + active bar; many compliance roles don't.",
+    category: "qualification",
+  },
+  {
+    id: "corp_legal_focus",
+    prompt: "Which legal or compliance area is your center of gravity?",
+    kind: "single_select",
+    options: [
+      { id: "leg_contracts", label: "Corporate / commercial contracts" },
+      { id: "leg_ma", label: "M&A / transactional" },
+      { id: "leg_healthcare_reg", label: "Healthcare regulatory" },
+      { id: "leg_employment", label: "Employment / labor" },
+      { id: "leg_litigation", label: "Litigation management" },
+      { id: "leg_compliance", label: "Compliance program leadership" },
+    ],
+    required: false,
+    rationale:
+      "Legal hires are highly specialized — route the candidate to the right seat up front.",
+    category: "experience",
+  },
+  {
+    id: "corp_legal_healthcare_reg",
+    prompt:
+      "Have you advised on dental/healthcare-specific regulation — HIPAA, Stark Law, Anti-Kickback, state dental practice acts or corporate-practice-of-dentistry (CPOM) rules?",
+    kind: "yes_no",
+    required: false,
+    rationale:
+      "DSO legal work lives in CPOM / Stark / AKS — this exposure is rare and high-value.",
+    category: "skills",
+  },
+  {
+    id: "corp_legal_program",
+    prompt:
+      "Have you built or run a corporate compliance program (policies, training, audits, hotline)?",
+    kind: "yes_no",
+    required: false,
+    rationale:
+      "Standing up a compliance function is distinct from advising on discrete legal matters.",
+    category: "skills",
+  },
+  {
+    id: "corp_legal_multistate",
+    prompt: "Have you managed legal or compliance matters across multiple states?",
+    kind: "yes_no",
+    required: false,
+    rationale:
+      "Multi-state regulatory variation is a defining challenge for a scaling DSO.",
+    category: "experience",
+  },
+  {
+    id: "corp_legal_depth",
+    prompt: "Briefly describe your deepest area of legal or compliance expertise.",
+    kind: "long_text",
+    required: false,
+    rationale: "Surfaces genuine depth vs. broad familiarity.",
+    category: "fit",
+  },
+];
+
+/* ─────────────────────────────────────────────────────────────────
+ * Bank 8 — Real Estate & Facilities
+ * ────────────────────────────────────────────────────────────────*/
+
+const REAL_ESTATE_QUESTIONS: RecommendedQuestion[] = [
+  {
+    id: "corp_re_focus",
+    prompt: "Which real-estate / facilities area is your focus?",
+    kind: "single_select",
+    options: [
+      { id: "re_site", label: "Site selection / market analysis" },
+      { id: "re_lease", label: "Lease negotiation & administration" },
+      { id: "re_construction", label: "De novo design, buildout & construction PM" },
+      { id: "re_facilities", label: "Facilities / property management" },
+      { id: "re_capex", label: "Capital projects & capex planning" },
+    ],
+    required: false,
+    rationale:
+      "Site selection, construction, and facilities management are distinct disciplines.",
+    category: "experience",
+  },
+  {
+    id: "corp_re_sites",
+    prompt: "What is the largest site portfolio you've had real-estate responsibility for?",
+    kind: "single_select",
+    options: SITE_SCALE_OPTIONS,
+    required: false,
+    rationale: "Portfolio size calibrates the candidate against your footprint.",
+    category: "experience",
+  },
+  {
+    id: "corp_re_denovo",
+    prompt:
+      "Have you led ground-up (de novo) buildouts from site selection through opening?",
+    kind: "yes_no",
+    required: false,
+    rationale:
+      "De novo development is the central RE motion for a growing DSO — different from steady-state facilities.",
+    category: "skills",
+  },
+  {
+    id: "corp_re_lease_portfolio",
+    prompt:
+      "Have you managed a multi-site lease portfolio (renewals, LOIs, negotiations)?",
+    kind: "yes_no",
+    required: false,
+    rationale: "Lease administration at scale is a core cost and risk lever.",
+    category: "skills",
+  },
+  {
+    id: "corp_re_healthcare_buildout",
+    prompt:
+      "Have you built or managed healthcare/dental facilities specifically (clinical buildout requirements, op plumbing, imaging)?",
+    kind: "yes_no",
+    required: false,
+    rationale: "Dental/medical buildouts carry requirements generic retail RE doesn't.",
+    category: "skills",
+  },
+  {
+    id: "corp_re_capex",
+    prompt: "What is the largest annual capital / construction budget you've managed?",
+    kind: "single_select",
+    options: SPEND_SCALE_OPTIONS,
+    required: false,
+    rationale: "Capex scale is a sharper fit signal than years for a RE/facilities leader.",
+    category: "experience",
+  },
+];
+
+/* ─────────────────────────────────────────────────────────────────
+ * Bank 9 — M&A / Corporate & Business Development
+ * ────────────────────────────────────────────────────────────────*/
+
+const CORP_DEV_QUESTIONS: RecommendedQuestion[] = [
+  {
+    id: "corp_dev_focus",
+    prompt: "Which deal / development motion is your strength?",
+    kind: "single_select",
+    options: [
+      { id: "dev_sourcing", label: "Deal sourcing / origination" },
+      { id: "dev_diligence", label: "Financial diligence & valuation" },
+      { id: "dev_execution", label: "Deal execution / negotiation" },
+      { id: "dev_integration", label: "Post-close integration" },
+      { id: "dev_partnerships", label: "Partnership & affiliation development" },
+    ],
+    required: false,
+    rationale:
+      "Sourcing, diligence, execution, and integration are different skill sets — pinpoint the candidate's.",
+    category: "experience",
+  },
+  {
+    id: "corp_dev_throughput",
+    prompt:
+      "Roughly how many acquisitions, affiliations, or partnerships have you sourced or closed?",
+    kind: "single_select",
+    options: [
+      { id: "deal_0", label: "None closed yet" },
+      { id: "deal_1_5", label: "1–5" },
+      { id: "deal_6_15", label: "6–15" },
+      { id: "deal_16_40", label: "16–40" },
+      { id: "deal_40p", label: "40+" },
+    ],
+    required: false,
+    rationale: "Deal throughput is the highest-signal metric for a corp-dev / BizDev hire.",
+    category: "skills",
+  },
+  {
+    id: "corp_dev_deal_size",
+    prompt: "What is the typical enterprise value of deals you've worked?",
+    kind: "single_select",
+    options: [
+      { id: "ev_lt5m", label: "Under $5M" },
+      { id: "ev_5_25m", label: "$5M–$25M" },
+      { id: "ev_25_100m", label: "$25M–$100M" },
+      { id: "ev_100mp", label: "$100M+" },
+    ],
+    required: false,
+    rationale: "Deal size calibrates the candidate against your transaction profile.",
+    category: "experience",
+  },
+  {
+    id: "corp_dev_dental",
+    prompt:
+      "Have you sourced or closed dental practice affiliations / acquisitions specifically?",
+    kind: "yes_no",
+    required: false,
+    rationale:
+      "Dental affiliation sourcing (doctor relationships, broker network) transfers directly.",
+    category: "skills",
+  },
+  {
+    id: "corp_dev_integration",
+    prompt:
+      "Have you owned post-acquisition integration (operational, financial, or systems)?",
+    kind: "yes_no",
+    required: false,
+    rationale: "Sourcing wins deals; integration captures the value — DSOs need both.",
+    category: "skills",
+  },
+  {
+    id: "corp_dev_pipeline",
+    prompt: "How do you build and manage a deal or affiliation pipeline?",
+    helper_text:
+      "Brokers, advisors, doctor relationships, outbound — whatever your engine is.",
+    kind: "long_text",
+    required: false,
+    rationale: "Reveals the candidate's actual sourcing engine, not just deals they inherited.",
+    category: "fit",
+  },
+];
+
+/* ─────────────────────────────────────────────────────────────────
+ * Bank 10 — Training & Development
+ * ────────────────────────────────────────────────────────────────*/
+
+const TRAINING_QUESTIONS: RecommendedQuestion[] = [
+  {
+    id: "corp_train_focus",
+    prompt: "Which training / L&D area is your focus?",
+    kind: "single_select",
+    options: [
+      { id: "trn_clinical", label: "Clinical training / continuing education" },
+      { id: "trn_onboarding", label: "New-hire onboarding programs" },
+      { id: "trn_leadership", label: "Leadership development" },
+      { id: "trn_instructional", label: "LMS / instructional design" },
+      { id: "trn_field", label: "Field training across sites" },
+    ],
+    required: false,
+    rationale: "L&D spans clinical CE to leadership programs — route to the right need.",
+    category: "experience",
+  },
+  {
+    id: "corp_train_audience",
+    prompt: "Which audience have you primarily built training for?",
+    kind: "single_select",
+    options: [
+      { id: "aud_clinical", label: "Clinical staff (providers, hygienists, assistants)" },
+      { id: "aud_admin", label: "Front-office / administrative" },
+      { id: "aud_leadership", label: "Managers / leadership" },
+      { id: "aud_all", label: "All of the above" },
+    ],
+    required: false,
+    rationale: "Clinical vs. admin vs. leadership training are distinct design problems.",
+    category: "experience",
+  },
+  {
+    id: "corp_train_multisite",
+    prompt: "Have you rolled out standardized training across many locations?",
+    kind: "yes_no",
+    required: false,
+    rationale: "Scaling consistent training across sites is the core DSO L&D challenge.",
+    category: "skills",
+  },
+  {
+    id: "corp_train_curriculum",
+    prompt: "Have you designed curriculum or certification programs from scratch?",
+    kind: "yes_no",
+    required: false,
+    rationale: "Program design is distinct from delivering someone else's curriculum.",
+    category: "skills",
+  },
+  {
+    id: "corp_train_lms",
+    prompt: "Which LMS or training platforms have you built or administered?",
+    helper_text: "e.g. Workday Learning, Docebo, Absorb, Lessonly, TalentLMS.",
+    kind: "short_text",
+    required: false,
+    rationale: "Platform fluency shortens ramp and signals scale.",
+    category: "skills",
+  },
+];
+
+/* ─────────────────────────────────────────────────────────────────
+ * Bank 11 — Supply Chain & Procurement
+ * ────────────────────────────────────────────────────────────────*/
+
+const SUPPLY_CHAIN_QUESTIONS: RecommendedQuestion[] = [
+  {
+    id: "corp_sc_focus",
+    prompt: "Which supply-chain / procurement area is your focus?",
+    kind: "single_select",
+    options: [
+      { id: "sc_sourcing", label: "Strategic sourcing / vendor management" },
+      { id: "sc_procops", label: "Procurement operations" },
+      { id: "sc_inventory", label: "Inventory / distribution" },
+      { id: "sc_gpo", label: "GPO / contract management" },
+      { id: "sc_logistics", label: "Multi-site logistics" },
+    ],
+    required: false,
+    rationale: "Sourcing, procurement ops, and logistics are distinct procurement disciplines.",
+    category: "experience",
+  },
+  {
+    id: "corp_sc_spend",
+    prompt: "What is the largest annual spend you've had under management?",
+    kind: "single_select",
+    options: SPEND_SCALE_OPTIONS,
+    required: false,
+    rationale: "Spend under management is the sharpest seniority signal for a procurement leader.",
+    category: "experience",
+  },
+  {
+    id: "corp_sc_gpo",
+    prompt:
+      "Have you negotiated or managed GPO (group purchasing organization) relationships?",
+    kind: "yes_no",
+    required: false,
+    rationale: "Dental supply economics run through GPOs — direct, high-value experience.",
+    category: "skills",
+  },
+  {
+    id: "corp_sc_dental",
+    prompt:
+      "Have you managed dental or medical supply procurement specifically (consumables, equipment, lab)?",
+    kind: "yes_no",
+    required: false,
+    rationale: "Dental supply categories carry nuances generic procurement doesn't.",
+    category: "skills",
+  },
+  {
+    id: "corp_sc_savings",
+    prompt: "Describe a sourcing or cost-savings initiative you led and its impact.",
+    kind: "long_text",
+    required: false,
+    rationale: "Quantified savings is the clearest evidence of procurement impact.",
+    category: "fit",
+  },
+];
+
+/* ─────────────────────────────────────────────────────────────────
+ * Bank 12 — Clinical Operations (non-clinical-license framing)
+ * ────────────────────────────────────────────────────────────────*/
+
+const CLINICAL_OPS_QUESTIONS: RecommendedQuestion[] = [
+  {
+    id: "corp_clinops_role",
+    prompt: "Which clinical-operations area best describes your background?",
+    kind: "single_select",
+    options: [
+      { id: "clin_affairs", label: "VP / Director of Clinical Affairs" },
+      { id: "clin_regional", label: "Regional clinical director" },
+      { id: "clin_quality", label: "Clinical quality / compliance" },
+      { id: "clin_provider", label: "Provider relations / clinical recruiting" },
+      { id: "clin_standards", label: "Clinical training & standards" },
+    ],
+    required: false,
+    rationale:
+      "Clinical-ops leadership spans quality, provider relations, and standards — route accordingly.",
+    category: "experience",
+  },
+  {
+    id: "corp_clinops_providers",
+    prompt: "How many providers / clinicians have you supported or overseen?",
+    kind: "single_select",
+    options: [
+      { id: "prov_lt25", label: "Under 25" },
+      { id: "prov_25_75", label: "25–75" },
+      { id: "prov_75_200", label: "75–200" },
+      { id: "prov_200p", label: "200+" },
+    ],
+    required: false,
+    rationale: "Provider span calibrates the candidate against your clinical org size.",
+    category: "experience",
+  },
+  {
+    id: "corp_clinops_quality",
+    prompt:
+      "Have you owned clinical quality, standards, or compliance programs across multiple practices?",
+    kind: "yes_no",
+    required: false,
+    rationale: "Multi-site clinical quality is the heart of a DSO clinical-ops seat.",
+    category: "skills",
+  },
+  {
+    id: "corp_clinops_provider_relations",
+    prompt: "Have you led provider relations, retention, or clinical recruiting?",
+    kind: "yes_no",
+    required: false,
+    rationale: "Provider retention is a top operational risk for DSOs — direct experience matters.",
+    category: "skills",
+  },
+  {
+    id: "corp_clinops_credential",
+    prompt:
+      "Do you hold a clinical credential (DDS/DMD, RDH, etc.)? Optional — many clinical-ops leaders are non-clinical.",
+    helper_text: "List it if you'd like; it is not required for the role.",
+    kind: "yes_no",
+    required: false,
+    rationale: "A credential can help with provider credibility but isn't a gate.",
+    category: "qualification",
+  },
+  {
+    id: "corp_clinops_kpis",
+    prompt:
+      "How have you standardized clinical KPIs or care protocols across multiple sites?",
+    kind: "long_text",
+    required: false,
+    rationale: "Reveals operating philosophy on the clinical-quality-vs-autonomy balance.",
+    category: "fit",
+  },
+];
+
+/* ─────────────────────────────────────────────────────────────────
  * Bank registry + function → bank mapping
  * ────────────────────────────────────────────────────────────────*/
 
@@ -576,39 +1018,44 @@ export const CORPORATE_QUESTION_BANKS = {
     questions: IT_QUESTIONS,
   },
   marketing: {
-    label: "Marketing, BizDev & Corporate Development",
+    label: "Marketing",
     questions: MARKETING_QUESTIONS,
+  },
+  legal: {
+    label: "Legal & Compliance",
+    questions: LEGAL_QUESTIONS,
+  },
+  realEstate: {
+    label: "Real Estate & Facilities",
+    questions: REAL_ESTATE_QUESTIONS,
+  },
+  corpDev: {
+    label: "M&A, Corporate & Business Development",
+    questions: CORP_DEV_QUESTIONS,
+  },
+  training: {
+    label: "Training & Development",
+    questions: TRAINING_QUESTIONS,
+  },
+  supplyChain: {
+    label: "Supply Chain & Procurement",
+    questions: SUPPLY_CHAIN_QUESTIONS,
+  },
+  clinicalOps: {
+    label: "Clinical Operations",
+    questions: CLINICAL_OPS_QUESTIONS,
   },
 } as const;
 
 type CorporateBankId = keyof typeof CORPORATE_QUESTION_BANKS;
 
 /**
- * Maps all 12 CORPORATE_FUNCTIONS slugs (src/lib/corporate/functions.ts)
- * onto one of the 5 non-universal banks. Reasoning per non-obvious slug:
- *
- *   finance-accounting          → finance
- *   marketing                   → marketing
- *   operations                  → operations
- *   hr-recruiting               → hr
- *   it-engineering              → it
- *   legal-compliance            → operations  (corp-staff back-office; ops bank
- *                                  covers P&L / multi-site / standardization
- *                                  questions that read closest to a GC seat —
- *                                  better than mislabeling under marketing/finance)
- *   real-estate-facilities      → operations  (multi-site footprint, de novo
- *                                  openings, integration — squarely ops-flavored)
- *   ma-corporate-development    → marketing   (the marketing bank doubles as the
- *                                  BizDev/M&A bank — deal pipeline + sourcing Qs)
- *   training-development        → hr          (L&D / curriculum / LMS lives inside
- *                                  the HR bank's function-scope + depth Qs)
- *   supply-chain-procurement    → operations  (vendor mgmt, multi-site logistics,
- *                                  process standardization — ops-flavored)
- *   clinical-operations         → operations  (VP Clinical Affairs / regional
- *                                  clinical directors — same multi-site ops Qs,
- *                                  kept non-clinical in vocabulary by design)
- *   business-development        → marketing   (partnerships + affiliation sourcing
- *                                  — same bank as M&A / corp dev)
+ * Maps all 12 CORPORATE_FUNCTIONS slugs (src/lib/corporate/functions.ts) onto
+ * a dedicated bank. As of Day 24, each function has its OWN bank rather than
+ * borrowing a neighbor's — legal, real-estate, M&A/corp-dev, training,
+ * supply-chain, and clinical-ops each got purpose-written question sets.
+ * The only shared bank is corpDev, which serves both ma-corporate-development
+ * and business-development (same deal/affiliation talent pool, overlapping Qs).
  */
 const FUNCTION_TO_BANK: Record<string, CorporateBankId> = {
   "finance-accounting": "finance",
@@ -616,13 +1063,13 @@ const FUNCTION_TO_BANK: Record<string, CorporateBankId> = {
   "operations": "operations",
   "hr-recruiting": "hr",
   "it-engineering": "it",
-  "legal-compliance": "operations",
-  "real-estate-facilities": "operations",
-  "ma-corporate-development": "marketing",
-  "training-development": "hr",
-  "supply-chain-procurement": "operations",
-  "clinical-operations": "operations",
-  "business-development": "marketing",
+  "legal-compliance": "legal",
+  "real-estate-facilities": "realEstate",
+  "ma-corporate-development": "corpDev",
+  "training-development": "training",
+  "supply-chain-procurement": "supplyChain",
+  "clinical-operations": "clinicalOps",
+  "business-development": "corpDev",
 };
 
 /**

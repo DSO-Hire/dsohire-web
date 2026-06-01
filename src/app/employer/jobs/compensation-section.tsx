@@ -195,17 +195,27 @@ function MoneyInput({
   onChange: (v: string) => void;
   accent: Accent;
 }) {
+  // Parent state stays raw digits (so the server parser + OTE math keep
+  // working); we only format the DISPLAYED value with thousands separators
+  // and a $ affix. onChange strips back to digits before lifting state.
+  const digits = value.replace(/[^\d]/g, "");
+  const display = digits ? Number(digits).toLocaleString("en-US") : "";
   return (
     <div>
       <FieldLabel>{label}</FieldLabel>
-      <input
-        type="number"
-        min={0}
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`w-full h-[44px] px-4 bg-white border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:ring-1 transition-colors ${ACCENT[accent].ring}`}
-      />
+      <div className="relative">
+        <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[14px] text-slate-meta">
+          $
+        </span>
+        <input
+          type="text"
+          inputMode="numeric"
+          placeholder={placeholder}
+          value={display}
+          onChange={(e) => onChange(e.target.value.replace(/[^\d]/g, ""))}
+          className={`w-full h-[44px] pl-7 pr-4 bg-white border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:ring-1 transition-colors ${ACCENT[accent].ring}`}
+        />
+      </div>
     </div>
   );
 }
@@ -356,7 +366,7 @@ export function CompensationSection(props: CompensationSectionProps) {
                     ? "Starting at"
                     : "Pay"
               }
-              placeholder="190000"
+              placeholder="190,000"
               value={props.compMin}
               onChange={props.onCompMin}
               accent={props.accent}
@@ -365,7 +375,7 @@ export function CompensationSection(props: CompensationSectionProps) {
           {(props.compType === "range" || props.compType === "up_to") && (
             <MoneyInput
               label={props.compType === "range" ? "Maximum" : "Up to"}
-              placeholder="240000"
+              placeholder="240,000"
               value={props.compMax}
               onChange={props.onCompMax}
               accent={props.accent}
@@ -438,7 +448,7 @@ export function CompensationSection(props: CompensationSectionProps) {
             <div className="grid grid-cols-1 sm:grid-cols-[200px,1fr] gap-4">
               <MoneyInput
                 label="Annual target ($)"
-                placeholder="80000"
+                placeholder="80,000"
                 value={props.variableCompTarget}
                 onChange={props.onVariableCompTarget}
                 accent={props.accent}
@@ -469,7 +479,7 @@ export function CompensationSection(props: CompensationSectionProps) {
             <div className="grid grid-cols-1 sm:grid-cols-[200px,1fr] gap-4">
               <MoneyInput
                 label="Annual target ($)"
-                placeholder="20000"
+                placeholder="20,000"
                 value={props.bonusTarget}
                 onChange={props.onBonusTarget}
                 accent={props.accent}

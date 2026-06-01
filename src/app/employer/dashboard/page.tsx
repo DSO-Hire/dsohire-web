@@ -897,6 +897,8 @@ export default async function EmployerDashboard() {
             live={awaitingReviewCount > 0}
             hint={heroHint}
             slaChip={heroSlaChip}
+            spark={appsLast7Days.some((v) => v > 0) ? appsLast7Days : undefined}
+            sparkLabel="New applications · last 7 days"
             stageStrip={stageStripCounts}
             stageStripMax={stageStripMax}
             href="/employer/applications?stage=new"

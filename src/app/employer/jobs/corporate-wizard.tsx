@@ -1130,7 +1130,7 @@ function Stepper({
             onClick={() => onJump?.(i)}
             aria-label={`Go to step ${i + 1}: ${s.label}`}
             aria-current={i === currentIdx ? "step" : undefined}
-            className="group flex-1 text-left focus:outline-none focus-visible:ring-1 focus-visible:ring-[#3D5266]"
+            className="group flex-1 cursor-pointer text-left focus:outline-none focus-visible:ring-1 focus-visible:ring-[#3D5266]"
           >
             <span
               className={
@@ -1139,7 +1139,7 @@ function Stepper({
                   ? "bg-[#3D5266]"
                   : i === currentIdx
                     ? "bg-ink"
-                    : "bg-[var(--rule-strong)] group-hover:bg-slate-meta")
+                    : "bg-[var(--rule-strong)] group-hover:bg-[#3D5266]")
               }
             />
             <span
@@ -1147,13 +1147,16 @@ function Stepper({
                 "mt-1.5 block text-[9px] font-bold tracking-[1px] uppercase truncate transition-colors " +
                 (i === currentIdx
                   ? "text-ink"
-                  : "text-slate-meta group-hover:text-[#3D5266]")
+                  : "text-slate-meta group-hover:text-[#3D5266] group-hover:underline")
               }
             >
               {s.short}
             </span>
           </button>
         ))}
+      </div>
+      <div className="mt-2 flex items-center gap-1 text-[10px] text-slate-meta">
+        <span aria-hidden>↔</span> Tap any step to jump.
       </div>
     </div>
   );
@@ -2691,10 +2694,14 @@ function formatComp(
     annual: "/yr",
   };
   const suffix = period ? periodLabel[period] ?? "" : "";
-  if (type === "exact") return `$${min}${suffix}`;
-  if (type === "starting_at" || !max) return `$${min}+${suffix}`;
-  if (type === "up_to" || !min) return `up to $${max}${suffix}`;
-  return `$${min}–$${max}${suffix}`;
+  const fmt = (s: string) => {
+    const d = s.replace(/[^\d]/g, "");
+    return d ? Number(d).toLocaleString("en-US") : s;
+  };
+  if (type === "exact") return `$${fmt(min)}${suffix}`;
+  if (type === "starting_at" || !max) return `$${fmt(min)}+${suffix}`;
+  if (type === "up_to" || !min) return `up to $${fmt(max)}${suffix}`;
+  return `$${fmt(min)}–$${fmt(max)}${suffix}`;
 }
 
 /* ───── Validation ───── */

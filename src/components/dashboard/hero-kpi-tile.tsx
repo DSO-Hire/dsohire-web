@@ -58,6 +58,10 @@ interface HeroKpiTileProps {
    * the hero count and so misled (Day 24).
    */
   slaChip?: { label: string; tone: "ok" | "breach" };
+  /** Optional sparkline data (renders a labeled trend block when present). */
+  spark?: number[];
+  /** Caption for the sparkline so it self-explains (e.g. "New applications · last 7 days"). */
+  sparkLabel?: string;
   /** Optional stage distribution strip. */
   stageStrip?: StageBucket[];
   /** Stage strip max — used to scale bar widths. Defaults to max count. */
@@ -74,11 +78,15 @@ export function HeroKpiTile({
   hint,
   live = false,
   slaChip,
+  spark,
+  sparkLabel,
   stageStrip,
   stageStripMax,
   href,
   ctaLabel,
 }: HeroKpiTileProps) {
+  const showSpark = Array.isArray(spark) && spark.length > 1;
+  const sparkTotal = showSpark ? spark!.reduce((a, b) => a + b, 0) : 0;
   return (
     <Link
       href={href}
@@ -154,6 +162,23 @@ export function HeroKpiTile({
         </div>
       )}
 
+      {/* Labeled trend — the sparkline now states exactly what it plots
+          (incoming applications, 7-day window) + the total, so it reads as
+          a flow trend rather than an unexplained line next to the queue. */}
+      {showSpark && (
+        <div className="mt-5">
+          <div className="flex items-baseline justify-between mb-1.5">
+            <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-ivory/45">
+              {sparkLabel ?? "Trend · last 7 days"}
+            </span>
+            <span className="text-[12px] font-bold text-ivory/80">
+              {sparkTotal} total
+            </span>
+          </div>
+          <HeroSparkline data={spark as number[]} />
+        </div>
+      )}
+
       {/* Stage strip — labeled so it's clearly the 30-day pipeline snapshot,
           not a trend of the queue count above. */}
       {stageStrip && stageStrip.length > 0 && (
@@ -173,6 +198,59 @@ export function HeroKpiTile({
         <ArrowRight className="h-3.5 w-3.5 mt-5 group-hover:translate-x-1 transition-transform" />
       </div>
     </Link>
+  );
+}
+
+/* ───── Hero sparkline ───── */
+
+function HeroSparkline({ data }: { data: number[] }) {
+  if (data.length < 2) return null;
+  const width = 400;
+  const height = 56;
+  const padding = 4;
+  const innerW = width - padding * 2;
+  const innerH = height - padding * 2;
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const stepX = innerW / (data.length - 1);
+  const points = data.map((v, i) => ({
+    x: padding + i * stepX,
+    y: padding + innerH - ((v - min) / range) * innerH,
+  }));
+  const linePath = points
+    .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`)
+    .join(" ");
+  const areaPath = `${linePath} L ${points[points.length - 1].x.toFixed(2)} ${(
+    height - padding
+  ).toFixed(2)} L ${points[0].x.toFixed(2)} ${(height - padding).toFixed(2)} Z`;
+  const last = points[points.length - 1];
+
+  return (
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      width="100%"
+      height={height}
+      preserveAspectRatio="none"
+      aria-hidden
+    >
+      <defs>
+        <linearGradient id="heroSparkFill" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor="#8db8a3" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#8db8a3" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={areaPath} fill="url(#heroSparkFill)" />
+      <path
+        d={linePath}
+        fill="none"
+        stroke="#8db8a3"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx={last.x} cy={last.y} r={3.5} fill="#8db8a3" />
+    </svg>
   );
 }
 
