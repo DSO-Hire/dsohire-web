@@ -199,6 +199,7 @@ function KpiGrid({ overview }: { overview: AnalyticsOverview }) {
         value={fmtRatio(coverage)}
         unit={coverage !== null ? "× per open req" : undefined}
         hint={`${overview.pipeline_coverage.active_candidates} active · ${overview.pipeline_coverage.open_reqs} open reqs`}
+        href="/employer/applications"
       />
       <StatCard
         label="Open reqs · aging"
@@ -210,6 +211,7 @@ function KpiGrid({ overview }: { overview: AnalyticsOverview }) {
               ? `oldest ${Math.round(aging.oldest_days)}d open`
               : "no open reqs"
         }
+        href="/employer/jobs?status=active"
       />
       <StatCard
         label="Interview booking rate"
@@ -241,11 +243,13 @@ function KpiGrid({ overview }: { overview: AnalyticsOverview }) {
         label="Applications"
         value={overview.applications.toLocaleString()}
         hint={`last ${overview.window_days} days`}
+        href="/employer/applications"
       />
       <StatCard
         label="Hires"
         value={overview.hires.toLocaleString()}
         hint={`last ${overview.window_days} days`}
+        href="/employer/applications?stage=hired"
       />
     </section>
   );

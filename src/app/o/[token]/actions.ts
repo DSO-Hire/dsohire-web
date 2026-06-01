@@ -36,6 +36,7 @@ import { headers } from "next/headers";
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/supabase/database.types";
 import { looksLikeOfferToken } from "@/lib/offers/tokens";
+import { DECLINE_REASON_CODES } from "@/lib/offers/decline-reasons";
 import { sendEmail } from "@/lib/email/send";
 import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
 import { recordAuditEvent } from "@/lib/audit/record";
@@ -216,7 +217,8 @@ export async function recordAcceptance(
 
 export async function recordDecline(
   token: string,
-  reason: string | null
+  reason: string | null,
+  reasonCode?: string | null
 ): Promise<RecordOfferResponseResult> {
   const cleanToken = (token ?? "").trim();
   if (!looksLikeOfferToken(cleanToken)) {
@@ -230,6 +232,10 @@ export async function recordDecline(
       error: `Reason is too long (max ${REASON_MAX} characters).`,
     };
   }
+  // Structured decline reason (Analytics Phase 1) — only persist a recognized
+  // code; anything else is dropped (free-text `reason` still captures color).
+  const cleanCode =
+    reasonCode && DECLINE_REASON_CODES.includes(reasonCode) ? reasonCode : null;
 
   const admin = createSupabaseServiceRoleClient();
   const ctx = await loadOfferContext(admin, cleanToken);
@@ -252,6 +258,7 @@ export async function recordDecline(
       application_id: ctx.applicationId,
       response: "declined",
       reason: cleanReason || null,
+      decline_reason_code: cleanCode,
       ip,
       user_agent: userAgent,
     });

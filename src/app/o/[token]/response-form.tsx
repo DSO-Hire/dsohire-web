@@ -30,6 +30,7 @@
 import { useState, useTransition } from "react";
 import { CheckCircle2, X, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { recordAcceptance, recordDecline } from "./actions";
+import { DECLINE_REASONS } from "@/lib/offers/decline-reasons";
 
 type Choice = "accept" | "decline" | null;
 
@@ -59,6 +60,7 @@ export function OfferResponseForm({
   const [choice, setChoice] = useState<Choice>(initialChoice);
   const [signedName, setSignedName] = useState<string>(candidateName ?? "");
   const [reason, setReason] = useState<string>("");
+  const [reasonCode, setReasonCode] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [submittedAs, setSubmittedAs] = useState<
     "accepted" | "declined" | null
@@ -100,7 +102,7 @@ export function OfferResponseForm({
   function handleDecline() {
     setError(null);
     startTransition(async () => {
-      const res = await recordDecline(token, reason || null);
+      const res = await recordDecline(token, reason || null, reasonCode || null);
       if (!res.ok) {
         setError(res.error);
         if (res.alreadyResponded) {
@@ -183,6 +185,8 @@ export function OfferResponseForm({
         <DeclinePane
           reason={reason}
           onChange={setReason}
+          reasonCode={reasonCode}
+          onChangeCode={setReasonCode}
           onCancel={() => {
             setChoice(null);
             setError(null);
@@ -335,12 +339,16 @@ function AcceptPane({
 function DeclinePane({
   reason,
   onChange,
+  reasonCode,
+  onChangeCode,
   onCancel,
   onSubmit,
   pending,
 }: {
   reason: string;
   onChange: (v: string) => void;
+  reasonCode: string;
+  onChangeCode: (v: string) => void;
   onCancel: () => void;
   onSubmit: () => void;
   pending: boolean;
@@ -357,7 +365,25 @@ function DeclinePane({
       </p>
       <label className="block mb-4">
         <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body mb-1.5">
-          Reason (optional)
+          Main reason (optional)
+        </div>
+        <select
+          value={reasonCode}
+          onChange={(e) => onChangeCode(e.target.value)}
+          disabled={pending}
+          className="w-full px-3 py-2.5 bg-cream border border-[#D4CCBB] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage disabled:opacity-60 mb-3"
+        >
+          <option value="">Select a reason…</option>
+          {DECLINE_REASONS.map((r) => (
+            <option key={r.code} value={r.code}>
+              {r.label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="block mb-4">
+        <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body mb-1.5">
+          Anything to add? (optional)
         </div>
         <textarea
           value={reason}

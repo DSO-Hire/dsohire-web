@@ -23,6 +23,7 @@
  */
 
 import type { createSupabaseServerClient } from "@/lib/supabase/server";
+import { declineReasonLabel } from "@/lib/offers/decline-reasons";
 
 type SupabaseClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
 
@@ -387,12 +388,13 @@ export async function getAnalyticsOverview(
       const sentAtById = new Map(sends.map((s) => [s.id, s.sent_at]));
       const { data: respRows } = await supabase
         .from("application_offer_responses")
-        .select("offer_send_id, response, reason, responded_at")
+        .select("offer_send_id, response, reason, decline_reason_code, responded_at")
         .in("offer_send_id", sendIds);
       const resp = (respRows ?? []) as Array<{
         offer_send_id: string;
         response: string;
         reason: string | null;
+        decline_reason_code: string | null;
         responded_at: string;
       }>;
       const respDays: number[] = [];
@@ -404,7 +406,10 @@ export async function getAnalyticsOverview(
         if (isAccept) offers.accepted += 1;
         else {
           offers.declined += 1;
-          const reason = (r.reason ?? "").trim() || "Not specified";
+          // Prefer the structured code's label; fall back to free-text.
+          const reason =
+            declineReasonLabel(r.decline_reason_code) ??
+            ((r.reason ?? "").trim() || "Not specified");
           declineReasons.set(reason, (declineReasons.get(reason) ?? 0) + 1);
         }
         const sentAt = sentAtById.get(r.offer_send_id);
