@@ -116,8 +116,8 @@ export default async function AnalyticsHubPage() {
             label="Open reqs · aging"
             value={aging.open_reqs.toLocaleString()}
             hint={
-              aging.d90_plus > 0
-                ? `${aging.d90_plus} aging past 90 days`
+              aging.buckets.d90_plus > 0
+                ? `${aging.buckets.d90_plus} aging past 90 days`
                 : aging.oldest_days !== null
                   ? `oldest ${Math.round(aging.oldest_days)}d open`
                   : "no open reqs"
