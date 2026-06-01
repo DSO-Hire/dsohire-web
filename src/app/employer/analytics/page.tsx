@@ -20,7 +20,6 @@ import type { Metadata } from "next";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
-  getDsoAnalytics,
   getDsoCrossLocationStats,
   getRecruiterProductivity,
 } from "@/lib/analytics/metrics";
@@ -30,8 +29,9 @@ import {
 } from "@/lib/analytics/hub-metrics";
 import { StatCard } from "@/components/analytics/hub/stat-card";
 import { TrendChart } from "@/components/analytics/hub/trend-chart";
+import { LocationFilter } from "@/components/analytics/hub/location-filter";
+import { PortfolioTable } from "@/components/analytics/hub/portfolio-table";
 import { FunnelChart } from "@/components/analytics/funnel-chart";
-import { CrossLocationTable } from "@/components/analytics/cross-location-table";
 import { RecruiterProductivityTable } from "@/components/analytics/recruiter-productivity-table";
 
 export const metadata: Metadata = { title: "Analytics" };
@@ -63,7 +63,7 @@ function fmtRatio(n: number | null): string {
 }
 
 interface PageProps {
-  searchParams: Promise<{ tab?: string; window?: string }>;
+  searchParams: Promise<{ tab?: string; window?: string; loc?: string }>;
 }
 
 export default async function AnalyticsHubPage({ searchParams }: PageProps) {
@@ -71,6 +71,7 @@ export default async function AnalyticsHubPage({ searchParams }: PageProps) {
   const tab: TabId =
     (TABS.find((t) => t.id === sp.tab)?.id as TabId) ?? "overview";
   const win = WINDOWS.find((w) => w.value === sp.window) ?? WINDOWS[1];
+  const loc = (sp.loc ?? "").trim();
 
   const supabase = await createSupabaseServerClient();
   const {
@@ -87,16 +88,23 @@ export default async function AnalyticsHubPage({ searchParams }: PageProps) {
 
   const dsoId = dsoUser.dso_id as string;
 
-  const [overview, analytics, crossLocationRows, recruiterRows] =
-    await Promise.all([
-      getAnalyticsOverview(supabase, dsoId, { windowDays: win.days }),
-      getDsoAnalytics(supabase, dsoId),
-      getDsoCrossLocationStats(supabase, dsoId),
-      getRecruiterProductivity(supabase, dsoId, 30),
-    ]);
+  const [overview, crossLocationRows, recruiterRows] = await Promise.all([
+    getAnalyticsOverview(supabase, dsoId, {
+      windowDays: win.days,
+      locationIds: loc ? [loc] : undefined,
+    }),
+    getDsoCrossLocationStats(supabase, dsoId),
+    getRecruiterProductivity(supabase, dsoId, 30),
+  ]);
 
-  const hrefFor = (t: TabId) => `/employer/analytics?tab=${t}&window=${win.value}`;
-  const winHref = (w: string) => `/employer/analytics?tab=${tab}&window=${w}`;
+  const scopedLocation = loc
+    ? crossLocationRows.find((r) => r.location_id === loc) ?? null
+    : null;
+  const locSuffix = loc ? `&loc=${loc}` : "";
+  const hrefFor = (t: TabId) =>
+    `/employer/analytics?tab=${t}&window=${win.value}${locSuffix}`;
+  const winHref = (w: string) =>
+    `/employer/analytics?tab=${tab}&window=${w}${locSuffix}`;
 
   return (
     <EmployerShell active="reports">
@@ -144,41 +152,70 @@ export default async function AnalyticsHubPage({ searchParams }: PageProps) {
             );
           })}
         </nav>
-        <div className="flex items-center gap-1 pb-2">
-          {WINDOWS.map((w) => {
-            const active = w.value === win.value;
-            return (
-              <Link
-                key={w.value}
-                href={winHref(w.value)}
-                className={
-                  "px-3 py-1.5 text-[11px] font-semibold border transition-colors " +
-                  (active
-                    ? "bg-ink text-ivory border-ink"
-                    : "bg-white text-slate-body border-[var(--rule-strong)] hover:border-ink")
-                }
-              >
-                {w.label}
-              </Link>
-            );
-          })}
+        <div className="flex items-center gap-3 pb-2">
+          <LocationFilter
+            locations={crossLocationRows.map((r) => ({
+              id: r.location_id,
+              name: r.name,
+              city: r.city,
+            }))}
+            value={loc}
+            tab={tab}
+            window={win.value}
+          />
+          <div className="flex items-center gap-1">
+            {WINDOWS.map((w) => {
+              const active = w.value === win.value;
+              return (
+                <Link
+                  key={w.value}
+                  href={winHref(w.value)}
+                  className={
+                    "px-3 py-1.5 text-[11px] font-semibold border transition-colors " +
+                    (active
+                      ? "bg-ink text-ivory border-ink"
+                      : "bg-white text-slate-body border-[var(--rule-strong)] hover:border-ink")
+                  }
+                >
+                  {w.label}
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </div>
+
+      {scopedLocation && (
+        <div className="mb-6 -mt-2 flex items-center gap-2 text-[12px] text-slate-body">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-cream border border-[var(--rule-strong)]">
+            <span className="font-semibold text-ink">
+              {scopedLocation.name}
+            </span>
+            {scopedLocation.city ? ` · ${scopedLocation.city}` : ""}
+          </span>
+          <Link
+            href={`/employer/analytics?tab=${tab}&window=${win.value}`}
+            className="text-heritage-deep hover:text-ink font-semibold underline"
+          >
+            Clear · all practices
+          </Link>
+        </div>
+      )}
 
       {tab === "overview" && (
         <OverviewTab
           overview={overview}
-          funnel={analytics.funnel}
+          funnel={overview.funnel}
           recruiterRows={recruiterRows}
         />
       )}
       {tab === "funnel" && (
-        <FunnelTab overview={overview} funnel={analytics.funnel} />
+        <FunnelTab overview={overview} funnel={overview.funnel} />
       )}
       {tab === "sources" && <SourcesTab overview={overview} />}
       {tab === "offers" && <OffersTab overview={overview} />}
       {tab === "locations" && (
-        <LocationsTab rows={crossLocationRows} />
+        <LocationsTab rows={crossLocationRows} window={win.value} />
       )}
     </EmployerShell>
   );
@@ -393,18 +430,20 @@ function OffersTab({ overview }: { overview: AnalyticsOverview }) {
 
 function LocationsTab({
   rows,
+  window,
 }: {
-  rows: ComponentProps<typeof CrossLocationTable>["rows"];
+  rows: ComponentProps<typeof PortfolioTable>["rows"];
+  window: string;
 }) {
   if (rows.length < 2) {
     return (
       <p className="text-[13px] text-slate-meta italic">
         Location comparison appears once you have jobs across two or more
-        practices. Richer per-practice drill-down lands soon.
+        practices.
       </p>
     );
   }
-  return <CrossLocationTable rows={rows} />;
+  return <PortfolioTable rows={rows} window={window} />;
 }
 
 /* ───────────────────────── Pieces ───────────────────────── */

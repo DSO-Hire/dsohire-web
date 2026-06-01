@@ -24,6 +24,58 @@
 
 import type { createSupabaseServerClient } from "@/lib/supabase/server";
 import { declineReasonLabel } from "@/lib/offers/decline-reasons";
+import type { FunnelStageRow } from "./metrics";
+
+const FUNNEL_ORDER = ["open", "screen", "interview", "offer", "hired"] as const;
+const FUNNEL_LABEL: Record<(typeof FUNNEL_ORDER)[number], string> = {
+  open: "Applied",
+  screen: "Screening",
+  interview: "Interview",
+  offer: "Offered",
+  hired: "Hired",
+};
+
+/** Reached-stage funnel from a set of applications (current stage kind). */
+function computeFunnel(apps: Array<{ kind: string | null }>): FunnelStageRow[] {
+  const current: Record<string, number> = {
+    open: 0,
+    screen: 0,
+    interview: 0,
+    offer: 0,
+    hired: 0,
+    rejected: 0,
+    withdrawn: 0,
+  };
+  for (const a of apps) {
+    if (a.kind && a.kind in current) current[a.kind] += 1;
+  }
+  const reached: Record<string, number> = {
+    open: 0,
+    screen: 0,
+    interview: 0,
+    offer: 0,
+    hired: 0,
+  };
+  let later = 0;
+  for (let i = FUNNEL_ORDER.length - 1; i >= 0; i--) {
+    const s = FUNNEL_ORDER[i];
+    const here = current[s] ?? 0;
+    reached[s] = here + later;
+    later += here;
+  }
+  reached.open += current.rejected + current.withdrawn;
+  return FUNNEL_ORDER.map((s, i) => {
+    const count = reached[s];
+    const prev = i === 0 ? count : reached[FUNNEL_ORDER[i - 1]];
+    const conversion = i === 0 ? 1 : prev > 0 ? count / prev : 0;
+    return {
+      stage: s,
+      label: FUNNEL_LABEL[s],
+      count,
+      conversion_from_prev: conversion,
+    };
+  });
+}
 
 type SupabaseClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
 
@@ -143,6 +195,8 @@ export interface AnalyticsOverview {
   time_to_first_response: TimeToFirstResponse;
   top_of_funnel: TopOfFunnel;
   trends: Trends;
+  /** Reached-stage funnel, scoped to the same job/location set as the bundle. */
+  funnel: FunnelStageRow[];
   sources: SourceRow[];
 }
 
@@ -271,6 +325,7 @@ export async function getAnalyticsOverview(
       applications: Array.from({ length: windowDays }, () => 0),
       hires: Array.from({ length: windowDays }, () => 0),
     },
+    funnel: computeFunnel([]),
     sources: [],
   };
   if (scopedJobIds.length === 0) return emptyOverview;
@@ -551,6 +606,7 @@ export async function getAnalyticsOverview(
         windowDays
       ),
     },
+    funnel: computeFunnel(apps),
     sources,
   };
 }
