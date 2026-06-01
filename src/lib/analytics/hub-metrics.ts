@@ -105,6 +105,24 @@ export interface SourceRow {
   hire_rate: number | null;
 }
 
+export interface TopOfFunnel {
+  /** apply-form start events (denominator). */
+  starts: number;
+  /** submitted applications (numerator). */
+  submitted: number;
+  /** submitted / starts, capped at 1; null when no starts recorded. */
+  completion_rate: number | null;
+}
+
+export interface TimeToFirstResponse {
+  /** application.created_at → first employer message (median). */
+  median_days: number | null;
+  avg_days: number | null;
+  /** how many windowed apps have received a first response. */
+  responded: number;
+  total: number;
+}
+
 export interface AnalyticsOverview {
   window_days: number;
   applications: number;
@@ -114,6 +132,8 @@ export interface AnalyticsOverview {
   req_aging: ReqAgingMetrics;
   pipeline_coverage: PipelineCoverage;
   time_to_hire_fill: TimeToHireFill;
+  time_to_first_response: TimeToFirstResponse;
+  top_of_funnel: TopOfFunnel;
   sources: SourceRow[];
 }
 
@@ -124,6 +144,7 @@ interface AppRow {
   job_id: string;
   created_at: string;
   hired_at: string | null;
+  first_response_at: string | null;
   source: string | null;
   kind: string | null;
 }
@@ -215,6 +236,13 @@ export async function getAnalyticsOverview(
       time_to_hire_median_days: null,
       time_to_hire_avg_days: null,
     },
+    time_to_first_response: {
+      median_days: null,
+      avg_days: null,
+      responded: 0,
+      total: 0,
+    },
+    top_of_funnel: { starts: 0, submitted: 0, completion_rate: null },
     sources: [],
   };
   if (scopedJobIds.length === 0) return emptyOverview;
@@ -223,7 +251,7 @@ export async function getAnalyticsOverview(
   const { data: appRowsRaw } = await supabase
     .from("applications")
     .select(
-      "id, job_id, created_at, hired_at, source, stage:dso_pipeline_stages!stage_id(kind)"
+      "id, job_id, created_at, hired_at, first_response_at, source, stage:dso_pipeline_stages!stage_id(kind)"
     )
     .in("job_id", scopedJobIds);
   const apps: AppRow[] = (
@@ -232,6 +260,7 @@ export async function getAnalyticsOverview(
       job_id: string;
       created_at: string;
       hired_at: string | null;
+      first_response_at: string | null;
       source: string | null;
       stage: { kind: string } | Array<{ kind: string }> | null;
     }>
@@ -240,6 +269,7 @@ export async function getAnalyticsOverview(
     job_id: r.job_id,
     created_at: r.created_at,
     hired_at: r.hired_at,
+    first_response_at: r.first_response_at,
     source: r.source,
     kind: stageKind(r.stage),
   }));
@@ -293,6 +323,17 @@ export async function getAnalyticsOverview(
     }
     const d2 = (hiredMs - new Date(h.created_at).getTime()) / 86400000;
     if (d2 >= 0) tthDays.push(d2);
+  }
+
+  // Time-to-first-response (created_at → first employer message).
+  const frDays: number[] = [];
+  for (const a of windowedApps) {
+    if (!a.first_response_at) continue;
+    const d =
+      (new Date(a.first_response_at).getTime() -
+        new Date(a.created_at).getTime()) /
+      86400000;
+    if (d >= 0) frDays.push(d);
   }
 
   // Source performance (window-scoped apps; hires attributed by source).
@@ -417,6 +458,17 @@ export async function getAnalyticsOverview(
     }
   }
 
+  // ── Top-of-funnel: apply-form starts → completion rate ──
+  const { count: startsCount } = await supabase
+    .from("application_starts")
+    .select("id", { count: "exact", head: true })
+    .in("job_id", scopedJobIds)
+    .gte("started_at", daysAgoIso(windowDays));
+  const starts = startsCount ?? 0;
+  const submitted = windowedApps.length;
+  const completionRate =
+    starts > 0 ? Math.min(1, submitted / starts) : null;
+
   // Mutate appById reference to satisfy lint (used for potential drill-down).
   void appById;
 
@@ -443,6 +495,17 @@ export async function getAnalyticsOverview(
       time_to_fill_avg_days: mean(ttfDays),
       time_to_hire_median_days: median(tthDays),
       time_to_hire_avg_days: mean(tthDays),
+    },
+    time_to_first_response: {
+      median_days: median(frDays),
+      avg_days: mean(frDays),
+      responded: frDays.length,
+      total: windowedApps.length,
+    },
+    top_of_funnel: {
+      starts,
+      submitted,
+      completion_rate: completionRate,
     },
     sources,
   };

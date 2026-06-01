@@ -287,39 +287,36 @@ function FunnelTab({
   const t = overview.time_to_hire_fill;
   return (
     <>
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-[var(--rule)] border border-[var(--rule)] mb-6">
-        <div className="bg-white">
-          <StatCard
-            label="Time to fill · median"
-            value={fmtDays(t.time_to_fill_median_days)}
-            unit={t.time_to_fill_median_days !== null ? "days" : undefined}
-            hint={`mean ${fmtDays(t.time_to_fill_avg_days)}d · posted → hired`}
-            benchmark="Industry ~60d"
-          />
-        </div>
-        <div className="bg-white">
-          <StatCard
-            label="Time to hire · median"
-            value={fmtDays(t.time_to_hire_median_days)}
-            unit={t.time_to_hire_median_days !== null ? "days" : undefined}
-            hint={`mean ${fmtDays(t.time_to_hire_avg_days)}d · applied → hired`}
-          />
-        </div>
-        <div className="bg-white">
-          <StatCard
-            label="Pipeline coverage"
-            value={fmtRatio(overview.pipeline_coverage.ratio)}
-            unit={overview.pipeline_coverage.ratio !== null ? "×" : undefined}
-            hint={`${overview.pipeline_coverage.active_candidates} active candidates`}
-          />
-        </div>
-        <div className="bg-white">
-          <StatCard
-            label="Hires"
-            value={overview.hires.toLocaleString()}
-            hint={`last ${overview.window_days} days`}
-          />
-        </div>
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <StatCard
+          label="Time to fill · median"
+          value={fmtDays(t.time_to_fill_median_days)}
+          unit={t.time_to_fill_median_days !== null ? "days" : undefined}
+          hint={`mean ${fmtDays(t.time_to_fill_avg_days)}d · posted → hired`}
+          benchmark="Industry ~60d"
+        />
+        <StatCard
+          label="Time to hire · median"
+          value={fmtDays(t.time_to_hire_median_days)}
+          unit={t.time_to_hire_median_days !== null ? "days" : undefined}
+          hint={`mean ${fmtDays(t.time_to_hire_avg_days)}d · applied → hired`}
+        />
+        <StatCard
+          label="Time to first response"
+          value={fmtDays(overview.time_to_first_response.median_days)}
+          unit={
+            overview.time_to_first_response.median_days !== null
+              ? "days"
+              : undefined
+          }
+          hint={`${overview.time_to_first_response.responded} of ${overview.time_to_first_response.total} apps · median`}
+        />
+        <StatCard
+          label="Pipeline coverage"
+          value={fmtRatio(overview.pipeline_coverage.ratio)}
+          unit={overview.pipeline_coverage.ratio !== null ? "×" : undefined}
+          hint={`${overview.pipeline_coverage.active_candidates} active candidates`}
+        />
       </section>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <FunnelChart rows={funnel} title="Pipeline funnel · all jobs" />
@@ -330,10 +327,41 @@ function FunnelTab({
 }
 
 function SourcesTab({ overview }: { overview: AnalyticsOverview }) {
+  const tof = overview.top_of_funnel;
   return (
-    <div className="max-w-[760px]">
-      <SourcePerformance rows={overview.sources} showAll />
-    </div>
+    <>
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <StatCard
+          label="Application completion"
+          value={fmtPct(tof.completion_rate)}
+          unit={tof.completion_rate !== null ? "%" : undefined}
+          hint={`${tof.submitted} submitted · ${tof.starts} started`}
+          benchmark="Industry avg ~11%"
+        />
+        <StatCard
+          label="Applications"
+          value={overview.applications.toLocaleString()}
+          hint={`last ${overview.window_days} days`}
+        />
+        <StatCard
+          label="Hires"
+          value={overview.hires.toLocaleString()}
+          hint={`last ${overview.window_days} days`}
+        />
+        <StatCard
+          label="Apps per hire"
+          value={
+            overview.hires > 0
+              ? Math.round(overview.applications / overview.hires).toLocaleString()
+              : "—"
+          }
+          hint="overall efficiency"
+        />
+      </section>
+      <div className="max-w-[760px]">
+        <SourcePerformance rows={overview.sources} showAll />
+      </div>
+    </>
   );
 }
 

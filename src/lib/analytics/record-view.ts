@@ -100,3 +100,37 @@ export async function recordJobView(input: RecordJobViewInput): Promise<void> {
     console.warn("[record-view] insert failed", err);
   }
 }
+
+/**
+ * Apply-form START recorder (Analytics Phase 1). Fired when a candidate
+ * reaches an apply page — the denominator for application completion rate
+ * (submitted applications ÷ starts). Same service-role + session-cookie
+ * pattern as recordJobView; fail-silent so it never blocks the apply page.
+ */
+export async function recordApplicationStart(jobId: string): Promise<void> {
+  try {
+    const cookieStore = await cookies();
+    let sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value ?? null;
+    if (!sessionId) {
+      sessionId = randomUUID();
+      try {
+        cookieStore.set({
+          name: SESSION_COOKIE_NAME,
+          value: sessionId,
+          maxAge: SESSION_COOKIE_MAX_AGE,
+          httpOnly: true,
+          sameSite: "lax",
+          path: "/",
+        });
+      } catch {
+        // RSC contexts can't set cookies; OK to skip.
+      }
+    }
+    const admin = createSupabaseServiceRoleClient();
+    await admin
+      .from("application_starts")
+      .insert({ job_id: jobId, session_id: sessionId });
+  } catch (err) {
+    console.warn("[record-start] insert failed", err);
+  }
+}

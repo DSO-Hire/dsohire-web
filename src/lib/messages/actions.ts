@@ -244,6 +244,19 @@ export async function sendApplicationMessage({
   }
 
   const messageId = data.id as string;
+
+  // Analytics Phase 1 — stamp time-to-first-response on the FIRST employer
+  // outbound message for this application. Idempotent: the `is null` guard
+  // means only the first employer message ever sets it. Candidate messages
+  // never set it. Awaited (not fire-and-forget) per the Vercel serverless rule.
+  if (senderRole === "employer") {
+    await supabase
+      .from("applications")
+      .update({ first_response_at: new Date().toISOString() })
+      .eq("id", applicationId)
+      .is("first_response_at", null);
+  }
+
   const insertedAttachments: ApplicationMessageAttachment[] = [];
 
   if (files.length > 0) {
@@ -461,6 +474,18 @@ export async function bulkMessageApplications(
   }
 
   const insertedRows = inserted as Array<{ id: string; application_id: string }>;
+
+  // Analytics Phase 1 — stamp time-to-first-response on each application that
+  // hadn't been responded to yet (bulk is always employer-sent). The `is null`
+  // guard keeps it to the genuine first response per application.
+  await supabase
+    .from("applications")
+    .update({ first_response_at: new Date().toISOString() })
+    .in(
+      "id",
+      insertedRows.map((r) => r.application_id)
+    )
+    .is("first_response_at", null);
 
   // Fire candidate notifications (inbox unread + email) AFTER the response
   // ships, but guaranteed to run — bare void gets killed mid-flight on

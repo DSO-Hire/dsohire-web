@@ -21,6 +21,7 @@ import { ArrowLeft, MapPin, Briefcase } from "lucide-react";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ApplyWizard } from "./apply-wizard";
+import { recordApplicationStart } from "@/lib/analytics/record-view";
 import type {
   ScreeningQuestion,
   CandidatePrefill,
@@ -89,6 +90,10 @@ export default async function ApplyPage({ params, searchParams }: PageProps) {
     .eq("id", jobId)
     .maybeSingle();
   if (!job || (job.status as string) !== "active") notFound();
+
+  // Analytics Phase 1 — record an apply-form START (completion-rate
+  // denominator). Fail-silent inside the helper.
+  await recordApplicationStart(jobId);
 
   // DSO + locations + screening questions + verification requirements in parallel
   const [

@@ -19,6 +19,7 @@ import { ArrowLeft, Briefcase, MapPin } from "lucide-react";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { GuestApplyForm } from "./guest-form";
+import { recordApplicationStart } from "@/lib/analytics/record-view";
 import type { ScreeningQuestion, JobVerificationRequirement } from "../types";
 import type { Metadata } from "next";
 
@@ -62,6 +63,10 @@ export default async function GuestApplyPage({ params, searchParams }: PageProps
   if (!job || (job.status as string) !== "active" || job.deleted_at) {
     notFound();
   }
+
+  // Analytics Phase 1 — record an apply-form START (completion-rate
+  // denominator). Fail-silent inside the helper; awaited so it's captured.
+  await recordApplicationStart(jobId);
 
   const [
     { data: dso },
