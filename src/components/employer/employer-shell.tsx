@@ -47,6 +47,7 @@ import {
   UsersRound,
   BarChart3,
   LifeBuoy,
+  UserPlus,
 } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { BrandLockup } from "@/components/marketing/site-shell";
@@ -102,6 +103,7 @@ const NAV: ReadonlyArray<NavItem> = [
   { id: "jobs", label: "Jobs", href: "/employer/jobs", Icon: Briefcase, group: "work" },
   { id: "applications", label: "Applications", href: "/employer/applications", Icon: FileText, group: "work" },
   { id: "talent-pool", label: "Talent Pool", href: "/employer/talent-pool", Icon: UsersRound, group: "work" },
+  { id: "referrals", label: "Referrals", href: "/employer/referrals", Icon: UserPlus, group: "work" },
   { id: "inbox", label: "Inbox", href: "/employer/inbox", Icon: InboxIcon, group: "work" },
   // ─── Insight ───
   { id: "reports", label: "Analytics", href: "/employer/analytics", Icon: BarChart3, group: "insight", hideFromRoles: ["hiring_manager"] },

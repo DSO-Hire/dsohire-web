@@ -1497,6 +1497,60 @@ export type Database = {
           },
         ]
       }
+      referrals: {
+        Row: {
+          id: string
+          dso_id: string
+          source: string
+          referred_by_dso_user_id: string | null
+          referrer_name: string | null
+          referrer_email: string | null
+          candidate_name: string
+          candidate_email: string | null
+          candidate_phone: string | null
+          job_id: string | null
+          note: string | null
+          status: string
+          application_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          dso_id: string
+          source: string
+          referred_by_dso_user_id?: string | null
+          referrer_name?: string | null
+          referrer_email?: string | null
+          candidate_name: string
+          candidate_email?: string | null
+          candidate_phone?: string | null
+          job_id?: string | null
+          note?: string | null
+          status?: string
+          application_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          dso_id?: string
+          source?: string
+          referred_by_dso_user_id?: string | null
+          referrer_name?: string | null
+          referrer_email?: string | null
+          candidate_name?: string
+          candidate_email?: string | null
+          candidate_phone?: string | null
+          job_id?: string | null
+          note?: string | null
+          status?: string
+          application_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       dm_conversations: {
         Row: {
           id: string
@@ -2157,6 +2211,7 @@ export type Database = {
           mission: string | null
           name: string
           practice_count: number | null
+          referral_code: string | null
           require_mfa: boolean
           slug: string
           status: Database["public"]["Enums"]["dso_status"]
@@ -2185,6 +2240,7 @@ export type Database = {
           mission?: string | null
           name: string
           practice_count?: number | null
+          referral_code?: string | null
           require_mfa?: boolean
           slug: string
           status?: Database["public"]["Enums"]["dso_status"]
@@ -2213,6 +2269,7 @@ export type Database = {
           mission?: string | null
           name?: string
           practice_count?: number | null
+          referral_code?: string | null
           require_mfa?: boolean
           slug?: string
           status?: Database["public"]["Enums"]["dso_status"]
