@@ -29,6 +29,7 @@ import {
   type AnalyticsOverview,
 } from "@/lib/analytics/hub-metrics";
 import { StatCard } from "@/components/analytics/hub/stat-card";
+import { TrendChart } from "@/components/analytics/hub/trend-chart";
 import { FunnelChart } from "@/components/analytics/funnel-chart";
 import { CrossLocationTable } from "@/components/analytics/cross-location-table";
 import { RecruiterProductivityTable } from "@/components/analytics/recruiter-productivity-table";
@@ -267,6 +268,19 @@ function OverviewTab({
   return (
     <>
       <KpiGrid overview={overview} />
+      <div className="mb-6">
+        <TrendChart
+          title={`Applications & hires · last ${overview.window_days} days`}
+          series={[
+            {
+              label: "Applications",
+              color: "var(--color-heritage, #4D7A60)",
+              data: overview.trends.applications,
+            },
+            { label: "Hires", color: "#14233F", data: overview.trends.hires },
+          ]}
+        />
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <FunnelChart rows={funnel} title="Pipeline funnel · all jobs" />
         <SourcePerformance rows={overview.sources} />

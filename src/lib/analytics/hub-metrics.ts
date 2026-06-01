@@ -106,6 +106,13 @@ export interface SourceRow {
   hire_rate: number | null;
 }
 
+export interface Trends {
+  /** Applications submitted per day over the window (oldest → newest). */
+  applications: number[];
+  /** Hires per day over the window (oldest → newest). */
+  hires: number[];
+}
+
 export interface TopOfFunnel {
   /** apply-form start events (denominator). */
   starts: number;
@@ -135,7 +142,23 @@ export interface AnalyticsOverview {
   time_to_hire_fill: TimeToHireFill;
   time_to_first_response: TimeToFirstResponse;
   top_of_funnel: TopOfFunnel;
+  trends: Trends;
   sources: SourceRow[];
+}
+
+/** Bucket ISO timestamps into per-day counts over the last `windowDays`. */
+function bucketDaily(timestamps: string[], windowDays: number): number[] {
+  const buckets = Array.from({ length: windowDays }, () => 0);
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  for (const ts of timestamps) {
+    const d = new Date(ts);
+    d.setUTCHours(0, 0, 0, 0);
+    const daysAgo = Math.floor((today.getTime() - d.getTime()) / 86400000);
+    const idx = windowDays - 1 - daysAgo;
+    if (idx >= 0 && idx < windowDays) buckets[idx] += 1;
+  }
+  return buckets;
 }
 
 /* ───────────────────────── Internal fetch shapes ───────────────────────── */
@@ -244,6 +267,10 @@ export async function getAnalyticsOverview(
       total: 0,
     },
     top_of_funnel: { starts: 0, submitted: 0, completion_rate: null },
+    trends: {
+      applications: Array.from({ length: windowDays }, () => 0),
+      hires: Array.from({ length: windowDays }, () => 0),
+    },
     sources: [],
   };
   if (scopedJobIds.length === 0) return emptyOverview;
@@ -511,6 +538,18 @@ export async function getAnalyticsOverview(
       starts,
       submitted,
       completion_rate: completionRate,
+    },
+    trends: {
+      applications: bucketDaily(
+        windowedApps.map((a) => a.created_at),
+        windowDays
+      ),
+      hires: bucketDaily(
+        hiresInWindow
+          .filter((h) => h.hired_at)
+          .map((h) => h.hired_at as string),
+        windowDays
+      ),
     },
     sources,
   };
