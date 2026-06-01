@@ -103,7 +103,7 @@ const NAV: ReadonlyArray<NavItem> = [
   { id: "talent-pool", label: "Talent Pool", href: "/employer/talent-pool", Icon: UsersRound, group: "work" },
   { id: "inbox", label: "Inbox", href: "/employer/inbox", Icon: InboxIcon, group: "work" },
   // ─── Insight ───
-  { id: "reports", label: "Reports", href: "/employer/reports", Icon: BarChart3, group: "insight", hideFromRoles: ["hiring_manager"] },
+  { id: "reports", label: "Analytics", href: "/employer/analytics", Icon: BarChart3, group: "insight", hideFromRoles: ["hiring_manager"] },
   // ─── Setup ───
   { id: "locations", label: "Locations", href: "/employer/locations", Icon: MapPin, group: "setup", hideFromRoles: ["recruiter", "hiring_manager"] },
   { id: "team", label: "Team", href: "/employer/team", Icon: UsersIcon, group: "setup", hideFromRoles: ["recruiter", "hiring_manager"] },

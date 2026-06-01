@@ -308,6 +308,7 @@ export type Database = {
           created_at: string
           id: string
           ip: string | null
+          decline_reason_code: string | null
           offer_send_id: string
           reason: string | null
           responded_at: string
@@ -320,6 +321,7 @@ export type Database = {
           created_at?: string
           id?: string
           ip?: string | null
+          decline_reason_code?: string | null
           offer_send_id: string
           reason?: string | null
           responded_at?: string
@@ -332,6 +334,7 @@ export type Database = {
           created_at?: string
           id?: string
           ip?: string | null
+          decline_reason_code?: string | null
           offer_send_id?: string
           reason?: string | null
           responded_at?: string
@@ -565,6 +568,35 @@ export type Database = {
           },
         ]
       }
+      application_starts: {
+        Row: {
+          id: string
+          job_id: string
+          session_id: string | null
+          started_at: string
+        }
+        Insert: {
+          id?: string
+          job_id: string
+          session_id?: string | null
+          started_at?: string
+        }
+        Update: {
+          id?: string
+          job_id?: string
+          session_id?: string | null
+          started_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_starts_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       application_status_events: {
         Row: {
           actor_id: string | null
@@ -726,6 +758,7 @@ export type Database = {
           cover_letter: string | null
           created_at: string
           employer_notes: string | null
+          first_response_at: string | null
           hidden_at: string | null
           hired_at: string | null
           id: string
@@ -750,6 +783,7 @@ export type Database = {
           cover_letter?: string | null
           created_at?: string
           employer_notes?: string | null
+          first_response_at?: string | null
           hidden_at?: string | null
           hired_at?: string | null
           id?: string
@@ -774,6 +808,7 @@ export type Database = {
           cover_letter?: string | null
           created_at?: string
           employer_notes?: string | null
+          first_response_at?: string | null
           hidden_at?: string | null
           hired_at?: string | null
           id?: string
