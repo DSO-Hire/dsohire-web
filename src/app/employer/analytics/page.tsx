@@ -31,19 +31,33 @@ import { StatCard } from "@/components/analytics/hub/stat-card";
 import { TrendChart } from "@/components/analytics/hub/trend-chart";
 import { LocationFilter } from "@/components/analytics/hub/location-filter";
 import { PortfolioTable } from "@/components/analytics/hub/portfolio-table";
+import { BulletBar } from "@/components/analytics/hub/bullet-bar";
+import {
+  getPayBenchmarks,
+  getVacancyCost,
+  type PayBenchmarkRow,
+  type VacancyCostResult,
+} from "@/lib/analytics/benchmarks";
 import { FunnelChart } from "@/components/analytics/funnel-chart";
 import { RecruiterProductivityTable } from "@/components/analytics/recruiter-productivity-table";
 
 export const metadata: Metadata = { title: "Analytics" };
 export const dynamic = "force-dynamic";
 
-type TabId = "overview" | "funnel" | "sources" | "offers" | "locations";
+type TabId =
+  | "overview"
+  | "funnel"
+  | "sources"
+  | "offers"
+  | "locations"
+  | "benchmarks";
 const TABS: Array<{ id: TabId; label: string }> = [
   { id: "overview", label: "Overview" },
   { id: "funnel", label: "Funnel & velocity" },
   { id: "sources", label: "Sources" },
   { id: "offers", label: "Offers" },
   { id: "locations", label: "Locations" },
+  { id: "benchmarks", label: "Benchmarks" },
 ];
 
 const WINDOWS: Array<{ value: string; days: number; label: string }> = [
@@ -96,6 +110,16 @@ export default async function AnalyticsHubPage({ searchParams }: PageProps) {
     getDsoCrossLocationStats(supabase, dsoId),
     getRecruiterProductivity(supabase, dsoId, 30),
   ]);
+
+  // Benchmarks tab pulls its own (heavier) data only when active.
+  let payBenchmarks: PayBenchmarkRow[] = [];
+  let vacancyCost: VacancyCostResult | null = null;
+  if (tab === "benchmarks") {
+    [payBenchmarks, vacancyCost] = await Promise.all([
+      getPayBenchmarks(supabase, dsoId),
+      getVacancyCost(supabase, dsoId),
+    ]);
+  }
 
   const scopedLocation = loc
     ? crossLocationRows.find((r) => r.location_id === loc) ?? null
@@ -216,6 +240,9 @@ export default async function AnalyticsHubPage({ searchParams }: PageProps) {
       {tab === "offers" && <OffersTab overview={overview} />}
       {tab === "locations" && (
         <LocationsTab rows={crossLocationRows} window={win.value} />
+      )}
+      {tab === "benchmarks" && (
+        <BenchmarksTab pay={payBenchmarks} vacancy={vacancyCost} />
       )}
     </EmployerShell>
   );
@@ -444,6 +471,109 @@ function LocationsTab({
     );
   }
   return <PortfolioTable rows={rows} window={window} />;
+}
+
+function BenchmarksTab({
+  pay,
+  vacancy,
+}: {
+  pay: PayBenchmarkRow[];
+  vacancy: VacancyCostResult | null;
+}) {
+  const usd = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
+  const openSeats = vacancy
+    ? vacancy.hygiene_open + vacancy.dentist_open
+    : 0;
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <section className="border border-[var(--rule)] bg-white p-6">
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
+          Your pay vs. market
+        </div>
+        <p className="text-[12px] text-slate-body leading-snug mb-3">
+          Your average offered pay against the BLS OEWS median for each role.
+          The marker is the market median; the bar is your average.
+        </p>
+        {pay.map((r) => {
+          const caption =
+            r.market_hourly != null
+              ? `Market median ${usd(r.market_hourly)}/hr (${
+                  r.market_scope === "state"
+                    ? `${r.market_state} · `
+                    : "national · "
+                }BLS OEWS ${r.vintage})${
+                  r.your_job_count > 0
+                    ? ` · your avg from ${r.your_job_count} posting${r.your_job_count === 1 ? "" : "s"}`
+                    : " · no active postings to compare"
+                }`
+              : "No market data for this role.";
+          return (
+            <BulletBar
+              key={r.role}
+              label={r.label}
+              yourValue={r.your_hourly}
+              marketValue={r.market_hourly}
+              caption={caption}
+            />
+          );
+        })}
+        <p className="mt-3 text-[11px] text-slate-meta leading-snug">
+          BLS OEWS employee medians (a lagging government survey). Temp/1099 day
+          rates often run higher, and state figures mask metro and cost-of-living
+          variation. Directional guide, not legal/comp advice.
+        </p>
+      </section>
+
+      <section className="border border-[var(--rule)] bg-white p-6">
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
+          Cost of open chairs
+        </div>
+        <p className="text-[12px] text-slate-body leading-snug mb-4">
+          Estimated production lost each month while clinical seats sit unfilled
+          — the dollar case for hiring speed.
+        </p>
+        {vacancy && openSeats > 0 ? (
+          <>
+            <div className="text-[28px] font-extrabold tracking-[-0.8px] text-ink leading-none">
+              {usd(vacancy.monthly_low)}
+              <span className="text-slate-meta font-bold"> – </span>
+              {usd(vacancy.monthly_high)}
+              <span className="ml-2 text-[13px] font-semibold text-slate-meta">
+                / month
+              </span>
+            </div>
+            <div className="mt-4 space-y-1.5 text-[13px] text-slate-body">
+              {vacancy.hygiene_open > 0 && (
+                <div>
+                  <span className="font-bold text-ink">
+                    {vacancy.hygiene_open}
+                  </span>{" "}
+                  open hygiene seat{vacancy.hygiene_open === 1 ? "" : "s"} · ~$15K–$25K each
+                </div>
+              )}
+              {vacancy.dentist_open > 0 && (
+                <div>
+                  <span className="font-bold text-ink">
+                    {vacancy.dentist_open}
+                  </span>{" "}
+                  open dentist seat{vacancy.dentist_open === 1 ? "" : "s"} · ~$70K–$100K each
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <p className="text-[13px] text-slate-meta italic">
+            No open hygienist or dentist reqs right now — nothing to estimate.
+          </p>
+        )}
+        <p className="mt-4 text-[11px] text-slate-meta leading-snug">
+          Industry estimate (not government data): hygiene seat ≈ $1,000–$1,500
+          production/day, dentist seat ≈ $3,500–$5,000/day. Your practice&apos;s
+          actual figures may differ.
+        </p>
+      </section>
+    </div>
+  );
 }
 
 /* ───────────────────────── Pieces ───────────────────────── */

@@ -3580,6 +3580,48 @@ export type Database = {
           },
         ]
       }
+      wage_benchmarks: {
+        Row: {
+          id: string
+          role_category: string
+          scope: string
+          state: string | null
+          median_hourly: number | null
+          median_annual: number | null
+          mean_hourly: number | null
+          mean_annual: number | null
+          source: string
+          vintage: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          role_category: string
+          scope: string
+          state?: string | null
+          median_hourly?: number | null
+          median_annual?: number | null
+          mean_hourly?: number | null
+          mean_annual?: number | null
+          source: string
+          vintage: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          role_category?: string
+          scope?: string
+          state?: string | null
+          median_hourly?: number | null
+          median_annual?: number | null
+          mean_hourly?: number | null
+          mean_annual?: number | null
+          source?: string
+          vintage?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       application_comment_counts: {
