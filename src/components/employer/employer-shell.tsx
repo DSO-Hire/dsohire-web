@@ -360,7 +360,7 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
       </div>
 
       {/* Floating "?" support launcher (Tier 2 chat surface, Day 21 Phase C). */}
-      <SupportLauncher audience="employer" authUserId={user.id} />
+      <SupportLauncher audience="employer" authUserId={user.id} raised />
 
       {/* Pop-up team + candidate chat (Day 24) — stacked above the support button. */}
       <ChatWidget dsoId={dsoUser.dso_id as string} authId={user.id} />

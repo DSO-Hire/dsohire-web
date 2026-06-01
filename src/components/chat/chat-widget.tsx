@@ -13,7 +13,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  MessageCircle, X, ChevronLeft, Search, Plus, Send, Loader2,
+  MessageCircle, X, ChevronLeft, ChevronUp, Search, Plus, Send, Loader2,
 } from "lucide-react";
 import {
   REALTIME_LISTEN_TYPES,
@@ -180,9 +180,9 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
   const candThreads = filtered.filter((t) => t.kind === "candidate");
 
   return (
-    <div className="fixed bottom-[5.25rem] right-5 z-[55] flex flex-col items-end gap-3 print:hidden">
-      {open && (
-        <div className="w-[360px] max-w-[calc(100vw-2.5rem)] h-[540px] max-h-[calc(100vh-7rem)] bg-white border border-[var(--rule-strong)] shadow-2xl rounded-lg overflow-hidden flex flex-col">
+    <div className="fixed bottom-0 right-6 z-[55] print:hidden">
+      {open ? (
+        <div className="w-[360px] max-w-[calc(100vw-2rem)] h-[540px] max-h-[calc(100vh-5rem)] bg-white border border-[var(--rule-strong)] border-b-0 shadow-2xl rounded-t-lg overflow-hidden flex flex-col">
           {/* Header */}
           <div className="bg-ink text-ivory px-4 py-3 flex items-center gap-2 shrink-0">
             {view !== "list" ? (
@@ -295,18 +295,22 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
             </>
           )}
         </div>
-      )}
-
-      {/* Launcher */}
-      <button onClick={() => setOpen((o) => !o)} aria-label="Messages"
-        className="relative h-14 w-14 rounded-full bg-ink text-ivory shadow-xl flex items-center justify-center hover:bg-ink-soft transition-colors ring-2 ring-[var(--heritage-bright,#8db8a3)]/30">
-        {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
-        {!open && totalUnread > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 rounded-full bg-heritage text-ivory text-[11px] font-bold flex items-center justify-center border-2 border-white">
-            {totalUnread > 99 ? "99+" : totalUnread}
+      ) : (
+        /* Docked bar (LinkedIn-style) — flush to the bottom edge. */
+        <button onClick={() => setOpen(true)} aria-label="Open messages"
+          className="w-[260px] max-w-[calc(100vw-2rem)] bg-ink text-ivory rounded-t-lg shadow-xl flex items-center gap-2.5 px-4 py-3 hover:bg-ink-soft transition-colors">
+          <MessageCircle className="h-4 w-4 text-[var(--heritage-bright,#8db8a3)] shrink-0" />
+          <span className="text-[13px] font-bold tracking-[0.3px] flex-1 text-left">
+            Messages
           </span>
-        )}
-      </button>
+          {totalUnread > 0 && (
+            <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-heritage text-ivory text-[11px] font-bold flex items-center justify-center">
+              {totalUnread > 99 ? "99+" : totalUnread}
+            </span>
+          )}
+          <ChevronUp className="h-4 w-4 text-ivory/70 shrink-0" />
+        </button>
+      )}
     </div>
   );
 }

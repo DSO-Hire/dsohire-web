@@ -21,9 +21,11 @@ interface Props {
   /** Threaded from the auth-gated shell. Null = signed-out; drawer
    *  shows a sign-in prompt instead of the chat surface. */
   authUserId: string | null;
+  /** Raise the button above the docked chat bar (employer pages). */
+  raised?: boolean;
 }
 
-export function SupportLauncher({ audience, authUserId }: Props) {
+export function SupportLauncher({ audience, authUserId, raised = false }: Props) {
   const [open, setOpen] = useState(false);
 
   // Global "?" shortcut. Skip when the user is typing.
@@ -56,7 +58,10 @@ export function SupportLauncher({ audience, authUserId }: Props) {
           onClick={() => setOpen(true)}
           aria-label="Open support"
           title="Get help — press ?"
-          className="fixed bottom-5 right-5 z-30 size-12 rounded-full bg-ink text-ivory shadow-lg hover:bg-ink-soft transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2 flex items-center justify-center"
+          className={
+            "fixed right-5 z-30 size-12 rounded-full bg-ink text-ivory shadow-lg hover:bg-ink-soft transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2 flex items-center justify-center " +
+            (raised ? "bottom-[4.5rem]" : "bottom-5")
+          }
         >
           <HelpCircle className="size-5" />
         </button>
