@@ -65,7 +65,7 @@ export async function listTeammates(): Promise<ChatTeammate[]> {
   if (!cur) return [];
   const { data } = await supabase
     .from("dso_users")
-    .select("id, auth_user_id, first_name, last_name, role")
+    .select("id, auth_user_id, first_name, last_name, role, title, avatar_url")
     .eq("dso_id", cur.dsoId);
   return ((data ?? []) as Array<{
     id: string;
@@ -73,6 +73,8 @@ export async function listTeammates(): Promise<ChatTeammate[]> {
     first_name: string | null;
     last_name: string | null;
     role: string | null;
+    title: string | null;
+    avatar_url: string | null;
   }>)
     .filter((u) => u.id !== cur.dsoUserId)
     .map((u) => {
@@ -84,6 +86,8 @@ export async function listTeammates(): Promise<ChatTeammate[]> {
         auth_user_id: u.auth_user_id,
         name,
         role: u.role ?? "member",
+        title: u.title ?? null,
+        avatar_url: u.avatar_url ?? null,
         initials: initialsOf(name),
       };
     })

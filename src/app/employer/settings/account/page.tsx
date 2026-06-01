@@ -18,6 +18,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { PasswordForm } from "../password-form";
 import { MfaSection } from "./mfa-section";
+import { ProfileCard } from "./profile-card";
 import { TimezoneCard } from "@/components/settings/timezone-card";
 import { updatePreferredTimezone } from "./actions";
 import { createSupabaseServerClient, createSupabaseServiceRoleClient } from "@/lib/supabase/server";
@@ -44,6 +45,24 @@ export default async function AccountSettingsPage() {
   let isEnterprise = false;
   let initialRequireMfa = false;
   let preferredTimezone = "America/Chicago";
+  let profile = {
+    firstName: "",
+    lastName: "",
+    title: "",
+    pronouns: "",
+    phone: "",
+    bio: "",
+    avatarUrl: null as string | null,
+    workBase: "",
+    baseLocationId: "",
+    coverageArea: "",
+  };
+  let locationOptions: Array<{
+    id: string;
+    name: string;
+    city: string | null;
+    state: string | null;
+  }> = [];
 
   if (user) {
     const mfaState = await getMfaState(supabase);
@@ -61,13 +80,34 @@ export default async function AccountSettingsPage() {
 
     const { data: dsoUser } = await supabase
       .from("dso_users")
-      .select("dso_id, role, preferred_timezone")
+      .select(
+        "dso_id, role, preferred_timezone, first_name, last_name, title, pronouns, phone, bio, avatar_url, work_base, base_location_id, coverage_area"
+      )
       .eq("auth_user_id", user.id)
       .maybeSingle();
     if (dsoUser) {
       isOwner = (dsoUser.role as string) === "owner";
       preferredTimezone =
         (dsoUser.preferred_timezone as string | null) ?? "America/Chicago";
+      profile = {
+        firstName: (dsoUser.first_name as string | null) ?? "",
+        lastName: (dsoUser.last_name as string | null) ?? "",
+        title: (dsoUser.title as string | null) ?? "",
+        pronouns: (dsoUser.pronouns as string | null) ?? "",
+        phone: (dsoUser.phone as string | null) ?? "",
+        bio: (dsoUser.bio as string | null) ?? "",
+        avatarUrl: (dsoUser.avatar_url as string | null) ?? null,
+        workBase: (dsoUser.work_base as string | null) ?? "",
+        baseLocationId: (dsoUser.base_location_id as string | null) ?? "",
+        coverageArea: (dsoUser.coverage_area as string | null) ?? "",
+      };
+
+      const { data: locs } = await supabase
+        .from("dso_locations")
+        .select("id, name, city, state")
+        .eq("dso_id", dsoUser.dso_id as string)
+        .order("name", { ascending: true });
+      locationOptions = (locs ?? []) as typeof locationOptions;
       const sub = await getActiveSubscription(
         supabase,
         dsoUser.dso_id as string
@@ -85,6 +125,12 @@ export default async function AccountSettingsPage() {
 
   return (
     <div className="space-y-8 max-w-[760px]">
+      <ProfileCard
+        email={user?.email ?? ""}
+        locations={locationOptions}
+        initial={profile}
+      />
+
       <section className="border border-[var(--rule)] bg-white p-7 sm:p-8">
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Password

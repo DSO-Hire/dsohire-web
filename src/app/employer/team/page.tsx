@@ -89,7 +89,9 @@ export default async function TeamPage({ searchParams }: PageProps) {
   // Pull all team members for the DSO
   const { data: members } = await supabase
     .from("dso_users")
-    .select("id, auth_user_id, role, full_name, created_at")
+    .select(
+      "id, auth_user_id, role, full_name, title, avatar_url, work_base, base_location_id, coverage_area, created_at"
+    )
     .eq("dso_id", dsoUser.dso_id)
     .order("created_at", { ascending: true });
 
@@ -292,6 +294,11 @@ interface MemberRow {
   auth_user_id: string;
   role: string;
   full_name: string | null;
+  title: string | null;
+  avatar_url: string | null;
+  work_base: string | null;
+  base_location_id: string | null;
+  coverage_area: string | null;
   created_at: string;
 }
 
@@ -344,6 +351,7 @@ function MemberRowItem({
     <li className="border-b border-[var(--rule)] py-5 px-2 flex items-start gap-6 hover:bg-cream/40 transition-colors">
       <Avatar
         name={member.full_name ?? email ?? "Teammate"}
+        imageUrl={member.avatar_url}
         seed={member.auth_user_id}
         size="md"
         className="shrink-0"
@@ -359,6 +367,19 @@ function MemberRowItem({
             </span>
           )}
         </div>
+        {member.title && (
+          <div className="text-[13px] font-medium text-ink leading-snug">
+            {member.title}
+          </div>
+        )}
+        {(() => {
+          const base = describeWorkBase(member, locationsById);
+          return base ? (
+            <div className="text-[12px] tracking-[0.2px] text-heritage-deep">
+              {base}
+            </div>
+          ) : null;
+        })()}
         <div className="text-[13px] tracking-[0.3px] text-slate-meta">
           {email ?? "—"} · Joined {formatDate(member.created_at)}
         </div>
@@ -526,6 +547,34 @@ function InviteRowItem({
 }
 
 /* ───── formatters ───── */
+
+/**
+ * Human-readable "works out of" descriptor for the team roster. Returns
+ * null when the teammate hasn't set a base. Practice base resolves the
+ * location name via the page's locationsById map.
+ */
+function describeWorkBase(
+  member: MemberRow,
+  locationsById: Map<string, LocationRow>
+): string | null {
+  switch (member.work_base) {
+    case "corporate":
+      return "Corporate / central office";
+    case "practice": {
+      const loc = member.base_location_id
+        ? locationsById.get(member.base_location_id)
+        : null;
+      if (!loc) return "Based at a practice";
+      return `Based at ${loc.name}${loc.state ? ` · ${loc.state}` : ""}`;
+    }
+    case "regional":
+      return member.coverage_area
+        ? `Regional · ${member.coverage_area}`
+        : "Regional";
+    default:
+      return null;
+  }
+}
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", {

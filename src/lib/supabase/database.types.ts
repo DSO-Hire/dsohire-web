@@ -2065,6 +2065,9 @@ export type Database = {
         Row: {
           auth_user_id: string
           avatar_url: string | null
+          base_location_id: string | null
+          bio: string | null
+          coverage_area: string | null
           created_at: string
           dso_id: string
           first_name: string | null
@@ -2073,12 +2076,18 @@ export type Database = {
           last_name: string | null
           phone: string | null
           preferred_timezone: string
+          pronouns: string | null
           role: Database["public"]["Enums"]["dso_user_role"]
+          title: string | null
           updated_at: string
+          work_base: string | null
         }
         Insert: {
           auth_user_id: string
           avatar_url?: string | null
+          base_location_id?: string | null
+          bio?: string | null
+          coverage_area?: string | null
           created_at?: string
           dso_id: string
           first_name?: string | null
@@ -2086,12 +2095,18 @@ export type Database = {
           last_name?: string | null
           phone?: string | null
           preferred_timezone?: string
+          pronouns?: string | null
           role?: Database["public"]["Enums"]["dso_user_role"]
+          title?: string | null
           updated_at?: string
+          work_base?: string | null
         }
         Update: {
           auth_user_id?: string
           avatar_url?: string | null
+          base_location_id?: string | null
+          bio?: string | null
+          coverage_area?: string | null
           created_at?: string
           dso_id?: string
           first_name?: string | null
@@ -2099,8 +2114,11 @@ export type Database = {
           last_name?: string | null
           phone?: string | null
           preferred_timezone?: string
+          pronouns?: string | null
           role?: Database["public"]["Enums"]["dso_user_role"]
+          title?: string | null
           updated_at?: string
+          work_base?: string | null
         }
         Relationships: [
           {

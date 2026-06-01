@@ -250,10 +250,10 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
               ) : teammates.map((mate) => (
                 <button key={mate.dso_user_id} onClick={() => startDm(mate)}
                   className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-cream/60 text-left">
-                  <Avatar initials={mate.initials} online={!!mate.auth_user_id && online.has(mate.auth_user_id)} />
+                  <Avatar initials={mate.initials} imageUrl={mate.avatar_url} online={!!mate.auth_user_id && online.has(mate.auth_user_id)} />
                   <div className="min-w-0">
                     <div className="text-[13px] font-semibold text-ink truncate">{mate.name}</div>
-                    <div className="text-[11px] text-slate-meta">{mate.role}</div>
+                    <div className="text-[11px] text-slate-meta truncate">{mate.title || mate.role}</div>
                   </div>
                 </button>
               ))}
@@ -358,12 +358,29 @@ function ThreadGroup({
   );
 }
 
-function Avatar({ initials, online }: { initials: string; online: boolean }) {
+function Avatar({
+  initials,
+  online,
+  imageUrl,
+}: {
+  initials: string;
+  online: boolean;
+  imageUrl?: string | null;
+}) {
   return (
     <div className="relative shrink-0">
-      <div className="h-9 w-9 rounded-full bg-ink text-ivory flex items-center justify-center text-[12px] font-bold">
-        {initials}
-      </div>
+      {imageUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={imageUrl}
+          alt=""
+          className="h-9 w-9 rounded-full object-cover"
+        />
+      ) : (
+        <div className="h-9 w-9 rounded-full bg-ink text-ivory flex items-center justify-center text-[12px] font-bold">
+          {initials}
+        </div>
+      )}
       {online && (
         <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-[var(--heritage-bright,#8db8a3)] border-2 border-white" />
       )}

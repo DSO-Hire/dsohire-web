@@ -9,6 +9,10 @@ export interface ChatTeammate {
   auth_user_id: string | null;
   name: string;
   role: string;
+  /** Human job title, if set — shown under the name in the picker. */
+  title: string | null;
+  /** Uploaded headshot URL, if set. */
+  avatar_url: string | null;
   initials: string;
 }
 
