@@ -44,6 +44,7 @@ export interface ProfileData {
   website: string | null;
   headquarters_city: string | null;
   headquarters_state: string | null;
+  candidate_reply_to_email: string | null;
   practice_count: number | null;
 
   /** Photo gallery (separate table) */

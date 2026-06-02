@@ -551,6 +551,7 @@ export async function upsertCompanyDetails(input: {
   website: string | null;
   headquarters_city: string | null;
   headquarters_state: string | null;
+  candidate_reply_to_email: string | null;
   practice_count: number | null;
 }): Promise<Result> {
   const ctx = await getDsoAdminContext();
@@ -612,12 +613,31 @@ export async function upsertCompanyDetails(input: {
     practice_count = null;
   }
 
+  // Candidate reply-to — optional. Where candidate replies (application
+  // confirmations, stage updates, nurtures) land. Empty → null (falls back to
+  // the owner's email at send time). Loose validation; a routing hint, not
+  // auth-critical.
+  let candidate_reply_to_email = input.candidate_reply_to_email?.trim() || null;
+  if (candidate_reply_to_email) {
+    if (
+      candidate_reply_to_email.length > 254 ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(candidate_reply_to_email)
+    ) {
+      return {
+        ok: false,
+        error: "Enter a valid reply-to email like careers@yourpractice.com.",
+      };
+    }
+    candidate_reply_to_email = candidate_reply_to_email.toLowerCase();
+  }
+
   const { error } = await ctx.supabase
     .from("dsos")
     .update({
       website,
       headquarters_city,
       headquarters_state,
+      candidate_reply_to_email,
       practice_count,
     })
     .eq("id", ctx.dsoId);

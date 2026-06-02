@@ -32,6 +32,7 @@ import {
   Users,
 } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
+import { OnboardingChecklist } from "@/components/onboarding/onboarding-checklist";
 import { BillingBanner } from "@/components/employer/billing-banner";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getSubscriptionAnyStatus } from "@/lib/billing/subscription";
@@ -132,6 +133,17 @@ export default async function EmployerDashboard() {
     .from("dso_users")
     .select("*", { count: "exact", head: true })
     .eq("dso_id", dsoId ?? "");
+
+  const { count: jobsCount } = await supabase
+    .from("jobs")
+    .select("*", { count: "exact", head: true })
+    .eq("dso_id", dsoId ?? "");
+
+  const { count: customAutomationCount } = await supabase
+    .from("automation_rules")
+    .select("*", { count: "exact", head: true })
+    .eq("dso_id", dsoId ?? "")
+    .eq("is_system", false);
 
   const subscription = dsoId
     ? await getSubscriptionAnyStatus(supabase, dsoId)
@@ -838,6 +850,38 @@ export default async function EmployerDashboard() {
     year: "numeric",
   });
 
+  const isDsoAdmin = dsoUser?.role === "owner" || dsoUser?.role === "admin";
+  const employerOnboardingItems = [
+    {
+      key: "job",
+      label: "Post your first job",
+      done: (jobsCount ?? 0) > 0,
+      href: "/employer/jobs/new",
+    },
+    {
+      key: "loc",
+      label: "Add a practice location",
+      done: (locationsCount ?? 0) > 0,
+      href: "/employer/locations",
+    },
+    ...(isDsoAdmin
+      ? [
+          {
+            key: "team",
+            label: "Invite a teammate",
+            done: (teamCount ?? 0) > 1,
+            href: "/employer/team",
+          },
+          {
+            key: "auto",
+            label: "Set up an automation to save time",
+            done: (customAutomationCount ?? 0) > 0,
+            href: "/employer/automations",
+          },
+        ]
+      : []),
+  ];
+
   return (
     <EmployerShell active="dashboard">
       <header className="mb-10">
@@ -879,6 +923,17 @@ export default async function EmployerDashboard() {
           )}
         </div>
       </header>
+
+      {dsoUser?.role !== "hiring_manager" && (
+        <div className="mb-8">
+          <OnboardingChecklist
+            title="Get started"
+            subtitle="Knock these out to get your hiring running — you can do them in any order."
+            storageKey="employer-onboarding-checklist-v1"
+            items={employerOnboardingItems}
+          />
+        </div>
+      )}
 
       {dsoUser?.role === "hiring_manager" && (
         <HmScopeContextBar locations={hmScopeLocations} />

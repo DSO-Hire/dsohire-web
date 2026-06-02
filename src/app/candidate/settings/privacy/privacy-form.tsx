@@ -486,7 +486,7 @@ function PracticeFitSection({
     <SectionCard
       icon={<ShieldCheck className="size-5 text-[#4D7A60]" />}
       title="Practice Fit consent"
-      description="Practice Fit is our upcoming proprietary matching algorithm. Off by default — opt in only when it ships."
+      description="Practice Fit is our proprietary matching algorithm — it scores how well you fit each role on must-haves and preferences. Off by default; turn it on so DSOs can find you by fit."
     >
       <RadioGroup
         legend="Compute and display"

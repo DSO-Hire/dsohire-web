@@ -17,6 +17,7 @@
 
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { dispatchCandidateEmail } from "./dispatch";
+import { resolveCandidateReplyTo } from "@/lib/email/candidate-reply-to";
 import { StageChanged } from "@/emails/StageChanged";
 import { greetingFirstName } from "@/lib/candidate/name";
 
@@ -100,12 +101,14 @@ export async function dispatchStageChangedEmail(
       (dsoRow?.name as string | undefined) ?? "the hiring team";
 
     const fallbackSubject = `Update on your application for ${input.jobTitle}`;
+    const replyTo = await resolveCandidateReplyTo(input.dsoId);
 
     await dispatchCandidateEmail({
       kind: "candidate.stage_changed",
       dsoId: input.dsoId,
       recipientUserId: authUserId,
       recipientEmail,
+      replyTo,
       candidate: {
         first_name: firstName,
         full_name: fullName,

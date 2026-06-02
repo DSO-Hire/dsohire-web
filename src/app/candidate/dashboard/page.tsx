@@ -32,6 +32,7 @@ import {
   UserCircle,
 } from "lucide-react";
 import { CandidateShell } from "@/components/candidate/candidate-shell";
+import { OnboardingChecklist } from "@/components/onboarding/onboarding-checklist";
 import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
@@ -81,7 +82,7 @@ export default async function CandidateDashboardPage() {
   const { data: candidate } = await supabase
     .from("candidates")
     .select(
-      "id, first_name, last_name, salutation, full_name, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, desired_specialty, pms_systems, skills, languages, temp_or_perm, schedule_preferences, min_salary, salary_unit, cv_visibility, availability, resume_url, linkedin_url, avatar_url",
+      "id, first_name, last_name, salutation, full_name, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, desired_specialty, pms_systems, skills, languages, temp_or_perm, schedule_preferences, min_salary, salary_unit, cv_visibility, availability, resume_url, linkedin_url, avatar_url, is_searchable, practice_fit_consent",
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
@@ -170,6 +171,36 @@ export default async function CandidateDashboardPage() {
   );
   const profilePct = Math.round((completeness.score / completeness.total) * 100);
   const missingFields = completeness.missing.length;
+
+  // Progressive onboarding checklist (dismissible; auto-hides when complete).
+  const onboardingItems = [
+    {
+      key: "profile",
+      label: "Finish your profile",
+      done: completeness.missing.length === 0,
+      href: "/candidate/profile",
+    },
+    {
+      key: "prefs",
+      label: "Set your job preferences",
+      done:
+        profileData.jobPreferences.desired_locations.length > 0 ||
+        profileData.jobPreferences.min_salary != null,
+      href: "/candidate/profile",
+    },
+    {
+      key: "visible",
+      label: "Turn on profile visibility so recruiters can find you",
+      done: Boolean((c.is_searchable as boolean | null) ?? false),
+      href: "/candidate/settings/privacy",
+    },
+    {
+      key: "fit",
+      label: "Choose your Practice Fit matching setting",
+      done: ((c.practice_fit_consent as string | null) ?? "off") !== "off",
+      href: "/candidate/settings/privacy",
+    },
+  ];
 
   // ── All applications ────────────────────────────────────────────────
   // RLS on dso_pipeline_stages is DSO-only, so the candidate's RLS-scoped
@@ -533,6 +564,15 @@ export default async function CandidateDashboardPage() {
           {headerSub}
         </p>
       </header>
+
+      <div className="mb-6">
+        <OnboardingChecklist
+          title="Get set up"
+          subtitle="A few quick steps to get the most out of DSO Hire — you can change anything later in Settings."
+          storageKey="candidate-onboarding-checklist-v1"
+          items={onboardingItems}
+        />
+      </div>
 
       {/* KPI grid — adaptive hero + 4 tonal tiles */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr] gap-px bg-[var(--rule)] border border-[var(--rule)] mb-6">

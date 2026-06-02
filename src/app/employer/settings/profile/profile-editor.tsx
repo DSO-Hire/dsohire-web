@@ -80,6 +80,7 @@ export function ProfileEditor({ initial, canEdit }: ProfileEditorProps) {
         initialWebsite={initial.website}
         initialCity={initial.headquarters_city}
         initialState={initial.headquarters_state}
+        initialCandidateReplyTo={initial.candidate_reply_to_email}
         initialPracticeCount={initial.practice_count}
       />
       <AboutSection
@@ -427,11 +428,15 @@ function CompanyDetailsSection({
   initialWebsite: string | null;
   initialCity: string | null;
   initialState: string | null;
+  initialCandidateReplyTo: string | null;
   initialPracticeCount: number | null;
 }) {
   const [website, setWebsite] = useState(initialWebsite ?? "");
   const [city, setCity] = useState(initialCity ?? "");
   const [stateField, setStateField] = useState(initialState ?? "");
+  const [candidateReplyTo, setCandidateReplyTo] = useState(
+    initialCandidateReplyTo ?? ""
+  );
   // Practice count is held as a string for clean typing; parsed on save.
   const [practiceCount, setPracticeCount] = useState(
     initialPracticeCount != null ? String(initialPracticeCount) : ""
@@ -440,6 +445,7 @@ function CompanyDetailsSection({
     website: initialWebsite ?? "",
     city: initialCity ?? "",
     state: initialState ?? "",
+    candidateReplyTo: initialCandidateReplyTo ?? "",
     practiceCount: initialPracticeCount != null ? String(initialPracticeCount) : "",
   });
   const [pending, startTransition] = useTransition();
@@ -450,6 +456,7 @@ function CompanyDetailsSection({
     website !== snapshot.website ||
     city !== snapshot.city ||
     stateField !== snapshot.state ||
+    candidateReplyTo !== snapshot.candidateReplyTo ||
     practiceCount !== snapshot.practiceCount;
 
   const clearFlags = () => {
@@ -477,6 +484,7 @@ function CompanyDetailsSection({
         website: website.trim() || null,
         headquarters_city: city.trim() || null,
         headquarters_state: stateField.trim() || null,
+        candidate_reply_to_email: candidateReplyTo.trim() || null,
         practice_count: parsedCount,
       });
       if (!result.ok) {
@@ -489,6 +497,7 @@ function CompanyDetailsSection({
         website,
         city,
         state: stateField,
+        candidateReplyTo,
         practiceCount,
       });
       setSaved(true);
@@ -547,6 +556,33 @@ function CompanyDetailsSection({
               setStateField(s);
             }}
           />
+        </div>
+
+        <div>
+          <label
+            htmlFor="dso-candidate-reply-to"
+            className="mb-1.5 block text-[12px] font-semibold text-ink"
+          >
+            Candidate reply-to email
+          </label>
+          <input
+            id="dso-candidate-reply-to"
+            type="email"
+            value={candidateReplyTo}
+            disabled={!canEdit}
+            onChange={(e) => {
+              clearFlags();
+              setCandidateReplyTo(e.target.value);
+            }}
+            maxLength={254}
+            placeholder="e.g. careers@yourpractice.com"
+            className="w-full rounded border border-[var(--rule-strong)] bg-white px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
+          />
+          <p className="mt-1.5 text-[12px] text-slate-meta leading-relaxed">
+            Where candidate replies to your automated emails land (application
+            confirmations, stage updates, re-engagement). Leave blank to use the
+            account owner&apos;s email.
+          </p>
         </div>
 
         <div>

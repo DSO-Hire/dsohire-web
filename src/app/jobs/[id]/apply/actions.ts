@@ -32,6 +32,7 @@ import { dispatchCandidateEmail } from "@/lib/email/templates/dispatch";
 import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
 import { after } from "next/server";
 import { runAutomationsForEvent } from "@/lib/automations/engine";
+import { resolveCandidateReplyTo } from "@/lib/email/candidate-reply-to";
 import { ApplicationReceived } from "@/emails/candidate/ApplicationReceived";
 import { NewApplication } from "@/emails/employer/NewApplication";
 import type { ScreeningQuestion } from "./types";
@@ -816,6 +817,9 @@ async function sendApplicationEmails(
     void policy;
     const candidateEmail = candidateAuthUser?.data?.user?.email ?? null;
     const candidateDisplayName = params.candidateName?.trim() || "there";
+    // Reply-To routes candidate replies to the DSO (configured careers inbox
+    // or owner email), never the platform founder. Was hardcoded before.
+    const candidateReplyTo = await resolveCandidateReplyTo(params.dsoId);
 
     /* ── Email 1: candidate confirmation ──
        Phase 4.5.f: dispatchCandidateEmail() short-circuits to a custom
@@ -841,7 +845,7 @@ async function sendApplicationEmails(
         },
         relatedDsoId: params.dsoId,
         relatedCandidateId: params.candidateId,
-        replyTo: "cam@dsohire.com",
+        replyTo: candidateReplyTo,
         fallback: {
           subject: `Application received: ${params.jobTitle} at ${displayedEmployerName}`,
           react: ApplicationReceived({

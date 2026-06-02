@@ -26,6 +26,7 @@ import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
 import { dispatchStageChangedEmail } from "@/lib/email/templates/stage-changed-dispatch";
 import { dispatchNotification } from "@/lib/notifications/dispatcher";
+import { resolveCandidateReplyTo } from "@/lib/email/candidate-reply-to";
 import { AutomationNotice } from "@/emails/employer/AutomationNotice";
 import { NurtureMessage } from "@/emails/candidate/NurtureMessage";
 import {
@@ -389,6 +390,7 @@ async function runNurtureEmail(
   const subject = fill(rawSubject);
   const body = fill(rawBody);
   const applicationUrl = `${SITE_URL}/candidate/applications/${event.applicationId}`;
+  const replyTo = await resolveCandidateReplyTo(event.dsoId);
 
   await dispatchNotification({
     userId: authUserId,
@@ -398,6 +400,7 @@ async function runNurtureEmail(
     email: {
       to: email,
       subject,
+      replyTo,
       react: NurtureMessage({
         recipientName: firstName,
         dsoName,
