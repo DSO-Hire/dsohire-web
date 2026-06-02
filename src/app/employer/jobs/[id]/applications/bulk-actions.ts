@@ -46,7 +46,7 @@ import {
 } from "@/lib/applications/stages";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
-import { dispatchStageChangedEmail } from "@/lib/email/templates/stage-changed-dispatch";
+import { runAutomationsForEvent } from "@/lib/automations/engine";
 
 const VALID_KINDS = new Set<StageKind>(STAGE_KINDS);
 
@@ -198,7 +198,31 @@ async function moveOne(
   // bulk response ships but are still guaranteed to complete on Vercel
   // — per feedback_vercel_serverless_fire_and_forget.md, bare `void` in
   // serverless gets killed mid-flight. after() callbacks are honored.
-  if (!hideStagesFromCandidate) {
+  // N13: route candidate-facing stage-change dispatch through the
+  // automation rules engine (same as the single-move path). The seeded
+  // `is_system` default rule reproduces the former two dispatches 1:1,
+  // including the hideStagesFromCandidate suppression. See
+  // Business Plan & Strategy/N13_Automation_Rules_Engine_Design_2026-06-02.md.
+  if (dsoId) {
+    const triggerEventKey = `stage_changed:${applicationId}:${prevStageId}->${nextStageId}:${new Date().toISOString()}`;
+    after(async () => {
+      await runAutomationsForEvent({
+        trigger: "application.stage_changed",
+        applicationId,
+        dsoId,
+        candidateId,
+        jobId: jobId ?? "",
+        jobTitle,
+        fromStageLabel: prevStageLabel,
+        toStageLabel: nextStageLabel,
+        fromKind: prevKind,
+        toKind: nextKind,
+        hideStagesFromCandidate,
+        triggerEventKey,
+      });
+    });
+  } else if (!hideStagesFromCandidate) {
+    // Pathological dsoId-null edge: preserve pre-N13 inbox-only behavior.
     after(async () => {
       await dispatchInboxSystemMessage({
         applicationId,
@@ -207,19 +231,6 @@ async function moveOne(
         body: `Your application moved from ${prevStageLabel} to ${nextStageLabel}.`,
       });
     });
-    if (dsoId && candidateId) {
-      after(async () => {
-        await dispatchStageChangedEmail({
-          applicationId,
-          candidateId,
-          jobId: jobId ?? "",
-          jobTitle,
-          dsoId,
-          fromStageLabel: prevStageLabel,
-          toStageLabel: nextStageLabel,
-        });
-      });
-    }
   }
 
   return {

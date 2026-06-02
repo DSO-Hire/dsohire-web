@@ -195,6 +195,132 @@ export type Database = {
           },
         ]
       }
+      automation_rules: {
+        Row: {
+          conditions: Json
+          created_at: string
+          created_by: string | null
+          dso_id: string
+          id: string
+          is_enabled: boolean
+          is_system: boolean
+          name: string
+          sort_order: number
+          trigger_kind: string
+          updated_at: string
+        }
+        Insert: {
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          dso_id: string
+          id?: string
+          is_enabled?: boolean
+          is_system?: boolean
+          name: string
+          sort_order?: number
+          trigger_kind: string
+          updated_at?: string
+        }
+        Update: {
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          dso_id?: string
+          id?: string
+          is_enabled?: boolean
+          is_system?: boolean
+          name?: string
+          sort_order?: number
+          trigger_kind?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_rules_dso_id_fkey"
+            columns: ["dso_id"]
+            isOneToOne: false
+            referencedRelation: "dsos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automation_rule_actions: {
+        Row: {
+          action_kind: string
+          config: Json
+          created_at: string
+          id: string
+          rule_id: string
+          sort_order: number
+        }
+        Insert: {
+          action_kind: string
+          config?: Json
+          created_at?: string
+          id?: string
+          rule_id: string
+          sort_order?: number
+        }
+        Update: {
+          action_kind?: string
+          config?: Json
+          created_at?: string
+          id?: string
+          rule_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_rule_actions_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "automation_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automation_rule_runs: {
+        Row: {
+          application_id: string | null
+          created_at: string
+          detail: Json
+          dso_id: string
+          id: string
+          rule_id: string
+          status: string
+          trigger_event: string
+        }
+        Insert: {
+          application_id?: string | null
+          created_at?: string
+          detail?: Json
+          dso_id: string
+          id?: string
+          rule_id: string
+          status: string
+          trigger_event: string
+        }
+        Update: {
+          application_id?: string | null
+          created_at?: string
+          detail?: Json
+          dso_id?: string
+          id?: string
+          rule_id?: string
+          status?: string
+          trigger_event?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_rule_runs_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "automation_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       application_message_attachments: {
         Row: {
           created_at: string

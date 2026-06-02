@@ -24,7 +24,7 @@ import {
   type StageKind,
 } from "@/lib/applications/stages";
 import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
-import { dispatchStageChangedEmail } from "@/lib/email/templates/stage-changed-dispatch";
+import { runAutomationsForEvent } from "@/lib/automations/engine";
 import { recordAuditEvent } from "@/lib/audit/record";
 
 export interface ActionState {
@@ -289,7 +289,37 @@ export async function moveApplicationStage(
   // serverless route gets killed mid-flight — symptom is silently-dropped
   // stage_changed emails on the single-move path. The bulk path (Day 22,
   // 1f0f33c) already moved to after(); this closes the single-move holdout.
-  if (!hideStagesFromCandidate) {
+  // N13: route candidate-facing stage-change dispatch through the
+  // automation rules engine instead of calling the dispatch helpers
+  // directly. The seeded `is_system` default rule reproduces the former
+  // two dispatches (inbox system message + candidate.stage_changed email)
+  // 1:1, including the hideStagesFromCandidate suppression (enforced
+  // inside the engine's action runners). See
+  // Business Plan & Strategy/N13_Automation_Rules_Engine_Design_2026-06-02.md.
+  const candidateId = (prev as unknown as Record<string, unknown>)
+    .candidate_id as string | null;
+  if (dsoId) {
+    const triggerEventKey = `stage_changed:${applicationId}:${prevStageId}->${resolved.stageId}:${new Date().toISOString()}`;
+    after(async () => {
+      await runAutomationsForEvent({
+        trigger: "application.stage_changed",
+        applicationId,
+        dsoId,
+        candidateId,
+        jobId: (jobRow?.id as string | undefined) ?? "",
+        jobTitle,
+        fromStageLabel: prevStageLabel,
+        toStageLabel: resolved.label,
+        fromKind: prevKind,
+        toKind: resolved.kind,
+        hideStagesFromCandidate,
+        triggerEventKey,
+      });
+    });
+  } else if (!hideStagesFromCandidate) {
+    // Pathological dsoId-null edge (a job with no DSO): we can't load
+    // rules without a DSO, so preserve the exact pre-N13 inbox-only
+    // behavior (the email path also required dsoId before N13).
     after(async () => {
       await dispatchInboxSystemMessage({
         applicationId,
@@ -298,23 +328,6 @@ export async function moveApplicationStage(
         body: `Your application moved from ${prevStageLabel} to ${resolved.label}.`,
       });
     });
-    if (dsoId) {
-      const candidateId = (prev as unknown as Record<string, unknown>)
-        .candidate_id as string | null;
-      if (candidateId) {
-        after(async () => {
-          await dispatchStageChangedEmail({
-            applicationId,
-            candidateId,
-            jobId: (jobRow?.id as string | undefined) ?? "",
-            jobTitle,
-            dsoId,
-            fromStageLabel: prevStageLabel,
-            toStageLabel: resolved.label,
-          });
-        });
-      }
-    }
   }
 
   // Audit log (Phase 4.5.e). Fire-and-forget.
