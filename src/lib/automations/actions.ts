@@ -38,9 +38,19 @@ const ACTIONS_BY_TRIGGER: Record<string, Set<AutomationActionKind>> = {
     "inbox_system_message",
     "add_tag",
     "notify_teammate",
+    "assign",
   ]),
-  "application.received": new Set<AutomationActionKind>(["add_tag", "notify_teammate"]),
+  "application.received": new Set<AutomationActionKind>([
+    "add_tag",
+    "notify_teammate",
+    "assign",
+  ]),
 };
+/** Action kinds whose config carries a dso_user target that must be validated. */
+const TEAMMATE_TARGET_ACTIONS = new Set<AutomationActionKind>([
+  "notify_teammate",
+  "assign",
+]);
 // Condition fields available per trigger.
 const CONDITION_FIELDS_BY_TRIGGER: Record<string, Set<string>> = {
   "application.stage_changed": new Set(["to_kind", "from_kind", "job_id"]),
@@ -104,11 +114,15 @@ function validateRuleInput(input: RuleInput): string | null {
       const label = String((a.config?.label as string | undefined) ?? "").trim();
       if (!label) return "Tag action needs a label.";
     }
-    if (a.action_kind === "notify_teammate") {
+    if (TEAMMATE_TARGET_ACTIONS.has(a.action_kind)) {
       const target = String(
         (a.config?.target_dso_user_id as string | undefined) ?? ""
       ).trim();
-      if (!target) return "Choose a teammate to notify.";
+      if (!target) {
+        return a.action_kind === "assign"
+          ? "Choose a teammate to assign to."
+          : "Choose a teammate to notify.";
+      }
     }
   }
   for (const c of input.conditions ?? []) {
@@ -135,7 +149,7 @@ async function validateTeammateTargets(
   actions: ActionInput[]
 ): Promise<string | null> {
   const targets = actions
-    .filter((a) => a.action_kind === "notify_teammate")
+    .filter((a) => TEAMMATE_TARGET_ACTIONS.has(a.action_kind))
     .map((a) => String((a.config?.target_dso_user_id as string | undefined) ?? "").trim())
     .filter(Boolean);
   if (targets.length === 0) return null;

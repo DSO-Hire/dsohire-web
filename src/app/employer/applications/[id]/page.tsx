@@ -53,6 +53,7 @@ import {
 } from "@/components/interviews/interview-section";
 import { AffiliationCard } from "./affiliation-card";
 import { NotesEditor } from "./notes-editor";
+import { AssigneePicker } from "./assignee-picker";
 import { TagsSection } from "./tags-section";
 import { MoveCopyCard } from "./move-copy-card";
 import {
@@ -187,7 +188,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const { data: rawApp } = await supabase
     .from("applications")
     .select(
-      "id, job_id, candidate_id, stage_id, cover_letter, resume_url, employer_notes, created_at, updated_at, affiliation_revealed, affiliation_revealed_at, affiliation_revealed_by_dso_user_id, knockout_failed_questions, knockout_failed_at"
+      "id, job_id, candidate_id, stage_id, assigned_to_dso_user_id, cover_letter, resume_url, employer_notes, created_at, updated_at, affiliation_revealed, affiliation_revealed_at, affiliation_revealed_by_dso_user_id, knockout_failed_questions, knockout_failed_at"
     )
     .eq("id", appId)
     .maybeSingle();
@@ -208,6 +209,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     job_id: string;
     candidate_id: string;
     stage_id: string;
+    assigned_to_dso_user_id: string | null;
     cover_letter: string | null;
     resume_url: string | null;
     employer_notes: string | null;
@@ -425,6 +427,11 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     authUserId: u.auth_user_id,
     fullName: u.full_name,
     role: u.role,
+  }));
+  // Teammate options for the manual assignee picker (id + display name).
+  const assigneeTeammates = dsoUsersRows.map((u) => ({
+    id: u.id,
+    name: u.full_name || "Teammate",
   }));
 
   // ── Direct candidate ↔ DSO messages thread (separate from internal
@@ -1366,6 +1373,14 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               aiSuggesterAvailable={aiSuggesterAvailable}
               aiSuggesterHasContext={aiSuggesterHasContext}
             />
+
+            <div className="mt-4">
+              <AssigneePicker
+                applicationId={app.id}
+                teammates={assigneeTeammates}
+                current={app.assigned_to_dso_user_id}
+              />
+            </div>
 
             {canSendCustomEmail && (
               <div className="mt-4">

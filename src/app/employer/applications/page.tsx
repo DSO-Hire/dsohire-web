@@ -6,7 +6,7 @@
  */
 
 import Link from "next/link";
-import { ChevronRight, MapPin } from "lucide-react";
+import { ChevronRight, MapPin, UserRound } from "lucide-react";
 import { redirect } from "next/navigation";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { Avatar } from "@/components/ui/avatar";
@@ -109,7 +109,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
   let appQuery = supabase
     .from("applications")
     .select(
-      "id, job_id, candidate_id, stage_id, cover_letter, created_at, updated_at, " +
+      "id, job_id, candidate_id, stage_id, assigned_to_dso_user_id, cover_letter, created_at, updated_at, " +
         "stage:dso_pipeline_stages!stage_id(kind, label)"
     )
     .in("job_id", dsoJobIds.length > 0 ? dsoJobIds : ["__none__"])
@@ -134,6 +134,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
     stage_id: string;
     kind: StageKind;
     stageLabel: string;
+    assignedTo: string | null;
     cover_letter: string | null;
     created_at: string;
     updated_at: string;
@@ -158,6 +159,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
         kind,
         stageLabel:
           (stageRow?.label as string | undefined) ?? KIND_DEFAULT_LABELS[kind],
+        assignedTo: (row.assigned_to_dso_user_id as string | null) ?? null,
         cover_letter: row.cover_letter as string | null,
         created_at: row.created_at as string,
         updated_at: row.updated_at as string,
@@ -195,6 +197,25 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
   };
   const cands = (rawCands ?? []) as CandRow[];
   const candMap = new Map(cands.map((c) => [c.id, c]));
+
+  // Resolve assigned-teammate names for the "Assigned to" row chip.
+  const assigneeIds = Array.from(
+    new Set(apps.map((a) => a.assignedTo).filter((x): x is string => !!x))
+  );
+  const { data: rawAssignees } = assigneeIds.length
+    ? await supabase
+        .from("dso_users")
+        .select("id, first_name, last_name")
+        .in("id", assigneeIds)
+    : { data: [] };
+  const assigneeMap = new Map(
+    ((rawAssignees ?? []) as Array<Record<string, unknown>>).map((u) => [
+      u.id as string,
+      [u.first_name as string | null, u.last_name as string | null]
+        .filter(Boolean)
+        .join(" ") || "Teammate",
+    ])
+  );
 
   // Per-job location label map (Cam feedback 2026-05-06 PM): the inbox
   // needs a practice tag on each row so two applications to identically-
@@ -492,6 +513,15 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                           fit={fitByAppId.get(app.id) ?? null}
                           size="sm"
                         />
+                      )}
+                      {app.assignedTo && assigneeMap.get(app.assignedTo) && (
+                        <span
+                          className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-ink/15 bg-ink/[0.04] px-2 py-0.5 text-[10px] font-semibold tracking-[0.3px] text-ink/70"
+                          title={`Assigned to ${assigneeMap.get(app.assignedTo)}`}
+                        >
+                          <UserRound className="h-2.5 w-2.5" strokeWidth={2.5} />
+                          {assigneeMap.get(app.assignedTo)}
+                        </span>
                       )}
                     </div>
                     <div className="text-[14px] text-slate-body mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">

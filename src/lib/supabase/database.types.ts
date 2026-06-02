@@ -880,6 +880,7 @@ export type Database = {
           affiliation_revealed: boolean
           affiliation_revealed_at: string | null
           affiliation_revealed_by_dso_user_id: string | null
+          assigned_to_dso_user_id: string | null
           candidate_id: string
           cover_letter: string | null
           created_at: string
@@ -905,6 +906,7 @@ export type Database = {
           affiliation_revealed?: boolean
           affiliation_revealed_at?: string | null
           affiliation_revealed_by_dso_user_id?: string | null
+          assigned_to_dso_user_id?: string | null
           candidate_id: string
           cover_letter?: string | null
           created_at?: string
@@ -930,6 +932,7 @@ export type Database = {
           affiliation_revealed?: boolean
           affiliation_revealed_at?: string | null
           affiliation_revealed_by_dso_user_id?: string | null
+          assigned_to_dso_user_id?: string | null
           candidate_id?: string
           cover_letter?: string | null
           created_at?: string

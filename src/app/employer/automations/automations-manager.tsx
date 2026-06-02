@@ -49,7 +49,8 @@ type DraftAction =
   | { action_kind: "email_candidate"; config: { template_kind: string } }
   | { action_kind: "inbox_system_message"; config: Record<string, never> }
   | { action_kind: "add_tag"; config: { label: string; color: string } }
-  | { action_kind: "notify_teammate"; config: { target_dso_user_id: string } };
+  | { action_kind: "notify_teammate"; config: { target_dso_user_id: string } }
+  | { action_kind: "assign"; config: { target_dso_user_id: string } };
 
 interface Draft {
   name: string;
@@ -68,8 +69,8 @@ const TRIGGER_OPTS: Array<{ value: TriggerKind; label: string }> = [
 
 // Which actions + condition fields each trigger allows (mirrors the server).
 const ACTIONS_FOR_TRIGGER: Record<TriggerKind, DraftAction["action_kind"][]> = {
-  "application.stage_changed": ["email_candidate", "inbox_system_message", "add_tag", "notify_teammate"],
-  "application.received": ["add_tag", "notify_teammate"],
+  "application.stage_changed": ["email_candidate", "inbox_system_message", "add_tag", "notify_teammate", "assign"],
+  "application.received": ["add_tag", "notify_teammate", "assign"],
 };
 const FIELDS_FOR_TRIGGER: Record<TriggerKind, RuleCondition["field"][]> = {
   "application.stage_changed": ["to_kind", "from_kind", "job_id"],
@@ -81,6 +82,7 @@ const ACTION_LABELS: Record<string, string> = {
   inbox_system_message: "Post an inbox update",
   add_tag: "Add a tag",
   notify_teammate: "Notify a teammate",
+  assign: "Assign to a teammate",
 };
 
 // ── plain-English sentence ───────────────────────────────────────────
@@ -114,10 +116,11 @@ function actionsPhrase(
         const label = String((a.config?.label as string | undefined) ?? "").trim();
         return label ? `add the tag "${label}"` : "add a tag";
       }
-      if (a.action_kind === "notify_teammate") {
+      if (a.action_kind === "notify_teammate" || a.action_kind === "assign") {
         const id = String((a.config?.target_dso_user_id as string | undefined) ?? "");
         const who = teammates.find((t) => t.id === id)?.name;
-        return who ? `notify ${who}` : "notify a teammate";
+        const verb = a.action_kind === "assign" ? "assign to" : "notify";
+        return who ? `${verb} ${who}` : `${verb} a teammate`;
       }
       return (ACTION_LABELS[a.action_kind] ?? a.action_kind).toLowerCase();
     })
@@ -518,9 +521,9 @@ function normalizeAction(a: { action_kind: string; config: Record<string, unknow
       },
     };
   }
-  if (a.action_kind === "notify_teammate") {
+  if (a.action_kind === "notify_teammate" || a.action_kind === "assign") {
     return {
-      action_kind: "notify_teammate",
+      action_kind: a.action_kind,
       config: { target_dso_user_id: String((a.config?.target_dso_user_id as string | undefined) ?? "") },
     };
   }
@@ -667,6 +670,7 @@ function ActionsEditor({
     if (kind === "add_tag") update(idx, { action_kind: "add_tag", config: { label: "", color: "slate" } });
     else if (kind === "inbox_system_message") update(idx, { action_kind: "inbox_system_message", config: {} });
     else if (kind === "notify_teammate") update(idx, { action_kind: "notify_teammate", config: { target_dso_user_id: "" } });
+    else if (kind === "assign") update(idx, { action_kind: "assign", config: { target_dso_user_id: "" } });
     else update(idx, { action_kind: "email_candidate", config: { template_kind: "candidate.stage_changed" } });
   }
 
@@ -714,11 +718,11 @@ function ActionsEditor({
                 </select>
               </>
             )}
-            {a.action_kind === "notify_teammate" && (
+            {(a.action_kind === "notify_teammate" || a.action_kind === "assign") && (
               <select
                 value={a.config.target_dso_user_id}
                 onChange={(e) =>
-                  update(idx, { action_kind: "notify_teammate", config: { target_dso_user_id: e.target.value } })
+                  update(idx, { action_kind: a.action_kind, config: { target_dso_user_id: e.target.value } })
                 }
                 className="flex-1 rounded border border-ink/15 px-2 py-1.5 text-[13px]"
               >

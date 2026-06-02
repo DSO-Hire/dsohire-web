@@ -226,11 +226,11 @@ async function runAction(
         return await runAddTag(action, event);
       case "notify_teammate":
         return await runNotifyTeammate(action, event, ruleName);
+      case "assign":
+        return await runAssign(action, event);
       // Reserved actions — not yet runnable. `move_stage` is HELD on
       // purpose (Cam, Day 25 — the riskiest foot-gun + the loop case);
-      // `assign` needs an assignee column + a surface to display it;
       // start_sequence is the N16 hook. No-op safely.
-      case "assign":
       case "move_stage":
       case "start_sequence":
         return {
@@ -387,4 +387,40 @@ async function runNotifyTeammate(
     },
   });
   return { action_kind: "notify_teammate", status: "ran" };
+}
+
+/**
+ * Assign the application to a teammate. config.target_dso_user_id names the
+ * assignee; we confirm they're in this DSO, then set
+ * applications.assigned_to_dso_user_id via the service-role client (the
+ * engine runs in after() with no user session). Internal, not candidate-facing.
+ */
+async function runAssign(
+  action: RuleActionRow,
+  event: AutomationEvent
+): Promise<ActionOutcome> {
+  const targetId = String(
+    (action.config.target_dso_user_id as string | undefined) ?? ""
+  ).trim();
+  if (!targetId) {
+    return { action_kind: "assign", status: "skipped", note: "no target" };
+  }
+  const admin = createSupabaseServiceRoleClient();
+  const { data: teammate } = await admin
+    .from("dso_users")
+    .select("id")
+    .eq("id", targetId)
+    .eq("dso_id", event.dsoId)
+    .maybeSingle();
+  if (!teammate) {
+    return { action_kind: "assign", status: "skipped", note: "teammate not found" };
+  }
+  const { error } = await admin
+    .from("applications")
+    .update({ assigned_to_dso_user_id: targetId })
+    .eq("id", event.applicationId);
+  if (error) {
+    return { action_kind: "assign", status: "error", note: error.message };
+  }
+  return { action_kind: "assign", status: "ran" };
 }
