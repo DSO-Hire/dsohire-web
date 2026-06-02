@@ -10,7 +10,7 @@
  * employers by RLS).
  */
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Check, ChevronDown, ChevronUp, ShieldCheck } from "lucide-react";
 import { submitEeoSelfId } from "./eeo-actions";
 import { EEO_FIELDS, type EeoFieldKey } from "@/lib/eeo/options";
@@ -27,6 +27,13 @@ export function EeoSelfId({ applicationId }: { applicationId: string }) {
     veteran_status: "",
     disability_status: "",
   });
+
+  // Persist "skip" per application so the detail-page safety-net card (which
+  // re-renders on every visit until a response exists) doesn't re-nag.
+  const storageKey = `eeo-dismissed-${applicationId}`;
+  useEffect(() => {
+    if (window.localStorage.getItem(storageKey) === "1") setDismissed(true);
+  }, [storageKey]);
 
   const setField = (key: EeoFieldKey, value: string) =>
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -160,7 +167,10 @@ export function EeoSelfId({ applicationId }: { applicationId: string }) {
             </button>
             <button
               type="button"
-              onClick={() => setDismissed(true)}
+              onClick={() => {
+                window.localStorage.setItem(storageKey, "1");
+                setDismissed(true);
+              }}
               disabled={pending}
               className="text-[12px] font-bold uppercase tracking-[2px] text-ink-soft transition-colors hover:text-ink disabled:opacity-60"
             >

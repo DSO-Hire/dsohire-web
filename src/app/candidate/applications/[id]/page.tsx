@@ -21,6 +21,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { CandidateShell } from "@/components/candidate/candidate-shell";
+import { EeoSelfId } from "@/app/jobs/[id]/apply/eeo-self-id";
 import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
@@ -91,6 +92,17 @@ export default async function CandidateApplicationDetailPage({
     .maybeSingle();
 
   if (!rawApp) notFound();
+
+  // Voluntary EEO self-ID safety net (E2.17). The apply success screen also
+  // offers it, but a re-navigation there can yank it before the candidate
+  // answers — so we also surface it here (where they reliably land) when
+  // they haven't recorded a response yet. RLS lets the candidate read their
+  // own row.
+  const { count: eeoCount } = await supabase
+    .from("application_eeo_responses")
+    .select("*", { count: "exact", head: true })
+    .eq("application_id", appId);
+  const showEeoCard = (eeoCount ?? 0) === 0;
 
   type AppRow = {
     id: string;
@@ -301,6 +313,12 @@ export default async function CandidateApplicationDetailPage({
 
       {activeProposal && (
         <CandidateInterviewPicker proposal={activeProposal} />
+      )}
+
+      {showEeoCard && (
+        <div className="mb-8">
+          <EeoSelfId applicationId={app.id} />
+        </div>
       )}
 
       <header className="mb-8">
