@@ -225,7 +225,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   // (RLS would block it anyway, but we want a clean 404 if not).
   const { data: job } = await supabase
     .from("jobs")
-    .select("id, title, dso_id, role_category, employment_type")
+    .select("id, title, dso_id, role_category, employment_type, compensation_min, compensation_max, compensation_period")
     .eq("id", app.job_id)
     .maybeSingle();
   if (!job || (job.dso_id as string) !== (dsoUser.dso_id as string)) notFound();
@@ -1678,6 +1678,9 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 jobEmploymentType={offerSectionJobEmploymentType}
                 roleCategory={String(job.role_category)}
                 benchmarkState={offerSectionState}
+                jobCompMin={(job.compensation_min as number | null) ?? null}
+                jobCompMax={(job.compensation_max as number | null) ?? null}
+                jobCompPeriod={(job.compensation_period as string | null) ?? null}
                 templates={offerTemplates}
                 sends={offerSends}
               />

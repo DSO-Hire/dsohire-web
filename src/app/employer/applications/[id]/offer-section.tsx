@@ -34,6 +34,10 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { sendOffer } from "./offer-actions";
+import {
+  evaluateOfferGuardrail,
+  type JobCompPeriod,
+} from "@/lib/offers/comp-guardrail";
 import { PayBenchmarkHint } from "../../jobs/pay-benchmark-hint";
 import {
   OFFER_FIELDS,
@@ -93,6 +97,10 @@ interface OfferSectionProps {
   /** Job role + state — drive the market-pay reference by the comp field (N4). */
   roleCategory: string;
   benchmarkState: string | null;
+  /** N12 — the job's POSTED comp range, for the offer guardrail banner. */
+  jobCompMin: number | null;
+  jobCompMax: number | null;
+  jobCompPeriod: string | null;
   templates: OfferTemplateOption[];
   sends: OfferSendRow[];
 }
@@ -107,6 +115,9 @@ export function OfferSection({
   jobEmploymentType,
   roleCategory,
   benchmarkState,
+  jobCompMin,
+  jobCompMax,
+  jobCompPeriod,
   templates,
   sends,
 }: OfferSectionProps) {
@@ -190,6 +201,9 @@ export function OfferSection({
           jobEmploymentType={jobEmploymentType}
           roleCategory={roleCategory}
           benchmarkState={benchmarkState}
+          jobCompMin={jobCompMin}
+          jobCompMax={jobCompMax}
+          jobCompPeriod={jobCompPeriod}
           templates={templates}
           onClose={() => setModalOpen(false)}
         />
@@ -506,6 +520,9 @@ function SendOfferModal({
   jobEmploymentType,
   roleCategory,
   benchmarkState,
+  jobCompMin,
+  jobCompMax,
+  jobCompPeriod,
   templates,
   onClose,
 }: {
@@ -518,6 +535,9 @@ function SendOfferModal({
   jobEmploymentType: string;
   roleCategory: string;
   benchmarkState: string | null;
+  jobCompMin: number | null;
+  jobCompMax: number | null;
+  jobCompPeriod: string | null;
   templates: OfferTemplateOption[];
   onClose: () => void;
 }) {
@@ -531,6 +551,11 @@ function SendOfferModal({
   const [error, setError] = useState<string | null>(null);
   const [previewHtml, setPreviewHtml] = useState<string>("");
   const [pending, startTransition] = useTransition();
+  // N12 — structured base comp (separate from the prose offer.compensation).
+  const [baseAmount, setBaseAmount] = useState<string>("");
+  const [basePeriod, setBasePeriod] = useState<"hourly" | "annual">(
+    jobCompPeriod === "annual" ? "annual" : "hourly"
+  );
 
   const selectedTemplate = useMemo(
     () => templates.find((t) => t.id === templateId) ?? null,
@@ -581,11 +606,16 @@ function SendOfferModal({
     if (!selectedTemplate) return;
     setError(null);
     startTransition(async () => {
+      const parsedBase = baseAmount.trim()
+        ? Number(baseAmount.replace(/[^0-9.]/g, "")) || null
+        : null;
       const res = await sendOffer({
         applicationId,
         templateId: selectedTemplate.id,
         mergeValues: values,
         subject: subject.trim() || `Offer from ${dsoName}`,
+        baseAmount: parsedBase,
+        basePeriod,
       });
       if (!res.ok) {
         setError(res.error);
@@ -674,13 +704,24 @@ function SendOfferModal({
             />
           )}
           {step === 2 && selectedTemplate && (
-            <Step2FillFields
-              template={selectedTemplate}
-              values={values}
-              onChange={setValues}
-              roleCategory={roleCategory}
-              benchmarkState={benchmarkState}
-            />
+            <div className="space-y-5">
+              <OfferBaseCompField
+                amount={baseAmount}
+                onAmount={setBaseAmount}
+                period={basePeriod}
+                onPeriod={setBasePeriod}
+                jobCompMin={jobCompMin}
+                jobCompMax={jobCompMax}
+                jobCompPeriod={jobCompPeriod}
+              />
+              <Step2FillFields
+                template={selectedTemplate}
+                values={values}
+                onChange={setValues}
+                roleCategory={roleCategory}
+                benchmarkState={benchmarkState}
+              />
+            </div>
           )}
           {step === 3 && (
             <Step3Preview html={previewHtml} />
@@ -813,6 +854,91 @@ function Step1PickTemplate({
 }
 
 /* ── Step 2 ── */
+
+/**
+ * N12 — structured base-comp input + live guardrail banner. The amount/period
+ * here is the number we check against the job's posted range (and store for
+ * offer analytics); the prose pay details still live in the "Compensation"
+ * field. Phase 1 surfaces an in-range / out-of-range banner; Phase 2 will
+ * route out-of-range offers through the approval policy.
+ */
+function OfferBaseCompField({
+  amount,
+  onAmount,
+  period,
+  onPeriod,
+  jobCompMin,
+  jobCompMax,
+  jobCompPeriod,
+}: {
+  amount: string;
+  onAmount: (v: string) => void;
+  period: "hourly" | "annual";
+  onPeriod: (p: "hourly" | "annual") => void;
+  jobCompMin: number | null;
+  jobCompMax: number | null;
+  jobCompPeriod: string | null;
+}) {
+  const numeric = amount.trim() ? Number(amount.replace(/[^0-9.]/g, "")) : null;
+  const guardrail = evaluateOfferGuardrail({
+    baseAmount: numeric != null && Number.isFinite(numeric) ? numeric : null,
+    basePeriod: period,
+    jobMin: jobCompMin,
+    jobMax: jobCompMax,
+    jobPeriod: jobCompPeriod as JobCompPeriod | null,
+  });
+  const hasRange = jobCompMin != null || jobCompMax != null;
+
+  return (
+    <div className="rounded-md border border-[var(--rule)] bg-cream/40 p-4">
+      <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1">
+        Base compensation
+      </div>
+      <p className="text-[12px] text-slate-body leading-relaxed mb-2.5">
+        The structured base we check against your posted range and use in offer
+        analytics. The full pay details still go in the “Compensation” field below.
+        {!hasRange && " (This job has no posted range, so there's nothing to check against.)"}
+      </p>
+      <div className="flex items-stretch gap-2">
+        <div className="relative flex-1">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-meta text-sm">
+            $
+          </span>
+          <input
+            type="text"
+            inputMode="decimal"
+            value={amount}
+            onChange={(e) => onAmount(e.target.value)}
+            placeholder={jobCompMin != null ? String(jobCompMin) : "Base amount"}
+            className="w-full pl-6 pr-3 py-2 border border-[var(--rule-strong)] bg-white text-ink text-sm focus:outline-none focus:border-heritage"
+          />
+        </div>
+        <select
+          value={period}
+          onChange={(e) => onPeriod(e.target.value as "hourly" | "annual")}
+          className="px-3 py-2 border border-[var(--rule-strong)] bg-white text-ink text-sm focus:outline-none focus:border-heritage"
+        >
+          <option value="hourly">per hour</option>
+          <option value="annual">per year</option>
+        </select>
+      </div>
+      {guardrail.severity === "ok" && guardrail.message && (
+        <div className="mt-2 rounded border border-heritage/30 bg-heritage/[0.06] px-3 py-2 text-[12px] font-medium text-heritage-deep">
+          ✓ {guardrail.message}
+        </div>
+      )}
+      {guardrail.severity === "out_of_range" && guardrail.message && (
+        <div className="mt-2 flex items-start gap-2 rounded border border-amber-300 bg-amber-50 px-3 py-2 text-[12px] text-amber-900">
+          <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+          <span>
+            {guardrail.message} You can still send — this is the kind of offer your
+            approval policy can route for sign-off.
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function Step2FillFields({
   template,

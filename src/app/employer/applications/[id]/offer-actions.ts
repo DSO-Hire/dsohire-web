@@ -43,6 +43,10 @@ export interface SendOfferInput {
   mergeValues: Record<string, string>;
   /** Editable subject — defaults to "Offer from {dsoName}" at the modal. */
   subject: string;
+  /** N12: structured base amount (powers comp guardrails + offer analytics).
+   *  The prose `offer.compensation` mergeValue stays for the letter body. */
+  baseAmount?: number | null;
+  basePeriod?: "hourly" | "annual" | null;
 }
 
 export type SendOfferResult = { ok: true; sendId: string } | { ok: false; error: string };
@@ -290,6 +294,14 @@ export async function sendOffer(
       body_html: render.html,
       merge_values: mergeValues,
       token: responseToken,
+      base_amount:
+        typeof input.baseAmount === "number" && Number.isFinite(input.baseAmount)
+          ? input.baseAmount
+          : null,
+      base_period:
+        input.basePeriod === "hourly" || input.basePeriod === "annual"
+          ? input.basePeriod
+          : null,
     })
     .select("id")
     .maybeSingle();
