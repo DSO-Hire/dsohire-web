@@ -2332,6 +2332,7 @@ export type Database = {
           deleted_at: string | null
           description: string | null
           featured_until: string | null
+          candidate_reply_to_email: string | null
           headquarters_city: string | null
           headquarters_state: string | null
           id: string
@@ -2361,6 +2362,7 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           featured_until?: string | null
+          candidate_reply_to_email?: string | null
           headquarters_city?: string | null
           headquarters_state?: string | null
           id?: string
@@ -2390,6 +2392,7 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           featured_until?: string | null
+          candidate_reply_to_email?: string | null
           headquarters_city?: string | null
           headquarters_state?: string | null
           id?: string

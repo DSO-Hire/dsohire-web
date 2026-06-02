@@ -82,7 +82,7 @@ export default async function CandidateDashboardPage() {
   const { data: candidate } = await supabase
     .from("candidates")
     .select(
-      "id, first_name, last_name, salutation, full_name, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, desired_specialty, pms_systems, skills, languages, temp_or_perm, schedule_preferences, min_salary, salary_unit, cv_visibility, availability, resume_url, linkedin_url, avatar_url, is_searchable, practice_fit_consent",
+      "id, first_name, last_name, salutation, full_name, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, desired_specialty, pms_systems, skills, languages, temp_or_perm, schedule_preferences, min_salary, salary_unit, cv_visibility, availability, resume_url, linkedin_url, avatar_url, practice_fit_consent",
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
@@ -190,8 +190,10 @@ export default async function CandidateDashboardPage() {
     },
     {
       key: "visible",
-      label: "Turn on profile visibility so recruiters can find you",
-      done: Boolean((c.is_searchable as boolean | null) ?? false),
+      label: "Set your profile visibility so recruiters can find you",
+      // cv_visibility is the "Profile status" enum: hidden / recruiters_only /
+      // open_to_work. Anything but "hidden" means discoverable → done.
+      done: ((c.cv_visibility as string | null) ?? "hidden") !== "hidden",
       href: "/candidate/settings/privacy",
     },
     {
