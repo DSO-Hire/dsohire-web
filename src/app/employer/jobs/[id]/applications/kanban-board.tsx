@@ -34,6 +34,7 @@ import {
   useTransition,
 } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ChevronRight,
   ChevronDown,
@@ -195,6 +196,7 @@ export function KanbanBoard({
   // Last broadcast body — lets the result banner's Retry resend to the
   // failed subset without re-opening the compose dialog.
   const lastBulkMessageBodyRef = useRef<string>("");
+  const router = useRouter();
   const [, startTransition] = useTransition();
 
   // pendingMovesRef tracks {applicationId -> expectedStageId}.
@@ -439,6 +441,15 @@ export function KanbanBoard({
             result.nextKind,
             result.stageEnteredAt
           );
+          // OFFER-UX — moving a single card into the Offer stage jumps to
+          // that candidate's offer composer (opened via ?compose=offer)
+          // instead of leaving the recruiter to find it on the detail page.
+          // Single-card moves only (bulk goes through a separate path).
+          if (result.nextKind === "offer" && prevKind !== "offer") {
+            router.push(
+              `/employer/applications/${applicationId}?compose=offer`
+            );
+          }
         } else {
           pendingMovesRef.current.delete(applicationId);
           const prevLabel =

@@ -23,6 +23,7 @@ import {
   useState,
   useTransition,
 } from "react";
+import { useRouter } from "next/navigation";
 import { ChevronDown, MoreHorizontal, Loader2 } from "lucide-react";
 import {
   colorTripleFor,
@@ -99,6 +100,7 @@ export function StageSelector({
   aiSuggesterAvailable,
   aiSuggesterHasContext,
 }: StageSelectorProps) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -146,6 +148,16 @@ export function StageSelector({
       });
       if (!result.ok) {
         setError(result.error);
+        return;
+      }
+      // OFFER-UX — landing the candidate in the Offer stage opens the offer
+      // composer automatically (the section is far down the page; this saves
+      // the hunt). Only when moving INTO offer from a different kind.
+      if (stage.kind === "offer" && optimisticState.kind !== "offer") {
+        router.push(
+          `/employer/applications/${applicationId}?compose=offer`,
+          { scroll: false }
+        );
       }
     });
   }

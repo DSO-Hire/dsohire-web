@@ -19,8 +19,8 @@
  * confirm) that posts to `sendOffer()` in offer-actions.ts.
  */
 
-import { useEffect, useMemo, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Send,
   Loader2,
@@ -101,6 +101,9 @@ interface OfferSectionProps {
   jobCompMin: number | null;
   jobCompMax: number | null;
   jobCompPeriod: string | null;
+  /** N12 OFFER-UX — the job's posted benefits text, to prefill the offer
+   * benefits field so the offer matches what was advertised. */
+  jobBenefits: string | null;
   templates: OfferTemplateOption[];
   sends: OfferSendRow[];
 }
@@ -118,9 +121,13 @@ export function OfferSection({
   jobCompMin,
   jobCompMax,
   jobCompPeriod,
+  jobBenefits,
   templates,
   sends,
 }: OfferSectionProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const sectionRef = useRef<HTMLDivElement | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   // When the latest send has been accepted, the primary CTA changes
   // copy + intent. A fresh send becomes a revised-offer flow and
@@ -146,8 +153,27 @@ export function OfferSection({
     setModalOpen(true);
   }
 
+  // OFFER-UX — when the recruiter lands here via ?compose=offer (e.g. they
+  // just flipped the candidate into the Offer stage from the kanban or the
+  // stage selector), scroll the offer block into view and open the composer
+  // automatically instead of making them hunt for it. We consume the param
+  // once (router.replace strips it) so a refresh doesn't reopen the modal.
+  const autoOpenedRef = useRef(false);
+  useEffect(() => {
+    if (autoOpenedRef.current) return;
+    if (searchParams.get("compose") !== "offer") return;
+    autoOpenedRef.current = true;
+    // Strip the param without adding a history entry.
+    router.replace(`/employer/applications/${applicationId}`, { scroll: false });
+    if (!canSend) return;
+    sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (latestAccepted) setConfirmRevision(true);
+    else setModalOpen(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
   return (
-    <div className="space-y-4">
+    <div ref={sectionRef} id="offer-composer" className="space-y-4 scroll-mt-24">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <p className="text-[13px] text-slate-meta leading-relaxed max-w-[520px]">
           {hasSends
@@ -204,6 +230,7 @@ export function OfferSection({
           jobCompMin={jobCompMin}
           jobCompMax={jobCompMax}
           jobCompPeriod={jobCompPeriod}
+          jobBenefits={jobBenefits}
           templates={templates}
           onClose={() => setModalOpen(false)}
         />
@@ -523,6 +550,7 @@ function SendOfferModal({
   jobCompMin,
   jobCompMax,
   jobCompPeriod,
+  jobBenefits,
   templates,
   onClose,
 }: {
@@ -538,6 +566,7 @@ function SendOfferModal({
   jobCompMin: number | null;
   jobCompMax: number | null;
   jobCompPeriod: string | null;
+  jobBenefits: string | null;
   templates: OfferTemplateOption[];
   onClose: () => void;
 }) {
@@ -561,6 +590,47 @@ function SendOfferModal({
     () => templates.find((t) => t.id === templateId) ?? null,
     [templates, templateId]
   );
+
+  // OFFER-UX — prefill the benefits field from what the job posting already
+  // advertised, so the offer doesn't silently drop benefits the candidate
+  // saw on the listing. Only seeds an EMPTY field, once per template, and
+  // stays fully editable.
+  const seededBenefitsForRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!selectedTemplate) return;
+    if (seededBenefitsForRef.current === selectedTemplate.id) return;
+    seededBenefitsForRef.current = selectedTemplate.id;
+    if (!jobBenefits || !jobBenefits.trim()) return;
+    if (!isTokenInBody(selectedTemplate.body, "offer.benefits_summary")) return;
+    setValues((prev) =>
+      (prev["offer.benefits_summary"] ?? "").trim() !== ""
+        ? prev
+        : { ...prev, "offer.benefits_summary": jobBenefits.trim() }
+    );
+  }, [selectedTemplate, jobBenefits]);
+
+  // OFFER-UX — mirror the structured base amount into the prose Compensation
+  // field so recruiters don't retype it on a straight hourly/salary offer.
+  // We only overwrite while the field is empty or still showing OUR last
+  // auto-seed; the moment the recruiter edits it themselves, we back off.
+  const lastAutoCompRef = useRef<string>("");
+  useEffect(() => {
+    if (!selectedTemplate) return;
+    if (!isTokenInBody(selectedTemplate.body, "offer.compensation")) return;
+    const numeric = baseAmount.trim()
+      ? Number(baseAmount.replace(/[^0-9.]/g, ""))
+      : null;
+    if (numeric == null || !Number.isFinite(numeric) || numeric <= 0) return;
+    const pretty = numeric % 1 === 0 ? String(numeric) : numeric.toFixed(2);
+    const seed = `$${pretty}/${basePeriod === "annual" ? "year" : "hour"}`;
+    setValues((prev) => {
+      const cur = prev["offer.compensation"] ?? "";
+      if (cur !== "" && cur !== lastAutoCompRef.current) return prev;
+      if (cur === seed) return prev;
+      return { ...prev, "offer.compensation": seed };
+    });
+    lastAutoCompRef.current = seed;
+  }, [baseAmount, basePeriod, selectedTemplate]);
 
   function next() {
     setError(null);
@@ -989,18 +1059,163 @@ function Step2FillFields({
         />
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {usedFields.map((f) => (
-          <OfferField
-            key={f.key}
-            field={f}
-            value={values[f.key] ?? ""}
-            onChange={(v) => setField(f.key, v)}
-          />
-        ))}
+        {usedFields.map((f) => {
+          if (f.key === "offer.start_date") {
+            return (
+              <DateOfferField
+                key={f.key}
+                field={f}
+                value={values[f.key] ?? ""}
+                onChange={(v) => setField(f.key, v)}
+                withTime={false}
+              />
+            );
+          }
+          if (f.key === "offer.deadline_to_accept") {
+            return (
+              <DateOfferField
+                key={f.key}
+                field={f}
+                value={values[f.key] ?? ""}
+                onChange={(v) => setField(f.key, v)}
+                withTime
+              />
+            );
+          }
+          return (
+            <OfferField
+              key={f.key}
+              field={f}
+              value={values[f.key] ?? ""}
+              onChange={(v) => setField(f.key, v)}
+            />
+          );
+        })}
       </div>
     </div>
   );
 }
+
+/* ── OFFER-UX date helpers ──
+ * The merge value stored on the offer (and rendered in the letter) is a
+ * human-readable string like "Monday, June 16, 2026". The <input> wants an
+ * ISO value. These convert between the two so the recruiter gets a real
+ * calendar/clock picker while the letter still reads naturally. Parsing the
+ * stored string back to ISO is best-effort (strips the weekday prefix and
+ * trailing tz); if it can't parse, the picker just starts empty and the
+ * "Appears as" caption still shows what's saved. */
+function isoToHumanDate(iso: string): string {
+  if (!iso) return "";
+  const d = new Date(`${iso}T12:00:00`);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+function humanToIsoDate(human: string): string {
+  if (!human) return "";
+  const cleaned = human.replace(/^[A-Za-z]+,\s*/, "").replace(/\s+at\s+.*$/i, "");
+  const d = new Date(cleaned);
+  if (Number.isNaN(d.getTime())) return "";
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+function isoToHumanDateTime(iso: string): string {
+  if (!iso) return "";
+  const d = new Date(iso); // datetime-local is local time, no tz suffix
+  if (Number.isNaN(d.getTime())) return "";
+  const datePart = d.toLocaleDateString(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  const timePart = d.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+  return `${datePart} at ${timePart}`;
+}
+function humanToIsoDateTime(human: string): string {
+  if (!human) return "";
+  const cleaned = human
+    .replace(/^[A-Za-z]+,\s*/, "")
+    .replace(/\bat\b/i, " ")
+    .replace(/\s+[A-Za-z]{2,4}\s*$/, "")
+    .trim();
+  const d = new Date(cleaned);
+  if (Number.isNaN(d.getTime())) return "";
+  const y = d.getFullYear();
+  const mo = String(d.getMonth() + 1).padStart(2, "0");
+  const da = String(d.getDate()).padStart(2, "0");
+  const h = String(d.getHours()).padStart(2, "0");
+  const mi = String(d.getMinutes()).padStart(2, "0");
+  return `${y}-${mo}-${da}T${h}:${mi}`;
+}
+
+/** OFFER-UX — calendar (and optionally clock) picker for date merge fields. */
+function DateOfferField({
+  field,
+  value,
+  onChange,
+  withTime,
+}: {
+  field: MergeFieldDef;
+  value: string;
+  onChange: (v: string) => void;
+  withTime: boolean;
+}) {
+  const inputValue = withTime ? humanToIsoDateTime(value) : humanToIsoDate(value);
+  return (
+    <label className="block sm:col-span-2">
+      <div className="flex items-baseline gap-2 mb-1">
+        <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+          {field.label}
+        </span>
+        {field.required && (
+          <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-red-700">
+            Required
+          </span>
+        )}
+      </div>
+      <input
+        type={withTime ? "datetime-local" : "date"}
+        value={inputValue}
+        onChange={(e) =>
+          onChange(
+            e.target.value
+              ? withTime
+                ? isoToHumanDateTime(e.target.value)
+                : isoToHumanDate(e.target.value)
+              : ""
+          )
+        }
+        className="w-full sm:w-auto px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+      />
+      {value && (
+        <p className="mt-1 text-[11px] text-slate-meta">
+          Appears in the letter as:{" "}
+          <span className="text-slate-body">{value}</span>
+        </p>
+      )}
+    </label>
+  );
+}
+
+/** OFFER-UX — display overrides so the prose pay field reads as an
+ * additive "details" field now that the structured base lives up top. */
+const OFFER_FIELD_LABEL_OVERRIDES: Record<string, string> = {
+  "offer.compensation": "Full compensation details",
+};
+const OFFER_FIELD_HELPER: Record<string, string> = {
+  "offer.compensation":
+    "Pre-filled from your base above — add bonuses, production %, differentials, or equity here.",
+};
 
 function OfferField({
   field,
@@ -1018,11 +1233,13 @@ function OfferField({
   // Long-ish fields get a textarea; short ones get an input. Span full
   // width when long.
   const wrapperClass = isLong ? "sm:col-span-2" : "";
+  const label = OFFER_FIELD_LABEL_OVERRIDES[field.key] ?? field.label;
+  const helper = OFFER_FIELD_HELPER[field.key];
   return (
     <label className={`block ${wrapperClass}`}>
       <div className="flex items-baseline gap-2 mb-1">
         <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
-          {field.label}
+          {label}
         </span>
         {field.required && (
           <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-red-700">
@@ -1030,6 +1247,9 @@ function OfferField({
           </span>
         )}
       </div>
+      {helper && (
+        <p className="text-[11px] text-slate-meta leading-snug mb-1.5">{helper}</p>
+      )}
       {isLong ? (
         <textarea
           value={value}
