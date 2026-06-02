@@ -3990,6 +3990,7 @@ export type Database = {
           posted_within_days?: number
           query_text?: string
           state_filter?: string
+          states_filter?: string[] | null
           within_miles?: number | null
         }
         Returns: {

@@ -98,7 +98,9 @@ type JobsSortKey = (typeof JOBS_SORT_OPTIONS)[number]["value"];
 interface PageProps {
   searchParams: Promise<{
     q?: string;
-    state?: string;
+    /** Multi-state: a repeated ?state= param arrives as string[]; a single
+     *  selection arrives as string. Normalized to a code list below. */
+    state?: string | string[];
     employment?: string;
     category?: string;
     view?: string;
@@ -173,6 +175,21 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
   const sp = await searchParams;
   const supabase = await createSupabaseServerClient();
 
+  // Multi-state filter: the URL may carry a repeated ?state= (string[]) or a
+  // single ?state= (string). Normalize to a deduped list of canonical codes.
+  const selectedStates = Array.from(
+    new Set(
+      (Array.isArray(sp.state) ? sp.state : sp.state ? [sp.state] : [])
+        .map((s) => normalizeStateInput(s))
+        .filter((s): s is string => Boolean(s))
+    )
+  );
+  // Carry every selected state through any href/filter rebuild as repeated
+  // ?state= params (mirrors how the multi-select form submits them).
+  const pushStates = (params: Array<[string, string]>) => {
+    for (const code of selectedStates) params.push(["state", code]);
+  };
+
   const sortKey: JobsSortKey =
     (JOBS_SORT_OPTIONS.find((o) => o.value === sp.sort)?.value as
       | JobsSortKey
@@ -213,7 +230,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
   // page until the DB schema catches up).
   const rpcArgs: Record<string, unknown> = {
     query_text: sp.q || null,
-    state_filter: sp.state || null,
+    states_filter: selectedStates.length ? selectedStates : null,
     employment_filter: sp.employment || null,
     category_filter: sp.category || null,
     posted_within_days: postedWithinDays,
@@ -465,7 +482,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
   // Preserve current filters when toggling view modes
   const filterParams: Array<[string, string]> = [];
   if (sp.q) filterParams.push(["q", sp.q]);
-  if (sp.state) filterParams.push(["state", sp.state]);
+  pushStates(filterParams);
   if (sp.employment) filterParams.push(["employment", sp.employment]);
   if (sp.category) filterParams.push(["category", sp.category]);
   if (postedFilterValue) filterParams.push(["posted", postedFilterValue]);
@@ -507,7 +524,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
   const buildSurfaceHref = (surface: JobsSurface): string => {
     const params: Array<[string, string]> = [];
     if (sp.q) params.push(["q", sp.q]);
-    if (sp.state) params.push(["state", sp.state]);
+    pushStates(params);
     if (sp.employment) params.push(["employment", sp.employment]);
     if (sp.category) params.push(["category", sp.category]);
     if (postedFilterValue) params.push(["posted", postedFilterValue]);
@@ -522,7 +539,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
   const buildFunctionHref = (slug: string | null): string => {
     const params: Array<[string, string]> = [];
     if (sp.q) params.push(["q", sp.q]);
-    if (sp.state) params.push(["state", sp.state]);
+    pushStates(params);
     if (sp.employment) params.push(["employment", sp.employment]);
     if (sp.category) params.push(["category", sp.category]);
     if (postedFilterValue) params.push(["posted", postedFilterValue]);
@@ -537,7 +554,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
   const buildPostedHref = (value: PostedFilterValue | null): string => {
     const params: Array<[string, string]> = [];
     if (sp.q) params.push(["q", sp.q]);
-    if (sp.state) params.push(["state", sp.state]);
+    pushStates(params);
     if (sp.employment) params.push(["employment", sp.employment]);
     if (sp.category) params.push(["category", sp.category]);
     if (showMap) params.push(["view", "map"]);
@@ -734,7 +751,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
               State
             </div>
             <JobsStateFilter
-              defaultValue={normalizeStateInput(sp.state)}
+              defaultValues={selectedStates}
             />
           </div>
           <SearchField
@@ -808,7 +825,9 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
           className="mt-3 flex flex-wrap items-center gap-2"
         >
           {sp.q && <input type="hidden" name="q" value={sp.q} />}
-          {sp.state && <input type="hidden" name="state" value={sp.state} />}
+          {selectedStates.map((code) => (
+            <input key={code} type="hidden" name="state" value={code} />
+          ))}
           {sp.employment && (
             <input type="hidden" name="employment" value={sp.employment} />
           )}
