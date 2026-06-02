@@ -7,7 +7,7 @@
  *   import { NurtureMessage } from '@/emails/candidate/NurtureMessage';
  */
 
-import { Heading, Section, Text } from "@react-email/components";
+import { Section, Text } from "@react-email/components";
 import { Layout } from "../components/Layout";
 import { PrimaryButton } from "../components/PrimaryButton";
 import { brand } from "../lib/brand";
@@ -22,7 +22,6 @@ interface NurtureMessageProps {
 }
 
 export function NurtureMessage({
-  recipientName = "there",
   dsoName = "the hiring team",
   jobTitle = "the role",
   messageBody = "We wanted to check in on your application.",
@@ -33,10 +32,11 @@ export function NurtureMessage({
     .map((p) => p.trim())
     .filter(Boolean);
 
+  // No auto greeting heading: the employer writes the full message (incl. its
+  // own greeting), so an auto "Hi {name} —" would double up the salutation.
   return (
     <Layout previewText={`A note from ${dsoName} about ${jobTitle}`}>
       <Text style={eyebrow}>A note from {dsoName}</Text>
-      <Heading style={heading}>Hi {recipientName} —</Heading>
       {paragraphs.length > 0 ? (
         paragraphs.map((p, i) => (
           <Text key={i} style={paragraph}>
