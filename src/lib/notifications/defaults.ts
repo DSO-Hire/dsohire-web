@@ -82,6 +82,13 @@ export const NOTIFICATION_DEFAULTS: DefaultsMap = {
     in_app: { enabled: true, frequency: "instant" },
     sms: { enabled: false, frequency: "off" },
   },
+  "employer.automation_notice": {
+    // An admin explicitly built a rule to notify this teammate, so it sends
+    // regardless of personal prefs (also listed in ALWAYS_DISPATCH_EVENTS).
+    email: { enabled: true, frequency: "instant" },
+    in_app: { enabled: false, frequency: "off" },
+    sms: { enabled: false, frequency: "off" },
+  },
 };
 
 /**
@@ -96,4 +103,5 @@ export const NOTIFICATION_DEFAULTS: DefaultsMap = {
 export const ALWAYS_DISPATCH_EVENTS: ReadonlySet<NotificationEventKind> =
   new Set<NotificationEventKind>([
     "employer.team_invite", // can't accept an invite without the email
+    "employer.automation_notice", // admin-configured automation; not a personal pref
   ]);

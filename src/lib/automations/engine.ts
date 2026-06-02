@@ -25,6 +25,8 @@
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
 import { dispatchStageChangedEmail } from "@/lib/email/templates/stage-changed-dispatch";
+import { dispatchNotification } from "@/lib/notifications/dispatcher";
+import { AutomationNotice } from "@/emails/employer/AutomationNotice";
 import {
   evaluateConditions,
   type AutomationEvent,
@@ -33,6 +35,8 @@ import {
   type RuleFacts,
   type StageChangedEvent,
 } from "./types";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
 
 type ServiceClient = ReturnType<typeof createSupabaseServiceRoleClient>;
 
@@ -73,7 +77,7 @@ export async function runAutomationsForEvent(event: AutomationEvent): Promise<vo
 
       const outcomes: ActionOutcome[] = [];
       for (const action of rule.actions) {
-        outcomes.push(await runAction(action, event));
+        outcomes.push(await runAction(action, event, rule.name));
       }
 
       const anyError = outcomes.some((o) => o.status === "error");
@@ -196,6 +200,8 @@ function factsForEvent(event: AutomationEvent): RuleFacts {
         from_kind: event.fromKind,
         job_id: event.jobId,
       };
+    case "application.received":
+      return { job_id: event.jobId };
     default:
       return {};
   }
@@ -207,7 +213,8 @@ function factsForEvent(event: AutomationEvent): RuleFacts {
 
 async function runAction(
   action: RuleActionRow,
-  event: AutomationEvent
+  event: AutomationEvent,
+  ruleName: string
 ): Promise<ActionOutcome> {
   try {
     switch (action.action_kind) {
@@ -217,12 +224,12 @@ async function runAction(
         return await runEmailCandidate(event);
       case "add_tag":
         return await runAddTag(action, event);
+      case "notify_teammate":
+        return await runNotifyTeammate(action, event, ruleName);
       // Reserved actions — not yet runnable. `move_stage` is HELD on
       // purpose (Cam, Day 25 — the riskiest foot-gun + the loop case);
-      // notify_teammate / assign need notification-eventkind / schema
-      // plumbing landing in a later chunk; start_sequence is the N16 hook.
-      // No-op safely so a rule carrying one never crashes the engine.
-      case "notify_teammate":
+      // `assign` needs an assignee column + a surface to display it;
+      // start_sequence is the N16 hook. No-op safely.
       case "assign":
       case "move_stage":
       case "start_sequence":
@@ -310,4 +317,74 @@ async function runAddTag(
     return { action_kind: "add_tag", status: "error", note: error.message };
   }
   return { action_kind: "add_tag", status: "ran" };
+}
+
+/**
+ * Email a teammate when the rule fires. config.target_dso_user_id names the
+ * recipient; we resolve their auth user + email, build a short headline/body
+ * from the event, and route through the shared notification dispatcher
+ * (employer.automation_notice always-dispatches — the admin set it up, so it
+ * isn't a personal preference). NOT candidate-facing, so no stage-hide gate.
+ */
+async function runNotifyTeammate(
+  action: RuleActionRow,
+  event: AutomationEvent,
+  ruleName: string
+): Promise<ActionOutcome> {
+  const targetId = String(
+    (action.config.target_dso_user_id as string | undefined) ?? ""
+  ).trim();
+  if (!targetId) {
+    return { action_kind: "notify_teammate", status: "skipped", note: "no target" };
+  }
+
+  const admin = createSupabaseServiceRoleClient();
+  // Confirm the teammate belongs to THIS DSO before notifying.
+  const { data: teammate } = await admin
+    .from("dso_users")
+    .select("auth_user_id, first_name")
+    .eq("id", targetId)
+    .eq("dso_id", event.dsoId)
+    .maybeSingle();
+  const authUserId = (teammate?.auth_user_id as string | null) ?? null;
+  if (!authUserId) {
+    return { action_kind: "notify_teammate", status: "skipped", note: "teammate not found" };
+  }
+
+  const { data: authResp, error: authErr } =
+    await admin.auth.admin.getUserById(authUserId);
+  const email = authResp?.user?.email;
+  if (authErr || !email) {
+    return { action_kind: "notify_teammate", status: "skipped", note: "no teammate email" };
+  }
+
+  let headline: string;
+  let body: string;
+  if (event.trigger === "application.received") {
+    headline = `New application for ${event.jobTitle}`;
+    body = `A new application just came in for ${event.jobTitle}.`;
+  } else {
+    const e = event as StageChangedEvent;
+    headline = `Application moved to ${e.toStageLabel}`;
+    body = `An application for ${e.jobTitle} moved from ${e.fromStageLabel} to ${e.toStageLabel}.`;
+  }
+  const applicationUrl = `${SITE_URL}/employer/applications/${event.applicationId}`;
+
+  await dispatchNotification({
+    userId: authUserId,
+    eventKind: "employer.automation_notice",
+    relatedDsoId: event.dsoId,
+    email: {
+      to: email,
+      subject: headline,
+      react: AutomationNotice({
+        recipientName: (teammate?.first_name as string | null) ?? "there",
+        ruleName,
+        headline,
+        body,
+        applicationUrl,
+      }),
+    },
+  });
+  return { action_kind: "notify_teammate", status: "ran" };
 }

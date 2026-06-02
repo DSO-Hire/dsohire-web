@@ -25,7 +25,8 @@ export type NotificationEventKind =
   // Employer-facing (per-DSO-member)
   | "employer.new_application"              // candidate applied to a job
   | "employer.team_invite"                  // teammate invitation
-  | "employer.comment_mention";             // @-mentioned in a comment
+  | "employer.comment_mention"              // @-mentioned in a comment
+  | "employer.automation_notice";           // N13 automation "notify a teammate" action
 
 export type NotificationChannel = "email" | "in_app" | "sms";
 
@@ -56,4 +57,5 @@ export const EVENT_KIND_LABELS: Record<NotificationEventKind, string> = {
   "employer.new_application": "New application",
   "employer.team_invite": "Team invitation",
   "employer.comment_mention": "Comment @-mention",
+  "employer.automation_notice": "Automation alert",
 };

@@ -24,15 +24,28 @@ import { STAGE_KINDS, type StageKind } from "@/lib/applications/stages";
 
 export type ActionResult = { ok: true; id?: string } | { ok: false; error: string };
 
-// Triggers the builder may target in this phase (only the wired one).
-const UI_TRIGGERS = new Set<AutomationTrigger>(["application.stage_changed"]);
-// Actions the builder may attach in this phase (the runnable ones).
-const UI_ACTION_KINDS = new Set<AutomationActionKind>([
-  "email_candidate",
-  "inbox_system_message",
-  "add_tag",
+// Triggers the builder may target in this phase.
+const UI_TRIGGERS = new Set<AutomationTrigger>([
+  "application.stage_changed",
+  "application.received",
 ]);
-const CONDITION_FIELDS = new Set(["to_kind", "from_kind", "job_id"]);
+// Actions allowed per trigger. received is ADDITIVE (fires after the existing
+// ack email), so candidate-facing email/inbox actions aren't offered there —
+// only the internal actions (tag, notify a teammate).
+const ACTIONS_BY_TRIGGER: Record<string, Set<AutomationActionKind>> = {
+  "application.stage_changed": new Set<AutomationActionKind>([
+    "email_candidate",
+    "inbox_system_message",
+    "add_tag",
+    "notify_teammate",
+  ]),
+  "application.received": new Set<AutomationActionKind>(["add_tag", "notify_teammate"]),
+};
+// Condition fields available per trigger.
+const CONDITION_FIELDS_BY_TRIGGER: Record<string, Set<string>> = {
+  "application.stage_changed": new Set(["to_kind", "from_kind", "job_id"]),
+  "application.received": new Set(["job_id"]),
+};
 const CONDITION_OPS = new Set(["in", "eq", "neq", "gte", "lte"]);
 const VALID_KINDS = new Set<StageKind>(STAGE_KINDS);
 
@@ -75,25 +88,66 @@ function validateRuleInput(input: RuleInput): string | null {
   if (name.length < 1) return "Give the rule a name.";
   if (name.length > 80) return "Rule name is too long (80 char max).";
   if (!UI_TRIGGERS.has(input.trigger_kind)) return "Unsupported trigger.";
+
+  const allowedActions = ACTIONS_BY_TRIGGER[input.trigger_kind];
+  const allowedFields = CONDITION_FIELDS_BY_TRIGGER[input.trigger_kind];
+  if (!allowedActions || !allowedFields) return "Unsupported trigger.";
+
   if (!Array.isArray(input.actions) || input.actions.length === 0) {
     return "Add at least one action.";
   }
   for (const a of input.actions) {
-    if (!UI_ACTION_KINDS.has(a.action_kind)) return "Unsupported action.";
+    if (!allowedActions.has(a.action_kind)) {
+      return "That action isn't available for this trigger.";
+    }
     if (a.action_kind === "add_tag") {
       const label = String((a.config?.label as string | undefined) ?? "").trim();
       if (!label) return "Tag action needs a label.";
     }
+    if (a.action_kind === "notify_teammate") {
+      const target = String(
+        (a.config?.target_dso_user_id as string | undefined) ?? ""
+      ).trim();
+      if (!target) return "Choose a teammate to notify.";
+    }
   }
   for (const c of input.conditions ?? []) {
-    if (!CONDITION_FIELDS.has(c.field)) return `Unknown condition field: ${c.field}.`;
+    if (!allowedFields.has(c.field)) return `Unknown condition field: ${c.field}.`;
     if (!CONDITION_OPS.has(c.op)) return `Unknown operator: ${c.op}.`;
-    if ((c.field === "to_kind" || c.field === "from_kind")) {
+    if (c.field === "to_kind" || c.field === "from_kind") {
       const vals = Array.isArray(c.value) ? c.value : [c.value];
       for (const v of vals) {
         if (!VALID_KINDS.has(v as StageKind)) return `Unknown stage kind: ${String(v)}.`;
       }
     }
+  }
+  return null;
+}
+
+/**
+ * Confirm every notify_teammate action targets a teammate in THIS DSO.
+ * Returns an error string, or null if clean. Async (needs a DB check), so
+ * it runs in create/update after the sync validation.
+ */
+async function validateTeammateTargets(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  dsoId: string,
+  actions: ActionInput[]
+): Promise<string | null> {
+  const targets = actions
+    .filter((a) => a.action_kind === "notify_teammate")
+    .map((a) => String((a.config?.target_dso_user_id as string | undefined) ?? "").trim())
+    .filter(Boolean);
+  if (targets.length === 0) return null;
+
+  const { data } = await supabase
+    .from("dso_users")
+    .select("id")
+    .eq("dso_id", dsoId)
+    .in("id", targets);
+  const found = new Set(((data as Array<{ id: string }> | null) ?? []).map((r) => r.id));
+  for (const t of targets) {
+    if (!found.has(t)) return "One of the chosen teammates isn't on your team.";
   }
   return null;
 }
@@ -124,6 +178,8 @@ export async function createAutomationRule(input: RuleInput): Promise<ActionResu
   }
   const invalid = validateRuleInput(input);
   if (invalid) return { ok: false, error: invalid };
+  const teammateErr = await validateTeammateTargets(supabase, who.dsoId, input.actions);
+  if (teammateErr) return { ok: false, error: teammateErr };
 
   const { data: rule, error } = await supabase
     .from("automation_rules")
@@ -169,6 +225,8 @@ export async function updateAutomationRule(
   }
   const invalid = validateRuleInput(input);
   if (invalid) return { ok: false, error: invalid };
+  const teammateErr = await validateTeammateTargets(supabase, who.dsoId, input.actions);
+  if (teammateErr) return { ok: false, error: teammateErr };
 
   // Confirm ownership + trigger immutability (don't let an edit change the
   // trigger of the system default out from under the seeder).

@@ -130,8 +130,25 @@ export interface StageChangedEvent {
   triggerEventKey: string;
 }
 
-/** Phase 1 union (widens as triggers are wired). */
-export type AutomationEvent = StageChangedEvent;
+/**
+ * Context for an `application.received` event — a new application landed.
+ * Fired ADDITIVELY from the apply flow (after the existing acknowledgment
+ * email), so candidate-facing email/inbox actions are intentionally NOT run
+ * for this trigger (the ack already covers them); the useful actions here
+ * are notify_teammate + add_tag.
+ */
+export interface ReceivedEvent {
+  trigger: "application.received";
+  applicationId: string;
+  dsoId: string;
+  candidateId: string | null;
+  jobId: string;
+  jobTitle: string;
+  triggerEventKey: string;
+}
+
+/** Wired-trigger union (widens as more triggers are added). */
+export type AutomationEvent = StageChangedEvent | ReceivedEvent;
 
 // ─────────────────────────────────────────────────────────────────────
 // Condition evaluation — pure, shared by the engine + the UI dry-run

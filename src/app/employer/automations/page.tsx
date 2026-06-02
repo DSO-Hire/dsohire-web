@@ -95,11 +95,25 @@ export default async function AutomationsPage() {
     title: (j.title as string | null) ?? "Untitled job",
   }));
 
+  const { data: teamRows } = await supabase
+    .from("dso_users")
+    .select("id, first_name, last_name")
+    .eq("dso_id", dsoId)
+    .order("first_name", { ascending: true });
+  const teammates = ((teamRows as Array<Record<string, unknown>> | null) ?? []).map((t) => ({
+    id: t.id as string,
+    name:
+      [t.first_name as string | null, t.last_name as string | null]
+        .filter(Boolean)
+        .join(" ") || "Teammate",
+  }));
+
   return (
     <EmployerShell active="automations">
       <AutomationsManager
         rules={rules}
         jobs={jobs}
+        teammates={teammates}
         canManage={canManage}
       />
     </EmployerShell>

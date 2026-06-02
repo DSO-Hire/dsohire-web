@@ -3,12 +3,14 @@
 /**
  * AutomationsManager — list + full builder for N13 automation rules.
  *
- * Renders each rule as a plain-English sentence with an enable/disable
- * toggle + run count. The builder is a 3-part form (trigger fixed to the
- * one wired trigger in this phase → conditions → actions) with a live
- * sentence preview and a "test against recent moves" dry-run. Custom-rule
- * create/edit is gated to canManage (Scale+); the seeded default rule is
- * editable but not deletable.
+ * Renders each rule as a plain-English sentence with an enable/disable toggle
+ * + run count. The builder is a 3-part form (trigger → conditions → actions)
+ * with a live sentence preview and, for the stage-change trigger, a "test
+ * against recent moves" dry-run. Custom-rule create/edit is gated to
+ * canManage (Scale+); the seeded default rule is editable but not deletable.
+ *
+ * Triggers wired: application.stage_changed + application.received (additive —
+ * received offers internal actions only, since the ack email already sends).
  */
 
 import { useState, useTransition, useMemo } from "react";
@@ -29,20 +31,29 @@ interface JobOpt {
   id: string;
   title: string;
 }
+interface TeammateOpt {
+  id: string;
+  name: string;
+}
 
 interface Props {
   rules: RuleView[];
   jobs: JobOpt[];
+  teammates: TeammateOpt[];
   canManage: boolean;
 }
+
+type TriggerKind = "application.stage_changed" | "application.received";
 
 type DraftAction =
   | { action_kind: "email_candidate"; config: { template_kind: string } }
   | { action_kind: "inbox_system_message"; config: Record<string, never> }
-  | { action_kind: "add_tag"; config: { label: string; color: string } };
+  | { action_kind: "add_tag"; config: { label: string; color: string } }
+  | { action_kind: "notify_teammate"; config: { target_dso_user_id: string } };
 
 interface Draft {
   name: string;
+  trigger_kind: TriggerKind;
   conditions: RuleCondition[];
   actions: DraftAction[];
 }
@@ -50,10 +61,26 @@ interface Draft {
 const STAGE_OPTS = STAGE_KINDS.map((k) => ({ value: k, label: KIND_DEFAULT_LABELS[k] }));
 const TAG_COLORS = ["slate", "green", "blue", "amber", "rose", "purple"];
 
+const TRIGGER_OPTS: Array<{ value: TriggerKind; label: string }> = [
+  { value: "application.stage_changed", label: "An application changes stage" },
+  { value: "application.received", label: "A new application arrives" },
+];
+
+// Which actions + condition fields each trigger allows (mirrors the server).
+const ACTIONS_FOR_TRIGGER: Record<TriggerKind, DraftAction["action_kind"][]> = {
+  "application.stage_changed": ["email_candidate", "inbox_system_message", "add_tag", "notify_teammate"],
+  "application.received": ["add_tag", "notify_teammate"],
+};
+const FIELDS_FOR_TRIGGER: Record<TriggerKind, RuleCondition["field"][]> = {
+  "application.stage_changed": ["to_kind", "from_kind", "job_id"],
+  "application.received": ["job_id"],
+};
+
 const ACTION_LABELS: Record<string, string> = {
-  email_candidate: "email the candidate",
-  inbox_system_message: "post an inbox update",
-  add_tag: "add a tag",
+  email_candidate: "Email the candidate",
+  inbox_system_message: "Post an inbox update",
+  add_tag: "Add a tag",
+  notify_teammate: "Notify a teammate",
 };
 
 // ── plain-English sentence ───────────────────────────────────────────
@@ -76,7 +103,10 @@ function conditionsPhrase(conditions: RuleCondition[], jobs: JobOpt[]): string {
   return ", " + parts.join(", ");
 }
 
-function actionsPhrase(actions: Array<{ action_kind: string; config: Record<string, unknown> }>): string {
+function actionsPhrase(
+  actions: Array<{ action_kind: string; config: Record<string, unknown> }>,
+  teammates: TeammateOpt[]
+): string {
   if (!actions.length) return "do nothing";
   return actions
     .map((a) => {
@@ -84,21 +114,33 @@ function actionsPhrase(actions: Array<{ action_kind: string; config: Record<stri
         const label = String((a.config?.label as string | undefined) ?? "").trim();
         return label ? `add the tag "${label}"` : "add a tag";
       }
-      return ACTION_LABELS[a.action_kind] ?? a.action_kind;
+      if (a.action_kind === "notify_teammate") {
+        const id = String((a.config?.target_dso_user_id as string | undefined) ?? "");
+        const who = teammates.find((t) => t.id === id)?.name;
+        return who ? `notify ${who}` : "notify a teammate";
+      }
+      return (ACTION_LABELS[a.action_kind] ?? a.action_kind).toLowerCase();
     })
     .join(", then ");
 }
 
 function ruleSentence(
+  trigger: string,
   conditions: RuleCondition[],
   actions: Array<{ action_kind: string; config: Record<string, unknown> }>,
-  jobs: JobOpt[]
+  jobs: JobOpt[],
+  teammates: TeammateOpt[]
 ): string {
-  return `When an application${conditionsPhrase(conditions, jobs)} changes stage → ${actionsPhrase(actions)}.`;
+  const cond = conditionsPhrase(conditions, jobs);
+  const act = actionsPhrase(actions, teammates);
+  if (trigger === "application.received") {
+    return `When a new application arrives${cond} → ${act}.`;
+  }
+  return `When an application${cond} changes stage → ${act}.`;
 }
 
 // ── component ────────────────────────────────────────────────────────
-export function AutomationsManager({ rules, jobs, canManage }: Props) {
+export function AutomationsManager({ rules, jobs, teammates, canManage }: Props) {
   const router = useRouter();
   const [editing, setEditing] = useState<string | "new" | null>(null);
 
@@ -112,7 +154,7 @@ export function AutomationsManager({ rules, jobs, canManage }: Props) {
           </h1>
           <p className="mt-1 text-sm text-ink/60">
             Run actions automatically when something happens in your pipeline — like emailing a
-            candidate or tagging an application when it moves stage.
+            candidate, tagging an application, or pinging a teammate.
           </p>
         </div>
         {canManage && editing === null && (
@@ -151,6 +193,7 @@ export function AutomationsManager({ rules, jobs, canManage }: Props) {
       {editing === "new" && (
         <RuleForm
           jobs={jobs}
+          teammates={teammates}
           onClose={() => setEditing(null)}
           onSaved={() => {
             setEditing(null);
@@ -165,6 +208,7 @@ export function AutomationsManager({ rules, jobs, canManage }: Props) {
             {editing === rule.id ? (
               <RuleForm
                 jobs={jobs}
+                teammates={teammates}
                 existing={rule}
                 onClose={() => setEditing(null)}
                 onSaved={() => {
@@ -176,6 +220,7 @@ export function AutomationsManager({ rules, jobs, canManage }: Props) {
               <RuleRow
                 rule={rule}
                 jobs={jobs}
+                teammates={teammates}
                 canManage={canManage}
                 onEdit={() => setEditing(rule.id)}
                 onChanged={() => router.refresh()}
@@ -192,12 +237,14 @@ export function AutomationsManager({ rules, jobs, canManage }: Props) {
 function RuleRow({
   rule,
   jobs,
+  teammates,
   canManage,
   onEdit,
   onChanged,
 }: {
   rule: RuleView;
   jobs: JobOpt[];
+  teammates: TeammateOpt[];
   canManage: boolean;
   onEdit: () => void;
   onChanged: () => void;
@@ -236,7 +283,7 @@ function RuleRow({
             )}
           </div>
           <p className="mt-1 text-[13px] leading-snug text-ink/60">
-            {ruleSentence(rule.conditions, rule.actions, jobs)}
+            {ruleSentence(rule.trigger_kind, rule.conditions, rule.actions, jobs, teammates)}
           </p>
           <p className="mt-1.5 text-[11px] text-ink/40">
             Fired {rule.firedCount} {rule.firedCount === 1 ? "time" : "times"}
@@ -290,11 +337,13 @@ function RuleRow({
 // ── builder form ─────────────────────────────────────────────────────
 function RuleForm({
   jobs,
+  teammates,
   existing,
   onClose,
   onSaved,
 }: {
   jobs: JobOpt[];
+  teammates: TeammateOpt[];
   existing?: RuleView;
   onClose: () => void;
   onSaved: () => void;
@@ -305,22 +354,33 @@ function RuleForm({
 
   const [draft, setDraft] = useState<Draft>(() => ({
     name: existing?.name ?? "",
+    trigger_kind: (existing?.trigger_kind as TriggerKind) ?? "application.stage_changed",
     conditions: existing?.conditions ?? [],
-    actions: (existing?.actions ?? [{ action_kind: "email_candidate", config: { template_kind: "candidate.stage_changed" } }]).map(
-      (a) => normalizeAction(a)
-    ),
+    actions: (existing?.actions ?? [
+      { action_kind: "email_candidate", config: { template_kind: "candidate.stage_changed" } },
+    ]).map((a) => normalizeAction(a)),
   }));
 
   const sentence = useMemo(
-    () => ruleSentence(draft.conditions, draft.actions, jobs),
-    [draft, jobs]
+    () => ruleSentence(draft.trigger_kind, draft.conditions, draft.actions, jobs, teammates),
+    [draft, jobs, teammates]
   );
+
+  function changeTrigger(trigger: TriggerKind) {
+    // Switching trigger resets conditions + actions to valid defaults for it.
+    const defaultAction: DraftAction =
+      trigger === "application.received"
+        ? { action_kind: "add_tag", config: { label: "", color: "slate" } }
+        : { action_kind: "email_candidate", config: { template_kind: "candidate.stage_changed" } };
+    setDraft((d) => ({ ...d, trigger_kind: trigger, conditions: [], actions: [defaultAction] }));
+    setDry(null);
+  }
 
   function save() {
     setErr(null);
     const payload = {
       name: draft.name,
-      trigger_kind: "application.stage_changed" as const,
+      trigger_kind: draft.trigger_kind,
       conditions: draft.conditions,
       actions: draft.actions.map((a) => ({ action_kind: a.action_kind, config: a.config })),
     };
@@ -342,6 +402,8 @@ function RuleForm({
     });
   }
 
+  const isStageTrigger = draft.trigger_kind === "application.stage_changed";
+
   return (
     <div className="rounded-lg border-2 border-heritage/40 bg-white p-5">
       <div className="mb-4 flex items-center justify-between">
@@ -355,21 +417,35 @@ function RuleForm({
       <input
         value={draft.name}
         onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
-        placeholder="e.g. Notify candidate + tag when moved to Interview"
+        placeholder="e.g. Ping the office manager on new hygienist applications"
         className="mb-4 w-full rounded border border-ink/15 px-3 py-2 text-sm focus:border-heritage focus:outline-none"
       />
 
-      {/* trigger (fixed) */}
+      {/* trigger */}
       <div className="mb-4">
         <label className="mb-1 block text-[12px] font-medium text-ink/70">When</label>
-        <div className="rounded border border-ink/10 bg-ink/[0.02] px-3 py-2 text-sm text-ink/80">
-          An application changes stage
-          <span className="ml-2 text-[11px] text-ink/40">More triggers coming soon</span>
-        </div>
+        {existing ? (
+          <div className="rounded border border-ink/10 bg-ink/[0.02] px-3 py-2 text-sm text-ink/80">
+            {TRIGGER_OPTS.find((t) => t.value === draft.trigger_kind)?.label}
+            <span className="ml-2 text-[11px] text-ink/40">A rule's trigger can't be changed</span>
+          </div>
+        ) : (
+          <select
+            value={draft.trigger_kind}
+            onChange={(e) => changeTrigger(e.target.value as TriggerKind)}
+            className="w-full rounded border border-ink/15 px-3 py-2 text-sm"
+          >
+            {TRIGGER_OPTS.map((t) => (
+              <option key={t.value} value={t.value}>
+                {t.label}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
-      {/* conditions */}
       <ConditionsEditor
+        trigger={draft.trigger_kind}
         jobs={jobs}
         conditions={draft.conditions}
         onChange={(conditions) => {
@@ -378,33 +454,34 @@ function RuleForm({
         }}
       />
 
-      {/* actions */}
       <ActionsEditor
+        trigger={draft.trigger_kind}
+        teammates={teammates}
         actions={draft.actions}
         onChange={(actions) => setDraft((d) => ({ ...d, actions }))}
       />
 
       {/* live sentence */}
-      <div className="mt-4 rounded bg-heritage/5 px-3 py-2 text-[13px] text-ink/75">
-        {sentence}
-      </div>
+      <div className="mt-4 rounded bg-heritage/5 px-3 py-2 text-[13px] text-ink/75">{sentence}</div>
 
-      {/* dry run */}
-      <div className="mt-3 flex items-center gap-3">
-        <button
-          onClick={runDry}
-          disabled={pending}
-          className="inline-flex items-center gap-1.5 rounded border border-ink/15 px-2.5 py-1.5 text-[12px] font-medium text-ink/70 hover:bg-ink/5 disabled:opacity-50"
-        >
-          <FlaskConical className="size-3.5" /> Test against recent moves
-        </button>
-        {dry && (
-          <span className="text-[12px] text-ink/60">
-            Would have fired on <strong className="text-ink">{dry.matched}</strong> of your last{" "}
-            {dry.sampled} stage move{dry.sampled === 1 ? "" : "s"}.
-          </span>
-        )}
-      </div>
+      {/* dry run — stage-change trigger only */}
+      {isStageTrigger && (
+        <div className="mt-3 flex items-center gap-3">
+          <button
+            onClick={runDry}
+            disabled={pending}
+            className="inline-flex items-center gap-1.5 rounded border border-ink/15 px-2.5 py-1.5 text-[12px] font-medium text-ink/70 hover:bg-ink/5 disabled:opacity-50"
+          >
+            <FlaskConical className="size-3.5" /> Test against recent moves
+          </button>
+          {dry && (
+            <span className="text-[12px] text-ink/60">
+              Would have fired on <strong className="text-ink">{dry.matched}</strong> of your last{" "}
+              {dry.sampled} stage move{dry.sampled === 1 ? "" : "s"}.
+            </span>
+          )}
+        </div>
+      )}
 
       {err && <p className="mt-3 text-[12px] text-rose-600">{err}</p>}
 
@@ -441,6 +518,12 @@ function normalizeAction(a: { action_kind: string; config: Record<string, unknow
       },
     };
   }
+  if (a.action_kind === "notify_teammate") {
+    return {
+      action_kind: "notify_teammate",
+      config: { target_dso_user_id: String((a.config?.target_dso_user_id as string | undefined) ?? "") },
+    };
+  }
   if (a.action_kind === "inbox_system_message") {
     return { action_kind: "inbox_system_message", config: {} };
   }
@@ -449,16 +532,21 @@ function normalizeAction(a: { action_kind: string; config: Record<string, unknow
 
 // ── conditions editor ────────────────────────────────────────────────
 function ConditionsEditor({
+  trigger,
   jobs,
   conditions,
   onChange,
 }: {
+  trigger: TriggerKind;
   jobs: JobOpt[];
   conditions: RuleCondition[];
   onChange: (c: RuleCondition[]) => void;
 }) {
+  const allowedFields = FIELDS_FOR_TRIGGER[trigger];
+
   function addCondition() {
-    onChange([...conditions, { field: "to_kind", op: "in", value: [] }]);
+    const field = allowedFields[0];
+    onChange([...conditions, { field, op: "in", value: [] }]);
   }
   function update(idx: number, next: RuleCondition) {
     onChange(conditions.map((c, i) => (i === idx ? next : c)));
@@ -470,26 +558,19 @@ function ConditionsEditor({
   return (
     <div className="mb-4">
       <label className="mb-1 block text-[12px] font-medium text-ink/70">
-        Only if <span className="font-normal text-ink/40">(optional — leave empty for every move)</span>
+        Only if <span className="font-normal text-ink/40">(optional — leave empty for every one)</span>
       </label>
       <div className="space-y-2">
         {conditions.map((c, idx) => (
           <div key={idx} className="flex flex-wrap items-center gap-2 rounded border border-ink/10 p-2">
             <select
               value={c.field}
-              onChange={(e) => {
-                const field = e.target.value;
-                update(idx, {
-                  field,
-                  op: field === "job_id" ? "in" : "in",
-                  value: [],
-                });
-              }}
+              onChange={(e) => update(idx, { field: e.target.value, op: "in", value: [] })}
               className="rounded border border-ink/15 px-2 py-1.5 text-[13px]"
             >
-              <option value="to_kind">moves to</option>
-              <option value="from_kind">moves from</option>
-              <option value="job_id">for job</option>
+              {allowedFields.includes("to_kind") && <option value="to_kind">moves to</option>}
+              {allowedFields.includes("from_kind") && <option value="from_kind">moves from</option>}
+              {allowedFields.includes("job_id") && <option value="job_id">for job</option>}
             </select>
 
             {c.field === "job_id" ? (
@@ -497,10 +578,7 @@ function ConditionsEditor({
                 multiple
                 value={(Array.isArray(c.value) ? c.value : []).map(String)}
                 onChange={(e) =>
-                  update(idx, {
-                    ...c,
-                    value: Array.from(e.target.selectedOptions).map((o) => o.value),
-                  })
+                  update(idx, { ...c, value: Array.from(e.target.selectedOptions).map((o) => o.value) })
                 }
                 className="min-w-[12rem] flex-1 rounded border border-ink/15 px-2 py-1.5 text-[13px]"
               >
@@ -525,9 +603,7 @@ function ConditionsEditor({
                       }}
                       className={
                         "rounded-full px-2.5 py-1 text-[12px] font-medium " +
-                        (selected
-                          ? "bg-heritage text-white"
-                          : "bg-ink/5 text-ink/60 hover:bg-ink/10")
+                        (selected ? "bg-heritage text-white" : "bg-ink/5 text-ink/60 hover:bg-ink/10")
                       }
                     >
                       {opt.label}
@@ -561,14 +637,25 @@ function ConditionsEditor({
 
 // ── actions editor ───────────────────────────────────────────────────
 function ActionsEditor({
+  trigger,
+  teammates,
   actions,
   onChange,
 }: {
+  trigger: TriggerKind;
+  teammates: TeammateOpt[];
   actions: DraftAction[];
   onChange: (a: DraftAction[]) => void;
 }) {
+  const allowed = ACTIONS_FOR_TRIGGER[trigger];
+
+  function defaultAction(): DraftAction {
+    return allowed.includes("add_tag")
+      ? { action_kind: "add_tag", config: { label: "", color: "slate" } }
+      : { action_kind: "notify_teammate", config: { target_dso_user_id: "" } };
+  }
   function add() {
-    onChange([...actions, { action_kind: "add_tag", config: { label: "", color: "slate" } }]);
+    onChange([...actions, defaultAction()]);
   }
   function update(idx: number, next: DraftAction) {
     onChange(actions.map((a, i) => (i === idx ? next : a)));
@@ -579,6 +666,7 @@ function ActionsEditor({
   function changeKind(idx: number, kind: DraftAction["action_kind"]) {
     if (kind === "add_tag") update(idx, { action_kind: "add_tag", config: { label: "", color: "slate" } });
     else if (kind === "inbox_system_message") update(idx, { action_kind: "inbox_system_message", config: {} });
+    else if (kind === "notify_teammate") update(idx, { action_kind: "notify_teammate", config: { target_dso_user_id: "" } });
     else update(idx, { action_kind: "email_candidate", config: { template_kind: "candidate.stage_changed" } });
   }
 
@@ -593,9 +681,11 @@ function ActionsEditor({
               onChange={(e) => changeKind(idx, e.target.value as DraftAction["action_kind"])}
               className="rounded border border-ink/15 px-2 py-1.5 text-[13px]"
             >
-              <option value="email_candidate">Email the candidate</option>
-              <option value="inbox_system_message">Post an inbox update</option>
-              <option value="add_tag">Add a tag</option>
+              {allowed.map((k) => (
+                <option key={k} value={k}>
+                  {ACTION_LABELS[k]}
+                </option>
+              ))}
             </select>
 
             {a.action_kind === "add_tag" && (
@@ -623,6 +713,22 @@ function ActionsEditor({
                   ))}
                 </select>
               </>
+            )}
+            {a.action_kind === "notify_teammate" && (
+              <select
+                value={a.config.target_dso_user_id}
+                onChange={(e) =>
+                  update(idx, { action_kind: "notify_teammate", config: { target_dso_user_id: e.target.value } })
+                }
+                className="flex-1 rounded border border-ink/15 px-2 py-1.5 text-[13px]"
+              >
+                <option value="">Choose a teammate…</option>
+                {teammates.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
             )}
             {a.action_kind === "email_candidate" && (
               <span className="text-[12px] text-ink/45">uses your “Stage moved” template</span>

@@ -30,6 +30,8 @@ import {
 import { dispatchNotification } from "@/lib/notifications/dispatcher";
 import { dispatchCandidateEmail } from "@/lib/email/templates/dispatch";
 import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
+import { after } from "next/server";
+import { runAutomationsForEvent } from "@/lib/automations/engine";
 import { ApplicationReceived } from "@/emails/candidate/ApplicationReceived";
 import { NewApplication } from "@/emails/employer/NewApplication";
 import type { ScreeningQuestion } from "./types";
@@ -510,6 +512,24 @@ export async function applyToJob(
       eventKind: "application_received",
       senderRole: "employer",
       body: `Your application for ${job.title} was received. We'll let you know when the team reviews it or moves it forward.`,
+    });
+
+    // N13: fire the application.received automation trigger ADDITIVELY —
+    // AFTER the existing ack email + inbox message above (which are untouched,
+    // so there's no double-send). Custom received rules (Scale+, opt-in) can
+    // notify a teammate or tag the application. Uses next/after() so it
+    // survives the serverless freeze per feedback_vercel_serverless_fire_and_forget.
+    const receivedAppId = applicationId;
+    after(async () => {
+      await runAutomationsForEvent({
+        trigger: "application.received",
+        applicationId: receivedAppId,
+        dsoId: job.dso_id as string,
+        candidateId: candidate.id as string,
+        jobId,
+        jobTitle: job.title as string,
+        triggerEventKey: `received:${receivedAppId}`,
+      });
     });
   }
 
