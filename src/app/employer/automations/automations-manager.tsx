@@ -43,7 +43,10 @@ interface Props {
   canManage: boolean;
 }
 
-type TriggerKind = "application.stage_changed" | "application.received";
+type TriggerKind =
+  | "application.stage_changed"
+  | "application.received"
+  | "application.idle_in_stage";
 
 type DraftAction =
   | { action_kind: "email_candidate"; config: { template_kind: string } }
@@ -65,17 +68,28 @@ const TAG_COLORS = ["slate", "green", "blue", "amber", "rose", "purple"];
 const TRIGGER_OPTS: Array<{ value: TriggerKind; label: string }> = [
   { value: "application.stage_changed", label: "An application changes stage" },
   { value: "application.received", label: "A new application arrives" },
+  { value: "application.idle_in_stage", label: "An application sits too long in a stage" },
 ];
 
-// Which actions + condition fields each trigger allows (mirrors the server).
+// Which actions + (generic) condition fields each trigger allows. The idle
+// trigger's day threshold is handled by its own field, not the generic rows.
 const ACTIONS_FOR_TRIGGER: Record<TriggerKind, DraftAction["action_kind"][]> = {
   "application.stage_changed": ["email_candidate", "inbox_system_message", "add_tag", "notify_teammate", "assign"],
   "application.received": ["add_tag", "notify_teammate", "assign"],
+  "application.idle_in_stage": ["add_tag", "notify_teammate", "assign"],
 };
 const FIELDS_FOR_TRIGGER: Record<TriggerKind, RuleCondition["field"][]> = {
   "application.stage_changed": ["to_kind", "from_kind", "job_id"],
   "application.received": ["job_id"],
+  "application.idle_in_stage": ["to_kind", "job_id"],
 };
+
+const DEFAULT_IDLE_DAYS = 7;
+function idleDaysFromConditions(conditions: RuleCondition[]): number {
+  const c = conditions.find((x) => x.field === "days_in_stage" && x.op === "gte");
+  const n = c ? Number(c.value) : NaN;
+  return Number.isFinite(n) && n > 0 ? n : DEFAULT_IDLE_DAYS;
+}
 
 const ACTION_LABELS: Record<string, string> = {
   email_candidate: "Email the candidate",
@@ -134,8 +148,20 @@ function ruleSentence(
   jobs: JobOpt[],
   teammates: TeammateOpt[]
 ): string {
-  const cond = conditionsPhrase(conditions, jobs);
   const act = actionsPhrase(actions, teammates);
+  if (trigger === "application.idle_in_stage") {
+    const days = idleDaysFromConditions(conditions);
+    const parts: string[] = [];
+    for (const c of conditions) {
+      const vals = Array.isArray(c.value) ? c.value : [c.value];
+      if (c.field === "to_kind") parts.push(`in ${vals.map((v) => kindLabel(String(v))).join(" or ")}`);
+      else if (c.field === "job_id")
+        parts.push(`for ${vals.map((v) => jobs.find((j) => j.id === v)?.title ?? "a job").join(" or ")}`);
+    }
+    const where = parts.length ? " " + parts.join(", ") : " a stage";
+    return `When an application sits${where} for ${days}+ days → ${act}.`;
+  }
+  const cond = conditionsPhrase(conditions, jobs);
   if (trigger === "application.received") {
     return `When a new application arrives${cond} → ${act}.`;
   }
@@ -371,12 +397,45 @@ function RuleForm({
 
   function changeTrigger(trigger: TriggerKind) {
     // Switching trigger resets conditions + actions to valid defaults for it.
-    const defaultAction: DraftAction =
-      trigger === "application.received"
-        ? { action_kind: "add_tag", config: { label: "", color: "slate" } }
-        : { action_kind: "email_candidate", config: { template_kind: "candidate.stage_changed" } };
-    setDraft((d) => ({ ...d, trigger_kind: trigger, conditions: [], actions: [defaultAction] }));
+    let conditions: RuleCondition[] = [];
+    let defaultAction: DraftAction;
+    if (trigger === "application.received") {
+      defaultAction = { action_kind: "add_tag", config: { label: "", color: "slate" } };
+    } else if (trigger === "application.idle_in_stage") {
+      conditions = [{ field: "days_in_stage", op: "gte", value: DEFAULT_IDLE_DAYS }];
+      defaultAction = { action_kind: "notify_teammate", config: { target_dso_user_id: "" } };
+    } else {
+      defaultAction = { action_kind: "email_candidate", config: { template_kind: "candidate.stage_changed" } };
+    }
+    setDraft((d) => ({ ...d, trigger_kind: trigger, conditions, actions: [defaultAction] }));
     setDry(null);
+  }
+
+  const isIdle = draft.trigger_kind === "application.idle_in_stage";
+  const otherConditions = isIdle
+    ? draft.conditions.filter((c) => c.field !== "days_in_stage")
+    : draft.conditions;
+  function setOtherConditions(next: RuleCondition[]) {
+    if (isIdle) {
+      const days = draft.conditions.find((c) => c.field === "days_in_stage") ?? {
+        field: "days_in_stage",
+        op: "gte" as const,
+        value: DEFAULT_IDLE_DAYS,
+      };
+      setDraft((d) => ({ ...d, conditions: [days, ...next] }));
+    } else {
+      setDraft((d) => ({ ...d, conditions: next }));
+    }
+    setDry(null);
+  }
+  function setIdleDays(n: number) {
+    setDraft((d) => ({
+      ...d,
+      conditions: [
+        { field: "days_in_stage", op: "gte", value: n },
+        ...d.conditions.filter((c) => c.field !== "days_in_stage"),
+      ],
+    }));
   }
 
   function save() {
@@ -447,14 +506,30 @@ function RuleForm({
         )}
       </div>
 
+      {isIdle && (
+        <div className="mb-4">
+          <label className="mb-1 block text-[12px] font-medium text-ink/70">
+            After how many days in a stage
+          </label>
+          <div className="flex items-center gap-2 text-sm text-ink/70">
+            <input
+              type="number"
+              min={1}
+              max={365}
+              value={idleDaysFromConditions(draft.conditions)}
+              onChange={(e) => setIdleDays(Math.max(1, Math.min(365, Number(e.target.value) || 1)))}
+              className="w-20 rounded border border-ink/15 px-2 py-1.5 text-sm focus:border-heritage focus:outline-none"
+            />
+            <span>days with no stage change</span>
+          </div>
+        </div>
+      )}
+
       <ConditionsEditor
         trigger={draft.trigger_kind}
         jobs={jobs}
-        conditions={draft.conditions}
-        onChange={(conditions) => {
-          setDraft((d) => ({ ...d, conditions }));
-          setDry(null);
-        }}
+        conditions={otherConditions}
+        onChange={setOtherConditions}
       />
 
       <ActionsEditor
@@ -571,7 +646,11 @@ function ConditionsEditor({
               onChange={(e) => update(idx, { field: e.target.value, op: "in", value: [] })}
               className="rounded border border-ink/15 px-2 py-1.5 text-[13px]"
             >
-              {allowedFields.includes("to_kind") && <option value="to_kind">moves to</option>}
+              {allowedFields.includes("to_kind") && (
+                <option value="to_kind">
+                  {trigger === "application.idle_in_stage" ? "in stage" : "moves to"}
+                </option>
+              )}
               {allowedFields.includes("from_kind") && <option value="from_kind">moves from</option>}
               {allowedFields.includes("job_id") && <option value="job_id">for job</option>}
             </select>

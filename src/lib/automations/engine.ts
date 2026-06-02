@@ -66,14 +66,18 @@ export async function runAutomationsForEvent(event: AutomationEvent): Promise<vo
     const facts = factsForEvent(event);
 
     for (const rule of rules) {
-      // Claim the run row first — the unique constraint is the dedup guard.
-      const claimed = await claimRun(admin, rule.id, event);
-      if (!claimed) continue; // already ran for this exact event
+      // Evaluate conditions BEFORE claiming the ledger row. This matters for
+      // TIME triggers, whose trigger_event key is a deterministic per-window
+      // bucket (e.g. idle:<app>:<stage>:<entered_at>): if we claimed on a
+      // condition-fail, a higher-threshold rule (14d) evaluated early (7d)
+      // would burn the key and never fire at day 14. Only claim when the
+      // rule actually matches. Event triggers carry a unique key per event,
+      // so this ordering is equally correct for them.
+      if (!evaluateConditions(rule.conditions, facts)) continue;
 
-      if (!evaluateConditions(rule.conditions, facts)) {
-        await finalizeRun(admin, claimed, "skipped_condition", { facts });
-        continue;
-      }
+      // Claim the run row — the unique constraint is the dedup/loop guard.
+      const claimed = await claimRun(admin, rule.id, event);
+      if (!claimed) continue; // already fired for this exact event
 
       const outcomes: ActionOutcome[] = [];
       for (const action of rule.actions) {
@@ -202,6 +206,12 @@ function factsForEvent(event: AutomationEvent): RuleFacts {
       };
     case "application.received":
       return { job_id: event.jobId };
+    case "application.idle_in_stage":
+      return {
+        to_kind: event.toKind,
+        job_id: event.jobId,
+        days_in_stage: event.daysInStage,
+      };
     default:
       return {};
   }
@@ -363,6 +373,9 @@ async function runNotifyTeammate(
   if (event.trigger === "application.received") {
     headline = `New application for ${event.jobTitle}`;
     body = `A new application just came in for ${event.jobTitle}.`;
+  } else if (event.trigger === "application.idle_in_stage") {
+    headline = `Stale application — ${event.jobTitle}`;
+    body = `An application for ${event.jobTitle} has been in "${event.stageLabel}" for ${event.daysInStage} days with no movement.`;
   } else {
     const e = event as StageChangedEvent;
     headline = `Application moved to ${e.toStageLabel}`;

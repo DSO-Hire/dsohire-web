@@ -28,6 +28,7 @@ export type ActionResult = { ok: true; id?: string } | { ok: false; error: strin
 const UI_TRIGGERS = new Set<AutomationTrigger>([
   "application.stage_changed",
   "application.received",
+  "application.idle_in_stage",
 ]);
 // Actions allowed per trigger. received is ADDITIVE (fires after the existing
 // ack email), so candidate-facing email/inbox actions aren't offered there —
@@ -45,6 +46,12 @@ const ACTIONS_BY_TRIGGER: Record<string, Set<AutomationActionKind>> = {
     "notify_teammate",
     "assign",
   ]),
+  // Time-based → internal actions only (candidate nurture mail is N16).
+  "application.idle_in_stage": new Set<AutomationActionKind>([
+    "add_tag",
+    "notify_teammate",
+    "assign",
+  ]),
 };
 /** Action kinds whose config carries a dso_user target that must be validated. */
 const TEAMMATE_TARGET_ACTIONS = new Set<AutomationActionKind>([
@@ -55,6 +62,7 @@ const TEAMMATE_TARGET_ACTIONS = new Set<AutomationActionKind>([
 const CONDITION_FIELDS_BY_TRIGGER: Record<string, Set<string>> = {
   "application.stage_changed": new Set(["to_kind", "from_kind", "job_id"]),
   "application.received": new Set(["job_id"]),
+  "application.idle_in_stage": new Set(["to_kind", "job_id", "days_in_stage"]),
 };
 const CONDITION_OPS = new Set(["in", "eq", "neq", "gte", "lte"]);
 const VALID_KINDS = new Set<StageKind>(STAGE_KINDS);
@@ -134,6 +142,19 @@ function validateRuleInput(input: RuleInput): string | null {
         if (!VALID_KINDS.has(v as StageKind)) return `Unknown stage kind: ${String(v)}.`;
       }
     }
+    if (c.field === "days_in_stage") {
+      const n = Number(c.value);
+      if (!Number.isFinite(n) || n < 1 || n > 365) {
+        return "Set the days threshold between 1 and 365.";
+      }
+    }
+  }
+  // The idle trigger is meaningless without a day threshold.
+  if (input.trigger_kind === "application.idle_in_stage") {
+    const hasThreshold = (input.conditions ?? []).some(
+      (c) => c.field === "days_in_stage" && c.op === "gte"
+    );
+    if (!hasThreshold) return "Set how many days an application can sit before this runs.";
   }
   return null;
 }

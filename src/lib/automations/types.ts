@@ -147,8 +147,32 @@ export interface ReceivedEvent {
   triggerEventKey: string;
 }
 
+/**
+ * Context for an `application.idle_in_stage` event — fired by the
+ * /api/cron/automation-rules cron for an application that has sat in its
+ * current (non-terminal) stage past a rule's day threshold. The cron passes
+ * `daysInStage` as a fact so a rule's `days_in_stage >= N` condition decides
+ * which threshold actually fires. Time-based, so only INTERNAL actions
+ * (notify_teammate / add_tag / assign) run — candidate-facing nurture mail
+ * is N16's job.
+ */
+export interface IdleInStageEvent {
+  trigger: "application.idle_in_stage";
+  applicationId: string;
+  dsoId: string;
+  candidateId: string | null;
+  jobId: string;
+  jobTitle: string;
+  /** Kind of the stage the application is sitting in. */
+  toKind: StageKind;
+  stageId: string;
+  stageLabel: string;
+  daysInStage: number;
+  triggerEventKey: string;
+}
+
 /** Wired-trigger union (widens as more triggers are added). */
-export type AutomationEvent = StageChangedEvent | ReceivedEvent;
+export type AutomationEvent = StageChangedEvent | ReceivedEvent | IdleInStageEvent;
 
 // ─────────────────────────────────────────────────────────────────────
 // Condition evaluation — pure, shared by the engine + the UI dry-run
