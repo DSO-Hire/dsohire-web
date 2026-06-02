@@ -49,6 +49,7 @@ import {
   ComboboxField,
   InlineError,
 } from "./edit-sheet";
+import { LocationAutocompleteInput } from "@/components/ui/location-autocomplete-input";
 import { PRONOUN_OPTIONS } from "@/lib/candidate/name";
 import {
   ROLE_CATEGORIES,
@@ -2079,12 +2080,12 @@ function JobPreferencesModal({
           ))}
         </div>
       </div>
-      <ChipArrayInput
+      <LocationAutocompleteInput
         label="Desired locations"
         values={locations}
         onChange={setLocations}
-        placeholder="Wichita, KS · Kansas City, MO · …"
-        helper="City + state, one per chip."
+        placeholder="Start typing a city — e.g. Prairie Village…"
+        helper="Pick from the list so we match you accurately. One city per chip."
       />
       <div className="grid gap-4 sm:grid-cols-2">
         <TextField
