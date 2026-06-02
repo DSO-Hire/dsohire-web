@@ -50,6 +50,7 @@ type TriggerKind =
 
 type DraftAction =
   | { action_kind: "email_candidate"; config: { template_kind: string } }
+  | { action_kind: "email_candidate_nurture"; config: { subject: string; body: string } }
   | { action_kind: "inbox_system_message"; config: Record<string, never> }
   | { action_kind: "add_tag"; config: { label: string; color: string } }
   | { action_kind: "notify_teammate"; config: { target_dso_user_id: string } }
@@ -74,9 +75,9 @@ const TRIGGER_OPTS: Array<{ value: TriggerKind; label: string }> = [
 // Which actions + (generic) condition fields each trigger allows. The idle
 // trigger's day threshold is handled by its own field, not the generic rows.
 const ACTIONS_FOR_TRIGGER: Record<TriggerKind, DraftAction["action_kind"][]> = {
-  "application.stage_changed": ["email_candidate", "inbox_system_message", "add_tag", "notify_teammate", "assign"],
+  "application.stage_changed": ["email_candidate", "email_candidate_nurture", "inbox_system_message", "add_tag", "notify_teammate", "assign"],
   "application.received": ["add_tag", "notify_teammate", "assign"],
-  "application.idle_in_stage": ["add_tag", "notify_teammate", "assign"],
+  "application.idle_in_stage": ["email_candidate_nurture", "add_tag", "notify_teammate", "assign"],
 };
 const FIELDS_FOR_TRIGGER: Record<TriggerKind, RuleCondition["field"][]> = {
   "application.stage_changed": ["to_kind", "from_kind", "job_id"],
@@ -93,6 +94,7 @@ function idleDaysFromConditions(conditions: RuleCondition[]): number {
 
 const ACTION_LABELS: Record<string, string> = {
   email_candidate: "Email the candidate",
+  email_candidate_nurture: "Email the candidate a message",
   inbox_system_message: "Post an inbox update",
   add_tag: "Add a tag",
   notify_teammate: "Notify a teammate",
@@ -130,6 +132,7 @@ function actionsPhrase(
         const label = String((a.config?.label as string | undefined) ?? "").trim();
         return label ? `add the tag "${label}"` : "add a tag";
       }
+      if (a.action_kind === "email_candidate_nurture") return "email the candidate a message";
       if (a.action_kind === "notify_teammate" || a.action_kind === "assign") {
         const id = String((a.config?.target_dso_user_id as string | undefined) ?? "");
         const who = teammates.find((t) => t.id === id)?.name;
@@ -602,6 +605,15 @@ function normalizeAction(a: { action_kind: string; config: Record<string, unknow
       config: { target_dso_user_id: String((a.config?.target_dso_user_id as string | undefined) ?? "") },
     };
   }
+  if (a.action_kind === "email_candidate_nurture") {
+    return {
+      action_kind: "email_candidate_nurture",
+      config: {
+        subject: String((a.config?.subject as string | undefined) ?? ""),
+        body: String((a.config?.body as string | undefined) ?? ""),
+      },
+    };
+  }
   if (a.action_kind === "inbox_system_message") {
     return { action_kind: "inbox_system_message", config: {} };
   }
@@ -750,6 +762,7 @@ function ActionsEditor({
     else if (kind === "inbox_system_message") update(idx, { action_kind: "inbox_system_message", config: {} });
     else if (kind === "notify_teammate") update(idx, { action_kind: "notify_teammate", config: { target_dso_user_id: "" } });
     else if (kind === "assign") update(idx, { action_kind: "assign", config: { target_dso_user_id: "" } });
+    else if (kind === "email_candidate_nurture") update(idx, { action_kind: "email_candidate_nurture", config: { subject: "", body: "" } });
     else update(idx, { action_kind: "email_candidate", config: { template_kind: "candidate.stage_changed" } });
   }
 
@@ -812,6 +825,32 @@ function ActionsEditor({
                   </option>
                 ))}
               </select>
+            )}
+            {a.action_kind === "email_candidate_nurture" && (
+              <div className="basis-full space-y-2">
+                <input
+                  value={a.config.subject}
+                  onChange={(e) =>
+                    update(idx, { action_kind: "email_candidate_nurture", config: { ...a.config, subject: e.target.value } })
+                  }
+                  placeholder="Subject — e.g. Still interested, {{first_name}}?"
+                  maxLength={200}
+                  className="w-full rounded border border-ink/15 px-2 py-1.5 text-[13px]"
+                />
+                <textarea
+                  value={a.config.body}
+                  onChange={(e) =>
+                    update(idx, { action_kind: "email_candidate_nurture", config: { ...a.config, body: e.target.value } })
+                  }
+                  placeholder="Your message to the candidate…"
+                  rows={4}
+                  maxLength={4000}
+                  className="w-full rounded border border-ink/15 px-2 py-1.5 text-[13px] leading-relaxed"
+                />
+                <p className="text-[11px] text-ink/40">
+                  {"Personalize with {{first_name}} and {{job_title}}."}
+                </p>
+              </div>
             )}
             {a.action_kind === "email_candidate" && (
               <span className="text-[12px] text-ink/45">uses your “Stage moved” template</span>

@@ -27,6 +27,7 @@ import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
 import { dispatchStageChangedEmail } from "@/lib/email/templates/stage-changed-dispatch";
 import { dispatchNotification } from "@/lib/notifications/dispatcher";
 import { AutomationNotice } from "@/emails/employer/AutomationNotice";
+import { NurtureMessage } from "@/emails/candidate/NurtureMessage";
 import {
   evaluateConditions,
   type AutomationEvent,
@@ -234,6 +235,8 @@ async function runAction(
         return await runEmailCandidate(event);
       case "add_tag":
         return await runAddTag(action, event);
+      case "email_candidate_nurture":
+        return await runNurtureEmail(action, event);
       case "notify_teammate":
         return await runNotifyTeammate(action, event, ruleName);
       case "assign":
@@ -327,6 +330,84 @@ async function runAddTag(
     return { action_kind: "add_tag", status: "error", note: error.message };
   }
   return { action_kind: "add_tag", status: "ran" };
+}
+
+/**
+ * N16 — send the candidate a custom re-engagement message. config.subject +
+ * config.body are author-written; {{first_name}} and {{job_title}} are
+ * substituted. Resolves the candidate's auth email (guests have none → skip).
+ * Candidate-facing, so suppressed when the job hides stages from candidates.
+ */
+async function runNurtureEmail(
+  action: RuleActionRow,
+  event: AutomationEvent
+): Promise<ActionOutcome> {
+  // Respect the same candidate-suppression gate the other candidate emails use.
+  if (event.trigger === "application.stage_changed" && event.hideStagesFromCandidate) {
+    return { action_kind: "email_candidate_nurture", status: "skipped", note: "stages hidden" };
+  }
+  if (!event.candidateId) {
+    return { action_kind: "email_candidate_nurture", status: "skipped", note: "no candidate id" };
+  }
+  const rawSubject = String((action.config.subject as string | undefined) ?? "").trim();
+  const rawBody = String((action.config.body as string | undefined) ?? "").trim();
+  if (!rawSubject || !rawBody) {
+    return { action_kind: "email_candidate_nurture", status: "skipped", note: "empty message" };
+  }
+
+  const admin = createSupabaseServiceRoleClient();
+  const { data: cand } = await admin
+    .from("candidates")
+    .select("first_name, full_name, auth_user_id")
+    .eq("id", event.candidateId)
+    .maybeSingle();
+  const authUserId = (cand?.auth_user_id as string | null) ?? null;
+  if (!authUserId) {
+    return { action_kind: "email_candidate_nurture", status: "skipped", note: "guest / no auth" };
+  }
+  const { data: authResp, error: authErr } = await admin.auth.admin.getUserById(authUserId);
+  const email = authResp?.user?.email;
+  if (authErr || !email) {
+    return { action_kind: "email_candidate_nurture", status: "skipped", note: "no candidate email" };
+  }
+
+  const firstName =
+    (cand?.first_name as string | null) ??
+    ((cand?.full_name as string | null) ?? "there").split(" ")[0] ??
+    "there";
+  const { data: dsoRow } = await admin
+    .from("dsos")
+    .select("name")
+    .eq("id", event.dsoId)
+    .maybeSingle();
+  const dsoName = (dsoRow?.name as string | undefined) ?? "the hiring team";
+
+  const fill = (s: string) =>
+    s
+      .replaceAll("{{first_name}}", firstName)
+      .replaceAll("{{job_title}}", event.jobTitle);
+  const subject = fill(rawSubject);
+  const body = fill(rawBody);
+  const applicationUrl = `${SITE_URL}/candidate/applications/${event.applicationId}`;
+
+  await dispatchNotification({
+    userId: authUserId,
+    eventKind: "candidate.nurture",
+    relatedDsoId: event.dsoId,
+    relatedCandidateId: event.candidateId,
+    email: {
+      to: email,
+      subject,
+      react: NurtureMessage({
+        recipientName: firstName,
+        dsoName,
+        jobTitle: event.jobTitle,
+        messageBody: body,
+        applicationUrl,
+      }),
+    },
+  });
+  return { action_kind: "email_candidate_nurture", status: "ran" };
 }
 
 /**

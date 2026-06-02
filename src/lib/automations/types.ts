@@ -66,6 +66,7 @@ export type RuleFacts = Record<string, string | number | undefined>;
 
 export const AUTOMATION_ACTION_KINDS = [
   "email_candidate",
+  "email_candidate_nurture", // N16 — custom re-engagement message to the candidate
   "inbox_system_message",
   "notify_teammate",
   "assign",

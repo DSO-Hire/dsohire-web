@@ -36,6 +36,7 @@ const UI_TRIGGERS = new Set<AutomationTrigger>([
 const ACTIONS_BY_TRIGGER: Record<string, Set<AutomationActionKind>> = {
   "application.stage_changed": new Set<AutomationActionKind>([
     "email_candidate",
+    "email_candidate_nurture",
     "inbox_system_message",
     "add_tag",
     "notify_teammate",
@@ -46,8 +47,9 @@ const ACTIONS_BY_TRIGGER: Record<string, Set<AutomationActionKind>> = {
     "notify_teammate",
     "assign",
   ]),
-  // Time-based → internal actions only (candidate nurture mail is N16).
+  // Time-based → internal actions + the N16 candidate re-engagement email.
   "application.idle_in_stage": new Set<AutomationActionKind>([
+    "email_candidate_nurture",
     "add_tag",
     "notify_teammate",
     "assign",
@@ -121,6 +123,14 @@ function validateRuleInput(input: RuleInput): string | null {
     if (a.action_kind === "add_tag") {
       const label = String((a.config?.label as string | undefined) ?? "").trim();
       if (!label) return "Tag action needs a label.";
+    }
+    if (a.action_kind === "email_candidate_nurture") {
+      const subject = String((a.config?.subject as string | undefined) ?? "").trim();
+      const body = String((a.config?.body as string | undefined) ?? "").trim();
+      if (!subject) return "Give the re-engagement email a subject.";
+      if (!body) return "Write the re-engagement email message.";
+      if (subject.length > 200) return "Email subject is too long (200 char max).";
+      if (body.length > 4000) return "Email message is too long (4000 char max).";
     }
     if (TEAMMATE_TARGET_ACTIONS.has(a.action_kind)) {
       const target = String(
