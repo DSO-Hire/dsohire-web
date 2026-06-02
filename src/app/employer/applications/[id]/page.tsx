@@ -1681,7 +1681,15 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 jobCompMin={(job.compensation_min as number | null) ?? null}
                 jobCompMax={(job.compensation_max as number | null) ?? null}
                 jobCompPeriod={(job.compensation_period as string | null) ?? null}
-                jobBenefits={(job.benefits as string | null) ?? null}
+                jobBenefits={
+                  // jobs.benefits is a text[] — join to a string for the
+                  // offer benefits field (never cast the array `as string`,
+                  // or .trim() throws at runtime).
+                  Array.isArray(job.benefits)
+                    ? (job.benefits as string[]).filter(Boolean).join(", ") ||
+                      null
+                    : ((job.benefits as string | null) ?? null)
+                }
                 templates={offerTemplates}
                 sends={offerSends}
               />

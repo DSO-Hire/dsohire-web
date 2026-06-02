@@ -600,12 +600,15 @@ function SendOfferModal({
     if (!selectedTemplate) return;
     if (seededBenefitsForRef.current === selectedTemplate.id) return;
     seededBenefitsForRef.current = selectedTemplate.id;
-    if (!jobBenefits || !jobBenefits.trim()) return;
+    // Coerce defensively — never assume the prop is a non-empty string.
+    const benefitsText =
+      typeof jobBenefits === "string" ? jobBenefits.trim() : "";
+    if (!benefitsText) return;
     if (!isTokenInBody(selectedTemplate.body, "offer.benefits_summary")) return;
     setValues((prev) =>
       (prev["offer.benefits_summary"] ?? "").trim() !== ""
         ? prev
-        : { ...prev, "offer.benefits_summary": jobBenefits.trim() }
+        : { ...prev, "offer.benefits_summary": benefitsText }
     );
   }, [selectedTemplate, jobBenefits]);
 
