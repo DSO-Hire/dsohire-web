@@ -476,9 +476,25 @@ export default async function PerJobPipelinePage({
       </div>
       <HelpDisclosure helpKey="pipeline.practice_fit" className="mb-6" />
 
-      <PerJobAnalyticsCard metrics={analytics} />
+      {/* Pipeline (kanban inline) — the primary working surface for this job,
+          kept at the top so it's visible without scrolling past the
+          analytics. The per-job metrics, Smart Picks, and funnel/dwell charts
+          are supporting context and live below the board. */}
+      <div className="mb-10">
+        <ApplicationsBoard
+          initialApplications={initialApplications}
+          stages={stages}
+          job={{ id: job.id as string, title: jobTitle }}
+          initialView={initialView}
+          aiSuggesterAvailable={aiSuggesterAvailable}
+          aiSuggesterContextByAppId={Object.fromEntries(aiContextByAppId)}
+          canBulkAct={canBulkAct}
+        />
+      </div>
 
       <SmartPicksCard picks={smartPicks} />
+
+      <PerJobAnalyticsCard metrics={analytics} />
 
       <div className="mb-10 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
         <FunnelChart
@@ -489,17 +505,6 @@ export default async function PerJobPipelinePage({
         />
         <StageDwellCard rows={stageDwell} />
       </div>
-
-      {/* Pipeline (kanban inline) */}
-      <ApplicationsBoard
-        initialApplications={initialApplications}
-        stages={stages}
-        job={{ id: job.id as string, title: jobTitle }}
-        initialView={initialView}
-        aiSuggesterAvailable={aiSuggesterAvailable}
-        aiSuggesterContextByAppId={Object.fromEntries(aiContextByAppId)}
-        canBulkAct={canBulkAct}
-      />
     </EmployerShell>
   );
 }
