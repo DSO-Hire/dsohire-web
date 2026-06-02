@@ -215,11 +215,15 @@ async function runAction(
         return await runInboxSystemMessage(event);
       case "email_candidate":
         return await runEmailCandidate(event);
-      // Phase 2/3 actions — reserved, not yet runnable. No-op safely so a
-      // rule carrying one never crashes the engine.
+      case "add_tag":
+        return await runAddTag(action, event);
+      // Reserved actions — not yet runnable. `move_stage` is HELD on
+      // purpose (Cam, Day 25 — the riskiest foot-gun + the loop case);
+      // notify_teammate / assign need notification-eventkind / schema
+      // plumbing landing in a later chunk; start_sequence is the N16 hook.
+      // No-op safely so a rule carrying one never crashes the engine.
       case "notify_teammate":
       case "assign":
-      case "add_tag":
       case "move_stage":
       case "start_sequence":
         return {
@@ -277,4 +281,33 @@ async function runEmailCandidate(event: AutomationEvent): Promise<ActionOutcome>
     toStageLabel: e.toStageLabel,
   });
   return { action_kind: "email_candidate", status: "ran" };
+}
+
+/**
+ * Add an internal tag to the application. Tags are an internal workspace
+ * concept (not candidate-facing), so this is NOT gated on
+ * hideStagesFromCandidate. Reuses the application_tags table the manual
+ * tag UI writes to; the (application_id, label) unique constraint makes a
+ * repeat no-op (23505 swallowed).
+ */
+async function runAddTag(
+  action: RuleActionRow,
+  event: AutomationEvent
+): Promise<ActionOutcome> {
+  const label = String((action.config.label as string | undefined) ?? "").trim();
+  if (!label) {
+    return { action_kind: "add_tag", status: "skipped", note: "no tag label" };
+  }
+  const color = String((action.config.color as string | undefined) ?? "slate");
+  const admin = createSupabaseServiceRoleClient();
+  const { error } = await admin.from("application_tags").insert({
+    application_id: event.applicationId,
+    label: label.slice(0, 40),
+    color,
+    created_by: null,
+  });
+  if (error && error.code !== "23505") {
+    return { action_kind: "add_tag", status: "error", note: error.message };
+  }
+  return { action_kind: "add_tag", status: "ran" };
 }

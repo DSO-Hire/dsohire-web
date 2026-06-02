@@ -48,6 +48,7 @@ import {
   BarChart3,
   LifeBuoy,
   UserPlus,
+  Workflow,
 } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { BrandLockup } from "@/components/marketing/site-shell";
@@ -80,6 +81,7 @@ export type NavId =
   | "locations"
   | "team"
   | "billing"
+  | "automations"
   | "settings"
   | "help";
 
@@ -112,6 +114,7 @@ const NAV: ReadonlyArray<NavItem> = [
   { id: "locations", label: "Locations", href: "/employer/locations", Icon: MapPin, group: "setup", hideFromRoles: ["recruiter", "hiring_manager"] },
   { id: "team", label: "Team", href: "/employer/team", Icon: UsersIcon, group: "setup", hideFromRoles: ["recruiter", "hiring_manager"] },
   { id: "billing", label: "Billing", href: "/employer/billing", Icon: CreditCard, group: "setup", hideFromRoles: ["recruiter", "hiring_manager"] },
+  { id: "automations", label: "Automations", href: "/employer/automations", Icon: Workflow, group: "setup", hideFromRoles: ["recruiter", "hiring_manager"] },
   { id: "settings", label: "Settings", href: "/employer/settings", Icon: Settings, group: "setup" },
 ];
 
