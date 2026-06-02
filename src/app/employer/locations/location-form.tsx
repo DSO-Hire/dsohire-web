@@ -17,10 +17,8 @@ import {
   updateLocation,
   type LocationActionState,
 } from "./actions";
-import {
-  StateCombobox,
-  normalizeStateInput,
-} from "@/components/ui/state-combobox";
+import { normalizeStateInput } from "@/components/ui/state-combobox";
+import { LocationAutocompleteField } from "@/components/ui/location-autocomplete-input";
 
 export interface LocationFormInitial {
   id: string;
@@ -63,9 +61,6 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
   const action = mode === "edit" ? updateLocation : createLocation;
   const [state, formAction, pending] = useActionState(action, initialState);
   const router = useRouter();
-  const [stateCode, setStateCode] = useState<string | null>(
-    normalizeStateInput(initial?.state ?? null)
-  );
   const [showDsoAffiliation, setShowDsoAffiliation] = useState<boolean>(
     initial?.public_dso_affiliation ?? true
   );
@@ -119,29 +114,20 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-[2fr_1fr_1.2fr] gap-4">
-        <Field
-          label="City"
-          name="city"
-          required
-          autoComplete="address-level2"
-          placeholder="Kansas City"
-          defaultValue={initial?.city ?? ""}
-        />
-        <div>
+        <div className="sm:col-span-2">
           <label
-            htmlFor="loc-state"
+            htmlFor="loc-city"
             className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
           >
-            State <span className="text-heritage"> *</span>
+            City &amp; state <span className="text-heritage"> *</span>
           </label>
-          <StateCombobox
-            id="loc-state"
-            name="state"
-            value={stateCode}
-            onValueChange={setStateCode}
-            placeholder="Select state"
-            required
-            hideClear
+          <LocationAutocompleteField
+            id="loc-city"
+            cityName="city"
+            stateName="state"
+            defaultCity={initial?.city ?? ""}
+            defaultState={normalizeStateInput(initial?.state ?? null) ?? ""}
+            placeholder="Start typing a city…"
           />
         </div>
         <Field

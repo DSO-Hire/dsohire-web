@@ -49,7 +49,10 @@ import {
   ComboboxField,
   InlineError,
 } from "./edit-sheet";
-import { LocationAutocompleteInput } from "@/components/ui/location-autocomplete-input";
+import {
+  LocationAutocompleteInput,
+  LocationAutocompleteField,
+} from "@/components/ui/location-autocomplete-input";
 import { PRONOUN_OPTIONS } from "@/lib/candidate/name";
 import {
   ROLE_CATEGORIES,
@@ -628,24 +631,21 @@ function IdentityModal({
         />
       </div>
       <div className="grid gap-4 sm:grid-cols-3">
-        <TextField
-          label="City"
-          value={v.current_location_city ?? ""}
-          onChange={(x) =>
-            setV((p) => ({ ...p, current_location_city: x }))
-          }
-        />
-        <TextField
-          label="State (2-letter)"
-          value={v.current_location_state ?? ""}
-          onChange={(x) =>
-            setV((p) => ({
-              ...p,
-              current_location_state: x.toUpperCase().slice(0, 2),
-            }))
-          }
-          maxLength={2}
-        />
+        <div className="sm:col-span-2">
+          <LocationAutocompleteField
+            label="Current location"
+            defaultCity={v.current_location_city ?? ""}
+            defaultState={v.current_location_state ?? ""}
+            placeholder="Start typing your city…"
+            onSelect={(city, state) =>
+              setV((p) => ({
+                ...p,
+                current_location_city: city || null,
+                current_location_state: state || null,
+              }))
+            }
+          />
+        </div>
         <TextField
           label="Years (dental)"
           type="number"

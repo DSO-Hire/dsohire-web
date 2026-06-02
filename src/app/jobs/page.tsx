@@ -19,6 +19,7 @@ import { SiteShell } from "@/components/marketing/site-shell";
 import { JobsMap, type JobsMapLocation } from "@/components/jobs-map";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { JobsStateFilter } from "./jobs-state-filter";
+import { LocationAutocompleteField } from "@/components/ui/location-autocomplete-input";
 import { normalizeStateInput } from "@/lib/us-states";
 import { CORPORATE_FUNCTIONS } from "@/lib/corporate/functions";
 import { ListSort } from "@/components/ui/list-sort";
@@ -851,15 +852,14 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
           <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mr-2">
             Near
           </span>
-          <input
-            type="text"
-            name="near"
-            placeholder="City, State (e.g. Austin, TX)"
-            defaultValue={
-              nearParsed ? `${nearParsed.city}, ${nearParsed.state}` : ""
-            }
-            className="px-3 py-1.5 text-[12px] border border-[var(--rule-strong)] bg-white text-ink min-w-[220px] focus:outline-none focus:border-heritage"
-          />
+          <div className="min-w-[240px]">
+            <LocationAutocompleteField
+              combinedName="near"
+              defaultCity={nearParsed?.city ?? ""}
+              defaultState={nearParsed?.state ?? ""}
+              placeholder="City, e.g. Austin, TX"
+            />
+          </div>
           <select
             name="within"
             defaultValue={

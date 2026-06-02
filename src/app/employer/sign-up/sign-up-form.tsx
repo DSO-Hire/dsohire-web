@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { ArrowRight, ArrowLeft } from "lucide-react";
+import { LocationAutocompleteField } from "@/components/ui/location-autocomplete-input";
 import {
   signUpEmployer,
   verifySignUpEmployer,
@@ -174,20 +175,14 @@ export function SignUpForm({
         helper="Used as the public name and to generate your dsohire.com URL slug. You can edit either later."
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-[2fr_1fr] gap-4">
-        <Field
-          label="Headquarters city"
-          name="headquarters_city"
-          autoComplete="address-level2"
-          placeholder="Kansas City"
-        />
-        <Field
-          label="State"
-          name="headquarters_state"
-          autoComplete="address-level1"
-          placeholder="KS"
-          maxLength={2}
-          required
+      <div>
+        <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+          Headquarters city &amp; state <span className="text-heritage">*</span>
+        </label>
+        <LocationAutocompleteField
+          cityName="headquarters_city"
+          stateName="headquarters_state"
+          placeholder="Start typing a city…"
         />
       </div>
 

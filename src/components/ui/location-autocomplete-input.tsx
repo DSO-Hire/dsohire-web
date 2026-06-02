@@ -43,6 +43,201 @@ function toSuggestion(f: MapboxFeature): Suggestion | null {
   return { value: `${city}, ${stateAbbr}`, label: `${city}, ${regionName}` };
 }
 
+// ─────────────────────────────────────────────────────────────────────
+// Single-select variant — for the many "one city" surfaces (job search
+// "Near", candidate current location, employer location/HQ forms). Emits
+// the chosen city/state as hidden inputs (form-native surfaces) and/or via
+// an onSelect callback (client-state surfaces). Selection-only → typo-proof.
+// ─────────────────────────────────────────────────────────────────────
+
+export function LocationAutocompleteField({
+  label,
+  helper,
+  placeholder = "Start typing a city…",
+  defaultCity = "",
+  defaultState = "",
+  cityName,
+  stateName,
+  combinedName,
+  onSelect,
+  disabled,
+  id,
+}: {
+  label?: string;
+  helper?: string;
+  placeholder?: string;
+  defaultCity?: string;
+  defaultState?: string;
+  /** Hidden input name to emit the chosen city (separate-field surfaces). */
+  cityName?: string;
+  /** Hidden input name to emit the chosen state abbreviation. */
+  stateName?: string;
+  /** Hidden input name to emit a combined "City, ST" (e.g. /jobs ?near=). */
+  combinedName?: string;
+  /** Callback for client-state surfaces; ("","") on clear. */
+  onSelect?: (city: string, state: string) => void;
+  disabled?: boolean;
+  id?: string;
+}) {
+  const initial =
+    defaultCity && defaultState ? { city: defaultCity, state: defaultState } : null;
+  const [selected, setSelected] = React.useState<{ city: string; state: string } | null>(initial);
+  const [draft, setDraft] = React.useState(initial ? `${defaultCity}, ${defaultState}` : "");
+  const [suggestions, setSuggestions] = React.useState<Suggestion[]>([]);
+  const [open, setOpen] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const [activeIdx, setActiveIdx] = React.useState(0);
+  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+
+  React.useEffect(() => {
+    const q = draft.trim();
+    if (selected && q === `${selected.city}, ${selected.state}`) {
+      setSuggestions([]);
+      return;
+    }
+    if (q.length < 2 || !token) {
+      setSuggestions([]);
+      return;
+    }
+    let cancelled = false;
+    setLoading(true);
+    const t = setTimeout(async () => {
+      try {
+        const url =
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json` +
+          `?country=us&types=place&autocomplete=true&limit=5&access_token=${encodeURIComponent(token)}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(String(res.status));
+        const json = (await res.json()) as { features?: MapboxFeature[] };
+        if (cancelled) return;
+        setSuggestions(
+          (json.features ?? []).map(toSuggestion).filter((s): s is Suggestion => s !== null)
+        );
+        setActiveIdx(0);
+        setOpen(true);
+      } catch {
+        if (!cancelled) setSuggestions([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }, 250);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [draft, token, selected]);
+
+  function choose(s: Suggestion) {
+    const [city, state] = s.value.split(", ");
+    setSelected({ city: city ?? "", state: state ?? "" });
+    setDraft(s.value);
+    setSuggestions([]);
+    setOpen(false);
+    onSelect?.(city ?? "", state ?? "");
+  }
+  function clear() {
+    setSelected(null);
+    setDraft("");
+    setSuggestions([]);
+    setOpen(false);
+    onSelect?.("", "");
+  }
+  function onDraft(v: string) {
+    setDraft(v);
+    if (selected) {
+      setSelected(null);
+      onSelect?.("", "");
+    }
+  }
+  function onKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIdx((i) => Math.min(suggestions.length - 1, i + 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIdx((i) => Math.max(0, i - 1));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (suggestions[activeIdx]) choose(suggestions[activeIdx]);
+    } else if (e.key === "Escape") {
+      setOpen(false);
+    }
+  }
+
+  return (
+    <div>
+      {label && <span className="mb-1 block text-sm font-medium text-slate-800">{label}</span>}
+      {helper && <span className="mb-1.5 block text-xs text-slate-500">{helper}</span>}
+
+      {combinedName && selected && (
+        <input type="hidden" name={combinedName} value={`${selected.city}, ${selected.state}`} />
+      )}
+      {cityName && <input type="hidden" name={cityName} value={selected?.city ?? ""} />}
+      {stateName && <input type="hidden" name={stateName} value={selected?.state ?? ""} />}
+
+      <div className="relative">
+        <div className="flex items-center gap-2 rounded border border-[var(--rule-strong,#cbd5e1)] bg-white px-3 py-2 focus-within:border-[#4D7A60]">
+          <MapPin className="size-4 shrink-0 text-slate-400" aria-hidden />
+          <input
+            id={id}
+            type="text"
+            value={draft}
+            onChange={(e) => onDraft(e.target.value)}
+            onKeyDown={onKeyDown}
+            onFocus={() => suggestions.length > 0 && setOpen(true)}
+            onBlur={() => setTimeout(() => setOpen(false), 120)}
+            placeholder={placeholder}
+            disabled={disabled}
+            className="w-full bg-transparent text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none disabled:opacity-60"
+            autoComplete="off"
+            role="combobox"
+            aria-expanded={open}
+            aria-autocomplete="list"
+          />
+          {selected && !disabled && (
+            <button
+              type="button"
+              onClick={clear}
+              className="shrink-0 text-slate-400 hover:text-[#14233F]"
+              aria-label="Clear location"
+            >
+              <X className="size-3.5" />
+            </button>
+          )}
+          {loading && <Loader2 className="size-3.5 shrink-0 animate-spin text-slate-400" />}
+        </div>
+
+        {open && suggestions.length > 0 && (
+          <ul
+            role="listbox"
+            className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded border border-slate-200 bg-white py-1 shadow-lg"
+          >
+            {suggestions.map((s, idx) => (
+              <li
+                key={s.value}
+                role="option"
+                aria-selected={idx === activeIdx}
+                onMouseEnter={() => setActiveIdx(idx)}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  choose(s);
+                }}
+                className={
+                  "flex cursor-pointer items-center gap-2 px-3 py-2 text-sm " +
+                  (idx === activeIdx ? "bg-[#4D7A60]/10 text-[#14233F]" : "text-slate-700")
+                }
+              >
+                <MapPin className="size-3.5 shrink-0 text-[#4D7A60]" aria-hidden />
+                {s.label}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
 interface Props {
   label: string;
   values: string[];

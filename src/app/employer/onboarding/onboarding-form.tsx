@@ -1,15 +1,14 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { ArrowRight } from "lucide-react";
 import { addFirstLocation, type OnboardingState } from "./actions";
-import { StateCombobox } from "@/components/ui/state-combobox";
+import { LocationAutocompleteField } from "@/components/ui/location-autocomplete-input";
 
 const initial: OnboardingState = { ok: false };
 
 export function OnboardingForm({ dsoId }: { dsoId: string }) {
   const [state, action, pending] = useActionState(addFirstLocation, initial);
-  const [stateCode, setStateCode] = useState<string | null>(null);
 
   return (
     <form action={action} className="space-y-5">
@@ -53,37 +52,18 @@ export function OnboardingForm({ dsoId }: { dsoId: string }) {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-[2fr_1fr_1.2fr] gap-4">
-        <div>
+        <div className="sm:col-span-2">
           <label
             htmlFor="loc-city"
             className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
           >
-            City <span className="text-heritage">*</span>
+            City &amp; state <span className="text-heritage">*</span>
           </label>
-          <input
+          <LocationAutocompleteField
             id="loc-city"
-            name="city"
-            required
-            autoComplete="address-level2"
-            placeholder="Kansas City"
-            className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
-          />
-        </div>
-        <div>
-          <label
-            htmlFor="loc-state"
-            className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
-          >
-            State <span className="text-heritage">*</span>
-          </label>
-          <StateCombobox
-            id="loc-state"
-            name="state"
-            value={stateCode}
-            onValueChange={setStateCode}
-            placeholder="Select state"
-            required
-            hideClear
+            cityName="city"
+            stateName="state"
+            placeholder="Start typing a city…"
           />
         </div>
         <div>

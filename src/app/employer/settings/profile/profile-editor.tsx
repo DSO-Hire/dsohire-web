@@ -27,6 +27,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { ImageUpload } from "@/components/image-upload/image-upload";
+import { LocationAutocompleteField } from "@/components/ui/location-autocomplete-input";
 import { JobDescriptionEditor } from "@/components/job-description-editor";
 import { setDsoLogoUrl } from "../actions";
 import {
@@ -527,49 +528,25 @@ function CompanyDetailsSection({
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_140px]">
-          <div>
-            <label
-              htmlFor="dso-hq-city"
-              className="mb-1.5 block text-[12px] font-semibold text-ink"
-            >
-              Headquarters city
-            </label>
-            <input
-              id="dso-hq-city"
-              type="text"
-              value={city}
-              disabled={!canEdit}
-              onChange={(e) => {
-                clearFlags();
-                setCity(e.target.value);
-              }}
-              maxLength={PROFILE_LIMITS.HQ_CITY_MAX}
-              placeholder="e.g. Kansas City"
-              className="w-full rounded border border-[var(--rule-strong)] bg-white px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="dso-hq-state"
-              className="mb-1.5 block text-[12px] font-semibold text-ink"
-            >
-              State
-            </label>
-            <input
-              id="dso-hq-state"
-              type="text"
-              value={stateField}
-              disabled={!canEdit}
-              onChange={(e) => {
-                clearFlags();
-                setStateField(e.target.value);
-              }}
-              maxLength={PROFILE_LIMITS.HQ_STATE_MAX}
-              placeholder="e.g. MO"
-              className="w-full rounded border border-[var(--rule-strong)] bg-white px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
-            />
-          </div>
+        <div>
+          <label
+            htmlFor="dso-hq-city"
+            className="mb-1.5 block text-[12px] font-semibold text-ink"
+          >
+            Headquarters city &amp; state
+          </label>
+          <LocationAutocompleteField
+            id="dso-hq-city"
+            defaultCity={city}
+            defaultState={stateField}
+            disabled={!canEdit}
+            placeholder="e.g. Kansas City"
+            onSelect={(c, s) => {
+              clearFlags();
+              setCity(c);
+              setStateField(s);
+            }}
+          />
         </div>
 
         <div>
