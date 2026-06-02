@@ -183,6 +183,33 @@ export async function parseResumeAction(
     console.warn("[resume/import] failed to cache parsed_resume_json", cacheErr);
   }
 
+  // Persist the resume FILE itself (not just the parsed data) so it's on
+  // file for future applications. The apply wizard already auto-attaches
+  // candidates.resume_url when present — previously this parse step
+  // discarded the file after text extraction, leaving resume_url null and
+  // forcing a re-upload on every application. Same storage bucket + path
+  // convention as the apply flow (user-id-prefixed). Best-effort: a storage
+  // failure must NOT fail the parse — the parsed data is the primary value.
+  // Latest parsed resume wins (the candidate just chose to upload it).
+  try {
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const path = `${user.id}/${Date.now()}-${safeName}`;
+    const { error: uploadErr } = await supabase.storage
+      .from("resumes")
+      .upload(path, file, { contentType: file.type, upsert: false });
+    if (uploadErr) {
+      console.warn("[resume/import] resume file upload failed", uploadErr);
+    } else {
+      const { error: urlErr } = await supabase
+        .from("candidates")
+        .update({ resume_url: path })
+        .eq("id", candidate.id);
+      if (urlErr) console.warn("[resume/import] resume_url set failed", urlErr);
+    }
+  } catch (err) {
+    console.warn("[resume/import] resume persist threw", err);
+  }
+
   return { ok: true, parsed: result.parsed };
 }
 
