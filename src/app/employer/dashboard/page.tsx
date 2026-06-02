@@ -901,8 +901,8 @@ export default async function EmployerDashboard() {
             sparkLabel="New applications · last 7 days"
             stageStrip={stageStripCounts}
             stageStripMax={stageStripMax}
-            href="/employer/applications?stage=new"
-            ctaLabel="Open inbox"
+            href="/employer/applications?status=open&sort=oldest"
+            ctaLabel="Review the queue"
           />
         </div>
 
@@ -944,7 +944,7 @@ export default async function EmployerDashboard() {
               ? "Candidates moved to hired"
               : "When candidates are hired, they show up here"
           }
-          href="/employer/applications?stage=hired"
+          href="/employer/applications?status=hired"
           routeLabel="See hires"
         />
 
