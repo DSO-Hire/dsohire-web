@@ -116,12 +116,11 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
     .order("created_at", { ascending: false });
 
   if (sp.job) appQuery = appQuery.eq("job_id", sp.job);
-  // Status filter is keyed by stage_kind via the join (the URL still uses
-  // the kind text — open/screen/interview/etc.).
-  if (sp.status && VALID_STATUS_FILTER.has(sp.status)) {
-    // Filter via the embedded stage row's kind column.
-    appQuery = appQuery.eq("stage.kind", sp.status);
-  }
+  // NOTE: do NOT filter status via `.eq("stage.kind", …)` here. The stage
+  // embed is a non-inner to-one, so that filter does NOT drop parent rows —
+  // it only NULLS the embed on non-matching apps, which then default to
+  // kind="open" below and pollute the list (every app shows as "New").
+  // The status filter is applied in JS on the real kind, just below.
 
   const { data: rawApps, error: appsErr } = await appQuery;
   if (appsErr) {
@@ -169,7 +168,8 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
     // can return rows where the embed didn't match the filter; defensively
     // re-filter on the JS side.
     .filter((row) => {
-      if (!sp.status) return true;
+      // Status filter applied here on the REAL stage kind (see note above).
+      if (!sp.status || !VALID_STATUS_FILTER.has(sp.status)) return true;
       return row.kind === sp.status;
     });
 
