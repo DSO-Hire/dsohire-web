@@ -600,8 +600,8 @@ export default async function CandidateDashboardPage() {
           label="Profile Completeness"
           hint={
             profilePct < 100
-              ? `Add ${missingFields} more field${missingFields === 1 ? "" : "s"} to be visible to employers.`
-              : "Profile complete — employers can find you."
+              ? `Add ${missingFields} more field${missingFields === 1 ? "" : "s"} to stand out to employers.`
+              : "Profile complete — you're putting your best foot forward."
           }
           href="/candidate/profile"
           routeLabel="Finish profile"

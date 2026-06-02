@@ -68,11 +68,29 @@ export interface CompletenessReport {
 const SUMMARY_MIN_CHARS = 100;
 const SKILLS_MIN_COUNT = 3;
 
+/**
+ * Desired roles that require a professional license. Non-clinical roles
+ * (regional/office managers, front office, other corporate functions) never
+ * carry one, so the "Add a license" checklist item is dropped for them —
+ * otherwise they could never reach All-Star. If no desired role is set yet we
+ * keep the item (clinical is the default expectation on a dental platform).
+ */
+const LICENSE_ROLES = new Set([
+  "dentist",
+  "dental_hygienist",
+  "dental_assistant",
+  "specialist",
+]);
+
 export function computeCompleteness(
   data: ProfileData,
   photoUrl: string | null
 ): CompletenessReport {
-  const items: CompletenessItem[] = [
+  const desiredRoles = data.rolePreferences?.desired_roles ?? [];
+  const licenseRelevant =
+    desiredRoles.length === 0 || desiredRoles.some((r) => LICENSE_ROLES.has(r));
+
+  const allItems: CompletenessItem[] = [
     {
       key: "photo",
       label: "Add a profile photo",
@@ -137,8 +155,14 @@ export function computeCompleteness(
     },
   ];
 
+  // Drop the license item for non-clinical roles so they aren't stuck below
+  // All-Star forever. Order is preserved (license sat after work history).
+  const items = licenseRelevant
+    ? allItems
+    : allItems.filter((i) => i.key !== "license");
+
   const score = items.filter((i) => i.done).length;
-  const tier = scoreToTier(score);
+  const tier = scoreToTier(score, items.length);
 
   return {
     tier,
@@ -149,17 +173,20 @@ export function computeCompleteness(
   };
 }
 
-function scoreToTier(score: number): CompletenessTier {
-  // 0-1: just getting started
-  // 2-4: shaping up
-  // 5-6: real profile
-  // 7-8: nearly there
-  // 9: All-Star
-  if (score <= 1) return "beginner";
-  if (score <= 4) return "intermediate";
-  if (score <= 6) return "advanced";
-  if (score <= 8) return "expert";
-  return "all_star";
+/**
+ * Tier is proportional to the checklist length so it works whether there are
+ * 9 items (clinical) or 8 (non-clinical, no license). Thresholds chosen to
+ * reproduce the original 9-item banding (≤1 beginner, 2-4 intermediate, 5-6
+ * advanced, 7-8 expert, 9 All-Star).
+ */
+function scoreToTier(score: number, total: number): CompletenessTier {
+  if (total <= 0) return "beginner";
+  if (score >= total) return "all_star";
+  const pct = score / total;
+  if (pct < 0.2) return "beginner";
+  if (pct < 0.5) return "intermediate";
+  if (pct < 0.72) return "advanced";
+  return "expert";
 }
 
 export const TIER_META: Record<
