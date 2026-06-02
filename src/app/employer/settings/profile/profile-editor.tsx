@@ -422,6 +422,7 @@ function CompanyDetailsSection({
   initialWebsite,
   initialCity,
   initialState,
+  initialCandidateReplyTo,
   initialPracticeCount,
 }: {
   canEdit: boolean;
