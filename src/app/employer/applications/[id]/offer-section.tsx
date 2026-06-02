@@ -632,13 +632,16 @@ function SendOfferModal({
     if (numeric == null || !Number.isFinite(numeric) || numeric <= 0) return;
     const pretty = numeric % 1 === 0 ? String(numeric) : numeric.toFixed(2);
     const seed = `$${pretty}/${period === "annual" ? "year" : "hour"}`;
-    setValues((prev) => {
-      const cur = prev["offer.compensation"] ?? "";
-      if (cur !== "" && cur !== lastAutoCompRef.current) return prev;
-      if (cur === seed) return prev;
-      return { ...prev, "offer.compensation": seed };
-    });
+    // Compare against the CURRENT committed value + the last auto-seed BEFORE
+    // mutating the ref. (Doing the check inside the deferred setValues updater
+    // is a trap: lastAutoCompRef would already hold the new seed by the time
+    // the updater runs, so the "still our auto-seed?" check would falsely fail
+    // and leave a stale "$2".)
+    const cur = values["offer.compensation"] ?? "";
+    if (cur !== "" && cur !== lastAutoCompRef.current) return; // hand-edited → leave it
+    if (cur === seed) return;
     lastAutoCompRef.current = seed;
+    setValues((prev) => ({ ...prev, "offer.compensation": seed }));
   }
   function handleBaseAmount(v: string) {
     setBaseAmount(v);
