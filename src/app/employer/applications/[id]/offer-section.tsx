@@ -614,18 +614,24 @@ function SendOfferModal({
 
   // OFFER-UX — mirror the structured base amount into the prose Compensation
   // field so recruiters don't retype it on a straight hourly/salary offer.
-  // We only overwrite while the field is empty or still showing OUR last
-  // auto-seed; the moment the recruiter edits it themselves, we back off.
+  // Driven synchronously by the base input's onChange (NOT a state-mirroring
+  // effect, which raced and could leave a stale partial like "$2/hour" while
+  // you finished typing "25"). We only overwrite while the field is empty or
+  // still showing OUR last auto-seed; the moment the recruiter edits it
+  // themselves, we back off.
   const lastAutoCompRef = useRef<string>("");
-  useEffect(() => {
+  function seedCompFromBase(
+    amountStr: string,
+    period: "hourly" | "annual"
+  ) {
     if (!selectedTemplate) return;
     if (!isTokenInBody(selectedTemplate.body, "offer.compensation")) return;
-    const numeric = baseAmount.trim()
-      ? Number(baseAmount.replace(/[^0-9.]/g, ""))
+    const numeric = amountStr.trim()
+      ? Number(amountStr.replace(/[^0-9.]/g, ""))
       : null;
     if (numeric == null || !Number.isFinite(numeric) || numeric <= 0) return;
     const pretty = numeric % 1 === 0 ? String(numeric) : numeric.toFixed(2);
-    const seed = `$${pretty}/${basePeriod === "annual" ? "year" : "hour"}`;
+    const seed = `$${pretty}/${period === "annual" ? "year" : "hour"}`;
     setValues((prev) => {
       const cur = prev["offer.compensation"] ?? "";
       if (cur !== "" && cur !== lastAutoCompRef.current) return prev;
@@ -633,7 +639,15 @@ function SendOfferModal({
       return { ...prev, "offer.compensation": seed };
     });
     lastAutoCompRef.current = seed;
-  }, [baseAmount, basePeriod, selectedTemplate]);
+  }
+  function handleBaseAmount(v: string) {
+    setBaseAmount(v);
+    seedCompFromBase(v, basePeriod);
+  }
+  function handleBasePeriod(p: "hourly" | "annual") {
+    setBasePeriod(p);
+    seedCompFromBase(baseAmount, p);
+  }
 
   function next() {
     setError(null);
@@ -780,9 +794,9 @@ function SendOfferModal({
             <div className="space-y-5">
               <OfferBaseCompField
                 amount={baseAmount}
-                onAmount={setBaseAmount}
+                onAmount={handleBaseAmount}
                 period={basePeriod}
-                onPeriod={setBasePeriod}
+                onPeriod={handleBasePeriod}
                 jobCompMin={jobCompMin}
                 jobCompMax={jobCompMax}
                 jobCompPeriod={jobCompPeriod}
@@ -1146,10 +1160,11 @@ function isoToHumanDateTime(iso: string): string {
 }
 function humanToIsoDateTime(human: string): string {
   if (!human) return "";
+  // Strip the weekday prefix and the literal " at ", but KEEP the AM/PM —
+  // an over-eager tz strip used to eat "PM" and re-show the time as AM.
   const cleaned = human
     .replace(/^[A-Za-z]+,\s*/, "")
-    .replace(/\bat\b/i, " ")
-    .replace(/\s+[A-Za-z]{2,4}\s*$/, "")
+    .replace(/\s+at\s+/i, " ")
     .trim();
   const d = new Date(cleaned);
   if (Number.isNaN(d.getTime())) return "";
