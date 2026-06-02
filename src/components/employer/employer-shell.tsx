@@ -284,12 +284,12 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
         </div>
 
         {/* Grouped nav */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4">
+        <nav className="flex-1 overflow-y-auto px-3 py-3">
           {groupedNav.map((group, idx) => (
             <ul
               key={group.group}
               className={
-                "list-none space-y-0.5 " + (idx > 0 ? "mt-5" : "")
+                "list-none space-y-0.5 " + (idx > 0 ? "mt-2.5" : "")
               }
             >
               {group.items.map((item) => (
@@ -389,7 +389,7 @@ function NavRow({
       <Link
         href={item.href}
         className={
-          "flex items-center gap-3 px-3 py-2.5 text-[13px] font-semibold tracking-[0.5px] rounded transition-colors " +
+          "flex items-center gap-3 px-3 py-2 text-[13px] font-semibold tracking-[0.5px] rounded transition-colors " +
           (isActive
             ? "bg-white/10 text-ivory"
             : "text-ivory/65 hover:bg-white/5 hover:text-ivory")
