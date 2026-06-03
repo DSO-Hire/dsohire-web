@@ -879,6 +879,10 @@ function SendOfferModal({
   const [basePeriod, setBasePeriod] = useState<"hourly" | "annual">(
     jobCompPeriod === "annual" ? "annual" : "hourly"
   );
+  // N12 — per-offer live edit of the letter body. null = use the template
+  // as-is; a string = a fully-merged markdown override for THIS send only.
+  const [bodyOverride, setBodyOverride] = useState<string | null>(null);
+  const [editingBody, setEditingBody] = useState(false);
 
   const selectedTemplate = useMemo(
     () => templates.find((t) => t.id === templateId) ?? null,
@@ -1000,6 +1004,7 @@ function SendOfferModal({
         subject: subject.trim() || `Offer from ${dsoName}`,
         baseAmount: parsedBase,
         basePeriod,
+        bodyOverride: bodyOverride && bodyOverride.trim() ? bodyOverride : null,
       });
       if (!res.ok) {
         setError(res.error);
@@ -1020,9 +1025,8 @@ function SendOfferModal({
   // engine as the server so the preview matches what will actually be
   // sent. Auto-filled fields are injected from the props we already
   // have (candidate full_name + email, job title, DSO name).
-  useEffect(() => {
-    if (step !== 3 || !selectedTemplate) return;
-    const allValues: Record<string, string> = {
+  const previewValues = useMemo<Record<string, string>>(
+    () => ({
       "candidate.full_name": candidateName,
       "candidate.first_name": candidateName.split(" ")[0] ?? candidateName,
       "candidate.email": candidateEmail,
@@ -1031,20 +1035,26 @@ function SendOfferModal({
       "job.employment_type": jobEmploymentType,
       "dso.name": dsoName,
       ...values,
-    };
-    const result = renderTemplate(selectedTemplate.body, allValues);
+    }),
+    [
+      candidateName,
+      candidateEmail,
+      jobTitle,
+      jobLocation,
+      jobEmploymentType,
+      dsoName,
+      values,
+    ]
+  );
+
+  useEffect(() => {
+    if (step !== 3 || !selectedTemplate) return;
+    // A live edit (bodyOverride) already has tokens merged in, so renderTemplate
+    // just markdown→HTMLs it; otherwise render the template with the values.
+    const source = bodyOverride != null ? bodyOverride : selectedTemplate.body;
+    const result = renderTemplate(source, previewValues);
     setPreviewHtml(result.html);
-  }, [
-    step,
-    selectedTemplate,
-    candidateName,
-    candidateEmail,
-    jobTitle,
-    jobLocation,
-    jobEmploymentType,
-    dsoName,
-    values,
-  ]);
+  }, [step, selectedTemplate, previewValues, bodyOverride]);
 
   // N12 — mirror the server gate so the button + banners read accurately.
   // Authoritative routing still happens server-side in sendOffer().
@@ -1147,8 +1157,25 @@ function SendOfferModal({
               />
             </div>
           )}
-          {!submittedPending && step === 3 && (
-            <Step3Preview html={previewHtml} />
+          {!submittedPending && step === 3 && selectedTemplate && (
+            <Step3Preview
+              html={previewHtml}
+              editing={editingBody}
+              bodyText={bodyOverride ?? ""}
+              hasEdits={bodyOverride != null}
+              onStartEdit={() => {
+                if (bodyOverride == null) {
+                  setBodyOverride(mergeToMarkdown(selectedTemplate.body, previewValues));
+                }
+                setEditingBody(true);
+              }}
+              onChangeText={(t) => setBodyOverride(t)}
+              onPreview={() => setEditingBody(false)}
+              onReset={() => {
+                setBodyOverride(null);
+                setEditingBody(false);
+              }}
+            />
           )}
           {!submittedPending && step === 4 && (
             <Step4Confirm
@@ -1665,28 +1692,104 @@ function OfferField({
 
 /* ── Step 3 ── */
 
-function Step3Preview({ html }: { html: string }) {
-  if (!html) {
-    return (
-      <div className="flex items-center justify-center p-12 text-slate-meta">
-        <Loader2 className="h-5 w-5 animate-spin" />
-      </div>
-    );
-  }
+/** N12 — fill `{{ token }}` in the template SOURCE with current values, so
+ *  the live editor starts from the real merged letter (no tokens left). */
+function mergeToMarkdown(body: string, values: Record<string, string>): string {
+  return body.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_m, key) => values[key] ?? "");
+}
+
+function Step3Preview({
+  html,
+  editing,
+  bodyText,
+  hasEdits,
+  onStartEdit,
+  onChangeText,
+  onPreview,
+  onReset,
+}: {
+  html: string;
+  editing: boolean;
+  bodyText: string;
+  hasEdits: boolean;
+  onStartEdit: () => void;
+  onChangeText: (v: string) => void;
+  onPreview: () => void;
+  onReset: () => void;
+}) {
   const shell = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{margin:0;padding:20px;font-family:'Manrope','Helvetica Neue',Arial,sans-serif;color:#14233F;font-size:14px;line-height:1.6;background:#FAF7F1;}p{margin:0 0 12px;}h2{font-size:18px;margin:22px 0 10px;}h3{font-size:16px;margin:18px 0 8px;}ul{margin:12px 0 16px;padding-left:22px;}</style></head><body>${html}</body></html>`;
   return (
     <div>
-      <p className="text-[13px] text-slate-body mb-3">
-        Preview of the rendered offer letter. The actual email also includes
-        the standard DSO Hire header + closing chrome.
-      </p>
-      <iframe
-        title="Offer letter preview"
-        srcDoc={shell}
-        sandbox=""
-        className="w-full border border-[var(--rule-strong)]"
-        style={{ height: "520px" }}
-      />
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-[13px] text-slate-body">
+          {editing
+            ? "Editing this offer's text. Your saved template isn't changed."
+            : "Preview of the rendered offer letter. The email also adds the standard DSO Hire header + closing chrome."}
+        </p>
+        <div className="flex items-center gap-2 shrink-0">
+          {hasEdits && (
+            <button
+              type="button"
+              onClick={onReset}
+              className="text-[11px] font-bold tracking-[1px] uppercase text-slate-meta hover:text-ink"
+            >
+              Reset to template
+            </button>
+          )}
+          {editing ? (
+            <button
+              type="button"
+              onClick={onPreview}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-ink bg-white hover:bg-cream"
+            >
+              <CheckCircle2 className="h-3 w-3" /> Preview
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onStartEdit}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-ink bg-white hover:bg-cream"
+            >
+              <FileSignature className="h-3 w-3" /> {hasEdits ? "Continue editing" : "Edit text"}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {hasEdits && !editing && (
+        <div className="mb-3 inline-flex items-center gap-1.5 rounded border border-heritage/30 bg-heritage/[0.06] px-2.5 py-1 text-[11px] font-semibold text-heritage-deep">
+          <CheckCircle2 className="h-3 w-3" /> Custom edits applied to this offer
+        </div>
+      )}
+
+      {editing ? (
+        <div>
+          <textarea
+            value={bodyText}
+            onChange={(e) => onChangeText(e.target.value)}
+            rows={18}
+            spellCheck
+            className="w-full px-3 py-2.5 bg-white border border-[var(--rule-strong)] text-ink text-[13px] leading-relaxed font-mono focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage resize-y"
+          />
+          <p className="mt-1.5 text-[11px] text-slate-meta leading-snug">
+            Basic formatting: <code>##</code> heading, <code>**bold**</code>,
+            <code>*italic*</code>, and <code>-</code> for bullets. Hit{" "}
+            <strong>Preview</strong> to see the rendered letter.
+          </p>
+        </div>
+      ) : !html ? (
+        <div className="flex items-center justify-center p-12 text-slate-meta">
+          <Loader2 className="h-5 w-5 animate-spin" />
+        </div>
+      ) : (
+        <iframe
+          title="Offer letter preview"
+          srcDoc={shell}
+          sandbox=""
+          className="w-full border border-[var(--rule-strong)]"
+          style={{ height: "520px" }}
+        />
+      )}
     </div>
   );
 }

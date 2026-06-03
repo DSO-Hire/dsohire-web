@@ -23,6 +23,7 @@ import { recordAuditEvent } from "@/lib/audit/record";
 import { dispatchInboxRichCard } from "@/lib/inbox/dispatch-rich-card";
 import { dispatchNotification } from "@/lib/notifications/dispatcher";
 import { sendEmail } from "@/lib/email/send";
+import { resolveCandidateReplyTo } from "@/lib/email/candidate-reply-to";
 import { OfferLetter as OfferLetterEmail } from "@/emails/employer/OfferLetter";
 import { OfferApprovalDecision } from "@/emails/employer/OfferApprovalDecision";
 import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
@@ -169,9 +170,12 @@ export async function approveOffer(
     console.warn("[offer-approval] dso name resolve failed", e);
   }
 
-  // Original sender's display name + dso_user id (for the inbox card author).
+  // Original sender's display name + dso_user id (for the inbox card author)
+  // + email (the letter names them as the follow-up contact, so replies must
+  // reach them, not the platform).
   let senderName: string | null = null;
   let senderDsoUserId: string | null = null;
+  let senderEmail: string | null = null;
   if (ctx.senderAuthId) {
     const { data: senderRow } = await admin
       .from("dso_users")
@@ -181,7 +185,15 @@ export async function approveOffer(
       .maybeSingle();
     senderName = ((senderRow as Record<string, unknown> | null)?.full_name as string | null) ?? null;
     senderDsoUserId = ((senderRow as Record<string, unknown> | null)?.id as string | null) ?? null;
+    try {
+      const { data: authResp } = await admin.auth.admin.getUserById(ctx.senderAuthId);
+      senderEmail = authResp?.user?.email ?? null;
+    } catch {
+      senderEmail = null;
+    }
   }
+  const replyToAddress =
+    (senderEmail ?? undefined) ?? (await resolveCandidateReplyTo(ctx.dsoId));
 
   const token = ctx.token;
   const responseUrl = token ? offerResponseUrl(token) : `${SITE_URL}/employer/applications/${ctx.applicationId}`;
@@ -192,7 +204,7 @@ export async function approveOffer(
     to: ctx.recipientEmail,
     subject: ctx.subject,
     template: "employer.offer_letter",
-    replyTo: "info@dsohire.com",
+    replyTo: replyToAddress,
     react: OfferLetterEmail({
       candidateFirstName: firstName(ctx.candidateFullName),
       dsoName,

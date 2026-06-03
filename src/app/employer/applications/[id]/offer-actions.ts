@@ -27,6 +27,7 @@ import {
 import { recordAuditEvent } from "@/lib/audit/record";
 import { dispatchInboxRichCard } from "@/lib/inbox/dispatch-rich-card";
 import { sendEmail } from "@/lib/email/send";
+import { resolveCandidateReplyTo } from "@/lib/email/candidate-reply-to";
 import { dispatchNotification } from "@/lib/notifications/dispatcher";
 import { renderTemplate } from "@/lib/offer-letters/merge";
 import { OfferLetter as OfferLetterEmail } from "@/emails/employer/OfferLetter";
@@ -63,6 +64,10 @@ export interface SendOfferInput {
    *  The prose `offer.compensation` mergeValue stays for the letter body. */
   baseAmount?: number | null;
   basePeriod?: "hourly" | "annual" | null;
+  /** N12 — per-offer live edit: a fully-merged markdown body that replaces
+   *  the template for THIS send only (the saved template is untouched).
+   *  When present + non-empty, it's rendered instead of the template body. */
+  bodyOverride?: string | null;
 }
 
 export type SendOfferResult =
@@ -276,8 +281,14 @@ export async function sendOffer(
     ...mergeValues,
   };
 
-  // ── Render
-  const render = renderTemplate(templateBody, allValues);
+  // ── Render. A per-offer live edit (bodyOverride) replaces the template
+  // body for this send only; tokens are already merged in the override, so
+  // renderTemplate just markdown→HTMLs it (missingRequired comes back empty).
+  const sourceBody =
+    typeof input.bodyOverride === "string" && input.bodyOverride.trim()
+      ? input.bodyOverride
+      : templateBody;
+  const render = renderTemplate(sourceBody, allValues);
   if (render.missingRequired.length > 0) {
     return {
       ok: false,
@@ -403,13 +414,16 @@ export async function sendOffer(
   // ── Send the email. The OfferLetter React Email template wraps the
   // pre-rendered fragment in the brand chrome + adds the tokenized
   // "Review and respond" CTA + Accept/Decline quick-reply links.
-  // replyTo points at info@dsohire.com (alias-routes to Cam) so the
-  // "questions about anything in the offer" line doesn't bounce.
+  // The letter says "reply and {sender} will follow up," so replies must
+  // reach the sender — not the platform. Sender's own email first, then the
+  // DSO's candidate reply-to (careers@ / owner), then no header.
+  const replyToAddress =
+    (user.email ?? undefined) ?? (await resolveCandidateReplyTo(jobDsoId));
   const sendResult = await sendEmail({
     to: candidateEmail,
     subject: subject.trim(),
     template: "employer.offer_letter",
-    replyTo: "info@dsohire.com",
+    replyTo: replyToAddress,
     react: OfferLetterEmail({
       candidateFirstName: firstName(candidateFullName),
       dsoName,
