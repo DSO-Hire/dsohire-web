@@ -16,7 +16,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { Menu, X, LifeBuoy, LogOut } from "lucide-react";
+import { Menu, X, LifeBuoy, LogOut, Settings as SettingsIcon } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 
 export interface MobileNavItem {
@@ -28,6 +28,7 @@ export interface MobileNavItem {
 interface EmployerMobileNavProps {
   active?: string;
   groups: Array<{ group: string; items: MobileNavItem[] }>;
+  settings: MobileNavItem;
   help: MobileNavItem;
   user: {
     fullName: string;
@@ -41,6 +42,7 @@ interface EmployerMobileNavProps {
 export function EmployerMobileNav({
   active,
   groups,
+  settings,
   help,
   user,
 }: EmployerMobileNavProps) {
@@ -153,6 +155,19 @@ export function EmployerMobileNav({
             </nav>
 
             <div className="border-t border-white/10 p-3 space-y-1">
+              <Link
+                href={settings.href}
+                onClick={() => setOpen(false)}
+                className={
+                  "flex items-center gap-3 px-3 py-2.5 text-[13px] font-semibold rounded " +
+                  (active === settings.id
+                    ? "bg-white/10 text-ivory"
+                    : "text-ivory/65 hover:bg-white/5 hover:text-ivory")
+                }
+              >
+                <SettingsIcon className="size-4 flex-shrink-0" />
+                {settings.label}
+              </Link>
               <Link
                 href={help.href}
                 onClick={() => setOpen(false)}

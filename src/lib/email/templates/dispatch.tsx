@@ -66,6 +66,13 @@ export interface CandidateEmailDispatchInput {
   relatedDsoId?: string | null;
   relatedCandidateId?: string | null;
   replyTo?: string;
+  /**
+   * Affiliation-MASKED DSO name for the `{{dso.name}}` mergefield. Callers
+   * MUST pass this for candidate-facing sends so a masked DSO's corporate
+   * name never leaks through a custom template. Falls back to the raw
+   * dsos.name only if omitted (audit any caller that does).
+   */
+  displayDsoName?: string;
 }
 
 /**
@@ -103,7 +110,9 @@ export async function dispatchCandidateEmail(
     .eq("id", input.dsoId)
     .maybeSingle();
 
-  const dsoName = (dsoRow?.name as string | undefined) ?? "the hiring team";
+  // Masked name wins — never leak the corporate DSO name to a candidate.
+  const dsoName =
+    input.displayDsoName ?? (dsoRow?.name as string | undefined) ?? "the hiring team";
   const dsoSlug = (dsoRow?.slug as string | undefined) ?? "";
 
   const mergeContext: Record<string, Record<string, string>> = {

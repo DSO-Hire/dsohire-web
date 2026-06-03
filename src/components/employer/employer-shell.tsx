@@ -118,8 +118,17 @@ const NAV: ReadonlyArray<NavItem> = [
   { id: "billing", label: "Billing", href: "/employer/billing", Icon: CreditCard, group: "setup", hideFromRoles: ["recruiter", "hiring_manager"] },
   { id: "automations", label: "Automations", href: "/employer/automations", Icon: Workflow, group: "setup", hideFromRoles: ["recruiter", "hiring_manager"] },
   { id: "offer-approvals", label: "Offer approvals", href: "/employer/offer-approvals", Icon: ClipboardCheck, group: "setup", hideFromRoles: ["recruiter", "hiring_manager"] },
-  { id: "settings", label: "Settings", href: "/employer/settings", Icon: Settings, group: "setup" },
 ];
+
+// Settings lives in the footer cluster with Help + Sign out (Cam, Day 26) —
+// it's an account-level destination, not a daily-work nav item.
+const SETTINGS_ITEM: NavItem = {
+  id: "settings",
+  label: "Settings",
+  href: "/employer/settings",
+  Icon: Settings,
+  group: "setup",
+};
 
 const HELP_ITEM: NavItem = {
   id: "help",
@@ -318,8 +327,9 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
           ))}
         </nav>
 
-        {/* Footer cluster: Help + Sign out */}
+        {/* Footer cluster: Settings + Help + Sign out */}
         <div className="border-t border-white/10 p-3 space-y-1">
+          <NavRow item={SETTINGS_ITEM} active={active} />
           <NavRow item={HELP_ITEM} active={active} />
           <form action="/employer/sign-out" method="post">
             <button
@@ -350,6 +360,11 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
                 href: item.href,
               })),
             }))}
+            settings={{
+              id: SETTINGS_ITEM.id,
+              label: SETTINGS_ITEM.label,
+              href: SETTINGS_ITEM.href,
+            }}
             help={{
               id: HELP_ITEM.id,
               label: HELP_ITEM.label,
@@ -408,7 +423,7 @@ function NavRow({
       <Link
         href={item.href}
         className={
-          "flex items-center gap-3 px-3 py-2 text-[13px] font-semibold tracking-[0.5px] rounded transition-colors " +
+          "flex items-center gap-3 px-3 py-1.5 text-[13px] font-semibold tracking-[0.5px] rounded transition-colors " +
           (isActive
             ? "bg-white/10 text-ivory"
             : "text-ivory/65 hover:bg-white/5 hover:text-ivory")

@@ -17,6 +17,7 @@
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { dispatchNotification } from "@/lib/notifications/dispatcher";
 import { resolveCandidateReplyTo } from "@/lib/email/candidate-reply-to";
+import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
 import { NurtureMessage } from "@/emails/candidate/NurtureMessage";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
@@ -263,12 +264,18 @@ async function sendStep(
     : { data: null };
   const jobTitle = (jobRow?.title as string | null) ?? "the role";
 
-  const { data: dsoRow } = await admin
-    .from("dsos")
-    .select("name")
-    .eq("id", enr.dso_id)
-    .maybeSingle();
-  const dsoName = (dsoRow?.name as string | undefined) ?? "the hiring team";
+  // Affiliation-masked name — candidate sees the PRACTICE name, never the
+  // corporate DSO, when masking is on. Raw dsos.name was an affiliation leak.
+  let dsoName = "the hiring team";
+  try {
+    const displayed = await getDisplayedDsoName({
+      jobId: jobId ?? "",
+      viewer: { role: "candidate", applicationId: enr.application_id },
+    });
+    if (displayed.name) dsoName = displayed.name;
+  } catch (e) {
+    console.warn("[sequences] dso name resolve failed", e);
+  }
 
   const fill = (s: string) =>
     s

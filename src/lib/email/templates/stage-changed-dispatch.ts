@@ -18,6 +18,7 @@
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { dispatchCandidateEmail } from "./dispatch";
 import { resolveCandidateReplyTo } from "@/lib/email/candidate-reply-to";
+import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
 import { StageChanged } from "@/emails/StageChanged";
 import { greetingFirstName } from "@/lib/candidate/name";
 
@@ -89,16 +90,19 @@ export async function dispatchStageChangedEmail(
     const jobUrl = `${SITE_URL}/jobs/${input.jobId}`;
     const applicationUrl = `${SITE_URL}/candidate/applications/${input.applicationId}`;
 
-    // Pull DSO name for the fallback React component. The custom-template
-    // path inside dispatchCandidateEmail pulls its own dso row; we just
-    // need a label here for the system-default fallback.
-    const { data: dsoRow } = await admin
-      .from("dsos")
-      .select("name")
-      .eq("id", input.dsoId)
-      .maybeSingle();
-    const dsoName =
-      (dsoRow?.name as string | undefined) ?? "the hiring team";
+    // DSO name for the fallback React component — affiliation-MASKED so a
+    // candidate sees the practice name, never the corporate DSO. Raw
+    // dsos.name here was an affiliation leak.
+    let dsoName = "the hiring team";
+    try {
+      const displayed = await getDisplayedDsoName({
+        jobId: input.jobId,
+        viewer: { role: "candidate", applicationId: input.applicationId },
+      });
+      if (displayed.name) dsoName = displayed.name;
+    } catch (e) {
+      console.warn("[stage-changed] dso name resolve failed", e);
+    }
 
     const fallbackSubject = `Update on your application for ${input.jobTitle}`;
     const replyTo = await resolveCandidateReplyTo(input.dsoId);
@@ -109,6 +113,7 @@ export async function dispatchStageChangedEmail(
       recipientUserId: authUserId,
       recipientEmail,
       replyTo,
+      displayDsoName: dsoName,
       candidate: {
         first_name: firstName,
         full_name: fullName,

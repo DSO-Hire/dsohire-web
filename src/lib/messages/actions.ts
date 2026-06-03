@@ -27,6 +27,7 @@ import {
 import { recordAuditEvent } from "@/lib/audit/record";
 import { dispatchNotification } from "@/lib/notifications/dispatcher";
 import { dispatchCandidateEmail } from "@/lib/email/templates/dispatch";
+import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
 import { MessageReceived } from "@/emails/MessageReceived";
 import { greetingFirstName } from "@/lib/candidate/name";
 
@@ -937,11 +938,24 @@ async function dispatchMessageNotification(
       // Recipient is the candidate → eligible for the DSO's custom template
       // (Phase 4.5.f). dispatchCandidateEmail short-circuits to the fallback
       // when the DSO isn't on Growth+ or hasn't customized this template.
+      // Affiliation-MASK the DSO name for the candidate (raw dsoName leaks
+      // the corporate name through both the fallback + custom templates).
+      let candidateDsoName = dsoName;
+      try {
+        const displayed = await getDisplayedDsoName({
+          jobId: appRow.job_id as string,
+          viewer: { role: "candidate", applicationId: appRow.id as string },
+        });
+        if (displayed.name) candidateDsoName = displayed.name;
+      } catch (e) {
+        console.warn("[messages] dso name resolve failed", e);
+      }
       void dispatchCandidateEmail({
         kind: "application.message_received",
         dsoId: job.dso_id as string,
         recipientUserId: recipientAuthUserId,
         recipientEmail,
+        displayDsoName: candidateDsoName,
         candidate: {
           first_name: recipientName,
           full_name: candidateFullName ?? recipientName,
@@ -959,7 +973,20 @@ async function dispatchMessageNotification(
         },
         relatedDsoId,
         relatedCandidateId,
-        fallback: { subject, react: fallbackReact },
+        fallback: {
+          subject,
+          react: MessageReceived({
+            recipientName,
+            senderName,
+            senderRole: args.senderRole,
+            jobTitle,
+            dsoName: candidateDsoName,
+            candidateName: candidateFullName,
+            messageBody: args.body,
+            deepLink,
+            fullMessageLink: deepLink,
+          }),
+        },
       });
     } else {
       // Recipient is a DSO admin/owner — employer-internal notification, no

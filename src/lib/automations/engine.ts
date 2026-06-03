@@ -27,6 +27,7 @@ import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
 import { dispatchStageChangedEmail } from "@/lib/email/templates/stage-changed-dispatch";
 import { dispatchNotification } from "@/lib/notifications/dispatcher";
 import { resolveCandidateReplyTo } from "@/lib/email/candidate-reply-to";
+import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
 import { AutomationNotice } from "@/emails/employer/AutomationNotice";
 import { NurtureMessage } from "@/emails/candidate/NurtureMessage";
 import {
@@ -376,12 +377,19 @@ async function runNurtureEmail(
     (cand?.first_name as string | null) ??
     ((cand?.full_name as string | null) ?? "there").split(" ")[0] ??
     "there";
-  const { data: dsoRow } = await admin
-    .from("dsos")
-    .select("name")
-    .eq("id", event.dsoId)
-    .maybeSingle();
-  const dsoName = (dsoRow?.name as string | undefined) ?? "the hiring team";
+  // Affiliation-masked name — the candidate must see the PRACTICE name, never
+  // the corporate DSO name, when the DSO has masking on. Same posture as the
+  // offer flow. Raw dsos.name here was an affiliation leak.
+  let dsoName = "the hiring team";
+  try {
+    const displayed = await getDisplayedDsoName({
+      jobId: event.jobId,
+      viewer: { role: "candidate", applicationId: event.applicationId },
+    });
+    if (displayed.name) dsoName = displayed.name;
+  } catch (e) {
+    console.warn("[automations] nurture dso name resolve failed", e);
+  }
 
   const fill = (s: string) =>
     s

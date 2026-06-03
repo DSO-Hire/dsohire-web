@@ -833,6 +833,7 @@ async function sendApplicationEmails(
         dsoId: params.dsoId,
         recipientUserId: params.candidateAuthUserId,
         recipientEmail: candidateEmail,
+        displayDsoName: displayedEmployerName,
         candidate: {
           first_name: firstName,
           full_name: candidateDisplayName,

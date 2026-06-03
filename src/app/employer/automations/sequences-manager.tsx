@@ -43,7 +43,7 @@ const PREVIEW_SAMPLE: Record<string, string> = {
   "{{first_name}}": "Maria",
   "{{last_name}}": "Lopez",
   "{{job_title}}": "Dental Hygienist",
-  "{{practice_name}}": "Eslinger Dental Partners",
+  "{{practice_name}}": "Bright Smiles Dental",
 };
 
 function fillPreview(s: string): string {
