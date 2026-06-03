@@ -28,11 +28,12 @@
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
   useTransition,
   type ChangeEvent,
 } from "react";
-import { Star, Trash2, Lock, Loader2, AlertCircle, Sparkles, X } from "lucide-react";
+import { Star, Trash2, Lock, Loader2, AlertCircle, Sparkles, X, Upload } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import {
   REALTIME_LISTEN_TYPES,
@@ -62,7 +63,10 @@ import {
   deleteScorecardDraft,
   type ApplicationScorecardRow,
 } from "./scorecard-actions";
-import { draftScorecardFromTranscript } from "@/lib/scorecards/notetaker-action";
+import {
+  draftScorecardFromTranscript,
+  extractTranscriptText,
+} from "@/lib/scorecards/notetaker-action";
 
 /* ───────────────────────────────────────────────────────────────
  * Public types — what the server passes in
@@ -792,7 +796,30 @@ function NoteTakerModal({
   const [transcript, setTranscript] = useState("");
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [reading, setReading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const chars = transcript.trim().length;
+
+  function onFile(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-selecting the same file
+    if (!file) return;
+    setError(null);
+    setReading(true);
+    const fd = new FormData();
+    fd.append("file", file);
+    void (async () => {
+      const res = await extractTranscriptText(fd);
+      setReading(false);
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      setTranscript((prev) =>
+        prev.trim() ? `${prev.trim()}\n\n${res.text}` : res.text
+      );
+    })();
+  }
 
   function generate() {
     setError(null);
@@ -851,11 +878,39 @@ function NoteTakerModal({
         </header>
 
         <div className="flex-1 overflow-y-auto p-5">
+          <div className="mb-2 flex items-center gap-3">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".txt,.pdf,.docx,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              onChange={onFile}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={pending || reading}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[var(--rule-strong)] bg-white text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream disabled:opacity-60"
+            >
+              {reading ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> Reading…
+                </>
+              ) : (
+                <>
+                  <Upload className="h-3.5 w-3.5" /> Upload a file
+                </>
+              )}
+            </button>
+            <span className="text-[11px] text-slate-meta">
+              .txt, .pdf, or .docx — or paste below
+            </span>
+          </div>
           <textarea
             value={transcript}
             onChange={(e) => setTranscript(e.target.value)}
             rows={14}
-            disabled={pending}
+            disabled={pending || reading}
             placeholder="Paste the interview transcript or your notes here…"
             className="w-full px-3 py-2.5 bg-cream border border-[var(--rule-strong)] text-ink text-[13px] leading-relaxed focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage resize-y disabled:opacity-60"
           />

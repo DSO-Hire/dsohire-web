@@ -25,6 +25,11 @@ import {
 import { logAiUsage, checkAiRateLimit } from "@/lib/ai/usage";
 import { extractJson } from "@/lib/ai/extract-json";
 import {
+  extractResumeText,
+  ResumeExtractionError,
+  MAX_FILE_BYTES,
+} from "@/lib/resume/extract";
+import {
   getRubricById,
   RECOMMENDATION_ORDER,
   SCORE_LABELS,
@@ -209,6 +214,75 @@ export async function draftScorecardFromTranscript(input: {
       scoredCount: Object.keys(scores).length,
     },
   };
+}
+
+export type ExtractTranscriptResult =
+  | { ok: true; text: string }
+  | { ok: false; error: string };
+
+/**
+ * Pull plain text out of an uploaded transcript file (.txt / .pdf / .docx)
+ * so the recruiter can drop in an Otter/Fireflies/Word export instead of
+ * pasting. Reuses the resume text-extraction pipeline (unpdf + mammoth);
+ * .txt is decoded directly. Returns the text for the recruiter to review in
+ * the box before drafting — we never auto-run the draft from a file.
+ */
+export async function extractTranscriptText(
+  formData: FormData
+): Promise<ExtractTranscriptResult> {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Your session expired. Sign in again." };
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, error: "No file received. Try again." };
+  }
+  if (file.size > MAX_FILE_BYTES) {
+    return {
+      ok: false,
+      error: `That file is ${(file.size / 1_048_576).toFixed(1)}MB; the limit is ${MAX_FILE_BYTES / 1_048_576}MB.`,
+    };
+  }
+
+  const name = file.name.toLowerCase();
+  const mime = file.type || "";
+  let bytes: ArrayBuffer;
+  try {
+    bytes = await file.arrayBuffer();
+  } catch {
+    return { ok: false, error: "Couldn't read that file. Try again." };
+  }
+
+  // Plain text — decode directly (the resume extractor only does pdf/docx).
+  if (mime === "text/plain" || name.endsWith(".txt")) {
+    const text = new TextDecoder().decode(new Uint8Array(bytes)).trim();
+    if (!text) return { ok: false, error: "That file looks empty." };
+    return { ok: true, text };
+  }
+
+  try {
+    const result = await extractResumeText({
+      bytes,
+      mimeType: mime,
+      filename: file.name,
+    });
+    const text = (result.text ?? "").trim();
+    if (!text) {
+      return {
+        ok: false,
+        error: "We couldn't pull any text from that file — if it's a scanned PDF, paste the notes instead.",
+      };
+    }
+    return { ok: true, text };
+  } catch (err) {
+    if (err instanceof ResumeExtractionError) {
+      return { ok: false, error: err.message };
+    }
+    return { ok: false, error: "Couldn't read that file. Paste the notes instead." };
+  }
 }
 
 function buildSystemPrompt(): string {
