@@ -23,6 +23,8 @@ export type FitDimensionKey =
   | "role_fit"
   | "compensation"
   | "location"
+  | "pms_fluency"
+  | "license_state"
   | "specialty"
   | "skills"
   | "years_experience"
@@ -126,6 +128,11 @@ export interface CandidateFitInputs {
    * string/state matching.
    */
   desired_location_points: Array<{ lat: number; lng: number }>;
+  /**
+   * v2 (Phase A.3) — practice-management systems the candidate is fluent in
+   * (canonical PMS_SYSTEMS values). Drives the pms_fluency dimension.
+   */
+  pms_systems: string[];
   skills: string[];
   schedule_preferences: {
     mon?: boolean;
@@ -183,6 +190,12 @@ export interface JobFitInputs {
   }>;
   /** From job_skills join. v1 schema doesn't distinguish required vs preferred. */
   skills: string[];
+  /**
+   * v2 (Phase A.3) — canonical PMS names detected in the job's title /
+   * requirements / description text (the job side has no structured PMS
+   * field). Empty when the posting doesn't name one → pms_fluency excluded.
+   */
+  pms_required: string[];
   /**
    * v1.1 — multi-select against the SPECIALTIES canonical list. Empty
    * array means "specialty-agnostic" (admin / front-desk roles); the

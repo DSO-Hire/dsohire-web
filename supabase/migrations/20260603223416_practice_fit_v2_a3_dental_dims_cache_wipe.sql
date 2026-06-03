@@ -1,0 +1,15 @@
+-- Practice Fit v2 (Phase A.3) — dental dimensions.
+--
+-- Added two scored dimensions to the engine:
+--   • pms_fluency  — candidate.pms_systems vs the PMS detected in the job
+--     posting's text (the dental moat's headline signal). Booster, not a
+--     deal-breaker: a mismatch floors at 35.
+--   • license_state — for license-required clinical roles, the candidate's
+--     license_states vs the job's location state(s). Near-deal-breaker
+--     (hard cap lands in A.4); excluded for admin/front-office roles.
+--
+-- Also reweighted so clinical/logistical signals dominate (compensation
+-- 20->12, generic dims shaved). The input hash now folds in pms_systems
+-- (candidate) and pms_required (job), so every A.1/A.2 hash is stale.
+-- Wipe the recomputable cache; rows recompute lazily on next view.
+truncate table public.practice_fit_scores;

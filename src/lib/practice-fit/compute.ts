@@ -49,21 +49,26 @@ import type {
 // fill schedule preferences and most jobs leave schedule_days empty, so
 // it'll fall out of the denominator on most pairs — but when both sides
 // have data, it's a strong day-1-friction signal.
-// Phase A.1 (2026-06-03) — role_fit (15) is added as a scored dimension so
-// an EXACT role match (100) outranks a merely ADJACENT one (60). The 15
-// points come from compensation (25→20), specialty (15→10) and
-// employment_type (10→5). Unrelated pairs never reach scoring — the
-// adjacency gate drops them to null upstream.
+// Phase A.1 (2026-06-03) — role_fit added (exact 100 vs adjacent 60).
+// Phase A.3 (2026-06-03) — dental signals added + reweight so clinical /
+// logistical dimensions dominate (the dental moat). pms_fluency (12) and
+// license_state (10) are the new dental signals; compensation trimmed
+// (20→12) and the generic dims (specialty/skills/years/employment/dso/
+// schedule) shaved so "speaks dental" leads. Missing dims drop OUT of the
+// denominator (normalized over scored only), so PMS/license simply fall
+// away on postings/roles where they don't apply — they never dilute.
 const WEIGHTS: Record<FitDimensionKey, number> = {
-  role_fit: 15,
-  compensation: 20,
-  location: 20,
-  specialty: 10,
-  skills: 10,
-  years_experience: 10,
-  employment_type: 5,
-  dso_size: 5,
-  schedule_overlap: 5,
+  role_fit: 14,
+  location: 18,
+  pms_fluency: 12,
+  compensation: 12,
+  license_state: 10,
+  specialty: 9,
+  skills: 9,
+  years_experience: 7,
+  employment_type: 4,
+  dso_size: 3,
+  schedule_overlap: 2,
 };
 
 /* ──────────────────────────────────────────────────────────────
@@ -105,6 +110,8 @@ export function computePracticeFit(inputs: FitInputs): FitResult | null {
     role_fit: scoreRoleFit(inputs),
     compensation: scoreCompensation(inputs),
     location: scoreLocation(inputs),
+    pms_fluency: scorePmsFluency(inputs),
+    license_state: scoreLicenseState(inputs),
     specialty: scoreSpecialty(inputs),
     skills: scoreSkills(inputs),
     years_experience: scoreYearsExperience(inputs),
@@ -537,6 +544,162 @@ function scoreLocation({ candidate, job }: FitInputs): FitDimension {
   return makeScoredDim("location", "Location", raw, detail, detailEmployer);
 }
 
+/**
+ * scorePmsFluency — Phase A.3. The dental moat's headline signal. A hire
+ * fluent in the practice's PMS ramps in days, not months — it's the first
+ * thing operators ask in interviews and the first thing no horizontal job
+ * board can score. Job PMS need is detected from the posting text in the
+ * loader (the job side has no structured PMS field). A learnable gap, not a
+ * deal-breaker, so a mismatch floors at 35 rather than zero.
+ */
+function scorePmsFluency({ candidate, job }: FitInputs): FitDimension {
+  const jobPms = (job.pms_required ?? []).map((s) => s.toLowerCase());
+  if (jobPms.length === 0) {
+    return makeUnscoredDim("pms_fluency", "PMS fluency", {
+      detail:
+        "This posting doesn't name a practice-management system — PMS fluency is excluded from the score.",
+      detail_employer:
+        "Job text doesn't name a PMS — PMS fluency excluded. Name your system (e.g. Open Dental) to factor it in.",
+      cta_label: null,
+      cta_href: null,
+    });
+  }
+
+  const candPms = (candidate.pms_systems ?? []).map((s) => s.toLowerCase());
+  if (candPms.length === 0) {
+    return makeUnscoredDim("pms_fluency", "PMS fluency", {
+      detail:
+        "Add the practice-management systems you know to factor PMS fluency into your match.",
+      detail_employer:
+        "Candidate hasn't listed any PMS experience — PMS fluency excluded from their score.",
+      cta_label: "Add your PMS experience",
+      cta_href: "/candidate/profile#section-skills",
+    });
+  }
+
+  const overlap = jobPms.filter((p) => candPms.includes(p));
+  const prettyJob = (job.pms_required ?? []).join(", ");
+  if (overlap.length > 0) {
+    const pretty = titleCasePms(job.pms_required ?? [], overlap);
+    const raw = overlap.length >= jobPms.length ? 100 : 88;
+    return makeScoredDim(
+      "pms_fluency",
+      "PMS fluency",
+      raw,
+      `Fluent in ${pretty} — the system this practice runs. You'd ramp in days.`,
+      `Fluent in ${pretty} — the system this practice runs; minimal ramp-up.`
+    );
+  }
+
+  const candPretty = (candidate.pms_systems ?? []).join(", ");
+  return makeScoredDim(
+    "pms_fluency",
+    "PMS fluency",
+    35,
+    `This practice runs ${prettyJob}; you've listed ${candPretty}. Learnable, but a ramp-up.`,
+    `Practice runs ${prettyJob}; they've listed ${candPretty}. Learnable, but a ramp-up.`
+  );
+}
+
+/** Render the matched PMS names in their canonical casing for copy. */
+function titleCasePms(jobPms: string[], overlapLower: string[]): string {
+  const matched = jobPms.filter((p) => overlapLower.includes(p.toLowerCase()));
+  return matched.join(", ");
+}
+
+/**
+ * Roles that legally require a state clinical license. Assistants vary by
+ * state (cert, not license) so they're handled by the certs signal (A.3b),
+ * not here.
+ */
+const LICENSE_REQUIRED_ROLES = new Set([
+  "associate_dentist",
+  "specialist_dentist",
+  "hygienist",
+]);
+
+/**
+ * scoreLicenseState — Phase A.3. A clinician can't legally work without the
+ * right state license, so a license-state mismatch is a near-deal-breaker
+ * (the hard score cap lands in A.4; for now the raw reflects reality). Only
+ * fires for license-required clinical roles — excluded for admin/front-office
+ * roles, where it isn't meaningful.
+ */
+function scoreLicenseState({ candidate, job }: FitInputs): FitDimension {
+  const jobRole = canonicalizeRoleCategory(job.role_category);
+  if (!LICENSE_REQUIRED_ROLES.has(jobRole)) {
+    return makeUnscoredDim("license_state", "State licensure", {
+      detail:
+        "This role doesn't require a state clinical license — licensure is excluded from the score.",
+      detail_employer:
+        "Role doesn't require a state clinical license — licensure excluded from the score.",
+      cta_label: null,
+      cta_href: null,
+    });
+  }
+
+  const jobStates = new Set(
+    (job.locations ?? [])
+      .map((l) => (l.state ?? "").toUpperCase())
+      .filter((s) => s.length > 0)
+  );
+  if (jobStates.size === 0) {
+    return makeUnscoredDim("license_state", "State licensure", {
+      detail:
+        "This posting has no location state on file — licensure is excluded from the score.",
+      detail_employer:
+        "Job has no location state on file — licensure excluded from the score.",
+      cta_label: null,
+      cta_href: null,
+    });
+  }
+
+  const candStates = (candidate.license_states ?? []).map((s) =>
+    s.toUpperCase()
+  );
+  if (candStates.length === 0) {
+    return makeUnscoredDim("license_state", "State licensure", {
+      detail:
+        "Add the state(s) you're licensed in to factor licensure into your match.",
+      detail_employer:
+        "Candidate hasn't listed any license states — licensure excluded from their score.",
+      cta_label: "Add license states",
+      cta_href: "/candidate/profile#section-licenses",
+    });
+  }
+
+  const jobStateList = [...jobStates];
+  const matchState = jobStateList.find((s) => candStates.includes(s));
+  if (matchState) {
+    return makeScoredDim(
+      "license_state",
+      "State licensure",
+      100,
+      `Licensed in ${matchState} — cleared to practice at this location.`,
+      `Licensed in ${matchState} — cleared to practice at this location.`
+    );
+  }
+
+  const jobStateStr = jobStateList.join(" / ");
+  const candStateStr = candStates.join(", ");
+  if (candidate.schedule_preferences?.willing_to_relocate) {
+    return makeScoredDim(
+      "license_state",
+      "State licensure",
+      45,
+      `Licensed in ${candStateStr}, not ${jobStateStr} — you'd need ${jobStateStr} licensure, and you're open to relocating.`,
+      `Licensed in ${candStateStr}, not ${jobStateStr} — would need ${jobStateStr} licensure; open to relocating.`
+    );
+  }
+  return makeScoredDim(
+    "license_state",
+    "State licensure",
+    20,
+    `Licensed in ${candStateStr}, not ${jobStateStr} — ${jobStateStr} licensure is required to work here.`,
+    `Licensed in ${candStateStr}, not ${jobStateStr} — ${jobStateStr} licensure required to work here.`
+  );
+}
+
 function scoreSpecialty({ candidate, job }: FitInputs): FitDimension {
   const jobSpecs = (job.specialty ?? []).map((s) => s.toLowerCase());
   const candSpecs = (candidate.desired_specialty ?? []).map((s) =>
@@ -940,6 +1103,7 @@ export function hashInputs(inputs: FitInputs): string {
         .sort((a, b) => (a.lat === b.lat ? a.lng - b.lng : a.lat - b.lat)),
       desired_specialty: sortedLowercase(inputs.candidate.desired_specialty),
       license_states: sortedUpper(inputs.candidate.license_states),
+      pms_systems: sortedLowercase(inputs.candidate.pms_systems),
       desired_locations: sortedLowercase(inputs.candidate.desired_locations),
       skills: sortedLowercase(inputs.candidate.skills),
       schedule_preferences: sortedSchedule(inputs.candidate.schedule_preferences),
@@ -970,6 +1134,7 @@ export function hashInputs(inputs: FitInputs): string {
             : a.state.localeCompare(b.state)
         ),
       skills: sortedLowercase(inputs.job.skills),
+      pms_required: sortedLowercase(inputs.job.pms_required),
       specialty: sortedLowercase(inputs.job.specialty),
       min_years_experience: inputs.job.min_years_experience ?? null,
       schedule_days: sortedLowercase(inputs.job.schedule_days),

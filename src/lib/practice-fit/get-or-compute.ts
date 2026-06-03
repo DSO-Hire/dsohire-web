@@ -31,7 +31,24 @@ import {
   parsePlacePoints,
   resolveDesiredLocationPoints,
 } from "@/lib/geocoding/place-cache";
+import { PMS_SYSTEMS } from "@/lib/candidate/canonical-lists";
 import type { FitInputs, FitResult } from "./types";
+
+/**
+ * Detect canonical PMS names mentioned in a job's free text (title +
+ * requirements + description). The job side has no structured PMS field, so
+ * this is how the pms_fluency dimension learns what the practice runs.
+ * Word-boundary matched to avoid short names (e.g. "Adit") false-matching
+ * inside other words.
+ */
+function detectJobPms(...textParts: Array<string | null | undefined>): string[] {
+  const text = textParts.filter(Boolean).join("  ");
+  if (!text) return [];
+  return PMS_SYSTEMS.map((p) => p.value).filter((name) => {
+    const escaped = name.replace(/[.*+?^${}()|[\]\\-]/g, "\\$&");
+    return new RegExp(`\\b${escaped}\\b`, "i").test(text);
+  });
+}
 
 const STALE_AFTER_DAYS = 7;
 
@@ -183,7 +200,7 @@ async function loadCandidateInputs(
   const { data: c } = await supabase
     .from("candidates")
     .select(
-      "desired_roles, current_title, desired_specialty, license_states, desired_locations, desired_location_points, skills, schedule_preferences, min_salary, salary_unit, temp_or_perm, dso_size_preference, years_experience_dental"
+      "desired_roles, current_title, desired_specialty, license_states, desired_locations, desired_location_points, pms_systems, skills, schedule_preferences, min_salary, salary_unit, temp_or_perm, dso_size_preference, years_experience_dental"
     )
     .eq("id", candidateId)
     .maybeSingle();
@@ -224,6 +241,7 @@ async function loadCandidateInputs(
     license_states: ((r.license_states as string[] | null) ?? []) as string[],
     desired_locations: desiredLocations,
     desired_location_points: points.map((p) => ({ lat: p.lat, lng: p.lng })),
+    pms_systems: ((r.pms_systems as string[] | null) ?? []) as string[],
     skills: ((r.skills as string[] | null) ?? []) as string[],
     schedule_preferences:
       (r.schedule_preferences as FitInputs["candidate"]["schedule_preferences"]) ??
@@ -248,7 +266,7 @@ async function loadJobAndDso(
   const { data: j } = await supabase
     .from("jobs")
     .select(
-      `id, dso_id, role_category, employment_type,
+      `id, dso_id, role_category, employment_type, title, requirements, description,
        compensation_min, compensation_max, compensation_period,
        compensation_type,
        specialty, min_years_experience,
@@ -299,6 +317,12 @@ async function loadJobAndDso(
         null,
       locations,
       skills,
+      // Phase A.3 — PMS need detected from the posting text.
+      pms_required: detectJobPms(
+        r.title as string | null,
+        r.requirements as string | null,
+        r.description as string | null
+      ),
       specialty: ((r.specialty as string[] | null) ?? []) as string[],
       min_years_experience:
         (r.min_years_experience as number | null) ?? null,
