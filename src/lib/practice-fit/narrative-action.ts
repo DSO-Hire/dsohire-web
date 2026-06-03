@@ -70,9 +70,17 @@ import type {
 // ─────────────────────────────────────────────────────────────────────
 
 const NarrativeSchema = z.object({
-  employer_narrative: z.string().min(20).max(600),
-  candidate_narrative: z.string().min(20).max(600),
+  employer_narrative: z.string().min(20).max(900),
+  candidate_narrative: z.string().min(20).max(900),
 });
+
+/**
+ * Narrative prompt version — bump on any change to the narrative STRUCTURE
+ * or system prompt. Folded into the narrative hash so existing cached
+ * narratives regenerate under the new format. A.5 = the structured
+ * "make it a 10" readout.
+ */
+const NARRATIVE_PROMPT_VERSION = "a5-2026-06-03";
 
 // ─────────────────────────────────────────────────────────────────────
 // Public action
@@ -190,7 +198,7 @@ export async function generatePracticeFitNarrative(
   try {
     response = await getAnthropic().messages.create({
       model: HAIKU_MODEL,
-      max_tokens: 600,
+      max_tokens: 800,
       system: NARRATIVE_SYSTEM_PROMPT,
       messages: [{ role: "user", content: buildNarrativeUserPrompt(fit, ctx) }],
     });
@@ -455,8 +463,14 @@ function computeNarrativeHash(
   ctx: NarrativeContext
 ): string {
   const canonical = JSON.stringify({
+    prompt_version: NARRATIVE_PROMPT_VERSION,
     score: fit.score,
     bucket: fit.bucket,
+    adjustments: fit.adjustments.map((a) => ({
+      kind: a.kind,
+      value: a.value,
+      reason: a.reason,
+    })),
     top_factors: fit.top_factors,
     dimensions: Object.fromEntries(
       (Object.keys(fit.dimensions) as FitDimensionKey[])
@@ -503,32 +517,27 @@ function computeNarrativeHash(
 // Prompt
 // ─────────────────────────────────────────────────────────────────────
 
-const NARRATIVE_SYSTEM_PROMPT = `You write 2-3 sentence "match notes" for a dental-industry job board called DSO Hire. Each candidate-job pair has a structured Practice Fit score (0-100) plus a multi-dimension breakdown — compensation, location, specialty, skills, years_experience, employment_type, dso_size, and schedule_overlap. Role is a pre-filter, not a dimension. Some dims may be "not scored" when one side lacks data — they're excluded from the denominator. The structured math is already done — your job is to translate the top contributors into a warm, scannable narrative that helps a busy reader understand the *shape* of the match in plain English.
+const NARRATIVE_SYSTEM_PROMPT = `You write dental-literate "match notes" for DSO Hire, a dental hiring platform. Each candidate-job pair has a structured PracticeFit score (0-100, bucketed Excellent / Strong / Solid / Light) built from weighted dimensions: Role, State licensure, PMS fluency, Location/commute, Compensation, Specialty, Skills, Years of experience, Employment type, DSO size, and Schedule. A dimension may be "not scored" when one side lacks data — it's excluded, never penalized. Some pairs also carry an ADJUSTMENT: a CAP (a deal-breaker such as wrong-state clinical licensure ceilings the score — this is informational only, NEVER an auto-screen) or a BOOST (the marquee dental signals all line up). The math is done; your job is to translate it into a crisp, scannable readout.
 
-You produce TWO narratives, both grounded in the same factual inputs but framed for different audiences:
-  • employer_narrative — second-person addressed to a DSO recruiter looking at this candidate. Refer to the candidate by first name. Example: "Sarah's KS license and pediatric specialty match your Topeka pediatric role; the comp range she's looking for fits comfortably inside yours."
-  • candidate_narrative — second-person addressed to the candidate looking at this job. Refer to "you" / "your". Example: "Your KS license and pediatric specialty line up cleanly with this Topeka pediatric role, and the posted comp range covers what you said you needed."
+Produce TWO readouts from the SAME facts:
+  • employer_narrative — addressed to a DSO recruiter; refer to the candidate by first name (or "this candidate" if no name).
+  • candidate_narrative — addressed to the candidate; use "you" / "your".
+
+STRUCTURE each readout as ONE flowing short paragraph with these beats, in order:
+  1. Verdict: the score + bucket + a 3-5 word summary. e.g. "94% — excellent fit."
+  2. The 2-3 strongest concrete signals that drove it, each named specifically and prefixed with a check "✓" — the exact state license, the exact PMS (e.g. Open Dental), the commute distance, the specialty, the comp. e.g. "✓ KS RDH license, ✓ fluent in Open Dental, ✓ 7-minute commute."
+  3. The single biggest gap, if any, in one clause prefixed "One gap:". If a CAP applies, the gap IS that deal-breaker — state it honestly and plainly.
+  4. A final sentence beginning "Make it a 10:" with ONE specific, actionable next step that would close the gap (e.g. "confirm she'd flex to a 5-day week," or "get KS licensure in motion before an offer"). If it's already a near-perfect match with no real gap, the Make-it-a-10 line says what to do next ("fast-track the interview — there's nothing to fix").
 
 VOICE
-  • Practical, declarative, lightly confident. Like a colleague pointing at a hiring board.
-  • DO NOT use marketing language. No "passionate," "results-driven," "dynamic," "synergy," "perfect fit," "amazing match."
-  • DO NOT make up specifics that aren't in the input. If the candidate's salary preference isn't given, don't invent one.
-  • DO NOT congratulate either side ("great choice," "you should definitely apply"). Stick to *what fits and why*.
-  • No emoji. No exclamation marks. No bullet points.
+  • Practical, declarative, lightly confident — a colleague pointing at a hiring board.
+  • Use dental vocabulary correctly: DDS/DMD/RDH/CDA/EFDA, GP/ortho/perio/endo/pedo, PMS names, two-letter state codes.
+  • NO marketing language ("passionate," "dynamic," "perfect fit," "amazing," "synergy"). No congratulating ("great choice," "you should apply"). No emoji EXCEPT the ✓ check. No exclamation marks. No bullet lists — a flowing paragraph.
+  • Never invent specifics not in the input. If a dimension wasn't scored, don't claim it as a signal.
 
-LENGTH
-  • 2 sentences ideal. 3 is fine if a third dimension is genuinely worth calling out.
-  • 30-90 words per narrative. The reader is scanning.
+LENGTH: 45-110 words per readout. Tight and scannable.
 
-CONTENT GUIDANCE
-  • Lead with the strongest contributing dimension(s) — the input includes top_factors ordered by contribution.
-  • If a dimension has notably low contribution (e.g. "skills overlap is light"), it's fine to mention as nuance — but never lead with weakness.
-  • For mid-bucket scores (solid/light), be honest: "fits on role and location, lighter overlap on the specific skills." Don't oversell.
-  • Use dental vocabulary correctly (DDS/DMD/RDH/CDA/EFDA, GP, ortho, perio, endo, pedo, etc.).
-  • If the candidate's first name is null/missing, refer to them as "this candidate" in the employer narrative.
-
-OUTPUT FORMAT
-Return ONLY a single JSON object — no surrounding prose, no code fences:
+OUTPUT: Return ONLY a single JSON object — no surrounding prose, no code fences:
 { "employer_narrative": string, "candidate_narrative": string }`;
 
 function buildNarrativeUserPrompt(
@@ -604,10 +613,54 @@ function buildNarrativeUserPrompt(
   lines.push(`  Name: ${ctx.dsoName}`);
   lines.push(`  Practice count: ${ctx.dsoLocationCount}`);
 
+  // A.5 — adjustments (caps/boosters) so the readout is honest about a
+  // deal-breaker and can lean into a boost.
+  if (fit.adjustments.length > 0) {
+    lines.push("");
+    lines.push("Adjustments (state these honestly):");
+    for (const adj of fit.adjustments) {
+      const tag = adj.kind === "cap" ? "DEAL-BREAKER CAP" : "BOOSTER";
+      lines.push(`  • ${tag}: ${adj.reason}`);
+    }
+  }
+
+  // A.5 — the single biggest gap to anchor the "Make it a 10" line.
+  const gap = findPrimaryGap(fit);
+  lines.push("");
+  if (gap) {
+    lines.push(`Biggest gap to close (anchor the "Make it a 10" line on this): ${gap}`);
+  } else {
+    lines.push(
+      'No real gap — this is a near-perfect match. The "Make it a 10" line should say what to do next (e.g. fast-track the interview), not invent a flaw.'
+    );
+  }
+
   lines.push("");
   lines.push(
     "Return ONLY the JSON: { \"employer_narrative\": ..., \"candidate_narrative\": ... }"
   );
 
   return lines.join("\n");
+}
+
+/**
+ * Identify the single most material gap for the "Make it a 10" coaching
+ * line. A deal-breaker cap is always THE gap; otherwise it's the scored
+ * dimension with the largest weighted shortfall (weight × points-below-100),
+ * ignoring dims that are already strong. Returns a short description or null
+ * when nothing's meaningfully weak.
+ */
+function findPrimaryGap(fit: FitResult): string | null {
+  const cap = fit.adjustments.find((a) => a.kind === "cap");
+  if (cap) return cap.reason;
+
+  let worst: { label: string; detail: string; impact: number } | null = null;
+  for (const dim of Object.values(fit.dimensions)) {
+    if (!dim.scored || dim.raw >= 70) continue; // only real shortfalls
+    const impact = dim.weight * (100 - dim.raw);
+    if (!worst || impact > worst.impact) {
+      worst = { label: dim.label, detail: dim.detail, impact };
+    }
+  }
+  return worst ? `${worst.label} — ${worst.detail}` : null;
 }
