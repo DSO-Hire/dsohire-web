@@ -16,6 +16,8 @@ import { OfferApprovalsManager, type PendingOffer } from "./offer-approvals-mana
 
 export const dynamic = "force-dynamic";
 
+export const metadata = { title: "Offer approvals" };
+
 export default async function OfferApprovalsPage() {
   const supabase = await createSupabaseServerClient();
   const {

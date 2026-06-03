@@ -176,6 +176,23 @@ const ROLE_LABELS: Record<string, string> = {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data } = await supabase
+      .from("applications")
+      .select("candidate:candidates(full_name)")
+      .eq("id", id)
+      .maybeSingle();
+    const rel = (data as Record<string, unknown> | null)?.candidate as
+      | { full_name: string | null }
+      | Array<{ full_name: string | null }>
+      | null;
+    const cand = Array.isArray(rel) ? rel[0] ?? null : rel;
+    const name = (cand?.full_name ?? "").trim();
+    if (name) return { title: `${name} · Application` };
+  } catch {
+    // fall through to the generic title
+  }
   return { title: `Application ${id.slice(0, 8)}` };
 }
 
