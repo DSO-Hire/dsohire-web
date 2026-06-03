@@ -27,6 +27,10 @@ import {
 } from "@/lib/supabase/server";
 import { computePracticeFit, hashInputs } from "./compute";
 import { scoreToBucket } from "./buckets";
+import {
+  parsePlacePoints,
+  resolveDesiredLocationPoints,
+} from "@/lib/geocoding/place-cache";
 import type { FitInputs, FitResult } from "./types";
 
 const STALE_AFTER_DAYS = 7;
@@ -179,18 +183,47 @@ async function loadCandidateInputs(
   const { data: c } = await supabase
     .from("candidates")
     .select(
-      "desired_roles, current_title, desired_specialty, license_states, desired_locations, skills, schedule_preferences, min_salary, salary_unit, temp_or_perm, dso_size_preference, years_experience_dental"
+      "desired_roles, current_title, desired_specialty, license_states, desired_locations, desired_location_points, skills, schedule_preferences, min_salary, salary_unit, temp_or_perm, dso_size_preference, years_experience_dental"
     )
     .eq("id", candidateId)
     .maybeSingle();
   if (!c) return null;
   const r = c as Record<string, unknown>;
+
+  // Phase A.2 — resolve the candidate's desired markets to centroids,
+  // reusing stored points and geocoding only new ones. Persist back when
+  // the set changed so we geocode each market at most once.
+  const desiredLocations = ((r.desired_locations as string[] | null) ?? []) as string[];
+  const { points, changed } = await resolveDesiredLocationPoints(
+    desiredLocations,
+    parsePlacePoints(r.desired_location_points)
+  );
+  if (changed) {
+    const admin = createSupabaseServiceRoleClient();
+    const { error } = await admin
+      .from("candidates")
+      .update({
+        // Inline literals (not the PlacePoint interface) so the value is
+        // assignable to the jsonb column's Json type.
+        desired_location_points: points.map((p) => ({
+          label: p.label,
+          lat: p.lat,
+          lng: p.lng,
+        })),
+      })
+      .eq("id", candidateId);
+    if (error) {
+      console.error("[practice-fit] desired_location_points persist failed:", error);
+    }
+  }
+
   return {
     desired_roles: ((r.desired_roles as string[] | null) ?? []) as string[],
     current_title: (r.current_title as string | null) ?? null,
     desired_specialty: ((r.desired_specialty as string[] | null) ?? []) as string[],
     license_states: ((r.license_states as string[] | null) ?? []) as string[],
-    desired_locations: ((r.desired_locations as string[] | null) ?? []) as string[],
+    desired_locations: desiredLocations,
+    desired_location_points: points.map((p) => ({ lat: p.lat, lng: p.lng })),
     skills: ((r.skills as string[] | null) ?? []) as string[],
     schedule_preferences:
       (r.schedule_preferences as FitInputs["candidate"]["schedule_preferences"]) ??
@@ -220,7 +253,7 @@ async function loadJobAndDso(
        compensation_type,
        specialty, min_years_experience,
        schedule_days, schedule_evenings, schedule_weekends,
-       job_locations(location:dso_locations(city, state)),
+       job_locations(location:dso_locations(city, state, latitude, longitude)),
        job_skills(skill)`
     )
     .eq("id", jobId)
@@ -230,7 +263,12 @@ async function loadJobAndDso(
   const dsoId = r.dso_id as string;
 
   const locationsJoin = (r.job_locations ?? []) as Array<{
-    location: { city: string | null; state: string | null } | null;
+    location: {
+      city: string | null;
+      state: string | null;
+      latitude: number | null;
+      longitude: number | null;
+    } | null;
   }>;
   const locations = locationsJoin
     .map((row) => row.location)

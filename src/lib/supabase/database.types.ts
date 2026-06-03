@@ -1592,6 +1592,7 @@ export type Database = {
           current_title: string | null
           cv_visibility: Database["public"]["Enums"]["candidate_visibility"]
           deleted_at: string | null
+          desired_location_points: Json
           desired_locations: string[] | null
           desired_roles: string[] | null
           desired_specialty: string[]
@@ -1643,6 +1644,7 @@ export type Database = {
           current_title?: string | null
           cv_visibility?: Database["public"]["Enums"]["candidate_visibility"]
           deleted_at?: string | null
+          desired_location_points?: Json
           desired_locations?: string[] | null
           desired_roles?: string[] | null
           desired_specialty?: string[]
@@ -1692,6 +1694,7 @@ export type Database = {
           current_title?: string | null
           cv_visibility?: Database["public"]["Enums"]["candidate_visibility"]
           deleted_at?: string | null
+          desired_location_points?: Json
           desired_locations?: string[] | null
           desired_roles?: string[] | null
           desired_specialty?: string[]

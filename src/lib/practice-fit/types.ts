@@ -119,6 +119,13 @@ export interface CandidateFitInputs {
   desired_specialty: string[];
   license_states: string[];
   desired_locations: string[];
+  /**
+   * v2 (Phase A.2) — geocoded centroids of the candidate's desired markets
+   * (resolved server-side from desired_locations). Drives real commute-
+   * distance scoring. Empty when none geocoded yet → location falls back to
+   * string/state matching.
+   */
+  desired_location_points: Array<{ lat: number; lng: number }>;
   skills: string[];
   schedule_preferences: {
     mon?: boolean;
@@ -164,8 +171,16 @@ export interface JobFitInputs {
   compensation_min: number | null;
   compensation_max: number | null;
   compensation_period: "hourly" | "yearly" | "per_visit" | "per_day" | null;
-  /** From job_locations join — { state }, may have multiple. */
-  locations: Array<{ state: string | null; city: string | null }>;
+  /**
+   * From job_locations join — city/state plus city-centroid coords (v2,
+   * Phase A.2) for commute-distance scoring. May have multiple.
+   */
+  locations: Array<{
+    state: string | null;
+    city: string | null;
+    latitude: number | null;
+    longitude: number | null;
+  }>;
   /** From job_skills join. v1 schema doesn't distinguish required vs preferred. */
   skills: string[];
   /**

@@ -437,10 +437,11 @@ function scoreLocation({ candidate, job }: FitInputs): FitDimension {
   );
 
   // Candidate hasn't said where they're licensed AND hasn't picked
-  // desired locations — exclude with a CTA.
+  // desired locations (string or geocoded) — exclude with a CTA.
   if (
     candidateStates.size === 0 &&
-    (candidate.desired_locations ?? []).length === 0
+    (candidate.desired_locations ?? []).length === 0 &&
+    (candidate.desired_location_points ?? []).length === 0
   ) {
     return makeUnscoredDim("location", "Location", {
       detail:
@@ -454,6 +455,50 @@ function scoreLocation({ candidate, job }: FitInputs): FitDimension {
 
   const stateMatch = [...jobStates].some((s) => candidateStates.has(s));
 
+  // ── v2 (Phase A.2) distance path — preferred when both sides have coords.
+  // Score on the candidate's DESIRED markets (relocation-aware), never a
+  // home address. Min great-circle distance from any target market to any
+  // job location, run through a gentle decay curve.
+  const jobPoints = (job.locations ?? [])
+    .filter((l) => l.latitude != null && l.longitude != null)
+    .map((l) => ({ lat: l.latitude as number, lng: l.longitude as number }));
+  const candPoints = candidate.desired_location_points ?? [];
+
+  if (jobPoints.length > 0 && candPoints.length > 0) {
+    let minMiles = Infinity;
+    for (const c of candPoints) {
+      for (const j of jobPoints) {
+        const d = haversineMiles(c.lat, c.lng, j.lat, j.lng);
+        if (d < minMiles) minMiles = d;
+      }
+    }
+    const mi = Math.round(minMiles);
+    // 0–10 mi → 100, then ~1 pt/mile, floored at 20.
+    let raw = Math.max(20, Math.min(100, Math.round(100 - Math.max(0, minMiles - 10))));
+    const relocate = Boolean(candidate.schedule_preferences?.willing_to_relocate);
+
+    let detail: string;
+    let detailEmployer: string;
+    if (minMiles <= 15) {
+      detail = `Right in a market you're targeting — about ${mi} mi out.`;
+      detailEmployer = `In a market they're targeting — about ${mi} mi out.`;
+    } else if (relocate) {
+      raw = Math.max(raw, 55);
+      detail = `About ${mi} mi from your nearest target market — and you're open to relocating.`;
+      detailEmployer = `About ${mi} mi from their nearest target market; open to relocating.`;
+    } else {
+      detail = `About ${mi} mi from your nearest target market.`;
+      detailEmployer = `About ${mi} mi from their nearest target market.`;
+    }
+    if (stateMatch) {
+      detail += " You're licensed in this state.";
+      detailEmployer += " Licensed in this state.";
+    }
+    return makeScoredDim("location", "Location", raw, detail, detailEmployer);
+  }
+
+  // ── Fallback: no coords on one side — keep the v1 string/state logic so
+  // we never regress when geocoding is unavailable.
   const jobCityStateLabels = (job.locations ?? []).map((l) =>
     [l.city, l.state].filter(Boolean).join(", ").toLowerCase()
   );
@@ -888,6 +933,11 @@ export function hashInputs(inputs: FitInputs): string {
       // Phase A.1 — current_title feeds role_fit (fallback role signal),
       // so it must be in the hash or the cache won't invalidate on change.
       current_title: (inputs.candidate.current_title ?? "").trim().toLowerCase(),
+      // Phase A.2 — target-market centroids drive distance scoring, so they
+      // must be in the hash. Rounded + sorted for a stable fingerprint.
+      desired_location_points: (inputs.candidate.desired_location_points ?? [])
+        .map((p) => ({ lat: round3(p.lat), lng: round3(p.lng) }))
+        .sort((a, b) => (a.lat === b.lat ? a.lng - b.lng : a.lat - b.lat)),
       desired_specialty: sortedLowercase(inputs.candidate.desired_specialty),
       license_states: sortedUpper(inputs.candidate.license_states),
       desired_locations: sortedLowercase(inputs.candidate.desired_locations),
@@ -910,6 +960,9 @@ export function hashInputs(inputs: FitInputs): string {
         .map((l) => ({
           state: (l.state ?? "").toUpperCase(),
           city: (l.city ?? "").toLowerCase(),
+          // Phase A.2 — coords feed the distance scorer.
+          lat: l.latitude == null ? null : round3(l.latitude),
+          lng: l.longitude == null ? null : round3(l.longitude),
         }))
         .sort((a, b) =>
           a.state === b.state
@@ -935,6 +988,28 @@ export function hashInputs(inputs: FitInputs): string {
 /* ──────────────────────────────────────────────────────────────
  * Helpers
  * ─────────────────────────────────────────────────────────── */
+
+/** Round to 3 decimal places (~110 m) for stable coord hashing. */
+function round3(n: number): number {
+  return Math.round(n * 1000) / 1000;
+}
+
+/** Great-circle distance in statute miles between two lat/lng pairs. */
+function haversineMiles(
+  aLat: number,
+  aLng: number,
+  bLat: number,
+  bLng: number
+): number {
+  const R = 3958.8; // Earth radius, miles
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(bLat - aLat);
+  const dLng = toRad(bLng - aLng);
+  const s =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(aLat)) * Math.cos(toRad(bLat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(s)));
+}
 
 function sortedLowercase(arr: string[] | null | undefined): string[] {
   return [...(arr ?? []).map((s) => s.trim().toLowerCase())].sort();
