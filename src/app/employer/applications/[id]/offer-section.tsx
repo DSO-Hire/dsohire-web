@@ -85,6 +85,8 @@ export interface OfferSendRow {
   /** Structured base on the send (for the pending/approval summary). */
   base_amount: number | null;
   base_period: "hourly" | "annual" | null;
+  /** N12 Phase 3 — links a revised offer to the send it supersedes. */
+  revised_from_offer_send_id: string | null;
   /**
    * Candidate's response to this offer, if any. One per send max
    * (UNIQUE(offer_send_id) on application_offer_responses). Track E
@@ -168,6 +170,16 @@ export function OfferSection({
   const latest = sends[0] ?? null;
   const earlier = sends.slice(1);
   const canSend = templates.length > 0 && !!candidateEmail;
+
+  // N12 Phase 3 — resolve the offer a given send revised (its predecessor).
+  const sendById = useMemo(
+    () => new Map(sends.map((s) => [s.id, s])),
+    [sends]
+  );
+  const prevOf = (s: OfferSendRow): OfferSendRow | null =>
+    s.revised_from_offer_send_id
+      ? sendById.get(s.revised_from_offer_send_id) ?? null
+      : null;
 
   // N12 — the latest send's approval lifecycle drives what we show.
   const latestStatus = latest?.approval_status ?? "not_required";
@@ -259,17 +271,21 @@ export function OfferSection({
       )}
 
       {latest && latestPending && (
-        <PendingApprovalCard send={latest} viewerCanApprove={viewerCanApprove} />
+        <PendingApprovalCard
+          send={latest}
+          viewerCanApprove={viewerCanApprove}
+          prev={prevOf(latest)}
+        />
       )}
       {latest && latestRejected && (
         <RejectedOfferCard send={latest} onRevise={() => setModalOpen(true)} />
       )}
       {latest && !latestPending && !latestRejected && (
-        <LatestSendCard send={latest} />
+        <LatestSendCard send={latest} prev={prevOf(latest)} />
       )}
 
       {earlier.length > 0 && (
-        <EarlierSendsAccordion sends={earlier} />
+        <EarlierSendsAccordion sends={earlier} prevOf={prevOf} />
       )}
 
       {modalOpen && candidateEmail && (
@@ -314,7 +330,13 @@ export function OfferSection({
  * Latest-send card — "Sent {date} to {email}" + iframe disclosure
  * ───────────────────────────────────────────────────────────── */
 
-function LatestSendCard({ send }: { send: OfferSendRow }) {
+function LatestSendCard({
+  send,
+  prev,
+}: {
+  send: OfferSendRow;
+  prev?: OfferSendRow | null;
+}) {
   const [open, setOpen] = useState(false);
   const sentAt = new Date(send.sent_at);
   const resp = send.response;
@@ -336,6 +358,11 @@ function LatestSendCard({ send }: { send: OfferSendRow }) {
             <span className="text-[10px] font-bold tracking-[2px] uppercase text-emerald-800">
               Offer sent
             </span>
+            {prev && (
+              <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep border border-heritage/30 bg-heritage/[0.06] px-1.5 py-0.5 rounded">
+                Revised
+              </span>
+            )}
             {send.template_name && (
               <span className="text-[11px] text-slate-meta">
                 · {send.template_name}
@@ -373,6 +400,8 @@ function LatestSendCard({ send }: { send: OfferSendRow }) {
           )}
         </button>
       </div>
+
+      {prev && <OfferDiff prev={prev} curr={send} />}
 
       {/* Response status — renders when the candidate has accepted or
           declined. Surfaces the typed-name soft-sig + optional decline
@@ -474,12 +503,84 @@ function fmtBase(amount: number | null, period: "hourly" | "annual" | null): str
   return `$${pretty}/${period === "annual" ? "yr" : "hr"}`;
 }
 
+/* ───────────────────────────────────────────────────────────────
+ * N12 Phase 3 — "what changed" diff between an offer and the one it
+ * supersedes. Compares the structured base + the key offer terms.
+ * ───────────────────────────────────────────────────────────── */
+
+interface OfferChange {
+  label: string;
+  from: string;
+  to: string;
+}
+
+const DIFF_FIELDS: ReadonlyArray<[key: string, label: string]> = [
+  ["offer.compensation", "Compensation details"],
+  ["offer.signing_bonus", "Signing bonus"],
+  ["offer.start_date", "Start date"],
+  ["offer.deadline_to_accept", "Response deadline"],
+  ["offer.reporting_to", "Reporting to"],
+  ["offer.benefits_summary", "Benefits"],
+];
+
+function diffOffers(prev: OfferSendRow, curr: OfferSendRow): OfferChange[] {
+  const changes: OfferChange[] = [];
+  const baseFrom = fmtBase(prev.base_amount, prev.base_period) ?? "—";
+  const baseTo = fmtBase(curr.base_amount, curr.base_period) ?? "—";
+  if (baseFrom !== baseTo) changes.push({ label: "Base pay", from: baseFrom, to: baseTo });
+  for (const [key, label] of DIFF_FIELDS) {
+    const from = (prev.merge_values?.[key] ?? "").trim();
+    const to = (curr.merge_values?.[key] ?? "").trim();
+    if (from !== to) changes.push({ label, from: from || "—", to: to || "—" });
+  }
+  return changes;
+}
+
+function OfferDiff({
+  prev,
+  curr,
+}: {
+  prev: OfferSendRow;
+  curr: OfferSendRow;
+}) {
+  const changes = diffOffers(prev, curr);
+  const prevDate = new Date(prev.sent_at).toLocaleDateString();
+  return (
+    <div className="border-t border-[var(--rule)] bg-white px-4 py-3">
+      <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-2">
+        What changed from the previous offer
+        <span className="text-slate-meta font-semibold normal-case tracking-normal">
+          {" "}· revised from {prevDate}
+        </span>
+      </div>
+      {changes.length === 0 ? (
+        <p className="text-[12px] text-slate-meta italic">
+          No tracked terms changed — only the letter wording was edited.
+        </p>
+      ) : (
+        <ul className="space-y-1.5">
+          {changes.map((c) => (
+            <li key={c.label} className="text-[12px] leading-snug">
+              <span className="font-semibold text-ink">{c.label}: </span>
+              <span className="text-slate-meta line-through">{c.from}</span>
+              <span className="text-slate-meta"> → </span>
+              <span className="font-semibold text-heritage-deep">{c.to}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function PendingApprovalCard({
   send,
   viewerCanApprove,
+  prev,
 }: {
   send: OfferSendRow;
   viewerCanApprove: boolean;
+  prev?: OfferSendRow | null;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -555,6 +656,8 @@ function PendingApprovalCard({
           )}
         </button>
       </div>
+
+      {prev && <OfferDiff prev={prev} curr={send} />}
 
       {open && (
         <div className="border-t border-amber-200 bg-white">
@@ -690,7 +793,13 @@ function RejectedOfferCard({
  * Earlier-sends accordion
  * ───────────────────────────────────────────────────────────── */
 
-function EarlierSendsAccordion({ sends }: { sends: OfferSendRow[] }) {
+function EarlierSendsAccordion({
+  sends,
+  prevOf,
+}: {
+  sends: OfferSendRow[];
+  prevOf: (s: OfferSendRow) => OfferSendRow | null;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <div className="pt-1">
@@ -700,25 +809,59 @@ function EarlierSendsAccordion({ sends }: { sends: OfferSendRow[] }) {
         className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[1.5px] uppercase text-slate-meta hover:text-ink"
       >
         {open ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-        Earlier sends ({sends.length})
+        Offer history ({sends.length})
       </button>
       {open && (
         <ul className="mt-2 border border-[var(--rule)] bg-white divide-y divide-[var(--rule)]">
-          {sends.map((s) => (
-            <li key={s.id} className="px-4 py-3 text-[12px] text-slate-body">
-              <div className="font-semibold text-ink">
-                {new Date(s.sent_at).toLocaleDateString()} ·{" "}
-                {new Date(s.sent_at).toLocaleTimeString([], {
-                  hour: "numeric",
-                  minute: "2-digit",
-                })}
-              </div>
-              <div className="text-slate-meta mt-0.5">
-                To {s.recipient_email} ·{" "}
-                {s.template_name ?? "(template deleted)"}
-              </div>
-            </li>
-          ))}
+          {sends.map((s) => {
+            const prev = prevOf(s);
+            const changes = prev ? diffOffers(prev, s) : [];
+            const st = s.approval_status ?? "not_required";
+            const statusLabel =
+              st === "pending"
+                ? "Awaiting approval"
+                : st === "rejected"
+                  ? "Not approved"
+                  : null;
+            const baseLabel = fmtBase(s.base_amount, s.base_period);
+            return (
+              <li key={s.id} className="px-4 py-3 text-[12px] text-slate-body">
+                <div className="font-semibold text-ink flex items-center gap-2 flex-wrap">
+                  {new Date(s.sent_at).toLocaleDateString()} ·{" "}
+                  {new Date(s.sent_at).toLocaleTimeString([], {
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
+                  {prev && (
+                    <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep border border-heritage/30 bg-heritage/[0.06] px-1.5 py-0.5 rounded">
+                      Revised
+                    </span>
+                  )}
+                  {statusLabel && (
+                    <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-slate-600">
+                      · {statusLabel}
+                    </span>
+                  )}
+                </div>
+                <div className="text-slate-meta mt-0.5">
+                  To {s.recipient_email} · {s.template_name ?? "(template deleted)"}
+                  {baseLabel ? ` · Base ${baseLabel}` : ""}
+                </div>
+                {prev && changes.length > 0 && (
+                  <ul className="mt-1.5 space-y-0.5">
+                    {changes.map((c) => (
+                      <li key={c.label} className="text-[11px] leading-snug">
+                        <span className="font-semibold text-ink">{c.label}: </span>
+                        <span className="text-slate-meta line-through">{c.from}</span>
+                        <span className="text-slate-meta"> → </span>
+                        <span className="font-semibold text-heritage-deep">{c.to}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

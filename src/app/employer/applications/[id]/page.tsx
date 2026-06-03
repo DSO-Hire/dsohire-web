@@ -1011,7 +1011,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
       supabase
         .from("application_offer_sends")
         .select(
-          "id, template_id, recipient_email, subject, body_html, merge_values, sent_at, sent_by_user_id, approval_status, approval_note, base_amount, base_period, dso_offer_letter_templates:dso_offer_letter_templates(id, name)"
+          "id, template_id, recipient_email, subject, body_html, merge_values, sent_at, sent_by_user_id, approval_status, approval_note, base_amount, base_period, revised_from_offer_send_id, dso_offer_letter_templates:dso_offer_letter_templates(id, name)"
         )
         .eq("application_id", app.id)
         .order("sent_at", { ascending: false }),
@@ -1044,6 +1044,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
       approval_note: string | null;
       base_amount: number | null;
       base_period: string | null;
+      revised_from_offer_send_id: string | null;
       dso_offer_letter_templates:
         | { id: string; name: string }
         | Array<{ id: string; name: string }>
@@ -1121,6 +1122,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
         approval_note: r.approval_note ?? null,
         base_amount: r.base_amount ?? null,
         base_period: (r.base_period as "hourly" | "annual" | null) ?? null,
+        revised_from_offer_send_id: r.revised_from_offer_send_id ?? null,
         response: resp
           ? {
               kind: resp.response as "accepted" | "declined",

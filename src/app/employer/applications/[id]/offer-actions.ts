@@ -332,6 +332,27 @@ export async function sendOffer(
     policy: offerPolicy,
   });
 
+  // ── N12 Phase 3 — link this offer to the most recent DELIVERED offer it
+  // supersedes (skip pending/rejected drafts — those never reached the
+  // candidate, so they're not part of the negotiation thread).
+  let revisedFromId: string | null = null;
+  {
+    const { data: priorSends } = await supabase
+      .from("application_offer_sends")
+      .select("id, approval_status")
+      .eq("application_id", applicationId)
+      .order("sent_at", { ascending: false })
+      .limit(20);
+    const prior = ((priorSends ?? []) as Array<{
+      id: string;
+      approval_status: string | null;
+    }>).find((s) => {
+      const st = s.approval_status ?? "not_required";
+      return st === "not_required" || st === "approved";
+    });
+    revisedFromId = prior?.id ?? null;
+  }
+
   if (gate.mode === "approval") {
     // Hold the offer as a PENDING draft — render + token are already on the
     // row, so an approver's click can dispatch the exact same letter. No
@@ -350,6 +371,7 @@ export async function sendOffer(
         token: responseToken,
         base_amount: structuredBase,
         base_period: structuredBase != null ? structuredPeriod : null,
+        revised_from_offer_send_id: revisedFromId,
         approval_status: "pending",
       })
       .select("id")
@@ -472,6 +494,7 @@ export async function sendOffer(
         input.basePeriod === "hourly" || input.basePeriod === "annual"
           ? input.basePeriod
           : null,
+      revised_from_offer_send_id: revisedFromId,
     })
     .select("id")
     .maybeSingle();
