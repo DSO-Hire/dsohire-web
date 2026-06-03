@@ -20,6 +20,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { approveOffer, rejectOffer } from "../applications/[id]/offer-approval-actions";
+import type { OfferChange } from "@/lib/offers/diff";
 
 export interface PendingOffer {
   id: string;
@@ -32,6 +33,9 @@ export interface PendingOffer {
   basePeriod: "hourly" | "annual" | null;
   submittedAt: string;
   senderName: string | null;
+  /** N12 Phase 3 — diff vs the offer this one supersedes (empty if first). */
+  changes: OfferChange[];
+  revisedFromDate: string | null;
 }
 
 function fmtBase(amount: number | null, period: "hourly" | "annual" | null): string | null {
@@ -190,6 +194,33 @@ function PendingOfferCard({ offer }: { offer: PendingOffer }) {
           )}
         </button>
       </div>
+
+      {offer.revisedFromDate && (
+        <div className="border-t border-amber-200 bg-white px-5 py-3">
+          <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-2">
+            What changed from the previous offer
+            <span className="text-slate-meta font-semibold normal-case tracking-normal">
+              {" "}· revised from {offer.revisedFromDate}
+            </span>
+          </div>
+          {offer.changes.length === 0 ? (
+            <p className="text-[12px] text-slate-meta italic">
+              No tracked terms changed — only the letter wording was edited.
+            </p>
+          ) : (
+            <ul className="space-y-1.5">
+              {offer.changes.map((c) => (
+                <li key={c.label} className="text-[12px] leading-snug">
+                  <span className="font-semibold text-ink">{c.label}: </span>
+                  <span className="text-slate-meta line-through">{c.from}</span>
+                  <span className="text-slate-meta"> → </span>
+                  <span className="font-semibold text-heritage-deep">{c.to}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {open && (
         <div className="border-t border-amber-200 bg-white">
