@@ -29,6 +29,7 @@ import {
   deleteSequence,
   runSequencesNow,
 } from "@/lib/sequences/actions";
+import { HelpDisclosure } from "@/components/help/help-disclosure";
 
 /** Friendly labels for the auto-exit reasons shown in the Run-now result. */
 const EXIT_REASON_LABELS: Record<string, string> = {
@@ -170,6 +171,10 @@ export function SequencesManager({
           </span>
         </div>
       )}
+
+      <div className="mb-5">
+        <HelpDisclosure helpKey="automations.sequences" />
+      </div>
 
       {sequences.length === 0 ? (
         <div className="border border-[var(--rule)] bg-cream/40 px-6 py-12 text-center">

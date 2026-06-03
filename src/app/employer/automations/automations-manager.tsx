@@ -26,6 +26,7 @@ import {
 } from "@/lib/automations/actions";
 import type { RuleCondition } from "@/lib/automations/types";
 import type { RuleView } from "./page";
+import { HelpDisclosure } from "@/components/help/help-disclosure";
 
 interface JobOpt {
   id: string;
@@ -198,6 +199,10 @@ export function AutomationsManager({ rules, jobs, teammates, canManage }: Props)
           </button>
         )}
       </header>
+
+      <div className="mb-6">
+        <HelpDisclosure helpKey="automations.rules" />
+      </div>
 
       {!canManage && (
         <div className="mb-6 border border-amber-200 bg-amber-50 p-5 text-sm text-amber-950">

@@ -15,6 +15,7 @@ import { dsoCanUseAutomationRules } from "@/lib/automations/tier";
 import { dsoCanUseSequences } from "@/lib/sequences/tier";
 import { AutomationsManager } from "./automations-manager";
 import { SequencesManager, type SequenceView } from "./sequences-manager";
+import { HelpDisclosure } from "@/components/help/help-disclosure";
 import type { RuleCondition } from "@/lib/automations/types";
 
 export const dynamic = "force-dynamic";
@@ -165,6 +166,10 @@ export default async function AutomationsPage({ searchParams }: PageProps) {
 
   return (
     <EmployerShell active="automations">
+      <div className="mb-5">
+        <HelpDisclosure helpKey="automations.overview" />
+      </div>
+
       <div className="mb-7 inline-flex items-center gap-1 rounded-lg border border-[var(--rule-strong)] bg-cream p-1">
         <TabLink href="/employer/automations?tab=rules" active={tab === "rules"}>
           Rules

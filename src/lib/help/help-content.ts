@@ -644,6 +644,112 @@ const CANDIDATE: Record<string, HelpEntry> = {
   },
 };
 
+/* ────────────────────────────────────────────────────────────────────
+ * EMPLOYER — Automations (rules + drip sequences). These are the most
+ * involved tools on the platform, so the copy is deliberately thorough —
+ * it powers the on-page "How it works" panels, the /help center, and the
+ * AI support assistant (RAG) from one place.
+ * ─────────────────────────────────────────────────────────────────── */
+
+const AUTOMATIONS: Record<string, HelpEntry> = {
+  "automations.overview": {
+    title: "Automations: rules vs. drip sequences",
+    tip: "Two different tools live under Automations. Rules react instantly to one thing that happens in your pipeline. Drip sequences send a planned series of emails over days. Use rules for 'when X happens, do Y'; use sequences to gently follow up with a candidate over time.",
+    format: "drawer",
+    lens: "employer",
+    videoId: null,
+    steps: [
+      {
+        heading: "Rules = instant reactions",
+        body: "A rule watches for a single event — a candidate applies, or moves to a stage — and immediately runs one or more actions (email the candidate, post an internal note, add a tag, notify or assign a teammate). One event, one set of actions, right now.",
+      },
+      {
+        heading: "Drip sequences = timed follow-ups",
+        body: "A sequence is a series of re-engagement emails sent on a schedule (e.g. day 0, day 3, day 7). You enroll a candidate from their application, and the steps go out over time until the sequence finishes or the candidate re-engages.",
+      },
+      {
+        heading: "Which should I use?",
+        body: "Use a RULE to automate a one-time response (\"when someone applies, tag it and tell the recruiter\"). Use a SEQUENCE to nurture a quiet candidate over time (\"check in three times over two weeks unless they reply\").",
+      },
+    ],
+    bullets: [
+      "Both live under Automations, on the Rules and Drip sequences tabs.",
+      "Custom rules and drip sequences are a Scale-plan feature; the built-in default stage-change rule runs on every plan.",
+      "Everything candidate-facing always shows your practice name, never the corporate group name, when affiliation masking is on.",
+    ],
+  },
+  "automations.rules": {
+    title: "Automation rules",
+    tip: "A rule is 'when this happens → optionally only if → do this.' Pick a trigger (a candidate applies, or an application changes stage, or it sits idle), narrow it with conditions, and choose actions. Rules fire once per matching event.",
+    format: "drawer",
+    lens: "employer",
+    videoId: null,
+    steps: [
+      {
+        heading: "1. Pick a trigger",
+        body: "The event that starts the rule: an application is received, an application changes stage, or an application sits idle in a stage for N days. The trigger decides which conditions and actions are available.",
+      },
+      {
+        heading: "2. Add conditions (optional)",
+        body: "Narrow when the rule runs — e.g. only when it moves to 'Interview', only for a specific job, or only after N days idle. With no conditions, the rule runs on every matching trigger. All conditions must be true (AND).",
+      },
+      {
+        heading: "3. Choose actions",
+        body: "What the rule does: email the candidate, send a re-engagement email, post an internal inbox update, add a tag, notify a teammate, or assign the application to a teammate. You can stack several actions on one rule.",
+      },
+      {
+        heading: "Test before you trust it",
+        body: "Use 'Test against recent moves' on a stage-change rule to dry-run it over your last 50 stage changes and see exactly which applications it would have matched — no emails sent.",
+      },
+      {
+        heading: "The default rule",
+        body: "Every account starts with a built-in 'notify candidate on stage change' rule (posts an inbox update, then emails the candidate). It runs on all plans and can be paused, but not deleted.",
+      },
+    ],
+    bullets: [
+      "Rules fire once per matching event, deduped so a candidate isn't emailed twice for the same move.",
+      "Auto-advancing or auto-rejecting a candidate (move-stage actions) is intentionally not offered yet — it's the riskiest action and is held until proven.",
+      "Custom rules require the Scale plan; the default rule works on every plan.",
+      "Owners and admins manage rules; recruiters don't see this tab.",
+    ],
+  },
+  "automations.sequences": {
+    title: "Drip sequences",
+    tip: "A drip sequence is a series of timed nurture emails to one candidate. Build the steps once, then enroll a candidate from their application. Each step sends after the delay you set, and the whole sequence stops automatically the moment the candidate re-engages.",
+    format: "drawer",
+    lens: "employer",
+    videoId: null,
+    steps: [
+      {
+        heading: "1. Build the sequence",
+        body: "On the Drip sequences tab, click New sequence. Name it, then add steps. Each step has a 'wait N days' delay (0 = send right away / on the next hourly run), a subject, and a message. Reorder or remove steps anytime.",
+      },
+      {
+        heading: "2. Personalize without typing code",
+        body: "Use the insert chips above each field — First name, Last name, Job title, Practice name — to drop a merge field at your cursor. Hit Preview on any step to see it rendered with sample values before you save.",
+      },
+      {
+        heading: "3. Enroll a candidate",
+        body: "Open a candidate's application → Pipeline stage section → pick a sequence under 'Nurture sequence' and click Start sequence. You'll see 'step X of N · next email <date>'. A candidate can be in one sequence at a time.",
+      },
+      {
+        heading: "4. It stops itself",
+        body: "A running sequence ends automatically the moment the candidate replies, moves to a different stage, or receives an offer — so you never accidentally keep emailing someone who's already engaged or hired. You can also hit Stop manually.",
+      },
+      {
+        heading: "Send schedule + Run now",
+        body: "Steps go out automatically every hour when they're due. To send what's due immediately instead of waiting, use the Run now button on the Drip sequences tab — it reports what sent and why anything stopped.",
+      },
+    ],
+    bullets: [
+      "Emails always show your practice name (affiliation-masked), never the corporate group name.",
+      "You can't enroll a candidate who already has an offer out or is in a closed stage — they'd just exit immediately.",
+      "Pausing a sequence stops its active enrollments on the next run.",
+      "Drip sequences require the Scale plan. Owners/admins build them; recruiters can start/stop one from an application.",
+    ],
+  },
+};
+
 /* ──────────────────────────────────────────────────────────────────── */
 
 export const HELP_CONTENT: Record<string, HelpEntry> = {
@@ -651,6 +757,7 @@ export const HELP_CONTENT: Record<string, HelpEntry> = {
   ...PIPELINE,
   ...INBOX,
   ...SETTINGS,
+  ...AUTOMATIONS,
   ...CANDIDATE,
 };
 
