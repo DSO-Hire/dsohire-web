@@ -58,6 +58,7 @@ import {
 import { logAiUsage, checkAiRateLimit } from "@/lib/ai/usage";
 import { extractJson } from "@/lib/ai/extract-json";
 import { greetingFirstName } from "@/lib/candidate/name";
+import { detectAdjustments } from "./compute";
 import type { FitBucket, FitDimensionKey, FitResult } from "./types";
 import type {
   GeneratePracticeFitNarrativeInput,
@@ -159,6 +160,7 @@ export async function generatePracticeFitNarrative(
     score: row.score as number,
     bucket,
     dimensions: dims,
+    adjustments: detectAdjustments(dims),
     top_factors: row.top_factors as FitDimensionKey[],
     coverage: { scored_weight, total_weight, scored_count, total_count },
     input_hash: row.input_hash as string,

@@ -79,11 +79,30 @@ export interface FitDimension {
   cta_inline: boolean;
 }
 
+/**
+ * v2 (Phase A.4) — a post-normalization adjustment to the score.
+ *   • "cap"   — a deal-breaker (e.g. wrong-state clinical license) ceilings
+ *     the overall score regardless of how strong the rest is. `value` is the
+ *     max score it imposes. Informational only — never auto-screens.
+ *   • "boost" — the marquee dental signals all line up, so a genuinely great
+ *     match is allowed to break 90. `value` is the points added (ceilinged).
+ * Derived deterministically from the dimensions, so cache hits reconstruct
+ * the same reasons without re-applying to the number.
+ */
+export interface FitAdjustment {
+  kind: "cap" | "boost";
+  dimension: FitDimensionKey | null;
+  value: number;
+  reason: string;
+}
+
 export interface FitResult {
-  /** 0-100 normalized over scored dimensions only. */
+  /** 0-100, normalized over scored dimensions then capped/boosted (A.4). */
   score: number;
   bucket: FitBucket;
   dimensions: Record<FitDimensionKey, FitDimension>;
+  /** Caps/boosters applied to the score, for transparent display. */
+  adjustments: FitAdjustment[];
   /** Top 3 SCORED dimensions by contribution desc — drives the highlights row. */
   top_factors: FitDimensionKey[];
   /**

@@ -1,0 +1,15 @@
+-- Practice Fit v2 (Phase A.4) — deal-breaker caps + booster ceiling.
+--
+-- Added a post-normalization adjustment layer to the engine:
+--   • cap   — a wrong-state clinical license ceilings the overall score
+--     (38 hard / 60 if open to relocating) no matter how strong the rest is.
+--     Informational only; never auto-screens.
+--   • boost — when the marquee dental signals (exact role, PMS fluency,
+--     short commute, in-state license) all line up, a great match is lifted
+--     toward a 97 ceiling so scores spread and standouts break 90.
+--
+-- This changed scoring LOGIC without adding a hashed input field, so a
+-- MODEL_VERSION stamp ("2026-06-03-a4") was folded into the input hash to
+-- force invalidation going forward. Wipe the cache for an immediate clean
+-- transition; rows recompute lazily on next view.
+truncate table public.practice_fit_scores;

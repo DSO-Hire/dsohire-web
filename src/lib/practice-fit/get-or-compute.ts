@@ -25,7 +25,7 @@ import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
-import { computePracticeFit, hashInputs } from "./compute";
+import { computePracticeFit, detectAdjustments, hashInputs } from "./compute";
 import { scoreToBucket } from "./buckets";
 import {
   parsePlacePoints,
@@ -415,6 +415,9 @@ function rowToResult(row: Record<string, unknown>): FitResult {
     score: row.score as number,
     bucket: scoreToBucket(row.score as number),
     dimensions: dims,
+    // Stored score is already capped/boosted — re-derive the reasons only
+    // (don't re-apply, or we'd double-cap/boost).
+    adjustments: detectAdjustments(dims),
     top_factors: row.top_factors as FitResult["top_factors"],
     coverage: { scored_weight, total_weight, scored_count, total_count },
     input_hash: row.input_hash as string,

@@ -31,11 +31,19 @@ import {
 } from "./role-adjacency";
 import type {
   CandidateFitInputs,
+  FitAdjustment,
   FitDimension,
   FitDimensionKey,
   FitInputs,
   FitResult,
 } from "./types";
+
+/**
+ * Model version — bump on any change to scoring LOGIC that doesn't change a
+ * hashed input field (e.g. the A.4 caps/boosters). It's folded into the
+ * input hash so a logic-only change still invalidates the read-through cache.
+ */
+const MODEL_VERSION = "2026-06-03-a4";
 
 /* ──────────────────────────────────────────────────────────────
  * Weights (must sum to 100). v0's role weight (25) is reallocated
@@ -150,6 +158,12 @@ export function computePracticeFit(inputs: FitInputs): FitResult | null {
     score = Math.max(0, Math.min(100, score));
   }
 
+  // Phase A.4 — deal-breaker caps + booster ceiling. Derived from the dims
+  // so the cache path can reconstruct the same reasons; applied here to the
+  // stored score.
+  const adjustments = detectAdjustments(dims);
+  score = applyAdjustments(score, adjustments);
+
   // Top 3 by contribution desc, only among SCORED dims. Excluded
   // dims are surfaced separately in the UI ("Add X to factor in").
   const top_factors = (Object.entries(dims) as Array<
@@ -170,6 +184,7 @@ export function computePracticeFit(inputs: FitInputs): FitResult | null {
     score,
     bucket: scoreToBucket(score),
     dimensions: dims,
+    adjustments,
     top_factors,
     coverage: {
       scored_weight: scoredWeight,
@@ -179,6 +194,83 @@ export function computePracticeFit(inputs: FitInputs): FitResult | null {
     },
     input_hash: hashInputs(inputs),
   };
+}
+
+/* ──────────────────────────────────────────────────────────────
+ * Caps + boosters (Phase A.4)
+ *
+ * detectAdjustments() is a pure function of the scored dimensions, so both
+ * the live compute and the cache-rehydration path (rowToResult) derive the
+ * SAME reasons. applyAdjustments() folds them into the number — boost first
+ * (lifts a great match toward the ceiling), then caps (a deal-breaker always
+ * wins). Caps are informational only; they never auto-screen a candidate.
+ * ─────────────────────────────────────────────────────────── */
+
+const BOOST_CEILING = 97; // leave honest headroom; never a synthetic 100
+const BOOST_AMOUNT = 5;
+
+export function detectAdjustments(
+  dims: Record<FitDimensionKey, FitDimension>
+): FitAdjustment[] {
+  const out: FitAdjustment[] = [];
+
+  // Deal-breaker: wrong-state clinical license. raw<=20 = not licensed and
+  // not relocating; 21-50 = the relocate case (raw 45).
+  const lic = dims.license_state;
+  if (lic && lic.scored) {
+    if (lic.raw <= 20) {
+      out.push({
+        kind: "cap",
+        dimension: "license_state",
+        value: 38,
+        reason:
+          "Not licensed in this state — a hard requirement for this clinical role. Informational only; never auto-screened.",
+      });
+    } else if (lic.raw <= 50) {
+      out.push({
+        kind: "cap",
+        dimension: "license_state",
+        value: 60,
+        reason:
+          "Would need licensure in this state first (candidate is open to relocating).",
+      });
+    }
+  }
+
+  // Booster: the marquee dental signals all line up → let a great match soar.
+  const maxed: string[] = [];
+  if (dims.role_fit?.scored && dims.role_fit.raw >= 100) maxed.push("exact role");
+  if (dims.pms_fluency?.scored && dims.pms_fluency.raw >= 88) maxed.push("PMS fluency");
+  if (dims.location?.scored && dims.location.raw >= 85) maxed.push("short commute");
+  if (dims.license_state?.scored && dims.license_state.raw >= 100)
+    maxed.push("in-state license");
+  if (maxed.length >= 3) {
+    out.push({
+      kind: "boost",
+      dimension: null,
+      value: BOOST_AMOUNT,
+      reason: `${maxed.join(", ")} all line up.`,
+    });
+  }
+
+  return out;
+}
+
+export function applyAdjustments(
+  base: number,
+  adjustments: FitAdjustment[]
+): number {
+  let s = base;
+  const boost = adjustments
+    .filter((a) => a.kind === "boost")
+    .reduce((m, a) => Math.max(m, a.value), 0);
+  // Boost lifts toward the ceiling but never reduces an already-higher base.
+  if (boost > 0) s = Math.max(s, Math.min(BOOST_CEILING, s + boost));
+  const caps = adjustments
+    .filter((a) => a.kind === "cap")
+    .map((a) => a.value);
+  if (caps.length > 0) s = Math.min(s, Math.min(...caps));
+  return Math.max(0, Math.min(100, Math.round(s)));
 }
 
 /* ──────────────────────────────────────────────────────────────
@@ -1091,6 +1183,9 @@ function scoreScheduleOverlap({ candidate, job }: FitInputs): FitDimension {
 
 export function hashInputs(inputs: FitInputs): string {
   const canonical = {
+    // Logic-version stamp — a scoring-logic change with no new input field
+    // (e.g. A.4 caps/boosters) still invalidates the cache.
+    model_version: MODEL_VERSION,
     candidate: {
       desired_roles: sortedLowercase(inputs.candidate.desired_roles),
       // Phase A.1 — current_title feeds role_fit (fallback role signal),
