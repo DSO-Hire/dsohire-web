@@ -20,6 +20,7 @@
 export type FitBucket = "excellent" | "strong" | "solid" | "light" | "low";
 
 export type FitDimensionKey =
+  | "role_fit"
   | "compensation"
   | "location"
   | "specialty"
@@ -108,6 +109,13 @@ export interface FitResult {
 
 export interface CandidateFitInputs {
   desired_roles: string[];
+  /**
+   * v2 (Phase A.1) — resume-derived current job title, free text. Used as
+   * the role signal when `desired_roles` is empty so "open to anything"
+   * candidates are still gated against their actual role (kills the
+   * Front-Desk-shows-fit-for-CLO bug). Null when not parsed.
+   */
+  current_title: string | null;
   desired_specialty: string[];
   license_states: string[];
   desired_locations: string[];

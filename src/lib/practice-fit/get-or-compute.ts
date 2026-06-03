@@ -179,7 +179,7 @@ async function loadCandidateInputs(
   const { data: c } = await supabase
     .from("candidates")
     .select(
-      "desired_roles, desired_specialty, license_states, desired_locations, skills, schedule_preferences, min_salary, salary_unit, temp_or_perm, dso_size_preference, years_experience_dental"
+      "desired_roles, current_title, desired_specialty, license_states, desired_locations, skills, schedule_preferences, min_salary, salary_unit, temp_or_perm, dso_size_preference, years_experience_dental"
     )
     .eq("id", candidateId)
     .maybeSingle();
@@ -187,6 +187,7 @@ async function loadCandidateInputs(
   const r = c as Record<string, unknown>;
   return {
     desired_roles: ((r.desired_roles as string[] | null) ?? []) as string[],
+    current_title: (r.current_title as string | null) ?? null,
     desired_specialty: ((r.desired_specialty as string[] | null) ?? []) as string[],
     license_states: ((r.license_states as string[] | null) ?? []) as string[],
     desired_locations: ((r.desired_locations as string[] | null) ?? []) as string[],

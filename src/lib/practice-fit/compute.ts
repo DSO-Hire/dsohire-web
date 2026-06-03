@@ -20,7 +20,15 @@
 
 import { createHash } from "crypto";
 import { scoreToBucket } from "./buckets";
-import { canonicalizeRoleCategory } from "./role-canonicalize";
+import {
+  canonicalizeRoleCategory,
+  CANONICAL_ROLE_LABELS,
+} from "./role-canonicalize";
+import {
+  deriveCandidateRoles,
+  nearestAdjacentRole,
+  roleRelation,
+} from "./role-adjacency";
 import type {
   CandidateFitInputs,
   FitDimension,
@@ -41,13 +49,19 @@ import type {
 // fill schedule preferences and most jobs leave schedule_days empty, so
 // it'll fall out of the denominator on most pairs — but when both sides
 // have data, it's a strong day-1-friction signal.
+// Phase A.1 (2026-06-03) — role_fit (15) is added as a scored dimension so
+// an EXACT role match (100) outranks a merely ADJACENT one (60). The 15
+// points come from compensation (25→20), specialty (15→10) and
+// employment_type (10→5). Unrelated pairs never reach scoring — the
+// adjacency gate drops them to null upstream.
 const WEIGHTS: Record<FitDimensionKey, number> = {
-  compensation: 25,
+  role_fit: 15,
+  compensation: 20,
   location: 20,
-  specialty: 15,
+  specialty: 10,
   skills: 10,
   years_experience: 10,
-  employment_type: 10,
+  employment_type: 5,
   dso_size: 5,
   schedule_overlap: 5,
 };
@@ -63,16 +77,21 @@ const WEIGHTS: Record<FitDimensionKey, number> = {
  * ─────────────────────────────────────────────────────────── */
 
 export function isRoleApplicable(inputs: FitInputs): boolean {
-  const desired = (inputs.candidate.desired_roles ?? [])
-    .map(canonicalizeRoleCategory)
-    .filter((r) => r !== "other"); // unmappable candidate prefs don't filter
-
-  if (desired.length === 0) return true; // candidate is open to anything
-
   const jobRole = canonicalizeRoleCategory(inputs.job.role_category);
   if (jobRole === "other") return true; // unmappable job role doesn't filter
 
-  return desired.includes(jobRole);
+  // v2 — role signal is desired_roles, falling back to the resume-derived
+  // current_title so "open to anything" candidates are still gated against
+  // their actual role.
+  const candidateRoles = deriveCandidateRoles(
+    inputs.candidate.desired_roles,
+    inputs.candidate.current_title
+  );
+  if (candidateRoles.length === 0) return true; // genuinely no role signal
+
+  // Only an outright UNRELATED relation drops the pair. Exact + adjacent
+  // both stay in (and are differentiated by the role_fit dimension).
+  return roleRelation(candidateRoles, jobRole) !== "unrelated";
 }
 
 /* ──────────────────────────────────────────────────────────────
@@ -83,6 +102,7 @@ export function computePracticeFit(inputs: FitInputs): FitResult | null {
   if (!isRoleApplicable(inputs)) return null;
 
   const dims: Record<FitDimensionKey, FitDimension> = {
+    role_fit: scoreRoleFit(inputs),
     compensation: scoreCompensation(inputs),
     location: scoreLocation(inputs),
     specialty: scoreSpecialty(inputs),
@@ -247,6 +267,66 @@ function derivedEmployerVoice(s: string): string {
     .replace(/\bYours\b/g, "Theirs")
     .replace(/\byou\b/g, "they")
     .replace(/\bYou\b/g, "They");
+}
+
+/**
+ * scoreRoleFit — Phase A.1. The adjacency gate has already dropped
+ * unrelated pairs, so this scorer only ever sees exact or adjacent
+ * relations (or "no signal", which it excludes). Exact = 100, adjacent
+ * = 60 — enough spread that a spot-on candidate outranks a transferable
+ * one without burying the adjacent match.
+ */
+function scoreRoleFit({ candidate, job }: FitInputs): FitDimension {
+  const jobRole = canonicalizeRoleCategory(job.role_category);
+  if (jobRole === "other") {
+    return makeUnscoredDim("role_fit", "Role", {
+      detail:
+        "This posting's role isn't categorized — role fit is excluded from the score.",
+      detail_employer:
+        "Job role isn't categorized — role fit excluded from the score.",
+      cta_label: null,
+      cta_href: null,
+    });
+  }
+
+  const candidateRoles = deriveCandidateRoles(
+    candidate.desired_roles,
+    candidate.current_title
+  );
+  if (candidateRoles.length === 0) {
+    return makeUnscoredDim("role_fit", "Role", {
+      detail:
+        "Add your target role(s) to factor role fit into your match.",
+      detail_employer:
+        "Candidate hasn't set target roles and we couldn't read one from their title — role fit excluded from their score.",
+      cta_label: "Set target roles",
+      cta_href: "/candidate/profile#section-role-specialty",
+    });
+  }
+
+  const jobLabel = CANONICAL_ROLE_LABELS[jobRole];
+  const relation = roleRelation(candidateRoles, jobRole);
+
+  if (relation === "exact") {
+    return makeScoredDim(
+      "role_fit",
+      "Role",
+      100,
+      `Exact role match — this is a ${jobLabel} role.`,
+      `Exact role match — they're targeting ${jobLabel}.`
+    );
+  }
+
+  // Adjacent — name the candidate's nearest neighbouring role for the copy.
+  const near = nearestAdjacentRole(candidateRoles, jobRole);
+  const nearLabel = near ? CANONICAL_ROLE_LABELS[near] : "a related role";
+  return makeScoredDim(
+    "role_fit",
+    "Role",
+    60,
+    `Adjacent role — you're ${nearLabel}, this is ${jobLabel}: related and transferable, not identical.`,
+    `Adjacent role — they're ${nearLabel}, this is ${jobLabel}: related and transferable, not identical.`
+  );
 }
 
 function scoreCompensation({ candidate, job }: FitInputs): FitDimension {
@@ -805,6 +885,9 @@ export function hashInputs(inputs: FitInputs): string {
   const canonical = {
     candidate: {
       desired_roles: sortedLowercase(inputs.candidate.desired_roles),
+      // Phase A.1 — current_title feeds role_fit (fallback role signal),
+      // so it must be in the hash or the cache won't invalidate on change.
+      current_title: (inputs.candidate.current_title ?? "").trim().toLowerCase(),
       desired_specialty: sortedLowercase(inputs.candidate.desired_specialty),
       license_states: sortedUpper(inputs.candidate.license_states),
       desired_locations: sortedLowercase(inputs.candidate.desired_locations),

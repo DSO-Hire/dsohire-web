@@ -1,0 +1,12 @@
+-- Practice Fit v2 (Phase A.1) — role-adjacency rework.
+--
+-- The scoring engine changed: role is now a 3-way adjacency relation
+-- (exact / adjacent / unrelated) with a new scored `role_fit` dimension,
+-- a reweight (compensation 25->20, specialty 15->10, employment_type
+-- 10->5, role_fit +15), and `current_title` folded into the input hash.
+-- Every stored input_hash from v1.x can therefore never match a v2 hash.
+--
+-- We wipe the cache so the transition is explicit rather than relying on
+-- hash drift (mirrors phase_5_d_v1_5_cache_wipe). Rows recompute lazily on
+-- next view via get-or-compute.ts.
+TRUNCATE TABLE public.practice_fit_scores;

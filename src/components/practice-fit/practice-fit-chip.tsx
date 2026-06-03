@@ -9,10 +9,10 @@
  *   • size="md" — application detail header + candidate job detail
  *
  * Renders nothing when fit is null (consent off, no compute yet, etc).
- * Caller is responsible for any "Practice Fit not enabled" empty state.
+ * Caller is responsible for any "PracticeFit not enabled" empty state.
  */
 
-import { Sparkles } from "lucide-react";
+import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
 import { BUCKET_STYLES } from "@/lib/practice-fit/buckets";
 import type { FitResult } from "@/lib/practice-fit/types";
 
@@ -37,7 +37,7 @@ export function PracticeFitChip({
         className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${style.bgClass} ${style.textClass} ${style.borderClass}`}
         title={buildChipTooltip(fit, style.label)}
       >
-        <Sparkles className="h-2.5 w-2.5" aria-hidden />
+        <PracticeFitMark className="h-2.5 w-2.5" />
         {style.label}
         {showScore && (
           <span className="font-mono text-[9px] opacity-70">{fit.score}</span>
@@ -51,8 +51,8 @@ export function PracticeFitChip({
       className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-bold tracking-wider uppercase ${style.bgClass} ${style.textClass} ${style.borderClass}`}
       title={buildChipTooltip(fit, style.label)}
     >
-      <Sparkles className="h-3 w-3" aria-hidden />
-      Practice Fit · {style.label}
+      <PracticeFitMark className="h-3 w-3" />
+      PracticeFit · {style.label}
       {showScore && (
         <span className="font-mono text-[10px] opacity-70">
           {fit.score}/100
@@ -68,7 +68,7 @@ export function PracticeFitChip({
  * is based on partial data, so the common case stays terse.
  */
 function buildChipTooltip(fit: FitResult, bucketLabel: string): string {
-  const base = `Practice Fit · ${bucketLabel} · ${fit.score}/100`;
+  const base = `PracticeFit · ${bucketLabel} · ${fit.score}/100`;
   if (
     fit.coverage &&
     fit.coverage.scored_count < fit.coverage.total_count
