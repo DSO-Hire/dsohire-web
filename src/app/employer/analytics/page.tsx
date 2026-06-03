@@ -18,6 +18,7 @@ import { redirect } from "next/navigation";
 import { ArrowRight, Download } from "lucide-react";
 import type { Metadata } from "next";
 import { EmployerShell } from "@/components/employer/employer-shell";
+import { HelpDisclosure } from "@/components/help/help-disclosure";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   getDsoCrossLocationStats,
@@ -165,6 +166,10 @@ export default async function AnalyticsHubPage({ searchParams }: PageProps) {
           </a>
         </div>
       </header>
+
+      <div className="mb-6">
+        <HelpDisclosure helpKey="analytics.overview" />
+      </div>
 
       {/* Tab bar + window selector */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--rule)]">

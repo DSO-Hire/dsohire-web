@@ -10,6 +10,7 @@ import { redirect } from "next/navigation";
 import { UserPlus } from "lucide-react";
 import type { Metadata } from "next";
 import { EmployerShell } from "@/components/employer/employer-shell";
+import { HelpDisclosure } from "@/components/help/help-disclosure";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ensureReferralCode } from "@/lib/referrals/code";
 import { ShareLinkBox, ReferralComposer, StatusSelect } from "./referrals-client";
@@ -103,6 +104,10 @@ export default async function ReferralsPage() {
           name — every referral lands here and you can track it through to hire.
         </p>
       </header>
+
+      <div className="mb-7">
+        <HelpDisclosure helpKey="referrals.overview" />
+      </div>
 
       {/* Share link */}
       <section className="mb-8 max-w-[680px]">

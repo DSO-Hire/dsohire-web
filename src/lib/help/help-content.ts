@@ -750,6 +750,111 @@ const AUTOMATIONS: Record<string, HelpEntry> = {
   },
 };
 
+/* ────────────────────────────────────────────────────────────────────
+ * EMPLOYER — Offer approvals + Analytics (the other involved tools).
+ * ─────────────────────────────────────────────────────────────────── */
+
+const OFFER_ANALYTICS: Record<string, HelpEntry> = {
+  "offers.approvals": {
+    title: "Offer approvals",
+    tip: "Offer letters can require a sign-off before they reach the candidate. Owners and admins send directly; recruiters and hiring managers route through approval unless you grant them direct authority. Pay outside your posted range (or above a ceiling you set) can require approval from anyone.",
+    format: "drawer",
+    lens: "employer",
+    videoId: null,
+    steps: [
+      {
+        heading: "Who needs approval",
+        body: "By default, owners and admins send offers straight to the candidate. Recruiters and hiring managers have their offers held for an owner/admin to approve. You can grant a specific recruiter or hiring manager direct-send authority in Settings → Offer approvals.",
+      },
+      {
+        heading: "Pay guardrails",
+        body: "When composing an offer you enter a structured base amount. If it falls outside the job's posted range — or above an optional dollar ceiling you set — the offer can be routed for approval even for people who normally send directly. The compose screen shows a live banner so the sender knows before submitting.",
+      },
+      {
+        heading: "The approvals queue",
+        body: "Held offers land on the Offer approvals page (a count badge shows in the nav). An approver reviews the exact letter and the 'what changed' diff if it's a revision, then Approves — which sends it to the candidate — or Rejects with a note that goes back to the sender.",
+      },
+      {
+        heading: "Everyone stays informed",
+        body: "Approvers are emailed when an offer needs sign-off; the original sender is emailed the decision. Nothing reaches the candidate until an approver approves it.",
+      },
+    ],
+    bullets: [
+      "Set the policy + per-teammate authority in Settings → Offer approvals.",
+      "Approval chains, the $ ceiling, and the version diff are a Scale-plan feature; the guardrail banner shows on every plan.",
+      "Owners/admins approve; recruiters see their own pending/rejected offers on the application.",
+    ],
+  },
+  "analytics.overview": {
+    title: "Reading your analytics",
+    tip: "Analytics turns the application data you're already capturing into hiring metrics — time-to-fill, funnel conversion, source performance, offer acceptance, per-location comparisons, and pay-vs-market benchmarks. No extra logging required.",
+    format: "drawer",
+    lens: "employer",
+    videoId: null,
+    steps: [
+      {
+        heading: "The tabs",
+        body: "Overview (headline KPIs + trend), Funnel & velocity (stage-to-stage conversion + time-to-fill), Sources (where applicants come from), Offers (acceptance + decline reasons), Locations (a per-practice comparison table), and Benchmarks (your pay vs. BLS market medians).",
+      },
+      {
+        heading: "Filters",
+        body: "Use the date window (30 / 90 / 365 days) to set the period, and the practice filter to scope every tab to a single location or view the whole portfolio.",
+      },
+      {
+        heading: "What changed and why",
+        body: "The AI summary reads the current numbers against the prior period and explains the movement in plain English — grounded only in your data, never invented.",
+      },
+      {
+        heading: "Export",
+        body: "Pull the per-practice rollup or the raw application data to CSV for your own reporting or a board deck.",
+      },
+    ],
+    bullets: [
+      "Metrics that depend on response/start tracking only count from when that capture went live, so brand-new accounts fill in over time.",
+      "Benchmarks compare to public BLS OEWS medians by role + state, with a national fallback.",
+      "Analytics is read-only and never affects a candidate's experience.",
+    ],
+  },
+};
+
+/* ────────────────────────────────────────────────────────────────────
+ * EMPLOYER — Dashboard + Referrals (rounding out help coverage).
+ * ─────────────────────────────────────────────────────────────────── */
+
+const MISC: Record<string, HelpEntry> = {
+  "dashboard.overview": {
+    title: "Your dashboard",
+    tip: "A daily snapshot of what needs your attention: applications awaiting review, candidates stuck or stale in the pipeline, recent activity, and how your jobs are performing. The cards link straight to a pre-filtered list so you can act in one click.",
+    format: "disclosure",
+    lens: "employer",
+    bullets: [
+      "Awaiting review shows the oldest-waiting application and flags when it's past your SLA.",
+      "Stuck = sitting in 'New' too long; Stale = no movement in a mid-pipeline stage. Both deep-link to the matching applications.",
+      "Use the location switcher (top left) to scope the whole dashboard to one practice.",
+    ],
+  },
+  "referrals.overview": {
+    title: "Referrals",
+    tip: "Invite your team (or anyone) to refer candidates with a personal link. When someone applies through that link, the referral is tracked back to the referrer so you can see who's sending you talent.",
+    format: "disclosure",
+    lens: "employer",
+    steps: [
+      {
+        heading: "Share a referral link",
+        body: "Generate a personal referral link and send it to a teammate or contact. Anyone who applies through it is tagged as their referral.",
+      },
+      {
+        heading: "Track who referred whom",
+        body: "The Referrals page lists each referral and its status as it moves through your pipeline, so you can credit the people sending you good candidates.",
+      },
+    ],
+    bullets: [
+      "There's no bonus/payout engine — this tracks the referral relationship, not payments.",
+      "Referred candidates apply and flow through your normal pipeline like any other applicant.",
+    ],
+  },
+};
+
 /* ──────────────────────────────────────────────────────────────────── */
 
 export const HELP_CONTENT: Record<string, HelpEntry> = {
@@ -758,6 +863,8 @@ export const HELP_CONTENT: Record<string, HelpEntry> = {
   ...INBOX,
   ...SETTINGS,
   ...AUTOMATIONS,
+  ...OFFER_ANALYTICS,
+  ...MISC,
   ...CANDIDATE,
 };
 

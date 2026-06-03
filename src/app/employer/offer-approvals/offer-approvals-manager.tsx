@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { approveOffer, rejectOffer } from "../applications/[id]/offer-approval-actions";
 import type { OfferChange } from "@/lib/offers/diff";
+import { HelpDisclosure } from "@/components/help/help-disclosure";
 
 export interface PendingOffer {
   id: string;
@@ -76,6 +77,10 @@ export function OfferApprovalsManager({
           .
         </p>
       </header>
+
+      <div className="mb-5">
+        <HelpDisclosure helpKey="offers.approvals" />
+      </div>
 
       {!approvalsEnabled && (
         <div className="mb-5 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-900 flex items-start gap-2">

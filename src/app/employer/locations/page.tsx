@@ -10,6 +10,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRight, MapPin, Plus, Upload } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
+import { HelpDisclosure } from "@/components/help/help-disclosure";
 import { Avatar } from "@/components/ui/avatar";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ListSort } from "@/components/ui/list-sort";
@@ -138,6 +139,10 @@ export default async function EmployerLocationsPage({ searchParams }: PageProps)
           </Link>
         </div>
       </header>
+
+      <div className="mb-7">
+        <HelpDisclosure helpKey="locations.overview" />
+      </div>
 
       {locationList.length === 0 ? (
         <EmptyState />

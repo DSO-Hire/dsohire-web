@@ -32,6 +32,7 @@ import {
   Users,
 } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
+import { HelpDisclosure } from "@/components/help/help-disclosure";
 import { OnboardingChecklist } from "@/components/onboarding/onboarding-checklist";
 import { BillingBanner } from "@/components/employer/billing-banner";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -923,6 +924,10 @@ export default async function EmployerDashboard() {
           )}
         </div>
       </header>
+
+      <div className="mb-6">
+        <HelpDisclosure helpKey="dashboard.overview" />
+      </div>
 
       {dsoUser?.role !== "hiring_manager" && (
         <div className="mb-8">

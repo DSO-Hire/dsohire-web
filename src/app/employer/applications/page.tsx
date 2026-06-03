@@ -9,6 +9,7 @@ import Link from "next/link";
 import { ChevronRight, MapPin, UserRound, AlertCircle } from "lucide-react";
 import { redirect } from "next/navigation";
 import { EmployerShell } from "@/components/employer/employer-shell";
+import { HelpDisclosure } from "@/components/help/help-disclosure";
 import { Avatar } from "@/components/ui/avatar";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
@@ -387,6 +388,10 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
           candidate, read their cover letter, and update status.
         </p>
       </header>
+
+      <div className="mb-7">
+        <HelpDisclosure helpKey="applications.review" />
+      </div>
 
       {/* Filters */}
       <div className="mb-7 flex flex-wrap items-center gap-3">
