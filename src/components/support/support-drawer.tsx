@@ -855,7 +855,19 @@ interface Suggestion {
 const URL_TO_PREFIXES: Array<{ match: RegExp; prefixes: string[] }> = [
   { match: /\/employer\/jobs\/new|\/employer\/jobs\/[^/]+\/edit/, prefixes: ["jd."] },
   { match: /\/employer\/jobs\/[^/]+\/applications/, prefixes: ["pipeline."] },
+  // Jobs LIST (not new/edit/applications, which are matched above).
+  { match: /\/employer\/jobs(\?|$)/, prefixes: ["jd."] },
+  { match: /\/employer\/automations/, prefixes: ["automations."] },
+  // Offer-approvals settings — before the generic /settings rule so its
+  // articles lead. The top-level queue is handled separately below.
+  { match: /\/employer\/settings\/offer-approvals/, prefixes: ["offers.approvals"] },
+  { match: /\/employer\/offer-approvals/, prefixes: ["offers.approvals", "offers."] },
+  { match: /\/employer\/analytics|\/employer\/reports/, prefixes: ["analytics.", "reports."] },
+  { match: /\/employer\/dashboard/, prefixes: ["dashboard."] },
+  { match: /\/employer\/referrals/, prefixes: ["referrals."] },
+  { match: /\/employer\/team/, prefixes: ["team."] },
   { match: /\/employer\/applications\//, prefixes: ["pipeline.", "inbox."] },
+  { match: /\/employer\/applications/, prefixes: ["applications.review", "pipeline."] },
   { match: /\/employer\/inbox/, prefixes: ["inbox."] },
   { match: /\/employer\/talent-pool/, prefixes: ["talent.", "candidate.profile_view"] },
   { match: /\/employer\/billing/, prefixes: ["billing."] },

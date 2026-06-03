@@ -833,6 +833,18 @@ const MISC: Record<string, HelpEntry> = {
       "Use the location switcher (top left) to scope the whole dashboard to one practice.",
     ],
   },
+  "team.overview": {
+    title: "Your team & roles",
+    tip: "Invite teammates and set what each can do. Owners have full control including billing; Admins manage hiring + settings; Recruiters work the pipeline; Hiring Managers see only the locations assigned to them. Change a teammate's role or location scope anytime.",
+    format: "disclosure",
+    lens: "employer",
+    bullets: [
+      "Owner: full control, billing, and ownership transfer — typically your VP of HR / CPO.",
+      "Admin: manage jobs, settings, and the team (no billing ownership).",
+      "Recruiter: works applications, messages, offers — no settings/billing.",
+      "Hiring manager: scoped to assigned locations only; never sees other practices' candidates.",
+    ],
+  },
   "referrals.overview": {
     title: "Referrals",
     tip: "Invite your team (or anyone) to refer candidates with a personal link. When someone applies through that link, the referral is tracked back to the referrer so you can see who's sending you talent.",
