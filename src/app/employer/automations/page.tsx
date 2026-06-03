@@ -19,6 +19,8 @@ import type { RuleCondition } from "@/lib/automations/types";
 
 export const dynamic = "force-dynamic";
 
+export const metadata = { title: "Automations · DSO Hire" };
+
 interface PageProps {
   searchParams: Promise<{ tab?: string }>;
 }

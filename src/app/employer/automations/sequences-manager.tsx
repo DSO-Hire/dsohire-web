@@ -30,6 +30,16 @@ import {
   runSequencesNow,
 } from "@/lib/sequences/actions";
 
+/** Friendly labels for the auto-exit reasons shown in the Run-now result. */
+const EXIT_REASON_LABELS: Record<string, string> = {
+  replied: "candidate replied",
+  stage_changed: "changed stage",
+  offer_sent: "got an offer",
+  sequence_disabled: "sequence paused",
+  no_candidate_email: "no candidate email",
+  application_gone: "application removed",
+};
+
 /** Personalization tokens offered as click-to-insert chips. */
 const MERGE_TOKENS: ReadonlyArray<{ token: string; label: string }> = [
   { token: "{{first_name}}", label: "First name" },
@@ -43,7 +53,10 @@ const PREVIEW_SAMPLE: Record<string, string> = {
   "{{first_name}}": "Maria",
   "{{last_name}}": "Lopez",
   "{{job_title}}": "Dental Hygienist",
-  "{{practice_name}}": "Bright Smiles Dental",
+  // Generic placeholder — at send time this resolves to the candidate's
+  // affiliation-masked practice name. Kept obviously generic so the builder
+  // doesn't look like it'll send a wrong/real practice name.
+  "{{practice_name}}": "your practice",
 };
 
 function fillPreview(s: string): string {
@@ -89,11 +102,20 @@ export function SequencesManager({
         setRunMsg(res.error);
         return;
       }
-      setRunMsg(
-        res.due === 0
-          ? "Nothing was due to send right now."
-          : `Sent ${res.sent} · completed ${res.completed} · stopped ${res.exited} (of ${res.due} due).`
-      );
+      if (res.due === 0) {
+        setRunMsg("Nothing was due to send right now.");
+      } else {
+        const reasons = Object.entries(res.exitReasons || {})
+          .map(([k, n]) => `${EXIT_REASON_LABELS[k] ?? k} ×${n}`)
+          .join(", ");
+        const stoppedPart =
+          res.exited > 0
+            ? ` · stopped ${res.exited}${reasons ? ` (${reasons})` : ""}`
+            : "";
+        setRunMsg(
+          `Sent ${res.sent} · completed ${res.completed}${stoppedPart} · of ${res.due} due.`
+        );
+      }
       router.refresh();
     });
   }

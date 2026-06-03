@@ -278,7 +278,14 @@ export async function enrollInSequence(
  * (so you don't have to wait for the hourly cron). Returns a short report.
  */
 export async function runSequencesNow(): Promise<
-  | { ok: true; sent: number; completed: number; exited: number; due: number }
+  | {
+      ok: true;
+      sent: number;
+      completed: number;
+      exited: number;
+      due: number;
+      exitReasons: Record<string, number>;
+    }
   | { ok: false; error: string }
 > {
   const who = await resolveActor();
@@ -289,7 +296,14 @@ export async function runSequencesNow(): Promise<
   try {
     const r = await processDueSequences(who.dsoId);
     revalidatePath("/employer/automations");
-    return { ok: true, sent: r.sent, completed: r.completed, exited: r.exited, due: r.due };
+    return {
+      ok: true,
+      sent: r.sent,
+      completed: r.completed,
+      exited: r.exited,
+      due: r.due,
+      exitReasons: r.exitReasons,
+    };
   } catch (err) {
     console.warn("[sequences] run-now failed", err);
     return { ok: false, error: "Couldn't run sequences right now. Try again." };

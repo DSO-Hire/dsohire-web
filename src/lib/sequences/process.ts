@@ -31,6 +31,8 @@ export interface ProcessResult {
   completed: number;
   exited: number;
   skipped: number;
+  /** Count of each auto-exit reason this run (replied / stage_changed / …). */
+  exitReasons: Record<string, number>;
 }
 
 interface EnrollmentRow {
@@ -58,7 +60,14 @@ export async function processDueSequences(
 ): Promise<ProcessResult> {
   const admin = createSupabaseServiceRoleClient();
   const nowIso = new Date().toISOString();
-  const result: ProcessResult = { due: 0, sent: 0, completed: 0, exited: 0, skipped: 0 };
+  const result: ProcessResult = {
+    due: 0,
+    sent: 0,
+    completed: 0,
+    exited: 0,
+    skipped: 0,
+    exitReasons: {},
+  };
 
   let query = admin
     .from("automation_sequence_enrollments")
@@ -103,6 +112,7 @@ async function processOne(
   if (!seq || seq.is_enabled !== true) {
     await exitEnrollment(admin, enr.id, "sequence_disabled");
     result.exited += 1;
+    result.exitReasons.sequence_disabled = (result.exitReasons.sequence_disabled ?? 0) + 1;
     return;
   }
 
@@ -111,6 +121,7 @@ async function processOne(
   if (exitReason) {
     await exitEnrollment(admin, enr.id, exitReason);
     result.exited += 1;
+    result.exitReasons[exitReason] = (result.exitReasons[exitReason] ?? 0) + 1;
     return;
   }
 
@@ -156,6 +167,7 @@ async function processOne(
       // sequence is undeliverable; exit instead of looping forever.
       await exitEnrollment(admin, enr.id, "no_candidate_email");
       result.exited += 1;
+      result.exitReasons.no_candidate_email = (result.exitReasons.no_candidate_email ?? 0) + 1;
       return;
     }
     result.sent += 1;
