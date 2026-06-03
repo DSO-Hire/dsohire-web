@@ -199,6 +199,33 @@ export async function enrollInSequence(
     return { ok: false, error: "Application is outside your organization." };
   }
 
+  // Don't enroll a candidate who would immediately auto-exit (they'd get no
+  // emails + a confusing "stopped" result). Two of the three exits are
+  // knowable up front: a delivered offer, or a closed/terminal stage.
+  const { count: deliveredOffers } = await supabase
+    .from("application_offer_sends")
+    .select("id", { count: "exact", head: true })
+    .eq("application_id", applicationId)
+    .in("approval_status", ["not_required", "approved"]);
+  if ((deliveredOffers ?? 0) > 0) {
+    return {
+      ok: false,
+      error: "This candidate already has an offer out — a nurture sequence won't send to them.",
+    };
+  }
+  const { data: stageRow } = await supabase
+    .from("dso_pipeline_stages")
+    .select("kind")
+    .eq("id", app.stage_id as string)
+    .maybeSingle();
+  const stageKind = (stageRow?.kind as string | null) ?? null;
+  if (stageKind && ["hired", "rejected", "withdrawn"].includes(stageKind)) {
+    return {
+      ok: false,
+      error: "This candidate is in a closed stage — sequences are for active candidates.",
+    };
+  }
+
   // Sequence must belong to the DSO, be enabled, and have steps.
   const { data: seq } = await supabase
     .from("automation_sequences")

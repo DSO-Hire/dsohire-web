@@ -252,10 +252,11 @@ async function sendStep(
   const email = authResp?.user?.email;
   if (!email) return "no_recipient";
 
+  const fullName = ((cand?.full_name as string | null) ?? "").trim();
+  const nameParts = fullName ? fullName.split(/\s+/) : [];
   const firstName =
-    (cand?.first_name as string | null) ??
-    ((cand?.full_name as string | null) ?? "there").split(" ")[0] ??
-    "there";
+    (cand?.first_name as string | null) ?? nameParts[0] ?? "there";
+  const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
 
   const { data: jobRow } = jobId
     ? await admin.from("jobs").select("title").eq("id", jobId).maybeSingle()
@@ -270,7 +271,11 @@ async function sendStep(
   const dsoName = (dsoRow?.name as string | undefined) ?? "the hiring team";
 
   const fill = (s: string) =>
-    s.replaceAll("{{first_name}}", firstName).replaceAll("{{job_title}}", jobTitle);
+    s
+      .replaceAll("{{first_name}}", firstName)
+      .replaceAll("{{last_name}}", lastName)
+      .replaceAll("{{job_title}}", jobTitle)
+      .replaceAll("{{practice_name}}", dsoName);
   const applicationUrl = `${SITE_URL}/candidate/applications/${enr.application_id}`;
   const replyTo = await resolveCandidateReplyTo(enr.dso_id);
 

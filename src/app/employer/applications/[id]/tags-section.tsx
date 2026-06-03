@@ -19,6 +19,16 @@ import {
 } from "@/lib/applications/tags";
 import { addApplicationTag, removeApplicationTag } from "./tag-actions";
 
+/** Seeded quick-add tags. Free text still works; these are one-click. */
+const SUGGESTED_TAGS: ReadonlyArray<{ label: string; color: TagColor }> = [
+  { label: "Top candidate", color: "green" },
+  { label: "Strong fit", color: "green" },
+  { label: "Needs follow-up", color: "amber" },
+  { label: "Phone screen done", color: "blue" },
+  { label: "On hold", color: "amber" },
+  { label: "Not a fit", color: "rose" },
+];
+
 export function TagsSection({
   applicationId,
   initialTags,
@@ -47,6 +57,16 @@ export function TagsSection({
       } else {
         setError(res.error);
       }
+    });
+  }
+
+  function quickAdd(presetLabel: string, presetColor: TagColor) {
+    if (tags.some((t) => t.label.toLowerCase() === presetLabel.toLowerCase())) return;
+    setError(null);
+    startTransition(async () => {
+      const res = await addApplicationTag(applicationId, presetLabel, presetColor);
+      if (res.ok) setTags((t) => [...t, res.tag]);
+      else setError(res.error);
     });
   }
 
@@ -107,7 +127,8 @@ export function TagsSection({
       </div>
 
       {adding && (
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+        <div className="mt-3 space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
           <input
             type="text"
             value={label}
@@ -162,6 +183,28 @@ export function TagsSection({
           >
             Cancel
           </button>
+          </div>
+
+          {SUGGESTED_TAGS.some(
+            (s) => !tags.some((t) => t.label.toLowerCase() === s.label.toLowerCase())
+          ) && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-[11px] text-slate-meta">Or pick one:</span>
+              {SUGGESTED_TAGS.filter(
+                (s) => !tags.some((t) => t.label.toLowerCase() === s.label.toLowerCase())
+              ).map((s) => (
+                <button
+                  key={s.label}
+                  type="button"
+                  disabled={pending}
+                  onClick={() => quickAdd(s.label, s.color)}
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold border ${TAG_COLOR_CLASSES[s.color]} hover:opacity-80 disabled:opacity-50`}
+                >
+                  <Plus className="h-2.5 w-2.5" /> {s.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

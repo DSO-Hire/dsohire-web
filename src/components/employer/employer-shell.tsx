@@ -307,7 +307,8 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
             <ul
               key={group.group}
               className={
-                "list-none space-y-0.5 " + (idx > 0 ? "mt-2" : "")
+                "list-none space-y-0.5 " +
+                (idx > 0 ? "mt-3 pt-3 border-t border-white/10" : "")
               }
             >
               {group.items.map((item) => (

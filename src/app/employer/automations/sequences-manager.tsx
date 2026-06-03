@@ -33,13 +33,17 @@ import {
 /** Personalization tokens offered as click-to-insert chips. */
 const MERGE_TOKENS: ReadonlyArray<{ token: string; label: string }> = [
   { token: "{{first_name}}", label: "First name" },
+  { token: "{{last_name}}", label: "Last name" },
   { token: "{{job_title}}", label: "Job title" },
+  { token: "{{practice_name}}", label: "Practice name" },
 ];
 
 /** Sample values for the live preview. */
 const PREVIEW_SAMPLE: Record<string, string> = {
   "{{first_name}}": "Maria",
+  "{{last_name}}": "Lopez",
   "{{job_title}}": "Dental Hygienist",
+  "{{practice_name}}": "Eslinger Dental Partners",
 };
 
 function fillPreview(s: string): string {
