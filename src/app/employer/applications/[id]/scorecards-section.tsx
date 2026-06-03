@@ -29,9 +29,10 @@ import {
   useEffect,
   useMemo,
   useState,
+  useTransition,
   type ChangeEvent,
 } from "react";
-import { Star, Trash2, Lock, Loader2, AlertCircle } from "lucide-react";
+import { Star, Trash2, Lock, Loader2, AlertCircle, Sparkles, X } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import {
   REALTIME_LISTEN_TYPES,
@@ -61,6 +62,7 @@ import {
   deleteScorecardDraft,
   type ApplicationScorecardRow,
 } from "./scorecard-actions";
+import { draftScorecardFromTranscript } from "@/lib/scorecards/notetaker-action";
 
 /* ───────────────────────────────────────────────────────────────
  * Public types — what the server passes in
@@ -287,6 +289,9 @@ export function ScorecardsSection({
   const [confirmingSubmit, setConfirmingSubmit] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // N14 — AI note-taker modal + the "drafted from notes" review banner.
+  const [showNoteTaker, setShowNoteTaker] = useState(false);
+  const [aiBanner, setAiBanner] = useState<string | null>(null);
 
   /* ── Realtime ── */
   useEffect(() => {
@@ -424,6 +429,30 @@ export function ScorecardsSection({
     setConfirmingDelete(false);
   }
 
+  // N14 — apply an AI draft into the editor: AI scores overlay any existing
+  // ones (AI wins on conflicts); recommendation + overall note only fill
+  // blanks so manual work is preserved. Always opens the editor for review;
+  // never submits.
+  function applyAiDraft(draft: {
+    scores: AttributeScoresMap;
+    recommendation: OverallRecommendation | null;
+    overallNote: string;
+    scoredCount: number;
+  }): void {
+    setFormScores({ ...(myScorecard?.attribute_scores ?? {}), ...draft.scores });
+    setFormRecommendation(
+      myScorecard?.overall_recommendation ?? draft.recommendation ?? null
+    );
+    const existingNote = myScorecard?.overall_note ?? "";
+    setFormOverallNote(existingNote.trim() ? existingNote : draft.overallNote);
+    setError(null);
+    setEditing(true);
+    setShowNoteTaker(false);
+    setAiBanner(
+      `Drafted ${draft.scoredCount} attribute${draft.scoredCount === 1 ? "" : "s"} from your notes. Review and edit everything before submitting — these are AI suggestions.`
+    );
+  }
+
   function setAttributeScore(attrId: string, score: number): void {
     setFormScores((prev) => {
       const next = { ...prev };
@@ -555,11 +584,23 @@ export function ScorecardsSection({
               </span>
             )}
           </div>
-          {myStatus === "submitted" && myScorecard?.submitted_at && (
-            <span className="text-[12px] text-slate-meta">
-              Submitted {relativeTime(myScorecard.submitted_at)}
-            </span>
-          )}
+          <div className="flex items-center gap-3">
+            {myStatus === "submitted" && myScorecard?.submitted_at && (
+              <span className="text-[12px] text-slate-meta">
+                Submitted {relativeTime(myScorecard.submitted_at)}
+              </span>
+            )}
+            {myStatus !== "submitted" && (
+              <button
+                type="button"
+                onClick={() => setShowNoteTaker(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-heritage/30 bg-heritage/[0.06] text-heritage-deep text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-heritage/10 transition-colors"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                Draft from notes
+              </button>
+            )}
+          </div>
         </div>
 
         {myStatus === "none" && !editing && (
@@ -607,6 +648,21 @@ export function ScorecardsSection({
               rubric={rubric}
               showReviewer={false}
             />
+          </div>
+        )}
+
+        {formIsOpen && aiBanner && (
+          <div className="mb-3 flex items-start gap-2 rounded border border-heritage/30 bg-heritage/[0.06] px-3 py-2.5 text-[12px] text-heritage-deep">
+            <Sparkles className="h-4 w-4 mt-0.5 shrink-0" />
+            <span className="flex-1">{aiBanner}</span>
+            <button
+              type="button"
+              onClick={() => setAiBanner(null)}
+              className="text-heritage-deep/70 hover:text-heritage-deep"
+              aria-label="Dismiss"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
           </div>
         )}
 
@@ -675,6 +731,154 @@ export function ScorecardsSection({
           onCancel={() => setConfirmingDelete(false)}
         />
       )}
+
+      {showNoteTaker && (
+        <NoteTakerModal
+          applicationId={applicationId}
+          rubricId={rubric.id}
+          rubricLabel={rubric.label}
+          onClose={() => setShowNoteTaker(false)}
+          onApply={applyAiDraft}
+        />
+      )}
+    </div>
+  );
+}
+
+/* ───────────────────────────────────────────────────────────────
+ * N14 — AI interview note-taker modal
+ * Paste a transcript / notes → Haiku drafts the scorecard → the draft
+ * prefills the editor for review. Never submits.
+ * ───────────────────────────────────────────────────────────── */
+
+function NoteTakerModal({
+  applicationId,
+  rubricId,
+  rubricLabel,
+  onClose,
+  onApply,
+}: {
+  applicationId: string;
+  rubricId: string;
+  rubricLabel: string;
+  onClose: () => void;
+  onApply: (draft: {
+    scores: AttributeScoresMap;
+    recommendation: OverallRecommendation | null;
+    overallNote: string;
+    scoredCount: number;
+  }) => void;
+}) {
+  const [transcript, setTranscript] = useState("");
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const chars = transcript.trim().length;
+
+  function generate() {
+    setError(null);
+    if (chars < 40) {
+      setError("Paste a bit more of the interview first.");
+      return;
+    }
+    startTransition(async () => {
+      const res = await draftScorecardFromTranscript({
+        applicationId,
+        rubricId,
+        transcript,
+      });
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      onApply(res.draft);
+    });
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#14233F]/60 backdrop-blur-sm p-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !pending) onClose();
+      }}
+    >
+      <div className="w-full max-w-[640px] max-h-[92vh] bg-white border border-[var(--rule)] shadow-xl flex flex-col">
+        <header className="flex items-start justify-between p-5 border-b border-[var(--rule)]">
+          <div>
+            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1 inline-flex items-center gap-2">
+              <Sparkles className="h-3 w-3" />
+              AI note-taker
+            </div>
+            <h2 className="text-[18px] font-extrabold tracking-[-0.4px] text-ink">
+              Draft a scorecard from your interview notes
+            </h2>
+            <p className="mt-1 text-[12px] text-slate-meta leading-relaxed max-w-[460px]">
+              Paste the transcript or your rough notes. We&apos;ll draft scores +
+              notes against the {rubricLabel.toLowerCase()} rubric for you to
+              review and edit — nothing is submitted automatically. We don&apos;t
+              record interviews; this only structures notes you already have.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={pending}
+            className="p-1 text-slate-meta hover:text-ink disabled:opacity-60"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </header>
+
+        <div className="flex-1 overflow-y-auto p-5">
+          <textarea
+            value={transcript}
+            onChange={(e) => setTranscript(e.target.value)}
+            rows={14}
+            disabled={pending}
+            placeholder="Paste the interview transcript or your notes here…"
+            className="w-full px-3 py-2.5 bg-cream border border-[var(--rule-strong)] text-ink text-[13px] leading-relaxed focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage resize-y disabled:opacity-60"
+          />
+          <p className="mt-1.5 text-[11px] text-slate-meta">
+            {chars.toLocaleString()} characters · only attributes your notes
+            actually cover get scored.
+          </p>
+          {error && (
+            <div className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-800 flex items-start gap-2">
+              <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+        </div>
+
+        <footer className="flex items-center justify-between gap-2 p-4 border-t border-[var(--rule)] bg-cream/40">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={pending}
+            className="px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-ink disabled:opacity-60"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={generate}
+            disabled={pending || chars < 40}
+            className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C] disabled:opacity-60"
+          >
+            {pending ? (
+              <>
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Drafting…
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-3.5 w-3.5" />
+                Draft scorecard
+              </>
+            )}
+          </button>
+        </footer>
+      </div>
     </div>
   );
 }
