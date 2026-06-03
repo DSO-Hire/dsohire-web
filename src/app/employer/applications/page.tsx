@@ -6,7 +6,7 @@
  */
 
 import Link from "next/link";
-import { ChevronRight, MapPin, UserRound } from "lucide-react";
+import { ChevronRight, MapPin, UserRound, AlertCircle } from "lucide-react";
 import { redirect } from "next/navigation";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { Avatar } from "@/components/ui/avatar";
@@ -44,6 +44,11 @@ interface PageProps {
      */
     sort?: string;
     min_fit?: string;
+    /** Workflow alerts (mirror the dashboard StuckAlert / StalePipelineAlert).
+     *  stuck=1 → New-stage apps past the 5d SLA; stale=1 → mid-pipeline apps
+     *  sitting past 14d in their current stage. */
+    stuck?: string;
+    stale?: string;
   }>;
 }
 
@@ -109,7 +114,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
   let appQuery = supabase
     .from("applications")
     .select(
-      "id, job_id, candidate_id, stage_id, assigned_to_dso_user_id, cover_letter, created_at, updated_at, " +
+      "id, job_id, candidate_id, stage_id, assigned_to_dso_user_id, cover_letter, created_at, updated_at, stage_entered_at, " +
         "stage:dso_pipeline_stages!stage_id(kind, label)"
     )
     .in("job_id", dsoJobIds.length > 0 ? dsoJobIds : ["__none__"])
@@ -138,6 +143,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
     cover_letter: string | null;
     created_at: string;
     updated_at: string;
+    stage_entered_at: string | null;
   };
   let apps: AppRow[] = ((rawApps ?? []) as unknown as Array<
     Record<string, unknown>
@@ -163,6 +169,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
         cover_letter: row.cover_letter as string | null,
         created_at: row.created_at as string,
         updated_at: row.updated_at as string,
+        stage_entered_at: (row.stage_entered_at as string | null) ?? null,
       };
     })
     // .eq("stage.kind", X) is an inner-join filter that drops apps whose
@@ -174,6 +181,34 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
       if (!sp.status || !VALID_STATUS_FILTER.has(sp.status)) return true;
       return row.kind === sp.status;
     });
+
+  // ── Workflow alerts (stuck / stale) — mirror the dashboard predicates so
+  // the StuckAlert / StalePipelineAlert "review all" links land pre-filtered
+  // instead of dumping the full inbox. stuck = New-stage apps past the 5d
+  // SLA (created_at); stale = mid-pipeline apps past 14d in their current
+  // stage (stage_entered_at). Only one applies at a time.
+  const STUCK_SLA_DAYS = 5;
+  const STALE_STAGE_DAYS = 14;
+  const STALE_KINDS = new Set<StageKind>(["screen", "interview", "offer"]);
+  const nowMs = Date.now();
+  const wantStuck = sp.stuck === "1";
+  const wantStale = sp.stale === "1";
+  if (wantStuck) {
+    apps = apps.filter(
+      (a) =>
+        a.kind === "open" &&
+        new Date(a.created_at).getTime() <=
+          nowMs - STUCK_SLA_DAYS * 86_400_000
+    );
+  } else if (wantStale) {
+    apps = apps.filter(
+      (a) =>
+        STALE_KINDS.has(a.kind) &&
+        a.stage_entered_at != null &&
+        new Date(a.stage_entered_at).getTime() <=
+          nowMs - STALE_STAGE_DAYS * 86_400_000
+    );
+  }
 
   // Pull candidate info in one batch (incl. avatar_url for the row avatar
   // primitive added Cam-feedback 2026-05-06 PM).
@@ -406,7 +441,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
           >
             Apply
           </button>
-          {(sp.job || sp.status || sp.min_fit || sp.sort) && (
+          {(sp.job || sp.status || sp.min_fit || sp.sort || wantStuck || wantStale) && (
             <Link
               href="/employer/applications"
               className="px-5 py-2.5 border border-[var(--rule-strong)] text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
@@ -416,6 +451,27 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
           )}
         </form>
       </div>
+
+      {/* Workflow-alert active filter (arrived from a dashboard alert link). */}
+      {(wantStuck || wantStale) && (
+        <div className="mb-6 flex flex-wrap items-center gap-3 border border-amber-300 bg-amber-50/60 px-4 py-3">
+          <span className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[1.5px] uppercase text-amber-800">
+            <AlertCircle className="h-3.5 w-3.5" />
+            {wantStuck
+              ? `Stuck — in "New" past ${STUCK_SLA_DAYS} days`
+              : `Stale — no movement for ${STALE_STAGE_DAYS}+ days`}
+          </span>
+          <span className="text-[12px] text-slate-body">
+            {apps.length} {apps.length === 1 ? "application" : "applications"} need attention.
+          </span>
+          <Link
+            href="/employer/applications"
+            className="ml-auto text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:underline"
+          >
+            Clear filter
+          </Link>
+        </div>
+      )}
 
       {/* Status summary chips */}
       <div className="mb-7 flex flex-wrap gap-2">
@@ -445,8 +501,12 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
             No applications yet
           </div>
           <p className="text-[15px] text-ink leading-relaxed mb-2">
-            {sp.job || sp.status
-              ? "Nothing matches your current filters."
+            {sp.job || sp.status || sp.min_fit || wantStuck || wantStale
+              ? wantStuck
+                ? "Nothing is stuck — no New-stage applications are past the SLA. Nice."
+                : wantStale
+                  ? "Nothing is stale — every active candidate has moved recently. Nice."
+                  : "Nothing matches your current filters."
               : "Once candidates start applying to your jobs, they'll show up here."}
           </p>
           <p className="text-[14px] text-slate-body leading-relaxed">
