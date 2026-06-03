@@ -8,7 +8,7 @@
  * replies, changes stage, or gets an offer.
  */
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   Plus,
@@ -19,12 +19,36 @@ import {
   Lock,
   Mail,
   X,
+  Play,
+  Eye,
+  CheckCircle2,
 } from "lucide-react";
 import {
   saveSequence,
   setSequenceEnabled,
   deleteSequence,
+  runSequencesNow,
 } from "@/lib/sequences/actions";
+
+/** Personalization tokens offered as click-to-insert chips. */
+const MERGE_TOKENS: ReadonlyArray<{ token: string; label: string }> = [
+  { token: "{{first_name}}", label: "First name" },
+  { token: "{{job_title}}", label: "Job title" },
+];
+
+/** Sample values for the live preview. */
+const PREVIEW_SAMPLE: Record<string, string> = {
+  "{{first_name}}": "Maria",
+  "{{job_title}}": "Dental Hygienist",
+};
+
+function fillPreview(s: string): string {
+  let out = s;
+  for (const { token } of MERGE_TOKENS) {
+    out = out.split(token).join(PREVIEW_SAMPLE[token] ?? token);
+  }
+  return out;
+}
 
 export interface SequenceStepView {
   delay_days: number;
@@ -48,25 +72,68 @@ export function SequencesManager({
   canManage: boolean;
 }) {
   const [editing, setEditing] = useState<SequenceView | "new" | null>(null);
+  const router = useRouter();
+  const [running, startRun] = useTransition();
+  const [runMsg, setRunMsg] = useState<string | null>(null);
+  const hasActive = sequences.some((s) => s.activeCount > 0);
+
+  function runNow() {
+    setRunMsg(null);
+    startRun(async () => {
+      const res = await runSequencesNow();
+      if (!res.ok) {
+        setRunMsg(res.error);
+        return;
+      }
+      setRunMsg(
+        res.due === 0
+          ? "Nothing was due to send right now."
+          : `Sent ${res.sent} · completed ${res.completed} · stopped ${res.exited} (of ${res.due} due).`
+      );
+      router.refresh();
+    });
+  }
 
   return (
     <div className="max-w-[860px]">
       <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
-        <p className="text-[14px] text-slate-body leading-relaxed max-w-[620px]">
+        <p className="text-[14px] text-slate-body leading-relaxed max-w-[560px]">
           Drip sequences send a series of timed re-engagement emails to a
           candidate. Enroll a candidate from their application; the sequence
           stops automatically if they reply, change stage, or receive an offer.
         </p>
         {canManage && (
-          <button
-            type="button"
-            onClick={() => setEditing("new")}
-            className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C] shrink-0"
-          >
-            <Plus className="h-3.5 w-3.5" /> New sequence
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={runNow}
+              disabled={running || !hasActive}
+              title={
+                hasActive
+                  ? "Send any steps due now instead of waiting for the hourly run"
+                  : "No active enrollments to process"
+              }
+              className="inline-flex items-center gap-2 border border-[var(--rule-strong)] text-ink bg-white px-3 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-cream disabled:opacity-50"
+            >
+              {running ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
+              Run now
+            </button>
+            <button
+              type="button"
+              onClick={() => setEditing("new")}
+              className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C]"
+            >
+              <Plus className="h-3.5 w-3.5" /> New sequence
+            </button>
+          </div>
         )}
       </div>
+
+      {runMsg && (
+        <div className="mb-4 inline-flex items-center gap-2 rounded border border-heritage/30 bg-heritage/[0.06] px-3 py-2 text-[12px] text-heritage-deep">
+          <CheckCircle2 className="h-3.5 w-3.5" /> {runMsg}
+        </div>
+      )}
 
       {!canManage && (
         <div className="mb-5 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-900 flex items-start gap-2">
@@ -315,56 +382,16 @@ function SequenceEditor({
 
           <div className="space-y-3">
             {steps.map((step, i) => (
-              <div key={i} className="border border-[var(--rule)] bg-cream/30 p-3">
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <div className="flex items-center gap-2 text-[11px] font-bold tracking-[1px] uppercase text-heritage-deep">
-                    <GripVertical className="h-3.5 w-3.5 text-slate-meta" />
-                    Step {i + 1}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <button type="button" onClick={() => move(i, -1)} disabled={i === 0 || pending}
-                      className="px-1.5 text-slate-meta hover:text-ink disabled:opacity-30 text-[12px]">↑</button>
-                    <button type="button" onClick={() => move(i, 1)} disabled={i === steps.length - 1 || pending}
-                      className="px-1.5 text-slate-meta hover:text-ink disabled:opacity-30 text-[12px]">↓</button>
-                    <button type="button" onClick={() => removeStep(i)} disabled={steps.length <= 1 || pending}
-                      className="p-1 text-slate-meta hover:text-red-700 disabled:opacity-30" aria-label="Remove step">
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 mb-2 text-[12px] text-slate-body">
-                  <span>Wait</span>
-                  <input
-                    type="number"
-                    min={0}
-                    max={365}
-                    value={step.delay_days}
-                    onChange={(e) => updateStep(i, { delay_days: Number(e.target.value) })}
-                    className="w-16 px-2 py-1 bg-white border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage"
-                  />
-                  <span>
-                    {i === 0
-                      ? "day(s) after enrolling, then email:"
-                      : "day(s) after the previous step, then email:"}
-                  </span>
-                </div>
-                <input
-                  type="text"
-                  value={step.subject}
-                  onChange={(e) => updateStep(i, { subject: e.target.value })}
-                  maxLength={200}
-                  placeholder="Subject — e.g. {{first_name}}, still interested in {{job_title}}?"
-                  className="w-full px-3 py-2 mb-2 bg-white border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage"
-                />
-                <textarea
-                  value={step.body}
-                  onChange={(e) => updateStep(i, { body: e.target.value })}
-                  rows={4}
-                  maxLength={4000}
-                  placeholder="Message body. Use {{first_name}} and {{job_title}} to personalize."
-                  className="w-full px-3 py-2 bg-white border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage resize-y"
-                />
-              </div>
+              <StepEditor
+                key={i}
+                index={i}
+                total={steps.length}
+                step={step}
+                pending={pending}
+                onUpdate={(patch) => updateStep(i, patch)}
+                onRemove={() => removeStep(i)}
+                onMove={(dir) => move(i, dir)}
+              />
             ))}
             <button
               type="button"
@@ -411,6 +438,179 @@ function SequenceEditor({
           </button>
         </footer>
       </div>
+    </div>
+  );
+}
+
+/* ── A single step: wait input + subject/body with insert-field chips +
+ *    a live preview toggle (no more typing {{tokens}} by hand). ── */
+function StepEditor({
+  index,
+  total,
+  step,
+  pending,
+  onUpdate,
+  onRemove,
+  onMove,
+}: {
+  index: number;
+  total: number;
+  step: SequenceStepView;
+  pending: boolean;
+  onUpdate: (patch: Partial<SequenceStepView>) => void;
+  onRemove: () => void;
+  onMove: (dir: -1 | 1) => void;
+}) {
+  const subjectRef = useRef<HTMLInputElement>(null);
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
+  const [preview, setPreview] = useState(false);
+
+  function insertSubject(token: string) {
+    const el = subjectRef.current;
+    const cur = step.subject ?? "";
+    if (!el) return onUpdate({ subject: cur + token });
+    const s = el.selectionStart ?? cur.length;
+    const e = el.selectionEnd ?? cur.length;
+    onUpdate({ subject: cur.slice(0, s) + token + cur.slice(e) });
+    requestAnimationFrame(() => {
+      el.focus();
+      const p = s + token.length;
+      el.setSelectionRange(p, p);
+    });
+  }
+  function insertBody(token: string) {
+    const el = bodyRef.current;
+    const cur = step.body ?? "";
+    if (!el) return onUpdate({ body: cur + token });
+    const s = el.selectionStart ?? cur.length;
+    const e = el.selectionEnd ?? cur.length;
+    onUpdate({ body: cur.slice(0, s) + token + cur.slice(e) });
+    requestAnimationFrame(() => {
+      el.focus();
+      const p = s + token.length;
+      el.setSelectionRange(p, p);
+    });
+  }
+
+  return (
+    <div className="border border-[var(--rule)] bg-cream/30 p-3">
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <div className="flex items-center gap-2 text-[11px] font-bold tracking-[1px] uppercase text-heritage-deep">
+          <GripVertical className="h-3.5 w-3.5 text-slate-meta" />
+          Step {index + 1}
+        </div>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setPreview((v) => !v)}
+            disabled={pending}
+            className={
+              "inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold tracking-[1px] uppercase border disabled:opacity-40 " +
+              (preview
+                ? "border-heritage text-heritage-deep bg-heritage/[0.06]"
+                : "border-[var(--rule-strong)] text-slate-body hover:text-ink")
+            }
+          >
+            <Eye className="h-3 w-3" /> {preview ? "Edit" : "Preview"}
+          </button>
+          <button type="button" onClick={() => onMove(-1)} disabled={index === 0 || pending}
+            className="px-1.5 text-slate-meta hover:text-ink disabled:opacity-30 text-[12px]">↑</button>
+          <button type="button" onClick={() => onMove(1)} disabled={index === total - 1 || pending}
+            className="px-1.5 text-slate-meta hover:text-ink disabled:opacity-30 text-[12px]">↓</button>
+          <button type="button" onClick={onRemove} disabled={total <= 1 || pending}
+            className="p-1 text-slate-meta hover:text-red-700 disabled:opacity-30" aria-label="Remove step">
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 mb-2 text-[12px] text-slate-body">
+        <span>Wait</span>
+        <input
+          type="number"
+          min={0}
+          max={365}
+          value={step.delay_days}
+          onChange={(e) => onUpdate({ delay_days: Number(e.target.value) })}
+          disabled={pending}
+          className="w-16 px-2 py-1 bg-white border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage"
+        />
+        <span>
+          {index === 0
+            ? "day(s) after enrolling, then email:"
+            : "day(s) after the previous step, then email:"}
+        </span>
+      </div>
+
+      {preview ? (
+        <div className="rounded border border-[var(--rule)] bg-white p-3">
+          <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-slate-meta">Subject</div>
+          <div className="text-[13px] font-semibold text-ink mb-2">
+            {fillPreview(step.subject) || "—"}
+          </div>
+          <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-slate-meta">Body</div>
+          <div className="text-[13px] text-slate-body whitespace-pre-wrap leading-relaxed">
+            {fillPreview(step.body) || "—"}
+          </div>
+          <div className="mt-2 text-[11px] text-slate-meta">
+            Preview with sample values (Maria · Dental Hygienist).
+          </div>
+        </div>
+      ) : (
+        <>
+          <TokenChips onInsert={insertSubject} disabled={pending} target="subject" />
+          <input
+            ref={subjectRef}
+            type="text"
+            value={step.subject}
+            onChange={(e) => onUpdate({ subject: e.target.value })}
+            maxLength={200}
+            placeholder="Subject line"
+            disabled={pending}
+            className="w-full px-3 py-2 mb-2 bg-white border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage"
+          />
+          <TokenChips onInsert={insertBody} disabled={pending} target="message" />
+          <textarea
+            ref={bodyRef}
+            value={step.body}
+            onChange={(e) => onUpdate({ body: e.target.value })}
+            rows={4}
+            maxLength={4000}
+            placeholder="Message body"
+            disabled={pending}
+            className="w-full px-3 py-2 bg-white border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage resize-y"
+          />
+        </>
+      )}
+    </div>
+  );
+}
+
+/** Click-to-insert personalization chips — beats typing {{tokens}} by hand. */
+function TokenChips({
+  onInsert,
+  disabled,
+  target,
+}: {
+  onInsert: (token: string) => void;
+  disabled: boolean;
+  target: string;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-1.5 mb-1">
+      <span className="text-[10px] text-slate-meta">Insert into {target}:</span>
+      {MERGE_TOKENS.map((t) => (
+        <button
+          key={t.token}
+          type="button"
+          disabled={disabled}
+          onMouseDown={(e) => e.preventDefault()} // keep caret in the field
+          onClick={() => onInsert(t.token)}
+          className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold text-heritage-deep border border-heritage/30 bg-heritage/[0.06] rounded hover:bg-heritage/10 disabled:opacity-50"
+        >
+          <Plus className="h-2.5 w-2.5" /> {t.label}
+        </button>
+      ))}
     </div>
   );
 }

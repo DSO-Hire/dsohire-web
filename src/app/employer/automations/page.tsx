@@ -163,7 +163,7 @@ export default async function AutomationsPage({ searchParams }: PageProps) {
 
   return (
     <EmployerShell active="automations">
-      <div className="mb-6 flex items-center gap-1 border-b border-[var(--rule)]">
+      <div className="mb-7 inline-flex items-center gap-1 rounded-lg border border-[var(--rule-strong)] bg-cream p-1">
         <TabLink href="/employer/automations?tab=rules" active={tab === "rules"}>
           Rules
         </TabLink>
@@ -199,10 +199,10 @@ function TabLink({
     <Link
       href={href}
       className={
-        "px-4 py-2.5 text-[11px] font-bold tracking-[1.5px] uppercase -mb-px border-b-2 transition-colors " +
+        "px-5 py-2 rounded-md text-[12px] font-bold tracking-[1px] uppercase transition-colors " +
         (active
-          ? "border-heritage text-ink"
-          : "border-transparent text-slate-meta hover:text-ink")
+          ? "bg-[#14233F] text-[#F7F4ED] shadow-sm"
+          : "text-slate-body hover:text-ink hover:bg-white/70")
       }
     >
       {children}

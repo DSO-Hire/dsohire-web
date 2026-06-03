@@ -18,6 +18,7 @@ import {
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
 import { dsoCanUseSequences } from "./tier";
+import { processDueSequences } from "./process";
 
 export type SeqResult = { ok: true; id?: string } | { ok: false; error: string };
 
@@ -243,6 +244,29 @@ export async function enrollInSequence(
 
   revalidatePath(`/employer/applications/${applicationId}`);
   return { ok: true };
+}
+
+/**
+ * Owner/admin "Run now" — process this DSO's due sequence steps on demand
+ * (so you don't have to wait for the hourly cron). Returns a short report.
+ */
+export async function runSequencesNow(): Promise<
+  | { ok: true; sent: number; completed: number; exited: number; due: number }
+  | { ok: false; error: string }
+> {
+  const who = await resolveActor();
+  if (!who.ok) return who;
+  if (who.role !== "owner" && who.role !== "admin") {
+    return { ok: false, error: "Only an owner or admin can run sequences." };
+  }
+  try {
+    const r = await processDueSequences(who.dsoId);
+    revalidatePath("/employer/automations");
+    return { ok: true, sent: r.sent, completed: r.completed, exited: r.exited, due: r.due };
+  } catch (err) {
+    console.warn("[sequences] run-now failed", err);
+    return { ok: false, error: "Couldn't run sequences right now. Try again." };
+  }
 }
 
 export async function stopEnrollment(enrollmentId: string): Promise<SeqResult> {

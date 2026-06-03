@@ -50,12 +50,16 @@ interface StepRow {
   body: string;
 }
 
-export async function processDueSequences(): Promise<ProcessResult> {
+export async function processDueSequences(
+  /** Optional DSO scope — used by the owner-triggered "Run now" button so it
+   *  only processes the caller's org. The cron passes nothing (all DSOs). */
+  dsoId?: string
+): Promise<ProcessResult> {
   const admin = createSupabaseServiceRoleClient();
   const nowIso = new Date().toISOString();
   const result: ProcessResult = { due: 0, sent: 0, completed: 0, exited: 0, skipped: 0 };
 
-  const { data: dueRows, error } = await admin
+  let query = admin
     .from("automation_sequence_enrollments")
     .select(
       "id, sequence_id, application_id, dso_id, enrolled_at, enrolled_stage_id, current_step"
@@ -64,6 +68,8 @@ export async function processDueSequences(): Promise<ProcessResult> {
     .lte("next_send_at", nowIso)
     .order("next_send_at", { ascending: true })
     .limit(MAX_PER_RUN);
+  if (dsoId) query = query.eq("dso_id", dsoId);
+  const { data: dueRows, error } = await query;
   if (error) {
     console.warn("[sequences] due query failed", error);
     return result;
