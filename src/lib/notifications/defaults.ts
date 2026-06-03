@@ -96,6 +96,19 @@ export const NOTIFICATION_DEFAULTS: DefaultsMap = {
     in_app: { enabled: false, frequency: "off" },
     sms: { enabled: false, frequency: "off" },
   },
+  "employer.offer_approval": {
+    // A teammate needs sign-off to send an offer — a workflow gate, not a
+    // personal preference. Always-dispatch so an approver never misses it.
+    email: { enabled: true, frequency: "instant" },
+    in_app: { enabled: false, frequency: "off" },
+    sms: { enabled: false, frequency: "off" },
+  },
+  "employer.offer_approval_decision": {
+    // The sender is told their pending offer was approved or rejected.
+    email: { enabled: true, frequency: "instant" },
+    in_app: { enabled: false, frequency: "off" },
+    sms: { enabled: false, frequency: "off" },
+  },
 };
 
 /**
@@ -111,4 +124,6 @@ export const ALWAYS_DISPATCH_EVENTS: ReadonlySet<NotificationEventKind> =
   new Set<NotificationEventKind>([
     "employer.team_invite", // can't accept an invite without the email
     "employer.automation_notice", // admin-configured automation; not a personal pref
+    "employer.offer_approval", // approval gate — an approver must always be told
+    "employer.offer_approval_decision", // the sender must learn the outcome
   ]);

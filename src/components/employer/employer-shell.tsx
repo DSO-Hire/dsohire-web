@@ -49,6 +49,7 @@ import {
   LifeBuoy,
   UserPlus,
   Workflow,
+  ClipboardCheck,
 } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { BrandLockup } from "@/components/marketing/site-shell";
@@ -82,6 +83,7 @@ export type NavId =
   | "team"
   | "billing"
   | "automations"
+  | "offer-approvals"
   | "settings"
   | "help";
 
@@ -115,6 +117,7 @@ const NAV: ReadonlyArray<NavItem> = [
   { id: "team", label: "Team", href: "/employer/team", Icon: UsersIcon, group: "setup", hideFromRoles: ["recruiter", "hiring_manager"] },
   { id: "billing", label: "Billing", href: "/employer/billing", Icon: CreditCard, group: "setup", hideFromRoles: ["recruiter", "hiring_manager"] },
   { id: "automations", label: "Automations", href: "/employer/automations", Icon: Workflow, group: "setup", hideFromRoles: ["recruiter", "hiring_manager"] },
+  { id: "offer-approvals", label: "Offer approvals", href: "/employer/offer-approvals", Icon: ClipboardCheck, group: "setup", hideFromRoles: ["recruiter", "hiring_manager"] },
   { id: "settings", label: "Settings", href: "/employer/settings", Icon: Settings, group: "setup" },
 ];
 
@@ -192,11 +195,23 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
     getNewApplicationCount(supabase),
   ]);
 
+  // N12 — pending-offer-approvals badge for approvers (owner/admin only).
+  // RLS scopes application_offer_sends to this DSO via the join.
+  let pendingApprovals = 0;
+  if (role === "owner" || role === "admin") {
+    const { count } = await supabase
+      .from("application_offer_sends")
+      .select("id", { count: "exact", head: true })
+      .eq("approval_status", "pending");
+    pendingApprovals = count ?? 0;
+  }
+
   const visibleNav = NAV.filter(
     (item) => !item.hideFromRoles?.includes(role)
   ).map((item) => {
     if (item.id === "inbox") return { ...item, badge: inboxUnread };
     if (item.id === "applications") return { ...item, badge: newApplications };
+    if (item.id === "offer-approvals") return { ...item, badge: pendingApprovals };
     return item;
   });
   const groupedNav = GROUP_ORDER.map((g) => ({

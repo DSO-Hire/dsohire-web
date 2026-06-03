@@ -19,6 +19,7 @@
  */
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
@@ -26,8 +27,10 @@ import {
 import { recordAuditEvent } from "@/lib/audit/record";
 import { dispatchInboxRichCard } from "@/lib/inbox/dispatch-rich-card";
 import { sendEmail } from "@/lib/email/send";
+import { dispatchNotification } from "@/lib/notifications/dispatcher";
 import { renderTemplate } from "@/lib/offer-letters/merge";
 import { OfferLetter as OfferLetterEmail } from "@/emails/employer/OfferLetter";
+import { OfferApprovalRequest } from "@/emails/employer/OfferApprovalRequest";
 import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
 import {
   generateOfferResponseToken,
@@ -35,6 +38,19 @@ import {
   offerQuickAcceptUrl,
   offerQuickDeclineUrl,
 } from "@/lib/offers/tokens";
+import {
+  evaluateOfferGuardrail,
+  type JobCompPeriod,
+} from "@/lib/offers/comp-guardrail";
+import {
+  resolveOfferGate,
+  parseOfferApprovalPolicy,
+  offerGateReasonLabel,
+  type OfferGateReason,
+} from "@/lib/offers/approval-policy";
+import { dsoCanUseOfferApprovals } from "@/lib/offers/approval-tier";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
 
 export interface SendOfferInput {
   applicationId: string;
@@ -49,7 +65,17 @@ export interface SendOfferInput {
   basePeriod?: "hourly" | "annual" | null;
 }
 
-export type SendOfferResult = { ok: true; sendId: string } | { ok: false; error: string };
+export type SendOfferResult =
+  | {
+      ok: true;
+      sendId: string;
+      /** 'sent' = went straight to the candidate. 'pending_approval' = held
+       *  for owner/admin sign-off (N12 Phase 2); nothing emailed yet. */
+      status: "sent" | "pending_approval";
+      /** Why approval was required (only when status === 'pending_approval'). */
+      reason?: OfferGateReason;
+    }
+  | { ok: false; error: string };
 
 export async function sendOffer(
   input: SendOfferInput
@@ -76,7 +102,7 @@ export async function sendOffer(
   const { data: appRow, error: appErr } = await supabase
     .from("applications")
     .select(
-      "id, candidate_id, job_id, jobs:jobs!inner(id, dso_id, title, employment_type)"
+      "id, candidate_id, job_id, jobs:jobs!inner(id, dso_id, title, employment_type, compensation_min, compensation_max, compensation_period)"
     )
     .eq("id", applicationId)
     .maybeSingle();
@@ -98,6 +124,9 @@ export async function sendOffer(
   const jobTitle = (jobRow?.title as string | null) ?? null;
   const jobEmploymentType =
     (jobRow?.employment_type as string | null) ?? null;
+  const jobCompMin = (jobRow?.compensation_min as number | null) ?? null;
+  const jobCompMax = (jobRow?.compensation_max as number | null) ?? null;
+  const jobCompPeriod = (jobRow?.compensation_period as string | null) ?? null;
   if (!jobDsoId || !candidateId) {
     return { ok: false, error: "Application missing scope context." };
   }
@@ -105,7 +134,7 @@ export async function sendOffer(
   // ── DSO membership check
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("id, dso_id, full_name, role")
+    .select("id, dso_id, full_name, role, can_send_offers_directly")
     .eq("auth_user_id", user.id)
     .eq("dso_id", jobDsoId)
     .maybeSingle();
@@ -113,9 +142,32 @@ export async function sendOffer(
     return { ok: false, error: "You don't have access to this DSO's applications." };
   }
   const dsoUserRole = (dsoUser as Record<string, unknown>).role as string;
-  if (!["owner", "admin", "recruiter"].includes(dsoUserRole)) {
+  // owner/admin/recruiter could always send; N12 adds hiring_manager to the
+  // set of roles that may PREPARE an offer — theirs always routes to approval
+  // (unless granted can_send_offers_directly), so it's safe to let them in.
+  if (!["owner", "admin", "recruiter", "hiring_manager"].includes(dsoUserRole)) {
     return { ok: false, error: "You don't have permission to send offers." };
   }
+  const senderCanSendDirectly =
+    ((dsoUser as Record<string, unknown>).can_send_offers_directly as
+      | boolean
+      | null) ?? false;
+  const senderName =
+    ((dsoUser as Record<string, unknown>).full_name as string | null) ?? null;
+  const dsoUserId = (dsoUser as Record<string, unknown>).id as string;
+
+  // ── N12 — load the DSO's offer-approval policy + whether the approval
+  // mechanism is unlocked for this tier (Scale+). Below Scale the gate is
+  // off and every permitted sender sends directly (pre-N12 behavior).
+  const { data: dsoPolicyRow } = await supabase
+    .from("dsos")
+    .select("offer_approval_policy")
+    .eq("id", jobDsoId)
+    .maybeSingle();
+  const offerPolicy = parseOfferApprovalPolicy(
+    (dsoPolicyRow as Record<string, unknown> | null)?.offer_approval_policy
+  );
+  const approvalsEnabled = await dsoCanUseOfferApprovals(supabase, jobDsoId);
 
   // ── Load template (RLS scopes by DSO, also confirms it's in this DSO).
   const { data: tpl, error: tplErr } = await supabase
@@ -242,13 +294,117 @@ export async function sendOffer(
   const quickAcceptUrl = offerQuickAcceptUrl(responseToken);
   const quickDeclineUrl = offerQuickDeclineUrl(responseToken);
 
+  // ── N12 GATE — decide whether this offer goes straight to the candidate
+  // or must be held for owner/admin sign-off. The guardrail is recomputed
+  // SERVER-SIDE here (never trust the client banner) from the structured
+  // base + the job's posted range.
+  const structuredBase =
+    typeof input.baseAmount === "number" && Number.isFinite(input.baseAmount)
+      ? input.baseAmount
+      : null;
+  const structuredPeriod: "hourly" | "annual" =
+    input.basePeriod === "annual" ? "annual" : "hourly";
+  const guardrail = evaluateOfferGuardrail({
+    baseAmount: structuredBase,
+    basePeriod: structuredPeriod,
+    jobMin: jobCompMin,
+    jobMax: jobCompMax,
+    jobPeriod: jobCompPeriod as JobCompPeriod | null,
+  });
+  const gate = resolveOfferGate({
+    approvalsEnabled,
+    role: dsoUserRole,
+    canSendDirectly: senderCanSendDirectly,
+    guardrailSeverity: guardrail.severity,
+    baseAmount: structuredBase,
+    basePeriod: structuredPeriod,
+    policy: offerPolicy,
+  });
+
+  if (gate.mode === "approval") {
+    // Hold the offer as a PENDING draft — render + token are already on the
+    // row, so an approver's click can dispatch the exact same letter. No
+    // email, no inbox card until approval.
+    const admin = createSupabaseServiceRoleClient();
+    const { data: pendingRow, error: pendingErr } = await admin
+      .from("application_offer_sends")
+      .insert({
+        application_id: applicationId,
+        template_id: templateId,
+        sent_by_user_id: user.id,
+        recipient_email: candidateEmail,
+        subject: subject.trim(),
+        body_html: render.html,
+        merge_values: mergeValues,
+        token: responseToken,
+        base_amount: structuredBase,
+        base_period: structuredBase != null ? structuredPeriod : null,
+        approval_status: "pending",
+      })
+      .select("id")
+      .maybeSingle();
+    if (pendingErr || !pendingRow) {
+      console.warn("[offer-letters] pending-approval insert failed", pendingErr);
+      return {
+        ok: false,
+        error: "Couldn't submit the offer for approval. Try again in a moment.",
+      };
+    }
+    const pendingId = (pendingRow as Record<string, unknown>).id as string;
+
+    await recordAuditEvent({
+      dsoId: jobDsoId,
+      actorUserId: user.id,
+      actorDsoUserId: dsoUserId,
+      actorName: senderName,
+      actorRole: dsoUserRole,
+      eventKind: "offer.approval_requested",
+      targetTable: "application_offer_sends",
+      targetId: pendingId,
+      summary: `Offer to ${candidateFullName} submitted for approval`,
+      metadata: {
+        application_id: applicationId,
+        reason: gate.reason,
+        base_amount: structuredBase,
+        base_period: structuredBase != null ? structuredPeriod : null,
+      },
+    });
+
+    // Notify owners/admins who can approve. after() keeps the action snappy
+    // while still completing the sends (no fire-and-forget mid-handler).
+    const baseLabel = formatBaseLabel(structuredBase, structuredPeriod);
+    const reasonLabel = offerGateReasonLabel(gate.reason);
+    after(async () => {
+      try {
+        await notifyApprovers({
+          dsoId: jobDsoId,
+          requesterAuthId: user.id,
+          requesterName: senderName ?? "A teammate",
+          candidateName: candidateFullName,
+          jobTitle: jobTitle ?? "a role",
+          baseLabel,
+          reasonLabel,
+        });
+      } catch (err) {
+        console.warn("[offer-letters] approver notification failed", err);
+      }
+    });
+
+    revalidatePath(`/employer/applications/${applicationId}`);
+    revalidatePath(`/employer/offer-approvals`);
+    return {
+      ok: true,
+      sendId: pendingId,
+      status: "pending_approval",
+      reason: gate.reason,
+    };
+  }
+
   // ── Send the email. The OfferLetter React Email template wraps the
   // pre-rendered fragment in the brand chrome + adds the tokenized
   // "Review and respond" CTA + Accept/Decline quick-reply links.
   // replyTo points at info@dsohire.com (alias-routes to Cam) so the
   // "questions about anything in the offer" line doesn't bounce.
-  const senderName =
-    ((dsoUser as Record<string, unknown>).full_name as string | null) ?? null;
   const sendResult = await sendEmail({
     to: candidateEmail,
     subject: subject.trim(),
@@ -369,7 +525,72 @@ export async function sendOffer(
   });
 
   revalidatePath(`/employer/applications/${applicationId}`);
-  return { ok: true, sendId };
+  return { ok: true, sendId, status: "sent" };
+}
+
+/** Pretty "$72/hr" / "$165,000/yr" label for the structured base, or null. */
+function formatBaseLabel(
+  amount: number | null,
+  period: "hourly" | "annual"
+): string | null {
+  if (amount == null || !Number.isFinite(amount) || amount <= 0) return null;
+  const pretty =
+    amount % 1 === 0
+      ? amount.toLocaleString("en-US")
+      : amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return `$${pretty}/${period === "annual" ? "yr" : "hr"}`;
+}
+
+/**
+ * Email every owner/admin in the DSO that an offer is awaiting their
+ * sign-off. Service-role lookup (we're notifying recipients, not the
+ * caller). The requester is skipped so they don't get their own request.
+ */
+async function notifyApprovers(args: {
+  dsoId: string;
+  requesterAuthId: string;
+  requesterName: string;
+  candidateName: string;
+  jobTitle: string;
+  baseLabel: string | null;
+  reasonLabel: string;
+}): Promise<void> {
+  const admin = createSupabaseServiceRoleClient();
+  const { data: approverRows } = await admin
+    .from("dso_users")
+    .select("auth_user_id, first_name, role")
+    .eq("dso_id", args.dsoId)
+    .in("role", ["owner", "admin"]);
+  const approvalsUrl = `${SITE_URL}/employer/offer-approvals`;
+  for (const row of (approverRows ?? []) as Array<{
+    auth_user_id: string | null;
+    first_name: string | null;
+    role: string;
+  }>) {
+    const authId = row.auth_user_id;
+    if (!authId || authId === args.requesterAuthId) continue;
+    const { data: authResp } = await admin.auth.admin.getUserById(authId);
+    const email = authResp?.user?.email;
+    if (!email) continue;
+    await dispatchNotification({
+      userId: authId,
+      eventKind: "employer.offer_approval",
+      relatedDsoId: args.dsoId,
+      email: {
+        to: email,
+        subject: `Offer approval needed — ${args.candidateName}`,
+        react: OfferApprovalRequest({
+          recipientName: row.first_name ?? "there",
+          requesterName: args.requesterName,
+          candidateName: args.candidateName,
+          jobTitle: args.jobTitle,
+          baseLabel: args.baseLabel,
+          reasonLabel: args.reasonLabel,
+          approvalsUrl,
+        }),
+      },
+    });
+  }
 }
 
 function firstName(full: string | null | undefined): string {

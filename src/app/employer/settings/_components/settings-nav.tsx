@@ -76,6 +76,7 @@ const GROUPS: NavGroup[] = [
     entries: [
       { id: "pipeline", label: "Pipeline", href: "/employer/settings/pipeline", Icon: Workflow },
       { id: "offer-letters", label: "Offer letters", href: "/employer/settings/offer-letters", Icon: FileSignature },
+      { id: "offer-approvals", label: "Offer approvals", href: "/employer/settings/offer-approvals", Icon: ShieldCheck },
       { id: "team", label: "Team", href: "/employer/team", Icon: Users, external: true },
       { id: "locations", label: "Locations", href: "/employer/locations", Icon: MapPin, external: true },
     ],

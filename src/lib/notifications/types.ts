@@ -27,7 +27,9 @@ export type NotificationEventKind =
   | "employer.new_application"              // candidate applied to a job
   | "employer.team_invite"                  // teammate invitation
   | "employer.comment_mention"              // @-mentioned in a comment
-  | "employer.automation_notice";           // N13 automation "notify a teammate" action
+  | "employer.automation_notice"            // N13 automation "notify a teammate" action
+  | "employer.offer_approval"               // N12 a teammate requested approval to send an offer (→ approvers)
+  | "employer.offer_approval_decision";     // N12 an approver approved/rejected an offer (→ original sender)
 
 export type NotificationChannel = "email" | "in_app" | "sms";
 
@@ -60,4 +62,6 @@ export const EVENT_KIND_LABELS: Record<NotificationEventKind, string> = {
   "employer.team_invite": "Team invitation",
   "employer.comment_mention": "Comment @-mention",
   "employer.automation_notice": "Automation alert",
+  "employer.offer_approval": "Offer approval request",
+  "employer.offer_approval_decision": "Offer approval decision",
 };

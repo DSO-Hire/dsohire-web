@@ -488,11 +488,18 @@ export type Database = {
       application_offer_sends: {
         Row: {
           application_id: string
+          approval_note: string | null
+          approval_status: string
+          approved_at: string | null
+          approved_by_user_id: string | null
+          base_amount: number | null
+          base_period: string | null
           body_html: string
           created_at: string
           id: string
           merge_values: Json
           recipient_email: string
+          revised_from_offer_send_id: string | null
           sent_at: string
           sent_by_user_id: string | null
           subject: string
@@ -501,11 +508,18 @@ export type Database = {
         }
         Insert: {
           application_id: string
+          approval_note?: string | null
+          approval_status?: string
+          approved_at?: string | null
+          approved_by_user_id?: string | null
+          base_amount?: number | null
+          base_period?: string | null
           body_html: string
           created_at?: string
           id?: string
           merge_values?: Json
           recipient_email: string
+          revised_from_offer_send_id?: string | null
           sent_at?: string
           sent_by_user_id?: string | null
           subject: string
@@ -514,11 +528,18 @@ export type Database = {
         }
         Update: {
           application_id?: string
+          approval_note?: string | null
+          approval_status?: string
+          approved_at?: string | null
+          approved_by_user_id?: string | null
+          base_amount?: number | null
+          base_period?: string | null
           body_html?: string
           created_at?: string
           id?: string
           merge_values?: Json
           recipient_email?: string
+          revised_from_offer_send_id?: string | null
           sent_at?: string
           sent_by_user_id?: string | null
           subject?: string
@@ -2256,6 +2277,7 @@ export type Database = {
           avatar_url: string | null
           base_location_id: string | null
           bio: string | null
+          can_send_offers_directly: boolean
           coverage_area: string | null
           created_at: string
           dso_id: string
@@ -2276,6 +2298,7 @@ export type Database = {
           avatar_url?: string | null
           base_location_id?: string | null
           bio?: string | null
+          can_send_offers_directly?: boolean
           coverage_area?: string | null
           created_at?: string
           dso_id: string
@@ -2295,6 +2318,7 @@ export type Database = {
           avatar_url?: string | null
           base_location_id?: string | null
           bio?: string | null
+          can_send_offers_directly?: boolean
           coverage_area?: string | null
           created_at?: string
           dso_id?: string
@@ -2340,6 +2364,7 @@ export type Database = {
           logo_url: string | null
           mission: string | null
           name: string
+          offer_approval_policy: Json
           practice_count: number | null
           referral_code: string | null
           require_mfa: boolean
@@ -2370,6 +2395,7 @@ export type Database = {
           logo_url?: string | null
           mission?: string | null
           name: string
+          offer_approval_policy?: Json
           practice_count?: number | null
           referral_code?: string | null
           require_mfa?: boolean
@@ -2400,6 +2426,7 @@ export type Database = {
           logo_url?: string | null
           mission?: string | null
           name?: string
+          offer_approval_policy?: Json
           practice_count?: number | null
           referral_code?: string | null
           require_mfa?: boolean

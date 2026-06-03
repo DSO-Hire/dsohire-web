@@ -32,12 +32,23 @@ import {
   ChevronUp,
   ArrowLeft,
   ArrowRight,
+  Clock,
+  ShieldCheck,
+  ThumbsDown,
 } from "lucide-react";
 import { sendOffer } from "./offer-actions";
+import { approveOffer, rejectOffer } from "./offer-approval-actions";
 import {
   evaluateOfferGuardrail,
   type JobCompPeriod,
 } from "@/lib/offers/comp-guardrail";
+import {
+  resolveOfferGate,
+  offerGateReasonLabel,
+  type OfferApprovalPolicy,
+  type OfferGate,
+  type OfferGateReason,
+} from "@/lib/offers/approval-policy";
 import { PayBenchmarkHint } from "../../jobs/pay-benchmark-hint";
 import {
   OFFER_FIELDS,
@@ -66,6 +77,14 @@ export interface OfferSendRow {
   merge_values: Record<string, string>;
   sent_at: string;
   sender_name: string | null;
+  /** N12 Phase 2 — approval lifecycle. 'not_required' = sent directly (pre-N12
+   *  rows are null → treated as 'not_required'). */
+  approval_status: "not_required" | "pending" | "approved" | "rejected" | null;
+  /** Approver's note (rejection reason, or an optional approval note). */
+  approval_note: string | null;
+  /** Structured base on the send (for the pending/approval summary). */
+  base_amount: number | null;
+  base_period: "hourly" | "annual" | null;
   /**
    * Candidate's response to this offer, if any. One per send max
    * (UNIQUE(offer_send_id) on application_offer_responses). Track E
@@ -106,6 +125,14 @@ interface OfferSectionProps {
   jobBenefits: string | null;
   templates: OfferTemplateOption[];
   sends: OfferSendRow[];
+  /** N12 Phase 2 — the viewer is owner/admin and can approve/reject. */
+  viewerCanApprove: boolean;
+  /** Approval mechanism unlocked for this tier (Scale+). */
+  approvalsEnabled: boolean;
+  /** The viewer can send offers without per-offer approval. */
+  senderEmpowered: boolean;
+  /** The DSO's offer-approval policy (drives the gate-aware compose copy). */
+  approvalPolicy: OfferApprovalPolicy;
 }
 
 export function OfferSection({
@@ -124,6 +151,10 @@ export function OfferSection({
   jobBenefits,
   templates,
   sends,
+  viewerCanApprove,
+  approvalsEnabled,
+  senderEmpowered,
+  approvalPolicy,
 }: OfferSectionProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -134,19 +165,34 @@ export function OfferSection({
   // requires explicit confirmation before opening the modal — guards
   // against accidental double-fires at someone who's already said yes.
   const [confirmRevision, setConfirmRevision] = useState(false);
-  const hasSends = sends.length > 0;
   const latest = sends[0] ?? null;
   const earlier = sends.slice(1);
   const canSend = templates.length > 0 && !!candidateEmail;
+
+  // N12 — the latest send's approval lifecycle drives what we show.
+  const latestStatus = latest?.approval_status ?? "not_required";
+  const latestPending = latestStatus === "pending";
+  const latestRejected = latestStatus === "rejected";
+  // "Sent" = actually reached the candidate (not a pending/rejected draft).
+  const sentCount = sends.filter((s) => {
+    const st = s.approval_status ?? "not_required";
+    return st !== "pending" && st !== "rejected";
+  }).length;
   const latestAccepted = latest?.response?.kind === "accepted";
-  const ctaLabel = !hasSends
-    ? "Send offer"
-    : latestAccepted
-      ? "Send revised offer"
-      : "Send another";
+
+  // The CTA is hidden while a request is pending (don't let a teammate fire
+  // a duplicate). After a rejection it becomes "Revise offer".
+  const showCta = canSend && !latestPending;
+  const ctaLabel = latestRejected
+    ? "Revise offer"
+    : sentCount === 0
+      ? "Send offer"
+      : latestAccepted
+        ? "Send revised offer"
+        : "Send another";
 
   function handleCtaClick() {
-    if (latestAccepted) {
+    if (latestAccepted && !latestRejected) {
       setConfirmRevision(true);
       return;
     }
@@ -165,9 +211,9 @@ export function OfferSection({
     autoOpenedRef.current = true;
     // Strip the param without adding a history entry.
     router.replace(`/employer/applications/${applicationId}`, { scroll: false });
-    if (!canSend) return;
+    if (!canSend || latestPending) return;
     sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-    if (latestAccepted) setConfirmRevision(true);
+    if (latestAccepted && !latestRejected) setConfirmRevision(true);
     else setModalOpen(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
@@ -176,11 +222,15 @@ export function OfferSection({
     <div ref={sectionRef} id="offer-composer" className="space-y-4 scroll-mt-24">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <p className="text-[13px] text-slate-meta leading-relaxed max-w-[520px]">
-          {hasSends
-            ? `${sends.length} offer${sends.length === 1 ? "" : "s"} sent to ${candidateName}.`
-            : `Send a templated offer letter to ${candidateName} via email. Pick a template, fill in the offer specifics, and preview before it goes out.`}
+          {sentCount > 0
+            ? `${sentCount} offer${sentCount === 1 ? "" : "s"} sent to ${candidateName}.`
+            : latestPending
+              ? `An offer to ${candidateName} is waiting on approval before it can be sent.`
+              : latestRejected
+                ? `Your last offer to ${candidateName} wasn't approved. Revise the terms and resubmit.`
+                : `Send a templated offer letter to ${candidateName} via email. Pick a template, fill in the offer specifics, and preview before it goes out.`}
         </p>
-        {canSend && (
+        {showCta && (
           <button
             type="button"
             onClick={handleCtaClick}
@@ -208,7 +258,13 @@ export function OfferSection({
         </NoticeBox>
       )}
 
-      {hasSends && latest && (
+      {latest && latestPending && (
+        <PendingApprovalCard send={latest} viewerCanApprove={viewerCanApprove} />
+      )}
+      {latest && latestRejected && (
+        <RejectedOfferCard send={latest} onRevise={() => setModalOpen(true)} />
+      )}
+      {latest && !latestPending && !latestRejected && (
         <LatestSendCard send={latest} />
       )}
 
@@ -232,6 +288,9 @@ export function OfferSection({
           jobCompPeriod={jobCompPeriod}
           jobBenefits={jobBenefits}
           templates={templates}
+          senderEmpowered={senderEmpowered}
+          approvalsEnabled={approvalsEnabled}
+          approvalPolicy={approvalPolicy}
           onClose={() => setModalOpen(false)}
         />
       )}
@@ -400,6 +459,234 @@ function SendBodyFrame({ html }: { html: string }) {
 }
 
 /* ───────────────────────────────────────────────────────────────
+ * N12 Phase 2 — pending-approval card
+ * Shows when the latest offer is held for owner/admin sign-off. Approvers
+ * (owner/admin) get Approve / Reject inline; everyone else sees a
+ * waiting-on-approval notice.
+ * ───────────────────────────────────────────────────────────── */
+
+function fmtBase(amount: number | null, period: "hourly" | "annual" | null): string | null {
+  if (amount == null || !Number.isFinite(amount) || amount <= 0) return null;
+  const pretty =
+    amount % 1 === 0
+      ? amount.toLocaleString("en-US")
+      : amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return `$${pretty}/${period === "annual" ? "yr" : "hr"}`;
+}
+
+function PendingApprovalCard({
+  send,
+  viewerCanApprove,
+}: {
+  send: OfferSendRow;
+  viewerCanApprove: boolean;
+}) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
+  const [note, setNote] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+  const submittedAt = new Date(send.sent_at);
+  const baseLabel = fmtBase(send.base_amount, send.base_period);
+
+  function doApprove() {
+    setError(null);
+    startTransition(async () => {
+      const res = await approveOffer(send.id);
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      router.refresh();
+    });
+  }
+  function doReject() {
+    setError(null);
+    if (!note.trim()) {
+      setError("Add a short note so the sender knows why.");
+      return;
+    }
+    startTransition(async () => {
+      const res = await rejectOffer(send.id, note.trim());
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      router.refresh();
+    });
+  }
+
+  return (
+    <div className="border border-amber-300 bg-amber-50/50">
+      <div className="px-4 py-3">
+        <div className="flex items-center gap-2 mb-1 flex-wrap">
+          <Clock className="h-3.5 w-3.5 text-amber-700 shrink-0" />
+          <span className="text-[10px] font-bold tracking-[2px] uppercase text-amber-800">
+            Awaiting approval
+          </span>
+          {send.template_name && (
+            <span className="text-[11px] text-slate-meta">· {send.template_name}</span>
+          )}
+        </div>
+        <div className="text-[13px] text-ink leading-snug">
+          Submitted <strong>{submittedAt.toLocaleDateString()}</strong> at{" "}
+          {submittedAt.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+          {send.sender_name ? ` by ${send.sender_name}` : ""}.
+        </div>
+        <div className="text-[12px] text-slate-meta mt-0.5">
+          Subject: {send.subject}
+          {baseLabel ? ` · Base ${baseLabel}` : ""}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-ink bg-white hover:bg-cream"
+        >
+          {open ? (
+            <>
+              <ChevronUp className="h-3 w-3" /> Hide draft
+            </>
+          ) : (
+            <>
+              <ChevronDown className="h-3 w-3" /> View draft text
+            </>
+          )}
+        </button>
+      </div>
+
+      {open && (
+        <div className="border-t border-amber-200 bg-white">
+          <SendBodyFrame html={send.body_html} />
+        </div>
+      )}
+
+      <div className="border-t border-amber-200 bg-white px-4 py-3">
+        {viewerCanApprove ? (
+          <div className="space-y-3">
+            <p className="text-[12px] text-slate-body leading-relaxed">
+              Nothing has been sent to the candidate yet. Approving sends this
+              exact letter; rejecting returns it to the sender with your note.
+            </p>
+            {rejecting ? (
+              <div className="space-y-2">
+                <textarea
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  rows={2}
+                  maxLength={1000}
+                  placeholder="Why are you sending this back? (the sender sees this)"
+                  className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage resize-y"
+                />
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={doReject}
+                    disabled={pending}
+                    className="inline-flex items-center gap-2 bg-[#7c2d12] text-[#F7F4ED] px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-[#5b210d] disabled:opacity-60"
+                  >
+                    {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ThumbsDown className="h-3.5 w-3.5" />}
+                    Send back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRejecting(false);
+                      setError(null);
+                    }}
+                    disabled={pending}
+                    className="px-3 py-2 text-[11px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-ink disabled:opacity-60"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={doApprove}
+                  disabled={pending}
+                  className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C] disabled:opacity-60"
+                >
+                  {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
+                  Approve &amp; send
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRejecting(true)}
+                  disabled={pending}
+                  className="inline-flex items-center gap-2 border border-[var(--rule-strong)] text-ink bg-white px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-cream disabled:opacity-60"
+                >
+                  <ThumbsDown className="h-3.5 w-3.5" />
+                  Reject
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <p className="text-[12px] text-slate-body leading-relaxed">
+            An owner or admin will review this offer before it&apos;s sent to the
+            candidate. You&apos;ll be notified when they approve or send it back.
+          </p>
+        )}
+        {error && (
+          <div className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-800 flex items-start gap-2">
+            <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ───────────────────────────────────────────────────────────────
+ * N12 Phase 2 — rejected-offer card
+ * ───────────────────────────────────────────────────────────── */
+
+function RejectedOfferCard({
+  send,
+  onRevise,
+}: {
+  send: OfferSendRow;
+  onRevise: () => void;
+}) {
+  const decidedAt = new Date(send.sent_at);
+  return (
+    <div className="border border-slate-300 bg-slate-50/70">
+      <div className="px-4 py-3">
+        <div className="flex items-center gap-2 mb-1 flex-wrap">
+          <ThumbsDown className="h-3.5 w-3.5 text-slate-600 shrink-0" />
+          <span className="text-[10px] font-bold tracking-[2px] uppercase text-slate-700">
+            Not approved
+          </span>
+        </div>
+        <div className="text-[13px] text-ink leading-snug">
+          Sent back on <strong>{decidedAt.toLocaleDateString()}</strong>
+          {send.sender_name ? ` · originally drafted by ${send.sender_name}` : ""}.
+          Nothing went to the candidate.
+        </div>
+        {send.approval_note && (
+          <div className="mt-2 border-l-2 border-slate-300 pl-3 text-[12px] text-slate-body italic">
+            “{send.approval_note}”
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={onRevise}
+          className="mt-3 inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C]"
+        >
+          <Send className="h-3.5 w-3.5" />
+          Revise &amp; resubmit
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ───────────────────────────────────────────────────────────────
  * Earlier-sends accordion
  * ───────────────────────────────────────────────────────────── */
 
@@ -552,6 +839,9 @@ function SendOfferModal({
   jobCompPeriod,
   jobBenefits,
   templates,
+  senderEmpowered,
+  approvalsEnabled,
+  approvalPolicy,
   onClose,
 }: {
   applicationId: string;
@@ -568,10 +858,14 @@ function SendOfferModal({
   jobCompPeriod: string | null;
   jobBenefits: string | null;
   templates: OfferTemplateOption[];
+  senderEmpowered: boolean;
+  approvalsEnabled: boolean;
+  approvalPolicy: OfferApprovalPolicy;
   onClose: () => void;
 }) {
   const router = useRouter();
   const [step, setStep] = useState<Step>(1);
+  const [submittedPending, setSubmittedPending] = useState(false);
   const [templateId, setTemplateId] = useState<string | null>(
     templates[0]?.id ?? null
   );
@@ -711,6 +1005,12 @@ function SendOfferModal({
         setError(res.error);
         return;
       }
+      if (res.status === "pending_approval") {
+        // Held for sign-off — show the confirmation instead of closing, so
+        // the sender clearly understands nothing went to the candidate yet.
+        setSubmittedPending(true);
+        return;
+      }
       onClose();
       router.refresh();
     });
@@ -745,6 +1045,36 @@ function SendOfferModal({
     dsoName,
     values,
   ]);
+
+  // N12 — mirror the server gate so the button + banners read accurately.
+  // Authoritative routing still happens server-side in sendOffer().
+  const parsedBaseNum = baseAmount.trim()
+    ? Number(baseAmount.replace(/[^0-9.]/g, ""))
+    : null;
+  const cleanBase =
+    parsedBaseNum != null && Number.isFinite(parsedBaseNum) && parsedBaseNum > 0
+      ? parsedBaseNum
+      : null;
+  const guardrailSeverity = evaluateOfferGuardrail({
+    baseAmount: cleanBase,
+    basePeriod,
+    jobMin: jobCompMin,
+    jobMax: jobCompMax,
+    jobPeriod: jobCompPeriod as JobCompPeriod | null,
+  }).severity;
+  const gate: OfferGate = resolveOfferGate({
+    approvalsEnabled,
+    // role is only consulted via isEmpoweredSender(role, canSendDirectly);
+    // passing the already-resolved empowered flag as canSendDirectly is
+    // equivalent and keeps the modal from needing the raw role.
+    role: "recruiter",
+    canSendDirectly: senderEmpowered,
+    guardrailSeverity,
+    baseAmount: cleanBase,
+    basePeriod,
+    policy: approvalPolicy,
+  });
+  const willRouteToApproval = gate.mode === "approval";
 
   return (
     <div
@@ -786,14 +1116,17 @@ function SendOfferModal({
         </header>
 
         <div className="flex-1 overflow-y-auto p-5">
-          {step === 1 && (
+          {submittedPending && (
+            <PendingSubmittedPanel candidateName={candidateName} reason={gate.mode === "approval" ? gate.reason : undefined} />
+          )}
+          {!submittedPending && step === 1 && (
             <Step1PickTemplate
               templates={templates}
               templateId={templateId}
               onPick={setTemplateId}
             />
           )}
-          {step === 2 && selectedTemplate && (
+          {!submittedPending && step === 2 && selectedTemplate && (
             <div className="space-y-5">
               <OfferBaseCompField
                 amount={baseAmount}
@@ -803,6 +1136,7 @@ function SendOfferModal({
                 jobCompMin={jobCompMin}
                 jobCompMax={jobCompMax}
                 jobCompPeriod={jobCompPeriod}
+                willRouteToApproval={willRouteToApproval}
               />
               <Step2FillFields
                 template={selectedTemplate}
@@ -813,18 +1147,19 @@ function SendOfferModal({
               />
             </div>
           )}
-          {step === 3 && (
+          {!submittedPending && step === 3 && (
             <Step3Preview html={previewHtml} />
           )}
-          {step === 4 && (
+          {!submittedPending && step === 4 && (
             <Step4Confirm
               candidateName={candidateName}
               candidateEmail={candidateEmail}
               subject={subject}
               onSubjectChange={setSubject}
+              willRouteToApproval={willRouteToApproval}
             />
           )}
-          {error && (
+          {error && !submittedPending && (
             <div className="mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-800 flex items-start gap-2">
               <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
               <span>{error}</span>
@@ -833,50 +1168,73 @@ function SendOfferModal({
         </div>
 
         <footer className="flex items-center justify-between gap-2 p-4 border-t border-[var(--rule)] bg-cream/40">
-          <button
-            type="button"
-            onClick={step === 1 ? onClose : back}
-            disabled={pending}
-            className="inline-flex items-center gap-2 px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-ink disabled:opacity-60"
-          >
-            {step === 1 ? (
-              "Cancel"
-            ) : (
-              <>
-                <ArrowLeft className="h-3 w-3" />
-                Back
-              </>
-            )}
-          </button>
-          {step < 4 ? (
-            <button
-              type="button"
-              onClick={next}
-              disabled={pending}
-              className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C] disabled:opacity-60"
-            >
-              Next
-              <ArrowRight className="h-3 w-3" />
-            </button>
+          {submittedPending ? (
+            <>
+              <span />
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  router.refresh();
+                }}
+                className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C]"
+              >
+                Done
+              </button>
+            </>
           ) : (
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={pending}
-              className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C] disabled:opacity-60"
-            >
-              {pending ? (
-                <>
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  Sending…
-                </>
+            <>
+              <button
+                type="button"
+                onClick={step === 1 ? onClose : back}
+                disabled={pending}
+                className="inline-flex items-center gap-2 px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-ink disabled:opacity-60"
+              >
+                {step === 1 ? (
+                  "Cancel"
+                ) : (
+                  <>
+                    <ArrowLeft className="h-3 w-3" />
+                    Back
+                  </>
+                )}
+              </button>
+              {step < 4 ? (
+                <button
+                  type="button"
+                  onClick={next}
+                  disabled={pending}
+                  className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C] disabled:opacity-60"
+                >
+                  Next
+                  <ArrowRight className="h-3 w-3" />
+                </button>
               ) : (
-                <>
-                  <Send className="h-3.5 w-3.5" />
-                  Send offer
-                </>
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={pending}
+                  className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C] disabled:opacity-60"
+                >
+                  {pending ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      {willRouteToApproval ? "Submitting…" : "Sending…"}
+                    </>
+                  ) : willRouteToApproval ? (
+                    <>
+                      <ShieldCheck className="h-3.5 w-3.5" />
+                      Submit for approval
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-3.5 w-3.5" />
+                      Send offer
+                    </>
+                  )}
+                </button>
               )}
-            </button>
+            </>
           )}
         </footer>
       </div>
@@ -960,6 +1318,7 @@ function OfferBaseCompField({
   jobCompMin,
   jobCompMax,
   jobCompPeriod,
+  willRouteToApproval,
 }: {
   amount: string;
   onAmount: (v: string) => void;
@@ -968,6 +1327,7 @@ function OfferBaseCompField({
   jobCompMin: number | null;
   jobCompMax: number | null;
   jobCompPeriod: string | null;
+  willRouteToApproval: boolean;
 }) {
   const numeric = amount.trim() ? Number(amount.replace(/[^0-9.]/g, "")) : null;
   const guardrail = evaluateOfferGuardrail({
@@ -1021,8 +1381,19 @@ function OfferBaseCompField({
         <div className="mt-2 flex items-start gap-2 rounded border border-amber-300 bg-amber-50 px-3 py-2 text-[12px] text-amber-900">
           <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
           <span>
-            {guardrail.message} You can still send — this is the kind of offer your
-            approval policy can route for sign-off.
+            {guardrail.message}{" "}
+            {willRouteToApproval
+              ? "Because of your approval policy, this offer will be sent to an owner or admin for sign-off before it reaches the candidate."
+              : "You can still send it — this is just a heads-up that it's outside the posted range."}
+          </span>
+        </div>
+      )}
+      {guardrail.severity !== "out_of_range" && willRouteToApproval && (
+        <div className="mt-2 flex items-start gap-2 rounded border border-heritage/30 bg-heritage/[0.06] px-3 py-2 text-[12px] text-heritage-deep">
+          <ShieldCheck className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+          <span>
+            This offer will be sent to an owner or admin for approval before it
+            reaches the candidate.
           </span>
         </div>
       )}
@@ -1327,19 +1698,43 @@ function Step4Confirm({
   candidateEmail,
   subject,
   onSubjectChange,
+  willRouteToApproval,
 }: {
   candidateName: string;
   candidateEmail: string;
   subject: string;
   onSubjectChange: (v: string) => void;
+  willRouteToApproval: boolean;
 }) {
   return (
     <div className="space-y-4">
+      {willRouteToApproval ? (
+        <div className="flex items-start gap-2 rounded border border-heritage/30 bg-heritage/[0.06] px-3 py-2.5 text-[13px] text-heritage-deep">
+          <ShieldCheck className="h-4 w-4 mt-0.5 shrink-0" />
+          <span>
+            This offer needs approval first. When you submit, an owner or admin
+            is notified to review it — <strong>nothing is sent to{" "}
+            {candidateName} until they approve</strong>. You&apos;ll be notified
+            of their decision.
+          </span>
+        </div>
+      ) : null}
       <p className="text-[13px] text-slate-body leading-relaxed">
-        You&apos;re about to send this offer to{" "}
-        <strong>{candidateName}</strong> at{" "}
-        <span className="break-all">{candidateEmail}</span>. Last chance to
-        adjust the subject line.
+        {willRouteToApproval ? (
+          <>
+            You&apos;re about to submit this offer for{" "}
+            <strong>{candidateName}</strong> (it would be sent to{" "}
+            <span className="break-all">{candidateEmail}</span> once approved).
+            Last chance to adjust the subject line.
+          </>
+        ) : (
+          <>
+            You&apos;re about to send this offer to{" "}
+            <strong>{candidateName}</strong> at{" "}
+            <span className="break-all">{candidateEmail}</span>. Last chance to
+            adjust the subject line.
+          </>
+        )}
       </p>
       <label className="block">
         <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
@@ -1359,6 +1754,38 @@ function Step4Confirm({
         application so the legal record is preserved even if the template is
         later edited or archived.
       </div>
+    </div>
+  );
+}
+
+/* ── N12 — pending-submitted confirmation (shown in-modal after a
+ *    submit-for-approval) ── */
+
+function PendingSubmittedPanel({
+  candidateName,
+  reason,
+}: {
+  candidateName: string;
+  reason?: OfferGateReason;
+}) {
+  return (
+    <div className="py-6 text-center">
+      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-heritage/10">
+        <Clock className="h-6 w-6 text-heritage-deep" />
+      </div>
+      <h3 className="text-[17px] font-extrabold tracking-[-0.4px] text-ink">
+        Submitted for approval
+      </h3>
+      <p className="mx-auto mt-2 max-w-[440px] text-[13px] text-slate-body leading-relaxed">
+        Your offer to <strong>{candidateName}</strong> is now waiting on an owner
+        or admin. <strong>Nothing has been sent to the candidate.</strong> You
+        and the approver will be notified once they approve it or send it back.
+      </p>
+      {reason && (
+        <p className="mx-auto mt-3 max-w-[440px] text-[12px] text-slate-meta">
+          Why approval was needed: {offerGateReasonLabel(reason).toLowerCase()}.
+        </p>
+      )}
     </div>
   );
 }

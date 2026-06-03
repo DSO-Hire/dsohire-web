@@ -92,6 +92,11 @@ import {
   type OfferSendRow,
 } from "./offer-section";
 import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
+import { dsoCanUseOfferApprovals } from "@/lib/offers/approval-tier";
+import {
+  parseOfferApprovalPolicy,
+  isEmpoweredSender,
+} from "@/lib/offers/approval-policy";
 import {
   getRubricForRole,
   parseAttributeScores,
@@ -180,7 +185,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id, role")
+    .select("dso_id, role, can_send_offers_directly")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) redirect("/employer/onboarding");
@@ -248,7 +253,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     supabase.rpc("job_is_publicly_dso_affiliated", { p_job_id: app.job_id }),
     supabase
       .from("dsos")
-      .select("id, name, affiliation_reveal_policy")
+      .select("id, name, affiliation_reveal_policy, offer_approval_policy")
       .eq("id", dsoUser.dso_id)
       .maybeSingle(),
     app.affiliation_revealed_by_dso_user_id
@@ -1006,7 +1011,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
       supabase
         .from("application_offer_sends")
         .select(
-          "id, template_id, recipient_email, subject, body_html, merge_values, sent_at, sent_by_user_id, dso_offer_letter_templates:dso_offer_letter_templates(id, name)"
+          "id, template_id, recipient_email, subject, body_html, merge_values, sent_at, sent_by_user_id, approval_status, approval_note, base_amount, base_period, dso_offer_letter_templates:dso_offer_letter_templates(id, name)"
         )
         .eq("application_id", app.id)
         .order("sent_at", { ascending: false }),
@@ -1035,6 +1040,10 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
       merge_values: Record<string, string> | null;
       sent_at: string;
       sent_by_user_id: string | null;
+      approval_status: string | null;
+      approval_note: string | null;
+      base_amount: number | null;
+      base_period: string | null;
       dso_offer_letter_templates:
         | { id: string; name: string }
         | Array<{ id: string; name: string }>
@@ -1107,6 +1116,11 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
         sender_name: r.sent_by_user_id
           ? senderNameByAuthId.get(r.sent_by_user_id) ?? null
           : null,
+        approval_status:
+          (r.approval_status as OfferSendRow["approval_status"]) ?? "not_required",
+        approval_note: r.approval_note ?? null,
+        base_amount: r.base_amount ?? null,
+        base_period: (r.base_period as "hourly" | "annual" | null) ?? null,
         response: resp
           ? {
               kind: resp.response as "accepted" | "declined",
@@ -1168,6 +1182,23 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   // flow flips stage to 'hired' and we still want the recruiter to
   // see the response card with the typed-name soft-sig.
   const showOfferSection = onOfferStage || offerSends.length > 0;
+
+  // N12 Phase 2 — offer-approval context for the OfferSection.
+  const offerViewerRole = (dsoUser.role as string) ?? "";
+  const offerViewerCanApprove =
+    offerViewerRole === "owner" || offerViewerRole === "admin";
+  const offerSenderEmpowered = isEmpoweredSender(
+    offerViewerRole,
+    ((dsoUser as Record<string, unknown>).can_send_offers_directly as
+      | boolean
+      | null) ?? false
+  );
+  const offerApprovalPolicy = parseOfferApprovalPolicy(
+    (dsoForAffiliation as Record<string, unknown> | null)?.offer_approval_policy
+  );
+  const offerApprovalsEnabled = showOfferSection
+    ? await dsoCanUseOfferApprovals(supabase, dsoUser.dso_id as string)
+    : false;
 
   const titleLine = cand?.current_title ?? cand?.headline ?? null;
 
@@ -1692,6 +1723,10 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 }
                 templates={offerTemplates}
                 sends={offerSends}
+                viewerCanApprove={offerViewerCanApprove}
+                approvalsEnabled={offerApprovalsEnabled}
+                senderEmpowered={offerSenderEmpowered}
+                approvalPolicy={offerApprovalPolicy}
               />
             </DetailSection>
           )}
