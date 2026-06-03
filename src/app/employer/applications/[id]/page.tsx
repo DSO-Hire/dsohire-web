@@ -93,6 +93,11 @@ import {
 } from "./offer-section";
 import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
 import { dsoCanUseOfferApprovals } from "@/lib/offers/approval-tier";
+import { dsoCanUseSequences } from "@/lib/sequences/tier";
+import {
+  SequenceEnrollControl,
+  type ActiveEnrollmentView,
+} from "./sequence-enroll-control";
 import {
   parseOfferApprovalPolicy,
   isEmpoweredSender,
@@ -1202,6 +1207,71 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     ? await dsoCanUseOfferApprovals(supabase, dsoUser.dso_id as string)
     : false;
 
+  // ── N16 v2 — manual drip-sequence control data.
+  const sequencesEnabled = await dsoCanUseSequences(
+    supabase,
+    dsoUser.dso_id as string
+  );
+  let activeEnrollment: ActiveEnrollmentView | null = null;
+  let enrollableSequences: { id: string; name: string; stepCount: number }[] = [];
+  {
+    const { data: enrRow } = await supabase
+      .from("automation_sequence_enrollments")
+      .select("id, sequence_id, current_step, next_send_at")
+      .eq("application_id", app.id)
+      .eq("status", "active")
+      .maybeSingle();
+    if (enrRow) {
+      const sid = (enrRow as Record<string, unknown>).sequence_id as string;
+      const [{ data: seqInfo }, { count: totalSteps }] = await Promise.all([
+        supabase.from("automation_sequences").select("name").eq("id", sid).maybeSingle(),
+        supabase
+          .from("automation_sequence_steps")
+          .select("id", { count: "exact", head: true })
+          .eq("sequence_id", sid),
+      ]);
+      activeEnrollment = {
+        id: (enrRow as Record<string, unknown>).id as string,
+        sequenceName:
+          ((seqInfo as Record<string, unknown> | null)?.name as string | null) ??
+          "Sequence",
+        currentStep:
+          ((enrRow as Record<string, unknown>).current_step as number | null) ?? 0,
+        totalSteps: totalSteps ?? 0,
+        nextSendAt:
+          ((enrRow as Record<string, unknown>).next_send_at as string | null) ?? null,
+      };
+    }
+    if (sequencesEnabled && !activeEnrollment) {
+      const { data: seqRows } = await supabase
+        .from("automation_sequences")
+        .select("id, name")
+        .eq("dso_id", dsoUser.dso_id as string)
+        .eq("is_enabled", true)
+        .order("created_at", { ascending: true });
+      const seqList = (seqRows as Array<Record<string, unknown>> | null) ?? [];
+      if (seqList.length > 0) {
+        const ids = seqList.map((s) => s.id as string);
+        const { data: stepRows } = await supabase
+          .from("automation_sequence_steps")
+          .select("sequence_id")
+          .in("sequence_id", ids);
+        const countBySeq = new Map<string, number>();
+        for (const st of (stepRows as Array<Record<string, unknown>> | null) ?? []) {
+          const sid = st.sequence_id as string;
+          countBySeq.set(sid, (countBySeq.get(sid) ?? 0) + 1);
+        }
+        enrollableSequences = seqList
+          .map((s) => ({
+            id: s.id as string,
+            name: s.name as string,
+            stepCount: countBySeq.get(s.id as string) ?? 0,
+          }))
+          .filter((s) => s.stepCount > 0);
+      }
+    }
+  }
+
   const titleLine = cand?.current_title ?? cand?.headline ?? null;
 
   // Location label for the candidate (preferred over their full address)
@@ -1412,6 +1482,15 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 applicationId={app.id}
                 teammates={assigneeTeammates}
                 current={app.assigned_to_dso_user_id}
+              />
+            </div>
+
+            <div className="mt-4">
+              <SequenceEnrollControl
+                applicationId={app.id}
+                canUse={sequencesEnabled}
+                enrollment={activeEnrollment}
+                sequences={enrollableSequences}
               />
             </div>
 

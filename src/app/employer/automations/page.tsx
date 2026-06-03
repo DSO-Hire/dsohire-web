@@ -7,14 +7,21 @@
  * every tier, so lower tiers still see + can disable it here.
  */
 
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { dsoCanUseAutomationRules } from "@/lib/automations/tier";
+import { dsoCanUseSequences } from "@/lib/sequences/tier";
 import { AutomationsManager } from "./automations-manager";
+import { SequencesManager, type SequenceView } from "./sequences-manager";
 import type { RuleCondition } from "@/lib/automations/types";
 
 export const dynamic = "force-dynamic";
+
+interface PageProps {
+  searchParams: Promise<{ tab?: string }>;
+}
 
 export interface RuleView {
   id: string;
@@ -28,7 +35,9 @@ export interface RuleView {
   firedCount: number;
 }
 
-export default async function AutomationsPage() {
+export default async function AutomationsPage({ searchParams }: PageProps) {
+  const sp = await searchParams;
+  const tab = sp.tab === "sequences" ? "sequences" : "rules";
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -46,6 +55,50 @@ export default async function AutomationsPage() {
   if (role !== "owner" && role !== "admin") redirect("/employer/dashboard");
 
   const canManage = await dsoCanUseAutomationRules(supabase, dsoId);
+  const canManageSequences = await dsoCanUseSequences(supabase, dsoId);
+
+  // ── N16 v2 — load drip sequences + per-sequence enrollment counts.
+  const { data: seqRows } = await supabase
+    .from("automation_sequences")
+    .select(
+      "id, name, is_enabled, created_at, steps:automation_sequence_steps(delay_days, subject, body, step_order)"
+    )
+    .eq("dso_id", dsoId)
+    .order("created_at", { ascending: true });
+  const { data: enrRows } = await supabase
+    .from("automation_sequence_enrollments")
+    .select("sequence_id, status")
+    .eq("dso_id", dsoId);
+  const activeBySeq = new Map<string, number>();
+  const completedBySeq = new Map<string, number>();
+  for (const e of (enrRows as Array<Record<string, unknown>> | null) ?? []) {
+    const sid = e.sequence_id as string;
+    const st = e.status as string;
+    if (st === "active") activeBySeq.set(sid, (activeBySeq.get(sid) ?? 0) + 1);
+    else if (st === "completed")
+      completedBySeq.set(sid, (completedBySeq.get(sid) ?? 0) + 1);
+  }
+  const sequences: SequenceView[] = (
+    (seqRows as Array<Record<string, unknown>> | null) ?? []
+  ).map((s) => {
+    const rawSteps = (s.steps as Array<Record<string, unknown>> | null) ?? [];
+    return {
+      id: s.id as string,
+      name: s.name as string,
+      is_enabled: s.is_enabled as boolean,
+      steps: rawSteps
+        .map((st) => ({
+          delay_days: (st.delay_days as number | null) ?? 0,
+          subject: (st.subject as string | null) ?? "",
+          body: (st.body as string | null) ?? "",
+          step_order: (st.step_order as number | null) ?? 0,
+        }))
+        .sort((a, b) => a.step_order - b.step_order)
+        .map(({ delay_days, subject, body }) => ({ delay_days, subject, body })),
+      activeCount: activeBySeq.get(s.id as string) ?? 0,
+      completedCount: completedBySeq.get(s.id as string) ?? 0,
+    };
+  });
 
   const { data: ruleRows } = await supabase
     .from("automation_rules")
@@ -110,12 +163,49 @@ export default async function AutomationsPage() {
 
   return (
     <EmployerShell active="automations">
-      <AutomationsManager
-        rules={rules}
-        jobs={jobs}
-        teammates={teammates}
-        canManage={canManage}
-      />
+      <div className="mb-6 flex items-center gap-1 border-b border-[var(--rule)]">
+        <TabLink href="/employer/automations?tab=rules" active={tab === "rules"}>
+          Rules
+        </TabLink>
+        <TabLink href="/employer/automations?tab=sequences" active={tab === "sequences"}>
+          Drip sequences
+        </TabLink>
+      </div>
+
+      {tab === "sequences" ? (
+        <SequencesManager sequences={sequences} canManage={canManageSequences} />
+      ) : (
+        <AutomationsManager
+          rules={rules}
+          jobs={jobs}
+          teammates={teammates}
+          canManage={canManage}
+        />
+      )}
     </EmployerShell>
+  );
+}
+
+function TabLink({
+  href,
+  active,
+  children,
+}: {
+  href: string;
+  active: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className={
+        "px-4 py-2.5 text-[11px] font-bold tracking-[1.5px] uppercase -mb-px border-b-2 transition-colors " +
+        (active
+          ? "border-heritage text-ink"
+          : "border-transparent text-slate-meta hover:text-ink")
+      }
+    >
+      {children}
+    </Link>
   );
 }

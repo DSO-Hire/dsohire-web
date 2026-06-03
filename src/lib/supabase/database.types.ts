@@ -321,6 +321,141 @@ export type Database = {
           },
         ]
       }
+      automation_sequences: {
+        Row: {
+          created_at: string
+          created_by_dso_user_id: string | null
+          dso_id: string
+          id: string
+          is_enabled: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by_dso_user_id?: string | null
+          dso_id: string
+          id?: string
+          is_enabled?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by_dso_user_id?: string | null
+          dso_id?: string
+          id?: string
+          is_enabled?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      automation_sequence_steps: {
+        Row: {
+          body: string
+          created_at: string
+          delay_days: number
+          id: string
+          sequence_id: string
+          step_order: number
+          subject: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          delay_days?: number
+          id?: string
+          sequence_id: string
+          step_order: number
+          subject: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          delay_days?: number
+          id?: string
+          sequence_id?: string
+          step_order?: number
+          subject?: string
+        }
+        Relationships: []
+      }
+      automation_sequence_enrollments: {
+        Row: {
+          application_id: string
+          created_at: string
+          current_step: number
+          dso_id: string
+          enrolled_at: string
+          enrolled_by_dso_user_id: string | null
+          enrolled_stage_id: string | null
+          exit_reason: string | null
+          exited_at: string | null
+          id: string
+          last_sent_at: string | null
+          next_send_at: string | null
+          sequence_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          current_step?: number
+          dso_id: string
+          enrolled_at?: string
+          enrolled_by_dso_user_id?: string | null
+          enrolled_stage_id?: string | null
+          exit_reason?: string | null
+          exited_at?: string | null
+          id?: string
+          last_sent_at?: string | null
+          next_send_at?: string | null
+          sequence_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          current_step?: number
+          dso_id?: string
+          enrolled_at?: string
+          enrolled_by_dso_user_id?: string | null
+          enrolled_stage_id?: string | null
+          exit_reason?: string | null
+          exited_at?: string | null
+          id?: string
+          last_sent_at?: string | null
+          next_send_at?: string | null
+          sequence_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      automation_sequence_sends: {
+        Row: {
+          enrollment_id: string
+          id: string
+          sent_at: string
+          step_id: string
+        }
+        Insert: {
+          enrollment_id: string
+          id?: string
+          sent_at?: string
+          step_id: string
+        }
+        Update: {
+          enrollment_id?: string
+          id?: string
+          sent_at?: string
+          step_id?: string
+        }
+        Relationships: []
+      }
       application_message_attachments: {
         Row: {
           created_at: string
