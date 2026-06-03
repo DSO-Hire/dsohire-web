@@ -427,6 +427,7 @@ export function ScorecardsSection({
     setError(null);
     setConfirmingSubmit(false);
     setConfirmingDelete(false);
+    setAiBanner(null);
   }
 
   // N14 — apply an AI draft into the editor: AI scores overlay any existing
@@ -494,6 +495,7 @@ export function ScorecardsSection({
     }
     setMyScorecard(buildThreadScorecard(result.scorecard, null, dsoUsers));
     setEditing(false);
+    setAiBanner(null);
   }
 
   async function handleSubmit(): Promise<void> {
@@ -531,8 +533,26 @@ export function ScorecardsSection({
       setMyScorecard(buildThreadScorecard(draftResult.scorecard, null, dsoUsers));
       return;
     }
-    setMyScorecard(buildThreadScorecard(submitResult.scorecard, null, dsoUsers));
+    // Build the submitted card from the row we just saved as the source of
+    // truth for the score data — the submit round-trip can come back without
+    // the freshly-written attribute_scores, which left the locked view blank
+    // until a hard refresh. Fall back to the draft (which always has them).
+    const submitted = submitResult.scorecard;
+    const safe =
+      Object.keys(submitted.attribute_scores ?? {}).length > 0
+        ? submitted
+        : {
+            ...submitted,
+            attribute_scores: draftResult.scorecard.attribute_scores,
+            overall_recommendation:
+              submitted.overall_recommendation ??
+              draftResult.scorecard.overall_recommendation,
+            overall_note:
+              submitted.overall_note || draftResult.scorecard.overall_note,
+          };
+    setMyScorecard(buildThreadScorecard(safe, null, dsoUsers));
     setEditing(false);
+    setAiBanner(null);
   }
 
   async function handleDelete(): Promise<void> {
@@ -813,9 +833,10 @@ function NoteTakerModal({
             </h2>
             <p className="mt-1 text-[12px] text-slate-meta leading-relaxed max-w-[460px]">
               Paste the transcript or your rough notes. We&apos;ll draft scores +
-              notes against the {rubricLabel.toLowerCase()} rubric for you to
-              review and edit — nothing is submitted automatically. We don&apos;t
-              record interviews; this only structures notes you already have.
+              notes against the {`${rubricLabel.toLowerCase()} rubric`} for you
+              to review and edit — nothing is submitted automatically. We
+              don&apos;t record interviews; this only structures notes you
+              already have.
             </p>
           </div>
           <button
