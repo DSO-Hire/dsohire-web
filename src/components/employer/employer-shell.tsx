@@ -302,12 +302,12 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
         </div>
 
         {/* Grouped nav */}
-        <nav className="flex-1 overflow-y-auto px-3 py-3">
+        <nav className="flex-1 overflow-y-auto px-3 py-2">
           {groupedNav.map((group, idx) => (
             <ul
               key={group.group}
               className={
-                "list-none space-y-0.5 " + (idx > 0 ? "mt-2.5" : "")
+                "list-none space-y-0.5 " + (idx > 0 ? "mt-2" : "")
               }
             >
               {group.items.map((item) => (
