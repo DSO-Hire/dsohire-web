@@ -167,6 +167,10 @@ export async function generateJobDescription(
   //     opted into corporate-name exposure, so use the DSO name.
   //   - 1+ locations selected → original logic (any private → mask).
   let useDsoName = true;
+  // Anonymity tier 2 — when the masked location also hides its practice name,
+  // the JD must not emit the practice name either (it'd leak straight past the
+  // "Dental Office in {city}" mask, which is exactly the bug Cam caught).
+  let anonymizePractice = false;
   let employerNameForPrompt = dso?.name ?? "the practice";
 
   const selectedIds = parsed.data.locationIds ?? [];
@@ -174,20 +178,32 @@ export async function generateJobDescription(
   if (selectedIds.length > 0) {
     const { data: selectedLocs } = await supabase
       .from("dso_locations")
-      .select("id, name, public_dso_affiliation")
+      .select("id, name, city, public_dso_affiliation, anonymize_name")
       .eq("dso_id", dsoUser.dso_id)
       .in("id", selectedIds);
     const locs = (selectedLocs ?? []) as Array<{
       id: string;
       name: string;
+      city: string | null;
       public_dso_affiliation: boolean;
+      anonymize_name: boolean;
     }>;
     const allPublic = locs.length > 0 && locs.every((l) => l.public_dso_affiliation);
     if (!allPublic && locs.length > 0) {
       useDsoName = false;
       const privateLocs = locs.filter((l) => !l.public_dso_affiliation);
-      employerNameForPrompt =
-        privateLocs.length === 1 ? privateLocs[0]!.name : "the practice";
+      // Mirror the display resolver: it masks to the FIRST private location, so
+      // if that one is anonymized the public sees "Dental Office in {city}".
+      const primaryPrivate = privateLocs[0] ?? null;
+      if (primaryPrivate?.anonymize_name) {
+        anonymizePractice = true;
+        employerNameForPrompt = primaryPrivate.city
+          ? `our office in ${primaryPrivate.city}`
+          : "our practice";
+      } else {
+        employerNameForPrompt =
+          privateLocs.length === 1 ? privateLocs[0]!.name : "the practice";
+      }
     }
   } else {
     // 0 locations selected — typical for corporate-scope jobs. Check the
@@ -233,7 +249,7 @@ export async function generateJobDescription(
     // the default DSO name.
   }
 
-  const systemPrompt = buildSystemPrompt({ useDsoName });
+  const systemPrompt = buildSystemPrompt({ useDsoName, anonymizePractice });
   const userPrompt = buildUserPrompt({
     roleLabel,
     roleCategory: parsed.data.roleCategory,
@@ -241,6 +257,7 @@ export async function generateJobDescription(
     tone: parsed.data.tone,
     employerName: employerNameForPrompt,
     useDsoName,
+    anonymizePractice,
     details: parsed.data.details,
   });
 
@@ -338,15 +355,28 @@ export async function generateJobDescription(
   };
 }
 
-function buildSystemPrompt({ useDsoName }: { useDsoName: boolean }): string {
+function buildSystemPrompt({
+  useDsoName,
+  anonymizePractice,
+}: {
+  useDsoName: boolean;
+  anonymizePractice: boolean;
+}): string {
   // Affiliation-aware variant of the summary instruction. When the
   // caller's selected location set includes any private-affiliation
   // practice, we instruct the model NOT to mention the corporate DSO
   // name and to refer only to the practice / "our practice." Phase
-  // 4.5.b launch-blocker, locked 2026-05-08.
-  const summaryConstraint = useDsoName
-    ? `- summary: 2-3 paragraphs, conversational but professional, mentions the employer name and role focus`
-    : `- summary: 2-3 paragraphs, conversational but professional, refers ONLY to the practice (the employer name supplied below). Do NOT mention any parent DSO, corporate parent, or affiliated brand. Do NOT use phrases like "part of a larger DSO," "owned by," or anything that implies corporate ownership. The practice presents as a standalone brand.`;
+  // 4.5.b launch-blocker, locked 2026-05-08. Anonymity tier 2 (2026-06-04)
+  // tightens this further: the practice NAME itself is withheld too.
+  const summaryConstraint = anonymizePractice
+    ? `- summary: 2-3 paragraphs, conversational but professional. Refer to the employer ONLY as "our practice" or "our office." Do NOT use ANY specific practice, office, company, brand, or DSO name anywhere — the employer's identity is intentionally withheld on this listing.`
+    : useDsoName
+      ? `- summary: 2-3 paragraphs, conversational but professional, mentions the employer name and role focus`
+      : `- summary: 2-3 paragraphs, conversational but professional, refers ONLY to the practice (the employer name supplied below). Do NOT mention any parent DSO, corporate parent, or affiliated brand. Do NOT use phrases like "part of a larger DSO," "owned by," or anything that implies corporate ownership. The practice presents as a standalone brand.`;
+
+  const titleConstraint = anonymizePractice
+    ? `- title: a clean, professional job title for the ROLE only (e.g., "Dental Office Manager"). Do NOT put any employer, practice, office, or company name in the title.`
+    : `- title: a clean, professional job title with seniority where appropriate (e.g., "Associate Dentist — Multi-Location DSO")`;
 
   return `You are a dental hiring expert helping a DSO write a job description for the DSO Hire job board. Tone: practical, declarative, no marketing fluff, no exclamation marks, no emoji.
 
@@ -360,7 +390,7 @@ Output ONLY a single JSON object with this exact shape (no surrounding prose, no
 }
 
 Constraints:
-- title: a clean, professional job title with seniority where appropriate (e.g., "Associate Dentist — Multi-Location DSO")
+${titleConstraint}
 ${summaryConstraint}
 - responsibilities: 5-8 bullet items, each one short imperative phrase
 - qualifications: 4-6 bullet items mixing required + preferred
@@ -376,15 +406,22 @@ function buildUserPrompt(args: {
   tone: "professional" | "friendly" | "concise";
   employerName: string;
   useDsoName: boolean;
+  anonymizePractice: boolean;
   details?: z.infer<typeof DetailsContextSchema>;
 }): string {
   // Label the employer field correctly for the model — when affiliation
   // is private, signal that this is the public-facing practice name,
   // not a DSO brand. Reinforces the system-prompt constraint.
-  const employerFieldLabel = args.useDsoName ? "DSO" : "Practice (public brand)";
-  const privacyReminder = args.useDsoName
-    ? ""
-    : `\n\nIMPORTANT: This practice presents publicly as a standalone brand. The corporate ownership is intentionally not disclosed in this job description. Refer to the employer only as "${args.employerName}" or generic terms like "our practice." Do not mention any DSO, corporate parent, or multi-location operator.`;
+  const employerFieldLabel = args.anonymizePractice
+    ? "Employer (name withheld — use only generic phrasing)"
+    : args.useDsoName
+      ? "DSO"
+      : "Practice (public brand)";
+  const privacyReminder = args.anonymizePractice
+    ? `\n\nIMPORTANT: This employer's identity is intentionally withheld on this listing. Do NOT use any specific practice, office, company, brand, or DSO name ANYWHERE in the output — not in the title, summary, or any bullet. Refer to the employer only as "${args.employerName}" or generic terms like "our practice" / "our team."`
+    : args.useDsoName
+      ? ""
+      : `\n\nIMPORTANT: This practice presents publicly as a standalone brand. The corporate ownership is intentionally not disclosed in this job description. Refer to the employer only as "${args.employerName}" or generic terms like "our practice." Do not mention any DSO, corporate parent, or multi-location operator.`;
 
   // 2026-05-26 — Job-specific context block. Built from the Details step
   // (now Step 2 of the wizard). When the recruiter has already locked in

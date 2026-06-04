@@ -14,6 +14,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Briefcase,
+  CalendarDays,
   Clock,
   DollarSign,
   ExternalLink,
@@ -146,7 +147,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
     supabase
       .from("job_locations")
       .select(
-        "location:dso_locations(id, name, address_line1, city, state, postal_code, website, public_dso_affiliation)"
+        "location:dso_locations(id, name, address_line1, city, state, postal_code, website, public_dso_affiliation, anonymize_name)"
       )
       .eq("job_id", id),
     supabase.from("job_skills").select("skill").eq("job_id", id),
@@ -172,10 +173,26 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
       postal_code: string | null;
       website: string | null;
       public_dso_affiliation: boolean | null;
+      anonymize_name: boolean | null;
     } | null;
   }>)
     .map((row) => row.location)
     .filter((l): l is NonNullable<typeof l> => l !== null);
+
+  // Anonymity tier 2 — the public name a location presents. When the location
+  // hides its practice name, even this detail page (headliner + sidebar) must
+  // show "Dental Office in {city}" instead of the real name. Mirrors
+  // maskedLocationName in affiliation-display.ts.
+  const publicLocName = (loc: {
+    name: string;
+    city: string | null;
+    anonymize_name: boolean | null;
+  }): string =>
+    loc.anonymize_name
+      ? loc.city
+        ? `Dental Office in ${loc.city}`
+        : "A dental office"
+      : loc.name;
 
   const skills = ((jobSkills ?? []) as Array<{ skill: string }>).map((s) => s.skill);
 
@@ -195,7 +212,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
   );
   const isPublicAffiliated = isPublicAffiliatedRpc === true;
   const singlePracticeName =
-    locations.length === 1 ? locations[0]!.name : null;
+    locations.length === 1 ? publicLocName(locations[0]!) : null;
   // 5G.a (2026-05-13) — corporate-scope jobs are DSO-wide and may have
   // 0 or many anchor locations. The label "Multiple locations" reads wrong
   // for a CFO posting; "Corporate" (or, when public-affiliated, "{DSO}
@@ -869,6 +886,23 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                 </Detail>
               )}
 
+            {(() => {
+              const days = (job.schedule_days as string[] | null) ?? [];
+              const evenings = Boolean(job.schedule_evenings);
+              const weekends = Boolean(job.schedule_weekends);
+              if (days.length === 0 && !evenings && !weekends) return null;
+              const parts = [
+                formatScheduleDays(days),
+                evenings ? "evenings" : null,
+                weekends ? "weekends" : null,
+              ].filter(Boolean);
+              return (
+                <Detail icon={CalendarDays} label="Schedule">
+                  {parts.join(" · ")}
+                </Detail>
+              );
+            })()}
+
             {(job.posted_at as string | null) && (
               <Detail icon={Clock} label="Posted">
                 {timeAgo(new Date(job.posted_at as string))}
@@ -885,11 +919,12 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                     // website footer, so we hide the link entirely.
                     const showWebsite =
                       Boolean(loc.website) &&
-                      (loc.public_dso_affiliation ?? true) === true;
+                      (loc.public_dso_affiliation ?? true) === true &&
+                      !loc.anonymize_name;
                     return (
                       <li key={loc.id}>
                         <div className="font-semibold text-ivory text-[15px]">
-                          {loc.name}
+                          {publicLocName(loc)}
                         </div>
                         <div className="text-[14px] text-ivory/70">
                           {[loc.city, loc.state].filter(Boolean).join(", ")}
@@ -965,6 +1000,50 @@ function Detail({
       </div>
     </div>
   );
+}
+
+/**
+ * Compact day summary for the At-a-glance Schedule row: collapses consecutive
+ * runs into ranges ("Mon–Thu") and lists gaps ("Mon–Wed, Fri"). Null when no
+ * recognized days. Dental candidates care a lot about which days / 4-day weeks.
+ */
+function formatScheduleDays(days: string[]): string | null {
+  const order = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+  const LABEL: Record<string, string> = {
+    mon: "Mon",
+    tue: "Tue",
+    wed: "Wed",
+    thu: "Thu",
+    fri: "Fri",
+    sat: "Sat",
+    sun: "Sun",
+  };
+  const idxs = Array.from(new Set(days))
+    .map((d) => order.indexOf(d))
+    .filter((i) => i >= 0)
+    .sort((a, b) => a - b);
+  if (idxs.length === 0) return null;
+  const runs: Array<[number, number]> = [];
+  let start = idxs[0]!;
+  let prev = idxs[0]!;
+  for (let k = 1; k < idxs.length; k++) {
+    const cur = idxs[k]!;
+    if (cur === prev + 1) {
+      prev = cur;
+    } else {
+      runs.push([start, prev]);
+      start = cur;
+      prev = cur;
+    }
+  }
+  runs.push([start, prev]);
+  return runs
+    .map(([s, e]) =>
+      s === e
+        ? LABEL[order[s]!]!
+        : `${LABEL[order[s]!]}–${LABEL[order[e]!]}`
+    )
+    .join(", ");
 }
 
 function formatComp(job: { [k: string]: unknown }): string {
