@@ -233,7 +233,7 @@ async function loadCandidateInputs(
   const { data: c } = await supabase
     .from("candidates")
     .select(
-      "desired_roles, current_title, desired_specialty, license_states, desired_locations, desired_location_points, pms_systems, skills, schedule_preferences, min_salary, salary_unit, temp_or_perm, dso_size_preference, years_experience_dental, candidate_certifications(kind)"
+      "desired_roles, current_title, desired_specialty, license_states, desired_locations, desired_location_points, pms_systems, skills, schedule_preferences, min_salary, salary_unit, temp_or_perm, dso_size_preference, years_experience, years_experience_dental, candidate_certifications(kind)"
     )
     .eq("id", candidateId)
     .maybeSingle();
@@ -293,8 +293,15 @@ async function loadCandidateInputs(
     dso_size_preference:
       (r.dso_size_preference as FitInputs["candidate"]["dso_size_preference"]) ??
       null,
+    // Mirror the profile/completeness fallback: PracticeFit must read the
+    // same value the candidate sees on their profile, or a candidate with the
+    // legacy `years_experience` populated (but `years_experience_dental` null)
+    // gets "100% complete, 9 years" on the profile yet an "Add experience"
+    // PracticeFit nag — the contradiction Cam hit on Sarah's dashboard.
     years_experience_dental:
-      (r.years_experience_dental as number | null) ?? null,
+      (r.years_experience_dental as number | null) ??
+      (r.years_experience as number | null) ??
+      null,
   };
 }
 

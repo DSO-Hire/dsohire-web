@@ -61,7 +61,7 @@ import { CandidateFitSummary } from "@/components/practice-fit/candidate-fit-sum
 import { RolesThatFitCard } from "@/components/practice-fit/roles-that-fit-card";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
 import { getTopFitJobsForCandidate } from "@/lib/practice-fit/roles-that-fit";
-import type { FitResult } from "@/lib/practice-fit/types";
+import type { FitResult, FitDimensionKey } from "@/lib/practice-fit/types";
 import { resolveCandidateApplicationAffiliations } from "@/lib/dso/affiliation-display";
 import type { Metadata } from "next";
 
@@ -84,7 +84,7 @@ export default async function CandidateDashboardPage() {
   const { data: candidate } = await supabase
     .from("candidates")
     .select(
-      "id, first_name, last_name, salutation, full_name, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, desired_specialty, pms_systems, skills, languages, temp_or_perm, schedule_preferences, min_salary, salary_unit, cv_visibility, availability, resume_url, linkedin_url, avatar_url, practice_fit_consent",
+      "id, first_name, last_name, salutation, full_name, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, desired_specialty, license_states, pms_systems, skills, languages, temp_or_perm, dso_size_preference, schedule_preferences, min_salary, salary_unit, cv_visibility, availability, resume_url, linkedin_url, avatar_url, practice_fit_consent",
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
@@ -281,9 +281,39 @@ export default async function CandidateDashboardPage() {
     (((candidate as Record<string, unknown>).practice_fit_consent as
       | string
       | null) ?? "off") !== "off";
-  const rolesThatFit = pfConsentOn
-    ? await getTopFitJobsForCandidate(candidateRowId, 4)
+  // Single source of truth for "matches": the PracticeFit role-gated open-role
+  // set. The KPI tile count AND the "Roles that fit you" card both derive from
+  // this list, so the dashboard can never show "0 matches" next to a populated
+  // fit list again (the contradiction Cam hit). Capped scan; top 4 in the card.
+  const rolesThatFitAll = pfConsentOn
+    ? await getTopFitJobsForCandidate(candidateRowId, 24)
     : [];
+  const rolesThatFit = rolesThatFitAll.slice(0, 4);
+  const fittingRolesCount = rolesThatFitAll.length;
+
+  // Dimensions the candidate has ALREADY filled — used to suppress
+  // "lift your match" nudges that would otherwise tell them to add data they
+  // already provided (defense-in-depth against any stale candidate-side CTA).
+  const filledDims = new Set<FitDimensionKey>();
+  {
+    const cr = candidate as Record<string, unknown>;
+    const filled = (v: unknown) => Array.isArray(v) && v.length > 0;
+    if (filled(cr.desired_roles) || cr.current_title) filledDims.add("role_fit");
+    if (cr.min_salary != null) filledDims.add("compensation");
+    if (filled(cr.desired_locations)) filledDims.add("location");
+    if (filled(cr.pms_systems)) filledDims.add("pms_fluency");
+    if (filled(cr.license_states)) filledDims.add("license_state");
+    if ((rawCertifications ?? []).length > 0) filledDims.add("certifications");
+    if (filled(cr.desired_specialty)) filledDims.add("specialty");
+    if (filled(cr.skills)) filledDims.add("skills");
+    if ((cr.years_experience_dental ?? cr.years_experience) != null)
+      filledDims.add("years_experience");
+    if (cr.temp_or_perm) filledDims.add("employment_type");
+    if (cr.dso_size_preference) filledDims.add("dso_size");
+    const sched = cr.schedule_preferences as Record<string, unknown> | null;
+    if (sched && Object.keys(sched).length > 0)
+      filledDims.add("schedule_overlap");
+  }
 
   // ── Job + DSO maps ──────────────────────────────────────────────────
   const jobIds = Array.from(new Set(apps.map((a) => a.job_id)));
@@ -450,26 +480,6 @@ export default async function CandidateDashboardPage() {
     }
   }
 
-  // ── Job matches (count of active jobs matching desired_roles) ───────
-  const desiredRoles = (candidate.desired_roles as string[] | null) ?? [];
-  let jobMatchCount = 0;
-  if (desiredRoles.length > 0) {
-    const { count } = await supabase
-      .from("jobs")
-      .select("*", { count: "exact", head: true })
-      .eq("status", "active")
-      .is("deleted_at", null)
-      .in("role_category", desiredRoles);
-    jobMatchCount = count ?? 0;
-  } else {
-    const { count } = await supabase
-      .from("jobs")
-      .select("*", { count: "exact", head: true })
-      .eq("status", "active")
-      .is("deleted_at", null);
-    jobMatchCount = count ?? 0;
-  }
-
   // ── Stage breakdown (active apps only) ──────────────────────────────
   const stageBreakdown: Record<(typeof KANBAN_KINDS)[number], number> = {
     open: 0,
@@ -598,7 +608,7 @@ export default async function CandidateDashboardPage() {
               mode="new-replies"
               unreadCount={totalUnread}
               replies={replyPreviews}
-              href="/candidate/applications"
+              href="/candidate/inbox"
               ctaLabel="Open inbox"
             />
           ) : heroMode === "active-apps" ? (
@@ -636,18 +646,16 @@ export default async function CandidateDashboardPage() {
         </div>
 
         <KpiTile
-          icon={Send}
-          value={String(activeApps.length)}
-          label="Active Applications"
+          icon={Mail}
+          value={String(totalUnread)}
+          label="Unread Replies"
           hint={
-            activeApps.length === 0
-              ? "Once you apply, every active application appears here."
-              : buildActiveAppsHint(stageBreakdown)
+            totalUnread === 0
+              ? "Messages from employers land here."
+              : `${totalUnread} new repl${totalUnread === 1 ? "y" : "ies"} from employers.`
           }
-          href="/candidate/applications"
-          routeLabel={
-            activeApps.length === 0 ? "Browse jobs" : "See applications"
-          }
+          href="/candidate/inbox"
+          routeLabel="Open inbox"
         />
 
         <KpiTile
@@ -665,17 +673,21 @@ export default async function CandidateDashboardPage() {
 
         <KpiTile
           icon={Search}
-          value={String(jobMatchCount)}
-          label={desiredRoles.length > 0 ? "Jobs Matching You" : "Open Jobs"}
+          value={pfConsentOn ? String(fittingRolesCount) : "Off"}
+          label="Roles That Fit You"
           hint={
-            desiredRoles.length === 0
-              ? "Set your target roles in your profile to get matched jobs."
-              : jobMatchCount === 0
-                ? "No matches yet. Try widening your role preferences."
-                : "Across multi-location dental groups in your area."
+            !pfConsentOn
+              ? "Turn on PracticeFit to see roles matched to your profile."
+              : fittingRolesCount === 0
+                ? "No open roles fit you yet — we'll email you the moment one posts."
+                : "Ranked by PracticeFit across dental groups near you."
           }
-          href={desiredRoles.length > 0 ? "/candidate/jobs?match=1" : "/candidate/jobs"}
-          routeLabel={desiredRoles.length > 0 ? "Browse matches" : "Browse jobs"}
+          href={
+            pfConsentOn
+              ? "/candidate/jobs?match=1"
+              : "/candidate/settings/privacy#practice-fit"
+          }
+          routeLabel={pfConsentOn ? "Browse matches" : "Turn on PracticeFit"}
         />
 
         <KpiTile
@@ -727,6 +739,7 @@ export default async function CandidateDashboardPage() {
       <CandidateFitSummary
         fitsByAppId={fitsByActiveAppId}
         totalActiveApps={activeApps.length}
+        filledDims={filledDims}
       />
 
       {/* Roles that fit you — top open roles ranked by PracticeFit (B.1) */}

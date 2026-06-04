@@ -36,6 +36,14 @@ export interface CandidateFitSummaryProps {
   fitsByAppId: Map<string, FitResult | null>;
   /** Total active apps the candidate has, scored or otherwise. */
   totalActiveApps: number;
+  /**
+   * Dimensions the candidate has ALREADY filled on their profile. A gap is only
+   * worth nudging when the candidate's OWN data is missing — never when a
+   * dimension is unscored for a job-side reason (e.g. the posting lists pay as
+   * "DOE"). Without this guard the card tells a candidate to "add" data they
+   * already provided (the Sarah-Chen "Add experience" bug).
+   */
+  filledDims?: Set<FitDimensionKey>;
 }
 
 interface CommonGap {
@@ -49,6 +57,7 @@ interface CommonGap {
 export function CandidateFitSummary({
   fitsByAppId,
   totalActiveApps,
+  filledDims,
 }: CandidateFitSummaryProps) {
   // No active apps → don't render. PracticeFit only makes sense in
   // the context of an application.
@@ -110,6 +119,9 @@ export function CandidateFitSummary({
       // Skip "job-side missing" gaps — the candidate can't act on those.
       if (!dim.cta_href || !dim.cta_label) continue;
       const key = keyRaw as FitDimensionKey;
+      // Skip anything the candidate has already filled — the gap is on the
+      // job's side, not theirs. Never tell someone to add data they have.
+      if (filledDims?.has(key)) continue;
       const existing = gapAccumulator.get(key);
       if (existing) {
         existing.count += 1;
@@ -137,7 +149,7 @@ export function CandidateFitSummary({
           {/* Best fit headline */}
           <div className="flex-1 min-w-[260px]">
             <p className="text-[11px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-2">
-              Your strongest match
+              Best fit · jobs you&apos;ve applied to
             </p>
             <div className="flex items-center gap-2 mb-1">
               <span
@@ -194,10 +206,6 @@ export function CandidateFitSummary({
                   >
                     <Plus className="h-3.5 w-3.5 text-heritage-deep" />
                     <span className="font-semibold">{g.cta_label}</span>
-                    <span className="text-slate-meta text-[12px]">
-                      — affects {g.count}{" "}
-                      {g.count === 1 ? "app" : "apps"}
-                    </span>
                     <ArrowRight className="h-3 w-3 text-slate-meta group-hover:translate-x-0.5 transition-transform" />
                   </Link>
                 </li>
