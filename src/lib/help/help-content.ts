@@ -122,7 +122,7 @@ const JD: Record<string, HelpEntry> = {
   },
   "jd.skills": {
     title: "Preferred skills",
-    tip: "Not a hard filter. Practice Fit rewards candidates who match a few of these; missing a skill never disqualifies anyone.",
+    tip: "Not a hard filter. PracticeFit rewards candidates who match a few of these; missing a skill never disqualifies anyone.",
     format: "tip",
     lens: "employer",
   },
@@ -211,7 +211,7 @@ const PIPELINE: Record<string, HelpEntry> = {
     lens: "employer",
   },
   "pipeline.practice_fit": {
-    title: "Practice Fit score",
+    title: "PracticeFit score",
     tip: "A guidance score, not a gate. It blends role, skills, schedule, and preferences — and drops any dimension the candidate left blank so sparse profiles aren't penalized.",
     format: "disclosure",
     lens: "employer",
@@ -479,7 +479,7 @@ const SETTINGS: Record<string, HelpEntry> = {
   },
   "applications.review": {
     title: "Reviewing applications",
-    tip: "Open any application to see the candidate's profile, resume, screening answers, knockout flags, and Practice Fit score side-by-side. Leave structured scorecard feedback and @mention teammates without leaving the page.",
+    tip: "Open any application to see the candidate's profile, resume, screening answers, knockout flags, and PracticeFit score side-by-side. Leave structured scorecard feedback and @mention teammates without leaving the page.",
     format: "drawer",
     lens: "employer",
     videoId: null,
@@ -490,7 +490,7 @@ const SETTINGS: Record<string, HelpEntry> = {
       },
       {
         heading: "2 · Open the detail page",
-        body: "Click any candidate to see profile, resume, screening question answers, knockout flags (with the exact failed question), Practice Fit score breakdown, and your team's notes — all on one page.",
+        body: "Click any candidate to see profile, resume, screening question answers, knockout flags (with the exact failed question), PracticeFit score breakdown, and your team's notes — all on one page.",
       },
       {
         heading: "3 · Move stages",
@@ -593,7 +593,7 @@ const CANDIDATE: Record<string, HelpEntry> = {
         body: "Upload a resume and we parse it into your profile. You review every field before it saves — nothing is applied on your behalf.",
       },
       {
-        heading: "Understand Practice Fit",
+        heading: "Understand PracticeFit",
         body: "On each job you'll see a fit score. It's guidance to help you prioritize, never a barrier to applying.",
       },
       {
@@ -603,7 +603,7 @@ const CANDIDATE: Record<string, HelpEntry> = {
     ],
   },
   "cand.practice_fit": {
-    title: "Your Practice Fit score",
+    title: "Your PracticeFit score",
     tip: "How well a role lines up with your profile — roles, skills, schedule, preferences. It's guidance to help you prioritize, not a gate. You can apply to anything.",
     format: "disclosure",
     lens: "candidate",

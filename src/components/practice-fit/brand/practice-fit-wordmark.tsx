@@ -22,7 +22,10 @@ export type PracticeFitSurface =
   | "dark"
   | "heritage"
   | "mono-navy"
-  | "mono-ivory";
+  | "mono-ivory"
+  /** Inherit the parent's text color (single-tone) — for colored headers
+   *  whose text color changes by state, e.g. the bucket-colored fit bar. */
+  | "inherit";
 
 interface SurfaceColors {
   practice: string;
@@ -61,6 +64,14 @@ const SURFACES: Record<PracticeFitSurface, SurfaceColors> = {
     fit: "text-ivory",
     spark: "text-ivory",
     pillBg: "bg-ivory/10",
+  },
+  // No color classes → "Practice", "Fit" and the sparkle all inherit the
+  // parent's currentColor. Single-tone, but legible on any background.
+  inherit: {
+    practice: "",
+    fit: "",
+    spark: "",
+    pillBg: "bg-current/10",
   },
 };
 

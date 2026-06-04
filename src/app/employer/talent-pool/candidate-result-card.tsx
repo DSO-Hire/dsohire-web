@@ -35,9 +35,9 @@ interface CandidateResultCardProps {
   pmsSystems?: string[] | null;
   /** Certification kinds the candidate has furnished (dental facet). */
   certKinds?: string[];
-  /** Practice Fit score against the picked job; null when no job picked. */
+  /** PracticeFit score against the picked job; null when no job picked. */
   fitScore?: number | null;
-  /** Practice Fit bucket against the picked job; null when no job picked. */
+  /** PracticeFit bucket against the picked job; null when no job picked. */
   fitBucket?:
     | "excellent"
     | "strong"

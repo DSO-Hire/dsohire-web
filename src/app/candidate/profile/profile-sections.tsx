@@ -17,7 +17,7 @@
  *   6. Licenses (multi-entry)
  *   7. Certifications (multi-entry)
  *   8. Job Preferences
- *   9. Practice Fit (placeholder, Phase 5D)
+ *   9. PracticeFit (placeholder, Phase 5D)
  *
  * Each card shows the strongest preview we can render from the available
  * data; the locked rule is "no shame state" — empty fields read as a
@@ -2186,7 +2186,7 @@ function JobPreferencesModal({
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// 9. Practice Fit (placeholder, Phase 5D)
+// 9. PracticeFit (placeholder, Phase 5D)
 // ─────────────────────────────────────────────────────────────────────
 
 function PracticeFitCard() {
@@ -2194,7 +2194,7 @@ function PracticeFitCard() {
     <section className="border border-slate-200 bg-[#F7F4ED] p-6 sm:p-8">
       <header className="mb-3">
         <h2 className="font-display text-lg font-bold text-[#14233F]">
-          Practice Fit
+          PracticeFit
         </h2>
         <p className="mt-0.5 text-sm text-slate-600">
           Employers already see how well you match their open roles — Practice
@@ -2205,7 +2205,7 @@ function PracticeFitCard() {
       </header>
       <div className="flex items-center gap-2 rounded-md bg-white px-4 py-3 text-xs text-slate-500">
         <AlertCircle className="size-4 text-[#4D7A60]" />
-        Nothing to fill in here — keep your profile up to date and Practice Fit
+        Nothing to fill in here — keep your profile up to date and PracticeFit
         follows. An optional work-style assessment to fine-tune it is coming
         later.
       </div>

@@ -145,7 +145,7 @@ export default async function CandidateJobsPage() {
       null,
   }));
 
-  // Practice Fit (Phase 5D v0) — only when the signed-in user has a
+  // PracticeFit (Phase 5D v0) — only when the signed-in user has a
   // candidate row AND consent != 'off'. Compute in parallel; cached
   // by (candidate_id, job_id), so repeat visits are sub-ms.
   const {

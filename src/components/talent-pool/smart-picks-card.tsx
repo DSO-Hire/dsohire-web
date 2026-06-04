@@ -7,7 +7,8 @@
  */
 
 import Link from "next/link";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import type { SmartPick } from "@/lib/talent-pool/smart-picks";
 import { SmartPicksSaveButton } from "./smart-picks-save-button";
 
@@ -32,11 +33,11 @@ export function SmartPicksCard({ picks }: SmartPicksCardProps) {
   return (
     <section className="mb-10 border border-[var(--rule)] bg-white">
       <header className="px-6 py-4 border-b border-[var(--rule)] flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-heritage-deep" aria-hidden />
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
-            Smart picks · Practice Fit
-          </div>
+        <div className="flex items-center gap-2 text-heritage-deep">
+          <span className="text-[10px] font-bold tracking-[2.5px] uppercase">
+            Smart picks ·
+          </span>
+          <PracticeFitWordmark surface="inherit" className="text-[14px]" />
         </div>
         <Link
           href="/employer/talent-pool"
@@ -46,7 +47,7 @@ export function SmartPicksCard({ picks }: SmartPicksCardProps) {
         </Link>
       </header>
       <div className="px-6 py-3 text-[12px] text-slate-meta border-b border-[var(--rule)]">
-        Top {picks.length} opted-in candidates ranked by Practice Fit for
+        Top {picks.length} opted-in candidates ranked by PracticeFit for
         this role. Already-applied candidates are excluded.
       </div>
       <ul>

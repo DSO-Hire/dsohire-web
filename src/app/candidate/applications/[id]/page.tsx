@@ -202,7 +202,7 @@ export default async function CandidateApplicationDetailPage({
   const otherPartyName = displayed?.name ?? dso?.name ?? "Hiring team";
   const candidateName = candidate.full_name?.trim() || "You";
 
-  // Practice Fit (Phase 5D v1.4 — wired into the candidate detail page).
+  // PracticeFit (Phase 5D v1.4 — wired into the candidate detail page).
   // Returns null when role-filtered or compute hasn't populated yet.
   // When null, we classify the reason against the candidate's own
   // desired_roles + the job's role to decide whether to render an
@@ -362,7 +362,7 @@ export default async function CandidateApplicationDetailPage({
             </div>
           </section>
 
-          {/* Practice Fit. When we have a scored fit we render
+          {/* PracticeFit. When we have a scored fit we render
               WhyThisMatch (with inline editors for lift-your-match
               flow); when fit is null but the reason is a role-mismatch,
               we render an explanation panel so the candidate isn't
@@ -371,7 +371,7 @@ export default async function CandidateApplicationDetailPage({
           {practiceFit ? (
             <section>
               <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
-                Practice Fit
+                PracticeFit
               </h2>
               <WhyThisMatch
                 fit={practiceFit}
@@ -383,7 +383,7 @@ export default async function CandidateApplicationDetailPage({
           ) : practiceFitReason === "role_mismatch" ? (
             <section>
               <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
-                Practice Fit
+                PracticeFit
               </h2>
               <div className="border border-[var(--rule)] bg-cream/40 p-5">
                 <div className="flex items-start gap-3">
@@ -393,7 +393,7 @@ export default async function CandidateApplicationDetailPage({
                       This role isn&apos;t in your preferences
                     </p>
                     <p className="text-[13px] text-slate-body leading-relaxed mb-3">
-                      Practice Fit only scores roles you&apos;ve told us
+                      PracticeFit only scores roles you&apos;ve told us
                       you&apos;re interested in. Your application still
                       stands — but if your goals have changed, update
                       your preferred roles to start seeing fit scores

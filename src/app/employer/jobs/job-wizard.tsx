@@ -157,7 +157,7 @@ const COMP_TYPE_OPTIONS: Array<{
   {
     value: "doe",
     label: "DOE / discussed",
-    helper: "Discussed at the offer stage. Comp drops out of Practice Fit.",
+    helper: "Discussed at the offer stage. Comp drops out of PracticeFit.",
   },
 ];
 
@@ -179,10 +179,10 @@ export interface JobWizardInitial {
   skills: string[];
   hide_stages_from_candidate: boolean;
   scope: JobScope;
-  // v1.1 — Practice Fit scoring inputs
+  // v1.1 — PracticeFit scoring inputs
   specialty: string[];
   min_years_experience: number | null;
-  // Track F (2026-05-12) — Practice Fit schedule overlap dimension
+  // Track F (2026-05-12) — PracticeFit schedule overlap dimension
   schedule_days: string[];
   schedule_evenings: boolean;
   schedule_weekends: boolean;
@@ -242,7 +242,7 @@ interface JobWizardProps {
 // keep them to avoid a Postgres enum migration. Labels match the
 // candidate-side ROLE_CATEGORIES vocabulary so an employer's "Dental
 // Assistant" posting reads identically to a candidate's "Dental
-// Assistant" preference. Practice Fit's role-canonicalize layer
+// Assistant" preference. PracticeFit's role-canonicalize layer
 // (src/lib/practice-fit/role-canonicalize.ts) maps both vocabularies to
 // a single internal key before comparing — that's how an "assistant"
 // candidate now matches a "dental_assistant" job, instead of dropping
@@ -447,7 +447,7 @@ export function JobWizard({
     initialQuestions ?? []
   );
   const [status, setStatus] = useState(initial?.status ?? "draft");
-  // v1.1 — Practice Fit inputs.
+  // v1.1 — PracticeFit inputs.
   const [specialty, setSpecialty] = useState<Set<string>>(
     new Set(initial?.specialty ?? [])
   );
@@ -457,7 +457,7 @@ export function JobWizard({
       ? String(initial.min_years_experience)
       : ""
   );
-  // Track F (2026-05-12) — Practice Fit schedule overlap inputs.
+  // Track F (2026-05-12) — PracticeFit schedule overlap inputs.
   const [scheduleDays, setScheduleDays] = useState<Set<string>>(
     new Set(initial?.schedule_days ?? [])
   );
@@ -1851,7 +1851,7 @@ function DetailsStep({
           Match scoring
         </legend>
         <p className="mt-1 text-[12px] text-slate-meta leading-relaxed">
-          These fields drive Practice Fit — the proprietary match score
+          These fields drive PracticeFit — the proprietary match score
           candidates and recruiters see on every application. Both are
           optional; the score adapts to whatever you fill in.
         </p>
@@ -1955,7 +1955,7 @@ function DetailsStep({
             </label>
           </div>
           <p className="mt-2 text-[11px] text-slate-meta">
-            Powers Practice Fit&apos;s schedule overlap dimension. Leave blank if
+            Powers PracticeFit&apos;s schedule overlap dimension. Leave blank if
             scheduling is flexible — the score excludes the dimension when no
             days/flags are set.
           </p>
@@ -1977,7 +1977,7 @@ function DetailsStep({
         // alphabetical flat list when role is unknown.
         options={getAllDentalSkillsPrioritized(roleCategory)}
         placeholder="Search skills — type and press Enter for custom"
-        helper="Skills you'd like to see in candidates — not a hard filter. Practice Fit rewards candidates who match a few of these; missing skills don't disqualify anyone."
+        helper="Skills you'd like to see in candidates — not a hard filter. PracticeFit rewards candidates who match a few of these; missing skills don't disqualify anyone."
       />
       <ChipArrayInput
         label="Benefits"

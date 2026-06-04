@@ -6,7 +6,7 @@
  *
  * Per-row card (locked):
  *   • Status pill (or "In review" when hide_stages_from_candidate=true)
- *   • Practice Fit chip placeholder (Phase 5D)
+ *   • PracticeFit chip placeholder (Phase 5D)
  *   • Title · Employer
  *   • Scope chip (location count for now; jobs.scope enum lands later)
  *   • "Applied {date}" + "Updated {ago}"
@@ -127,7 +127,7 @@ export default async function CandidateApplicationsPage({
     .maybeSingle();
   if (!candidate) return null;
   const candidateId = candidate.id as string;
-  // Practice Fit placeholder reason resolution (focused pass on the
+  // PracticeFit placeholder reason resolution (focused pass on the
   // candidate side). The candidate sees their own data, so we CAN
   // disambiguate why fit is unavailable — unlike the employer side
   // where RLS forces a generic banner. Per get-or-compute.ts, consent
@@ -387,7 +387,7 @@ export default async function CandidateApplicationsPage({
     filteredApps = sorted;
   }
 
-  // ── Practice Fit per filtered application ──────────────────────────
+  // ── PracticeFit per filtered application ──────────────────────────
   // Compute fits ONLY for the currently-rendered tab, in parallel.
   // Skipped on the Saved tab (it has its own data path below). Each
   // call hits the cache; v1.1 role filter may return null, in which
@@ -435,7 +435,7 @@ export default async function CandidateApplicationsPage({
     } | null;
   };
   let savedJobs: SavedJobRow[] = [];
-  // Practice Fit per saved job — parallel compute, cached after first
+  // PracticeFit per saved job — parallel compute, cached after first
   // visit. v1.4 closes the parallel gap with /candidate/applications
   // (the active-apps tab); both tabs now show the same chip pattern.
   const fitsBySavedJobId = new Map<string, FitResult | null>();
@@ -655,7 +655,7 @@ function ApplicationsList({
   unreadByAppId: Map<string, number>;
   fitsByAppId: Map<string, FitResult | null>;
   /**
-   * Per-application reason for the Practice Fit placeholder when fit is
+   * Per-application reason for the PracticeFit placeholder when fit is
    * null. Used to pick precise tooltip + label copy on the candidate
    * side. Defaults to "unavailable" when no entry is present.
    */
@@ -683,7 +683,7 @@ function ApplicationsList({
             >
               <div className="flex items-start justify-between gap-4 flex-wrap">
                 <div className="min-w-0 flex-1">
-                  {/* Top line — status pill + self-reported chip + Practice Fit + unread */}
+                  {/* Top line — status pill + self-reported chip + PracticeFit + unread */}
                   <div className="mb-2 flex flex-wrap items-center gap-2">
                     <StatusPill
                       kind={app.kind}

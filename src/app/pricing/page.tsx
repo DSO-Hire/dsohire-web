@@ -113,7 +113,7 @@ function PricingHero() {
       </h1>
       <p className="text-lg text-slate-body leading-[1.7] max-w-[640px]">
         Pick the tier that matches your footprint. Every tier includes
-        multi-location posting and Practice Fit. Cancel or change tiers anytime.
+        multi-location posting and PracticeFit. Cancel or change tiers anytime.
       </p>
     </section>
   );
@@ -211,7 +211,7 @@ function TierGrid({
       </div>
 
       <p className="mt-10 text-[14px] text-slate-body text-center leading-relaxed">
-        Every tier includes multi-location posting, Practice Fit, candidate
+        Every tier includes multi-location posting, PracticeFit, candidate
         dashboards, and Stripe-secured billing.{" "}
         <strong className="text-ink font-bold">
           No per-listing fees. No placement fees. Ever.
@@ -464,7 +464,7 @@ interface MatrixGroup {
  * Enterprise repositioning. Governing decisions:
  *   - Capacity: Solo 5 listings · 3 seats; Growth 20 · 10; Scale & Enterprise
  *     unlimited · unlimited. Hiring managers + applications stay uncapped.
- *   - Practice Fit + AI candidate matching ship at Solo and up (the
+ *   - PracticeFit + AI candidate matching ship at Solo and up (the
  *     differentiator is visible to every paying customer).
  *   - Pipeline depth (cross-job inbox, license tracking, funnel reports,
  *     rejection suggester, priority support) starts at Growth.
@@ -700,11 +700,11 @@ const COMPARE_GROUPS: MatrixGroup[] = [
         values: { solo: true, growth: true, scale: true, enterprise: true },
       },
       {
-        feature: "Practice Fit — AI candidate match-to-job",
+        feature: "PracticeFit — AI candidate match-to-job",
         values: { solo: true, growth: true, scale: true, enterprise: true },
       },
       {
-        feature: "Practice Fit Score (1–100)",
+        feature: "PracticeFit Score (1–100)",
         values: { solo: true, growth: true, scale: true, enterprise: true },
       },
       {

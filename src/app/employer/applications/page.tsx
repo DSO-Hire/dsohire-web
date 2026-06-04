@@ -39,7 +39,7 @@ interface PageProps {
     job?: string;
     status?: string;
     /**
-     * Practice Fit sort + filter (Phase 5D v1.2).
+     * PracticeFit sort + filter (Phase 5D v1.2).
      * sort: "fit" → desc by fit score; absent → default (created_at desc)
      * min_fit: "solid" | "strong" | "excellent" → filter rows by bucket floor
      */
@@ -303,7 +303,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
     statusCounts[a.kind] = (statusCounts[a.kind] ?? 0) + 1;
   }
 
-  // Practice Fit (Phase 5D) — cross-job list, so we fetch per (candidate,
+  // PracticeFit (Phase 5D) — cross-job list, so we fetch per (candidate,
   // job) in parallel. Cached on subsequent renders, so this is fast on
   // re-visit. Map keyed by application_id for quick lookup at render time.
   const fitByAppId = new Map<string, FitResult>();
@@ -317,7 +317,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
     });
   }
 
-  // ── Min-fit filter + Practice Fit sort (Phase 5D v1.2) ──────────────
+  // ── Min-fit filter + PracticeFit sort (Phase 5D v1.2) ──────────────
   // Bucket floors map to score thresholds via the locked v1.1 cutoffs
   // (75/60/45/30 — see src/lib/practice-fit/buckets.ts). Apps with no
   // fit (role-filtered or consent-off) are kept when min_fit is unset
@@ -437,7 +437,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
               { value: "oldest", label: "Oldest first" },
               { value: "alpha", label: "Candidate name (A→Z)" },
               { value: "stage", label: "Stage order" },
-              { value: "fit", label: "Best Practice Fit" },
+              { value: "fit", label: "Best PracticeFit" },
             ]}
           />
           <button

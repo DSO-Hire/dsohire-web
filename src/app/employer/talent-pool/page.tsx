@@ -21,6 +21,7 @@ import { Users, Bookmark, Search } from "lucide-react";
 import type { Metadata } from "next";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { HelpDisclosure } from "@/components/help/help-disclosure";
+import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { DiscoverFilters } from "./discover-filters";
 import { CandidateResultCard } from "./candidate-result-card";
@@ -54,7 +55,7 @@ interface PageProps {
     cert?: string;
     /**
      * Polish item (2026-05-12): when set to a job id, the discover
-     * results compute Practice Fit against that job + sort by score
+     * results compute PracticeFit against that job + sort by score
      * descending. Each card shows a fit chip.
      */
     fit_job?: string;
@@ -419,7 +420,7 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
             roleOptions={ROLE_FILTERS}
           />
 
-          {/* Practice Fit job picker (2026-05-12 polish). Pure GET form
+          {/* PracticeFit job picker (2026-05-12 polish). Pure GET form
               so the picker state lives in the URL — bookmark-friendly +
               shareable with teammates. */}
           {fitJobOptions.length > 0 && (
@@ -449,9 +450,11 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
               {sp.cert && <input type="hidden" name="cert" value={sp.cert} />}
               <label
                 htmlFor="fit_job"
-                className="font-medium text-slate-body"
+                className="font-medium text-slate-body inline-flex items-center gap-1.5 flex-wrap"
               >
-                Rank by Practice Fit against
+                Rank by
+                <PracticeFitWordmark surface="light" className="text-[15px]" />
+                against
               </label>
               <select
                 id="fit_job"

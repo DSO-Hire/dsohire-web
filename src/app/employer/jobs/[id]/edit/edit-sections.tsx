@@ -154,10 +154,10 @@ export interface EditSectionsInitial {
   skills: string[];
   hide_stages_from_candidate: boolean;
   scope: JobScope;
-  // v1.1 — Practice Fit scoring inputs
+  // v1.1 — PracticeFit scoring inputs
   specialty: string[];
   min_years_experience: number | null;
-  // Track F — Practice Fit schedule overlap inputs
+  // Track F — PracticeFit schedule overlap inputs
   schedule_days: string[];
   schedule_evenings: boolean;
   schedule_weekends: boolean;
@@ -848,7 +848,7 @@ function DetailsSection({
   const [benefits, setBenefits] = useState<string[]>(initialBenefits);
   const [requirements, setRequirements] = useState(initialRequirements);
   const [hideStages, setHideStages] = useState(initialHideStages);
-  // v1.1 — Practice Fit fields. specialty as a Set for chip-toggle ergonomics.
+  // v1.1 — PracticeFit fields. specialty as a Set for chip-toggle ergonomics.
   const [specialty, setSpecialty] = useState<Set<string>>(
     new Set(initialSpecialty)
   );
@@ -857,7 +857,7 @@ function DetailsSection({
       ? String(initialMinYearsExperience)
       : ""
   );
-  // Track F — Practice Fit schedule overlap inputs.
+  // Track F — PracticeFit schedule overlap inputs.
   const [scheduleDays, setScheduleDays] = useState<Set<string>>(
     new Set(initialScheduleDays)
   );
@@ -1191,7 +1191,7 @@ function DetailsSection({
             Match scoring
           </legend>
           <p className="mt-1 text-[12px] text-slate-meta leading-relaxed">
-            Drives Practice Fit — the proprietary match score on every
+            Drives PracticeFit — the proprietary match score on every
             application. Both fields are optional; the score adapts to
             whatever you fill in.
           </p>
@@ -1309,7 +1309,7 @@ function DetailsSection({
               </label>
             </div>
             <p className="mt-2 text-[11px] text-slate-meta">
-              Powers Practice Fit&apos;s schedule overlap dimension. Leave
+              Powers PracticeFit&apos;s schedule overlap dimension. Leave
               blank if scheduling is flexible.
             </p>
           </div>

@@ -701,7 +701,7 @@ const SHOWCASE_TOP: ShowcaseFeature[] = [
   },
   {
     icon: Target,
-    title: "Practice Fit matching",
+    title: "PracticeFit matching",
     body: "Our proprietary fit score ranks applicants against each role on skills, schedule, and stated preferences — so your strongest matches surface first, not just your most recent applicants.",
     status: "now",
   },
@@ -717,7 +717,7 @@ const SHOWCASE_BOTTOM: ShowcaseFeature[] = [
   {
     icon: Search,
     title: "Talent Pool sourcing",
-    body: "Search opt-in candidates and reach out before they apply. Save the best to your group's pool and rank them by Practice Fit against any open role.",
+    body: "Search opt-in candidates and reach out before they apply. Save the best to your group's pool and rank them by PracticeFit against any open role.",
     status: "now",
   },
   {

@@ -198,7 +198,7 @@ export default async function CandidateDashboardPage() {
     },
     {
       key: "fit",
-      label: "Choose your Practice Fit matching setting",
+      label: "Choose your PracticeFit matching setting",
       done: ((c.practice_fit_consent as string | null) ?? "off") !== "off",
       href: "/candidate/settings/privacy",
     },
@@ -260,7 +260,7 @@ export default async function CandidateDashboardPage() {
     (a) => a.kind !== "hired" && !isTerminalKind(a.kind),
   );
 
-  // ── Practice Fit per active application (Phase 5D v1.2) ─────────────
+  // ── PracticeFit per active application (Phase 5D v1.2) ─────────────
   // Compute in parallel; cached after first compute. Role-filtered or
   // consent-off pairs return null — handled by the summary widget.
   const fitsByActiveAppId = new Map<string, FitResult | null>();
@@ -709,7 +709,7 @@ export default async function CandidateDashboardPage() {
         </section>
       )}
 
-      {/* Practice Fit summary — best match + lift-your-match nudges */}
+      {/* PracticeFit summary — best match + lift-your-match nudges */}
       <CandidateFitSummary
         fitsByAppId={fitsByActiveAppId}
         totalActiveApps={activeApps.length}

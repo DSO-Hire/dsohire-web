@@ -270,7 +270,7 @@ export default async function PerJobPipelinePage({
 
   const jobTitle = job.title as string;
 
-  // Practice Fit (Phase 5D) — bulk-compute per-candidate scores for
+  // PracticeFit (Phase 5D) — bulk-compute per-candidate scores for
   // every application on this job in one call. RLS gates which scores
   // we can see (consent != 'off'); missing entries → null.
   const fitMap = candidateIds.length > 0
@@ -462,7 +462,7 @@ export default async function PerJobPipelinePage({
       </header>
 
       {/* Note 5 — pipeline contextual help. First-run nudge + walkthrough
-          drawer, plus a Practice Fit explainer for the scores on the board. */}
+          drawer, plus a PracticeFit explainer for the scores on the board. */}
       <Coachmark
         id="pipeline"
         message="This is your hiring pipeline. Drag candidates between stage columns to move them — and tap any ⓘ for help."

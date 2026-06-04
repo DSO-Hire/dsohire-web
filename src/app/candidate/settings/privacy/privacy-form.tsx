@@ -8,7 +8,7 @@
  *   1. Profile visibility (3-state radio + resume + contact toggles)
  *   2. Hide from current employer (master toggle bulk-flips work history)
  *   3. Block list (DSO typeahead + chip list, capped 100)
- *   4. Practice Fit consent (3-state)
+ *   4. PracticeFit consent (3-state)
  *   5. View-as-DSO link + Data sharing summary (informational)
  *
  * All copy is privacy-positive — never implies the candidate has done
@@ -100,7 +100,7 @@ const PRACTICE_FIT_OPTIONS: ReadonlyArray<{
   {
     value: "off",
     label: "Off (default)",
-    description: "Don't compute a Practice Fit score for me.",
+    description: "Don't compute a PracticeFit score for me.",
   },
   {
     value: "results_only",
@@ -112,7 +112,7 @@ const PRACTICE_FIT_OPTIONS: ReadonlyArray<{
     value: "full",
     label: "Full",
     description:
-      "Compute + display my Practice Fit score on my profile so DSOs can find me by fit.",
+      "Compute + display my PracticeFit score on my profile so DSOs can find me by fit.",
   },
 ];
 
@@ -453,7 +453,7 @@ function BlockListSection({ blocked }: { blocked: BlockedEmployer[] }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// Section 4 — Practice Fit consent
+// Section 4 — PracticeFit consent
 // ─────────────────────────────────────────────────────────────────────
 
 function PracticeFitSection({
@@ -485,8 +485,8 @@ function PracticeFitSection({
   return (
     <SectionCard
       icon={<ShieldCheck className="size-5 text-[#4D7A60]" />}
-      title="Practice Fit consent"
-      description="Practice Fit is our proprietary matching algorithm — it scores how well you fit each role on must-haves and preferences. Off by default; turn it on so DSOs can find you by fit."
+      title="PracticeFit consent"
+      description="PracticeFit is our proprietary matching algorithm — it scores how well you fit each role on must-haves and preferences. Off by default; turn it on so DSOs can find you by fit."
     >
       <RadioGroup
         legend="Compute and display"

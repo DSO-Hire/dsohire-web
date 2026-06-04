@@ -119,6 +119,7 @@ import {
 import { candidateDisplayName } from "@/lib/applications/candidate-display";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
 import { WhyThisMatch } from "@/components/practice-fit/why-this-match";
+import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import type {
   ScreeningQuestion,
   ScreeningQuestionKind,
@@ -222,7 +223,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
 
   if (!rawApp) notFound();
 
-  // Practice Fit (Phase 5D v0) — RLS blocks the read when the
+  // PracticeFit (Phase 5D v0) — RLS blocks the read when the
   // candidate's consent is 'off', so a null result means either
   // consent off or compute-not-yet-run. Either way, render the
   // consent-off banner.
@@ -1313,7 +1314,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   };
   const SECTIONS: SectionEntry[] = [
     { num: "01", id: "stage", label: "Pipeline stage", icon: Layers },
-    { num: "02", id: "fit", label: "Practice Fit", icon: Sparkles },
+    { num: "02", id: "fit", label: "PracticeFit", icon: Sparkles },
     { num: "03", id: "resume", label: "Resume", icon: FileText },
     { num: "04", id: "snapshot", label: "Candidate snapshot", icon: Briefcase },
     { num: "05", id: "screening", label: "Screening responses", icon: ClipboardList },
@@ -1537,13 +1538,18 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
           </div>
           <MoveCopyCard applicationId={app.id} />
 
-          {/* 02 · Practice Fit (Phase 5D v0 — structured-feature scoring) */}
+          {/* 02 · PracticeFit (Phase 5D v0 — structured-feature scoring) */}
           <DetailSection
             id="fit"
             num="02"
-            title="Practice Fit"
+            title={
+              <PracticeFitWordmark
+                surface="light"
+                className="text-xl sm:text-2xl"
+              />
+            }
             icon={Sparkles}
-            subtitle="Proprietary match score across role, comp, location, skills, employment type, and DSO size."
+            subtitle="Our proprietary dental match score — role, real commute distance, PMS fluency, state licensure, comp, specialty, skills, and schedule."
           >
             {practiceFit ? (
               <WhyThisMatch
@@ -2060,7 +2066,7 @@ function DetailSection({
 }: {
   id: string;
   num: string;
-  title: string;
+  title: React.ReactNode;
   subtitle?: string;
   icon: React.ComponentType<{ className?: string }>;
   tone?: "candidate" | "internal";
@@ -2106,7 +2112,7 @@ function DetailSection({
 }
 
 /**
- * Practice Fit placeholder banner. Per parity-sprint scope §6.4, we ship
+ * PracticeFit placeholder banner. Per parity-sprint scope §6.4, we ship
  * the surface contract NOW with three sub-bars (Skills / Culture /
  * Logistics) showing a "coming Phase 5D" treatment. Schema reservations
  * (`applications.fit_score`, `applications.fit_breakdown`) are not yet
@@ -2132,13 +2138,13 @@ function PracticeFitConsentOffBanner() {
         <Sparkles className="h-4 w-4 text-heritage-deep mt-0.5 shrink-0" />
         <div>
           <p className="text-[13px] font-semibold text-ink mb-1">
-            Practice Fit isn&apos;t available for this pair
+            PracticeFit isn&apos;t available for this pair
           </p>
           <p className="text-[13px] text-slate-body leading-relaxed">
             This can happen when the candidate&apos;s privacy settings
             keep their score private, or when their role preferences
             don&apos;t cover this posting. Their application stands on
-            its own — Practice Fit is informational only and never
+            its own — PracticeFit is informational only and never
             gates hiring decisions.
           </p>
         </div>

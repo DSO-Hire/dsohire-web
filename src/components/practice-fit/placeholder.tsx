@@ -1,5 +1,5 @@
 /**
- * Practice Fit placeholder pill — shown candidate-side when a job/candidate
+ * PracticeFit placeholder pill — shown candidate-side when a job/candidate
  * pair has no scored fit (role-as-filter rejected, or compute hasn't yet
  * populated). The candidate's own data tells us why; this component reads
  * a `reason` prop and picks precise label + tooltip copy.
@@ -23,7 +23,7 @@ import { Sparkles } from "lucide-react";
 import { canonicalizeRoleCategory } from "@/lib/practice-fit/role-canonicalize";
 
 /**
- * Reason a Practice Fit chip is showing as a placeholder rather than a
+ * Reason a PracticeFit chip is showing as a placeholder rather than a
  * scored chip.
  *
  * "consent_off" is intentionally NOT a state. Per the comment in
@@ -69,8 +69,8 @@ export function PracticeFitPlaceholder({
   const label = reason === "role_mismatch" ? "Different role" : "Fit · —";
   const tooltip =
     reason === "role_mismatch"
-      ? "This role isn't in your role preferences, so Practice Fit can't compare it. Update your preferred roles in your profile if your goals have changed."
-      : "Practice Fit isn't ready for this pair yet. Add more to your profile to give us more to work with, or check back in a moment.";
+      ? "This role isn't in your role preferences, so PracticeFit can't compare it. Update your preferred roles in your profile if your goals have changed."
+      : "PracticeFit isn't ready for this pair yet. Add more to your profile to give us more to work with, or check back in a moment.";
   return (
     <span
       className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500"

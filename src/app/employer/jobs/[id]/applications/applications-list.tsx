@@ -40,7 +40,7 @@ export interface ApplicationsListItem {
     years_experience: number | null;
   } | null;
   jobTitle: string;
-  /** Practice Fit (Phase 5D) — null when consent off OR not yet computed. */
+  /** PracticeFit (Phase 5D) — null when consent off OR not yet computed. */
   practiceFit?: import("@/lib/practice-fit/types").FitResult | null;
   /**
    * E2.10 — snapshotted prompts of knockout questions the candidate

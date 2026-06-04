@@ -4,7 +4,7 @@
  * Inspired by ZipRecruiter's "Great Match" + LinkedIn's profile-
  * completion nudges (per the v1.2 competitor research synthesis).
  * Renders a compact tile showing:
- *   • Best Practice Fit across the candidate's active applications
+ *   • Best PracticeFit across the candidate's active applications
  *     (the headline they care about: "where am I doing well?")
  *   • A "complete your profile" CTA when any dimension is excluded
  *     across multiple apps — indicates a profile gap that, if filled,
@@ -12,7 +12,7 @@
  *
  * Server component. Pure rendering. Caller passes in pre-computed fits
  * + candidate's resolvedness signals. We DO NOT show this when the
- * candidate has zero active apps — Practice Fit only makes sense in
+ * candidate has zero active apps — PracticeFit only makes sense in
  * the context of jobs they've actually engaged with.
  *
  * The role-as-filter philosophy means a null fit on an app just
@@ -25,7 +25,9 @@
  */
 
 import Link from "next/link";
-import { ArrowRight, Plus, Sparkles } from "lucide-react";
+import { ArrowRight, Plus } from "lucide-react";
+import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
+import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
 import { BUCKET_STYLES } from "@/lib/practice-fit/buckets";
 import type { FitDimensionKey, FitResult } from "@/lib/practice-fit/types";
 
@@ -48,7 +50,7 @@ export function CandidateFitSummary({
   fitsByAppId,
   totalActiveApps,
 }: CandidateFitSummaryProps) {
-  // No active apps → don't render. Practice Fit only makes sense in
+  // No active apps → don't render. PracticeFit only makes sense in
   // the context of an application.
   if (totalActiveApps === 0) return null;
 
@@ -60,7 +62,7 @@ export function CandidateFitSummary({
 
   // No scored fits but candidate has active apps → empty-state
   // disclosure. Don't disappear the section silently; the candidate
-  // should know Practice Fit exists and what's preventing it.
+  // should know PracticeFit exists and what's preventing it.
   //
   // Copy correction (focused-pass follow-up): the prior copy named
   // privacy as a possible cause, but `getPracticeFit` returns the
@@ -74,7 +76,7 @@ export function CandidateFitSummary({
       <section className="mb-6">
         <SectionHeader />
         <div className="border border-[var(--rule)] bg-cream/40 p-5 text-[13px] text-slate-body leading-relaxed">
-          Practice Fit isn&apos;t available on your active applications
+          PracticeFit isn&apos;t available on your active applications
           yet. This usually means your role preferences don&apos;t
           cover these postings, or compute hasn&apos;t finished. Update
           your preferred roles in{" "}
@@ -141,7 +143,7 @@ export function CandidateFitSummary({
               <span
                 className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-bold tracking-wider uppercase ${bestStyle.bgClass} ${bestStyle.textClass} ${bestStyle.borderClass}`}
               >
-                <Sparkles className="h-3 w-3" aria-hidden />
+                <PracticeFitMark className="h-3 w-3" />
                 {bestStyle.label}
               </span>
               <span className="text-[12px] font-mono text-slate-meta">
@@ -208,8 +210,8 @@ export function CandidateFitSummary({
 function SectionHeader() {
   return (
     <div className="flex items-end justify-between gap-4 mb-3">
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
-        Practice Fit
+      <div className="text-heritage-deep">
+        <PracticeFitWordmark surface="inherit" className="text-[14px]" />
       </div>
       <Link
         href="/candidate/settings/privacy"

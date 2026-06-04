@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * <WhyThisMatch /> — Practice Fit expander (Phase 5D v1.1).
+ * <WhyThisMatch /> — PracticeFit expander (Phase 5D v1.1).
  *
  * Drops below the PracticeFitChip on application detail pages and
  * candidate job detail pages. Click expands to show:
@@ -26,7 +26,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronDown, ChevronUp, Plus, Sparkles } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus } from "lucide-react";
+import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
+import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
 import { BUCKET_STYLES } from "@/lib/practice-fit/buckets";
 import type {
   FitDimension,
@@ -167,10 +169,7 @@ export function WhyThisMatch({
         className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left ${style.bgClass} ${style.textClass} hover:opacity-95`}
       >
         <span className="inline-flex items-center gap-2 flex-wrap">
-          <Sparkles className="h-3.5 w-3.5" aria-hidden />
-          <span className="text-[11px] font-bold tracking-[1.5px] uppercase">
-            Practice Fit
-          </span>
+          <PracticeFitWordmark surface="inherit" className="text-[15px]" />
           <span className="text-[14px] font-semibold">
             {style.label}
           </span>
@@ -231,14 +230,15 @@ export function WhyThisMatch({
           )}
           <li className="px-4 py-3 bg-slate-50/50">
             <p className="text-[11px] text-slate-meta leading-relaxed">
-              Practice Fit weighs compensation, location/license,
-              specialty, skills, years of experience, employment type,
-              DSO size, and schedule overlap — normalized over the
-              dimensions we have data on, so missing fields don&apos;t
-              drag the score down. Role match is a pre-filter: pairs
-              where the role doesn&apos;t line up don&apos;t get a chip
-              at all. Score updates automatically when either side
-              changes.
+              PracticeFit weighs role, real commute distance, PMS
+              fluency, state licensure, compensation, specialty, skills,
+              years of experience, employment type, DSO size, and
+              schedule overlap — normalized over the dimensions we have
+              data on, so missing fields don&apos;t drag the score down.
+              An unrelated role gets no chip at all, and a hard
+              requirement like out-of-state licensure caps the score
+              (informational only — never an auto-screen). Score updates
+              automatically when either side changes.
             </p>
           </li>
         </ul>
@@ -256,7 +256,7 @@ function NarrativeSkeleton() {
   return (
     <div aria-hidden>
       <div className="flex items-center gap-1.5 mb-2 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
-        <Sparkles className="h-3 w-3" />
+        <PracticeFitMark className="h-3 w-3" />
         Summarizing the match…
       </div>
       <div className="space-y-2 animate-pulse">

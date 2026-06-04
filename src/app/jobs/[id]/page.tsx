@@ -209,7 +209,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
       ? (singlePracticeName ?? "Corporate")
       : (singlePracticeName ?? "Multiple locations");
 
-  // ── Candidate-side state for the SaveJobButton + Practice Fit ──────
+  // ── Candidate-side state for the SaveJobButton + PracticeFit ──────
   // Anonymous visitors get the button hidden. Authenticated DSO members
   // (employers) also get it hidden — only candidates can save jobs.
   const {
@@ -229,7 +229,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
   let practiceFit: FitResult | null = null;
   // Reason-rich placeholder support (focused-pass extension, gap caught
   // by Cam 2026-05-08 PM viewing a Front Office job as a dental
-  // assistant — page went silent on Practice Fit). Classified only on
+  // assistant — page went silent on PracticeFit). Classified only on
   // the candidate's own data, just like the other candidate-side
   // surfaces.
   let practiceFitReason: PlaceholderReason | null = null;
@@ -261,7 +261,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
         .maybeSingle();
       initialSaved = Boolean(existing);
 
-      // Practice Fit (Phase 5D) — only when the candidate has opted in.
+      // PracticeFit (Phase 5D) — only when the candidate has opted in.
       const consent = (candidateRow as Record<string, unknown>)
         .practice_fit_consent as string;
       if (consent !== "off") {
@@ -438,7 +438,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
           </div>
         </header>
 
-        {/* Practice Fit. Scored fit → WhyThisMatch expander with
+        {/* PracticeFit. Scored fit → WhyThisMatch expander with
             inline-editor lift-your-match flow. No fit + role_mismatch
             → explanation panel so a signed-in candidate viewing a job
             outside their preferences understands why fit is missing
@@ -460,7 +460,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
               <Sparkles className="h-4 w-4 text-heritage-deep mt-0.5 shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-semibold text-ink mb-1">
-                  Practice Fit isn&apos;t scoring this role for you
+                  PracticeFit isn&apos;t scoring this role for you
                 </p>
                 <p className="text-[13px] text-slate-body leading-relaxed mb-3">
                   This job&apos;s role isn&apos;t in your preferences,
@@ -574,7 +574,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
 
             {/* Track F (2026-05-13) — surface schedule when the
                 employer specified one. Powers candidate-side day-1
-                expectations + visually mirrors the Practice Fit
+                expectations + visually mirrors the PracticeFit
                 schedule_overlap dim's inputs. We only render the
                 section when at least one signal is present — keeps
                 no-schedule postings clean. */}
