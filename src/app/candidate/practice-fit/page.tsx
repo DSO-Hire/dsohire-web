@@ -102,7 +102,7 @@ export default async function CandidatePracticeFitPage() {
           className="group mb-8 block border-l-4 border-heritage bg-cream/50 p-6 sm:p-7 transition-colors hover:bg-cream"
         >
           <div className="mb-1.5 text-[10px] font-extrabold tracking-[2.5px] uppercase text-heritage-deep">
-            Take the assessment · about 5 min
+            Take the PracticeFit Assessment · about 5 min
           </div>
           <h2 className="text-lg sm:text-xl font-extrabold tracking-[-0.4px] text-ink">
             Answer a few questions and your matches get a lot sharper.
@@ -119,7 +119,7 @@ export default async function CandidatePracticeFitPage() {
       ) : (
         <div className="mb-6 flex items-center justify-between gap-3 border border-[var(--rule)] bg-white px-4 py-3">
           <span className="text-[13px] text-slate-body">
-            Your PracticeFit assessment is complete — it&apos;s powering your
+            Your PracticeFit Assessment is complete — it&apos;s powering your
             matches.
           </span>
           <a
