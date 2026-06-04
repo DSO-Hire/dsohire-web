@@ -34,6 +34,8 @@ import { LocationFilter } from "@/components/analytics/hub/location-filter";
 import { PortfolioTable } from "@/components/analytics/hub/portfolio-table";
 import { BulletBar } from "@/components/analytics/hub/bullet-bar";
 import { AnalyticsNarrative } from "@/components/analytics/hub/analytics-narrative";
+import { FitProofCard } from "@/components/analytics/fit-proof-card";
+import { getFitOutcomeProof } from "@/lib/analytics/fit-outcomes";
 import {
   getPayBenchmarks,
   getVacancyCost,
@@ -126,6 +128,10 @@ export default async function AnalyticsHubPage({ searchParams }: PageProps) {
       getVacancyCost(supabase, dsoId),
     ]);
   }
+
+  // v3.2 Phase E — PracticeFit proof loop. Only the Overview tab shows it.
+  const fitProof =
+    tab === "overview" ? await getFitOutcomeProof(supabase, dsoId) : null;
 
   const scopedLocation = loc
     ? crossLocationRows.find((r) => r.location_id === loc) ?? null
@@ -249,6 +255,7 @@ export default async function AnalyticsHubPage({ searchParams }: PageProps) {
       {tab === "overview" && (
         <>
           <AnalyticsNarrative windowDays={win.days} loc={loc || null} />
+          {fitProof && <FitProofCard proof={fitProof} />}
           <OverviewTab
             overview={overview}
             funnel={overview.funnel}
