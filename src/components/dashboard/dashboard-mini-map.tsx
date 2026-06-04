@@ -124,7 +124,7 @@ export function DashboardMiniMap({
           {title}
         </h2>
         <span className="text-[10px] font-extrabold tracking-[1.5px] uppercase text-heritage group-hover:text-heritage-deep transition-colors">
-          Open map →
+          View locations →
         </span>
       </header>
 

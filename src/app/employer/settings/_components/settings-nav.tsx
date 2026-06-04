@@ -38,6 +38,7 @@ import {
   FileSignature,
   Bell,
   Mail,
+  Send,
   CreditCard,
   ShieldCheck,
   History,
@@ -85,8 +86,8 @@ const GROUPS: NavGroup[] = [
     id: "communication",
     entries: [
       { id: "notifications", label: "Notifications", href: "/employer/settings/notifications", Icon: Bell },
-      { id: "templates", label: "Email templates", href: "/employer/settings/templates", Icon: Mail },
-      { id: "outreach-templates", label: "Outreach templates", href: "/employer/settings/outreach-templates", Icon: Mail },
+      { id: "templates", label: "Automated emails", href: "/employer/settings/templates", Icon: Mail },
+      { id: "outreach-templates", label: "Candidate outreach", href: "/employer/settings/outreach-templates", Icon: Send },
     ],
   },
   {

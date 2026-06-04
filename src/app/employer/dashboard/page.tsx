@@ -962,7 +962,7 @@ export default async function EmployerDashboard() {
             stageStrip={stageStripCounts}
             stageStripMax={stageStripMax}
             href="/employer/applications?status=open&sort=oldest"
-            ctaLabel="Review the queue"
+            ctaLabel="Review new applications"
           />
         </div>
 
@@ -976,7 +976,7 @@ export default async function EmployerDashboard() {
               : "Post your first to start receiving applications"
           }
           href="/employer/jobs?status=active"
-          routeLabel="Manage jobs"
+          routeLabel="View jobs"
         />
 
         <KpiTile
@@ -992,7 +992,7 @@ export default async function EmployerDashboard() {
           delta={appsWeekOverWeekDelta}
           deltaLabel="vs last week"
           href="/employer/applications"
-          routeLabel="Browse applications"
+          routeLabel="View applications"
         />
 
         <KpiTile
@@ -1005,7 +1005,7 @@ export default async function EmployerDashboard() {
               : "When candidates are hired, they show up here"
           }
           href="/employer/applications?status=hired"
-          routeLabel="See hires"
+          routeLabel="View hires"
         />
 
         <KpiTile
@@ -1018,7 +1018,7 @@ export default async function EmployerDashboard() {
               : "Add your first to enable job posting"
           }
           href="/employer/locations"
-          routeLabel="Manage locations"
+          routeLabel="View locations"
         />
       </section>
 
@@ -1127,7 +1127,7 @@ export default async function EmployerDashboard() {
         />
         <DashboardMiniMap
           locations={miniMapLocations}
-          href="/jobs"
+          href="/employer/locations"
         />
       </section>
 

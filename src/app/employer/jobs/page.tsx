@@ -58,6 +58,8 @@ interface PageProps {
     sort?: string;
     /** dso_locations.id values to filter by (multi). */
     loc?: string | string[];
+    /** One-time notice key, e.g. "no_post_permission" after a role bounce. */
+    notice?: string;
   }>;
 }
 
@@ -84,6 +86,7 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
     : sp.loc
       ? [sp.loc]
       : [];
+  const notice = sp.notice ?? null;
 
   const supabase = await createSupabaseServerClient();
 
@@ -403,6 +406,16 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
           )}
         </div>
       </header>
+
+      {notice === "no_post_permission" && (
+        <div className="mb-6 border-l-2 border-amber-400 bg-amber-50 px-4 py-3">
+          <p className="text-[13px] text-amber-900 leading-relaxed">
+            Posting jobs is limited to owners, admins, and recruiters. Your role
+            can review applications and view jobs, but not create them — reach
+            out to an owner or admin if you need posting access.
+          </p>
+        </div>
+      )}
 
       {/* Aggregate stats strip — only when there's at least one job */}
       {allJobs.length > 0 && (
