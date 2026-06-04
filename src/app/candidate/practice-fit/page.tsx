@@ -39,7 +39,7 @@ export default async function CandidatePracticeFitPage() {
   const { data: candidateRow } = await supabase
     .from("candidates")
     .select(
-      "id, practice_fit_consent, desired_roles, desired_specialty, license_states, dso_size_preference, desired_locations, schedule_preferences, temp_or_perm, availability, min_salary, salary_unit"
+      "id, practice_fit_consent, desired_roles, desired_specialty, license_states, dso_size_preference, desired_locations, schedule_preferences, temp_or_perm, availability, min_salary, salary_unit, assessment_completed_at"
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
@@ -50,6 +50,7 @@ export default async function CandidatePracticeFitPage() {
   const consent =
     (c.practice_fit_consent as "off" | "results_only" | "full" | null) ?? "off";
   const consentOn = consent !== "off";
+  const assessmentDone = c.assessment_completed_at != null;
 
   const matches = consentOn
     ? await getTopFitJobsForCandidate(candidateId, 12)
@@ -91,6 +92,44 @@ export default async function CandidatePracticeFitPage() {
           experience. Tune what you want below and your matches update.
         </p>
       </header>
+
+      {/* Assessment CTA — the single biggest thing a candidate can do to
+          sharpen matches. Prominent when not yet taken; a quiet update link
+          once complete. */}
+      {!assessmentDone ? (
+        <a
+          href="/candidate/assessment"
+          className="group mb-8 block border-l-4 border-heritage bg-cream/50 p-6 sm:p-7 transition-colors hover:bg-cream"
+        >
+          <div className="mb-1.5 text-[10px] font-extrabold tracking-[2.5px] uppercase text-heritage-deep">
+            Take the assessment · about 5 min
+          </div>
+          <h2 className="text-lg sm:text-xl font-extrabold tracking-[-0.4px] text-ink">
+            Answer a few questions and your matches get a lot sharper.
+          </h2>
+          <p className="mt-2 text-[14px] text-slate-body max-w-[560px]">
+            Pace, autonomy, the procedures you love, the kind of team you thrive
+            on — the things no résumé captures. Mostly taps, and you can stop
+            anytime.
+          </p>
+          <span className="mt-3 inline-flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-[1.5px] text-heritage-deep group-hover:gap-2.5 transition-all">
+            Start now →
+          </span>
+        </a>
+      ) : (
+        <div className="mb-6 flex items-center justify-between gap-3 border border-[var(--rule)] bg-white px-4 py-3">
+          <span className="text-[13px] text-slate-body">
+            Your PracticeFit assessment is complete — it&apos;s powering your
+            matches.
+          </span>
+          <a
+            href="/candidate/assessment"
+            className="flex-shrink-0 text-[12px] font-bold uppercase tracking-[1.5px] text-heritage-deep hover:text-heritage underline underline-offset-2"
+          >
+            Update
+          </a>
+        </div>
+      )}
 
       {!consentOn ? (
         <section className="mb-8 p-7 sm:p-8 bg-ink text-ivory border-l-4 border-heritage">

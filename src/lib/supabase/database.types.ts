@@ -1615,6 +1615,23 @@ export type Database = {
           phone: string | null
           pms_systems: string[]
           practice_fit_consent: string
+          work_pace: string | null
+          autonomy_pref: string | null
+          patient_facing_energy: number | null
+          mentorship_pref: string | null
+          procedures_confident: string[]
+          procedures_growth: string[]
+          practice_feel: string | null
+          ce_growth_importance: number | null
+          work_life_priority: number | null
+          career_trajectory: string | null
+          commute_max_minutes: number | null
+          comp_priority: string | null
+          relocation_pref: string | null
+          assessment_note: string | null
+          assessment_responses: Json | null
+          assessment_completed_at: string | null
+          assessment_version: string | null
           preferred_timezone: string
           pronouns: string | null
           resume_url: string | null
@@ -1666,6 +1683,23 @@ export type Database = {
           phone?: string | null
           pms_systems?: string[]
           practice_fit_consent?: string
+          work_pace?: string | null
+          autonomy_pref?: string | null
+          patient_facing_energy?: number | null
+          mentorship_pref?: string | null
+          procedures_confident?: string[]
+          procedures_growth?: string[]
+          practice_feel?: string | null
+          ce_growth_importance?: number | null
+          work_life_priority?: number | null
+          career_trajectory?: string | null
+          commute_max_minutes?: number | null
+          comp_priority?: string | null
+          relocation_pref?: string | null
+          assessment_note?: string | null
+          assessment_responses?: Json | null
+          assessment_completed_at?: string | null
+          assessment_version?: string | null
           preferred_timezone?: string
           pronouns?: string | null
           resume_url?: string | null
@@ -1716,6 +1750,23 @@ export type Database = {
           phone?: string | null
           pms_systems?: string[]
           practice_fit_consent?: string
+          work_pace?: string | null
+          autonomy_pref?: string | null
+          patient_facing_energy?: number | null
+          mentorship_pref?: string | null
+          procedures_confident?: string[]
+          procedures_growth?: string[]
+          practice_feel?: string | null
+          ce_growth_importance?: number | null
+          work_life_priority?: number | null
+          career_trajectory?: string | null
+          commute_max_minutes?: number | null
+          comp_priority?: string | null
+          relocation_pref?: string | null
+          assessment_note?: string | null
+          assessment_responses?: Json | null
+          assessment_completed_at?: string | null
+          assessment_version?: string | null
           preferred_timezone?: string
           pronouns?: string | null
           resume_url?: string | null
