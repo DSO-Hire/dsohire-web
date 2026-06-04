@@ -79,7 +79,7 @@ export default async function CandidatePracticeFitPage() {
           <PracticeFitWordmark
             surface="light"
             tm
-            className="text-4xl sm:text-5xl"
+            className="text-3xl sm:text-4xl"
           />
         </div>
         <h1 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] leading-tight text-ink">
