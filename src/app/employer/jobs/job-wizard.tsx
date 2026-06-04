@@ -1445,8 +1445,23 @@ function BasicsStep({
                   onChange={() => onToggleLocation(loc.id)}
                 />
                 <div className="min-w-0">
-                  <div className="text-[14px] font-semibold text-ink">
+                  <div className="flex items-center gap-2 flex-wrap text-[14px] font-semibold text-ink">
                     {loc.name}
+                    {loc.anonymizeName ? (
+                      <span
+                        className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-ink text-ivory text-[9px] font-bold tracking-[0.8px] uppercase"
+                        title="This practice's name is hidden from candidates — listings show 'Dental Office in {city}'."
+                      >
+                        Name hidden
+                      </span>
+                    ) : loc.publicDsoAffiliation === false ? (
+                      <span
+                        className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-heritage/15 text-heritage-deep text-[9px] font-bold tracking-[0.8px] uppercase"
+                        title="Your dental-group name is hidden from candidates on this location's listings."
+                      >
+                        Anonymous
+                      </span>
+                    ) : null}
                   </div>
                   <div className="text-[13px] text-slate-meta tracking-[0.3px]">
                     {[loc.city, loc.state].filter(Boolean).join(", ") ||

@@ -41,7 +41,12 @@ export function HelpDisclosure({
 
   const title = entry?.title ?? "More info";
   const tip = entry?.tip;
-  const label = triggerLabel ?? `About ${title.toLowerCase()}`;
+  // Lowercase for the casual banner voice, but preserve the PracticeFit
+  // brand casing (the title is sentence-case; toLowerCase would mangle the
+  // wordmark to "practicefit").
+  const label =
+    triggerLabel ??
+    `About ${title.toLowerCase().replace(/practicefit/g, "PracticeFit")}`;
 
   return (
     <div className={"max-w-[820px] " + className}>
