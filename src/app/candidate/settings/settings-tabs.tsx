@@ -19,7 +19,6 @@ interface Tab {
 const TABS: ReadonlyArray<Tab> = [
   { href: "/candidate/settings/account", label: "Account" },
   { href: "/candidate/settings/notifications", label: "Notifications" },
-  { href: "/candidate/settings/job-preferences", label: "Job preferences" },
   { href: "/candidate/settings/privacy", label: "Privacy & visibility" },
   { href: "/candidate/settings/credentials", label: "Credentials" },
   { href: "/candidate/settings/integrations", label: "Integrations" },

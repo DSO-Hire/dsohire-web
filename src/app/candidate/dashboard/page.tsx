@@ -184,11 +184,11 @@ export default async function CandidateDashboardPage() {
     },
     {
       key: "prefs",
-      label: "Set your job preferences",
+      label: "Tell PracticeFit what you're looking for",
       done:
         profileData.jobPreferences.desired_locations.length > 0 ||
         profileData.jobPreferences.min_salary != null,
-      href: "/candidate/profile",
+      href: "/candidate/practice-fit#preferences",
     },
     {
       key: "visible",
@@ -682,12 +682,8 @@ export default async function CandidateDashboardPage() {
                 ? "No open roles fit you yet — we'll email you the moment one posts."
                 : "Ranked by PracticeFit across dental groups near you."
           }
-          href={
-            pfConsentOn
-              ? "/candidate/jobs?match=1"
-              : "/candidate/settings/privacy#practice-fit"
-          }
-          routeLabel={pfConsentOn ? "Browse matches" : "Turn on PracticeFit"}
+          href="/candidate/practice-fit"
+          routeLabel={pfConsentOn ? "See your matches" : "Turn on PracticeFit"}
         />
 
         <KpiTile

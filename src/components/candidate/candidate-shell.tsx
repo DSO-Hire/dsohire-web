@@ -25,6 +25,7 @@ import {
   LifeBuoy,
   Inbox as InboxIcon,
 } from "lucide-react";
+import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { BrandLockup } from "@/components/marketing/site-shell";
 import { Avatar } from "@/components/ui/avatar";
@@ -40,6 +41,7 @@ interface CandidateShellProps {
 
 export type NavId =
   | "dashboard"
+  | "practice-fit"
   | "jobs"
   | "applications"
   | "inbox"
@@ -58,6 +60,7 @@ interface NavItem {
 
 const NAV: ReadonlyArray<NavItem> = [
   { id: "dashboard", label: "Dashboard", href: "/candidate/dashboard", Icon: LayoutDashboard },
+  { id: "practice-fit", label: "PracticeFit", href: "/candidate/practice-fit", Icon: PracticeFitMark },
   { id: "jobs", label: "Jobs", href: "/candidate/jobs", Icon: Briefcase },
   { id: "applications", label: "Applications", href: "/candidate/applications", Icon: FileText },
   { id: "inbox", label: "Inbox", href: "/candidate/inbox", Icon: InboxIcon },

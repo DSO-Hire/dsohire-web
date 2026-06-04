@@ -53,7 +53,7 @@ import type {
  * hashed input field (e.g. the A.4 caps/boosters). It's folded into the
  * input hash so a logic-only change still invalidates the read-through cache.
  */
-const MODEL_VERSION = "2026-06-03-a4";
+const MODEL_VERSION = "2026-06-04-ia-ctas";
 
 /* ──────────────────────────────────────────────────────────────
  * Weights (must sum to 100). v0's role weight (25) is reallocated
@@ -415,7 +415,7 @@ function scoreRoleFit({ candidate, job }: FitInputs): FitDimension {
       detail_employer:
         "Candidate hasn't set target roles and we couldn't read one from their title — role fit excluded from their score.",
       cta_label: "Set target roles",
-      cta_href: "/candidate/profile#section-role-specialty",
+      cta_href: "/candidate/practice-fit#preferences",
     });
   }
 
@@ -467,7 +467,7 @@ function scoreCompensation({ candidate, job }: FitInputs): FitDimension {
       detail_employer:
         "Candidate hasn't set a minimum salary — comp excluded from their score.",
       cta_label: "Set salary preference",
-      cta_href: "/candidate/profile#section-job-preferences",
+      cta_href: "/candidate/practice-fit#preferences",
       cta_inline: true,
     });
   }
@@ -564,7 +564,7 @@ function scoreLocation({ candidate, job }: FitInputs): FitDimension {
       detail_employer:
         "Candidate hasn't listed license states or desired locations — location excluded from their score.",
       cta_label: "Add license + locations",
-      cta_href: "/candidate/profile#section-licenses",
+      cta_href: "/candidate/practice-fit#preferences",
     });
   }
 
@@ -772,7 +772,7 @@ function scoreLicenseState({ candidate, job }: FitInputs): FitDimension {
       detail_employer:
         "Candidate hasn't listed any license states — licensure excluded from their score.",
       cta_label: "Add license states",
-      cta_href: "/candidate/profile#section-licenses",
+      cta_href: "/candidate/practice-fit#preferences",
     });
   }
 
@@ -906,7 +906,7 @@ function scoreSpecialty({ candidate, job }: FitInputs): FitDimension {
       detail_employer:
         "Candidate hasn't picked specialties — specialty excluded from their score.",
       cta_label: "Add specialties",
-      cta_href: "/candidate/profile#section-role-specialty",
+      cta_href: "/candidate/practice-fit#preferences",
     });
   }
 
@@ -1062,8 +1062,8 @@ function scoreEmploymentType({ candidate, job }: FitInputs): FitDimension {
         "Pick whether you want permanent or temp/contract roles to factor employment type in.",
       detail_employer:
         "Candidate hasn't picked permanent vs temp/contract — employment type excluded from their score.",
-      cta_label: "Set preference",
-      cta_href: "/candidate/profile#section-role-specialty",
+      cta_label: "Choose permanent or temp/contract",
+      cta_href: "/candidate/practice-fit#preferences",
       cta_inline: true,
     });
   }
@@ -1110,8 +1110,8 @@ function scoreDsoSize({ candidate, dso }: FitInputs): FitDimension {
       detail: "Pick a DSO-size preference to factor it into your match.",
       detail_employer:
         "Candidate hasn't picked a DSO-size preference — DSO size excluded from their score.",
-      cta_label: "Set preference",
-      cta_href: "/candidate/profile#section-job-preferences",
+      cta_label: "Set your practice-size preference",
+      cta_href: "/candidate/practice-fit#preferences",
       cta_inline: true,
     });
   }
@@ -1190,7 +1190,7 @@ function scoreScheduleOverlap({ candidate, job }: FitInputs): FitDimension {
       detail_employer:
         "Candidate hasn't picked schedule preferences — schedule fit excluded from their score.",
       cta_label: "Set schedule preference",
-      cta_href: "/candidate/profile#section-job-preferences",
+      cta_href: "/candidate/practice-fit#preferences",
     });
   }
 

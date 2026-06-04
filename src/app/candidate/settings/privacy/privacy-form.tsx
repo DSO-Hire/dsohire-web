@@ -456,7 +456,7 @@ function BlockListSection({ blocked }: { blocked: BlockedEmployer[] }) {
 // Section 4 — PracticeFit consent
 // ─────────────────────────────────────────────────────────────────────
 
-function PracticeFitSection({
+export function PracticeFitSection({
   initial,
 }: {
   initial: "off" | "results_only" | "full";
