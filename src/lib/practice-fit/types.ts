@@ -31,7 +31,17 @@ export type FitDimensionKey =
   | "years_experience"
   | "employment_type"
   | "dso_size"
-  | "schedule_overlap";
+  | "schedule_overlap"
+  // v3 Phase B.1 — culture / work-style dims. Each scores a candidate
+  // assessment signal against the practice profile (or, for practice_feel,
+  // the practice size when the profile is blank). All stay UNSCORED until
+  // both sides have data — never a penalty.
+  | "work_pace"
+  | "autonomy"
+  | "mentorship"
+  | "ce_growth"
+  | "practice_feel"
+  | "work_life";
 
 export interface FitDimension {
   /** Maximum points this dimension can contribute when scored (0 when excluded). */
@@ -181,6 +191,24 @@ export interface CandidateFitInputs {
    * penalizing).
    */
   years_experience_dental: number | null;
+  /* ── v3 Phase B.1 — assessment work-style / culture signals. Each is
+   *    null until the candidate takes the assessment; null excludes the
+   *    matching dimension (never penalizes). Vocab matches the assessment
+   *    question options. ── */
+  /** high_volume | steady | thorough */
+  work_pace: string | null;
+  /** autonomy | balance | structure */
+  autonomy_pref: string | null;
+  /** strong | occasional | independent */
+  mentorship_pref: string | null;
+  /** 1-5; stored for future use — not yet a scored dimension in B.1. */
+  patient_facing_energy: number | null;
+  /** private | midsize | large | any ("any" = no preference → unscored). */
+  practice_feel: string | null;
+  /** 1-5 — how much the candidate values CE/growth (desire side). */
+  ce_growth_importance: number | null;
+  /** 1-5 — how much the candidate values predictable work-life balance. */
+  work_life_priority: number | null;
 }
 
 export interface JobFitInputs {
@@ -252,6 +280,27 @@ export interface JobFitInputs {
 export interface DsoFitInputs {
   /** Total practice / location count for the DSO. Drives the DSO-size dimension. */
   location_count: number;
+  /* ── v3 Phase B.1 — the practice-profile mirror of the candidate's
+   *    assessment culture signals. Null until the practice fills its
+   *    profile; null excludes the matching dimension (never penalizes).
+   *    Vocab matches the candidate columns so the engine compares
+   *    directly. ── */
+  /** high_volume | steady | thorough */
+  practice_pace: string | null;
+  /** autonomy | balance | structure */
+  autonomy_level: string | null;
+  /** strong | occasional | independent */
+  mentorship_offered: string | null;
+  /**
+   * private | midsize | large. When null, the engine DERIVES it from
+   * location_count (1 = private, 2-9 = midsize, 10+ = large) so the
+   * practice_feel dim can score even before the profile is filled.
+   */
+  practice_feel: string | null;
+  /** 1-5 — how much CE/growth the practice provides (provision side). */
+  ce_support: number | null;
+  /** 1-5 — how predictable / balanced the practice's schedule really is. */
+  work_life_balance: number | null;
 }
 
 export interface FitInputs {

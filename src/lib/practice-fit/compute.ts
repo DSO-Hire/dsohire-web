@@ -53,7 +53,7 @@ import type {
  * hashed input field (e.g. the A.4 caps/boosters). It's folded into the
  * input hash so a logic-only change still invalidates the read-through cache.
  */
-const MODEL_VERSION = "2026-06-04-ia-ctas";
+const MODEL_VERSION = "2026-06-04-v3-culture";
 
 /* ──────────────────────────────────────────────────────────────
  * Weights (must sum to 100). v0's role weight (25) is reallocated
@@ -79,19 +79,31 @@ const MODEL_VERSION = "2026-06-04-ia-ctas";
 // readiness: certs named in the posting vs the candidate's furnished certs).
 // The 6 points come from specialty (9→7), skills (9→7), years (7→6) and
 // employment (4→3).
+// v3 Phase B.1 (2026-06-04) — six culture/work-style dims added (combined 22)
+// carved proportionally from the hard dims so the table still sums to 100.
+// These dims stay UNSCORED until BOTH the candidate took the assessment AND
+// the practice filled its profile, so live scores for today's data don't move;
+// the weight only bites once both sides have data.
 const WEIGHTS: Record<FitDimensionKey, number> = {
-  role_fit: 14,
-  location: 18,
-  pms_fluency: 12,
-  compensation: 12,
-  license_state: 10,
-  certifications: 6,
-  specialty: 7,
-  skills: 7,
-  years_experience: 6,
+  role_fit: 12,
+  location: 14,
+  pms_fluency: 9,
+  compensation: 10,
+  license_state: 8,
+  certifications: 5,
+  specialty: 5,
+  skills: 5,
+  years_experience: 4,
   employment_type: 3,
-  dso_size: 3,
-  schedule_overlap: 2,
+  dso_size: 2,
+  schedule_overlap: 1,
+  // culture / work-style (v3)
+  work_pace: 4,
+  autonomy: 4,
+  mentorship: 4,
+  ce_growth: 4,
+  practice_feel: 3,
+  work_life: 3,
 };
 
 /* ──────────────────────────────────────────────────────────────
@@ -142,6 +154,13 @@ export function computePracticeFit(inputs: FitInputs): FitResult | null {
     employment_type: scoreEmploymentType(inputs),
     dso_size: scoreDsoSize(inputs),
     schedule_overlap: scoreScheduleOverlap(inputs),
+    // v3 Phase B.1 — culture / work-style.
+    work_pace: scoreWorkPace(inputs),
+    autonomy: scoreAutonomy(inputs),
+    mentorship: scoreMentorship(inputs),
+    ce_growth: scoreCeGrowth(inputs),
+    practice_feel: scorePracticeFeel(inputs),
+    work_life: scoreWorkLife(inputs),
   };
 
   // Sum scored contributions and scored weights — missing-data dims
@@ -1271,6 +1290,272 @@ function scoreScheduleOverlap({ candidate, job }: FitInputs): FitDimension {
  * to make the transition explicit rather than relying on hash drift.
  * ─────────────────────────────────────────────────────────── */
 
+/* ──────────────────────────────────────────────────────────────
+ * v3 Phase B.1 — culture / work-style scorers.
+ *
+ * Two scoring shapes:
+ *   • Ordinal MATCH (pace / autonomy / mentorship / practice-feel): both
+ *     sides pick a value on a short ordered scale. Same = 100, one step
+ *     apart = 60, two+ apart = 25. Symmetric — neither side is "right."
+ *   • Desire-vs-PROVISION (CE/growth, work-life): the candidate rates how
+ *     much they value it (1-5); the practice rates how much it provides
+ *     (1-5). Meeting or exceeding the candidate's bar = 100; each point the
+ *     practice falls short costs 20. Over-provision is never penalized — a
+ *     candidate who doesn't prioritize CE at a high-CE practice still fits.
+ *
+ * Every scorer is UNSCORED when either side is blank (missing data drops
+ * from the denominator — never a penalty), matching the rest of the engine.
+ * ─────────────────────────────────────────────────────────── */
+
+/** Normalize a stored signal to a trimmed lowercase token, or null. */
+function token(v: string | null | undefined): string | null {
+  if (typeof v !== "string") return null;
+  const t = v.trim().toLowerCase();
+  return t.length ? t : null;
+}
+
+/** 100 / 60 / 25 by distance on an ordered scale. Null if either off-scale. */
+function ordinalMatchRaw(
+  a: string | null,
+  b: string | null,
+  scale: readonly string[]
+): number | null {
+  if (!a || !b) return null;
+  const ia = scale.indexOf(a);
+  const ib = scale.indexOf(b);
+  if (ia < 0 || ib < 0) return null;
+  const dist = Math.abs(ia - ib);
+  return dist === 0 ? 100 : dist === 1 ? 60 : 25;
+}
+
+/** Practice meets/exceeds the candidate's 1-5 bar = 100; each short point -20. */
+function desireVsProvisionRaw(
+  desire: number | null,
+  provision: number | null
+): number | null {
+  if (desire == null || provision == null) return null;
+  if (provision >= desire) return 100;
+  return Math.max(0, 100 - (desire - provision) * 20);
+}
+
+const PACE_SCALE = ["high_volume", "steady", "thorough"] as const;
+const AUTONOMY_SCALE = ["autonomy", "balance", "structure"] as const;
+const MENTORSHIP_SCALE = ["strong", "occasional", "independent"] as const;
+const FEEL_SCALE = ["private", "midsize", "large"] as const;
+
+const PACE_LABEL: Record<string, string> = {
+  high_volume: "high-volume, fast-moving",
+  steady: "steady and balanced",
+  thorough: "unhurried and thorough",
+};
+const AUTONOMY_LABEL: Record<string, string> = {
+  autonomy: "high autonomy",
+  balance: "a balance of autonomy and support",
+  structure: "clear protocols and close support",
+};
+const MENTORSHIP_LABEL: Record<string, string> = {
+  strong: "strong mentorship",
+  occasional: "occasional guidance",
+  independent: "full independence",
+};
+const FEEL_LABEL: Record<string, string> = {
+  private: "a tight-knit, private-practice feel",
+  midsize: "a mid-size, collaborative group",
+  large: "a large team with lots of resources",
+};
+
+function scoreWorkPace(inputs: FitInputs): FitDimension {
+  const c = token(inputs.candidate.work_pace);
+  const p = token(inputs.dso.practice_pace);
+  if (!c) {
+    return makeUnscoredDim("work_pace", "Work pace", {
+      detail: "Take the assessment so we can match your ideal pace.",
+      detail_employer: "Candidate hasn't shared a pace preference — excluded.",
+      cta_label: "Take the assessment",
+      cta_href: "/candidate/assessment",
+    });
+  }
+  if (!p) {
+    return makeUnscoredDim("work_pace", "Work pace", {
+      detail: "This practice hasn't shared its pace yet — excluded for now.",
+      detail_employer:
+        "Add your practice's pace to factor it into candidate matches.",
+      cta_label: null,
+      cta_href: null,
+    });
+  }
+  const raw = ordinalMatchRaw(c, p, PACE_SCALE) ?? 0;
+  const verdict =
+    raw >= 100 ? "matches" : raw >= 60 ? "is close to" : "differs from";
+  return makeScoredDim(
+    "work_pace",
+    "Work pace",
+    raw,
+    `Your preferred pace (${PACE_LABEL[c] ?? c}) ${verdict} this practice's (${PACE_LABEL[p] ?? p}).`,
+    `Pace fit: candidate prefers ${PACE_LABEL[c] ?? c}; practice runs ${PACE_LABEL[p] ?? p}.`
+  );
+}
+
+function scoreAutonomy(inputs: FitInputs): FitDimension {
+  const c = token(inputs.candidate.autonomy_pref);
+  const p = token(inputs.dso.autonomy_level);
+  if (!c) {
+    return makeUnscoredDim("autonomy", "Autonomy", {
+      detail: "Take the assessment so we can match how independently you like to work.",
+      detail_employer: "Candidate hasn't shared an autonomy preference — excluded.",
+      cta_label: "Take the assessment",
+      cta_href: "/candidate/assessment",
+    });
+  }
+  if (!p) {
+    return makeUnscoredDim("autonomy", "Autonomy", {
+      detail: "This practice hasn't described its autonomy level yet — excluded.",
+      detail_employer: "Add your autonomy level to factor it into matches.",
+      cta_label: null,
+      cta_href: null,
+    });
+  }
+  const raw = ordinalMatchRaw(c, p, AUTONOMY_SCALE) ?? 0;
+  const verdict = raw >= 100 ? "matches" : raw >= 60 ? "is close to" : "differs from";
+  return makeScoredDim(
+    "autonomy",
+    "Autonomy",
+    raw,
+    `You want ${AUTONOMY_LABEL[c] ?? c}; this practice offers ${AUTONOMY_LABEL[p] ?? p} — ${verdict === "matches" ? "a match" : verdict === "is close to" ? "close" : "a gap"}.`,
+    `Autonomy: candidate wants ${AUTONOMY_LABEL[c] ?? c}; practice offers ${AUTONOMY_LABEL[p] ?? p}.`
+  );
+}
+
+function scoreMentorship(inputs: FitInputs): FitDimension {
+  const c = token(inputs.candidate.mentorship_pref);
+  const p = token(inputs.dso.mentorship_offered);
+  if (!c) {
+    return makeUnscoredDim("mentorship", "Mentorship", {
+      detail: "Take the assessment so we can match the mentorship you want.",
+      detail_employer: "Candidate hasn't shared a mentorship preference — excluded.",
+      cta_label: "Take the assessment",
+      cta_href: "/candidate/assessment",
+    });
+  }
+  if (!p) {
+    return makeUnscoredDim("mentorship", "Mentorship", {
+      detail: "This practice hasn't described its mentorship yet — excluded.",
+      detail_employer: "Add the mentorship you offer to factor it into matches.",
+      cta_label: null,
+      cta_href: null,
+    });
+  }
+  const raw = ordinalMatchRaw(c, p, MENTORSHIP_SCALE) ?? 0;
+  const verdict = raw >= 100 ? "matches" : raw >= 60 ? "is close to" : "differs from";
+  return makeScoredDim(
+    "mentorship",
+    "Mentorship",
+    raw,
+    `You're looking for ${MENTORSHIP_LABEL[c] ?? c}; this practice offers ${MENTORSHIP_LABEL[p] ?? p} — ${verdict === "matches" ? "a match" : verdict === "is close to" ? "close" : "a gap"}.`,
+    `Mentorship: candidate wants ${MENTORSHIP_LABEL[c] ?? c}; practice offers ${MENTORSHIP_LABEL[p] ?? p}.`
+  );
+}
+
+function scoreCeGrowth(inputs: FitInputs): FitDimension {
+  const desire = inputs.candidate.ce_growth_importance ?? null;
+  const provision = inputs.dso.ce_support ?? null;
+  if (desire == null) {
+    return makeUnscoredDim("ce_growth", "Growth & CE", {
+      detail: "Take the assessment to tell us how much growth and CE matter to you.",
+      detail_employer: "Candidate hasn't rated how much CE/growth matters — excluded.",
+      cta_label: "Take the assessment",
+      cta_href: "/candidate/assessment",
+    });
+  }
+  if (provision == null) {
+    return makeUnscoredDim("ce_growth", "Growth & CE", {
+      detail: "This practice hasn't shared its CE support yet — excluded.",
+      detail_employer: "Add your CE / growth support to factor it into matches.",
+      cta_label: null,
+      cta_href: null,
+    });
+  }
+  const raw = desireVsProvisionRaw(desire, provision) ?? 0;
+  return makeScoredDim(
+    "ce_growth",
+    "Growth & CE",
+    raw,
+    raw >= 100
+      ? "This practice's growth and CE support meets what you're looking for."
+      : "This practice offers less CE/growth support than you said you want.",
+    raw >= 100
+      ? "Practice's CE/growth support meets the candidate's priority."
+      : "Practice offers less CE/growth than the candidate prioritizes."
+  );
+}
+
+function scoreWorkLife(inputs: FitInputs): FitDimension {
+  const desire = inputs.candidate.work_life_priority ?? null;
+  const provision = inputs.dso.work_life_balance ?? null;
+  if (desire == null) {
+    return makeUnscoredDim("work_life", "Work-life balance", {
+      detail: "Take the assessment to tell us how much predictable balance matters.",
+      detail_employer: "Candidate hasn't rated work-life priority — excluded.",
+      cta_label: "Take the assessment",
+      cta_href: "/candidate/assessment",
+    });
+  }
+  if (provision == null) {
+    return makeUnscoredDim("work_life", "Work-life balance", {
+      detail: "This practice hasn't shared its work-life reality yet — excluded.",
+      detail_employer: "Add your practice's work-life reality to factor it in.",
+      cta_label: null,
+      cta_href: null,
+    });
+  }
+  const raw = desireVsProvisionRaw(desire, provision) ?? 0;
+  return makeScoredDim(
+    "work_life",
+    "Work-life balance",
+    raw,
+    raw >= 100
+      ? "This practice's schedule predictability meets what you're looking for."
+      : "This practice's schedule may be less predictable than you'd like.",
+    raw >= 100
+      ? "Practice's work-life reality meets the candidate's priority."
+      : "Practice's schedule may be less predictable than the candidate wants."
+  );
+}
+
+/** private | midsize | large — explicit profile, else derived from size. */
+function practiceFeelFromSize(count: number): string {
+  if (count <= 1) return "private";
+  if (count <= 9) return "midsize";
+  return "large";
+}
+
+function scorePracticeFeel(inputs: FitInputs): FitDimension {
+  const c = token(inputs.candidate.practice_feel);
+  // "any" = no preference → no signal to score against.
+  if (!c || c === "any") {
+    return makeUnscoredDim("practice_feel", "Practice feel", {
+      detail:
+        "Take the assessment (or pick a practice feel) to factor environment into your match.",
+      detail_employer:
+        "Candidate has no practice-feel preference — excluded (no penalty).",
+      cta_label: "Take the assessment",
+      cta_href: "/candidate/assessment",
+    });
+  }
+  const explicit = token(inputs.dso.practice_feel);
+  const p = explicit ?? practiceFeelFromSize(inputs.dso.location_count ?? 0);
+  const raw = ordinalMatchRaw(c, p, FEEL_SCALE) ?? 0;
+  const verdict = raw >= 100 ? "matches" : raw >= 60 ? "is close to" : "differs from";
+  const src = explicit ? "" : " (estimated from practice size)";
+  return makeScoredDim(
+    "practice_feel",
+    "Practice feel",
+    raw,
+    `You thrive in ${FEEL_LABEL[c] ?? c}; this practice has ${FEEL_LABEL[p] ?? p}${src} — ${verdict === "matches" ? "a match" : verdict === "is close to" ? "close" : "a gap"}.`,
+    `Practice feel: candidate prefers ${FEEL_LABEL[c] ?? c}; practice is ${FEEL_LABEL[p] ?? p}${src}.`
+  );
+}
+
 export function hashInputs(inputs: FitInputs): string {
   const canonical = {
     // Logic-version stamp — a scoring-logic change with no new input field
@@ -1299,6 +1584,14 @@ export function hashInputs(inputs: FitInputs): string {
       dso_size_preference: inputs.candidate.dso_size_preference ?? null,
       years_experience_dental:
         inputs.candidate.years_experience_dental ?? null,
+      // v3 Phase B.1 — culture signals must be hashed so the cache
+      // invalidates when the candidate retakes the assessment.
+      work_pace: token(inputs.candidate.work_pace),
+      autonomy_pref: token(inputs.candidate.autonomy_pref),
+      mentorship_pref: token(inputs.candidate.mentorship_pref),
+      practice_feel: token(inputs.candidate.practice_feel),
+      ce_growth_importance: inputs.candidate.ce_growth_importance ?? null,
+      work_life_priority: inputs.candidate.work_life_priority ?? null,
     },
     job: {
       role_category: inputs.job.role_category,
@@ -1330,6 +1623,14 @@ export function hashInputs(inputs: FitInputs): string {
     },
     dso: {
       location_count: inputs.dso.location_count ?? 0,
+      // v3 Phase B.1 — practice-profile signals; invalidate the cache when
+      // a practice edits its profile.
+      practice_pace: token(inputs.dso.practice_pace),
+      autonomy_level: token(inputs.dso.autonomy_level),
+      mentorship_offered: token(inputs.dso.mentorship_offered),
+      practice_feel: token(inputs.dso.practice_feel),
+      ce_support: inputs.dso.ce_support ?? null,
+      work_life_balance: inputs.dso.work_life_balance ?? null,
     },
   };
   return createHash("sha256")

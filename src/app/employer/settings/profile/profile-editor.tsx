@@ -39,11 +39,16 @@ import {
   upsertBrandAndCulture,
   upsertContactCta,
   upsertCompanyDetails,
+  upsertPracticeProfile,
 } from "./actions";
 import {
   type ProfileData,
   type WhyJoinUsBlock,
   PROFILE_LIMITS,
+  PRACTICE_PACE_OPTIONS,
+  AUTONOMY_LEVEL_OPTIONS,
+  MENTORSHIP_OPTIONS,
+  PRACTICE_FEEL_OPTIONS,
 } from "./profile-data";
 import {
   CULTURE_CHIP_GROUPS,
@@ -102,6 +107,15 @@ export function ProfileEditor({ initial, canEdit }: ProfileEditorProps) {
         canEdit={canEdit}
         initialChips={initial.culture_chips}
         initialBrandColor={initial.brand_color}
+      />
+      <PracticeProfileSection
+        canEdit={canEdit}
+        initialPace={initial.practice_pace}
+        initialAutonomy={initial.autonomy_level}
+        initialMentorship={initial.mentorship_offered}
+        initialFeel={initial.practice_feel}
+        initialCeSupport={initial.ce_support}
+        initialWorkLife={initial.work_life_balance}
       />
       <ContactCtaSection
         canEdit={canEdit}
@@ -191,6 +205,230 @@ function SaveBar({
           saveLabel
         )}
       </button>
+    </div>
+  );
+}
+
+/* ───────── PracticeFit practice profile (v3 culture mirror) ───────── */
+
+function PracticeProfileSection({
+  canEdit,
+  initialPace,
+  initialAutonomy,
+  initialMentorship,
+  initialFeel,
+  initialCeSupport,
+  initialWorkLife,
+}: {
+  canEdit: boolean;
+  initialPace: string | null;
+  initialAutonomy: string | null;
+  initialMentorship: string | null;
+  initialFeel: string | null;
+  initialCeSupport: number | null;
+  initialWorkLife: number | null;
+}) {
+  const [pace, setPace] = useState<string | null>(initialPace);
+  const [autonomy, setAutonomy] = useState<string | null>(initialAutonomy);
+  const [mentorship, setMentorship] = useState<string | null>(initialMentorship);
+  const [feel, setFeel] = useState<string | null>(initialFeel);
+  const [ce, setCe] = useState<number | null>(initialCeSupport);
+  const [wlb, setWlb] = useState<number | null>(initialWorkLife);
+  const [snapshot, setSnapshot] = useState({
+    pace: initialPace,
+    autonomy: initialAutonomy,
+    mentorship: initialMentorship,
+    feel: initialFeel,
+    ce: initialCeSupport,
+    wlb: initialWorkLife,
+  });
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  const dirty =
+    pace !== snapshot.pace ||
+    autonomy !== snapshot.autonomy ||
+    mentorship !== snapshot.mentorship ||
+    feel !== snapshot.feel ||
+    ce !== snapshot.ce ||
+    wlb !== snapshot.wlb;
+
+  const onSave = () => {
+    if (!dirty) return;
+    setError(null);
+    setSaved(false);
+    startTransition(async () => {
+      const result = await upsertPracticeProfile({
+        practice_pace: pace,
+        autonomy_level: autonomy,
+        mentorship_offered: mentorship,
+        practice_feel: feel,
+        ce_support: ce,
+        work_life_balance: wlb,
+      });
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      setSnapshot({ pace, autonomy, mentorship, feel, ce, wlb });
+      setSaved(true);
+    });
+  };
+
+  return (
+    <SectionShell
+      eyebrow="PracticeFit"
+      title="How your practice works"
+      subtitle="This powers PracticeFit — it's matched against what candidates tell us they want in our assessment. Every field is optional, and a strong match here is one of the biggest reasons the right candidate picks you. Candidates never see these as a checklist; they only see where you line up."
+    >
+      <div className="space-y-6">
+        <SelectRow
+          label="Day-to-day pace"
+          value={pace}
+          options={PRACTICE_PACE_OPTIONS}
+          disabled={!canEdit}
+          onChange={setPace}
+        />
+        <SelectRow
+          label="Autonomy your team has"
+          value={autonomy}
+          options={AUTONOMY_LEVEL_OPTIONS}
+          disabled={!canEdit}
+          onChange={setAutonomy}
+        />
+        <SelectRow
+          label="Mentorship you offer"
+          value={mentorship}
+          options={MENTORSHIP_OPTIONS}
+          disabled={!canEdit}
+          onChange={setMentorship}
+        />
+        <SelectRow
+          label="Practice feel"
+          value={feel}
+          options={PRACTICE_FEEL_OPTIONS}
+          disabled={!canEdit}
+          onChange={setFeel}
+          help="Leave blank to let us estimate from your number of locations."
+        />
+        <ScaleRow
+          label="CE & growth support"
+          lowLabel="Minimal"
+          highLabel="We invest heavily"
+          value={ce}
+          disabled={!canEdit}
+          onChange={setCe}
+        />
+        <ScaleRow
+          label="Work-life predictability"
+          lowLabel="Fast-paced / variable"
+          highLabel="Very predictable"
+          value={wlb}
+          disabled={!canEdit}
+          onChange={setWlb}
+        />
+      </div>
+      <SaveBar
+        dirty={dirty}
+        saving={pending}
+        saved={saved}
+        error={error}
+        onSave={onSave}
+        disabled={!canEdit}
+        saveLabel="Save practice profile"
+      />
+    </SectionShell>
+  );
+}
+
+function SelectRow({
+  label,
+  value,
+  options,
+  disabled,
+  onChange,
+  help,
+}: {
+  label: string;
+  value: string | null;
+  options: ReadonlyArray<{ value: string; label: string }>;
+  disabled: boolean;
+  onChange: (v: string | null) => void;
+  help?: string;
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-semibold text-ink mb-1.5">
+        {label}
+      </label>
+      <select
+        value={value ?? ""}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.value ? e.target.value : null)}
+        className="w-full max-w-[520px] border border-[var(--rule)] bg-white px-3 py-2 text-[14px] text-ink focus:border-heritage focus:outline-none disabled:opacity-50"
+      >
+        <option value="">No preference / not set</option>
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      {help && <p className="mt-1 text-[12px] text-slate-meta">{help}</p>}
+    </div>
+  );
+}
+
+function ScaleRow({
+  label,
+  lowLabel,
+  highLabel,
+  value,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  lowLabel: string;
+  highLabel: string;
+  value: number | null;
+  disabled: boolean;
+  onChange: (v: number | null) => void;
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-semibold text-ink mb-1.5">
+        {label}
+      </label>
+      <div className="flex items-center gap-2">
+        {[1, 2, 3, 4, 5].map((n) => {
+          const active = value === n;
+          return (
+            <button
+              key={n}
+              type="button"
+              disabled={disabled}
+              onClick={() => onChange(active ? null : n)}
+              aria-pressed={active}
+              className={
+                "h-9 w-9 border text-[13px] font-bold transition-colors disabled:opacity-50 " +
+                (active
+                  ? "border-heritage-deep bg-heritage-deep text-ivory"
+                  : "border-[var(--rule)] bg-white text-slate-body hover:border-heritage-deep")
+              }
+            >
+              {n}
+            </button>
+          );
+        })}
+        <span className="ml-2 text-[12px] text-slate-meta">
+          {value == null ? "Not set" : value <= 2 ? lowLabel : value >= 4 ? highLabel : "In between"}
+        </span>
+      </div>
+      <div className="mt-1 flex max-w-[260px] justify-between text-[11px] text-slate-meta">
+        <span>{lowLabel}</span>
+        <span>{highLabel}</span>
+      </div>
     </div>
   );
 }

@@ -62,7 +62,7 @@ export default async function PublicProfileSettingsPage({
     supabase
       .from("dsos")
       .select(
-        "id, name, slug, mission, description, logo_url, banner_url, brand_color, why_join_us, culture_chips, contact_cta_label, contact_cta_url, website, headquarters_city, headquarters_state, candidate_reply_to_email, practice_count, status"
+        "id, name, slug, mission, description, logo_url, banner_url, brand_color, why_join_us, culture_chips, contact_cta_label, contact_cta_url, website, headquarters_city, headquarters_state, candidate_reply_to_email, practice_count, practice_pace, autonomy_level, mentorship_offered, practice_feel, ce_support, work_life_balance, practice_profile_completed_at, status"
       )
       .eq("id", dsoId)
       .maybeSingle(),
@@ -98,6 +98,14 @@ export default async function PublicProfileSettingsPage({
     headquarters_state: (r.headquarters_state as string | null) ?? null,
     candidate_reply_to_email: (r.candidate_reply_to_email as string | null) ?? null,
     practice_count: (r.practice_count as number | null) ?? null,
+    practice_pace: (r.practice_pace as string | null) ?? null,
+    autonomy_level: (r.autonomy_level as string | null) ?? null,
+    mentorship_offered: (r.mentorship_offered as string | null) ?? null,
+    practice_feel: (r.practice_feel as string | null) ?? null,
+    ce_support: (r.ce_support as number | null) ?? null,
+    work_life_balance: (r.work_life_balance as number | null) ?? null,
+    practice_profile_completed_at:
+      (r.practice_profile_completed_at as string | null) ?? null,
     photos: ((photoRows ?? []) as ProfilePhoto[]).map((p) => ({
       id: p.id,
       storage_url: p.storage_url,

@@ -2542,6 +2542,13 @@ export type Database = {
           corporate_affiliation_policy: string
           created_at: string
           culture_chips: string[]
+          practice_pace: string | null
+          autonomy_level: string | null
+          mentorship_offered: string | null
+          practice_feel: string | null
+          ce_support: number | null
+          work_life_balance: number | null
+          practice_profile_completed_at: string | null
           deleted_at: string | null
           description: string | null
           featured_until: string | null
@@ -2573,6 +2580,13 @@ export type Database = {
           corporate_affiliation_policy?: string
           created_at?: string
           culture_chips?: string[]
+          practice_pace?: string | null
+          autonomy_level?: string | null
+          mentorship_offered?: string | null
+          practice_feel?: string | null
+          ce_support?: number | null
+          work_life_balance?: number | null
+          practice_profile_completed_at?: string | null
           deleted_at?: string | null
           description?: string | null
           featured_until?: string | null
@@ -2604,6 +2618,13 @@ export type Database = {
           corporate_affiliation_policy?: string
           created_at?: string
           culture_chips?: string[]
+          practice_pace?: string | null
+          autonomy_level?: string | null
+          mentorship_offered?: string | null
+          practice_feel?: string | null
+          ce_support?: number | null
+          work_life_balance?: number | null
+          practice_profile_completed_at?: string | null
           deleted_at?: string | null
           description?: string | null
           featured_until?: string | null

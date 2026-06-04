@@ -233,7 +233,7 @@ async function loadCandidateInputs(
   const { data: c } = await supabase
     .from("candidates")
     .select(
-      "desired_roles, current_title, desired_specialty, license_states, desired_locations, desired_location_points, pms_systems, skills, schedule_preferences, min_salary, salary_unit, temp_or_perm, dso_size_preference, years_experience, years_experience_dental, candidate_certifications(kind)"
+      "desired_roles, current_title, desired_specialty, license_states, desired_locations, desired_location_points, pms_systems, skills, schedule_preferences, min_salary, salary_unit, temp_or_perm, dso_size_preference, years_experience, years_experience_dental, work_pace, autonomy_pref, mentorship_pref, patient_facing_energy, practice_feel, ce_growth_importance, work_life_priority, candidate_certifications(kind)"
     )
     .eq("id", candidateId)
     .maybeSingle();
@@ -302,6 +302,14 @@ async function loadCandidateInputs(
       (r.years_experience_dental as number | null) ??
       (r.years_experience as number | null) ??
       null,
+    // v3 Phase B.1 — assessment culture signals (null until they take it).
+    work_pace: (r.work_pace as string | null) ?? null,
+    autonomy_pref: (r.autonomy_pref as string | null) ?? null,
+    mentorship_pref: (r.mentorship_pref as string | null) ?? null,
+    patient_facing_energy: (r.patient_facing_energy as number | null) ?? null,
+    practice_feel: (r.practice_feel as string | null) ?? null,
+    ce_growth_importance: (r.ce_growth_importance as number | null) ?? null,
+    work_life_priority: (r.work_life_priority as number | null) ?? null,
   };
 }
 
@@ -349,6 +357,16 @@ async function loadJobAndDso(
     .select("id", { count: "exact", head: true })
     .eq("dso_id", dsoId);
 
+  // v3 Phase B.1 — the practice-profile culture mirror.
+  const { data: dsoRow } = await supabase
+    .from("dsos")
+    .select(
+      "practice_pace, autonomy_level, mentorship_offered, practice_feel, ce_support, work_life_balance"
+    )
+    .eq("id", dsoId)
+    .maybeSingle();
+  const d = (dsoRow ?? {}) as Record<string, unknown>;
+
   return {
     job: {
       role_category: (r.role_category as string) ?? "other",
@@ -383,6 +401,13 @@ async function loadJobAndDso(
     },
     dso: {
       location_count: locationCount ?? 0,
+      // v3 Phase B.1 — practice-profile culture signals (null until filled).
+      practice_pace: (d.practice_pace as string | null) ?? null,
+      autonomy_level: (d.autonomy_level as string | null) ?? null,
+      mentorship_offered: (d.mentorship_offered as string | null) ?? null,
+      practice_feel: (d.practice_feel as string | null) ?? null,
+      ce_support: (d.ce_support as number | null) ?? null,
+      work_life_balance: (d.work_life_balance as number | null) ?? null,
     },
   };
 }

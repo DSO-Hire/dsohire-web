@@ -652,6 +652,82 @@ export async function upsertCompanyDetails(input: {
 }
 
 /* ──────────────────────────────────────────────────────────────
+ * Practice profile — the PracticeFit v3 culture mirror (Phase B.1).
+ *
+ * The employer side of the candidate assessment's work-style signals. Every
+ * field is optional; the matching engine leaves any blank dimension UNSCORED
+ * (never a penalty). Vocab matches the candidate columns so the engine
+ * compares directly. practice_feel can be left blank — the engine derives it
+ * from practice count — but setting it explicitly is more accurate.
+ *
+ * Module-local value sets (not exported — "use server" allows only async
+ * exports; see feedback_use_server_only_async_exports).
+ * ─────────────────────────────────────────────────────────── */
+
+const PRACTICE_PACE_VALUES = new Set(["high_volume", "steady", "thorough"]);
+const AUTONOMY_LEVEL_VALUES = new Set(["autonomy", "balance", "structure"]);
+const MENTORSHIP_VALUES = new Set(["strong", "occasional", "independent"]);
+const PRACTICE_FEEL_VALUES = new Set(["private", "midsize", "large"]);
+
+function cleanEnum(v: string | null | undefined, allowed: Set<string>): string | null {
+  const t = typeof v === "string" ? v.trim() : "";
+  return t && allowed.has(t) ? t : null;
+}
+function cleanScale(v: number | null | undefined): number | null {
+  if (v == null) return null;
+  const n = Math.round(Number(v));
+  return Number.isFinite(n) && n >= 1 && n <= 5 ? n : null;
+}
+
+export async function upsertPracticeProfile(input: {
+  practice_pace: string | null;
+  autonomy_level: string | null;
+  mentorship_offered: string | null;
+  practice_feel: string | null;
+  ce_support: number | null;
+  work_life_balance: number | null;
+}): Promise<Result> {
+  const ctx = await getDsoAdminContext();
+  if (!ctx.ok) return ctx;
+
+  const practice_pace = cleanEnum(input.practice_pace, PRACTICE_PACE_VALUES);
+  const autonomy_level = cleanEnum(input.autonomy_level, AUTONOMY_LEVEL_VALUES);
+  const mentorship_offered = cleanEnum(input.mentorship_offered, MENTORSHIP_VALUES);
+  const practice_feel = cleanEnum(input.practice_feel, PRACTICE_FEEL_VALUES);
+  const ce_support = cleanScale(input.ce_support);
+  const work_life_balance = cleanScale(input.work_life_balance);
+
+  const anySet =
+    practice_pace !== null ||
+    autonomy_level !== null ||
+    mentorship_offered !== null ||
+    practice_feel !== null ||
+    ce_support !== null ||
+    work_life_balance !== null;
+
+  const { error } = await ctx.supabase
+    .from("dsos")
+    .update({
+      practice_pace,
+      autonomy_level,
+      mentorship_offered,
+      practice_feel,
+      ce_support,
+      work_life_balance,
+      practice_profile_completed_at: anySet ? new Date().toISOString() : null,
+    })
+    .eq("id", ctx.dsoId);
+
+  if (error) {
+    console.error("[profile/upsertPracticeProfile]", error);
+    return { ok: false, error: "Couldn't save your practice profile." };
+  }
+
+  await revalidateProfileSurfaces(ctx.supabase, ctx.dsoId);
+  return { ok: true };
+}
+
+/* ──────────────────────────────────────────────────────────────
  * Contact CTA — label + URL pair
  * ─────────────────────────────────────────────────────────── */
 

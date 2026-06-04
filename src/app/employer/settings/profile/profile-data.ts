@@ -47,9 +47,46 @@ export interface ProfileData {
   candidate_reply_to_email: string | null;
   practice_count: number | null;
 
+  /** PracticeFit v3 practice profile — the culture mirror (Phase B.1).
+   *  All optional; blanks leave the matching dimension unscored. */
+  practice_pace: string | null;
+  autonomy_level: string | null;
+  mentorship_offered: string | null;
+  practice_feel: string | null;
+  ce_support: number | null;
+  work_life_balance: number | null;
+  practice_profile_completed_at: string | null;
+
   /** Photo gallery (separate table) */
   photos: ProfilePhoto[];
 }
+
+/* PracticeFit practice-profile option metadata — shared by the editor.
+ * Values mirror the candidate assessment columns so the engine compares
+ * directly. */
+export const PRACTICE_PACE_OPTIONS = [
+  { value: "high_volume", label: "High-volume, fast-moving" },
+  { value: "steady", label: "Steady and balanced" },
+  { value: "thorough", label: "Unhurried and thorough" },
+] as const;
+
+export const AUTONOMY_LEVEL_OPTIONS = [
+  { value: "autonomy", label: "High autonomy — providers run their own chair/desk" },
+  { value: "balance", label: "A balance of autonomy and support" },
+  { value: "structure", label: "Clear protocols and close support" },
+] as const;
+
+export const MENTORSHIP_OPTIONS = [
+  { value: "strong", label: "Strong mentorship + coaching" },
+  { value: "occasional", label: "Occasional guidance" },
+  { value: "independent", label: "Full independence" },
+] as const;
+
+export const PRACTICE_FEEL_OPTIONS = [
+  { value: "private", label: "Tight-knit, private-practice feel" },
+  { value: "midsize", label: "Mid-size, collaborative group" },
+  { value: "large", label: "Large team with lots of resources" },
+] as const;
 
 /** Length limits surfaced in the UI; mirrors action-layer validation. */
 export const PROFILE_LIMITS = {
