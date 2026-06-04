@@ -99,9 +99,10 @@ const PRACTICE_FIT_OPTIONS: ReadonlyArray<{
   description: string;
 }> = [
   {
-    value: "off",
-    label: "Off (default)",
-    description: "Don't compute a PracticeFit score for me.",
+    value: "full",
+    label: "Full (default)",
+    description:
+      "Compute + display my PracticeFit score on my profile so DSOs can find me by fit.",
   },
   {
     value: "results_only",
@@ -110,10 +111,9 @@ const PRACTICE_FIT_OPTIONS: ReadonlyArray<{
       "Compute a fit score, but only show it on the jobs I apply to — no public score on my profile.",
   },
   {
-    value: "full",
-    label: "Full",
-    description:
-      "Compute + display my PracticeFit score on my profile so DSOs can find me by fit.",
+    value: "off",
+    label: "Off",
+    description: "Don't compute a PracticeFit score for me.",
   },
 ];
 
@@ -492,7 +492,7 @@ export function PracticeFitSection({
           <span className="ml-1.5">consent</span>
         </span>
       }
-      description="PracticeFit is our proprietary matching algorithm — it scores how well you fit each role on must-haves and preferences. Off by default; turn it on so DSOs can find you by fit."
+      description="PracticeFit is our proprietary matching algorithm — it scores how well you fit each role on your must-haves and preferences. On by default so dental groups can find you by fit; you can turn it off anytime."
     >
       <RadioGroup
         legend="Compute and display"
@@ -500,6 +500,21 @@ export function PracticeFitSection({
         onChange={setConsent}
         options={PRACTICE_FIT_OPTIONS}
       />
+      {consent === "off" && (
+        <div className="rounded-md border border-amber-200 bg-amber-50 px-3.5 py-3 text-[13px] leading-relaxed text-amber-900">
+          PracticeFit is one of the most useful things on DSO Hire — with it
+          off, your roles stop ranking and dental groups can&apos;t find you by
+          fit. Worried about your privacy? You can keep PracticeFit on and still
+          control exactly what employers see using your{" "}
+          <a
+            href="/candidate/settings/privacy"
+            className="font-semibold underline underline-offset-2"
+          >
+            profile visibility settings
+          </a>{" "}
+          above.
+        </div>
+      )}
       <SaveBar
         dirty={dirty}
         saving={saving}
