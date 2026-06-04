@@ -14,7 +14,9 @@
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export const ASSESSMENT_VERSION = "2026-06-04-v3.0";
+// NOTE: a "use server" file may only EXPORT async functions, so this stays
+// module-local (not exported) — the build fails otherwise.
+const ASSESSMENT_VERSION = "2026-06-04-v3.0";
 
 type Answers = Record<string, unknown>;
 
