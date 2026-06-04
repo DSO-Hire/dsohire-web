@@ -45,7 +45,7 @@ export default async function NewJobPage() {
 
   const { data: locations } = await supabase
     .from("dso_locations")
-    .select("id, name, city, state")
+    .select("id, name, city, state, public_dso_affiliation, anonymize_name")
     .eq("dso_id", dsoUser.dso_id)
     .order("name");
 
@@ -54,7 +54,17 @@ export default async function NewJobPage() {
     name: l.name as string,
     city: (l.city as string | null) ?? null,
     state: (l.state as string | null) ?? null,
+    publicDsoAffiliation: (l.public_dso_affiliation as boolean | null) ?? true,
+    anonymizeName: (l.anonymize_name as boolean | null) ?? false,
   }));
+
+  // DSO name for the pre-publish name-leak nudge.
+  const { data: dsoRow } = await supabase
+    .from("dsos")
+    .select("name")
+    .eq("id", dsoUser.dso_id)
+    .maybeSingle();
+  const dsoName = (dsoRow?.name as string | null) ?? undefined;
 
   if (locationOptions.length === 0) {
     return (
@@ -138,6 +148,7 @@ export default async function NewJobPage() {
         dsoId={dsoUser.dso_id}
         locations={locationOptions}
         mode="create"
+        dsoName={dsoName}
       />
     </EmployerShell>
   );

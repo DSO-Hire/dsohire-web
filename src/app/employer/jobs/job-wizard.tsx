@@ -27,7 +27,9 @@ import {
   ChevronDown,
   Pencil,
   Check,
+  AlertTriangle,
 } from "lucide-react";
+import { findNameLeaks, stripHtml } from "@/lib/dso/name-leak";
 import { JobDescriptionEditor } from "@/components/job-description-editor";
 import {
   createJob,
@@ -68,6 +70,14 @@ export interface LocationOption {
   name: string;
   city: string | null;
   state: string | null;
+  /**
+   * Anonymity context for the pre-publish name-leak nudge. Optional so callers
+   * that don't supply it (corporate wizard) keep working. `false` =
+   * corporate-name hidden (mask shows the practice name); `anonymizeName` =
+   * practice name hidden too ("Dental Office in {city}").
+   */
+  publicDsoAffiliation?: boolean;
+  anonymizeName?: boolean;
 }
 
 export type ScreeningQuestionKind =
@@ -234,6 +244,9 @@ interface JobWizardProps {
   mode: "create" | "edit";
   initial?: JobWizardInitial;
   initialQuestions?: WizardScreeningQuestion[];
+  /** Corporate DSO name — used by the pre-publish nudge to detect a name leak
+   *  in the title/body when a selected location is private/anonymized. */
+  dsoName?: string;
 }
 
 /* ───── Constants ───── */
@@ -327,6 +340,7 @@ export function JobWizard({
   mode,
   initial,
   initialQuestions,
+  dsoName,
 }: JobWizardProps) {
   const [stepIdx, setStepIdx] = useState(0);
 
@@ -1147,6 +1161,7 @@ export function JobWizard({
           <PreviewStep
             mode={mode}
             title={title}
+            dsoName={dsoName}
             roleCategory={roleCategory}
             employmentType={employmentType}
             locations={locations}
@@ -2650,6 +2665,7 @@ export function KnockoutAuthoring({
 function PreviewStep({
   mode,
   title,
+  dsoName,
   roleCategory,
   employmentType,
   locations,
@@ -2669,6 +2685,7 @@ function PreviewStep({
 }: {
   mode: "create" | "edit";
   title: string;
+  dsoName?: string;
   roleCategory: string;
   employmentType: string;
   locations: LocationOption[];
@@ -2695,6 +2712,29 @@ function PreviewStep({
     selectedLocationIds.has(l.id)
   );
 
+  // Pre-publish name-leak nudge (anonymity, 2026-06-04). Masking hides the
+  // structured name, but free text the recruiter typed (title/body) can still
+  // leak it. When any selected location is private/anonymized, scan and warn.
+  const anySelectedMasked = selectedLocations.some(
+    (l) => l.publicDsoAffiliation === false || l.anonymizeName === true
+  );
+  const namesToCheck: string[] = [];
+  if (anySelectedMasked) {
+    // A private location hides the corporate DSO name.
+    if (dsoName) namesToCheck.push(dsoName);
+    // An anonymized location hides its practice name too.
+    for (const l of selectedLocations) {
+      if (l.anonymizeName) namesToCheck.push(l.name);
+    }
+  }
+  const leakedNames =
+    namesToCheck.length > 0
+      ? findNameLeaks(
+          [title, stripHtml(description), requirements],
+          namesToCheck
+        )
+      : [];
+
   return (
     <div className="space-y-6">
       <div>
@@ -2705,6 +2745,33 @@ function PreviewStep({
           Final check before it goes live.
         </h2>
       </div>
+
+      {leakedNames.length > 0 && (
+        <div className="border-l-4 border-amber-400 bg-amber-50 p-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-[14px] font-bold text-amber-900">
+                This listing is set to private, but the text still names{" "}
+                {leakedNames.map((n, i) => (
+                  <span key={n}>
+                    {i > 0 ? ", " : ""}
+                    <span className="font-extrabold">&ldquo;{n}&rdquo;</span>
+                  </span>
+                ))}
+                .
+              </p>
+              <p className="mt-1 text-[13px] text-amber-900/80 leading-relaxed">
+                Candidates will still see{" "}
+                {leakedNames.length === 1 ? "that name" : "those names"} in the
+                title or description even though the practice identity is masked
+                everywhere else. Use the <strong>Edit</strong> links below to
+                reword it, or publish anyway if that&apos;s intentional.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <ReviewBlock label="Basics" onEdit={() => onJumpTo("basics")}>
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
