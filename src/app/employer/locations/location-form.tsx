@@ -36,6 +36,12 @@ export interface LocationFormInitial {
    */
   public_dso_affiliation: boolean;
   /**
+   * Anonymity tier 2 (2026-06-04). When true, the MASKED public/candidate name
+   * for this location becomes a generic "Dental Office in {city}" instead of the
+   * practice name. Default false. Internal/team views always see the real name.
+   */
+  anonymize_name: boolean;
+  /**
    * Per-location practice website URL. Optional. Surfaced on candidate-
    * facing job listings only when public_dso_affiliation is true.
    */
@@ -63,6 +69,9 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
   const router = useRouter();
   const [showDsoAffiliation, setShowDsoAffiliation] = useState<boolean>(
     initial?.public_dso_affiliation ?? true
+  );
+  const [anonymizeName, setAnonymizeName] = useState<boolean>(
+    initial?.anonymize_name ?? false
   );
   // After a successful save, refresh the route so the Server Component
   // re-fetches the dso_locations row and the next render of this form
@@ -226,6 +235,63 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
             type="hidden"
             name="public_dso_affiliation"
             value={showDsoAffiliation ? "true" : "false"}
+          />
+        </div>
+      )}
+
+      {/* Anonymity tier 2 — hide the practice NAME too (2026-06-04). When on,
+          masked public/candidate listings show a neutral "Dental Office in
+          {city}" instead of this practice's name. Edit-mode only; same
+          hidden-input pattern as the affiliation toggle above. */}
+      {mode === "edit" && (
+        <div className="border border-[var(--rule-strong)] bg-cream/50 px-5 py-4">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <div className="text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
+              Practice-name anonymity
+            </div>
+            <span
+              className={
+                "inline-flex items-center px-2 py-0.5 text-[10px] font-bold tracking-[1.2px] uppercase " +
+                ((initial?.anonymize_name ?? false)
+                  ? "bg-ink text-ivory"
+                  : "bg-heritage text-ivory")
+              }
+            >
+              {(initial?.anonymize_name ?? false) ? "Name hidden" : "Name shown"}
+            </span>
+          </div>
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              name="anonymize_name_checkbox"
+              checked={anonymizeName}
+              onChange={(e) => setAnonymizeName(e.currentTarget.checked)}
+              className="mt-1 h-4 w-4 accent-heritage cursor-pointer flex-shrink-0"
+            />
+            <div className="min-w-0">
+              <div className="text-[14px] font-semibold text-ink">
+                Hide this practice&apos;s name on public + candidate views
+              </div>
+              <p className="mt-1 text-[13px] text-slate-body leading-relaxed">
+                On masked listings, show a neutral{" "}
+                <span className="font-semibold text-ink">
+                  &ldquo;Dental Office in {initial?.city ?? "your city"}&rdquo;
+                </span>{" "}
+                instead of the practice name (and hide the practice logo). Your
+                team always sees the real name. Most useful alongside hiding the{" "}
+                {dsoName ?? "DSO"} name above.
+              </p>
+              {anonymizeName !== (initial?.anonymize_name ?? false) && (
+                <p className="mt-2 text-[12px] text-amber-800 font-semibold">
+                  Unsaved change. Click Save to persist.
+                </p>
+              )}
+            </div>
+          </label>
+          <input
+            type="hidden"
+            name="anonymize_name"
+            value={anonymizeName ? "true" : "false"}
           />
         </div>
       )}

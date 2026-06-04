@@ -47,6 +47,23 @@
 
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 
+/**
+ * Anonymity tier 2 (2026-06-04) — when a location opts into `anonymize_name`,
+ * its MASKED public/candidate display name becomes a generic
+ * "Dental Office in {city}" instead of the practice name. Returns the raw name
+ * untouched when not anonymized (the default), so existing masking behavior is
+ * byte-identical for every location that hasn't opted in. Employer/internal
+ * views never route through this — they always see the real name.
+ */
+function maskedLocationName(
+  name: string,
+  city: string | null,
+  anonymize: boolean
+): string {
+  if (!anonymize) return name;
+  return city ? `Dental Office in ${city}` : "A dental office";
+}
+
 export type AffiliationViewer =
   | { role: "employer" }
   | { role: "public" }
@@ -208,13 +225,15 @@ export async function resolveCandidateApplicationAffiliations(
   let locsArr: Array<{
     id: string;
     name: string;
+    city: string | null;
     logo_url: string | null;
     public_dso_affiliation: boolean;
+    anonymize_name: boolean;
   }> = [];
   if (allLocationIds.length > 0) {
     const { data: locRows, error: locErr } = await admin
       .from("dso_locations")
-      .select("id, name, logo_url, public_dso_affiliation")
+      .select("id, name, city, logo_url, public_dso_affiliation, anonymize_name")
       .in("id", allLocationIds);
     if (locErr) {
       console.warn("[affiliation] dso_locations lookup failed", locErr);
@@ -226,7 +245,14 @@ export async function resolveCandidateApplicationAffiliations(
   // Group locations by job, preserving order (first wins for fallback)
   const locsByJob = new Map<
     string,
-    Array<{ id: string; name: string; logoUrl: string | null; isPublic: boolean }>
+    Array<{
+      id: string;
+      name: string;
+      maskedName: string;
+      logoUrl: string | null;
+      isPublic: boolean;
+      anonymize: boolean;
+    }>
   >();
   for (const jl of jobLocs) {
     const loc = locById.get(jl.location_id);
@@ -235,8 +261,10 @@ export async function resolveCandidateApplicationAffiliations(
     list.push({
       id: loc.id,
       name: loc.name,
+      maskedName: maskedLocationName(loc.name, loc.city, loc.anonymize_name),
       logoUrl: loc.logo_url,
       isPublic: loc.public_dso_affiliation,
+      anonymize: loc.anonymize_name,
     });
     locsByJob.set(jl.job_id, list);
   }
@@ -278,15 +306,19 @@ export async function resolveCandidateApplicationAffiliations(
     // literally no locations on the job.
     const privateLocs = locs.filter((l) => !l.isPublic);
     const fallbackLoc = privateLocs[0] ?? locs[0] ?? null;
-    const fallbackName = fallbackLoc?.name ?? "Hiring team";
-    const fallbackLogo = fallbackLoc?.logoUrl ?? null;
+    const fallbackName = fallbackLoc?.maskedName ?? "Hiring team";
+    // Anonymized locations suppress the practice logo too — the logo IS the
+    // brand identity, so showing it while masking the name is itself a leak.
+    const fallbackLogo =
+      fallbackLoc && !fallbackLoc.anonymize ? fallbackLoc.logoUrl : null;
     const singlePractice = locs.length === 1 ? locs[0]! : null;
 
     out.set(app.id, {
       name: showDsoName ? dsoName : fallbackName,
       isCorporate: showDsoName,
       dsoName,
-      practiceName: singlePractice?.name ?? fallbackLoc?.name ?? null,
+      practiceName:
+        singlePractice?.maskedName ?? fallbackLoc?.maskedName ?? null,
       avatarUrl: showDsoName ? dsoLogo : fallbackLogo,
     });
   }
@@ -305,16 +337,25 @@ interface JobAffiliationContext {
   scope: "location" | "regional" | "corporate";
   /**
    * The single practice name when there's exactly one linked location;
-   * null for multi-location jobs.
+   * null for multi-location jobs. RAW name — used by the employer/internal
+   * and reveal paths.
    */
   singlePracticeName: string | null;
   /**
    * For multi-location jobs: the FIRST linked location's name —
    * preferring the first private location when at least one is
    * private (per Cam 2026-05-08 PM, "Multiple locations" was too
-   * generic). Used as the masked display fallback.
+   * generic). Used as the masked display fallback. RAW name.
    */
   firstLocationName: string | null;
+  /**
+   * Anonymity tier 2 — the masked variants of the two names above. Equal to
+   * the raw name unless the location opted into `anonymize_name`, in which case
+   * it's "Dental Office in {city}". Public + candidate-masked paths render these
+   * instead of the raw names; employer + reveal paths keep the raw names.
+   */
+  maskedSinglePracticeName: string | null;
+  maskedFirstLocationName: string | null;
 }
 
 /**
@@ -397,6 +438,8 @@ async function fetchJobAffiliationContext(
       scope: "location",
       singlePracticeName: null,
       firstLocationName: null,
+      maskedSinglePracticeName: null,
+      maskedFirstLocationName: null,
     };
   }
   return all[0]!;
@@ -460,12 +503,14 @@ async function fetchJobAffiliationContextsBatch(
   let locsArr: Array<{
     id: string;
     name: string;
+    city: string | null;
     public_dso_affiliation: boolean;
+    anonymize_name: boolean;
   }> = [];
   if (allLocationIds.length > 0) {
     const { data: locRows, error: locErr } = await admin
       .from("dso_locations")
-      .select("id, name, public_dso_affiliation")
+      .select("id, name, city, public_dso_affiliation, anonymize_name")
       .in("id", allLocationIds);
     if (locErr) {
       console.warn("[affiliation] dso_locations lookup failed", locErr);
@@ -476,7 +521,7 @@ async function fetchJobAffiliationContextsBatch(
 
   const locsByJob = new Map<
     string,
-    Array<{ id: string; name: string; isPublic: boolean }>
+    Array<{ id: string; name: string; maskedName: string; isPublic: boolean }>
   >();
   for (const jl of jobLocs) {
     const loc = locById.get(jl.location_id);
@@ -485,6 +530,7 @@ async function fetchJobAffiliationContextsBatch(
     arr.push({
       id: loc.id,
       name: loc.name,
+      maskedName: maskedLocationName(loc.name, loc.city, loc.anonymize_name),
       isPublic: loc.public_dso_affiliation,
     });
     locsByJob.set(jl.job_id, arr);
@@ -495,10 +541,9 @@ async function fetchJobAffiliationContextsBatch(
     const dso = dsoMap.get(j.dso_id);
     const allLocationsPublic =
       locs.length > 0 && locs.every((l) => l.isPublic);
-    const singlePracticeName = locs.length === 1 ? locs[0]!.name : null;
+    const single = locs.length === 1 ? locs[0]! : null;
     const privateLocs = locs.filter((l) => !l.isPublic);
-    const firstLocationName =
-      privateLocs[0]?.name ?? locs[0]?.name ?? null;
+    const firstLoc = privateLocs[0] ?? locs[0] ?? null;
     return {
       jobId: j.id,
       dsoId: j.dso_id,
@@ -506,8 +551,10 @@ async function fetchJobAffiliationContextsBatch(
       affiliationRevealPolicy: dso?.affiliation_reveal_policy ?? "never",
       allLocationsPublic,
       scope: j.scope ?? "location",
-      singlePracticeName,
-      firstLocationName,
+      singlePracticeName: single?.name ?? null,
+      firstLocationName: firstLoc?.name ?? null,
+      maskedSinglePracticeName: single?.maskedName ?? null,
+      maskedFirstLocationName: firstLoc?.maskedName ?? null,
     };
   });
 }
@@ -585,10 +632,13 @@ function resolveDisplayedName(
   //   - candidate: layered policy from the DSO.
   if (viewer.role === "public") {
     return {
-      name: ctx.singlePracticeName ?? ctx.firstLocationName ?? "Hiring team",
+      name:
+        ctx.maskedSinglePracticeName ??
+        ctx.maskedFirstLocationName ??
+        "Hiring team",
       isCorporate: false,
       dsoName: ctx.dsoName,
-      practiceName: ctx.singlePracticeName ?? ctx.firstLocationName,
+      practiceName: ctx.maskedSinglePracticeName ?? ctx.maskedFirstLocationName,
       avatarUrl: null,
     };
   }
@@ -616,10 +666,13 @@ function resolveDisplayedName(
   }
 
   return {
-    name: ctx.singlePracticeName ?? ctx.firstLocationName ?? "Hiring team",
+    name:
+      ctx.maskedSinglePracticeName ??
+      ctx.maskedFirstLocationName ??
+      "Hiring team",
     isCorporate: false,
     dsoName: ctx.dsoName,
-    practiceName: ctx.singlePracticeName ?? ctx.firstLocationName,
+    practiceName: ctx.maskedSinglePracticeName ?? ctx.maskedFirstLocationName,
     avatarUrl: null,
   };
 }

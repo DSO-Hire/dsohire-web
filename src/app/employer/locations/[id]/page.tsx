@@ -47,7 +47,7 @@ export default async function EditLocationPage({ params }: PageProps) {
   const { data: location } = await supabase
     .from("dso_locations")
     .select(
-      "id, name, address_line1, address_line2, city, state, postal_code, dso_id, logo_url, public_dso_affiliation, website"
+      "id, name, address_line1, address_line2, city, state, postal_code, dso_id, logo_url, public_dso_affiliation, anonymize_name, website"
     )
     .eq("id", id)
     .eq("dso_id", dsoUser.dso_id)
@@ -88,6 +88,7 @@ export default async function EditLocationPage({ params }: PageProps) {
     postal_code: (location.postal_code as string | null) ?? null,
     public_dso_affiliation:
       (location.public_dso_affiliation as boolean | null) ?? true,
+    anonymize_name: (location.anonymize_name as boolean | null) ?? false,
     website: (location.website as string | null) ?? null,
   };
 

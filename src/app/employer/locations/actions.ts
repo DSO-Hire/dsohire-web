@@ -96,6 +96,13 @@ function parseFormFields(formData: FormData) {
       ? null
       : String(rawAffiliation).toLowerCase() === "true";
 
+  // Anonymity tier 2 — same null-means-preserve pattern as affiliation.
+  const rawAnonymize = formData.get("anonymize_name");
+  const anonymizeName =
+    rawAnonymize === null
+      ? null
+      : String(rawAnonymize).toLowerCase() === "true";
+
   return {
     dsoId,
     name,
@@ -105,6 +112,7 @@ function parseFormFields(formData: FormData) {
     state,
     postalCode,
     publicDsoAffiliation,
+    anonymizeName,
     websiteRaw,
   };
 }
@@ -252,6 +260,7 @@ export async function updateLocation(
     postal_code: string | null;
     website: string | null;
     public_dso_affiliation?: boolean;
+    anonymize_name?: boolean;
   } = {
     name: fields.name,
     address_line1: fields.addressLine1 || null,
@@ -263,6 +272,9 @@ export async function updateLocation(
   };
   if (fields.publicDsoAffiliation !== null) {
     updatePayload.public_dso_affiliation = fields.publicDsoAffiliation;
+  }
+  if (fields.anonymizeName !== null) {
+    updatePayload.anonymize_name = fields.anonymizeName;
   }
 
   // Add .select("id") so we get the row back and can verify the update
