@@ -1545,6 +1545,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             title={
               <PracticeFitWordmark
                 surface="light"
+                tm
                 className="text-xl sm:text-2xl"
               />
             }
@@ -2034,7 +2035,17 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                         {s.num}
                       </span>
                       <Icon className="h-3.5 w-3.5 text-slate-meta group-hover:text-heritage-deep transition-colors flex-shrink-0" />
-                      <span className="leading-snug">{s.label}</span>
+                      {s.id === "fit" ? (
+                        <span className="leading-snug font-bold tracking-[-0.01em]">
+                          <span className="text-ink">Practice</span>
+                          <span className="text-heritage">Fit</span>
+                          <sup className="ml-[1px] align-super text-[0.55em] font-semibold text-heritage">
+                            ™
+                          </sup>
+                        </span>
+                      ) : (
+                        <span className="leading-snug">{s.label}</span>
+                      )}
                     </a>
                   </li>
                 );

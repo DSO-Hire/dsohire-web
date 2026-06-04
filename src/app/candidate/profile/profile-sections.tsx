@@ -41,6 +41,7 @@ import {
   X,
   ShieldCheck,
 } from "lucide-react";
+import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import {
   EditSheet,
   TextField,
@@ -2193,14 +2194,14 @@ function PracticeFitCard() {
   return (
     <section className="border border-slate-200 bg-[#F7F4ED] p-6 sm:p-8">
       <header className="mb-3">
-        <h2 className="font-display text-lg font-bold text-[#14233F]">
-          PracticeFit
+        <h2 className="leading-none">
+          <PracticeFitWordmark surface="light" tm className="text-2xl" />
         </h2>
-        <p className="mt-0.5 text-sm text-slate-600">
-          Employers already see how well you match their open roles — Practice
-          Fit is scored automatically from your profile (your role, skills,
-          schedule, and preferences). The more complete your profile, the
-          sharper your matches.
+        <p className="mt-2 text-sm text-slate-600">
+          Employers already see how well you match their open roles —
+          PracticeFit is scored automatically from your profile (your role,
+          skills, schedule, and preferences). The more complete your
+          profile, the sharper your matches.
         </p>
       </header>
       <div className="flex items-center gap-2 rounded-md bg-white px-4 py-3 text-xs text-slate-500">

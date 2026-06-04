@@ -453,7 +453,7 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
                 className="font-medium text-slate-body inline-flex items-center gap-1.5 flex-wrap"
               >
                 Rank by
-                <PracticeFitWordmark surface="light" className="text-[15px]" />
+                <PracticeFitWordmark surface="light" tm className="text-[15px]" />
                 against
               </label>
               <select
