@@ -23,6 +23,15 @@ export interface OteInputs {
   compensationType: CompensationType | null;
   compensationMin: number | null;
   compensationMax: number | null;
+  /**
+   * The base's pay period (jobs.compensation_period: hourly / daily / annual /
+   * per_visit / …). REQUIRED for a correct OTE: the variable + bonus targets are
+   * annual dollar figures, so an hourly/daily base must be annualized before
+   * it's summed with them. Omitting it (or "annual") treats the base as already
+   * yearly. Without this, an hourly base + annual variable produced nonsense
+   * (e.g. $23.50/hr + $6,000 → "$6,024 OTE/yr").
+   */
+  compensationPeriod?: string | null;
   variableCompEnabled: boolean;
   variableCompTarget: number | null;
   bonusEnabled: boolean;
@@ -76,6 +85,36 @@ export function resolveBaseForOte(
   }
 }
 
+/**
+ * Factors to annualize a base figure so it can be summed with the (annual)
+ * variable + bonus targets. per_visit is intentionally absent — it can't be
+ * annualized without a visit count, so OTE isn't computed for it.
+ */
+const ANNUALIZATION_FACTOR: Record<string, number> = {
+  hourly: 2080, // 40 hrs/wk × 52
+  daily: 260, // 5 days/wk × 52
+  per_day: 260,
+  weekly: 52,
+  monthly: 12,
+  annual: 1,
+  yearly: 1,
+};
+
+/**
+ * Annualize the base so it shares the variable's annual unit. Returns null when
+ * the period can't be annualized (per_visit / unknown) so the caller shows no
+ * combined OTE rather than a nonsensical number. A null/absent period is
+ * treated as already-annual (the salaried default).
+ */
+function annualizeBase(
+  base: number,
+  period: string | null | undefined
+): number | null {
+  if (!period) return base;
+  const factor = ANNUALIZATION_FACTOR[period.toLowerCase()];
+  return factor == null ? null : base * factor;
+}
+
 export function computeOte(input: OteInputs): OteResult {
   const base = resolveBaseForOte(
     input.compensationType,
@@ -95,10 +134,15 @@ export function computeOte(input: OteInputs): OteResult {
     (input.variableCompEnabled && input.variableCompTarget != null) ||
     (input.bonusEnabled && input.bonusTarget != null);
 
+  // Annualize the base before summing with the annual variable. `base` stays in
+  // its native period (callers display it as "$X/hr"); only the OTE total is
+  // annualized. per_visit/unknown → annualBase null → no combined OTE.
+  const annualBase = base != null ? annualizeBase(base, input.compensationPeriod) : null;
+
   return {
     base,
     variable,
-    ote: base != null ? base + variable : null,
+    ote: annualBase != null ? annualBase + variable : null,
     hasVariable,
   };
 }

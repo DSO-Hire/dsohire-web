@@ -851,7 +851,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
 
           {/* Sidebar */}
           <aside className="bg-ink-3 p-7 h-fit">
-            <div className="text-[11px] font-bold tracking-[2.5px] uppercase text-heritage mb-4">
+            <div className="text-[12px] font-extrabold tracking-[2.5px] uppercase text-heritage-light mb-5">
               At a Glance
             </div>
 
@@ -956,11 +956,13 @@ function Detail({
 }) {
   return (
     <div className="mb-5 pb-5 last:mb-0 last:pb-0 last:border-0 border-b border-ivory/15">
-      <div className="flex items-center gap-2 text-[10px] font-bold tracking-[2px] uppercase text-ivory/55 mb-1.5">
-        <Icon className="h-3 w-3" />
+      <div className="flex items-center gap-2 text-[11px] font-bold tracking-[2px] uppercase text-ivory/70 mb-2">
+        <Icon className="h-3.5 w-3.5" />
         {label}
       </div>
-      <div className="text-[15px] text-ivory">{children}</div>
+      <div className="text-[17px] font-semibold text-ivory leading-snug">
+        {children}
+      </div>
     </div>
   );
 }
@@ -1030,6 +1032,7 @@ function CompensationGlance({ job }: { job: { [k: string]: unknown } }) {
         | "doe",
     compensationMin: job.compensation_min as number | null,
     compensationMax: job.compensation_max as number | null,
+    compensationPeriod: job.compensation_period as string | null,
     variableCompEnabled: variableEnabled,
     variableCompTarget: job.variable_comp_target as number | null,
     bonusEnabled: bonusEnabled,

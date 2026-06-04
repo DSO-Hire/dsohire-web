@@ -254,6 +254,7 @@ export function CompensationSection(props: CompensationSectionProps) {
     compensationType: props.compType,
     compensationMin: numOrNull(props.compMin),
     compensationMax: numOrNull(props.compMax),
+    compensationPeriod: props.compPeriod,
     variableCompEnabled: props.variableCompEnabled,
     variableCompTarget: numOrNull(props.variableCompTarget),
     bonusEnabled: props.bonusEnabled,
