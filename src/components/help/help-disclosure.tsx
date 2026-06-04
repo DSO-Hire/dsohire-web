@@ -19,6 +19,29 @@
 import { useId, useState } from "react";
 import { Info, X, ChevronDown } from "lucide-react";
 import { getHelp } from "@/lib/help/help-content";
+import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
+
+/**
+ * Render a help title with the PracticeFit token swapped for the two-tone
+ * wordmark, so the brand reads as a premium feature (Cam 2026-06-04 — "helps
+ * them recognize this is why we keep paying"). Plain text for non-PF titles.
+ * `text-[1em]` makes the mark match the surrounding font size.
+ */
+function brandTitle(text: string): React.ReactNode {
+  const parts = text.split(/(practicefit)/i);
+  if (parts.length === 1) return text;
+  return parts.map((part, i) =>
+    /^practicefit$/i.test(part) ? (
+      <PracticeFitWordmark
+        key={i}
+        surface="light"
+        className="text-[1em] align-[-0.12em]"
+      />
+    ) : (
+      <span key={i}>{part}</span>
+    )
+  );
+}
 
 export function HelpDisclosure({
   helpKey,
@@ -41,12 +64,11 @@ export function HelpDisclosure({
 
   const title = entry?.title ?? "More info";
   const tip = entry?.tip;
-  // Lowercase for the casual banner voice, but preserve the PracticeFit
-  // brand casing (the title is sentence-case; toLowerCase would mangle the
-  // wordmark to "practicefit").
-  const label =
-    triggerLabel ??
-    `About ${title.toLowerCase().replace(/practicefit/g, "PracticeFit")}`;
+  // Lowercase for the casual banner voice; brandTitle swaps any PracticeFit
+  // token for the two-tone wordmark (and leaves the rest lowercase).
+  const label: React.ReactNode = triggerLabel ?? (
+    <>About {brandTitle(title.toLowerCase())}</>
+  );
 
   return (
     <div className={"max-w-[820px] " + className}>
@@ -85,7 +107,7 @@ export function HelpDisclosure({
         >
           <div className="mb-3 flex items-start justify-between gap-4">
             <h3 className="text-[14px] font-extrabold tracking-[-0.3px] text-ink">
-              {title}
+              {brandTitle(title)}
             </h3>
             <button
               type="button"
