@@ -1,18 +1,17 @@
 /**
- * "Today's top fits" — the cross-job PracticeFit roll-up on the employer
- * dashboard (v3 Phase C).
+ * "Interested in you" — inbound candidate interest on the employer dashboard
+ * (v3 Phase D, mutual interest).
  *
- * The per-job version (Smart Picks) lives on each job page; this aggregates
- * across all of a practice's open roles and shows each candidate at their
- * single best-matched role. Identity masking + eligibility are handled
- * upstream in getTodaysTopFits → getSmartPicks (anonymous-but-discoverable
- * candidates arrive already masked), so this component just renders.
+ * Candidates who SAVED one of this practice's jobs. Their PracticeFit is shown
+ * for context but NEVER gates the list — a genuinely interested candidate with
+ * a low (or unscored) fit still appears. A "Mutual" badge marks the ones the
+ * practice has also saved. Identity masking is handled upstream in
+ * getInterestedCandidates.
  */
 
 import Link from "next/link";
-import { ArrowRight, EyeOff, Hand } from "lucide-react";
-import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
-import type { TodaysTopFit } from "@/lib/talent-pool/smart-picks";
+import { ArrowRight, EyeOff, Hand, Heart } from "lucide-react";
+import type { InterestedCandidate } from "@/lib/talent-pool/mutual-interest";
 
 const BUCKET_STYLE: Record<string, { label: string; bg: string; fg: string }> = {
   excellent: { label: "Excellent fit", bg: "#DCFCE7", fg: "#166534" },
@@ -22,17 +21,31 @@ const BUCKET_STYLE: Record<string, { label: string; bg: string; fg: string }> = 
   low: { label: "Low fit", bg: "#FEE2E2", fg: "#B91C1C" },
 };
 
-export function TodaysTopFits({ fits }: { fits: TodaysTopFit[] }) {
-  if (fits.length === 0) return null;
+function relTime(iso: string): string {
+  const ms = Date.now() - new Date(iso).getTime();
+  const d = Math.floor(ms / 86_400_000);
+  if (d <= 0) return "today";
+  if (d === 1) return "yesterday";
+  if (d < 7) return `${d}d ago`;
+  if (d < 30) return `${Math.floor(d / 7)}w ago`;
+  return `${Math.floor(d / 30)}mo ago`;
+}
+
+export function InterestedInYou({
+  candidates,
+}: {
+  candidates: InterestedCandidate[];
+}) {
+  if (candidates.length === 0) return null;
 
   return (
     <section className="mb-6 border border-[var(--rule)] bg-white">
       <header className="px-6 py-4 border-b border-[var(--rule)] flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-heritage-deep">
+          <Hand className="h-3.5 w-3.5" />
           <span className="text-[10px] font-bold tracking-[2.5px] uppercase">
-            Today&apos;s top fits ·
+            Interested in you
           </span>
-          <PracticeFitWordmark surface="inherit" className="text-[14px]" />
         </div>
         <Link
           href="/employer/talent-pool"
@@ -42,27 +55,35 @@ export function TodaysTopFits({ fits }: { fits: TodaysTopFit[] }) {
         </Link>
       </header>
       <div className="px-6 py-3 text-[12px] text-slate-meta border-b border-[var(--rule)]">
-        Your best-fit candidates across every open role, ranked by PracticeFit.
-        Already-applied candidates show up in your pipeline instead.
+        Candidates who saved one of your jobs. Fit is shown for context — reach
+        out to anyone who caught your eye, score aside.
       </div>
       <ul>
-        {fits.map((p) => {
-          const style = BUCKET_STYLE[p.fit.bucket] ?? BUCKET_STYLE.solid;
+        {candidates.map((c) => {
+          const style = c.fit ? BUCKET_STYLE[c.fit.bucket] ?? BUCKET_STYLE.solid : null;
           return (
             <li
-              key={p.candidate_id}
+              key={c.candidate_id}
               className="px-6 py-4 border-b border-[var(--rule)] last:border-b-0 flex items-center gap-4"
             >
-              <Avatar fullName={p.full_name} avatarUrl={p.avatar_url} />
+              <Avatar fullName={c.full_name} avatarUrl={c.avatar_url} />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 min-w-0">
                   <Link
-                    href={`/employer/candidates/${p.candidate_id}`}
+                    href={`/employer/candidates/${c.candidate_id}`}
                     className="text-[14px] font-bold text-ink hover:text-heritage-deep truncate inline-block max-w-full"
                   >
-                    {p.full_name ?? "Candidate"}
+                    {c.full_name ?? "Candidate"}
                   </Link>
-                  {p.anonymized && (
+                  {c.mutual && (
+                    <span
+                      title="You saved them too"
+                      className="inline-flex items-center gap-1 rounded-full bg-heritage/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[1px] text-heritage-deep shrink-0"
+                    >
+                      <Heart className="h-3 w-3" /> Mutual
+                    </span>
+                  )}
+                  {c.anonymized && (
                     <span
                       title="Anonymous until they apply"
                       className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[1px] text-slate-meta shrink-0"
@@ -72,30 +93,32 @@ export function TodaysTopFits({ fits }: { fits: TodaysTopFit[] }) {
                   )}
                 </div>
                 <div className="text-[12px] text-slate-body truncate mt-0.5">
-                  Best fit for{" "}
+                  Saved{" "}
                   <Link
-                    href={`/employer/jobs/${p.best_job_id}`}
+                    href={`/employer/jobs/${c.saved_job_id}`}
                     className="font-semibold text-heritage-deep hover:text-ink"
                   >
-                    {p.best_job_title}
-                  </Link>
-                  {p.interested && (
-                    <span className="ml-2 inline-flex items-center gap-1 text-[11px] font-bold text-heritage-deep">
-                      <Hand className="h-3 w-3" /> Interested in you
-                    </span>
-                  )}
+                    {c.saved_job_title}
+                  </Link>{" "}
+                  · {relTime(c.saved_at)}
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <span
-                  className="inline-flex items-center px-2 py-0.5 text-[11px] font-bold rounded-full"
-                  style={{ backgroundColor: style.bg, color: style.fg }}
-                >
-                  {style.label}
-                </span>
-                <span className="tabular-nums font-extrabold text-ink text-[14px]">
-                  {Math.round(p.fit.score)}
-                </span>
+                {style && c.fit ? (
+                  <>
+                    <span
+                      className="inline-flex items-center px-2 py-0.5 text-[11px] font-bold rounded-full"
+                      style={{ backgroundColor: style.bg, color: style.fg }}
+                    >
+                      {style.label}
+                    </span>
+                    <span className="tabular-nums font-extrabold text-ink text-[14px]">
+                      {Math.round(c.fit.score)}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-[11px] text-slate-meta">Not scored</span>
+                )}
               </div>
             </li>
           );

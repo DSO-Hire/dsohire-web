@@ -196,6 +196,9 @@ export interface TodaysTopFit extends SmartPick {
   /** The DSO job this candidate fits best (their highest score across roles). */
   best_job_id: string;
   best_job_title: string;
+  /** v3 Phase D — true if this candidate has also SAVED one of the DSO's jobs
+   *  (mutual interest: you rank them high AND they've raised a hand). */
+  interested: boolean;
 }
 
 export async function getTodaysTopFits(
@@ -228,12 +231,29 @@ export async function getTodaysTopFits(
           ...p,
           best_job_id: job.id,
           best_job_title: job.title ?? "Open role",
+          interested: false, // set below
         });
       }
     }
   }
 
-  return Array.from(bestByCandidate.values())
+  const top = Array.from(bestByCandidate.values())
     .sort((a, b) => b.fit.score - a.fit.score)
     .slice(0, limit);
+  if (top.length === 0) return top;
+
+  // v3 Phase D — flag the ones who've also saved a job here (mutual interest).
+  const { data: saveRows } = await supabase
+    .from("saved_jobs")
+    .select("candidate_id")
+    .in("job_id", jobs.map((j) => j.id))
+    .in(
+      "candidate_id",
+      top.map((t) => t.candidate_id)
+    );
+  const interestedSet = new Set<string>(
+    ((saveRows ?? []) as Array<{ candidate_id: string }>).map((s) => s.candidate_id)
+  );
+  for (const t of top) t.interested = interestedSet.has(t.candidate_id);
+  return top;
 }

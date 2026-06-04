@@ -60,6 +60,8 @@ import {
 import { DashboardMiniMap } from "@/components/dashboard/dashboard-mini-map";
 import { TodaysTopFits } from "@/components/dashboard/todays-top-fits";
 import { getTodaysTopFits } from "@/lib/talent-pool/smart-picks";
+import { InterestedInYou } from "@/components/dashboard/interested-in-you";
+import { getInterestedCandidates } from "@/lib/talent-pool/mutual-interest";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -157,6 +159,11 @@ export default async function EmployerDashboard() {
   // see it too — it's read-only discovery.
   const todaysTopFits = dsoId
     ? await getTodaysTopFits(supabase, dsoId, 3)
+    : [];
+
+  // v3 Phase D — inbound mutual interest (candidates who saved your jobs).
+  const interestedCandidates = dsoId
+    ? await getInterestedCandidates(supabase, dsoId, 6)
     : [];
 
   // ── KPI scaffolding ────────────────────────────────────────────────
@@ -1099,6 +1106,11 @@ export default async function EmployerDashboard() {
           />
         </section>
       )}
+
+      {/* v3 Phase D — inbound interest (candidates who saved your jobs) — a
+          warmer signal than an algorithmic pick, so it leads. Renders nothing
+          when nobody's saved a job yet. */}
+      <InterestedInYou candidates={interestedCandidates} />
 
       {/* v3 Phase C — Today's top fits (cross-job PracticeFit roll-up).
           Renders nothing when there are no scored fits yet. */}
