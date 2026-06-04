@@ -1,0 +1,13 @@
+-- PracticeFit v2 (Phase A.3b) — certifications dimension.
+--
+-- New scored dimension: certifications named in the posting's text (CPR/BLS,
+-- radiology, nitrous, IV/oral/local anesthesia, OSHA, HIPAA, infection
+-- control, malpractice) matched against the candidate's furnished
+-- candidate_certifications.kind. Detected from job text the same way PMS is
+-- (the structured job_verification_requirements only has coarse categories).
+-- Obtainable, not a deal-breaker — a gap floors at 30.
+--
+-- New hashed inputs (certifications, certs_required) + a reweight, so every
+-- prior input_hash is stale. Wipe the recomputable cache; rows recompute
+-- lazily on next view.
+truncate table public.practice_fit_scores;

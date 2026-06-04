@@ -1,0 +1,69 @@
+/**
+ * <RolesThatFitCard /> — candidate dashboard "Roles that fit you" feed (B.1).
+ *
+ * Compact ranked list of the candidate's strongest open-role matches by
+ * PracticeFit. Server component, pure rendering — the caller passes the
+ * already-ranked roles from getTopFitJobsForCandidate.
+ */
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
+import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
+import type { RoleThatFits } from "@/lib/practice-fit/roles-that-fit";
+
+function formatLocations(
+  locs: Array<{ city: string | null; state: string | null }>
+): string | null {
+  if (locs.length === 0) return null;
+  const first = [locs[0].city, locs[0].state].filter(Boolean).join(", ");
+  if (!first) return null;
+  return locs.length > 1 ? `${first} +${locs.length - 1} more` : first;
+}
+
+export function RolesThatFitCard({ roles }: { roles: RoleThatFits[] }) {
+  if (roles.length === 0) return null;
+  return (
+    <section className="mb-6">
+      <div className="flex items-end justify-between gap-4 mb-3">
+        <div className="flex items-center gap-2 text-heritage-deep">
+          <span className="text-[10px] font-bold tracking-[2.5px] uppercase">
+            Roles that fit you ·
+          </span>
+          <PracticeFitWordmark surface="inherit" className="text-[14px]" />
+        </div>
+        <Link
+          href="/candidate/jobs"
+          className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage hover:text-heritage-deep transition-colors"
+        >
+          Browse all
+        </Link>
+      </div>
+      <div className="border border-[var(--rule)] bg-white divide-y divide-[var(--rule)]">
+        {roles.map((r) => {
+          const loc = formatLocations(r.locations);
+          const sub = [r.dso_name, loc].filter(Boolean).join(" · ");
+          return (
+            <Link
+              key={r.job_id}
+              href={`/jobs/${r.job_id}`}
+              className="group flex items-center justify-between gap-3 px-4 py-3 hover:bg-cream transition-colors"
+            >
+              <div className="min-w-0">
+                <p className="text-[14px] font-semibold text-ink truncate group-hover:text-heritage-deep transition-colors">
+                  {r.title}
+                </p>
+                {sub && (
+                  <p className="text-[12px] text-slate-meta truncate">{sub}</p>
+                )}
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <PracticeFitChip fit={r.fit} size="sm" showScore />
+                <ArrowRight className="h-3.5 w-3.5 text-slate-meta group-hover:text-heritage-deep transition-colors" />
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
+}

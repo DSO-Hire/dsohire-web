@@ -58,7 +58,9 @@ import { computeCompleteness } from "@/lib/candidate/completeness";
 import { greetingFirstName } from "@/lib/candidate/name";
 import type { ProfileData } from "@/app/candidate/profile/profile-sections";
 import { CandidateFitSummary } from "@/components/practice-fit/candidate-fit-summary";
+import { RolesThatFitCard } from "@/components/practice-fit/roles-that-fit-card";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
+import { getTopFitJobsForCandidate } from "@/lib/practice-fit/roles-that-fit";
 import type { FitResult } from "@/lib/practice-fit/types";
 import { resolveCandidateApplicationAffiliations } from "@/lib/dso/affiliation-display";
 import type { Metadata } from "next";
@@ -270,6 +272,18 @@ export default async function CandidateDashboardPage() {
     );
     activeApps.forEach((a, i) => fitsByActiveAppId.set(a.id, fits[i]));
   }
+
+  // ── "Roles that fit you" feed (Phase B.1) ───────────────────────────
+  // Top open roles ranked by the candidate's PracticeFit. Role-filtered
+  // jobs drop out (relevance fix). Respect the opt-out: skip when the
+  // candidate set PracticeFit matching to off.
+  const pfConsentOn =
+    (((candidate as Record<string, unknown>).practice_fit_consent as
+      | string
+      | null) ?? "off") !== "off";
+  const rolesThatFit = pfConsentOn
+    ? await getTopFitJobsForCandidate(candidateRowId, 4)
+    : [];
 
   // ── Job + DSO maps ──────────────────────────────────────────────────
   const jobIds = Array.from(new Set(apps.map((a) => a.job_id)));
@@ -714,6 +728,9 @@ export default async function CandidateDashboardPage() {
         fitsByAppId={fitsByActiveAppId}
         totalActiveApps={activeApps.length}
       />
+
+      {/* Roles that fit you — top open roles ranked by PracticeFit (B.1) */}
+      <RolesThatFitCard roles={rolesThatFit} />
 
       {/* My Application Stages — personal kanban */}
       {activeApps.length > 0 && (

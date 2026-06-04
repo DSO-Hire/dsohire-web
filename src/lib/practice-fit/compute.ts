@@ -29,6 +29,16 @@ import {
   nearestAdjacentRole,
   roleRelation,
 } from "./role-adjacency";
+import { CERTIFICATION_KINDS } from "@/lib/candidate/canonical-lists";
+
+/** value → display label for certification kinds. */
+const CERT_LABELS: Record<string, string> = CERTIFICATION_KINDS.reduce(
+  (acc, c) => {
+    acc[c.value] = c.label;
+    return acc;
+  },
+  {} as Record<string, string>
+);
 import type {
   CandidateFitInputs,
   FitAdjustment,
@@ -65,16 +75,21 @@ const MODEL_VERSION = "2026-06-03-a4";
 // schedule) shaved so "speaks dental" leads. Missing dims drop OUT of the
 // denominator (normalized over scored only), so PMS/license simply fall
 // away on postings/roles where they don't apply — they never dilute.
+// Phase A.3b (2026-06-03) — certifications (6) added (dental credential
+// readiness: certs named in the posting vs the candidate's furnished certs).
+// The 6 points come from specialty (9→7), skills (9→7), years (7→6) and
+// employment (4→3).
 const WEIGHTS: Record<FitDimensionKey, number> = {
   role_fit: 14,
   location: 18,
   pms_fluency: 12,
   compensation: 12,
   license_state: 10,
-  specialty: 9,
-  skills: 9,
-  years_experience: 7,
-  employment_type: 4,
+  certifications: 6,
+  specialty: 7,
+  skills: 7,
+  years_experience: 6,
+  employment_type: 3,
   dso_size: 3,
   schedule_overlap: 2,
 };
@@ -120,6 +135,7 @@ export function computePracticeFit(inputs: FitInputs): FitResult | null {
     location: scoreLocation(inputs),
     pms_fluency: scorePmsFluency(inputs),
     license_state: scoreLicenseState(inputs),
+    certifications: scoreCertifications(inputs),
     specialty: scoreSpecialty(inputs),
     skills: scoreSkills(inputs),
     years_experience: scoreYearsExperience(inputs),
@@ -792,6 +808,80 @@ function scoreLicenseState({ candidate, job }: FitInputs): FitDimension {
   );
 }
 
+/**
+ * scoreCertifications — Phase A.3b. Dental credential readiness. The certs a
+ * posting calls out (CPR/BLS, radiology, nitrous, sedation, OSHA…) are
+ * detected from the job text in the loader; here we match them against the
+ * candidate's furnished certifications. Most certs are obtainable, so a gap
+ * floors at 30 rather than zero — it's a readiness signal, not a deal-breaker.
+ */
+function scoreCertifications({ candidate, job }: FitInputs): FitDimension {
+  const jobCerts = (job.certs_required ?? []).map((s) => s.toLowerCase());
+  if (jobCerts.length === 0) {
+    return makeUnscoredDim("certifications", "Certifications", {
+      detail:
+        "This posting doesn't call out specific certifications — excluded from the score.",
+      detail_employer:
+        "Job text doesn't name specific certifications — certifications excluded from the score.",
+      cta_label: null,
+      cta_href: null,
+    });
+  }
+
+  const candCerts = (candidate.certifications ?? []).map((s) =>
+    s.toLowerCase()
+  );
+  if (candCerts.length === 0) {
+    return makeUnscoredDim("certifications", "Certifications", {
+      detail:
+        "Add your certifications (radiology, nitrous, CPR/BLS…) to factor them into your match.",
+      detail_employer:
+        "Candidate hasn't listed certifications — certifications excluded from their score.",
+      cta_label: "Add certifications",
+      cta_href: "/candidate/profile#section-credentials",
+    });
+  }
+
+  const matched = jobCerts.filter((c) => candCerts.includes(c));
+  const label = (k: string) => CERT_LABELS[k] ?? k;
+  const matchedLabels = (job.certs_required ?? [])
+    .filter((c) => matched.includes(c.toLowerCase()))
+    .map(label)
+    .join(", ");
+  const requiredLabels = (job.certs_required ?? []).map(label).join(", ");
+
+  if (matched.length >= jobCerts.length) {
+    return makeScoredDim(
+      "certifications",
+      "Certifications",
+      100,
+      `Holds every certification this role calls out (${matchedLabels}).`,
+      `Holds every certification this role calls out (${matchedLabels}).`
+    );
+  }
+  if (matched.length > 0) {
+    const missingLabels = (job.certs_required ?? [])
+      .filter((c) => !matched.includes(c.toLowerCase()))
+      .map(label)
+      .join(", ");
+    const raw = Math.max(45, Math.round((matched.length / jobCerts.length) * 100));
+    return makeScoredDim(
+      "certifications",
+      "Certifications",
+      raw,
+      `Holds ${matched.length} of ${jobCerts.length} certs (${matchedLabels}). Missing: ${missingLabels}.`,
+      `Holds ${matched.length} of ${jobCerts.length} certs (${matchedLabels}). Missing: ${missingLabels}.`
+    );
+  }
+  return makeScoredDim(
+    "certifications",
+    "Certifications",
+    30,
+    `This role calls out ${requiredLabels}; none on your profile yet — most are quick to obtain.`,
+    `Role calls out ${requiredLabels}; none on their profile yet — most are quick to obtain.`
+  );
+}
+
 function scoreSpecialty({ candidate, job }: FitInputs): FitDimension {
   const jobSpecs = (job.specialty ?? []).map((s) => s.toLowerCase());
   const candSpecs = (candidate.desired_specialty ?? []).map((s) =>
@@ -1199,6 +1289,7 @@ export function hashInputs(inputs: FitInputs): string {
       desired_specialty: sortedLowercase(inputs.candidate.desired_specialty),
       license_states: sortedUpper(inputs.candidate.license_states),
       pms_systems: sortedLowercase(inputs.candidate.pms_systems),
+      certifications: sortedLowercase(inputs.candidate.certifications),
       desired_locations: sortedLowercase(inputs.candidate.desired_locations),
       skills: sortedLowercase(inputs.candidate.skills),
       schedule_preferences: sortedSchedule(inputs.candidate.schedule_preferences),
@@ -1230,6 +1321,7 @@ export function hashInputs(inputs: FitInputs): string {
         ),
       skills: sortedLowercase(inputs.job.skills),
       pms_required: sortedLowercase(inputs.job.pms_required),
+      certs_required: sortedLowercase(inputs.job.certs_required),
       specialty: sortedLowercase(inputs.job.specialty),
       min_years_experience: inputs.job.min_years_experience ?? null,
       schedule_days: sortedLowercase(inputs.job.schedule_days),

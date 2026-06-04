@@ -50,6 +50,31 @@ function detectJobPms(...textParts: Array<string | null | undefined>): string[] 
   });
 }
 
+/**
+ * Detect certification kinds (CERTIFICATION_KINDS values) named in a job's
+ * text. The job side stores only coarse verification categories, so — like
+ * PMS — we read the specific certs from the posting text. Keyword → kind.
+ */
+const CERT_KEYWORDS: Array<{ kind: string; re: RegExp }> = [
+  { kind: "cpr_bls", re: /\b(cpr|bls|basic life support)\b/i },
+  { kind: "nitrous", re: /\bnitrous\b/i },
+  { kind: "radiology", re: /\b(radiolog|x-?ray)\w*/i },
+  { kind: "anesthesia_local", re: /\blocal anesthesia\b/i },
+  { kind: "anesthesia_general", re: /\bgeneral anesthesia\b/i },
+  { kind: "sedation_iv", re: /\biv sedation\b/i },
+  { kind: "sedation_oral", re: /\boral sedation\b/i },
+  { kind: "osha", re: /\bosha\b/i },
+  { kind: "hipaa", re: /\bhipaa\b/i },
+  { kind: "infection_control", re: /\binfection control\b/i },
+  { kind: "malpractice", re: /\bmalpractice\b/i },
+];
+
+function detectJobCerts(...textParts: Array<string | null | undefined>): string[] {
+  const text = textParts.filter(Boolean).join("  ");
+  if (!text) return [];
+  return CERT_KEYWORDS.filter((c) => c.re.test(text)).map((c) => c.kind);
+}
+
 const STALE_AFTER_DAYS = 7;
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
@@ -200,7 +225,7 @@ async function loadCandidateInputs(
   const { data: c } = await supabase
     .from("candidates")
     .select(
-      "desired_roles, current_title, desired_specialty, license_states, desired_locations, desired_location_points, pms_systems, skills, schedule_preferences, min_salary, salary_unit, temp_or_perm, dso_size_preference, years_experience_dental"
+      "desired_roles, current_title, desired_specialty, license_states, desired_locations, desired_location_points, pms_systems, skills, schedule_preferences, min_salary, salary_unit, temp_or_perm, dso_size_preference, years_experience_dental, candidate_certifications(kind)"
     )
     .eq("id", candidateId)
     .maybeSingle();
@@ -242,6 +267,12 @@ async function loadCandidateInputs(
     desired_locations: desiredLocations,
     desired_location_points: points.map((p) => ({ lat: p.lat, lng: p.lng })),
     pms_systems: ((r.pms_systems as string[] | null) ?? []) as string[],
+    certifications: (
+      (r.candidate_certifications as Array<{ kind: string | null }> | null) ??
+      []
+    )
+      .map((c) => c.kind)
+      .filter((k): k is string => Boolean(k)),
     skills: ((r.skills as string[] | null) ?? []) as string[],
     schedule_preferences:
       (r.schedule_preferences as FitInputs["candidate"]["schedule_preferences"]) ??
@@ -319,6 +350,11 @@ async function loadJobAndDso(
       skills,
       // Phase A.3 — PMS need detected from the posting text.
       pms_required: detectJobPms(
+        r.title as string | null,
+        r.requirements as string | null,
+        r.description as string | null
+      ),
+      certs_required: detectJobCerts(
         r.title as string | null,
         r.requirements as string | null,
         r.description as string | null

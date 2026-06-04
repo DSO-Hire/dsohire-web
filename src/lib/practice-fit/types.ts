@@ -25,6 +25,7 @@ export type FitDimensionKey =
   | "location"
   | "pms_fluency"
   | "license_state"
+  | "certifications"
   | "specialty"
   | "skills"
   | "years_experience"
@@ -152,6 +153,12 @@ export interface CandidateFitInputs {
    * (canonical PMS_SYSTEMS values). Drives the pms_fluency dimension.
    */
   pms_systems: string[];
+  /**
+   * v2 (Phase A.3b) — certification kinds the candidate has on file
+   * (candidate_certifications.kind, canonical CERTIFICATION_KINDS values).
+   * Drives the certifications dimension.
+   */
+  certifications: string[];
   skills: string[];
   schedule_preferences: {
     mon?: boolean;
@@ -215,6 +222,12 @@ export interface JobFitInputs {
    * field). Empty when the posting doesn't name one → pms_fluency excluded.
    */
   pms_required: string[];
+  /**
+   * v2 (Phase A.3b) — certification kinds detected in the job's text
+   * (CERTIFICATION_KINDS values). Empty when the posting doesn't call any
+   * out → certifications dim excluded.
+   */
+  certs_required: string[];
   /**
    * v1.1 — multi-select against the SPECIALTIES canonical list. Empty
    * array means "specialty-agnostic" (admin / front-desk roles); the
