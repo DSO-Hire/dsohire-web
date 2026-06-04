@@ -18,7 +18,6 @@ import {
   Briefcase,
   Building2,
   Calendar,
-  Sparkles,
 } from "lucide-react";
 import { CandidateShell } from "@/components/candidate/candidate-shell";
 import { EeoSelfId } from "@/app/jobs/[id]/apply/eeo-self-id";
@@ -41,6 +40,8 @@ import {
   type StageKind,
 } from "@/lib/applications/stages";
 import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
+import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
+import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
 import { WhyThisMatch } from "@/components/practice-fit/why-this-match";
 import { classifyPlaceholderReason } from "@/components/practice-fit/placeholder";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
@@ -370,8 +371,8 @@ export default async function CandidateApplicationDetailPage({
               compute usually populates within seconds. */}
           {practiceFit ? (
             <section>
-              <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
-                PracticeFit
+              <h2 className="mb-3 leading-none">
+                <PracticeFitWordmark surface="light" tm className="text-lg" />
               </h2>
               <WhyThisMatch
                 fit={practiceFit}
@@ -382,12 +383,12 @@ export default async function CandidateApplicationDetailPage({
             </section>
           ) : practiceFitReason === "role_mismatch" ? (
             <section>
-              <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
-                PracticeFit
+              <h2 className="mb-3 leading-none">
+                <PracticeFitWordmark surface="light" tm className="text-lg" />
               </h2>
               <div className="border border-[var(--rule)] bg-cream/40 p-5">
                 <div className="flex items-start gap-3">
-                  <Sparkles className="h-4 w-4 text-heritage-deep mt-0.5 shrink-0" />
+                  <PracticeFitMark className="h-4 w-4 text-heritage-deep mt-0.5 shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-semibold text-ink mb-1">
                       This role isn&apos;t in your preferences

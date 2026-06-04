@@ -212,13 +212,13 @@ const PIPELINE: Record<string, HelpEntry> = {
   },
   "pipeline.practice_fit": {
     title: "PracticeFit score",
-    tip: "A guidance score, not a gate. It blends role, skills, schedule, and preferences — and drops any dimension the candidate left blank so sparse profiles aren't penalized.",
+    tip: "A guidance score, not a gate. It speaks dental — weighing role, real commute distance, PMS fluency, state licensure, comp, specialty, skills, and schedule — and drops any dimension left blank so sparse profiles aren't penalized.",
     format: "disclosure",
     lens: "employer",
     bullets: [
-      "Blends role match, skills, schedule overlap, and stated preferences.",
+      "Speaks dental: PMS fluency, state licensure, real commute distance, role, specialty, skills, schedule, and comp.",
       "Missing data drops from the denominator — a thin profile isn't punished.",
-      "Buckets: Strong / Good / Fair / Low. It's a sort aid, never an auto-decision.",
+      "Buckets: Excellent / Strong / Solid / Light / Low. A hard requirement like out-of-state licensure caps the score — but it's only a sort aid, never an auto-decision.",
     ],
   },
   "pipeline.scorecards": {
