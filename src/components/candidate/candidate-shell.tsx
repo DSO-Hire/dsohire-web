@@ -65,8 +65,16 @@ const NAV: ReadonlyArray<NavItem> = [
   { id: "applications", label: "Applications", href: "/candidate/applications", Icon: FileText },
   { id: "inbox", label: "Inbox", href: "/candidate/inbox", Icon: InboxIcon },
   { id: "profile", label: "Profile", href: "/candidate/profile", Icon: UserCircle },
-  { id: "settings", label: "Settings", href: "/candidate/settings", Icon: Settings },
 ];
+
+// Settings lives in the footer cluster (with Help + Sign out), mirroring the
+// employer shell — keeps the main rail focused on day-to-day surfaces.
+const SETTINGS_ITEM: NavItem = {
+  id: "settings",
+  label: "Settings",
+  href: "/candidate/settings",
+  Icon: Settings,
+};
 
 const HELP_ITEM: NavItem = {
   id: "help",
@@ -165,8 +173,9 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
           </ul>
         </nav>
 
-        {/* Footer cluster: Help + Sign out */}
+        {/* Footer cluster: Settings + Help + Sign out */}
         <div className="border-t border-white/10 p-3 space-y-1">
+          <NavRow item={SETTINGS_ITEM} active={active} />
           <NavRow item={HELP_ITEM} active={active} />
           <form action="/candidate/sign-out" method="post">
             <button
@@ -189,7 +198,7 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
           </Link>
           <CandidateMobileNav
             active={active}
-            items={NAV.map((item) => ({
+            items={[...NAV, SETTINGS_ITEM].map((item) => ({
               id: item.id,
               label: item.label,
               href: item.href,

@@ -19,24 +19,22 @@
 import { useId, useState } from "react";
 import { Info, X, ChevronDown } from "lucide-react";
 import { getHelp } from "@/lib/help/help-content";
-import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 
 /**
- * Render a help title with the PracticeFit token swapped for the two-tone
- * wordmark, so the brand reads as a premium feature (Cam 2026-06-04 — "helps
- * them recognize this is why we keep paying"). Plain text for non-PF titles.
- * `text-[1em]` makes the mark match the surrounding font size.
+ * Render a help title with the PracticeFit token in the two-tone brand colors
+ * (navy "Practice" + heritage "Fit"), so it reads as a premium feature (Cam
+ * 2026-06-04). Inline text rather than the full sparkle wordmark — the sparkle
+ * is too busy at small inline sizes. Plain text for non-PF titles.
  */
 function brandTitle(text: string): React.ReactNode {
   const parts = text.split(/(practicefit)/i);
   if (parts.length === 1) return text;
   return parts.map((part, i) =>
     /^practicefit$/i.test(part) ? (
-      <PracticeFitWordmark
-        key={i}
-        surface="light"
-        className="text-[1em] align-[-0.12em]"
-      />
+      <span key={i} className="font-extrabold tracking-[-0.02em]">
+        <span className="text-ink">Practice</span>
+        <span className="text-heritage-deep">Fit</span>
+      </span>
     ) : (
       <span key={i}>{part}</span>
     )

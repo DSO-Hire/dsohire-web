@@ -139,13 +139,13 @@ export function PrivacyForm({ initial, blocked }: PrivacyFormProps) {
   return (
     <div className="space-y-6">
       <ProfileVisibilitySection initial={initial} />
+      <AnonymousModeSection initial={initial.anonymous_mode} />
       <CurrentEmployerSection
         hasCurrent={initial.has_current_employer}
         initialEnabled={initial.hide_from_current_employer}
       />
       <BlockListSection blocked={blocked} />
       <PracticeFitSection initial={initial.practice_fit_consent} />
-      <AnonymousModeSection initial={initial.anonymous_mode} />
       <ViewAsDsoCard />
       <DataSharingCard />
     </div>
