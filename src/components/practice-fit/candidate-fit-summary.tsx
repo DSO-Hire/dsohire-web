@@ -179,8 +179,11 @@ export function CandidateFitSummary({
             gaps the candidate can act on. */}
         {topGaps.length > 0 && (
           <div className="mt-5 pt-4 border-t border-[var(--rule)]">
-            <p className="text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-3">
+            <p className="text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-1">
               Lift your match
+            </p>
+            <p className="text-[12px] text-slate-meta mb-3">
+              Each one sharpens your PracticeFit on every role you apply to.
             </p>
             <ul className="space-y-2">
               {topGaps.map((g) => (

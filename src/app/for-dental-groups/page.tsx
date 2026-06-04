@@ -26,14 +26,16 @@ import Link from "next/link";
 import {
   ArrowRight,
   Check,
+  ClipboardList,
   Columns3,
   MessageCircle,
   Minus,
   Search,
-  Sparkles,
   Star,
-  Target,
+  Wand2,
 } from "lucide-react";
+import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
+import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import { getAllTiers, type TierConfig } from "@/lib/stripe/prices";
 import { SiteShell, BrandLockup } from "@/components/marketing/site-shell";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
@@ -681,16 +683,21 @@ function RoiCard({
 
 interface ShowcaseFeature {
   icon: React.ComponentType<{ className?: string }>;
-  title: string;
+  title: React.ReactNode;
   body: string;
   status: "now" | "h2-2026";
 }
 
 const SHOWCASE_TOP: ShowcaseFeature[] = [
   {
-    icon: Sparkles,
-    title: "AI job description generator",
-    body: "Type a brief, get a dental-specific posting in seconds. Knows DDS, RDH, EFDA, DEA, perio, and the rest of the vocabulary. Three tones, regenerate as often as you want.",
+    icon: PracticeFitMark,
+    title: (
+      <span className="inline-flex flex-wrap items-center gap-1.5">
+        <PracticeFitWordmark surface="light" tm className="text-[18px]" />
+        <span>matching</span>
+      </span>
+    ),
+    body: "Our proprietary dental fit score ranks every applicant against the role on real commute distance, PMS fluency, state licensure, certifications, specialty, and more — so your strongest matches surface first, not just your most recent applicants.",
     status: "now",
   },
   {
@@ -700,9 +707,9 @@ const SHOWCASE_TOP: ShowcaseFeature[] = [
     status: "now",
   },
   {
-    icon: Target,
-    title: "PracticeFit matching",
-    body: "Our proprietary fit score ranks applicants against each role on skills, schedule, and stated preferences — so your strongest matches surface first, not just your most recent applicants.",
+    icon: Wand2,
+    title: "AI job description generator",
+    body: "Type a brief, get a dental-specific posting in seconds. Knows DDS, RDH, EFDA, DEA, perio, and the rest of the vocabulary. Three tones, regenerate as often as you want.",
     status: "now",
   },
 ];
@@ -721,7 +728,7 @@ const SHOWCASE_BOTTOM: ShowcaseFeature[] = [
     status: "now",
   },
   {
-    icon: Star,
+    icon: ClipboardList,
     title: "Screening library + role scorecards",
     body: "100+ curated screening questions across all 7 role categories — one click adds the recommended set. Then score finalists with multi-reviewer, role-specific scorecards that roll up automatically.",
     status: "now",
@@ -744,15 +751,15 @@ function FeatureShowcase() {
 
         {/* Top row — 3 columns, the headline features */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-          {SHOWCASE_TOP.map((f) => (
-            <FeatureCard key={f.title} feature={f} />
+          {SHOWCASE_TOP.map((f, i) => (
+            <FeatureCard key={i} feature={f} />
           ))}
         </div>
 
         {/* Bottom row — 3 columns, supporting depth features */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-          {SHOWCASE_BOTTOM.map((f) => (
-            <FeatureCard key={f.title} feature={f} />
+          {SHOWCASE_BOTTOM.map((f, i) => (
+            <FeatureCard key={i} feature={f} />
           ))}
         </div>
       </div>
