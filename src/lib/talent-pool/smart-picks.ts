@@ -21,6 +21,10 @@
 import type { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getPracticeFitForJob } from "@/lib/practice-fit/get-or-compute";
 import type { FitResult } from "@/lib/practice-fit/types";
+import {
+  anonymousDisplayLabel,
+  getDsoAppliedCandidateIds,
+} from "@/lib/candidate/anonymity";
 
 type SupabaseClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
 
@@ -37,6 +41,14 @@ export interface SmartPick {
   /** True if this DSO has already saved the candidate to its pool. */
   in_pool: boolean;
   pool_entry_id: string | null;
+  /**
+   * True when the candidate is in anonymous-but-discoverable mode and hasn't
+   * applied to one of this DSO's jobs — name/photo are masked. The rule is
+   * `anonymous_mode && !appliedToThisDso` (see lib/candidate/anonymity). This
+   * was a leak before v3 Phase C: Smart Picks rendered the real name on the
+   * job page; the dashboard "Today's 3" would have amplified it.
+   */
+  anonymized: boolean;
 }
 
 /**
@@ -75,7 +87,7 @@ export async function getSmartPicks(
   let q = supabase
     .from("candidates")
     .select(
-      "id, full_name, headline, current_title, years_experience, avatar_url"
+      "id, full_name, headline, current_title, years_experience, avatar_url, anonymous_mode, desired_roles, current_location_city, current_location_state"
     )
     .in("cv_visibility", ["open_to_work", "recruiters_only"])
     .eq("is_guest", false)
@@ -98,6 +110,10 @@ export async function getSmartPicks(
       current_title: string | null;
       years_experience: number | null;
       avatar_url: string | null;
+      anonymous_mode: boolean | null;
+      desired_roles: string[] | null;
+      current_location_city: string | null;
+      current_location_state: string | null;
     }>).filter((c) => !excludedCandidateIds.has(c.id));
   if (candidates.length === 0) return [];
 
@@ -123,23 +139,101 @@ export async function getSmartPicks(
     poolByCandidate.set(e.candidate_id, e.id);
   }
 
+  // 4b. Anonymity gate — which of the scored candidates have applied to one
+  // of this DSO's jobs? Those are de-masked; the rest in anonymous_mode stay
+  // masked (name + photo hidden) on this discovery surface.
+  const appliedToDso = await getDsoAppliedCandidateIds(
+    supabase,
+    dsoId,
+    Array.from(fitsByCandidate.keys())
+  );
+
   // 5. Build + sort picks.
   const picks: SmartPick[] = [];
   for (const cand of candidates) {
     const fit = fitsByCandidate.get(cand.id);
     if (!fit) continue;
+    const masked =
+      Boolean(cand.anonymous_mode) && !appliedToDso.has(cand.id);
     picks.push({
       candidate_id: cand.id,
-      full_name: cand.full_name,
-      headline: cand.headline,
-      current_title: cand.current_title,
+      full_name: masked
+        ? anonymousDisplayLabel({
+            current_title: cand.current_title,
+            desired_roles: cand.desired_roles,
+            current_location_city: cand.current_location_city,
+            current_location_state: cand.current_location_state,
+          })
+        : cand.full_name,
+      headline: masked ? null : cand.headline,
+      current_title: masked ? null : cand.current_title,
       years_experience: cand.years_experience,
-      avatar_url: cand.avatar_url,
+      avatar_url: masked ? null : cand.avatar_url,
       fit,
       in_pool: poolByCandidate.has(cand.id),
       pool_entry_id: poolByCandidate.get(cand.id) ?? null,
+      anonymized: masked,
     });
   }
   picks.sort((a, b) => b.fit.score - a.fit.score);
   return picks.slice(0, limit);
+}
+
+/* ──────────────────────────────────────────────────────────────
+ * "Today's top fits" — the cross-job dashboard roll-up (v3 Phase C).
+ *
+ * The per-job version (getSmartPicks) is rendered on each job page. This
+ * aggregates across all of a DSO's open jobs and returns the single best fit
+ * per candidate (deduped to their strongest-matched role), so the employer
+ * dashboard can show "your N best-fit candidates today" at a glance. It reuses
+ * getSmartPicks per job, so the anonymity masking + eligibility rules are
+ * inherited — no separate privacy path to keep in sync.
+ * ─────────────────────────────────────────────────────────── */
+
+const JOB_SCAN_CAP = 12;
+
+export interface TodaysTopFit extends SmartPick {
+  /** The DSO job this candidate fits best (their highest score across roles). */
+  best_job_id: string;
+  best_job_title: string;
+}
+
+export async function getTodaysTopFits(
+  supabase: SupabaseClient,
+  dsoId: string,
+  limit = 3
+): Promise<TodaysTopFit[]> {
+  if (!dsoId) return [];
+
+  // The DSO's most recently posted open jobs (bounded for per-render cost).
+  const { data: jobRows } = await supabase
+    .from("jobs")
+    .select("id, title")
+    .eq("dso_id", dsoId)
+    .eq("status", "active")
+    .is("deleted_at", null)
+    .order("posted_at", { ascending: false, nullsFirst: false })
+    .limit(JOB_SCAN_CAP);
+  const jobs = (jobRows ?? []) as Array<{ id: string; title: string | null }>;
+  if (jobs.length === 0) return [];
+
+  // Score each job's pool, then keep each candidate's single best match.
+  const bestByCandidate = new Map<string, TodaysTopFit>();
+  for (const job of jobs) {
+    const picks = await getSmartPicks(supabase, job.id, dsoId, 5);
+    for (const p of picks) {
+      const prior = bestByCandidate.get(p.candidate_id);
+      if (!prior || p.fit.score > prior.fit.score) {
+        bestByCandidate.set(p.candidate_id, {
+          ...p,
+          best_job_id: job.id,
+          best_job_title: job.title ?? "Open role",
+        });
+      }
+    }
+  }
+
+  return Array.from(bestByCandidate.values())
+    .sort((a, b) => b.fit.score - a.fit.score)
+    .slice(0, limit);
 }

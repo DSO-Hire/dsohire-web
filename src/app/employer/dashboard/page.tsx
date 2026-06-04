@@ -58,6 +58,8 @@ import {
   type LeaderboardJob,
 } from "@/components/dashboard/job-leaderboard";
 import { DashboardMiniMap } from "@/components/dashboard/dashboard-mini-map";
+import { TodaysTopFits } from "@/components/dashboard/todays-top-fits";
+import { getTodaysTopFits } from "@/lib/talent-pool/smart-picks";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -149,6 +151,13 @@ export default async function EmployerDashboard() {
   const subscription = dsoId
     ? await getSubscriptionAnyStatus(supabase, dsoId)
     : null;
+
+  // v3 Phase C — "Today's top fits" cross-job roll-up. Cache-aware
+  // (practice_fit_scores); identity masking handled upstream. Hiring managers
+  // see it too — it's read-only discovery.
+  const todaysTopFits = dsoId
+    ? await getTodaysTopFits(supabase, dsoId, 3)
+    : [];
 
   // ── KPI scaffolding ────────────────────────────────────────────────
   let openJobsCount = 0;
@@ -1090,6 +1099,10 @@ export default async function EmployerDashboard() {
           />
         </section>
       )}
+
+      {/* v3 Phase C — Today's top fits (cross-job PracticeFit roll-up).
+          Renders nothing when there are no scored fits yet. */}
+      <TodaysTopFits fits={todaysTopFits} />
 
       {/* Pipeline funnel — full-width. */}
       <section className="mb-6">
