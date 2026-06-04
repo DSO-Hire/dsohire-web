@@ -49,6 +49,16 @@ export interface OteResult {
   variable: number;
   /** base + variable. Null when `base` is null (can't total an unknown base). */
   ote: number | null;
+  /**
+   * OTE range endpoints (annualized base bound + variable). For a range base
+   * these are the low (min) and high (max) OTE; for a single-figure base both
+   * equal `ote`. Null when there's no base to anchor to. Drives the
+   * "$X–$Y OTE/yr" display so a range base shows a range, not a midpoint.
+   */
+  ote_low: number | null;
+  ote_high: number | null;
+  /** True when ote_low and ote_high differ (a genuine range to display). */
+  isRange: boolean;
   /** True when at least one variable component is enabled AND has a target. */
   hasVariable: boolean;
 }
@@ -82,6 +92,39 @@ export function resolveBaseForOte(
     case undefined:
     default:
       return null;
+  }
+}
+
+/**
+ * The low/high base bounds for the OTE range. Only a `range` base with two
+ * distinct figures yields a true range; every other shape collapses to a single
+ * point (low === high).
+ */
+export function resolveBaseBoundsForOte(
+  type: CompensationType | null,
+  min: number | null,
+  max: number | null
+): { low: number | null; high: number | null } {
+  switch (type) {
+    case "range": {
+      const lo = min ?? max ?? null;
+      const hi = max ?? min ?? null;
+      return { low: lo, high: hi };
+    }
+    case "starting_at": {
+      const v = min ?? null;
+      return { low: v, high: v };
+    }
+    case "up_to": {
+      const v = max ?? null;
+      return { low: v, high: v };
+    }
+    case "exact": {
+      const v = min ?? max ?? null;
+      return { low: v, high: v };
+    }
+    default:
+      return { low: null, high: null };
   }
 }
 
@@ -139,10 +182,28 @@ export function computeOte(input: OteInputs): OteResult {
   // annualized. per_visit/unknown → annualBase null → no combined OTE.
   const annualBase = base != null ? annualizeBase(base, input.compensationPeriod) : null;
 
+  // Range endpoints — a range base shows "$X–$Y OTE/yr" instead of a midpoint.
+  const bounds = resolveBaseBoundsForOte(
+    input.compensationType,
+    input.compensationMin,
+    input.compensationMax
+  );
+  const annualLow =
+    bounds.low != null ? annualizeBase(bounds.low, input.compensationPeriod) : null;
+  const annualHigh =
+    bounds.high != null ? annualizeBase(bounds.high, input.compensationPeriod) : null;
+  const ote_low = annualLow != null ? annualLow + variable : null;
+  const ote_high = annualHigh != null ? annualHigh + variable : null;
+  const isRange =
+    ote_low != null && ote_high != null && ote_low !== ote_high;
+
   return {
     base,
     variable,
     ote: annualBase != null ? annualBase + variable : null,
+    ote_low,
+    ote_high,
+    isRange,
     hasVariable,
   };
 }

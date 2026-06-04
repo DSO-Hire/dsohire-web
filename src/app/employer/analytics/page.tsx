@@ -71,6 +71,10 @@ const WINDOWS: Array<{ value: string; days: number; label: string }> = [
 function fmtDays(n: number | null): string {
   return n === null ? "—" : Math.round(n).toLocaleString("en-US");
 }
+/** "day" / "days" unit matched to the displayed (rounded) value. */
+function daysUnit(n: number | null): string | undefined {
+  return n === null ? undefined : Math.round(n) === 1 ? "day" : "days";
+}
 function fmtPct(n: number | null): string {
   return n === null ? "—" : `${Math.round(n * 100)}`;
 }
@@ -313,14 +317,14 @@ function KpiGrid({ overview }: { overview: AnalyticsOverview }) {
       <StatCard
         label="Time to fill"
         value={fmtDays(ttf)}
-        unit={ttf !== null ? "days" : undefined}
+        unit={daysUnit(ttf)}
         hint="posted → hired (median)"
         benchmark="Industry ~60d"
       />
       <StatCard
         label="Time to hire"
         value={fmtDays(tth)}
-        unit={tth !== null ? "days" : undefined}
+        unit={daysUnit(tth)}
         hint="applied → hired (median)"
       />
       <StatCard
@@ -392,24 +396,20 @@ function FunnelTab({
         <StatCard
           label="Time to fill · median"
           value={fmtDays(t.time_to_fill_median_days)}
-          unit={t.time_to_fill_median_days !== null ? "days" : undefined}
+          unit={daysUnit(t.time_to_fill_median_days)}
           hint={`mean ${fmtDays(t.time_to_fill_avg_days)}d · posted → hired`}
           benchmark="Industry ~60d"
         />
         <StatCard
           label="Time to hire · median"
           value={fmtDays(t.time_to_hire_median_days)}
-          unit={t.time_to_hire_median_days !== null ? "days" : undefined}
+          unit={daysUnit(t.time_to_hire_median_days)}
           hint={`mean ${fmtDays(t.time_to_hire_avg_days)}d · applied → hired`}
         />
         <StatCard
           label="Time to first response"
           value={fmtDays(overview.time_to_first_response.median_days)}
-          unit={
-            overview.time_to_first_response.median_days !== null
-              ? "days"
-              : undefined
-          }
+          unit={daysUnit(overview.time_to_first_response.median_days)}
           hint={`${overview.time_to_first_response.responded} of ${overview.time_to_first_response.total} apps · median`}
         />
         <StatCard

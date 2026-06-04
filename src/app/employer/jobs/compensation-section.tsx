@@ -553,14 +553,16 @@ export function CompensationSection(props: CompensationSectionProps) {
                 On-Target Earnings
               </div>
               <div className="mt-0.5 text-[20px] font-extrabold text-ink">
-                ~{formatUsd(ote.ote)}
+                {ote.isRange && ote.ote_low != null && ote.ote_high != null
+                  ? `~${formatUsd(ote.ote_low)}–${formatUsd(ote.ote_high)}`
+                  : `~${formatUsd(ote.ote)}`}
                 <span className="ml-2 text-[12px] font-medium text-slate-meta">
                   / year
                 </span>
               </div>
               <p className="mt-1 text-[11px] text-slate-meta leading-snug">
                 {formatUsd(ote.base ?? 0)} base
-                {props.compType === "range" ? " (midpoint)" : ""} +{" "}
+                {props.compType === "range" && !ote.isRange ? " (midpoint)" : ""} +{" "}
                 {formatUsd(ote.variable)} target variable
                 {props.equityOffered ? " · plus equity" : ""}
               </p>

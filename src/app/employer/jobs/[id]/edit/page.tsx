@@ -18,9 +18,10 @@
 
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink, Trash2 } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ExternalLink, Trash2 } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { findNameLeaks, stripHtml } from "@/lib/dso/name-leak";
 import { getActiveSubscription } from "@/lib/billing/subscription";
 import {
   loadJobAttachments,
@@ -100,7 +101,7 @@ export default async function EditJobPage({ params }: PageProps) {
   ] = await Promise.all([
     supabase
       .from("dso_locations")
-      .select("id, name, city, state")
+      .select("id, name, city, state, public_dso_affiliation, anonymize_name")
       .eq("dso_id", dsoUser.dso_id)
       .order("name"),
     supabase.from("job_locations").select("location_id").eq("job_id", jobId),
@@ -125,6 +126,49 @@ export default async function EditJobPage({ params }: PageProps) {
     city: (l.city as string | null) ?? null,
     state: (l.state as string | null) ?? null,
   }));
+
+  // Pre-publish name-leak check (anonymity) — a saved job can name the DSO or
+  // practice in its title/body while a tagged location is private/anonymized.
+  // Masking can't rewrite that free text, so we warn at the top of the editor.
+  const { data: dsoRow } = await supabase
+    .from("dsos")
+    .select("name")
+    .eq("id", dsoUser.dso_id)
+    .maybeSingle();
+  const dsoName = (dsoRow?.name as string | null) ?? null;
+  const taggedLocationIds = new Set(
+    ((jobLocations ?? []) as Array<{ location_id: string }>).map(
+      (r) => r.location_id
+    )
+  );
+  const taggedLocs = (
+    (locations ?? []) as Array<{
+      id: string;
+      name: string;
+      public_dso_affiliation: boolean | null;
+      anonymize_name: boolean | null;
+    }>
+  ).filter((l) => taggedLocationIds.has(l.id));
+  const leakNames: string[] = [];
+  if (
+    taggedLocs.some(
+      (l) => l.public_dso_affiliation === false || l.anonymize_name === true
+    )
+  ) {
+    if (dsoName) leakNames.push(dsoName);
+    for (const l of taggedLocs) if (l.anonymize_name) leakNames.push(l.name);
+  }
+  const nameLeaks =
+    leakNames.length > 0
+      ? findNameLeaks(
+          [
+            job.title as string,
+            stripHtml(job.description as string | null),
+            (job.requirements as string | null) ?? "",
+          ],
+          leakNames
+        )
+      : [];
 
   const initial: EditSectionsInitial = {
     id: job.id as string,
@@ -270,6 +314,33 @@ export default async function EditJobPage({ params }: PageProps) {
           step or publish button to remember.
         </p>
       </header>
+
+      {nameLeaks.length > 0 && (
+        <div className="mb-8 max-w-[820px] border-l-4 border-amber-400 bg-amber-50 p-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 flex-shrink-0 text-amber-600 mt-0.5" />
+            <div>
+              <p className="text-[14px] font-bold text-amber-900">
+                This listing is set to private, but the text still names{" "}
+                {nameLeaks.map((n, i) => (
+                  <span key={n}>
+                    {i > 0 ? ", " : ""}
+                    <span className="font-extrabold">&ldquo;{n}&rdquo;</span>
+                  </span>
+                ))}
+                .
+              </p>
+              <p className="mt-1 text-[13px] leading-relaxed text-amber-900/80">
+                Candidates see{" "}
+                {nameLeaks.length === 1 ? "that name" : "those names"} in the
+                title or description even though the practice identity is masked
+                everywhere else. Edit the Basics and Description sections below to
+                reword it.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <EditSections
         dsoId={dsoUser.dso_id as string}

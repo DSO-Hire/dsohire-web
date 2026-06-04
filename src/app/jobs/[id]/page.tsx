@@ -1125,7 +1125,9 @@ function CompensationGlance({ job }: { job: { [k: string]: unknown } }) {
       {ote.hasVariable && ote.ote != null ? (
         <>
           <div className="text-[20px] font-extrabold text-ivory leading-tight">
-            ~{formatUsd(ote.ote)}
+            {ote.isRange && ote.ote_low != null && ote.ote_high != null
+              ? `~${formatUsd(ote.ote_low)}–${formatUsd(ote.ote_high)}`
+              : `~${formatUsd(ote.ote)}`}
             <span className="ml-1.5 text-[12px] font-semibold text-heritage">
               OTE / yr
             </span>
