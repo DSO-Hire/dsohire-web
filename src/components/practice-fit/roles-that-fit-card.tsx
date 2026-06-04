@@ -29,7 +29,7 @@ export function RolesThatFitCard({ roles }: { roles: RoleThatFits[] }) {
           <span className="text-[10px] font-bold tracking-[2.5px] uppercase">
             Roles that fit you ·
           </span>
-          <PracticeFitWordmark surface="inherit" className="text-[14px]" />
+          <PracticeFitWordmark surface="light" className="text-[14px]" />
         </div>
         <Link
           href="/candidate/jobs"

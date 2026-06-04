@@ -75,14 +75,14 @@ export default async function CandidatePracticeFitPage() {
   return (
     <CandidateShell active="practice-fit">
       <header className="mb-8">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-[10px] font-extrabold tracking-[3px] uppercase text-heritage-deep">
-            Your matches
-          </span>
-          <span className="text-heritage-deep">·</span>
-          <PracticeFitWordmark surface="inherit" className="text-[15px]" />
+        <div className="mb-3">
+          <PracticeFitWordmark
+            surface="light"
+            tm
+            className="text-4xl sm:text-5xl"
+          />
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-[-1px] leading-[1.1] text-ink">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] leading-tight text-ink">
           Roles ranked for you.
         </h1>
         <p className="mt-3 text-base text-slate-body max-w-[640px]">

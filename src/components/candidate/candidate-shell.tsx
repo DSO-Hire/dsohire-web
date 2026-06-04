@@ -237,7 +237,15 @@ function NavRow({
         }
       >
         <Icon className="h-4 w-4 flex-shrink-0" />
-        <span className="flex-1">{item.label}</span>
+        <span className="flex-1">
+          {item.id === "practice-fit" ? (
+            <>
+              Practice<span className="text-heritage-light">Fit</span>
+            </>
+          ) : (
+            item.label
+          )}
+        </span>
         {item.badge && item.badge > 0 ? (
           <span
             aria-label={`${item.badge} unread`}

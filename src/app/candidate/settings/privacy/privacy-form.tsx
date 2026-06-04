@@ -41,6 +41,7 @@ import {
   type VisibilityInput,
 } from "./actions";
 import { CV_VISIBILITY_OPTIONS } from "@/lib/candidate/canonical-lists";
+import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 
 // ─────────────────────────────────────────────────────────────────────
 // Static config
@@ -485,7 +486,12 @@ export function PracticeFitSection({
   return (
     <SectionCard
       icon={<ShieldCheck className="size-5 text-[#4D7A60]" />}
-      title="PracticeFit consent"
+      title={
+        <span className="inline-flex items-baseline">
+          <PracticeFitWordmark surface="light" tm className="text-[1.1em]" />
+          <span className="ml-1.5">consent</span>
+        </span>
+      }
       description="PracticeFit is our proprietary matching algorithm — it scores how well you fit each role on must-haves and preferences. Off by default; turn it on so DSOs can find you by fit."
     >
       <RadioGroup
@@ -586,7 +592,7 @@ function SectionCard({
   children,
 }: {
   icon: React.ReactNode;
-  title: string;
+  title: React.ReactNode;
   description: string;
   children: React.ReactNode;
 }) {

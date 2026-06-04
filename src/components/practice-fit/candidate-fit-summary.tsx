@@ -222,7 +222,7 @@ function SectionHeader() {
   return (
     <div className="flex items-end justify-between gap-4 mb-3">
       <div className="text-heritage-deep">
-        <PracticeFitWordmark surface="inherit" className="text-[14px]" />
+        <PracticeFitWordmark surface="light" className="text-[14px]" />
       </div>
       <Link
         href="/candidate/settings/privacy"
