@@ -90,6 +90,7 @@ const EMP_LABELS: Record<string, string> = {
 // already, but candidates skim differently — give them control.
 const JOBS_SORT_OPTIONS = [
   { value: "newest", label: "Newest first" },
+  { value: "fit", label: "Best PracticeFit" },
   { value: "oldest", label: "Oldest first" },
   { value: "pay", label: "Highest pay" },
   { value: "title", label: "Title (A→Z)" },
@@ -456,6 +457,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
   // signed in, mark cards for jobs they've already submitted to so
   // they don't redundantly apply. Anonymous viewers get no badge.
   const appliedJobIds = new Set<string>();
+  let viewerIsCandidate = false;
   {
     const {
       data: { user: viewer },
@@ -467,6 +469,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
         .eq("auth_user_id", viewer.id)
         .maybeSingle();
       if (cand) {
+        viewerIsCandidate = true;
         const candidateId = (cand as { id: string }).id;
         const { data: appliedRows } = await supabase
           .from("applications")
@@ -960,6 +963,22 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
             )}
           </div>
         </div>
+
+        {sortKey === "fit" && (
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-l-4 border-heritage bg-cream/70 p-4">
+            <p className="max-w-[640px] text-[13px] leading-relaxed text-slate-body">
+              {viewerIsCandidate
+                ? "PracticeFit ranks every open role to your profile — your role, location, pay, schedule, and dental experience. See your full ranked board on your dashboard."
+                : "PracticeFit ranks roles to your profile — your role, location, pay, schedule, and dental experience. Create a free candidate account to unlock it."}
+            </p>
+            <Link
+              href={viewerIsCandidate ? "/candidate/jobs" : "/candidate/sign-up"}
+              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md bg-heritage px-4 py-2 text-[11px] font-bold uppercase tracking-[1px] text-ivory hover:bg-heritage-deep"
+            >
+              {viewerIsCandidate ? "Open your PracticeFit board" : "Sign up free"}
+            </Link>
+          </div>
+        )}
 
         {/* MAP VIEW */}
         {showMap ? (
