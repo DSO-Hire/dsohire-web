@@ -75,7 +75,13 @@ export const UNSUBSCRIBE_CATEGORIES: ReadonlyArray<UnsubscribeCategory> = [
     label: "Job alerts & recommendations",
     description:
       "Saved-search matches and recommended jobs based on your profile.",
-    eventKinds: ["job_alert.match", "job_alert.recommended"],
+    eventKinds: [
+      "job_alert.match",
+      "job_alert.recommended",
+      // B.2 — the weekly PracticeFit drip rides this category so one-click
+      // unsubscribe + the List-Unsubscribe header turn it off in one tap.
+      "candidate.practice_fit_digest",
+    ],
     commercial: true,
   },
   {

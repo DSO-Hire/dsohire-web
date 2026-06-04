@@ -22,6 +22,8 @@ import type { FitResult } from "./types";
 
 const POOL_CAP = 30;
 
+type SupabaseServerClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
+
 export interface RoleThatFits {
   job_id: string;
   title: string;
@@ -33,10 +35,17 @@ export interface RoleThatFits {
 
 export async function getTopFitJobsForCandidate(
   candidateId: string,
-  limit = 4
+  limit = 4,
+  /**
+   * Optional injected client. Defaults to the cookie-bound server client for
+   * the candidate's own dashboard (RLS-scoped). The B.2 weekly-digest cron runs
+   * session-less and passes the service-role client so the candidate's
+   * applications + private fit rows are visible.
+   */
+  injectedClient?: SupabaseServerClient
 ): Promise<RoleThatFits[]> {
   if (!candidateId) return [];
-  const supabase = await createSupabaseServerClient();
+  const supabase = injectedClient ?? (await createSupabaseServerClient());
 
   // Recent open jobs across all DSOs. Public read on `jobs` covers this;
   // RLS hides internal-only postings.
@@ -70,7 +79,7 @@ export async function getTopFitJobsForCandidate(
   // Score each (cached). null = role-filtered → excluded from the feed.
   const scored = await Promise.all(
     pool.map(async (j) => {
-      const fit = await getPracticeFit(candidateId, j.id);
+      const fit = await getPracticeFit(candidateId, j.id, injectedClient);
       return fit ? { job: j, fit } : null;
     })
   );

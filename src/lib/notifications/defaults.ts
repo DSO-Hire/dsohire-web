@@ -71,6 +71,16 @@ export const NOTIFICATION_DEFAULTS: DefaultsMap = {
     in_app: { enabled: true, frequency: "instant" },
     sms: { enabled: false, frequency: "off" },
   },
+  "candidate.practice_fit_digest": {
+    // B.2 weekly drip. The cron IS the scheduler, so the default frequency is
+    // 'instant' (send when invoked) — NOT 'weekly_digest', which the dispatcher
+    // would treat as "defer to a future digest scheduler" and suppress_by_cap.
+    // Default ON (a valuable, opt-out job-alert stream); one-click unsubscribe
+    // via the candidate.jobs category flips email=false → dispatcher suppresses.
+    email: { enabled: true, frequency: "instant" },
+    in_app: { enabled: false, frequency: "off" },
+    sms: { enabled: false, frequency: "off" },
+  },
   "employer.new_application": {
     email: { enabled: true, frequency: "instant" },
     in_app: { enabled: true, frequency: "instant" },

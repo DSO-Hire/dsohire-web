@@ -91,10 +91,18 @@ type SupabaseServerClient = Awaited<ReturnType<typeof createSupabaseServerClient
  */
 export async function getPracticeFit(
   candidateId: string,
-  jobId: string
+  jobId: string,
+  /**
+   * Optional injected client. Defaults to the cookie-bound server client
+   * (RLS-scoped to the signed-in candidate). Trusted server contexts that
+   * run WITHOUT a session — e.g. the B.2 weekly-digest cron — pass the
+   * service-role client so the candidate-private reads (candidates,
+   * practice_fit_scores) aren't nulled out by RLS.
+   */
+  injectedClient?: SupabaseServerClient
 ): Promise<FitResult | null> {
   if (!candidateId || !jobId) return null;
-  const supabase = await createSupabaseServerClient();
+  const supabase = injectedClient ?? (await createSupabaseServerClient());
 
   // Read-through cache. RLS scopes which rows the user can see.
   const { data: existing } = await supabase
