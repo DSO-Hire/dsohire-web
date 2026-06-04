@@ -174,13 +174,13 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
         </nav>
 
         {/* Footer cluster: Settings + Help + Sign out */}
-        <div className="border-t border-white/10 p-3 space-y-1">
+        <div className="border-t border-white/10 p-3 space-y-0.5">
           <NavRow item={SETTINGS_ITEM} active={active} />
           <NavRow item={HELP_ITEM} active={active} />
           <form action="/candidate/sign-out" method="post">
             <button
               type="submit"
-              className="flex w-full items-center gap-3 px-3 py-2 text-[13px] font-semibold tracking-[0.5px] text-ivory/55 hover:text-ivory hover:bg-white/5 rounded transition-colors"
+              className="flex w-full items-center gap-3 px-3 py-2.5 text-[13px] font-semibold tracking-[0.5px] text-ivory/55 hover:text-ivory hover:bg-white/5 rounded transition-colors"
             >
               <LogOut className="h-4 w-4 flex-shrink-0" />
               <span>Sign out</span>
