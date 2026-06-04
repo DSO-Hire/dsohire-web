@@ -209,6 +209,13 @@ export interface CandidateFitInputs {
   ce_growth_importance: number | null;
   /** 1-5 — how much the candidate values predictable work-life balance. */
   work_life_priority: number | null;
+  /**
+   * v3 Phase B.2 — "what matters MOST to you" (comp | schedule | culture |
+   * growth | location). Re-weights THIS candidate's match toward the dimensions
+   * they care about (a per-candidate tilt, not a new dimension). Null = no tilt
+   * (identical to pre-B.2 scoring).
+   */
+  comp_priority: string | null;
 }
 
 export interface JobFitInputs {

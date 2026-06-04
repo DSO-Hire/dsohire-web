@@ -53,7 +53,52 @@ import type {
  * hashed input field (e.g. the A.4 caps/boosters). It's folded into the
  * input hash so a logic-only change still invalidates the read-through cache.
  */
-const MODEL_VERSION = "2026-06-04-v3-culture";
+const MODEL_VERSION = "2026-06-04-v3-comp-priority";
+
+/* ──────────────────────────────────────────────────────────────
+ * v3 Phase B.2 — comp_priority re-weighting ("what matters MOST").
+ *
+ * A per-candidate tilt, NOT a new dimension. When a candidate says what matters
+ * most, we scale the effective weight of the dimensions that express it, so the
+ * normalized score leans toward their stated priority. Deterministic (the
+ * priority is a hashed candidate input) and back-compatible (null = no tilt).
+ *
+ * Cam flagged this as "powerful but opinionated — keep it?"; shipped behind the
+ * explicit comp_priority signal so it only ever fires for candidates who took
+ * the assessment and chose a priority.
+ * ─────────────────────────────────────────────────────────── */
+
+const PRIORITY_MULTIPLIER = 1.5;
+
+const PRIORITY_DIMS: Record<string, FitDimensionKey[]> = {
+  comp: ["compensation"],
+  schedule: ["schedule_overlap", "work_life"],
+  culture: ["practice_feel", "work_pace", "autonomy", "mentorship"],
+  growth: ["ce_growth", "years_experience"],
+  location: ["location"],
+};
+
+/**
+ * Scale the effective weight (and recompute contribution) of the dimensions
+ * tied to the candidate's stated priority. Mutates the dims in place BEFORE
+ * normalization, so both the score and the displayed weights/top-factors
+ * reflect the tilt. Unscored boosted dims still contribute 0 (raw 0) — the
+ * tilt only bites when the dim has data on both sides.
+ */
+function applyCompPriority(
+  dims: Record<FitDimensionKey, FitDimension>,
+  compPriority: string | null
+): void {
+  if (!compPriority) return;
+  const boosted = PRIORITY_DIMS[compPriority];
+  if (!boosted) return;
+  for (const key of boosted) {
+    const d = dims[key];
+    if (!d) continue;
+    d.weight = Math.round(d.weight * PRIORITY_MULTIPLIER);
+    d.contribution = (d.weight * d.raw) / 100;
+  }
+}
 
 /* ──────────────────────────────────────────────────────────────
  * Weights (must sum to 100). v0's role weight (25) is reallocated
@@ -162,6 +207,10 @@ export function computePracticeFit(inputs: FitInputs): FitResult | null {
     practice_feel: scorePracticeFeel(inputs),
     work_life: scoreWorkLife(inputs),
   };
+
+  // v3 Phase B.2 — tilt the weights toward what this candidate said matters
+  // most (no-op when comp_priority is null). Runs before normalization.
+  applyCompPriority(dims, inputs.candidate.comp_priority);
 
   // Sum scored contributions and scored weights — missing-data dims
   // are EXCLUDED from both numerator and denominator.
@@ -1592,6 +1641,8 @@ export function hashInputs(inputs: FitInputs): string {
       practice_feel: token(inputs.candidate.practice_feel),
       ce_growth_importance: inputs.candidate.ce_growth_importance ?? null,
       work_life_priority: inputs.candidate.work_life_priority ?? null,
+      // Phase B.2 — re-weighting signal; must invalidate cache on change.
+      comp_priority: token(inputs.candidate.comp_priority),
     },
     job: {
       role_category: inputs.job.role_category,
