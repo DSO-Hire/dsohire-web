@@ -34,6 +34,10 @@ import {
   type CPVLicense,
   type CPVCertification,
 } from "@/components/candidate/candidate-profile-view";
+import {
+  anonymousDisplayLabel,
+  getDsoAppliedCandidateIds,
+} from "@/lib/candidate/anonymity";
 
 export const dynamic = "force-dynamic";
 
@@ -46,11 +50,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const supabase = await createSupabaseServerClient();
   const { data: c } = await supabase
     .from("candidates")
-    .select("full_name")
+    .select("full_name, anonymous_mode")
     .eq("id", id)
     .maybeSingle();
+  // Don't leak the name in the tab title for anonymous candidates.
+  const anon = Boolean((c as { anonymous_mode?: boolean } | null)?.anonymous_mode);
   return {
-    title: c?.full_name ? `${c.full_name as string} · Candidate` : "Candidate",
+    title:
+      !anon && c?.full_name
+        ? `${c.full_name as string} · Candidate`
+        : "Candidate",
   };
 }
 
@@ -73,7 +82,7 @@ export default async function CandidateDetailPage({ params }: PageProps) {
   const { data: candidate } = await supabase
     .from("candidates")
     .select(
-      "id, full_name, headline, summary, current_title, years_experience, years_experience_dental, avatar_url, profile_accent_color, license_states, current_location_city, current_location_state, desired_roles, desired_locations, availability, skills, pms_systems, languages, schedule_preferences, linkedin_url, resume_url, is_searchable"
+      "id, full_name, headline, summary, current_title, years_experience, years_experience_dental, avatar_url, profile_accent_color, license_states, current_location_city, current_location_state, desired_roles, desired_locations, availability, skills, pms_systems, languages, schedule_preferences, linkedin_url, resume_url, is_searchable, anonymous_mode"
     )
     .eq("id", id)
     .is("deleted_at", null)
@@ -195,7 +204,19 @@ export default async function CandidateDetailPage({ params }: PageProps) {
     linkedin_url: string | null;
     resume_url: string | null;
     is_searchable: boolean;
+    anonymous_mode: boolean;
   };
+
+  // Anonymity: mask name/photo/contact unless this candidate has applied to one
+  // of our jobs (then they've chosen to reveal). Structured history is already
+  // RLS-gated to applicants, so for masked browse-only candidates it reads empty.
+  const appliedToUs = await getDsoAppliedCandidateIds(
+    supabase,
+    dsoUser.dso_id as string,
+    [c.id]
+  );
+  const masked = c.anonymous_mode && !appliedToUs.has(c.id);
+  const displayName = masked ? anonymousDisplayLabel(c) : c.full_name;
 
   return (
     <EmployerShell active="talent-pool">
@@ -207,16 +228,30 @@ export default async function CandidateDetailPage({ params }: PageProps) {
         Back to Talent Pool
       </Link>
 
+      {masked && (
+        <div className="mb-6 max-w-[820px] border-l-2 border-heritage bg-cream/60 px-4 py-3">
+          <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
+            Browsing anonymously
+          </div>
+          <p className="text-[13px] text-slate-body leading-relaxed">
+            This candidate keeps their name, photo, and contact details hidden
+            while open to opportunities. Their experience, skills, and PracticeFit
+            are all here — and their identity reveals automatically the moment
+            they apply to one of your roles.
+          </p>
+        </div>
+      )}
+
       <CandidateProfileView
         viewer="employer"
         data={{
-          full_name: c.full_name,
+          full_name: displayName,
           headline: c.headline,
           summary: c.summary,
           current_title: c.current_title,
           years_experience: c.years_experience,
           years_experience_dental: c.years_experience_dental,
-          avatar_url: c.avatar_url,
+          avatar_url: masked ? null : c.avatar_url,
           accent_color: c.profile_accent_color,
           license_states: c.license_states,
           current_location_city: c.current_location_city,
@@ -228,8 +263,8 @@ export default async function CandidateDetailPage({ params }: PageProps) {
           pms_systems: c.pms_systems,
           languages: c.languages,
           schedule_preferences: c.schedule_preferences,
-          linkedin_url: c.linkedin_url,
-          resume_url: c.resume_url,
+          linkedin_url: masked ? null : c.linkedin_url,
+          resume_url: masked ? null : c.resume_url,
         }}
         work={work}
         education={education}
@@ -239,7 +274,7 @@ export default async function CandidateDetailPage({ params }: PageProps) {
           <>
             <OutreachLauncher
               candidateId={c.id}
-              candidateName={c.full_name}
+              candidateName={displayName}
               templates={outreachTemplates}
             />
             <TalentPoolSaveButton

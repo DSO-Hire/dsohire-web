@@ -28,6 +28,10 @@ import { CandidateResultCard } from "./candidate-result-card";
 import { SavedEntryCard } from "./saved-entry-card";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
 import type { FitBucket } from "@/lib/practice-fit/types";
+import {
+  anonymousDisplayLabel,
+  getDsoAppliedCandidateIds,
+} from "@/lib/candidate/anonymity";
 
 export const metadata: Metadata = { title: "Talent Pool" };
 export const dynamic = "force-dynamic";
@@ -96,11 +100,11 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
     const { data: entries } = await supabase
       .from("dso_talent_pool_entries")
       .select(
-        "id, candidate_id, notes, tags, created_at, candidates(full_name, headline, current_title, years_experience, avatar_url)"
+        "id, candidate_id, notes, tags, created_at, candidates(full_name, headline, current_title, years_experience, avatar_url, anonymous_mode, desired_roles, current_location_city, current_location_state)"
       )
       .eq("dso_id", dsoUser.dso_id as string)
       .order("created_at", { ascending: false });
-    savedEntries = ((entries ?? []) as unknown as Array<{
+    const savedRows = (entries ?? []) as unknown as Array<{
       id: string;
       candidate_id: string;
       notes: string | null;
@@ -112,17 +116,32 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
         current_title: string | null;
         years_experience: number | null;
         avatar_url: string | null;
+        anonymous_mode: boolean | null;
+        desired_roles: string[] | null;
+        current_location_city: string | null;
+        current_location_state: string | null;
       }>;
-    }>).map((e) => {
+    }>;
+    // Reveal candidates who've applied to one of our jobs (anonymity rule).
+    const savedApplied = await getDsoAppliedCandidateIds(
+      supabase,
+      dsoUser.dso_id as string,
+      savedRows.map((e) => e.candidate_id)
+    );
+    savedEntries = savedRows.map((e) => {
       const c = e.candidates?.[0];
+      const masked =
+        Boolean(c?.anonymous_mode) && !savedApplied.has(e.candidate_id);
       return {
         entry_id: e.id,
         candidate_id: e.candidate_id,
-        full_name: c?.full_name ?? null,
+        full_name: masked
+          ? anonymousDisplayLabel(c ?? {})
+          : c?.full_name ?? null,
         headline: c?.headline ?? null,
         current_title: c?.current_title ?? null,
         years_experience: c?.years_experience ?? null,
-        avatar_url: c?.avatar_url ?? null,
+        avatar_url: masked ? null : c?.avatar_url ?? null,
         notes: e.notes,
         tags: e.tags,
         created_at: e.created_at,
@@ -211,7 +230,7 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
     let q = supabase
       .from("candidates")
       .select(
-        "id, full_name, headline, current_title, years_experience, avatar_url, license_states, current_location_city, current_location_state, availability, pms_systems, desired_roles, cv_visibility, deleted_at",
+        "id, full_name, headline, current_title, years_experience, avatar_url, license_states, current_location_city, current_location_state, availability, pms_systems, desired_roles, anonymous_mode, cv_visibility, deleted_at",
         { count: "exact" }
       )
       .in("cv_visibility", ["open_to_work", "recruiters_only"])
@@ -285,6 +304,8 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
       current_location_state: string | null;
       availability: string | null;
       pms_systems: string[] | null;
+      anonymous_mode: boolean | null;
+      desired_roles: string[] | null;
     }>;
     discoverTotal = count ?? rows.length;
 
@@ -323,14 +344,27 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
       }
     }
 
-    discoverResults = rows.map((r) => ({
-      ...r,
-      cert_kinds: certKindsByCand.get(r.id) ?? [],
-      saved: savedSet.has(r.id),
-      saved_entry_id: savedSet.get(r.id) ?? null,
-      fit_score: null,
-      fit_bucket: null,
-    }));
+    // Reveal candidates who've applied to one of our jobs (anonymity rule);
+    // mask name + photo for the rest who browse anonymously.
+    const discoverApplied = await getDsoAppliedCandidateIds(
+      supabase,
+      dsoUser.dso_id as string,
+      ids
+    );
+
+    discoverResults = rows.map((r) => {
+      const masked = Boolean(r.anonymous_mode) && !discoverApplied.has(r.id);
+      return {
+        ...r,
+        full_name: masked ? anonymousDisplayLabel(r) : r.full_name,
+        avatar_url: masked ? null : r.avatar_url,
+        cert_kinds: certKindsByCand.get(r.id) ?? [],
+        saved: savedSet.has(r.id),
+        saved_entry_id: savedSet.get(r.id) ?? null,
+        fit_score: null,
+        fit_bucket: null,
+      };
+    });
 
     // Polish item (2026-05-12) — when fit_job is set, compute Practice
     // Fit for every result candidate against that job, then sort desc

@@ -33,6 +33,7 @@ import {
   updateVisibility,
   setHideFromCurrentEmployer,
   updatePracticeFitConsent,
+  updateAnonymousMode,
   addBlockedEmployer,
   removeBlockedEmployer,
   searchDsosForBlock,
@@ -127,6 +128,7 @@ export interface PrivacyFormProps {
     resume_visibility: VisibilityInput["resume_visibility"];
     contact_info_visibility: VisibilityInput["contact_info_visibility"];
     practice_fit_consent: "off" | "results_only" | "full";
+    anonymous_mode: boolean;
     has_current_employer: boolean;
     hide_from_current_employer: boolean;
   };
@@ -143,6 +145,7 @@ export function PrivacyForm({ initial, blocked }: PrivacyFormProps) {
       />
       <BlockListSection blocked={blocked} />
       <PracticeFitSection initial={initial.practice_fit_consent} />
+      <AnonymousModeSection initial={initial.anonymous_mode} />
       <ViewAsDsoCard />
       <DataSharingCard />
     </div>
@@ -515,6 +518,73 @@ export function PracticeFitSection({
           above.
         </div>
       )}
+      <SaveBar
+        dirty={dirty}
+        saving={saving}
+        error={error}
+        savedFlash={savedFlash}
+        onSave={onSave}
+      />
+    </SectionCard>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Section 4.5 — Anonymous browsing
+// ─────────────────────────────────────────────────────────────────────
+
+function AnonymousModeSection({ initial }: { initial: boolean }) {
+  const [enabled, setEnabled] = useState(initial);
+  const [, startSaving] = useTransition();
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [savedFlash, setSavedFlash] = useState<string | null>(null);
+
+  const dirty = enabled !== initial;
+
+  const onSave = () => {
+    setError(null);
+    setSavedFlash(null);
+    setSaving(true);
+    startSaving(async () => {
+      const result = await updateAnonymousMode(enabled);
+      setSaving(false);
+      if (!result.ok) return setError(result.error);
+      setSavedFlash("Saved.");
+      window.setTimeout(() => setSavedFlash(null), 2500);
+    });
+  };
+
+  return (
+    <SectionCard
+      icon={<EyeOff className="size-5 text-[#4D7A60]" />}
+      title="Anonymous browsing"
+      description="Stay discoverable to dental groups while hiding your name and photo until you choose to apply."
+    >
+      <label className="flex cursor-pointer items-start gap-3">
+        <input
+          type="checkbox"
+          checked={enabled}
+          onChange={(e) => setEnabled(e.currentTarget.checked)}
+          className="mt-1 h-4 w-4 flex-shrink-0 accent-[#4D7A60]"
+        />
+        <div>
+          <div className="text-[14px] font-semibold text-[#14233F]">
+            Browse anonymously
+          </div>
+          <p className="mt-1 text-[13px] leading-relaxed text-slate-600">
+            When on, employers searching the Talent Pool see a generic label
+            like{" "}
+            <span className="font-semibold text-[#14233F]">
+              &ldquo;Dental Assistant in Denver&rdquo;
+            </span>{" "}
+            instead of your name or photo. Your experience, skills, and
+            PracticeFit stay visible, so you&apos;re still findable. The moment
+            you apply to one of their roles, your full profile reveals to that
+            group.
+          </p>
+        </div>
+      </label>
       <SaveBar
         dirty={dirty}
         saving={saving}

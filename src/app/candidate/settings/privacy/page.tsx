@@ -25,7 +25,7 @@ export default async function CandidatePrivacyPage() {
   const { data: candidateRow } = await supabase
     .from("candidates")
     .select(
-      "id, cv_visibility, resume_visibility, contact_info_visibility, practice_fit_consent"
+      "id, cv_visibility, resume_visibility, contact_info_visibility, practice_fit_consent, anonymous_mode"
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
@@ -93,6 +93,7 @@ export default async function CandidatePrivacyPage() {
       (c.contact_info_visibility as "always" | "after_apply") ?? "after_apply",
     practice_fit_consent:
       (c.practice_fit_consent as "off" | "results_only" | "full") ?? "off",
+    anonymous_mode: (c.anonymous_mode as boolean | null) ?? false,
     has_current_employer: hasCurrent,
     hide_from_current_employer: hideFromCurrent,
   };

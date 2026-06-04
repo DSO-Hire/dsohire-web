@@ -137,6 +137,27 @@ export async function updatePracticeFitConsent(
 }
 
 // ─────────────────────────────────────────────────────────────────────
+// Anonymous browsing mode
+// ─────────────────────────────────────────────────────────────────────
+
+export async function updateAnonymousMode(enabled: boolean): Promise<Result> {
+  const ctx = await getCandidateContext();
+  if (!ctx.ok) return ctx;
+
+  const { error } = await ctx.supabase
+    .from("candidates")
+    .update({ anonymous_mode: enabled })
+    .eq("id", ctx.candidateId);
+
+  if (error) {
+    console.error("[settings/privacy] updateAnonymousMode", error);
+    return { ok: false, error: "Couldn't update anonymous browsing." };
+  }
+  revalidatePath("/candidate/settings/privacy");
+  return { ok: true };
+}
+
+// ─────────────────────────────────────────────────────────────────────
 // Block list
 // ─────────────────────────────────────────────────────────────────────
 
