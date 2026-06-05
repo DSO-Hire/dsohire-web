@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { applyToJob } from "./actions";
 import { addInlineCredential } from "./credential-actions";
+import { parseResumeAction } from "@/app/candidate/profile/import/actions";
 import { EeoSelfId } from "./eeo-self-id";
 import type {
   AnswerValue,
@@ -140,7 +141,8 @@ export function ApplyWizard(props: ApplyWizardProps) {
       answers: seedAnswersFromExisting(questions, existingAnswers),
       verifications: seedVerificationsFromExisting(
         verificationRequirements,
-        existingVerifications
+        existingVerifications,
+        candidateCredentials
       ),
       resumeChoice: hasSavedResume ? "saved" : "upload",
     };
@@ -152,6 +154,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
     questions,
     verificationRequirements,
     existingVerifications,
+    candidateCredentials,
     hasSavedResume,
   ]);
 
@@ -198,6 +201,51 @@ export function ApplyWizard(props: ApplyWizardProps) {
   // Resume file cannot be serialized — held outside draft.
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [resumeError, setResumeError] = useState<string | null>(null);
+
+  // #70 — opt-in "autofill from résumé". Parses the uploaded file (reusing the
+  // profile-import LLM parser, which also saves the file on file) and fills the
+  // draft name. Never silent: the candidate taps the button and reviews at
+  // submit. Degrades gracefully on the 1/day parse cap.
+  const [autofilling, setAutofilling] = useState(false);
+  const [autofillNote, setAutofillNote] = useState<string | null>(null);
+  const autofillFromResume = () => {
+    if (!resumeFile || autofilling) return;
+    setAutofillNote(null);
+    setAutofilling(true);
+    const fd = new FormData();
+    fd.set("resume", resumeFile);
+    void parseResumeAction(fd)
+      .then((res) => {
+        if (!res.ok) {
+          setAutofillNote(
+            res.errorCode === "cap_exceeded"
+              ? "You've imported a résumé recently — your saved details are already on your profile."
+              : res.error || "We couldn't read that résumé. You can fill the fields in manually."
+          );
+          return;
+        }
+        const fullName = res.parsed.basics.full_name.value?.trim();
+        if (fullName) {
+          const { first_name, last_name } = splitFullName(fullName);
+          setDraft((d) => ({
+            ...d,
+            firstName: first_name || d.firstName,
+            lastName: last_name || d.lastName,
+          }));
+          setAutofillNote(
+            `Filled your name from your résumé (${fullName}). Double-check everything before you submit.`
+          );
+        } else {
+          setAutofillNote(
+            "We saved your résumé, but couldn't read a name from it — add it on the first step."
+          );
+        }
+      })
+      .catch(() =>
+        setAutofillNote("Something went wrong reading that résumé.")
+      )
+      .finally(() => setAutofilling(false));
+  };
 
   // ── Hydrate from localStorage on mount, ask if found ────────
   useEffect(() => {
@@ -557,8 +605,12 @@ export function ApplyWizard(props: ApplyWizardProps) {
             onResumeFile={(f, err) => {
               setResumeFile(f);
               setResumeError(err);
+              setAutofillNote(null);
             }}
             resumeError={resumeError}
+            onAutofill={autofillFromResume}
+            autofilling={autofilling}
+            autofillNote={autofillNote}
           />
         )}
 
@@ -1369,6 +1421,9 @@ function ResumeStep({
   resumeFile,
   onResumeFile,
   resumeError,
+  onAutofill,
+  autofilling,
+  autofillNote,
 }: {
   hasSavedResume: boolean;
   savedResumeName: string | null;
@@ -1377,6 +1432,9 @@ function ResumeStep({
   resumeFile: File | null;
   onResumeFile: (f: File | null, err: string | null) => void;
   resumeError: string | null;
+  onAutofill: () => void;
+  autofilling: boolean;
+  autofillNote: string | null;
 }) {
   const RESUME_MIME = new Set([
     "application/pdf",
@@ -1453,6 +1511,31 @@ function ResumeStep({
             }}
           />
         </FieldShell>
+      )}
+
+      {resumeFile && (
+        <div className="border border-[var(--rule)] bg-cream/40 p-4">
+          <button
+            type="button"
+            onClick={onAutofill}
+            disabled={autofilling}
+            className="inline-flex items-center gap-2 border border-heritage-deep px-4 py-2.5 text-[12px] font-bold uppercase tracking-[1.5px] text-heritage-deep transition-colors hover:bg-heritage/10 disabled:opacity-50"
+          >
+            <BrandMark className="h-4 w-4" />
+            {autofilling
+              ? "Reading your résumé…"
+              : "Autofill my details from this résumé"}
+          </button>
+          <p className="mt-2 text-[13px] leading-relaxed text-slate-meta">
+            Optional — we&apos;ll read your name from the file to save you
+            typing. You review everything before submitting.
+          </p>
+          {autofillNote && (
+            <p className="mt-2 text-[13px] font-semibold leading-relaxed text-heritage-deep">
+              {autofillNote}
+            </p>
+          )}
+        </div>
       )}
     </div>
   );
@@ -1788,7 +1871,8 @@ function emptyVerification(): VerificationValue {
 
 function seedVerificationsFromExisting(
   requirements: JobVerificationRequirement[],
-  existing: ExistingVerification[]
+  existing: ExistingVerification[],
+  credentials: CandidateCredential[]
 ): Record<string, VerificationValue> {
   const out: Record<string, VerificationValue> = {};
   for (const req of requirements) {
@@ -1796,7 +1880,21 @@ function seedVerificationsFromExisting(
       (e) => e.verification_type === req.verification_type
     );
     if (!prior) {
-      out[req.verification_type] = emptyVerification();
+      // #70 — pre-link any profile credentials that already match this
+      // requirement's source (e.g. an on-file license for a license check),
+      // so the candidate never re-selects what they've already provided.
+      // They still actively attest; only the proof is pre-attached.
+      const vt = getVerificationType(req.verification_type);
+      const preLinked = vt?.credentialSource
+        ? credentials
+            .filter((c) => c.source === vt.credentialSource)
+            .map((c) => c.id)
+        : [];
+      out[req.verification_type] = {
+        attested: false,
+        linkedCredentialIds: preLinked,
+        note: "",
+      };
       continue;
     }
     out[req.verification_type] = {
