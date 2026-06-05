@@ -694,6 +694,17 @@ const SHOWCASE_TOP: ShowcaseFeature[] = [
     title: (
       <span className="inline-flex flex-wrap items-center gap-1.5">
         <PracticeFitWordmark surface="light" tm className="text-[18px]" />
+        <span>Assessment</span>
+      </span>
+    ),
+    body: "Candidates spend about five minutes on the PracticeFit Assessment — a two-sided questionnaire that captures what no résumé can: work pace, autonomy, mentorship, the culture they thrive in, clinical confidence, the benefits and patient populations they care about, and what matters most to them. It's the proprietary signal behind every match, so applicants arrive already measured against how your practice actually runs.",
+    status: "now",
+  },
+  {
+    icon: PracticeFitMark,
+    title: (
+      <span className="inline-flex flex-wrap items-center gap-1.5">
+        <PracticeFitWordmark surface="light" tm className="text-[18px]" />
         <span>matching</span>
       </span>
     ),
@@ -704,12 +715,6 @@ const SHOWCASE_TOP: ShowcaseFeature[] = [
     icon: Columns3,
     title: "Pipeline kanban with real-time team sync",
     body: "Drag candidates through New → Screening → Interview → Offer → Hired. When one teammate moves a card, everyone sees it within half a second. No refresh, no email chains.",
-    status: "now",
-  },
-  {
-    icon: Wand2,
-    title: "AI job description generator",
-    body: "Type a brief, get a dental-specific posting in seconds. Knows DDS, RDH, EFDA, DEA, perio, and the rest of the vocabulary. Three tones, regenerate as often as you want.",
     status: "now",
   },
 ];
@@ -731,6 +736,12 @@ const SHOWCASE_BOTTOM: ShowcaseFeature[] = [
     icon: ClipboardList,
     title: "Screening library + role scorecards",
     body: "100+ curated screening questions across all 7 role categories — one click adds the recommended set. Then score finalists with multi-reviewer, role-specific scorecards that roll up automatically.",
+    status: "now",
+  },
+  {
+    icon: Wand2,
+    title: "AI job description generator",
+    body: "Type a brief, get a dental-specific posting in seconds. Knows DDS, RDH, EFDA, DEA, perio, and the rest of the vocabulary. Three tones, regenerate as often as you want.",
     status: "now",
   },
 ];

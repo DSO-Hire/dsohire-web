@@ -43,7 +43,7 @@ export default async function CandidateAssessmentPage() {
     .select(
       // Part 1 (résumé-prefilled basics) + Part 2 (v3 signal columns, so a
       // re-take shows prior answers).
-      "id, desired_roles, years_experience_dental, desired_specialty, pms_systems, temp_or_perm, min_salary, salary_unit, availability, work_pace, autonomy_pref, patient_facing_energy, mentorship_pref, procedures_confident, procedures_growth, practice_feel, ce_growth_importance, work_life_priority, career_trajectory, commute_max_minutes, comp_priority, comp_priorities, relocation_pref, assessment_note"
+      "id, desired_roles, years_experience_dental, desired_specialty, pms_systems, temp_or_perm, min_salary, salary_unit, availability, work_pace, autonomy_pref, patient_facing_energy, mentorship_pref, procedures_confident, procedures_growth, practice_feel, ce_growth_importance, work_life_priority, career_trajectory, commute_max_minutes, comp_priority, comp_priorities, relocation_pref, assessment_note, pms_proficiency, team_size_pref, patient_population_pref, benefit_priorities, deal_breakers"
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
@@ -78,6 +78,13 @@ export default async function CandidateAssessmentPage() {
     comp_priorities: (c.comp_priorities as string[] | null) ?? [],
     relocation: (c.relocation_pref as string | null) ?? null,
     assessment_note: (c.assessment_note as string | null) ?? "",
+    // v3.1 — so a re-take shows prior answers to the new questions too.
+    pms_proficiency: (c.pms_proficiency as string | null) ?? null,
+    team_size_pref: (c.team_size_pref as string | null) ?? null,
+    patient_population_pref:
+      (c.patient_population_pref as string[] | null) ?? [],
+    benefit_priorities: (c.benefit_priorities as string[] | null) ?? [],
+    deal_breakers: (c.deal_breakers as string[] | null) ?? [],
   };
 
   return (
