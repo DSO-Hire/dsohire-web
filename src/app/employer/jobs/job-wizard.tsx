@@ -1271,7 +1271,7 @@ function BasicsStep({
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Basics
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.5px] text-ink leading-tight">
+        <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           What is the job and where is it open?
         </h2>
       </div>
@@ -1557,7 +1557,7 @@ function DescriptionStep({
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Description
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.5px] text-ink leading-tight">
+        <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           Tell candidates about the role.
         </h2>
         <p className="mt-2 text-[13px] text-slate-meta leading-relaxed">
@@ -1755,7 +1755,7 @@ function DetailsStep({
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Compensation & details
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.5px] text-ink leading-tight">
+        <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           Pay, perks, and must-haves.
         </h2>
       </div>
@@ -2090,7 +2090,7 @@ function ScreeningStep({
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Screening questions
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.5px] text-ink leading-tight">
+        <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           What do you want to know up front?
         </h2>
         <p className="mt-3 text-[14px] text-slate-body leading-relaxed">
@@ -2681,7 +2681,7 @@ function PreviewStep({
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Preview & publish
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.5px] text-ink leading-tight">
+        <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           Final check before it goes live.
         </h2>
       </div>
@@ -2934,18 +2934,21 @@ function Input({
   onChange: (v: string) => void;
 }) {
   return (
-    <div>
-      <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
-        {label} {required && <span className="text-heritage">*</span>}
-      </label>
-      <input
-        type={type}
-        placeholder={placeholder}
+    <FieldShell
+      label={
+        <>
+          {label} {required && <span className="text-heritage">*</span>}
+        </>
+      }
+    >
+      <TextField
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+        onChange={onChange}
+        type={type === "number" ? "number" : "text"}
+        inputMode={type === "number" ? "numeric" : undefined}
+        placeholder={placeholder}
       />
-    </div>
+    </FieldShell>
   );
 }
 
@@ -2963,21 +2966,19 @@ function Select({
   options: Array<{ value: string; label: string }>;
 }) {
   return (
-    <div>
-      <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
-        {label} {required && <span className="text-heritage">*</span>}
-      </label>
-      <select
+    <FieldShell
+      label={
+        <>
+          {label} {required && <span className="text-heritage">*</span>}
+        </>
+      }
+    >
+      <SelectField
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
-      >
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-    </div>
+        onChange={onChange}
+        options={options}
+        widthClass="w-full"
+      />
+    </FieldShell>
   );
 }
