@@ -129,6 +129,80 @@ export const ROLE_OPTIONS: AssessmentOption[] = ROLE_CATEGORIES.map((r) => ({
   label: r.label,
 }));
 
+/* ──────────────────────────────────────────────────────────────
+ * v3.1 (2026-06-05) — question-bank expansion option lists.
+ *
+ * All pure config (no schema). Each new question stores to a candidate
+ * signal column; the genuinely-new dimensions (deal_breakers, benefits,
+ * patient_population, team_size) stay UNSCORED until a practice-profile
+ * mirror exists — exactly like the Phase B.1 culture dims started. PMS
+ * proficiency piggybacks the existing pms_fluency dim (no engine change).
+ * ─────────────────────────────────────────────────────────── */
+
+/**
+ * Curated ALLOWLIST of deal-breakers (HARD RULE: allowlist-only, and selecting
+ * one NEVER auto-hides a job — purely a signal we surface to the candidate +
+ * employer). Working-condition items only; deliberately excludes anything tied
+ * to patient demographics or protected characteristics.
+ */
+export const DEAL_BREAKER_OPTIONS: AssessmentOption[] = [
+  { value: "benefits_required", label: "Must offer health benefits" },
+  { value: "no_nights", label: "No required nights" },
+  { value: "no_weekends", label: "No required weekends" },
+  { value: "four_day_week", label: "4-day work week" },
+  { value: "commute_cap", label: "Within my commute limit" },
+  { value: "modern_tech", label: "Modern / digital workflow" },
+  { value: "no_quota_pressure", label: "No production-quota pressure" },
+  { value: "guaranteed_base", label: "Guaranteed base pay" },
+];
+
+/**
+ * Short curated benefits list for the "which benefits matter most" chip
+ * question. The full canonical BENEFITS list (~28) is too long to tap through;
+ * this is the high-signal subset candidates actually weigh a role on.
+ */
+export const BENEFIT_PRIORITY_OPTIONS: AssessmentOption[] = [
+  { value: "health", label: "Health insurance" },
+  { value: "retirement_match", label: "401(k) match" },
+  { value: "pto", label: "Generous PTO" },
+  { value: "ce_allowance", label: "CE allowance" },
+  { value: "bonus", label: "Production / sign-on bonus" },
+  { value: "loan_repayment", label: "Student-loan help" },
+  { value: "flex_schedule", label: "Flexible schedule" },
+  { value: "partnership", label: "Equity / partnership track" },
+];
+
+/** Day-to-day team size the candidate wants around them. */
+export const TEAM_SIZE_OPTIONS: AssessmentOption[] = [
+  { value: "solo", label: "Solo or 1–2 chairs" },
+  { value: "small", label: "A handful (3–6)" },
+  { value: "large", label: "Big team (7+)" },
+  { value: "any", label: "No preference" },
+];
+
+/**
+ * PMS proficiency — a depth signal on top of the *which systems* multi-select.
+ * Every option is positive; "newer to PMS" is first-class (adaptability is a
+ * plus, never a penalty), mirroring the engine's denominator rule.
+ */
+export const PMS_PROFICIENCY_OPTIONS: AssessmentOption[] = [
+  { value: "power", label: "Power user — I train others" },
+  { value: "confident", label: "Confident in my main system" },
+  { value: "adaptable", label: "Comfortable — I pick up new ones fast" },
+  { value: "learning", label: "Newer to PMS — happy to learn" },
+];
+
+/** Patient populations the candidate most enjoys / wants to work with. */
+export const PATIENT_POPULATION_OPTIONS: AssessmentOption[] = [
+  { value: "pediatric", label: "Kids / pediatric" },
+  { value: "geriatric", label: "Older adults" },
+  { value: "special_needs", label: "Special-needs patients" },
+  { value: "anxious", label: "Anxious / phobic patients" },
+  { value: "cosmetic", label: "Cosmetic-focused" },
+  { value: "underserved", label: "Underserved / community health" },
+  { value: "all", label: "I enjoy all populations" },
+];
+
 /** The full ordered question list. The wizard sections + role-gates from this. */
 export const ASSESSMENT_QUESTIONS: AssessmentQuestion[] = [
   // ── PART 1 — basics (résumé-prefilled) ──
@@ -174,6 +248,15 @@ export const ASSESSMENT_QUESTIONS: AssessmentQuestion[] = [
     type: "multi",
     options: PMS_SYSTEMS.map((p) => ({ value: p.value, label: p.label })),
     resumePrefill: true,
+  },
+  {
+    key: "pms_proficiency",
+    section: "basics",
+    dimension: "pms_fluency",
+    prompt: "How deep does your software know-how go?",
+    help: "New to dental software? Pick the last option — adaptability counts, never a penalty.",
+    type: "single",
+    options: PMS_PROFICIENCY_OPTIONS,
   },
 
   // ── PART 2A — how you like to work (always asked) ──
@@ -285,6 +368,23 @@ export const ASSESSMENT_QUESTIONS: AssessmentQuestion[] = [
       { value: "unsure", label: "Still figuring it out" },
     ],
   },
+  {
+    key: "team_size_pref",
+    section: "culture",
+    dimension: "team_size",
+    prompt: "Day-to-day, how big a team do you want around you?",
+    type: "single",
+    options: TEAM_SIZE_OPTIONS,
+  },
+  {
+    key: "patient_population_pref",
+    section: "culture",
+    dimension: "patient_population",
+    prompt: "Which patients do you most enjoy caring for?",
+    help: "Pick any that fit — “I enjoy all populations” is a perfectly strong answer.",
+    type: "multi",
+    options: PATIENT_POPULATION_OPTIONS,
+  },
 
   // ── PART 2D — logistics & what matters most ──
   {
@@ -328,6 +428,25 @@ export const ASSESSMENT_QUESTIONS: AssessmentQuestion[] = [
       { value: "growth", label: "Growth & learning" },
       { value: "location", label: "Location / commute" },
     ],
+  },
+  {
+    key: "benefit_priorities",
+    section: "logistics",
+    dimension: "benefits",
+    prompt: "Which benefits matter most to you?",
+    help: "Tap any that move the needle — helps us surface roles that actually offer them.",
+    type: "multi",
+    options: BENEFIT_PRIORITY_OPTIONS,
+  },
+  {
+    key: "deal_breakers",
+    section: "logistics",
+    dimension: "deal_breakers",
+    prompt: "Any hard deal-breakers?",
+    help: "Tap any that apply. We'll flag how roles stack up — we never auto-hide jobs from you.",
+    type: "multi",
+    options: DEAL_BREAKER_OPTIONS,
+    optional: true,
   },
   {
     key: "min_salary",

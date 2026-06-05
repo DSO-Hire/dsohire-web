@@ -16,7 +16,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 // NOTE: a "use server" file may only EXPORT async functions, so this stays
 // module-local (not exported) — the build fails otherwise.
-const ASSESSMENT_VERSION = "2026-06-04-v3.0";
+const ASSESSMENT_VERSION = "2026-06-05-v3.1";
 
 type Answers = Record<string, unknown>;
 
@@ -106,6 +106,14 @@ export async function saveAssessment(answers: Answers): Promise<Result> {
   );
   set("relocation_pref", str(answers.relocation));
   set("assessment_note", str(answers.assessment_note));
+
+  // v3.1 — question-bank expansion signals. Stored now; the genuinely-new
+  // dims stay unscored until a practice-profile mirror exists (never a penalty).
+  set("pms_proficiency", str(answers.pms_proficiency));
+  set("team_size_pref", str(answers.team_size_pref));
+  set("patient_population_pref", strArr(answers.patient_population_pref));
+  set("benefit_priorities", strArr(answers.benefit_priorities));
+  set("deal_breakers", strArr(answers.deal_breakers));
 
   // Raw payload + metadata (re-scoring / analytics / autofill).
   update.assessment_responses = answers;

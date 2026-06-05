@@ -1628,6 +1628,11 @@ export type Database = {
           commute_max_minutes: number | null
           comp_priority: string | null
           comp_priorities: string[]
+          pms_proficiency: string | null
+          team_size_pref: string | null
+          patient_population_pref: string[]
+          benefit_priorities: string[]
+          deal_breakers: string[]
           relocation_pref: string | null
           assessment_note: string | null
           assessment_responses: Json | null
@@ -1697,6 +1702,11 @@ export type Database = {
           commute_max_minutes?: number | null
           comp_priority?: string | null
           comp_priorities?: string[]
+          pms_proficiency?: string | null
+          team_size_pref?: string | null
+          patient_population_pref?: string[]
+          benefit_priorities?: string[]
+          deal_breakers?: string[]
           relocation_pref?: string | null
           assessment_note?: string | null
           assessment_responses?: Json | null
@@ -1765,6 +1775,11 @@ export type Database = {
           commute_max_minutes?: number | null
           comp_priority?: string | null
           comp_priorities?: string[]
+          pms_proficiency?: string | null
+          team_size_pref?: string | null
+          patient_population_pref?: string[]
+          benefit_priorities?: string[]
+          deal_breakers?: string[]
           relocation_pref?: string | null
           assessment_note?: string | null
           assessment_responses?: Json | null
