@@ -233,7 +233,7 @@ async function loadCandidateInputs(
   const { data: c } = await supabase
     .from("candidates")
     .select(
-      "desired_roles, current_title, desired_specialty, license_states, desired_locations, desired_location_points, pms_systems, skills, schedule_preferences, min_salary, salary_unit, temp_or_perm, dso_size_preference, years_experience, years_experience_dental, work_pace, autonomy_pref, mentorship_pref, patient_facing_energy, practice_feel, ce_growth_importance, work_life_priority, comp_priority, comp_priorities, benefit_priorities, candidate_certifications(kind)"
+      "desired_roles, current_title, desired_specialty, license_states, desired_locations, desired_location_points, pms_systems, skills, schedule_preferences, min_salary, salary_unit, temp_or_perm, dso_size_preference, years_experience, years_experience_dental, work_pace, autonomy_pref, mentorship_pref, patient_facing_energy, practice_feel, ce_growth_importance, work_life_priority, comp_priority, comp_priorities, benefit_priorities, patient_population_pref, candidate_certifications(kind)"
     )
     .eq("id", candidateId)
     .maybeSingle();
@@ -314,6 +314,8 @@ async function loadCandidateInputs(
     comp_priorities: ((r.comp_priorities as string[] | null) ?? []) as string[],
     // v3.1 — benefits the candidate prioritized (null until they take v3.1).
     benefit_priorities: ((r.benefit_priorities as string[] | null) ?? []) as string[],
+    // v3.1 — patient populations the candidate enjoys (null until v3.1 taken).
+    patient_population_pref: ((r.patient_population_pref as string[] | null) ?? []) as string[],
   };
 }
 
@@ -366,7 +368,7 @@ async function loadJobAndDso(
   const { data: dsoRow } = await supabase
     .from("dsos")
     .select(
-      "practice_pace, autonomy_level, mentorship_offered, practice_feel, ce_support, work_life_balance"
+      "practice_pace, autonomy_level, mentorship_offered, practice_feel, ce_support, work_life_balance, patient_populations"
     )
     .eq("id", dsoId)
     .maybeSingle();
@@ -415,6 +417,8 @@ async function loadJobAndDso(
       practice_feel: (d.practice_feel as string | null) ?? null,
       ce_support: (d.ce_support as number | null) ?? null,
       work_life_balance: (d.work_life_balance as number | null) ?? null,
+      // v3.1 — populations the practice serves (empty until profile filled).
+      patient_populations: ((d.patient_populations as string[] | null) ?? []) as string[],
     },
   };
 }

@@ -716,6 +716,27 @@ export const COMMON_LANGUAGES: ReadonlyArray<CanonicalOption> = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────
+// Patient populations (PracticeFit v3.1)
+//
+// Shared vocab for both sides of the patient-population match: the candidate
+// assessment ("which patients do you most enjoy caring for?") and the employer
+// practice profile ("which patient populations you serve"). Values MUST match
+// the candidate PATIENT_POPULATION_OPTIONS in the assessment config so the
+// engine compares tokens directly. The candidate side additionally offers an
+// "all" option ("I enjoy all populations") — a no-penalty universal answer,
+// not a discriminating population, so it's not listed here.
+// ─────────────────────────────────────────────────────────────────────
+
+export const PATIENT_POPULATIONS: ReadonlyArray<CanonicalOption> = [
+  { value: "pediatric", label: "Children / pediatric" },
+  { value: "geriatric", label: "Older adults" },
+  { value: "special_needs", label: "Special-needs patients" },
+  { value: "anxious", label: "Anxious / phobic patients" },
+  { value: "cosmetic", label: "Cosmetic-focused" },
+  { value: "underserved", label: "Underserved / community health" },
+];
+
+// ─────────────────────────────────────────────────────────────────────
 // Visibility / temp_or_perm / salary_unit (CHECK-constraint allowed values)
 // ─────────────────────────────────────────────────────────────────────
 

@@ -46,7 +46,12 @@ export type FitDimensionKey =
   // ranked "benefits that matter most" against the benefits the JOB lists
   // (existing structured data — no employer profile needed). Unscored until
   // the candidate has priorities AND the job lists benefits; never a penalty.
-  | "benefits";
+  | "benefits"
+  // v3.1 (2026-06-05) — patient-population fit. The candidate picks who they
+  // most enjoy caring for; the practice picks the populations it serves
+  // (employer practice profile). Unscored until both sides have data; the
+  // candidate's "I enjoy all populations" answer is a no-penalty no-signal.
+  | "patient_population";
 
 export interface FitDimension {
   /** Maximum points this dimension can contribute when scored (0 when excluded). */
@@ -233,6 +238,12 @@ export interface CandidateFitInputs {
    * flex_schedule | partnership). Empty = no signal → benefits dim excluded.
    */
   benefit_priorities: string[];
+  /**
+   * v3.1 — patient populations the candidate most enjoys caring for (canonical
+   * PATIENT_POPULATIONS values, plus a no-signal "all"). Scored against the
+   * practice's served populations. Empty / "all"-only → dim excluded.
+   */
+  patient_population_pref: string[];
 }
 
 export interface JobFitInputs {
@@ -332,6 +343,12 @@ export interface DsoFitInputs {
   ce_support: number | null;
   /** 1-5 — how predictable / balanced the practice's schedule really is. */
   work_life_balance: number | null;
+  /**
+   * v3.1 — patient populations the practice serves (canonical
+   * PATIENT_POPULATIONS values). Mirrors the candidate's
+   * patient_population_pref. Empty → patient_population dim excluded.
+   */
+  patient_populations: string[];
 }
 
 export interface FitInputs {

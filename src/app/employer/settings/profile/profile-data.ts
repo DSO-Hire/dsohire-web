@@ -9,6 +9,8 @@
  * consume.
  */
 
+import { PATIENT_POPULATIONS } from "@/lib/candidate/canonical-lists";
+
 export interface WhyJoinUsBlock {
   title: string;
   body: string;
@@ -55,6 +57,8 @@ export interface ProfileData {
   practice_feel: string | null;
   ce_support: number | null;
   work_life_balance: number | null;
+  /** v3.1 — patient populations the practice serves (canonical values). */
+  patient_populations: string[];
   practice_profile_completed_at: string | null;
 
   /** Photo gallery (separate table) */
@@ -87,6 +91,14 @@ export const PRACTICE_FEEL_OPTIONS = [
   { value: "midsize", label: "Mid-size, collaborative group" },
   { value: "large", label: "Large team with lots of resources" },
 ] as const;
+
+/** v3.1 — patient populations the practice serves. Mirrors the candidate
+ *  assessment's PATIENT_POPULATION_OPTIONS (minus the candidate-only "all"),
+ *  via the shared canonical list, so the engine matches tokens directly. */
+export const PATIENT_POPULATION_OPTIONS = PATIENT_POPULATIONS.map((p) => ({
+  value: p.value,
+  label: p.label,
+}));
 
 /** Length limits surfaced in the UI; mirrors action-layer validation. */
 export const PROFILE_LIMITS = {

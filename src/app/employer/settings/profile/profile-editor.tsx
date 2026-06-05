@@ -49,6 +49,7 @@ import {
   AUTONOMY_LEVEL_OPTIONS,
   MENTORSHIP_OPTIONS,
   PRACTICE_FEEL_OPTIONS,
+  PATIENT_POPULATION_OPTIONS,
 } from "./profile-data";
 import {
   CULTURE_CHIP_GROUPS,
@@ -116,6 +117,7 @@ export function ProfileEditor({ initial, canEdit }: ProfileEditorProps) {
         initialFeel={initial.practice_feel}
         initialCeSupport={initial.ce_support}
         initialWorkLife={initial.work_life_balance}
+        initialPatientPopulations={initial.patient_populations}
       />
       <ContactCtaSection
         canEdit={canEdit}
@@ -219,6 +221,7 @@ function PracticeProfileSection({
   initialFeel,
   initialCeSupport,
   initialWorkLife,
+  initialPatientPopulations,
 }: {
   canEdit: boolean;
   initialPace: string | null;
@@ -227,6 +230,7 @@ function PracticeProfileSection({
   initialFeel: string | null;
   initialCeSupport: number | null;
   initialWorkLife: number | null;
+  initialPatientPopulations: string[];
 }) {
   const [pace, setPace] = useState<string | null>(initialPace);
   const [autonomy, setAutonomy] = useState<string | null>(initialAutonomy);
@@ -234,6 +238,9 @@ function PracticeProfileSection({
   const [feel, setFeel] = useState<string | null>(initialFeel);
   const [ce, setCe] = useState<number | null>(initialCeSupport);
   const [wlb, setWlb] = useState<number | null>(initialWorkLife);
+  const [populations, setPopulations] = useState<string[]>(
+    initialPatientPopulations
+  );
   const [snapshot, setSnapshot] = useState({
     pace: initialPace,
     autonomy: initialAutonomy,
@@ -241,10 +248,14 @@ function PracticeProfileSection({
     feel: initialFeel,
     ce: initialCeSupport,
     wlb: initialWorkLife,
+    populations: initialPatientPopulations,
   });
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+
+  const sameSet = (a: string[], b: string[]) =>
+    a.length === b.length && [...a].sort().join("|") === [...b].sort().join("|");
 
   const dirty =
     pace !== snapshot.pace ||
@@ -252,7 +263,13 @@ function PracticeProfileSection({
     mentorship !== snapshot.mentorship ||
     feel !== snapshot.feel ||
     ce !== snapshot.ce ||
-    wlb !== snapshot.wlb;
+    wlb !== snapshot.wlb ||
+    !sameSet(populations, snapshot.populations);
+
+  const togglePopulation = (value: string) =>
+    setPopulations((cur) =>
+      cur.includes(value) ? cur.filter((v) => v !== value) : [...cur, value]
+    );
 
   const onSave = () => {
     if (!dirty) return;
@@ -266,12 +283,13 @@ function PracticeProfileSection({
         practice_feel: feel,
         ce_support: ce,
         work_life_balance: wlb,
+        patient_populations: populations,
       });
       if (!result.ok) {
         setError(result.error);
         return;
       }
-      setSnapshot({ pace, autonomy, mentorship, feel, ce, wlb });
+      setSnapshot({ pace, autonomy, mentorship, feel, ce, wlb, populations });
       setSaved(true);
     });
   };
@@ -328,6 +346,37 @@ function PracticeProfileSection({
           disabled={!canEdit}
           onChange={setWlb}
         />
+        <div>
+          <label className="block text-sm font-semibold text-ink mb-1.5">
+            Patient populations you serve
+          </label>
+          <p className="mb-2 text-[12px] text-slate-meta">
+            Pick any that describe your patient base — we match these to the
+            populations candidates tell us they most enjoy caring for.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {PATIENT_POPULATION_OPTIONS.map((opt) => {
+              const active = populations.includes(opt.value);
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  disabled={!canEdit}
+                  aria-pressed={active}
+                  onClick={() => togglePopulation(opt.value)}
+                  className={
+                    "rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition-colors disabled:opacity-50 " +
+                    (active
+                      ? "border-heritage-deep bg-heritage-deep text-ivory"
+                      : "border-[var(--rule)] text-slate-body hover:border-heritage-deep")
+                  }
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
       <SaveBar
         dirty={dirty}

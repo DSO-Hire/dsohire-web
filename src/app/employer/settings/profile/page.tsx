@@ -62,7 +62,7 @@ export default async function PublicProfileSettingsPage({
     supabase
       .from("dsos")
       .select(
-        "id, name, slug, mission, description, logo_url, banner_url, brand_color, why_join_us, culture_chips, contact_cta_label, contact_cta_url, website, headquarters_city, headquarters_state, candidate_reply_to_email, practice_count, practice_pace, autonomy_level, mentorship_offered, practice_feel, ce_support, work_life_balance, practice_profile_completed_at, status"
+        "id, name, slug, mission, description, logo_url, banner_url, brand_color, why_join_us, culture_chips, contact_cta_label, contact_cta_url, website, headquarters_city, headquarters_state, candidate_reply_to_email, practice_count, practice_pace, autonomy_level, mentorship_offered, practice_feel, ce_support, work_life_balance, patient_populations, practice_profile_completed_at, status"
       )
       .eq("id", dsoId)
       .maybeSingle(),
@@ -104,6 +104,7 @@ export default async function PublicProfileSettingsPage({
     practice_feel: (r.practice_feel as string | null) ?? null,
     ce_support: (r.ce_support as number | null) ?? null,
     work_life_balance: (r.work_life_balance as number | null) ?? null,
+    patient_populations: ((r.patient_populations as string[] | null) ?? []),
     practice_profile_completed_at:
       (r.practice_profile_completed_at as string | null) ?? null,
     photos: ((photoRows ?? []) as ProfilePhoto[]).map((p) => ({

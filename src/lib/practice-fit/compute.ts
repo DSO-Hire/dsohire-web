@@ -53,7 +53,7 @@ import type {
  * hashed input field (e.g. the A.4 caps/boosters). It's folded into the
  * input hash so a logic-only change still invalidates the read-through cache.
  */
-const MODEL_VERSION = "2026-06-05-v3.1-benefits";
+const MODEL_VERSION = "2026-06-05-v3.1-patient-pop";
 
 /* ──────────────────────────────────────────────────────────────
  * v3 Phase B.2 — comp_priority re-weighting ("what matters MOST").
@@ -169,6 +169,10 @@ const WEIGHTS: Record<FitDimensionKey, number> = {
   // the other dims — was the minimal-disturbance choice: live scores only move
   // on pairs where benefits actually scores. Weight 4 ≈ the culture dims.
   benefits: 4,
+  // v3.1 — patient-population fit (also additive; table now sums to 107). Same
+  // normalization rationale: unscored until the candidate picks populations
+  // AND the practice lists the ones it serves, so existing pairs don't move.
+  patient_population: 3,
 };
 
 /* ──────────────────────────────────────────────────────────────
@@ -228,6 +232,9 @@ export function computePracticeFit(inputs: FitInputs): FitResult | null {
     work_life: scoreWorkLife(inputs),
     // v3.1 — benefits coverage (candidate priorities vs job's listed benefits).
     benefits: scoreBenefits(inputs),
+    // v3.1 — patient-population fit (candidate's preferred populations vs the
+    // practice's served populations).
+    patient_population: scorePatientPopulation(inputs),
   };
 
   // v3 Phase B.2 — tilt the weights toward what this candidate said matters
@@ -1729,6 +1736,82 @@ function scoreBenefits({ candidate, job }: FitInputs): FitDimension {
   return makeScoredDim("benefits", "Benefits", raw, detail, detailEmployer);
 }
 
+/* ──────────────────────────────────────────────────────────────
+ * scorePatientPopulation — v3.1 (2026-06-05)
+ *
+ * The candidate picks the patient populations they most enjoy caring for; the
+ * practice picks the populations it serves (employer practice profile). Shared
+ * canonical vocab (PATIENT_POPULATIONS), so we compare tokens directly.
+ *
+ * The candidate's "all" answer ("I enjoy all populations") is a no-penalty,
+ * NON-discriminating signal — stripped before scoring; if it's the only thing
+ * they picked, the dim is UNSCORED (never penalizes). raw = share of the
+ * candidate's preferred populations the practice serves; zero overlap floors at
+ * 30 (a preference miss, not a deal-breaker). UNSCORED when either side is
+ * blank.
+ * ─────────────────────────────────────────────────────────── */
+
+const PATIENT_POP_LABEL: Record<string, string> = {
+  pediatric: "children / pediatric",
+  geriatric: "older adults",
+  special_needs: "special-needs patients",
+  anxious: "anxious / phobic patients",
+  cosmetic: "cosmetic-focused care",
+  underserved: "underserved / community health",
+};
+
+function scorePatientPopulation({ candidate, dso }: FitInputs): FitDimension {
+  // Strip "all" — it's the universal no-signal answer, not a population.
+  const cand = (candidate.patient_population_pref ?? [])
+    .map((p) => token(p))
+    .filter((p): p is string => Boolean(p) && p !== "all");
+  if (cand.length === 0) {
+    return makeUnscoredDim("patient_population", "Patient population", {
+      detail:
+        "Tell us which patients you most enjoy caring for (in the assessment) to factor this in.",
+      detail_employer:
+        "Candidate enjoys all populations (or hasn't said) — patient-population fit excluded (no penalty).",
+      cta_label: "Take the assessment",
+      cta_href: "/candidate/assessment",
+    });
+  }
+
+  const practice = (dso.patient_populations ?? [])
+    .map((p) => token(p))
+    .filter((p): p is string => Boolean(p));
+  if (practice.length === 0) {
+    return makeUnscoredDim("patient_population", "Patient population", {
+      detail:
+        "This practice hasn't said which patient populations it serves — excluded for now.",
+      detail_employer:
+        "Add the patient populations your practice serves to factor it into matches.",
+      cta_label: null,
+      cta_href: null,
+    });
+  }
+
+  const matched = cand.filter((p) => practice.includes(p));
+  const matchedLabels = matched.map((p) => PATIENT_POP_LABEL[p] ?? p);
+  const missingLabels = cand
+    .filter((p) => !matched.includes(p))
+    .map((p) => PATIENT_POP_LABEL[p] ?? p);
+  const raw = matched.length === 0 ? 30 : Math.round((matched.length / cand.length) * 100);
+
+  let detail: string;
+  let detailEmployer: string;
+  if (matched.length === cand.length) {
+    detail = `This practice serves the patients you love working with (${matchedLabels.join(", ")}).`;
+    detailEmployer = `Serves the populations the candidate most enjoys (${matchedLabels.join(", ")}).`;
+  } else if (matched.length > 0) {
+    detail = `Overlap on ${matchedLabels.join(", ")}; less so on ${missingLabels.join(", ")}.`;
+    detailEmployer = `Overlaps on ${matchedLabels.join(", ")}; candidate also enjoys ${missingLabels.join(", ")}.`;
+  } else {
+    detail = `You gravitate to ${missingLabels.join(", ")}; this practice serves a different mix.`;
+    detailEmployer = `Candidate gravitates to ${missingLabels.join(", ")}; practice serves a different mix.`;
+  }
+  return makeScoredDim("patient_population", "Patient population", raw, detail, detailEmployer);
+}
+
 export function hashInputs(inputs: FitInputs): string {
   const canonical = {
     // Logic-version stamp — a scoring-logic change with no new input field
@@ -1774,6 +1857,10 @@ export function hashInputs(inputs: FitInputs): string {
       // v3.1 — benefits priorities feed the benefits dim; hash so retaking the
       // assessment invalidates the cache.
       benefit_priorities: sortedLowercase(inputs.candidate.benefit_priorities),
+      // v3.1 — patient-population preference feeds the patient_population dim.
+      patient_population_pref: sortedLowercase(
+        inputs.candidate.patient_population_pref
+      ),
     },
     job: {
       role_category: inputs.job.role_category,
@@ -1816,6 +1903,8 @@ export function hashInputs(inputs: FitInputs): string {
       practice_feel: token(inputs.dso.practice_feel),
       ce_support: inputs.dso.ce_support ?? null,
       work_life_balance: inputs.dso.work_life_balance ?? null,
+      // v3.1 — practice's served populations feed the patient_population dim.
+      patient_populations: sortedLowercase(inputs.dso.patient_populations),
     },
   };
   return createHash("sha256")

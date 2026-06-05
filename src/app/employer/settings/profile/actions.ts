@@ -668,6 +668,16 @@ const PRACTICE_PACE_VALUES = new Set(["high_volume", "steady", "thorough"]);
 const AUTONOMY_LEVEL_VALUES = new Set(["autonomy", "balance", "structure"]);
 const MENTORSHIP_VALUES = new Set(["strong", "occasional", "independent"]);
 const PRACTICE_FEEL_VALUES = new Set(["private", "midsize", "large"]);
+// v3.1 — canonical patient populations (mirrors PATIENT_POPULATIONS). Kept as a
+// module-local literal set since "use server" allows only async exports.
+const PATIENT_POPULATION_VALUES = new Set([
+  "pediatric",
+  "geriatric",
+  "special_needs",
+  "anxious",
+  "cosmetic",
+  "underserved",
+]);
 
 function cleanEnum(v: string | null | undefined, allowed: Set<string>): string | null {
   const t = typeof v === "string" ? v.trim() : "";
@@ -686,6 +696,7 @@ export async function upsertPracticeProfile(input: {
   practice_feel: string | null;
   ce_support: number | null;
   work_life_balance: number | null;
+  patient_populations?: string[] | null;
 }): Promise<Result> {
   const ctx = await getDsoAdminContext();
   if (!ctx.ok) return ctx;
@@ -696,6 +707,14 @@ export async function upsertPracticeProfile(input: {
   const practice_feel = cleanEnum(input.practice_feel, PRACTICE_FEEL_VALUES);
   const ce_support = cleanScale(input.ce_support);
   const work_life_balance = cleanScale(input.work_life_balance);
+  // De-dupe + allowlist-filter the multi-select (drops anything unrecognized).
+  const patient_populations = Array.from(
+    new Set(
+      (input.patient_populations ?? []).filter((p) =>
+        PATIENT_POPULATION_VALUES.has(p)
+      )
+    )
+  );
 
   const anySet =
     practice_pace !== null ||
@@ -703,7 +722,8 @@ export async function upsertPracticeProfile(input: {
     mentorship_offered !== null ||
     practice_feel !== null ||
     ce_support !== null ||
-    work_life_balance !== null;
+    work_life_balance !== null ||
+    patient_populations.length > 0;
 
   const { error } = await ctx.supabase
     .from("dsos")
@@ -714,6 +734,7 @@ export async function upsertPracticeProfile(input: {
       practice_feel,
       ce_support,
       work_life_balance,
+      patient_populations,
       practice_profile_completed_at: anySet ? new Date().toISOString() : null,
     })
     .eq("id", ctx.dsoId);

@@ -2566,6 +2566,7 @@ export type Database = {
           practice_feel: string | null
           ce_support: number | null
           work_life_balance: number | null
+          patient_populations: string[]
           practice_profile_completed_at: string | null
           deleted_at: string | null
           description: string | null
@@ -2604,6 +2605,7 @@ export type Database = {
           practice_feel?: string | null
           ce_support?: number | null
           work_life_balance?: number | null
+          patient_populations?: string[]
           practice_profile_completed_at?: string | null
           deleted_at?: string | null
           description?: string | null
@@ -2642,6 +2644,7 @@ export type Database = {
           practice_feel?: string | null
           ce_support?: number | null
           work_life_balance?: number | null
+          patient_populations?: string[]
           practice_profile_completed_at?: string | null
           deleted_at?: string | null
           description?: string | null
