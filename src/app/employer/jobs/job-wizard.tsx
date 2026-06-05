@@ -2692,6 +2692,18 @@ function PreviewStep({
     selectedLocationIds.has(l.id)
   );
 
+  // #75 — "view as candidate" preview toggle. Renders the posting the way a
+  // candidate sees it (masked employer identity included) vs. the employer
+  // review. Pre-save, so it's rendered from the in-memory wizard state.
+  const [viewAsCandidate, setViewAsCandidate] = useState(false);
+  const candidateEmployerLabel = (() => {
+    const anon = selectedLocations.find((l) => l.anonymizeName);
+    if (anon) return `Dental practice in ${anon.city ?? "your area"}`;
+    const priv = selectedLocations.find((l) => l.publicDsoAffiliation === false);
+    if (priv) return priv.name;
+    return dsoName || "Your practice";
+  })();
+
   // Pre-publish name-leak nudge (anonymity, 2026-06-04). Masking hides the
   // structured name, but free text the recruiter typed (title/body) can still
   // leak it. When any selected location is private/anonymized, scan and warn.
@@ -2726,6 +2738,33 @@ function PreviewStep({
         </h2>
       </div>
 
+      <div className="inline-flex rounded-full border border-[var(--rule)] bg-cream p-1 text-[12px] font-bold uppercase tracking-[1px]">
+        <button
+          type="button"
+          onClick={() => setViewAsCandidate(false)}
+          className={
+            "rounded-full px-3.5 py-1.5 transition-colors " +
+            (!viewAsCandidate
+              ? "bg-ink text-ivory"
+              : "text-slate-body hover:text-ink")
+          }
+        >
+          Employer review
+        </button>
+        <button
+          type="button"
+          onClick={() => setViewAsCandidate(true)}
+          className={
+            "rounded-full px-3.5 py-1.5 transition-colors " +
+            (viewAsCandidate
+              ? "bg-ink text-ivory"
+              : "text-slate-body hover:text-ink")
+          }
+        >
+          View as candidate
+        </button>
+      </div>
+
       {leakedNames.length > 0 && (
         <div className="border-l-4 border-amber-400 bg-amber-50 p-4">
           <div className="flex items-start gap-3">
@@ -2753,6 +2792,8 @@ function PreviewStep({
         </div>
       )}
 
+      {!viewAsCandidate && (
+        <>
       <ReviewBlock label="Basics" onEdit={() => onJumpTo("basics")}>
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
           <Row label="Title" value={title || "—"} />
@@ -2837,6 +2878,28 @@ function PreviewStep({
           </ul>
         )}
       </ReviewBlock>
+        </>
+      )}
+
+      {viewAsCandidate && (
+        <CandidateJobPreview
+          employerLabel={candidateEmployerLabel}
+          title={title}
+          role={role}
+          employment={employment}
+          locationLabel={
+            selectedLocations
+              .map((l) => [l.city, l.state].filter(Boolean).join(", "))
+              .filter(Boolean)
+              .join(" · ") || null
+          }
+          description={description}
+          comp={compVisible ? formatComp(compMin, compMax, compPeriod) : null}
+          benefits={benefits}
+          requirements={requirements}
+          questionCount={questions.length}
+        />
+      )}
 
       <div className="border border-[var(--rule)] p-5 bg-cream/40">
         <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
@@ -2870,6 +2933,101 @@ function PreviewStep({
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+/* #75 — candidate-eye-view of the posting, rendered from in-memory wizard
+   state (the job isn't saved yet, so we can't link the public page). */
+function CandidateJobPreview({
+  employerLabel,
+  title,
+  role,
+  employment,
+  locationLabel,
+  description,
+  comp,
+  benefits,
+  requirements,
+  questionCount,
+}: {
+  employerLabel: string;
+  title: string;
+  role: string;
+  employment: string;
+  locationLabel: string | null;
+  description: string;
+  comp: string | null;
+  benefits: string[];
+  requirements: string;
+  questionCount: number;
+}) {
+  const hasDesc = description.replace(/<[^>]*>/g, "").trim().length > 0;
+  const chip =
+    "rounded-full bg-cream px-3 py-1 text-[12px] font-semibold text-slate-body";
+  return (
+    <div className="border border-[var(--rule)] bg-white p-6 sm:p-8">
+      <div className="mb-3 text-[10px] font-bold uppercase tracking-[2px] text-heritage-deep">
+        How candidates see this
+      </div>
+      <div className="text-[13px] font-semibold text-slate-meta">
+        {employerLabel}
+      </div>
+      <h3 className="mt-1 text-2xl font-extrabold leading-tight tracking-[-0.5px] text-ink">
+        {title || "Untitled role"}
+      </h3>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <span className={chip}>{role}</span>
+        <span className={chip}>{employment}</span>
+        {locationLabel && <span className={chip}>{locationLabel}</span>}
+        {comp && (
+          <span className="rounded-full bg-heritage/10 px-3 py-1 text-[12px] font-semibold text-heritage-deep">
+            {comp}
+          </span>
+        )}
+      </div>
+      {hasDesc ? (
+        <div
+          className="dso-prose mt-5 text-[14px]"
+          dangerouslySetInnerHTML={{ __html: description }}
+        />
+      ) : (
+        <p className="mt-5 text-[14px] italic text-slate-meta">
+          No description yet — candidates would see an empty role description.
+        </p>
+      )}
+      {benefits.length > 0 && (
+        <div className="mt-5">
+          <div className="mb-2 text-[10px] font-bold uppercase tracking-[1.5px] text-slate-meta">
+            Benefits
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {benefits.map((b) => (
+              <span
+                key={b}
+                className="rounded-full border border-[var(--rule)] px-3 py-1 text-[12px] text-slate-body"
+              >
+                {b}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+      {requirements.trim() && (
+        <div className="mt-5">
+          <div className="mb-1 text-[10px] font-bold uppercase tracking-[1.5px] text-slate-meta">
+            Requirements
+          </div>
+          <pre className="whitespace-pre-wrap font-sans text-[14px] leading-relaxed text-ink">
+            {requirements}
+          </pre>
+        </div>
+      )}
+      <p className="mt-6 border-t border-[var(--rule)] pt-4 text-[13px] text-slate-meta">
+        {questionCount > 0
+          ? `${questionCount} screening question${questionCount === 1 ? "" : "s"} on apply.`
+          : "Candidates apply with just résumé + cover letter."}
+      </p>
     </div>
   );
 }

@@ -84,7 +84,7 @@ export default async function CandidateDashboardPage() {
   const { data: candidate } = await supabase
     .from("candidates")
     .select(
-      "id, first_name, last_name, salutation, full_name, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, desired_specialty, license_states, pms_systems, skills, languages, temp_or_perm, dso_size_preference, schedule_preferences, min_salary, salary_unit, cv_visibility, availability, resume_url, linkedin_url, avatar_url, practice_fit_consent",
+      "id, first_name, last_name, salutation, full_name, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, desired_specialty, license_states, pms_systems, skills, languages, temp_or_perm, dso_size_preference, schedule_preferences, min_salary, salary_unit, cv_visibility, availability, resume_url, linkedin_url, avatar_url, practice_fit_consent, work_pace, autonomy_pref, mentorship_pref, practice_feel, ce_growth_importance, work_life_priority, benefit_priorities, patient_population_pref",
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
@@ -313,6 +313,20 @@ export default async function CandidateDashboardPage() {
     const sched = cr.schedule_preferences as Record<string, unknown> | null;
     if (sched && Object.keys(sched).length > 0)
       filledDims.add("schedule_overlap");
+    // #74 — assessment-driven dims. Once the candidate has answered these in
+    // the PracticeFit assessment, the gap is on the practice's side (their
+    // profile), NOT the candidate's — so never nag them to "Take the
+    // assessment" again. Marking each filled here is what stops the
+    // "Take the assessment ×3" repeat after Sarah completed it.
+    if (cr.work_pace) filledDims.add("work_pace");
+    if (cr.autonomy_pref) filledDims.add("autonomy");
+    if (cr.mentorship_pref) filledDims.add("mentorship");
+    if (cr.practice_feel) filledDims.add("practice_feel");
+    if (cr.ce_growth_importance != null) filledDims.add("ce_growth");
+    if (cr.work_life_priority != null) filledDims.add("work_life");
+    if (filled(cr.benefit_priorities)) filledDims.add("benefits");
+    if (filled(cr.patient_population_pref))
+      filledDims.add("patient_population");
   }
 
   // ── Job + DSO maps ──────────────────────────────────────────────────

@@ -112,7 +112,13 @@ export function CandidateFitSummary({
 
   // Common gaps: which dimensions are excluded on >=2 apps? Those
   // are the highest-leverage profile-completion targets.
-  const gapAccumulator = new Map<FitDimensionKey, CommonGap>();
+  // Keyed by cta_href (the actionable target) — NOT by dimension. Several
+  // dimensions can share one CTA (e.g. work_pace / autonomy / mentorship /
+  // practice_feel / ce_growth / work_life all point at "Take the assessment");
+  // keying by the action collapses them into a single nudge instead of
+  // repeating the same row three times (the Sarah-Chen "Take the assessment ×3"
+  // bug).
+  const gapAccumulator = new Map<string, CommonGap>();
   for (const fit of scoredFits) {
     for (const [keyRaw, dim] of Object.entries(fit.dimensions)) {
       if (dim.scored) continue;
@@ -122,11 +128,11 @@ export function CandidateFitSummary({
       // Skip anything the candidate has already filled — the gap is on the
       // job's side, not theirs. Never tell someone to add data they have.
       if (filledDims?.has(key)) continue;
-      const existing = gapAccumulator.get(key);
+      const existing = gapAccumulator.get(dim.cta_href);
       if (existing) {
         existing.count += 1;
       } else {
-        gapAccumulator.set(key, {
+        gapAccumulator.set(dim.cta_href, {
           key,
           label: dim.label,
           count: 1,
@@ -199,7 +205,7 @@ export function CandidateFitSummary({
             </p>
             <ul className="space-y-2">
               {topGaps.map((g) => (
-                <li key={g.key}>
+                <li key={g.cta_href ?? g.key}>
                   <Link
                     href={g.cta_href ?? "#"}
                     className="group inline-flex items-center gap-2 text-[13px] text-ink hover:text-heritage-deep"
