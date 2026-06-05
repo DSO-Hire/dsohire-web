@@ -26,7 +26,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Lock, Sparkles, Info } from "lucide-react";
+import { Lock, Info } from "lucide-react";
+import { BrandMark } from "@/components/brand/brand-mark";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getActiveSubscription } from "@/lib/billing/subscription";
 import { MAX_STAGES_PER_DSO, type PipelineStage } from "@/lib/applications/stages";
@@ -100,7 +101,7 @@ export default async function PipelineSettingsPage() {
             <Lock className="size-4 mt-0.5 shrink-0 text-amber-700" />
             <div className="flex-1">
               <strong className="font-semibold inline-flex items-center gap-1.5">
-                <Sparkles className="size-3.5" />
+                <BrandMark className="size-3.5" />
                 Growth+ feature
               </strong>
               <p className="mt-1.5 leading-relaxed">

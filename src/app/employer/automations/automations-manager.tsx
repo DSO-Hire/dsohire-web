@@ -15,7 +15,8 @@
 
 import { useState, useTransition, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Workflow, Lock, Sparkles, Plus, Trash2, Pencil, FlaskConical } from "lucide-react";
+import { Workflow, Lock, Plus, Trash2, Pencil, FlaskConical } from "lucide-react";
+import { BrandMark } from "@/components/brand/brand-mark";
 import { STAGE_KINDS, KIND_DEFAULT_LABELS, type StageKind } from "@/lib/applications/stages";
 import {
   createAutomationRule,
@@ -210,7 +211,7 @@ export function AutomationsManager({ rules, jobs, teammates, canManage }: Props)
             <Lock className="mt-0.5 size-4 shrink-0 text-amber-700" />
             <div className="flex-1">
               <strong className="inline-flex items-center gap-1.5 font-semibold">
-                <Sparkles className="size-3.5" /> Scale feature
+                <BrandMark className="size-3.5" /> Scale feature
               </strong>
               <p className="mt-1.5 leading-relaxed">
                 Building custom automations is part of the Scale and Enterprise tiers. Your default
