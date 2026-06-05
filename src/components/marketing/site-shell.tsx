@@ -348,42 +348,6 @@ export function BrandLockup({
   );
 }
 
-/**
- * BrandMark — compact mark-only icon (no wordmark). Use for favicons, app
- * icons, seal/stamps, or tight-space contexts where the full lockup won't fit
- * (e.g., 24×24 cell). For nav and footer use BrandLockup instead.
- *
- * Same D-form silhouette as BrandLockup, fitted to a square viewBox.
- */
-export function BrandMark({ dark }: { dark?: boolean }) {
-  const stroke = dark ? "#F7F4ED" : "#14233F";
-  return (
-    <svg
-      width="32"
-      height="32"
-      viewBox="0 0 44 44"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-label="DSO Hire"
-    >
-      {/* Outer D-form */}
-      <path
-        d="M 5 5 L 28 5 Q 40 5 40 17 L 40 27 Q 40 39 28 39 L 5 39"
-        fill="none"
-        stroke={stroke}
-        strokeWidth="4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Heritage crossbar — implied H */}
-      <line
-        x1="8"
-        y1="22"
-        x2="24"
-        y2="22"
-        stroke="#4D7A60"
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
+// BrandMark moved to its own reusable primitive (used by tier-gate badges,
+// etc.) — re-exported here so existing/marketing imports keep working.
+export { BrandMark } from "@/components/brand/brand-mark";

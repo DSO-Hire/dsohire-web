@@ -15,7 +15,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Lock, Sparkles } from "lucide-react";
+import { Lock } from "lucide-react";
+import { BrandMark } from "@/components/brand/brand-mark";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { dsoCanUseCustomTemplates } from "@/lib/email/templates/tier";
 import {
@@ -167,8 +168,8 @@ export default async function EmailTemplatesPage() {
           <div className="space-y-1.5 flex-1 min-w-0">
             <h2 className="font-display text-xl font-bold tracking-[-0.4px] text-ink inline-flex items-center gap-2">
               Custom templates
-              <span className="inline-flex items-center gap-1 rounded-full bg-heritage-deep/10 px-2 py-0.5 text-[10px] font-semibold tracking-[0.5px] uppercase text-heritage-deep">
-                <Sparkles className="size-3" />
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-heritage-deep/10 px-2 py-0.5 text-[10px] font-semibold tracking-[0.5px] uppercase text-heritage-deep">
+                <BrandMark className="size-3.5" />
                 Growth+
               </span>
             </h2>
