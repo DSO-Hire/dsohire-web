@@ -19,8 +19,6 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import {
-  ArrowRight,
-  ArrowLeft,
   Plus,
   Trash2,
   ChevronUp,
@@ -62,6 +60,16 @@ import { HelpDrawer } from "@/components/help/help-drawer";
 import { HelpTip } from "@/components/help/help-tip";
 import { HelpDisclosure } from "@/components/help/help-disclosure";
 import { Coachmark } from "@/components/help/coachmark";
+import {
+  WizardShell,
+  FieldShell,
+  OptionCards,
+  TextField,
+  SelectField,
+  CheckCard,
+} from "@/components/wizard";
+import { BrandMark } from "@/components/brand/brand-mark";
+import { BrandLockup } from "@/components/brand/brand-lockup";
 
 /* ───── Types ───── */
 
@@ -1012,15 +1020,41 @@ export function JobWizard({
       <div className="flex items-center justify-end">
         <HelpDrawer helpKey="jd.overview" triggerLabel="How posting works" />
       </div>
-      <Stepper
-        currentIdx={stepIdx}
+      <WizardShell
+        steps={STEPS.map((s) => ({ id: s.id, label: s.short }))}
+        currentIndex={stepIdx}
+        maxWidthClass="max-w-[820px]"
+        eyebrow={
+          <>
+            <BrandLockup height={28} />
+            <span className="text-[12px] font-bold uppercase tracking-[2px] text-slate-meta">
+              post a job
+            </span>
+          </>
+        }
+        meterIcon={<BrandMark className="h-3.5 w-3.5" />}
+        canJumpTo={(i) => i !== stepIdx}
         onJump={(i) => {
           setError(null);
           setStepIdx(i);
         }}
-      />
-
-      <div className="border border-[var(--rule)] bg-white p-8 sm:p-10">
+        onBack={back}
+        onNext={() => {
+          if (stepIdx < STEPS.length - 1) tryAdvance();
+          else handleSubmit();
+        }}
+        nextLabel={
+          stepIdx < STEPS.length - 1
+            ? "Continue"
+            : mode === "create"
+              ? status === "active"
+                ? "Publish job"
+                : "Save draft"
+              : "Save changes"
+        }
+        busy={pending}
+        error={error}
+      >
         {currentStep.id === "basics" && (
           <BasicsStep
             title={title}
@@ -1184,12 +1218,6 @@ export function JobWizard({
           />
         )}
 
-        {error && (
-          <div className="mt-6 bg-red-50 border-l-4 border-red-500 p-4">
-            <p className="text-[14px] text-red-900">{error}</p>
-          </div>
-        )}
-
         {savedFlash && mode === "edit" && (
           <div className="mt-6 bg-cream border-l-4 border-heritage p-4">
             <p className="text-[14px] text-ink font-semibold">
@@ -1197,111 +1225,7 @@ export function JobWizard({
             </p>
           </div>
         )}
-
-        <div className="mt-8 pt-6 border-t border-[var(--rule)] flex items-center justify-between gap-4">
-          <button
-            type="button"
-            onClick={back}
-            disabled={stepIdx === 0}
-            className="inline-flex items-center gap-2 px-4 py-2.5 text-[10px] font-bold tracking-[1.5px] uppercase text-ink hover:bg-cream transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Back
-          </button>
-
-          {stepIdx < STEPS.length - 1 ? (
-            <button
-              type="button"
-              onClick={tryAdvance}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-ink text-ivory text-[10px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
-            >
-              Continue
-              <ArrowRight className="h-3.5 w-3.5" />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={pending}
-              className="inline-flex items-center gap-2 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {pending
-                ? "Saving…"
-                : mode === "create"
-                ? status === "active"
-                  ? "Publish Job"
-                  : "Save Draft"
-                : "Save Changes"}
-              {!pending && <ArrowRight className="h-4 w-4" />}
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ───── Stepper ───── */
-
-function Stepper({
-  currentIdx,
-  onJump,
-}: {
-  currentIdx: number;
-  onJump?: (idx: number) => void;
-}) {
-  return (
-    <div>
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
-          Step {currentIdx + 1} of {STEPS.length}
-        </span>
-        <span className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta">
-          ·
-        </span>
-        <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-ink">
-          {STEPS[currentIdx].label}
-        </span>
-      </div>
-      {/* Clickable step nav — jump straight to any step (e.g. back to
-          Compensation to fix a blocked publish) instead of clicking Back
-          through each page. */}
-      <div className="flex gap-1.5">
-        {STEPS.map((s, i) => (
-          <button
-            key={s.id}
-            type="button"
-            onClick={() => onJump?.(i)}
-            aria-label={`Go to step ${i + 1}: ${s.label}`}
-            aria-current={i === currentIdx ? "step" : undefined}
-            className="group flex-1 cursor-pointer text-left focus:outline-none focus-visible:ring-1 focus-visible:ring-heritage"
-          >
-            <span
-              className={
-                "block h-1 transition-colors " +
-                (i < currentIdx
-                  ? "bg-heritage"
-                  : i === currentIdx
-                    ? "bg-ink"
-                    : "bg-[var(--rule-strong)] group-hover:bg-heritage")
-              }
-            />
-            <span
-              className={
-                "mt-1.5 flex items-center gap-1 text-[9px] font-bold tracking-[1px] uppercase truncate transition-colors " +
-                (i === currentIdx
-                  ? "text-ink"
-                  : "text-slate-meta group-hover:text-heritage-deep group-hover:underline")
-              }
-            >
-              {s.short}
-            </span>
-          </button>
-        ))}
-      </div>
-      <div className="mt-2 flex items-center gap-1 text-[10px] text-slate-meta">
-        <span aria-hidden>↔</span> Tap any step to jump.
-      </div>
+      </WizardShell>
     </div>
   );
 }
