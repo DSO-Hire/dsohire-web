@@ -112,7 +112,10 @@ export const PROCEDURES_BY_ROLE: Record<string, AssessmentOption[]> = {
     { value: "sedation", label: "Sedation" },
     { value: "oral_surgery", label: "Oral surgery" },
   ],
-  dental_assistant: [
+  // NOTE: keyed by the CANDIDATE canonical role value ("assistant"), which is
+  // what the assessment wizard looks up — NOT the job-side "dental_assistant"
+  // vocabulary. Mismatch here left the Dental Assistant procedure picker empty.
+  assistant: [
     { value: "four_handed", label: "4-handed dentistry" },
     { value: "radiographs", label: "Radiographs" },
     { value: "temporaries", label: "Temporaries" },
