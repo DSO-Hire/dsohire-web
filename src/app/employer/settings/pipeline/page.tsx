@@ -139,7 +139,7 @@ export default async function PipelineSettingsPage() {
             <p className="text-[13px] text-slate-body leading-relaxed">
               The <strong className="text-ink">label</strong> is what
               your team sees on the kanban — rename freely. The{" "}
-              <strong className="text-ink">kind</strong> controls system
+              <strong className="text-ink">kind</strong>{" "}controls system
               behavior: terminal kinds (rejected, withdrawn) skip the
               advance arrow, and the kind &quot;open&quot; receives
               brand-new applications. Each kind needs at least one
