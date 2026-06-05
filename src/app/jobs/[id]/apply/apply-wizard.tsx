@@ -18,9 +18,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import {
   ArrowRight,
-  ArrowLeft,
   Check,
-  FileUp,
   Pencil,
   ExternalLink,
   Plus,
@@ -46,6 +44,18 @@ import {
   CERTIFICATION_KINDS,
 } from "@/lib/candidate/canonical-lists";
 import { composeName, splitFullName } from "@/lib/candidate/name";
+import {
+  WizardShell,
+  FieldShell,
+  OptionCards,
+  MultiChips,
+  TextField,
+  TextAreaField,
+  FileField,
+  CheckCard,
+} from "@/components/wizard";
+import { BrandMark } from "@/components/brand/brand-mark";
+import { BrandLockup } from "@/components/marketing/site-shell";
 
 const AVAILABILITY_LABEL: Record<string, string> = {
   immediate: "Immediately",
@@ -185,7 +195,6 @@ export function ApplyWizard(props: ApplyWizardProps) {
   // Resume file cannot be serialized — held outside draft.
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [resumeError, setResumeError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // ── Hydrate from localStorage on mount, ask if found ────────
   useEffect(() => {
@@ -463,10 +472,40 @@ export function ApplyWizard(props: ApplyWizardProps) {
         </div>
       )}
 
-      {/* ── Stepper ── */}
-      <Stepper steps={steps} currentIdx={stepIdx} />
-
-      <div className="border border-[var(--rule)] bg-white p-8 sm:p-10">
+      <WizardShell
+        steps={steps.map((s) => ({ id: s.id, label: s.label }))}
+        currentIndex={stepIdx}
+        eyebrow={
+          <>
+            <BrandLockup height={28} />
+            <span className="text-[12px] font-bold uppercase tracking-[2px] text-slate-meta">
+              application
+            </span>
+          </>
+        }
+        meterIcon={<BrandMark className="h-3.5 w-3.5" />}
+        onBack={() => setStepIdx(Math.max(0, stepIdx - 1))}
+        onNext={() => {
+          if (stepIdx < steps.length - 1) {
+            setStepIdx(Math.min(steps.length - 1, stepIdx + 1));
+            if (typeof window !== "undefined")
+              window.scrollTo({ top: 0, behavior: "smooth" });
+          } else {
+            handleSubmit();
+          }
+        }}
+        nextLabel={
+          stepIdx < steps.length - 1
+            ? "Continue"
+            : existingApplication
+              ? "Update application"
+              : "Submit application"
+        }
+        busy={pending}
+        error={submitError}
+        canJumpTo={(i) => i !== stepIdx}
+        onJump={(i) => setStepIdx(i)}
+      >
         {currentStep.id === "intro" && (
           <IntroStep
             jobTitle={jobTitle}
@@ -515,7 +554,6 @@ export function ApplyWizard(props: ApplyWizardProps) {
               setResumeError(err);
             }}
             resumeError={resumeError}
-            fileInputRef={fileInputRef}
           />
         )}
 
@@ -550,50 +588,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
           />
         )}
 
-        {submitError && (
-          <div className="mt-6 bg-red-50 border-l-4 border-red-500 p-4">
-            <p className="text-[14px] text-red-900">{submitError}</p>
-          </div>
-        )}
-
-        {/* ── Step nav ── */}
-        <div className="mt-8 pt-6 border-t border-[var(--rule)] flex items-center justify-between gap-4">
-          <button
-            type="button"
-            onClick={() => setStepIdx(Math.max(0, stepIdx - 1))}
-            disabled={stepIdx === 0}
-            className="inline-flex items-center gap-2 px-4 py-2.5 text-[10px] font-bold tracking-[1.5px] uppercase text-ink hover:bg-cream transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Back
-          </button>
-
-          {stepIdx < steps.length - 1 ? (
-            <button
-              type="button"
-              onClick={() => setStepIdx(Math.min(steps.length - 1, stepIdx + 1))}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-ink text-ivory text-[10px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
-            >
-              Continue
-              <ArrowRight className="h-3.5 w-3.5" />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={pending}
-              className="inline-flex items-center gap-2 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {pending
-                ? "Submitting…"
-                : existingApplication
-                ? "Update Application"
-                : "Submit Application"}
-              {!pending && <ArrowRight className="h-4 w-4" />}
-            </button>
-          )}
-        </div>
-      </div>
+      </WizardShell>
 
       <p className="text-[13px] text-slate-meta leading-relaxed">
         Your draft saves automatically on this device. Your application goes
@@ -610,10 +605,6 @@ export function ApplyWizard(props: ApplyWizardProps) {
   );
 }
 
-/* ───────────────────────────────────────────────────────────────
- * Stepper
- * ───────────────────────────────────────────────────────────── */
-
 type StepId =
   | "intro"
   | "screening"
@@ -621,45 +612,6 @@ type StepId =
   | "resume"
   | "cover"
   | "review";
-
-function Stepper({
-  steps,
-  currentIdx,
-}: {
-  steps: { id: StepId; label: string }[];
-  currentIdx: number;
-}) {
-  return (
-    <div>
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
-          Step {currentIdx + 1} of {steps.length}
-        </span>
-        <span className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta">
-          ·
-        </span>
-        <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-ink">
-          {steps[currentIdx].label}
-        </span>
-      </div>
-      <div className="flex gap-1.5">
-        {steps.map((s, i) => (
-          <div
-            key={s.id}
-            className={
-              "h-1 flex-1 transition-colors " +
-              (i < currentIdx
-                ? "bg-heritage"
-                : i === currentIdx
-                ? "bg-ink"
-                : "bg-[var(--rule-strong)]")
-            }
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
 
 /* ───────────────────────────────────────────────────────────────
  * Step 1 — Intro
@@ -701,7 +653,7 @@ function IntroStep({
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Before you begin
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.5px] text-ink leading-tight mb-3">
+        <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight mb-3">
           You're applying as {trimmedName || userEmail || "yourself"}.
         </h2>
         <p className="text-[14px] text-slate-body leading-relaxed">
@@ -711,46 +663,34 @@ function IntroStep({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label
-            htmlFor="apply-first-name"
-            className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
-          >
-            First name <span className="text-heritage">*</span>
-          </label>
-          <input
-            id="apply-first-name"
-            type="text"
-            name="first_name"
-            required
-            autoComplete="given-name"
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <FieldShell
+          label={
+            <>
+              First name <span className="text-heritage">*</span>
+            </>
+          }
+        >
+          <TextField
             value={firstName}
-            onChange={(e) => onFirstNameChange(e.target.value)}
+            onChange={onFirstNameChange}
             placeholder="Jordan"
-            className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
           />
-        </div>
-        <div>
-          <label
-            htmlFor="apply-last-name"
-            className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
-          >
-            Last name <span className="text-heritage">*</span>
-          </label>
-          <input
-            id="apply-last-name"
-            type="text"
-            name="last_name"
-            required
-            autoComplete="family-name"
+        </FieldShell>
+        <FieldShell
+          label={
+            <>
+              Last name <span className="text-heritage">*</span>
+            </>
+          }
+        >
+          <TextField
             value={lastName}
-            onChange={(e) => onLastNameChange(e.target.value)}
+            onChange={onLastNameChange}
             placeholder="Rivera"
-            className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
           />
-        </div>
-        <p className="sm:col-span-2 -mt-1 text-[12px] text-slate-meta leading-relaxed">
+        </FieldShell>
+        <p className="text-[12px] leading-relaxed text-slate-meta sm:col-span-2">
           Required — the hiring team needs a real name on your application.
           We&apos;ll save this back to your profile.
         </p>
@@ -808,7 +748,7 @@ function ScreeningStep({
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Screening
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.5px] text-ink leading-tight">
+        <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           A few quick questions from the hiring team.
         </h2>
       </div>
@@ -845,127 +785,68 @@ function QuestionInput({
   value: AnswerValue | undefined;
   onChange: (v: AnswerValue) => void;
 }) {
-  const baseInput =
-    "w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed";
-
   switch (question.kind) {
     case "short_text":
       return (
-        <input
-          type="text"
+        <TextField
           value={value?.kind === "text" ? value.value : ""}
-          onChange={(e) =>
-            onChange({ kind: "text", value: e.target.value })
-          }
-          className={baseInput}
+          onChange={(v) => onChange({ kind: "text", value: v })}
         />
       );
     case "long_text":
       return (
-        <textarea
+        <TextAreaField
           rows={4}
           value={value?.kind === "text" ? value.value : ""}
-          onChange={(e) =>
-            onChange({ kind: "text", value: e.target.value })
-          }
-          className={baseInput}
+          onChange={(v) => onChange({ kind: "text", value: v })}
         />
       );
     case "number":
       return (
-        <input
+        <TextField
           type="number"
           inputMode="numeric"
-          step="any"
+          widthClass="w-44"
           value={value?.kind === "number" ? value.value : ""}
-          onChange={(e) =>
-            onChange({ kind: "number", value: e.target.value })
-          }
-          className={baseInput + " max-w-[180px]"}
+          onChange={(v) => onChange({ kind: "number", value: v })}
         />
       );
-    case "yes_no": {
-      const v = value?.kind === "yes_no" ? value.value : "";
+    case "yes_no":
       return (
-        <div className="flex gap-2">
-          {(["yes", "no"] as const).map((choice) => (
-            <button
-              key={choice}
-              type="button"
-              onClick={() => onChange({ kind: "yes_no", value: choice })}
-              className={
-                "px-5 py-2.5 border text-[12px] font-bold tracking-[1.5px] uppercase transition-colors " +
-                (v === choice
-                  ? "bg-ink text-ivory border-ink"
-                  : "bg-cream text-ink border-[var(--rule-strong)] hover:bg-white")
-              }
-            >
-              {choice}
-            </button>
-          ))}
-        </div>
+        <OptionCards
+          columns={2}
+          value={value?.kind === "yes_no" ? value.value : ""}
+          options={[
+            { value: "yes", label: "Yes" },
+            { value: "no", label: "No" },
+          ]}
+          onChange={(v) =>
+            onChange({ kind: "yes_no", value: v as "yes" | "no" })
+          }
+        />
       );
-    }
-    case "single_select": {
-      const v = value?.kind === "single" ? value.value : "";
+    case "single_select":
       return (
-        <div className="space-y-1.5">
-          {(question.options ?? []).map((opt) => (
-            <label
-              key={opt.id}
-              className={
-                "flex items-center gap-3 px-4 py-2.5 border cursor-pointer transition-colors " +
-                (v === opt.id
-                  ? "bg-heritage/[0.08] border-heritage"
-                  : "bg-cream border-[var(--rule-strong)] hover:bg-white")
-              }
-            >
-              <input
-                type="radio"
-                name={`q_${question.id}`}
-                checked={v === opt.id}
-                onChange={() => onChange({ kind: "single", value: opt.id })}
-                className="accent-heritage"
-              />
-              <span className="text-[14px] text-ink">{opt.label}</span>
-            </label>
-          ))}
-        </div>
+        <OptionCards
+          value={value?.kind === "single" ? value.value : ""}
+          options={(question.options ?? []).map((opt) => ({
+            value: opt.id,
+            label: opt.label,
+          }))}
+          onChange={(v) => onChange({ kind: "single", value: v })}
+        />
       );
-    }
-    case "multi_select": {
-      const v = value?.kind === "multi" ? value.value : [];
-      const toggle = (id: string) => {
-        const next = v.includes(id) ? v.filter((x) => x !== id) : [...v, id];
-        onChange({ kind: "multi", value: next });
-      };
+    case "multi_select":
       return (
-        <div className="space-y-1.5">
-          {(question.options ?? []).map((opt) => {
-            const checked = v.includes(opt.id);
-            return (
-              <label
-                key={opt.id}
-                className={
-                  "flex items-center gap-3 px-4 py-2.5 border cursor-pointer transition-colors " +
-                  (checked
-                    ? "bg-heritage/[0.08] border-heritage"
-                    : "bg-cream border-[var(--rule-strong)] hover:bg-white")
-                }
-              >
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() => toggle(opt.id)}
-                  className="accent-heritage"
-                />
-                <span className="text-[14px] text-ink">{opt.label}</span>
-              </label>
-            );
-          })}
-        </div>
+        <MultiChips
+          value={value?.kind === "multi" ? value.value : []}
+          options={(question.options ?? []).map((opt) => ({
+            value: opt.id,
+            label: opt.label,
+          }))}
+          onChange={(v) => onChange({ kind: "multi", value: v })}
+        />
       );
-    }
   }
 }
 
@@ -1009,7 +890,7 @@ function VerificationStep({
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Verifications
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.5px] text-ink leading-tight">
+        <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           Confirm what this role requires.
         </h2>
         <p className="text-[14px] text-slate-body leading-relaxed mt-2">
@@ -1051,22 +932,13 @@ function VerificationStep({
               {req.required && <span className="text-heritage ml-1">*</span>}
             </div>
 
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={value.attested}
-                onChange={(e) =>
-                  update(req.verification_type, {
-                    ...value,
-                    attested: e.target.checked,
-                  })
-                }
-                className="mt-0.5 accent-heritage h-4 w-4 flex-shrink-0"
-              />
-              <span className="text-[14px] text-ink leading-relaxed">
-                {vt?.candidateHint ?? "I confirm this requirement."}
-              </span>
-            </label>
+            <CheckCard
+              checked={value.attested}
+              onChange={(c) =>
+                update(req.verification_type, { ...value, attested: c })
+              }
+              label={vt?.candidateHint ?? "I confirm this requirement."}
+            />
 
             {/* Multi-select credential linking — only for types backed by a
                 profile credential source. */}
@@ -1080,31 +952,15 @@ function VerificationStep({
                 </label>
 
                 {linkable.length > 0 ? (
-                  <div className="space-y-1.5">
-                    {linkable.map((c) => {
-                      const checked = value.linkedCredentialIds.includes(c.id);
-                      return (
-                        <label
-                          key={c.id}
-                          className={
-                            "flex items-center gap-3 px-4 py-2.5 border cursor-pointer transition-colors " +
-                            (checked
-                              ? "bg-heritage/[0.08] border-heritage"
-                              : "bg-cream border-[var(--rule-strong)] hover:bg-white")
-                          }
-                        >
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={() => toggleCredential(c.id)}
-                            className="accent-heritage"
-                          />
-                          <span className="text-[14px] text-ink">
-                            {c.label}
-                          </span>
-                        </label>
-                      );
-                    })}
+                  <div className="space-y-2">
+                    {linkable.map((c) => (
+                      <CheckCard
+                        key={c.id}
+                        checked={value.linkedCredentialIds.includes(c.id)}
+                        onChange={() => toggleCredential(c.id)}
+                        label={c.label}
+                      />
+                    ))}
                   </div>
                 ) : (
                   <p className="text-[12px] text-slate-meta leading-relaxed">
@@ -1129,17 +985,13 @@ function VerificationStep({
                   (optional)
                 </span>
               </label>
-              <textarea
+              <TextAreaField
                 rows={2}
                 value={value.note}
-                onChange={(e) =>
-                  update(req.verification_type, {
-                    ...value,
-                    note: e.target.value,
-                  })
+                onChange={(v) =>
+                  update(req.verification_type, { ...value, note: v })
                 }
                 placeholder="Anything the hiring team should know about this."
-                className={VERIFICATION_BASE_INPUT}
               />
             </div>
           </div>
@@ -1491,7 +1343,6 @@ function ResumeStep({
   resumeFile,
   onResumeFile,
   resumeError,
-  fileInputRef,
 }: {
   hasSavedResume: boolean;
   savedResumeName: string | null;
@@ -1500,7 +1351,6 @@ function ResumeStep({
   resumeFile: File | null;
   onResumeFile: (f: File | null, err: string | null) => void;
   resumeError: string | null;
-  fileInputRef: React.RefObject<HTMLInputElement | null>;
 }) {
   const RESUME_MIME = new Set([
     "application/pdf",
@@ -1515,7 +1365,7 @@ function ResumeStep({
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Resume
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.5px] text-ink leading-tight">
+        <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           {hasSavedResume
             ? "Use your saved resume, or upload a fresh one."
             : "Upload your resume."}
@@ -1523,75 +1373,41 @@ function ResumeStep({
       </div>
 
       {hasSavedResume && (
-        <div className="space-y-2">
-          <label
-            className={
-              "flex items-start gap-3 p-4 border cursor-pointer transition-colors " +
-              (resumeChoice === "saved"
-                ? "bg-heritage/[0.08] border-heritage"
-                : "bg-cream border-[var(--rule-strong)] hover:bg-white")
-            }
-          >
-            <input
-              type="radio"
-              name="resume_choice"
-              checked={resumeChoice === "saved"}
-              onChange={() => onResumeChoice("saved")}
-              className="mt-1 accent-heritage"
-            />
-            <div className="min-w-0 flex-1">
-              <div className="text-[14px] font-semibold text-ink leading-snug">
-                Use my saved resume
-              </div>
-              <div className="text-[12px] text-slate-body leading-snug mt-0.5">
-                {savedResumeName ?? "Stored on your profile"}
-              </div>
-            </div>
-            <FileUp className="h-4 w-4 text-heritage-deep flex-shrink-0 mt-1" />
-          </label>
-
-          <label
-            className={
-              "flex items-start gap-3 p-4 border cursor-pointer transition-colors " +
-              (resumeChoice === "upload"
-                ? "bg-heritage/[0.08] border-heritage"
-                : "bg-cream border-[var(--rule-strong)] hover:bg-white")
-            }
-          >
-            <input
-              type="radio"
-              name="resume_choice"
-              checked={resumeChoice === "upload"}
-              onChange={() => onResumeChoice("upload")}
-              className="mt-1 accent-heritage"
-            />
-            <div className="min-w-0 flex-1">
-              <div className="text-[14px] font-semibold text-ink leading-snug">
-                Upload a different resume for this application
-              </div>
-              <div className="text-[12px] text-slate-body leading-snug mt-0.5">
-                Replace just for this role; doesn't change your saved resume.
-              </div>
-            </div>
-          </label>
-        </div>
+        <FieldShell label="Which resume?">
+          <OptionCards
+            value={resumeChoice}
+            onChange={(v) => onResumeChoice(v as "saved" | "upload")}
+            options={[
+              {
+                value: "saved",
+                label: "Use my saved resume",
+                hint: savedResumeName ?? "Stored on your profile",
+              },
+              {
+                value: "upload",
+                label: "Upload a different resume for this application",
+                hint: "Replace just for this role; doesn't change your saved resume.",
+              },
+            ]}
+          />
+        </FieldShell>
       )}
 
       {(!hasSavedResume || resumeChoice === "upload") && (
-        <div>
-          <label
-            htmlFor="resume"
-            className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
-          >
-            Resume file {!hasSavedResume && <span className="text-heritage">*</span>}
-          </label>
-          <input
-            id="resume"
-            ref={fileInputRef}
-            type="file"
+        <FieldShell
+          label={
+            <>
+              Resume file{" "}
+              {!hasSavedResume && <span className="text-heritage">*</span>}
+            </>
+          }
+          error={resumeError}
+        >
+          <FileField
+            file={resumeFile}
             accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            onChange={(e) => {
-              const f = e.target.files?.[0] ?? null;
+            hint="PDF, DOC or DOCX · up to 10 MB"
+            onFile={(f) => {
               if (!f) {
                 onResumeFile(null, null);
                 return;
@@ -1609,21 +1425,8 @@ function ResumeStep({
               }
               onResumeFile(f, null);
             }}
-            className="block w-full text-[14px] text-ink file:mr-4 file:px-5 file:py-2.5 file:border-0 file:text-[10px] file:font-bold file:tracking-[1.5px] file:uppercase file:bg-ink file:text-ivory hover:file:bg-ink-soft file:cursor-pointer file:transition-colors"
           />
-          <p className="mt-1.5 text-[12px] text-slate-meta leading-relaxed">
-            PDF, DOC, or DOCX. Max 10 MB.
-          </p>
-          {resumeFile && (
-            <p className="mt-2 text-[13px] text-heritage-deep font-semibold">
-              <Check className="inline h-3.5 w-3.5 mr-1" />
-              {resumeFile.name} attached
-            </p>
-          )}
-          {resumeError && (
-            <p className="mt-2 text-[13px] text-red-700">{resumeError}</p>
-          )}
-        </div>
+        </FieldShell>
       )}
     </div>
   );
@@ -1648,17 +1451,16 @@ function CoverLetterStep({
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Cover letter
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.5px] text-ink leading-tight">
+        <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           Why are you a fit for this role?
         </h2>
       </div>
 
-      <textarea
+      <TextAreaField
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={onChange}
         rows={8}
         placeholder={`A short note to the hiring team. Mention what excites you about this ${jobTitle.toLowerCase()} role and what experience makes you a fit.`}
-        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed"
       />
       <p className="text-[13px] text-slate-meta leading-relaxed">
         Optional, but recommended — personalized cover letters typically get
@@ -1724,7 +1526,7 @@ function ReviewStep({
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Review
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.5px] text-ink leading-tight">
+        <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           Final check before you send.
         </h2>
         <p className="text-[14px] text-slate-body leading-relaxed mt-2">
