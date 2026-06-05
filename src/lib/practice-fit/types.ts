@@ -41,7 +41,12 @@ export type FitDimensionKey =
   | "mentorship"
   | "ce_growth"
   | "practice_feel"
-  | "work_life";
+  | "work_life"
+  // v3.1 Phase B.5 (2026-06-05) — benefits coverage. Scores the candidate's
+  // ranked "benefits that matter most" against the benefits the JOB lists
+  // (existing structured data — no employer profile needed). Unscored until
+  // the candidate has priorities AND the job lists benefits; never a penalty.
+  | "benefits";
 
 export interface FitDimension {
   /** Maximum points this dimension can contribute when scored (0 when excluded). */
@@ -222,6 +227,12 @@ export interface CandidateFitInputs {
    * (rank 1 heaviest). Empty array falls back to the single comp_priority.
    */
   comp_priorities: string[];
+  /**
+   * v3.1 — the candidate's "benefits that matter most" (assessment chips:
+   * health | retirement_match | pto | ce_allowance | bonus | loan_repayment |
+   * flex_schedule | partnership). Empty = no signal → benefits dim excluded.
+   */
+  benefit_priorities: string[];
 }
 
 export interface JobFitInputs {
@@ -277,6 +288,13 @@ export interface JobFitInputs {
   specialty: string[];
   /** v1.1 — null means "no minimum experience requirement"; the dim is excluded. */
   min_years_experience: number | null;
+  /**
+   * v3.1 — the benefits the posting lists (jobs.benefits, free-text-ish
+   * strings like "401(k) with employer match", "Sign-on bonus available").
+   * Matched against the candidate's benefit_priorities via keyword. Empty →
+   * benefits dim excluded.
+   */
+  benefits: string[];
   /**
    * Track F (2026-05-12) — days the job is staffed. Subset of
    * ['mon','tue','wed','thu','fri','sat','sun']. Empty array means

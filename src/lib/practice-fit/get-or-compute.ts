@@ -233,7 +233,7 @@ async function loadCandidateInputs(
   const { data: c } = await supabase
     .from("candidates")
     .select(
-      "desired_roles, current_title, desired_specialty, license_states, desired_locations, desired_location_points, pms_systems, skills, schedule_preferences, min_salary, salary_unit, temp_or_perm, dso_size_preference, years_experience, years_experience_dental, work_pace, autonomy_pref, mentorship_pref, patient_facing_energy, practice_feel, ce_growth_importance, work_life_priority, comp_priority, comp_priorities, candidate_certifications(kind)"
+      "desired_roles, current_title, desired_specialty, license_states, desired_locations, desired_location_points, pms_systems, skills, schedule_preferences, min_salary, salary_unit, temp_or_perm, dso_size_preference, years_experience, years_experience_dental, work_pace, autonomy_pref, mentorship_pref, patient_facing_energy, practice_feel, ce_growth_importance, work_life_priority, comp_priority, comp_priorities, benefit_priorities, candidate_certifications(kind)"
     )
     .eq("id", candidateId)
     .maybeSingle();
@@ -312,6 +312,8 @@ async function loadCandidateInputs(
     work_life_priority: (r.work_life_priority as number | null) ?? null,
     comp_priority: (r.comp_priority as string | null) ?? null,
     comp_priorities: ((r.comp_priorities as string[] | null) ?? []) as string[],
+    // v3.1 — benefits the candidate prioritized (null until they take v3.1).
+    benefit_priorities: ((r.benefit_priorities as string[] | null) ?? []) as string[],
   };
 }
 
@@ -325,6 +327,7 @@ async function loadJobAndDso(
       `id, dso_id, role_category, employment_type, title, requirements, description,
        compensation_min, compensation_max, compensation_period,
        compensation_type,
+       benefits,
        specialty, min_years_experience,
        schedule_days, schedule_evenings, schedule_weekends,
        job_locations(location:dso_locations(city, state, latitude, longitude)),
@@ -395,6 +398,8 @@ async function loadJobAndDso(
         r.description as string | null
       ),
       specialty: ((r.specialty as string[] | null) ?? []) as string[],
+      // v3.1 — benefits the posting lists (feeds the benefits dim).
+      benefits: ((r.benefits as string[] | null) ?? []) as string[],
       min_years_experience:
         (r.min_years_experience as number | null) ?? null,
       schedule_days: ((r.schedule_days as string[] | null) ?? []) as string[],

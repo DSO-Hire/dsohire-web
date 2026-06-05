@@ -53,7 +53,7 @@ import type {
  * hashed input field (e.g. the A.4 caps/boosters). It's folded into the
  * input hash so a logic-only change still invalidates the read-through cache.
  */
-const MODEL_VERSION = "2026-06-05-v3-ranked-priority";
+const MODEL_VERSION = "2026-06-05-v3.1-benefits";
 
 /* ──────────────────────────────────────────────────────────────
  * v3 Phase B.2 — comp_priority re-weighting ("what matters MOST").
@@ -72,7 +72,10 @@ const MODEL_VERSION = "2026-06-05-v3-ranked-priority";
 const PRIORITY_RANK_MULT = [1.6, 1.35, 1.15];
 
 const PRIORITY_DIMS: Record<string, FitDimensionKey[]> = {
-  comp: ["compensation"],
+  // "Compensation matters most" tilts the whole money picture — salary AND
+  // benefits. Groups stay disjoint (benefits appears here only), so no dim is
+  // scaled twice.
+  comp: ["compensation", "benefits"],
   schedule: ["schedule_overlap", "work_life"],
   culture: ["practice_feel", "work_pace", "autonomy", "mentorship"],
   growth: ["ce_growth", "years_experience"],
@@ -158,6 +161,14 @@ const WEIGHTS: Record<FitDimensionKey, number> = {
   ce_growth: 4,
   practice_feel: 3,
   work_life: 3,
+  // v3.1 (2026-06-05) — benefits is ADDITIVE (the table now sums to 104, not
+  // 100). The final score normalizes over SCORED weights only, so a dimension
+  // that's unscored on a pair (here: no candidate priorities or no job
+  // benefits) drops cleanly out of the denominator and leaves every existing
+  // scored pair's number unchanged. Adding it on top — rather than re-carving
+  // the other dims — was the minimal-disturbance choice: live scores only move
+  // on pairs where benefits actually scores. Weight 4 ≈ the culture dims.
+  benefits: 4,
 };
 
 /* ──────────────────────────────────────────────────────────────
@@ -215,6 +226,8 @@ export function computePracticeFit(inputs: FitInputs): FitResult | null {
     ce_growth: scoreCeGrowth(inputs),
     practice_feel: scorePracticeFeel(inputs),
     work_life: scoreWorkLife(inputs),
+    // v3.1 — benefits coverage (candidate priorities vs job's listed benefits).
+    benefits: scoreBenefits(inputs),
   };
 
   // v3 Phase B.2 — tilt the weights toward what this candidate said matters
@@ -1619,6 +1632,103 @@ function scorePracticeFeel(inputs: FitInputs): FitDimension {
   );
 }
 
+/* ──────────────────────────────────────────────────────────────
+ * scoreBenefits — v3.1 (2026-06-05)
+ *
+ * The candidate picks the benefits that matter most (assessment chips); the
+ * job lists the benefits it offers (jobs.benefits — free-text-ish strings).
+ * We can't rely on canonical equality (real values look like "401(k) with
+ * employer match", "Sign-on bonus available", "health"), so each priority is
+ * matched by keyword regex against the job's benefit strings — the same
+ * approach the PMS/cert detectors use.
+ *
+ * raw = share of the candidate's prioritized benefits the job covers. Zero
+ * coverage floors at 15 (benefits are negotiable, not a deal-breaker), full
+ * coverage = 100. UNSCORED when the candidate set no priorities OR the job
+ * lists no benefits — never a penalty.
+ * ─────────────────────────────────────────────────────────── */
+
+/** Candidate priority token → keyword matcher run over each job benefit string. */
+const BENEFIT_MATCHERS: Record<string, RegExp> = {
+  health: /\bhealth\b|medical/i,
+  retirement_match: /401\s*\(?k\)?|retirement|employer match|\bira\b/i,
+  pto: /\bpto\b|paid time off|paid holidays?|vacation|paid (sick )?leave|time-off/i,
+  ce_allowance:
+    /\bce\b|continuing education|license renewal|professional dues|membership/i,
+  bonus: /bonus|incentive/i,
+  loan_repayment: /loan|tuition|student debt/i,
+  flex_schedule:
+    /flexible schedule|flex|4-?day|four-?day|predictable (practice )?hours|no nights|no weekends|remote|hybrid|work-?life/i,
+  partnership: /partnership|equity|ownership|partner track/i,
+};
+
+/** Candidate-facing labels for the priority tokens (for the match copy). */
+const BENEFIT_PRIORITY_LABEL: Record<string, string> = {
+  health: "health insurance",
+  retirement_match: "401(k) match",
+  pto: "paid time off",
+  ce_allowance: "CE allowance",
+  bonus: "a bonus",
+  loan_repayment: "student-loan help",
+  flex_schedule: "a flexible schedule",
+  partnership: "an equity / partnership track",
+};
+
+function scoreBenefits({ candidate, job }: FitInputs): FitDimension {
+  const priorities = (candidate.benefit_priorities ?? [])
+    .map((p) => token(p))
+    .filter((p): p is string => Boolean(p));
+  if (priorities.length === 0) {
+    return makeUnscoredDim("benefits", "Benefits", {
+      detail:
+        "Tell us which benefits matter most (in the assessment) to factor benefits into your match.",
+      detail_employer:
+        "Candidate hasn't ranked the benefits that matter to them — benefits excluded from their score.",
+      cta_label: "Take the assessment",
+      cta_href: "/candidate/assessment",
+    });
+  }
+
+  const jobBenefits = (job.benefits ?? []).filter(
+    (b): b is string => typeof b === "string" && b.trim().length > 0
+  );
+  if (jobBenefits.length === 0) {
+    return makeUnscoredDim("benefits", "Benefits", {
+      detail:
+        "This posting doesn't list benefits — benefits are excluded from the score.",
+      detail_employer:
+        "Job lists no benefits — benefits excluded. Add them to the posting to factor it in.",
+      cta_label: null,
+      cta_href: null,
+    });
+  }
+
+  const matched: string[] = [];
+  const missing: string[] = [];
+  for (const p of priorities) {
+    const re = BENEFIT_MATCHERS[p];
+    const hit = re ? jobBenefits.some((b) => re.test(b)) : false;
+    (hit ? matched : missing).push(BENEFIT_PRIORITY_LABEL[p] ?? p);
+  }
+
+  const coverage = matched.length / priorities.length;
+  const raw = matched.length === 0 ? 15 : Math.round(coverage * 100);
+
+  let detail: string;
+  let detailEmployer: string;
+  if (missing.length === 0) {
+    detail = `This practice offers every benefit you prioritized (${matched.join(", ")}).`;
+    detailEmployer = `Offers every benefit the candidate prioritized (${matched.join(", ")}).`;
+  } else if (matched.length > 0) {
+    detail = `Covers ${matched.length} of ${priorities.length} of your priorities (${matched.join(", ")}). Not listed: ${missing.join(", ")}.`;
+    detailEmployer = `Covers ${matched.length} of ${priorities.length} of their priorities (${matched.join(", ")}). Not listed: ${missing.join(", ")}.`;
+  } else {
+    detail = `This posting doesn't list the benefits you prioritized (${missing.join(", ")}) — often negotiable at offer.`;
+    detailEmployer = `Posting doesn't list the benefits they prioritized (${missing.join(", ")}) — often negotiable at offer.`;
+  }
+  return makeScoredDim("benefits", "Benefits", raw, detail, detailEmployer);
+}
+
 export function hashInputs(inputs: FitInputs): string {
   const canonical = {
     // Logic-version stamp — a scoring-logic change with no new input field
@@ -1661,6 +1771,9 @@ export function hashInputs(inputs: FitInputs): string {
       comp_priorities: (inputs.candidate.comp_priorities ?? []).map((p) =>
         (p ?? "").trim().toLowerCase()
       ),
+      // v3.1 — benefits priorities feed the benefits dim; hash so retaking the
+      // assessment invalidates the cache.
+      benefit_priorities: sortedLowercase(inputs.candidate.benefit_priorities),
     },
     job: {
       role_category: inputs.job.role_category,
@@ -1686,6 +1799,9 @@ export function hashInputs(inputs: FitInputs): string {
       certs_required: sortedLowercase(inputs.job.certs_required),
       specialty: sortedLowercase(inputs.job.specialty),
       min_years_experience: inputs.job.min_years_experience ?? null,
+      // v3.1 — job benefits feed the benefits dim; hash so editing the posting
+      // invalidates the cache.
+      benefits: sortedLowercase(inputs.job.benefits),
       schedule_days: sortedLowercase(inputs.job.schedule_days),
       schedule_evenings: Boolean(inputs.job.schedule_evenings),
       schedule_weekends: Boolean(inputs.job.schedule_weekends),
