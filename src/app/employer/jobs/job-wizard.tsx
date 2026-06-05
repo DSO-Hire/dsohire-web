@@ -1024,6 +1024,7 @@ export function JobWizard({
         steps={STEPS.map((s) => ({ id: s.id, label: s.short }))}
         currentIndex={stepIdx}
         maxWidthClass="max-w-[820px]"
+        stickyTopClass="top-[64px] lg:top-0"
         eyebrow={
           <>
             <BrandLockup height={28} />

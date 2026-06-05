@@ -116,10 +116,12 @@ export function ApplyWizard(props: ApplyWizardProps) {
     const list: { id: StepId; label: string }[] = [
       { id: "intro", label: "Get started" },
     ];
+    // Résumé first (after intro) — Cam 2026-06-05: surface it before screening
+    // + verifications so we can eventually parse it and pre-fill later steps (#70).
+    list.push({ id: "resume", label: "Resume" });
     if (hasScreening) list.push({ id: "screening", label: "Screening" });
     if (hasVerifications)
       list.push({ id: "verifications", label: "Verifications" });
-    list.push({ id: "resume", label: "Resume" });
     list.push({ id: "cover", label: "Cover letter" });
     list.push({ id: "review", label: "Review" });
     return list;
@@ -475,6 +477,8 @@ export function ApplyWizard(props: ApplyWizardProps) {
       <WizardShell
         steps={steps.map((s) => ({ id: s.id, label: s.label }))}
         currentIndex={stepIdx}
+        maxWidthClass="max-w-full"
+        stickyTopClass="top-[80px]"
         eyebrow={
           <>
             <BrandLockup height={28} />

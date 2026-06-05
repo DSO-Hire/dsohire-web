@@ -39,14 +39,14 @@ export function FieldShell({
 }) {
   return (
     <fieldset>
-      <legend className="text-[15px] font-bold text-ink">
+      <legend className="text-[16px] font-bold text-ink">
         {label}
         {optional && (
-          <span className="ml-2 text-[12px] font-medium text-slate-meta">optional</span>
+          <span className="ml-2 text-[13px] font-medium text-slate-meta">optional</span>
         )}
       </legend>
       {help && (
-        <p className="mt-1 text-[13px] leading-relaxed text-slate-meta">{help}</p>
+        <p className="mt-1 text-[14px] leading-relaxed text-slate-meta">{help}</p>
       )}
       <div className="mt-3">{children}</div>
       {error && <p className="mt-2 text-[12px] font-semibold text-red-700">{error}</p>}
@@ -82,7 +82,7 @@ export function OptionCards({
             aria-pressed={active}
             onClick={() => onChange(opt.value)}
             className={
-              "flex w-full items-center justify-between gap-3 border px-4 py-3 text-left text-[14px] transition-colors " +
+              "flex w-full items-center justify-between gap-3 border px-4 py-3 text-left text-[15px] transition-colors " +
               (active
                 ? "border-heritage-deep bg-heritage/10 font-semibold text-ink"
                 : "border-[var(--rule)] bg-white text-slate-body hover:border-heritage-deep")
@@ -91,7 +91,7 @@ export function OptionCards({
             <span>
               {opt.label}
               {opt.hint && (
-                <span className="mt-0.5 block text-[12px] font-normal text-slate-meta">
+                <span className="mt-0.5 block text-[13px] font-normal text-slate-meta">
                   {opt.hint}
                 </span>
               )}
@@ -138,7 +138,7 @@ export function MultiChips({
               )
             }
             className={
-              "rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition-colors " +
+              "rounded-full border px-4 py-2 text-[14px] font-semibold transition-colors " +
               (active
                 ? "border-heritage-deep bg-heritage-deep text-ivory"
                 : "border-[var(--rule)] text-slate-body hover:border-heritage-deep")
@@ -190,7 +190,7 @@ export function RankCards({
               )
             }
             className={
-              "flex w-full items-center justify-between gap-3 border px-4 py-3 text-left text-[14px] transition-colors " +
+              "flex w-full items-center justify-between gap-3 border px-4 py-3 text-left text-[15px] transition-colors " +
               (active
                 ? "border-heritage-deep bg-heritage/10 font-semibold text-ink"
                 : full
@@ -207,7 +207,7 @@ export function RankCards({
           </button>
         );
       })}
-      <p className="text-[12px] text-slate-meta">
+      <p className="text-[13px] text-slate-meta">
         Tap up to {max} in priority order — tap again to remove.
       </p>
     </div>
@@ -243,7 +243,7 @@ export function ScaleSlider({
   const mid = Math.round((min + max) / 2);
   return (
     <div className="flex items-center gap-3">
-      <span className="w-28 text-right text-[12px] text-slate-meta">{low}</span>
+      <span className="w-28 text-right text-[13px] text-slate-meta">{low}</span>
       <input
         type="range"
         min={min}
@@ -253,7 +253,7 @@ export function ScaleSlider({
         onChange={(e) => onChange(Number(e.target.value))}
         className={(variant === "practicefit" ? "pf-slider" : "dso-slider") + " flex-1"}
       />
-      <span className="w-28 text-[12px] text-slate-meta">{high}</span>
+      <span className="w-28 text-[13px] text-slate-meta">{high}</span>
     </div>
   );
 }
@@ -295,7 +295,7 @@ export function TextField({
         onChange={(e) => onChange(e.target.value)}
         className={
           widthClass +
-          " border border-[var(--rule)] bg-white px-3 py-2 text-[14px] text-ink focus:border-heritage focus:outline-none"
+          " border border-[var(--rule)] bg-white px-3 py-2 text-[15px] text-ink focus:border-heritage focus:outline-none"
         }
       />
       {suffix != null && <span className="text-[13px] text-slate-meta">{suffix}</span>}
@@ -327,7 +327,7 @@ export function TextAreaField({
       rows={rows}
       maxLength={maxLength}
       placeholder={placeholder}
-      className="w-full border border-[var(--rule)] bg-white px-3 py-2 text-[14px] text-ink focus:border-heritage focus:outline-none"
+      className="w-full border border-[var(--rule)] bg-white px-3 py-2 text-[15px] text-ink focus:border-heritage focus:outline-none"
     />
   );
 }
@@ -355,7 +355,7 @@ export function SelectField({
       onChange={(e) => onChange(e.target.value)}
       className={
         widthClass +
-        " border border-[var(--rule)] bg-white px-3 py-2 text-[14px] text-ink focus:border-heritage focus:outline-none"
+        " border border-[var(--rule)] bg-white px-3 py-2 text-[15px] text-ink focus:border-heritage focus:outline-none"
       }
     >
       {placeholder != null && <option value="">{placeholder}</option>}
@@ -394,7 +394,7 @@ export function CheckCard({
       disabled={disabled}
       onClick={() => onChange(!checked)}
       className={
-        "flex w-full items-start gap-3 border px-4 py-3 text-left text-[14px] transition-colors disabled:opacity-50 " +
+        "flex w-full items-start gap-3 border px-4 py-3 text-left text-[15px] transition-colors disabled:opacity-50 " +
         (checked
           ? "border-heritage-deep bg-heritage/10 text-ink"
           : "border-[var(--rule)] bg-white text-slate-body hover:border-heritage-deep")
@@ -413,7 +413,7 @@ export function CheckCard({
       <span>
         <span className="font-semibold text-ink">{label}</span>
         {description && (
-          <span className="mt-0.5 block text-[13px] font-normal text-slate-meta">
+          <span className="mt-0.5 block text-[14px] font-normal text-slate-meta">
             {description}
           </span>
         )}
@@ -445,7 +445,7 @@ export function FileField({
     <div>
       <label
         className={
-          "flex cursor-pointer items-center gap-3 border border-dashed px-4 py-4 text-[14px] transition-colors " +
+          "flex cursor-pointer items-center gap-3 border border-dashed px-4 py-4 text-[15px] transition-colors " +
           (shownName
             ? "border-heritage-deep bg-heritage/5 text-ink"
             : "border-[var(--rule)] bg-white text-slate-body hover:border-heritage-deep")
@@ -459,7 +459,7 @@ export function FileField({
             <span className="font-semibold">Choose a file…</span>
           )}
           {hint && (
-            <span className="mt-0.5 block text-[12px] font-normal text-slate-meta">
+            <span className="mt-0.5 block text-[13px] font-normal text-slate-meta">
               {hint}
             </span>
           )}

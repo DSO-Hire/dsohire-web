@@ -79,6 +79,12 @@ export interface WizardShellProps {
 
   /** Max content width. Default 680px (the assessment width). */
   maxWidthClass?: string;
+  /**
+   * Tailwind `top-*` class controlling where the sticky header pins. Defaults
+   * to "top-0". Hosts with a fixed top bar pass an offset (e.g. the candidate
+   * apply flow passes "top-[64px] lg:top-0" to clear the mobile nav).
+   */
+  stickyTopClass?: string;
 }
 
 export function WizardShell({
@@ -103,6 +109,7 @@ export function WizardShell({
   canJumpTo,
   onJump,
   maxWidthClass = "max-w-[680px]",
+  stickyTopClass = "top-0",
 }: WizardShellProps) {
   const total = Math.max(1, steps.length);
   const clampedIndex = Math.min(Math.max(0, currentIndex), total - 1);
@@ -119,26 +126,30 @@ export function WizardShell({
 
   return (
     <div className={maxWidthClass}>
-      {/* Eyebrow + meter */}
-      <div className="mb-6">
-        {eyebrow != null && <div className="mb-2 flex items-center gap-2">{eyebrow}</div>}
+      {/* Eyebrow + meter — sticky so the candidate always sees their step + progress. */}
+      <div
+        className={
+          "sticky z-20 mb-6 bg-ivory pb-3 pt-4 " + stickyTopClass
+        }
+      >
+        {eyebrow != null && <div className="mb-2.5 flex items-center gap-2">{eyebrow}</div>}
 
         {!hideMeter && (
           <div className="flex items-center gap-3">
-            <div className="h-2 flex-1 overflow-hidden rounded-full bg-cream">
+            <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-cream">
               <div
                 className="h-full rounded-full bg-heritage transition-all duration-300"
                 style={{ width: `${Math.max(6, pct)}%` }}
               />
             </div>
-            <span className="inline-flex items-center gap-1 text-[12px] font-bold text-heritage-deep">
-              {meterIcon ?? <Sparkles className="h-3.5 w-3.5" />}
+            <span className="inline-flex items-center gap-1.5 text-[13px] font-bold text-heritage-deep">
+              {meterIcon ?? <Sparkles className="h-4 w-4" />}
               {pct}% {progressLabel}
             </span>
           </div>
         )}
 
-        <p className="mt-2 text-[12px] text-slate-meta">
+        <p className="mt-2 text-[13px] text-slate-meta">
           Step {clampedIndex + 1} of {total}
           {step?.label ? <> · {step.label}</> : null}
         </p>
@@ -156,7 +167,7 @@ export function WizardShell({
                   disabled={!jumpable}
                   onClick={() => jumpable && onJump(i)}
                   className={
-                    "rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[1px] transition-colors " +
+                    "rounded-full px-3 py-1 text-[12px] font-bold uppercase tracking-[1px] transition-colors " +
                     (active
                       ? "bg-ink text-ivory"
                       : jumpable
