@@ -356,3 +356,53 @@ html, body {
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='11' fill='white' stroke='%2314233F' stroke-opacity='0.18'/><path d='M12 4 L14.4 9.6 L20 12 L14.4 14.4 L12 20 L9.6 14.4 L4 12 L9.6 9.6 Z' fill='%234D7A60'/></svg>");
   cursor: pointer;
 }
+
+/* ──────────────────────────────────────────────────────────────
+ * DSO Hire wizard slider — the non-PracticeFit sibling of .pf-slider.
+ * Heritage-green track + a white-circle thumb carrying the D-form mark
+ * (navy D + heritage crossbar) instead of the PracticeFit sparkle. The
+ * sparkle stays reserved for PracticeFit surfaces; the apply + job-creation
+ * wizards wear the DSO Hire D mark. Applied via className="dso-slider".
+ * ─────────────────────────────────────────────────────────── */
+.dso-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: #4D7A60; /* heritage track */
+  outline: none;
+  cursor: pointer;
+}
+.dso-slider:focus-visible {
+  box-shadow: 0 0 0 3px var(--heritage-glow);
+}
+.dso-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 44'><circle cx='22' cy='22' r='21' fill='white' stroke='%2314233F' stroke-opacity='0.2'/><path d='M14 13 L26 13 Q33 13 33 20 L33 24 Q33 31 26 31 L14 31' fill='none' stroke='%2314233F' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/><line x1='16' y1='22' x2='25' y2='22' stroke='%234D7A60' stroke-width='2.6' stroke-linecap='round'/></svg>");
+  filter: drop-shadow(0 1px 2px rgba(20, 35, 63, 0.25));
+  cursor: pointer;
+}
+.dso-slider::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: #4D7A60;
+}
+.dso-slider::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 44'><circle cx='22' cy='22' r='21' fill='white' stroke='%2314233F' stroke-opacity='0.2'/><path d='M14 13 L26 13 Q33 13 33 20 L33 24 Q33 31 26 31 L14 31' fill='none' stroke='%2314233F' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/><line x1='16' y1='22' x2='25' y2='22' stroke='%234D7A60' stroke-width='2.6' stroke-linecap='round'/></svg>");
+  cursor: pointer;
+}
