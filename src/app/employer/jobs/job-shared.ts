@@ -37,7 +37,8 @@ export interface ScreeningQuestionPayload {
     | "yes_no"
     | "single_select"
     | "multi_select"
-    | "number";
+    | "number"
+    | "scale";
   options: Array<{ id: string; label: string }> | null;
   required: boolean;
   sort_order: number;
@@ -63,6 +64,7 @@ export const VALID_KINDS: Set<ScreeningQuestionPayload["kind"]> = new Set([
   "single_select",
   "multi_select",
   "number",
+  "scale",
 ]);
 
 /* ───── Pure helpers ───── */

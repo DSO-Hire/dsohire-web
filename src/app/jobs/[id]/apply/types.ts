@@ -10,7 +10,11 @@ export type ScreeningQuestionKind =
   | "yes_no"
   | "single_select"
   | "multi_select"
-  | "number";
+  | "number"
+  // #71 — slider/"drag" question: candidate drags a 1–5 scale between two
+  // labeled ends (stored in `options` as [{id:'low'},{id:'high'}]); the answer
+  // is a number (answer_number).
+  | "scale";
 
 export interface ScreeningQuestionOption {
   id: string;

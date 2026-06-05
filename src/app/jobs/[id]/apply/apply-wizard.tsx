@@ -49,6 +49,7 @@ import {
   FieldShell,
   OptionCards,
   MultiChips,
+  ScaleSlider,
   TextField,
   TextAreaField,
   FileField,
@@ -851,6 +852,27 @@ function QuestionInput({
           onChange={(v) => onChange({ kind: "multi", value: v })}
         />
       );
+    case "scale": {
+      // The two end labels live in options ([{id:'low'},{id:'high'}]). The
+      // answer is a 1–5 number, reusing the "number" AnswerValue shape.
+      const opts = question.options ?? [];
+      const low =
+        opts.find((o) => o.id === "low")?.label || opts[0]?.label || "1";
+      const high =
+        opts.find((o) => o.id === "high")?.label || opts[1]?.label || "5";
+      const num =
+        value?.kind === "number" && value.value !== ""
+          ? Number(value.value)
+          : null;
+      return (
+        <ScaleSlider
+          value={num !== null && Number.isFinite(num) ? num : null}
+          onChange={(n) => onChange({ kind: "number", value: String(n) })}
+          low={low}
+          high={high}
+        />
+      );
+    }
   }
 }
 
@@ -1728,6 +1750,7 @@ function seedAnswersFromExisting(
         out[q.id] = { kind: "multi", value: prior.answer_choices ?? [] };
         break;
       case "number":
+      case "scale":
         out[q.id] = {
           kind: "number",
           value: prior.answer_number !== null ? String(prior.answer_number) : "",
@@ -1750,6 +1773,7 @@ function emptyAnswer(q: ScreeningQuestion): AnswerValue {
     case "multi_select":
       return { kind: "multi", value: [] };
     case "number":
+    case "scale":
       return { kind: "number", value: "" };
   }
 }

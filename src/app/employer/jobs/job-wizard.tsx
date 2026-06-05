@@ -94,7 +94,10 @@ export type ScreeningQuestionKind =
   | "yes_no"
   | "single_select"
   | "multi_select"
-  | "number";
+  | "number"
+  // #71 — slider/"drag" question. Stores its two end labels in `options` as
+  // [{id:'low'},{id:'high'}]; candidate answers a 1–5 number.
+  | "scale";
 
 export interface ScreeningQuestionOption {
   id: string;
@@ -311,6 +314,7 @@ const KIND_LABELS: Record<ScreeningQuestionKind, string> = {
   single_select: "Single choice",
   multi_select: "Multiple choice",
   number: "Number",
+  scale: "Scale (slider)",
 };
 
 const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
@@ -2053,7 +2057,14 @@ function ScreeningStep({
               { id: `opt_${Date.now()}_a`, label: "" },
               { id: `opt_${Date.now()}_b`, label: "" },
             ]
-          : null,
+          : kind === "scale"
+            ? // #71 — a scale stores its two end labels in `options`, keyed
+              // 'low'/'high' so the candidate-side slider can read them.
+              [
+                { id: "low", label: "" },
+                { id: "high", label: "" },
+              ]
+            : null,
       required: false,
       sort_order: questions.length,
     };
@@ -2145,6 +2156,7 @@ function ScreeningStep({
               "single_select",
               "multi_select",
               "number",
+              "scale",
             ] as ScreeningQuestionKind[]
           ).map((k) => (
             <button
@@ -2187,6 +2199,9 @@ function QuestionCard({
 }) {
   const isSelect =
     question.kind === "single_select" || question.kind === "multi_select";
+  const isScale = question.kind === "scale";
+  const scaleLabel = (id: "low" | "high") =>
+    (question.options ?? []).find((o) => o.id === id)?.label ?? "";
 
   const updateOption = (id: string, label: string) => {
     if (!question.options) return;
@@ -2346,6 +2361,31 @@ function QuestionCard({
               <Plus className="h-3 w-3" />
               Add option
             </button>
+          </div>
+        )}
+
+        {isScale && (
+          <div>
+            <label className="block text-[16px] font-bold text-ink mb-1.5">
+              Slider end labels <span className="text-heritage">*</span>
+            </label>
+            <p className="mb-2.5 text-[13px] text-slate-meta">
+              Candidates drag a 1–5 slider between these two ends.
+            </p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <Input
+                label="Left end (1)"
+                placeholder="e.g. Prefer clinical focus"
+                value={scaleLabel("low")}
+                onChange={(v) => updateOption("low", v)}
+              />
+              <Input
+                label="Right end (5)"
+                placeholder="e.g. I love patient interaction"
+                value={scaleLabel("high")}
+                onChange={(v) => updateOption("high", v)}
+              />
+            </div>
           </div>
         )}
 

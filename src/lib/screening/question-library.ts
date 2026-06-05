@@ -201,6 +201,47 @@ const UNIVERSAL_QUESTIONS: RecommendedQuestion[] = [
       "Surfaces budget mismatches early so neither side wastes interviews.",
     category: "compensation",
   },
+  // #71 — slider ("drag") starters. Sliders shine for self-rated spectrums;
+  // these mirror the PracticeFit assessment so the apply flow feels cohesive.
+  {
+    id: "univ_scale_patient_energy",
+    prompt: "Patient interaction energizes me.",
+    kind: "scale",
+    options: [
+      { id: "low", label: "I prefer clinical focus" },
+      { id: "high", label: "I love it" },
+    ],
+    required: false,
+    rationale:
+      "A one-drag read on chairside temperament — great for patient-facing roles.",
+    category: "fit",
+  },
+  {
+    id: "univ_scale_pace",
+    prompt: "What pace brings out your best?",
+    kind: "scale",
+    options: [
+      { id: "low", label: "Steady & unhurried" },
+      { id: "high", label: "High-volume & fast" },
+    ],
+    required: false,
+    rationale:
+      "Pace mismatch is a top driver of early turnover — surface it up front.",
+    category: "fit",
+  },
+  {
+    id: "univ_scale_autonomy",
+    prompt: "How much autonomy do you want day-to-day?",
+    kind: "scale",
+    options: [
+      { id: "low", label: "Clear protocols & support" },
+      { id: "high", label: "Run my own chair" },
+    ],
+    required: false,
+    rationale:
+      "Reveals whether a candidate will thrive in your supervision style.",
+    category: "fit",
+  },
 ];
 
 /* ─────────────────────────────────────────────────────────────────

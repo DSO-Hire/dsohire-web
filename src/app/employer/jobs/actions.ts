@@ -849,6 +849,20 @@ export async function updateJobScreeningSection(
         }
         options.push({ id: optId, label });
       }
+    } else if (kind === "scale") {
+      // #71 — a scale stores two end labels keyed low/high; blank labels fall
+      // back to neutral defaults so the save never blocks on them.
+      const rawOpts = Array.isArray(raw.options)
+        ? (raw.options as Array<Record<string, unknown>>)
+        : [];
+      const pick = (oid: string) => {
+        const o = rawOpts.find((x) => String(x?.id ?? "") === oid);
+        return String(o?.label ?? "").trim();
+      };
+      options = [
+        { id: "low", label: pick("low") || "Low" },
+        { id: "high", label: pick("high") || "High" },
+      ];
     }
     // E2.10 — knockout flag + correct-answer payload. Server enforces:
     // (a) free-text kinds null both fields (they can't be evaluated);
@@ -1860,6 +1874,19 @@ function parseJobFormData(
           }
           options.push({ id: optId, label });
         }
+      } else if (kind === "scale") {
+        // #71 — two end labels keyed low/high; blank labels default neutrally.
+        const rawOpts = Array.isArray(raw.options)
+          ? (raw.options as Array<Record<string, unknown>>)
+          : [];
+        const pick = (oid: string) => {
+          const o = rawOpts.find((x) => String(x?.id ?? "") === oid);
+          return String(o?.label ?? "").trim();
+        };
+        options = [
+          { id: "low", label: pick("low") || "Low" },
+          { id: "high", label: pick("high") || "High" },
+        ];
       }
 
       // E2.10 — knockout flag + correct-answer payload. Same validation

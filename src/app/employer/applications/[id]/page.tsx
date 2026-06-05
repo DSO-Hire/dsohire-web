@@ -20,6 +20,7 @@ import {
   ListChecks,
   ToggleLeft,
   Hash,
+  SlidersHorizontal,
   AlignLeft,
   Type,
   Lock,
@@ -2198,6 +2199,7 @@ const KIND_ICON: Record<
   single_select: CheckSquare,
   multi_select: ListChecks,
   number: Hash,
+  scale: SlidersHorizontal,
 };
 
 const KIND_LABEL: Record<ScreeningQuestionKind, string> = {
@@ -2207,6 +2209,7 @@ const KIND_LABEL: Record<ScreeningQuestionKind, string> = {
   single_select: "Single choice",
   multi_select: "Multi choice",
   number: "Number",
+  scale: "Scale",
 };
 
 function formatAnswer(
@@ -2233,6 +2236,16 @@ function formatAnswer(
         return { display: "Not answered", missing: true };
       }
       return { display: String(answer.answer_number), missing: false };
+    }
+    case "scale": {
+      // #71 — slider answer (1–5); show the value with its end labels.
+      if (answer.answer_number === null || answer.answer_number === undefined) {
+        return { display: "Not answered", missing: true };
+      }
+      const low = question.options?.find((o) => o.id === "low")?.label;
+      const high = question.options?.find((o) => o.id === "high")?.label;
+      const ends = low && high ? ` (${low} → ${high})` : "";
+      return { display: `${answer.answer_number} of 5${ends}`, missing: false };
     }
     case "single_select": {
       const id = answer.answer_choice;

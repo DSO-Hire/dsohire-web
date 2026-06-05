@@ -55,6 +55,7 @@ const KIND_LABELS: Record<ScreeningQuestionKind, string> = {
   single_select: "Single choice",
   multi_select: "Multiple choice",
   number: "Number",
+  scale: "Scale (slider)",
 };
 
 interface CorporateRecommendedQuestionsPanelProps {
@@ -120,7 +121,10 @@ export function CorporateRecommendedQuestionsPanel({
       .toString(36)
       .slice(2, 6)}`;
     const options: ScreeningQuestionOption[] | null =
-      rq.options && (rq.kind === "single_select" || rq.kind === "multi_select")
+      rq.options &&
+      (rq.kind === "single_select" ||
+        rq.kind === "multi_select" ||
+        rq.kind === "scale")
         ? rq.options.map((o) => ({ id: o.id, label: o.label }))
         : null;
     return {

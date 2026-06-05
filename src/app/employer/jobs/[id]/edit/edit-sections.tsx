@@ -99,6 +99,7 @@ const KIND_LABELS: Record<ScreeningQuestionKind, string> = {
   single_select: "Single choice",
   multi_select: "Multiple choice",
   number: "Number",
+  scale: "Scale (slider)",
 };
 
 const STATUS_OPTIONS: Array<{ value: string; label: string; helper: string }> = [
@@ -1485,7 +1486,13 @@ function ScreeningSection({
               { id: `opt_${Date.now()}_a`, label: "" },
               { id: `opt_${Date.now()}_b`, label: "" },
             ]
-          : null,
+          : kind === "scale"
+            ? // #71 — scale stores its two end labels in options (low/high).
+              [
+                { id: "low", label: "" },
+                { id: "high", label: "" },
+              ]
+            : null,
       required: false,
       sort_order: questions.length,
     };
@@ -1631,6 +1638,7 @@ function ScreeningSection({
                 "single_select",
                 "multi_select",
                 "number",
+                "scale",
               ] as ScreeningQuestionKind[]
             ).map((k) => (
               <button
@@ -1679,6 +1687,9 @@ function QuestionCard({
 }) {
   const isSelect =
     question.kind === "single_select" || question.kind === "multi_select";
+  const isScale = question.kind === "scale";
+  const scaleLabel = (id: "low" | "high") =>
+    (question.options ?? []).find((o) => o.id === id)?.label ?? "";
 
   const updateOption = (id: string, label: string) => {
     if (!question.options) return;
@@ -1837,6 +1848,29 @@ function QuestionCard({
               <Plus className="h-3 w-3" />
               Add option
             </button>
+          </div>
+        )}
+        {isScale && (
+          <div>
+            <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+              Slider end labels <span className="text-heritage">*</span>
+            </label>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <input
+                type="text"
+                value={scaleLabel("low")}
+                onChange={(e) => updateOption("low", e.target.value)}
+                placeholder="Left end (1) — e.g. Prefer clinical focus"
+                className="px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+              />
+              <input
+                type="text"
+                value={scaleLabel("high")}
+                onChange={(e) => updateOption("high", e.target.value)}
+                placeholder="Right end (5) — e.g. I love patient interaction"
+                className="px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+              />
+            </div>
           </div>
         )}
         <label className="flex items-center gap-2.5 text-[14px] text-ink cursor-pointer pt-1">

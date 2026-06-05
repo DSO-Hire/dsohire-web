@@ -614,6 +614,18 @@ function parseAnswers(
         out[q.id] = Number.isFinite(n) ? { ...empty, number: n } : empty;
         break;
       }
+      case "scale": {
+        // #71 — 1–5 slider answer; clamp to range, store in answer_number.
+        if (first === "") {
+          out[q.id] = empty;
+          break;
+        }
+        const n = Math.round(Number(first));
+        out[q.id] = Number.isFinite(n)
+          ? { ...empty, number: Math.max(1, Math.min(5, n)) }
+          : empty;
+        break;
+      }
     }
   }
   return out;

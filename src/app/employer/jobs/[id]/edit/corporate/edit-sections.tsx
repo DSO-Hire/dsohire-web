@@ -108,6 +108,7 @@ const KIND_LABELS: Record<ScreeningQuestionKind, string> = {
   single_select: "Single choice",
   multi_select: "Multiple choice",
   number: "Number",
+  scale: "Scale (slider)",
 };
 
 const STATUS_OPTIONS: Array<{ value: string; label: string; helper: string }> =

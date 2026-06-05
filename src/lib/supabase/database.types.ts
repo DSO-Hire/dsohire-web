@@ -4383,6 +4383,7 @@ export type Database = {
         | "single_select"
         | "multi_select"
         | "number"
+        | "scale"
       subscription_status:
         | "trialing"
         | "active"
@@ -4565,6 +4566,7 @@ export const Constants = {
         "single_select",
         "multi_select",
         "number",
+        "scale",
       ],
       subscription_status: [
         "trialing",
