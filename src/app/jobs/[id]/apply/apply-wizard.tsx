@@ -55,7 +55,7 @@ import {
   CheckCard,
 } from "@/components/wizard";
 import { BrandMark } from "@/components/brand/brand-mark";
-import { BrandLockup } from "@/components/marketing/site-shell";
+import { BrandLockup } from "@/components/brand/brand-lockup";
 
 const AVAILABILITY_LABEL: Record<string, string> = {
   immediate: "Immediately",
