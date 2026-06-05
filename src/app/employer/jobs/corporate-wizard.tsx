@@ -31,7 +31,7 @@
  * the existing pattern rather than exporting a shared primitive set mid-5G.d).
  */
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import {
   Plus,
   Trash2,
@@ -1977,6 +1977,16 @@ function ScreeningStep({
     onChange(next);
   };
 
+  // #73 — drag-to-reorder (collapsed cards); arrows stay as fallback.
+  const dragIndex = useRef<number | null>(null);
+  const reorder = (from: number, to: number) => {
+    if (from === to || from < 0 || to < 0) return;
+    const next = [...questions];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    onChange(next);
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -2011,19 +2021,49 @@ function ScreeningStep({
         </div>
       )}
 
-      {questions.map((q, idx) => (
-        <QuestionCard
-          key={q.id}
-          question={q}
-          index={idx}
-          total={questions.length}
-          onUpdate={(patch) => updateQ(q.id, patch)}
-          onRemove={() => removeQ(q.id)}
-          onMove={(dir) => move(q.id, dir)}
-          expanded={expandedIds.has(q.id)}
-          onToggleExpand={() => toggleExpand(q.id)}
-        />
-      ))}
+      {questions.length >= 2 && (
+        <p className="text-[12px] text-slate-meta">
+          Drag a collapsed card to reorder — or use the arrows.
+        </p>
+      )}
+
+      {questions.map((q, idx) => {
+        const collapsed = !expandedIds.has(q.id);
+        return (
+          <div
+            key={q.id}
+            draggable={collapsed}
+            onDragStart={(e) => {
+              dragIndex.current = idx;
+              e.dataTransfer.effectAllowed = "move";
+            }}
+            onDragOver={(e) => {
+              if (dragIndex.current !== null && dragIndex.current !== idx)
+                e.preventDefault();
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              if (dragIndex.current !== null) reorder(dragIndex.current, idx);
+              dragIndex.current = null;
+            }}
+            onDragEnd={() => {
+              dragIndex.current = null;
+            }}
+            className={collapsed ? "cursor-grab active:cursor-grabbing" : ""}
+          >
+            <QuestionCard
+              question={q}
+              index={idx}
+              total={questions.length}
+              onUpdate={(patch) => updateQ(q.id, patch)}
+              onRemove={() => removeQ(q.id)}
+              onMove={(dir) => move(q.id, dir)}
+              expanded={expandedIds.has(q.id)}
+              onToggleExpand={() => toggleExpand(q.id)}
+            />
+          </div>
+        );
+      })}
 
       <div>
         <div className="text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
@@ -2378,6 +2418,16 @@ function PreviewStep({
     selectedLocationIds.has(l.id)
   );
 
+  // #78 — view-as-candidate toggle (mirrors the practice wizard).
+  const [viewAsCandidate, setViewAsCandidate] = useState(false);
+  const candidateEmployerLabel = (() => {
+    const anon = selectedLocations.find((l) => l.anonymizeName);
+    if (anon) return `Dental practice in ${anon.city ?? "your area"}`;
+    const priv = selectedLocations.find((l) => l.publicDsoAffiliation === false);
+    if (priv) return priv.name;
+    return selectedLocations[0]?.name ?? "Your organization · corporate role";
+  })();
+
   // Build the sandbox rows, only the populated ones.
   const sandboxRows: Array<{ label: string; value: string }> = [];
   if (workMode) {
@@ -2474,6 +2524,60 @@ function PreviewStep({
         </h2>
       </div>
 
+      <div className="inline-flex rounded-full border border-[var(--rule)] bg-cream p-1 text-[12px] font-bold uppercase tracking-[1px]">
+        <button
+          type="button"
+          onClick={() => setViewAsCandidate(false)}
+          className={
+            "rounded-full px-3.5 py-1.5 transition-colors " +
+            (!viewAsCandidate
+              ? "bg-ink text-ivory"
+              : "text-slate-body hover:text-ink")
+          }
+        >
+          Employer review
+        </button>
+        <button
+          type="button"
+          onClick={() => setViewAsCandidate(true)}
+          className={
+            "rounded-full px-3.5 py-1.5 transition-colors " +
+            (viewAsCandidate
+              ? "bg-ink text-ivory"
+              : "text-slate-body hover:text-ink")
+          }
+        >
+          View as candidate
+        </button>
+      </div>
+
+      {viewAsCandidate && (
+        <CorporateCandidatePreview
+          employerLabel={candidateEmployerLabel}
+          title={title}
+          fnLabel={fnLabel}
+          authorityLabel={authorityLabel}
+          employment={employment}
+          locationLabel={
+            selectedLocations
+              .map((l) => [l.city, l.state].filter(Boolean).join(", "))
+              .filter(Boolean)
+              .join(" · ") || null
+          }
+          comp={
+            compVisible
+              ? formatComp(compType, compMin, compMax, compPeriod)
+              : null
+          }
+          sandboxRows={sandboxRows}
+          description={description}
+          requirements={requirements}
+          questionCount={questions.length}
+        />
+      )}
+
+      {!viewAsCandidate && (
+        <>
       <ReviewBlock label="Basics" onEdit={() => onJumpTo("basics")}>
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
           <Row label="Title" value={title || "—"} />
@@ -2561,6 +2665,8 @@ function PreviewStep({
           </ul>
         )}
       </ReviewBlock>
+        </>
+      )}
 
       <div className="border border-[var(--rule)] p-5 bg-cream/40">
         <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
@@ -2594,6 +2700,103 @@ function PreviewStep({
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+/* #78 — candidate-eye-view of a corporate posting, from in-memory state. */
+function CorporateCandidatePreview({
+  employerLabel,
+  title,
+  fnLabel,
+  authorityLabel,
+  employment,
+  locationLabel,
+  comp,
+  sandboxRows,
+  description,
+  requirements,
+  questionCount,
+}: {
+  employerLabel: string;
+  title: string;
+  fnLabel: string;
+  authorityLabel: string;
+  employment: string;
+  locationLabel: string | null;
+  comp: string | null;
+  sandboxRows: Array<{ label: string; value: string }>;
+  description: string;
+  requirements: string;
+  questionCount: number;
+}) {
+  const hasDesc = description.replace(/<[^>]*>/g, "").trim().length > 0;
+  const chip =
+    "rounded-full bg-cream px-3 py-1 text-[12px] font-semibold text-slate-body";
+  return (
+    <div className="border border-[var(--rule)] bg-white p-6 sm:p-8">
+      <div className="mb-3 text-[10px] font-bold uppercase tracking-[2px] text-[#3D5266]">
+        How candidates see this
+      </div>
+      <div className="text-[13px] font-semibold text-slate-meta">
+        {employerLabel}
+      </div>
+      <h3 className="mt-1 text-2xl font-extrabold leading-tight tracking-[-0.5px] text-ink">
+        {title || "Untitled role"}
+      </h3>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <span className={chip}>{fnLabel}</span>
+        {authorityLabel && authorityLabel !== "—" && (
+          <span className={chip}>{authorityLabel}</span>
+        )}
+        <span className={chip}>{employment}</span>
+        {locationLabel && <span className={chip}>{locationLabel}</span>}
+        {comp && (
+          <span className="rounded-full bg-[#3D5266]/10 px-3 py-1 text-[12px] font-semibold text-[#3D5266]">
+            {comp}
+          </span>
+        )}
+      </div>
+      {hasDesc ? (
+        <div
+          className="dso-prose mt-5 text-[14px]"
+          dangerouslySetInnerHTML={{ __html: description }}
+        />
+      ) : (
+        <p className="mt-5 text-[14px] italic text-slate-meta">
+          No description yet — candidates would see an empty role description.
+        </p>
+      )}
+      {sandboxRows.length > 0 && (
+        <div className="mt-5">
+          <div className="mb-2 text-[10px] font-bold uppercase tracking-[1.5px] text-slate-meta">
+            Role details
+          </div>
+          <dl className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
+            {sandboxRows.map((r) => (
+              <div key={r.label}>
+                <dt className="text-[12px] text-slate-meta">{r.label}</dt>
+                <dd className="text-[14px] text-ink">{r.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      )}
+      {requirements.trim() && (
+        <div className="mt-5">
+          <div className="mb-1 text-[10px] font-bold uppercase tracking-[1.5px] text-slate-meta">
+            Requirements
+          </div>
+          <pre className="whitespace-pre-wrap font-sans text-[14px] leading-relaxed text-ink">
+            {requirements}
+          </pre>
+        </div>
+      )}
+      <p className="mt-6 border-t border-[var(--rule)] pt-4 text-[13px] text-slate-meta">
+        {questionCount > 0
+          ? `${questionCount} screening question${questionCount === 1 ? "" : "s"} on apply.`
+          : "Candidates apply with just résumé + cover letter."}
+      </p>
     </div>
   );
 }

@@ -17,7 +17,7 @@
  * which parses + syncs `job_screening_questions`.
  */
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import {
   Plus,
   Trash2,
@@ -2095,6 +2095,17 @@ function ScreeningStep({
     onChange(next);
   };
 
+  // #73 — drag-to-reorder. Collapsed cards are drag targets; the up/down
+  // arrows stay as a fallback. Pure array reorder, no data risk.
+  const dragIndex = useRef<number | null>(null);
+  const reorder = (from: number, to: number) => {
+    if (from === to || from < 0 || to < 0) return;
+    const next = [...questions];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    onChange(next);
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -2129,19 +2140,49 @@ function ScreeningStep({
         </div>
       )}
 
-      {questions.map((q, idx) => (
-        <QuestionCard
-          key={q.id}
-          question={q}
-          index={idx}
-          total={questions.length}
-          onUpdate={(patch) => updateQ(q.id, patch)}
-          onRemove={() => removeQ(q.id)}
-          onMove={(dir) => move(q.id, dir)}
-          expanded={expandedIds.has(q.id)}
-          onToggleExpand={() => toggleExpand(q.id)}
-        />
-      ))}
+      {questions.length >= 2 && (
+        <p className="text-[12px] text-slate-meta">
+          Drag a collapsed card to reorder — or use the arrows.
+        </p>
+      )}
+
+      {questions.map((q, idx) => {
+        const collapsed = !expandedIds.has(q.id);
+        return (
+          <div
+            key={q.id}
+            draggable={collapsed}
+            onDragStart={(e) => {
+              dragIndex.current = idx;
+              e.dataTransfer.effectAllowed = "move";
+            }}
+            onDragOver={(e) => {
+              if (dragIndex.current !== null && dragIndex.current !== idx)
+                e.preventDefault();
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              if (dragIndex.current !== null) reorder(dragIndex.current, idx);
+              dragIndex.current = null;
+            }}
+            onDragEnd={() => {
+              dragIndex.current = null;
+            }}
+            className={collapsed ? "cursor-grab active:cursor-grabbing" : ""}
+          >
+            <QuestionCard
+              question={q}
+              index={idx}
+              total={questions.length}
+              onUpdate={(patch) => updateQ(q.id, patch)}
+              onRemove={() => removeQ(q.id)}
+              onMove={(dir) => move(q.id, dir)}
+              expanded={expandedIds.has(q.id)}
+              onToggleExpand={() => toggleExpand(q.id)}
+            />
+          </div>
+        );
+      })}
 
       <div>
         <div className="text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-3">

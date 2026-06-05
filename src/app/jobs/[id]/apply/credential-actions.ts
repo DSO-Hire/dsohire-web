@@ -29,7 +29,7 @@
  */
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { AddCredentialResult } from "./types";
+import type { AddCredentialResult, CandidateCredential } from "./types";
 
 const CREDENTIAL_BUCKET = "candidate-credentials";
 const CREDENTIAL_MIME = new Set([
@@ -273,4 +273,90 @@ async function maybeUploadDocument(
   }
 
   return null;
+}
+
+/**
+ * #76 — re-read the candidate's profile credentials as the normalized
+ * CandidateCredential[] the verification step links against. The apply wizard
+ * calls this after a résumé import (saveParsedResumeAction) writes new
+ * licenses/certs/education to the profile, so the freshly-added rows become
+ * immediately selectable as proof without a page reload. Same projection as
+ * the apply page's server-side build. Returns [] on no session / no candidate.
+ */
+export async function refreshCandidateCredentials(): Promise<
+  CandidateCredential[]
+> {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+  const { data: candidate } = await supabase
+    .from("candidates")
+    .select("id")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+  if (!candidate) return [];
+  const cid = candidate.id as string;
+
+  const [
+    { data: rawLicenses },
+    { data: rawCertifications },
+    { data: rawEducation },
+  ] = await Promise.all([
+    supabase
+      .from("candidate_licenses")
+      .select("id, license_type, state")
+      .eq("candidate_id", cid),
+    supabase
+      .from("candidate_certifications")
+      .select("id, kind, level")
+      .eq("candidate_id", cid),
+    supabase
+      .from("candidate_education")
+      .select("id, degree, field_of_study, school_name")
+      .eq("candidate_id", cid),
+  ]);
+
+  const licenses = (
+    (rawLicenses ?? []) as Array<{
+      id: string;
+      license_type: string;
+      state: string | null;
+    }>
+  ).map<CandidateCredential>((l) => ({
+    source: "candidate_license",
+    id: l.id,
+    label: [l.license_type, l.state].filter(Boolean).join(" · "),
+  }));
+  const certifications = (
+    (rawCertifications ?? []) as Array<{
+      id: string;
+      kind: string;
+      level: string | null;
+    }>
+  ).map<CandidateCredential>((c) => ({
+    source: "candidate_certification",
+    id: c.id,
+    label: [c.kind, c.level].filter(Boolean).join(" · "),
+  }));
+  const education = (
+    (rawEducation ?? []) as Array<{
+      id: string;
+      degree: string | null;
+      field_of_study: string | null;
+      school_name: string;
+    }>
+  ).map<CandidateCredential>((e) => ({
+    source: "candidate_education",
+    id: e.id,
+    label: [
+      [e.degree, e.field_of_study].filter(Boolean).join(", "),
+      e.school_name,
+    ]
+      .filter(Boolean)
+      .join(" — "),
+  }));
+
+  return [...licenses, ...certifications, ...education];
 }

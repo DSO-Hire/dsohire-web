@@ -25,8 +25,15 @@ import {
   X,
 } from "lucide-react";
 import { applyToJob } from "./actions";
-import { addInlineCredential } from "./credential-actions";
-import { parseResumeAction } from "@/app/candidate/profile/import/actions";
+import {
+  addInlineCredential,
+  refreshCandidateCredentials,
+} from "./credential-actions";
+import {
+  parseResumeAction,
+  saveParsedResumeAction,
+} from "@/app/candidate/profile/import/actions";
+import type { ParsedResume } from "@/lib/resume/parse";
 import { EeoSelfId } from "./eeo-self-id";
 import type {
   AnswerValue,
@@ -208,6 +215,12 @@ export function ApplyWizard(props: ApplyWizardProps) {
   // submit. Degrades gracefully on the 1/day parse cap.
   const [autofilling, setAutofilling] = useState(false);
   const [autofillNote, setAutofillNote] = useState<string | null>(null);
+  // #76 — the résumé parsed in-session; lets us offer to add any licenses /
+  // certs / education it found to the candidate's profile (explicit tap only —
+  // respects the locked R8 no-silent-fill rule).
+  const [parsedResume, setParsedResume] = useState<ParsedResume | null>(null);
+  const [addingCreds, setAddingCreds] = useState(false);
+
   const autofillFromResume = () => {
     if (!resumeFile || autofilling) return;
     setAutofillNote(null);
@@ -224,6 +237,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
           );
           return;
         }
+        setParsedResume(res.parsed);
         const fullName = res.parsed.basics.full_name.value?.trim();
         if (fullName) {
           const { first_name, last_name } = splitFullName(fullName);
@@ -237,7 +251,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
           );
         } else {
           setAutofillNote(
-            "We saved your résumé, but couldn't read a name from it — add it on the first step."
+            "We read your résumé and saved it. Add your name on the first step if it's blank."
           );
         }
       })
@@ -245,6 +259,38 @@ export function ApplyWizard(props: ApplyWizardProps) {
         setAutofillNote("Something went wrong reading that résumé.")
       )
       .finally(() => setAutofilling(false));
+  };
+
+  // Licenses / certs / education the parsed résumé surfaced.
+  const resumeCredCount = parsedResume
+    ? parsedResume.licenses.filter((l) => l.license_type.value).length +
+      parsedResume.certifications.filter((c) => c.kind.value).length +
+      parsedResume.education.filter((e) => e.school_name.value).length
+    : 0;
+  // Only offer to add when the candidate has NO profile credentials yet —
+  // avoids duplicate inserts (saveParsedResumeAction is additive). Candidates
+  // who already have credentials get them pre-linked by #70 Part A.
+  const canAddResumeCreds = resumeCredCount > 0 && credentials.length === 0;
+
+  const addResumeCredentials = () => {
+    if (!parsedResume || addingCreds) return;
+    const count = resumeCredCount;
+    setAddingCreds(true);
+    void saveParsedResumeAction(parsedResume)
+      .then(async (res) => {
+        if (!res.ok) {
+          setAutofillNote(res.error || "Couldn't add those to your profile.");
+          return;
+        }
+        const fresh = await refreshCandidateCredentials();
+        setCredentials(fresh);
+        setParsedResume(null);
+        setAutofillNote(
+          `Added ${count} credential${count === 1 ? "" : "s"} to your profile — attach them in the Verifications step.`
+        );
+      })
+      .catch(() => setAutofillNote("Couldn't add those to your profile."))
+      .finally(() => setAddingCreds(false));
   };
 
   // ── Hydrate from localStorage on mount, ask if found ────────
@@ -611,6 +657,10 @@ export function ApplyWizard(props: ApplyWizardProps) {
             onAutofill={autofillFromResume}
             autofilling={autofilling}
             autofillNote={autofillNote}
+            canAddResumeCreds={canAddResumeCreds}
+            resumeCredCount={resumeCredCount}
+            onAddCredentials={addResumeCredentials}
+            addingCreds={addingCreds}
           />
         )}
 
@@ -1424,6 +1474,10 @@ function ResumeStep({
   onAutofill,
   autofilling,
   autofillNote,
+  canAddResumeCreds,
+  resumeCredCount,
+  onAddCredentials,
+  addingCreds,
 }: {
   hasSavedResume: boolean;
   savedResumeName: string | null;
@@ -1435,6 +1489,10 @@ function ResumeStep({
   onAutofill: () => void;
   autofilling: boolean;
   autofillNote: string | null;
+  canAddResumeCreds: boolean;
+  resumeCredCount: number;
+  onAddCredentials: () => void;
+  addingCreds: boolean;
 }) {
   const RESUME_MIME = new Set([
     "application/pdf",
@@ -1535,6 +1593,28 @@ function ResumeStep({
               {autofillNote}
             </p>
           )}
+        </div>
+      )}
+
+      {canAddResumeCreds && (
+        <div className="border border-heritage/40 bg-heritage/[0.05] p-4">
+          <p className="text-[14px] font-semibold text-ink">
+            We spotted {resumeCredCount} credential
+            {resumeCredCount === 1 ? "" : "s"} on your résumé.
+          </p>
+          <p className="mt-1 text-[13px] leading-relaxed text-slate-meta">
+            Add your licenses, certifications, and education to your profile so
+            you can attach them as proof in this application.
+          </p>
+          <button
+            type="button"
+            onClick={onAddCredentials}
+            disabled={addingCreds}
+            className="mt-3 inline-flex items-center gap-2 bg-ink px-4 py-2.5 text-[12px] font-bold uppercase tracking-[1.5px] text-ivory transition-colors hover:bg-ink-soft disabled:opacity-50"
+          >
+            <BrandMark dark className="h-4 w-4" />
+            {addingCreds ? "Adding…" : "Add to my profile"}
+          </button>
         </div>
       )}
     </div>
