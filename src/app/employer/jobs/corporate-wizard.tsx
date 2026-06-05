@@ -33,8 +33,6 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import {
-  ArrowRight,
-  ArrowLeft,
   Plus,
   Trash2,
   ChevronUp,
@@ -42,6 +40,14 @@ import {
   Pencil,
   Check,
 } from "lucide-react";
+import {
+  WizardShell,
+  FieldShell,
+  TextField,
+  SelectField,
+} from "@/components/wizard";
+import { BrandMark } from "@/components/brand/brand-mark";
+import { BrandLockup } from "@/components/brand/brand-lockup";
 import { JobDescriptionEditor } from "@/components/job-description-editor";
 import { createCorporateJob, updateCorporateJob } from "./corporate-actions";
 // JobActionState comes straight from ./actions — never re-exported through a
@@ -870,15 +876,42 @@ export function CorporateJobWizard({
           </div>
         </div>
       )}
-      <Stepper
-        currentIdx={stepIdx}
+      <WizardShell
+        steps={STEPS.map((s) => ({ id: s.id, label: s.short }))}
+        currentIndex={stepIdx}
+        maxWidthClass="max-w-[820px]"
+        stickyTopClass="top-[64px] lg:top-0"
+        eyebrow={
+          <>
+            <BrandLockup height={28} />
+            <span className="text-[12px] font-bold uppercase tracking-[2px] text-slate-meta">
+              post a corporate role
+            </span>
+          </>
+        }
+        meterIcon={<BrandMark className="h-3.5 w-3.5" />}
+        canJumpTo={(i) => i !== stepIdx}
         onJump={(i) => {
           setError(null);
           setStepIdx(i);
         }}
-      />
-
-      <div className="border border-[var(--rule)] bg-white p-8 sm:p-10">
+        onBack={back}
+        onNext={() => {
+          if (stepIdx < STEPS.length - 1) tryAdvance();
+          else handleSubmit();
+        }}
+        nextLabel={
+          stepIdx < STEPS.length - 1
+            ? "Continue"
+            : mode === "create"
+              ? status === "active"
+                ? "Publish job"
+                : "Save draft"
+              : "Save changes"
+        }
+        busy={pending}
+        error={error}
+      >
         {currentStep.id === "basics" && (
           <BasicsStep
             title={title}
@@ -1042,12 +1075,6 @@ export function CorporateJobWizard({
           />
         )}
 
-        {error && (
-          <div className="mt-6 bg-red-50 border-l-4 border-red-500 p-4">
-            <p className="text-[14px] text-red-900">{error}</p>
-          </div>
-        )}
-
         {savedFlash && mode === "edit" && (
           <div className="mt-6 bg-cream border-l-4 border-[#3D5266] p-4">
             <p className="text-[14px] text-ink font-semibold">
@@ -1055,110 +1082,7 @@ export function CorporateJobWizard({
             </p>
           </div>
         )}
-
-        <div className="mt-8 pt-6 border-t border-[var(--rule)] flex items-center justify-between gap-4">
-          <button
-            type="button"
-            onClick={back}
-            disabled={stepIdx === 0}
-            className="inline-flex items-center gap-2 px-4 py-2.5 text-[10px] font-bold tracking-[1.5px] uppercase text-ink hover:bg-cream transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Back
-          </button>
-
-          {stepIdx < STEPS.length - 1 ? (
-            <button
-              type="button"
-              onClick={tryAdvance}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-ink text-ivory text-[10px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
-            >
-              Continue
-              <ArrowRight className="h-3.5 w-3.5" />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={pending}
-              className="inline-flex items-center gap-2 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {pending
-                ? "Saving…"
-                : mode === "create"
-                ? status === "active"
-                  ? "Publish Job"
-                  : "Save Draft"
-                : "Save Changes"}
-              {!pending && <ArrowRight className="h-4 w-4" />}
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ───── Stepper ───── */
-
-function Stepper({
-  currentIdx,
-  onJump,
-}: {
-  currentIdx: number;
-  onJump?: (idx: number) => void;
-}) {
-  return (
-    <div>
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-[#3D5266]">
-          Step {currentIdx + 1} of {STEPS.length}
-        </span>
-        <span className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta">
-          ·
-        </span>
-        <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-ink">
-          {STEPS[currentIdx].label}
-        </span>
-      </div>
-      {/* Clickable step nav — jump straight to any step instead of clicking
-          Back through each page. */}
-      <div className="flex gap-1.5">
-        {STEPS.map((s, i) => (
-          <button
-            key={s.id}
-            type="button"
-            onClick={() => onJump?.(i)}
-            aria-label={`Go to step ${i + 1}: ${s.label}`}
-            aria-current={i === currentIdx ? "step" : undefined}
-            className="group flex-1 cursor-pointer text-left focus:outline-none focus-visible:ring-1 focus-visible:ring-[#3D5266]"
-          >
-            <span
-              className={
-                "block h-1 transition-colors " +
-                (i < currentIdx
-                  ? "bg-[#3D5266]"
-                  : i === currentIdx
-                    ? "bg-ink"
-                    : "bg-[var(--rule-strong)] group-hover:bg-[#3D5266]")
-              }
-            />
-            <span
-              className={
-                "mt-1.5 block text-[9px] font-bold tracking-[1px] uppercase truncate transition-colors " +
-                (i === currentIdx
-                  ? "text-ink"
-                  : "text-slate-meta group-hover:text-[#3D5266] group-hover:underline")
-              }
-            >
-              {s.short}
-            </span>
-          </button>
-        ))}
-      </div>
-      <div className="mt-2 flex items-center gap-1 text-[10px] text-slate-meta">
-        <span aria-hidden>↔</span> Tap any step to jump.
-      </div>
+      </WizardShell>
     </div>
   );
 }
@@ -1196,7 +1120,7 @@ function BasicsStep({
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-[#3D5266] mb-2">
           Basics
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.5px] text-ink leading-tight">
+        <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           What corporate role are you hiring for?
         </h2>
         <p className="mt-3 text-[14px] text-slate-body leading-relaxed">
@@ -1374,7 +1298,7 @@ function DescriptionStep({
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-[#3D5266] mb-2">
           Description
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.5px] text-ink leading-tight">
+        <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           Tell candidates about the role.
         </h2>
       </div>
@@ -1576,7 +1500,7 @@ function DetailsStep({
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-[#3D5266] mb-2">
           Compensation & sandbox
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.5px] text-ink leading-tight">
+        <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           Pay, work mode, and the role&apos;s shape.
         </h2>
       </div>
@@ -2018,7 +1942,12 @@ function ScreeningStep({
               { id: `opt_${Date.now()}_a`, label: "" },
               { id: `opt_${Date.now()}_b`, label: "" },
             ]
-          : null,
+          : kind === "scale"
+            ? [
+                { id: "low", label: "" },
+                { id: "high", label: "" },
+              ]
+            : null,
       required: false,
       sort_order: questions.length,
     };
@@ -2054,7 +1983,7 @@ function ScreeningStep({
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-[#3D5266] mb-2">
           Screening questions
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.5px] text-ink leading-tight">
+        <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           What do you want to know up front?
         </h2>
         <p className="mt-3 text-[14px] text-slate-body leading-relaxed">
@@ -2109,6 +2038,7 @@ function ScreeningStep({
               "single_select",
               "multi_select",
               "number",
+              "scale",
             ] as ScreeningQuestionKind[]
           ).map((k) => (
             <button
@@ -2148,6 +2078,9 @@ function QuestionCard({
 }) {
   const isSelect =
     question.kind === "single_select" || question.kind === "multi_select";
+  const isScale = question.kind === "scale";
+  const scaleLabel = (id: "low" | "high") =>
+    (question.options ?? []).find((o) => o.id === id)?.label ?? "";
 
   const updateOption = (id: string, label: string) => {
     if (!question.options) return;
@@ -2303,6 +2236,30 @@ function QuestionCard({
                 <Plus className="h-3 w-3" />
                 Add option
               </button>
+            </div>
+          )}
+
+          {isScale && (
+            <div>
+              <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+                Slider end labels <span className="text-heritage">*</span>
+              </label>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <input
+                  type="text"
+                  value={scaleLabel("low")}
+                  onChange={(e) => updateOption("low", e.target.value)}
+                  placeholder="Left end (1) — e.g. Individual contributor"
+                  className="px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+                />
+                <input
+                  type="text"
+                  value={scaleLabel("high")}
+                  onChange={(e) => updateOption("high", e.target.value)}
+                  placeholder="Right end (5) — e.g. Enterprise leadership"
+                  className="px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+                />
+              </div>
             </div>
           )}
 
@@ -2512,7 +2469,7 @@ function PreviewStep({
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-[#3D5266] mb-2">
           Preview & publish
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.5px] text-ink leading-tight">
+        <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           Final check before it goes live.
         </h2>
       </div>
@@ -2747,18 +2704,21 @@ function Input({
   onChange: (v: string) => void;
 }) {
   return (
-    <div>
-      <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
-        {label} {required && <span className="text-[#3D5266]">*</span>}
-      </label>
-      <input
-        type={type}
-        placeholder={placeholder}
+    <FieldShell
+      label={
+        <>
+          {label} {required && <span className="text-heritage">*</span>}
+        </>
+      }
+    >
+      <TextField
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-[#3D5266] focus:ring-1 focus:ring-[#3D5266] transition-colors"
+        onChange={onChange}
+        type={type === "number" ? "number" : "text"}
+        inputMode={type === "number" ? "numeric" : undefined}
+        placeholder={placeholder}
       />
-    </div>
+    </FieldShell>
   );
 }
 
@@ -2776,21 +2736,19 @@ function Select({
   options: Array<{ value: string; label: string }>;
 }) {
   return (
-    <div>
-      <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
-        {label} {required && <span className="text-[#3D5266]">*</span>}
-      </label>
-      <select
+    <FieldShell
+      label={
+        <>
+          {label} {required && <span className="text-heritage">*</span>}
+        </>
+      }
+    >
+      <SelectField
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-[#3D5266] focus:ring-1 focus:ring-[#3D5266] transition-colors"
-      >
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-    </div>
+        onChange={onChange}
+        options={options}
+        widthClass="w-full"
+      />
+    </FieldShell>
   );
 }
