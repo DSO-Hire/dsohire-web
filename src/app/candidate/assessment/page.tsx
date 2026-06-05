@@ -43,7 +43,7 @@ export default async function CandidateAssessmentPage() {
     .select(
       // Part 1 (résumé-prefilled basics) + Part 2 (v3 signal columns, so a
       // re-take shows prior answers).
-      "id, desired_roles, years_experience_dental, desired_specialty, pms_systems, temp_or_perm, min_salary, salary_unit, availability, work_pace, autonomy_pref, patient_facing_energy, mentorship_pref, procedures_confident, procedures_growth, practice_feel, ce_growth_importance, work_life_priority, career_trajectory, commute_max_minutes, comp_priority, relocation_pref, assessment_note"
+      "id, desired_roles, years_experience_dental, desired_specialty, pms_systems, temp_or_perm, min_salary, salary_unit, availability, work_pace, autonomy_pref, patient_facing_energy, mentorship_pref, procedures_confident, procedures_growth, practice_feel, ce_growth_importance, work_life_priority, career_trajectory, commute_max_minutes, comp_priority, comp_priorities, relocation_pref, assessment_note"
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
@@ -75,7 +75,7 @@ export default async function CandidateAssessmentPage() {
     work_life_priority: (c.work_life_priority as number | null) ?? null,
     career_trajectory: (c.career_trajectory as string | null) ?? null,
     commute_max_minutes: (c.commute_max_minutes as number | null) ?? null,
-    comp_priority: (c.comp_priority as string | null) ?? null,
+    comp_priorities: (c.comp_priorities as string[] | null) ?? [],
     relocation: (c.relocation_pref as string | null) ?? null,
     assessment_note: (c.assessment_note as string | null) ?? "",
   };

@@ -21,7 +21,13 @@ import {
   PMS_SYSTEMS,
 } from "@/lib/candidate/canonical-lists";
 
-export type AnswerType = "single" | "multi" | "slider" | "salary" | "text";
+export type AnswerType =
+  | "single"
+  | "multi"
+  | "slider"
+  | "salary"
+  | "text"
+  | "rank";
 
 export type AssessmentSection =
   | "basics"
@@ -309,12 +315,12 @@ export const ASSESSMENT_QUESTIONS: AssessmentQuestion[] = [
     resumePrefill: true,
   },
   {
-    key: "comp_priority",
+    key: "comp_priorities",
     section: "logistics",
     dimension: "comp_priority",
-    prompt: "What matters MOST to you in your next role?",
-    help: "We'll weight your matches toward what you pick.",
-    type: "single",
+    prompt: "What matters most in your next role?",
+    help: "Tap your top 3, in order — your #1 carries the most weight in your matches.",
+    type: "rank",
     options: [
       { value: "comp", label: "Compensation" },
       { value: "schedule", label: "Schedule & balance" },

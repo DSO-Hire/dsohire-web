@@ -233,7 +233,7 @@ async function loadCandidateInputs(
   const { data: c } = await supabase
     .from("candidates")
     .select(
-      "desired_roles, current_title, desired_specialty, license_states, desired_locations, desired_location_points, pms_systems, skills, schedule_preferences, min_salary, salary_unit, temp_or_perm, dso_size_preference, years_experience, years_experience_dental, work_pace, autonomy_pref, mentorship_pref, patient_facing_energy, practice_feel, ce_growth_importance, work_life_priority, comp_priority, candidate_certifications(kind)"
+      "desired_roles, current_title, desired_specialty, license_states, desired_locations, desired_location_points, pms_systems, skills, schedule_preferences, min_salary, salary_unit, temp_or_perm, dso_size_preference, years_experience, years_experience_dental, work_pace, autonomy_pref, mentorship_pref, patient_facing_energy, practice_feel, ce_growth_importance, work_life_priority, comp_priority, comp_priorities, candidate_certifications(kind)"
     )
     .eq("id", candidateId)
     .maybeSingle();
@@ -311,6 +311,7 @@ async function loadCandidateInputs(
     ce_growth_importance: (r.ce_growth_importance as number | null) ?? null,
     work_life_priority: (r.work_life_priority as number | null) ?? null,
     comp_priority: (r.comp_priority as string | null) ?? null,
+    comp_priorities: ((r.comp_priorities as string[] | null) ?? []) as string[],
   };
 }
 

@@ -1627,6 +1627,7 @@ export type Database = {
           career_trajectory: string | null
           commute_max_minutes: number | null
           comp_priority: string | null
+          comp_priorities: string[]
           relocation_pref: string | null
           assessment_note: string | null
           assessment_responses: Json | null
@@ -1695,6 +1696,7 @@ export type Database = {
           career_trajectory?: string | null
           commute_max_minutes?: number | null
           comp_priority?: string | null
+          comp_priorities?: string[]
           relocation_pref?: string | null
           assessment_note?: string | null
           assessment_responses?: Json | null
@@ -1762,6 +1764,7 @@ export type Database = {
           career_trajectory?: string | null
           commute_max_minutes?: number | null
           comp_priority?: string | null
+          comp_priorities?: string[]
           relocation_pref?: string | null
           assessment_note?: string | null
           assessment_responses?: Json | null

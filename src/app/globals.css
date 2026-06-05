@@ -308,3 +308,51 @@ html, body {
   color: var(--color-slate-body);
   line-height: 1.35;
 }
+
+/* ──────────────────────────────────────────────────────────────
+ * PracticeFit Assessment slider — branded range input.
+ * Navy track + the PracticeFit sparkle (heritage green) as the drag
+ * handle. Applied via className="pf-slider" on the assessment sliders.
+ * ─────────────────────────────────────────────────────────── */
+.pf-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: #14233F; /* navy brand "blue" track */
+  outline: none;
+  cursor: pointer;
+}
+.pf-slider:focus-visible {
+  box-shadow: 0 0 0 3px var(--heritage-glow);
+}
+.pf-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='11' fill='white' stroke='%2314233F' stroke-opacity='0.18'/><path d='M12 4 L14.4 9.6 L20 12 L14.4 14.4 L12 20 L9.6 14.4 L4 12 L9.6 9.6 Z' fill='%234D7A60'/></svg>");
+  filter: drop-shadow(0 1px 2px rgba(20, 35, 63, 0.25));
+  cursor: pointer;
+}
+.pf-slider::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: #14233F;
+}
+.pf-slider::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='11' fill='white' stroke='%2314233F' stroke-opacity='0.18'/><path d='M12 4 L14.4 9.6 L20 12 L14.4 14.4 L12 20 L9.6 14.4 L4 12 L9.6 9.6 Z' fill='%234D7A60'/></svg>");
+  cursor: pointer;
+}

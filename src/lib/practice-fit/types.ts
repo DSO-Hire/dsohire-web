@@ -216,6 +216,12 @@ export interface CandidateFitInputs {
    * (identical to pre-B.2 scoring).
    */
   comp_priority: string | null;
+  /**
+   * v3 — ranked "what matters most" (ordered, up to 3; index 0 = #1). When
+   * non-empty it supersedes `comp_priority` and applies a tiered weight tilt
+   * (rank 1 heaviest). Empty array falls back to the single comp_priority.
+   */
+  comp_priorities: string[];
 }
 
 export interface JobFitInputs {

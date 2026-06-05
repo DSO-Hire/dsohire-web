@@ -53,7 +53,7 @@ import type {
  * hashed input field (e.g. the A.4 caps/boosters). It's folded into the
  * input hash so a logic-only change still invalidates the read-through cache.
  */
-const MODEL_VERSION = "2026-06-04-v3-comp-priority";
+const MODEL_VERSION = "2026-06-05-v3-ranked-priority";
 
 /* ──────────────────────────────────────────────────────────────
  * v3 Phase B.2 — comp_priority re-weighting ("what matters MOST").
@@ -68,7 +68,8 @@ const MODEL_VERSION = "2026-06-04-v3-comp-priority";
  * the assessment and chose a priority.
  * ─────────────────────────────────────────────────────────── */
 
-const PRIORITY_MULTIPLIER = 1.5;
+/** Per-rank weight multipliers — #1 priority tilts hardest, #3 lightest. */
+const PRIORITY_RANK_MULT = [1.6, 1.35, 1.15];
 
 const PRIORITY_DIMS: Record<string, FitDimensionKey[]> = {
   comp: ["compensation"],
@@ -80,24 +81,32 @@ const PRIORITY_DIMS: Record<string, FitDimensionKey[]> = {
 
 /**
  * Scale the effective weight (and recompute contribution) of the dimensions
- * tied to the candidate's stated priority. Mutates the dims in place BEFORE
- * normalization, so both the score and the displayed weights/top-factors
- * reflect the tilt. Unscored boosted dims still contribute 0 (raw 0) — the
- * tilt only bites when the dim has data on both sides.
+ * tied to the candidate's stated priorities. Reads the RANKED list first
+ * (rank 1 heaviest, via PRIORITY_RANK_MULT), falling back to the single
+ * `comp_priority` (treated as a sole rank-1). Mutates the dims in place BEFORE
+ * normalization, so the score and the displayed weights/top-factors reflect
+ * the tilt. Unscored boosted dims still contribute 0 — the tilt only bites
+ * when the dim has data on both sides. The five priority groups map to
+ * disjoint dimensions, so no dim is scaled twice.
  */
 function applyCompPriority(
   dims: Record<FitDimensionKey, FitDimension>,
-  compPriority: string | null
+  ranked: string[] | null | undefined,
+  single: string | null
 ): void {
-  if (!compPriority) return;
-  const boosted = PRIORITY_DIMS[compPriority];
-  if (!boosted) return;
-  for (const key of boosted) {
-    const d = dims[key];
-    if (!d) continue;
-    d.weight = Math.round(d.weight * PRIORITY_MULTIPLIER);
-    d.contribution = (d.weight * d.raw) / 100;
-  }
+  const list =
+    ranked && ranked.length > 0 ? ranked.slice(0, 3) : single ? [single] : [];
+  list.forEach((priority, i) => {
+    const boosted = PRIORITY_DIMS[priority];
+    if (!boosted) return;
+    const mult = PRIORITY_RANK_MULT[i] ?? PRIORITY_RANK_MULT[PRIORITY_RANK_MULT.length - 1];
+    for (const key of boosted) {
+      const d = dims[key];
+      if (!d) continue;
+      d.weight = Math.round(d.weight * mult);
+      d.contribution = (d.weight * d.raw) / 100;
+    }
+  });
 }
 
 /* ──────────────────────────────────────────────────────────────
@@ -209,8 +218,13 @@ export function computePracticeFit(inputs: FitInputs): FitResult | null {
   };
 
   // v3 Phase B.2 — tilt the weights toward what this candidate said matters
-  // most (no-op when comp_priority is null). Runs before normalization.
-  applyCompPriority(dims, inputs.candidate.comp_priority);
+  // most (ranked top-3, or the single fallback; no-op when neither is set).
+  // Runs before normalization.
+  applyCompPriority(
+    dims,
+    inputs.candidate.comp_priorities,
+    inputs.candidate.comp_priority
+  );
 
   // Sum scored contributions and scored weights — missing-data dims
   // are EXCLUDED from both numerator and denominator.
@@ -1642,7 +1656,11 @@ export function hashInputs(inputs: FitInputs): string {
       ce_growth_importance: inputs.candidate.ce_growth_importance ?? null,
       work_life_priority: inputs.candidate.work_life_priority ?? null,
       // Phase B.2 — re-weighting signal; must invalidate cache on change.
+      // comp_priorities is ORDERED (rank matters) so it is NOT sorted.
       comp_priority: token(inputs.candidate.comp_priority),
+      comp_priorities: (inputs.candidate.comp_priorities ?? []).map((p) =>
+        (p ?? "").trim().toLowerCase()
+      ),
     },
     job: {
       role_category: inputs.job.role_category,

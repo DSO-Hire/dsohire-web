@@ -94,7 +94,16 @@ export async function saveAssessment(answers: Answers): Promise<Result> {
   set("work_life_priority", intOrNull(answers.work_life_priority));
   set("career_trajectory", str(answers.career_trajectory));
   set("commute_max_minutes", intOrNull(answers.commute_max_minutes));
-  set("comp_priority", str(answers.comp_priority));
+  // Ranked top-3 priorities; keep the legacy single comp_priority = the #1
+  // so any back-compat reader still works.
+  const rankedPriorities = strArr(answers.comp_priorities);
+  set("comp_priorities", rankedPriorities);
+  set(
+    "comp_priority",
+    rankedPriorities && rankedPriorities.length > 0
+      ? rankedPriorities[0]
+      : str(answers.comp_priority)
+  );
   set("relocation_pref", str(answers.relocation));
   set("assessment_note", str(answers.assessment_note));
 

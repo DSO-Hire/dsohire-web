@@ -277,6 +277,53 @@ function QuestionField({
           </div>
         )}
 
+        {q.type === "rank" && (
+          <div className="space-y-2">
+            {options.map((opt) => {
+              const arr = (value as string[] | undefined) ?? [];
+              const rank = arr.indexOf(opt.value);
+              const active = rank >= 0;
+              const full = arr.length >= 3 && !active;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  disabled={full}
+                  onClick={() => {
+                    const cur = (value as string[] | undefined) ?? [];
+                    const at = cur.indexOf(opt.value);
+                    const next =
+                      at >= 0
+                        ? cur.filter((v) => v !== opt.value)
+                        : cur.length < 3
+                          ? [...cur, opt.value]
+                          : cur;
+                    onChange(q.key, next);
+                  }}
+                  className={
+                    "flex w-full items-center justify-between gap-3 border px-4 py-3 text-left text-[14px] transition-colors " +
+                    (active
+                      ? "border-heritage-deep bg-heritage/10 font-semibold text-ink"
+                      : full
+                        ? "cursor-not-allowed border-[var(--rule)] bg-cream/40 text-slate-meta"
+                        : "border-[var(--rule)] bg-white text-slate-body hover:border-heritage-deep")
+                  }
+                >
+                  <span>{opt.label}</span>
+                  {active && (
+                    <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-heritage-deep text-[12px] font-bold text-ivory">
+                      {rank + 1}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+            <p className="text-[12px] text-slate-meta">
+              Tap up to 3 in priority order — tap again to remove.
+            </p>
+          </div>
+        )}
+
         {q.type === "slider" && (
           <div>
             <div className="flex items-center gap-3">
@@ -290,7 +337,7 @@ function QuestionField({
                 step={1}
                 value={typeof value === "number" ? value : 3}
                 onChange={(e) => onChange(q.key, Number(e.target.value))}
-                className="flex-1 accent-heritage"
+                className="pf-slider flex-1"
               />
               <span className="w-28 text-[12px] text-slate-meta">
                 {q.sliderLabels?.high}
