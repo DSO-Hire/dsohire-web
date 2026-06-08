@@ -11,6 +11,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { PrivacyForm } from "./privacy-form";
 import { HelpDisclosure } from "@/components/help/help-disclosure";
+import { ScrollToHash } from "@/components/scroll-to-hash";
 import type { BlockedEmployer } from "./actions";
 
 export const metadata: Metadata = { title: "Privacy & visibility · Settings" };
@@ -25,7 +26,7 @@ export default async function CandidatePrivacyPage() {
   const { data: candidateRow } = await supabase
     .from("candidates")
     .select(
-      "id, cv_visibility, resume_visibility, contact_info_visibility, practice_fit_consent, anonymous_mode"
+      "id, cv_visibility, resume_visibility, contact_info_visibility, practice_fit_consent, anonymous_mode, privacy_choices_reviewed_at"
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
@@ -33,6 +34,17 @@ export default async function CandidatePrivacyPage() {
   if (!candidateRow) redirect("/candidate/dashboard");
 
   const candidateId = candidateRow.id as string;
+
+  // #92 follow-up (Day 28) — opening this page = the candidate has laid eyes on
+  // their privacy + matching choices, so the onboarding steps can complete even
+  // if they don't change a setting (the defaults may already suit them). Stamp
+  // once on first view; saving a section also stamps it (see actions.ts).
+  if (!(candidateRow as Record<string, unknown>).privacy_choices_reviewed_at) {
+    await supabase
+      .from("candidates")
+      .update({ privacy_choices_reviewed_at: new Date().toISOString() })
+      .eq("id", candidateId);
+  }
 
   // Pull blocked employers + work history in parallel.
   const [{ data: blockedRows }, { data: currentWork }] = await Promise.all([
@@ -100,6 +112,8 @@ export default async function CandidatePrivacyPage() {
 
   return (
     <div>
+      {/* #103 — deep-link CTAs (#visibility / #practice-fit) scroll here. */}
+      <ScrollToHash />
       <header className="mb-6">
         <h2 className="font-display text-xl font-bold text-[#14233F]">
           Your privacy is the default

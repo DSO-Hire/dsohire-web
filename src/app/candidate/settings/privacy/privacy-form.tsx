@@ -197,6 +197,7 @@ function ProfileVisibilitySection({
 
   return (
     <SectionCard
+      id="visibility"
       icon={<Eye className="size-5 text-[#4D7A60]" />}
       title="Profile visibility"
       description="Three independent toggles — your profile, your resume, and your contact info."
@@ -488,6 +489,7 @@ export function PracticeFitSection({
 
   return (
     <SectionCard
+      id="practice-fit"
       icon={<ShieldCheck className="size-5 text-[#4D7A60]" />}
       title={
         <span className="inline-flex items-baseline">
@@ -675,14 +677,21 @@ function SectionCard({
   title,
   description,
   children,
+  id,
 }: {
   icon: React.ReactNode;
   title: React.ReactNode;
   description: string;
   children: React.ReactNode;
+  /** #103 (Day 28) — anchor target so onboarding "Do it" CTAs can deep-link
+   *  straight to this section. scroll-mt offsets the sticky header. */
+  id?: string;
 }) {
   return (
-    <section className="border border-[var(--rule)] bg-white p-6 sm:p-8">
+    <section
+      id={id}
+      className="scroll-mt-24 border border-[var(--rule)] bg-white p-6 sm:p-8"
+    >
       <header className="mb-4 flex items-start gap-3">
         <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-[#4D7A60]/10">
           {icon}

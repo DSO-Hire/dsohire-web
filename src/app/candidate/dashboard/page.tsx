@@ -208,13 +208,14 @@ export default async function CandidateDashboardPage() {
       // they save the privacy settings page). The default still applies
       // silently underneath; we just don't pre-check the box for them.
       done: (c.privacy_choices_reviewed_at as string | null) != null,
-      href: "/candidate/settings/privacy",
+      // #103 (Day 28) — deep-link to the exact section, not just the page.
+      href: "/candidate/settings/privacy#visibility",
     },
     {
       key: "fit",
       label: "Choose your PracticeFit matching setting",
       done: (c.privacy_choices_reviewed_at as string | null) != null,
-      href: "/candidate/settings/privacy",
+      href: "/candidate/settings/privacy#practice-fit",
     },
   ];
 

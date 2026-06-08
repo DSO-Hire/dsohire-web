@@ -23,6 +23,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getTopFitJobsForCandidate } from "@/lib/practice-fit/roles-that-fit";
 import { RolesThatFitCard } from "@/components/practice-fit/roles-that-fit-card";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
+import { ScrollToHash } from "@/components/scroll-to-hash";
 import { JobPreferencesForm } from "@/app/candidate/settings/job-preferences/job-preferences-form";
 import { PracticeFitSection } from "@/app/candidate/settings/privacy/privacy-form";
 import type { SchedulePreferences } from "@/lib/candidate/canonical-lists";
@@ -75,6 +76,8 @@ export default async function CandidatePracticeFitPage() {
 
   return (
     <CandidateShell active="practice-fit">
+      {/* #103 — deep-link CTA (#preferences) scrolls to that section. */}
+      <ScrollToHash />
       <header className="mb-8">
         <div className="mb-3">
           <PracticeFitWordmark
