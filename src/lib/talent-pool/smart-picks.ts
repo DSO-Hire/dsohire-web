@@ -221,9 +221,18 @@ export async function getTodaysTopFits(
   if (jobs.length === 0) return [];
 
   // Score each job's pool, then keep each candidate's single best match.
+  // #107 perf (Day 28) — score all jobs CONCURRENTLY (was a sequential await
+  // per job, up to JOB_SCAN_CAP). Promise.all preserves input order, and the
+  // merge below only replaces on a strictly-higher score, so tie-breaking and
+  // final results are identical to the serial version — just faster.
   const bestByCandidate = new Map<string, TodaysTopFit>();
-  for (const job of jobs) {
-    const picks = await getSmartPicks(supabase, job.id, dsoId, 5);
+  const perJob = await Promise.all(
+    jobs.map(async (job) => ({
+      job,
+      picks: await getSmartPicks(supabase, job.id, dsoId, 5),
+    }))
+  );
+  for (const { job, picks } of perJob) {
     for (const p of picks) {
       const prior = bestByCandidate.get(p.candidate_id);
       if (!prior || p.fit.score > prior.fit.score) {

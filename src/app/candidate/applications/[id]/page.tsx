@@ -74,35 +74,39 @@ export default async function CandidateApplicationDetailPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/candidate/sign-in");
 
-  const { data: candidate } = await supabase
-    .from("candidates")
-    .select("id, full_name, desired_roles")
-    .eq("auth_user_id", user.id)
-    .maybeSingle();
+  // #107 perf (Day 28) — these three reads are independent (keyed on the
+  // signed-in user / the appId in the URL, not on each other), so fetch them
+  // concurrently instead of three sequential round-trips. RLS still gates each;
+  // the redirect/notFound checks happen after, exactly as before.
+  const [{ data: candidate }, { data: rawApp }, { count: eeoCount }] =
+    await Promise.all([
+      supabase
+        .from("candidates")
+        .select("id, full_name, desired_roles")
+        .eq("auth_user_id", user.id)
+        .maybeSingle(),
+      // RLS-scoped read of the candidate's own application row.
+      supabase
+        .from("applications")
+        .select("id, job_id, candidate_id, stage_id, created_at, updated_at")
+        .eq("id", appId)
+        .maybeSingle(),
+      // Voluntary EEO self-ID safety net (E2.17). The apply success screen also
+      // offers it, but a re-navigation there can yank it before the candidate
+      // answers — so we also surface it here (where they reliably land) when
+      // they haven't recorded a response yet. RLS lets the candidate read their
+      // own row.
+      supabase
+        .from("application_eeo_responses")
+        .select("*", { count: "exact", head: true })
+        .eq("application_id", appId),
+    ]);
   if (!candidate) redirect("/candidate/sign-up");
   const candidateDesiredRoles =
     ((candidate as Record<string, unknown>).desired_roles as
       | string[]
       | null) ?? [];
-
-  // RLS-scoped read of the candidate's own application row.
-  const { data: rawApp } = await supabase
-    .from("applications")
-    .select("id, job_id, candidate_id, stage_id, created_at, updated_at")
-    .eq("id", appId)
-    .maybeSingle();
-
   if (!rawApp) notFound();
-
-  // Voluntary EEO self-ID safety net (E2.17). The apply success screen also
-  // offers it, but a re-navigation there can yank it before the candidate
-  // answers — so we also surface it here (where they reliably land) when
-  // they haven't recorded a response yet. RLS lets the candidate read their
-  // own row.
-  const { count: eeoCount } = await supabase
-    .from("application_eeo_responses")
-    .select("*", { count: "exact", head: true })
-    .eq("application_id", appId);
   const showEeoCard = (eeoCount ?? 0) === 0;
 
   type AppRow = {
