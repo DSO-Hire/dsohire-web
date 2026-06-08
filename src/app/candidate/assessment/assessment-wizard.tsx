@@ -25,6 +25,13 @@ import {
 } from "@/lib/practice-fit/assessment/questions";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import { saveAssessment } from "./actions";
+// #41 (Day 28) — résumé autofill on the landing: parse once, then fill BOTH
+// this assessment and the candidate's profile (saveParsedResumeAction writes
+// the profile + the file is saved for reuse). Reuses the profile-import parser.
+import {
+  parseResumeAction,
+  saveParsedResumeAction,
+} from "@/app/candidate/profile/import/actions";
 
 type Answers = Record<string, unknown>;
 
@@ -62,6 +69,78 @@ export function AssessmentWizard({
   // First-timers see a landing screen explaining PracticeFit before the
   // questions (Cam: jumping straight into the questionnaire felt strange).
   const [started, setStarted] = useState(completedBefore);
+
+  // #41 (Day 28) — résumé autofill on the landing.
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [parsing, setParsing] = useState(false);
+  const [autofillNote, setAutofillNote] = useState<string | null>(null);
+
+  // Map a parsed résumé's value into this candidate's profile-derived
+  // assessment years bucket (mirrors yearsBucket() in page.tsx).
+  const yearsBucketFromNumber = (n: number | null): string | null => {
+    if (n == null) return null;
+    if (n <= 0) return "new_grad";
+    if (n < 2) return "lt2";
+    if (n <= 5) return "2_5";
+    if (n <= 10) return "6_10";
+    return "10_plus";
+  };
+
+  const autofillFromResume = async () => {
+    if (!resumeFile || parsing) return;
+    setParsing(true);
+    setAutofillNote(null);
+    try {
+      const fd = new FormData();
+      fd.set("resume", resumeFile);
+      const res = await parseResumeAction(fd);
+      if (!res.ok) {
+        setAutofillNote(
+          res.errorCode === "cap_exceeded"
+            ? "You've imported a résumé recently — your saved details are already on your profile. Just hit Start."
+            : res.error ||
+                "We couldn't read that résumé. You can start and fill it in as you go."
+        );
+        return;
+      }
+      const parsed = res.parsed;
+      // Persist the whole profile (roles, specialty, PMS, years, work history,
+      // credentials, skills, languages) + the file — one parse, reused
+      // everywhere (profile, applications, future use).
+      await saveParsedResumeAction(parsed);
+      // Prefill the assessment answers directly (router.refresh wouldn't update
+      // this component's useState), then drop them into the questions.
+      const pms = Array.from(
+        new Set(
+          parsed.work_history
+            .flatMap((w) => w.pms_systems_used.value ?? [])
+            .map((s) => s.trim())
+            .filter(Boolean)
+        )
+      );
+      const yrs = yearsBucketFromNumber(
+        parsed.basics.years_experience_dental.value
+      );
+      setAnswers((a) => ({
+        ...a,
+        desired_roles: parsed.desired_roles.length
+          ? parsed.desired_roles
+          : (a.desired_roles ?? []),
+        desired_specialty: parsed.desired_specialty.length
+          ? parsed.desired_specialty
+          : (a.desired_specialty ?? []),
+        pms_systems: pms.length ? pms : (a.pms_systems ?? []),
+        years_experience: yrs ?? a.years_experience,
+      }));
+      setStarted(true);
+      if (typeof window !== "undefined")
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch {
+      setAutofillNote("Something went wrong reading that résumé.");
+    } finally {
+      setParsing(false);
+    }
+  };
 
   const roleValues = (answers.desired_roles as string[] | undefined) ?? [];
 
@@ -145,6 +224,42 @@ export function AssessmentWizard({
             </li>
           ))}
         </ul>
+        {/* #41 — résumé autofill: parse once → prefills this assessment AND the
+            full profile (+ saves the file for reuse). Optional; Start still works. */}
+        <div className="mt-6 rounded-lg border border-heritage/40 bg-heritage/[0.06] p-4">
+          <p className="text-[13px] font-bold text-ink">
+            Fastest start: autofill from your résumé
+          </p>
+          <p className="mt-1 text-[12px] leading-relaxed text-slate-meta">
+            Upload it once — we&apos;ll prefill this assessment <em>and</em> your
+            profile, so applying later is faster. You review everything as you go.
+          </p>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              onChange={(e) => {
+                setResumeFile(e.target.files?.[0] ?? null);
+                setAutofillNote(null);
+              }}
+              className="block text-[13px] text-ink file:mr-3 file:cursor-pointer file:border-0 file:bg-ink file:px-4 file:py-2 file:text-[10px] file:font-bold file:uppercase file:tracking-[1.5px] file:text-ivory hover:file:bg-ink-soft"
+            />
+            <button
+              type="button"
+              onClick={autofillFromResume}
+              disabled={!resumeFile || parsing}
+              className="inline-flex items-center justify-center gap-2 border border-heritage-deep px-4 py-2 text-[12px] font-bold uppercase tracking-[1.5px] text-heritage-deep transition-colors hover:bg-heritage/10 disabled:opacity-40"
+            >
+              {parsing ? "Reading…" : "Autofill from résumé"}
+            </button>
+          </div>
+          {autofillNote && (
+            <p className="mt-2 text-[12px] font-semibold leading-relaxed text-heritage-deep">
+              {autofillNote}
+            </p>
+          )}
+        </div>
+
         <div className="mt-7 flex flex-col items-start gap-3">
           <button
             type="button"
