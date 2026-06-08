@@ -11,7 +11,7 @@
  * set includes a positive "new / growing" option, never a dead end.
  */
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, Sparkles } from "lucide-react";
@@ -157,6 +157,16 @@ export function AssessmentWizard({
   const step = sections[Math.min(stepIdx, sections.length - 1)]!;
   const isLast = stepIdx >= sections.length - 1;
 
+  // #102 (Day 28) — scroll to the top of every section reliably. Doing this in
+  // an effect (after the new step renders) instead of inline in next()/back()
+  // is the fix: an inline scroll could be canceled by the re-render's DOM
+  // mutation, which is why it only worked "sometimes."
+  useEffect(() => {
+    if (started && typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [stepIdx, started]);
+
   // Live "match strength" — share of non-optional questions answered.
   const { answered, total } = useMemo(() => {
     const all = questionsForRoles(roleValues).filter((q) => !q.optional);
@@ -179,15 +189,12 @@ export function AssessmentWizard({
       return;
     }
     setStepIdx((i) => i + 1);
-    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+    // Scroll handled by the [stepIdx] effect (reliable post-render).
   };
   const back = () => {
     setError(null);
     setStepIdx((i) => Math.max(0, i - 1));
-    // #102 (Day 28) — scroll to top on Back too, mirroring next(), so each
-    // section starts at the question stem instead of mid-page.
-    if (typeof window !== "undefined")
-      window.scrollTo({ top: 0, behavior: "smooth" });
+    // Scroll handled by the [stepIdx] effect.
   };
 
   // #94 (Day 28) — landing/intro screen so candidates know what PracticeFit is
@@ -528,24 +535,45 @@ function QuestionField({
         )}
 
         {q.type === "slider" && (
-          <div>
+          <div className="space-y-2">
             <div className="flex items-center gap-3">
               <span className="w-28 text-right text-[12px] text-slate-meta">
                 {q.sliderLabels?.low}
               </span>
-              <input
-                type="range"
-                min={1}
-                max={5}
-                step={1}
-                value={typeof value === "number" ? value : 3}
-                onChange={(e) => onChange(q.key, Number(e.target.value))}
-                className="pf-slider flex-1"
-              />
+              <div className="flex-1">
+                <input
+                  type="range"
+                  min={1}
+                  max={5}
+                  step={1}
+                  value={typeof value === "number" ? value : 3}
+                  onChange={(e) => onChange(q.key, Number(e.target.value))}
+                  className="pf-slider w-full"
+                />
+                {/* #101 (Day 28) — labeled ticks so the midpoints aren't vague. */}
+                <div className="mt-1 flex justify-between px-0.5" aria-hidden>
+                  {[1, 2, 3, 4, 5].map((t) => (
+                    <span
+                      key={t}
+                      className={
+                        "text-[11px] tabular-nums " +
+                        (value === t ? "font-bold text-ink" : "text-slate-meta")
+                      }
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
               <span className="w-28 text-[12px] text-slate-meta">
                 {q.sliderLabels?.high}
               </span>
             </div>
+            <p className="text-center text-[12px] font-semibold text-slate-body">
+              {typeof value === "number"
+                ? `Your answer: ${value} of 5`
+                : "Drag to choose — 1 to 5"}
+            </p>
           </div>
         )}
 
@@ -553,12 +581,17 @@ function QuestionField({
           <div className="flex items-center gap-2">
             <span className="text-[15px] font-bold text-ink">$</span>
             <input
-              type="number"
+              type="text"
               inputMode="numeric"
-              value={typeof value === "number" ? value : ""}
-              onChange={(e) =>
-                onChange(q.key, e.target.value ? Number(e.target.value) : null)
+              // #(Day 28) — currency with thousands separators. Display the
+              // number formatted (125,000); store the raw integer.
+              value={
+                typeof value === "number" ? value.toLocaleString("en-US") : ""
               }
+              onChange={(e) => {
+                const digits = e.target.value.replace(/[^0-9]/g, "");
+                onChange(q.key, digits ? Number(digits) : null);
+              }}
               placeholder="0"
               className="w-40 border border-[var(--rule)] bg-white px-3 py-2 text-[14px] text-ink focus:border-heritage focus:outline-none"
             />
