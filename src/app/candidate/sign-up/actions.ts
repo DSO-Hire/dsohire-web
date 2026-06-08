@@ -176,7 +176,13 @@ export async function verifySignUpCandidate(
     };
   }
 
-  redirect(next);
+  // #94/#40 (Day 28) — a brand-new candidate with no specific destination
+  // normally lands on the dashboard; instead route them straight into the
+  // PracticeFit assessment so every new candidate at least lays eyes on it.
+  // The assessment has a "Skip for now" exit, so this is a nudge, not a wall.
+  // Intentful destinations (e.g. ?next=/jobs/[id]/apply) are respected.
+  const dest = next === "/candidate/dashboard" ? "/candidate/assessment" : next;
+  redirect(dest);
 }
 
 export async function resendCandidateSignUpCode(

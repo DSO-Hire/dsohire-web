@@ -13,6 +13,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, Sparkles } from "lucide-react";
 import {
   ASSESSMENT_QUESTIONS,
@@ -166,6 +167,20 @@ export function AssessmentWizard({ initial }: { initial: Answers }) {
           {isLast ? <Check className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
         </button>
       </div>
+
+      {/* #94/#40 (Day 28) — new candidates are routed here right after signup
+          so they see the assessment, but it's never a wall: a quiet exit lets
+          them leave. The dashboard onboarding step keeps nudging them back. */}
+      {!isLast && (
+        <div className="mt-4 text-center">
+          <Link
+            href="/candidate/dashboard"
+            className="text-[12px] font-semibold text-slate-meta underline underline-offset-2 hover:text-ink"
+          >
+            Skip for now — I&apos;ll take this later
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
