@@ -518,6 +518,32 @@ export function ApplyWizard(props: ApplyWizardProps) {
             </Link>
           </div>
         </div>
+        {/* #94/#106 (Day 28) — apply-origin candidates go straight to applying
+            (we don't interrupt them), then the success screen routes them to
+            the PracticeFit assessment with a quick explanation. Only on a fresh
+            application, not a re-submit. */}
+        {!submitted.alreadyApplied && (
+          <div className="mt-6 border border-heritage/40 bg-heritage/[0.06] p-6">
+            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+              Next: get matched
+            </div>
+            <h3 className="text-[17px] font-bold text-ink leading-snug">
+              See which roles fit you best with PracticeFit
+            </h3>
+            <p className="mt-1.5 text-[14px] text-slate-body leading-relaxed">
+              Take our quick ~5-minute assessment — we&apos;ll score how well
+              every role and practice fits you and surface your best matches. It
+              also helps practices find you by fit, not just keywords.
+            </p>
+            <Link
+              href="/candidate/assessment"
+              className="mt-4 inline-flex items-center gap-2 px-5 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+            >
+              Take the PracticeFit assessment
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+        )}
         {/* E2.17 — voluntary EEO self-ID, post-application (success screen only). */}
         {submitted.applicationId && !submitted.alreadyApplied && (
           <EeoSelfId applicationId={submitted.applicationId} />

@@ -45,12 +45,23 @@ const SECTION_LABEL: Record<string, string> = {
   open: "Anything else",
 };
 
-export function AssessmentWizard({ initial }: { initial: Answers }) {
+export function AssessmentWizard({
+  initial,
+  completedBefore = false,
+}: {
+  initial: Answers;
+  /** #94 (Day 28) — true if the candidate has finished the assessment before.
+   *  Re-takers skip the landing/intro and go straight into the questions. */
+  completedBefore?: boolean;
+}) {
   const router = useRouter();
   const [answers, setAnswers] = useState<Answers>(initial);
   const [stepIdx, setStepIdx] = useState(0);
   const [saving, startSaving] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  // First-timers see a landing screen explaining PracticeFit before the
+  // questions (Cam: jumping straight into the questionnaire felt strange).
+  const [started, setStarted] = useState(completedBefore);
 
   const roleValues = (answers.desired_roles as string[] | undefined) ?? [];
 
@@ -99,6 +110,64 @@ export function AssessmentWizard({ initial }: { initial: Answers }) {
     if (typeof window !== "undefined")
       window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  // #94 (Day 28) — landing/intro screen so candidates know what PracticeFit is
+  // before answering. First-timers only; "Start now" reveals the questions,
+  // "Skip for now" leaves. Re-takers skip straight to the questions.
+  if (!started) {
+    return (
+      <div className="max-w-[680px]">
+        <div className="mb-3 flex items-center gap-2">
+          <PracticeFitWordmark surface="light" tm className="text-3xl" />
+          <span className="text-[12px] font-bold uppercase tracking-[2px] text-slate-meta">
+            assessment
+          </span>
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-[-0.5px] leading-tight text-ink">
+          Find the practices that actually fit you.
+        </h1>
+        <p className="mt-3 text-[15px] leading-relaxed text-slate-body">
+          PracticeFit is our matching engine. Answer a few quick questions about
+          your work style, clinical focus, and what matters most — and we&apos;ll
+          score how well every role and practice fits <em>you</em>, then surface
+          your best matches. About <strong>5 minutes</strong>. Nothing is
+          required and you can stop anytime.
+        </p>
+        <ul className="mt-5 space-y-2.5">
+          {[
+            "See your best-fit roles ranked — not just a keyword search.",
+            "Get found by practices whose culture + priorities match yours.",
+            "We pre-fill what we can from your profile, so it's fast.",
+          ].map((b) => (
+            <li key={b} className="flex items-start gap-2.5 text-[14px] text-ink">
+              <Sparkles className="mt-0.5 h-4 w-4 flex-shrink-0 text-heritage-deep" />
+              <span>{b}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-7 flex flex-col items-start gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              setStarted(true);
+              if (typeof window !== "undefined")
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="inline-flex items-center gap-2 bg-ink px-7 py-3.5 text-[13px] font-bold uppercase tracking-[1.5px] text-ivory transition-colors hover:bg-ink-soft"
+          >
+            Start now
+            <ArrowRight className="h-4 w-4" />
+          </button>
+          <Link
+            href="/candidate/dashboard"
+            className="text-[12px] font-semibold text-slate-meta underline underline-offset-2 hover:text-ink"
+          >
+            Skip for now — I&apos;ll take this later
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-[680px]">

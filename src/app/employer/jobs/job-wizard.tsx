@@ -1468,7 +1468,14 @@ function BasicsStep({
           Job scope
         </label>
         <div className="space-y-2">
-          {SCOPE_OPTIONS.map((opt) => (
+          {SCOPE_OPTIONS
+            // #105 (Day 28) — DSO-wide is removed from the practice wizard: as
+            // built it stripped the clinical role category and duplicated the
+            // Corporate wizard. Corporate roles belong in the Corporate wizard;
+            // a clinical role "anywhere" is Regional + Select-all. Still shown
+            // if THIS job is already corporate-scoped (legacy edit back-compat).
+            .filter((opt) => opt.value !== "corporate" || scope === "corporate")
+            .map((opt) => (
             <label
               key={opt.value}
               className={
