@@ -355,6 +355,13 @@ export function JobWizard({
   dsoName,
 }: JobWizardProps) {
   const [stepIdx, setStepIdx] = useState(0);
+  // #97 (Day 28) — the clickable stepper let users jump FORWARD past unfilled
+  // required fields (Continue blocked them, but a tab-jump didn't). Track the
+  // furthest step legitimately reached via Continue and only allow jumping to
+  // steps at or before it. Edit mode starts fully unlocked (all data exists).
+  const [maxStepReached, setMaxStepReached] = useState(
+    mode === "edit" ? STEPS.length - 1 : 0
+  );
 
   // v1.8 — draft autosave. Only on create (we don't want a stale local
   // draft overriding edits on a saved job). Key per dso so multiple
@@ -690,6 +697,9 @@ export function JobWizard({
           Math.max(0, d.stepIdx as number)
         );
         setStepIdx(clamped);
+        // #97 — a restored draft already passed validation up to its saved
+        // step, so unlock stepper jumps up to there.
+        setMaxStepReached((m) => Math.max(m, clamped));
       }
     } catch {
       /* noop */
@@ -733,7 +743,10 @@ export function JobWizard({
       const validation = validateQuestions(questions);
       if (validation) return setError(validation);
     }
-    setStepIdx((i) => Math.min(STEPS.length - 1, i + 1));
+    const nextIdx = Math.min(STEPS.length - 1, stepIdx + 1);
+    setStepIdx(nextIdx);
+    // #97 — unlock the step we just validated into for stepper jumps.
+    setMaxStepReached((m) => Math.max(m, nextIdx));
   }
 
   function back() {
@@ -1045,7 +1058,7 @@ export function JobWizard({
           </>
         }
         meterIcon={<BrandMark className="h-3.5 w-3.5" />}
-        canJumpTo={(i) => i !== stepIdx}
+        canJumpTo={(i) => i !== stepIdx && i <= maxStepReached}
         onJump={(i) => {
           setError(null);
           setStepIdx(i);
@@ -1415,6 +1428,39 @@ function BasicsStep({
               ? "Tag every practice this regional role covers. Hiring managers at any tagged practice will see this job."
               : "Tag every location this job is open at. We render separate location-specific listings on the public job board automatically."}
         </p>
+        {/* #98 (Day 28) — explain the privacy badges so the tags aren't a
+            mystery on this screen. Only shown when a selected/listed location
+            actually carries one. Privacy itself is set per location in
+            Settings → Locations (not edited here). */}
+        {locations.some(
+          (l) => l.anonymizeName || l.publicDsoAffiliation === false
+        ) && (
+          <div className="mt-3 border border-[var(--rule)] bg-cream/50 p-3 text-[12px] leading-relaxed text-slate-body">
+            <span className="font-bold uppercase tracking-[1px] text-[10px] text-slate-meta">
+              What the tags mean
+            </span>
+            <ul className="mt-1.5 space-y-1">
+              {locations.some((l) => l.publicDsoAffiliation === false) && (
+                <li>
+                  <span className="font-semibold">Anonymous</span> — your
+                  dental-group name is hidden from candidates on this
+                  location&apos;s listings (the practice name still shows).
+                </li>
+              )}
+              {locations.some((l) => l.anonymizeName) && (
+                <li>
+                  <span className="font-semibold">Name hidden</span> — even the
+                  practice name is hidden; listings read &ldquo;Dental Office in
+                  {" "}
+                  {"{city}"}.&rdquo;
+                </li>
+              )}
+            </ul>
+            <p className="mt-1.5 text-slate-meta">
+              Change a location&apos;s privacy in Settings → Locations.
+            </p>
+          </div>
+        )}
       </div>
 
       <div>
@@ -1455,6 +1501,29 @@ function BasicsStep({
           and recruiters always see every job — this only changes what
           hiring managers see.
         </p>
+        {/* #99 (Day 28) — DSO-wide roles are corporate roles, and we now have a
+            purpose-built Corporate job wizard (remote/hybrid, report-to chains,
+            corporate functions). Nudge — don't force — the recruiter there
+            instead of posting a corporate-flavored job from the practice flow. */}
+        {scope === "corporate" && (
+          <div className="mt-3 border-l-4 border-heritage bg-heritage/[0.06] p-3.5">
+            <p className="text-[13px] font-semibold text-ink">
+              DSO-wide roles have their own wizard.
+            </p>
+            <p className="mt-1 text-[12px] leading-relaxed text-slate-body">
+              The Corporate job wizard is built for HQ / region-wide roles —
+              in-office vs. remote vs. hybrid, travel expectations, and
+              report-to chains. You can keep posting here, but the corporate
+              flow will fit a DSO-wide role better.
+            </p>
+            <a
+              href="/employer/jobs/new/corporate"
+              className="mt-2 inline-flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-[1.5px] text-heritage-deep hover:text-ink transition-colors"
+            >
+              Switch to the Corporate wizard →
+            </a>
+          </div>
+        )}
       </div>
 
       {/* 5G.c — corporate function selector. Only surfaces when
@@ -2418,7 +2487,10 @@ function QuestionCard({
               Slider end labels <span className="text-heritage">*</span>
             </label>
             <p className="mb-2.5 text-[13px] text-slate-meta">
-              Candidates drag a 1–5 slider between these two ends.
+              Candidates drag a <strong>1–5</strong> slider between these two
+              ends — best for attitude or comfort-level questions. For a count
+              or amount (e.g. &ldquo;how many locations&rdquo;), use a{" "}
+              <strong>Number</strong> question instead.
             </p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Input

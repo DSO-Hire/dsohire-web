@@ -232,6 +232,12 @@ export function CorporateJobWizard({
   initialQuestions,
 }: CorporateWizardProps) {
   const [stepIdx, setStepIdx] = useState(0);
+  // #97 (Day 28) — gate forward stepper jumps to the furthest validated step
+  // so the tab nav can't skip past unfilled required fields (Continue blocks
+  // them; tab-jump shouldn't be a loophole). Edit mode starts fully unlocked.
+  const [maxStepReached, setMaxStepReached] = useState(
+    mode === "edit" ? STEPS.length - 1 : 0
+  );
 
   // 5G.d — draft autosave (create mode only). Key per DSO. Keyed
   // dsohire-corporate-wizard-draft-${dsoId} so it never collides with the
@@ -607,7 +613,15 @@ export function CorporateJobWizard({
       setHideStagesFromCandidate(Boolean(d.hideStagesFromCandidate));
       setQuestions((d.questions as WizardScreeningQuestion[]) ?? []);
       setStatus((d.status as string) ?? "draft");
-      if (typeof d.stepIdx === "number") setStepIdx(d.stepIdx as number);
+      if (typeof d.stepIdx === "number") {
+        const clamped = Math.min(
+          STEPS.length - 1,
+          Math.max(0, d.stepIdx as number)
+        );
+        setStepIdx(clamped);
+        // #97 — unlock stepper jumps up to the restored step.
+        setMaxStepReached((m) => Math.max(m, clamped));
+      }
     } catch {
       /* noop */
     } finally {
@@ -660,7 +674,10 @@ export function CorporateJobWizard({
       const validation = validateQuestions(questions);
       if (validation) return setError(validation);
     }
-    setStepIdx((i) => Math.min(STEPS.length - 1, i + 1));
+    const nextIdx = Math.min(STEPS.length - 1, stepIdx + 1);
+    setStepIdx(nextIdx);
+    // #97 — unlock the validated step for stepper jumps.
+    setMaxStepReached((m) => Math.max(m, nextIdx));
   }
 
   function back() {
@@ -897,7 +914,7 @@ export function CorporateJobWizard({
           </>
         }
         meterIcon={<BrandMark className="h-3.5 w-3.5" />}
-        canJumpTo={(i) => i !== stepIdx}
+        canJumpTo={(i) => i !== stepIdx && i <= maxStepReached}
         onJump={(i) => {
           setError(null);
           setStepIdx(i);
@@ -2291,6 +2308,12 @@ function QuestionCard({
               <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
                 Slider end labels <span className="text-heritage">*</span>
               </label>
+              <p className="mb-2 text-[13px] text-slate-meta">
+                Candidates drag a <strong>1–5</strong> slider between these two
+                ends — best for attitude or comfort-level questions. For a count
+                or amount (e.g. &ldquo;locations managed&rdquo;), use a{" "}
+                <strong>Number</strong> question instead.
+              </p>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <input
                   type="text"

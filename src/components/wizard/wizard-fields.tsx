@@ -241,19 +241,48 @@ export function ScaleSlider({
   variant?: "dsohire" | "practicefit";
 }) {
   const mid = Math.round((min + max) / 2);
+  // #101 (Day 28) — show the selected number + labeled ticks so dragging isn't
+  // vague. `current` stays null until the user actually moves the slider, so we
+  // prompt "drag to choose" instead of echoing a value they never picked.
+  const current = typeof value === "number" ? value : null;
+  const ticks = Array.from({ length: max - min + 1 }, (_, i) => min + i);
   return (
-    <div className="flex items-center gap-3">
-      <span className="w-28 text-right text-[13px] text-slate-meta">{low}</span>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={1}
-        value={typeof value === "number" ? value : mid}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className={(variant === "practicefit" ? "pf-slider" : "dso-slider") + " flex-1"}
-      />
-      <span className="w-28 text-[13px] text-slate-meta">{high}</span>
+    <div className="space-y-2">
+      <div className="flex items-center gap-3">
+        <span className="w-28 text-right text-[13px] text-slate-meta">{low}</span>
+        <div className="flex-1">
+          <input
+            type="range"
+            min={min}
+            max={max}
+            step={1}
+            value={current ?? mid}
+            onChange={(e) => onChange(Number(e.target.value))}
+            className={
+              (variant === "practicefit" ? "pf-slider" : "dso-slider") + " w-full"
+            }
+          />
+          <div className="mt-1 flex justify-between px-0.5" aria-hidden>
+            {ticks.map((t) => (
+              <span
+                key={t}
+                className={
+                  "text-[11px] tabular-nums " +
+                  (current === t ? "font-bold text-ink" : "text-slate-meta")
+                }
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+        <span className="w-28 text-[13px] text-slate-meta">{high}</span>
+      </div>
+      <p className="text-center text-[12px] font-semibold text-slate-body">
+        {current !== null
+          ? `Your answer: ${current} of ${max}`
+          : `Drag to choose — ${min} (${low}) to ${max} (${high})`}
+      </p>
     </div>
   );
 }

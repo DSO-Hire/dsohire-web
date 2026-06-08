@@ -70,9 +70,11 @@ export function ExternalLinksField({
         </span>
       </label>
       <p className="text-[12px] text-slate-meta leading-relaxed mb-3">
-        Video tours, benefits PDFs, &ldquo;meet the team&rdquo; pages, or any
-        other URLs you want candidates to see alongside the job posting.
-        Each link needs a short label + a full URL (http/https).
+        Add <strong>links</strong> (URLs) candidates see alongside the posting
+        — a video tour, a &ldquo;meet the team&rdquo; page, or a benefits PDF.
+        These are links only; we don&apos;t host file uploads here, so to share
+        a PDF, paste the URL where it already lives (your website, Google Drive,
+        Dropbox, etc.). Each needs a short label + a full URL (http/https).
       </p>
 
       {/* Each row submits via these form names. The empty rows that the

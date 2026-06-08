@@ -93,6 +93,10 @@ export function AssessmentWizard({ initial }: { initial: Answers }) {
   const back = () => {
     setError(null);
     setStepIdx((i) => Math.max(0, i - 1));
+    // #102 (Day 28) — scroll to top on Back too, mirroring next(), so each
+    // section starts at the question stem instead of mid-page.
+    if (typeof window !== "undefined")
+      window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
