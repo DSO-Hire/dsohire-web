@@ -84,7 +84,7 @@ export default async function CandidateDashboardPage() {
   const { data: candidate } = await supabase
     .from("candidates")
     .select(
-      "id, first_name, last_name, salutation, full_name, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, desired_specialty, license_states, pms_systems, skills, languages, temp_or_perm, dso_size_preference, schedule_preferences, min_salary, salary_unit, cv_visibility, availability, resume_url, linkedin_url, avatar_url, practice_fit_consent, work_pace, autonomy_pref, mentorship_pref, practice_feel, ce_growth_importance, work_life_priority, benefit_priorities, patient_population_pref",
+      "id, first_name, last_name, salutation, full_name, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, desired_specialty, license_states, pms_systems, skills, languages, temp_or_perm, dso_size_preference, schedule_preferences, min_salary, salary_unit, cv_visibility, availability, resume_url, linkedin_url, avatar_url, practice_fit_consent, work_pace, autonomy_pref, mentorship_pref, practice_feel, ce_growth_importance, work_life_priority, benefit_priorities, patient_population_pref, assessment_completed_at, privacy_choices_reviewed_at",
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
@@ -183,6 +183,15 @@ export default async function CandidateDashboardPage() {
       href: "/candidate/profile",
     },
     {
+      // #94 (Day 28) — drive every new candidate to the PracticeFit
+      // assessment (our differentiator + feeds match quality). Prominent,
+      // second only to the profile. done when they've actually completed it.
+      key: "assessment",
+      label: "Take your 5-minute PracticeFit assessment",
+      done: (c.assessment_completed_at as string | null) != null,
+      href: "/candidate/assessment",
+    },
+    {
       key: "prefs",
       label: "Tell PracticeFit what you're looking for",
       done:
@@ -193,15 +202,18 @@ export default async function CandidateDashboardPage() {
     {
       key: "visible",
       label: "Set your profile visibility so recruiters can find you",
-      // cv_visibility is the "Profile status" enum: hidden / recruiters_only /
-      // open_to_work. Anything but "hidden" means discoverable → done.
-      done: ((c.cv_visibility as string | null) ?? "hidden") !== "hidden",
+      // #92 (Day 28) — a default value existing is NOT the user deciding.
+      // Only mark this done once the candidate has actually reviewed their
+      // privacy/matching choices (privacy_choices_reviewed_at, stamped when
+      // they save the privacy settings page). The default still applies
+      // silently underneath; we just don't pre-check the box for them.
+      done: (c.privacy_choices_reviewed_at as string | null) != null,
       href: "/candidate/settings/privacy",
     },
     {
       key: "fit",
       label: "Choose your PracticeFit matching setting",
-      done: ((c.practice_fit_consent as string | null) ?? "off") !== "off",
+      done: (c.privacy_choices_reviewed_at as string | null) != null,
       href: "/candidate/settings/privacy",
     },
   ];

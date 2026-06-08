@@ -21,6 +21,15 @@ import { useState } from "react";
 import { ShieldCheck, Sparkles, Save, X, Plus, Trash2 } from "lucide-react";
 import type { ParsedResume } from "@/lib/resume/parse";
 import { ConfidencePill } from "./import-wizard";
+// #93 (Day 28) — canonical pickers for roles/specialties/languages so the
+// résumé-review step can't seed free-text typos that exclude the candidate
+// from employers' structured search.
+import { ChipArrayInput } from "@/app/candidate/profile/edit-sheet";
+import {
+  ROLE_CATEGORIES,
+  SPECIALTIES,
+  COMMON_LANGUAGES,
+} from "@/lib/candidate/canonical-lists";
 
 interface ReviewFormProps {
   parsed: ParsedResume;
@@ -555,24 +564,42 @@ export function ReviewForm({
         />
       </Section>
       <Section title="Languages">
-        <ChipArrayEditor
+        <ChipArrayInput
+          label=""
           values={parsed.languages}
           onChange={(next) => updateStringArray("languages", next)}
-          placeholder="Add a language"
+          options={COMMON_LANGUAGES}
+          labelFor={(v) =>
+            COMMON_LANGUAGES.find((o) => o.value === v)?.label ?? v
+          }
+          restrictToOptions
+          placeholder="Search languages…"
+          helper="Pick from the list so employers' filters match you."
         />
       </Section>
       <Section title="Desired roles">
-        <ChipArrayEditor
+        <ChipArrayInput
+          label=""
           values={parsed.desired_roles}
           onChange={(next) => updateStringArray("desired_roles", next)}
-          placeholder="associate_dentist, hygienist, …"
+          options={ROLE_CATEGORIES}
+          labelFor={(v) =>
+            ROLE_CATEGORIES.find((o) => o.value === v)?.label ?? v
+          }
+          restrictToOptions
+          placeholder="Search roles…"
+          helper="Pick from the list so employers' searches match you."
         />
       </Section>
       <Section title="Specialties">
-        <ChipArrayEditor
+        <ChipArrayInput
+          label=""
           values={parsed.desired_specialty}
           onChange={(next) => updateStringArray("desired_specialty", next)}
-          placeholder="general_dentistry, orthodontics, …"
+          options={SPECIALTIES}
+          labelFor={(v) => SPECIALTIES.find((o) => o.value === v)?.label ?? v}
+          restrictToOptions
+          placeholder="Search specialties…"
         />
       </Section>
 

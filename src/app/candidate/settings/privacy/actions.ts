@@ -72,6 +72,10 @@ export async function updateVisibility(
       cv_visibility: input.cv_visibility,
       resume_visibility: input.resume_visibility,
       contact_info_visibility: input.contact_info_visibility,
+      // #92 (Day 28) — the candidate has now explicitly reviewed their
+      // privacy choices, so the onboarding visibility/matching steps can
+      // legitimately complete (vs. pre-checking them from a default).
+      privacy_choices_reviewed_at: new Date().toISOString(),
     })
     .eq("id", ctx.candidateId);
 
@@ -125,7 +129,11 @@ export async function updatePracticeFitConsent(
 
   const { error } = await ctx.supabase
     .from("candidates")
-    .update({ practice_fit_consent: consent })
+    .update({
+      practice_fit_consent: consent,
+      // #92 (Day 28) — explicit review → onboarding matching step can complete.
+      privacy_choices_reviewed_at: new Date().toISOString(),
+    })
     .eq("id", ctx.candidateId);
 
   if (error) {

@@ -926,7 +926,14 @@ export function JobWizard({
           helper_text: q.helper_text?.trim() || null,
           kind: q.kind,
           options:
-            q.kind === "single_select" || q.kind === "multi_select"
+            // #71 fix (Day 28): a `scale` question stores its two end labels
+            // in `options` and the DB constraint screening_options_present
+            // REQUIRES options for single_select | multi_select | scale.
+            // Previously scale serialized as null → constraint violation
+            // ("Job created, but couldn't save screening questions").
+            q.kind === "single_select" ||
+            q.kind === "multi_select" ||
+            q.kind === "scale"
               ? (q.options ?? []).map((o) => ({
                   id: o.id,
                   label: o.label.trim(),
@@ -3149,6 +3156,18 @@ function validateQuestions(
         if (!q.options[j].label.trim()) {
           return `Question ${i + 1}: option ${j + 1} is empty.`;
         }
+      }
+    }
+    // #90 (Day 28) — a scale question stores its two end labels in options;
+    // catch a missing label here with a numbered, human message instead of
+    // letting it hit the DB's screening_options_present constraint and surface
+    // a raw error the recruiter can't act on.
+    if (q.kind === "scale") {
+      const opts = q.options ?? [];
+      const low = (opts.find((o) => o.id === "low")?.label ?? opts[0]?.label ?? "").trim();
+      const high = (opts.find((o) => o.id === "high")?.label ?? opts[1]?.label ?? "").trim();
+      if (!low || !high) {
+        return `Question ${i + 1} (scale): add a label for both the low and high end of the slider.`;
       }
     }
   }

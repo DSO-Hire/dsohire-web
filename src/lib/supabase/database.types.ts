@@ -1638,6 +1638,7 @@ export type Database = {
           assessment_responses: Json | null
           assessment_completed_at: string | null
           assessment_version: string | null
+          privacy_choices_reviewed_at: string | null
           preferred_timezone: string
           pronouns: string | null
           resume_url: string | null
@@ -1712,6 +1713,7 @@ export type Database = {
           assessment_responses?: Json | null
           assessment_completed_at?: string | null
           assessment_version?: string | null
+          privacy_choices_reviewed_at?: string | null
           preferred_timezone?: string
           pronouns?: string | null
           resume_url?: string | null
@@ -1785,6 +1787,7 @@ export type Database = {
           assessment_responses?: Json | null
           assessment_completed_at?: string | null
           assessment_version?: string | null
+          privacy_choices_reviewed_at?: string | null
           preferred_timezone?: string
           pronouns?: string | null
           resume_url?: string | null

@@ -808,7 +808,8 @@ function RolePreferencesModal({
         onChange={setRoles}
         options={ROLE_CATEGORIES}
         labelFor={(v) => labelFor(v, ROLE_CATEGORIES)}
-        placeholder="Type or click a quick-add chip"
+        restrictToOptions
+        placeholder="Search roles…"
         helper="Pick from the dropdown so employers' searches match you."
       />
       <ChipArrayInput
@@ -817,7 +818,8 @@ function RolePreferencesModal({
         onChange={setSpecialty}
         options={SPECIALTIES}
         labelFor={(v) => labelFor(v, SPECIALTIES)}
-        placeholder="general_dentistry, orthodontics, …"
+        restrictToOptions
+        placeholder="Search specialties…"
       />
       <div>
         <p className="mb-2 text-sm font-medium text-slate-800">
@@ -952,7 +954,8 @@ function SkillsLanguagesModal({
         values={languages}
         onChange={setLanguages}
         options={COMMON_LANGUAGES}
-        placeholder="Spanish, Mandarin, …"
+        restrictToOptions
+        placeholder="Search languages…"
       />
       <ChipArrayInput
         label="Practice-management systems"

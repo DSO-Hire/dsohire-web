@@ -293,7 +293,11 @@ export const ASSESSMENT_QUESTIONS: AssessmentQuestion[] = [
     dimension: "patient_facing",
     prompt: "Patient interaction energizes me.",
     type: "slider",
-    sliderLabels: { low: "I prefer clinical focus", high: "I love it" },
+    // #96 (Day 28) — anchors now read as opposite poles of the stem so the
+    // slider is coherent (was "I prefer clinical focus" vs "I love it", which
+    // didn't complete the sentence). Still captures the clinical-vs-people
+    // signal the patient_facing dimension scores.
+    sliderLabels: { low: "I'd rather focus on the work", high: "It's the best part of my day" },
   },
   {
     key: "mentorship_pref",

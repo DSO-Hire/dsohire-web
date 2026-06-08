@@ -802,7 +802,14 @@ export function CorporateJobWizard({
           helper_text: q.helper_text?.trim() || null,
           kind: q.kind,
           options:
-            q.kind === "single_select" || q.kind === "multi_select"
+            // #71 fix (Day 28): scale stores its two end labels in `options`;
+            // DB constraint screening_options_present REQUIRES options for
+            // single_select | multi_select | scale. Scale was serializing as
+            // null → "couldn't save screening questions" on the corporate
+            // wizard (the IT-manager role Cam hit in the Day 28 stress test).
+            q.kind === "single_select" ||
+            q.kind === "multi_select" ||
+            q.kind === "scale"
               ? (q.options ?? []).map((o) => ({
                   id: o.id,
                   label: o.label.trim(),
@@ -2883,6 +2890,17 @@ function validateQuestions(
         if (!q.options[j].label.trim()) {
           return `Question ${i + 1}: option ${j + 1} is empty.`;
         }
+      }
+    }
+    // #90 (Day 28) — scale stores its two end labels in options; catch a
+    // missing label with a numbered, human message instead of the raw DB
+    // screening_options_present constraint error.
+    if (q.kind === "scale") {
+      const opts = q.options ?? [];
+      const low = (opts.find((o) => o.id === "low")?.label ?? opts[0]?.label ?? "").trim();
+      const high = (opts.find((o) => o.id === "high")?.label ?? opts[1]?.label ?? "").trim();
+      if (!low || !high) {
+        return `Question ${i + 1} (scale): add a label for both the low and high end of the slider.`;
       }
     }
   }

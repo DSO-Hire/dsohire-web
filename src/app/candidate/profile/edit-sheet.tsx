@@ -237,6 +237,14 @@ export function ChipArrayInput(props: {
   helper?: string;
   /** Render each chip's label via this lookup (e.g., role label from value). */
   labelFor?: (value: string) => string;
+  /**
+   * #93 (Day 28) — when true (and `options` supplied), only canonical values
+   * can be added: a typed value/label is resolved to its option `value`, and
+   * anything with no match is rejected. Kills the free-text typo loop that
+   * silently excludes a candidate from employers' structured search. Leave
+   * false (default) for genuinely open fields like locations/timeline.
+   */
+  restrictToOptions?: boolean;
 }) {
   const [draft, setDraft] = useState("");
   const [showAll, setShowAll] = useState(false);
@@ -244,11 +252,23 @@ export function ChipArrayInput(props: {
   const add = (raw: string) => {
     const v = raw.trim();
     if (!v) return;
-    if (props.values.includes(v)) {
+    // #93 — resolve a typed value or label to its canonical option value so we
+    // store the slug, not the typed text. With restrictToOptions, a non-match
+    // is ignored (the user picks a quick-add chip instead).
+    let resolved = v;
+    if (props.options) {
+      const lower = v.toLowerCase();
+      const match = props.options.find(
+        (o) => o.value.toLowerCase() === lower || o.label.toLowerCase() === lower
+      );
+      if (match) resolved = match.value;
+      else if (props.restrictToOptions) return;
+    }
+    if (props.values.includes(resolved)) {
       setDraft("");
       return;
     }
-    props.onChange([...props.values, v]);
+    props.onChange([...props.values, resolved]);
     setDraft("");
   };
   const remove = (idx: number) =>
@@ -378,7 +398,9 @@ export function ChipArrayInput(props: {
       )}
       {isFiltering && remainingOptions && remainingOptions.length === 0 && (
         <p className="mt-3 text-xs italic text-slate-400">
-          No matches — press Enter to add &ldquo;{draft.trim()}&rdquo; as a custom value.
+          {props.restrictToOptions
+            ? "No matches. Pick from the list — custom values aren't allowed for this field."
+            : `No matches — press Enter to add “${draft.trim()}” as a custom value.`}
         </p>
       )}
     </div>
