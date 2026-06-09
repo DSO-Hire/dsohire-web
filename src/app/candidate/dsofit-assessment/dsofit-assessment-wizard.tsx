@@ -262,7 +262,9 @@ export function DsoFitAssessmentWizard({
     startTransition(async () => {
       const res = await saveDsoFitAssessment(answers);
       if (res.ok) {
-        router.push("/candidate/dashboard");
+        // Drop into the DSOFit hub (their ranked matches) — parity with the
+        // PracticeFit assessment's "see my matches" landing, not the dashboard.
+        router.push("/candidate/dsofit");
         router.refresh();
       } else {
         setError(res.error ?? "Couldn't save — try again.");
@@ -338,16 +340,21 @@ function renderField(
           maxLength={120}
         />
       );
-    case "salary":
+    case "salary": {
+      // Display with thousands separators (150,000); store the raw digits.
+      const rawSalary = (answers.min_salary as string) ?? "";
+      const displaySalary = rawSalary
+        ? Number(rawSalary).toLocaleString("en-US")
+        : "";
       return (
         <div className="flex flex-wrap items-center gap-3">
           <TextField
-            value={(answers.min_salary as string) ?? ""}
+            value={displaySalary}
             onChange={(v) => set("min_salary", v.replace(/[^0-9]/g, ""))}
             type="text"
             inputMode="numeric"
             prefix="$"
-            placeholder="e.g. 150000"
+            placeholder="e.g. 150,000"
             widthClass="w-[180px]"
           />
           <SelectField
@@ -358,6 +365,7 @@ function renderField(
           />
         </div>
       );
+    }
     default:
       return null;
   }

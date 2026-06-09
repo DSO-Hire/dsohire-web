@@ -42,6 +42,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
+import { DsoFitWordmark } from "@/components/practice-fit/brand/dsofit-wordmark";
 import {
   EditSheet,
   TextField,
@@ -200,9 +201,12 @@ type OpenModal =
 export function ProfileSections({
   data,
   photoUrl,
+  fitProduct = "practicefit",
 }: {
   data: ProfileData;
   photoUrl: string | null;
+  /** Which fit sibling to show in the bottom card (#54 — navy PF / heritage DSOFit). */
+  fitProduct?: "practicefit" | "dsofit";
 }) {
   const [open, setOpen] = useState<OpenModal>(null);
   const completeness = computeCompleteness(data, photoUrl);
@@ -265,7 +269,7 @@ export function ProfileSections({
             employer-initiated, consent-based, late-stage step — not something
             candidates pre-store. Keeps us off a third-party-PII surface
             (legal-first). The employer-side reference-check flow remains. */}
-        <PracticeFitCard />
+        <PracticeFitCard product={fitProduct} />
       </div>
 
       {open?.kind === "identity" && (
@@ -2190,28 +2194,60 @@ function JobPreferencesModal({
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// 9. PracticeFit (placeholder, Phase 5D)
+// 9. PracticeFit / DSOFit (product-aware — #54). A corporate candidate
+//    (primary_fit_product = "dsofit") sees the DSOFit sibling here, not
+//    PracticeFit, so their profile reads consistently with the rest of
+//    their experience.
 // ─────────────────────────────────────────────────────────────────────
 
-function PracticeFitCard() {
+function PracticeFitCard({
+  product = "practicefit",
+}: {
+  product?: "practicefit" | "dsofit";
+}) {
+  const isDso = product === "dsofit";
   return (
     <section className="border border-slate-200 bg-[#F7F4ED] p-6 sm:p-8">
       <header className="mb-3">
         <h2 className="leading-none">
-          <PracticeFitWordmark surface="light" tm className="text-2xl" />
+          {isDso ? (
+            <DsoFitWordmark surface="light" tm className="text-2xl" />
+          ) : (
+            <PracticeFitWordmark surface="light" tm className="text-2xl" />
+          )}
         </h2>
         <p className="mt-2 text-sm text-slate-600">
-          Employers already see how well you match their open roles —
-          PracticeFit is scored automatically from your profile (your role,
-          skills, schedule, and preferences). The more complete your
-          profile, the sharper your matches.
+          {isDso ? (
+            <>
+              DSOs already see how well you match their open roles — DSOFit is
+              scored from your profile and your DSOFit assessment (your
+              function, level, multi-site experience, and how you want to
+              work). The more complete your profile, the sharper your matches.
+            </>
+          ) : (
+            <>
+              Employers already see how well you match their open roles —
+              PracticeFit is scored automatically from your profile (your role,
+              skills, schedule, and preferences). The more complete your
+              profile, the sharper your matches.
+            </>
+          )}
         </p>
       </header>
       <div className="flex items-center gap-2 rounded-md bg-white px-4 py-3 text-xs text-slate-500">
         <AlertCircle className="size-4 text-[#4D7A60]" />
-        Nothing to fill in here — keep your profile up to date and PracticeFit
-        follows. An optional work-style assessment to fine-tune it is coming
-        later.
+        {isDso ? (
+          <>
+            Nothing to fill in here — keep your profile up to date and take
+            your DSOFit assessment to sharpen it.
+          </>
+        ) : (
+          <>
+            Nothing to fill in here — keep your profile up to date and
+            PracticeFit follows. An optional work-style assessment to fine-tune
+            it is coming later.
+          </>
+        )}
       </div>
     </section>
   );

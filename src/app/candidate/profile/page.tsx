@@ -44,7 +44,7 @@ export default async function CandidateProfilePage() {
     supabase
       .from("candidates")
       .select(
-        "id, full_name, first_name, last_name, salutation, phone, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, availability, linkedin_url, resume_url, is_searchable, avatar_url, desired_specialty, pms_systems, skills, languages, temp_or_perm, schedule_preferences, min_salary, salary_unit, cv_visibility, last_parsed_at, profile_accent_color"
+        "id, full_name, first_name, last_name, salutation, phone, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, availability, linkedin_url, resume_url, is_searchable, avatar_url, desired_specialty, pms_systems, skills, languages, temp_or_perm, schedule_preferences, min_salary, salary_unit, cv_visibility, last_parsed_at, profile_accent_color, primary_fit_product"
       )
       .eq("auth_user_id", user.id)
       .maybeSingle(),
@@ -249,8 +249,18 @@ export default async function CandidateProfilePage() {
 
       {/* Section cards (Completeness meter renders inside, before the
           first section card, so it shares modal-open state with the
-          section editors.) */}
-      <ProfileSections data={data} photoUrl={avatarUrl} />
+          section editors.) The fit-product flag swaps the bottom card
+          between PracticeFit (navy) and DSOFit (heritage) so a corporate
+          candidate doesn't see the wrong sibling on their profile. */}
+      <ProfileSections
+        data={data}
+        photoUrl={avatarUrl}
+        fitProduct={
+          ((c.primary_fit_product as string | null) ?? "practicefit") === "dsofit"
+            ? "dsofit"
+            : "practicefit"
+        }
+      />
     </CandidateShell>
   );
 }
