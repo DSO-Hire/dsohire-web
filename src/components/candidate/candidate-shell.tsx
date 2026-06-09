@@ -26,6 +26,7 @@ import {
   Inbox as InboxIcon,
 } from "lucide-react";
 import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
+import { DsoFitMark } from "@/components/practice-fit/brand/dsofit-mark";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { BrandLockup } from "@/components/marketing/site-shell";
 import { Avatar } from "@/components/ui/avatar";
@@ -94,7 +95,7 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
   const { data: candidate } = await supabase
     .from("candidates")
     .select(
-      "id, full_name, headline, current_title, is_searchable, avatar_url, deleted_at"
+      "id, full_name, headline, current_title, is_searchable, avatar_url, deleted_at, primary_fit_product"
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
@@ -119,9 +120,24 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
   // Inbox unread badge — counts messages from the OTHER side that
   // haven't been marked read. RLS scopes the query automatically.
   const inboxUnread = await getUnreadCount(supabase, "candidate");
-  const navWithBadges = NAV.map((item) =>
-    item.id === "inbox" ? { ...item, badge: inboxUnread } : item
-  );
+  // #54 — the fit nav slot swaps PracticeFit↔DSOFit by the candidate's chosen
+  // track (null → PracticeFit default). Same slot id ("practice-fit") so the
+  // `active` highlighting keeps working for both products.
+  const fitProduct =
+    ((candidate as Record<string, unknown>).primary_fit_product as string | null) ??
+    "practicefit";
+  const isDso = fitProduct === "dsofit";
+  const navWithBadges = NAV.map((item) => {
+    if (item.id === "inbox") return { ...item, badge: inboxUnread };
+    if (item.id === "practice-fit")
+      return {
+        ...item,
+        label: isDso ? "DSOFit" : "PracticeFit",
+        href: isDso ? "/candidate/dsofit" : "/candidate/practice-fit",
+        Icon: isDso ? DsoFitMark : PracticeFitMark,
+      };
+    return item;
+  });
 
   return (
     <div className="min-h-screen flex bg-ivory">
@@ -170,6 +186,15 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
             {navWithBadges.map((item) => (
               <NavRow key={item.id} item={item} active={active} />
             ))}
+            {/* #54 — crossover candidates can reach the other fit product. */}
+            <li className="mt-1 px-3">
+              <Link
+                href={isDso ? "/candidate/practice-fit" : "/candidate/dsofit"}
+                className="block py-1.5 text-[11px] text-ivory/45 hover:text-ivory/80 transition-colors"
+              >
+                Also explore {isDso ? "PracticeFit" : "DSOFit"} →
+              </Link>
+            </li>
           </ul>
         </nav>
 
@@ -198,7 +223,7 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
           </Link>
           <CandidateMobileNav
             active={active}
-            items={[...NAV, SETTINGS_ITEM].map((item) => ({
+            items={[...navWithBadges, SETTINGS_ITEM].map((item) => ({
               id: item.id,
               label: item.label,
               href: item.href,
@@ -249,7 +274,8 @@ function NavRow({
         <span className="flex-1">
           {item.id === "practice-fit" ? (
             <>
-              Practice<span className="text-heritage-light">Fit</span>
+              {item.label.replace(/Fit$/, "")}
+              <span className="text-heritage-light">Fit</span>
             </>
           ) : (
             item.label

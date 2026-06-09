@@ -8,7 +8,7 @@
  */
 
 export function DsoFitMark({
-  tone = "navy",
+  tone = "current",
   className = "h-4 w-4",
 }: {
   tone?: "navy" | "heritage" | "heritage-deep" | "ivory" | "current";

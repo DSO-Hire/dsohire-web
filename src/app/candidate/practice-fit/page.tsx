@@ -199,6 +199,20 @@ export default async function CandidatePracticeFitPage() {
           >
             Privacy &amp; visibility
           </a>
+          . DSO / corporate candidate?{" "}
+          <a
+            href="/candidate/dsofit"
+            className="font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
+          >
+            Explore DSOFit
+          </a>{" "}
+          or{" "}
+          <a
+            href="/candidate/track-chooser?change=1"
+            className="font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
+          >
+            switch your primary track
+          </a>
           .
         </p>
       </section>

@@ -176,12 +176,12 @@ export async function verifySignUpCandidate(
     };
   }
 
-  // #94/#40 (Day 28) — a brand-new candidate with no specific destination
-  // normally lands on the dashboard; instead route them straight into the
-  // PracticeFit assessment so every new candidate at least lays eyes on it.
-  // The assessment has a "Skip for now" exit, so this is a nudge, not a wall.
-  // Intentful destinations (e.g. ?next=/jobs/[id]/apply) are respected.
-  const dest = next === "/candidate/dashboard" ? "/candidate/assessment" : next;
+  // #53 (Day 29) — a brand-new candidate with no specific destination goes to
+  // the TRACK CHOOSER first (PracticeFit vs DSOFit). The chooser saves their
+  // choice and routes them into the right assessment, so every new candidate
+  // both self-identifies AND lays eyes on the matching tool. Intentful
+  // destinations (e.g. ?next=/jobs/[id]/apply) are respected and skip it.
+  const dest = next === "/candidate/dashboard" ? "/candidate/track-chooser" : next;
   redirect(dest);
 }
 
