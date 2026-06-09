@@ -54,7 +54,7 @@ export default async function CandidatePracticeFitPage() {
   const assessmentDone = c.assessment_completed_at != null;
 
   const matches = consentOn
-    ? await getTopFitJobsForCandidate(candidateId, 12)
+    ? await getTopFitJobsForCandidate(candidateId, 12, undefined, "practicefit")
     : [];
 
   const initial = {

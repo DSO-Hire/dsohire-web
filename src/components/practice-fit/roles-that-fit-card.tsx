@@ -8,6 +8,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
+import { DsoFitWordmark } from "@/components/practice-fit/brand/dsofit-wordmark";
 import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
 import type { RoleThatFits } from "@/lib/practice-fit/roles-that-fit";
 
@@ -20,7 +21,14 @@ function formatLocations(
   return locs.length > 1 ? `${first} +${locs.length - 1} more` : first;
 }
 
-export function RolesThatFitCard({ roles }: { roles: RoleThatFits[] }) {
+export function RolesThatFitCard({
+  roles,
+  product = "practicefit",
+}: {
+  roles: RoleThatFits[];
+  /** Which fit brand to show in the header (#55). Defaults to PracticeFit. */
+  product?: "practicefit" | "dsofit";
+}) {
   if (roles.length === 0) return null;
   return (
     <section className="mb-6">
@@ -29,7 +37,11 @@ export function RolesThatFitCard({ roles }: { roles: RoleThatFits[] }) {
           <span className="text-[10px] font-bold tracking-[2.5px] uppercase">
             Roles that fit you ·
           </span>
-          <PracticeFitWordmark surface="light" className="text-[14px]" />
+          {product === "dsofit" ? (
+            <DsoFitWordmark surface="light" className="text-[14px]" />
+          ) : (
+            <PracticeFitWordmark surface="light" className="text-[14px]" />
+          )}
         </div>
         <Link
           href="/candidate/jobs"

@@ -14,7 +14,7 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Building2, UploadCloud } from "lucide-react";
+import { Building2, UploadCloud, Check } from "lucide-react";
 import { WizardShell } from "@/components/wizard/wizard-shell";
 import {
   FieldShell,
@@ -127,46 +127,69 @@ export function DsoFitAssessmentWizard({
   // ── Landing (first-timers) ──
   if (!started) {
     return (
-      <div className="mx-auto max-w-[680px]">
+      <div className="mx-auto max-w-[700px]">
         <div className="mb-5">
           <DsoFitWordmark className="text-3xl sm:text-4xl" tm />
         </div>
-        <h1 className="text-2xl font-extrabold tracking-[-0.4px] text-ink mb-2">
-          Let&apos;s find your DSO matches.
+        <h1 className="text-[26px] sm:text-[31px] font-extrabold tracking-[-0.5px] leading-tight text-ink mb-3">
+          The fit score DSOs see — built in 5 minutes.
         </h1>
-        <p className="text-[15px] text-slate-body leading-relaxed mb-6 max-w-[560px]">
-          A few quick questions — your function, level, the scale you&apos;ve
-          operated at, and how you like to work. About 5 minutes, mostly taps.
-          Drop your résumé first and we&apos;ll save it to your profile and
-          pre-fill what we can.
+        <p className="text-[15px] sm:text-[16px] text-slate-body leading-relaxed mb-6 max-w-[580px]">
+          DSOFit ranks every open DSO and corporate role by how well it fits
+          your function, level, multi-site experience, and how you want to
+          work — the things a résumé can&apos;t show. Take it once and you&apos;ll:
         </p>
+        <ul className="space-y-3 mb-8">
+          {[
+            "See DSO & corporate roles ranked for you — strongest matches first.",
+            "Get surfaced to DSOs hiring for your function, by fit — not keywords.",
+            "Save your résumé to your profile and apply in one click.",
+          ].map((line) => (
+            <li key={line} className="flex items-start gap-3 text-[15px] text-slate-body">
+              <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-heritage/15">
+                <Check className="h-3.5 w-3.5 text-heritage-deep" />
+              </span>
+              <span>{line}</span>
+            </li>
+          ))}
+        </ul>
 
-        <div className="border border-[var(--rule)] bg-cream/40 p-5 mb-6">
-          <div className="flex items-center gap-2 mb-2 text-ink">
-            <UploadCloud className="h-4 w-4 text-heritage-deep" />
-            <span className="text-[13px] font-bold">
-              Upload your résumé{" "}
-              <span className="font-medium text-slate-meta">(optional, saves time)</span>
-            </span>
+        {/* Prominent résumé drop-zone — the time-saver, hard to miss. */}
+        <div className="border-2 border-dashed border-heritage/45 bg-cream/50 rounded-xl p-7 mb-6 text-center">
+          <UploadCloud className="mx-auto mb-2 h-8 w-8 text-heritage-deep" />
+          <div className="text-[16px] font-extrabold text-ink">
+            Drop your résumé to save time
           </div>
-          <input
-            type="file"
-            accept=".pdf,.doc,.docx"
-            onChange={(e) => setResumeFile(e.target.files?.[0] ?? null)}
-            className="block w-full text-[13px] text-slate-body file:mr-3 file:border file:border-[var(--rule)] file:bg-white file:px-3 file:py-1.5 file:text-[12px] file:font-semibold file:text-ink"
-          />
+          <p className="mx-auto mt-1 mb-4 max-w-[420px] text-[13px] text-slate-meta">
+            We&apos;ll save it to your profile and pre-fill what we can. PDF or
+            Word — totally optional.
+          </p>
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-heritage-deep bg-white px-5 py-2.5 text-[14px] font-bold text-heritage-deep hover:bg-heritage/5 transition-colors">
+            {resumeFile ? "Choose a different file" : "Choose your résumé"}
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx"
+              onChange={(e) => setResumeFile(e.target.files?.[0] ?? null)}
+              className="hidden"
+            />
+          </label>
           {resumeFile && (
-            <button
-              type="button"
-              onClick={autofillFromResume}
-              disabled={parsing}
-              className="mt-3 inline-flex items-center gap-2 rounded bg-heritage-deep px-4 py-2 text-[13px] font-bold text-ivory disabled:opacity-60"
-            >
-              {parsing ? "Reading your résumé…" : "Use this résumé & start →"}
-            </button>
+            <div className="mt-4">
+              <div className="mb-3 text-[13px] text-slate-body">
+                Selected: <span className="font-semibold text-ink">{resumeFile.name}</span>
+              </div>
+              <button
+                type="button"
+                onClick={autofillFromResume}
+                disabled={parsing}
+                className="inline-flex items-center gap-2 rounded-full bg-heritage-deep px-6 py-2.5 text-[14px] font-bold text-ivory disabled:opacity-60"
+              >
+                {parsing ? "Reading your résumé…" : "Use this résumé & start →"}
+              </button>
+            </div>
           )}
           {autofillNote && (
-            <p className="mt-2 text-[12px] text-slate-meta">{autofillNote}</p>
+            <p className="mt-3 text-[12px] text-slate-meta">{autofillNote}</p>
           )}
         </div>
 
@@ -174,9 +197,9 @@ export function DsoFitAssessmentWizard({
           <button
             type="button"
             onClick={() => setStarted(true)}
-            className="inline-flex items-center gap-2 rounded bg-ink px-5 py-2.5 text-[14px] font-bold text-ivory hover:bg-ink/90 transition-colors"
+            className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-[15px] font-bold text-ivory hover:bg-ink/90 transition-colors"
           >
-            Start the assessment →
+            Start without a résumé →
           </button>
           <Link
             href="/candidate/dashboard"

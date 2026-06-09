@@ -42,7 +42,14 @@ export async function getTopFitJobsForCandidate(
    * session-less and passes the service-role client so the candidate's
    * applications + private fit rows are visible.
    */
-  injectedClient?: SupabaseServerClient
+  injectedClient?: SupabaseServerClient,
+  /**
+   * #55 — restrict the feed to one fit product: "practicefit" = clinical/admin
+   * jobs, "dsofit" = corporate jobs. Each fit hub passes its own product so it
+   * only shows its own matches (no clinical roles on the DSOFit hub, etc.).
+   * Undefined = no filter (mixed — the legacy default for the dashboard/cron).
+   */
+  product?: "practicefit" | "dsofit"
 ): Promise<RoleThatFits[]> {
   if (!candidateId) return [];
   const supabase = injectedClient ?? (await createSupabaseServerClient());
@@ -87,6 +94,7 @@ export async function getTopFitJobsForCandidate(
     .filter((x): x is { job: (typeof pool)[number]; fit: FitResult } =>
       x !== null
     )
+    .filter((x) => !product || (x.fit.product ?? "practicefit") === product)
     .sort((a, b) => b.fit.score - a.fit.score)
     .slice(0, limit);
   if (ranked.length === 0) return [];

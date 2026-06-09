@@ -40,7 +40,7 @@ export default async function CandidateDsoFitPage() {
   const assessmentDone = c.dsofit_assessment_completed_at != null;
 
   const matches = consentOn
-    ? await getTopFitJobsForCandidate(candidateId, 12)
+    ? await getTopFitJobsForCandidate(candidateId, 12, undefined, "dsofit")
     : [];
 
   return (
@@ -117,7 +117,7 @@ export default async function CandidateDsoFitPage() {
         </section>
       ) : matches.length > 0 ? (
         <div className="mb-8">
-          <RolesThatFitCard roles={matches} />
+          <RolesThatFitCard roles={matches} product="dsofit" />
         </div>
       ) : (
         <section className="mb-8">
