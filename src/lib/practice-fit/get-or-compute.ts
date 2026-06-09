@@ -326,7 +326,7 @@ async function loadJobAndDso(
   const { data: j } = await supabase
     .from("jobs")
     .select(
-      `id, dso_id, role_category, employment_type, title, requirements, description,
+      `id, dso_id, role_category, corporate_function, employment_type, title, requirements, description,
        compensation_min, compensation_max, compensation_period,
        compensation_type,
        benefits,
@@ -377,6 +377,7 @@ async function loadJobAndDso(
   return {
     job: {
       role_category: (r.role_category as string) ?? "other",
+      corporate_function: (r.corporate_function as string | null) ?? null,
       employment_type: (r.employment_type as string) ?? "full_time",
       compensation_type:
         (r.compensation_type as FitInputs["job"]["compensation_type"]) ??

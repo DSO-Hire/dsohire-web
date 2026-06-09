@@ -253,6 +253,14 @@ export interface JobFitInputs {
    * is not in that list.
    */
   role_category: string;
+  /**
+   * #110 (2026-06-09) — corporate postings store role_category="other" and
+   * carry their real category here (a CORPORATE_FUNCTIONS slug, e.g.
+   * "business-development", "it-engineering"). Null for clinical/admin jobs.
+   * Drives corporate-track gating + function-fit scoring so a corporate req is
+   * matched against the right corporate function, not against everyone.
+   */
+  corporate_function: string | null;
   employment_type: string;
   /**
    * v1.8 — the comp shape the employer chose. Drives whether the

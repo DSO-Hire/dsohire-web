@@ -29,6 +29,17 @@ import {
   nearestAdjacentRole,
   roleRelation,
 } from "./role-adjacency";
+import {
+  jobTrack,
+  candidateTracks,
+  applicableDimsForJob,
+} from "./track";
+import {
+  canonicalizeCorporateFunction,
+  deriveCandidateCorporateFunctions,
+  corporateFunctionRelation,
+  CORPORATE_FUNCTION_LABELS,
+} from "./corporate-function";
 import { CERTIFICATION_KINDS } from "@/lib/candidate/canonical-lists";
 
 /** value → display label for certification kinds. */
@@ -53,7 +64,7 @@ import type {
  * hashed input field (e.g. the A.4 caps/boosters). It's folded into the
  * input hash so a logic-only change still invalidates the read-through cache.
  */
-const MODEL_VERSION = "2026-06-05-v3.1-patient-pop";
+const MODEL_VERSION = "2026-06-09-v4-tracks-corp-fn";
 
 /* ──────────────────────────────────────────────────────────────
  * v3 Phase B.2 — comp_priority re-weighting ("what matters MOST").
@@ -186,20 +197,42 @@ const WEIGHTS: Record<FitDimensionKey, number> = {
  * ─────────────────────────────────────────────────────────── */
 
 export function isRoleApplicable(inputs: FitInputs): boolean {
-  const jobRole = canonicalizeRoleCategory(inputs.job.role_category);
-  if (jobRole === "other") return true; // unmappable job role doesn't filter
+  const { candidate, job } = inputs;
 
-  // v2 — role signal is desired_roles, falling back to the resume-derived
-  // current_title so "open to anything" candidates are still gated against
-  // their actual role.
+  // #110 — TRACK gate first. A candidate is only scored against jobs in their
+  // own track (clinical / admin / corporate). This is what walls a dentist off
+  // from a Corporate Counsel req and an office manager off from a VP-of-BD req.
+  const jt = jobTrack(job);
+  const cTracks = candidateTracks(candidate);
+
+  // Genuinely "open to anything" (no role/title/corporate signal at all) →
+  // stays in the pool; role_fit is excluded rather than guessed.
+  if (cTracks.size === 0) return true;
+
+  // Legacy uncategorized job (role_category="other" with no corporate_function)
+  // → can't place it on a track; leave ungated (the coverage damp keeps it
+  // honest) rather than silently dropping real postings.
+  if (jt === "unknown") return true;
+
+  // Cross-track → drop. THE leak fix.
+  if (!cTracks.has(jt)) return false;
+
+  // ── Same track: refine with the within-track relation. ──
+  if (jt === "corporate") {
+    const jobFn = canonicalizeCorporateFunction(job.corporate_function);
+    if (!jobFn) return true; // corporate job, function unresolved → don't drop
+    const candFns = deriveCandidateCorporateFunctions(candidate.current_title);
+    if (candFns.length === 0) return true; // corporate track, function unknown → keep
+    return corporateFunctionRelation(candFns, jobFn) !== "unrelated";
+  }
+
+  // Clinical / admin — existing canonical role adjacency.
+  const jobRole = canonicalizeRoleCategory(job.role_category);
   const candidateRoles = deriveCandidateRoles(
-    inputs.candidate.desired_roles,
-    inputs.candidate.current_title
+    candidate.desired_roles,
+    candidate.current_title
   );
-  if (candidateRoles.length === 0) return true; // genuinely no role signal
-
-  // Only an outright UNRELATED relation drops the pair. Exact + adjacent
-  // both stay in (and are differentiated by the role_fit dimension).
+  if (candidateRoles.length === 0) return true; // no clinical/admin role signal
   return roleRelation(candidateRoles, jobRole) !== "unrelated";
 }
 
@@ -236,6 +269,30 @@ export function computePracticeFit(inputs: FitInputs): FitResult | null {
     // practice's served populations).
     patient_population: scorePatientPopulation(inputs),
   };
+
+  // #110 — DIMENSION APPLICABILITY by track. Force-exclude any dimension that
+  // doesn't belong to this job's track (e.g. the dental specialty / license /
+  // certifications / patient-population dims on a corporate or admin req), so
+  // dental signal can never leak into a non-clinical score. Excluded dims drop
+  // from both numerator and denominator and surface no candidate-side CTA.
+  const applicable = applicableDimsForJob(inputs.job);
+  for (const key of Object.keys(dims) as FitDimensionKey[]) {
+    if (!applicable.has(key)) {
+      const d = dims[key];
+      d.scored = false;
+      d.raw = 0;
+      d.contribution = 0;
+      d.cta_href = null;
+      d.cta_label = null;
+      d.cta_inline = false;
+      d.detail = "Not applicable to this kind of role.";
+      d.detail_employer = "Not applicable to this kind of role.";
+    }
+  }
+  // The maximum scored weight this pair COULD reach if every applicable dim had
+  // data on both sides — the denominator for the coverage-confidence damp.
+  let applicableWeight = 0;
+  for (const key of applicable) applicableWeight += WEIGHTS[key];
 
   // v3 Phase B.2 — tilt the weights toward what this candidate said matters
   // most (ranked top-3, or the single fallback; no-op when neither is set).
@@ -275,6 +332,14 @@ export function computePracticeFit(inputs: FitInputs): FitResult | null {
     score = Math.round((scoredContribution / scoredWeight) * 100);
     score = Math.max(0, Math.min(100, score));
   }
+
+  // #110 — ANTI-SATURATION coverage damp. A pair scored on a thin slice of the
+  // applicable dimensions can't claim a top score: with little signal we're not
+  // confident enough to say "Excellent". This is what stops two maxed generic
+  // dims (lives nearby + pay works) from normalizing straight to 100. It caps
+  // the UPSIDE only — it never lifts a low score — so a genuine, well-covered
+  // match is untouched (high coverage → confidence 1 → no cap).
+  score = applyCoverageDamp(score, scoredWeight, applicableWeight);
 
   // Phase A.4 — deal-breaker caps + booster ceiling. Derived from the dims
   // so the cache path can reconstruct the same reasons; applied here to the
@@ -331,6 +396,21 @@ export function detectAdjustments(
   dims: Record<FitDimensionKey, FitDimension>
 ): FitAdjustment[] {
   const out: FitAdjustment[] = [];
+
+  // #110 — role/function fit is the load-bearing signal. If we couldn't score
+  // it (the candidate gave no target role and we couldn't read one from their
+  // title — i.e. "open to anything"), we don't know enough to call ANY pair
+  // "Excellent". Cap at the top of Strong so an open candidate with two maxed
+  // generic dims (lives nearby + pay works) can't read as a top match.
+  if (!dims.role_fit?.scored) {
+    out.push({
+      kind: "cap",
+      dimension: "role_fit",
+      value: 74,
+      reason:
+        "Role fit couldn't be determined (no target role set) — capped below Excellent until the candidate names the role they want.",
+    });
+  }
 
   // Deal-breaker: wrong-state clinical license. raw<=20 = not licensed and
   // not relocating; 21-50 = the relocate case (raw 45).
@@ -389,6 +469,33 @@ export function applyAdjustments(
     .map((a) => a.value);
   if (caps.length > 0) s = Math.min(s, Math.min(...caps));
   return Math.max(0, Math.min(100, Math.round(s)));
+}
+
+/* ──────────────────────────────────────────────────────────────
+ * #110 — coverage-confidence damp (anti-saturation)
+ *
+ * confidence = how much of the APPLICABLE weight actually scored. At/above the
+ * target fraction we're fully confident and the score is untouched; below it,
+ * the achievable ceiling slides down toward an anchor so a pair with only a
+ * sliver of signal can't read "Excellent". Upside-only: a low score is never
+ * lifted (a thin-data pair shouldn't look better OR be falsely confident-high).
+ * ─────────────────────────────────────────────────────────── */
+
+const COVERAGE_TARGET_FRACTION = 0.55; // ≥55% of applicable weight = full confidence
+const COVERAGE_ANCHOR = 45; // a near-zero-coverage pair tops out here (Solid)
+
+export function applyCoverageDamp(
+  score: number,
+  scoredWeight: number,
+  applicableWeight: number
+): number {
+  if (applicableWeight <= 0) return score;
+  const confidence = Math.max(
+    0,
+    Math.min(1, scoredWeight / (applicableWeight * COVERAGE_TARGET_FRACTION))
+  );
+  const ceiling = COVERAGE_ANCHOR + (100 - COVERAGE_ANCHOR) * confidence;
+  return Math.min(score, Math.round(ceiling));
 }
 
 /* ──────────────────────────────────────────────────────────────
@@ -493,7 +600,16 @@ function derivedEmployerVoice(s: string): string {
  * = 60 — enough spread that a spot-on candidate outranks a transferable
  * one without burying the adjacent match.
  */
-function scoreRoleFit({ candidate, job }: FitInputs): FitDimension {
+function scoreRoleFit(inputs: FitInputs): FitDimension {
+  const { candidate, job } = inputs;
+
+  // #110 — corporate track scores FUNCTION fit (the gate has already dropped
+  // cross-track + unrelated-function pairs, so this only sees exact/adjacent or
+  // an unknown-function corporate candidate).
+  if (jobTrack(job) === "corporate") {
+    return scoreCorporateFunctionFit(inputs);
+  }
+
   const jobRole = canonicalizeRoleCategory(job.role_category);
   if (jobRole === "other") {
     return makeUnscoredDim("role_fit", "Role", {
@@ -543,6 +659,59 @@ function scoreRoleFit({ candidate, job }: FitInputs): FitDimension {
     60,
     `Adjacent role — you're ${nearLabel}, this is ${jobLabel}: related and transferable, not identical.`,
     `Adjacent role — they're ${nearLabel}, this is ${jobLabel}: related and transferable, not identical.`
+  );
+}
+
+/**
+ * #110 — corporate function fit. Mirrors scoreRoleFit's exact/adjacent spread
+ * (100 / 60) but over the corporate-function taxonomy. The corporate candidate
+ * signal is derived from their resume title; when we can't resolve a function
+ * (e.g. the candidate only said "DSO Corporate") the dim is excluded rather
+ * than guessed — the gate already kept the pair in-track, and the coverage damp
+ * keeps a low-signal corporate pair out of "Excellent".
+ */
+function scoreCorporateFunctionFit({ candidate, job }: FitInputs): FitDimension {
+  const jobFn = canonicalizeCorporateFunction(job.corporate_function);
+  if (!jobFn) {
+    return makeUnscoredDim("role_fit", "Function", {
+      detail:
+        "This posting's corporate function isn't categorized — function fit is excluded.",
+      detail_employer:
+        "Job's corporate function isn't categorized — function fit excluded from the score.",
+      cta_label: null,
+      cta_href: null,
+    });
+  }
+  const candFns = deriveCandidateCorporateFunctions(candidate.current_title);
+  if (candFns.length === 0) {
+    return makeUnscoredDim("role_fit", "Function", {
+      detail:
+        "Add your corporate function / current title so we can factor function fit into your match.",
+      detail_employer:
+        "Candidate's corporate function couldn't be read from their title — function fit excluded from their score.",
+      cta_label: "Add your title",
+      cta_href: "/candidate/profile#section-identity",
+    });
+  }
+  const jobLabel = CORPORATE_FUNCTION_LABELS[jobFn];
+  const relation = corporateFunctionRelation(candFns, jobFn);
+  if (relation === "exact") {
+    return makeScoredDim(
+      "role_fit",
+      "Function",
+      100,
+      `Exact function match — this is a ${jobLabel} role.`,
+      `Exact function match — they work in ${jobLabel}.`
+    );
+  }
+  // Adjacent (unrelated was dropped at the gate).
+  const candLabel = CORPORATE_FUNCTION_LABELS[candFns[0]] ?? "a related function";
+  return makeScoredDim(
+    "role_fit",
+    "Function",
+    60,
+    `Adjacent function — you're in ${candLabel}, this is ${jobLabel}: transferable, not identical.`,
+    `Adjacent function — they're in ${candLabel}, this is ${jobLabel}: transferable, not identical.`
   );
 }
 
@@ -1864,6 +2033,9 @@ export function hashInputs(inputs: FitInputs): string {
     },
     job: {
       role_category: inputs.job.role_category,
+      // #110 — corporate function drives corporate-track gating + function fit.
+      corporate_function:
+        canonicalizeCorporateFunction(inputs.job.corporate_function),
       employment_type: inputs.job.employment_type,
       compensation_min: inputs.job.compensation_min ?? null,
       compensation_max: inputs.job.compensation_max ?? null,
