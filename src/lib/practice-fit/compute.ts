@@ -446,12 +446,61 @@ export function detectAdjustments(
   // "Excellent". Cap at the top of Strong so an open candidate with two maxed
   // generic dims (lives nearby + pay works) can't read as a top match.
   if (!dims.role_fit?.scored) {
+    // No role/function signal at all (open candidate, or corporate candidate
+    // with no derivable function) — we can't claim a real fit. Cap at Solid.
     out.push({
       kind: "cap",
       dimension: "role_fit",
-      value: 74,
+      value: 58,
       reason:
-        "Role fit couldn't be determined (no target role set) — capped below Excellent until the candidate names the role they want.",
+        "Role/function fit couldn't be determined — capped at Solid until the candidate's target role or function is known.",
+    });
+  } else if (dims.role_fit.raw <= 60) {
+    // Adjacent / transferable role or function (not a direct match), or the
+    // clinical→corporate bridge — real but not a top match. Keep it out of
+    // top-Excellent.
+    out.push({
+      kind: "cap",
+      dimension: "role_fit",
+      value: 82,
+      reason:
+        "Adjacent or transferable role/function — related, not a direct match.",
+    });
+  }
+
+  // #52/DSOFit — seniority is load-bearing for corporate roles: a junior
+  // candidate shouldn't read as a top match for a senior req just because the
+  // generic signals (location, pay, skills) line up. A real tier gap ceilings
+  // the score instead of being averaged away. (Corporate-only dim — never fires
+  // on clinical/admin pairs, where it's excluded.)
+  const sen = dims.seniority;
+  if (sen?.scored) {
+    if (sen.raw <= 35) {
+      out.push({
+        kind: "cap",
+        dimension: "seniority",
+        value: 48,
+        reason: "Two or more levels below this role's target seniority.",
+      });
+    } else if (sen.raw < 60) {
+      out.push({
+        kind: "cap",
+        dimension: "seniority",
+        value: 66,
+        reason: "A level below this role's target seniority.",
+      });
+    }
+  }
+
+  // #52/DSOFit — leadership scope cap: well below the people/P&L scope a
+  // leadership role needs → ceiling, not an averaged dent.
+  const lead = dims.leadership_scope;
+  if (lead?.scored && lead.raw <= 34) {
+    out.push({
+      kind: "cap",
+      dimension: "leadership_scope",
+      value: 62,
+      reason: "Leadership scope is well below what this role requires.",
     });
   }
 
