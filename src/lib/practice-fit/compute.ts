@@ -406,6 +406,9 @@ export function computePracticeFit(inputs: FitInputs): FitResult | null {
   return {
     score,
     bucket: scoreToBucket(score),
+    // #49/DSOFit — color ramp selector: corporate jobs are DSOFit (heritage),
+    // everything else is PracticeFit (navy).
+    product: jobTrack(inputs.job) === "corporate" ? "dsofit" : "practicefit",
     dimensions: dims,
     adjustments,
     top_factors,

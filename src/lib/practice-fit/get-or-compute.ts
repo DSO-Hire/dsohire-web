@@ -600,6 +600,11 @@ function rowToResult(row: Record<string, unknown>): FitResult {
   return {
     score: row.score as number,
     bucket: scoreToBucket(row.score as number),
+    // #49/DSOFit — derive the product from the stored dims (the corporate
+    // function-fit scorer labels role_fit "Function"; clinical/admin use
+    // "Role"), matching how coverage is derived rather than persisted.
+    product:
+      dims.role_fit?.label === "Function" ? "dsofit" : "practicefit",
     dimensions: dims,
     // Stored score is already capped/boosted — re-derive the reasons only
     // (don't re-apply, or we'd double-cap/boost).

@@ -127,6 +127,13 @@ export interface FitResult {
   /** 0-100, normalized over scored dimensions then capped/boosted (A.4). */
   score: number;
   bucket: FitBucket;
+  /**
+   * #49/DSOFit — which fit product this score belongs to, driving the chip's
+   * color ramp (navy PracticeFit vs heritage DSOFit). Derived from the job's
+   * track (corporate → "dsofit", else "practicefit"). Optional for back-compat;
+   * consumers default to "practicefit".
+   */
+  product?: "practicefit" | "dsofit";
   dimensions: Record<FitDimensionKey, FitDimension>;
   /** Caps/boosters applied to the score, for transparent display. */
   adjustments: FitAdjustment[];
