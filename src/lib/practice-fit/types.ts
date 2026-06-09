@@ -52,9 +52,12 @@ export type FitDimensionKey =
   // (employer practice profile). Unscored until both sides have data; the
   // candidate's "I enjoy all populations" answer is a no-penalty no-signal.
   | "patient_population"
-  // #52 DSOFit corporate moat dims (corporate-track only; per-function weighted).
+  // #52 DSOFit corporate dims (corporate-track only; per-function weighted).
   | "seniority"
-  | "org_scale";
+  | "org_scale"
+  | "domain_fit"
+  | "leadership_scope"
+  | "work_mode";
 
 export interface FitDimension {
   /** Maximum points this dimension can contribute when scored (0 when excluded). */
@@ -255,6 +258,18 @@ export interface CandidateFitInputs {
   /** solo | small | mid | large | enterprise — largest org SCALE operated at
    *  (1 / 2–9 / 10–49 / 50–99 / 100+ locations). The multi-site moat signal. */
   org_scale_experience: string | null;
+  /** none | adjacent_healthcare | dental_dso — dental/healthcare domain depth. */
+  domain_background: string | null;
+  /** Years in that domain (optional; nuances domain_fit). */
+  domain_years: number | null;
+  /** none | 1-5 | 6-20 | 21-100 | 100+ — people managed (leadership scope). */
+  mgmt_span: string | null;
+  /** none | departmental | multi_site | org_wide — P&L / budget ownership. */
+  pl_scope: string | null;
+  /** onsite | hybrid | remote | open — work-mode preference. */
+  work_mode_pref: string | null;
+  /** none | occasional | frequent — travel tolerance. */
+  travel_tolerance: string | null;
 }
 
 export interface JobFitInputs {
@@ -342,6 +357,16 @@ export interface JobFitInputs {
   /** #52 DSOFit — minimum org scale the role expects experience at
    *  (solo…enterprise) or null when it doesn't matter. */
   org_scale_need: string | null;
+  /** #52 DSOFit — domain preference: dental_preferred | healthcare_ok |
+   *  agnostic (or null = agnostic, dim excluded). */
+  domain_preference: string | null;
+  /** #52 DSOFit — leadership tier the role needs: none | team | dept |
+   *  multi_site | org (or null = not a leadership role, dim excluded). */
+  leadership_required: string | null;
+  /** #52 DSOFit — onsite | hybrid | remote (role's work mode) or null. */
+  work_mode: string | null;
+  /** #52 DSOFit — none | occasional | frequent (role's travel) or null. */
+  travel_required: string | null;
 }
 
 export interface DsoFitInputs {

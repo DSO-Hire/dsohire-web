@@ -320,6 +320,12 @@ async function loadCandidateInputs(
     // migration; null until then so the dims stay excluded (no live movement).
     seniority_level: (r.seniority_level as string | null) ?? null,
     org_scale_experience: (r.org_scale_experience as string | null) ?? null,
+    domain_background: (r.domain_background as string | null) ?? null,
+    domain_years: (r.domain_years as number | null) ?? null,
+    mgmt_span: (r.mgmt_span as string | null) ?? null,
+    pl_scope: (r.pl_scope as string | null) ?? null,
+    work_mode_pref: (r.work_mode_pref as string | null) ?? null,
+    travel_tolerance: (r.travel_tolerance as string | null) ?? null,
   };
 }
 
@@ -416,6 +422,10 @@ async function loadJobAndDso(
       // null today so seniority/scale dims stay excluded until data flows).
       seniority_target: (r.seniority_target as string | null) ?? null,
       org_scale_need: (r.org_scale_need as string | null) ?? null,
+      domain_preference: (r.domain_preference as string | null) ?? null,
+      leadership_required: (r.leadership_required as string | null) ?? null,
+      work_mode: (r.work_mode as string | null) ?? null,
+      travel_required: (r.travel_required as string | null) ?? null,
     },
     dso: {
       location_count: locationCount ?? 0,

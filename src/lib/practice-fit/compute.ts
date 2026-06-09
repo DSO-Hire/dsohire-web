@@ -193,6 +193,9 @@ const WEIGHTS: Record<FitDimensionKey, number> = {
   // assessment supplies the signal, so no live score moves before it ships.
   seniority: 8,
   org_scale: 6,
+  domain_fit: 6,
+  leadership_scope: 7,
+  work_mode: 4,
 };
 
 /* ──────────────────────────────────────────────────────────────
@@ -286,9 +289,13 @@ export function computePracticeFit(inputs: FitInputs): FitResult | null {
     // v3.1 — patient-population fit (candidate's preferred populations vs the
     // practice's served populations).
     patient_population: scorePatientPopulation(inputs),
-    // #52 DSOFit corporate moat dims (seniority/scope + multi-site scale).
+    // #52 DSOFit corporate dims (seniority/scope, multi-site scale, domain,
+    // leadership scope, work-mode).
     seniority: scoreSeniority(inputs),
     org_scale: scoreOrgScale(inputs),
+    domain_fit: scoreDomainFit(inputs),
+    leadership_scope: scoreLeadershipScope(inputs),
+    work_mode: scoreWorkMode(inputs),
   };
 
   // #110 — DIMENSION APPLICABILITY by track. Force-exclude any dimension that
@@ -890,32 +897,184 @@ function scoreOrgScale({ candidate, job }: FitInputs): FitDimension {
   return makeScoredDim("org_scale", "Multi-site scale", raw, detail, detailEmployer);
 }
 
+const DOMAIN_LEVEL: Record<string, number> = {
+  none: 0,
+  adjacent_healthcare: 1,
+  dental_dso: 2,
+};
+
+/**
+ * scoreDomainFit — dental/DSO domain depth vs the role's preference. PARTIAL
+ * credit, never zero: a strong outside-industry candidate still scores
+ * (transferable). Excluded when the role is industry-agnostic or the candidate
+ * hasn't shared a background.
+ */
+function scoreDomainFit({ candidate, job }: FitInputs): FitDimension {
+  const pref = token(job.domain_preference);
+  if (!pref || pref === "agnostic") {
+    return makeUnscoredDim("domain_fit", "Industry domain", {
+      detail: "This role is open to any industry background — domain is excluded from the score.",
+      detail_employer: "Role is industry-agnostic — domain excluded from the score.",
+      cta_label: null,
+      cta_href: null,
+    });
+  }
+  const bg = token(candidate.domain_background);
+  if (!bg) {
+    return makeUnscoredDim("domain_fit", "Industry domain", {
+      detail: "Tell us your dental/healthcare background (in the DSOFit assessment) to factor domain in.",
+      detail_employer: "Candidate hasn't shared an industry background — domain excluded from their score.",
+      cta_label: "Take the DSOFit assessment",
+      cta_href: "/candidate/assessment",
+    });
+  }
+  const lvl = DOMAIN_LEVEL[bg] ?? 0;
+  let raw: number;
+  let detail: string;
+  if (pref === "dental_preferred") {
+    raw = lvl >= 2 ? 100 : lvl === 1 ? 75 : 50;
+    detail =
+      lvl >= 2
+        ? "Direct dental/DSO experience — exactly the domain this role prefers."
+        : lvl === 1
+        ? "Adjacent healthcare experience — transferable to this dental-preferred role."
+        : "Outside dental/healthcare — transferable, with a domain ramp.";
+  } else {
+    raw = lvl >= 1 ? 100 : 60;
+    detail =
+      lvl >= 1
+        ? "Healthcare/dental background fits this role's domain."
+        : "Outside healthcare — transferable, with a domain ramp.";
+  }
+  return makeScoredDim("domain_fit", "Industry domain", raw, detail, derivedEmployerVoice(detail));
+}
+
+const LEAD_REQ_TIER: Record<string, number> = {
+  none: 0,
+  team: 1,
+  dept: 2,
+  multi_site: 3,
+  org: 4,
+};
+function candidateLeadershipTier(candidate: CandidateFitInputs): number {
+  const span = token(candidate.mgmt_span);
+  const pl = token(candidate.pl_scope);
+  const s = span === "100+" ? 4 : span === "21-100" ? 3 : span === "6-20" ? 2 : span === "1-5" ? 1 : 0;
+  const p = pl === "org_wide" ? 4 : pl === "multi_site" ? 3 : pl === "departmental" ? 2 : 0;
+  return Math.max(s, p);
+}
+
+/**
+ * scoreLeadershipScope — does the candidate's span of control / P&L scope meet
+ * what the role needs? Meet-or-exceed = 100; each tier short ~−22, floored 30.
+ * Excluded for non-leadership roles or when scope isn't shared. COMPLIANCE:
+ * derived from scope, never age/tenure.
+ */
+function scoreLeadershipScope({ candidate, job }: FitInputs): FitDimension {
+  const req = token(job.leadership_required);
+  if (!req || req === "none") {
+    return makeUnscoredDim("leadership_scope", "Leadership scope", {
+      detail: "This role isn't a people-leadership role — leadership scope is excluded from the score.",
+      detail_employer: "Role isn't a leadership role — leadership scope excluded from the score.",
+      cta_label: null,
+      cta_href: null,
+    });
+  }
+  const reqTier = LEAD_REQ_TIER[req];
+  if (reqTier == null) {
+    return makeUnscoredDim("leadership_scope", "Leadership scope", {
+      detail: "Leadership requirement isn't recognized — excluded.",
+      detail_employer: "Leadership requirement isn't recognized — excluded.",
+      cta_label: null,
+      cta_href: null,
+    });
+  }
+  if (!token(candidate.mgmt_span) && !token(candidate.pl_scope)) {
+    return makeUnscoredDim("leadership_scope", "Leadership scope", {
+      detail: "Share the team size / budget you've led (in the DSOFit assessment) to factor leadership in.",
+      detail_employer: "Candidate hasn't shared leadership scope — excluded from their score.",
+      cta_label: "Take the DSOFit assessment",
+      cta_href: "/candidate/assessment",
+    });
+  }
+  const have = candidateLeadershipTier(candidate);
+  const raw = have >= reqTier ? 100 : Math.max(30, 100 - (reqTier - have) * 22);
+  const detail =
+    have >= reqTier
+      ? "Your leadership scope meets what this role needs."
+      : "This role needs broader leadership scope than you've logged — a step up.";
+  return makeScoredDim("leadership_scope", "Leadership scope", raw, detail, derivedEmployerVoice(detail));
+}
+
+/**
+ * scoreWorkMode — onsite/hybrid/remote + travel compatibility (averaged).
+ * Excluded when the role doesn't specify a work mode or the candidate has no
+ * work-mode/travel preference.
+ */
+function scoreWorkMode({ candidate, job }: FitInputs): FitDimension {
+  const jm = token(job.work_mode);
+  if (!jm) {
+    return makeUnscoredDim("work_mode", "Work mode & travel", {
+      detail: "This role didn't specify a work mode — excluded from the score.",
+      detail_employer: "Role has no work mode specified — excluded from the score.",
+      cta_label: null,
+      cta_href: null,
+    });
+  }
+  const cm = token(candidate.work_mode_pref);
+  const ct = token(candidate.travel_tolerance);
+  if (!cm && !ct) {
+    return makeUnscoredDim("work_mode", "Work mode & travel", {
+      detail: "Tell us your work-mode and travel preferences (in the DSOFit assessment) to factor this in.",
+      detail_employer: "Candidate hasn't shared work-mode/travel preferences — excluded from their score.",
+      cta_label: "Take the DSOFit assessment",
+      cta_href: "/candidate/assessment",
+    });
+  }
+  let modeRaw = 100;
+  if (cm && cm !== "open") {
+    modeRaw = cm === jm ? 100 : jm === "hybrid" || cm === "hybrid" ? 75 : 40;
+  }
+  let travelRaw = 100;
+  const jt = token(job.travel_required);
+  if (jt && ct) {
+    const need = jt === "frequent" ? 2 : jt === "occasional" ? 1 : 0;
+    const tol = ct === "frequent" ? 2 : ct === "occasional" ? 1 : 0;
+    travelRaw = tol >= need ? 100 : Math.max(40, 100 - (need - tol) * 30);
+  }
+  const raw = Math.round((modeRaw + travelRaw) / 2);
+  const detail =
+    raw >= 85
+      ? "Your work-mode and travel preferences fit this role."
+      : "Partial fit on work mode / travel for this role.";
+  return makeScoredDim("work_mode", "Work mode & travel", raw, detail, derivedEmployerVoice(detail));
+}
+
 /**
  * Per-function weight multipliers (DSOFit). Scales the APPLICABLE dims for a
  * corporate function so the score is role-appropriate. Only dims listed are
  * adjusted (default ×1). Derived from the spec's H/M/L matrix
- * (DSOFit_Dimension_Model_2026-06-09.md §4); tunable. Domain/leadership/
- * work-mode dims join here as they're built.
+ * (DSOFit_Dimension_Model_2026-06-09.md §4); tunable.
  */
 const FUNCTION_WEIGHT_PROFILE: Partial<
   Record<string, Partial<Record<FitDimensionKey, number>>>
 > = {
-  operations: { org_scale: 1.7, seniority: 1.3, role_fit: 1.2 },
-  "clinical-operations": { org_scale: 1.4, seniority: 1.3, role_fit: 1.2 },
-  "finance-accounting": { seniority: 1.3, skills: 1.3, org_scale: 0.7 },
-  "revenue-cycle-management": { skills: 1.4, org_scale: 0.8 },
-  "credentialing-enrollment": { skills: 1.5, seniority: 0.8, org_scale: 0.7 },
-  "it-engineering": { skills: 1.5, seniority: 0.9, org_scale: 0.5 },
-  "data-analytics": { skills: 1.5, org_scale: 0.6 },
-  "legal-compliance": { seniority: 1.3, skills: 1.2 },
-  "ma-corporate-development": { seniority: 1.3, org_scale: 1.3, compensation: 1.3 },
-  "business-development": { compensation: 1.2, org_scale: 0.9 },
-  "hr-recruiting": { org_scale: 1.3, skills: 1.2 },
-  marketing: { skills: 1.3 },
-  "real-estate-facilities": { org_scale: 1.3, skills: 1.2 },
-  "supply-chain-procurement": { org_scale: 1.4, skills: 1.2 },
-  "training-development": { skills: 1.2 },
-  "patient-contact-center": { org_scale: 1.3, skills: 1.2, seniority: 0.9 },
+  operations: { org_scale: 1.7, seniority: 1.3, leadership_scope: 1.5, role_fit: 1.2, domain_fit: 1.2 },
+  "clinical-operations": { org_scale: 1.4, seniority: 1.3, leadership_scope: 1.4, domain_fit: 1.6, role_fit: 1.2 },
+  "finance-accounting": { seniority: 1.3, skills: 1.3, leadership_scope: 1.2, org_scale: 0.7, domain_fit: 0.9 },
+  "revenue-cycle-management": { skills: 1.4, domain_fit: 1.6, org_scale: 0.8 },
+  "credentialing-enrollment": { skills: 1.5, domain_fit: 1.6, seniority: 0.8, org_scale: 0.7 },
+  "it-engineering": { skills: 1.5, seniority: 0.9, org_scale: 0.5, domain_fit: 0.5, work_mode: 1.2 },
+  "data-analytics": { skills: 1.5, org_scale: 0.6, domain_fit: 0.8, work_mode: 1.2 },
+  "legal-compliance": { seniority: 1.3, skills: 1.2, domain_fit: 1.5 },
+  "ma-corporate-development": { seniority: 1.3, org_scale: 1.3, compensation: 1.3, leadership_scope: 1.2 },
+  "business-development": { compensation: 1.2, org_scale: 0.9, domain_fit: 1.1, work_mode: 1.1 },
+  "hr-recruiting": { org_scale: 1.3, skills: 1.2, leadership_scope: 1.2 },
+  marketing: { skills: 1.3, domain_fit: 1.1 },
+  "real-estate-facilities": { org_scale: 1.3, skills: 1.2, domain_fit: 0.6, work_mode: 1.1 },
+  "supply-chain-procurement": { org_scale: 1.4, skills: 1.2, domain_fit: 0.8 },
+  "training-development": { skills: 1.2, domain_fit: 1.2 },
+  "patient-contact-center": { org_scale: 1.3, skills: 1.2, seniority: 0.9, domain_fit: 1.1 },
 };
 
 /** The weight-multiplier map for a job's corporate function, or {} otherwise. */
@@ -2257,9 +2416,15 @@ export function hashInputs(inputs: FitInputs): string {
       patient_population_pref: sortedLowercase(
         inputs.candidate.patient_population_pref
       ),
-      // #52 DSOFit — corporate moat signals.
+      // #52 DSOFit — corporate signals.
       seniority_level: token(inputs.candidate.seniority_level),
       org_scale_experience: token(inputs.candidate.org_scale_experience),
+      domain_background: token(inputs.candidate.domain_background),
+      domain_years: inputs.candidate.domain_years ?? null,
+      mgmt_span: token(inputs.candidate.mgmt_span),
+      pl_scope: token(inputs.candidate.pl_scope),
+      work_mode_pref: token(inputs.candidate.work_mode_pref),
+      travel_tolerance: token(inputs.candidate.travel_tolerance),
     },
     job: {
       role_category: inputs.job.role_category,
@@ -2297,6 +2462,10 @@ export function hashInputs(inputs: FitInputs): string {
       // #52 DSOFit — corporate role targets.
       seniority_target: token(inputs.job.seniority_target),
       org_scale_need: token(inputs.job.org_scale_need),
+      domain_preference: token(inputs.job.domain_preference),
+      leadership_required: token(inputs.job.leadership_required),
+      work_mode: token(inputs.job.work_mode),
+      travel_required: token(inputs.job.travel_required),
     },
     dso: {
       location_count: inputs.dso.location_count ?? 0,
