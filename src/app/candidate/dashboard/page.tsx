@@ -84,7 +84,7 @@ export default async function CandidateDashboardPage() {
   const { data: candidate } = await supabase
     .from("candidates")
     .select(
-      "id, first_name, last_name, salutation, full_name, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, desired_specialty, license_states, pms_systems, skills, languages, temp_or_perm, dso_size_preference, schedule_preferences, min_salary, salary_unit, cv_visibility, availability, resume_url, linkedin_url, avatar_url, practice_fit_consent, work_pace, autonomy_pref, mentorship_pref, practice_feel, ce_growth_importance, work_life_priority, benefit_priorities, patient_population_pref, assessment_completed_at, privacy_choices_reviewed_at",
+      "id, first_name, last_name, salutation, full_name, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, desired_specialty, license_states, pms_systems, skills, languages, temp_or_perm, dso_size_preference, schedule_preferences, min_salary, salary_unit, cv_visibility, availability, resume_url, linkedin_url, avatar_url, practice_fit_consent, work_pace, autonomy_pref, mentorship_pref, practice_feel, ce_growth_importance, work_life_priority, benefit_priorities, patient_population_pref, assessment_completed_at, dsofit_assessment_completed_at, privacy_choices_reviewed_at",
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
@@ -191,6 +191,19 @@ export default async function CandidateDashboardPage() {
       done: (c.assessment_completed_at as string | null) != null,
       href: "/candidate/assessment",
     },
+    // DSOFit — only nudge candidates who've signalled DSO/corporate interest
+    // (a "DSO Corporate / HQ" desired role). Done when they've completed the
+    // corporate-side assessment. Clinical-only candidates never see this.
+    ...(((c.desired_roles as string[] | null) ?? []).includes("dso_corporate")
+      ? [
+          {
+            key: "dsofit",
+            label: "Take your 5-minute DSOFit assessment",
+            done: (c.dsofit_assessment_completed_at as string | null) != null,
+            href: "/candidate/dsofit-assessment",
+          },
+        ]
+      : []),
     {
       key: "prefs",
       label: "Tell PracticeFit what you're looking for",
