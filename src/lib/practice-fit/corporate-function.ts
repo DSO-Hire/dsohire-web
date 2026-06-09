@@ -89,6 +89,26 @@ export const CORPORATE_FUNCTION_ADJACENCY: Record<
 export type CorporateRelation = "exact" | "adjacent" | "unrelated";
 
 /**
+ * #110/#48 — corporate functions that WELCOME a clinical (DDS/DMD/hygiene)
+ * background. A clinically-credentialed candidate isn't gated out of these and
+ * gets credit for their clinical experience (the path DDS/DMDs take into the
+ * DSO: clinical leadership, doctor recruitment / affiliation, clinical
+ * training). The door stays open for chairside-leavers without forcing every
+ * dentist onto every corporate req. (Executive tier joins this set with #51.)
+ */
+export const CLINICAL_WELCOMING_FUNCTIONS = new Set<CorporateFunctionSlug>([
+  "clinical-operations",
+  "business-development",
+  "training-development",
+]);
+
+export function isClinicalWelcomingFunction(
+  fn: CorporateFunctionSlug | null
+): boolean {
+  return fn !== null && CLINICAL_WELCOMING_FUNCTIONS.has(fn);
+}
+
+/**
  * Map any corporate-function string (a stored slug, a label, or a free-text
  * value) to a canonical slug. Returns null when it can't be resolved.
  */

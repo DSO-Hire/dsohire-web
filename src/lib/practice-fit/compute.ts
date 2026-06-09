@@ -33,11 +33,13 @@ import {
   jobTrack,
   candidateTracks,
   applicableDimsForJob,
+  isClinicallyCredentialed,
 } from "./track";
 import {
   canonicalizeCorporateFunction,
   deriveCandidateCorporateFunctions,
   corporateFunctionRelation,
+  isClinicalWelcomingFunction,
   CORPORATE_FUNCTION_LABELS,
 } from "./corporate-function";
 import { CERTIFICATION_KINDS } from "@/lib/candidate/canonical-lists";
@@ -213,6 +215,20 @@ export function isRoleApplicable(inputs: FitInputs): boolean {
   // → can't place it on a track; leave ungated (the coverage damp keeps it
   // honest) rather than silently dropping real postings.
   if (jt === "unknown") return true;
+
+  // #48 — clinical→DSOFit bridge. A clinically-credentialed candidate (DDS/DMD/
+  // hygiene) is welcome in the clinical-welcoming corporate functions (clinical
+  // leadership, doctor recruitment / BD, clinical training) even though they're
+  // on the clinical track — the path chairside clinicians take into the DSO.
+  // The door stays open; the moderate bridge score + coverage damp keep it from
+  // flooding (a dentist with no corporate intent surfaces mid-pack, not top).
+  if (
+    jt === "corporate" &&
+    isClinicalWelcomingFunction(canonicalizeCorporateFunction(job.corporate_function)) &&
+    isClinicallyCredentialed(candidate)
+  ) {
+    return true;
+  }
 
   // Cross-track → drop. THE leak fix.
   if (!cTracks.has(jt)) return false;
@@ -682,8 +698,21 @@ function scoreCorporateFunctionFit({ candidate, job }: FitInputs): FitDimension 
       cta_href: null,
     });
   }
+  const jobLabel = CORPORATE_FUNCTION_LABELS[jobFn];
   const candFns = deriveCandidateCorporateFunctions(candidate.current_title);
   if (candFns.length === 0) {
+    // #48 — clinical bridge: a clinically-credentialed candidate on a
+    // clinical-welcoming function (clinical leadership / BD / training) is
+    // credited for their clinical background rather than excluded.
+    if (isClinicalWelcomingFunction(jobFn) && isClinicallyCredentialed(candidate)) {
+      return makeScoredDim(
+        "role_fit",
+        "Function",
+        80,
+        `Your clinical background fits this ${jobLabel} role — clinician experience is valued here.`,
+        `Clinical background fits this ${jobLabel} role — clinician experience is valued here.`
+      );
+    }
     return makeUnscoredDim("role_fit", "Function", {
       detail:
         "Add your corporate function / current title so we can factor function fit into your match.",
@@ -693,7 +722,6 @@ function scoreCorporateFunctionFit({ candidate, job }: FitInputs): FitDimension 
       cta_href: "/candidate/profile#section-identity",
     });
   }
-  const jobLabel = CORPORATE_FUNCTION_LABELS[jobFn];
   const relation = corporateFunctionRelation(candFns, jobFn);
   if (relation === "exact") {
     return makeScoredDim(

@@ -95,6 +95,27 @@ export function candidateTracks(candidate: CandidateFitInputs): Set<Track> {
   return tracks;
 }
 
+const CLINICAL_CANON = new Set<string>([
+  "associate_dentist",
+  "specialist_dentist",
+  "hygienist",
+  "assistant",
+]);
+
+/**
+ * #48 — does the candidate hold a clinical credential / background? Used by the
+ * clinical→DSOFit bridge so a DDS/DMD (or hygienist) is welcomed into the
+ * clinical-welcoming corporate functions (clinical leadership, BD, training).
+ * A state license is the strongest signal; a clinical desired-role or title
+ * also counts.
+ */
+export function isClinicallyCredentialed(candidate: CandidateFitInputs): boolean {
+  if ((candidate.license_states ?? []).length > 0) return true;
+  const fromDesired = (candidate.desired_roles ?? []).map(canonicalizeRoleCategory);
+  if (fromDesired.some((c) => CLINICAL_CANON.has(c))) return true;
+  return CLINICAL_CANON.has(canonicalizeRoleCategory(candidate.current_title));
+}
+
 /* ──────────────────────────────────────────────────────────────
  * Dimension applicability by track.
  *
