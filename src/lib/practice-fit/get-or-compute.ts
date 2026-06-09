@@ -329,6 +329,75 @@ async function loadCandidateInputs(
   };
 }
 
+/* ──────────────────────────────────────────────────────────────
+ * #52 DSOFit — map the corporate wizard's stored columns into the engine's
+ * job-signal vocab. Null when the source value is absent / unrecognized (the
+ * dim is then excluded — never a guess). Only meaningful for corporate-track
+ * jobs; the track applicability gate excludes these dims on clinical/admin.
+ * ─────────────────────────────────────────────────────────── */
+function mapSeniorityTarget(a: string | null): string | null {
+  switch (a) {
+    case "ic": return "ic";
+    case "manager": return "manager";
+    case "senior_manager": return "manager";
+    case "director": return "director";
+    case "vp": return "vp";
+    case "svp": return "vp";
+    case "c_suite": return "c_suite";
+    default: return null;
+  }
+}
+function mapWorkMode(w: string | null): string | null {
+  switch (w) {
+    case "onsite": return "onsite";
+    case "remote": return "remote";
+    case "hybrid": return "hybrid";
+    case "blended": return "hybrid";
+    default: return null;
+  }
+}
+function mapTravel(t: string | null): string | null {
+  switch (t) {
+    case "none":
+    case "under_10": return "none";
+    case "10_to_25":
+    case "25_to_50": return "occasional";
+    case "50_plus": return "frequent";
+    default: return null;
+  }
+}
+function mapDomainPreference(i: string | null): string | null {
+  switch (i) {
+    case "dso_required": return "dental_preferred";
+    case "healthcare_adjacent": return "healthcare_ok";
+    case "agnostic": return "agnostic";
+    default: return null;
+  }
+}
+function mapLeadershipRequired(
+  direct: string | null,
+  indirect: string | null,
+  authority: string | null
+): string | null {
+  if (indirect === "50_plus" || authority === "c_suite" || authority === "svp") return "multi_site";
+  if (direct === "10_plus" || indirect === "10_49" || authority === "vp") return "dept";
+  if (direct === "1_3" || direct === "4_9" || indirect === "1_9") return "team";
+  if (
+    direct === "zero" &&
+    (indirect === "zero" || indirect == null) &&
+    (authority === "ic" || authority === "manager" || authority == null)
+  )
+    return "none";
+  return null;
+}
+function mapOrgScaleNeed(locationCount: number): string | null {
+  if (locationCount <= 1) return null; // single-practice → multi-site not meaningful
+  if (locationCount <= 9) return "small";
+  if (locationCount <= 49) return "mid";
+  if (locationCount <= 99) return "large";
+  return "enterprise";
+}
+
 async function loadJobAndDso(
   supabase: SupabaseServerClient,
   jobId: string
@@ -337,6 +406,8 @@ async function loadJobAndDso(
     .from("jobs")
     .select(
       `id, dso_id, role_category, corporate_function, employment_type, title, requirements, description,
+       authority_level, work_mode, travel_expectation, direct_reports_band, indirect_reports_band,
+       industry_experience, domain_preference,
        compensation_min, compensation_max, compensation_period,
        compensation_type,
        benefits,
@@ -418,14 +489,23 @@ async function loadJobAndDso(
       schedule_days: ((r.schedule_days as string[] | null) ?? []) as string[],
       schedule_evenings: Boolean(r.schedule_evenings),
       schedule_weekends: Boolean(r.schedule_weekends),
-      // #52 DSOFit — corporate role targets (wired with the assessment migration;
-      // null today so seniority/scale dims stay excluded until data flows).
-      seniority_target: (r.seniority_target as string | null) ?? null,
-      org_scale_need: (r.org_scale_need as string | null) ?? null,
-      domain_preference: (r.domain_preference as string | null) ?? null,
-      leadership_required: (r.leadership_required as string | null) ?? null,
-      work_mode: (r.work_mode as string | null) ?? null,
-      travel_required: (r.travel_required as string | null) ?? null,
+      // #52 DSOFit — corporate role targets, MAPPED from the corporate wizard's
+      // existing columns into the engine's signal vocab. (Only score for
+      // corporate-track jobs; the track applicability gate excludes them on
+      // clinical/admin regardless, so unconditional mapping is safe.)
+      seniority_target: mapSeniorityTarget(r.authority_level as string | null),
+      org_scale_need: mapOrgScaleNeed(locationCount ?? 0),
+      // Prefer an explicit per-job override; else derive from industry_experience.
+      domain_preference:
+        ((r.domain_preference as string | null) ?? null) ||
+        mapDomainPreference(r.industry_experience as string | null),
+      leadership_required: mapLeadershipRequired(
+        r.direct_reports_band as string | null,
+        r.indirect_reports_band as string | null,
+        r.authority_level as string | null
+      ),
+      work_mode: mapWorkMode(r.work_mode as string | null),
+      travel_required: mapTravel(r.travel_expectation as string | null),
     },
     dso: {
       location_count: locationCount ?? 0,
