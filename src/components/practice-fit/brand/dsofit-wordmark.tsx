@@ -22,9 +22,9 @@ const SURFACES: Record<DsoFitSurface, SurfaceColors> = {
   light: { dso: "text-heritage-deep", fit: "text-ink", mark: "text-ink", pillBg: "bg-ink/10" },
   // On navy: ivory "DSO", light-blue "Fit" + mark.
   dark: { dso: "text-ivory", fit: "text-blue-400", mark: "text-blue-400", pillBg: "bg-ivory/10" },
-  // On heritage/green (the chooser panel): ivory "DSO", light-blue "Fit" + mark
-  // — the blue pops against the green, juxtaposing PracticeFit's green-on-navy.
-  heritage: { dso: "text-ivory", fit: "text-blue-400", mark: "text-blue-400", pillBg: "bg-ivory/15" },
+  // On heritage/green (the chooser panel): ivory "DSO" + TRUE-NAVY "Fit" + mark
+  // — our locked brand navy, mirroring PracticeFit's navy/green two-tone.
+  heritage: { dso: "text-ivory", fit: "text-ink", mark: "text-ink", pillBg: "bg-ivory/15" },
   inherit: { dso: "", fit: "", mark: "", pillBg: "bg-current/10" },
 };
 
