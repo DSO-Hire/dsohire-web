@@ -28,7 +28,7 @@ import Link from "next/link";
 import { ArrowRight, Plus } from "lucide-react";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
-import { BUCKET_STYLES } from "@/lib/practice-fit/buckets";
+import { bucketStyle } from "@/lib/practice-fit/buckets";
 import type { FitDimensionKey, FitResult } from "@/lib/practice-fit/types";
 
 export interface CandidateFitSummaryProps {
@@ -103,7 +103,7 @@ export function CandidateFitSummary({
 
   // Best fit headline — the brightest signal the candidate has.
   const best = scoredFits.reduce((acc, f) => (f.score > acc.score ? f : acc));
-  const bestStyle = BUCKET_STYLES[best.bucket];
+  const bestStyle = bucketStyle(best.bucket, best.product);
 
   // Average across scored apps — secondary signal.
   const avgScore = Math.round(

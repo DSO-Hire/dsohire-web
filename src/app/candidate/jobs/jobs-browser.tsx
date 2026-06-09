@@ -18,10 +18,10 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, MapPin, Search, X } from "lucide-react";
+import { ArrowRight, Building2, MapPin, Search, X } from "lucide-react";
 import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
-import { BUCKET_STYLES } from "@/lib/practice-fit/buckets";
+import { bucketStyle, type FitProduct } from "@/lib/practice-fit/buckets";
 import type { FitBucket } from "@/lib/practice-fit/types";
 
 export interface BrowseJob {
@@ -37,6 +37,8 @@ export interface BrowseJob {
   compPeriodLabel: string | null;
   fitScore: number | null;
   fitBucket: FitBucket | null;
+  /** #49 — navy PracticeFit vs heritage DSOFit color ramp. */
+  fitProduct: FitProduct | null;
   applied: boolean;
 }
 
@@ -310,7 +312,10 @@ function JobSection({
 }
 
 function Row({ job }: { job: BrowseJob }) {
-  const bucketStyle = job.fitBucket ? BUCKET_STYLES[job.fitBucket] : null;
+  const style = job.fitBucket
+    ? bucketStyle(job.fitBucket, job.fitProduct ?? undefined)
+    : null;
+  const fitBrand = job.fitProduct === "dsofit" ? "DSOFit" : "PracticeFit";
   return (
     <li className="border-b border-[var(--rule)]">
       <Link
@@ -326,13 +331,17 @@ function Row({ job }: { job: BrowseJob }) {
               <span className="text-[10px] tracking-[0.5px] text-slate-meta">
                 {job.employmentLabel}
               </span>
-              {bucketStyle && (
+              {style && (
                 <span
-                  className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${bucketStyle.bgClass} ${bucketStyle.textClass} ${bucketStyle.borderClass}`}
-                  title={`PracticeFit · ${bucketStyle.label} · ${job.fitScore}/100`}
+                  className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${style.bgClass} ${style.textClass} ${style.borderClass}`}
+                  title={`${fitBrand} · ${style.label} · ${job.fitScore}/100`}
                 >
-                  <PracticeFitMark className="h-2.5 w-2.5" />
-                  {bucketStyle.label}
+                  {job.fitProduct === "dsofit" ? (
+                    <Building2 className="h-2.5 w-2.5 text-current" />
+                  ) : (
+                    <PracticeFitMark className="h-2.5 w-2.5" />
+                  )}
+                  {style.label}
                   <span className="font-mono text-[9px] opacity-70">
                     {job.fitScore}
                   </span>

@@ -109,7 +109,10 @@ export default async function CandidateJobsPage() {
 
   let consentOn = false;
   const appliedJobIds = new Set<string>();
-  const fitByJobId = new Map<string, { score: number; bucket: BrowseJob["fitBucket"] }>();
+  const fitByJobId = new Map<
+    string,
+    { score: number; bucket: BrowseJob["fitBucket"]; product: BrowseJob["fitProduct"] }
+  >();
 
   if (user && jobs.length > 0) {
     const { data: candidate } = await supabase
@@ -139,7 +142,7 @@ export default async function CandidateJobsPage() {
         );
         jobs.forEach((j, i) => {
           const f = fits[i];
-          if (f) fitByJobId.set(j.id, { score: f.score, bucket: f.bucket });
+          if (f) fitByJobId.set(j.id, { score: f.score, bucket: f.bucket, product: f.product ?? null });
         });
       }
     }
@@ -169,6 +172,7 @@ export default async function CandidateJobsPage() {
         : null,
       fitScore: fit?.score ?? null,
       fitBucket: fit?.bucket ?? null,
+      fitProduct: fit?.product ?? null,
       applied: appliedJobIds.has(j.id),
     };
   });

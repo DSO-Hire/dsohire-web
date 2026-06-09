@@ -29,7 +29,7 @@ import Link from "next/link";
 import { ChevronDown, ChevronUp, Plus } from "lucide-react";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
-import { BUCKET_STYLES } from "@/lib/practice-fit/buckets";
+import { bucketStyle } from "@/lib/practice-fit/buckets";
 import type {
   FitDimension,
   FitDimensionKey,
@@ -74,7 +74,7 @@ export function WhyThisMatch({
     candidate: null,
     errorMessage: null,
   });
-  const style = BUCKET_STYLES[fit.bucket];
+  const style = bucketStyle(fit.bucket, fit.product);
 
   // Lazy fetch on first open. Re-running narrative requests on every
   // expand would waste tokens, so we bail if status !== "idle".
