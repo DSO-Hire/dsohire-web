@@ -53,23 +53,25 @@ export function TrackChooser() {
   }
 
   return (
-    <div className="min-h-screen bg-ivory flex flex-col items-center px-5 py-12">
-      <div className="w-full max-w-[920px]">
-        <header className="text-center mb-9">
-          <h1 className="text-[26px] sm:text-[30px] font-extrabold tracking-tight text-ink">
+    <div className="min-h-screen bg-ivory flex flex-col items-center justify-center px-5 py-16">
+      <div className="w-full max-w-[1080px]">
+        <header className="text-center mb-12">
+          <h1 className="text-[34px] sm:text-[44px] font-extrabold tracking-[-0.5px] text-ink leading-tight">
             Which side of dental are you?
           </h1>
-          <p className="mt-2 text-[15px] text-slate-body max-w-[560px] mx-auto leading-relaxed">
+          <p className="mt-4 text-[17px] sm:text-[18px] text-slate-body max-w-[640px] mx-auto leading-relaxed">
             We match two very different kinds of talent. Pick the one that fits
             you best — it tailors your assessment and your matches. You can switch
             anytime in Settings.
           </p>
         </header>
 
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid gap-6 sm:grid-cols-2">
           <Panel
             tone="navy"
-            wordmark={<PracticeFitWordmark surface="dark" className="text-2xl" tm />}
+            wordmark={
+              <PracticeFitWordmark surface="dark" className="text-[34px] sm:text-[40px]" tm />
+            }
             tagline="You work IN a dental practice — chairside or front office."
             examples={PRACTICE_EXAMPLES}
             cta="This is me"
@@ -79,7 +81,9 @@ export function TrackChooser() {
           />
           <Panel
             tone="heritage"
-            wordmark={<DsoFitWordmark surface="dark" className="text-2xl" tm />}
+            wordmark={
+              <DsoFitWordmark surface="heritage" className="text-[34px] sm:text-[40px]" tm />
+            }
             tagline="You work at the DSO / corporate level — running the business."
             examples={DSO_EXAMPLES}
             cta="This is me"
@@ -90,11 +94,11 @@ export function TrackChooser() {
         </div>
 
         {error && (
-          <p className="mt-5 text-center text-[13px] font-semibold text-red-700">
+          <p className="mt-6 text-center text-[14px] font-semibold text-red-700">
             {error}
           </p>
         )}
-        <p className="mt-8 text-center text-[12px] text-slate-meta">
+        <p className="mt-9 text-center text-[13px] text-slate-meta">
           Not sure? Pick your closest fit — you can always explore the other side later.
         </p>
       </div>
@@ -122,28 +126,35 @@ function Panel({
   onClick: () => void;
 }) {
   const bg = tone === "navy" ? "bg-ink" : "bg-heritage-deep";
+  const ctaText = tone === "navy" ? "text-ink" : "text-heritage-deep";
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`group flex flex-col text-left ${bg} text-ivory rounded-lg p-7 transition-all ${
-        disabled ? "opacity-50" : "hover:shadow-[0_12px_40px_-16px_rgba(20,35,63,0.5)] hover:-translate-y-0.5"
+      className={`group flex flex-col text-left ${bg} text-ivory rounded-xl p-9 sm:p-10 transition-all ${
+        disabled
+          ? "opacity-50"
+          : "hover:shadow-[0_18px_50px_-18px_rgba(20,35,63,0.55)] hover:-translate-y-1"
       }`}
     >
-      <div className="mb-4">{wordmark}</div>
-      <p className="text-[14px] text-ivory/85 leading-relaxed mb-5">{tagline}</p>
-      <ul className="list-none space-y-2 mb-7 flex-1">
+      <div className="mb-5">{wordmark}</div>
+      <p className="text-[16px] sm:text-[17px] text-ivory/85 leading-relaxed mb-7">
+        {tagline}
+      </p>
+      <ul className="list-none space-y-3 mb-9 flex-1">
         {examples.map((e) => (
-          <li key={e} className="flex items-start gap-2 text-[13.5px] text-ivory/90">
-            <Check className="h-4 w-4 flex-shrink-0 mt-0.5 text-ivory/60" />
+          <li key={e} className="flex items-start gap-2.5 text-[15px] sm:text-[16px] text-ivory/90">
+            <Check className="h-5 w-5 flex-shrink-0 mt-0.5 text-ivory/55" />
             <span>{e}</span>
           </li>
         ))}
       </ul>
-      <span className="inline-flex items-center gap-2 self-start rounded-full bg-ivory/15 px-4 py-2 text-[13px] font-bold tracking-wide group-hover:bg-ivory/25 transition-colors">
+      <span
+        className={`inline-flex items-center gap-2 self-start rounded-full bg-white px-6 py-3 text-[15px] font-bold tracking-wide ${ctaText} group-hover:bg-white/90 transition-colors`}
+      >
         {busy ? "Setting up…" : cta}
-        {!busy && <ArrowRight className="h-4 w-4" />}
+        {!busy && <ArrowRight className="h-[18px] w-[18px]" />}
       </span>
     </button>
   );

@@ -71,7 +71,10 @@ export default async function DsoFitAssessmentPage() {
 
   return (
     <CandidateShell active="practice-fit">
-      <DsoFitAssessmentWizard initial={initial} />
+      <DsoFitAssessmentWizard
+        initial={initial}
+        completedBefore={c.dsofit_assessment_completed_at != null}
+      />
     </CandidateShell>
   );
 }
