@@ -64,6 +64,9 @@ export function DsoFitAssessmentWizard({
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [parsing, setParsing] = useState(false);
   const [autofillNote, setAutofillNote] = useState<string | null>(null);
+  // Soft skip nudge — first tap makes the case for staying, second tap lets
+  // them leave anyway (never a hard gate).
+  const [skipNudge, setSkipNudge] = useState(false);
 
   const sections = DSOFIT_SECTION_ORDER;
   const steps = sections.map((s) => ({ id: s, label: DSOFIT_SECTION_LABEL[s] }));
@@ -201,13 +204,49 @@ export function DsoFitAssessmentWizard({
           >
             Start without a résumé →
           </button>
-          <Link
-            href="/candidate/dashboard"
-            className="text-[13px] text-slate-meta hover:text-ink hover:underline underline-offset-2"
-          >
-            Skip for now
-          </Link>
+          {!skipNudge ? (
+            <button
+              type="button"
+              onClick={() => setSkipNudge(true)}
+              className="text-[13px] text-slate-meta hover:text-ink hover:underline underline-offset-2"
+            >
+              Skip for now
+            </button>
+          ) : null}
         </div>
+
+        {/* Soft skip nudge — make the case once, then let them go. */}
+        {skipNudge && (
+          <div className="mt-5 rounded-xl border border-heritage/30 bg-cream/50 p-5">
+            <p className="text-[14px] font-bold text-ink">
+              You can skip — but it&apos;s only about 5 minutes, and it&apos;s
+              what powers everything.
+            </p>
+            <p className="mt-1.5 text-[13px] text-slate-body leading-relaxed max-w-[520px]">
+              Without it, we can&apos;t rank DSO roles for you or surface you to
+              DSOs hiring for your function — those stay dark until you finish.
+              It&apos;s mostly taps, and you can stop anytime.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setSkipNudge(false);
+                  setStarted(true);
+                }}
+                className="inline-flex items-center gap-2 rounded-full bg-heritage-deep px-5 py-2.5 text-[14px] font-bold text-ivory hover:bg-heritage transition-colors"
+              >
+                Take 5 minutes →
+              </button>
+              <Link
+                href="/candidate/dashboard"
+                className="text-[13px] text-slate-meta hover:text-ink hover:underline underline-offset-2"
+              >
+                Skip anyway
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
