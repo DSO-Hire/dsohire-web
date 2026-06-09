@@ -51,7 +51,10 @@ export type FitDimensionKey =
   // most enjoy caring for; the practice picks the populations it serves
   // (employer practice profile). Unscored until both sides have data; the
   // candidate's "I enjoy all populations" answer is a no-penalty no-signal.
-  | "patient_population";
+  | "patient_population"
+  // #52 DSOFit corporate moat dims (corporate-track only; per-function weighted).
+  | "seniority"
+  | "org_scale";
 
 export interface FitDimension {
   /** Maximum points this dimension can contribute when scored (0 when excluded). */
@@ -244,6 +247,14 @@ export interface CandidateFitInputs {
    * practice's served populations. Empty / "all"-only → dim excluded.
    */
   patient_population_pref: string[];
+  /* ── #52 DSOFit corporate signals. Null until the DSOFit assessment captures
+   *    them; null excludes the matching dim (never a penalty). Derived where
+   *    possible from the resume, confirmed by the assessment. ── */
+  /** ic | lead | manager | director | vp | c_suite (candidate's level). */
+  seniority_level: string | null;
+  /** solo | small | mid | large | enterprise — largest org SCALE operated at
+   *  (1 / 2–9 / 10–49 / 50–99 / 100+ locations). The multi-site moat signal. */
+  org_scale_experience: string | null;
 }
 
 export interface JobFitInputs {
@@ -325,6 +336,12 @@ export interface JobFitInputs {
   /** Track F — true if the role includes Sat/Sun. Sometimes set
    *  independently of schedule_days when the employer only flags it. */
   schedule_weekends: boolean;
+  /** #52 DSOFit — target seniority tier for the role (ic…c_suite) or null.
+   *  From the corporate wizard level field / derived from title. */
+  seniority_target: string | null;
+  /** #52 DSOFit — minimum org scale the role expects experience at
+   *  (solo…enterprise) or null when it doesn't matter. */
+  org_scale_need: string | null;
 }
 
 export interface DsoFitInputs {

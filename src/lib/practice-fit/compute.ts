@@ -66,7 +66,7 @@ import type {
  * hashed input field (e.g. the A.4 caps/boosters). It's folded into the
  * input hash so a logic-only change still invalidates the read-through cache.
  */
-const MODEL_VERSION = "2026-06-09-v4-tracks-corp-fn";
+const MODEL_VERSION = "2026-06-09-v5-dsofit-dims";
 
 /* ──────────────────────────────────────────────────────────────
  * v3 Phase B.2 — comp_priority re-weighting ("what matters MOST").
@@ -186,6 +186,13 @@ const WEIGHTS: Record<FitDimensionKey, number> = {
   // normalization rationale: unscored until the candidate picks populations
   // AND the practice lists the ones it serves, so existing pairs don't move.
   patient_population: 3,
+  // #52 DSOFit corporate moat dims. Corporate-track-applicable ONLY (excluded
+  // for clinical/admin → contribute nothing there). Additive to the table; the
+  // per-function weight profile (FUNCTION_WEIGHT_PROFILE) scales them so each
+  // corporate function emphasizes the right ones. Unscored until the DSOFit
+  // assessment supplies the signal, so no live score moves before it ships.
+  seniority: 8,
+  org_scale: 6,
 };
 
 /* ──────────────────────────────────────────────────────────────
@@ -279,6 +286,9 @@ export function computePracticeFit(inputs: FitInputs): FitResult | null {
     // v3.1 — patient-population fit (candidate's preferred populations vs the
     // practice's served populations).
     patient_population: scorePatientPopulation(inputs),
+    // #52 DSOFit corporate moat dims (seniority/scope + multi-site scale).
+    seniority: scoreSeniority(inputs),
+    org_scale: scoreOrgScale(inputs),
   };
 
   // #110 — DIMENSION APPLICABILITY by track. Force-exclude any dimension that
@@ -300,10 +310,22 @@ export function computePracticeFit(inputs: FitInputs): FitResult | null {
       d.detail_employer = "Not applicable to this kind of role.";
     }
   }
+  // #52 — per-function weight profile (DSOFit). For corporate jobs, scale the
+  // applicable dims' weights so each function emphasizes what matters for it
+  // (Operations leans hard on multi-site scale + seniority; IT leans on
+  // functional skills; Credentialing on skills + domain). No-op for
+  // clinical/admin. This is what makes corporate roles score role-appropriately
+  // instead of falling into one generic bucket.
+  const fnProfile = functionWeightProfile(inputs.job);
+  applyFunctionProfile(dims, fnProfile);
+
   // The maximum scored weight this pair COULD reach if every applicable dim had
-  // data on both sides — the denominator for the coverage-confidence damp.
+  // data on both sides — the denominator for the coverage-confidence damp. Uses
+  // the SAME profile multipliers so the damp stays calibrated under reweighting.
   let applicableWeight = 0;
-  for (const key of applicable) applicableWeight += WEIGHTS[key];
+  for (const key of applicable) {
+    applicableWeight += Math.round(WEIGHTS[key] * (fnProfile[key] ?? 1));
+  }
 
   // v3 Phase B.2 — tilt the weights toward what this candidate said matters
   // most (ranked top-3, or the single fallback; no-op when neither is set).
@@ -740,6 +762,184 @@ function scoreCorporateFunctionFit({ candidate, job }: FitInputs): FitDimension 
     `Adjacent function — you're in ${candLabel}, this is ${jobLabel}: transferable, not identical.`,
     `Adjacent function — they're in ${candLabel}, this is ${jobLabel}: transferable, not identical.`
   );
+}
+
+/* ──────────────────────────────────────────────────────────────
+ * #52 DSOFit corporate moat dimensions + per-function weighting.
+ * ─────────────────────────────────────────────────────────── */
+
+/** Ordered seniority tiers (IC → C-suite). Distance drives the score. */
+const SENIORITY_SCALE = ["ic", "lead", "manager", "director", "vp", "c_suite"] as const;
+const SENIORITY_LABEL: Record<string, string> = {
+  ic: "individual contributor",
+  lead: "lead / senior",
+  manager: "manager",
+  director: "director",
+  vp: "VP / SVP",
+  c_suite: "C-suite",
+};
+
+/**
+ * scoreSeniority — does the candidate's level match the role's target tier?
+ * Same tier = 100; one off = 80/85; two off = 50/55; 3+ = 30. Slightly kinder
+ * to over-qualification than under. COMPLIANCE: tier comes from role level +
+ * scope, never age/graduation-year. Excluded when either side is blank.
+ */
+function scoreSeniority({ candidate, job }: FitInputs): FitDimension {
+  const j = token(job.seniority_target);
+  if (!j) {
+    return makeUnscoredDim("seniority", "Seniority", {
+      detail: "This role doesn't specify a target level — seniority is excluded from the score.",
+      detail_employer: "Job has no target seniority set — seniority excluded from the score.",
+      cta_label: null,
+      cta_href: null,
+    });
+  }
+  const c = token(candidate.seniority_level);
+  if (!c) {
+    return makeUnscoredDim("seniority", "Seniority", {
+      detail: "Tell us your level (in the DSOFit assessment) to factor seniority into your match.",
+      detail_employer: "Candidate hasn't shared their level — seniority excluded from their score.",
+      cta_label: "Take the DSOFit assessment",
+      cta_href: "/candidate/assessment",
+    });
+  }
+  const ic = SENIORITY_SCALE.indexOf(c as (typeof SENIORITY_SCALE)[number]);
+  const ij = SENIORITY_SCALE.indexOf(j as (typeof SENIORITY_SCALE)[number]);
+  if (ic < 0 || ij < 0) {
+    return makeUnscoredDim("seniority", "Seniority", {
+      detail: "Seniority level isn't recognized — excluded from the score.",
+      detail_employer: "Seniority level isn't recognized — excluded from the score.",
+      cta_label: null,
+      cta_href: null,
+    });
+  }
+  const dist = Math.abs(ic - ij);
+  const over = ic > ij;
+  const raw =
+    dist === 0 ? 100 : dist === 1 ? (over ? 85 : 80) : dist === 2 ? (over ? 55 : 50) : 30;
+  const cl = SENIORITY_LABEL[c] ?? c;
+  const jl = SENIORITY_LABEL[j] ?? j;
+  const verdict = dist === 0 ? "matches" : dist === 1 ? "is one tier from" : "is a stretch from";
+  return makeScoredDim(
+    "seniority",
+    "Seniority",
+    raw,
+    `Your level (${cl}) ${verdict} this role's (${jl}).`,
+    `Candidate level (${cl}) ${verdict} the role's target (${jl}).`
+  );
+}
+
+/** Ordered org-scale bands: 1 / 2–9 / 10–49 / 50–99 / 100+ locations. */
+const SCALE_BANDS = ["solo", "small", "mid", "large", "enterprise"] as const;
+const SCALE_LABEL: Record<string, string> = {
+  solo: "a single location",
+  small: "a small group (2–9)",
+  mid: "a mid-size DSO (10–49)",
+  large: "a large DSO (50–99)",
+  enterprise: "an enterprise DSO (100+)",
+};
+
+/**
+ * scoreOrgScale — the multi-site moat. Has the candidate operated at the scale
+ * this role needs? Meeting OR exceeding the needed scale = 100 (running 80
+ * practices covers a 30-practice role); each band short costs 25, floored at 30
+ * (a learnable stretch, not a deal-breaker). Excluded when the role doesn't
+ * specify a scale need or the candidate hasn't shared their experience.
+ */
+function scoreOrgScale({ candidate, job }: FitInputs): FitDimension {
+  const need = token(job.org_scale_need);
+  if (!need) {
+    return makeUnscoredDim("org_scale", "Multi-site scale", {
+      detail: "This role doesn't specify a multi-site scale — excluded from the score.",
+      detail_employer: "Job has no multi-site scale requirement — excluded from the score.",
+      cta_label: null,
+      cta_href: null,
+    });
+  }
+  const exp = token(candidate.org_scale_experience);
+  if (!exp) {
+    return makeUnscoredDim("org_scale", "Multi-site scale", {
+      detail: "Tell us the largest organization you've operated at (in the DSOFit assessment) to factor this in.",
+      detail_employer: "Candidate hasn't shared the scale they've operated at — excluded from their score.",
+      cta_label: "Take the DSOFit assessment",
+      cta_href: "/candidate/assessment",
+    });
+  }
+  const ie = SCALE_BANDS.indexOf(exp as (typeof SCALE_BANDS)[number]);
+  const inb = SCALE_BANDS.indexOf(need as (typeof SCALE_BANDS)[number]);
+  if (ie < 0 || inb < 0) {
+    return makeUnscoredDim("org_scale", "Multi-site scale", {
+      detail: "Scale isn't recognized — excluded from the score.",
+      detail_employer: "Scale isn't recognized — excluded from the score.",
+      cta_label: null,
+      cta_href: null,
+    });
+  }
+  const raw = ie >= inb ? 100 : Math.max(30, 100 - (inb - ie) * 25);
+  const el = SCALE_LABEL[exp] ?? exp;
+  const nl = SCALE_LABEL[need] ?? need;
+  const detail =
+    ie >= inb
+      ? `You've operated at ${el} — at or above the scale this role runs (${nl}).`
+      : `You've operated at ${el}; this role runs at ${nl} — a step up.`;
+  const detailEmployer =
+    ie >= inb
+      ? `Has operated at ${el} — at or above the role's scale (${nl}).`
+      : `Has operated at ${el}; role runs at ${nl} — a step up.`;
+  return makeScoredDim("org_scale", "Multi-site scale", raw, detail, detailEmployer);
+}
+
+/**
+ * Per-function weight multipliers (DSOFit). Scales the APPLICABLE dims for a
+ * corporate function so the score is role-appropriate. Only dims listed are
+ * adjusted (default ×1). Derived from the spec's H/M/L matrix
+ * (DSOFit_Dimension_Model_2026-06-09.md §4); tunable. Domain/leadership/
+ * work-mode dims join here as they're built.
+ */
+const FUNCTION_WEIGHT_PROFILE: Partial<
+  Record<string, Partial<Record<FitDimensionKey, number>>>
+> = {
+  operations: { org_scale: 1.7, seniority: 1.3, role_fit: 1.2 },
+  "clinical-operations": { org_scale: 1.4, seniority: 1.3, role_fit: 1.2 },
+  "finance-accounting": { seniority: 1.3, skills: 1.3, org_scale: 0.7 },
+  "revenue-cycle-management": { skills: 1.4, org_scale: 0.8 },
+  "credentialing-enrollment": { skills: 1.5, seniority: 0.8, org_scale: 0.7 },
+  "it-engineering": { skills: 1.5, seniority: 0.9, org_scale: 0.5 },
+  "data-analytics": { skills: 1.5, org_scale: 0.6 },
+  "legal-compliance": { seniority: 1.3, skills: 1.2 },
+  "ma-corporate-development": { seniority: 1.3, org_scale: 1.3, compensation: 1.3 },
+  "business-development": { compensation: 1.2, org_scale: 0.9 },
+  "hr-recruiting": { org_scale: 1.3, skills: 1.2 },
+  marketing: { skills: 1.3 },
+  "real-estate-facilities": { org_scale: 1.3, skills: 1.2 },
+  "supply-chain-procurement": { org_scale: 1.4, skills: 1.2 },
+  "training-development": { skills: 1.2 },
+  "patient-contact-center": { org_scale: 1.3, skills: 1.2, seniority: 0.9 },
+};
+
+/** The weight-multiplier map for a job's corporate function, or {} otherwise. */
+function functionWeightProfile(
+  job: FitInputs["job"]
+): Partial<Record<FitDimensionKey, number>> {
+  if (jobTrack(job) !== "corporate") return {};
+  const fn = canonicalizeCorporateFunction(job.corporate_function);
+  if (!fn) return {};
+  return FUNCTION_WEIGHT_PROFILE[fn] ?? {};
+}
+
+/** Apply the profile multipliers in place (weight + recomputed contribution). */
+function applyFunctionProfile(
+  dims: Record<FitDimensionKey, FitDimension>,
+  profile: Partial<Record<FitDimensionKey, number>>
+): void {
+  for (const key of Object.keys(profile) as FitDimensionKey[]) {
+    const mult = profile[key];
+    const d = dims[key];
+    if (!d || mult == null) continue;
+    d.weight = Math.round(d.weight * mult);
+    d.contribution = (d.weight * d.raw) / 100;
+  }
 }
 
 function scoreCompensation({ candidate, job }: FitInputs): FitDimension {
@@ -2057,6 +2257,9 @@ export function hashInputs(inputs: FitInputs): string {
       patient_population_pref: sortedLowercase(
         inputs.candidate.patient_population_pref
       ),
+      // #52 DSOFit — corporate moat signals.
+      seniority_level: token(inputs.candidate.seniority_level),
+      org_scale_experience: token(inputs.candidate.org_scale_experience),
     },
     job: {
       role_category: inputs.job.role_category,
@@ -2091,6 +2294,9 @@ export function hashInputs(inputs: FitInputs): string {
       schedule_days: sortedLowercase(inputs.job.schedule_days),
       schedule_evenings: Boolean(inputs.job.schedule_evenings),
       schedule_weekends: Boolean(inputs.job.schedule_weekends),
+      // #52 DSOFit — corporate role targets.
+      seniority_target: token(inputs.job.seniority_target),
+      org_scale_need: token(inputs.job.org_scale_need),
     },
     dso: {
       location_count: inputs.dso.location_count ?? 0,

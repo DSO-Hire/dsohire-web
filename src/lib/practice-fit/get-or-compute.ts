@@ -316,6 +316,10 @@ async function loadCandidateInputs(
     benefit_priorities: ((r.benefit_priorities as string[] | null) ?? []) as string[],
     // v3.1 — patient populations the candidate enjoys (null until v3.1 taken).
     patient_population_pref: ((r.patient_population_pref as string[] | null) ?? []) as string[],
+    // #52 DSOFit corporate signals — columns arrive with the DSOFit assessment
+    // migration; null until then so the dims stay excluded (no live movement).
+    seniority_level: (r.seniority_level as string | null) ?? null,
+    org_scale_experience: (r.org_scale_experience as string | null) ?? null,
   };
 }
 
@@ -408,6 +412,10 @@ async function loadJobAndDso(
       schedule_days: ((r.schedule_days as string[] | null) ?? []) as string[],
       schedule_evenings: Boolean(r.schedule_evenings),
       schedule_weekends: Boolean(r.schedule_weekends),
+      // #52 DSOFit — corporate role targets (wired with the assessment migration;
+      // null today so seniority/scale dims stay excluded until data flows).
+      seniority_target: (r.seniority_target as string | null) ?? null,
+      org_scale_need: (r.org_scale_need as string | null) ?? null,
     },
     dso: {
       location_count: locationCount ?? 0,

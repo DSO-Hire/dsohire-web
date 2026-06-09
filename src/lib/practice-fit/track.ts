@@ -159,8 +159,9 @@ export const APPLICABLE_DIMS: Record<Track, Set<FitDimensionKey>> = {
   ]),
   // Front office uses the PMS; the other dental signals don't apply.
   admin: new Set<FitDimensionKey>([...UNIVERSAL, "pms_fluency"]),
-  // Corporate: universal signals only — no dental dims, no PMS.
-  corporate: new Set<FitDimensionKey>([...UNIVERSAL]),
+  // Corporate: universal signals + the DSOFit moat dims (seniority, multi-site
+  // scale). No dental dims, no PMS.
+  corporate: new Set<FitDimensionKey>([...UNIVERSAL, "seniority", "org_scale"]),
 };
 
 /** Applicable-dim set for a job's track. "unknown" → universal (conservative). */
