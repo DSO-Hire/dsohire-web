@@ -61,8 +61,8 @@ export function TrackChooser() {
           </h1>
           <p className="mt-4 text-[17px] sm:text-[18px] text-slate-body max-w-[640px] mx-auto leading-relaxed">
             We match two very different kinds of talent. Pick the one that fits
-            you best — it tailors your assessment and your matches. You can switch
-            anytime in Settings.
+            you best. It tailors your assessment and your matches, and you can
+            switch anytime in Settings.
           </p>
         </header>
 
@@ -72,7 +72,7 @@ export function TrackChooser() {
             wordmark={
               <PracticeFitWordmark surface="dark" className="text-[34px] sm:text-[40px]" tm />
             }
-            tagline="You work IN a dental practice — chairside or front office."
+            tagline="You work IN a dental practice, chairside or front office."
             examples={PRACTICE_EXAMPLES}
             cta="This is me"
             busy={busy === "practicefit"}
@@ -84,7 +84,7 @@ export function TrackChooser() {
             wordmark={
               <DsoFitWordmark surface="heritage" className="text-[34px] sm:text-[40px]" tm />
             }
-            tagline="You work at the DSO / corporate level — running the business."
+            tagline="You work at the DSO / corporate level, running the business."
             examples={DSO_EXAMPLES}
             cta="This is me"
             busy={busy === "dsofit"}
@@ -99,7 +99,7 @@ export function TrackChooser() {
           </p>
         )}
         <p className="mt-9 text-center text-[13px] text-slate-meta">
-          Not sure? Pick your closest fit — you can always explore the other side later.
+          Not sure? Pick your closest fit. You can always explore the other side later.
         </p>
       </div>
     </div>
@@ -125,7 +125,7 @@ function Panel({
   disabled: boolean;
   onClick: () => void;
 }) {
-  const bg = tone === "navy" ? "bg-ink" : "bg-heritage-deep";
+  const bg = tone === "navy" ? "bg-ink" : "bg-heritage";
   const ctaText = tone === "navy" ? "text-ink" : "text-heritage-deep";
   return (
     <button
@@ -139,7 +139,7 @@ function Panel({
       }`}
     >
       <div className="mb-5">{wordmark}</div>
-      <p className="text-[16px] sm:text-[17px] text-ivory/85 leading-relaxed mb-7">
+      <p className="text-[19px] sm:text-[21px] font-bold text-ivory leading-snug mb-7">
         {tagline}
       </p>
       <ul className="list-none space-y-3 mb-9 flex-1">
