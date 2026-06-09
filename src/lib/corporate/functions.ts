@@ -188,6 +188,59 @@ export const CORPORATE_FUNCTIONS: CorporateFunction[] = [
       "Doctor Recruitment",
     ],
   },
+  {
+    slug: "revenue-cycle-management",
+    label: "Revenue Cycle Management",
+    blurb:
+      "Own the money engine of a multi-practice DSO — centralized billing, claims, AR, payer relations, and reimbursement performance.",
+    subRoles: [
+      "SVP/VP Revenue Cycle",
+      "Billing Manager",
+      "Claims Manager",
+      "AR Manager",
+      "Payer Relations / Managed Care",
+      "Insurance Verification Lead",
+    ],
+  },
+  {
+    slug: "credentialing-enrollment",
+    label: "Credentialing & Provider Enrollment",
+    blurb:
+      "Keep every provider credentialed and enrolled across payers and states — CAQH, payer enrollment, licensing, and re-credentialing at scale.",
+    subRoles: [
+      "Credentialing Manager",
+      "Provider Enrollment Specialist",
+      "Payer Enrollment",
+      "Licensing Coordinator",
+      "Re-credentialing Lead",
+    ],
+  },
+  {
+    slug: "data-analytics",
+    label: "Data & Analytics",
+    blurb:
+      "Turn multi-practice data into decisions — BI, reporting, data engineering, and the KPI backbone of a growing DSO.",
+    subRoles: [
+      "VP Analytics",
+      "BI Analyst",
+      "Data Engineer",
+      "Reporting Analyst",
+      "Data Scientist",
+    ],
+  },
+  {
+    slug: "patient-contact-center",
+    label: "Patient Contact Center",
+    blurb:
+      "Run centralized patient access for a multi-practice DSO — scheduling, patient experience, and care coordination at scale.",
+    subRoles: [
+      "Contact Center Director",
+      "Centralized Scheduling Manager",
+      "Patient Experience Lead",
+      "Care Coordination Manager",
+      "Scheduling Team Lead",
+    ],
+  },
 ];
 
 /** Lookup helper used by landing pages + filter components. */

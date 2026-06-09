@@ -40,7 +40,11 @@ export type CorporateFunctionSlug =
   | "training-development"
   | "supply-chain-procurement"
   | "clinical-operations"
-  | "business-development";
+  | "business-development"
+  | "revenue-cycle-management"
+  | "credentialing-enrollment"
+  | "data-analytics"
+  | "patient-contact-center";
 
 export const CORPORATE_FUNCTION_LABELS: Record<CorporateFunctionSlug, string> = {
   "finance-accounting": "Finance & Accounting",
@@ -55,6 +59,10 @@ export const CORPORATE_FUNCTION_LABELS: Record<CorporateFunctionSlug, string> = 
   "supply-chain-procurement": "Supply Chain & Procurement",
   "clinical-operations": "Clinical Operations",
   "business-development": "Business Development",
+  "revenue-cycle-management": "Revenue Cycle Management",
+  "credentialing-enrollment": "Credentialing & Provider Enrollment",
+  "data-analytics": "Data & Analytics",
+  "patient-contact-center": "Patient Contact Center",
 };
 
 const VALID_SLUGS = new Set<string>(Object.keys(CORPORATE_FUNCTION_LABELS));
@@ -72,18 +80,22 @@ export const CORPORATE_FUNCTION_ADJACENCY: Record<
   CorporateFunctionSlug,
   CorporateFunctionSlug[]
 > = {
-  "finance-accounting": ["ma-corporate-development"],
+  "finance-accounting": ["ma-corporate-development", "revenue-cycle-management", "data-analytics"],
   "ma-corporate-development": ["finance-accounting", "business-development"],
   "business-development": ["ma-corporate-development", "marketing"],
   marketing: ["business-development"],
-  operations: ["clinical-operations", "supply-chain-procurement", "training-development"],
-  "clinical-operations": ["operations"],
+  operations: ["clinical-operations", "supply-chain-procurement", "training-development", "patient-contact-center"],
+  "clinical-operations": ["operations", "credentialing-enrollment"],
   "supply-chain-procurement": ["operations"],
   "training-development": ["hr-recruiting", "operations"],
   "hr-recruiting": ["training-development"],
-  "it-engineering": [],
+  "it-engineering": ["data-analytics"],
   "legal-compliance": [],
   "real-estate-facilities": [],
+  "revenue-cycle-management": ["finance-accounting", "credentialing-enrollment"],
+  "credentialing-enrollment": ["revenue-cycle-management", "clinical-operations"],
+  "data-analytics": ["it-engineering", "finance-accounting"],
+  "patient-contact-center": ["operations"],
 };
 
 export type CorporateRelation = "exact" | "adjacent" | "unrelated";
@@ -139,6 +151,14 @@ function matchTitleToFunction(
 
   if (has("clinical affairs", "clinical operations", "clinical director", "clinical outcomes", "quality assurance", "clinical quality"))
     return "clinical-operations";
+  if (has("contact center", "call center", "centralized scheduling", "patient access", "patient experience", "care coordination", "scheduling manager"))
+    return "patient-contact-center";
+  if (has("credentialing", "provider enrollment", "caqh", "payer enrollment", "re-credential", "licensing coordinator"))
+    return "credentialing-enrollment";
+  if (has("revenue cycle", "rcm", "claims", "accounts receivable", "payer relations", "managed care", "reimbursement", "insurance verification", "medical billing", "dental billing"))
+    return "revenue-cycle-management";
+  if (has("analytics", "business intelligence", "data analyst", "data engineer", "data scientist", "reporting analyst", "power bi", "tableau"))
+    return "data-analytics";
   if (has("m&a", "mergers", "acquisition", "corporate development", "integration", "deal", "diligence", "investor relations"))
     return "ma-corporate-development";
   if (has("business development", "partnership", "affiliation", "doctor recruitment", "practice acquisition", "bizdev", "bd "))
