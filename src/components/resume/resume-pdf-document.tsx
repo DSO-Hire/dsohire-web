@@ -10,13 +10,14 @@
  * preview) — they render the same ResumeData.
  */
 
-import type { ReactNode } from "react";
+import { createElement, type ReactNode } from "react";
 import {
   Document,
   Page,
   View,
   Text,
   StyleSheet,
+  renderToBuffer,
 } from "@react-pdf/renderer";
 import {
   type ResumeData,
@@ -224,4 +225,17 @@ export function ResumePdfDocument({ data }: { data: ResumeData }) {
       </Page>
     </Document>
   );
+}
+
+/**
+ * Render the résumé to a PDF buffer. The cast bridges @react-pdf's
+ * `renderToBuffer` type (it wants a `<Document>` element) and our wrapping
+ * component element — the component renders a Document at runtime, so this is
+ * type-only. Both the download route and saveResumePdf use this.
+ */
+export async function renderResumePdfBuffer(data: ResumeData): Promise<Buffer> {
+  const element = createElement(ResumePdfDocument, { data }) as unknown as Parameters<
+    typeof renderToBuffer
+  >[0];
+  return renderToBuffer(element);
 }

@@ -10,12 +10,10 @@
  * artifact rather than a one-off browser print.
  */
 
-import { createElement } from "react";
-import { renderToBuffer } from "@react-pdf/renderer";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getResumeData } from "@/lib/resume/resume-data";
-import { ResumePdfDocument } from "@/components/resume/resume-pdf-document";
+import { renderResumePdfBuffer } from "@/components/resume/resume-pdf-document";
 
 export async function saveResumePdf(): Promise<{ ok: boolean; error?: string }> {
   const supabase = await createSupabaseServerClient();
@@ -29,7 +27,7 @@ export async function saveResumePdf(): Promise<{ ok: boolean; error?: string }> 
 
   let buffer: Buffer;
   try {
-    buffer = await renderToBuffer(createElement(ResumePdfDocument, { data }));
+    buffer = await renderResumePdfBuffer(data);
   } catch {
     return { ok: false, error: "Couldn't generate the PDF. Please try again." };
   }
