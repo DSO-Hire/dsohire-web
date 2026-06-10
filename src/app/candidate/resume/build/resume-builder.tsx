@@ -86,7 +86,13 @@ const inputCls =
   "w-full rounded-md border border-[var(--rule)] bg-white px-3 py-2 text-[14px] text-ink focus:border-heritage-deep focus:outline-none";
 const labelCls = "block text-[12px] font-bold uppercase tracking-[1px] text-slate-meta mb-1.5";
 
-export function ResumeBuilder({ data }: { data: BuilderData }) {
+export function ResumeBuilder({
+  data,
+  returnTo = null,
+}: {
+  data: BuilderData;
+  returnTo?: string | null;
+}) {
   const router = useRouter();
   const [index, setIndex] = useState(0);
   const [pending, startTransition] = useTransition();
@@ -233,7 +239,9 @@ export function ResumeBuilder({ data }: { data: BuilderData }) {
         setError(res.error ?? "Couldn't save your résumé PDF.");
         return;
       }
-      router.push("/candidate/resume");
+      // Return to where they came from (e.g. an in-progress application) or
+      // the résumé view by default.
+      router.push(returnTo ?? "/candidate/resume");
     });
   }
 

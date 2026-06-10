@@ -209,6 +209,19 @@ export function ApplyWizard(props: ApplyWizardProps) {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [resumeError, setResumeError] = useState<string | null>(null);
 
+  // #87b.3 — returning from the free résumé builder (?built=1). The freshly
+  // built résumé is now saved to the profile, so prefer it over the stale
+  // "upload" choice the draft may still hold from before the détour.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const built = new URLSearchParams(window.location.search).get("built");
+    if (built === "1" && hasSavedResume) {
+      setDraft((d) => ({ ...d, resumeChoice: "saved" }));
+    }
+    // mount-only
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // #70 — opt-in "autofill from résumé". Parses the uploaded file (reusing the
   // profile-import LLM parser, which also saves the file on file) and fills the
   // draft name. Never silent: the candidate taps the button and reviews at
@@ -671,6 +684,9 @@ export function ApplyWizard(props: ApplyWizardProps) {
           <ResumeStep
             hasSavedResume={hasSavedResume}
             savedResumeName={savedResumeName}
+            buildHref={`/candidate/resume/build?return=${encodeURIComponent(
+              `/jobs/${jobId}/apply?built=1`
+            )}`}
             resumeChoice={draft.resumeChoice}
             onResumeChoice={(c) => setDraft({ ...draft, resumeChoice: c })}
             resumeFile={resumeFile}
@@ -1492,6 +1508,7 @@ function InlineCredentialForm({
 function ResumeStep({
   hasSavedResume,
   savedResumeName,
+  buildHref,
   resumeChoice,
   onResumeChoice,
   resumeFile,
@@ -1507,6 +1524,7 @@ function ResumeStep({
 }: {
   hasSavedResume: boolean;
   savedResumeName: string | null;
+  buildHref: string;
   resumeChoice: "saved" | "upload";
   onResumeChoice: (c: "saved" | "upload") => void;
   resumeFile: File | null;
@@ -1539,6 +1557,21 @@ function ResumeStep({
             : "Upload your resume."}
         </h2>
       </div>
+
+      {!hasSavedResume && (
+        <div className="flex items-center justify-between gap-3 rounded-md border border-heritage/30 bg-heritage/5 px-4 py-3">
+          <p className="text-[13px] text-slate-body leading-snug">
+            No résumé handy? Build a clean, ATS-safe one free from your
+            profile — we&apos;ll save it and attach it here.
+          </p>
+          <Link
+            href={buildHref}
+            className="shrink-0 whitespace-nowrap text-[12px] font-bold uppercase tracking-[1px] text-heritage-deep hover:text-ink"
+          >
+            Build one free →
+          </Link>
+        </div>
+      )}
 
       {hasSavedResume && (
         <FieldShell label="Which resume?">

@@ -17,7 +17,20 @@ export const metadata: Metadata = { title: "Build your résumé" };
 
 const arr = (v: unknown): string[] => ((v as string[] | null) ?? []) as string[];
 
-export default async function ResumeBuilderPage() {
+export default async function ResumeBuilderPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ return?: string }>;
+}) {
+  // Only honor internal, relative return paths (no open redirect).
+  const sp = await searchParams;
+  const returnTo =
+    typeof sp.return === "string" &&
+    sp.return.startsWith("/") &&
+    !sp.return.startsWith("//")
+      ? sp.return
+      : null;
+
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -126,7 +139,7 @@ export default async function ResumeBuilderPage() {
 
   return (
     <div className="min-h-screen bg-ivory">
-      <ResumeBuilder data={data} />
+      <ResumeBuilder data={data} returnTo={returnTo} />
     </div>
   );
 }
