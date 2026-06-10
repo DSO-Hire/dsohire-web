@@ -41,6 +41,7 @@ const ROUTES: SitemapRoute[] = [
   { path: "/about", priority: 0.6, changeFrequency: "monthly" },
   { path: "/contact", priority: 0.5, changeFrequency: "monthly" },
   { path: "/dental-hiring-report", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/resume-templates", priority: 0.7, changeFrequency: "monthly" },
 
   // Role / audience landing pages — keep all of them indexable so each
   // role-specific search query has a tailored landing page to rank.
