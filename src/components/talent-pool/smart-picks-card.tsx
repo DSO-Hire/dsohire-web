@@ -9,23 +9,13 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { FitWordmark } from "@/components/practice-fit/brand/fit-wordmark";
+import { bucketStyle } from "@/lib/practice-fit/buckets";
 import type { SmartPick } from "@/lib/talent-pool/smart-picks";
 import { SmartPicksSaveButton } from "./smart-picks-save-button";
 
 interface SmartPicksCardProps {
   picks: SmartPick[];
 }
-
-const BUCKET_STYLE: Record<
-  string,
-  { label: string; bg: string; fg: string }
-> = {
-  excellent: { label: "Excellent fit", bg: "#DCFCE7", fg: "#166534" },
-  strong: { label: "Strong fit", bg: "#DCFCE7", fg: "#166534" },
-  solid: { label: "Solid fit", bg: "#E8EFEB", fg: "#2F5D4F" },
-  light: { label: "Light fit", bg: "#FEF3C7", fg: "#B45309" },
-  low: { label: "Low fit", bg: "#FEE2E2", fg: "#B91C1C" },
-};
 
 export function SmartPicksCard({ picks }: SmartPicksCardProps) {
   if (picks.length === 0) return null;
@@ -57,7 +47,7 @@ export function SmartPicksCard({ picks }: SmartPicksCardProps) {
       </div>
       <ul>
         {picks.map((p) => {
-          const style = BUCKET_STYLE[p.fit.bucket] ?? BUCKET_STYLE.solid;
+          const style = bucketStyle(p.fit.bucket, p.fit.product);
           return (
             <li
               key={p.candidate_id}
@@ -91,11 +81,7 @@ export function SmartPicksCard({ picks }: SmartPicksCardProps) {
               <div className="flex flex-col items-end gap-1.5 shrink-0">
                 <div className="flex items-center gap-2">
                   <span
-                    className="inline-flex items-center px-2 py-0.5 text-[11px] font-bold rounded-full"
-                    style={{
-                      backgroundColor: style.bg,
-                      color: style.fg,
-                    }}
+                    className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-bold ${style.bgClass} ${style.textClass} ${style.borderClass}`}
                   >
                     {style.label}
                   </span>
