@@ -55,7 +55,6 @@ export function JobsBrowser({
   /** #54 — the candidate's chosen track drives page-level fit branding. */
   primaryProduct?: FitProduct;
 }) {
-  const primaryName = primaryProduct === "dsofit" ? "DSOFit" : "PracticeFit";
   const [query, setQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<Set<string>>(new Set());
   const [stateFilter, setStateFilter] = useState<string>("");
@@ -141,7 +140,7 @@ export function JobsBrowser({
             <h1 className="font-display text-3xl font-extrabold tracking-[-0.8px] text-ink leading-tight">
               Open roles at dental groups.
             </h1>
-            <PracticeFitOffBanner />
+            <PracticeFitOffBanner product={primaryProduct} />
           </>
         )}
       </header>
@@ -394,19 +393,24 @@ function Row({ job }: { job: BrowseJob }) {
   );
 }
 
-function PracticeFitOffBanner() {
+function PracticeFitOffBanner({
+  product = "practicefit",
+}: {
+  product?: FitProduct;
+}) {
+  const name = product === "dsofit" ? "DSOFit" : "PracticeFit";
   return (
     <div className="mt-2 flex flex-wrap items-center justify-between gap-3 border-l-2 border-heritage bg-cream/60 px-4 py-3">
       <p className="text-[13px] text-slate-body leading-relaxed">
-        Turn on PracticeFit to rank these roles to your profile and let dental
+        Turn on {name} to rank these roles to your profile and let dental
         groups find you by fit.
       </p>
       <Link
-        href={primaryProduct === "dsofit" ? "/candidate/dsofit" : "/candidate/practice-fit"}
+        href={product === "dsofit" ? "/candidate/dsofit" : "/candidate/practice-fit"}
         className="inline-flex items-center gap-1.5 rounded-md bg-heritage px-3 py-2 text-[11px] font-bold tracking-[1px] uppercase text-ivory hover:bg-heritage-deep"
       >
-        <FitMark product={primaryProduct} className="h-3 w-3" />
-        Turn on {primaryName}
+        <FitMark product={product} className="h-3 w-3" />
+        Turn on {name}
       </Link>
     </div>
   );
