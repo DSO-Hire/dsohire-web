@@ -1,23 +1,25 @@
 "use client";
 
 /**
- * #87b.2 — guided résumé builder with live preview.
+ * #87b.2 (+ all-inclusive upgrade) — guided résumé builder with live preview.
  *
- * Reuses the shared WizardShell + the existing profile section-actions, so it
- * writes straight to the canonical profile (no 4th silo). Saves carry the FULL
- * current values for each row (e.g. a work entry's pms_systems_used) so the
- * upserts never null fields the builder doesn't surface.
+ * Builds a COMPLETE résumé from zero: Contact, Summary, Experience (with dates
+ * + add/remove jobs), Education (add/remove), Licenses & Certifications
+ * (dental-critical, add/remove), and Skills — all with a live preview and a
+ * template picker. Writes straight to the canonical profile via the existing
+ * section-actions (renderer, not a 4th silo).
  *
- * Scope: edits Contact, Summary, Experience prose, and Skills — the résumé
- * content that matters most — with a live preview. Adding/removing work,
- * education, license, and cert ENTRIES stays in the profile editor (linked);
- * those show read-only in the preview here.
+ * Persistence model: single-row sections (identity, skills) save per-step.
+ * LIST sections (work/education/licenses/certs) reconcile on Finish —
+ * delete-diff (originals no longer present) + upsert-all (new entries carry a
+ * `tmp_` id → insert; real ids → update). Finish runs once, so no duplicate
+ * inserts and no need to change the shared actions.
  */
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FileText } from "lucide-react";
+import { FileText, Plus, Trash2 } from "lucide-react";
 import { WizardShell, type WizardStepMeta } from "@/components/wizard/wizard-shell";
 import { ResumeDocument } from "@/components/resume/resume-document";
 import type {
@@ -29,8 +31,19 @@ import type {
 import {
   upsertIdentity,
   upsertWorkHistoryEntry,
+  deleteWorkHistoryEntry,
+  upsertEducationEntry,
+  deleteEducationEntry,
+  upsertLicenseEntry,
+  deleteLicenseEntry,
+  upsertCertificationEntry,
+  deleteCertificationEntry,
   upsertSkillsLanguages,
 } from "@/app/candidate/profile/section-actions";
+import {
+  LICENSE_TYPES,
+  CERTIFICATION_KINDS,
+} from "@/lib/candidate/canonical-lists";
 import {
   RESUME_TEMPLATE_LIST,
   type ResumeTemplateId,
@@ -82,13 +95,21 @@ const STEPS: WizardStepMeta[] = [
   { id: "contact", label: "Contact" },
   { id: "summary", label: "Summary" },
   { id: "experience", label: "Experience" },
+  { id: "education", label: "Education" },
+  { id: "credentials", label: "Credentials" },
   { id: "skills", label: "Skills" },
   { id: "finish", label: "Finish" },
 ];
 
 const inputCls =
   "w-full rounded-md border border-[var(--rule)] bg-white px-3 py-2 text-[14px] text-ink focus:border-heritage-deep focus:outline-none";
-const labelCls = "block text-[12px] font-bold uppercase tracking-[1px] text-slate-meta mb-1.5";
+const labelCls =
+  "block text-[12px] font-bold uppercase tracking-[1px] text-slate-meta mb-1.5";
+
+let _tmp = 0;
+const tmpId = () => `tmp_${Date.now()}_${_tmp++}`;
+const isTmp = (id: string) => id.startsWith("tmp_");
+const toMonth = (d: string | null) => (d ? d.slice(0, 7) : "");
 
 export function ResumeBuilder({
   data,
@@ -104,18 +125,16 @@ export function ResumeBuilder({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  // ── editable state ──────────────────────────────────────────────
   const [identity, setIdentity] = useState(data.identity);
   const [work, setWork] = useState<WorkEntry[]>(data.work);
+  const [education, setEducation] = useState<ResumeEducation[]>(data.education);
+  const [licenses, setLicenses] = useState<ResumeLicense[]>(data.licenses);
+  const [certs, setCerts] = useState<ResumeCert[]>(data.certifications);
   const [skillsText, setSkillsText] = useState(data.skills.join(", "));
   const [template, setTemplate] = useState<ResumeTemplateId>(initialTemplate);
 
   const skills = useMemo(
-    () =>
-      skillsText
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
+    () => skillsText.split(",").map((s) => s.trim()).filter(Boolean),
     [skillsText]
   );
 
@@ -123,14 +142,10 @@ export function ResumeBuilder({
     key: K,
     value: BuilderData["identity"][K]
   ) {
-    setIdentity((prev) => ({ ...prev, [key]: value }));
+    setIdentity((p) => ({ ...p, [key]: value }));
   }
 
-  function setWorkDescription(id: string, patch: Partial<WorkEntry>) {
-    setWork((prev) => prev.map((w) => (w.id === id ? { ...w, ...patch } : w)));
-  }
-
-  // ── live preview data (derived from current state) ──────────────
+  // ── live preview (filters out blank in-progress rows) ───────────
   const preview: ResumeData = useMemo(
     () => ({
       name: `${identity.first_name} ${identity.last_name}`.trim(),
@@ -147,24 +162,26 @@ export function ResumeBuilder({
       skills,
       languages: data.languages,
       pmsSystems: data.pms_systems,
-      work: work.map((w) => ({
-        id: w.id,
-        title: w.title,
-        company: w.company_name,
-        isDso: w.is_dso,
-        start: w.start_date,
-        end: w.end_date,
-        isCurrent: w.is_current,
-        description: w.description,
-      })),
-      education: data.education,
-      licenses: data.licenses,
-      certifications: data.certifications,
+      work: work
+        .filter((w) => w.title.trim() || w.company_name.trim())
+        .map((w) => ({
+          id: w.id,
+          title: w.title,
+          company: w.company_name,
+          isDso: w.is_dso,
+          start: w.start_date,
+          end: w.end_date,
+          isCurrent: w.is_current,
+          description: w.description,
+        })),
+      education: education.filter((e) => e.school.trim()),
+      licenses: licenses.filter((l) => l.type.trim()),
+      certifications: certs.filter((c) => c.kind.trim()),
     }),
-    [identity, work, skills, data]
+    [identity, work, education, licenses, certs, skills, data]
   );
 
-  // ── saves (full payloads → no nulling) ──────────────────────────
+  // ── per-step saves (single-row sections) ────────────────────────
   async function saveIdentity(): Promise<boolean> {
     if (!identity.first_name.trim() || !identity.last_name.trim()) {
       setError("Please add your first and last name.");
@@ -183,17 +200,28 @@ export function ResumeBuilder({
       years_experience_dental: identity.years_experience_dental,
       linkedin_url: identity.linkedin_url,
     });
-    if (!res.ok) {
-      setError(res.error);
-      return false;
-    }
+    if (!res.ok) return setError(res.error), false;
     return true;
   }
 
-  async function saveWork(): Promise<boolean> {
-    for (const w of work) {
+  async function saveSkills(): Promise<boolean> {
+    const res = await upsertSkillsLanguages({
+      skills,
+      languages: data.languages,
+      pms_systems: data.pms_systems,
+    });
+    if (!res.ok) return setError(res.error), false;
+    return true;
+  }
+
+  // ── finish-time list reconciliation (delete-diff + upsert-all) ──
+  async function reconcileLists(): Promise<boolean> {
+    const validWork = work.filter(
+      (w) => w.title.trim() && w.company_name.trim()
+    );
+    for (const w of validWork) {
       const res = await upsertWorkHistoryEntry({
-        id: w.id,
+        id: isTmp(w.id) ? undefined : w.id,
         title: w.title,
         company_name: w.company_name,
         is_dso: w.is_dso,
@@ -205,51 +233,99 @@ export function ResumeBuilder({
         procedures_performed: w.procedures_performed,
         auto_blocklisted: w.auto_blocklisted,
       });
-      if (!res.ok) {
-        setError(res.error);
-        return false;
+      if (!res.ok) return setError(res.error), false;
+    }
+    const keepWork = new Set(validWork.filter((w) => !isTmp(w.id)).map((w) => w.id));
+    for (const o of data.work) {
+      if (!keepWork.has(o.id)) {
+        const res = await deleteWorkHistoryEntry(o.id);
+        if (!res.ok) return setError(res.error), false;
       }
     }
-    return true;
-  }
 
-  async function saveSkills(): Promise<boolean> {
-    const res = await upsertSkillsLanguages({
-      skills,
-      languages: data.languages,
-      pms_systems: data.pms_systems,
-    });
-    if (!res.ok) {
-      setError(res.error);
-      return false;
+    const validEdu = education.filter((e) => e.school.trim());
+    for (const e of validEdu) {
+      const res = await upsertEducationEntry({
+        id: isTmp(e.id) ? undefined : e.id,
+        school_name: e.school,
+        degree: e.degree,
+        field_of_study: e.field,
+        start_year: e.startYear,
+        end_year: e.endYear,
+        description: e.description,
+      });
+      if (!res.ok) return setError(res.error), false;
+    }
+    const keepEdu = new Set(validEdu.filter((e) => !isTmp(e.id)).map((e) => e.id));
+    for (const o of data.education) {
+      if (!keepEdu.has(o.id)) {
+        const res = await deleteEducationEntry(o.id);
+        if (!res.ok) return setError(res.error), false;
+      }
+    }
+
+    const validLic = licenses.filter((l) => l.type.trim());
+    for (const l of validLic) {
+      const res = await upsertLicenseEntry({
+        id: isTmp(l.id) ? undefined : l.id,
+        license_type: l.type,
+        license_number: l.number,
+        state: l.state,
+        issued_date: null,
+        expires_date: l.expires,
+        display_number: l.displayNumber,
+      });
+      if (!res.ok) return setError(res.error), false;
+    }
+    const keepLic = new Set(validLic.filter((l) => !isTmp(l.id)).map((l) => l.id));
+    for (const o of data.licenses) {
+      if (!keepLic.has(o.id)) {
+        const res = await deleteLicenseEntry(o.id);
+        if (!res.ok) return setError(res.error), false;
+      }
+    }
+
+    const validCert = certs.filter((c) => c.kind.trim());
+    for (const c of validCert) {
+      const res = await upsertCertificationEntry({
+        id: isTmp(c.id) ? undefined : c.id,
+        kind: c.kind,
+        level: c.level,
+        issued_date: null,
+        expires_date: c.expires,
+      });
+      if (!res.ok) return setError(res.error), false;
+    }
+    const keepCert = new Set(validCert.filter((c) => !isTmp(c.id)).map((c) => c.id));
+    for (const o of data.certifications) {
+      if (!keepCert.has(o.id)) {
+        const res = await deleteCertificationEntry(o.id);
+        if (!res.ok) return setError(res.error), false;
+      }
     }
     return true;
   }
 
   function handleNext() {
     setError(null);
+    const id = STEPS[index].id;
     startTransition(async () => {
-      let ok = true;
-      if (index === 0 || index === 1) ok = await saveIdentity();
-      else if (index === 2) ok = await saveWork();
-      else if (index === 3) ok = await saveSkills();
-
-      if (!ok) return;
-
-      if (index < STEPS.length - 1) {
+      if (id === "contact" || id === "summary") {
+        if (!(await saveIdentity())) return;
+      } else if (id === "skills") {
+        if (!(await saveSkills())) return;
+      }
+      if (id !== "finish") {
         setIndex((i) => i + 1);
         return;
       }
-      // Finish: generate + save the PDF, then view it.
-      // Persist the chosen template first so the saved PDF uses it.
+      // Finish: persist identity (in case they jumped), reconcile lists,
+      // save template + PDF, then return.
+      if (!(await saveIdentity())) return;
+      if (!(await reconcileLists())) return;
       await setResumeTemplate(template);
       const res = await saveResumePdf();
-      if (!res.ok) {
-        setError(res.error ?? "Couldn't save your résumé PDF.");
-        return;
-      }
-      // Return to where they came from (e.g. an in-progress application) or
-      // the résumé view by default.
+      if (!res.ok) return setError(res.error ?? "Couldn't save your résumé PDF.");
       router.push(returnTo ?? "/candidate/resume");
     });
   }
@@ -257,7 +333,6 @@ export function ResumeBuilder({
   return (
     <div className="mx-auto max-w-[1180px] px-4 py-8 lg:px-8">
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)]">
-        {/* Wizard */}
         <WizardShell
           steps={STEPS}
           currentIndex={index}
@@ -283,7 +358,7 @@ export function ResumeBuilder({
             setIndex(i);
           }}
         >
-          {index === 0 && (
+          {STEPS[index].id === "contact" && (
             <div className="space-y-5">
               <Title>Let&apos;s start with the basics.</Title>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -344,12 +419,11 @@ export function ResumeBuilder({
             </div>
           )}
 
-          {index === 1 && (
+          {STEPS[index].id === "summary" && (
             <div className="space-y-4">
               <Title>Your professional summary.</Title>
               <p className="text-[14px] text-slate-body">
-                Two to three sentences on who you are and what you do well. This
-                sits at the top of your résumé.
+                Two to three sentences on who you are and what you do well.
               </p>
               <textarea
                 className={inputCls + " min-h-[160px] leading-relaxed"}
@@ -360,63 +434,299 @@ export function ResumeBuilder({
             </div>
           )}
 
-          {index === 2 && (
-            <div className="space-y-6">
+          {STEPS[index].id === "experience" && (
+            <div className="space-y-5">
               <Title>Your experience.</Title>
-              {work.length === 0 ? (
-                <p className="text-[14px] text-slate-body">
-                  No work history yet.{" "}
-                  <Link href="/candidate/profile" className="font-bold text-heritage-deep underline">
-                    Add jobs in your profile
-                  </Link>{" "}
-                  and they&apos;ll appear here.
-                </p>
-              ) : (
-                work.map((w) => (
-                  <div key={w.id} className="rounded-md border border-[var(--rule)] bg-white p-4">
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                      <Field label="Title">
+              {work.map((w) => (
+                <div key={w.id} className="rounded-md border border-[var(--rule)] bg-white p-4">
+                  <div className="mb-3 flex justify-end">
+                    <RemoveBtn onClick={() => setWork((p) => p.filter((x) => x.id !== w.id))} />
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <Field label="Title">
+                      <input
+                        className={inputCls}
+                        value={w.title}
+                        onChange={(e) =>
+                          setWork((p) => p.map((x) => (x.id === w.id ? { ...x, title: e.target.value } : x)))
+                        }
+                      />
+                    </Field>
+                    <Field label="Company">
+                      <input
+                        className={inputCls}
+                        value={w.company_name}
+                        onChange={(e) =>
+                          setWork((p) => p.map((x) => (x.id === w.id ? { ...x, company_name: e.target.value } : x)))
+                        }
+                      />
+                    </Field>
+                  </div>
+                  <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <Field label="Start">
+                      <input
+                        type="month"
+                        className={inputCls}
+                        value={toMonth(w.start_date)}
+                        onChange={(e) =>
+                          setWork((p) => p.map((x) => (x.id === w.id ? { ...x, start_date: e.target.value || null } : x)))
+                        }
+                      />
+                    </Field>
+                    <Field label="End">
+                      <input
+                        type="month"
+                        className={inputCls + (w.is_current ? " opacity-50" : "")}
+                        disabled={w.is_current}
+                        value={toMonth(w.end_date)}
+                        onChange={(e) =>
+                          setWork((p) => p.map((x) => (x.id === w.id ? { ...x, end_date: e.target.value || null } : x)))
+                        }
+                      />
+                      <label className="mt-1.5 inline-flex items-center gap-1.5 text-[12px] text-slate-body">
+                        <input
+                          type="checkbox"
+                          checked={w.is_current}
+                          onChange={(e) =>
+                            setWork((p) =>
+                              p.map((x) =>
+                                x.id === w.id
+                                  ? { ...x, is_current: e.target.checked, end_date: e.target.checked ? null : x.end_date }
+                                  : x
+                              )
+                            )
+                          }
+                        />
+                        I currently work here
+                      </label>
+                    </Field>
+                  </div>
+                  <div className="mt-3">
+                    <label className={labelCls}>What you did</label>
+                    <textarea
+                      className={inputCls + " min-h-[100px] leading-relaxed"}
+                      placeholder="Key responsibilities and wins…"
+                      value={w.description ?? ""}
+                      onChange={(e) =>
+                        setWork((p) => p.map((x) => (x.id === w.id ? { ...x, description: e.target.value || null } : x)))
+                      }
+                    />
+                  </div>
+                </div>
+              ))}
+              <AddBtn
+                label="Add a job"
+                onClick={() =>
+                  setWork((p) => [
+                    ...p,
+                    {
+                      id: tmpId(),
+                      title: "",
+                      company_name: "",
+                      is_dso: false,
+                      start_date: null,
+                      end_date: null,
+                      is_current: false,
+                      description: null,
+                      pms_systems_used: [],
+                      procedures_performed: [],
+                      auto_blocklisted: false,
+                    },
+                  ])
+                }
+              />
+            </div>
+          )}
+
+          {STEPS[index].id === "education" && (
+            <div className="space-y-5">
+              <Title>Your education.</Title>
+              {education.map((e) => (
+                <div key={e.id} className="rounded-md border border-[var(--rule)] bg-white p-4">
+                  <div className="mb-3 flex justify-end">
+                    <RemoveBtn onClick={() => setEducation((p) => p.filter((x) => x.id !== e.id))} />
+                  </div>
+                  <Field label="School">
+                    <input
+                      className={inputCls}
+                      value={e.school}
+                      onChange={(ev) =>
+                        setEducation((p) => p.map((x) => (x.id === e.id ? { ...x, school: ev.target.value } : x)))
+                      }
+                    />
+                  </Field>
+                  <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <Field label="Degree">
+                      <input
+                        className={inputCls}
+                        placeholder="e.g. Associate of Applied Science"
+                        value={e.degree ?? ""}
+                        onChange={(ev) =>
+                          setEducation((p) => p.map((x) => (x.id === e.id ? { ...x, degree: ev.target.value || null } : x)))
+                        }
+                      />
+                    </Field>
+                    <Field label="Field of study">
+                      <input
+                        className={inputCls}
+                        placeholder="e.g. Dental Hygiene"
+                        value={e.field ?? ""}
+                        onChange={(ev) =>
+                          setEducation((p) => p.map((x) => (x.id === e.id ? { ...x, field: ev.target.value || null } : x)))
+                        }
+                      />
+                    </Field>
+                  </div>
+                  <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <Field label="Start year">
+                      <input
+                        type="number"
+                        className={inputCls}
+                        value={e.startYear ?? ""}
+                        onChange={(ev) =>
+                          setEducation((p) =>
+                            p.map((x) => (x.id === e.id ? { ...x, startYear: ev.target.value ? Number(ev.target.value) : null } : x))
+                          )
+                        }
+                      />
+                    </Field>
+                    <Field label="End year">
+                      <input
+                        type="number"
+                        className={inputCls}
+                        value={e.endYear ?? ""}
+                        onChange={(ev) =>
+                          setEducation((p) =>
+                            p.map((x) => (x.id === e.id ? { ...x, endYear: ev.target.value ? Number(ev.target.value) : null } : x))
+                          )
+                        }
+                      />
+                    </Field>
+                  </div>
+                </div>
+              ))}
+              <AddBtn
+                label="Add education"
+                onClick={() =>
+                  setEducation((p) => [
+                    ...p,
+                    { id: tmpId(), school: "", degree: null, field: null, startYear: null, endYear: null, description: null },
+                  ])
+                }
+              />
+            </div>
+          )}
+
+          {STEPS[index].id === "credentials" && (
+            <div className="space-y-6">
+              <Title>Licenses &amp; certifications.</Title>
+
+              <div className="space-y-4">
+                <h3 className="text-[13px] font-bold uppercase tracking-[1px] text-ink">Licenses</h3>
+                {licenses.map((l) => (
+                  <div key={l.id} className="rounded-md border border-[var(--rule)] bg-white p-4">
+                    <div className="mb-3 flex justify-end">
+                      <RemoveBtn onClick={() => setLicenses((p) => p.filter((x) => x.id !== l.id))} />
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                      <Field label="Type">
+                        <select
+                          className={inputCls}
+                          value={l.type}
+                          onChange={(e) =>
+                            setLicenses((p) => p.map((x) => (x.id === l.id ? { ...x, type: e.target.value } : x)))
+                          }
+                        >
+                          <option value="">Select…</option>
+                          {LICENSE_TYPES.map((o) => (
+                            <option key={o.value} value={o.value}>
+                              {o.label}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+                      <Field label="State">
                         <input
                           className={inputCls}
-                          value={w.title}
-                          onChange={(e) => setWorkDescription(w.id, { title: e.target.value })}
+                          maxLength={2}
+                          value={l.state ?? ""}
+                          onChange={(e) =>
+                            setLicenses((p) => p.map((x) => (x.id === l.id ? { ...x, state: e.target.value || null } : x)))
+                          }
                         />
                       </Field>
-                      <Field label="Company">
+                      <Field label="Expires">
                         <input
+                          type="month"
                           className={inputCls}
-                          value={w.company_name}
+                          value={toMonth(l.expires)}
                           onChange={(e) =>
-                            setWorkDescription(w.id, { company_name: e.target.value })
+                            setLicenses((p) => p.map((x) => (x.id === l.id ? { ...x, expires: e.target.value || null } : x)))
                           }
                         />
                       </Field>
                     </div>
-                    <div className="mt-3">
-                      <label className={labelCls}>What you did</label>
-                      <textarea
-                        className={inputCls + " min-h-[110px] leading-relaxed"}
-                        placeholder="Key responsibilities and wins…"
-                        value={w.description ?? ""}
-                        onChange={(e) =>
-                          setWorkDescription(w.id, { description: e.target.value || null })
-                        }
-                      />
+                  </div>
+                ))}
+                <AddBtn
+                  label="Add license"
+                  onClick={() =>
+                    setLicenses((p) => [
+                      ...p,
+                      { id: tmpId(), type: "", state: null, number: null, displayNumber: false, expires: null },
+                    ])
+                  }
+                />
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-[13px] font-bold uppercase tracking-[1px] text-ink">Certifications</h3>
+                {certs.map((c) => (
+                  <div key={c.id} className="rounded-md border border-[var(--rule)] bg-white p-4">
+                    <div className="mb-3 flex justify-end">
+                      <RemoveBtn onClick={() => setCerts((p) => p.filter((x) => x.id !== c.id))} />
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <Field label="Type">
+                        <select
+                          className={inputCls}
+                          value={c.kind}
+                          onChange={(e) =>
+                            setCerts((p) => p.map((x) => (x.id === c.id ? { ...x, kind: e.target.value } : x)))
+                          }
+                        >
+                          <option value="">Select…</option>
+                          {CERTIFICATION_KINDS.map((o) => (
+                            <option key={o.value} value={o.value}>
+                              {o.label}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+                      <Field label="Expires (optional)">
+                        <input
+                          type="month"
+                          className={inputCls}
+                          value={toMonth(c.expires)}
+                          onChange={(e) =>
+                            setCerts((p) => p.map((x) => (x.id === c.id ? { ...x, expires: e.target.value || null } : x)))
+                          }
+                        />
+                      </Field>
                     </div>
                   </div>
-                ))
-              )}
-              <p className="text-[12px] text-slate-meta">
-                Add or remove jobs, dates, and details in your{" "}
-                <Link href="/candidate/profile" className="font-semibold underline">
-                  profile
-                </Link>
-                .
-              </p>
+                ))}
+                <AddBtn
+                  label="Add certification"
+                  onClick={() =>
+                    setCerts((p) => [...p, { id: tmpId(), kind: "", level: null, expires: null }])
+                  }
+                />
+              </div>
             </div>
           )}
 
-          {index === 3 && (
+          {STEPS[index].id === "skills" && (
             <div className="space-y-4">
               <Title>Your skills.</Title>
               <p className="text-[14px] text-slate-body">
@@ -431,7 +741,7 @@ export function ResumeBuilder({
             </div>
           )}
 
-          {index === 4 && (
+          {STEPS[index].id === "finish" && (
             <div className="space-y-4">
               <Title>You&apos;re ready.</Title>
               <p className="text-[14px] text-slate-body">
@@ -479,9 +789,7 @@ export function ResumeBuilder({
 }
 
 function Title({ children }: { children: React.ReactNode }) {
-  return (
-    <h1 className="text-xl font-bold tracking-[-0.4px] text-ink sm:text-2xl">{children}</h1>
-  );
+  return <h1 className="text-xl font-bold tracking-[-0.4px] text-ink sm:text-2xl">{children}</h1>;
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -490,5 +798,31 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <label className={labelCls}>{label}</label>
       {children}
     </div>
+  );
+}
+
+function AddBtn({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-[var(--rule)] px-3 py-2 text-[13px] font-semibold text-heritage-deep hover:border-heritage-deep transition-colors"
+    >
+      <Plus className="h-4 w-4" />
+      {label}
+    </button>
+  );
+}
+
+function RemoveBtn({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-1 text-[12px] font-semibold text-slate-meta hover:text-red-600 transition-colors"
+    >
+      <Trash2 className="h-3.5 w-3.5" />
+      Remove
+    </button>
   );
 }
