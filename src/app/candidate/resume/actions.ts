@@ -12,8 +12,12 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getResumeData } from "@/lib/resume/resume-data";
+import { getResumeData, getResumeTemplateId } from "@/lib/resume/resume-data";
 import { renderResumePdfBuffer } from "@/components/resume/resume-pdf-document";
+import {
+  getResumeTemplate,
+  type ResumeTemplateId,
+} from "@/lib/resume/resume-templates";
 
 export async function saveResumePdf(): Promise<{ ok: boolean; error?: string }> {
   const supabase = await createSupabaseServerClient();
@@ -25,9 +29,10 @@ export async function saveResumePdf(): Promise<{ ok: boolean; error?: string }> 
   const data = await getResumeData();
   if (!data) return { ok: false, error: "We couldn't find your profile." };
 
+  const template = await getResumeTemplateId();
   let buffer: Buffer;
   try {
-    buffer = await renderResumePdfBuffer(data);
+    buffer = await renderResumePdfBuffer(data, template);
   } catch {
     return { ok: false, error: "Couldn't generate the PDF. Please try again." };
   }
@@ -47,6 +52,27 @@ export async function saveResumePdf(): Promise<{ ok: boolean; error?: string }> 
   if (updErr) return { ok: false, error: updErr.message };
 
   revalidatePath("/candidate/profile");
+  revalidatePath("/candidate/resume");
+  return { ok: true };
+}
+
+/** Persist the candidate's chosen résumé template (presentation only). */
+export async function setResumeTemplate(
+  template: ResumeTemplateId
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "You're not signed in." };
+
+  const id = getResumeTemplate(template).id; // normalize / validate
+  const { error } = await supabase
+    .from("candidates")
+    .update({ resume_template: id })
+    .eq("auth_user_id", user.id);
+  if (error) return { ok: false, error: error.message };
+
   revalidatePath("/candidate/resume");
   return { ok: true };
 }

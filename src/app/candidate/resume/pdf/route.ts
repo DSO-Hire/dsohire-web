@@ -6,19 +6,22 @@
  * APIs). Real selectable text → ATS-safe.
  */
 
-import { getResumeData } from "@/lib/resume/resume-data";
+import { getResumeData, getResumeTemplateId } from "@/lib/resume/resume-data";
 import { renderResumePdfBuffer } from "@/components/resume/resume-pdf-document";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const data = await getResumeData();
+  const [data, template] = await Promise.all([
+    getResumeData(),
+    getResumeTemplateId(),
+  ]);
   if (!data) {
     return new Response("No résumé found", { status: 404 });
   }
 
-  const buffer = await renderResumePdfBuffer(data);
+  const buffer = await renderResumePdfBuffer(data, template);
 
   const safeName =
     (data.name || "resume").replace(/[^a-z0-9]+/gi, "_").replace(/^_|_$/g, "") ||

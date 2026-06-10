@@ -12,9 +12,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getResumeData, resumeHasContent } from "@/lib/resume/resume-data";
+import {
+  getResumeData,
+  getResumeTemplateId,
+  resumeHasContent,
+} from "@/lib/resume/resume-data";
 import { ResumeDocument } from "@/components/resume/resume-document";
 import { ResumeToolbar } from "./resume-toolbar";
+import { TemplatePicker } from "./template-picker";
 
 export const metadata: Metadata = { title: "Your résumé" };
 
@@ -28,7 +33,10 @@ const PRINT_CSS = `
 `;
 
 export default async function CandidateResumePage() {
-  const data = await getResumeData();
+  const [data, templateId] = await Promise.all([
+    getResumeData(),
+    getResumeTemplateId(),
+  ]);
   if (!data) redirect("/candidate/profile");
   const sparse = !resumeHasContent(data);
 
@@ -48,8 +56,10 @@ export default async function CandidateResumePage() {
         </div>
       )}
 
+      <TemplatePicker current={templateId} />
+
       <div className="resume-sheet mx-auto max-w-[760px] shadow-[0_1px_3px_rgba(0,0,0,0.12),0_8px_24px_rgba(0,0,0,0.08)]">
-        <ResumeDocument data={data} />
+        <ResumeDocument data={data} template={templateId} />
       </div>
     </div>
   );

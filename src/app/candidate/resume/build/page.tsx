@@ -11,6 +11,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getResumeTemplate } from "@/lib/resume/resume-templates";
 import { ResumeBuilder, type BuilderData } from "./resume-builder";
 
 export const metadata: Metadata = { title: "Build your résumé" };
@@ -47,7 +48,7 @@ export default async function ResumeBuilderPage({
     supabase
       .from("candidates")
       .select(
-        "id, full_name, first_name, last_name, salutation, pronouns, headline, summary, phone, current_location_city, current_location_state, linkedin_url, years_experience, years_experience_dental, desired_roles, desired_specialty, skills, languages, pms_systems"
+        "id, full_name, first_name, last_name, salutation, pronouns, headline, summary, phone, current_location_city, current_location_state, linkedin_url, years_experience, years_experience_dental, desired_roles, desired_specialty, skills, languages, pms_systems, resume_template"
       )
       .eq("auth_user_id", user.id)
       .maybeSingle(),
@@ -137,9 +138,17 @@ export default async function ResumeBuilderPage({
     email: user.email ?? null,
   };
 
+  const initialTemplate = getResumeTemplate(
+    c.resume_template as string | null
+  ).id;
+
   return (
     <div className="min-h-screen bg-ivory">
-      <ResumeBuilder data={data} returnTo={returnTo} />
+      <ResumeBuilder
+        data={data}
+        returnTo={returnTo}
+        initialTemplate={initialTemplate}
+      />
     </div>
   );
 }

@@ -37,7 +37,31 @@ export {
   resumeHasContent,
 };
 
+import {
+  type ResumeTemplateId,
+  DEFAULT_RESUME_TEMPLATE,
+  getResumeTemplate,
+} from "@/lib/resume/resume-templates";
+
 const arr = (v: unknown): string[] => ((v as string[] | null) ?? []) as string[];
+
+/** The candidate's saved résumé template id (normalized; default when unset). */
+export async function getResumeTemplateId(): Promise<ResumeTemplateId> {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return DEFAULT_RESUME_TEMPLATE;
+  const { data } = await supabase
+    .from("candidates")
+    .select("resume_template")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+  const id = (data as Record<string, unknown> | null)?.resume_template as
+    | string
+    | null;
+  return getResumeTemplate(id).id;
+}
 
 /**
  * Fetch the signed-in candidate's résumé data. Returns null when there's no

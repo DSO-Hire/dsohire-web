@@ -1,13 +1,10 @@
 /**
- * #87b — @react-pdf/renderer version of the "Classic" résumé template.
+ * #87b/#87c — @react-pdf render of the résumé, template-driven.
  *
- * Server-rendered to a real PDF buffer (see /candidate/resume/pdf/route.ts and
- * saveResumePdf). Same content + ATS-safe structure as the on-screen
- * ResumeDocument, expressed in @react-pdf primitives. Uses the built-in
- * Helvetica family (no font hosting, always real selectable text).
- *
- * Keep this in sync with components/resume/resume-document.tsx (the HTML
- * preview) — they render the same ResumeData.
+ * Mirrors resume-document.tsx (the on-screen preview) using the same template
+ * tokens (resume-templates.ts), so the PDF and the preview match. Built-in
+ * faces only — sans → Helvetica, serif → Times-Roman — so it's ATS-safe with
+ * no fonts to host. Single column, real text, standard headings throughout.
  */
 
 import { createElement, type ReactNode } from "react";
@@ -28,41 +25,79 @@ import {
   monthYear,
   dateRange,
 } from "@/lib/resume/resume-format";
+import {
+  getResumeTemplate,
+  type ResumeTemplate,
+  type ResumeTemplateId,
+} from "@/lib/resume/resume-templates";
 
-const styles = StyleSheet.create({
-  page: {
-    paddingVertical: 44,
-    paddingHorizontal: 50,
-    fontSize: 10,
-    fontFamily: "Helvetica",
-    color: "#111111",
-    lineHeight: 1.4,
-  },
-  name: { fontSize: 20, fontFamily: "Helvetica-Bold", color: "#000000" },
-  headline: { fontSize: 11, marginTop: 2, color: "#333333" },
-  contact: { fontSize: 9, marginTop: 6, color: "#555555" },
-  section: { marginTop: 14 },
-  h2: {
-    fontSize: 9,
-    fontFamily: "Helvetica-Bold",
-    color: "#000000",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#999999",
-    paddingBottom: 3,
-    marginBottom: 6,
-  },
-  item: { marginBottom: 8 },
-  row: { flexDirection: "row", justifyContent: "space-between" },
-  bold: { fontFamily: "Helvetica-Bold", color: "#000000" },
-  meta: { fontSize: 9, color: "#666666" },
-  body: { color: "#222222", marginTop: 2 },
-  li: { color: "#222222", marginBottom: 2 },
-  kv: { color: "#222222", marginBottom: 2 },
-});
+function faces(family: ResumeTemplate["family"]) {
+  return family === "serif"
+    ? { regular: "Times-Roman", bold: "Times-Bold" }
+    : { regular: "Helvetica", bold: "Helvetica-Bold" };
+}
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function buildStyles(t: ResumeTemplate) {
+  const f = faces(t.family);
+  return StyleSheet.create({
+    page: {
+      paddingVertical: 44,
+      paddingHorizontal: 50,
+      fontSize: t.bodySizePt,
+      fontFamily: f.regular,
+      color: "#1a1a1a",
+      lineHeight: 1.45,
+    },
+    header: {
+      textAlign: t.nameAlign,
+      paddingBottom: t.headerRule ? 8 : 0,
+      borderBottomWidth: t.headerRule ? 1.5 : 0,
+      borderBottomColor: t.ruleHex,
+    },
+    name: {
+      fontSize: t.nameSizePt,
+      fontFamily: f.bold,
+      color: t.nameAccent ? t.accentHex : "#000000",
+      textAlign: t.nameAlign,
+    },
+    headline: {
+      fontSize: t.bodySizePt + 1,
+      marginTop: 2,
+      color: "#333333",
+      textAlign: t.nameAlign,
+    },
+    contact: { fontSize: 8.5, marginTop: 6, color: "#444444", textAlign: t.nameAlign },
+    section: { marginTop: t.sectionGapPt },
+    h2: {
+      fontSize: 9,
+      fontFamily: f.bold,
+      color: t.headingAccent ? t.accentHex : "#000000",
+      textTransform: t.headingTransform,
+      letterSpacing: t.headingLetterSpacing,
+      borderBottomWidth: t.headingRule === "full" ? 0.5 : 0,
+      borderBottomColor: t.ruleHex,
+      paddingBottom: t.headingRule === "full" ? 3 : 0,
+      marginBottom: 6,
+    },
+    item: { marginBottom: 8 },
+    row: { flexDirection: "row", justifyContent: "space-between" },
+    bold: { fontFamily: f.bold, color: "#000000" },
+    meta: { fontSize: 8.5, color: "#666666" },
+    body: { color: "#222222", marginTop: 2 },
+    li: { color: "#222222", marginBottom: 2 },
+    kv: { color: "#222222", marginBottom: 2 },
+  });
+}
+
+function Section({
+  title,
+  styles,
+  children,
+}: {
+  title: string;
+  styles: ReturnType<typeof buildStyles>;
+  children: ReactNode;
+}) {
   return (
     <View style={styles.section}>
       <Text style={styles.h2}>{title}</Text>
@@ -71,7 +106,16 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-export function ResumePdfDocument({ data }: { data: ResumeData }) {
+export function ResumePdfDocument({
+  data,
+  template,
+}: {
+  data: ResumeData;
+  template?: ResumeTemplateId;
+}) {
+  const t = getResumeTemplate(template);
+  const styles = buildStyles(t);
+
   const contact = [
     data.email,
     data.phone,
@@ -87,8 +131,7 @@ export function ResumePdfDocument({ data }: { data: ResumeData }) {
   return (
     <Document title={`${data.name || "Résumé"} — Résumé`}>
       <Page size="LETTER" style={styles.page}>
-        {/* Header */}
-        <View>
+        <View style={styles.header}>
           <Text style={styles.name}>{data.name || "Your Name"}</Text>
           {(data.headline || roleLine) && (
             <Text style={styles.headline}>{data.headline || roleLine}</Text>
@@ -99,13 +142,13 @@ export function ResumePdfDocument({ data }: { data: ResumeData }) {
         </View>
 
         {data.summary && data.summary.trim() && (
-          <Section title="Summary">
+          <Section title="Summary" styles={styles}>
             <Text style={styles.body}>{data.summary.trim()}</Text>
           </Section>
         )}
 
         {data.work.length > 0 && (
-          <Section title="Experience">
+          <Section title="Experience" styles={styles}>
             {data.work.map((w) => {
               const range = dateRange(w.start, w.end, w.isCurrent);
               return (
@@ -127,7 +170,7 @@ export function ResumePdfDocument({ data }: { data: ResumeData }) {
         )}
 
         {data.education.length > 0 && (
-          <Section title="Education">
+          <Section title="Education" styles={styles}>
             {data.education.map((e) => {
               const years = [e.startYear, e.endYear].filter(Boolean).join(" – ");
               const deg = [e.degree, e.field].filter(Boolean).join(", ");
@@ -148,7 +191,7 @@ export function ResumePdfDocument({ data }: { data: ResumeData }) {
         )}
 
         {(data.licenses.length > 0 || data.certifications.length > 0) && (
-          <Section title="Licenses & Certifications">
+          <Section title="Licenses & Certifications" styles={styles}>
             {data.licenses.map((l) => {
               const exp = l.expires ? ` (exp. ${monthYear(l.expires)})` : "";
               const num = l.displayNumber && l.number ? ` #${l.number}` : "";
@@ -177,13 +220,13 @@ export function ResumePdfDocument({ data }: { data: ResumeData }) {
         )}
 
         {data.skills.length > 0 && (
-          <Section title="Skills">
+          <Section title="Skills" styles={styles}>
             <Text style={styles.body}>{data.skills.join("   ·   ")}</Text>
           </Section>
         )}
 
         {hasAdditional && (
-          <Section title="Additional">
+          <Section title="Additional" styles={styles}>
             {specialtyLine ? (
               <Text style={styles.kv}>
                 <Text style={styles.bold}>Specialties: </Text>
@@ -210,13 +253,15 @@ export function ResumePdfDocument({ data }: { data: ResumeData }) {
 }
 
 /**
- * Render the résumé to a PDF buffer. The cast bridges @react-pdf's
- * `renderToBuffer` type (it wants a `<Document>` element) and our wrapping
- * component element — the component renders a Document at runtime, so this is
- * type-only. Both the download route and saveResumePdf use this.
+ * Render the résumé to a PDF buffer with the chosen template. The cast bridges
+ * @react-pdf's renderToBuffer type (it wants a Document element) and our
+ * wrapping component — type-only; the component renders a Document at runtime.
  */
-export async function renderResumePdfBuffer(data: ResumeData): Promise<Buffer> {
-  const element = createElement(ResumePdfDocument, { data }) as unknown as Parameters<
+export async function renderResumePdfBuffer(
+  data: ResumeData,
+  template?: ResumeTemplateId
+): Promise<Buffer> {
+  const element = createElement(ResumePdfDocument, { data, template }) as unknown as Parameters<
     typeof renderToBuffer
   >[0];
   return renderToBuffer(element);

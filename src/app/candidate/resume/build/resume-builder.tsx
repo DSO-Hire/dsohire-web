@@ -31,7 +31,11 @@ import {
   upsertWorkHistoryEntry,
   upsertSkillsLanguages,
 } from "@/app/candidate/profile/section-actions";
-import { saveResumePdf } from "../actions";
+import {
+  RESUME_TEMPLATE_LIST,
+  type ResumeTemplateId,
+} from "@/lib/resume/resume-templates";
+import { saveResumePdf, setResumeTemplate } from "../actions";
 
 type WorkEntry = {
   id: string;
@@ -89,9 +93,11 @@ const labelCls = "block text-[12px] font-bold uppercase tracking-[1px] text-slat
 export function ResumeBuilder({
   data,
   returnTo = null,
+  initialTemplate = "classic",
 }: {
   data: BuilderData;
   returnTo?: string | null;
+  initialTemplate?: ResumeTemplateId;
 }) {
   const router = useRouter();
   const [index, setIndex] = useState(0);
@@ -102,6 +108,7 @@ export function ResumeBuilder({
   const [identity, setIdentity] = useState(data.identity);
   const [work, setWork] = useState<WorkEntry[]>(data.work);
   const [skillsText, setSkillsText] = useState(data.skills.join(", "));
+  const [template, setTemplate] = useState<ResumeTemplateId>(initialTemplate);
 
   const skills = useMemo(
     () =>
@@ -234,6 +241,8 @@ export function ResumeBuilder({
         return;
       }
       // Finish: generate + save the PDF, then view it.
+      // Persist the chosen template first so the saved PDF uses it.
+      await setResumeTemplate(template);
       const res = await saveResumePdf();
       if (!res.ok) {
         setError(res.error ?? "Couldn't save your résumé PDF.");
@@ -439,8 +448,29 @@ export function ResumeBuilder({
           <div className="mb-2 text-[10px] font-bold uppercase tracking-[2.5px] text-slate-meta">
             Live preview
           </div>
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            {RESUME_TEMPLATE_LIST.map((tpl) => {
+              const active = tpl.id === template;
+              return (
+                <button
+                  key={tpl.id}
+                  type="button"
+                  onClick={() => setTemplate(tpl.id)}
+                  title={tpl.blurb}
+                  className={
+                    "rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors " +
+                    (active
+                      ? "border-heritage-deep bg-heritage-deep text-ivory"
+                      : "border-[var(--rule)] bg-white text-slate-body hover:border-heritage-deep")
+                  }
+                >
+                  {tpl.name}
+                </button>
+              );
+            })}
+          </div>
           <div className="max-h-[80vh] overflow-auto rounded-md border border-[var(--rule)] bg-white shadow-sm">
-            <ResumeDocument data={preview} />
+            <ResumeDocument data={preview} template={template} />
           </div>
         </div>
       </div>
