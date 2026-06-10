@@ -177,6 +177,7 @@ export interface CorporateWizardInitial {
   title: string;
   description: string;
   employment_type: string;
+  openings?: number | null;
   corporate_function: string | null;
   authority_level: string | null;
   compensation_min: number | null;
@@ -261,6 +262,7 @@ export function CorporateJobWizard({
   const [employmentType, setEmploymentType] = useState(
     initial?.employment_type ?? "full_time"
   );
+  const [openings, setOpenings] = useState(String(initial?.openings ?? 1));
   const [corporateFunction, setCorporateFunction] = useState<string>(
     initial?.corporate_function ?? ""
   );
@@ -475,6 +477,7 @@ export function CorporateJobWizard({
         savedAt: new Date().toISOString(),
         title,
         employmentType,
+        openings,
         corporateFunction,
         authorityLevel,
         selectedLocationIds: [...selectedLocationIds],
@@ -524,6 +527,7 @@ export function CorporateJobWizard({
     draftFound,
     title,
     employmentType,
+    openings,
     corporateFunction,
     authorityLevel,
     selectedLocationIds,
@@ -570,6 +574,7 @@ export function CorporateJobWizard({
       const d = JSON.parse(raw) as Record<string, unknown>;
       setTitle((d.title as string) ?? "");
       setEmploymentType((d.employmentType as string) ?? "full_time");
+      setOpenings(String(d.openings ?? 1));
       setCorporateFunction((d.corporateFunction as string) ?? "");
       setAuthorityLevel((d.authorityLevel as string) ?? "");
       setSelectedLocationIds(
@@ -727,6 +732,7 @@ export function CorporateJobWizard({
     formData.set("title", title);
     formData.set("description", description);
     formData.set("employment_type", employmentType);
+    formData.set("openings", openings || "1");
     formData.set("corporate_function", corporateFunction);
     formData.set("authority_level", authorityLevel);
     for (const id of selectedLocationIds) {
@@ -942,6 +948,8 @@ export function CorporateJobWizard({
             onTitle={setTitle}
             employmentType={employmentType}
             onEmploymentType={setEmploymentType}
+            openings={openings}
+            onOpenings={setOpenings}
             corporateFunction={corporateFunction}
             onCorporateFunction={setCorporateFunction}
             authorityLevel={authorityLevel}
@@ -1118,6 +1126,8 @@ function BasicsStep({
   onTitle,
   employmentType,
   onEmploymentType,
+  openings,
+  onOpenings,
   corporateFunction,
   onCorporateFunction,
   authorityLevel,
@@ -1130,6 +1140,8 @@ function BasicsStep({
   onTitle: (v: string) => void;
   employmentType: string;
   onEmploymentType: (v: string) => void;
+  openings: string;
+  onOpenings: (v: string) => void;
   corporateFunction: string;
   onCorporateFunction: (v: string) => void;
   authorityLevel: string;
@@ -1181,6 +1193,13 @@ function BasicsStep({
           value={employmentType}
           onChange={onEmploymentType}
           options={EMPLOYMENT_OPTIONS}
+        />
+        <Input
+          label="Number of openings"
+          type="number"
+          placeholder="1"
+          value={openings}
+          onChange={onOpenings}
         />
       </div>
       <p className="-mt-3 text-[12px] text-slate-meta">

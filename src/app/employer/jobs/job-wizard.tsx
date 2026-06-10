@@ -187,6 +187,7 @@ export interface JobWizardInitial {
   title: string;
   description: string;
   employment_type: string;
+  openings?: number | null;
   role_category: string;
   compensation_min: number | null;
   compensation_max: number | null;
@@ -394,6 +395,7 @@ export function JobWizard({
   const [employmentType, setEmploymentType] = useState(
     initial?.employment_type ?? "full_time"
   );
+  const [openings, setOpenings] = useState(String(initial?.openings ?? 1));
   const [selectedLocationIds, setSelectedLocationIds] = useState<Set<string>>(
     new Set(initial?.location_ids ?? [])
   );
@@ -552,6 +554,7 @@ export function JobWizard({
         title,
         roleCategory,
         employmentType,
+        openings,
         selectedLocationIds: [...selectedLocationIds],
         description,
         compType,
@@ -597,6 +600,7 @@ export function JobWizard({
     title,
     roleCategory,
     employmentType,
+    openings,
     selectedLocationIds,
     description,
     compType,
@@ -637,6 +641,7 @@ export function JobWizard({
       setTitle((d.title as string) ?? "");
       setRoleCategory((d.roleCategory as string) ?? "dentist");
       setEmploymentType((d.employmentType as string) ?? "full_time");
+      setOpenings(String(d.openings ?? 1));
       setSelectedLocationIds(
         new Set(((d.selectedLocationIds as string[]) ?? []))
       );
@@ -842,6 +847,7 @@ export function JobWizard({
     formData.set("description", description);
     formData.set("role_category", roleCategory);
     formData.set("employment_type", employmentType);
+    formData.set("openings", openings || "1");
     for (const id of selectedLocationIds) {
       formData.append("location_ids", id);
     }
@@ -1088,6 +1094,8 @@ export function JobWizard({
             onRoleCategory={setRoleCategory}
             employmentType={employmentType}
             onEmploymentType={setEmploymentType}
+            openings={openings}
+            onOpenings={setOpenings}
             scope={scope}
             onScope={setScope}
             corporateFunction={corporateFunction}
@@ -1264,6 +1272,8 @@ function BasicsStep({
   onRoleCategory,
   employmentType,
   onEmploymentType,
+  openings,
+  onOpenings,
   scope,
   onScope,
   corporateFunction,
@@ -1279,6 +1289,8 @@ function BasicsStep({
   onRoleCategory: (v: string) => void;
   employmentType: string;
   onEmploymentType: (v: string) => void;
+  openings: string;
+  onOpenings: (v: string) => void;
   scope: JobScope;
   onScope: (v: JobScope) => void;
   corporateFunction: string;
@@ -1334,6 +1346,13 @@ function BasicsStep({
           value={employmentType}
           onChange={onEmploymentType}
           options={EMPLOYMENT_OPTIONS}
+        />
+        <Input
+          label="Number of openings"
+          type="number"
+          placeholder="1"
+          value={openings}
+          onChange={onOpenings}
         />
       </div>
 
