@@ -14,6 +14,7 @@ import {
   PRICING_TIERS,
   isPricingTier,
 } from "@/lib/stripe/prices";
+import { getActiveSubscription } from "@/lib/billing/subscription";
 import type { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type SupabaseClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
@@ -112,4 +113,27 @@ export function evaluateCap(
     wouldBe,
     nearLimit: wouldBe >= Math.ceil(cap * NUDGE_THRESHOLD),
   };
+}
+
+/**
+ * Gate for activating a job. Returns an error string to block, or null to
+ * allow. `addingOpenings` = the openings on the job being activated. Pass
+ * `excludeJobId` when re-activating an existing job so it isn't double-counted.
+ * Unlimited tiers (Scale-and-up... Enterprise) always pass.
+ */
+export async function jobCapBlockError(
+  supabase: SupabaseClient,
+  dsoId: string,
+  addingOpenings: number,
+  opts?: { excludeJobId?: string }
+): Promise<string | null> {
+  const sub = await getActiveSubscription(supabase, dsoId);
+  const caps = resolveCaps(sub?.tier);
+  if (caps.maxActiveJobs === null) return null; // unlimited
+  const used = await getActiveOpeningsCount(supabase, dsoId, opts);
+  const check = evaluateCap(caps.maxActiveJobs, used, addingOpenings);
+  if (check.ok) return null;
+  const noun =
+    addingOpenings === 1 ? "this opening" : `these ${addingOpenings} openings`;
+  return `Activating ${noun} would put you at ${check.wouldBe} active openings — your plan allows ${caps.maxActiveJobs}. Pause an active listing to free a slot, or upgrade for more capacity and features.`;
 }

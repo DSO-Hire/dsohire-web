@@ -25,6 +25,7 @@ import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
 import { requireActiveSubscriptionError } from "@/lib/billing/subscription";
+import { jobCapBlockError } from "@/lib/billing/caps";
 import {
   guardNewJobPublish,
   guardExistingJobPublish,
@@ -95,6 +96,18 @@ export async function createJob(
     if (ptError) return { ok: false, error: ptError };
   }
 
+  // #88 — "# of openings" on this posting (default 1); the active-jobs cap
+  // counts the SUM of openings across active jobs. Only a job going LIVE
+  // consumes capacity.
+  const openings = Math.max(
+    1,
+    Number.parseInt(String(formData.get("openings") ?? "1"), 10) || 1
+  );
+  if (parsed.status === "active") {
+    const capError = await jobCapBlockError(supabase, dsoId, openings);
+    if (capError) return { ok: false, error: capError };
+  }
+
   const baseSlug = makeSlug(parsed.title);
   if (!baseSlug) return { ok: false, error: "Couldn't generate a URL slug." };
   const slug = await resolveAvailableJobSlug(supabase, dsoId, baseSlug);
@@ -147,6 +160,7 @@ export async function createJob(
       corporate_function: parsed.corporateFunction,
       scope: parsed.scope,
       posted_at: parsed.status === "active" ? new Date().toISOString() : null,
+      openings,
       created_by: dsoUser?.id ?? null,
     })
     .select("id")
@@ -271,6 +285,31 @@ export async function updateJob(
     if (ptError) return { ok: false, error: ptError };
   }
 
+  // #88 — "# of openings" is sentinel-gated on edit: only overwrite when the
+  // form actually submitted it, so a partial/legacy edit can't reset it.
+  const openingsRaw = formData.get("openings");
+  const submittedOpenings =
+    openingsRaw !== null
+      ? Math.max(1, Number.parseInt(String(openingsRaw), 10) || 1)
+      : null;
+  // Active-openings cap on an edit that keeps/sets the job live (exclude self).
+  if (parsed.status === "active") {
+    let addOpenings = submittedOpenings;
+    if (addOpenings === null) {
+      const { data: cur } = await supabase
+        .from("jobs")
+        .select("openings")
+        .eq("id", jobId)
+        .maybeSingle();
+      addOpenings =
+        Number((cur as { openings?: number } | null)?.openings ?? 1) || 1;
+    }
+    const capError = await jobCapBlockError(supabase, dsoId, addOpenings, {
+      excludeJobId: jobId,
+    });
+    if (capError) return { ok: false, error: capError };
+  }
+
   const { error: updateError } = await supabase
     .from("jobs")
     .update({
@@ -311,6 +350,7 @@ export async function updateJob(
         : {}),
       corporate_function: parsed.corporateFunction,
       scope: parsed.scope,
+      ...(submittedOpenings !== null ? { openings: submittedOpenings } : {}),
       posted_at:
         parsed.status === "active" ? new Date().toISOString() : null,
     })
@@ -1004,7 +1044,7 @@ export async function setJobStatus(
   // broadcast to applicants.
   const { data: priorJob } = await supabase
     .from("jobs")
-    .select("status, title")
+    .select("status, title, dso_id, openings")
     .eq("id", jobId)
     .maybeSingle();
   const priorStatus = (priorJob as Record<string, unknown> | null)?.status as
@@ -1024,6 +1064,22 @@ export async function setJobStatus(
       formData.get("pay_transparency_exempt") === "on"
     );
     if (ptError) return { ok: false, error: ptError };
+  }
+
+  // #88 — active-openings cap on activate / un-pause. Exclude this job from
+  // the current count (it isn't active yet) and add its own openings.
+  if (newStatus === "active" && priorStatus !== "active") {
+    const capDsoId = (priorJob as Record<string, unknown> | null)?.dso_id as
+      | string
+      | null;
+    const jobOpenings =
+      Number((priorJob as Record<string, unknown> | null)?.openings ?? 1) || 1;
+    if (capDsoId) {
+      const capError = await jobCapBlockError(supabase, capDsoId, jobOpenings, {
+        excludeJobId: jobId,
+      });
+      if (capError) return { ok: false, error: capError };
+    }
   }
 
   const update: Record<string, unknown> = { status: newStatus };

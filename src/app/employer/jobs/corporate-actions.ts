@@ -127,6 +127,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireActiveSubscriptionError } from "@/lib/billing/subscription";
+import { jobCapBlockError } from "@/lib/billing/caps";
 import { guardNewJobPublish } from "@/lib/compliance/pay-transparency-guard";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { SUPPORT_EMAIL } from "@/lib/contact";
@@ -698,6 +699,16 @@ export async function createCorporateJob(
     if (ptError) return { ok: false, error: ptError };
   }
 
+  // #88 — active-openings cap (only a job going LIVE consumes capacity).
+  const openings = Math.max(
+    1,
+    Number.parseInt(String(formData.get("openings") ?? "1"), 10) || 1
+  );
+  if (parsed.status === "active") {
+    const capError = await jobCapBlockError(supabase, dsoId, openings);
+    if (capError) return { ok: false, error: capError };
+  }
+
   const baseSlug = makeSlug(parsed.title);
   if (!baseSlug) return { ok: false, error: "Couldn't generate a URL slug." };
   const slug = await resolveAvailableJobSlug(supabase, dsoId, baseSlug);
@@ -739,6 +750,7 @@ export async function createCorporateJob(
       external_links: parsed.externalLinks,
       // 16-column corporate sandbox.
       ...corporateSandboxColumns(parsed),
+      openings,
       posted_at:
         parsed.status === "active" ? new Date().toISOString() : null,
       created_by: dsoUser?.id ?? null,
@@ -854,6 +866,30 @@ export async function updateCorporateJob(
     if (ptError) return { ok: false, error: ptError };
   }
 
+  // #88 — "# of openings" sentinel-gated on edit (only overwrite when
+  // submitted), + active-openings cap on an edit that keeps/sets the job live.
+  const openingsRaw = formData.get("openings");
+  const submittedOpenings =
+    openingsRaw !== null
+      ? Math.max(1, Number.parseInt(String(openingsRaw), 10) || 1)
+      : null;
+  if (parsed.status === "active") {
+    let addOpenings = submittedOpenings;
+    if (addOpenings === null) {
+      const { data: cur } = await supabase
+        .from("jobs")
+        .select("openings")
+        .eq("id", jobId)
+        .maybeSingle();
+      addOpenings =
+        Number((cur as { openings?: number } | null)?.openings ?? 1) || 1;
+    }
+    const capError = await jobCapBlockError(supabase, dsoId, addOpenings, {
+      excludeJobId: jobId,
+    });
+    if (capError) return { ok: false, error: capError };
+  }
+
   const { error: updateError } = await supabase
     .from("jobs")
     .update({
@@ -879,6 +915,7 @@ export async function updateCorporateJob(
         : {}),
       // 16-column corporate sandbox.
       ...corporateSandboxColumns(parsed),
+      ...(submittedOpenings !== null ? { openings: submittedOpenings } : {}),
       posted_at:
         parsed.status === "active" ? new Date().toISOString() : null,
     })
