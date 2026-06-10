@@ -30,6 +30,10 @@ import {
 import { findNameLeaks, stripHtml } from "@/lib/dso/name-leak";
 import { JobDescriptionEditor } from "@/components/job-description-editor";
 import {
+  ConfidentialSearchFields,
+  type TeammateOption,
+} from "@/components/employer/confidential-search-fields";
+import {
   createJob,
   updateJob,
   type JobActionState,
@@ -259,6 +263,8 @@ interface JobWizardProps {
   /** Corporate DSO name — used by the pre-publish nudge to detect a name leak
    *  in the title/body when a selected location is private/anonymized. */
   dsoName?: string;
+  /** #83 Phase 4 — team roster for the confidential-search assignee picker. */
+  teammates?: TeammateOption[];
 }
 
 /* ───── Constants ───── */
@@ -354,6 +360,7 @@ export function JobWizard({
   initial,
   initialQuestions,
   dsoName,
+  teammates = [],
 }: JobWizardProps) {
   const [stepIdx, setStepIdx] = useState(0);
   // #97 (Day 28) — the clickable stepper let users jump FORWARD past unfilled
@@ -458,6 +465,12 @@ export function JobWizard({
   const [hideStagesFromCandidate, setHideStagesFromCandidate] = useState(
     initial?.hide_stages_from_candidate ?? false
   );
+  // #83 Phase 4 — confidential search (create-mode only; edit pages use
+  // the standalone ConfidentialSearchCard).
+  const [confidential, setConfidential] = useState(false);
+  const [confidentialAssigneeIds, setConfidentialAssigneeIds] = useState<
+    string[]
+  >([]);
   const [scope, setScope] = useState<JobScope>(initial?.scope ?? "location");
   // 5G.c — corporate function. Tracked in wizard state regardless of
   // current scope; serializer only submits it when scope=corporate.
@@ -905,6 +918,16 @@ export function JobWizard({
     if (payExempt) formData.set("pay_transparency_exempt", "on");
     if (hideStagesFromCandidate)
       formData.set("hide_stages_from_candidate", "on");
+    // #83 Phase 4 — confidential search (sentinel-gated; create mode only).
+    if (mode === "create") {
+      formData.set("confidential_submitted", "1");
+      if (confidential) {
+        formData.set("confidential", "on");
+        for (const id of confidentialAssigneeIds) {
+          formData.append("confidential_assignee_ids", id);
+        }
+      }
+    }
     formData.set("scope", scope);
     // 5G.c — only submit corporate_function on corporate scope. Server
     // validator already ignores it on other scopes; gating here too keeps
@@ -1087,33 +1110,48 @@ export function JobWizard({
         error={error}
       >
         {currentStep.id === "basics" && (
-          <BasicsStep
-            title={title}
-            onTitle={setTitle}
-            roleCategory={roleCategory}
-            onRoleCategory={setRoleCategory}
-            employmentType={employmentType}
-            onEmploymentType={setEmploymentType}
-            openings={openings}
-            onOpenings={setOpenings}
-            scope={scope}
-            onScope={setScope}
-            corporateFunction={corporateFunction}
-            onCorporateFunction={setCorporateFunction}
-            locations={locations}
-            selectedLocationIds={selectedLocationIds}
-            onToggleLocation={(id) => {
-              setSelectedLocationIds((prev) => {
-                const next = new Set(prev);
-                if (next.has(id)) next.delete(id);
-                else next.add(id);
-                return next;
-              });
-            }}
-            onSetAllLocations={(ids) => {
-              setSelectedLocationIds(new Set(ids));
-            }}
-          />
+          <>
+            <BasicsStep
+              title={title}
+              onTitle={setTitle}
+              roleCategory={roleCategory}
+              onRoleCategory={setRoleCategory}
+              employmentType={employmentType}
+              onEmploymentType={setEmploymentType}
+              openings={openings}
+              onOpenings={setOpenings}
+              scope={scope}
+              onScope={setScope}
+              corporateFunction={corporateFunction}
+              onCorporateFunction={setCorporateFunction}
+              locations={locations}
+              selectedLocationIds={selectedLocationIds}
+              onToggleLocation={(id) => {
+                setSelectedLocationIds((prev) => {
+                  const next = new Set(prev);
+                  if (next.has(id)) next.delete(id);
+                  else next.add(id);
+                  return next;
+                });
+              }}
+              onSetAllLocations={(ids) => {
+                setSelectedLocationIds(new Set(ids));
+              }}
+            />
+            {/* #83 Phase 4 — confidential-search toggle + assignees (create
+                mode only; edit pages manage this via their own card). */}
+            {mode === "create" && teammates.length >= 0 && (
+              <div className="mt-6">
+                <ConfidentialSearchFields
+                  teammates={teammates}
+                  confidential={confidential}
+                  onConfidentialChange={setConfidential}
+                  assigneeIds={confidentialAssigneeIds}
+                  onAssigneeIdsChange={setConfidentialAssigneeIds}
+                />
+              </div>
+            )}
+          </>
         )}
 
         {currentStep.id === "description" && (

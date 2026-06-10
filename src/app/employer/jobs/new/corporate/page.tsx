@@ -57,6 +57,21 @@ export default async function NewCorporateJobPage() {
     state: (l.state as string | null) ?? null,
   }));
 
+  // #83 Phase 4 — team roster for the confidential-search assignee picker.
+  // The quiet C-suite search is THE corporate-side use case (#56).
+  const { data: rosterRows } = await supabase
+    .from("dso_users")
+    .select("id, full_name, role")
+    .eq("dso_id", dsoUser.dso_id)
+    .order("full_name");
+  const teammates = ((rosterRows ?? []) as Array<Record<string, unknown>>).map(
+    (t) => ({
+      id: t.id as string,
+      name: ((t.full_name as string | null) ?? "Teammate").trim() || "Teammate",
+      role: (t.role as string | null) ?? "",
+    })
+  );
+
   // NOTE: unlike the practice wizard's new/page.tsx, we do NOT bounce when
   // there are zero locations — corporate roles are DSO-wide and the anchor
   // location is optional.
@@ -115,6 +130,7 @@ export default async function NewCorporateJobPage() {
         dsoId={dsoUser.dso_id}
         locations={locationOptions}
         mode="create"
+        teammates={teammates}
       />
     </EmployerShell>
   );

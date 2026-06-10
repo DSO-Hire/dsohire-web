@@ -62,6 +62,10 @@ import {
   type ScreeningQuestionPayload,
 } from "./job-shared";
 import { capabilityBlockError } from "@/lib/permissions/guard";
+import {
+  parseConfidentialFields,
+  syncJobConfidentiality,
+} from "@/lib/permissions/confidential";
 
 /* ───── Create ───── */
 
@@ -187,6 +191,26 @@ export async function createJob(
         jobError?.message ??
         `Failed to create job. Refresh and try again, or email ${SUPPORT_EMAIL}.`,
     };
+  }
+
+  // #83 Phase 4 — confidential search (sentinel-gated; creator is
+  // force-included in the assignment set so they can't lock themselves out).
+  const confidentialFields = parseConfidentialFields(formData);
+  if (confidentialFields.submitted && confidentialFields.confidential) {
+    const confResult = await syncJobConfidentiality({
+      jobId: job.id as string,
+      dsoId,
+      fields: confidentialFields,
+      actorDsoUserId: (dsoUser?.id as string | undefined) ?? null,
+    });
+    if (!confResult.ok) {
+      console.warn("[createJob] confidentiality sync failed", confResult.error);
+      return {
+        ok: false,
+        error:
+          "The job was created, but the confidential restriction couldn't be saved. Open the job's edit page and set Confidential search again.",
+      };
+    }
   }
 
   // Insert job_locations join rows

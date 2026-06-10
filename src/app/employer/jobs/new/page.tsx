@@ -66,6 +66,20 @@ export default async function NewJobPage() {
     .maybeSingle();
   const dsoName = (dsoRow?.name as string | null) ?? undefined;
 
+  // #83 Phase 4 — team roster for the confidential-search assignee picker.
+  const { data: rosterRows } = await supabase
+    .from("dso_users")
+    .select("id, full_name, role")
+    .eq("dso_id", dsoUser.dso_id)
+    .order("full_name");
+  const teammates = ((rosterRows ?? []) as Array<Record<string, unknown>>).map(
+    (t) => ({
+      id: t.id as string,
+      name: ((t.full_name as string | null) ?? "Teammate").trim() || "Teammate",
+      role: (t.role as string | null) ?? "",
+    })
+  );
+
   if (locationOptions.length === 0) {
     return (
       <EmployerShell active="jobs">
@@ -149,6 +163,7 @@ export default async function NewJobPage() {
         locations={locationOptions}
         mode="create"
         dsoName={dsoName}
+        teammates={teammates}
       />
     </EmployerShell>
   );

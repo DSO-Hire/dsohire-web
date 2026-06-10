@@ -127,6 +127,10 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { capabilityBlockError } from "@/lib/permissions/guard";
+import {
+  parseConfidentialFields,
+  syncJobConfidentiality,
+} from "@/lib/permissions/confidential";
 import { requireActiveSubscriptionError } from "@/lib/billing/subscription";
 import { jobCapBlockError } from "@/lib/billing/caps";
 import { guardNewJobPublish } from "@/lib/compliance/pay-transparency-guard";
@@ -779,6 +783,29 @@ export async function createCorporateJob(
         jobError?.message ??
         `Failed to create job. Refresh and try again, or email ${SUPPORT_EMAIL}.`,
     };
+  }
+
+  // #83 Phase 4 — confidential search (sentinel-gated; creator force-included
+  // so they can't lock themselves out). The DSOFit C-suite quiet-search flow.
+  const confidentialFields = parseConfidentialFields(formData);
+  if (confidentialFields.submitted && confidentialFields.confidential) {
+    const confResult = await syncJobConfidentiality({
+      jobId: job.id as string,
+      dsoId,
+      fields: confidentialFields,
+      actorDsoUserId: (dsoUser?.id as string | undefined) ?? null,
+    });
+    if (!confResult.ok) {
+      console.warn(
+        "[createCorporateJob] confidentiality sync failed",
+        confResult.error
+      );
+      return {
+        ok: false,
+        error:
+          "The job was created, but the confidential restriction couldn't be saved. Open the job's edit page and set Confidential search again.",
+      };
+    }
   }
 
   // Insert job_locations join rows — OPTIONAL for corporate (0/1/N).

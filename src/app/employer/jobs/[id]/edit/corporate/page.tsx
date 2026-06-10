@@ -23,6 +23,7 @@ import { redirect, notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, Trash2 } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { ConfidentialSearchCard } from "@/components/employer/confidential-search-card";
 import { softDeleteJob } from "../../../actions";
 import {
   CorporateEditSections,
@@ -76,7 +77,7 @@ export default async function EditCorporateJobPage({ params }: PageProps) {
   const { data: job } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, slug, description, employment_type, scope, corporate_function, authority_level, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, requirements, status, hide_stages_from_candidate, external_links, work_mode, work_mode_detail, remote_state_restrictions, travel_expectation, travel_territory, reports_to, direct_reports_band, indirect_reports_band, education_requirement, industry_experience, min_years_corporate_experience, max_years_corporate_experience, variable_comp_enabled, variable_comp_target, variable_comp_structure, bonus_enabled, bonus_target, bonus_structure, equity_offered, equity_note"
+      "id, dso_id, title, slug, description, employment_type, scope, corporate_function, authority_level, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, requirements, status, hide_stages_from_candidate, external_links, work_mode, work_mode_detail, remote_state_restrictions, travel_expectation, travel_territory, reports_to, direct_reports_band, indirect_reports_band, education_requirement, industry_experience, min_years_corporate_experience, max_years_corporate_experience, variable_comp_enabled, variable_comp_target, variable_comp_structure, bonus_enabled, bonus_target, bonus_structure, equity_offered, equity_note, confidential"
     )
     .eq("id", jobId)
     .eq("dso_id", dsoUser.dso_id)
@@ -124,6 +125,26 @@ export default async function EditCorporateJobPage({ params }: PageProps) {
     city: (l.city as string | null) ?? null,
     state: (l.state as string | null) ?? null,
   }));
+
+  // #83 Phase 4 — roster + current assignment set for the confidential card.
+  const [{ data: rosterRows }, { data: accessRows }] = await Promise.all([
+    supabase
+      .from("dso_users")
+      .select("id, full_name, role")
+      .eq("dso_id", dsoUser.dso_id)
+      .order("full_name"),
+    supabase.from("job_team_access").select("dso_user_id").eq("job_id", jobId),
+  ]);
+  const teammates = ((rosterRows ?? []) as Array<Record<string, unknown>>).map(
+    (t) => ({
+      id: t.id as string,
+      name: ((t.full_name as string | null) ?? "Teammate").trim() || "Teammate",
+      role: (t.role as string | null) ?? "",
+    })
+  );
+  const assignedIds = (
+    (accessRows ?? []) as Array<{ dso_user_id: string }>
+  ).map((r) => r.dso_user_id);
 
   const initial: CorporateEditSectionsInitial = {
     id: job.id as string,
@@ -252,6 +273,19 @@ export default async function EditCorporateJobPage({ params }: PageProps) {
         initialQuestions={initialQuestions}
         locations={locationOptions}
       />
+
+      {/* #83 Phase 4 — confidential search (the DSOFit quiet C-suite flow). */}
+      <div className="mt-8 max-w-[820px]">
+        <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+          Team Visibility
+        </h2>
+        <ConfidentialSearchCard
+          jobId={initial.id}
+          teammates={teammates}
+          initialConfidential={Boolean(job.confidential)}
+          initialAssigneeIds={assignedIds}
+        />
+      </div>
 
       {/* Soft-delete (separated from main form for safety) */}
       <section className="mt-16 pt-10 border-t border-[var(--rule)] max-w-[820px]">

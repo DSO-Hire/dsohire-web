@@ -49,6 +49,10 @@ import {
 import { BrandMark } from "@/components/brand/brand-mark";
 import { BrandLockup } from "@/components/brand/brand-lockup";
 import { JobDescriptionEditor } from "@/components/job-description-editor";
+import {
+  ConfidentialSearchFields,
+  type TeammateOption,
+} from "@/components/employer/confidential-search-fields";
 import { createCorporateJob, updateCorporateJob } from "./corporate-actions";
 // JobActionState comes straight from ./actions — never re-exported through a
 // "use server" module (that ReferenceErrors at request time).
@@ -221,6 +225,8 @@ interface CorporateWizardProps {
   mode: "create" | "edit";
   initial?: CorporateWizardInitial;
   initialQuestions?: WizardScreeningQuestion[];
+  /** #83 Phase 4 — team roster for the confidential-search assignee picker. */
+  teammates?: TeammateOption[];
 }
 
 /* ───── Component ───── */
@@ -231,6 +237,7 @@ export function CorporateJobWizard({
   mode,
   initial,
   initialQuestions,
+  teammates = [],
 }: CorporateWizardProps) {
   const [stepIdx, setStepIdx] = useState(0);
   // #97 (Day 28) — gate forward stepper jumps to the furthest validated step
@@ -439,6 +446,12 @@ export function CorporateJobWizard({
   const [hideStagesFromCandidate, setHideStagesFromCandidate] = useState(
     initial?.hide_stages_from_candidate ?? false
   );
+  // #83 Phase 4 — confidential search (create-mode only; the edit page
+  // uses the standalone ConfidentialSearchCard).
+  const [confidential, setConfidential] = useState(false);
+  const [confidentialAssigneeIds, setConfidentialAssigneeIds] = useState<
+    string[]
+  >([]);
   const [questions, setQuestions] = useState<WizardScreeningQuestion[]>(
     initialQuestions ?? []
   );
@@ -809,6 +822,16 @@ export function CorporateJobWizard({
     formData.set("requirements", requirements);
     if (hideStagesFromCandidate)
       formData.set("hide_stages_from_candidate", "on");
+    // #83 Phase 4 — confidential search (sentinel-gated; create mode only).
+    if (mode === "create") {
+      formData.set("confidential_submitted", "1");
+      if (confidential) {
+        formData.set("confidential", "on");
+        for (const id of confidentialAssigneeIds) {
+          formData.append("confidential_assignee_ids", id);
+        }
+      }
+    }
 
     // 5G.e Tier 2 — verification requirements. One entry per ticked type;
     // IDENTICAL contract to the practice side.
@@ -943,28 +966,44 @@ export function CorporateJobWizard({
         error={error}
       >
         {currentStep.id === "basics" && (
-          <BasicsStep
-            title={title}
-            onTitle={setTitle}
-            employmentType={employmentType}
-            onEmploymentType={setEmploymentType}
-            openings={openings}
-            onOpenings={setOpenings}
-            corporateFunction={corporateFunction}
-            onCorporateFunction={setCorporateFunction}
-            authorityLevel={authorityLevel}
-            onAuthorityLevel={setAuthorityLevel}
-            locations={locations}
-            selectedLocationIds={selectedLocationIds}
-            onToggleLocation={(id) => {
-              setSelectedLocationIds((prev) => {
-                const next = new Set(prev);
-                if (next.has(id)) next.delete(id);
-                else next.add(id);
-                return next;
-              });
-            }}
-          />
+          <>
+            <BasicsStep
+              title={title}
+              onTitle={setTitle}
+              employmentType={employmentType}
+              onEmploymentType={setEmploymentType}
+              openings={openings}
+              onOpenings={setOpenings}
+              corporateFunction={corporateFunction}
+              onCorporateFunction={setCorporateFunction}
+              authorityLevel={authorityLevel}
+              onAuthorityLevel={setAuthorityLevel}
+              locations={locations}
+              selectedLocationIds={selectedLocationIds}
+              onToggleLocation={(id) => {
+                setSelectedLocationIds((prev) => {
+                  const next = new Set(prev);
+                  if (next.has(id)) next.delete(id);
+                  else next.add(id);
+                  return next;
+                });
+              }}
+            />
+            {/* #83 Phase 4 — confidential search. The DSOFit C-suite
+                differentiator: a quiet CFO/COO search visible only to
+                owner/admin + assigned teammates. */}
+            {mode === "create" && (
+              <div className="mt-6">
+                <ConfidentialSearchFields
+                  teammates={teammates}
+                  confidential={confidential}
+                  onConfidentialChange={setConfidential}
+                  assigneeIds={confidentialAssigneeIds}
+                  onAssigneeIdsChange={setConfidentialAssigneeIds}
+                />
+              </div>
+            )}
+          </>
         )}
 
         {currentStep.id === "description" && (

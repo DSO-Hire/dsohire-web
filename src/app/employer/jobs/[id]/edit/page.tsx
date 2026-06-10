@@ -34,6 +34,7 @@ import {
   type EditSectionsInitial,
 } from "./edit-sections";
 import { JobAttachmentsSection } from "../job-attachments-section";
+import { ConfidentialSearchCard } from "@/components/employer/confidential-search-card";
 import type {
   LocationOption,
   WizardScreeningQuestion,
@@ -76,7 +77,7 @@ export default async function EditJobPage({ params }: PageProps) {
   const { data: job } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, variable_comp_enabled, variable_comp_target, variable_comp_structure, bonus_enabled, bonus_target, bonus_structure, equity_offered, equity_note, benefits, requirements, status, posted_at, expires_at, scheduled_publish_at, applications_count, views, hide_stages_from_candidate, scope, specialty, min_years_experience, schedule_days, schedule_evenings, schedule_weekends, corporate_function, external_links"
+      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, variable_comp_enabled, variable_comp_target, variable_comp_structure, bonus_enabled, bonus_target, bonus_structure, equity_offered, equity_note, benefits, requirements, status, posted_at, expires_at, scheduled_publish_at, applications_count, views, hide_stages_from_candidate, scope, specialty, min_years_experience, schedule_days, schedule_evenings, schedule_weekends, corporate_function, external_links, confidential"
     )
     .eq("id", jobId)
     .eq("dso_id", dsoUser.dso_id)
@@ -126,6 +127,26 @@ export default async function EditJobPage({ params }: PageProps) {
     city: (l.city as string | null) ?? null,
     state: (l.state as string | null) ?? null,
   }));
+
+  // #83 Phase 4 — roster + current assignment set for the confidential card.
+  const [{ data: rosterRows }, { data: accessRows }] = await Promise.all([
+    supabase
+      .from("dso_users")
+      .select("id, full_name, role")
+      .eq("dso_id", dsoUser.dso_id)
+      .order("full_name"),
+    supabase.from("job_team_access").select("dso_user_id").eq("job_id", jobId),
+  ]);
+  const teammates = ((rosterRows ?? []) as Array<Record<string, unknown>>).map(
+    (t) => ({
+      id: t.id as string,
+      name: ((t.full_name as string | null) ?? "Teammate").trim() || "Teammate",
+      role: (t.role as string | null) ?? "",
+    })
+  );
+  const assignedIds = (
+    (accessRows ?? []) as Array<{ dso_user_id: string }>
+  ).map((r) => r.dso_user_id);
 
   // Pre-publish name-leak check (anonymity) — a saved job can name the DSO or
   // practice in its title/body while a tagged location is private/anonymized.
@@ -348,6 +369,19 @@ export default async function EditJobPage({ params }: PageProps) {
         initialQuestions={initialQuestions}
         locations={locationOptions}
       />
+
+      {/* #83 Phase 4 — confidential search (employer-side visibility). */}
+      <div className="mt-8 max-w-[820px]">
+        <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+          Team Visibility
+        </h2>
+        <ConfidentialSearchCard
+          jobId={initial.id}
+          teammates={teammates}
+          initialConfidential={Boolean(job.confidential)}
+          initialAssigneeIds={assignedIds}
+        />
+      </div>
 
       <div className="mt-8 max-w-[820px]">
         <JobAttachmentsSection
