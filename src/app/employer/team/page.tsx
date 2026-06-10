@@ -26,6 +26,15 @@ import {
 import { InviteForm } from "./invite-form";
 import { getCapStatus } from "@/lib/billing/caps";
 import { CapNudge } from "@/components/billing/cap-nudge";
+import { SeatPackControl } from "@/components/billing/seat-pack-control";
+import {
+  seatPacksConfigured,
+  tierCanBuySeatPacks,
+  periodFromStripePriceId,
+  SEAT_PACK_SIZE,
+  SEAT_PACK_MONTHLY_PRICE,
+  SEAT_PACK_ANNUAL_PRICE,
+} from "@/lib/stripe/prices";
 import { RoleSelect } from "./role-select";
 import { RoleHelp } from "./role-help";
 import { HmRescopeButton } from "./hm-rescope-button";
@@ -88,6 +97,38 @@ export default async function TeamPage({ searchParams }: PageProps) {
 
   const canManage = dsoUser.role === "owner" || dsoUser.role === "admin";
   const capStatus = await getCapStatus(supabase, dsoUser.dso_id as string);
+
+  // #88 — seat-pack add-on props (owner/admin, eligible tier, packs configured).
+  // Surface the control when seats are near/over the cap or packs already exist.
+  let seatPack: {
+    currentPacks: number;
+    seatsUsed: number;
+    seatCap: number | null;
+    period: "monthly" | "annual";
+  } | null = null;
+  if (
+    canManage &&
+    seatPacksConfigured() &&
+    tierCanBuySeatPacks(capStatus.tier)
+  ) {
+    const { data: subRow } = await supabase
+      .from("subscriptions")
+      .select("stripe_price_id, seat_pack_qty")
+      .eq("dso_id", dsoUser.dso_id)
+      .maybeSingle();
+    const currentPacks = (subRow?.seat_pack_qty as number | null) ?? 0;
+    if (capStatus.seats.nearLimit || currentPacks > 0) {
+      seatPack = {
+        currentPacks,
+        seatsUsed: capStatus.seats.used,
+        seatCap: capStatus.seats.cap,
+        period:
+          periodFromStripePriceId(
+            (subRow?.stripe_price_id as string | null) ?? ""
+          ) ?? "monthly",
+      };
+    }
+  }
 
   // Pull all team members for the DSO
   const { data: members } = await supabase
@@ -207,6 +248,19 @@ export default async function TeamPage({ searchParams }: PageProps) {
   return (
     <EmployerShell active="team">
       <CapNudge kind="seats" usage={capStatus.seats} tier={capStatus.tier} />
+      {seatPack && (
+        <div className="mb-8">
+          <SeatPackControl
+            currentPacks={seatPack.currentPacks}
+            seatsUsed={seatPack.seatsUsed}
+            seatCap={seatPack.seatCap}
+            packSize={SEAT_PACK_SIZE}
+            monthlyPrice={SEAT_PACK_MONTHLY_PRICE}
+            annualPrice={SEAT_PACK_ANNUAL_PRICE}
+            period={seatPack.period}
+          />
+        </div>
+      )}
       <header className="mb-10 max-w-[820px]">
         <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
           Team

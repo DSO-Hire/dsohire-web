@@ -13,6 +13,7 @@
 import {
   PRICING_TIERS,
   isPricingTier,
+  SEAT_PACK_SIZE,
 } from "@/lib/stripe/prices";
 import { getActiveSubscription } from "@/lib/billing/subscription";
 import type { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -29,15 +30,20 @@ export interface Caps {
  * Caps for a tier string. Unknown/missing tier falls back to the most
  * restrictive (Solo) so an unsubscribed/edge account can't bypass the gate;
  * callers still gate on an active subscription separately.
+ *
+ * `seatPackQty` (#88) raises ONLY the seat cap by `qty × SEAT_PACK_SIZE`.
+ * Unlimited seats (null) stay unlimited. Job caps are never affected by packs.
  */
-export function resolveCaps(tier: string | null | undefined): Caps {
-  if (tier && isPricingTier(tier)) {
-    const c = PRICING_TIERS[tier];
-    return { maxActiveJobs: c.maxActiveJobs, maxSeats: c.maxSeats };
-  }
+export function resolveCaps(
+  tier: string | null | undefined,
+  seatPackQty = 0
+): Caps {
+  const base =
+    tier && isPricingTier(tier) ? PRICING_TIERS[tier] : PRICING_TIERS.solo;
+  const extraSeats = Math.max(0, seatPackQty) * SEAT_PACK_SIZE;
   return {
-    maxActiveJobs: PRICING_TIERS.solo.maxActiveJobs,
-    maxSeats: PRICING_TIERS.solo.maxSeats,
+    maxActiveJobs: base.maxActiveJobs,
+    maxSeats: base.maxSeats === null ? null : base.maxSeats + extraSeats,
   };
 }
 
@@ -162,7 +168,7 @@ export async function getCapStatus(
   dsoId: string
 ): Promise<CapStatus> {
   const sub = await getActiveSubscription(supabase, dsoId);
-  const caps = resolveCaps(sub?.tier);
+  const caps = resolveCaps(sub?.tier, sub?.seat_pack_qty ?? 0);
   const [jobsUsed, seatsUsed] = await Promise.all([
     getActiveOpeningsCount(supabase, dsoId),
     getSeatsUsed(supabase, dsoId),
@@ -249,10 +255,10 @@ export async function seatCapBlockError(
   dsoId: string
 ): Promise<string | null> {
   const sub = await getActiveSubscription(supabase, dsoId);
-  const caps = resolveCaps(sub?.tier);
+  const caps = resolveCaps(sub?.tier, sub?.seat_pack_qty ?? 0);
   if (caps.maxSeats === null) return null; // unlimited
   const used = await getSeatsUsed(supabase, dsoId);
   const check = evaluateCap(caps.maxSeats, used, 1);
   if (check.ok) return null;
-  return `Your plan's ${caps.maxSeats} admin seats are all in use (members + pending invites). Remove a teammate or a pending invite, or upgrade for more seats and features.`;
+  return `Your plan's ${caps.maxSeats} admin seats are all in use (members + pending invites). Remove a teammate or a pending invite, add a seat pack, or upgrade for more seats and features.`;
 }

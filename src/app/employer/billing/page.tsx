@@ -23,8 +23,18 @@ import {
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { HelpDisclosure } from "@/components/help/help-disclosure";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { PRICING_TIERS, periodFromStripePriceId } from "@/lib/stripe/prices";
+import {
+  PRICING_TIERS,
+  periodFromStripePriceId,
+  seatPacksConfigured,
+  tierCanBuySeatPacks,
+  SEAT_PACK_SIZE,
+  SEAT_PACK_MONTHLY_PRICE,
+  SEAT_PACK_ANNUAL_PRICE,
+} from "@/lib/stripe/prices";
 import { getStripe } from "@/lib/stripe/server";
+import { getCapStatus } from "@/lib/billing/caps";
+import { SeatPackControl } from "@/components/billing/seat-pack-control";
 import { SUPPORT_EMAIL } from "@/lib/contact";
 import { openCustomerPortal } from "./actions";
 import type { Metadata } from "next";
@@ -54,10 +64,13 @@ export default async function EmployerBillingPage({ searchParams }: PageProps) {
   // Hiring managers don't see billing — owner/admin surface only.
   if (dsoUser.role === "hiring_manager") redirect("/employer/dashboard");
 
+  const canManageBilling =
+    dsoUser.role === "owner" || dsoUser.role === "admin";
+
   const { data: sub } = await supabase
     .from("subscriptions")
     .select(
-      "id, tier, status, current_period_start, current_period_end, cancel_at_period_end, stripe_customer_id, stripe_price_id"
+      "id, tier, status, current_period_start, current_period_end, cancel_at_period_end, stripe_customer_id, stripe_price_id, seat_pack_qty"
     )
     .eq("dso_id", dsoUser.dso_id)
     .maybeSingle();
@@ -90,6 +103,15 @@ export default async function EmployerBillingPage({ searchParams }: PageProps) {
     ? periodFromStripePriceId(subscription.stripe_price_id)
     : null;
   const card = await getCardSnapshot(subscription.stripe_customer_id);
+
+  // #88 — seat-pack management (owner/admin, eligible tier, packs configured).
+  const showSeatPacks =
+    canManageBilling &&
+    seatPacksConfigured() &&
+    tierCanBuySeatPacks(subscription.tier);
+  const seatCapStatus = showSeatPacks
+    ? await getCapStatus(supabase, dsoUser.dso_id as string)
+    : null;
 
   return (
     <EmployerShell active="billing">
@@ -204,6 +226,24 @@ export default async function EmployerBillingPage({ searchParams }: PageProps) {
         </div>
       </section>
 
+      {/* Seat packs (#88) */}
+      {showSeatPacks && seatCapStatus && (
+        <section className="mb-12">
+          <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+            Seats
+          </h2>
+          <SeatPackControl
+            currentPacks={subscription.seat_pack_qty ?? 0}
+            seatsUsed={seatCapStatus.seats.used}
+            seatCap={seatCapStatus.seats.cap}
+            packSize={SEAT_PACK_SIZE}
+            monthlyPrice={SEAT_PACK_MONTHLY_PRICE}
+            annualPrice={SEAT_PACK_ANNUAL_PRICE}
+            period={billingPeriod ?? "monthly"}
+          />
+        </section>
+      )}
+
       {/* Invoice history */}
       <section>
         <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
@@ -238,6 +278,7 @@ interface SubscriptionRow {
   cancel_at_period_end: boolean;
   stripe_customer_id: string | null;
   stripe_price_id: string | null;
+  seat_pack_qty: number | null;
 }
 
 interface CardSnapshot {

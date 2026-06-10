@@ -30,6 +30,7 @@ import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import {
   tierFromStripePriceId,
   isPricingTier,
+  isSeatPackPriceId,
   type PricingTier,
 } from "@/lib/stripe/prices";
 import { autoPauseOverflowForDowngrade } from "@/lib/billing/caps";
@@ -260,8 +261,19 @@ async function upsertSubscription(params: UpsertParams): Promise<void> {
   const { dsoId, subscription, stripeCustomerId } = params;
   const admin = createSupabaseServiceRoleClient();
 
-  const item = subscription.items.data[0];
-  const priceId = item?.price?.id ?? null;
+  // The PLAN item is the one whose price maps to a tier — NOT blindly data[0],
+  // because a seat-pack add-on (#88) is a second line item that can land at
+  // index 0. Fall back to data[0] for a legacy/unrecognized price so the
+  // tier-preserve logic in resolveTier still runs.
+  const items = subscription.items.data;
+  const planItem =
+    items.find((i) => i.price?.id && tierFromStripePriceId(i.price.id)) ??
+    items[0];
+  const priceId = planItem?.price?.id ?? null;
+  // Sum quantities across any seat-pack line items.
+  const seatPackQty = items
+    .filter((i) => isSeatPackPriceId(i.price?.id))
+    .reduce((sum, i) => sum + (i.quantity ?? 0), 0);
   let tier = resolveTier(subscription, priceId);
   if (tier === null) {
     // Price isn't in our map and no metadata tier — e.g. a legacy/grandfathered
@@ -281,8 +293,8 @@ async function upsertSubscription(params: UpsertParams): Promise<void> {
         `preserved tier="${tier}" instead of downgrading.`
     );
   }
-  const periodStart = tsToIso(item?.current_period_start ?? null);
-  const periodEnd = tsToIso(item?.current_period_end ?? null);
+  const periodStart = tsToIso(planItem?.current_period_start ?? null);
+  const periodEnd = tsToIso(planItem?.current_period_end ?? null);
 
   const { error } = await admin.from("subscriptions").upsert(
     {
@@ -295,6 +307,7 @@ async function upsertSubscription(params: UpsertParams): Promise<void> {
       current_period_start: periodStart,
       current_period_end: periodEnd,
       cancel_at_period_end: subscription.cancel_at_period_end ?? false,
+      seat_pack_qty: seatPackQty,
     },
     { onConflict: "dso_id" }
   );

@@ -23,6 +23,8 @@ export interface SubscriptionSummary {
   status: string;
   current_period_end: string | null;
   cancel_at_period_end: boolean;
+  /** #88 — count of +3 seat-pack add-ons purchased on top of the base cap. */
+  seat_pack_qty: number;
 }
 
 const ACTIVE_STATUSES = new Set(["active", "trialing"]);
@@ -38,7 +40,9 @@ export async function getActiveSubscription(
 ): Promise<SubscriptionSummary | null> {
   const { data } = await supabase
     .from("subscriptions")
-    .select("id, tier, status, current_period_end, cancel_at_period_end")
+    .select(
+      "id, tier, status, current_period_end, cancel_at_period_end, seat_pack_qty"
+    )
     .eq("dso_id", dsoId)
     .maybeSingle();
 
@@ -52,6 +56,7 @@ export async function getActiveSubscription(
     status,
     current_period_end: (data.current_period_end as string | null) ?? null,
     cancel_at_period_end: (data.cancel_at_period_end as boolean) ?? false,
+    seat_pack_qty: (data.seat_pack_qty as number | null) ?? 0,
   };
 }
 
@@ -67,7 +72,9 @@ export async function getSubscriptionAnyStatus(
 ): Promise<SubscriptionSummary | null> {
   const { data } = await supabase
     .from("subscriptions")
-    .select("id, tier, status, current_period_end, cancel_at_period_end")
+    .select(
+      "id, tier, status, current_period_end, cancel_at_period_end, seat_pack_qty"
+    )
     .eq("dso_id", dsoId)
     .maybeSingle();
 
@@ -78,6 +85,7 @@ export async function getSubscriptionAnyStatus(
     status: data.status as string,
     current_period_end: (data.current_period_end as string | null) ?? null,
     cancel_at_period_end: (data.cancel_at_period_end as boolean) ?? false,
+    seat_pack_qty: (data.seat_pack_qty as number | null) ?? 0,
   };
 }
 

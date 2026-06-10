@@ -5,10 +5,13 @@
  * Public ladder (locked 2026-05-20, repositioning): Solo / Growth / Scale /
  * Enterprise. Replaces the prior Starter / Growth / Enterprise ladder.
  *
- *   Solo        $399/mo   ($359/mo billed annually)  — 5 listings · 3 seats
- *   Growth      $699/mo   ($629/mo billed annually)  — 20 listings · 10 seats   [most popular]
- *   Scale       $1,499/mo ($1,349/mo billed annually)— unlimited · unlimited
+ *   Solo        $399/mo   ($359/mo billed annually)  — 5 active openings · 5 seats
+ *   Growth      $699/mo   ($629/mo billed annually)  — 20 active openings · 15 seats
+ *   Scale       $1,499/mo ($1,349/mo billed annually)— 100 active openings · 50 seats   [most popular]
  *   Enterprise  $2,999/mo ($2,699/mo billed annually)— unlimited · unlimited
+ *
+ * Caps are code-enforced (#88): the advertised number === the enforced number.
+ * Seat packs (+3 seats, $99/mo) can raise the seat cap on Solo/Growth/Scale.
  *
  * Annual plans are billed yearly at ~10% off the monthly rate.
  *
@@ -160,6 +163,81 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
     stripePriceIdTestAnnual: "price_1TZCTQ0uFxwSh1Fn3FCyRSvk",
   },
 };
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * SEAT PACKS (#88) — optional add-on that raises a DSO's seat cap by a fixed
+ * bundle without forcing a full tier jump. Sold as a SECOND recurring line
+ * item on the existing subscription (Stripe auto-prorates). The pack price's
+ * billing interval MUST match the plan's interval — Stripe rejects mixed
+ * intervals on one subscription — so we keep a monthly AND an annual price and
+ * pick the one matching the subscription's period.
+ *
+ * Locked 2026-06-10: +3 seats per pack · $99/mo · ~$1,069/yr (≈10% annual
+ * discount, mirroring the tier ladder). Available on Solo / Growth / Scale
+ * (Enterprise is already unlimited). Heavy seat needs are steered to a tier
+ * upgrade by the nudge guardrail; the pack is the light top-off.
+ *
+ * Price IDs come from ENV (not hardcoded) so they can be created in Stripe +
+ * set in Vercel without a code change:
+ *   STRIPE_SEAT_PACK_PRICE_TEST_MONTHLY / _TEST_ANNUAL
+ *   STRIPE_SEAT_PACK_PRICE_LIVE_MONTHLY / _LIVE_ANNUAL
+ * Until they're set, seatPacksConfigured() is false and the UI hides the
+ * add-seats control.
+ * ───────────────────────────────────────────────────────────────────────── */
+
+/** Seats added per pack. */
+export const SEAT_PACK_SIZE = 3;
+/** Display price of one pack billed monthly (dollars). */
+export const SEAT_PACK_MONTHLY_PRICE = 99;
+/** Display price of one pack billed annually — yearly total (dollars). */
+export const SEAT_PACK_ANNUAL_PRICE = 1069;
+/** Tiers eligible to buy seat packs (Enterprise is already unlimited). */
+export const SEAT_PACK_TIERS: PricingTier[] = ["solo", "growth", "scale"];
+
+/** Whether a tier can purchase seat packs (capped + eligible). */
+export function tierCanBuySeatPacks(tier: string | null | undefined): boolean {
+  return isPricingTier(tier) && SEAT_PACK_TIERS.includes(tier);
+}
+
+/**
+ * Resolve the seat-pack Stripe Price ID for the current env + billing period.
+ * Returns null if the matching env var isn't set (packs not yet configured).
+ */
+export function getSeatPackPriceId(
+  period: BillingPeriod = "monthly"
+): string | null {
+  const isLive = process.env.STRIPE_LIVE_MODE === "1";
+  if (period === "annual") {
+    return (
+      (isLive
+        ? process.env.STRIPE_SEAT_PACK_PRICE_LIVE_ANNUAL
+        : process.env.STRIPE_SEAT_PACK_PRICE_TEST_ANNUAL) ?? null
+    );
+  }
+  return (
+    (isLive
+      ? process.env.STRIPE_SEAT_PACK_PRICE_LIVE_MONTHLY
+      : process.env.STRIPE_SEAT_PACK_PRICE_TEST_MONTHLY) ?? null
+  );
+}
+
+/** All configured seat-pack price IDs (both intervals, current env mode). */
+export function getSeatPackPriceIds(): string[] {
+  return [getSeatPackPriceId("monthly"), getSeatPackPriceId("annual")].filter(
+    (id): id is string => Boolean(id)
+  );
+}
+
+/** True if the given Stripe price ID is one of our seat-pack prices. */
+export function isSeatPackPriceId(priceId: string | null | undefined): boolean {
+  if (!priceId) return false;
+  return getSeatPackPriceIds().includes(priceId);
+}
+
+/** Whether seat packs are usable in the current env (price IDs are set). */
+export function seatPacksConfigured(): boolean {
+  return getSeatPackPriceId("monthly") !== null;
+}
 
 /** Display order for /pricing page (left-to-right). */
 export const PRICING_TIER_ORDER: PricingTier[] = [
