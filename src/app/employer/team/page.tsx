@@ -24,6 +24,8 @@ import {
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
 import { InviteForm } from "./invite-form";
+import { getCapStatus } from "@/lib/billing/caps";
+import { CapNudge } from "@/components/billing/cap-nudge";
 import { RoleSelect } from "./role-select";
 import { RoleHelp } from "./role-help";
 import { HmRescopeButton } from "./hm-rescope-button";
@@ -85,6 +87,7 @@ export default async function TeamPage({ searchParams }: PageProps) {
   if (dsoUser.role === "hiring_manager") redirect("/employer/dashboard");
 
   const canManage = dsoUser.role === "owner" || dsoUser.role === "admin";
+  const capStatus = await getCapStatus(supabase, dsoUser.dso_id as string);
 
   // Pull all team members for the DSO
   const { data: members } = await supabase
@@ -203,6 +206,7 @@ export default async function TeamPage({ searchParams }: PageProps) {
 
   return (
     <EmployerShell active="team">
+      <CapNudge kind="seats" usage={capStatus.seats} tier={capStatus.tier} />
       <header className="mb-10 max-w-[820px]">
         <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
           Team

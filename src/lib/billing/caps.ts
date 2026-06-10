@@ -127,6 +127,53 @@ export function evaluateCap(
   };
 }
 
+export interface CapUsage {
+  cap: number | null; // null = unlimited
+  used: number;
+  remaining: number | null;
+  /** At/above the nudge threshold (80%) but not unlimited. */
+  nearLimit: boolean;
+  /** At/over the cap. */
+  atLimit: boolean;
+}
+
+export interface CapStatus {
+  tier: string | null;
+  jobs: CapUsage;
+  seats: CapUsage;
+}
+
+function usage(cap: number | null, used: number): CapUsage {
+  if (cap === null) {
+    return { cap, used, remaining: null, nearLimit: false, atLimit: false };
+  }
+  return {
+    cap,
+    used,
+    remaining: Math.max(0, cap - used),
+    nearLimit: used >= Math.ceil(cap * NUDGE_THRESHOLD),
+    atLimit: used >= cap,
+  };
+}
+
+/** Usage + cap for both jobs and seats — for the approach-nudge banners. */
+export async function getCapStatus(
+  supabase: SupabaseClient,
+  dsoId: string
+): Promise<CapStatus> {
+  const sub = await getActiveSubscription(supabase, dsoId);
+  const caps = resolveCaps(sub?.tier);
+  const [jobsUsed, seatsUsed] = await Promise.all([
+    getActiveOpeningsCount(supabase, dsoId),
+    getSeatsUsed(supabase, dsoId),
+  ]);
+  return {
+    tier: sub?.tier ?? null,
+    jobs: usage(caps.maxActiveJobs, jobsUsed),
+    seats: usage(caps.maxSeats, seatsUsed),
+  };
+}
+
 /**
  * Gate for activating a job. Returns an error string to block, or null to
  * allow. `addingOpenings` = the openings on the job being activated. Pass

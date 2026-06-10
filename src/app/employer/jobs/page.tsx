@@ -28,6 +28,8 @@ import {
 } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCapStatus } from "@/lib/billing/caps";
+import { CapNudge } from "@/components/billing/cap-nudge";
 import { Sparkline } from "@/components/dashboard/sparkline";
 import { TrendPill } from "@/components/dashboard/trend-pill";
 import { getActiveLocationId } from "@/lib/employer/active-location";
@@ -103,6 +105,7 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
   if (!dsoUser) redirect("/employer/onboarding");
 
   const canPostJobs = dsoUser.role !== "hiring_manager";
+  const capStatus = await getCapStatus(supabase, dsoUser.dso_id as string);
 
   // ── Multi-location filter (Phase 4.6.d). When an active location is
   // set, restrict the jobs query to jobs tagged with that location. ─
@@ -371,6 +374,7 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
 
   return (
     <EmployerShell active="jobs">
+      <CapNudge kind="jobs" usage={capStatus.jobs} tier={capStatus.tier} />
       <header className="mb-7">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
