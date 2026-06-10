@@ -474,7 +474,14 @@ export default async function PerJobPipelinePage({
           triggerLabel="How the pipeline works"
         />
       </div>
-      <HelpDisclosure helpKey="pipeline.practice_fit" className="mb-6" />
+      <HelpDisclosure
+        helpKey={
+          (job.scope as string | null) === "corporate"
+            ? "pipeline.dso_fit"
+            : "pipeline.practice_fit"
+        }
+        className="mb-6"
+      />
 
       {/* Pipeline (kanban inline) — the primary working surface for this job,
           kept at the top so it's visible without scrolling past the

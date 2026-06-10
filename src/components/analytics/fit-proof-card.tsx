@@ -7,7 +7,6 @@
  * at all until at least one scored application exists.
  */
 
-import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import type { FitOutcomeProof } from "@/lib/analytics/fit-outcomes";
 
 const BUCKET_META: Record<string, { label: string; bar: string }> = {
@@ -28,9 +27,8 @@ export function FitProofCard({ proof }: { proof: FitOutcomeProof }) {
     <section className="mb-6 border border-[var(--rule)] bg-white p-6 sm:p-7">
       <header className="mb-4 flex items-center gap-2 text-heritage-deep">
         <span className="text-[10px] font-bold tracking-[2.5px] uppercase">
-          Proof ·
+          Proof
         </span>
-        <PracticeFitWordmark surface="inherit" className="text-[14px]" />
       </header>
 
       {!proof.enough_data ? (
@@ -39,12 +37,12 @@ export function FitProofCard({ proof }: { proof: FitOutcomeProof }) {
             Your proof is still building.
           </h3>
           <p className="mt-1.5 text-[13px] text-slate-body leading-relaxed max-w-[560px]">
-            As candidates move through your pipeline, we track how PracticeFit
+            As candidates move through your pipeline, we track how the fit score
             predicted who advanced. You&apos;ve got{" "}
             <span className="font-bold text-ink">{proof.total_scored}</span>{" "}
-            scored {proof.total_scored === 1 ? "application" : "applications"} so
-            far — once you reach about 10, you&apos;ll see your advance rate by
-            fit level here.
+            scored {proof.total_scored === 1 ? "application" : "applications"}{" "}
+            so far — once you reach about 10, you&apos;ll see your advance rate
+            by fit level here.
           </p>
         </div>
       ) : (

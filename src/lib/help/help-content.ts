@@ -221,6 +221,17 @@ const PIPELINE: Record<string, HelpEntry> = {
       "Buckets: Excellent / Strong / Solid / Light / Low. A hard requirement like out-of-state licensure caps the score — but it's only a sort aid, never an auto-decision.",
     ],
   },
+  "pipeline.dso_fit": {
+    title: "DSOFit score",
+    tip: "A guidance score, not a gate. It weighs what a corporate/DSO role actually needs — function fit, seniority and leadership scope, multi-site experience, dental-industry domain, comp, and how the person wants to work — and drops any dimension left blank so sparse profiles aren't penalized.",
+    format: "disclosure",
+    lens: "employer",
+    bullets: [
+      "Speaks DSO: function fit, seniority, multi-site scale, dental-domain background, leadership scope, work mode, and comp.",
+      "Missing data drops from the denominator — a thin profile isn't punished.",
+      "Buckets: Excellent / Strong / Solid / Light / Low. A gap on a role-critical dimension like seniority or leadership scope caps the score — but it's only a sort aid, never an auto-decision.",
+    ],
+  },
   "pipeline.scorecards": {
     title: "Scorecards",
     tip: "Structured interview feedback attached to a candidate. Keeps interviewer notes consistent and comparable across your team.",

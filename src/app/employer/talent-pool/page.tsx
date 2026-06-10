@@ -21,7 +21,6 @@ import { Users, Bookmark, Search } from "lucide-react";
 import type { Metadata } from "next";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { HelpDisclosure } from "@/components/help/help-disclosure";
-import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { DiscoverFilters } from "./discover-filters";
 import { CandidateResultCard } from "./candidate-result-card";
@@ -486,9 +485,7 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
                 htmlFor="fit_job"
                 className="font-medium text-slate-body inline-flex items-center gap-1.5 flex-wrap"
               >
-                Rank by
-                <PracticeFitWordmark surface="light" tm className="text-[15px]" />
-                against
+                Rank by fit against
               </label>
               <select
                 id="fit_job"

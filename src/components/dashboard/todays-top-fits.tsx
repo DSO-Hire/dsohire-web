@@ -11,7 +11,6 @@
 
 import Link from "next/link";
 import { ArrowRight, EyeOff, Hand } from "lucide-react";
-import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import type { TodaysTopFit } from "@/lib/talent-pool/smart-picks";
 
 const BUCKET_STYLE: Record<string, { label: string; bg: string; fg: string }> = {
@@ -30,9 +29,8 @@ export function TodaysTopFits({ fits }: { fits: TodaysTopFit[] }) {
       <header className="px-6 py-4 border-b border-[var(--rule)] flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-heritage-deep">
           <span className="text-[10px] font-bold tracking-[2.5px] uppercase">
-            Today&apos;s top fits ·
+            Today&apos;s top fits
           </span>
-          <PracticeFitWordmark surface="inherit" className="text-[14px]" />
         </div>
         <Link
           href="/employer/talent-pool"
@@ -42,7 +40,7 @@ export function TodaysTopFits({ fits }: { fits: TodaysTopFit[] }) {
         </Link>
       </header>
       <div className="px-6 py-3 text-[12px] text-slate-meta border-b border-[var(--rule)]">
-        Your best-fit candidates across every open role, ranked by PracticeFit.
+        Your best-fit candidates across every open role, ranked by fit.
         Already-applied candidates show up in your pipeline instead.
       </div>
       <ul>
