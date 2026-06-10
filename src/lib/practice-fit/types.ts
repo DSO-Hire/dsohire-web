@@ -73,6 +73,15 @@ export interface FitDimension {
    * don't drag the number down.
    */
   scored: boolean;
+  /**
+   * False when this dimension doesn't APPLY to the job's track (e.g. a
+   * clinical dim on a corporate req). Distinct from `scored` (which is
+   * false for applicable-but-empty gaps). Non-applicable dims drop from
+   * the coverage denominator on BOTH the fresh-compute and cache-read
+   * paths. Optional for back-compat with rows stored before this field
+   * existed (treated as applicable); a MODEL_VERSION bump repopulates it.
+   */
+  applicable?: boolean;
   /** Short label for the dimension (rendered in WhyThisMatch). */
   label: string;
   /**

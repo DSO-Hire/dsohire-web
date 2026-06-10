@@ -66,7 +66,7 @@ import type {
  * hashed input field (e.g. the A.4 caps/boosters). It's folded into the
  * input hash so a logic-only change still invalidates the read-through cache.
  */
-const MODEL_VERSION = "2026-06-09-v6-dsofit-coverage";
+const MODEL_VERSION = "2026-06-10-v7-coverage-cacheread";
 
 /* ──────────────────────────────────────────────────────────────
  * v3 Phase B.2 — comp_priority re-weighting ("what matters MOST").
@@ -305,8 +305,13 @@ export function computePracticeFit(inputs: FitInputs): FitResult | null {
   // from both numerator and denominator and surface no candidate-side CTA.
   const applicable = applicableDimsForJob(inputs.job);
   for (const key of Object.keys(dims) as FitDimensionKey[]) {
+    const d = dims[key];
+    // Stamp applicability so BOTH the fresh-compute coverage loop (below)
+    // AND the cache-read reconstruction (get-or-compute.rowToResult) count
+    // the same denominator. Without this the cache path counted all 25
+    // stored dims, so corporate matches read "X of 25" instead of "X of 20".
+    d.applicable = applicable.has(key);
     if (!applicable.has(key)) {
-      const d = dims[key];
       d.scored = false;
       d.raw = 0;
       d.contribution = 0;

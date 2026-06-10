@@ -590,6 +590,12 @@ function rowToResult(row: Record<string, unknown>): FitResult {
   let scored_count = 0;
   let total_count = 0;
   for (const d of Object.values(dims)) {
+    // Skip dims that don't apply to this job's track (clinical dims on a
+    // corporate req, etc.) so the cache-read denominator matches the
+    // fresh-compute one. `applicable === false` only on rows stored after
+    // the v7 stamp; older rows lack the flag and count as applicable
+    // (back-compat) until they recompute under the new MODEL_VERSION.
+    if (d.applicable === false) continue;
     total_weight += d.weight;
     total_count += 1;
     if (d.scored) {
