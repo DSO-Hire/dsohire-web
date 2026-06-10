@@ -84,7 +84,7 @@ export default async function CandidateDashboardPage() {
   const { data: candidate } = await supabase
     .from("candidates")
     .select(
-      "id, first_name, last_name, salutation, full_name, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, desired_specialty, license_states, pms_systems, skills, languages, temp_or_perm, dso_size_preference, schedule_preferences, min_salary, salary_unit, cv_visibility, availability, resume_url, linkedin_url, avatar_url, practice_fit_consent, work_pace, autonomy_pref, mentorship_pref, practice_feel, ce_growth_importance, work_life_priority, benefit_priorities, patient_population_pref, assessment_completed_at, dsofit_assessment_completed_at, privacy_choices_reviewed_at",
+      "id, first_name, last_name, salutation, full_name, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, desired_specialty, license_states, pms_systems, skills, languages, temp_or_perm, dso_size_preference, schedule_preferences, min_salary, salary_unit, cv_visibility, availability, resume_url, linkedin_url, avatar_url, practice_fit_consent, work_pace, autonomy_pref, mentorship_pref, practice_feel, ce_growth_importance, work_life_priority, benefit_priorities, patient_population_pref, assessment_completed_at, dsofit_assessment_completed_at, privacy_choices_reviewed_at, primary_fit_product",
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
@@ -174,6 +174,38 @@ export default async function CandidateDashboardPage() {
   const profilePct = Math.round((completeness.score / completeness.total) * 100);
   const missingFields = completeness.missing.length;
 
+  // #54 — the candidate's chosen track drives which fit product leads their
+  // dashboard (matches feed, assessment nudge, prefs CTA). null → PracticeFit.
+  const primaryFitProduct: "practicefit" | "dsofit" =
+    (c.primary_fit_product as string | null) === "dsofit"
+      ? "dsofit"
+      : "practicefit";
+  const isDsoPrimary = primaryFitProduct === "dsofit";
+  const fitName = isDsoPrimary ? "DSOFit" : "PracticeFit";
+  const desiredRoles = ((c.desired_roles as string[] | null) ?? []) as string[];
+  const hasCorporateInterest =
+    isDsoPrimary || desiredRoles.includes("dso_corporate");
+  const hasNonCorporateInterest = desiredRoles.some((r) => r !== "dso_corporate");
+
+  const pfAssessmentItem = {
+    key: "assessment",
+    label: "Take your 5-minute PracticeFit assessment",
+    done: (c.assessment_completed_at as string | null) != null,
+    href: "/candidate/assessment",
+  };
+  const dsoAssessmentItem = {
+    key: "dsofit",
+    label: "Take your 5-minute DSOFit assessment",
+    done: (c.dsofit_assessment_completed_at as string | null) != null,
+    href: "/candidate/dsofit-assessment",
+  };
+  // Lead with the candidate's PRIMARY track's assessment; surface the other
+  // only when they've signalled interest in it (corporate role, or any
+  // non-corporate role for a DSO-primary candidate).
+  const assessmentItems = isDsoPrimary
+    ? [dsoAssessmentItem, ...(hasNonCorporateInterest ? [pfAssessmentItem] : [])]
+    : [pfAssessmentItem, ...(hasCorporateInterest ? [dsoAssessmentItem] : [])];
+
   // Progressive onboarding checklist (dismissible; auto-hides when complete).
   const onboardingItems = [
     {
@@ -182,35 +214,19 @@ export default async function CandidateDashboardPage() {
       done: completeness.missing.length === 0,
       href: "/candidate/profile",
     },
-    {
-      // #94 (Day 28) — drive every new candidate to the PracticeFit
-      // assessment (our differentiator + feeds match quality). Prominent,
-      // second only to the profile. done when they've actually completed it.
-      key: "assessment",
-      label: "Take your 5-minute PracticeFit assessment",
-      done: (c.assessment_completed_at as string | null) != null,
-      href: "/candidate/assessment",
-    },
-    // DSOFit — only nudge candidates who've signalled DSO/corporate interest
-    // (a "DSO Corporate / HQ" desired role). Done when they've completed the
-    // corporate-side assessment. Clinical-only candidates never see this.
-    ...(((c.desired_roles as string[] | null) ?? []).includes("dso_corporate")
-      ? [
-          {
-            key: "dsofit",
-            label: "Take your 5-minute DSOFit assessment",
-            done: (c.dsofit_assessment_completed_at as string | null) != null,
-            href: "/candidate/dsofit-assessment",
-          },
-        ]
-      : []),
+    // #94 (Day 28) — drive every new candidate to their fit assessment (our
+    // differentiator + feeds match quality). Prominent, second only to the
+    // profile. Primary track leads; the other follows only on signalled interest.
+    ...assessmentItems,
     {
       key: "prefs",
-      label: "Tell PracticeFit what you're looking for",
+      label: `Tell ${fitName} what you're looking for`,
       done:
         profileData.jobPreferences.desired_locations.length > 0 ||
         profileData.jobPreferences.min_salary != null,
-      href: "/candidate/practice-fit#preferences",
+      href: isDsoPrimary
+        ? "/candidate/dsofit"
+        : "/candidate/practice-fit#preferences",
     },
     {
       key: "visible",
@@ -226,7 +242,7 @@ export default async function CandidateDashboardPage() {
     },
     {
       key: "fit",
-      label: "Choose your PracticeFit matching setting",
+      label: `Choose your ${fitName} matching setting`,
       done: (c.privacy_choices_reviewed_at as string | null) != null,
       href: "/candidate/settings/privacy#practice-fit",
     },
@@ -312,7 +328,12 @@ export default async function CandidateDashboardPage() {
   // this list, so the dashboard can never show "0 matches" next to a populated
   // fit list again (the contradiction Cam hit). Capped scan; top 4 in the card.
   const rolesThatFitAll = pfConsentOn
-    ? await getTopFitJobsForCandidate(candidateRowId, 24)
+    ? await getTopFitJobsForCandidate(
+        candidateRowId,
+        24,
+        undefined,
+        primaryFitProduct
+      )
     : [];
   const rolesThatFit = rolesThatFitAll.slice(0, 4);
   const fittingRolesCount = rolesThatFitAll.length;
@@ -779,7 +800,7 @@ export default async function CandidateDashboardPage() {
       />
 
       {/* Roles that fit you — top open roles ranked by PracticeFit (B.1) */}
-      <RolesThatFitCard roles={rolesThatFit} />
+      <RolesThatFitCard roles={rolesThatFit} product={primaryFitProduct} />
 
       {/* My Application Stages — personal kanban */}
       {activeApps.length > 0 && (

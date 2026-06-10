@@ -26,8 +26,7 @@
 
 import Link from "next/link";
 import { ArrowRight, Plus } from "lucide-react";
-import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
-import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
+import { FitWordmark, FitMark } from "@/components/practice-fit/brand/fit-wordmark";
 import { bucketStyle } from "@/lib/practice-fit/buckets";
 import type { FitDimensionKey, FitResult } from "@/lib/practice-fit/types";
 
@@ -149,7 +148,7 @@ export function CandidateFitSummary({
 
   return (
     <section className="mb-6">
-      <SectionHeader />
+      <SectionHeader product={best.product} />
       <div className="border border-[var(--rule)] bg-white p-5">
         <div className="flex items-start gap-5 flex-wrap">
           {/* Best fit headline */}
@@ -161,7 +160,7 @@ export function CandidateFitSummary({
               <span
                 className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-bold tracking-wider uppercase ${bestStyle.bgClass} ${bestStyle.textClass} ${bestStyle.borderClass}`}
               >
-                <PracticeFitMark className="h-3 w-3" />
+                <FitMark product={best.product} className="h-3 w-3" />
                 {bestStyle.label}
               </span>
               <span className="text-[12px] font-mono text-slate-meta">
@@ -201,7 +200,8 @@ export function CandidateFitSummary({
               Lift your match
             </p>
             <p className="text-[12px] text-slate-meta mb-3">
-              Each one sharpens your PracticeFit on every role you apply to.
+              Each one sharpens your {best.product === "dsofit" ? "DSOFit" : "PracticeFit"} on
+              every role you apply to.
             </p>
             <ul className="space-y-2">
               {topGaps.map((g) => (
@@ -224,11 +224,11 @@ export function CandidateFitSummary({
   );
 }
 
-function SectionHeader() {
+function SectionHeader({ product }: { product?: "practicefit" | "dsofit" }) {
   return (
     <div className="flex items-end justify-between gap-4 mb-3">
       <div className="text-heritage-deep">
-        <PracticeFitWordmark surface="light" className="text-[14px]" />
+        <FitWordmark product={product} surface="light" className="text-[14px]" />
       </div>
       <Link
         href="/candidate/settings/privacy"

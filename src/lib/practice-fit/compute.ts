@@ -66,7 +66,7 @@ import type {
  * hashed input field (e.g. the A.4 caps/boosters). It's folded into the
  * input hash so a logic-only change still invalidates the read-through cache.
  */
-const MODEL_VERSION = "2026-06-09-v5-dsofit-dims";
+const MODEL_VERSION = "2026-06-09-v6-dsofit-coverage";
 
 /* ──────────────────────────────────────────────────────────────
  * v3 Phase B.2 — comp_priority re-weighting ("what matters MOST").
@@ -344,13 +344,22 @@ export function computePracticeFit(inputs: FitInputs): FitResult | null {
   );
 
   // Sum scored contributions and scored weights — missing-data dims
-  // are EXCLUDED from both numerator and denominator.
+  // are EXCLUDED from both numerator and denominator. Dimensions that
+  // don't APPLY to this job's track (e.g. clinical dims on a corporate
+  // req) are excluded from the coverage denominator entirely, so a
+  // corporate match reads "7 of 10 dims", not "7 of 25" (the other 15
+  // are clinical and were never in play). Applicable-but-unscored dims
+  // DO count in the denominator — they're real gaps the candidate can
+  // fill.
   let scoredContribution = 0;
   let scoredWeight = 0;
   let totalWeight = 0;
   let scoredCount = 0;
   let totalCount = 0;
-  for (const dim of Object.values(dims)) {
+  for (const [key, dim] of Object.entries(dims) as Array<
+    [FitDimensionKey, FitDimension]
+  >) {
+    if (!applicable.has(key)) continue;
     totalWeight += dim.weight;
     totalCount += 1;
     if (dim.scored) {

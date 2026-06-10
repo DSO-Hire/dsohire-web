@@ -20,7 +20,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Building2, MapPin, Search, X } from "lucide-react";
 import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
-import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
+import { FitWordmark, FitMark } from "@/components/practice-fit/brand/fit-wordmark";
 import { bucketStyle, type FitProduct } from "@/lib/practice-fit/buckets";
 import type { FitBucket } from "@/lib/practice-fit/types";
 
@@ -48,10 +48,14 @@ const HIGH_FIT = 60;
 export function JobsBrowser({
   jobs,
   consentOn,
+  primaryProduct = "practicefit",
 }: {
   jobs: BrowseJob[];
   consentOn: boolean;
+  /** #54 — the candidate's chosen track drives page-level fit branding. */
+  primaryProduct?: FitProduct;
 }) {
+  const primaryName = primaryProduct === "dsofit" ? "DSOFit" : "PracticeFit";
   const [query, setQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<Set<string>>(new Set());
   const [stateFilter, setStateFilter] = useState<string>("");
@@ -119,7 +123,7 @@ export function JobsBrowser({
       <header className="space-y-3">
         {consentOn ? (
           <>
-            <PracticeFitWordmark surface="light" tm className="text-3xl sm:text-4xl" />
+            <FitWordmark product={primaryProduct} surface="light" tm className="text-3xl sm:text-4xl" />
             <h1 className="font-display text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
               Jobs ranked for you.
             </h1>
@@ -180,7 +184,7 @@ export function JobsBrowser({
                   : "border-[var(--rule)] text-slate-body hover:border-heritage-deep hover:text-heritage-deep")
               }
             >
-              <PracticeFitMark className="h-3 w-3" />
+              <FitMark product={primaryProduct} className="h-3 w-3" />
               Top matches only
             </button>
           )}
@@ -398,11 +402,11 @@ function PracticeFitOffBanner() {
         groups find you by fit.
       </p>
       <Link
-        href="/candidate/practice-fit"
+        href={primaryProduct === "dsofit" ? "/candidate/dsofit" : "/candidate/practice-fit"}
         className="inline-flex items-center gap-1.5 rounded-md bg-heritage px-3 py-2 text-[11px] font-bold tracking-[1px] uppercase text-ivory hover:bg-heritage-deep"
       >
-        <PracticeFitMark className="h-3 w-3" />
-        Turn on PracticeFit
+        <FitMark product={primaryProduct} className="h-3 w-3" />
+        Turn on {primaryName}
       </Link>
     </div>
   );

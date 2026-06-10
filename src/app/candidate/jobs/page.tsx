@@ -108,6 +108,7 @@ export default async function CandidateJobsPage() {
   } = await supabase.auth.getUser();
 
   let consentOn = false;
+  let primaryProduct: "practicefit" | "dsofit" = "practicefit";
   const appliedJobIds = new Set<string>();
   const fitByJobId = new Map<
     string,
@@ -117,7 +118,7 @@ export default async function CandidateJobsPage() {
   if (user && jobs.length > 0) {
     const { data: candidate } = await supabase
       .from("candidates")
-      .select("id, practice_fit_consent")
+      .select("id, practice_fit_consent, primary_fit_product")
       .eq("auth_user_id", user.id)
       .maybeSingle();
     if (candidate) {
@@ -126,6 +127,12 @@ export default async function CandidateJobsPage() {
         (((candidate as Record<string, unknown>).practice_fit_consent as
           | string
           | null) ?? "off") !== "off";
+      primaryProduct =
+        ((candidate as Record<string, unknown>).primary_fit_product as
+          | string
+          | null) === "dsofit"
+          ? "dsofit"
+          : "practicefit";
 
       const { data: appliedRows } = await supabase
         .from("applications")
@@ -180,7 +187,7 @@ export default async function CandidateJobsPage() {
   return (
     <CandidateShell active="jobs">
       <div className="max-w-[920px]">
-        <JobsBrowser jobs={browseJobs} consentOn={consentOn} />
+        <JobsBrowser jobs={browseJobs} consentOn={consentOn} primaryProduct={primaryProduct} />
       </div>
     </CandidateShell>
   );

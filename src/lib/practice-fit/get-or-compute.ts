@@ -233,7 +233,7 @@ async function loadCandidateInputs(
   const { data: c } = await supabase
     .from("candidates")
     .select(
-      "desired_roles, current_title, desired_specialty, license_states, desired_locations, desired_location_points, pms_systems, skills, schedule_preferences, min_salary, salary_unit, temp_or_perm, dso_size_preference, years_experience, years_experience_dental, work_pace, autonomy_pref, mentorship_pref, patient_facing_energy, practice_feel, ce_growth_importance, work_life_priority, comp_priority, comp_priorities, benefit_priorities, patient_population_pref, candidate_certifications(kind)"
+      "desired_roles, current_title, desired_specialty, license_states, desired_locations, desired_location_points, pms_systems, skills, schedule_preferences, min_salary, salary_unit, temp_or_perm, dso_size_preference, years_experience, years_experience_dental, work_pace, autonomy_pref, mentorship_pref, patient_facing_energy, practice_feel, ce_growth_importance, work_life_priority, comp_priority, comp_priorities, benefit_priorities, patient_population_pref, seniority_level, org_scale_experience, domain_background, domain_years, mgmt_span, pl_scope, work_mode_pref, travel_tolerance, candidate_certifications(kind)"
     )
     .eq("id", candidateId)
     .maybeSingle();

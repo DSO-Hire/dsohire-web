@@ -27,8 +27,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronDown, ChevronUp, Plus } from "lucide-react";
-import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
-import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
+import { FitWordmark, FitMark } from "@/components/practice-fit/brand/fit-wordmark";
 import { bucketStyle } from "@/lib/practice-fit/buckets";
 import type {
   FitDimension,
@@ -169,7 +168,7 @@ export function WhyThisMatch({
         className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left ${style.bgClass} ${style.textClass} hover:opacity-95`}
       >
         <span className="inline-flex items-center gap-2 flex-wrap">
-          <PracticeFitWordmark surface="inherit" className="text-[15px]" />
+          <FitWordmark product={fit.product} surface="inherit" className="text-[15px]" />
           <span className="text-[14px] font-semibold">
             {style.label}
           </span>
@@ -202,7 +201,9 @@ export function WhyThisMatch({
               narrative.status === "ready" ||
               narrative.status === "error") && (
               <li className="px-4 py-3 bg-[#FAF7F1]">
-                {narrative.status === "loading" && <NarrativeSkeleton />}
+                {narrative.status === "loading" && (
+                  <NarrativeSkeleton product={fit.product} />
+                )}
                 {narrative.status === "ready" && narrativeText && (
                   <p className="text-[13px] leading-relaxed text-ink">
                     {narrativeText}
@@ -230,15 +231,30 @@ export function WhyThisMatch({
           )}
           <li className="px-4 py-3 bg-slate-50/50">
             <p className="text-[11px] text-slate-meta leading-relaxed">
-              PracticeFit weighs role, real commute distance, PMS
-              fluency, state licensure, compensation, specialty, skills,
-              years of experience, employment type, DSO size, and
-              schedule overlap — normalized over the dimensions we have
-              data on, so missing fields don&apos;t drag the score down.
-              An unrelated role gets no chip at all, and a hard
-              requirement like out-of-state licensure caps the score
-              (informational only — never an auto-screen). Score updates
-              automatically when either side changes.
+              {fit.product === "dsofit" ? (
+                <>
+                  DSOFit weighs function, seniority and scope, multi-site
+                  experience, dental-domain depth, leadership scope,
+                  compensation, work mode and travel — normalized over the
+                  dimensions we have data on, so missing fields don&apos;t drag
+                  the score down. An unrelated function gets no chip at all, and
+                  a gap like seniority caps the score (informational only —
+                  never an auto-screen). Score updates automatically when either
+                  side changes.
+                </>
+              ) : (
+                <>
+                  PracticeFit weighs role, real commute distance, PMS fluency,
+                  state licensure, compensation, specialty, skills, years of
+                  experience, employment type, DSO size, and schedule overlap —
+                  normalized over the dimensions we have data on, so missing
+                  fields don&apos;t drag the score down. An unrelated role gets
+                  no chip at all, and a hard requirement like out-of-state
+                  licensure caps the score (informational only — never an
+                  auto-screen). Score updates automatically when either side
+                  changes.
+                </>
+              )}
             </p>
           </li>
         </ul>
@@ -252,11 +268,11 @@ export function WhyThisMatch({
  * the prose's typical 30-90 word footprint at the rendered font size
  * so the band doesn't visibly grow when the response lands.
  */
-function NarrativeSkeleton() {
+function NarrativeSkeleton({ product }: { product?: "practicefit" | "dsofit" }) {
   return (
     <div aria-hidden>
       <div className="flex items-center gap-1.5 mb-2 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
-        <PracticeFitMark className="h-3 w-3" />
+        <FitMark product={product} className="h-3 w-3" />
         Summarizing the match…
       </div>
       <div className="space-y-2 animate-pulse">
