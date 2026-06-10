@@ -27,6 +27,7 @@ import {
 import { sendEmail } from "@/lib/email/send";
 import { TeamInvite } from "@/emails/employer/TeamInvite";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { seatCapBlockError } from "@/lib/billing/caps";
 
 export type DsoRole = "owner" | "admin" | "recruiter" | "hiring_manager";
 
@@ -94,6 +95,11 @@ export async function inviteTeammate(
   if (dsoUser.role !== "owner" && dsoUser.role !== "admin") {
     return { ok: false, error: "Only owners and admins can invite teammates." };
   }
+
+  // #88 — seat cap: block inviting beyond the plan's admin seats (counts
+  // current members + outstanding invites).
+  const seatError = await seatCapBlockError(supabase, dsoUser.dso_id as string);
+  if (seatError) return { ok: false, error: seatError };
 
   // Don't invite someone who's already on the team
   const { data: existingMember } = await supabase

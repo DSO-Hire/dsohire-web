@@ -61,17 +61,29 @@ export async function getActiveOpeningsCount(
   );
 }
 
-/** Seats currently consumed (counter maintained on the subscription row). */
+/**
+ * Seats currently consumed = active members + outstanding (unaccepted,
+ * unrevoked, unexpired) invitations. We count live rather than reading the
+ * `subscriptions.seats_used` column, which isn't maintained anywhere.
+ */
 export async function getSeatsUsed(
   supabase: SupabaseClient,
   dsoId: string
 ): Promise<number> {
-  const { data } = await supabase
-    .from("subscriptions")
-    .select("seats_used")
-    .eq("dso_id", dsoId)
-    .maybeSingle();
-  return ((data as { seats_used?: number | null } | null)?.seats_used) ?? 0;
+  const [members, pending] = await Promise.all([
+    supabase
+      .from("dso_users")
+      .select("id", { count: "exact", head: true })
+      .eq("dso_id", dsoId),
+    supabase
+      .from("dso_invitations")
+      .select("id", { count: "exact", head: true })
+      .eq("dso_id", dsoId)
+      .is("accepted_at", null)
+      .is("revoked_at", null)
+      .gt("expires_at", new Date().toISOString()),
+  ]);
+  return (members.count ?? 0) + (pending.count ?? 0);
 }
 
 /** Fraction (0..1) at/above which we surface an approach nudge. */
@@ -136,4 +148,21 @@ export async function jobCapBlockError(
   const noun =
     addingOpenings === 1 ? "this opening" : `these ${addingOpenings} openings`;
   return `Activating ${noun} would put you at ${check.wouldBe} active openings — your plan allows ${caps.maxActiveJobs}. Pause an active listing to free a slot, or upgrade for more capacity and features.`;
+}
+
+/**
+ * Gate for adding a teammate (invite). Returns an error string to block, or
+ * null to allow. Counts members + pending invites against the seat cap.
+ */
+export async function seatCapBlockError(
+  supabase: SupabaseClient,
+  dsoId: string
+): Promise<string | null> {
+  const sub = await getActiveSubscription(supabase, dsoId);
+  const caps = resolveCaps(sub?.tier);
+  if (caps.maxSeats === null) return null; // unlimited
+  const used = await getSeatsUsed(supabase, dsoId);
+  const check = evaluateCap(caps.maxSeats, used, 1);
+  if (check.ok) return null;
+  return `Your plan's ${caps.maxSeats} admin seats are all in use (members + pending invites). Remove a teammate or a pending invite, or upgrade for more seats and features.`;
 }
