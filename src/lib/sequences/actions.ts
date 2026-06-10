@@ -19,6 +19,10 @@ import {
 } from "@/lib/supabase/server";
 import { dsoCanUseSequences } from "./tier";
 import { processDueSequences } from "./process";
+import {
+  effectivePermissions,
+  type Capability,
+} from "@/lib/permissions/capabilities";
 
 export type SeqResult = { ok: true; id?: string } | { ok: false; error: string };
 
@@ -29,7 +33,17 @@ interface StepInput {
 }
 
 async function resolveActor(): Promise<
-  | { ok: true; dsoId: string; dsoUserId: string; role: string; authId: string }
+  | {
+      ok: true;
+      dsoId: string;
+      dsoUserId: string;
+      role: string;
+      authId: string;
+      /** #83 Phase 2 — effective capability map (role preset + overrides). */
+      perms: Record<Capability, boolean>;
+      /** Shorthand for perms["integrations.manage"]. */
+      canManage: boolean;
+    }
   | { ok: false; error: string }
 > {
   const supabase = await createSupabaseServerClient();
@@ -39,16 +53,22 @@ async function resolveActor(): Promise<
   if (!user) return { ok: false, error: "Your session expired. Sign in again." };
   const { data: me } = await supabase
     .from("dso_users")
-    .select("id, dso_id, role")
+    .select("id, dso_id, role, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!me) return { ok: false, error: "You don't have access to this DSO." };
+  const perms = effectivePermissions(
+    me.role as string,
+    (me as Record<string, unknown>).permission_overrides
+  );
   return {
     ok: true,
     dsoId: me.dso_id as string,
     dsoUserId: me.id as string,
     role: me.role as string,
     authId: user.id,
+    perms,
+    canManage: perms["integrations.manage"],
   };
 }
 
@@ -78,8 +98,8 @@ export async function saveSequence(input: {
 }): Promise<SeqResult> {
   const who = await resolveActor();
   if (!who.ok) return who;
-  if (who.role !== "owner" && who.role !== "admin") {
-    return { ok: false, error: "Only an owner or admin can edit sequences." };
+  if (!who.canManage) {
+    return { ok: false, error: "You don't have permission to edit sequences." };
   }
   const supabase = await createSupabaseServerClient();
   if (!(await dsoCanUseSequences(supabase, who.dsoId))) {
@@ -137,8 +157,8 @@ export async function setSequenceEnabled(
 ): Promise<SeqResult> {
   const who = await resolveActor();
   if (!who.ok) return who;
-  if (who.role !== "owner" && who.role !== "admin") {
-    return { ok: false, error: "Only an owner or admin can change sequences." };
+  if (!who.canManage) {
+    return { ok: false, error: "You don't have permission to change sequences." };
   }
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase
@@ -154,8 +174,8 @@ export async function setSequenceEnabled(
 export async function deleteSequence(id: string): Promise<SeqResult> {
   const who = await resolveActor();
   if (!who.ok) return who;
-  if (who.role !== "owner" && who.role !== "admin") {
-    return { ok: false, error: "Only an owner or admin can delete sequences." };
+  if (!who.canManage) {
+    return { ok: false, error: "You don't have permission to delete sequences." };
   }
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase
@@ -175,7 +195,8 @@ export async function enrollInSequence(
 ): Promise<SeqResult> {
   const who = await resolveActor();
   if (!who.ok) return who;
-  if (!["owner", "admin", "recruiter"].includes(who.role)) {
+  // #83 Phase 2 — enrolling a candidate in a drip is messaging them.
+  if (!who.perms["apps.message"]) {
     return { ok: false, error: "You don't have permission to start sequences." };
   }
   const supabase = await createSupabaseServerClient();
@@ -290,8 +311,8 @@ export async function runSequencesNow(): Promise<
 > {
   const who = await resolveActor();
   if (!who.ok) return who;
-  if (who.role !== "owner" && who.role !== "admin") {
-    return { ok: false, error: "Only an owner or admin can run sequences." };
+  if (!who.canManage) {
+    return { ok: false, error: "You don't have permission to run sequences." };
   }
   try {
     const r = await processDueSequences(who.dsoId);
@@ -313,7 +334,8 @@ export async function runSequencesNow(): Promise<
 export async function stopEnrollment(enrollmentId: string): Promise<SeqResult> {
   const who = await resolveActor();
   if (!who.ok) return who;
-  if (!["owner", "admin", "recruiter"].includes(who.role)) {
+  // #83 Phase 2 — same capability as starting one.
+  if (!who.perms["apps.message"]) {
     return { ok: false, error: "You don't have permission to stop sequences." };
   }
   const admin = createSupabaseServiceRoleClient();

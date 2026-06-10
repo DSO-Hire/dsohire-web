@@ -38,6 +38,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { after } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { capabilityBlockError } from "@/lib/permissions/guard";
 import { attachStatusEventNote } from "@/lib/applications/status-event-notes";
 import {
   KIND_DEFAULT_LABELS,
@@ -357,6 +358,20 @@ async function bulkMoveApplicationsImpl(
         id,
         error: "Could not resolve DSO for selection",
       })),
+    };
+  }
+
+  // #83 Phase 2 — bulk reject needs apps.reject; bulk move/archive need
+  // apps.move_stage (same mapping as the single-row choke point).
+  const bulkBlock = await capabilityBlockError(
+    supabase,
+    action === "reject" ? "apps.reject" : "apps.move_stage",
+    { dsoId }
+  );
+  if (bulkBlock) {
+    return {
+      succeeded: [],
+      failed: applicationIds.map((id) => ({ id, error: bulkBlock })),
     };
   }
 

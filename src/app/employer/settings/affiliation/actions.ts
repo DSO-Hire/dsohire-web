@@ -10,6 +10,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { can } from "@/lib/permissions/capabilities";
 import { recordAuditEvent } from "@/lib/audit/record";
 
 export type AffiliationRevealPolicy =
@@ -60,14 +61,21 @@ export async function updateAffiliationRevealPolicy(
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id, role")
+    .select("dso_id, role, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) return { ok: false, error: "No DSO membership." };
-  if (dsoUser.role !== "owner" && dsoUser.role !== "admin") {
+  // #83 Phase 2 — settings.manage capability (was hard owner/admin).
+  if (
+    !can(
+      dsoUser.role as string,
+      (dsoUser as Record<string, unknown>).permission_overrides,
+      "settings.manage"
+    )
+  ) {
     return {
       ok: false,
-      error: "Only owners and admins can change the affiliation policy.",
+      error: "You don't have permission to change the affiliation policy.",
     };
   }
 
@@ -153,15 +161,22 @@ export async function updateCorporateAffiliationPolicy(
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id, role")
+    .select("dso_id, role, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) return { ok: false, error: "No DSO membership." };
-  if (dsoUser.role !== "owner" && dsoUser.role !== "admin") {
+  // #83 Phase 2 — settings.manage capability (was hard owner/admin).
+  if (
+    !can(
+      dsoUser.role as string,
+      (dsoUser as Record<string, unknown>).permission_overrides,
+      "settings.manage"
+    )
+  ) {
     return {
       ok: false,
       error:
-        "Only owners and admins can change the corporate affiliation policy.",
+        "You don't have permission to change the corporate affiliation policy.",
     };
   }
 

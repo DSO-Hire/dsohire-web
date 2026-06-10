@@ -19,6 +19,8 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { can } from "@/lib/permissions/capabilities";
+import { capabilityBlockError } from "@/lib/permissions/guard";
 import {
   getRubricById,
   parseAttributeScores,
@@ -140,10 +142,25 @@ export async function upsertScorecardDraft({
   // Resolve reviewer's dso_users row (NOT NULL FK on the scorecard).
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("id, dso_id")
+    .select("id, dso_id, role, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) return { ok: false, error: "No DSO context found." };
+
+  // #83 Phase 2 — scorecards need apps.scorecard.
+  if (
+    !can(
+      (dsoUser as Record<string, unknown>).role as string,
+      (dsoUser as Record<string, unknown>).permission_overrides,
+      "apps.scorecard"
+    )
+  ) {
+    return {
+      ok: false,
+      error:
+        "Your account doesn't have permission to leave scorecards. An owner or admin can grant this on the Team page.",
+    };
+  }
 
   // Look up the reviewer's existing scorecard for this application (if any).
   const { data: existingRaw } = await supabase
@@ -287,6 +304,10 @@ export async function submitScorecard(
   if (prior.status === "submitted") {
     return { ok: false, error: "This scorecard is already submitted." };
   }
+
+  // #83 Phase 2 — submitting needs apps.scorecard (mirrors the draft gate).
+  const submitBlock = await capabilityBlockError(supabase, "apps.scorecard");
+  if (submitBlock) return { ok: false, error: submitBlock };
 
   const parsed = parseAttributeScores(prior.attribute_scores);
   if (Object.keys(parsed).length === 0) {

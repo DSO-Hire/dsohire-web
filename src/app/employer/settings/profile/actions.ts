@@ -27,6 +27,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { can } from "@/lib/permissions/capabilities";
 import { recordAuditEvent } from "@/lib/audit/record";
 import {
   ALL_CULTURE_CHIPS,
@@ -53,7 +54,7 @@ async function getDsoAdminContext() {
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id, role")
+    .select("dso_id, role, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
 
@@ -61,13 +62,19 @@ async function getDsoAdminContext() {
     return { ok: false as const, error: "No DSO membership found." };
   }
 
-  // Mirror the is_dso_admin() helper used by RLS — owner + admin can edit
-  // public profile content. Recruiter / hiring manager cannot.
+  // #83 Phase 2 — settings.manage capability (was hard owner/admin; RLS
+  // is_dso_admin() stays as the coarse floor underneath).
   const role = dsoUser.role as string;
-  if (role !== "owner" && role !== "admin") {
+  if (
+    !can(
+      role,
+      (dsoUser as Record<string, unknown>).permission_overrides,
+      "settings.manage"
+    )
+  ) {
     return {
       ok: false as const,
-      error: "Only owners or admins can edit the public profile.",
+      error: "You don't have permission to edit the public profile.",
     };
   }
 

@@ -52,6 +52,10 @@ import {
   ClipboardCheck,
 } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  effectivePermissions,
+  type Capability,
+} from "@/lib/permissions/capabilities";
 import { BrandLockup } from "@/components/marketing/site-shell";
 import { getUnreadCount, getNewApplicationCount } from "@/lib/inbox/queries";
 import { NavBadgeRealtime } from "@/components/inbox/nav-badge-realtime";
@@ -96,8 +100,12 @@ interface NavItem {
   href: string;
   Icon: React.ComponentType<{ className?: string }>;
   group: NavGroup;
-  /** If set, hide the entry from these roles. */
-  hideFromRoles?: ReadonlyArray<Role>;
+  /**
+   * #83 Phase 2 — if set, show only when the viewer's EFFECTIVE permissions
+   * (role preset + per-teammate overrides) include this capability.
+   * Replaces the old hard hideFromRoles lists.
+   */
+  requiresCap?: Capability;
   /** Optional unread/notification badge — heritage pill when > 0. */
   badge?: number;
 }
@@ -106,18 +114,18 @@ const NAV: ReadonlyArray<NavItem> = [
   // ─── Work ───
   { id: "dashboard", label: "Dashboard", href: "/employer/dashboard", Icon: LayoutDashboard, group: "work" },
   { id: "jobs", label: "Jobs", href: "/employer/jobs", Icon: Briefcase, group: "work" },
-  { id: "applications", label: "Applications", href: "/employer/applications", Icon: FileText, group: "work" },
+  { id: "applications", label: "Applications", href: "/employer/applications", Icon: FileText, group: "work", requiresCap: "apps.view" },
   { id: "talent-pool", label: "Talent Pool", href: "/employer/talent-pool", Icon: UsersRound, group: "work" },
   { id: "referrals", label: "Referrals", href: "/employer/referrals", Icon: UserPlus, group: "work" },
   { id: "inbox", label: "Inbox", href: "/employer/inbox", Icon: InboxIcon, group: "work" },
   // ─── Insight ───
-  { id: "reports", label: "Analytics", href: "/employer/analytics", Icon: BarChart3, group: "insight", hideFromRoles: ["hiring_manager"] },
+  { id: "reports", label: "Analytics", href: "/employer/analytics", Icon: BarChart3, group: "insight", requiresCap: "analytics.view" },
   // ─── Setup ───
-  { id: "locations", label: "Locations", href: "/employer/locations", Icon: MapPin, group: "setup", hideFromRoles: ["recruiter", "hiring_manager"] },
-  { id: "team", label: "Team", href: "/employer/team", Icon: UsersIcon, group: "setup", hideFromRoles: ["recruiter", "hiring_manager"] },
-  { id: "billing", label: "Billing", href: "/employer/billing", Icon: CreditCard, group: "setup", hideFromRoles: ["recruiter", "hiring_manager"] },
-  { id: "automations", label: "Automations", href: "/employer/automations", Icon: Workflow, group: "setup", hideFromRoles: ["recruiter", "hiring_manager"] },
-  { id: "offer-approvals", label: "Offer approvals", href: "/employer/offer-approvals", Icon: ClipboardCheck, group: "setup", hideFromRoles: ["recruiter", "hiring_manager"] },
+  { id: "locations", label: "Locations", href: "/employer/locations", Icon: MapPin, group: "setup", requiresCap: "settings.manage" },
+  { id: "team", label: "Team", href: "/employer/team", Icon: UsersIcon, group: "setup", requiresCap: "team.manage" },
+  { id: "billing", label: "Billing", href: "/employer/billing", Icon: CreditCard, group: "setup", requiresCap: "billing.manage" },
+  { id: "automations", label: "Automations", href: "/employer/automations", Icon: Workflow, group: "setup", requiresCap: "integrations.manage" },
+  { id: "offer-approvals", label: "Offer approvals", href: "/employer/offer-approvals", Icon: ClipboardCheck, group: "setup", requiresCap: "offers.approve" },
 ];
 
 // Settings lives in the footer cluster with Help + Sign out (Cam, Day 26) —
@@ -151,7 +159,7 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("id, dso_id, role, full_name")
+    .select("id, dso_id, role, full_name, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
 
@@ -194,6 +202,13 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
 
   const role = dsoUser.role as Role;
 
+  // #83 Phase 2 — nav visibility is capability-driven (role preset +
+  // per-teammate overrides) instead of hard role lists.
+  const navPerms = effectivePermissions(
+    role,
+    (dsoUser as Record<string, unknown>).permission_overrides
+  );
+
   // Inbox unread badge — counts messages from candidates that this user
   // (or any DSO teammate) hasn't marked read.
   // Applications new-count badge — Cam's sharpened ask 2026-05-15.
@@ -204,10 +219,10 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
     getNewApplicationCount(supabase),
   ]);
 
-  // N12 — pending-offer-approvals badge for approvers (owner/admin only).
+  // N12 — pending-offer-approvals badge for approvers.
   // RLS scopes application_offer_sends to this DSO via the join.
   let pendingApprovals = 0;
-  if (role === "owner" || role === "admin") {
+  if (navPerms["offers.approve"]) {
     const { count } = await supabase
       .from("application_offer_sends")
       .select("id", { count: "exact", head: true })
@@ -216,7 +231,7 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
   }
 
   const visibleNav = NAV.filter(
-    (item) => !item.hideFromRoles?.includes(role)
+    (item) => !item.requiresCap || navPerms[item.requiresCap]
   ).map((item) => {
     if (item.id === "inbox") return { ...item, badge: inboxUnread };
     if (item.id === "applications") return { ...item, badge: newApplications };

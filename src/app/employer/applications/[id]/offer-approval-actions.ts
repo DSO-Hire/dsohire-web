@@ -27,6 +27,7 @@ import { resolveCandidateReplyTo } from "@/lib/email/candidate-reply-to";
 import { OfferLetter as OfferLetterEmail } from "@/emails/employer/OfferLetter";
 import { OfferApprovalDecision } from "@/emails/employer/OfferApprovalDecision";
 import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
+import { can } from "@/lib/permissions/capabilities";
 import {
   offerResponseUrl,
   offerQuickAcceptUrl,
@@ -103,17 +104,24 @@ async function loadPendingForDecider(sendId: string): Promise<
   const candidateId = (appRow as Record<string, unknown>).candidate_id as string;
   if (!dsoId || !jobId) return { ok: false, error: "Offer is missing scope context." };
 
-  // Caller must be owner/admin in this DSO.
+  // #83 Phase 2 — caller needs the offers.approve capability (owner/admin
+  // by preset; never grantable to recruiter/HM per the defaults matrix).
   const { data: me } = await supabase
     .from("dso_users")
-    .select("id, full_name, role")
+    .select("id, full_name, role, permission_overrides")
     .eq("auth_user_id", user.id)
     .eq("dso_id", dsoId)
     .maybeSingle();
   if (!me) return { ok: false, error: "You don't have access to this DSO." };
   const callerRole = (me as Record<string, unknown>).role as string;
-  if (callerRole !== "owner" && callerRole !== "admin") {
-    return { ok: false, error: "Only an owner or admin can approve offers." };
+  if (
+    !can(
+      callerRole,
+      (me as Record<string, unknown>).permission_overrides,
+      "offers.approve"
+    )
+  ) {
+    return { ok: false, error: "You don't have permission to approve offers." };
   }
 
   // Candidate full name.

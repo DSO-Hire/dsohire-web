@@ -126,6 +126,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { capabilityBlockError } from "@/lib/permissions/guard";
 import { requireActiveSubscriptionError } from "@/lib/billing/subscription";
 import { jobCapBlockError } from "@/lib/billing/caps";
 import { guardNewJobPublish } from "@/lib/compliance/pay-transparency-guard";
@@ -677,6 +678,19 @@ export async function createCorporateJob(
 
   const supabase = await createSupabaseServerClient();
 
+  // #83 Phase 2 — capability gates (parity with createJob): jobs.create to
+  // create, plus jobs.publish when creating straight to ACTIVE.
+  const createBlock = await capabilityBlockError(supabase, "jobs.create", {
+    dsoId,
+  });
+  if (createBlock) return { ok: false, error: createBlock };
+  if (parsed.status === "active") {
+    const publishBlock = await capabilityBlockError(supabase, "jobs.publish", {
+      dsoId,
+    });
+    if (publishBlock) return { ok: false, error: publishBlock };
+  }
+
   // Feature gate — block job creation behind an active subscription.
   const billingError = await requireActiveSubscriptionError(supabase, dsoId);
   if (billingError) return { ok: false, error: billingError };
@@ -849,6 +863,10 @@ export async function updateCorporateJob(
   if ("error" in parsed) return { ok: false, error: parsed.error };
 
   const supabase = await createSupabaseServerClient();
+
+  // #83 Phase 2 — editing needs jobs.edit.
+  const editBlock = await capabilityBlockError(supabase, "jobs.edit", { dsoId });
+  if (editBlock) return { ok: false, error: editBlock };
 
   // Pay-transparency — re-validate when the edit keeps/sets the job live.
   if (parsed.status === "active") {
@@ -1112,6 +1130,10 @@ export async function updateCorporateJobBasicsSection(
 
   const supabase = await createSupabaseServerClient();
 
+  // #83 Phase 2 — section edits need jobs.edit.
+  const editBlock = await capabilityBlockError(supabase, "jobs.edit", { dsoId });
+  if (editBlock) return { ok: false, error: editBlock };
+
   const { error: updateError } = await supabase
     .from("jobs")
     .update({
@@ -1203,6 +1225,10 @@ export async function updateCorporateJobDetailsSection(
   if ("error" in parsed) return { ok: false, error: parsed.error };
 
   const supabase = await createSupabaseServerClient();
+
+  // #83 Phase 2 — section edits need jobs.edit.
+  const editBlock = await capabilityBlockError(supabase, "jobs.edit", { dsoId });
+  if (editBlock) return { ok: false, error: editBlock };
 
   const { error: updateError } = await supabase
     .from("jobs")

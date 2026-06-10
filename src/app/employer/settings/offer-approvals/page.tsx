@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { dsoCanUseOfferApprovals } from "@/lib/offers/approval-tier";
 import { parseOfferApprovalPolicy } from "@/lib/offers/approval-policy";
+import { can } from "@/lib/permissions/capabilities";
 import {
   OfferApprovalsSettings,
   type TeammateRow,
@@ -44,7 +45,7 @@ export default async function OfferApprovalsSettingsPage() {
 
   const { data: teamRows } = await supabase
     .from("dso_users")
-    .select("id, full_name, first_name, last_name, role, can_send_offers_directly")
+    .select("id, full_name, first_name, last_name, role, permission_overrides")
     .eq("dso_id", dsoId)
     .order("role", { ascending: true })
     .order("first_name", { ascending: true });
@@ -59,7 +60,13 @@ export default async function OfferApprovalsSettingsPage() {
             .join(" ")) ||
         "Teammate",
       role: t.role as string,
-      canSendDirectly: Boolean(t.can_send_offers_directly),
+      // #83 Phase 2 — read the grant from the capability model (the legacy
+      // can_send_offers_directly column is dead).
+      canSendDirectly: can(
+        t.role as string,
+        t.permission_overrides,
+        "offers.send_direct"
+      ),
     })
   );
 

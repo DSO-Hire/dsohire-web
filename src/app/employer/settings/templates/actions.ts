@@ -25,6 +25,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { can } from "@/lib/permissions/capabilities";
 import {
   CUSTOM_KIND_PREFIX,
   PREDEFINED_TEMPLATE_KINDS,
@@ -53,17 +54,24 @@ async function getDsoAdminContext() {
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id, role")
+    .select("dso_id, role, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) {
     return { ok: false as const, error: "No DSO membership found." };
   }
+  // #83 Phase 2 — settings.manage capability (was hard owner/admin).
   const role = dsoUser.role as string;
-  if (role !== "owner" && role !== "admin") {
+  if (
+    !can(
+      role,
+      (dsoUser as Record<string, unknown>).permission_overrides,
+      "settings.manage"
+    )
+  ) {
     return {
       ok: false as const,
-      error: "Only owners and admins can edit email templates.",
+      error: "You don't have permission to edit email templates.",
     };
   }
   return {

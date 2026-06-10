@@ -67,11 +67,18 @@ export function parseOfferApprovalPolicy(raw: unknown): OfferApprovalPolicy {
 export type OfferRole = "owner" | "admin" | "recruiter" | "hiring_manager" | string;
 
 /**
- * An empowered sender can send offers without per-offer approval. Owner +
- * admin are always empowered; recruiter/HM only when explicitly granted.
+ * An empowered sender can send offers without per-offer approval.
+ *
+ * #83 Phase 2: `canSendDirectly` is now the capability-resolved
+ * can(role, permission_overrides, "offers.send_direct") — role defaults are
+ * already encoded there (owner/admin true, recruiter/HM grant-only), so this
+ * no longer short-circuits on role. That also means a per-teammate override
+ * can restrict an ADMIN's direct send (it couldn't before). The legacy
+ * dso_users.can_send_offers_directly column is dead — never pass it here.
+ * `role` is kept for call-site readability/back-compat only.
  */
 export function isEmpoweredSender(role: OfferRole, canSendDirectly: boolean): boolean {
-  if (role === "owner" || role === "admin") return true;
+  void role;
   return canSendDirectly === true;
 }
 

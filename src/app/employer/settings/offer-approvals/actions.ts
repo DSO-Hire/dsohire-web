@@ -15,6 +15,7 @@ import {
 } from "@/lib/supabase/server";
 import { dsoCanUseOfferApprovals } from "@/lib/offers/approval-tier";
 import { parseOfferApprovalPolicy } from "@/lib/offers/approval-policy";
+import { parsePermissionOverrides } from "@/lib/permissions/capabilities";
 import { recordAuditEvent } from "@/lib/audit/record";
 
 export type SettingsResult = { ok: true } | { ok: false; error: string };
@@ -118,7 +119,7 @@ export async function setTeammateCanSendDirectly(
   // are always empowered — the grant is meaningless for them).
   const { data: target } = await admin
     .from("dso_users")
-    .select("id, role, dso_id, full_name")
+    .select("id, role, dso_id, full_name, permission_overrides")
     .eq("id", targetDsoUserId)
     .maybeSingle();
   if (!target || (target.dso_id as string) !== who.dsoId) {
@@ -129,9 +130,20 @@ export async function setTeammateCanSendDirectly(
     return { ok: false, error: "Owners and admins already send offers directly." };
   }
 
+  // #83 Phase 2 — the grant lives in permission_overrides (single source of
+  // truth; the legacy can_send_offers_directly column is dead). Minimal-diff
+  // storage: recruiter/HM preset is false, so value=true sets the key and
+  // value=false removes it (back to preset).
+  const currentOverrides = parsePermissionOverrides(
+    (target as Record<string, unknown>).permission_overrides
+  );
+  const nextOverrides: Record<string, boolean> = { ...currentOverrides };
+  if (value) nextOverrides["offers.send_direct"] = true;
+  else delete nextOverrides["offers.send_direct"];
+
   const { error } = await admin
     .from("dso_users")
-    .update({ can_send_offers_directly: value })
+    .update({ permission_overrides: nextOverrides })
     .eq("id", targetDsoUserId)
     .eq("dso_id", who.dsoId);
   if (error) {
@@ -151,7 +163,7 @@ export async function setTeammateCanSendDirectly(
     summary: `${value ? "Granted" : "Revoked"} direct offer-send for ${
       (target.full_name as string | null) ?? "a teammate"
     }`,
-    metadata: { can_send_offers_directly: value },
+    metadata: { "offers.send_direct": value },
   });
 
   revalidatePath("/employer/settings/offer-approvals");

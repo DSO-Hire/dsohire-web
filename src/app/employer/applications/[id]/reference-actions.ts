@@ -29,6 +29,7 @@ import {
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { can } from "@/lib/permissions/capabilities";
 import { sendEmail } from "@/lib/email/send";
 import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
 import { ReferenceRequest as ReferenceRequestEmail } from "@/emails/employer/ReferenceRequest";
@@ -108,7 +109,7 @@ async function resolveScope(
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("id, dso_id, full_name, role")
+    .select("id, dso_id, full_name, role, permission_overrides")
     .eq("auth_user_id", user.id)
     .eq("dso_id", jobDsoId)
     .maybeSingle();
@@ -116,6 +117,22 @@ async function resolveScope(
     return {
       ok: false,
       error: "You don't have access to this DSO's applications.",
+    };
+  }
+
+  // #83 Phase 2 — reference requests email the candidate → apps.message.
+  // Single choke point: every reference action resolves scope through here.
+  if (
+    !can(
+      (dsoUser as Record<string, unknown>).role as string,
+      (dsoUser as Record<string, unknown>).permission_overrides,
+      "apps.message"
+    )
+  ) {
+    return {
+      ok: false,
+      error:
+        "Your account doesn't have permission to contact candidates. An owner or admin can grant this on the Team page.",
     };
   }
 

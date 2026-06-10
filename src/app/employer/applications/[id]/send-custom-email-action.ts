@@ -25,6 +25,7 @@ import {
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
 import { dsoCanUseCustomTemplates } from "@/lib/email/templates/tier";
+import { can } from "@/lib/permissions/capabilities";
 import { renderTemplate } from "@/lib/email/templates/renderer";
 import { sanitizeTiptapHtml, htmlToPlainText } from "@/lib/html/sanitize-tiptap";
 import { sendEmail } from "@/lib/email/send";
@@ -49,18 +50,28 @@ export async function sendCustomTemplateEmail(input: {
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Please sign in." };
 
-  // DSO membership + role check.
+  // DSO membership + capability check. #83 Phase 2 — owner/admin hard-gate
+  // swapped for apps.message (recruiters message candidates by preset; an
+  // override can revoke it). Deliberate loosening per the locked defaults
+  // matrix; the Growth+ tier gate below is unchanged.
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id, role, full_name")
+    .select("dso_id, role, full_name, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) return { ok: false, error: "No DSO membership found." };
   const role = dsoUser.role as string;
-  if (role !== "owner" && role !== "admin") {
+  if (
+    !can(
+      role,
+      (dsoUser as Record<string, unknown>).permission_overrides,
+      "apps.message"
+    )
+  ) {
     return {
       ok: false,
-      error: "Only owners and admins can send custom emails.",
+      error:
+        "Your account doesn't have permission to message candidates. An owner or admin can grant this on the Team page.",
     };
   }
   const dsoId = dsoUser.dso_id as string;

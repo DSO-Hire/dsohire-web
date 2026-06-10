@@ -18,6 +18,7 @@ import { redirect } from "next/navigation";
 import { ArrowRight, Download } from "lucide-react";
 import type { Metadata } from "next";
 import { EmployerShell } from "@/components/employer/employer-shell";
+import { can } from "@/lib/permissions/capabilities";
 import { HelpDisclosure } from "@/components/help/help-disclosure";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
@@ -103,10 +104,21 @@ export default async function AnalyticsHubPage({ searchParams }: PageProps) {
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id, role")
+    .select("dso_id, role, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) redirect("/employer/onboarding");
+
+  // #83 Phase 2 — analytics.view gate (HM preset off; override-tunable).
+  if (
+    !can(
+      dsoUser.role as string,
+      (dsoUser as Record<string, unknown>).permission_overrides,
+      "analytics.view"
+    )
+  ) {
+    redirect("/employer/dashboard");
+  }
 
   const dsoId = dsoUser.dso_id as string;
 

@@ -28,6 +28,8 @@ import { sendEmail } from "@/lib/email/send";
 import { TeamInvite } from "@/emails/employer/TeamInvite";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { seatCapBlockError } from "@/lib/billing/caps";
+import { can } from "@/lib/permissions/capabilities";
+import { getActingMember, memberCan } from "@/lib/permissions/guard";
 
 export type DsoRole = "owner" | "admin" | "recruiter" | "hiring_manager";
 
@@ -87,13 +89,22 @@ export async function inviteTeammate(
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("id, dso_id, role, full_name")
+    .select("id, dso_id, role, full_name, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) return { ok: false, error: "No DSO context found." };
 
-  if (dsoUser.role !== "owner" && dsoUser.role !== "admin") {
-    return { ok: false, error: "Only owners and admins can invite teammates." };
+  // #83 Phase 2 — team.manage capability (owner/admin preset; ADMIN_ONLY so
+  // it can never be granted to recruiter/HM, but an admin can have it
+  // revoked via override).
+  if (
+    !can(
+      dsoUser.role as string,
+      (dsoUser as Record<string, unknown>).permission_overrides,
+      "team.manage"
+    )
+  ) {
+    return { ok: false, error: "You don't have permission to manage the team." };
   }
 
   // #88 — seat cap: block inviting beyond the plan's admin seats (counts
@@ -244,10 +255,16 @@ export async function revokeInvitation(formData: FormData): Promise<void> {
   if (!invitationId) return;
 
   const supabase = await createSupabaseServerClient();
+
+  // #83 Phase 2 — team.manage + same-DSO scope (defense-in-depth over RLS).
+  const actor = await getActingMember(supabase);
+  if (!actor || !memberCan(actor, "team.manage")) return;
+
   await supabase
     .from("dso_invitations")
     .update({ revoked_at: new Date().toISOString() })
     .eq("id", invitationId)
+    .eq("dso_id", actor.dsoId)
     .is("accepted_at", null)
     .is("revoked_at", null);
 
@@ -274,6 +291,12 @@ export async function changeTeammateRole(formData: FormData): Promise<void> {
 
   const supabase = await createSupabaseServerClient();
 
+  // #83 Phase 2 — explicit actor gate (was RLS-only): team.manage, same DSO,
+  // no self-role-change (self-escalation floor), and only an OWNER may
+  // assign the owner role or change an existing owner's role.
+  const actor = await getActingMember(supabase);
+  if (!actor || !memberCan(actor, "team.manage")) return;
+
   // Fetch the target row + the current sole-owner check
   const { data: target } = await supabase
     .from("dso_users")
@@ -281,6 +304,14 @@ export async function changeTeammateRole(formData: FormData): Promise<void> {
     .eq("id", dsoUserId)
     .maybeSingle();
   if (!target) return;
+  if ((target.dso_id as string) !== actor.dsoId) return;
+  if ((target.id as string) === actor.dsoUserId) return; // never your own role
+  if (
+    (newRole === "owner" || target.role === "owner") &&
+    actor.role !== "owner"
+  ) {
+    return; // ownership moves are owner-gated
+  }
 
   // Block demoting the only owner
   if (target.role === "owner" && newRole !== "owner") {
@@ -354,12 +385,22 @@ export async function assignHmLocations(formData: FormData): Promise<void> {
   } = await supabase.auth.getUser();
   if (!user) return;
 
+  // #83 Phase 2 — team.manage capability (was hard owner/admin).
   const { data: caller } = await supabase
     .from("dso_users")
-    .select("dso_id, role")
+    .select("dso_id, role, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
-  if (!caller || (caller.role !== "owner" && caller.role !== "admin")) return;
+  if (
+    !caller ||
+    !can(
+      caller.role as string,
+      (caller as Record<string, unknown>).permission_overrides,
+      "team.manage"
+    )
+  ) {
+    return;
+  }
 
   const { data: target } = await supabase
     .from("dso_users")
@@ -410,12 +451,19 @@ export async function removeTeammate(formData: FormData): Promise<void> {
 
   const supabase = await createSupabaseServerClient();
 
+  // #83 Phase 2 — explicit actor gate (was RLS-only): team.manage + same DSO.
+  const actor = await getActingMember(supabase);
+  if (!actor || !memberCan(actor, "team.manage")) return;
+
   const { data: target } = await supabase
     .from("dso_users")
     .select("id, dso_id, role, auth_user_id")
     .eq("id", dsoUserId)
     .maybeSingle();
   if (!target) return;
+  if ((target.dso_id as string) !== actor.dsoId) return;
+  // Removing an OWNER is owner-gated (an admin can't remove the owner).
+  if (target.role === "owner" && actor.role !== "owner") return;
 
   // Guard: don't remove the sole owner
   if (target.role === "owner") {

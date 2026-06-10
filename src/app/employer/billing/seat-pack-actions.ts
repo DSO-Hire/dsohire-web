@@ -25,6 +25,7 @@ import {
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/server";
+import { can } from "@/lib/permissions/capabilities";
 import {
   getSeatPackPriceId,
   isSeatPackPriceId,
@@ -59,12 +60,19 @@ async function loadContext(): Promise<
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id, role")
+    .select("dso_id, role, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) return { error: "No employer account found." };
-  if (dsoUser.role !== "owner" && dsoUser.role !== "admin") {
-    return { error: "Only owners and admins can change seats." };
+  // #83 Phase 2 — billing.manage capability (was hard owner/admin).
+  if (
+    !can(
+      dsoUser.role as string,
+      (dsoUser as Record<string, unknown>).permission_overrides,
+      "billing.manage"
+    )
+  ) {
+    return { error: "You don't have permission to manage billing." };
   }
 
   const { data: sub } = await supabase

@@ -15,6 +15,7 @@
 
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { can } from "@/lib/permissions/capabilities";
 import { getStripe } from "@/lib/stripe/server";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
@@ -29,10 +30,22 @@ export async function openCustomerPortal() {
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id")
+    .select("dso_id, role, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) redirect("/employer/sign-up");
+
+  // #83 Phase 2 — Stripe portal (cancel / plan change / payment methods) is
+  // billing.manage (owner/admin preset; never grantable to recruiter/HM).
+  if (
+    !can(
+      dsoUser.role as string,
+      (dsoUser as Record<string, unknown>).permission_overrides,
+      "billing.manage"
+    )
+  ) {
+    redirect("/employer/billing");
+  }
 
   const { data: sub } = await supabase
     .from("subscriptions")

@@ -12,6 +12,7 @@ import { EmployerShell } from "@/components/employer/employer-shell";
 import { HelpDisclosure } from "@/components/help/help-disclosure";
 import { Avatar } from "@/components/ui/avatar";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { can } from "@/lib/permissions/capabilities";
 import {
   KANBAN_KINDS,
   KIND_DEFAULT_LABELS,
@@ -65,10 +66,22 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id")
+    .select("dso_id, role, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) redirect("/employer/onboarding");
+
+  // #83 Phase 2 — apps.view gate (on for every preset; an override can
+  // revoke it; nav hides the entry in lockstep).
+  if (
+    !can(
+      dsoUser.role as string,
+      (dsoUser as Record<string, unknown>).permission_overrides,
+      "apps.view"
+    )
+  ) {
+    redirect("/employer/dashboard");
+  }
 
   // Multi-location filter (Phase 4.6.d) — when an active location is
   // set, restrict the jobs (and therefore applications) to that

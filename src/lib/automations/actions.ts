@@ -14,6 +14,7 @@ import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { dsoCanUseAutomationRules } from "./tier";
+import { can } from "@/lib/permissions/capabilities";
 import {
   evaluateConditions,
   type RuleCondition,
@@ -92,13 +93,19 @@ async function resolveOwnerAdmin(): Promise<
   if (!user) return { ok: false, error: "Please sign in." };
   const { data: me } = await supabase
     .from("dso_users")
-    .select("id, dso_id, role")
+    .select("id, dso_id, role, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!me) return { ok: false, error: "Teammate record not found." };
-  const role = me.role as string;
-  if (role !== "owner" && role !== "admin") {
-    return { ok: false, error: "Only owners and admins can manage automations." };
+  // #83 Phase 2 — integrations.manage capability (was hard owner/admin).
+  if (
+    !can(
+      me.role as string,
+      (me as Record<string, unknown>).permission_overrides,
+      "integrations.manage"
+    )
+  ) {
+    return { ok: false, error: "You don't have permission to manage automations." };
   }
   return { ok: true, dsoId: me.dso_id as string, dsoUserId: me.id as string };
 }

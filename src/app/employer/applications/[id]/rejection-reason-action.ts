@@ -36,6 +36,7 @@ import {
 import { logAiUsage, checkAiRateLimit } from "@/lib/ai/usage";
 import { extractJson } from "@/lib/ai/extract-json";
 import { getRubricForRole } from "@/lib/scorecards/rubric-library";
+import { can } from "@/lib/permissions/capabilities";
 import type { PricingTier } from "@/lib/stripe/prices";
 
 const InputSchema = z.object({
@@ -99,12 +100,27 @@ export async function suggestRejectionReason(
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id")
+    .select("dso_id, role, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) return { ok: false, error: "No DSO membership" };
 
   const dsoId = dsoUser.dso_id as string;
+
+  // #83 Phase 2 — drafting rejection reasons is part of rejecting.
+  if (
+    !can(
+      dsoUser.role as string,
+      (dsoUser as Record<string, unknown>).permission_overrides,
+      "apps.reject"
+    )
+  ) {
+    return {
+      ok: false,
+      error:
+        "Your account doesn't have permission to reject candidates. An owner or admin can grant this on the Team page.",
+    };
+  }
 
   // ── Tier gate (Growth+ only). Read tier + status from subscriptions
   // directly so we can distinguish Growth from Starter; the billing helper

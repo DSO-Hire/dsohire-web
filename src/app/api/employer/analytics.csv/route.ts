@@ -8,6 +8,7 @@
 
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { can } from "@/lib/permissions/capabilities";
 import { getDsoCrossLocationStats } from "@/lib/analytics/metrics";
 import { toCsv, csvFilename } from "@/lib/analytics/csv";
 
@@ -25,11 +26,25 @@ export async function GET() {
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id")
+    .select("dso_id, role, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) {
     return NextResponse.json({ error: "no dso" }, { status: 403 });
+  }
+
+  // #83 Phase 2 — aggregate metrics export rides analytics.view (no PII).
+  if (
+    !can(
+      dsoUser.role as string,
+      (dsoUser as Record<string, unknown>).permission_overrides,
+      "analytics.view"
+    )
+  ) {
+    return NextResponse.json(
+      { error: "You don't have permission to view analytics." },
+      { status: 403 }
+    );
   }
 
   const rows = await getDsoCrossLocationStats(

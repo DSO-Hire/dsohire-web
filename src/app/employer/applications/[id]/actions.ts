@@ -18,6 +18,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { after } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { capabilityBlockError } from "@/lib/permissions/guard";
 import {
   KIND_DEFAULT_LABELS,
   STAGE_KINDS,
@@ -185,6 +186,15 @@ export async function moveApplicationStage(
     );
     return { ok: false, error: "Stage not found for this DSO." };
   }
+
+  // #83 Phase 2 — moving stages needs apps.move_stage; moving INTO the
+  // rejected stage needs apps.reject (the reject/withdraw-with-reason flows
+  // route through here, so this is the single choke point for both).
+  const moveBlock = await capabilityBlockError(
+    supabase,
+    resolved.kind === "rejected" ? "apps.reject" : "apps.move_stage"
+  );
+  if (moveBlock) return { ok: false, error: moveBlock };
 
   // Read the application's current stage_id + the job's hide-stages flag
   // + dso_id (audit logging) + candidate name (audit summary) in one
@@ -388,6 +398,11 @@ export async function saveEmployerNotes(
   if (!id) return { ok: false, error: "Missing application id." };
 
   const supabase = await createSupabaseServerClient();
+
+  // #83 Phase 2 — internal notes are feedback → apps.scorecard.
+  const notesBlock = await capabilityBlockError(supabase, "apps.scorecard");
+  if (notesBlock) return { ok: false, error: notesBlock };
+
   const { error } = await supabase
     .from("applications")
     .update({ employer_notes: notes || null })

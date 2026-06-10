@@ -10,6 +10,7 @@
 
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { capabilityBlockError } from "@/lib/permissions/guard";
 import { toCsv, csvFilename } from "@/lib/analytics/csv";
 
 export const dynamic = "force-dynamic";
@@ -37,6 +38,14 @@ export async function GET(
     .maybeSingle();
   if (!job) {
     return NextResponse.json({ error: "not found" }, { status: 404 });
+  }
+
+  // #83 Phase 2 — candidate PII export needs candidates.export.
+  const exportBlock = await capabilityBlockError(supabase, "candidates.export", {
+    dsoId: job.dso_id as string,
+  });
+  if (exportBlock) {
+    return NextResponse.json({ error: exportBlock }, { status: 403 });
   }
 
   // `status` (the old enum column) was removed when configurable pipeline

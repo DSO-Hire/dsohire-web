@@ -9,6 +9,7 @@
 
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { can } from "@/lib/permissions/capabilities";
 import { toCsv, csvFilename } from "@/lib/analytics/csv";
 
 export const dynamic = "force-dynamic";
@@ -25,11 +26,26 @@ export async function GET() {
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id")
+    .select("dso_id, role, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) {
     return NextResponse.json({ error: "no dso" }, { status: 403 });
+  }
+
+  // #83 Phase 2 — candidate PII export needs candidates.export
+  // (owner/admin preset; grant-only for recruiters).
+  if (
+    !can(
+      dsoUser.role as string,
+      (dsoUser as Record<string, unknown>).permission_overrides,
+      "candidates.export"
+    )
+  ) {
+    return NextResponse.json(
+      { error: "You don't have permission to export candidate data." },
+      { status: 403 }
+    );
   }
 
   // `status` (the old enum column) was removed when configurable pipeline

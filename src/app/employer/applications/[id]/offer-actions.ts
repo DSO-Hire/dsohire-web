@@ -50,6 +50,7 @@ import {
   type OfferGateReason,
 } from "@/lib/offers/approval-policy";
 import { dsoCanUseOfferApprovals } from "@/lib/offers/approval-tier";
+import { can } from "@/lib/permissions/capabilities";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
 
@@ -139,7 +140,7 @@ export async function sendOffer(
   // ── DSO membership check
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("id, dso_id, full_name, role, can_send_offers_directly")
+    .select("id, dso_id, full_name, role, permission_overrides")
     .eq("auth_user_id", user.id)
     .eq("dso_id", jobDsoId)
     .maybeSingle();
@@ -147,16 +148,25 @@ export async function sendOffer(
     return { ok: false, error: "You don't have access to this DSO's applications." };
   }
   const dsoUserRole = (dsoUser as Record<string, unknown>).role as string;
-  // owner/admin/recruiter could always send; N12 adds hiring_manager to the
-  // set of roles that may PREPARE an offer — theirs always routes to approval
-  // (unless granted can_send_offers_directly), so it's safe to let them in.
-  if (!["owner", "admin", "recruiter", "hiring_manager"].includes(dsoUserRole)) {
-    return { ok: false, error: "You don't have permission to send offers." };
+  const dsoUserOverrides = (dsoUser as Record<string, unknown>)
+    .permission_overrides;
+  // #83 Phase 2 — preparing an offer requires the offers.draft capability
+  // (owner/admin/recruiter by preset; HM only via per-teammate grant). A
+  // non-empowered drafter's offer still routes to approval below.
+  if (!can(dsoUserRole, dsoUserOverrides, "offers.draft")) {
+    return {
+      ok: false,
+      error:
+        "Your account doesn't have permission to draft offers. An owner or admin can grant this on the Team page.",
+    };
   }
-  const senderCanSendDirectly =
-    ((dsoUser as Record<string, unknown>).can_send_offers_directly as
-      | boolean
-      | null) ?? false;
+  // Single source of truth for direct-send: the capability model (the legacy
+  // can_send_offers_directly column was migrated into permission_overrides).
+  const senderCanSendDirectly = can(
+    dsoUserRole,
+    dsoUserOverrides,
+    "offers.send_direct"
+  );
   const senderName =
     ((dsoUser as Record<string, unknown>).full_name as string | null) ?? null;
   const dsoUserId = (dsoUser as Record<string, unknown>).id as string;

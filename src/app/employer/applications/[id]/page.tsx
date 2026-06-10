@@ -103,6 +103,7 @@ import {
   parseOfferApprovalPolicy,
   isEmpoweredSender,
 } from "@/lib/offers/approval-policy";
+import { effectivePermissions } from "@/lib/permissions/capabilities";
 import {
   getRubricForRole,
   parseAttributeScores,
@@ -209,10 +210,20 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id, role, can_send_offers_directly")
+    .select("dso_id, role, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) redirect("/employer/onboarding");
+
+  // #83 Phase 2 — effective capability map for this viewer (role preset +
+  // per-teammate overrides). Gates below: apps.view (whole page),
+  // comp.view (offer history + comp-expectation answers), offers.draft
+  // (compose), plus per-control flags threaded into the sections.
+  const viewerPerms = effectivePermissions(
+    dsoUser.role as string,
+    (dsoUser as Record<string, unknown>).permission_overrides
+  );
+  if (!viewerPerms["apps.view"]) redirect("/employer/dashboard");
 
   const { data: rawApp } = await supabase
     .from("applications")
@@ -431,7 +442,22 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     required: boolean;
     sort_order: number;
   }>) as ScreeningQuestion[];
-  const answers = (rawAnswers ?? []) as ExistingAnswer[];
+  const allAnswers = (rawAnswers ?? []) as ExistingAnswer[];
+
+  // #83 Phase 2 — comp.view gate. Viewers without the capability never
+  // receive compensation-expectation screening Q&A (stripped server-side,
+  // not hidden in CSS). Library comp questions all match on prompt; custom
+  // employer comp questions are caught by the same keywords.
+  const compMasked = !viewerPerms["comp.view"];
+  const COMP_PROMPT_RE =
+    /compensation|salary|pay rate|pay range|pay expectation|hourly rate|daily rate|wage|production|collections/i;
+  const visibleQuestions = compMasked
+    ? questions.filter((q) => !COMP_PROMPT_RE.test(q.prompt))
+    : questions;
+  const visibleQuestionIds = new Set(visibleQuestions.map((q) => q.id));
+  const answers = compMasked
+    ? allAnswers.filter((a) => visibleQuestionIds.has(a.question_id))
+    : allAnswers;
   const answersByQuestionId = new Map<string, ExistingAnswer>(
     answers.map((a) => [a.question_id, a])
   );
@@ -1210,14 +1236,14 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const showOfferSection = onOfferStage || offerSends.length > 0;
 
   // N12 Phase 2 — offer-approval context for the OfferSection.
+  // #83 Phase 2 — both flags now come from the capability model (role preset
+  // + per-teammate overrides); the legacy can_send_offers_directly column is
+  // dead.
   const offerViewerRole = (dsoUser.role as string) ?? "";
-  const offerViewerCanApprove =
-    offerViewerRole === "owner" || offerViewerRole === "admin";
+  const offerViewerCanApprove = viewerPerms["offers.approve"];
   const offerSenderEmpowered = isEmpoweredSender(
     offerViewerRole,
-    ((dsoUser as Record<string, unknown>).can_send_offers_directly as
-      | boolean
-      | null) ?? false
+    viewerPerms["offers.send_direct"]
   );
   const offerApprovalPolicy = parseOfferApprovalPolicy(
     (dsoForAffiliation as Record<string, unknown> | null)?.offer_approval_policy
@@ -1719,18 +1745,18 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             title="Screening responses"
             icon={ClipboardList}
             subtitle={
-              questions.length > 0
-                ? `Answers to the ${questions.length} screening question${questions.length === 1 ? "" : "s"} on this job.`
+              visibleQuestions.length > 0
+                ? `Answers to the ${visibleQuestions.length} screening question${visibleQuestions.length === 1 ? "" : "s"} on this job.`
                 : undefined
             }
           >
-            {questions.length === 0 ? (
+            {visibleQuestions.length === 0 ? (
               <p className="text-[14px] text-slate-meta italic">
                 No screening questions on this job.
               </p>
             ) : (
               <div className="border border-[var(--rule)] bg-white divide-y divide-[var(--rule)]">
-                {questions.map((q) => (
+                {visibleQuestions.map((q) => (
                   <ScreeningResponseRow
                     key={q.id}
                     question={q}
@@ -1805,6 +1831,16 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               subtitle={`Send a templated offer letter to ${displayName} via email. Past sends are snapshotted as the legal record.`}
               tone="candidate"
             >
+              {compMasked ? (
+                // #83 Phase 2 — comp.view gate: offer letters + amounts are
+                // compensation data. Masked server-side for viewers without
+                // the capability.
+                <p className="text-[14px] text-slate-meta italic">
+                  Offer and compensation details are hidden for your account.
+                  An owner or admin can grant &ldquo;View compensation /
+                  salary fields&rdquo; from the Team page.
+                </p>
+              ) : (
               <OfferSection
                 applicationId={app.id}
                 candidateName={displayName}
@@ -1834,6 +1870,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 senderEmpowered={offerSenderEmpowered}
                 approvalPolicy={offerApprovalPolicy}
               />
+              )}
             </DetailSection>
           )}
 

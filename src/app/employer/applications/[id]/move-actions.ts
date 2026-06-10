@@ -24,6 +24,7 @@
  */
 
 import { revalidatePath } from "next/cache";
+import { capabilityBlockError } from "@/lib/permissions/guard";
 import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
@@ -158,6 +159,13 @@ export async function transferApplication(
   // Authorize via the user's session (RLS proves DSO membership).
   const ctx = await loadSourceContext(supabase, applicationId);
   if (!ctx) return { ok: false, error: "Application not found." };
+
+  // #83 Phase 2 — moving/copying a candidate between jobs is a pipeline
+  // move → apps.move_stage.
+  const transferBlock = await capabilityBlockError(supabase, "apps.move_stage", {
+    dsoId: ctx.dsoId,
+  });
+  if (transferBlock) return { ok: false, error: transferBlock };
 
   // Resolve the target job + confirm it's in the SAME DSO and readable by
   // this user (RLS). Cross-DSO transfers are never allowed.

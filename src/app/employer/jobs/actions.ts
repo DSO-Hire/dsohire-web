@@ -61,6 +61,7 @@ import {
   syncJobVerificationRequirements,
   type ScreeningQuestionPayload,
 } from "./job-shared";
+import { capabilityBlockError } from "@/lib/permissions/guard";
 
 /* ───── Create ───── */
 
@@ -73,6 +74,19 @@ export async function createJob(
   if ("error" in parsed) return { ok: false, error: parsed.error };
 
   const supabase = await createSupabaseServerClient();
+
+  // #83 Phase 2 — capability gates: creating needs jobs.create; creating
+  // straight to ACTIVE additionally needs jobs.publish.
+  const createBlock = await capabilityBlockError(supabase, "jobs.create", {
+    dsoId,
+  });
+  if (createBlock) return { ok: false, error: createBlock };
+  if (parsed.status === "active") {
+    const publishBlock = await capabilityBlockError(supabase, "jobs.publish", {
+      dsoId,
+    });
+    if (publishBlock) return { ok: false, error: publishBlock };
+  }
 
   // Feature gate — block job creation behind an active subscription.
   const billingError = await requireActiveSubscriptionError(supabase, dsoId);
@@ -268,6 +282,12 @@ export async function updateJob(
   if ("error" in parsed) return { ok: false, error: parsed.error };
 
   const supabase = await createSupabaseServerClient();
+
+  // #83 Phase 2 — editing needs jobs.edit.
+  const editBlock = await capabilityBlockError(supabase, "jobs.edit", {
+    dsoId,
+  });
+  if (editBlock) return { ok: false, error: editBlock };
 
   // Pay-transparency — re-validate when the edit keeps/sets the job live.
   if (parsed.status === "active") {
@@ -527,6 +547,10 @@ export async function updateJobBasicsSection(
 
   const supabase = await createSupabaseServerClient();
 
+  // #83 Phase 2 — section edits need jobs.edit.
+  const editBlock = await capabilityBlockError(supabase, "jobs.edit", { dsoId });
+  if (editBlock) return { ok: false, error: editBlock };
+
   // 5G.c follow-up — corporate jobs always carry role_category="other";
   // corporate_function field is the real categorization. Override any
   // stale value the form may have inherited from a prior non-corporate
@@ -580,6 +604,11 @@ export async function updateJobDescriptionSection(
   }
 
   const supabase = await createSupabaseServerClient();
+
+  // #83 Phase 2 — section edits need jobs.edit.
+  const editBlock = await capabilityBlockError(supabase, "jobs.edit", { dsoId });
+  if (editBlock) return { ok: false, error: editBlock };
+
   const { error } = await supabase
     .from("jobs")
     .update({ description })
@@ -746,6 +775,10 @@ export async function updateJobDetailsSection(
   }
 
   const supabase = await createSupabaseServerClient();
+
+  // #83 Phase 2 — section edits need jobs.edit.
+  const editBlock = await capabilityBlockError(supabase, "jobs.edit", { dsoId });
+  if (editBlock) return { ok: false, error: editBlock };
 
   // Pay-transparency — block hiding pay / dropping the range / removing
   // benefits on a LIVE covered posting. No-op for drafts + non-covered jobs.
@@ -948,6 +981,10 @@ export async function updateJobScreeningSection(
 
   const supabase = await createSupabaseServerClient();
 
+  // #83 Phase 2 — section edits need jobs.edit.
+  const editBlock = await capabilityBlockError(supabase, "jobs.edit", { dsoId });
+  if (editBlock) return { ok: false, error: editBlock };
+
   const incomingIds = new Set(
     screening.map((q) => q.id).filter((id): id is string => id !== null)
   );
@@ -1053,6 +1090,16 @@ export async function setJobStatus(
   const jobTitle =
     ((priorJob as Record<string, unknown> | null)?.title as string | null) ??
     "the job";
+
+  // #83 Phase 2 — every status transition (publish / pause / fill / archive /
+  // reactivate) is the jobs.publish capability.
+  const statusDsoId = (priorJob as Record<string, unknown> | null)?.dso_id as
+    | string
+    | undefined;
+  const publishBlock = await capabilityBlockError(supabase, "jobs.publish", {
+    dsoId: statusDsoId,
+  });
+  if (publishBlock) return { ok: false, error: publishBlock };
 
   // Pay-transparency enforcement on the draft → active (and re-activate)
   // transition. Loads the persisted job + locations; employer can self-certify
@@ -1276,6 +1323,12 @@ export async function updateJobSchedule(
   const jobStatus = (jobRow as { status: string }).status;
   const jobTitle = (jobRow as { title: string | null }).title ?? "the job";
 
+  // #83 Phase 2 — scheduling go-live / expiry controls publish state.
+  const scheduleBlock = await capabilityBlockError(supabase, "jobs.publish", {
+    dsoId,
+  });
+  if (scheduleBlock) return { ok: false, error: scheduleBlock };
+
   // Scheduled publish only applies to drafts (the held-until-live state).
   // For any non-draft job, ignore an incoming publish date so we can't
   // accidentally un-publish a live role.
@@ -1343,6 +1396,12 @@ export async function setJobVisibility(
     "the job";
   const dsoId =
     (priorJob as Record<string, unknown> | null)?.dso_id as string | null;
+
+  // #83 Phase 2 — public ↔ internal visibility is a publish-state control.
+  const visibilityBlock = await capabilityBlockError(supabase, "jobs.publish", {
+    dsoId: dsoId ?? undefined,
+  });
+  if (visibilityBlock) return { ok: false, error: visibilityBlock };
 
   const { error } = await supabase
     .from("jobs")
@@ -1416,6 +1475,12 @@ export async function cloneJob(formData: FormData): Promise<void> {
   if (srcErr || !src) return;
 
   const dsoId = src.dso_id as string;
+
+  // #83 Phase 2 — cloning creates a new draft → jobs.create.
+  const cloneBlock = await capabilityBlockError(supabase, "jobs.create", {
+    dsoId,
+  });
+  if (cloneBlock) return;
 
   // Active-subscription gate (matches createJob's posture).
   const billingError = await requireActiveSubscriptionError(supabase, dsoId);
@@ -1579,6 +1644,12 @@ export async function softDeleteJob(
   const dsoId =
     ((priorJob as Record<string, unknown> | null)?.dso_id as string | null) ??
     null;
+
+  // #83 Phase 2 — deleting/archiving needs jobs.delete (owner/admin preset).
+  const deleteBlock = await capabilityBlockError(supabase, "jobs.delete", {
+    dsoId: dsoId ?? undefined,
+  });
+  if (deleteBlock) return { ok: false, error: deleteBlock };
 
   const { error } = await supabase
     .from("jobs")
