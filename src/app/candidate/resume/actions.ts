@@ -18,6 +18,14 @@ import {
   getResumeTemplate,
   type ResumeTemplateId,
 } from "@/lib/resume/resume-templates";
+import { RESUME_MAIN_SECTIONS } from "@/lib/resume/resume-format";
+
+type CustomSectionInput = {
+  title: string;
+  body: string;
+  dateStart: string | null;
+  dateEnd: string | null;
+};
 
 export async function saveResumePdf(): Promise<{ ok: boolean; error?: string }> {
   const supabase = await createSupabaseServerClient();
@@ -70,6 +78,60 @@ export async function setResumeTemplate(
   const { error } = await supabase
     .from("candidates")
     .update({ resume_template: id })
+    .eq("auth_user_id", user.id);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/candidate/resume");
+  return { ok: true };
+}
+
+/** Persist the candidate's custom résumé sections (title + body + dates). */
+export async function setResumeCustomSections(
+  sections: CustomSectionInput[]
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "You're not signed in." };
+
+  const payload = sections
+    .filter((s) => s.title.trim())
+    .slice(0, 5)
+    .map((s) => ({
+      title: s.title.trim(),
+      body: s.body ?? "",
+      date_start: s.dateStart || null,
+      date_end: s.dateEnd || null,
+    }));
+
+  const { error } = await supabase
+    .from("candidates")
+    .update({ resume_custom_sections: payload })
+    .eq("auth_user_id", user.id);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/candidate/resume");
+  return { ok: true };
+}
+
+/** Persist the main-section render order (validated to known keys). */
+export async function setResumeSectionOrder(
+  order: string[]
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "You're not signed in." };
+
+  const valid = order.filter((k) =>
+    (RESUME_MAIN_SECTIONS as readonly string[]).includes(k)
+  );
+
+  const { error } = await supabase
+    .from("candidates")
+    .update({ resume_section_order: valid })
     .eq("auth_user_id", user.id);
   if (error) return { ok: false, error: error.message };
 

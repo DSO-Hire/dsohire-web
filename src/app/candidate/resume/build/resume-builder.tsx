@@ -19,14 +19,17 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FileText, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, FileText, Plus, Trash2, X } from "lucide-react";
 import { WizardShell, type WizardStepMeta } from "@/components/wizard/wizard-shell";
 import { ResumeDocument } from "@/components/resume/resume-document";
-import type {
-  ResumeData,
-  ResumeEducation,
-  ResumeLicense,
-  ResumeCert,
+import {
+  RESUME_MAIN_SECTIONS,
+  orderedMainSections,
+  type ResumeData,
+  type ResumeEducation,
+  type ResumeLicense,
+  type ResumeCert,
+  type ResumeCustomSection,
 } from "@/lib/resume/resume-format";
 import {
   upsertIdentity,
@@ -48,7 +51,12 @@ import {
   RESUME_TEMPLATE_LIST,
   type ResumeTemplateId,
 } from "@/lib/resume/resume-templates";
-import { saveResumePdf, setResumeTemplate } from "../actions";
+import {
+  saveResumePdf,
+  setResumeTemplate,
+  setResumeCustomSections,
+  setResumeSectionOrder,
+} from "../actions";
 
 type WorkEntry = {
   id: string;
@@ -89,6 +97,17 @@ export type BuilderData = {
   desiredRoles: string[];
   specialties: string[];
   email: string | null;
+  customSections: ResumeCustomSection[];
+  sectionOrder: string[];
+};
+
+const SECTION_LABELS: Record<string, string> = {
+  summary: "Summary",
+  experience: "Experience",
+  education: "Education",
+  credentials: "Licenses & Certifications",
+  skills: "Skills",
+  additional: "Additional (systems, languages)",
 };
 
 const STEPS: WizardStepMeta[] = [
@@ -98,6 +117,7 @@ const STEPS: WizardStepMeta[] = [
   { id: "education", label: "Education" },
   { id: "credentials", label: "Credentials" },
   { id: "skills", label: "Skills" },
+  { id: "sections", label: "Sections" },
   { id: "finish", label: "Finish" },
 ];
 
@@ -131,7 +151,21 @@ export function ResumeBuilder({
   const [licenses, setLicenses] = useState<ResumeLicense[]>(data.licenses);
   const [certs, setCerts] = useState<ResumeCert[]>(data.certifications);
   const [skillsText, setSkillsText] = useState(data.skills.join(", "));
+  const [customSections, setCustomSections] = useState<ResumeCustomSection[]>(
+    data.customSections
+  );
+  const [order, setOrder] = useState<string[]>(orderedMainSections(data.sectionOrder));
   const [template, setTemplate] = useState<ResumeTemplateId>(initialTemplate);
+
+  function moveSection(i: number, dir: -1 | 1) {
+    const j = i + dir;
+    if (j < 0 || j >= order.length) return;
+    setOrder((p) => {
+      const next = [...p];
+      [next[i], next[j]] = [next[j], next[i]];
+      return next;
+    });
+  }
 
   const skills = useMemo(
     () => skillsText.split(",").map((s) => s.trim()).filter(Boolean),
@@ -177,8 +211,10 @@ export function ResumeBuilder({
       education: education.filter((e) => e.school.trim()),
       licenses: licenses.filter((l) => l.type.trim()),
       certifications: certs.filter((c) => c.kind.trim()),
+      customSections: customSections.filter((s) => s.title.trim()),
+      sectionOrder: order,
     }),
-    [identity, work, education, licenses, certs, skills, data]
+    [identity, work, education, licenses, certs, skills, customSections, order, data]
   );
 
   // ── per-step saves (single-row sections) ────────────────────────
@@ -323,6 +359,10 @@ export function ResumeBuilder({
       // save template + PDF, then return.
       if (!(await saveIdentity())) return;
       if (!(await reconcileLists())) return;
+      const cs = await setResumeCustomSections(customSections);
+      if (!cs.ok) return setError(cs.error ?? "Couldn't save custom sections.");
+      const so = await setResumeSectionOrder(order);
+      if (!so.ok) return setError(so.error ?? "Couldn't save section order.");
       await setResumeTemplate(template);
       const res = await saveResumePdf();
       if (!res.ok) return setError(res.error ?? "Couldn't save your résumé PDF.");
@@ -503,13 +543,12 @@ export function ResumeBuilder({
                   </div>
                   <div className="mt-3">
                     <label className={labelCls}>What you did</label>
-                    <textarea
-                      className={inputCls + " min-h-[100px] leading-relaxed"}
-                      placeholder="Key responsibilities and wins…"
+                    <BulletEditor
                       value={w.description ?? ""}
-                      onChange={(e) =>
-                        setWork((p) => p.map((x) => (x.id === w.id ? { ...x, description: e.target.value || null } : x)))
+                      onChange={(v) =>
+                        setWork((p) => p.map((x) => (x.id === w.id ? { ...x, description: v || null } : x)))
                       }
+                      hint="One bullet per line. Lead with an action verb and quantify the result — e.g. “Lifted recall compliance 18% across two locations.”"
                     />
                   </div>
                 </div>
@@ -741,6 +780,113 @@ export function ResumeBuilder({
             </div>
           )}
 
+          {STEPS[index].id === "sections" && (
+            <div className="space-y-8">
+              <div className="space-y-2">
+                <Title>Order &amp; extras.</Title>
+                <p className="text-[14px] text-slate-body">
+                  Reorder your résumé sections, or add a custom one (e.g.
+                  Volunteer Work, Awards, Publications).
+                </p>
+              </div>
+
+              <div>
+                <label className={labelCls}>Section order</label>
+                <div className="space-y-1.5">
+                  {order.map((key, i) => (
+                    <div
+                      key={key}
+                      className="flex items-center justify-between rounded-md border border-[var(--rule)] bg-white px-3 py-2"
+                    >
+                      <span className="text-[14px] text-ink">{SECTION_LABELS[key] ?? key}</span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          disabled={i === 0}
+                          onClick={() => moveSection(i, -1)}
+                          className="rounded p-1 text-slate-meta hover:text-ink disabled:opacity-30"
+                          aria-label="Move up"
+                        >
+                          <ChevronUp className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={i === order.length - 1}
+                          onClick={() => moveSection(i, 1)}
+                          className="rounded p-1 text-slate-meta hover:text-ink disabled:opacity-30"
+                          aria-label="Move down"
+                        >
+                          <ChevronDown className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <label className={labelCls}>Custom sections</label>
+                {customSections.map((s, i) => (
+                  <div key={i} className="rounded-md border border-[var(--rule)] bg-white p-4">
+                    <div className="mb-3 flex justify-end">
+                      <RemoveBtn onClick={() => setCustomSections((p) => p.filter((_, j) => j !== i))} />
+                    </div>
+                    <Field label="Section title">
+                      <input
+                        className={inputCls}
+                        placeholder="e.g. Volunteer Work"
+                        value={s.title}
+                        onChange={(e) =>
+                          setCustomSections((p) => p.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)))
+                        }
+                      />
+                    </Field>
+                    <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <Field label="Start (optional)">
+                        <input
+                          type="month"
+                          className={inputCls}
+                          value={toMonth(s.dateStart)}
+                          onChange={(e) =>
+                            setCustomSections((p) => p.map((x, j) => (j === i ? { ...x, dateStart: e.target.value || null } : x)))
+                          }
+                        />
+                      </Field>
+                      <Field label="End (optional)">
+                        <input
+                          type="month"
+                          className={inputCls}
+                          value={toMonth(s.dateEnd)}
+                          onChange={(e) =>
+                            setCustomSections((p) => p.map((x, j) => (j === i ? { ...x, dateEnd: e.target.value || null } : x)))
+                          }
+                        />
+                      </Field>
+                    </div>
+                    <div className="mt-3">
+                      <label className={labelCls}>Details</label>
+                      <BulletEditor
+                        value={s.body}
+                        onChange={(v) =>
+                          setCustomSections((p) => p.map((x, j) => (j === i ? { ...x, body: v } : x)))
+                        }
+                        hint="One line each renders as bullets; a single line renders as a paragraph."
+                      />
+                    </div>
+                  </div>
+                ))}
+                {customSections.length < 5 && (
+                  <AddBtn
+                    label="Add a custom section"
+                    onClick={() =>
+                      setCustomSections((p) => [...p, { title: "", body: "", dateStart: null, dateEnd: null }])
+                    }
+                  />
+                )}
+              </div>
+            </div>
+          )}
+
           {STEPS[index].id === "finish" && (
             <div className="space-y-4">
               <Title>You&apos;re ready.</Title>
@@ -824,5 +970,52 @@ function RemoveBtn({ onClick }: { onClick: () => void }) {
       <Trash2 className="h-3.5 w-3.5" />
       Remove
     </button>
+  );
+}
+
+/** Edits a newline-joined string as a list of bullet rows. */
+function BulletEditor({
+  value,
+  onChange,
+  hint,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  hint?: string;
+}) {
+  const lines = value.length ? value.split("\n") : [""];
+  const update = (next: string[]) => onChange((next.length ? next : [""]).join("\n"));
+  return (
+    <div className="space-y-2">
+      {lines.map((ln, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <span className="text-slate-meta">•</span>
+          <input
+            className={inputCls}
+            value={ln}
+            placeholder="Add a bullet…"
+            onChange={(e) => update(lines.map((x, j) => (j === i ? e.target.value : x)))}
+          />
+          {lines.length > 1 && (
+            <button
+              type="button"
+              onClick={() => update(lines.filter((_, j) => j !== i))}
+              className="text-slate-meta hover:text-red-600"
+              aria-label="Remove bullet"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => update([...lines, ""])}
+        className="text-[12px] font-semibold text-heritage-deep hover:text-ink"
+      >
+        + Add bullet
+      </button>
+      {hint && <p className="text-[11px] leading-snug text-slate-meta">{hint}</p>}
+    </div>
   );
 }

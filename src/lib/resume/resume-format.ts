@@ -96,6 +96,14 @@ export type ResumeCert = {
   expires: string | null;
 };
 
+export type ResumeCustomSection = {
+  title: string;
+  /** Newline-separated; rendered as bullets when multi-line, else a paragraph. */
+  body: string;
+  dateStart: string | null;
+  dateEnd: string | null;
+};
+
 export type ResumeData = {
   name: string;
   headline: string | null;
@@ -115,7 +123,41 @@ export type ResumeData = {
   education: ResumeEducation[];
   licenses: ResumeLicense[];
   certifications: ResumeCert[];
+  customSections: ResumeCustomSection[];
+  /** Render order for the main sections; empty → default order. */
+  sectionOrder: string[];
 };
+
+/** Split a multi-line text field into clean bullet lines (empties dropped). */
+export function toBullets(text: string | null | undefined): string[] {
+  if (!text) return [];
+  return text
+    .split("\n")
+    .map((l) => l.replace(/^[•\-*\s]+/, "").trim())
+    .filter(Boolean);
+}
+
+/** The reorderable main résumé sections, in default order. */
+export const RESUME_MAIN_SECTIONS = [
+  "summary",
+  "experience",
+  "education",
+  "credentials",
+  "skills",
+  "additional",
+] as const;
+
+export type ResumeSectionKey = (typeof RESUME_MAIN_SECTIONS)[number];
+
+/** Stored order filtered to valid keys, with any missing sections appended. */
+export function orderedMainSections(order: string[]): ResumeSectionKey[] {
+  const valid = order.filter(
+    (k): k is ResumeSectionKey =>
+      (RESUME_MAIN_SECTIONS as readonly string[]).includes(k)
+  );
+  const seen = new Set(valid);
+  return [...valid, ...RESUME_MAIN_SECTIONS.filter((k) => !seen.has(k))];
+}
 
 /** Does this résumé have any real body content beyond the header? */
 export function resumeHasContent(d: ResumeData): boolean {

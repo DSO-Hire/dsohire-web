@@ -48,7 +48,7 @@ export default async function ResumeBuilderPage({
     supabase
       .from("candidates")
       .select(
-        "id, full_name, first_name, last_name, salutation, pronouns, headline, summary, phone, current_location_city, current_location_state, linkedin_url, years_experience, years_experience_dental, desired_roles, desired_specialty, skills, languages, pms_systems, resume_template"
+        "id, full_name, first_name, last_name, salutation, pronouns, headline, summary, phone, current_location_city, current_location_state, linkedin_url, years_experience, years_experience_dental, desired_roles, desired_specialty, skills, languages, pms_systems, resume_template, resume_custom_sections, resume_section_order"
       )
       .eq("auth_user_id", user.id)
       .maybeSingle(),
@@ -136,6 +136,15 @@ export default async function ResumeBuilderPage({
     desiredRoles: arr(c.desired_roles),
     specialties: arr(c.desired_specialty),
     email: user.email ?? null,
+    customSections: (
+      (c.resume_custom_sections as Array<Record<string, unknown>> | null) ?? []
+    ).map((s) => ({
+      title: (s.title as string | null) ?? "",
+      body: (s.body as string | null) ?? "",
+      dateStart: (s.date_start as string | null) ?? null,
+      dateEnd: (s.date_end as string | null) ?? null,
+    })),
+    sectionOrder: ((c.resume_section_order as string[] | null) ?? []) as string[],
   };
 
   const initialTemplate = getResumeTemplate(

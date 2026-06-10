@@ -85,7 +85,7 @@ export async function getResumeData(): Promise<ResumeData | null> {
     supabase
       .from("candidates")
       .select(
-        "id, full_name, first_name, last_name, headline, summary, phone, current_location_city, current_location_state, linkedin_url, years_experience, years_experience_dental, desired_roles, desired_specialty, skills, languages, pms_systems"
+        "id, full_name, first_name, last_name, headline, summary, phone, current_location_city, current_location_state, linkedin_url, years_experience, years_experience_dental, desired_roles, desired_specialty, skills, languages, pms_systems, resume_custom_sections, resume_section_order"
       )
       .eq("auth_user_id", user.id)
       .maybeSingle(),
@@ -170,5 +170,14 @@ export async function getResumeData(): Promise<ResumeData | null> {
       level: (r.level as string | null) ?? null,
       expires: (r.expires_date as string | null) ?? null,
     })),
+    customSections: (
+      (c.resume_custom_sections as Array<Record<string, unknown>> | null) ?? []
+    ).map((s) => ({
+      title: (s.title as string | null) ?? "",
+      body: (s.body as string | null) ?? "",
+      dateStart: (s.date_start as string | null) ?? null,
+      dateEnd: (s.date_end as string | null) ?? null,
+    })),
+    sectionOrder: ((c.resume_section_order as string[] | null) ?? []) as string[],
   };
 }

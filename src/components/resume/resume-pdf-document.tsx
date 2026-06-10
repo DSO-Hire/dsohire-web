@@ -1,10 +1,9 @@
 /**
- * #87b/#87c — @react-pdf render of the résumé, template-driven.
- *
- * Mirrors resume-document.tsx (the on-screen preview) using the same template
- * tokens (resume-templates.ts), so the PDF and the preview match. Built-in
- * faces only — sans → Helvetica, serif → Times-Roman — so it's ATS-safe with
- * no fonts to host. Single column, real text, standard headings throughout.
+ * #87 — @react-pdf render of the résumé. Template-driven, section-ordered,
+ * with bullet lists and user custom sections. Mirrors resume-document.tsx
+ * using the same tokens, so the PDF and the on-screen preview match. Built-in
+ * faces only (sans → Helvetica, serif → Times-Roman) → ATS-safe, no font
+ * hosting. Single column, real text, standard headings throughout.
  */
 
 import { createElement, type ReactNode } from "react";
@@ -18,12 +17,15 @@ import {
 } from "@react-pdf/renderer";
 import {
   type ResumeData,
+  type ResumeSectionKey,
   roleLabel,
   specialtyLabel,
   licenseTypeLabel,
   certKindLabel,
   monthYear,
   dateRange,
+  toBullets,
+  orderedMainSections,
 } from "@/lib/resume/resume-format";
 import {
   getResumeTemplate,
@@ -60,12 +62,7 @@ function buildStyles(t: ResumeTemplate) {
       color: t.nameAccent ? t.accentHex : "#000000",
       textAlign: t.nameAlign,
     },
-    headline: {
-      fontSize: t.bodySizePt + 1,
-      marginTop: 2,
-      color: "#333333",
-      textAlign: t.nameAlign,
-    },
+    headline: { fontSize: t.bodySizePt + 1, marginTop: 2, color: "#333333", textAlign: t.nameAlign },
     contact: { fontSize: 8.5, marginTop: 6, color: "#444444", textAlign: t.nameAlign },
     section: { marginTop: t.sectionGapPt },
     h2: {
@@ -84,10 +81,13 @@ function buildStyles(t: ResumeTemplate) {
     bold: { fontFamily: f.bold, color: "#000000" },
     meta: { fontSize: 8.5, color: "#666666" },
     body: { color: "#222222", marginTop: 2 },
+    bullet: { color: "#222222", marginTop: 1, paddingLeft: 8 },
     li: { color: "#222222", marginBottom: 2 },
     kv: { color: "#222222", marginBottom: 2 },
   });
 }
+
+type Styles = ReturnType<typeof buildStyles>;
 
 function Section({
   title,
@@ -95,13 +95,26 @@ function Section({
   children,
 }: {
   title: string;
-  styles: ReturnType<typeof buildStyles>;
+  styles: Styles;
   children: ReactNode;
 }) {
   return (
     <View style={styles.section}>
       <Text style={styles.h2}>{title}</Text>
       {children}
+    </View>
+  );
+}
+
+function PdfBody({ text, styles }: { text: string | null; styles: Styles }) {
+  const bullets = toBullets(text);
+  if (bullets.length === 0) return null;
+  if (bullets.length === 1) return <Text style={styles.body}>{bullets[0]}</Text>;
+  return (
+    <View style={{ marginTop: 2 }}>
+      {bullets.map((b, i) => (
+        <Text key={i} style={styles.bullet}>{`•  ${b}`}</Text>
+      ))}
     </View>
   );
 }
@@ -125,30 +138,18 @@ export function ResumePdfDocument({
 
   const roleLine = data.desiredRoles.map(roleLabel).filter(Boolean).join("  ·  ");
   const specialtyLine = data.specialties.map(specialtyLabel).filter(Boolean).join(", ");
-  const hasAdditional =
-    data.pmsSystems.length > 0 || data.languages.length > 0 || Boolean(specialtyLine);
 
-  return (
-    <Document title={`${data.name || "Résumé"} — Résumé`}>
-      <Page size="LETTER" style={styles.page}>
-        <View style={styles.header}>
-          <Text style={styles.name}>{data.name || "Your Name"}</Text>
-          {(data.headline || roleLine) && (
-            <Text style={styles.headline}>{data.headline || roleLine}</Text>
-          )}
-          {contact.length > 0 && (
-            <Text style={styles.contact}>{contact.join("   ·   ")}</Text>
-          )}
-        </View>
-
-        {data.summary && data.summary.trim() && (
-          <Section title="Summary" styles={styles}>
+  function renderMain(key: ResumeSectionKey): ReactNode {
+    switch (key) {
+      case "summary":
+        return data.summary && data.summary.trim() ? (
+          <Section key={key} title="Summary" styles={styles}>
             <Text style={styles.body}>{data.summary.trim()}</Text>
           </Section>
-        )}
-
-        {data.work.length > 0 && (
-          <Section title="Experience" styles={styles}>
+        ) : null;
+      case "experience":
+        return data.work.length > 0 ? (
+          <Section key={key} title="Experience" styles={styles}>
             {data.work.map((w) => {
               const range = dateRange(w.start, w.end, w.isCurrent);
               return (
@@ -160,17 +161,15 @@ export function ResumePdfDocument({
                     </Text>
                     {range ? <Text style={styles.meta}>{range}</Text> : null}
                   </View>
-                  {w.description && w.description.trim() ? (
-                    <Text style={styles.body}>{w.description.trim()}</Text>
-                  ) : null}
+                  <PdfBody text={w.description} styles={styles} />
                 </View>
               );
             })}
           </Section>
-        )}
-
-        {data.education.length > 0 && (
-          <Section title="Education" styles={styles}>
+        ) : null;
+      case "education":
+        return data.education.length > 0 ? (
+          <Section key={key} title="Education" styles={styles}>
             {data.education.map((e) => {
               const years = [e.startYear, e.endYear].filter(Boolean).join(" – ");
               const deg = [e.degree, e.field].filter(Boolean).join(", ");
@@ -181,17 +180,15 @@ export function ResumePdfDocument({
                     {years ? <Text style={styles.meta}>{years}</Text> : null}
                   </View>
                   {deg ? <Text style={styles.body}>{deg}</Text> : null}
-                  {e.description && e.description.trim() ? (
-                    <Text style={styles.body}>{e.description.trim()}</Text>
-                  ) : null}
+                  <PdfBody text={e.description} styles={styles} />
                 </View>
               );
             })}
           </Section>
-        )}
-
-        {(data.licenses.length > 0 || data.certifications.length > 0) && (
-          <Section title="Licenses & Certifications" styles={styles}>
+        ) : null;
+      case "credentials":
+        return data.licenses.length > 0 || data.certifications.length > 0 ? (
+          <Section key={key} title="Licenses & Certifications" styles={styles}>
             {data.licenses.map((l) => {
               const exp = l.expires ? ` (exp. ${monthYear(l.expires)})` : "";
               const num = l.displayNumber && l.number ? ` #${l.number}` : "";
@@ -217,16 +214,18 @@ export function ResumePdfDocument({
               );
             })}
           </Section>
-        )}
-
-        {data.skills.length > 0 && (
-          <Section title="Skills" styles={styles}>
+        ) : null;
+      case "skills":
+        return data.skills.length > 0 ? (
+          <Section key={key} title="Skills" styles={styles}>
             <Text style={styles.body}>{data.skills.join("   ·   ")}</Text>
           </Section>
-        )}
-
-        {hasAdditional && (
-          <Section title="Additional" styles={styles}>
+        ) : null;
+      case "additional": {
+        const hasAdditional =
+          data.pmsSystems.length > 0 || data.languages.length > 0 || Boolean(specialtyLine);
+        return hasAdditional ? (
+          <Section key={key} title="Additional" styles={styles}>
             {specialtyLine ? (
               <Text style={styles.kv}>
                 <Text style={styles.bold}>Specialties: </Text>
@@ -246,7 +245,37 @@ export function ResumePdfDocument({
               </Text>
             ) : null}
           </Section>
-        )}
+        ) : null;
+      }
+      default:
+        return null;
+    }
+  }
+
+  const customSections = data.customSections.filter((s) => s.title.trim());
+
+  return (
+    <Document title={`${data.name || "Résumé"} — Résumé`}>
+      <Page size="LETTER" style={styles.page}>
+        <View style={styles.header}>
+          <Text style={styles.name}>{data.name || "Your Name"}</Text>
+          {(data.headline || roleLine) && (
+            <Text style={styles.headline}>{data.headline || roleLine}</Text>
+          )}
+          {contact.length > 0 && <Text style={styles.contact}>{contact.join("   ·   ")}</Text>}
+        </View>
+
+        {orderedMainSections(data.sectionOrder).map((k) => renderMain(k))}
+
+        {customSections.map((s, i) => {
+          const range = dateRange(s.dateStart, s.dateEnd, false);
+          return (
+            <Section key={`custom-${i}`} title={s.title} styles={styles}>
+              {range ? <Text style={styles.meta}>{range}</Text> : null}
+              <PdfBody text={s.body} styles={styles} />
+            </Section>
+          );
+        })}
       </Page>
     </Document>
   );
@@ -254,8 +283,7 @@ export function ResumePdfDocument({
 
 /**
  * Render the résumé to a PDF buffer with the chosen template. The cast bridges
- * @react-pdf's renderToBuffer type (it wants a Document element) and our
- * wrapping component — type-only; the component renders a Document at runtime.
+ * @react-pdf's renderToBuffer type and our wrapping component — type-only.
  */
 export async function renderResumePdfBuffer(
   data: ResumeData,

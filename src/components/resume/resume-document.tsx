@@ -1,24 +1,29 @@
 /**
- * #87a/#87c — on-screen résumé render, template-driven.
+ * #87 — on-screen résumé render. Template-driven, section-ordered, with
+ * bullet lists and user custom sections.
  *
- * A presentation layer over ResumeData. Styling comes entirely from the
- * selected template's tokens (resume-templates.ts), so every template stays
- * single-column / real-text / standard-headings (ATS-safe) and only the
- * typography, spacing, color, and heading treatment change. Pure component —
- * renders on server (résumé page) and client (builder live preview) alike.
+ * Styling comes entirely from the selected template's tokens
+ * (resume-templates.ts) — every template stays single-column / real-text /
+ * standard-headings (ATS-safe). Main sections render in the candidate's saved
+ * order; multi-line descriptions render as real bullets; custom sections
+ * render after the main block. Pure component (server + client).
  *
- * Keep in sync with resume-pdf-document.tsx (the PDF render of the same data).
+ * Keep in sync with resume-pdf-document.tsx.
  */
 
-import type { CSSProperties, ReactNode } from "react";
+import { Fragment, type CSSProperties, type ReactNode } from "react";
 import {
   type ResumeData,
+  type ResumeCustomSection,
+  type ResumeSectionKey,
   roleLabel,
   specialtyLabel,
   licenseTypeLabel,
   certKindLabel,
   monthYear,
   dateRange,
+  toBullets,
+  orderedMainSections,
 } from "@/lib/resume/resume-format";
 import {
   getResumeTemplate,
@@ -61,6 +66,21 @@ function Section({
   );
 }
 
+function Body({ text }: { text: string | null }) {
+  const bullets = toBullets(text);
+  if (bullets.length === 0) return null;
+  if (bullets.length === 1) {
+    return <p style={{ whiteSpace: "pre-line", color: "#222222", marginTop: "2px" }}>{bullets[0]}</p>;
+  }
+  return (
+    <ul style={{ listStyle: "disc", paddingLeft: "18px", marginTop: "2px", color: "#222222" }}>
+      {bullets.map((b, i) => (
+        <li key={i} style={{ marginBottom: "1px" }}>{b}</li>
+      ))}
+    </ul>
+  );
+}
+
 export function ResumeDocument({
   data,
   template,
@@ -99,6 +119,123 @@ export function ResumeDocument({
     borderBottom: t.headerRule ? `2px solid ${t.ruleHex}` : "none",
   };
   const metaStyle: CSSProperties = { color: "#444444", fontSize: px(8.5) };
+  const boldRow: CSSProperties = { fontWeight: 700, color: "#000000" };
+
+  function renderMain(key: ResumeSectionKey): ReactNode {
+    switch (key) {
+      case "summary":
+        return data.summary && data.summary.trim() ? (
+          <Section title="Summary" t={t}>
+            <p style={{ whiteSpace: "pre-line", color: "#222222" }}>{data.summary.trim()}</p>
+          </Section>
+        ) : null;
+      case "experience":
+        return data.work.length > 0 ? (
+          <Section title="Experience" t={t}>
+            <div className="space-y-3">
+              {data.work.map((w) => {
+                const range = dateRange(w.start, w.end, w.isCurrent);
+                return (
+                  <div key={w.id} className="break-inside-avoid">
+                    <div className="flex items-baseline justify-between gap-4">
+                      <span style={boldRow}>
+                        {w.title}
+                        {w.company ? ` — ${w.company}` : ""}
+                      </span>
+                      {range && <span style={metaStyle}>{range}</span>}
+                    </div>
+                    <Body text={w.description} />
+                  </div>
+                );
+              })}
+            </div>
+          </Section>
+        ) : null;
+      case "education":
+        return data.education.length > 0 ? (
+          <Section title="Education" t={t}>
+            <div className="space-y-2">
+              {data.education.map((e) => {
+                const years = [e.startYear, e.endYear].filter(Boolean).join(" – ");
+                const deg = [e.degree, e.field].filter(Boolean).join(", ");
+                return (
+                  <div key={e.id} className="break-inside-avoid">
+                    <div className="flex items-baseline justify-between gap-4">
+                      <span style={boldRow}>{e.school}</span>
+                      {years && <span style={metaStyle}>{years}</span>}
+                    </div>
+                    {deg && <p style={{ color: "#222222" }}>{deg}</p>}
+                    <Body text={e.description} />
+                  </div>
+                );
+              })}
+            </div>
+          </Section>
+        ) : null;
+      case "credentials":
+        return data.licenses.length > 0 || data.certifications.length > 0 ? (
+          <Section title="Licenses & Certifications" t={t}>
+            <ul className="space-y-1">
+              {data.licenses.map((l) => {
+                const exp = l.expires ? ` (exp. ${monthYear(l.expires)})` : "";
+                const num = l.displayNumber && l.number ? ` #${l.number}` : "";
+                const state = l.state ? ` — ${l.state}` : "";
+                return (
+                  <li key={l.id} style={{ color: "#222222" }}>
+                    {licenseTypeLabel(l.type)}
+                    {state}
+                    {num}
+                    {exp}
+                  </li>
+                );
+              })}
+              {data.certifications.map((ce) => {
+                const exp = ce.expires ? ` (exp. ${monthYear(ce.expires)})` : "";
+                const lvl = ce.level ? ` — ${ce.level}` : "";
+                return (
+                  <li key={ce.id} style={{ color: "#222222" }}>
+                    {certKindLabel(ce.kind)}
+                    {lvl}
+                    {exp}
+                  </li>
+                );
+              })}
+            </ul>
+          </Section>
+        ) : null;
+      case "skills":
+        return data.skills.length > 0 ? (
+          <Section title="Skills" t={t}>
+            <p style={{ color: "#222222" }}>{data.skills.join("   ·   ")}</p>
+          </Section>
+        ) : null;
+      case "additional":
+        return data.pmsSystems.length > 0 || data.languages.length > 0 || specialtyLine ? (
+          <Section title="Additional" t={t}>
+            {specialtyLine && (
+              <p style={{ color: "#222222" }}>
+                <span style={{ fontWeight: 700 }}>Specialties:</span> {specialtyLine}
+              </p>
+            )}
+            {data.pmsSystems.length > 0 && (
+              <p style={{ color: "#222222" }}>
+                <span style={{ fontWeight: 700 }}>Practice management systems:</span>{" "}
+                {data.pmsSystems.join(", ")}
+              </p>
+            )}
+            {data.languages.length > 0 && (
+              <p style={{ color: "#222222" }}>
+                <span style={{ fontWeight: 700 }}>Languages:</span> {data.languages.join(", ")}
+              </p>
+            )}
+          </Section>
+        ) : null;
+      default:
+        return null;
+    }
+  }
+
+  const customSections = data.customSections.filter((s) => s.title.trim());
 
   return (
     <article className="resume-sheet mx-auto max-w-[760px] bg-white px-12 py-10" style={sheet}>
@@ -116,120 +253,19 @@ export function ResumeDocument({
         )}
       </header>
 
-      {data.summary && data.summary.trim() && (
-        <Section title="Summary" t={t}>
-          <p style={{ whiteSpace: "pre-line", color: "#222222" }}>{data.summary.trim()}</p>
-        </Section>
-      )}
+      {orderedMainSections(data.sectionOrder).map((k) => (
+        <Fragment key={k}>{renderMain(k)}</Fragment>
+      ))}
 
-      {data.work.length > 0 && (
-        <Section title="Experience" t={t}>
-          <div className="space-y-3">
-            {data.work.map((w) => {
-              const range = dateRange(w.start, w.end, w.isCurrent);
-              return (
-                <div key={w.id} className="break-inside-avoid">
-                  <div className="flex items-baseline justify-between gap-4">
-                    <span style={{ fontWeight: 700, color: "#000000" }}>
-                      {w.title}
-                      {w.company ? ` — ${w.company}` : ""}
-                    </span>
-                    {range && <span style={metaStyle}>{range}</span>}
-                  </div>
-                  {w.description && w.description.trim() && (
-                    <p style={{ whiteSpace: "pre-line", color: "#222222", marginTop: "2px" }}>
-                      {w.description.trim()}
-                    </p>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </Section>
-      )}
-
-      {data.education.length > 0 && (
-        <Section title="Education" t={t}>
-          <div className="space-y-2">
-            {data.education.map((e) => {
-              const years = [e.startYear, e.endYear].filter(Boolean).join(" – ");
-              const deg = [e.degree, e.field].filter(Boolean).join(", ");
-              return (
-                <div key={e.id} className="break-inside-avoid">
-                  <div className="flex items-baseline justify-between gap-4">
-                    <span style={{ fontWeight: 700, color: "#000000" }}>{e.school}</span>
-                    {years && <span style={metaStyle}>{years}</span>}
-                  </div>
-                  {deg && <p style={{ color: "#222222" }}>{deg}</p>}
-                  {e.description && e.description.trim() && (
-                    <p style={{ whiteSpace: "pre-line", color: "#222222", marginTop: "2px" }}>
-                      {e.description.trim()}
-                    </p>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </Section>
-      )}
-
-      {(data.licenses.length > 0 || data.certifications.length > 0) && (
-        <Section title="Licenses & Certifications" t={t}>
-          <ul className="space-y-1">
-            {data.licenses.map((l) => {
-              const exp = l.expires ? ` (exp. ${monthYear(l.expires)})` : "";
-              const num = l.displayNumber && l.number ? ` #${l.number}` : "";
-              const state = l.state ? ` — ${l.state}` : "";
-              return (
-                <li key={l.id} style={{ color: "#222222" }}>
-                  {licenseTypeLabel(l.type)}
-                  {state}
-                  {num}
-                  {exp}
-                </li>
-              );
-            })}
-            {data.certifications.map((ce) => {
-              const exp = ce.expires ? ` (exp. ${monthYear(ce.expires)})` : "";
-              const lvl = ce.level ? ` — ${ce.level}` : "";
-              return (
-                <li key={ce.id} style={{ color: "#222222" }}>
-                  {certKindLabel(ce.kind)}
-                  {lvl}
-                  {exp}
-                </li>
-              );
-            })}
-          </ul>
-        </Section>
-      )}
-
-      {data.skills.length > 0 && (
-        <Section title="Skills" t={t}>
-          <p style={{ color: "#222222" }}>{data.skills.join("   ·   ")}</p>
-        </Section>
-      )}
-
-      {(data.pmsSystems.length > 0 || data.languages.length > 0 || specialtyLine) && (
-        <Section title="Additional" t={t}>
-          {specialtyLine && (
-            <p style={{ color: "#222222" }}>
-              <span style={{ fontWeight: 700 }}>Specialties:</span> {specialtyLine}
-            </p>
-          )}
-          {data.pmsSystems.length > 0 && (
-            <p style={{ color: "#222222" }}>
-              <span style={{ fontWeight: 700 }}>Practice management systems:</span>{" "}
-              {data.pmsSystems.join(", ")}
-            </p>
-          )}
-          {data.languages.length > 0 && (
-            <p style={{ color: "#222222" }}>
-              <span style={{ fontWeight: 700 }}>Languages:</span> {data.languages.join(", ")}
-            </p>
-          )}
-        </Section>
-      )}
+      {customSections.map((s: ResumeCustomSection, i) => {
+        const range = dateRange(s.dateStart, s.dateEnd, false);
+        return (
+          <Section key={`custom-${i}`} title={s.title} t={t}>
+            {range && <p style={{ ...metaStyle, marginBottom: "2px" }}>{range}</p>}
+            <Body text={s.body} />
+          </Section>
+        );
+      })}
     </article>
   );
 }

@@ -103,6 +103,8 @@ const SAMPLE: ResumeData = {
     { id: "c1", kind: "cpr_bls", level: null, expires: "2026-09-01" },
     { id: "c2", kind: "local_anesthesia", level: null, expires: null },
   ],
+  customSections: [],
+  sectionOrder: [],
 };
 
 export default function ResumeTemplatesLanding() {
