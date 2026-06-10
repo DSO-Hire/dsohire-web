@@ -25,27 +25,9 @@ import {
   specialtyLabel,
   licenseTypeLabel,
   certKindLabel,
-} from "@/lib/resume/resume-data";
-
-const MONTHS = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
-
-function monthYear(d: string | null): string {
-  if (!d) return "";
-  const [y, m] = d.split("-");
-  const mi = Number(m) - 1;
-  if (!y || mi < 0 || mi > 11) return y ?? "";
-  return `${MONTHS[mi]} ${y}`;
-}
-
-function dateRange(start: string | null, end: string | null, isCurrent: boolean): string {
-  const s = monthYear(start);
-  const e = isCurrent ? "Present" : monthYear(end);
-  if (s && e) return `${s} – ${e}`;
-  return s || e || "";
-}
+  monthYear,
+  dateRange,
+} from "@/lib/resume/resume-format";
 
 const styles = StyleSheet.create({
   page: {

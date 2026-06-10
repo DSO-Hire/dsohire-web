@@ -42,6 +42,12 @@ export function ResumeToolbar() {
           Back to profile
         </Link>
         <div className="flex items-center gap-2.5">
+          <a
+            href="/candidate/resume/build"
+            className="inline-flex items-center gap-2 rounded-md border border-[var(--rule)] bg-white px-4 py-2 text-[13px] font-bold text-ink hover:border-heritage-deep transition-colors"
+          >
+            Edit step-by-step
+          </a>
           <button
             type="button"
             onClick={onSave}

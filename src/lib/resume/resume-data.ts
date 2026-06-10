@@ -1,111 +1,41 @@
 /**
- * #87a — Résumé data layer.
+ * #87a — Résumé data layer (server fetch).
  *
  * The résumé is a RENDER of the canonical profile, never a 4th data silo
- * (see TASKS.md #87). This module pulls the candidate's profile + the four
- * structured child tables (work history / education / licenses / certs) into
- * one normalized `ResumeData` shape the template components consume. No new
- * storage, no parsing — the data already lives on the profile.
- *
- * Label maps reuse the canonical option lists so the résumé prints
- * "Dental Assistant" / "CPR/BLS", not the raw slugs.
+ * (TASKS.md #87). This module pulls the candidate's profile + the four
+ * structured child tables into one normalized `ResumeData`. Pure types +
+ * formatting live in resume-format.ts (client-safe); this file adds the
+ * server fetch and re-exports the rest for back-compat.
  */
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
-  ROLE_CATEGORIES,
-  SPECIALTIES,
-  LICENSE_TYPES,
-  CERTIFICATION_KINDS,
-} from "@/lib/candidate/canonical-lists";
+  type ResumeData,
+  roleLabel,
+  specialtyLabel,
+  licenseTypeLabel,
+  certKindLabel,
+  monthYear,
+  dateRange,
+  resumeHasContent,
+} from "@/lib/resume/resume-format";
 
-type CanonOpt = { value: string; label: string };
-
-function prettify(v: string): string {
-  return v.replace(/[_-]+/g, " ").replace(/\b\w/g, (ch) => ch.toUpperCase());
-}
-
-function makeLookup(
-  list: ReadonlyArray<CanonOpt>
-): (v: string | null | undefined) => string {
-  const m = new Map(list.map((o) => [o.value, o.label]));
-  return (v) => (v ? m.get(v) ?? prettify(v) : "");
-}
-
-export const roleLabel = makeLookup(ROLE_CATEGORIES);
-export const specialtyLabel = makeLookup(SPECIALTIES);
-export const licenseTypeLabel = makeLookup(LICENSE_TYPES);
-export const certKindLabel = makeLookup(CERTIFICATION_KINDS);
-
-export type ResumeWork = {
-  id: string;
-  title: string;
-  company: string;
-  isDso: boolean;
-  start: string | null;
-  end: string | null;
-  isCurrent: boolean;
-  description: string | null;
+export type {
+  ResumeData,
+  ResumeWork,
+  ResumeEducation,
+  ResumeLicense,
+  ResumeCert,
+} from "@/lib/resume/resume-format";
+export {
+  roleLabel,
+  specialtyLabel,
+  licenseTypeLabel,
+  certKindLabel,
+  monthYear,
+  dateRange,
+  resumeHasContent,
 };
-
-export type ResumeEducation = {
-  id: string;
-  school: string;
-  degree: string | null;
-  field: string | null;
-  startYear: number | null;
-  endYear: number | null;
-  description: string | null;
-};
-
-export type ResumeLicense = {
-  id: string;
-  type: string;
-  state: string | null;
-  number: string | null;
-  displayNumber: boolean;
-  expires: string | null;
-};
-
-export type ResumeCert = {
-  id: string;
-  kind: string;
-  level: string | null;
-  expires: string | null;
-};
-
-export type ResumeData = {
-  name: string;
-  headline: string | null;
-  summary: string | null;
-  phone: string | null;
-  email: string | null;
-  city: string | null;
-  state: string | null;
-  linkedinUrl: string | null;
-  yearsExperience: number | null;
-  desiredRoles: string[];
-  specialties: string[];
-  skills: string[];
-  languages: string[];
-  pmsSystems: string[];
-  work: ResumeWork[];
-  education: ResumeEducation[];
-  licenses: ResumeLicense[];
-  certifications: ResumeCert[];
-};
-
-/** Does this résumé have any real body content beyond the header? */
-export function resumeHasContent(d: ResumeData): boolean {
-  return (
-    d.work.length > 0 ||
-    d.education.length > 0 ||
-    d.licenses.length > 0 ||
-    d.certifications.length > 0 ||
-    d.skills.length > 0 ||
-    Boolean(d.summary && d.summary.trim())
-  );
-}
 
 const arr = (v: unknown): string[] => ((v as string[] | null) ?? []) as string[];
 
