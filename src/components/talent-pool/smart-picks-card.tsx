@@ -8,7 +8,7 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
+import { FitWordmark } from "@/components/practice-fit/brand/fit-wordmark";
 import type { SmartPick } from "@/lib/talent-pool/smart-picks";
 import { SmartPicksSaveButton } from "./smart-picks-save-button";
 
@@ -30,6 +30,11 @@ const BUCKET_STYLE: Record<
 export function SmartPicksCard({ picks }: SmartPicksCardProps) {
   if (picks.length === 0) return null;
 
+  // Smart Picks is per-job, so every pick shares one product — derive it once
+  // from the first pick so a corporate role shows DSOFit, not PracticeFit.
+  const product = picks[0]?.fit.product === "dsofit" ? "dsofit" : "practicefit";
+  const fitName = product === "dsofit" ? "DSOFit" : "PracticeFit";
+
   return (
     <section className="mb-10 border border-[var(--rule)] bg-white">
       <header className="px-6 py-4 border-b border-[var(--rule)] flex items-center justify-between">
@@ -37,7 +42,7 @@ export function SmartPicksCard({ picks }: SmartPicksCardProps) {
           <span className="text-[10px] font-bold tracking-[2.5px] uppercase">
             Smart picks ·
           </span>
-          <PracticeFitWordmark surface="inherit" className="text-[14px]" />
+          <FitWordmark product={product} surface="inherit" className="text-[14px]" />
         </div>
         <Link
           href="/employer/talent-pool"
@@ -47,7 +52,7 @@ export function SmartPicksCard({ picks }: SmartPicksCardProps) {
         </Link>
       </header>
       <div className="px-6 py-3 text-[12px] text-slate-meta border-b border-[var(--rule)]">
-        Top {picks.length} opted-in candidates ranked by PracticeFit for
+        Top {picks.length} opted-in candidates ranked by {fitName} for
         this role. Already-applied candidates are excluded.
       </div>
       <ul>

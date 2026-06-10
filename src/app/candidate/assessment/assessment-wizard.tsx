@@ -69,6 +69,9 @@ export function AssessmentWizard({
   // First-timers see a landing screen explaining PracticeFit before the
   // questions (Cam: jumping straight into the questionnaire felt strange).
   const [started, setStarted] = useState(completedBefore);
+  // Soft skip nudge — first tap makes the case for staying, second tap leaves
+  // (never a hard gate). Mirrors the DSOFit assessment landing.
+  const [skipNudge, setSkipNudge] = useState(false);
 
   // #41 (Day 28) — résumé autofill on the landing.
   const [resumeFile, setResumeFile] = useState<File | null>(null);
@@ -280,12 +283,48 @@ export function AssessmentWizard({
             Start now
             <ArrowRight className="h-4 w-4" />
           </button>
-          <Link
-            href="/candidate/dashboard"
-            className="text-[12px] font-semibold text-slate-meta underline underline-offset-2 hover:text-ink"
-          >
-            Skip for now — I&apos;ll take this later
-          </Link>
+          {!skipNudge ? (
+            <button
+              type="button"
+              onClick={() => setSkipNudge(true)}
+              className="text-[12px] font-semibold text-slate-meta underline underline-offset-2 hover:text-ink"
+            >
+              Skip for now — I&apos;ll take this later
+            </button>
+          ) : (
+            <div className="rounded-xl border border-heritage/30 bg-cream/50 p-5">
+              <p className="text-[14px] font-bold text-ink">
+                You can skip — but it&apos;s only about 5 minutes, and it&apos;s
+                what sharpens your matches.
+              </p>
+              <p className="mt-1.5 max-w-[520px] text-[13px] leading-relaxed text-slate-body">
+                Without it we match you on your profile alone — pace, autonomy,
+                the procedures you love and the team you thrive on stay
+                invisible. It&apos;s mostly taps, and you can stop anytime.
+              </p>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSkipNudge(false);
+                    setStarted(true);
+                    if (typeof window !== "undefined")
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className="inline-flex items-center gap-2 rounded-full bg-heritage-deep px-5 py-2.5 text-[14px] font-bold text-ivory transition-colors hover:bg-heritage"
+                >
+                  Take 5 minutes
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+                <Link
+                  href="/candidate/dashboard"
+                  className="text-[13px] text-slate-meta underline underline-offset-2 hover:text-ink"
+                >
+                  Skip anyway
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
