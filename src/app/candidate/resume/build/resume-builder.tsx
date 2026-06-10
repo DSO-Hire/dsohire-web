@@ -134,7 +134,7 @@ const toMonth = (d: string | null) => (d ? d.slice(0, 7) : "");
 export function ResumeBuilder({
   data,
   returnTo = null,
-  initialTemplate = "classic",
+  initialTemplate = "accent",
 }: {
   data: BuilderData;
   returnTo?: string | null;

@@ -51,6 +51,24 @@ export type ResumeTemplate = {
 };
 
 export const RESUME_TEMPLATES: Record<ResumeTemplateId, ResumeTemplate> = {
+  accent: {
+    id: "accent",
+    name: "Accent",
+    blurb: "A teal pop on the name & headings. Distinctive but parser-safe.",
+    family: "sans",
+    nameAlign: "left",
+    nameSizePt: 24,
+    nameAccent: true,
+    headerRule: true,
+    headingTransform: "uppercase",
+    headingLetterSpacing: 1.5,
+    headingAccent: true,
+    headingRule: "full",
+    accentHex: "#0F766E",
+    ruleHex: "#0F766E",
+    bodySizePt: 10,
+    sectionGapPt: 16,
+  },
   classic: {
     id: "classic",
     name: "Classic",
@@ -141,30 +159,12 @@ export const RESUME_TEMPLATES: Record<ResumeTemplateId, ResumeTemplate> = {
     bodySizePt: 9.5,
     sectionGapPt: 10,
   },
-  accent: {
-    id: "accent",
-    name: "Accent",
-    blurb: "A teal pop on the name & headings. Distinctive but parser-safe.",
-    family: "sans",
-    nameAlign: "left",
-    nameSizePt: 24,
-    nameAccent: true,
-    headerRule: true,
-    headingTransform: "uppercase",
-    headingLetterSpacing: 1.5,
-    headingAccent: true,
-    headingRule: "full",
-    accentHex: "#0F766E",
-    ruleHex: "#0F766E",
-    bodySizePt: 10,
-    sectionGapPt: 16,
-  },
 };
 
 export const RESUME_TEMPLATE_LIST: ResumeTemplate[] =
   Object.values(RESUME_TEMPLATES);
 
-export const DEFAULT_RESUME_TEMPLATE: ResumeTemplateId = "classic";
+export const DEFAULT_RESUME_TEMPLATE: ResumeTemplateId = "accent";
 
 export function getResumeTemplate(id: string | null | undefined): ResumeTemplate {
   if (id && id in RESUME_TEMPLATES) {

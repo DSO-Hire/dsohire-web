@@ -13,8 +13,13 @@ import {
   View,
   Text,
   StyleSheet,
+  Font,
   renderToBuffer,
 } from "@react-pdf/renderer";
+
+// @react-pdf auto-hyphenates words at line breaks (e.g. "NetSuite-"). Disable
+// it so words stay whole — résumés should never show invented hyphens.
+Font.registerHyphenationCallback((word) => [word]);
 import {
   type ResumeData,
   type ResumeSectionKey,
@@ -58,11 +63,12 @@ function buildStyles(t: ResumeTemplate) {
     },
     name: {
       fontSize: t.nameSizePt,
+      lineHeight: 1.3,
       fontFamily: f.bold,
       color: t.nameAccent ? t.accentHex : "#000000",
       textAlign: t.nameAlign,
     },
-    headline: { fontSize: t.bodySizePt + 1, marginTop: 2, color: "#333333", textAlign: t.nameAlign },
+    headline: { fontSize: t.bodySizePt + 1, marginTop: 4, color: "#333333", textAlign: t.nameAlign },
     contact: { fontSize: 8.5, marginTop: 6, color: "#444444", textAlign: t.nameAlign },
     section: { marginTop: t.sectionGapPt },
     h2: {
@@ -84,6 +90,8 @@ function buildStyles(t: ResumeTemplate) {
     bullet: { color: "#222222", marginTop: 1, paddingLeft: 8 },
     li: { color: "#222222", marginBottom: 2 },
     kv: { color: "#222222", marginBottom: 2 },
+    token: { color: "#222222" },
+    contactToken: { fontSize: 8.5, color: "#444444" },
   });
 }
 
@@ -218,7 +226,14 @@ export function ResumePdfDocument({
       case "skills":
         return data.skills.length > 0 ? (
           <Section key={key} title="Skills" styles={styles}>
-            <Text style={styles.body}>{data.skills.join("   ·   ")}</Text>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 2 }}>
+              {data.skills.map((s, i) => (
+                <Text key={i} style={styles.token}>
+                  {s}
+                  {i < data.skills.length - 1 ? "   ·   " : ""}
+                </Text>
+              ))}
+            </View>
           </Section>
         ) : null;
       case "additional": {
@@ -262,7 +277,23 @@ export function ResumePdfDocument({
           {(data.headline || roleLine) && (
             <Text style={styles.headline}>{data.headline || roleLine}</Text>
           )}
-          {contact.length > 0 && <Text style={styles.contact}>{contact.join("   ·   ")}</Text>}
+          {contact.length > 0 && (
+            <View
+              style={{
+                flexDirection: "row",
+                flexWrap: "wrap",
+                marginTop: 6,
+                justifyContent: t.nameAlign === "center" ? "center" : "flex-start",
+              }}
+            >
+              {contact.map((c, i) => (
+                <Text key={i} style={styles.contactToken}>
+                  {c}
+                  {i < contact.length - 1 ? "   ·   " : ""}
+                </Text>
+              ))}
+            </View>
+          )}
         </View>
 
         {orderedMainSections(data.sectionOrder).map((k) => renderMain(k))}
