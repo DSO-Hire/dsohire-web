@@ -758,7 +758,7 @@ export const CV_VISIBILITY_OPTIONS: ReadonlyArray<{
     value: "recruiters_only",
     label: "Recruiters only",
     description:
-      "Discoverable by signed-in DSOs but not boosted. The default for working clinicians who want to be findable without flagging an active search.",
+      "Discoverable by signed-in DSOs but not boosted. The default for working professionals who want to be findable without flagging an active search.",
   },
   {
     value: "hidden",

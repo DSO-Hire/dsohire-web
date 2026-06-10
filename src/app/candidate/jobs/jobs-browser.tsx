@@ -63,8 +63,16 @@ export function JobsBrowser({
   const roleOptions = useMemo(() => {
     const m = new Map<string, string>();
     for (const j of jobs) if (!m.has(j.roleCategory)) m.set(j.roleCategory, j.roleLabel);
-    return Array.from(m, ([value, label]) => ({ value, label }));
-  }, [jobs]);
+    let opts = Array.from(m, ([value, label]) => ({ value, label }));
+    // #111 — a DSOFit (corporate) candidate shouldn't get clinical role-filter
+    // chips (Dentist/Hygienist/Dental Assistant/Specialist). Restrict the chips
+    // to corporate-track categories; the browse itself still lists every role.
+    if (primaryProduct === "dsofit") {
+      const CORP = new Set(["other", "regional_manager"]);
+      opts = opts.filter((o) => CORP.has(o.value));
+    }
+    return opts;
+  }, [jobs, primaryProduct]);
 
   const stateOptions = useMemo(
     () => Array.from(new Set(jobs.flatMap((j) => j.states).filter(Boolean))).sort(),

@@ -257,6 +257,7 @@ export function ProfileSections({
         />
         <CertificationsCard
           entries={data.certifications}
+          product={fitProduct}
           onAdd={() => setOpen({ kind: "certification", entryId: null })}
           onEdit={(id) => setOpen({ kind: "certification", entryId: id })}
         />
@@ -1608,10 +1609,12 @@ function LicenseModal({
 
 function CertificationsCard({
   entries,
+  product = "practicefit",
   onAdd,
   onEdit,
 }: {
   entries: ProfileData["certifications"];
+  product?: "practicefit" | "dsofit";
   onAdd: () => void;
   onEdit: (id: string) => void;
 }) {
@@ -1621,7 +1624,13 @@ function CertificationsCard({
       action={<AddButton onClick={onAdd} label="Add certification" />}
     >
       {entries.length === 0 ? (
-        <EmptyHint text="CPR/BLS, anesthesia, sedation, OSHA, HIPAA, etc." />
+        <EmptyHint
+          text={
+            product === "dsofit"
+              ? "CPA, PMP, SHRM-CP, Six Sigma, CISSP, etc."
+              : "CPR/BLS, anesthesia, sedation, OSHA, HIPAA, etc."
+          }
+        />
       ) : (
         <ul className="space-y-3">
           {entries.map((e) => {
