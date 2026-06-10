@@ -32,6 +32,7 @@ import {
   isPricingTier,
   type PricingTier,
 } from "@/lib/stripe/prices";
+import { autoPauseOverflowForDowngrade } from "@/lib/billing/caps";
 
 // Raw body required for signature verification — opt out of any parsing.
 export const dynamic = "force-dynamic";
@@ -298,6 +299,21 @@ async function upsertSubscription(params: UpsertParams): Promise<void> {
     { onConflict: "dso_id" }
   );
   if (error) throw new TransientWebhookError(error.message);
+
+  // #88 — if this plan change leaves the DSO over its active-openings cap
+  // (i.e. a downgrade), auto-pause the overflow. Recoverable: the jobs page
+  // shows a "choose what to reactivate" banner. Best-effort — a failure here
+  // must not fail the webhook (it re-runs on the next event).
+  if (subscription.status === "active" || subscription.status === "trialing") {
+    try {
+      await autoPauseOverflowForDowngrade(admin, dsoId, tier);
+    } catch (e) {
+      console.warn(
+        `[stripe-webhook] downgrade auto-pause failed for dso ${dsoId}`,
+        e
+      );
+    }
+  }
 }
 
 /* ───────────────────────────────────────────────────────────────

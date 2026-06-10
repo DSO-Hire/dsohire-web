@@ -1082,7 +1082,12 @@ export async function setJobStatus(
     }
   }
 
-  const update: Record<string, unknown> = { status: newStatus };
+  // #88 — any manual status change on a job clears its downgrade auto-pause
+  // flag (the candidate has resolved this one).
+  const update: Record<string, unknown> = {
+    status: newStatus,
+    auto_paused_reason: null,
+  };
   if (newStatus === "active") {
     update.posted_at = new Date().toISOString();
     // E1.18 — a manual "Activate" is a publish-now action, so it

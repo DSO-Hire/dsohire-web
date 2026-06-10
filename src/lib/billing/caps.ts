@@ -198,6 +198,49 @@ export async function jobCapBlockError(
 }
 
 /**
+ * After a downgrade leaves a DSO over its active-openings cap, auto-pause the
+ * overflow so they're back under cap. KEEPS the most recently posted openings
+ * within cap and pauses the rest (a default the resolver banner lets them
+ * re-choose). Flags paused rows with `auto_paused_reason='plan_downgrade'` so
+ * the UI can surface "choose what to reactivate". Returns the number paused.
+ *
+ * Never deletes or fills — only pauses (recoverable). Safe to run on any
+ * subscription event; a no-op when at/under cap or on unlimited tiers.
+ */
+export async function autoPauseOverflowForDowngrade(
+  supabase: SupabaseClient,
+  dsoId: string,
+  tier: string | null | undefined
+): Promise<number> {
+  const caps = resolveCaps(tier);
+  if (caps.maxActiveJobs === null) return 0;
+
+  const { data } = await supabase
+    .from("jobs")
+    .select("id, openings, posted_at")
+    .eq("dso_id", dsoId)
+    .eq("status", "active")
+    .is("deleted_at", null)
+    .order("posted_at", { ascending: false, nullsFirst: false });
+
+  const jobs = (data ?? []) as Array<{ id: string; openings: number | null }>;
+  let kept = 0;
+  const toPause: string[] = [];
+  for (const j of jobs) {
+    const o = j.openings ?? 1;
+    if (kept + o <= caps.maxActiveJobs) kept += o;
+    else toPause.push(j.id);
+  }
+  if (toPause.length === 0) return 0;
+
+  await supabase
+    .from("jobs")
+    .update({ status: "paused", auto_paused_reason: "plan_downgrade" })
+    .in("id", toPause);
+  return toPause.length;
+}
+
+/**
  * Gate for adding a teammate (invite). Returns an error string to block, or
  * null to allow. Counts members + pending invites against the seat cap.
  */

@@ -106,6 +106,14 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
 
   const canPostJobs = dsoUser.role !== "hiring_manager";
   const capStatus = await getCapStatus(supabase, dsoUser.dso_id as string);
+  // #88 — listings auto-paused by a plan downgrade (resolver banner).
+  const { count: autoPausedCount } = await supabase
+    .from("jobs")
+    .select("id", { count: "exact", head: true })
+    .eq("dso_id", dsoUser.dso_id)
+    .eq("status", "paused")
+    .eq("auto_paused_reason", "plan_downgrade")
+    .is("deleted_at", null);
 
   // ── Multi-location filter (Phase 4.6.d). When an active location is
   // set, restrict the jobs query to jobs tagged with that location. ─
@@ -375,6 +383,19 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
   return (
     <EmployerShell active="jobs">
       <CapNudge kind="jobs" usage={capStatus.jobs} tier={capStatus.tier} />
+      {(autoPausedCount ?? 0) > 0 && (
+        <div className="mb-6 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-[13px] text-amber-900">
+          <strong>
+            {autoPausedCount} listing{autoPausedCount === 1 ? "" : "s"} paused
+            after your plan change.
+          </strong>{" "}
+          Your active openings exceeded the new plan&apos;s limit, so we paused
+          the overflow (nothing was deleted). Reactivate the ones you want from
+          the list below — you have {capStatus.jobs.remaining ?? 0} active-opening
+          slot{capStatus.jobs.remaining === 1 ? "" : "s"} available, or upgrade
+          to keep them all live.
+        </div>
+      )}
       <header className="mb-7">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
