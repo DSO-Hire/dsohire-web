@@ -157,6 +157,12 @@ export default async function CandidateProfilePage() {
       />
       <div className="mb-4 flex max-w-[820px] flex-wrap items-center justify-end gap-x-5 gap-y-2">
         <a
+          href="/candidate/resume"
+          className="inline-flex items-center gap-1.5 text-[12px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+        >
+          Build / download my résumé →
+        </a>
+        <a
           href="/candidate/profile/preview"
           className="inline-flex items-center gap-1.5 text-[12px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
         >
