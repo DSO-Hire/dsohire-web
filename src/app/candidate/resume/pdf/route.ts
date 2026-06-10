@@ -24,7 +24,9 @@ export async function GET() {
     (data.name || "resume").replace(/[^a-z0-9]+/gi, "_").replace(/^_|_$/g, "") ||
     "resume";
 
-  return new Response(buffer, {
+  // Wrap in a plain Uint8Array — a Node Buffer isn't typed as a web BodyInit
+  // under current @types/node, but a Uint8Array is a valid BufferSource.
+  return new Response(new Uint8Array(buffer), {
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="${safeName}_resume.pdf"`,
