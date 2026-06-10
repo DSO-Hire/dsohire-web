@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // @react-pdf/renderer (résumé PDF generation, #87b) ships native-ish deps
+  // (yoga-layout, fontkit) that must NOT be bundled — keep it a runtime
+  // require in the serverless function or the build can fail.
+  serverExternalPackages: ["@react-pdf/renderer"],
   experimental: {
     // Server actions ship file uploads (resume parser + image upload).
     // Default 1MB body limit chokes on a 5MB image; default also chokes
