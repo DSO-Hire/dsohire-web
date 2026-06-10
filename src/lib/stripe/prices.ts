@@ -50,6 +50,14 @@ export interface TierConfig {
   /** Per-month equivalent of the annual plan, for the toggle's headline price. */
   annualMonthlyEquivalent: number; // dollars
   features: string[];
+  /**
+   * Hard cap on concurrent ACTIVE openings (the sum of `openings` across the
+   * DSO's `status='active'` jobs). null = unlimited. The advertised number
+   * MUST equal this enforced number (memo #88 §4.6). Counted, not metered.
+   */
+  maxActiveJobs: number | null;
+  /** Hard cap on admin seats (reuses seats_used). null = unlimited. */
+  maxSeats: number | null;
   /** Stripe Price IDs — test mode for now; live IDs added at soft launch. */
   stripePriceIdTest: string; // monthly
   stripePriceIdTestAnnual: string; // annual
@@ -72,12 +80,14 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
     annualPriceCents: 430800,
     annualMonthlyEquivalent: 359,
     features: [
-      "Up to 5 active listings · 3 admin seats",
+      "Up to 5 active openings · 5 admin seats",
       "Multi-location posting in a single flow",
       "Practice Fit + AI candidate matching",
       "AI Job Description generator (dental-context)",
       "Branded company page + map view",
     ],
+    maxActiveJobs: 5,
+    maxSeats: 5,
     stripePriceIdTest: "price_1TZCQh0uFxwSh1FnO9cRurPI",
     stripePriceIdTestAnnual: "price_1TZCRL0uFxwSh1FnqaMDm06C",
   },
@@ -92,12 +102,14 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
     annualPriceCents: 754800,
     annualMonthlyEquivalent: 629,
     features: [
-      "Up to 20 active listings · 10 admin seats",
+      "Up to 20 active openings · 15 admin seats",
       "Everything in Solo, plus:",
       "Cross-job application inbox",
       "License requirements + attestation tracking",
       "Funnel reports + AI rejection suggester + priority support",
     ],
+    maxActiveJobs: 20,
+    maxSeats: 15,
     stripePriceIdTest: "price_1TZCRe0uFxwSh1FnqKatGAUP",
     stripePriceIdTestAnnual: "price_1TZCS20uFxwSh1Fnt8Gsc0Y2",
   },
@@ -112,12 +124,14 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
     annualPriceCents: 1618800,
     annualMonthlyEquivalent: 1349,
     features: [
-      "Unlimited listings · unlimited admin seats",
+      "Up to 100 active openings · 50 admin seats",
       "Everything in Growth, plus:",
       "Per-location dashboards",
       "Cross-location benchmarking",
       "Custom approval chains (H2 2026)",
     ],
+    maxActiveJobs: 100,
+    maxSeats: 50,
     stripePriceIdTest: "price_1TZCSO0uFxwSh1FnGSO3OoJR",
     stripePriceIdTestAnnual: "price_1TZCSj0uFxwSh1FnkuUbRajm",
     badge: "Most popular",
@@ -133,12 +147,15 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
     annualPriceCents: 3238800,
     annualMonthlyEquivalent: 2699,
     features: [
+      "Unlimited active openings · unlimited admin seats",
       "Everything in Scale, plus:",
       "Audit log with indefinite retention",
       "Dedicated CSM + SLA (H2 2026)",
       "SSO / SAML + SOC 2 (H2 2026)",
       "BAA-readiness for HIPAA workflows",
     ],
+    maxActiveJobs: null,
+    maxSeats: null,
     stripePriceIdTest: "price_1TZCT70uFxwSh1FnIQNZziqE",
     stripePriceIdTestAnnual: "price_1TZCTQ0uFxwSh1Fn3FCyRSvk",
   },
