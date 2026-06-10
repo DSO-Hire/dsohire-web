@@ -27,6 +27,8 @@ type SupabaseClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
 
 export interface ActingMember {
   dsoUserId: string;
+  /** auth.users id — handy for recordAuditEvent's actorUserId. */
+  authUserId: string;
   dsoId: string;
   role: string;
   permissionOverrides: unknown;
@@ -58,6 +60,7 @@ export async function getActingMember(
   const row = data as Record<string, unknown>;
   return {
     dsoUserId: row.id as string,
+    authUserId: user.id,
     dsoId: row.dso_id as string,
     role: (row.role as string | null) ?? "",
     permissionOverrides: row.permission_overrides,

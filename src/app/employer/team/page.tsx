@@ -38,6 +38,14 @@ import {
 import { RoleSelect } from "./role-select";
 import { RoleHelp } from "./role-help";
 import { HmRescopeButton } from "./hm-rescope-button";
+import { PermissionsEditorButton } from "./permissions-editor";
+import {
+  effectivePermissions,
+  parsePermissionOverrides,
+  type Capability,
+  type DsoRole,
+} from "@/lib/permissions/capabilities";
+import { dsoCanEditPermissions } from "@/lib/permissions/tier";
 import { removeTeammate, revokeInvitation } from "./actions";
 import { ListSort } from "@/components/ui/list-sort";
 import { RoleFilter } from "./role-filter";
@@ -87,7 +95,7 @@ export default async function TeamPage({ searchParams }: PageProps) {
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("id, dso_id, role, full_name")
+    .select("id, dso_id, role, full_name, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) redirect("/employer/onboarding");
@@ -95,7 +103,18 @@ export default async function TeamPage({ searchParams }: PageProps) {
   // Hiring managers don't access team management.
   if (dsoUser.role === "hiring_manager") redirect("/employer/dashboard");
 
-  const canManage = dsoUser.role === "owner" || dsoUser.role === "admin";
+  // #83 — capability-driven (role preset + per-teammate overrides).
+  const viewerPerms = effectivePermissions(
+    dsoUser.role as string,
+    (dsoUser as Record<string, unknown>).permission_overrides
+  );
+  const canManage = viewerPerms["team.manage"];
+  // Phase 3 — per-teammate permission overrides are Growth+ (Solo sees the
+  // presets read-only with an upgrade nudge inside the dialog).
+  const canEditPermissions = await dsoCanEditPermissions(
+    supabase,
+    dsoUser.dso_id as string
+  );
   const capStatus = await getCapStatus(supabase, dsoUser.dso_id as string);
 
   // #88 — seat-pack add-on props (owner/admin, eligible tier, packs configured).
@@ -134,7 +153,7 @@ export default async function TeamPage({ searchParams }: PageProps) {
   const { data: members } = await supabase
     .from("dso_users")
     .select(
-      "id, auth_user_id, role, full_name, title, avatar_url, work_base, base_location_id, coverage_area, created_at"
+      "id, auth_user_id, role, full_name, title, avatar_url, work_base, base_location_id, coverage_area, created_at, permission_overrides"
     )
     .eq("dso_id", dsoUser.dso_id)
     .order("created_at", { ascending: true });
@@ -316,6 +335,8 @@ export default async function TeamPage({ searchParams }: PageProps) {
               email={memberEmails.get(m.auth_user_id) ?? null}
               isCurrentUser={m.auth_user_id === user.id}
               canManage={canManage}
+              canEditPermissions={canEditPermissions}
+              viewerPerms={viewerPerms}
               ownerCount={ownerCount}
               adminCount={adminCount}
               scopedLocationIds={hmScopeByUserId.get(m.id) ?? []}
@@ -358,6 +379,8 @@ interface MemberRow {
   base_location_id: string | null;
   coverage_area: string | null;
   created_at: string;
+  /** #83 — per-teammate capability overrides (jsonb). */
+  permission_overrides: unknown;
 }
 
 interface InviteRow {
@@ -382,6 +405,8 @@ function MemberRowItem({
   email,
   isCurrentUser,
   canManage,
+  canEditPermissions,
+  viewerPerms,
   ownerCount,
   adminCount,
   scopedLocationIds,
@@ -392,6 +417,8 @@ function MemberRowItem({
   email: string | null;
   isCurrentUser: boolean;
   canManage: boolean;
+  canEditPermissions: boolean;
+  viewerPerms: Record<Capability, boolean>;
   ownerCount: number;
   adminCount: number;
   scopedLocationIds: string[];
@@ -475,11 +502,25 @@ function MemberRowItem({
         )}
       </div>
 
-      <RoleControl
-        member={member}
-        canManage={canManage}
-        isSoleOwner={isSoleOwner}
-      />
+      <div className="flex flex-col items-end gap-1.5">
+        <RoleControl
+          member={member}
+          canManage={canManage}
+          isSoleOwner={isSoleOwner}
+        />
+        {/* #83 Phase 3 — per-teammate permission editor. Owner rows have
+            everything; your own row is never editable (no self-escalation). */}
+        {canManage && member.role !== "owner" && !isCurrentUser && (
+          <PermissionsEditorButton
+            targetDsoUserId={member.id}
+            targetName={member.full_name || (email ?? "Teammate")}
+            targetRole={member.role as DsoRole}
+            overrides={parsePermissionOverrides(member.permission_overrides)}
+            editable={canEditPermissions}
+            viewerPerms={viewerPerms}
+          />
+        )}
+      </div>
 
       {canRemove && (
         <form action={removeTeammate}>
