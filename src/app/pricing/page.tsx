@@ -21,6 +21,7 @@ import {
   type BillingPeriod,
 } from "@/lib/stripe/prices";
 import { BillingPeriodToggle } from "./billing-period-toggle";
+import { PlanFinder } from "./plan-finder";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import { MotionMount } from "@/components/marketing/motion";
 import { RoiCalculator } from "@/components/marketing/roi-calculator";
@@ -77,6 +78,9 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
         period={period}
         authedNeedsCheckout={authedNeedsCheckout}
       />
+      {/* #115 Model 03 (Day 32) — 3-tap honest tier recommender, parked
+          between the cards and the full matrix to catch comparison paralysis. */}
+      <PlanFinder />
       <CompareMatrix tiers={tiers} period={period} />
       <FAQ />
       <FinalCta nextParam={nextParam} />
@@ -167,7 +171,7 @@ function TierGrid({
   const soloTier = tiers.find((t) => t.id === "solo");
   const dsoTiers = tiers.filter((t) => t.id !== "solo");
   return (
-    <section className="px-6 sm:px-14 max-w-[1240px] mx-auto">
+    <section id="tiers" className="px-6 sm:px-14 max-w-[1240px] mx-auto scroll-mt-[100px]">
       {/* ── Solo standout (audience = multi-location owner-operator) ── */}
       {soloTier && (
         <div className="mb-14">
@@ -245,6 +249,16 @@ function TierGrid({
         <strong className="text-ink font-bold">
           No per-listing fees. No placement fees. Ever.
         </strong>
+      </p>
+      {/* #115 Model 03 — caps honesty as a trust signal, not fine print. */}
+      <p className="mt-3 text-center">
+        <span
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 text-[10px] font-bold tracking-[1.4px] uppercase text-heritage-deep border border-heritage/30"
+          style={{ background: "var(--heritage-tint)" }}
+        >
+          Every cap shown is the enforced cap — what we advertise is what the
+          code allows
+        </span>
       </p>
     </section>
   );
@@ -904,6 +918,36 @@ function CompareMatrix({
   period: BillingPeriod;
 }) {
   const isAnnual = period === "annual";
+
+  // #115 Model 03 (Day 32) — roadmap-row consolidation (the queued
+  // "roadmap-row consolidation" pass): any row that isn't live for ANY
+  // tier moves out of its category into one honest "On the roadmap" band
+  // at the bottom, keeping its category as a suffix. Mixed rows (live for
+  // some tiers, roadmapped for others) stay put — they're real today.
+  // COMPARE_GROUPS stays the single source of truth.
+  const ROADMAP_VALUES = new Set(["H2 2026", "Phase 6+"]);
+  const isRoadmapOnly = (row: MatrixRow) =>
+    Object.values(row.values).every(
+      (v) => v === false || (typeof v === "string" && ROADMAP_VALUES.has(v))
+    );
+  const movedRows: MatrixRow[] = [];
+  const currentGroups = COMPARE_GROUPS.map((g) => ({
+    ...g,
+    rows: g.rows.filter((row) => {
+      if (isRoadmapOnly(row)) {
+        movedRows.push({ ...row, feature: `${row.feature} · ${g.label}` });
+        return false;
+      }
+      return true;
+    }),
+  })).filter((g) => g.rows.length > 0);
+  const renderGroups: MatrixGroup[] = movedRows.length
+    ? [
+        ...currentGroups,
+        { label: "On the roadmap — committed, not yet shipped", rows: movedRows },
+      ]
+    : currentGroups;
+
   return (
     <section className="px-6 sm:px-14 pt-28 pb-20 max-w-[1240px] mx-auto">
       <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
@@ -924,12 +968,13 @@ function CompareMatrix({
       <div className="-mx-6 sm:-mx-14 px-6 sm:px-14 overflow-x-auto lg:overflow-visible">
         <p className="text-[13px] text-slate-meta mb-5 max-w-[680px] leading-relaxed">
           <strong className="text-ink font-semibold">Reading this matrix:</strong>{" "}
-          checkmarks = available today. <span className="font-bold tracking-[1px] uppercase text-[10px]">H2 2026</span> =
-          on the active roadmap, ships across the second half of 2026.{" "}
-          <span className="font-bold tracking-[1px] uppercase text-[10px]">Phase 6+</span> =
-          on the longer-term roadmap, scheduled after first $5K MRR. We commit to
-          features publicly so prospects see the platform&apos;s shape, not just
-          its current state.
+          checkmarks = available today, and every capacity number is
+          code-enforced. Anything not yet live for any tier sits in the final{" "}
+          <span className="font-bold tracking-[1px] uppercase text-[10px]">On the roadmap</span>{" "}
+          band — labeled <span className="font-bold tracking-[1px] uppercase text-[10px]">H2 2026</span>{" "}
+          (active roadmap) or <span className="font-bold tracking-[1px] uppercase text-[10px]">Phase 6+</span>{" "}
+          (longer-term). We commit to features publicly so prospects see the
+          platform&apos;s shape — and nothing roadmapped masquerades as shipped.
         </p>
         <table className="w-full min-w-[1040px] border-collapse">
           {/* ── Branded navy header row — sticks below the 80px nav on scroll ── */}
@@ -975,7 +1020,7 @@ function CompareMatrix({
             </tr>
           </thead>
           <tbody>
-            {COMPARE_GROUPS.map((group, gi) => (
+            {renderGroups.map((group, gi) => (
               <MatrixGroupBlock
                 key={gi}
                 group={group}
