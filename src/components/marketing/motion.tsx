@@ -102,6 +102,12 @@ export function MotionMount() {
  * ("47", "1,204") with a snappy count-up; anything pre-formatted ("3.2d",
  * "59%", "—") renders untouched. Lets KPI tiles / stat cards adopt motion
  * with zero call-site changes and zero risk to non-numeric states.
+ *
+ * In-app mode = ssrZero + reserveWidth: the value renders as 0 from the
+ * server (no SSR-final → snap-to-0 flash — the authed app requires JS
+ * anyway) and the span pre-reserves the FINAL value's width in `ch`, so
+ * digit-count changes never shift neighboring layout. (Cam Day 31:
+ * "dashboard motion is a little jumpy" — this was the fix.)
  */
 export function StatValue({
   value,
@@ -113,7 +119,12 @@ export function StatValue({
   const m = /^(\d[\d,]*)$/.exec(value.trim());
   if (!m) return <>{value}</>;
   return (
-    <CountUp to={parseInt(m[1].replace(/,/g, ""), 10)} duration={duration} />
+    <CountUp
+      to={parseInt(m[1].replace(/,/g, ""), 10)}
+      duration={duration}
+      ssrZero
+      reserveWidth
+    />
   );
 }
 
@@ -123,18 +134,33 @@ export function CountUp({
   suffix = "",
   duration = 950,
   className,
+  ssrZero = false,
+  reserveWidth = false,
 }: {
   to: number;
   prefix?: string;
   suffix?: string;
   duration?: number;
   className?: string;
+  /**
+   * Render 0 from the server and count up on view. Use IN-APP only —
+   * marketing surfaces keep the real value in the HTML for SEO/no-JS
+   * (their reveal layer hides the wind-up instead).
+   */
+  ssrZero?: boolean;
+  /** Reserve the final value's width so digits never shift layout. */
+  reserveWidth?: boolean;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
+  const finalText = `${prefix}${to.toLocaleString("en-US")}${suffix}`;
 
   useEffect(() => {
     const el = ref.current;
-    if (!el || prefersReducedMotion()) return;
+    if (!el) return;
+    if (prefersReducedMotion()) {
+      el.textContent = finalText;
+      return;
+    }
 
     let raf = 0;
     const io = new IntersectionObserver(
@@ -148,9 +174,10 @@ export function CountUp({
           el.textContent = `${prefix}${v.toLocaleString("en-US")}${suffix}`;
           if (p < 1) raf = requestAnimationFrame(step);
         };
-        // Zero only once we're committed to animating — until this moment
-        // the server-rendered FINAL value is what's on screen (SEO/no-JS).
-        el.textContent = `${prefix}0${suffix}`;
+        // ssrZero mode is already showing 0 — start counting directly.
+        // SSR-final mode zeroes only at this moment (element is inside a
+        // reveal-hidden parent on marketing pages, so no visible snap).
+        if (!ssrZero) el.textContent = `${prefix}0${suffix}`;
         raf = requestAnimationFrame(step);
       },
       { threshold: 0.6 }
@@ -160,13 +187,23 @@ export function CountUp({
       io.disconnect();
       cancelAnimationFrame(raf);
     };
-  }, [to, prefix, suffix, duration]);
+  }, [to, prefix, suffix, duration, ssrZero, finalText]);
 
   return (
-    <span ref={ref} className={className} style={{ fontVariantNumeric: "tabular-nums" }}>
-      {prefix}
-      {to.toLocaleString("en-US")}
-      {suffix}
+    <span
+      ref={ref}
+      className={className}
+      style={{
+        fontVariantNumeric: "tabular-nums",
+        ...(reserveWidth
+          ? {
+              display: "inline-block",
+              minWidth: `${finalText.length}ch`,
+            }
+          : null),
+      }}
+    >
+      {ssrZero ? `${prefix}0${suffix}` : finalText}
     </span>
   );
 }

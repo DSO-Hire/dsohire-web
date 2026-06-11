@@ -116,7 +116,9 @@ function Hero() {
             body="Post across every practice on one flat monthly subscription, with an applicant pipeline built for the way dental groups hire."
             proof="Flat monthly fee · No per-listing fees · No placement charges"
             ctaLabel="Explore Dental Group Hiring"
-            href="/for-dental-groups"
+            ctaHref="/for-dental-groups"
+            secondaryLabel="See pricing"
+            secondaryHref="/pricing"
             revealDelay={200}
           />
           <DoorwayPanel
@@ -127,7 +129,9 @@ function Hero() {
             body="Real openings at multi-location dental groups — clinical and corporate, hygiene through specialist."
             proof="Free forever · Direct apply · Multi-location dental groups only"
             ctaLabel="Browse Dental Jobs"
-            href="/for-candidates"
+            ctaHref="/jobs"
+            secondaryLabel="How it works for candidates"
+            secondaryHref="/for-candidates"
             revealDelay={280}
           />
         </div>
@@ -144,7 +148,9 @@ function DoorwayPanel({
   body,
   proof,
   ctaLabel,
-  href,
+  ctaHref,
+  secondaryLabel,
+  secondaryHref,
   revealDelay,
 }: {
   /** "ink" = navy block, "heritage" = green block. Equal weight, distinct identity. */
@@ -155,18 +161,25 @@ function DoorwayPanel({
   body: string;
   /** Single dot-separated proof line — keeps the panel compact (above the fold). */
   proof: string;
+  /**
+   * #115 (Cam, Day 31) — the CTA goes EXACTLY where it promises ("Browse
+   * Dental Jobs" → /jobs, not a marketing detour). The pitch page rides
+   * the secondary link. Panel is a div now (no whole-card link) so the
+   * two destinations can coexist without nested anchors.
+   */
   ctaLabel: string;
-  href: string;
+  ctaHref: string;
+  secondaryLabel: string;
+  secondaryHref: string;
   /** #115 FOH-1 — scroll-settle stagger (ms). */
   revealDelay?: number;
 }) {
   const isInk = accent === "ink";
   return (
-    <Link
-      href={href}
+    <div
       data-reveal
       className={`group relative flex flex-col p-7 sm:p-8 text-ivory motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1 overflow-hidden ${
-        isInk ? "bg-ink hover:bg-ink-soft" : "bg-heritage hover:bg-heritage-deep"
+        isInk ? "bg-ink" : "bg-heritage"
       }`}
       style={
         {
@@ -209,12 +222,24 @@ function DoorwayPanel({
 
       {/* CTA — ivory on both cards so they pop with high contrast against
           both the navy and the green backgrounds, and the two CTAs read as
-          a unified pair. */}
-      <span className="mt-auto inline-flex items-center justify-center gap-2.5 px-6 py-3 text-[12px] font-bold tracking-[1.8px] uppercase bg-ivory text-ink group-hover:bg-ivory-deep transition-colors">
+          a unified pair. Real link to the literal destination. */}
+      <Link
+        href={ctaHref}
+        className="mt-auto inline-flex items-center justify-center gap-2.5 px-6 py-3 text-[12px] font-bold tracking-[1.8px] uppercase bg-ivory text-ink hover:bg-ivory-deep transition-colors"
+      >
         {ctaLabel}
         <ArrowRight className="h-3.5 w-3.5 motion-safe:transition-transform motion-safe:group-hover:translate-x-1" />
-      </span>
-    </Link>
+      </Link>
+
+      {/* Secondary — the pitch/detail page, named for what it is. */}
+      <Link
+        href={secondaryHref}
+        className="mt-3.5 inline-flex items-center justify-center gap-1.5 text-[11px] font-bold tracking-[1.6px] uppercase text-ivory/65 hover:text-ivory transition-colors"
+      >
+        {secondaryLabel}
+        <ArrowRight className="h-3 w-3" />
+      </Link>
+    </div>
   );
 }
 
