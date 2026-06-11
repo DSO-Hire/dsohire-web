@@ -18,8 +18,9 @@
  *   3. One proof strip per side (employer depth / candidate moat) — these
  *      replaced the old "Why Two Doors" IA-essay and the three abstract
  *      value-prop cards.
- *   4. OPERATOR LINE — "built by operators," compressed and signed-feeling,
- *      until /about ships the full founder story.
+ *   4. FOUNDER LINE — ten-years-in-the-business-of-dentistry voice (Day 32
+ *      reword: the old "built by operators" claim was inaccurate — founder
+ *      is business-side, not an operator; see memory), until /about ships.
  *   5. Closing doorways (unchanged — it worked).
  *
  * SEO posture unchanged: `/` carries brand/marketplace keywords; the two
@@ -652,7 +653,7 @@ function CandidateStrip() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   OPERATOR LINE — signed, human, brief (until /about ships)
+   FOUNDER LINE — signed, human, brief (until /about ships)
 ═══════════════════════════════════════════════════════ */
 
 function OperatorLine() {
@@ -663,9 +664,9 @@ function OperatorLine() {
         className="max-w-[820px] mx-auto text-center border-l-2 border-heritage bg-cream/70 px-8 sm:px-12 py-10"
       >
         <p className="text-lg sm:text-xl text-ink font-semibold leading-[1.6] tracking-[-0.2px] mb-4">
-          &ldquo;DSO Hire is built inside a real multi-location dental group —
-          by operators who got tired of paying $30,000 placement fees for
-          hires we found ourselves.&rdquo;
+          &ldquo;Dentistry professionalized everything except hiring. After
+          ten years on the business side of this industry, we built the
+          missing piece — no agencies, no $30,000 introductions.&rdquo;
         </p>
         <Link
           href="/about"

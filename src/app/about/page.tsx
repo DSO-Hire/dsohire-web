@@ -1,9 +1,10 @@
 /**
  * /about — DSO Hire's positioning and operating principles.
  *
- * Tone: company-voice, operator-led. Talks about the product and the
- * incentive alignment, not the founder. Anonymized per the launch policy
- * (see feedback_anonymize_public_copy in product memory).
+ * Tone: company-voice, industry-insider (Day 32: no operator claims — the
+ * founder is business-side, not an operator; see memory). Talks about the
+ * product and the incentive alignment, not the founder. Anonymized per the
+ * launch policy (see feedback_anonymize_public_copy in product memory).
  */
 
 import Link from "next/link";
@@ -14,7 +15,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "DSO Hire is the dental hiring platform built specifically for multi-location dental groups (DSOs). Operator-led, dental-focused, no placement fees ever.",
+    "DSO Hire is the dental hiring platform built specifically for multi-location dental groups (DSOs). Born from ten years inside the business of dentistry. Dental-only, no placement fees ever.",
 };
 
 export default function AboutPage() {
@@ -38,8 +39,8 @@ function Hero() {
         </span>
       </div>
       <h1 className="text-4xl sm:text-7xl font-extrabold tracking-[-2px] leading-[1.02] text-ink mb-7">
-        Built by operators,{" "}
-        <em className="not-italic text-heritage-light">for operators.</em>
+        Dentistry professionalized everything —{" "}
+        <em className="not-italic text-heritage-light">except hiring.</em>
       </h1>
       <p className="text-lg sm:text-xl text-slate-body leading-relaxed">
         DSO Hire is the dental hiring platform purpose-built for multi-location
@@ -99,8 +100,8 @@ function Story() {
 
 const PRINCIPLES = [
   {
-    eyebrow: "Operator-led",
-    title: "Decisions get made by people who have actually hired in this industry.",
+    eyebrow: "Inside the industry",
+    title: "Decisions get made by people who know dental hiring from the inside.",
     body: "Every product choice runs through one filter: would a real recruiter at a dental group pick this up and use it tomorrow without a 30-minute training session? If the answer is no, we keep iterating.",
   },
   {
