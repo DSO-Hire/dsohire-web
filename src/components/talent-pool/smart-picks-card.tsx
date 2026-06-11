@@ -12,6 +12,7 @@ import { FitWordmark } from "@/components/practice-fit/brand/fit-wordmark";
 import { bucketStyle } from "@/lib/practice-fit/buckets";
 import type { SmartPick } from "@/lib/talent-pool/smart-picks";
 import { SmartPicksSaveButton } from "./smart-picks-save-button";
+import { CountUp } from "@/components/marketing/motion";
 
 interface SmartPicksCardProps {
   picks: SmartPick[];
@@ -86,7 +87,8 @@ export function SmartPicksCard({ picks }: SmartPicksCardProps) {
                     {style.label}
                   </span>
                   <span className="tabular-nums font-extrabold text-ink text-[14px]">
-                    {Math.round(p.fit.score)}
+                    {/* FOH-9 — fit scores assemble on view (snappy 600ms). */}
+                    <CountUp to={Math.round(p.fit.score)} duration={600} />
                   </span>
                 </div>
                 <SmartPicksSaveButton

@@ -97,6 +97,26 @@ export function MotionMount() {
    CountUp — settle-into-place number
 ─────────────────────────────────────────────────────── */
 
+/**
+ * StatValue — FOH-9 in-app wrapper. Animates PURE-INTEGER display values
+ * ("47", "1,204") with a snappy count-up; anything pre-formatted ("3.2d",
+ * "59%", "—") renders untouched. Lets KPI tiles / stat cards adopt motion
+ * with zero call-site changes and zero risk to non-numeric states.
+ */
+export function StatValue({
+  value,
+  duration = 700,
+}: {
+  value: string;
+  duration?: number;
+}) {
+  const m = /^(\d[\d,]*)$/.exec(value.trim());
+  if (!m) return <>{value}</>;
+  return (
+    <CountUp to={parseInt(m[1].replace(/,/g, ""), 10)} duration={duration} />
+  );
+}
+
 export function CountUp({
   to,
   prefix = "",

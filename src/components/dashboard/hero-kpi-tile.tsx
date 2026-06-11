@@ -33,6 +33,7 @@
 
 import Link from "next/link";
 import { ChevronRight, ArrowRight } from "lucide-react";
+import { StatValue } from "@/components/marketing/motion";
 
 interface StageBucket {
   key: string;
@@ -128,10 +129,10 @@ export function HeroKpiTile({
         </div>
       )}
 
-      {/* Giant value + SLA / delta pill */}
+      {/* Giant value + SLA / delta pill — FOH-9: counts up on view. */}
       <div className="flex items-baseline gap-3 flex-wrap mb-3">
-        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-ivory">
-          {value}
+        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-ivory tabular-nums">
+          <StatValue value={value} duration={800} />
         </div>
         {slaChip && (
           <span

@@ -12,6 +12,7 @@
 
 import Link from "next/link";
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
+import { StatValue } from "@/components/marketing/motion";
 
 export interface StatDelta {
   /** Display string, e.g. "+12%" or "−3d". */
@@ -86,7 +87,8 @@ export function StatCard({
 
       <div className="mt-2 flex items-baseline gap-1.5">
         <span className="text-[32px] font-extrabold tracking-[-1px] tabular-nums text-ink leading-none">
-          {value}
+          {/* FOH-9 — integer values count up on view; formatted values render as-is. */}
+          <StatValue value={value} />
         </span>
         {unit && (
           <span className="text-[13px] font-semibold text-slate-meta">

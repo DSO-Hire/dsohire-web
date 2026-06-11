@@ -33,6 +33,7 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { Sparkline } from "./sparkline";
 import { TrendPill } from "./trend-pill";
+import { StatValue } from "@/components/marketing/motion";
 
 interface KpiTileProps {
   /** Lucide icon component. */
@@ -102,9 +103,10 @@ export function KpiTile({
         </div>
       </div>
 
-      {/* Big value */}
-      <div className="text-[56px] font-black tracking-[-2.5px] leading-[0.95] text-ink mb-2">
-        {value}
+      {/* Big value — FOH-9: integers count up on view (700ms, settles fast
+          so daily users never wait); pre-formatted values render as-is. */}
+      <div className="text-[56px] font-black tracking-[-2.5px] leading-[0.95] text-ink mb-2 tabular-nums">
+        <StatValue value={value} />
       </div>
 
       {/* Optional secondary signal line */}
