@@ -656,6 +656,49 @@ html, body {
   background: var(--color-heritage);
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   BOH Remodel Lane 1 (Day 32) — the in-app interaction grammar.
+   Four verbs, one accent: the heritage ring/flash ALWAYS means
+   "committed successfully." kb-settle (below) was the first verb
+   (FOH-9); save-flash, row-commit and badge-pulse complete the
+   family. Purely additive — surfaces adopt them lane by lane.
+   Personality unchanged: precise, settling, architectural.
+═══════════════════════════════════════════════════════════════ */
+
+/* save-flash — a field/form value commits (apply to the input) */
+@media (prefers-reduced-motion: no-preference) {
+  .save-flash {
+    animation: save-flash 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+@keyframes save-flash {
+  0% { box-shadow: 0 0 0 3px rgba(77, 122, 96, 0.55); }
+  100% { box-shadow: 0 0 0 0 rgba(77, 122, 96, 0); }
+}
+
+/* row-commit — a list/table row lands or updates in place */
+@media (prefers-reduced-motion: no-preference) {
+  .row-commit {
+    animation: row-commit 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+@keyframes row-commit {
+  0% { transform: translateX(-8px); background-color: var(--heritage-tint); }
+  100% { transform: none; background-color: transparent; }
+}
+
+/* badge-pulse — an unread/count badge changes value */
+@media (prefers-reduced-motion: no-preference) {
+  .badge-pulse {
+    animation: badge-pulse 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+}
+@keyframes badge-pulse {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
 /* ── FOH-9: kanban drop "settle" ──
    Plays once when a card's move is server-confirmed (pending true→false):
    a quick scale-down + heritage ring that fades as the card seats itself. */
