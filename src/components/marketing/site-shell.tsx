@@ -17,10 +17,14 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { INFO_EMAIL as SUPPORT_EMAIL, INFO_MAILTO as SUPPORT_MAILTO } from "@/lib/contact";
 import { MobileMenu } from "./mobile-menu";
 import { LensToggle } from "./lens-toggle";
+import { MotionMount } from "./motion";
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   return (
     <>
+      {/* #115 FOH-1 — one observer per page powers every [data-reveal]
+          scroll-settle on the marketing surfaces. */}
+      <MotionMount />
       <SiteNav />
       <main className="flex-1">{children}</main>
       <SiteFooter />
@@ -88,7 +92,7 @@ export async function SiteNav() {
   return (
     <nav className="fixed top-0 inset-x-0 z-50 h-[80px] px-6 sm:px-14 flex items-center justify-between backdrop-blur-md bg-ivory/85 border-b border-[var(--rule)]">
       <Link href="/" className="flex items-center" aria-label="DSO Hire — home">
-        <BrandLockup height={42} />
+        <BrandLockup height={42} draw />
       </Link>
       <ul className="hidden md:flex items-center gap-7 list-none">
         {/* Dual-lens segmented control — "For DSOs | Job Candidates".
@@ -263,9 +267,17 @@ function FooterLink({ href, children }: { href: string; children: React.ReactNod
 export function BrandLockup({
   dark,
   height = 36,
+  draw,
 }: {
   dark?: boolean;
   height?: number;
+  /**
+   * #115 FOH-1 — opt-in draw-on: the arch sweeps on, the heritage crossbar
+   * follows, wordmark + divider fade up. Pure CSS (globals.css
+   * `.lockup-draw`), reduced-motion safe. Used by the marketing SiteNav;
+   * keep OFF for in-app shells unless FOH-9 decides otherwise.
+   */
+  draw?: boolean;
 }) {
   const ink = dark ? "#F7F4ED" : "#14233F";
   const dividerColor = dark
@@ -279,6 +291,7 @@ export function BrandLockup({
       style={{ height, width: "auto" }}
       role="img"
       aria-label="DSO Hire"
+      className={draw ? "lockup-draw" : undefined}
     >
       {/* Outer arch — rotated 90° CW so it opens LEFT with the curve on the
           right. Top arm extends right from x=5 to x=28 at y=5, curves down
@@ -286,6 +299,7 @@ export function BrandLockup({
           then curves down and around to the bottom arm extending left from
           x=28 back to x=5 at y=39. */}
       <path
+        className="lockup-arch"
         d="M 5 5 L 28 5 Q 40 5 40 17 L 40 27 Q 40 39 28 39 L 5 39"
         fill="none"
         stroke={ink}
@@ -297,6 +311,7 @@ export function BrandLockup({
           midpoint of the mark, extending from inside the open left side to
           just shy of the inner curve on the right. */}
       <line
+        className="lockup-bar"
         x1="8"
         y1="22"
         x2="24"
@@ -307,6 +322,7 @@ export function BrandLockup({
       />
       {/* Vertical hairline divider between mark and wordmark */}
       <line
+        className="lockup-fade"
         x1="52"
         y1="6"
         x2="52"
@@ -317,6 +333,7 @@ export function BrandLockup({
       {/* DSO wordmark, heavy weight — explicit textLength locks the width
           so the HIRE underneath matches exactly regardless of font rendering. */}
       <text
+        className="lockup-fade"
         x="58"
         y="28"
         fontFamily="'Manrope', 'Helvetica Neue', Arial, sans-serif"
@@ -333,6 +350,7 @@ export function BrandLockup({
           means only inter-letter spacing is adjusted, not glyph widths. Drop
           letterSpacing so textLength is the only width driver. */}
       <text
+        className="lockup-fade"
         x="58"
         y="38"
         fontFamily="'Manrope', 'Helvetica Neue', Arial, sans-serif"

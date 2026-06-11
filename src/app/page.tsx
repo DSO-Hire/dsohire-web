@@ -77,6 +77,7 @@ function Hero() {
 
       <div className="relative z-10 max-w-[1180px] mx-auto text-center">
         <span
+          data-reveal
           className="inline-flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold tracking-[1.8px] uppercase text-ink border border-heritage/35 mb-5"
           style={{
             background: "var(--heritage-tint)",
@@ -87,11 +88,19 @@ function Hero() {
           <span>The dental-only hiring platform</span>
         </span>
 
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[-0.025em] leading-[1.02] text-ink mb-4">
+        <h1
+          data-reveal
+          style={{ "--mk-delay": "70ms" } as React.CSSProperties}
+          className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[-0.025em] leading-[1.02] text-ink mb-4"
+        >
           Dental hiring,{" "}
           <em className="not-italic text-heritage-light">done direct.</em>
         </h1>
-        <p className="text-base sm:text-lg text-slate-body leading-relaxed max-w-[600px] mx-auto mb-9">
+        <p
+          data-reveal
+          style={{ "--mk-delay": "140ms" } as React.CSSProperties}
+          className="text-base sm:text-lg text-slate-body leading-relaxed max-w-[600px] mx-auto mb-9"
+        >
           The dental-only job platform — connecting multi-location dental groups
           with dental professionals, directly. No agencies, no per-listing fees,
           no middlemen.
@@ -108,6 +117,7 @@ function Hero() {
             proof="Flat monthly fee · No per-listing fees · No placement charges"
             ctaLabel="Explore Dental Group Hiring"
             href="/for-dental-groups"
+            revealDelay={200}
           />
           <DoorwayPanel
             accent="heritage"
@@ -118,6 +128,7 @@ function Hero() {
             proof="Free forever · Direct apply · Multi-location dental groups only"
             ctaLabel="Browse Dental Jobs"
             href="/for-candidates"
+            revealDelay={280}
           />
         </div>
       </div>
@@ -134,6 +145,7 @@ function DoorwayPanel({
   proof,
   ctaLabel,
   href,
+  revealDelay,
 }: {
   /** "ink" = navy block, "heritage" = green block. Equal weight, distinct identity. */
   accent: "ink" | "heritage";
@@ -145,18 +157,24 @@ function DoorwayPanel({
   proof: string;
   ctaLabel: string;
   href: string;
+  /** #115 FOH-1 — scroll-settle stagger (ms). */
+  revealDelay?: number;
 }) {
   const isInk = accent === "ink";
   return (
     <Link
       href={href}
+      data-reveal
       className={`group relative flex flex-col p-7 sm:p-8 text-ivory motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1 overflow-hidden ${
         isInk ? "bg-ink hover:bg-ink-soft" : "bg-heritage hover:bg-heritage-deep"
       }`}
-      style={{
-        boxShadow:
-          "0 28px 56px -28px rgba(7,15,28,0.40), 0 12px 24px -12px rgba(7,15,28,0.18)",
-      }}
+      style={
+        {
+          boxShadow:
+            "0 28px 56px -28px rgba(7,15,28,0.40), 0 12px 24px -12px rgba(7,15,28,0.18)",
+          "--mk-delay": revealDelay ? `${revealDelay}ms` : undefined,
+        } as React.CSSProperties
+      }
     >
       {/* Top accent stripe — cross-lens color hint, adds depth to the flat block */}
       <span
@@ -208,13 +226,21 @@ function MarketplaceBand() {
   return (
     <section className="bg-cream border-y border-[var(--rule)] px-6 sm:px-14 py-24">
       <div className="max-w-[760px] mx-auto text-center">
-        <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
+        <div data-reveal className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
           Why Two Doors
         </div>
-        <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink mb-6">
+        <h2
+          data-reveal
+          style={{ "--mk-delay": "70ms" } as React.CSSProperties}
+          className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink mb-6"
+        >
           A hiring platform only works when both sides show up.
         </h2>
-        <p className="text-base sm:text-lg text-slate-body leading-[1.7]">
+        <p
+          data-reveal
+          style={{ "--mk-delay": "140ms" } as React.CSSProperties}
+          className="text-base sm:text-lg text-slate-body leading-[1.7]"
+        >
           Dental groups need a steady pipeline of dental talent. Dental
           professionals need real openings at employers worth their time.
           Generic job boards serve neither well — so DSO Hire is dental-only on
@@ -254,16 +280,25 @@ const VALUE_PROPS = [
 function WhyDental() {
   return (
     <section className="px-6 sm:px-14 py-24 max-w-[1240px] mx-auto">
-      <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
+      <div data-reveal className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
         What Makes It Different
       </div>
-      <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink max-w-[720px] mb-12">
+      <h2
+        data-reveal
+        style={{ "--mk-delay": "70ms" } as React.CSSProperties}
+        className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink max-w-[720px] mb-12"
+      >
         One platform, one industry, no middlemen.
       </h2>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-px bg-[var(--rule)] border border-[var(--rule)]">
-        {VALUE_PROPS.map(({ icon: Icon, title, body }) => (
-          <div key={title} className="bg-white p-9">
+        {VALUE_PROPS.map(({ icon: Icon, title, body }, i) => (
+          <div
+            key={title}
+            data-reveal
+            style={{ "--mk-delay": `${i * 90}ms` } as React.CSSProperties}
+            className="bg-white p-9"
+          >
             <span
               className="inline-flex items-center justify-center w-10 h-10 mb-5 text-heritage-deep"
               style={{ background: "var(--heritage-tint)" }}
@@ -304,14 +339,22 @@ function ClosingDoorways() {
         }}
       />
       <div className="relative max-w-[820px] mx-auto text-center">
-        <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.08] text-ivory mb-4">
+        <h2 data-reveal className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.08] text-ivory mb-4">
           Pick your door.
         </h2>
-        <p className="text-base text-ivory/60 leading-[1.7] max-w-[560px] mx-auto mb-10">
+        <p
+          data-reveal
+          style={{ "--mk-delay": "70ms" } as React.CSSProperties}
+          className="text-base text-ivory/60 leading-[1.7] max-w-[560px] mx-auto mb-10"
+        >
           Two audiences, one dental-only platform. Head to the side that fits —
           you can always switch.
         </p>
-        <div className="flex flex-col sm:flex-row gap-3.5 justify-center">
+        <div
+          data-reveal
+          style={{ "--mk-delay": "140ms" } as React.CSSProperties}
+          className="flex flex-col sm:flex-row gap-3.5 justify-center"
+        >
           <Link
             href="/for-dental-groups"
             className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-ivory text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-ivory-deep transition-colors"

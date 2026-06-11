@@ -406,3 +406,139 @@ html, body {
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 44'><circle cx='22' cy='22' r='21' fill='white' stroke='%2314233F' stroke-opacity='0.2'/><path d='M14 13 L26 13 Q33 13 33 20 L33 24 Q33 31 26 31 L14 31' fill='none' stroke='%2314233F' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/><line x1='16' y1='22' x2='25' y2='22' stroke='%234D7A60' stroke-width='2.6' stroke-linecap='round'/></svg>");
   cursor: pointer;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   #115 FOH-1 — DSO Hire motion system (marketing layer)
+   Personality: precise, settling, architectural. Things slide into
+   alignment on the grid. See components/marketing/motion.tsx.
+
+   [data-reveal] hiding only applies when scripting is enabled, so
+   no-JS visitors + crawlers always get visible content; the whole
+   layer is inert under prefers-reduced-motion.
+═══════════════════════════════════════════════════════════════ */
+
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--mk-delay, 0ms);
+  }
+  [data-reveal].mk-in {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Brand lockup draw-on (opt-in via BrandLockup `draw`) ──
+   The D-form arch sweeps on, the heritage crossbar follows, the
+   wordmark + divider fade up last. Pure CSS — runs on load. */
+@media (prefers-reduced-motion: no-preference) {
+  .lockup-draw .lockup-arch {
+    stroke-dasharray: 112;
+    stroke-dashoffset: 112;
+    animation: mk-draw 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards;
+  }
+  .lockup-draw .lockup-bar {
+    stroke-dasharray: 18;
+    stroke-dashoffset: 18;
+    animation: mk-draw 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.8s forwards;
+  }
+  .lockup-draw .lockup-fade {
+    opacity: 0;
+    animation: mk-fade 0.5s ease-out 0.55s forwards;
+  }
+}
+@keyframes mk-draw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes mk-fade {
+  to { opacity: 1; }
+}
+
+/* ── Living kanban (/for-dental-groups hero) ──
+   Plays the page's own story ONCE on load: Dr. Chen's card lifts out
+   of Screening, glides to the top of Interview, settles; the realtime
+   notification pops in as she lands. Space for the destination card is
+   reserved the whole time (opacity/transform only — zero layout shift).
+   Reduced motion: everything rests in its final state. */
+.hk-mover { display: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .hk-mover {
+    display: block;
+    position: absolute;
+    z-index: 5;
+    /* Start: hovering over the Screening column (col 2 of 4). */
+    left: calc(25% + 7px);
+    width: calc(25% - 14px);
+    animation: hk-travel 1.3s cubic-bezier(0.45, 0.05, 0.25, 1) 0.9s forwards;
+    opacity: 0;
+  }
+  .hk-chen {
+    opacity: 0;
+    transform: scale(0.98);
+    animation: hk-appear 0.25s ease-out 2.12s forwards;
+  }
+  .hk-notif {
+    opacity: 0;
+    animation: hk-notif-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) 2.3s forwards;
+  }
+}
+/* Rotation lives here (not inline on the element) so the entrance
+   animation composes with it; reduced-motion gets the rotated, visible
+   resting state. */
+.hk-notif {
+  transform: rotate(-1.5deg);
+}
+@keyframes hk-travel {
+  0% {
+    opacity: 0;
+    left: calc(25% + 7px);
+    transform: translateY(0) rotate(0deg);
+  }
+  12% {
+    opacity: 1;
+    transform: translateY(-7px) rotate(-1.2deg);
+  }
+  78% {
+    opacity: 1;
+    left: calc(50% + 7px);
+    transform: translateY(-4px) rotate(0.6deg);
+  }
+  92% {
+    opacity: 1;
+    left: calc(50% + 7px);
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    left: calc(50% + 7px);
+    transform: translateY(0) rotate(0deg);
+  }
+}
+@keyframes hk-appear {
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes hk-notif-in {
+  from { opacity: 0; transform: translateY(10px) rotate(-1.5deg); }
+  to { opacity: 1; transform: translateY(0) rotate(-1.5deg); }
+}
+
+/* ── FitDial sparkle (components/marketing/fit-dial.tsx) ── */
+.mk-dial-sparkle {
+  opacity: 0;
+  transform: scale(0.4);
+  transition:
+    opacity 0.4s ease-out,
+    transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.mk-dial-lit .mk-dial-sparkle {
+  opacity: 1;
+  transform: scale(1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .mk-dial-sparkle { opacity: 1; transform: none; transition: none; }
+}
