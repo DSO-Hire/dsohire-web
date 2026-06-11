@@ -281,11 +281,13 @@ function DoorwayPanel({
         } as React.CSSProperties
       }
     >
-      {/* Top accent stripe — cross-lens color hint, adds depth to the flat block */}
+      {/* Top accent stripe — true cross-lens reciprocity: the navy door
+          wears heritage, the green door wears navy. (The old ivory stripe
+          on green read as a gap that made the card look shorter — Cam.) */}
       <span
         aria-hidden
         className={`absolute top-0 inset-x-0 h-[3px] ${
-          isInk ? "bg-heritage" : "bg-ivory"
+          isInk ? "bg-heritage" : "bg-ink"
         }`}
       />
 
@@ -315,23 +317,27 @@ function DoorwayPanel({
       {/* The miniature — the door shows the product. */}
       {demo}
 
-      {/* CTA — real link to the literal destination. */}
-      <Link
-        href={ctaHref}
-        className="mt-6 inline-flex items-center justify-center gap-2.5 px-6 py-3 text-[12px] font-bold tracking-[1.8px] uppercase bg-ivory text-ink hover:bg-ivory-deep transition-colors"
-      >
-        {ctaLabel}
-        <ArrowRight className="h-3.5 w-3.5 motion-safe:transition-transform motion-safe:group-hover:translate-x-1" />
-      </Link>
+      {/* CTA block — mt-auto bottom-anchors the whole row so BOTH doors'
+          buttons sit at identical heights regardless of demo height
+          (symmetry — Cam). */}
+      <div className="mt-auto pt-6 flex flex-col">
+        <Link
+          href={ctaHref}
+          className="inline-flex items-center justify-center gap-2.5 px-6 py-3 text-[12px] font-bold tracking-[1.8px] uppercase bg-ivory text-ink hover:bg-ivory-deep transition-colors"
+        >
+          {ctaLabel}
+          <ArrowRight className="h-3.5 w-3.5 motion-safe:transition-transform motion-safe:group-hover:translate-x-1" />
+        </Link>
 
-      {/* Secondary — the pitch/detail page, named for what it is. */}
-      <Link
-        href={secondaryHref}
-        className="mt-3.5 inline-flex items-center justify-center gap-1.5 text-[11px] font-bold tracking-[1.6px] uppercase text-ivory/65 hover:text-ivory transition-colors"
-      >
-        {secondaryLabel}
-        <ArrowRight className="h-3 w-3" />
-      </Link>
+        {/* Secondary — the pitch/detail page, named for what it is. */}
+        <Link
+          href={secondaryHref}
+          className="mt-3.5 inline-flex items-center justify-center gap-1.5 text-[11px] font-bold tracking-[1.6px] uppercase text-ivory/65 hover:text-ivory transition-colors"
+        >
+          {secondaryLabel}
+          <ArrowRight className="h-3 w-3" />
+        </Link>
+      </div>
     </div>
   );
 }
