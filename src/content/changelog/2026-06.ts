@@ -8,6 +8,12 @@ import type { ChangelogEntry } from "./index";
 export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-11",
+    kind: "improved",
+    title: "The ROI calculator now counts job-board fees too",
+    body: "Hiring spend is two channels, not one — agency placement fees AND per-listing job-board costs. A side-by-side spend picture shows your stack against our one flat line, and the math finally works for groups that never touch agencies.",
+  },
+  {
+    date: "2026-06-11",
     kind: "fixed",
     title: "Pricing page polish",
     body: "The comparison header now sticks cleanly while you scroll, and the ROI calculator models large-group volumes — up to 300 locations and 600 hires a year, counted across all locations.",
