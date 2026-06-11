@@ -1,28 +1,50 @@
 /**
- * / — the neutral dual-doorway home for DSO Hire.
+ * / — the DSO Hire lobby (#115 Day-31 rework).
  *
- * Part of the dual-lens website restructure. DSO Hire is a two-sided
- * marketplace; this page is deliberately NEUTRAL — it doesn't pitch either
- * side in depth, it routes. The two fully-realized side homes are:
- *   - /for-dental-groups        — the employer home (kanban, pricing, ROI, etc.)
- *   - /for-candidates  — the dental-professional home (jobs, roles, etc.)
+ * v2 of the dual-doorway home. The IA survives — two equal doors, because
+ * the marketplace needs both sides — but the page stopped DESCRIBING the
+ * platform and started DEMONSTRATING it:
  *
- * SEO posture: `/` is the highest-authority URL, so it stays a substantive
- * brand page (not a thin chooser) — but it carries brand/marketplace-level
- * keywords only, leaving the audience-intent keywords to the two side pages
- * so they don't cannibalize each other.
+ *   1. HERO — the doors themselves show product: a miniature living kanban
+ *      inside the Groups door, a miniature fit dial filling inside the
+ *      Candidates door. CTAs go EXACTLY where they promise (Browse Dental
+ *      Jobs → /jobs); the pitch pages ride labeled secondary links.
+ *   2. LIVE MARKETPLACE BAND — the creative unlock: jobs are public data,
+ *      so the homepage shows REAL inventory. DB-truth counters + a slow
+ *      marquee of actual openings (title/location/pay — deliberately NO
+ *      employer names, so anonymity masking can't be violated here).
+ *      Honesty floors in lib/marketing/home-live.ts hide the band
+ *      gracefully when inventory is thin (post-seed-scrub safety).
+ *   3. One proof strip per side (employer depth / candidate moat) — these
+ *      replaced the old "Why Two Doors" IA-essay and the three abstract
+ *      value-prop cards.
+ *   4. OPERATOR LINE — "built by operators," compressed and signed-feeling,
+ *      until /about ships the full founder story.
+ *   5. Closing doorways (unchanged — it worked).
+ *
+ * SEO posture unchanged: `/` carries brand/marketplace keywords; the two
+ * side pages own audience-intent keywords. The marquee adds real, fresh,
+ * crawlable job titles to the highest-authority URL — a bonus, not the
+ * strategy.
  */
 
 import Link from "next/link";
 import {
   ArrowRight,
-  ArrowLeftRight,
-  BadgeCheck,
   Building2,
-  Hammer,
+  MapPin,
   Stethoscope,
+  Wand2,
+  Workflow,
 } from "lucide-react";
 import { SiteShell } from "@/components/marketing/site-shell";
+import { CountUp } from "@/components/marketing/motion";
+import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
+import {
+  getHomeLiveSnapshot,
+  type HomeLiveSnapshot,
+  type MarqueeJob,
+} from "@/lib/marketing/home-live";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -33,24 +55,27 @@ export const metadata: Metadata = {
     "DSO Hire is the dental-only job platform connecting multi-location dental groups (DSOs) with dental professionals — directly. No per-listing fees, no placement fees, no agency middlemen. Whether you're hiring across your practices or looking for your next dental role, start here.",
 };
 
-export default function Home() {
+export default async function Home() {
+  const live = await getHomeLiveSnapshot();
   return (
     <SiteShell>
       <Hero />
-      <MarketplaceBand />
-      <WhyDental />
+      <LiveMarketBand live={live} />
+      <EmployerStrip />
+      <CandidateStrip />
+      <OperatorLine />
       <ClosingDoorways />
     </SiteShell>
   );
 }
 
 /* ═══════════════════════════════════════════════════════
-   HERO — neutral framing + the equal-weight dual entry
+   HERO — equal-weight doors that DEMONSTRATE
 ═══════════════════════════════════════════════════════ */
 
 function Hero() {
   return (
-    <section className="relative overflow-hidden pt-[120px] pb-14 px-6 sm:px-14">
+    <section className="relative overflow-hidden pt-[120px] pb-16 px-6 sm:px-14">
       {/* 80px brand grid, masked toward the top-left */}
       <div
         aria-hidden
@@ -101,12 +126,11 @@ function Hero() {
           style={{ "--mk-delay": "140ms" } as React.CSSProperties}
           className="text-base sm:text-lg text-slate-body leading-relaxed max-w-[600px] mx-auto mb-9"
         >
-          The dental-only job platform — connecting multi-location dental groups
-          with dental professionals, directly. No agencies, no per-listing fees,
-          no middlemen.
+          Multi-location dental groups and dental professionals, connected
+          directly. No agencies, no per-listing fees, no middlemen.
         </p>
 
-        {/* ── The equal-weight dual entry — bold full-color calling cards ── */}
+        {/* ── The equal-weight dual entry — now demonstrating, not describing ── */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-left">
           <DoorwayPanel
             accent="ink"
@@ -115,6 +139,7 @@ function Hero() {
             title="Hiring across your practices"
             body="Post across every practice on one flat monthly subscription, with an applicant pipeline built for the way dental groups hire."
             proof="Flat monthly fee · No per-listing fees · No placement charges"
+            demo={<MiniKanban />}
             ctaLabel="Explore Dental Group Hiring"
             ctaHref="/for-dental-groups"
             secondaryLabel="See pricing"
@@ -126,8 +151,9 @@ function Hero() {
             icon={Stethoscope}
             eyebrow="Job Candidates"
             title="Find your next dental role"
-            body="Real openings at multi-location dental groups — clinical and corporate, hygiene through specialist."
-            proof="Free forever · Direct apply · Multi-location dental groups only"
+            body="Real openings at multi-location dental groups — clinical and corporate, hygiene through specialist — scored to how you actually like to work."
+            proof="Free forever · Direct apply · Private from your current office"
+            demo={<MiniDial />}
             ctaLabel="Browse Dental Jobs"
             ctaHref="/jobs"
             secondaryLabel="How it works for candidates"
@@ -140,6 +166,68 @@ function Hero() {
   );
 }
 
+/* ── Door miniature: living kanban (decorative, plays once on load) ── */
+
+function MiniKanban() {
+  return (
+    <div className="mini-kb mt-5 mb-1 grid grid-cols-3 gap-2" aria-hidden>
+      {[
+        { label: "New", bars: 2 },
+        { label: "Interview", bars: 1 },
+        { label: "Offer", bars: 1 },
+      ].map((col) => (
+        <div key={col.label} className="bg-ivory/10 border border-ivory/15 p-1.5">
+          <div className="text-[8px] font-bold tracking-[1.4px] uppercase text-ivory/55 mb-1.5">
+            {col.label}
+          </div>
+          <div className="space-y-1.5">
+            {Array.from({ length: col.bars }).map((_, i) => (
+              <div key={i} className="h-3.5 bg-ivory/20" />
+            ))}
+            {/* reserved landing slot in Interview keeps layout stable */}
+            {col.label === "Interview" && <div className="h-3.5" />}
+          </div>
+        </div>
+      ))}
+      {/* the traveling chip — lands in the Interview slot */}
+      <div className="mini-kb-chip" style={{ top: "44px" }} />
+    </div>
+  );
+}
+
+/* ── Door miniature: fit dial filling to 92 (decorative) ── */
+
+function MiniDial() {
+  return (
+    <div className="mt-5 mb-1 flex items-center gap-4" aria-hidden>
+      <div className="relative w-[64px] h-[64px] shrink-0">
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none" className="-rotate-90">
+          <circle cx="32" cy="32" r="26" stroke="rgba(247,244,237,0.18)" strokeWidth="6" fill="none" />
+          <circle
+            className="mini-dial-arc"
+            cx="32"
+            cy="32"
+            r="26"
+            stroke="#F7F4ED"
+            strokeWidth="6"
+            fill="none"
+          />
+        </svg>
+        <span className="mini-dial-num absolute inset-0 flex items-center justify-center text-[18px] font-extrabold tracking-[-0.5px] text-ivory">
+          92
+        </span>
+      </div>
+      <div className="text-[11px] leading-snug text-ivory/70">
+        <span className="block font-bold tracking-[1.4px] uppercase text-ivory/90 text-[9.5px] mb-0.5">
+          PracticeFit™ score
+        </span>
+        Every opening, scored against how you work — schedule, pace, culture,
+        commute.
+      </div>
+    </div>
+  );
+}
+
 function DoorwayPanel({
   accent,
   icon: Icon,
@@ -147,6 +235,7 @@ function DoorwayPanel({
   title,
   body,
   proof,
+  demo,
   ctaLabel,
   ctaHref,
   secondaryLabel,
@@ -161,11 +250,11 @@ function DoorwayPanel({
   body: string;
   /** Single dot-separated proof line — keeps the panel compact (above the fold). */
   proof: string;
+  /** The door's product miniature — show, don't tell. */
+  demo?: React.ReactNode;
   /**
-   * #115 (Cam, Day 31) — the CTA goes EXACTLY where it promises ("Browse
-   * Dental Jobs" → /jobs, not a marketing detour). The pitch page rides
-   * the secondary link. Panel is a div now (no whole-card link) so the
-   * two destinations can coexist without nested anchors.
+   * CTAs go EXACTLY where they promise (Cam, Day 31); the pitch page rides
+   * the secondary link. Panel is a div so two destinations can coexist.
    */
   ctaLabel: string;
   ctaHref: string;
@@ -216,16 +305,17 @@ function DoorwayPanel({
       <p className="text-[14px] text-ivory/80 leading-[1.55] mb-3.5">{body}</p>
 
       {/* Single-line proof — dot-separated keyword chips */}
-      <div className="text-[10.5px] font-bold tracking-[1.6px] uppercase text-ivory/55 mb-6">
+      <div className="text-[10.5px] font-bold tracking-[1.6px] uppercase text-ivory/55">
         {proof}
       </div>
 
-      {/* CTA — ivory on both cards so they pop with high contrast against
-          both the navy and the green backgrounds, and the two CTAs read as
-          a unified pair. Real link to the literal destination. */}
+      {/* The miniature — the door shows the product. */}
+      {demo}
+
+      {/* CTA — real link to the literal destination. */}
       <Link
         href={ctaHref}
-        className="mt-auto inline-flex items-center justify-center gap-2.5 px-6 py-3 text-[12px] font-bold tracking-[1.8px] uppercase bg-ivory text-ink hover:bg-ivory-deep transition-colors"
+        className="mt-6 inline-flex items-center justify-center gap-2.5 px-6 py-3 text-[12px] font-bold tracking-[1.8px] uppercase bg-ivory text-ink hover:bg-ivory-deep transition-colors"
       >
         {ctaLabel}
         <ArrowRight className="h-3.5 w-3.5 motion-safe:transition-transform motion-safe:group-hover:translate-x-1" />
@@ -244,106 +334,328 @@ function DoorwayPanel({
 }
 
 /* ═══════════════════════════════════════════════════════
-   MARKETPLACE BAND — the neutral two-sided explainer
+   LIVE MARKETPLACE BAND — real inventory, DB-truth numbers
 ═══════════════════════════════════════════════════════ */
 
-function MarketplaceBand() {
+function LiveMarketBand({ live }: { live: HomeLiveSnapshot }) {
+  const hasMarquee = live.marquee.length > 0;
+  if (!hasMarquee && !live.showCounters) return null;
   return (
-    <section className="bg-cream border-y border-[var(--rule)] px-6 sm:px-14 py-24">
-      <div className="max-w-[760px] mx-auto text-center">
-        <div data-reveal className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
-          Why Two Doors
+    <section className="bg-cream border-y border-[var(--rule)] py-14 overflow-hidden">
+      <div className="max-w-[1240px] mx-auto px-6 sm:px-14">
+        <div className="flex flex-wrap items-end justify-between gap-6 mb-8">
+          <div>
+            <div data-reveal className="flex items-center gap-2 text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-heritage opacity-60" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-heritage" />
+              </span>
+              On The Board Right Now
+            </div>
+            <h2
+              data-reveal
+              style={{ "--mk-delay": "70ms" } as React.CSSProperties}
+              className="text-2xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-[1.1] text-ink"
+            >
+              Real openings. Live counts. No vanity numbers.
+            </h2>
+          </div>
+
+          {live.showCounters && (
+            <div
+              data-reveal
+              style={{ "--mk-delay": "140ms" } as React.CSSProperties}
+              className="flex items-center gap-8"
+            >
+              <LiveStat value={live.activeJobs} label="Open roles live" />
+              <LiveStat value={live.states} label="States covered" />
+              <div>
+                <div className="text-[34px] font-extrabold tracking-[-1.5px] leading-none text-heritage-deep tabular-nums">
+                  $0
+                </div>
+                <div className="mt-1 text-[10px] font-bold tracking-[1.8px] uppercase text-slate-meta">
+                  Placement fees, ever
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-        <h2
-          data-reveal
-          style={{ "--mk-delay": "70ms" } as React.CSSProperties}
-          className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink mb-6"
-        >
-          A hiring platform only works when both sides show up.
-        </h2>
-        <p
-          data-reveal
-          style={{ "--mk-delay": "140ms" } as React.CSSProperties}
-          className="text-base sm:text-lg text-slate-body leading-[1.7]"
-        >
-          Dental groups need a steady pipeline of dental talent. Dental
-          professionals need real openings at employers worth their time.
-          Generic job boards serve neither well — so DSO Hire is dental-only on
-          purpose. Every employer is a multi-location dental group — from
-          established DSOs to independent owners running a handful of practices —
-          with roles from chairside to the corporate teams behind a growing
-          group, and both sides connect directly. That&apos;s why each audience
-          gets its own front door — equal weight, built with the same care.
-        </p>
       </div>
+
+      {/* The marquee — full-bleed, real jobs, no employer names by design. */}
+      {hasMarquee && (
+        <div data-reveal style={{ "--mk-delay": "200ms" } as React.CSSProperties}>
+          <div className="mq">
+            <div className="mq-track">
+              {[...live.marquee, ...live.marquee].map((job, i) => (
+                <MarqueeCard key={`${job.id}-${i}`} job={job} ariaHidden={i >= live.marquee.length} />
+              ))}
+            </div>
+          </div>
+          <div className="max-w-[1240px] mx-auto px-6 sm:px-14 mt-6">
+            <Link
+              href="/jobs"
+              className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[1.8px] uppercase text-heritage-deep hover:text-ink transition-colors"
+            >
+              Browse every opening
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
 
+function LiveStat({ value, label }: { value: number; label: string }) {
+  return (
+    <div>
+      <div className="text-[34px] font-extrabold tracking-[-1.5px] leading-none text-ink tabular-nums">
+        <CountUp to={value} duration={800} />
+      </div>
+      <div className="mt-1 text-[10px] font-bold tracking-[1.8px] uppercase text-slate-meta">
+        {label}
+      </div>
+    </div>
+  );
+}
+
+function MarqueeCard({ job, ariaHidden }: { job: MarqueeJob; ariaHidden?: boolean }) {
+  return (
+    <Link
+      href={`/jobs/${job.id}`}
+      aria-hidden={ariaHidden || undefined}
+      tabIndex={ariaHidden ? -1 : undefined}
+      className="group/card flex flex-col w-[280px] shrink-0 bg-white border border-[var(--rule)] px-5 py-4 hover:border-heritage hover:shadow-[0_14px_28px_-16px_rgba(7,15,28,0.22)] transition-all"
+    >
+      <span className="inline-flex self-start items-center px-1.5 py-0.5 mb-2.5 text-[8.5px] font-bold tracking-[1.4px] uppercase text-heritage-deep border border-heritage/30" style={{ background: "var(--heritage-tint)" }}>
+        {job.chip}
+      </span>
+      <span className="text-[14.5px] font-extrabold tracking-[-0.3px] leading-snug text-ink mb-1.5 line-clamp-2">
+        {job.title}
+      </span>
+      <span className="mt-auto flex items-center justify-between gap-3 text-[12px] text-slate-body">
+        <span className="inline-flex items-center gap-1 min-w-0">
+          <MapPin className="h-3 w-3 shrink-0 text-slate-meta" />
+          <span className="truncate">{job.location ?? "Multiple locations"}</span>
+        </span>
+        {job.pay && (
+          <span className="font-bold text-heritage-deep whitespace-nowrap tabular-nums">
+            {job.pay}
+          </span>
+        )}
+      </span>
+    </Link>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════
-   WHY DENTAL — three neutral value props (apply to both sides)
+   EMPLOYER STRIP — the depth claim, compressed
 ═══════════════════════════════════════════════════════ */
 
-const VALUE_PROPS = [
-  {
-    icon: BadgeCheck,
-    title: "Dental-only, on purpose",
-    body: "Not a generic job board with a dental filter. Every employer is a multi-location dental group, and every role — clinical or corporate — sits inside the dental industry. Both sides show up because they belong here.",
-  },
-  {
-    icon: ArrowLeftRight,
-    title: "Direct — no middlemen",
-    body: "Dental groups and dental professionals connect straight through the platform. No staffing agencies skimming placement fees, no recruiters gatekeeping the pipeline, no resume reselling.",
-  },
-  {
-    icon: Hammer,
-    title: "Built by operators",
-    body: "Made by people who have run dental practices, for the way dental hiring actually works. The same small team that builds the product answers the email.",
-  },
-];
-
-function WhyDental() {
+function EmployerStrip() {
   return (
     <section className="px-6 sm:px-14 py-24 max-w-[1240px] mx-auto">
-      <div data-reveal className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
-        What Makes It Different
-      </div>
-      <h2
-        data-reveal
-        style={{ "--mk-delay": "70ms" } as React.CSSProperties}
-        className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink max-w-[720px] mb-12"
-      >
-        One platform, one industry, no middlemen.
-      </h2>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-px bg-[var(--rule)] border border-[var(--rule)]">
-        {VALUE_PROPS.map(({ icon: Icon, title, body }, i) => (
-          <div
-            key={title}
-            data-reveal
-            style={{ "--mk-delay": `${i * 90}ms` } as React.CSSProperties}
-            className="bg-white p-9"
-          >
-            <span
-              className="inline-flex items-center justify-center w-10 h-10 mb-5 text-heritage-deep"
-              style={{ background: "var(--heritage-tint)" }}
-              aria-hidden
-            >
-              <Icon className="h-5 w-5" />
-            </span>
-            <h3 className="text-[19px] font-extrabold tracking-[-0.4px] leading-tight text-ink mb-2.5">
-              {title}
-            </h3>
-            <p className="text-[14px] text-slate-body leading-[1.65]">{body}</p>
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-12 lg:gap-20 items-center">
+        <div>
+          <div data-reveal className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
+            For Dental Groups
           </div>
-        ))}
+          <h2
+            data-reveal
+            style={{ "--mk-delay": "70ms" } as React.CSSProperties}
+            className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink mb-6"
+          >
+            A real ATS underneath. Dental all the way down.
+          </h2>
+          <p
+            data-reveal
+            style={{ "--mk-delay": "140ms" } as React.CSSProperties}
+            className="text-base text-slate-body leading-[1.7] max-w-[520px] mb-8"
+          >
+            Not a job board with a dental filter — a full hiring platform
+            that happens to speak fluent dentistry. One flat monthly fee
+            replaces per-listing charges and the 15–25% placement fees
+            agencies take per hire.
+          </p>
+          <div
+            data-reveal
+            style={{ "--mk-delay": "200ms" } as React.CSSProperties}
+            className="flex flex-wrap gap-3.5"
+          >
+            <Link
+              href="/for-dental-groups"
+              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+            >
+              Explore The Platform
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+            <Link
+              href="/pricing"
+              className="inline-flex items-center px-7 py-[13px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[1.8px] uppercase hover:border-ink hover:bg-cream transition-colors"
+            >
+              See Pricing
+            </Link>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-px bg-[var(--rule)] border border-[var(--rule)]">
+          {[
+            {
+              icon: Workflow,
+              title: "Pipeline, automations, offers — the whole machine",
+              body: "Realtime kanban, if-this-then-that rules, drip sequences, offer approval chains with comp guardrails, per-teammate permissions, confidential searches.",
+            },
+            {
+              icon: Stethoscope,
+              title: "Applicants arrive ranked by PracticeFit™",
+              body: "Schedule overlap, PMS fluency, clinical mix, commute — your strongest fits surface first on every opening, clinical or corporate.",
+            },
+            {
+              icon: Wand2,
+              title: "AI that already knows DDS from RDH",
+              body: "Dental-tuned job descriptions in seconds, compliant rejection-reason drafts, and an in-app assistant that answers from your live data.",
+            },
+          ].map((f, i) => (
+            <div
+              key={f.title}
+              data-reveal
+              style={{ "--mk-delay": `${i * 90}ms` } as React.CSSProperties}
+              className="bg-white p-7 flex gap-5"
+            >
+              <span
+                className="inline-flex items-center justify-center w-10 h-10 shrink-0 text-heritage-deep"
+                style={{ background: "var(--heritage-tint)" }}
+                aria-hidden
+              >
+                <f.icon className="h-5 w-5" />
+              </span>
+              <div>
+                <h3 className="text-[16px] font-extrabold tracking-[-0.3px] leading-tight text-ink mb-1.5">
+                  {f.title}
+                </h3>
+                <p className="text-[13.5px] text-slate-body leading-[1.6]">{f.body}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
 }
 
 /* ═══════════════════════════════════════════════════════
-   CLOSING DOORWAYS — dual CTA, equal weight
+   CANDIDATE STRIP — the moat, candidate-voiced
+═══════════════════════════════════════════════════════ */
+
+function CandidateStrip() {
+  return (
+    <section className="bg-white border-y border-[var(--rule)] px-6 sm:px-14 py-24">
+      <div className="max-w-[1240px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-12 lg:gap-20 items-center">
+        <div className="order-2 lg:order-1 grid grid-cols-1 gap-px bg-[var(--rule)] border border-[var(--rule)]">
+          {[
+            {
+              title: "Your PracticeFit™ score on every job",
+              body: "Five minutes of questions about how you actually like to work — then every opening shows you a fit score and the plain-English why.",
+            },
+            {
+              title: "A free résumé builder that's actually good",
+              body: "Six ATS-safe dental templates, built from your profile, exported as a real PDF. Yours to use anywhere — even off-platform.",
+            },
+            {
+              title: "Private from your current office",
+              body: "Browsing is invisible, and anonymous mode masks your name and photo from any employer you haven't applied to. Looking around while employed is normal — we built for it.",
+            },
+          ].map((f, i) => (
+            <div
+              key={f.title}
+              data-reveal
+              style={{ "--mk-delay": `${i * 90}ms` } as React.CSSProperties}
+              className="bg-cream/60 p-7"
+            >
+              <h3 className="text-[16px] font-extrabold tracking-[-0.3px] leading-tight text-ink mb-1.5">
+                {f.title}
+              </h3>
+              <p className="text-[13.5px] text-slate-body leading-[1.6]">{f.body}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="order-1 lg:order-2">
+          <div data-reveal className="mb-4">
+            <PracticeFitWordmark surface="light" tm className="text-[26px]" />
+          </div>
+          <h2
+            data-reveal
+            style={{ "--mk-delay": "70ms" } as React.CSSProperties}
+            className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink mb-6"
+          >
+            Job hunting that respects your license — and your privacy.
+          </h2>
+          <p
+            data-reveal
+            style={{ "--mk-delay": "140ms" } as React.CSSProperties}
+            className="text-base text-slate-body leading-[1.7] max-w-[520px] mb-8"
+          >
+            Free forever, no premium tier, no résumé reselling. Apply direct
+            to the group that posted the job — your application never passes
+            through a recruiter taking 20% on the way.
+          </p>
+          <div
+            data-reveal
+            style={{ "--mk-delay": "200ms" } as React.CSSProperties}
+            className="flex flex-wrap gap-3.5"
+          >
+            <Link
+              href="/jobs"
+              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-heritage text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-heritage-deep transition-colors"
+            >
+              Browse Dental Jobs
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+            <Link
+              href="/practicefit"
+              className="inline-flex items-center px-7 py-[13px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[1.8px] uppercase hover:border-ink hover:bg-cream transition-colors"
+            >
+              Meet PracticeFit
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   OPERATOR LINE — signed, human, brief (until /about ships)
+═══════════════════════════════════════════════════════ */
+
+function OperatorLine() {
+  return (
+    <section className="px-6 sm:px-14 py-20">
+      <div
+        data-reveal
+        className="max-w-[820px] mx-auto text-center border-l-2 border-heritage bg-cream/70 px-8 sm:px-12 py-10"
+      >
+        <p className="text-lg sm:text-xl text-ink font-semibold leading-[1.6] tracking-[-0.2px] mb-4">
+          &ldquo;DSO Hire is built inside a real multi-location dental group —
+          by operators who got tired of paying $30,000 placement fees for
+          hires we found ourselves.&rdquo;
+        </p>
+        <Link
+          href="/about"
+          className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[1.8px] uppercase text-heritage-deep hover:text-ink transition-colors"
+        >
+          More about us
+          <ArrowRight className="h-3 w-3" />
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   CLOSING DOORWAYS — dual CTA, equal weight (unchanged)
 ═══════════════════════════════════════════════════════ */
 
 function ClosingDoorways() {

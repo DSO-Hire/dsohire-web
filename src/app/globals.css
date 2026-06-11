@@ -557,3 +557,84 @@ html, body {
 @media (prefers-reduced-motion: reduce) {
   .mk-dial-sparkle { opacity: 1; transform: none; transition: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   #115 — homepage "lobby" rework (Day 31)
+   Doors that demonstrate + the live-inventory marquee.
+═══════════════════════════════════════════════════════════════ */
+
+/* ── Door miniature: kanban (navy door) ──
+   Three skeleton columns; one heritage chip lifts from col 1 and settles
+   into col 2, once, ~1.4s after load. Decorative (aria-hidden). */
+.mini-kb { position: relative; }
+.mini-kb-chip {
+  position: absolute;
+  top: 26px;
+  left: 4px;
+  width: calc(33.333% - 12px);
+  height: 14px;
+  background: var(--heritage);
+  opacity: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mini-kb-chip {
+    animation: mini-kb-move 1.1s cubic-bezier(0.45, 0.05, 0.25, 1) 1.4s forwards;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mini-kb-chip { opacity: 1; left: calc(33.333% + 8px); }
+}
+@keyframes mini-kb-move {
+  0% { opacity: 0; left: 4px; transform: translateY(0); }
+  15% { opacity: 1; transform: translateY(-4px) rotate(-2deg); }
+  80% { opacity: 1; left: calc(33.333% + 8px); transform: translateY(-2px) rotate(1deg); }
+  100% { opacity: 1; left: calc(33.333% + 8px); transform: translateY(0) rotate(0); }
+}
+
+/* ── Door miniature: fit dial (green door) ──
+   Small ring fills to 92% ~1.2s after load; the score fades up with it. */
+.mini-dial-arc {
+  stroke-dasharray: 163.4; /* 2πr, r=26 */
+  stroke-dashoffset: 163.4;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mini-dial-arc {
+    animation: mini-dial-fill 1.2s cubic-bezier(0.22, 1, 0.36, 1) 1.2s forwards;
+  }
+  .mini-dial-num {
+    opacity: 0;
+    animation: mk-fade 0.5s ease-out 1.7s forwards;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mini-dial-arc { stroke-dashoffset: 13.1; } /* 92% filled */
+  .mini-dial-num { opacity: 1; }
+}
+@keyframes mini-dial-fill {
+  to { stroke-dashoffset: 13.1; }
+}
+
+/* ── Live-inventory marquee ──
+   Duplicated track translating -50%; pauses on hover; reduced-motion
+   falls back to a normal scrollable row. */
+.mq {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+.mq-track {
+  display: flex;
+  gap: 14px;
+  width: max-content;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mq-track { animation: mq-scroll 45s linear infinite; }
+  .mq:hover .mq-track { animation-play-state: paused; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mq { overflow-x: auto; mask-image: none; -webkit-mask-image: none; }
+}
+@keyframes mq-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
