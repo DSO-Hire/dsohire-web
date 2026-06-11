@@ -105,13 +105,21 @@ async function employerNeedsCheckout(): Promise<boolean> {
 function PricingHero() {
   return (
     <section className="pt-[120px] pb-12 px-6 sm:px-14 max-w-[1240px] mx-auto">
-      <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
+      <div data-reveal className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
         Pricing
       </div>
-      <h1 className="text-4xl sm:text-6xl font-extrabold tracking-[-2px] leading-[1.05] text-ink mb-5 max-w-[820px]">
+      <h1
+        data-reveal
+        style={{ "--mk-delay": "70ms" } as React.CSSProperties}
+        className="text-4xl sm:text-6xl font-extrabold tracking-[-2px] leading-[1.05] text-ink mb-5 max-w-[820px]"
+      >
         One flat fee. Sized to your footprint.
       </h1>
-      <p className="text-lg text-slate-body leading-[1.7] max-w-[640px]">
+      <p
+        data-reveal
+        style={{ "--mk-delay": "140ms" } as React.CSSProperties}
+        className="text-lg text-slate-body leading-[1.7] max-w-[640px]"
+      >
         Pick the tier that matches your footprint. Every tier includes
         multi-location posting and PracticeFit. Cancel or change tiers anytime.
       </p>
@@ -198,14 +206,20 @@ function TierGrid({
           <BillingPeriodToggle period={period} />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-[var(--rule)] border border-[var(--rule)]">
-          {dsoTiers.map((tier) => (
-            <TierCard
+          {dsoTiers.map((tier, i) => (
+            <div
               key={tier.id}
-              tier={tier}
-              nextParam={nextParam}
-              period={period}
-              authedNeedsCheckout={authedNeedsCheckout}
-            />
+              data-reveal
+              style={{ "--mk-delay": `${i * 90}ms` } as React.CSSProperties}
+              className="flex"
+            >
+              <TierCard
+                tier={tier}
+                nextParam={nextParam}
+                period={period}
+                authedNeedsCheckout={authedNeedsCheckout}
+              />
+            </div>
           ))}
         </div>
       </div>
@@ -355,7 +369,7 @@ function TierCard({
     : `/employer/sign-up?${params.toString()}`;
   return (
     <div
-      className={`relative p-9 flex flex-col motion-safe:transition-all motion-safe:duration-200 ${
+      className={`relative p-9 flex flex-col flex-1 w-full motion-safe:transition-all motion-safe:duration-200 ${
         isFeatured
           ? "bg-ink text-ivory"
           : "bg-white text-ink motion-safe:hover:-translate-y-1 hover:shadow-[0_12px_28px_-14px_rgba(7,15,28,0.18)] hover:bg-cream/30"

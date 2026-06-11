@@ -48,6 +48,9 @@ import {
 } from "lucide-react";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
+import { FitDial } from "@/components/marketing/fit-dial";
+import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
+import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -75,6 +78,7 @@ export default function ForCandidatesPage() {
   return (
     <SiteShell>
       <Hero />
+      <PracticeFitCandidateBand />
       <Promises />
       <RoleBreakdown />
       <HonestTake />
@@ -121,14 +125,18 @@ function Hero() {
           far right when the new "Find your next dental role. Directly
           with dental groups." h1 grew longer than the old copy. */}
       <div className="relative z-10 max-w-[1240px] mx-auto">
-        <div className="flex items-center gap-3.5 mb-8">
+        <div data-reveal className="flex items-center gap-3.5 mb-8">
           <span className="block w-7 h-px bg-heritage" />
           <span className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep">
             For Dental Professionals
           </span>
         </div>
 
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[-1.6px] leading-[1.04] text-ink mb-10 max-w-[1080px]">
+        <h1
+          data-reveal
+          style={{ "--mk-delay": "60ms" } as React.CSSProperties}
+          className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[-1.6px] leading-[1.04] text-ink mb-10 max-w-[1080px]"
+        >
           Find your next dental role.{" "}
           <br className="hidden sm:inline" />
           <em className="not-italic relative text-heritage-light">
@@ -148,7 +156,7 @@ function Hero() {
           taller left column), keeping the whole hero tighter to the fold. */}
       <div className="relative z-10 max-w-[1240px] mx-auto mt-2 grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-12 lg:gap-16 items-start">
         {/* Left column */}
-        <div>
+        <div data-reveal style={{ "--mk-delay": "130ms" } as React.CSSProperties}>
           <p className="text-lg sm:text-xl text-slate-body leading-[1.65] max-w-[560px] mb-10">
             DSO Hire is the hiring platform built for dental professionals
             applying to multi-location practices. You apply direct — no
@@ -182,7 +190,71 @@ function Hero() {
         </div>
 
         {/* Right column: stylized "Your applications" mock card */}
-        <CandidateApplicationsPreview />
+        <div data-reveal style={{ "--mk-delay": "220ms" } as React.CSSProperties}>
+          <CandidateApplicationsPreview />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ───────────────────────────────────────────────────────
+   PRACTICEFIT CANDIDATE BAND — #115 FOH-1
+   The candidate-voiced money shot: YOUR fit score assembling itself
+   (FitDial client primitive). Sits right under the hero so passive
+   browsers meet the moat before the feature list. White band breaks
+   the ivory rhythm (review §1.2a).
+─────────────────────────────────────────────────────── */
+
+function PracticeFitCandidateBand() {
+  return (
+    <section className="bg-white border-y border-[var(--rule)] px-6 sm:px-14 py-24">
+      <div className="max-w-[1240px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-14 lg:gap-20 items-center">
+        <div data-reveal className="order-2 lg:order-1">
+          <FitDial
+            score={92}
+            caption="Strong match"
+            dimensions={[
+              { label: "Schedule fit", value: 94 },
+              { label: "Pace & culture", value: 88 },
+              { label: "Growth & mentorship", value: 91 },
+              { label: "Commute", value: 86 },
+            ]}
+          />
+        </div>
+        <div className="order-1 lg:order-2">
+          <div data-reveal className="flex items-center gap-2.5 mb-3.5">
+            <PracticeFitMark className="h-4 w-4" />
+            <PracticeFitWordmark surface="light" tm className="text-[17px]" />
+          </div>
+          <h2
+            data-reveal
+            style={{ "--mk-delay": "70ms" } as React.CSSProperties}
+            className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink max-w-[620px] mb-6"
+          >
+            See which practices actually fit the way you work.
+          </h2>
+          <p
+            data-reveal
+            style={{ "--mk-delay": "140ms" } as React.CSSProperties}
+            className="text-base text-slate-body leading-[1.7] max-w-[560px] mb-8"
+          >
+            A five-minute assessment — your pace, your schedule, how you like
+            to be mentored — and every opening gets a PracticeFit score
+            against it. No more guessing from a job description what a
+            practice is actually like to work in. Free, private, and your
+            current office never sees you browsing.
+          </p>
+          <Link
+            data-reveal
+            style={{ "--mk-delay": "200ms" } as React.CSSProperties}
+            href="/candidate/sign-up"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-heritage text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-heritage-deep transition-colors"
+          >
+            Take Your PracticeFit
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
       </div>
     </section>
   );
