@@ -18,6 +18,7 @@ import { INFO_EMAIL as SUPPORT_EMAIL, INFO_MAILTO as SUPPORT_MAILTO } from "@/li
 import { MobileMenu } from "./mobile-menu";
 import { LensToggle } from "./lens-toggle";
 import { MotionMount } from "./motion";
+import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   return (
@@ -100,11 +101,19 @@ export async function SiteNav() {
             right segment is also the hover trigger for the role dropdown. */}
         <LensToggle />
         <NavLink href="/jobs">Browse Jobs</NavLink>
-        {/* Note 7 (Dave 2026-05-22) — surface the public DSO directory in the
-            top nav. Sits next to Browse Jobs as the other candidate-facing
-            "browse" action. Label kept inclusive ("Companies") to align with
-            the Dental Groups rebrand rather than "Browse DSOs". */}
-        <NavLink href="/companies">Companies</NavLink>
+        {/* #115 FOH (Cam, Day 31) — the proprietary wow-feature gets the nav
+            slot: the trademarked PracticeFit wordmark links its dedicated
+            page (which covers DSOFit too). Companies moved to the footer +
+            mobile menu — the directory is a browse surface, not a headline. */}
+        <li>
+          <Link
+            href="/practicefit"
+            aria-label="PracticeFit"
+            className="flex items-center hover:opacity-75 transition-opacity"
+          >
+            <PracticeFitWordmark surface="light" tm className="text-[15.5px]" />
+          </Link>
+        </li>
         <NavLink href="/pricing">Pricing</NavLink>
         <NavLink href="/about">About</NavLink>
         <NavLink href="/contact">Contact</NavLink>
@@ -174,6 +183,7 @@ export function SiteFooter() {
 
           <FooterCol title="For Candidates">
             <FooterLink href="/jobs">Browse Jobs</FooterLink>
+            <FooterLink href="/practicefit">PracticeFit™</FooterLink>
             <FooterLink href="/for-candidates">Job Candidates</FooterLink>
             <FooterLink href="/for-dentists">For Dentists</FooterLink>
             <FooterLink href="/for-hygienists">For Hygienists</FooterLink>

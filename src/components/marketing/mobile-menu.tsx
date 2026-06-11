@@ -58,7 +58,10 @@ const DSO_SIZE_LINKS = [
 // segmented control.
 const PRIMARY_LINKS = [
   { href: "/jobs", label: "Browse Jobs" },
-  // Note 7 (Dave 2026-05-22) — public DSO directory, mirrors the desktop nav.
+  // #115 FOH (Cam, Day 31) — PracticeFit takes the headline slot (mirrors
+  // the desktop nav's wordmark link); Companies stays reachable here +
+  // in the footer.
+  { href: "/practicefit", label: "PracticeFit™" },
   { href: "/companies", label: "Companies" },
   { href: "/pricing", label: "Pricing" },
   { href: "/about", label: "About" },
