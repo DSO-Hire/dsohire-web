@@ -1394,7 +1394,9 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
           wrappers anywhere in this chain — both stickies (tab bar, rail)
           ride the document scroll. */}
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-8 items-start">
-        <aside className="lg:order-2 lg:sticky lg:top-6 space-y-5 min-w-0">
+        {/* Mobile: evidence first, controls after (order-2); lg: rail
+            right. Fuller mobile pass tracked in TASKS (Lane 3). */}
+        <aside className="order-2 lg:order-2 lg:sticky lg:top-6 space-y-5 min-w-0">
           <RailCard id="stage" label="Pipeline stage">
             <StageSelector
               applicationId={app.id}
@@ -1450,7 +1452,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
           <MoveCopyCard applicationId={app.id} />
         </aside>
 
-        <div className="lg:order-1 min-w-0">
+        <div className="order-1 lg:order-1 min-w-0">
           <WorkspaceTabs
             unreadMessages={candidateUnreadCount}
             profile={
