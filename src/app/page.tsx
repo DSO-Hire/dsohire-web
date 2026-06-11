@@ -170,7 +170,7 @@ function Hero() {
 
 function MiniKanban() {
   return (
-    <div className="mini-kb mt-5 mb-1 grid grid-cols-3 gap-2" aria-hidden>
+    <div className="mt-5 mb-1 grid grid-cols-3 gap-2" aria-hidden>
       {[
         { label: "New", bars: 2 },
         { label: "Interview", bars: 1 },
@@ -184,13 +184,12 @@ function MiniKanban() {
             {Array.from({ length: col.bars }).map((_, i) => (
               <div key={i} className="h-3.5 bg-ivory/20" />
             ))}
-            {/* reserved landing slot in Interview keeps layout stable */}
-            {col.label === "Interview" && <div className="h-3.5" />}
+            {/* the traveling chip lives IN the Interview slot and slides in
+                from the column to its left — landing can't miss. */}
+            {col.label === "Interview" && <div className="mini-kb-chip" />}
           </div>
         </div>
       ))}
-      {/* the traveling chip — lands in the Interview slot */}
-      <div className="mini-kb-chip" style={{ top: "44px" }} />
     </div>
   );
 }
@@ -218,11 +217,15 @@ function MiniDial() {
         </span>
       </div>
       <div className="text-[11px] leading-snug text-ivory/70">
-        <span className="block font-bold tracking-[1.4px] uppercase text-ivory/90 text-[9.5px] mb-0.5">
-          PracticeFit™ score
+        {/* The real two-tone wordmark, on an ivory pill so it survives the
+            green door (Cam, Day 31). It embeds its own sparkle mark. */}
+        <span className="inline-flex items-center bg-ivory px-2 py-1 mb-1.5">
+          <PracticeFitWordmark surface="light" tm className="text-[14px]" />
         </span>
-        Every opening, scored against how you work — schedule, pace, culture,
-        commute.
+        <span className="block">
+          Every opening, scored against how you work — schedule, pace,
+          culture, commute.
+        </span>
       </div>
     </div>
   );
@@ -341,7 +344,12 @@ function LiveMarketBand({ live }: { live: HomeLiveSnapshot }) {
   const hasMarquee = live.marquee.length > 0;
   if (!hasMarquee && !live.showCounters) return null;
   return (
-    <section className="bg-cream border-y border-[var(--rule)] py-14 overflow-hidden">
+    // Heritage wash — the centerpiece band deliberately breaks the
+    // ivory/cream rhythm (Cam, Day 31). White cards pop against it.
+    <section
+      className="border-y border-heritage/25 py-14 overflow-hidden"
+      style={{ background: "var(--heritage-tint)" }}
+    >
       <div className="max-w-[1240px] mx-auto px-6 sm:px-14">
         <div className="flex flex-wrap items-end justify-between gap-6 mb-8">
           <div>
@@ -500,7 +508,7 @@ function EmployerStrip() {
         </div>
 
         <div className="grid grid-cols-1 gap-px bg-[var(--rule)] border border-[var(--rule)]">
-          {[
+          {([
             {
               icon: Workflow,
               title: "Pipeline, automations, offers — the whole machine",
@@ -508,7 +516,14 @@ function EmployerStrip() {
             },
             {
               icon: Stethoscope,
-              title: "Applicants arrive ranked by PracticeFit™",
+              // The real two-tone wordmark, slightly oversize vs the heading
+              // type so the brand reads as a brand (Cam, Day 31).
+              title: (
+                <span className="inline-flex flex-wrap items-baseline gap-x-1.5">
+                  <span>Applicants arrive ranked by</span>
+                  <PracticeFitWordmark surface="light" tm className="text-[18px]" />
+                </span>
+              ),
               body: "Schedule overlap, PMS fluency, clinical mix, commute — your strongest fits surface first on every opening, clinical or corporate.",
             },
             {
@@ -516,9 +531,13 @@ function EmployerStrip() {
               title: "AI that already knows DDS from RDH",
               body: "Dental-tuned job descriptions in seconds, compliant rejection-reason drafts, and an in-app assistant that answers from your live data.",
             },
-          ].map((f, i) => (
+          ] as Array<{
+            icon: React.ComponentType<{ className?: string }>;
+            title: React.ReactNode;
+            body: string;
+          }>).map((f, i) => (
             <div
-              key={f.title}
+              key={i}
               data-reveal
               style={{ "--mk-delay": `${i * 90}ms` } as React.CSSProperties}
               className="bg-white p-7 flex gap-5"

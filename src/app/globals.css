@@ -564,31 +564,30 @@ html, body {
 ═══════════════════════════════════════════════════════════════ */
 
 /* ── Door miniature: kanban (navy door) ──
-   Three skeleton columns; one heritage chip lifts from col 1 and settles
-   into col 2, once, ~1.4s after load. Decorative (aria-hidden). */
-.mini-kb { position: relative; }
+   The chip LIVES in the Interview column's reserved slot and slides in
+   from one column to its left via transform — column-relative, so the
+   landing can never miss (v1 used absolute page math + dark heritage on
+   navy; invisible — Cam caught it). heritage-bright pops on ink. */
 .mini-kb-chip {
-  position: absolute;
-  top: 26px;
-  left: 4px;
-  width: calc(33.333% - 12px);
   height: 14px;
-  background: var(--heritage);
+  background: #8db8a3; /* heritage-bright — readable on the navy door */
   opacity: 0;
+  position: relative;
+  z-index: 2;
 }
 @media (prefers-reduced-motion: no-preference) {
   .mini-kb-chip {
-    animation: mini-kb-move 1.1s cubic-bezier(0.45, 0.05, 0.25, 1) 1.4s forwards;
+    animation: mini-kb-slide 1.1s cubic-bezier(0.45, 0.05, 0.25, 1) 1.4s forwards;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .mini-kb-chip { opacity: 1; left: calc(33.333% + 8px); }
+  .mini-kb-chip { opacity: 1; }
 }
-@keyframes mini-kb-move {
-  0% { opacity: 0; left: 4px; transform: translateY(0); }
-  15% { opacity: 1; transform: translateY(-4px) rotate(-2deg); }
-  80% { opacity: 1; left: calc(33.333% + 8px); transform: translateY(-2px) rotate(1deg); }
-  100% { opacity: 1; left: calc(33.333% + 8px); transform: translateY(0) rotate(0); }
+@keyframes mini-kb-slide {
+  0% { opacity: 0; transform: translateX(calc(-100% - 22px)) translateY(0); }
+  15% { opacity: 1; transform: translateX(calc(-100% - 22px)) translateY(-3px) rotate(-2deg); }
+  80% { opacity: 1; transform: translateX(0) translateY(-2px) rotate(1deg); }
+  100% { opacity: 1; transform: translateX(0) translateY(0) rotate(0); }
 }
 
 /* ── Door miniature: fit dial (green door) ──
