@@ -8,6 +8,12 @@ import type { ChangelogEntry } from "./index";
 export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-11",
+    kind: "new",
+    title: "Your dashboard now leads with Next Best Actions",
+    body: "Overdue reviews, your strongest fit, stalled candidates, and inbound interest — unified into one ranked queue at the top of the dashboard. Keyboard users: j/k to move, Enter to open.",
+  },
+  {
+    date: "2026-06-11",
     kind: "improved",
     title: "Help center caught up with everything new",
     body: "Seven new help articles — per-teammate permissions, confidential searches, Pipeline HQ, seat packs, the résumé builder, DSOFit, and the new apply flow — plus refreshed plan and team guides. The in-app AI assistant learned all of it too.",

@@ -50,8 +50,11 @@ import {
   ActivityFeed,
   type ActivityEvent,
 } from "@/components/dashboard/activity-feed";
-import { StuckAlert } from "@/components/dashboard/stuck-alert";
-import { StalePipelineAlert } from "@/components/dashboard/stale-pipeline-alert";
+// BOH Lane 2a — StuckAlert + StalePipelineAlert are superseded by the
+// Next Best Actions queue (their data feeds it; components kept on disk
+// for surgical revert).
+import { NextBestActions } from "./next-best-actions";
+import { buildNextBestActions } from "@/lib/dashboard/next-best-actions";
 import { PipelineFunnel } from "@/components/dashboard/pipeline-funnel";
 import {
   JobLeaderboard,
@@ -899,6 +902,30 @@ export default async function EmployerDashboard() {
       : []),
   ];
 
+  // BOH Lane 2a — unify the attention signals into the ranked queue.
+  // Anonymity rule applied HERE (mask before the pure lib ever sees a
+  // name): same `anonymized` flag Today's Top Fits renders with.
+  const bestFit = todaysTopFits[0] ?? null;
+  const nbaItems = buildNextBestActions({
+    stuck: stuckCandidates,
+    stuckTotal: stuckTotalCount,
+    slaDays: STUCK_SLA_DAYS,
+    stale: staleCandidates,
+    staleTotal: staleTotalCount,
+    staleDays: STALE_STAGE_DAYS,
+    topFit: bestFit
+      ? {
+          name: bestFit.anonymized
+            ? "An anonymous candidate"
+            : (bestFit.full_name ?? "A candidate"),
+          jobTitle: bestFit.best_job_title,
+          score: bestFit.fit.score,
+          interested: bestFit.interested,
+        }
+      : null,
+    interestedCount: interestedCandidates.length,
+  });
+
   return (
     <EmployerShell active="dashboard">
       <header className="mb-10">
@@ -1038,22 +1065,11 @@ export default async function EmployerDashboard() {
         />
       </section>
 
-      {/* Stuck candidates — only renders when SLA breached. */}
-      <StuckAlert
-        candidates={stuckCandidates}
-        totalCount={stuckTotalCount}
-        slaDays={STUCK_SLA_DAYS}
-        reviewAllHref="/employer/applications?stuck=1"
-      />
-
-      {/* E3.24 — stale mid-pipeline candidates (distinct from the new-app
-          SLA above). Renders only when something is stale. */}
-      <StalePipelineAlert
-        candidates={staleCandidates}
-        totalCount={staleTotalCount}
-        thresholdDays={STALE_STAGE_DAYS}
-        reviewAllHref="/employer/applications?stale=1"
-      />
+      {/* BOH Lane 2a (Model 01) — the ranked Next Best Actions queue.
+          Supersedes the StuckAlert + StalePipelineAlert banner pair and
+          folds in top-fit + inbound-interest signals. j/k + Enter triage;
+          renders nothing when the queue is empty. */}
+      <NextBestActions items={nbaItems} />
 
       {/* Onboarding nudge — only when no locations on file. */}
       {(locationsCount ?? 0) === 0 && (
@@ -1110,7 +1126,9 @@ export default async function EmployerDashboard() {
       {/* v3 Phase D — inbound interest (candidates who saved your jobs) — a
           warmer signal than an algorithmic pick, so it leads. Renders nothing
           when nobody's saved a job yet. */}
-      <InterestedInYou candidates={interestedCandidates} />
+      <div id="interested-in-you" className="scroll-mt-24">
+        <InterestedInYou candidates={interestedCandidates} />
+      </div>
 
       {/* v3 Phase C — Today's top fits (cross-job PracticeFit roll-up).
           Renders nothing when there are no scored fits yet. */}
