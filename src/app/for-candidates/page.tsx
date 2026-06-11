@@ -50,7 +50,7 @@ import {
 } from "lucide-react";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
-import { FitDial } from "@/components/marketing/fit-dial";
+import { PracticeFitTeaser } from "@/components/marketing/practicefit-teaser";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import { DsoFitWordmark } from "@/components/practice-fit/brand/dsofit-wordmark";
 import type { Metadata } from "next";
@@ -213,53 +213,11 @@ function PracticeFitCandidateBand() {
   return (
     <section className="bg-white border-y border-[var(--rule)] px-6 sm:px-14 py-24">
       <div className="max-w-[1240px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_1.05fr] gap-14 lg:gap-20 items-center">
-        {/* The dial framed as the candidate's own product surface — your
-            score on a real opening, not an abstract gauge. */}
+        {/* #115 FOH-5 — the INTERACTIVE teaser: three taps, a sample score
+            assembling, the full assessment behind the CTA. Replaced the
+            static product card — trying beats looking. */}
         <div data-reveal className="order-2 lg:order-1">
-          <div
-            className="bg-white border border-[var(--rule-strong)] overflow-hidden"
-            style={{
-              boxShadow:
-                "0 30px 60px -30px rgba(7,15,28,0.18), 0 10px 24px -12px rgba(7,15,28,0.10)",
-            }}
-          >
-            <div className="flex items-start justify-between gap-4 px-6 py-4 bg-cream border-b border-[var(--rule)]">
-              <div className="min-w-0">
-                <div className="text-[9px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
-                  Your Fit · Hygienist
-                </div>
-                <div className="text-[16px] font-bold tracking-[-0.3px] text-ink leading-tight">
-                  Greenfield Dental Group
-                </div>
-                <div className="text-[12px] text-slate-body mt-0.5">
-                  Westerville, OH · 4-day week · Posted pay range
-                </div>
-              </div>
-              <span
-                className="shrink-0 px-2 py-1 text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep border border-heritage/35"
-                style={{ background: "var(--heritage-tint)" }}
-              >
-                Strong Match
-              </span>
-            </div>
-            <div className="px-6 sm:px-8 py-8">
-              <FitDial
-                score={92}
-                caption="Strong match"
-                dimensions={[
-                  { label: "Schedule fit", value: 94 },
-                  { label: "Pace & culture", value: 88 },
-                  { label: "Growth & mentorship", value: 91 },
-                  { label: "Commute", value: 86 },
-                ]}
-              />
-            </div>
-            <div className="px-6 py-4 border-t border-[var(--rule)] bg-cream/50 text-[12.5px] text-slate-body leading-relaxed">
-              <strong className="text-heritage-deep font-bold">Why this match:</strong>{" "}
-              your 4-day week lines up · mentorship-forward team · 12-minute
-              commute from your preferred area.
-            </div>
-          </div>
+          <PracticeFitTeaser />
         </div>
 
         <div className="order-1 lg:order-2">

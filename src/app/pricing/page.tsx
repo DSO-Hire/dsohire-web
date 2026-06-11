@@ -23,6 +23,7 @@ import {
 import { BillingPeriodToggle } from "./billing-period-toggle";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import { MotionMount } from "@/components/marketing/motion";
+import { RoiCalculator } from "@/components/marketing/roi-calculator";
 import { SALES_EMAIL } from "@/lib/contact";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
@@ -61,6 +62,15 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
           [data-reveal] content stays hidden (the Day-31 "gray slab" bug). */}
       <MotionMount />
       <PricingHero />
+      {/* #115 FOH-5 — lead with outcomes, not capacity: the visitor's own
+          agency math vs our flat fee, before the tier cards. */}
+      <RoiCalculator
+        tiers={tiers.map((t) => ({
+          id: t.id,
+          name: t.name,
+          annualMonthly: t.annualMonthlyEquivalent,
+        }))}
+      />
       <TierGrid
         tiers={tiers}
         nextParam={nextParam}
