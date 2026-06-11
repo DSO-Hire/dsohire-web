@@ -8,6 +8,12 @@ import type { ChangelogEntry } from "./index";
 export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-11",
+    kind: "new",
+    title: "Review candidates without leaving the keyboard",
+    body: "On any application, j and k now step you through every candidate in that job's pipeline — with a position marker so you always know where you are. Open the pipeline, hit j, and review the whole stack in one sitting.",
+  },
+  {
+    date: "2026-06-11",
     kind: "improved",
     title: "The candidate workspace, rebuilt",
     body: "Application detail is now a true workspace: evidence organized into tabs (Profile, Screening, Messages, Offer, Internal, Timeline) beside an always-visible pipeline rail with stage, assignee, interviews, and tags. No more thirteen-section scroll — and your internal notes stay clearly walled off from anything candidate-facing.",

@@ -115,6 +115,7 @@ import {
 import { ScreeningResponseRow, VerificationRow } from "./screening-rows";
 import { ActivityTimeline } from "./activity-timeline";
 import { WorkspaceTabs } from "./workspace-tabs";
+import { ReviewNav } from "./review-nav";
 import { candidateDisplayName } from "@/lib/applications/candidate-display";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
 import { WhyThisMatch } from "@/components/practice-fit/why-this-match";
@@ -1314,6 +1315,35 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     }
   }
 
+  // ── Review Mode cursor (Lane 3 commit 3) ─────────────────────────
+  // Sibling applications in this job's pipeline, same ordering the
+  // pipeline surfaces use (newest first). RLS scopes the read; one
+  // cheap indexed query. >500 apps on one job: cursor covers the
+  // newest 500 and hides itself if the current app falls outside.
+  let reviewPrevId: string | null = null;
+  let reviewNextId: string | null = null;
+  let reviewPosition = 0;
+  let reviewTotal = 0;
+  {
+    const { data: siblingRows } = await supabase
+      .from("applications")
+      .select("id")
+      .eq("job_id", job.id as string)
+      .order("created_at", { ascending: false })
+      .limit(500);
+    const siblingIds = ((siblingRows ?? []) as Array<{ id: string }>).map(
+      (r) => r.id
+    );
+    const idx = siblingIds.indexOf(app.id as string);
+    if (idx !== -1) {
+      reviewTotal = siblingIds.length;
+      reviewPosition = idx + 1;
+      reviewPrevId = idx > 0 ? siblingIds[idx - 1] : null;
+      reviewNextId =
+        idx < siblingIds.length - 1 ? siblingIds[idx + 1] : null;
+    }
+  }
+
   const titleLine = cand?.current_title ?? cand?.headline ?? null;
 
   // Location label for the candidate (preferred over their full address)
@@ -1345,6 +1375,17 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
         >
           View in {String(job.title)} pipeline →
         </Link>
+        {/* Review Mode cursor — j/k through this job's pipeline. */}
+        <ReviewNav
+          prevHref={
+            reviewPrevId ? `/employer/applications/${reviewPrevId}` : null
+          }
+          nextHref={
+            reviewNextId ? `/employer/applications/${reviewNextId}` : null
+          }
+          position={reviewPosition}
+          total={reviewTotal}
+        />
       </div>
 
       {/* Hero — avatar + name + meta + status pill + contact strip
