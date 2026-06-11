@@ -43,6 +43,7 @@ import { SiteShell } from "@/components/marketing/site-shell";
 import { FilmStrip } from "@/components/marketing/film-strip";
 import { CountUp } from "@/components/marketing/motion";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
+import { DsoFitWordmark } from "@/components/practice-fit/brand/dsofit-wordmark";
 import {
   getHomeLiveSnapshot,
   type HomeLiveSnapshot,
@@ -488,10 +489,14 @@ function MachineBand() {
       body: "Kanban pipelines per role, custom stages, bulk actions, stale alerts — across every practice from one screen.",
     },
     {
+      // Both fit products as their REAL wordmarks at matched size — PracticeFit
+      // (navy + green Fit) beside DSOFit (green DSO + navy Fit), the locked
+      // reversed-palette pair (Cam, Day 32: no plain-text "DSOFit").
       title: (
         <span className="inline-flex flex-wrap items-baseline gap-x-1.5">
           <PracticeFitWordmark surface="light" className="text-[17px]" />
-          <span>+ DSOFit</span>
+          <span className="text-slate-meta font-bold">+</span>
+          <DsoFitWordmark surface="light" className="text-[17px]" />
         </span>
       ),
       body: "Two-sided fit scoring for clinical and corporate roles. Displayed, never used to auto-screen. Honest by design.",
