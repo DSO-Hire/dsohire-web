@@ -117,6 +117,13 @@ interface KanbanBoardProps {
   aiSuggesterAvailable: boolean;
   aiSuggesterContextByAppId: Record<string, boolean>;
   canBulkAct?: boolean;
+  /**
+   * FOH-10 (Day 32) — Pipeline HQ passes the full DSO job-id set so the
+   * realtime subscription covers every job on the cross-job board.
+   * Omitted on the per-job board, which keeps deriving the single id
+   * from its applications (unchanged behavior).
+   */
+  realtimeJobIds?: string[];
 }
 
 interface OptimisticMove {
@@ -177,6 +184,7 @@ export function KanbanBoard({
   aiSuggesterAvailable,
   aiSuggesterContextByAppId,
   canBulkAct = true,
+  realtimeJobIds,
 }: KanbanBoardProps) {
   const [closedExpanded, setClosedExpanded] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -237,7 +245,7 @@ export function KanbanBoard({
 
   const { applications: appsState, isConnected, commitLocal, reseed } =
     useRealtimeApplications({
-      jobId: applications[0]?.job_id ?? "",
+      jobId: realtimeJobIds ?? (applications[0]?.job_id ?? ""),
       initialApplications: applications,
       pendingMovesRef,
       onRemoteChange: (event: RemoteChangeEvent) => {

@@ -50,6 +50,7 @@ import {
   UserPlus,
   Workflow,
   ClipboardCheck,
+  SquareKanban,
 } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
@@ -78,6 +79,7 @@ interface EmployerShellProps {
 export type NavId =
   | "dashboard"
   | "jobs"
+  | "pipeline"
   | "applications"
   | "talent-pool"
   | "referrals"
@@ -114,6 +116,9 @@ const NAV: ReadonlyArray<NavItem> = [
   // ─── Work ───
   { id: "dashboard", label: "Dashboard", href: "/employer/dashboard", Icon: LayoutDashboard, group: "work" },
   { id: "jobs", label: "Jobs", href: "/employer/jobs", Icon: Briefcase, group: "work" },
+  // FOH-10 (Day 32) — the cross-job board. Same capability gate as the
+  // applications list; RLS handles confidential/HM scoping inside.
+  { id: "pipeline", label: "Pipeline HQ", href: "/employer/pipeline", Icon: SquareKanban, group: "work", requiresCap: "apps.view" },
   { id: "applications", label: "Applications", href: "/employer/applications", Icon: FileText, group: "work", requiresCap: "apps.view" },
   { id: "talent-pool", label: "Talent Pool", href: "/employer/talent-pool", Icon: UsersRound, group: "work" },
   { id: "referrals", label: "Referrals", href: "/employer/referrals", Icon: UserPlus, group: "work" },

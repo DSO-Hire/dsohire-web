@@ -63,7 +63,12 @@ export interface RemoteChangeEvent {
 }
 
 interface UseRealtimeApplicationsArgs {
-  jobId: string;
+  /**
+   * One job id (per-job board) or several (FOH-10 Pipeline HQ, Day 32).
+   * Multi-id mode subscribes a single channel with a `job_id=in.(…)`
+   * filter and refetches with `.in()` — per-job behavior is unchanged.
+   */
+  jobId: string | string[];
   initialApplications: KanbanApplication[];
   pendingMovesRef: React.MutableRefObject<Map<string, string>>;
   onRemoteChange?: (event: RemoteChangeEvent) => void;
@@ -91,6 +96,12 @@ export function useRealtimeApplications({
   pendingMovesRef,
   onRemoteChange,
 }: UseRealtimeApplicationsArgs): UseRealtimeApplicationsResult {
+  // Normalize the single/multi jobId arg once. `jobKey` is the stable
+  // dependency for the subscription + refetch effects (array props get a
+  // fresh identity every render — the joined string doesn't).
+  const jobIds = Array.isArray(jobId) ? jobId : [jobId];
+  const jobKey = jobIds.join(",");
+
   const [applications, setApplications] =
     useState<KanbanApplication[]>(initialApplications);
   const [isConnected, setIsConnected] = useState(false);
@@ -141,7 +152,7 @@ export function useRealtimeApplications({
       .select(
         "id, job_id, candidate_id, stage_id, created_at, stage_entered_at, pipeline_position, stage:dso_pipeline_stages!stage_id(kind)"
       )
-      .eq("job_id", jobId);
+      .in("job_id", jobKey.split(","));
     if (error || !data) {
       if (error) console.warn("[realtime] applications refetch failed", error);
       return;
@@ -190,7 +201,7 @@ export function useRealtimeApplications({
       }
       return next;
     });
-  }, [jobId]);
+  }, [jobKey]);
 
   // Resolve a stage_id to a kind using local state. Returns "open" as the
   // safest fallback when the id is unseen (a teammate just created a
@@ -205,16 +216,28 @@ export function useRealtimeApplications({
   );
 
   useEffect(() => {
+    const ids = jobKey.split(",").filter(Boolean);
+    if (ids.length === 0) return;
     const supabase = createSupabaseBrowserClient();
     const channel = supabase
-      .channel(`applications:job:${jobId}`)
+      // Per-job keeps its historical channel name; multi-job gets a
+      // compact name (count + first id) — names just need client-local
+      // uniqueness, not the full id list.
+      .channel(
+        ids.length === 1
+          ? `applications:job:${ids[0]}`
+          : `applications:jobs:${ids.length}:${ids[0]}`
+      )
       .on(
         REALTIME_LISTEN_TYPES.POSTGRES_CHANGES,
         {
           event: REALTIME_POSTGRES_CHANGES_LISTEN_EVENT.UPDATE,
           schema: "public",
           table: "applications",
-          filter: `job_id=eq.${jobId}`,
+          filter:
+            ids.length === 1
+              ? `job_id=eq.${ids[0]}`
+              : `job_id=in.(${ids.join(",")})`,
         },
         (payload: RealtimePostgresUpdatePayload<ApplicationsRow>) => {
           const row = payload.new;
@@ -276,7 +299,7 @@ export function useRealtimeApplications({
       void supabase.removeChannel(channel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobId]);
+  }, [jobKey]);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
