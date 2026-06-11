@@ -62,9 +62,9 @@ export function ReviewNav({
     "inline-flex items-center gap-1 text-[10px] font-bold tracking-[2px] uppercase transition-colors";
 
   return (
-    <span className="ml-auto inline-flex items-center gap-3.5">
+    <span className="ml-auto inline-flex items-center gap-3.5 border border-[var(--rule-strong)] bg-white px-3 py-1.5">
       <span className="hidden sm:inline text-[9px] font-bold tracking-[1.5px] uppercase text-slate-meta">
-        j / k
+        Review · j/k
       </span>
       {prevHref ? (
         <Link
