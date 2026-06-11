@@ -8,6 +8,12 @@ import type { ChangelogEntry } from "./index";
 export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-11",
+    kind: "improved",
+    title: "A pricing comparison you can actually scan",
+    body: "The tier matrix is now collapsible categories with at-a-glance coverage chips — open what you care about instead of scrolling sixty rows. Roadmap items stay honestly separated from what's live.",
+  },
+  {
+    date: "2026-06-11",
     kind: "new",
     title: "Walk the back office from the homepage",
     body: "A film strip of the platform's machinery — pipeline, automations, offer approvals, permissions, analytics — so you can see what's behind a posting before you sign up.",

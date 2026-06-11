@@ -12,7 +12,7 @@
  */
 
 import Link from "next/link";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import {
   getAllTiers,
   isBillingPeriod,
@@ -22,6 +22,7 @@ import {
 } from "@/lib/stripe/prices";
 import { BillingPeriodToggle } from "./billing-period-toggle";
 import { PlanFinder } from "./plan-finder";
+import { CompareMatrixAccordion } from "./compare-matrix-accordion";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import { MotionMount } from "@/components/marketing/motion";
 import { RoiCalculator } from "@/components/marketing/roi-calculator";
@@ -957,192 +958,40 @@ function CompareMatrix({
         What you get at each tier.
       </h2>
 
-      {/*
-        Sticky thead trick: we need the page (not a wrapper) to be the scroll
-        container for vertical sticky to work. On lg+ the table fits without
-        horizontal scroll, so overflow is visible there. On smaller screens
-        the wrapper falls back to overflow-x-auto for horizontal scroll, and
-        the sticky header just doesn't engage — acceptable trade-off since
-        comparison tables are primarily a desktop surface.
-      */}
+      {/* Model-03 accordion (Day 32 v2 — Cam's call): collapsible category
+          bands w/ per-tier coverage chips replace the flat ~60-row table.
+          The consolidation above still runs server-side; the client
+          component only owns open/close state. */}
       <div className="-mx-6 sm:-mx-14 px-6 sm:px-14 overflow-x-auto lg:overflow-visible">
         <p className="text-[13px] text-slate-meta mb-5 max-w-[680px] leading-relaxed">
           <strong className="text-ink font-semibold">Reading this matrix:</strong>{" "}
-          checkmarks = available today, and every capacity number is
-          code-enforced. Anything not yet live for any tier sits in the final{" "}
+          expand a category — the chips on each band show how much of it a
+          tier includes before you open it. Checkmarks = available today, and
+          every capacity number is code-enforced. Anything not yet live for
+          any tier sits in the final{" "}
           <span className="font-bold tracking-[1px] uppercase text-[10px]">On the roadmap</span>{" "}
           band — labeled <span className="font-bold tracking-[1px] uppercase text-[10px]">H2 2026</span>{" "}
           (active roadmap) or <span className="font-bold tracking-[1px] uppercase text-[10px]">Phase 6+</span>{" "}
           (longer-term). We commit to features publicly so prospects see the
           platform&apos;s shape — and nothing roadmapped masquerades as shipped.
         </p>
-        <table className="w-full min-w-[1040px] border-collapse">
-          {/* ── Branded navy header row — sticks below the 80px nav on scroll ── */}
-          <thead className="sticky top-[80px] z-20 shadow-[0_4px_12px_-8px_rgba(7,15,28,0.25)]">
-            <tr className="bg-ink">
-              <th className="text-left text-[10px] font-bold tracking-[2.5px] uppercase text-ivory/60 py-6 pl-5 pr-6 align-bottom rounded-tl-sm">
-                Feature
-              </th>
-              {tiers.map((tier, idx) => {
-                const isFeatured = tier.badge === "Most popular";
-                const isLast = idx === tiers.length - 1;
-                const headlinePrice = isAnnual
-                  ? tier.annualMonthlyEquivalent
-                  : tier.monthlyPrice;
-                return (
-                  <th
-                    key={tier.id}
-                    className={`text-left py-6 px-4 align-bottom relative ${
-                      isFeatured
-                        ? "bg-ink-soft border-l-2 border-r-2 border-heritage"
-                        : ""
-                    } ${isLast ? "rounded-tr-sm pr-5" : ""}`}
-                  >
-                    {isFeatured && (
-                      <span className="absolute top-2.5 right-3 inline-flex items-center px-2 py-0.5 bg-heritage text-ivory text-[8px] font-bold tracking-[1.5px] uppercase">
-                        Most Popular
-                      </span>
-                    )}
-                    <div className="text-[16px] font-extrabold tracking-[-0.4px] text-ivory mb-1">
-                      {tier.name}
-                    </div>
-                    <div className="text-[13px] font-semibold text-ivory/55">
-                      ${headlinePrice.toLocaleString()}/mo
-                    </div>
-                    {isAnnual && (
-                      <div className="text-[10px] font-bold tracking-[1px] uppercase text-ivory/40 mt-0.5">
-                        billed annually
-                      </div>
-                    )}
-                  </th>
-                );
-              })}
-            </tr>
-          </thead>
-          <tbody>
-            {renderGroups.map((group, gi) => (
-              <MatrixGroupBlock
-                key={gi}
-                group={group}
-                tiers={tiers}
-                isFirst={gi === 0}
-              />
-            ))}
-          </tbody>
-        </table>
+        <CompareMatrixAccordion
+          groups={renderGroups}
+          tiers={tiers.map((tier) => {
+            const headlinePrice = isAnnual
+              ? tier.annualMonthlyEquivalent
+              : tier.monthlyPrice;
+            return {
+              id: tier.id,
+              name: tier.name,
+              featured: tier.badge === "Most popular",
+              priceLine: `$${headlinePrice.toLocaleString()}/mo`,
+              subLine: isAnnual ? "billed annually" : null,
+            };
+          })}
+        />
       </div>
     </section>
-  );
-}
-
-function MatrixGroupBlock({
-  group,
-  tiers,
-  isFirst,
-}: {
-  group: MatrixGroup;
-  tiers: TierConfig[];
-  isFirst: boolean;
-}) {
-  return (
-    <>
-      {/* ── Group label band ──
-          Split into per-column cells so the navy Growth column can continue
-          uninterrupted through the section dividers. */}
-      <tr className={isFirst ? "" : "border-t-4 border-white"}>
-        <td className="bg-cream py-3 pl-5 pr-4 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
-          <span className="inline-flex items-center gap-2.5">
-            <span className="block w-5 h-px bg-heritage" />
-            {group.label}
-          </span>
-        </td>
-        {tiers.map((tier) => {
-          const isFeatured = tier.badge === "Most popular";
-          return (
-            <td
-              key={tier.id}
-              className={
-                isFeatured
-                  ? "bg-ink border-l-2 border-r-2 border-heritage"
-                  : "bg-cream"
-              }
-              aria-hidden="true"
-            />
-          );
-        })}
-      </tr>
-      {/* ── Group rows ── */}
-      {group.rows.map((row, ri) => (
-        <tr
-          key={ri}
-          className="border-b border-[var(--rule)] hover:bg-cream/40 transition-colors"
-        >
-          <td className="text-[14.5px] text-ink py-4 pl-5 pr-6 leading-snug font-medium">
-            {row.feature}
-          </td>
-          {tiers.map((tier) => {
-            const value = row.values[tier.id];
-            const isFeatured = tier.badge === "Most popular";
-            // Soft labels = roadmap markers ("H2 2026", "Phase 6+") and modality
-            // labels ("Public", "Candidate-side") that aren't capacity values and
-            // shouldn't compete visually with the "Up to 5" / "Unlimited" cells.
-            const isSoftLabel =
-              typeof value === "string" &&
-              /^(H[12] 20\d{2}|Phase \d|Public|Candidate-side|Coming)/.test(value);
-            return (
-              <td
-                key={tier.id}
-                className={`text-[14px] py-4 px-4 align-middle ${
-                  isFeatured
-                    ? "bg-ink border-l-2 border-r-2 border-heritage"
-                    : ""
-                }`}
-              >
-                {typeof value === "boolean" ? (
-                  value ? (
-                    <>
-                      <Check
-                        aria-hidden="true"
-                        className={`h-4 w-4 ${
-                          isFeatured ? "text-ivory" : "text-heritage"
-                        }`}
-                        strokeWidth={3}
-                      />
-                      <span className="sr-only">Included</span>
-                    </>
-                  ) : (
-                    <span
-                      className={`text-[18px] leading-none font-light ${
-                        isFeatured ? "text-ivory/30" : "text-slate-meta/30"
-                      }`}
-                    >
-                      <span aria-hidden="true">—</span>
-                      <span className="sr-only">Not included</span>
-                    </span>
-                  )
-                ) : isSoftLabel ? (
-                  <span
-                    className={`text-[10px] font-bold tracking-[1.5px] uppercase whitespace-nowrap ${
-                      isFeatured ? "text-ivory/55" : "text-slate-meta"
-                    }`}
-                  >
-                    {value}
-                  </span>
-                ) : (
-                  <span
-                    className={`font-semibold ${
-                      isFeatured ? "text-ivory" : "text-ink"
-                    }`}
-                  >
-                    {value}
-                  </span>
-                )}
-              </td>
-            );
-          })}
-        </tr>
-      ))}
-    </>
   );
 }
 
