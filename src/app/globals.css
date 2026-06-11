@@ -637,3 +637,49 @@ html, body {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
 }
+
+/* ── FOH-9: kanban drop "settle" ──
+   Plays once when a card's move is server-confirmed (pending true→false):
+   a quick scale-down + heritage ring that fades as the card seats itself. */
+@media (prefers-reduced-motion: no-preference) {
+  .kb-settle {
+    animation: kb-settle 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+@keyframes kb-settle {
+  0% {
+    transform: scale(1.03);
+    box-shadow:
+      0 0 0 2px rgba(77, 122, 96, 0.55),
+      0 12px 22px -10px rgba(7, 15, 28, 0.28);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(77, 122, 96, 0);
+  }
+}
+
+/* ── FOH-9: in-app skeleton shimmer (loading.tsx surfaces) ── */
+.sk {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-ivory-deep, #ECE7DB);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .sk::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.55),
+      transparent
+    );
+    animation: sk-shimmer 1.4s ease-in-out infinite;
+  }
+}
+@keyframes sk-shimmer {
+  to { transform: translateX(100%); }
+}

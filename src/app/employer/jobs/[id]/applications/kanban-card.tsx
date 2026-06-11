@@ -22,6 +22,7 @@
 
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDraggable } from "@dnd-kit/core";
 import { MessageCircle, Star } from "lucide-react";
@@ -80,6 +81,22 @@ export function KanbanCard({
     disabled: pending && !isOverlay,
   });
 
+  // #115 FOH-9 — drop "settle": when `pending` flips true→false the move
+  // just confirmed, so the card plays a 400ms scale-down + heritage-ring
+  // fade right where it landed. Self-contained (no board threading);
+  // reduced-motion users see nothing extra (CSS-gated).
+  const wasPendingRef = useRef(false);
+  const [settling, setSettling] = useState(false);
+  useEffect(() => {
+    const was = wasPendingRef.current;
+    wasPendingRef.current = pending;
+    if (was && !pending && !isOverlay) {
+      setSettling(true);
+      const t = setTimeout(() => setSettling(false), 450);
+      return () => clearTimeout(t);
+    }
+  }, [pending, isOverlay]);
+
   const days = daysInStage(application.stage_entered_at);
   const heat = stageHeatLevel(days);
   const heatClasses = STAGE_HEAT_CLASSES[heat];
@@ -122,7 +139,9 @@ export function KanbanCard({
       style={style}
       {...(isOverlay ? {} : listeners)}
       {...(isOverlay ? {} : attributes)}
-      className={`${baseClasses} ${borderClass} ${interactiveClasses}`}
+      className={`${baseClasses} ${borderClass} ${interactiveClasses} ${
+        settling ? "kb-settle" : ""
+      }`}
       aria-roledescription="Draggable application card"
       aria-label={`${cand?.full_name ?? "Anonymous candidate"} — ${days} days in stage`}
       onClick={(e) => {
