@@ -46,10 +46,9 @@ import {
 } from "@/lib/applications/stages";
 import { candidateDisplayName } from "@/lib/applications/candidate-display";
 import { KpiTile } from "@/components/dashboard/kpi-tile";
-import {
-  ActivityFeed,
-  type ActivityEvent,
-} from "@/components/dashboard/activity-feed";
+// BOH Lane 2d — ActivityFeed retired from this page (the LivePulse rail
+// supersedes it, seeded from the same data + kept live via realtime).
+import { LivePulse } from "./live-pulse";
 // BOH Lane 2a — StuckAlert + StalePipelineAlert are superseded by the
 // Next Best Actions queue (their data feeds it; components kept on disk
 // for surgical revert).
@@ -1021,6 +1020,35 @@ export default async function EmployerDashboard() {
       : []),
   ];
 
+  // BOH Lane 2d — seed the live pulse from the same recent-applications
+  // data the old Recent Activity section rendered. Names are masked HERE
+  // via candidateDisplayName before anything reaches the client; the
+  // lookup maps let realtime events resolve friendly copy without ever
+  // fetching names client-side.
+  const pulseCandidateNames: Record<string, string> = {};
+  for (const [id, cand] of recentCandMap) {
+    pulseCandidateNames[id] = candidateDisplayName({
+      fullName: cand.full_name,
+      candidateId: id,
+    });
+  }
+  const pulseJobTitles: Record<string, string> = {};
+  for (const [id, job] of recentJobMap) {
+    pulseJobTitles[id] = job.title;
+  }
+  const pulseSeed = recentApps.slice(0, 7).map((app) => {
+    const name = pulseCandidateNames[app.candidate_id] ?? "A candidate";
+    const job = recentJobMap.get(app.job_id);
+    const stageLabel = KIND_DEFAULT_LABELS[app.kind] ?? app.kind;
+    return {
+      id: `seed-${app.id}`,
+      kind: "app" as const,
+      text: `${name} applied — ${job?.title ?? "a role"}${app.kind !== "open" ? ` · now in ${stageLabel}` : ""}`,
+      ago: relativeDate(app.created_at, nowMs),
+      href: `/employer/applications/${app.id}`,
+    };
+  });
+
   // BOH Lane 2a — unify the attention signals into the ranked queue.
   // Anonymity rule applied HERE (mask before the pure lib ever sees a
   // name): same `anonymized` flag Today's Top Fits renders with.
@@ -1176,11 +1204,19 @@ export default async function EmployerDashboard() {
         />
       </section>
 
-      {/* BOH Lane 2a (Model 01) — the ranked Next Best Actions queue.
-          Supersedes the StuckAlert + StalePipelineAlert banner pair and
-          folds in top-fit + inbound-interest signals. j/k + Enter triage;
-          renders nothing when the queue is empty. */}
-      <NextBestActions items={nbaItems} />
+      {/* BOH Lane 2a+2d (Model 01) — queue + live pulse side by side.
+          The queue (j/k + Enter triage) supersedes the alert banners; the
+          pulse supersedes the bottom Recent Activity section, seeded from
+          the same data and kept live by realtime INSERT subscriptions.
+          Stacks to one column below lg. */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-4 mb-6 items-start">
+        <NextBestActions items={nbaItems} />
+        <LivePulse
+          initialEvents={pulseSeed}
+          jobTitles={pulseJobTitles}
+          candidateNames={pulseCandidateNames}
+        />
+      </div>
 
       {/* Onboarding nudge — only when no locations on file. */}
       {(locationsCount ?? 0) === 0 && (
@@ -1285,59 +1321,6 @@ export default async function EmployerDashboard() {
         />
       </section>
 
-      {/* Recent activity — unchanged from v2. */}
-      <section className="mt-6">
-        <div className="flex items-end justify-between gap-4 mb-4">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
-            Recent Activity
-          </div>
-          {recentApps.length > 0 && (
-            <Link
-              href="/employer/applications"
-              className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage hover:text-heritage-deep transition-colors"
-            >
-              View all
-            </Link>
-          )}
-        </div>
-        <ActivityFeed
-          title=""
-          emptyMessage="No applications yet — once candidates start applying, recent activity shows up here."
-          events={recentApps.map((app): ActivityEvent => {
-            const cand = recentCandMap.get(app.candidate_id);
-            const job = recentJobMap.get(app.job_id);
-            const name = candidateDisplayName({
-              fullName: cand?.full_name,
-              candidateId: app.candidate_id,
-            });
-            const stageLabel = KIND_DEFAULT_LABELS[app.kind] ?? app.kind;
-            return {
-              id: app.id,
-              icon: app.kind === "open" ? UserPlus : ArrowRightCircle,
-              tone: app.kind === "open" ? "positive" : "neutral",
-              body: (
-                <>
-                  <strong className="font-semibold">{name}</strong> applied to{" "}
-                  <span className="text-slate-body">
-                    {job?.title ?? "Unknown job"}
-                  </span>
-                  {app.kind !== "open" && (
-                    <>
-                      {" "}
-                      · now in{" "}
-                      <span className="text-slate-body">{stageLabel}</span>
-                    </>
-                  )}
-                </>
-              ),
-              timestamp: relativeDate(app.created_at, nowMs),
-              href: job
-                ? `/employer/jobs/${job.id}/applications`
-                : `/employer/applications/${app.id}`,
-            };
-          })}
-        />
-      </section>
     </EmployerShell>
   );
 }
