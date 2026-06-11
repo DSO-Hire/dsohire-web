@@ -39,6 +39,8 @@ import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fi
 import { getAllTiers, type TierConfig } from "@/lib/stripe/prices";
 import { SiteShell, BrandLockup } from "@/components/marketing/site-shell";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
+import { CountUp } from "@/components/marketing/motion";
+import { FitDial } from "@/components/marketing/fit-dial";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -64,6 +66,7 @@ export default function ForDsosPage() {
       <ProofStrip />
       <ProblemSection />
       <RoiMath />
+      <PracticeFitBand />
       <FeatureShowcase />
       <PricingTeaser />
       <HowItWorks />
@@ -108,6 +111,7 @@ function Hero() {
               horizontal space with the kanban illustration anymore. */}
         <div className="mb-8">
           <span
+            data-reveal
             className="inline-flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold tracking-[1.8px] uppercase text-ink border border-heritage/35"
             style={{
               background: "var(--heritage-tint)",
@@ -130,7 +134,11 @@ function Hero() {
               the viewport. The heritage-tint underline is only rendered at
               lg+ for the same reason — `absolute` positioning on a wrapped
               inline element only sits under the last line and looks broken. */}
-        <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-[80px] font-extrabold tracking-[-0.025em] leading-[1.05] text-ink mb-12">
+        <h1
+          data-reveal
+          style={{ "--mk-delay": "60ms" } as React.CSSProperties}
+          className="text-4xl sm:text-5xl md:text-7xl lg:text-[80px] font-extrabold tracking-[-0.025em] leading-[1.05] text-ink mb-12"
+        >
           Hire across every practice.{" "}
           <br className="hidden sm:inline" />
           <em className="not-italic relative lg:whitespace-nowrap text-heritage-light">
@@ -148,7 +156,7 @@ function Hero() {
               (vs. ~49% in the old layout) and sits inset cleanly without
               crowding the right edge. */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-12 lg:gap-16 items-start">
-          <div>
+          <div data-reveal style={{ "--mk-delay": "130ms" } as React.CSSProperties}>
             <p className="text-lg sm:text-xl text-slate-body leading-relaxed mb-10">
               Built for multi-location dental groups — from DSOs to independent
               owners running a handful of practices. Subscribe once and post
@@ -182,7 +190,9 @@ function Hero() {
           </div>
 
           {/* Right cell: stylized employer kanban preview, now wider */}
-          <HeroKanbanPreview />
+          <div data-reveal style={{ "--mk-delay": "220ms" } as React.CSSProperties}>
+            <HeroKanbanPreview />
+          </div>
         </div>
       </div>
     </section>
@@ -316,8 +326,12 @@ function HeroKanbanPreview() {
           </div>
         </div>
 
-        {/* Board */}
-        <div className="grid grid-cols-4 gap-px bg-[var(--rule)]">
+        {/* Board — `relative` anchors the .hk-mover travel card.
+            #115 FOH-1: the board plays its own story once on load — Dr.
+            Chen's card lifts out of Screening, glides into Interview, and
+            the realtime notification below pops in as she lands. Pure CSS
+            (globals.css .hk-*); reduced-motion renders the resting state. */}
+        <div className="relative grid grid-cols-4 gap-px bg-[var(--rule)]">
           {HERO_COLUMNS.map((col) => (
             <div key={col.label} className="bg-white flex flex-col">
               <header
@@ -335,20 +349,40 @@ function HeroKanbanPreview() {
               </header>
               <div className="flex-1 p-1.5 space-y-1.5 bg-cream/40 min-h-[178px]">
                 {col.cards.map((card) => (
-                  <HeroKanbanCard key={card.name} {...card} />
+                  <div
+                    key={card.name}
+                    className={card.name === "Dr. Sarah Chen" ? "hk-chen" : undefined}
+                  >
+                    <HeroKanbanCard {...card} />
+                  </div>
                 ))}
               </div>
             </div>
           ))}
+
+          {/* The traveling card — a lifted clone of Dr. Chen's card. Hidden
+              entirely under prefers-reduced-motion (and from AT always). */}
+          <div className="hk-mover" style={{ top: "37px" }} aria-hidden>
+            <div style={{ filter: "drop-shadow(0 14px 18px rgba(7,15,28,0.28))" }}>
+              <HeroKanbanCard
+                name="Dr. Sarah Chen"
+                role="Associate Dentist"
+                days={0}
+                heat="cool"
+                comments={1}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Floating realtime notification */}
+      {/* Floating realtime notification — entrance synced to the card
+          landing (globals.css .hk-notif). Rotation moved from inline style
+          into the class so the animation composes with it. */}
       <div
-        className="absolute -bottom-5 -left-6 bg-white border border-[var(--rule)] px-4 py-3.5 flex items-center gap-3 max-w-[260px]"
+        className="hk-notif absolute -bottom-5 -left-6 bg-white border border-[var(--rule)] px-4 py-3.5 flex items-center gap-3 max-w-[260px]"
         style={{
           boxShadow: "0 14px 28px -14px rgba(7,15,28,0.18)",
-          transform: "rotate(-1.5deg)",
         }}
       >
         <span className="flex items-center justify-center w-8 h-8 bg-heritage text-ivory font-extrabold text-[13px] tracking-[-0.3px]">
@@ -593,28 +627,49 @@ function RoiMath() {
         <RoiCard
           label="What you spend today"
           accent="slate"
+          revealDelay={0}
           rows={[
             { item: "Per-listing job boards (15 active × ~$99/mo)", value: "$1,485 / mo" },
             { item: "1 staffing-agency hire/quarter ($30K avg fee)", value: "$10,000 / mo" },
             { item: "Recruiter time re-entering jobs across listings", value: "Hidden" },
           ]}
-          total="≈ $11,500 / mo"
-          totalLabel="Annual: ~$138,000"
+          total={
+            <>
+              ≈ <CountUp to={11500} prefix="$" /> / mo
+            </>
+          }
+          totalLabel={
+            <>
+              Annual: ~<CountUp to={138000} prefix="$" />
+            </>
+          }
         />
         <RoiCard
           label="What DSO Hire costs"
           accent="heritage"
+          revealDelay={110}
           rows={[
             { item: "Growth tier subscription", value: "$699 / mo" },
             { item: "Per-listing fees", value: "$0" },
             { item: "Placement fees", value: "$0" },
           ]}
-          total="$699 / mo"
-          totalLabel="Annual: $8,388"
+          total={
+            <>
+              <CountUp to={699} prefix="$" /> / mo
+            </>
+          }
+          totalLabel={
+            <>
+              Annual: <CountUp to={8388} prefix="$" />
+            </>
+          }
         />
       </div>
 
-      <div className="mt-10 bg-ink text-ivory p-8 sm:p-10">
+      <div
+        data-reveal
+        className="mt-10 bg-ink text-ivory p-8 sm:p-10"
+      >
         <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-light mb-3">
           Net difference
         </div>
@@ -633,15 +688,26 @@ function RoiCard({
   total,
   totalLabel,
   accent,
+  revealDelay,
 }: {
   label: string;
   rows: Array<{ item: string; value: string }>;
-  total: string;
-  totalLabel: string;
+  /** ReactNode so the totals can carry #115 FOH-1 CountUp animations. */
+  total: React.ReactNode;
+  totalLabel: React.ReactNode;
   accent: "slate" | "heritage";
+  revealDelay?: number;
 }) {
   return (
-    <div className="bg-white p-10">
+    <div
+      data-reveal
+      style={
+        revealDelay
+          ? ({ "--mk-delay": `${revealDelay}ms` } as React.CSSProperties)
+          : undefined
+      }
+      className="bg-white p-10"
+    >
       <div
         className={`text-[10px] font-bold tracking-[2.5px] uppercase mb-6 ${
           accent === "heritage" ? "text-heritage-deep" : "text-slate-body"
@@ -671,6 +737,68 @@ function RoiCard({
         </div>
       </div>
     </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   PRACTICEFIT BAND — #115 FOH-1
+   The moat, finally shown moving: a real-looking fit score assembling
+   itself (FitDial client primitive). Employer-voiced. White band breaks
+   the ivory→cream section rhythm on purpose (review §1.2a).
+═══════════════════════════════════════════════════════ */
+
+function PracticeFitBand() {
+  return (
+    <section className="bg-white border-y border-[var(--rule)] px-6 sm:px-14 py-24">
+      <div className="max-w-[1240px] mx-auto grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-14 lg:gap-20 items-center">
+        <div>
+          <div data-reveal className="flex items-center gap-2.5 mb-3.5">
+            <PracticeFitMark className="h-4 w-4" />
+            <PracticeFitWordmark surface="light" tm className="text-[17px]" />
+          </div>
+          <h2
+            data-reveal
+            style={{ "--mk-delay": "70ms" } as React.CSSProperties}
+            className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink max-w-[640px] mb-6"
+          >
+            Applicants, ranked by how they&apos;d actually fit your practice.
+          </h2>
+          <p
+            data-reveal
+            style={{ "--mk-delay": "140ms" } as React.CSSProperties}
+            className="text-base text-slate-body leading-[1.7] max-w-[560px] mb-8"
+          >
+            Not keyword matching — a two-sided fit model built only for
+            dentistry. Schedule overlap, PMS fluency, clinical mix, pace and
+            culture: every applicant lands in your pipeline already scored, so
+            your team starts with the strongest fits instead of a stack of
+            résumés. Included on every tier.
+          </p>
+          <Link
+            data-reveal
+            style={{ "--mk-delay": "200ms" } as React.CSSProperties}
+            href="#pricing"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+          >
+            See It On Your Openings
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+
+        <div data-reveal style={{ "--mk-delay": "180ms" } as React.CSSProperties}>
+          <FitDial
+            score={92}
+            caption="Strong match"
+            dimensions={[
+              { label: "Schedule overlap", value: 94 },
+              { label: "PMS fluency", value: 88 },
+              { label: "Clinical mix", value: 91 },
+              { label: "Pace & culture", value: 86 },
+            ]}
+          />
+        </div>
+      </div>
+    </section>
   );
 }
 
