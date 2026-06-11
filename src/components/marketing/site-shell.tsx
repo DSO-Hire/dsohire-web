@@ -197,6 +197,7 @@ export function SiteFooter() {
           <FooterCol title="Company">
             <FooterLink href="/about">About</FooterLink>
             <FooterLink href="/changelog">Changelog</FooterLink>
+            <FooterLink href="/hiring-pulse">Hiring Pulse</FooterLink>
             <FooterLink href="/security">Security &amp; Trust</FooterLink>
             <FooterLink href="/contact">Contact</FooterLink>
             <FooterLink href="/help">Help Center</FooterLink>
