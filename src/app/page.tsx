@@ -701,7 +701,7 @@ function FounderLine() {
             when Brand Assets/founder-signature/ is processed (Day 31 plan) —
             keep it name-only until then; no faux script fonts. */}
         <div className="mb-6 text-[11px] font-bold tracking-[1.8px] uppercase text-slate-meta">
-          <span className="text-heritage-deep">Cameron Eslinger</span>
+          <span className="text-heritage-deep">Cam Eslinger</span>
           <span className="mx-2 text-[var(--rule-strong)]">·</span>
           Founder, DSO Hire
         </div>
