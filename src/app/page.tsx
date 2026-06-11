@@ -32,6 +32,7 @@
  */
 
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   Building2,
@@ -697,9 +698,17 @@ function FounderLine() {
           ten years on the business side of this industry, we built the
           missing piece — no agencies, no $30,000 introductions.&rdquo;
         </p>
-        {/* Attribution. The real signature image slots in above this line
-            when Brand Assets/founder-signature/ is processed (Day 31 plan) —
-            keep it name-only until then; no faux script fonts. */}
+        {/* The real signature (Brand Assets/founder-signature/, processed
+            Day 32 — trimmed 640w; ivory variant exists for dark surfaces).
+            Decorative: the name line below carries the accessible text. */}
+        <Image
+          src="/about/signature.png"
+          alt=""
+          aria-hidden
+          width={163}
+          height={52}
+          className="mx-auto mb-3 -rotate-2 select-none"
+        />
         <div className="mb-6 text-[11px] font-bold tracking-[1.8px] uppercase text-slate-meta">
           <span className="text-heritage-deep">Cam Eslinger</span>
           <span className="mx-2 text-[var(--rule-strong)]">·</span>
