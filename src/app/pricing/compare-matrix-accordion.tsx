@@ -80,7 +80,12 @@ export function CompareMatrixAccordion({
     });
 
   return (
-    <div className="overflow-x-auto">
+    // NOTE: no overflow wrapper here — an `overflow-x` ancestor breaks
+    // vertical position:sticky (the Day-32 "header collapsed into the
+    // first row" bug, Cam catch). The PAGE-level wrapper provides
+    // overflow-x-auto on small screens and goes overflow-visible on lg
+    // so the tier header can stick — same trick the old table used.
+    <div>
       <div className="min-w-[860px] border border-[var(--rule-strong)]">
         {/* ── Sticky tier header ── */}
         <div

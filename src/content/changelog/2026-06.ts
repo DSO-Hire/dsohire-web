@@ -8,6 +8,12 @@ import type { ChangelogEntry } from "./index";
 export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-11",
+    kind: "fixed",
+    title: "Pricing page polish",
+    body: "The comparison header now sticks cleanly while you scroll, and the ROI calculator models large-group volumes — up to 300 locations and 600 hires a year, counted across all locations.",
+  },
+  {
+    date: "2026-06-11",
     kind: "improved",
     title: "A pricing comparison you can actually scan",
     body: "The tier matrix is now collapsible categories with at-a-glance coverage chips — open what you care about instead of scrolling sixty rows. Roadmap items stay honestly separated from what's live.",

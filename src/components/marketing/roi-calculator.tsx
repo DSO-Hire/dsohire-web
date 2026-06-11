@@ -79,17 +79,21 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
               value={locations}
               display={String(locations)}
               min={2}
-              max={120}
+              max={300}
               step={1}
               onChange={setLocations}
             />
+            {/* Day 32 (Cam): "all locations" added — the old bare label read
+                as per-location to some eyes; and 60/yr capped out absurdly
+                low for large platforms (a 120-location group with normal
+                dental turnover hires hundreds a year). */}
             <CalcSlider
-              label="Hires per year"
+              label="Hires per year — all locations"
               value={hiresPerYear}
               display={String(hiresPerYear)}
-              min={1}
-              max={60}
-              step={1}
+              min={5}
+              max={600}
+              step={5}
               onChange={setHiresPerYear}
             />
             <CalcSlider
