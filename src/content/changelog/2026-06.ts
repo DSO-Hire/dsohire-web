@@ -9,6 +9,12 @@ export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-11",
     kind: "improved",
+    title: "A leaner, faster dashboard",
+    body: "The dashboard tightened up: a compact header, four at-a-glance hiring numbers with trend sparklines (awaiting review, apps this week, offers out, time-to-fill), and your action queue right below. Less scrolling, same depth.",
+  },
+  {
+    date: "2026-06-11",
+    kind: "improved",
     title: "Time-to-fill, front and center",
     body: "The dashboard now shows your median posting-to-hire time over the trailing 90 days — the number multi-location groups actually manage to — plus a hires sparkline. Location switcher applies, like everything else.",
   },

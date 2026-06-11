@@ -30,10 +30,10 @@ import {
   MapPin,
   Plus,
   UserPlus,
-  Users,
 } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
-import { HelpDisclosure } from "@/components/help/help-disclosure";
+// BOH Lane 2c — HelpDisclosure + HeroKpiTile retired from this page
+// (About box → help center + ? launcher; hero → slim KPI strip).
 import { OnboardingChecklist } from "@/components/onboarding/onboarding-checklist";
 import { BillingBanner } from "@/components/employer/billing-banner";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -46,7 +46,6 @@ import {
 } from "@/lib/applications/stages";
 import { candidateDisplayName } from "@/lib/applications/candidate-display";
 import { KpiTile } from "@/components/dashboard/kpi-tile";
-import { HeroKpiTile } from "@/components/dashboard/hero-kpi-tile";
 import {
   ActivityFeed,
   type ActivityEvent,
@@ -206,6 +205,9 @@ export default async function EmployerDashboard() {
   let ttfMedianDays: number | null = null;
   let ttfFillCount = 0;
   let hiresLast7Days: number[] = [];
+
+  // ── BOH Lane 2c — offers out (sent, no candidate response yet) ──
+  let offersOutCount = 0;
 
   // ── Pipeline funnel scaffolding (counts of CURRENT stage kind, last 30
   // days of submissions). v1: kind-snapshot funnel. A flow-based funnel
@@ -650,6 +652,51 @@ export default async function EmployerDashboard() {
         hiresLast7Days = hiresBuckets;
       }
 
+      // ── BOH Lane 2c — offers out: sends in the last 60 days with no
+      // candidate response on file. Location-scoped in JS via the
+      // embedded application.job_id (nested .in() isn't expressible).
+      {
+        const { data: sendRows } = await supabase
+          .from("application_offer_sends")
+          .select(
+            "id, application:applications!inner(job_id, job:jobs!inner(dso_id))"
+          )
+          .eq("application.job.dso_id", dsoId)
+          .gte("sent_at", new Date(nowMs - 60 * 86400000).toISOString());
+        type SendRow = {
+          id: string;
+          application:
+            | { job_id: string }
+            | Array<{ job_id: string }>
+            | null;
+        };
+        let sends = ((sendRows ?? []) as unknown as SendRow[]).map((r) => ({
+          id: r.id,
+          jobId: Array.isArray(r.application)
+            ? r.application[0]?.job_id ?? ""
+            : r.application?.job_id ?? "",
+        }));
+        if (locationFilteredJobIds !== null) {
+          const allowed = new Set(locationFilteredJobIds);
+          sends = sends.filter((s) => allowed.has(s.jobId));
+        }
+        if (sends.length > 0) {
+          const { data: respRows } = await supabase
+            .from("application_offer_responses")
+            .select("offer_send_id")
+            .in(
+              "offer_send_id",
+              sends.map((s) => s.id)
+            );
+          const responded = new Set(
+            ((respRows ?? []) as Array<{ offer_send_id: string }>).map(
+              (r) => r.offer_send_id
+            )
+          );
+          offersOutCount = sends.filter((s) => !responded.has(s.id)).length;
+        }
+      }
+
       // ── Pipeline funnel ──────────────────────────────────────────
       type FunnelRow = {
         stage: { kind: string } | Array<{ kind: string }> | null;
@@ -1000,38 +1047,40 @@ export default async function EmployerDashboard() {
 
   return (
     <EmployerShell active="dashboard">
-      <header className="mb-10">
-        {/* 2026-05-26 — Top-right Post a job CTA per Cam direction. The
-            existing quick-action strip below stays; this duplicates the action
-            in a high-visibility position recruiters expect (top-right is the
-            primary-action slot in most ATS UIs). Hidden for hiring managers,
-            same as the quick-action strip. */}
-        <div className="flex items-start justify-between gap-6 flex-wrap">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-3.5 mb-2 flex-wrap">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-heritage opacity-75 animate-ping" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-heritage" />
-              </span>
-              <span className="text-[10px] font-extrabold tracking-[3px] uppercase text-heritage-deep">
+      {/* BOH Lane 2c (Model 01, full-refresh doctrine) — the compact
+          mission-control greeting bar replaces the tall welcome block.
+          Open Jobs lives here as a live chip (the KPI strip below holds
+          the four hiring numbers). The "About your dashboard" inline
+          disclosure is retired — the entry remains in /employer/help and
+          the ? assistant. No time-of-day greeting: the server renders in
+          UTC and we don't fake local time. */}
+      <header className="mb-7">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-extrabold tracking-[-0.6px] leading-snug text-ink">
+              Here&apos;s what moves hiring forward today,{" "}
+              {dsoUser?.full_name?.split(" ")[0] ?? "there"}.
+            </h1>
+            <div className="mt-2 flex items-center gap-3.5 flex-wrap text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+              <span className="inline-flex items-center gap-2 text-heritage-deep">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-heritage opacity-75 animate-ping" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-heritage" />
+                </span>
                 {dso?.status === "active" ? "Active" : "Onboarding"}
               </span>
-              <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta border-l border-rule pl-3.5">
-                {dateLabel}
+              <span className="border-l border-rule pl-3.5">{dateLabel}</span>
+              <span className="inline-flex items-center gap-1.5 border-l border-rule pl-3.5 text-ink">
+                <Briefcase className="size-3" />
+                {openJobsCount} {openJobsCount === 1 ? "job" : "jobs"} live
               </span>
+              <span className="border-l border-rule pl-3.5">{dso?.name}</span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.1] text-ink">
-              Welcome back, {dsoUser?.full_name?.split(" ")[0] ?? "there"}.
-            </h1>
-            <p className="mt-3 text-base text-slate-body max-w-[640px]">
-              Here&apos;s where things stand at{" "}
-              <strong className="text-ink font-bold">{dso?.name}</strong>.
-            </p>
           </div>
           {dsoUser?.role !== "hiring_manager" && (
             <Link
               href="/employer/jobs/new"
-              className="inline-flex items-center gap-2 px-5 py-3 bg-heritage text-ivory text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-heritage-deep transition-colors shrink-0 mt-1"
+              className="inline-flex items-center gap-2 px-5 py-3 bg-heritage text-ivory text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-heritage-deep transition-colors shrink-0"
             >
               <Plus className="size-4" strokeWidth={2.5} />
               Post a job
@@ -1039,10 +1088,6 @@ export default async function EmployerDashboard() {
           )}
         </div>
       </header>
-
-      <div className="mb-6">
-        <HelpDisclosure helpKey="dashboard.overview" />
-      </div>
 
       {dsoUser?.role !== "hiring_manager" && (
         <div className="mb-8">
@@ -1061,41 +1106,28 @@ export default async function EmployerDashboard() {
 
       <BillingBanner subscription={subscription} />
 
-      {/* KPI grid — navy hero (Awaiting Review) + 4 tonal supporting tiles.
-          Hero spans the leftmost column across both rows; the four tonal
-          tiles fill the right two columns in a 2×2. */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr] gap-px bg-[var(--rule)] border border-[var(--rule)] mb-6">
-        <div className="lg:row-span-2">
-          <HeroKpiTile
-            label="Awaiting Review"
-            value={String(awaitingReviewCount)}
-            live={awaitingReviewCount > 0}
-            hint={heroHint}
-            slaChip={heroSlaChip}
-            spark={appsLast7Days.some((v) => v > 0) ? appsLast7Days : undefined}
-            sparkLabel="New applications · last 7 days"
-            stageStrip={stageStripCounts}
-            stageStripMax={stageStripMax}
-            href="/employer/applications?status=open&sort=oldest"
-            ctaLabel="Review new applications"
-          />
-        </div>
-
+      {/* BOH Lane 2c (Model 01) — the slim four-KPI sparkline strip
+          replaces the hero+2×2 grid. Awaiting Review keeps its SLA chip
+          as hint; the hero's pipeline stage-strip retires in favor of the
+          PipelineFunnel section below (same data, one home); Open Jobs
+          moved to the greeting bar. No "Interviews this week" until real
+          scheduling data exists — no invented numbers. */}
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-[var(--rule)] border border-[var(--rule)] mb-6">
         <KpiTile
-          icon={Briefcase}
-          value={String(openJobsCount)}
-          label="Open Jobs"
-          hint={
-            openJobsCount > 0
-              ? "Live on the board"
-              : "Post your first to start receiving applications"
+          icon={Mail}
+          value={String(awaitingReviewCount)}
+          label="Awaiting Review"
+          hint={heroSlaChip ? heroSlaChip.label : heroHint}
+          trendIntent={
+            heroSlaChip?.tone === "breach" ? "negative" : "neutral"
           }
-          href="/employer/jobs?status=active"
-          routeLabel="View jobs"
+          spark={appsLast7Days.some((v) => v > 0) ? appsLast7Days : undefined}
+          href="/employer/applications?status=open&sort=oldest"
+          routeLabel="Review new applications"
         />
 
         <KpiTile
-          icon={Mail}
+          icon={ArrowRightCircle}
           value={String(appsThisWeekCount)}
           label="Apps This Week"
           hint={
@@ -1110,25 +1142,23 @@ export default async function EmployerDashboard() {
           routeLabel="View applications"
         />
 
+        {/* BOH Lane 2c — Offers Out (sent, awaiting candidate response).
+            The Hires number lives on in the TTF tile's hint + the funnel. */}
         <KpiTile
-          icon={Users}
-          value={String(stage30dCounts.hired)}
-          label="Hires · Last 30d"
+          icon={UserPlus}
+          value={String(offersOutCount)}
+          label="Offers Out"
           hint={
-            stage30dCounts.hired > 0
-              ? "Candidates moved to hired"
-              : "When candidates are hired, they show up here"
+            offersOutCount > 0
+              ? "Awaiting candidate response"
+              : "Sent offers awaiting reply show here"
           }
-          spark={
-            hiresLast7Days.some((v) => v > 0) ? hiresLast7Days : undefined
-          }
-          href="/employer/applications?status=hired"
-          routeLabel="View hires"
+          href="/employer/offer-approvals"
+          routeLabel="View offers"
         />
 
-        {/* BOH Lane 2b (Model 01, Cam pick) — median time-to-fill replaces
-            the Locations tile (setup info; lives in nav + switcher). Same
-            fill definition as the analytics hub. */}
+        {/* BOH Lane 2b (Model 01, Cam pick) — median time-to-fill. Same
+            fill definition as the analytics hub; spark = fills last 7d. */}
         <KpiTile
           icon={Clock}
           value={ttfMedianDays != null ? `${ttfMedianDays}d` : "—"}
@@ -1137,6 +1167,9 @@ export default async function EmployerDashboard() {
             ttfMedianDays != null
               ? `Median across ${ttfFillCount} ${ttfFillCount === 1 ? "fill" : "fills"} · posting → hire`
               : "Measures posting → hire once roles fill"
+          }
+          spark={
+            hiresLast7Days.some((v) => v > 0) ? hiresLast7Days : undefined
           }
           href="/employer/analytics"
           routeLabel="View analytics"
