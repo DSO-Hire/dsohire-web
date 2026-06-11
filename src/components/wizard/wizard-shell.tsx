@@ -207,15 +207,18 @@ export function WizardShell({
         </div>
       )}
 
-      {/* Footer nav */}
-      <div className="mt-8 flex items-center justify-between gap-3">
+      {/* Footer nav — FOH-2 (Day 32, Model 08 audit): on phones the primary
+          action is a full-width thumb-zone bar with Back beneath it
+          (column-reverse keeps the primary visually first); ≥sm restores
+          the Back-left / Continue-right desktop row. */}
+      <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
         <button
           type="button"
           onClick={onBack}
           disabled={!backVisible || backDisabled || busy}
           className={
-            "inline-flex items-center gap-1.5 px-3 py-2 text-[13px] font-semibold text-slate-body transition-colors hover:text-ink disabled:opacity-30 " +
-            (backVisible ? "" : "invisible")
+            "inline-flex items-center justify-center sm:justify-start gap-1.5 px-3 py-2.5 text-[13px] font-semibold text-slate-body transition-colors hover:text-ink disabled:opacity-30 " +
+            (backVisible ? "" : "hidden sm:inline-flex sm:invisible")
           }
         >
           <ArrowLeft className="h-4 w-4" />
@@ -225,7 +228,7 @@ export function WizardShell({
           type="button"
           onClick={onNext}
           disabled={nextDisabled || busy}
-          className="inline-flex items-center gap-2 bg-ink px-6 py-3 text-[12px] font-bold uppercase tracking-[1.5px] text-ivory transition-colors hover:bg-ink-soft disabled:opacity-60"
+          className="inline-flex w-full sm:w-auto items-center justify-center gap-2 bg-ink px-6 py-3.5 sm:py-3 text-[12px] font-bold uppercase tracking-[1.5px] text-ivory transition-colors hover:bg-ink-soft disabled:opacity-60"
         >
           {busy ? "Saving…" : nextLabel}
           {isLast ? <Check className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
