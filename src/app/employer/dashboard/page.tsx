@@ -25,6 +25,7 @@ import {
   ArrowRight,
   ArrowRightCircle,
   Briefcase,
+  Clock,
   Mail,
   MapPin,
   Plus,
@@ -196,6 +197,15 @@ export default async function EmployerDashboard() {
   type StaleCandidateRow = StuckCandidateRow & { stageLabel: string };
   let staleCandidates: StaleCandidateRow[] = [];
   let staleTotalCount = 0;
+
+  // ── BOH Lane 2b — median time-to-fill (trailing 90d) scaffolding ──
+  // Same definition as lib/analytics/hub-metrics (the source of truth):
+  // a fill = application whose CURRENT stage kind is "hired" with hired_at
+  // in the window; TTF = hired_at − job.posted_at in days, negatives
+  // dropped. The hired rows also feed a free 7-day hires sparkline.
+  let ttfMedianDays: number | null = null;
+  let ttfFillCount = 0;
+  let hiresLast7Days: number[] = [];
 
   // ── Pipeline funnel scaffolding (counts of CURRENT stage kind, last 30
   // days of submissions). v1: kind-snapshot funnel. A flow-based funnel
@@ -577,6 +587,68 @@ export default async function EmployerDashboard() {
           stageLabel: midStageLabelById.get(row.stage_id) ?? "in pipeline",
         };
       });
+
+      // ── BOH Lane 2b — median time-to-fill, trailing 90 days ──────
+      // One focused query (hub-metrics' full overview is too heavy for
+      // the dashboard). Location-scoped like every other tile.
+      {
+        let ttfQuery = supabase
+          .from("applications")
+          .select(
+            "hired_at, job_id, stage:dso_pipeline_stages!stage_id(kind), job:jobs!inner(posted_at, dso_id)"
+          )
+          .eq("job.dso_id", dsoId)
+          .not("hired_at", "is", null)
+          .gte(
+            "hired_at",
+            new Date(nowMs - 90 * 86400000).toISOString()
+          );
+        if (locationFilteredJobIds !== null) {
+          ttfQuery = ttfQuery.in(
+            "job_id",
+            locationFilteredJobIds.length > 0
+              ? locationFilteredJobIds
+              : ["__none__"]
+          );
+        }
+        const { data: ttfRows } = await ttfQuery;
+        type TtfRow = {
+          hired_at: string | null;
+          stage: { kind: string } | Array<{ kind: string }> | null;
+          job:
+            | { posted_at: string | null }
+            | Array<{ posted_at: string | null }>
+            | null;
+        };
+        const ttfDays: number[] = [];
+        const hiresBuckets = Array.from({ length: 7 }, () => 0);
+        for (const row of (ttfRows ?? []) as unknown as TtfRow[]) {
+          const stageRel = Array.isArray(row.stage)
+            ? row.stage[0] ?? null
+            : row.stage;
+          if (stageRel?.kind !== "hired" || !row.hired_at) continue;
+          ttfFillCount += 1;
+          const hiredMs = new Date(row.hired_at).getTime();
+          const jobRel = Array.isArray(row.job) ? row.job[0] ?? null : row.job;
+          if (jobRel?.posted_at) {
+            const d = (hiredMs - new Date(jobRel.posted_at).getTime()) / 86400000;
+            if (d >= 0) ttfDays.push(d);
+          }
+          // Free 7-day hires sparkline from the same rows (oldest first).
+          const ago = Math.floor((nowMs - hiredMs) / 86400000);
+          if (ago >= 0 && ago < 7) hiresBuckets[6 - ago] += 1;
+        }
+        if (ttfDays.length > 0) {
+          const sorted = [...ttfDays].sort((a, b) => a - b);
+          const mid = Math.floor(sorted.length / 2);
+          ttfMedianDays = Math.round(
+            sorted.length % 2 === 1
+              ? sorted[mid]
+              : (sorted[mid - 1] + sorted[mid]) / 2
+          );
+        }
+        hiresLast7Days = hiresBuckets;
+      }
 
       // ── Pipeline funnel ──────────────────────────────────────────
       type FunnelRow = {
@@ -1047,21 +1119,27 @@ export default async function EmployerDashboard() {
               ? "Candidates moved to hired"
               : "When candidates are hired, they show up here"
           }
+          spark={
+            hiresLast7Days.some((v) => v > 0) ? hiresLast7Days : undefined
+          }
           href="/employer/applications?status=hired"
           routeLabel="View hires"
         />
 
+        {/* BOH Lane 2b (Model 01, Cam pick) — median time-to-fill replaces
+            the Locations tile (setup info; lives in nav + switcher). Same
+            fill definition as the analytics hub. */}
         <KpiTile
-          icon={MapPin}
-          value={String(locationsCount ?? 0)}
-          label="Locations"
+          icon={Clock}
+          value={ttfMedianDays != null ? `${ttfMedianDays}d` : "—"}
+          label="Time To Fill · 90d"
           hint={
-            (locationsCount ?? 0) > 0
-              ? `${locationsCount} on file`
-              : "Add your first to enable job posting"
+            ttfMedianDays != null
+              ? `Median across ${ttfFillCount} ${ttfFillCount === 1 ? "fill" : "fills"} · posting → hire`
+              : "Measures posting → hire once roles fill"
           }
-          href="/employer/locations"
-          routeLabel="View locations"
+          href="/employer/analytics"
+          routeLabel="View analytics"
         />
       </section>
 

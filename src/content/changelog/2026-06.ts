@@ -8,6 +8,12 @@ import type { ChangelogEntry } from "./index";
 export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-11",
+    kind: "improved",
+    title: "Time-to-fill, front and center",
+    body: "The dashboard now shows your median posting-to-hire time over the trailing 90 days — the number multi-location groups actually manage to — plus a hires sparkline. Location switcher applies, like everything else.",
+  },
+  {
+    date: "2026-06-11",
     kind: "new",
     title: "Your dashboard now leads with Next Best Actions",
     body: "Overdue reviews, your strongest fit, stalled candidates, and inbound interest — unified into one ranked queue at the top of the dashboard. Keyboard users: j/k to move, Enter to open.",
