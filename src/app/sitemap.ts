@@ -46,6 +46,7 @@ const ROUTES: SitemapRoute[] = [
   { path: "/practicefit", priority: 0.8, changeFrequency: "monthly" },
   // #115 FOH-6 — trust + comparison net.
   { path: "/security", priority: 0.6, changeFrequency: "monthly" },
+  { path: "/changelog", priority: 0.6, changeFrequency: "weekly" },
   { path: "/switch", priority: 0.7, changeFrequency: "monthly" },
   { path: "/vs/job-boards", priority: 0.7, changeFrequency: "monthly" },
   { path: "/vs/staffing-agencies", priority: 0.7, changeFrequency: "monthly" },

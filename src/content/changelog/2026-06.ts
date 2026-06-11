@@ -1,0 +1,105 @@
+/**
+ * June 2026 ship notes. Append-only within the month; one entry per
+ * user-visible change, written in customer language. See ./index.ts
+ * for the maintenance rule.
+ */
+import type { ChangelogEntry } from "./index";
+
+export const entries: ChangelogEntry[] = [
+  {
+    date: "2026-06-11",
+    kind: "new",
+    title: "Walk the back office from the homepage",
+    body: "A film strip of the platform's machinery — pipeline, automations, offer approvals, permissions, analytics — so you can see what's behind a posting before you sign up.",
+  },
+  {
+    date: "2026-06-11",
+    kind: "new",
+    title: "The founder story, signed",
+    body: "A real letter on /about — who built this, why, and the six things we will never do. Several of them are enforced in the database, not just promised.",
+  },
+  {
+    date: "2026-06-11",
+    kind: "new",
+    title: "The homepage shows the live marketplace",
+    body: "Real open roles, real counts, straight from the database — with honesty floors so we never inflate. What you see is what's actually hiring.",
+  },
+  {
+    date: "2026-06-11",
+    kind: "new",
+    title: "Try PracticeFit before signing up",
+    body: "A three-tap sample on the candidates page shows how fit scoring works — clearly labeled as a sample. Your real score comes from your real answers.",
+  },
+  {
+    date: "2026-06-11",
+    kind: "new",
+    title: "ROI calculator on pricing",
+    body: "Drag your locations, hires, and agency spend — see what switching saves and which tier fits. It recommends down when your footprint is small.",
+  },
+  {
+    date: "2026-06-11",
+    kind: "new",
+    title: "Security, switching, and comparison pages",
+    body: "An honest security posture page (including what's still on the roadmap), a white-glove switching offer, and straight category comparisons against job boards and staffing agencies.",
+  },
+  {
+    date: "2026-06-10",
+    kind: "new",
+    title: "Confidential searches",
+    body: "Run a sensitive replacement search only specific teammates can see. Enforced at the database layer — not just hidden in the interface.",
+  },
+  {
+    date: "2026-06-10",
+    kind: "new",
+    title: "Per-teammate permissions",
+    body: "30+ actions individually grantable per person on Growth and up — who can send offers, edit postings, message candidates, see billing.",
+  },
+  {
+    date: "2026-06-10",
+    kind: "new",
+    title: "Seat packs",
+    body: "Need a few more seats without a tier jump? +3 seats for $99/mo on Growth and Scale, prorated automatically.",
+  },
+  {
+    date: "2026-06-10",
+    kind: "new",
+    title: "Free résumé builder for candidates",
+    body: "Six ATS-safe templates, built from your profile in minutes, exported as clean PDF. Free forever — no watermark games.",
+  },
+  {
+    date: "2026-06-09",
+    kind: "improved",
+    title: "Smarter fit scoring for corporate roles",
+    body: "DSOFit now scores corporate functions on their own dimensions instead of borrowing clinical ones — scores you can take at face value.",
+  },
+  {
+    date: "2026-06-08",
+    kind: "improved",
+    title: "Faster everywhere",
+    body: "Dashboard loads parallelized and 49 database indexes added. The app feels noticeably snappier on big pipelines.",
+  },
+  {
+    date: "2026-06-05",
+    kind: "improved",
+    title: "Rebuilt application wizard",
+    body: "Applying is now one clear question at a time — with résumé autofill so candidates never type what we can read.",
+  },
+  {
+    date: "2026-06-04",
+    kind: "new",
+    title: "Weekly fit digest for candidates",
+    body: "A Monday email with your top new high-fit roles — only when there's something genuinely worth seeing. No matches, no email.",
+  },
+  {
+    date: "2026-06-04",
+    kind: "new",
+    title: "PracticeFit assessment — ranked priorities",
+    body: "Rank what matters most to you and the matching tilts accordingly. About five minutes, role-aware, and your matches explain themselves.",
+  },
+  {
+    date: "2026-06-03",
+    kind: "new",
+    title: "Offer approval chains",
+    body: "Offers can require owner or admin approval before anything sends — with comp guardrails and a full audit trail.",
+  },
+];

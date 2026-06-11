@@ -170,7 +170,7 @@ export function SiteFooter() {
             <p className="text-[14px] text-ivory/55 leading-[1.7] mt-5 max-w-[280px]">
               Dental hiring, done direct. The hiring platform built for
               multi-location DSOs. One flat monthly fee, unlimited postings.
-              Made by operators, for operators.
+              Born from ten years inside the business of dentistry.
             </p>
           </div>
 
@@ -196,6 +196,7 @@ export function SiteFooter() {
 
           <FooterCol title="Company">
             <FooterLink href="/about">About</FooterLink>
+            <FooterLink href="/changelog">Changelog</FooterLink>
             <FooterLink href="/security">Security &amp; Trust</FooterLink>
             <FooterLink href="/contact">Contact</FooterLink>
             <FooterLink href="/help">Help Center</FooterLink>
