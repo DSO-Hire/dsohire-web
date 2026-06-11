@@ -21,7 +21,9 @@ export function DetailSection({
   children,
 }: {
   id: string;
-  num: string;
+  /** Optional eyebrow number — the tabbed workspace (Lane 3) drops the
+      old 01–13 numbering; icon-only eyebrows render when absent. */
+  num?: string;
   title: React.ReactNode;
   subtitle?: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -45,7 +47,7 @@ export function DetailSection({
           <span className="inline-flex items-center gap-1.5">
             {tone === "internal" && <Lock className="h-3 w-3" />}
             <Icon className="h-3.5 w-3.5" />
-            <span>{num}</span>
+            {num && <span>{num}</span>}
           </span>
           {badge && (
             <span className="text-[9px] font-bold tracking-[1.5px] uppercase px-2 py-0.5 bg-heritage/15 text-heritage-deep">
@@ -98,6 +100,33 @@ export function PracticeFitConsentOffBanner() {
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * RailCard — compact bordered card for the pipeline rail (Lane 3
+ * commit 2): uppercase eyebrow label + content, sized for the 340px
+ * right rail (full-width on mobile).
+ */
+export function RailCard({
+  id,
+  label,
+  children,
+}: {
+  id?: string;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section
+      id={id}
+      className="border border-[var(--rule)] bg-white p-4 scroll-mt-6"
+    >
+      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+        {label}
+      </div>
+      {children}
+    </section>
   );
 }
 

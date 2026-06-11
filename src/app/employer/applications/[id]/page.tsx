@@ -23,7 +23,6 @@ import {
   Users,
   History,
   ClipboardList,
-  Layers,
   ShieldCheck,
 } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
@@ -111,9 +110,11 @@ import {
   DetailRow,
   DetailSection,
   PracticeFitConsentOffBanner,
+  RailCard,
 } from "./detail-section";
 import { ScreeningResponseRow, VerificationRow } from "./screening-rows";
 import { ActivityTimeline } from "./activity-timeline";
+import { WorkspaceTabs } from "./workspace-tabs";
 import { candidateDisplayName } from "@/lib/applications/candidate-display";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
 import { WhyThisMatch } from "@/components/practice-fit/why-this-match";
@@ -1321,37 +1322,11 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
       .filter(Boolean)
       .join(", ") || null;
 
-  // The 13-section table-of-contents drives both the right-rail nav and
-  // the section-header eyebrow numbers. The "Offer" entry (07) is
-  // gated on the application's current stage kind being 'offer' — when
-  // it's not, the section + the TOC entry both disappear, so the
-  // downstream Internal Workspace numbers still read 08-13.
-  type SectionEntry = {
-    num: string;
-    id: string;
-    label: string;
-    icon: React.ComponentType<{ className?: string }>;
-    /** Marks the first item of the internal-only workspace — the TOC draws a
-     *  labeled divider above it, mirroring the body's candidate/internal split. */
-    startsInternal?: boolean;
-  };
-  const SECTIONS: SectionEntry[] = [
-    { num: "01", id: "stage", label: "Pipeline stage", icon: Layers },
-    { num: "02", id: "fit", label: "PracticeFit", icon: Sparkles },
-    { num: "03", id: "resume", label: "Resume", icon: FileText },
-    { num: "04", id: "snapshot", label: "Candidate snapshot", icon: Briefcase },
-    { num: "05", id: "screening", label: "Screening responses", icon: ClipboardList },
-    { num: "06", id: "messages", label: "Messages with candidate", icon: MessageSquare },
-    ...(showOfferSection
-      ? ([{ num: "07", id: "offer", label: "Offer", icon: FileSignature }] as SectionEntry[])
-      : ([] as SectionEntry[])),
-    { num: showOfferSection ? "08" : "07", id: "credentials", label: "Credentials", icon: ShieldCheck, startsInternal: true },
-    { num: showOfferSection ? "09" : "08", id: "references", label: "References", icon: Mail },
-    { num: showOfferSection ? "10" : "09", id: "scorecards", label: "Scorecards", icon: Star },
-    { num: showOfferSection ? "11" : "10", id: "comments", label: "Team comments", icon: Users },
-    { num: showOfferSection ? "12" : "11", id: "notes", label: "Internal notes", icon: StickyNote },
-    { num: showOfferSection ? "13" : "12", id: "activity", label: "Activity timeline", icon: History },
-  ];
+  // Lane 3 commit 2 (Model 03): the 13-section scroll + right-rail TOC
+  // is replaced by the evidence tabs (WorkspaceTabs) + pipeline rail.
+  // Section ids survive as anchors inside their tabs — WorkspaceTabs
+  // maps incoming hashes (#message-*, #credential-*, section ids) to
+  // the owning tab, so existing deep links keep working.
 
   return (
     <EmployerShell active="applications">
@@ -1395,33 +1370,32 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
         submitted={submitted}
       />
 
-      {/* Two-column body — main 10-section column + sticky right-rail TOC */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_240px] gap-10">
-        <div className="space-y-12 min-w-0">
-          {/* DSO Affiliation card — only renders when the job has at
-              least one private-affiliation location. Self-suppresses
-              for publicly-affiliated jobs. Sits above the numbered
-              detail sections so the recruiter sees the affiliation
-              context first. */}
-          <AffiliationCard
-            isPublicAffiliated={isPublicAffiliated}
-            policy={affiliationPolicy}
-            applicationStatus={currentKind}
-            alreadyRevealed={app.affiliation_revealed}
-            revealedAt={app.affiliation_revealed_at}
-            revealedByName={revealedByName}
-            applicationId={app.id}
-            dsoName={dsoNameForAffiliation}
-            candidateFirstName={displayName.split(" ")[0] ?? "Candidate"}
-          />
+      {/* DSO Affiliation card — only renders when the job has at least
+          one private-affiliation location. Self-suppresses for
+          publicly-affiliated jobs. Sits above the workspace so the
+          recruiter sees the affiliation context first. */}
+      <div className="mb-8">
+        <AffiliationCard
+          isPublicAffiliated={isPublicAffiliated}
+          policy={affiliationPolicy}
+          applicationStatus={currentKind}
+          alreadyRevealed={app.affiliation_revealed}
+          revealedAt={app.affiliation_revealed_at}
+          revealedByName={revealedByName}
+          applicationId={app.id}
+          dsoName={dsoNameForAffiliation}
+          candidateFirstName={displayName.split(" ")[0] ?? "Candidate"}
+        />
+      </div>
 
-          {/* 01 · Pipeline stage */}
-          <DetailSection
-            id="stage"
-            num="01"
-            title="Pipeline stage"
-            icon={Layers}
-          >
+      {/* Lane 3 commit 2 (Model 03) — evidence tabs + pipeline rail.
+          Rail renders FIRST in the DOM (mobile: controls above the
+          evidence), grid order flips it to the right on lg. No overflow
+          wrappers anywhere in this chain — both stickies (tab bar, rail)
+          ride the document scroll. */}
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-8 items-start">
+        <aside className="lg:order-2 lg:sticky lg:top-6 space-y-5 min-w-0">
+          <RailCard id="stage" label="Pipeline stage">
             <StageSelector
               applicationId={app.id}
               currentStageId={app.stage_id}
@@ -1459,27 +1433,31 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 />
               </div>
             )}
+          </RailCard>
 
-            <div className="mt-6">
-              <EmployerInterviewSection
-                applicationId={app.id}
-                candidateName={displayName}
-                proposals={interviewProposals}
-              />
-            </div>
-          </DetailSection>
+          <RailCard label="Interviews">
+            <EmployerInterviewSection
+              applicationId={app.id}
+              candidateName={displayName}
+              proposals={interviewProposals}
+            />
+          </RailCard>
 
-          {/* Quick actions — candidate tags (E3.22) + move/copy (E3.21),
-              surfaced at the top of the page for discoverability. */}
+          {/* Quick actions — candidate tags (E3.22) + move/copy (E3.21). */}
           <div id="tags" className="scroll-mt-6">
             <TagsSection applicationId={app.id} initialTags={initialTags} />
           </div>
           <MoveCopyCard applicationId={app.id} />
+        </aside>
 
+        <div className="lg:order-1 min-w-0">
+          <WorkspaceTabs
+            unreadMessages={candidateUnreadCount}
+            profile={
+              <div className="space-y-12">
           {/* 02 · PracticeFit (Phase 5D v0 — structured-feature scoring) */}
           <DetailSection
             id="fit"
-            num="02"
             title={
               <PracticeFitWordmark
                 surface="light"
@@ -1505,7 +1483,6 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
           {/* 03 · Resume */}
           <DetailSection
             id="resume"
-            num="03"
             title="Resume"
             icon={FileText}
           >
@@ -1542,7 +1519,6 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 preferences into one compact card. */}
           <DetailSection
             id="snapshot"
-            num="04"
             title="Candidate snapshot"
             icon={Briefcase}
           >
@@ -1599,7 +1575,10 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               )}
             </div>
           </DetailSection>
-
+              </div>
+            }
+            screening={
+              <div className="space-y-12">
           {/* E2.10 — soft-knockout callout. Renders ONLY when the
               candidate failed at least one knockout question. Lists the
               specific prompts so the recruiter can decide if the gap is
@@ -1652,7 +1631,6 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
           {/* 05 · Screening responses */}
           <DetailSection
             id="screening"
-            num="05"
             title="Screening responses"
             icon={ClipboardList}
             subtitle={
@@ -1684,7 +1662,6 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
           {verificationRows.length > 0 && (
             <DetailSection
               id="verifications"
-              num="05"
               title="Verifications"
               icon={ShieldCheck}
               subtitle={`What this job requires and what ${displayName} self-attested at apply time.`}
@@ -1697,11 +1674,13 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             </DetailSection>
           )}
 
-          {/* 06 · Messages with candidate — candidate-facing surface,
-                rendered before the internal-workspace divider. */}
+              </div>
+            }
+            messages={
+              <div className="space-y-12">
+          {/* 06 · Messages with candidate */}
           <DetailSection
             id="messages"
-            num="06"
             title="Messages with candidate"
             icon={MessageSquare}
             subtitle="Direct candidate ↔ DSO thread. Replies route to email."
@@ -1729,14 +1708,12 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             </div>
           </DetailSection>
 
-          {/* 07 · Offer — candidate-facing surface, only renders when
-                the application's current stage kind is 'offer'. The
-                downstream Internal Workspace sections renumber to
-                08-13 when this is visible; otherwise they stay 07-12. */}
-          {showOfferSection && (
+              </div>
+            }
+            offer={
+              showOfferSection ? (
             <DetailSection
               id="offer"
-              num="07"
               title="Offer"
               icon={FileSignature}
               subtitle={`Send a templated offer letter to ${displayName} via email. Past sends are snapshotted as the legal record.`}
@@ -1783,8 +1760,10 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               />
               )}
             </DetailSection>
-          )}
-
+              ) : null
+            }
+            internal={
+              <div>
           {/* ───── Internal workspace ─────
               Visually differentiated so employers don't accidentally
               treat scorecards / comments / notes as candidate-visible.
@@ -1814,7 +1793,6 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
           {/* 08 (or 07 when no Offer section) · Credentials — licenses + certifications with verification + document download */}
           <DetailSection
             id="credentials"
-            num={showOfferSection ? "08" : "07"}
             title="Credentials"
             icon={ShieldCheck}
             tone="internal"
@@ -1832,7 +1810,6 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 screen stage; gating handled in the section component. */}
           <DetailSection
             id="references"
-            num={showOfferSection ? "09" : "08"}
             title="References"
             icon={Mail}
             tone="internal"
@@ -1849,7 +1826,6 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
           {/* 10 (or 09) · Scorecards */}
           <DetailSection
             id="scorecards"
-            num={showOfferSection ? "10" : "09"}
             title="Scorecards"
             icon={Star}
             tone="internal"
@@ -1868,7 +1844,6 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
           {/* 11 (or 10) · Team comments */}
           <DetailSection
             id="comments"
-            num={showOfferSection ? "11" : "10"}
             title="Team comments"
             icon={Users}
             tone="internal"
@@ -1885,7 +1860,6 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
           {/* 12 (or 11) · Internal notes */}
           <DetailSection
             id="notes"
-            num={showOfferSection ? "12" : "11"}
             title="Internal notes"
             icon={StickyNote}
             tone="internal"
@@ -1896,70 +1870,26 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               initialValue={app.employer_notes ?? ""}
             />
           </DetailSection>
-
-          {/* 13 (or 12) · Activity timeline */}
+            </div>
+          </div>
+          {/* ───── End internal workspace ───── */}
+              </div>
+            }
+            timeline={
+              <div className="space-y-12">
+          {/* Activity timeline */}
           <DetailSection
             id="activity"
-            num={showOfferSection ? "13" : "12"}
             title="Activity timeline"
             icon={History}
             subtitle="Every stage transition captured for this application."
           >
             <ActivityTimeline events={events} />
           </DetailSection>
-            </div>
-          </div>
-          {/* ───── End internal workspace ───── */}
+              </div>
+            }
+          />
         </div>
-
-        {/* Sticky right-rail TOC */}
-        <aside className="hidden lg:block">
-          <nav className="sticky top-6">
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-4">
-              On this page
-            </div>
-            <ol className="list-none space-y-1.5">
-              {SECTIONS.map((s) => {
-                const Icon = s.icon;
-                return (
-                  <li key={s.id}>
-                    {s.startsInternal && (
-                      <div className="pt-3 mt-2 mb-1 border-t border-[var(--rule-strong)]">
-                        <div className="flex items-center gap-1.5 text-[9px] font-bold tracking-[2px] uppercase text-ink/70">
-                          <Lock className="h-3 w-3" />
-                          Internal workspace
-                        </div>
-                        <div className="mt-0.5 text-[10px] text-slate-meta leading-snug">
-                          Only your team sees these.
-                        </div>
-                      </div>
-                    )}
-                    <a
-                      href={`#${s.id}`}
-                      className="group flex items-center gap-2.5 py-1.5 px-2 -mx-2 rounded text-[13px] text-slate-body hover:bg-cream hover:text-ink transition-colors"
-                    >
-                      <span className="text-[10px] font-bold tracking-[1.5px] text-slate-meta group-hover:text-heritage-deep transition-colors w-5">
-                        {s.num}
-                      </span>
-                      <Icon className="h-3.5 w-3.5 text-slate-meta group-hover:text-heritage-deep transition-colors flex-shrink-0" />
-                      {s.id === "fit" ? (
-                        <span className="leading-snug font-bold tracking-[-0.01em]">
-                          <span className="text-ink">Practice</span>
-                          <span className="text-heritage">Fit</span>
-                          <sup className="ml-[1px] align-super text-[0.55em] font-semibold text-heritage">
-                            ™
-                          </sup>
-                        </span>
-                      ) : (
-                        <span className="leading-snug">{s.label}</span>
-                      )}
-                    </a>
-                  </li>
-                );
-              })}
-            </ol>
-          </nav>
-        </aside>
       </div>
     </EmployerShell>
   );

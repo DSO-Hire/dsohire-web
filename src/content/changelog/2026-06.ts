@@ -9,6 +9,12 @@ export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-11",
     kind: "improved",
+    title: "The candidate workspace, rebuilt",
+    body: "Application detail is now a true workspace: evidence organized into tabs (Profile, Screening, Messages, Offer, Internal, Timeline) beside an always-visible pipeline rail with stage, assignee, interviews, and tags. No more thirteen-section scroll — and your internal notes stay clearly walled off from anything candidate-facing.",
+  },
+  {
+    date: "2026-06-11",
+    kind: "improved",
     title: "Job health, per opening",
     body: "Every active job on the dashboard now shows its pipeline funnel, days open, weekly application velocity, and a health dot that flags stalled candidates or overdue reviews — replacing the plain job leaderboard. The dashboard also loads with a true-to-layout skeleton, so nothing jumps when your numbers arrive.",
   },
