@@ -500,8 +500,10 @@ const COMPARE_GROUPS: MatrixGroup[] = [
     label: "Capacity",
     rows: [
       {
-        feature: "Active job listings",
-        values: { solo: "Up to 5", growth: "Up to 20", scale: "Unlimited", enterprise: "Unlimited" },
+        // #88 — these two rows mirror the ENFORCED caps in lib/billing/caps.ts
+        // (advertised cap = enforced cap, locked rule). Keep in sync.
+        feature: "Active job openings",
+        values: { solo: "Up to 5", growth: "Up to 20", scale: "Up to 100", enterprise: "Unlimited" },
       },
       {
         feature: "Practice locations covered",
@@ -509,7 +511,7 @@ const COMPARE_GROUPS: MatrixGroup[] = [
       },
       {
         feature: "Team members (admin seats)",
-        values: { solo: "Up to 3", growth: "Up to 10", scale: "Unlimited", enterprise: "Unlimited" },
+        values: { solo: "Up to 5", growth: "Up to 15", scale: "Up to 50", enterprise: "Unlimited" },
       },
       {
         feature: "Hiring managers (per-location, scoped)",
@@ -640,8 +642,10 @@ const COMPARE_GROUPS: MatrixGroup[] = [
         values: { solo: true, growth: true, scale: true, enterprise: true },
       },
       {
-        feature: "Custom approval chain for offers",
-        values: { solo: false, growth: false, scale: "H2 2026", enterprise: "H2 2026" },
+        // N12 Phase 2 shipped 2026-06-03: pending-offer queue, owner/admin
+        // sign-off, out-of-range + above-ceiling routing, per-teammate grants.
+        feature: "Offer approval chains + comp guardrails",
+        values: { solo: false, growth: false, scale: true, enterprise: true },
       },
     ],
   },
@@ -727,8 +731,23 @@ const COMPARE_GROUPS: MatrixGroup[] = [
         values: { solo: true, growth: true, scale: true, enterprise: true },
       },
       {
+        // DSOFit shipped 2026-06-09 — corporate-side sibling of PracticeFit.
+        feature: "DSOFit — corporate-role fit scoring (finance, ops, HR, IT)",
+        values: { solo: true, growth: true, scale: true, enterprise: true },
+      },
+      {
         feature: "AI rejection-reason suggester",
         values: { solo: false, growth: true, scale: true, enterprise: true },
+      },
+      {
+        // N13 shipped 2026-06-02 (Scale+): triggers → conditions → actions.
+        feature: "Automation rules (if-this-then-that on your pipeline)",
+        values: { solo: false, growth: false, scale: true, enterprise: true },
+      },
+      {
+        // N16 v2 shipped 2026-06-03 (Scale+): multi-step nurture sequences.
+        feature: "Drip sequences (multi-step candidate nurture)",
+        values: { solo: false, growth: false, scale: true, enterprise: true },
       },
       {
         feature: "AI Interview Assistant (record + summarize)",
@@ -789,8 +808,15 @@ const COMPARE_GROUPS: MatrixGroup[] = [
         values: { solo: true, growth: true, scale: true, enterprise: true },
       },
       {
-        feature: "Role-based access control (custom roles)",
-        values: { solo: false, growth: false, scale: "H2 2026", enterprise: "H2 2026" },
+        // #83 shipped 2026-06-10: per-teammate capability editor (Growth+);
+        // role presets enforce on every tier.
+        feature: "Per-teammate permissions (Dentrix-style overrides)",
+        values: { solo: false, growth: true, scale: true, enterprise: true },
+      },
+      {
+        // #83 Phase 4 shipped 2026-06-10 — no tier gate.
+        feature: "Confidential searches (restrict a posting to named teammates)",
+        values: { solo: true, growth: true, scale: true, enterprise: true },
       },
       {
         feature: "Audit log",
@@ -836,6 +862,12 @@ const COMPARE_GROUPS: MatrixGroup[] = [
     rows: [
       {
         feature: "Email support",
+        values: { solo: true, growth: true, scale: true, enterprise: true },
+      },
+      {
+        // Tier 2 in-app AI support shipped 2026-05-27 — answers from the
+        // DSO's live data with read-only tools. No tier gate.
+        feature: "In-app AI assistant (answers from your live account data)",
         values: { solo: true, growth: true, scale: true, enterprise: true },
       },
       {

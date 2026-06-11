@@ -28,15 +28,19 @@ import {
   Check,
   ClipboardList,
   Columns3,
+  FileSignature,
   MessageCircle,
   Minus,
   Search,
+  ShieldCheck,
   Star,
   Wand2,
+  Workflow,
 } from "lucide-react";
 import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import { DsoFitWordmark } from "@/components/practice-fit/brand/dsofit-wordmark";
+import { DsoFitMark } from "@/components/practice-fit/brand/dsofit-mark";
 import { getAllTiers, type TierConfig } from "@/lib/stripe/prices";
 import { SiteShell, BrandLockup } from "@/components/marketing/site-shell";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
@@ -878,54 +882,66 @@ const SHOWCASE_TOP: ShowcaseFeature[] = [
     title: (
       <span className="inline-flex flex-wrap items-center gap-1.5">
         <PracticeFitWordmark surface="light" tm className="text-[18px]" />
-        <span>Assessment</span>
-      </span>
-    ),
-    body: "Candidates spend about five minutes on the PracticeFit Assessment — a two-sided questionnaire that captures what no résumé can: work pace, autonomy, mentorship, the culture they thrive in, clinical confidence, the benefits and patient populations they care about, and what matters most to them. It's the proprietary signal behind every match, so applicants arrive already measured against how your practice actually runs.",
-    status: "now",
-  },
-  {
-    icon: PracticeFitMark,
-    title: (
-      <span className="inline-flex flex-wrap items-center gap-1.5">
-        <PracticeFitWordmark surface="light" tm className="text-[18px]" />
         <span>matching</span>
       </span>
     ),
-    body: "Our proprietary dental fit score ranks every applicant against the role on real commute distance, PMS fluency, state licensure, certifications, specialty, and more — so your strongest matches surface first, not just your most recent applicants.",
+    body: "A five-minute, two-sided assessment captures what no résumé can — work pace, mentorship, culture, schedule — and our proprietary dental fit score ranks every applicant against the role on it, plus real commute distance, PMS fluency, licensure, certifications, and specialty. Your strongest matches surface first, not your most recent.",
+    status: "now",
+  },
+  {
+    icon: DsoFitMark,
+    title: (
+      <span className="inline-flex flex-wrap items-center gap-1.5">
+        <DsoFitWordmark surface="light" tm className="text-[18px]" />
+        <span>for corporate hiring</span>
+      </span>
+    ),
+    body: "The back-office half of the engine. Finance, ops, marketing, HR, IT — 16 corporate functions scored on seniority, multi-site scale, dental-domain depth, and leadership scope. Pair it with a confidential search to quietly run a CFO or COO replacement only your inner circle can see.",
     status: "now",
   },
   {
     icon: Columns3,
     title: "Pipeline kanban with real-time team sync",
-    body: "Drag candidates through New → Screening → Interview → Offer → Hired. When one teammate moves a card, everyone sees it within half a second. No refresh, no email chains.",
+    body: "Drag candidates through New → Screening → Interview → Offer → Hired. When one teammate moves a card, everyone sees it within half a second. Bulk actions, multi-card drag, @mention comments — no refresh, no email chains.",
     status: "now",
   },
 ];
 
 const SHOWCASE_BOTTOM: ShowcaseFeature[] = [
   {
-    icon: MessageCircle,
-    title: "Inbox — interviews and offers in one thread",
-    body: "Message candidates, propose interview times, and send offers without leaving the platform. Booked interviews land on your connected Google or Outlook calendar; offers are accepted on a secure link and move the candidate's stage automatically.",
+    icon: Workflow,
+    title: "Automations + drip sequences",
+    body: "If-this-then-that rules on your pipeline — auto-message on stage change, nudge idle candidates, notify teammates — plus multi-step drip sequences that keep silver-medal candidates warm without anyone remembering to follow up.",
+    status: "now",
+  },
+  {
+    icon: FileSignature,
+    title: "Offers with approval chains + comp guardrails",
+    body: "Templated offer letters sent on a secure accept/decline link. Out-of-range or above-ceiling offers route to owner sign-off automatically, and every send is snapshotted as the legal record.",
+    status: "now",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Per-teammate permissions + confidential searches",
+    body: "Dentrix-style control: tune exactly what each recruiter or hiring manager can see and do — down to hiding pay fields — and restrict sensitive searches to the people on them. Every change audit-logged.",
     status: "now",
   },
   {
     icon: Search,
     title: "Talent Pool sourcing",
-    body: "Search opt-in candidates and reach out before they apply. Save the best to your group's pool and rank them by PracticeFit against any open role.",
+    body: "Search opt-in candidates with boolean queries and reach out before they apply. Save the best to your group's pool and rank them by PracticeFit against any open role.",
     status: "now",
   },
   {
     icon: ClipboardList,
     title: "Screening library + role scorecards",
-    body: "100+ curated screening questions across all 7 role categories — one click adds the recommended set. Then score finalists with multi-reviewer, role-specific scorecards that roll up automatically.",
+    body: "130+ curated screening questions across clinical and corporate roles — knockout rules included. Then score finalists with multi-reviewer, role-specific scorecards that roll up automatically.",
     status: "now",
   },
   {
     icon: Wand2,
-    title: "AI job description generator",
-    body: "Type a brief, get a dental-specific posting in seconds. Knows DDS, RDH, EFDA, DEA, perio, and the rest of the vocabulary. Three tones, regenerate as often as you want.",
+    title: "AI that speaks dental",
+    body: "A JD generator that knows DDS, RDH, EFDA, and perio. AI-suggested rejection reasons that stay compliant. An in-app assistant that answers from your live data. All dental-tuned, all included.",
     status: "now",
   },
 ];

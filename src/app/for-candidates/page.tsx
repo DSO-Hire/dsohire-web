@@ -39,9 +39,11 @@ import {
   Users,
   TrendingUp,
   GraduationCap,
+  EyeOff,
   FileText,
   Lock,
   DollarSign,
+  PenLine,
   ShieldCheck,
   Send,
   Briefcase,
@@ -818,6 +820,16 @@ function HonestTake() {
 /* ───────── Candidate-side benefits ───────── */
 
 const CANDIDATE_PERKS = [
+  {
+    Icon: PenLine,
+    title: "Free résumé builder — six ATS-safe templates",
+    body: "Build a clean, professional dental résumé from your profile in minutes — six recruiter-tested templates, real PDF export, and it auto-attaches when you apply. Use it anywhere, even off-platform. Completely free.",
+  },
+  {
+    Icon: EyeOff,
+    title: "Look around without your office knowing",
+    body: "Browsing is private, and anonymous mode masks your name and photo from employers you haven't applied to. Quietly exploring while employed is normal — the platform is built to protect it.",
+  },
   {
     Icon: GraduationCap,
     title: "CE tracking, free forever",
