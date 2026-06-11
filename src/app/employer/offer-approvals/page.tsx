@@ -11,6 +11,7 @@ import { redirect } from "next/navigation";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { dsoCanUseOfferApprovals } from "@/lib/offers/approval-tier";
+import { can } from "@/lib/permissions/capabilities";
 import { diffOffers } from "@/lib/offers/diff";
 import { OfferApprovalsManager, type PendingOffer } from "./offer-approvals-manager";
 
@@ -27,13 +28,25 @@ export default async function OfferApprovalsPage() {
 
   const { data: me } = await supabase
     .from("dso_users")
-    .select("dso_id, role")
+    .select("dso_id, role, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!me) redirect("/employer/onboarding");
   const dsoId = me.dso_id as string;
   const role = me.role as string;
-  if (role !== "owner" && role !== "admin") redirect("/employer/dashboard");
+  // #83 persona walkthrough (Day 32): gate on the offers.approve CAPABILITY,
+  // not the raw role — a recruiter granted offers.approve via override can
+  // now actually reach the queue (the old role check stranded the grant).
+  // Owner/admin presets include it, so their behavior is unchanged.
+  if (
+    !can(
+      role,
+      (me as Record<string, unknown>).permission_overrides,
+      "offers.approve"
+    )
+  ) {
+    redirect("/employer/dashboard");
+  }
 
   const approvalsEnabled = await dsoCanUseOfferApprovals(supabase, dsoId);
 

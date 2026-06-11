@@ -25,6 +25,7 @@ import {
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { can } from "@/lib/permissions/capabilities";
 import { dispatchNotification } from "@/lib/notifications/dispatcher";
 import { dispatchCandidateEmail } from "@/lib/email/templates/dispatch";
 import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
@@ -197,10 +198,27 @@ export async function sendApplicationMessage({
     // Try the employer side.
     const { data: dsoUser } = await supabase
       .from("dso_users")
-      .select("id, dso_id")
+      .select("id, dso_id, role, permission_overrides")
       .eq("auth_user_id", user.id)
       .maybeSingle();
     if (dsoUser) {
+      // #83 persona walkthrough (Day 32): this was the ONE messaging path
+      // without a capability guard (sequences / custom-email / reference
+      // requests all check). HM preset has apps.message=false — the UI hides
+      // the composer, but defense-in-depth means the server refuses too.
+      // Candidate sends are never capability-gated.
+      if (
+        !can(
+          dsoUser.role as string,
+          (dsoUser as Record<string, unknown>).permission_overrides,
+          "apps.message"
+        )
+      ) {
+        return {
+          ok: false,
+          error: "You don't have permission to message candidates.",
+        };
+      }
       const { data: appJob } = await supabase
         .from("applications")
         .select("id, jobs!inner(dso_id)")
@@ -415,7 +433,7 @@ export async function bulkMessageApplications(
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("id, dso_id")
+    .select("id, dso_id, role, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) {
@@ -424,6 +442,22 @@ export async function bulkMessageApplications(
       failed: applicationIds.map((id) => ({
         id,
         error: "You don't have employer access.",
+      })),
+    };
+  }
+  // #83 (Day 32) — same apps.message guard as the single-send path.
+  if (
+    !can(
+      dsoUser.role as string,
+      (dsoUser as Record<string, unknown>).permission_overrides,
+      "apps.message"
+    )
+  ) {
+    return {
+      succeeded: [],
+      failed: applicationIds.map((id) => ({
+        id,
+        error: "You don't have permission to message candidates.",
       })),
     };
   }
