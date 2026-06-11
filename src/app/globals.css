@@ -638,6 +638,24 @@ html, body {
   to { transform: translateX(-50%); }
 }
 
+/* ── FOH-3 (Day 32): homepage film strip — branded thin scrollbar ──
+   The strip itself is Tailwind (snap-x + overflow-x-auto in
+   components/marketing/film-strip.tsx); only the scrollbar skin
+   needs real CSS. */
+.film-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-heritage) transparent;
+}
+.film-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.film-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.film-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-heritage);
+}
+
 /* ── FOH-9: kanban drop "settle" ──
    Plays once when a card's move is server-confirmed (pending true→false):
    a quick scale-down + heritage ring that fades as the card seats itself. */

@@ -15,9 +15,11 @@
  *      employer names, so anonymity masking can't be violated here).
  *      Honesty floors in lib/marketing/home-live.ts hide the band
  *      gracefully when inventory is thin (post-seed-scrub safety).
- *   3. One proof strip per side (employer depth / candidate moat) — these
- *      replaced the old "Why Two Doors" IA-essay and the three abstract
- *      value-prop cards.
+ *   3. FILM STRIP + MACHINE BAND (Day 32 port, FOH 100x Model 01) — drawn
+ *      product frames walking the back office, then the named platform
+ *      pitch with real numbers. Supersedes the old employer proof strip
+ *      (its three cards were a subset). The candidate moat strip stays —
+ *      résumé builder + privacy are homepage-grade claims.
  *   4. FOUNDER LINE — ten-years-in-the-business-of-dentistry voice (Day 32
  *      reword: the old "built by operators" claim was inaccurate — founder
  *      is business-side, not an operator; see memory), until /about ships.
@@ -35,10 +37,9 @@ import {
   Building2,
   MapPin,
   Stethoscope,
-  Wand2,
-  Workflow,
 } from "lucide-react";
 import { SiteShell } from "@/components/marketing/site-shell";
+import { FilmStrip } from "@/components/marketing/film-strip";
 import { CountUp } from "@/components/marketing/motion";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import {
@@ -62,9 +63,10 @@ export default async function Home() {
     <SiteShell>
       <Hero />
       <LiveMarketBand live={live} />
-      <EmployerStrip />
+      <FilmStrip />
+      <MachineBand />
       <CandidateStrip />
-      <OperatorLine />
+      <FounderLine />
       <ClosingDoorways />
     </SiteShell>
   );
@@ -465,105 +467,132 @@ function MarqueeCard({ job, ariaHidden }: { job: MarqueeJob; ariaHidden?: boolea
 }
 
 /* ═══════════════════════════════════════════════════════
-   EMPLOYER STRIP — the depth claim, compressed
+   MACHINE BAND — the back office, named and numbered
+   (Day 32 port, FOH 100x Model 01. Supersedes the old
+   employer proof strip — same depth claim, with receipts.
+   Stats are REAL: 30+ can()-guarded actions, 12 PF dims,
+   18 seeded automation rules, 6 résumé templates.)
 ═══════════════════════════════════════════════════════ */
 
-function EmployerStrip() {
+function MachineBand() {
+  const stats = [
+    { value: 30, suffix: "+", label: "Permission-gated team actions" },
+    { value: 12, suffix: "", label: "PracticeFit scoring dimensions" },
+    { value: 18, suffix: "", label: "Automation rules out of the box" },
+    { value: 6, suffix: "", label: "ATS-safe résumé templates, free for candidates" },
+  ];
+  const items: Array<{ title: React.ReactNode; body: string; hg?: boolean }> = [
+    {
+      title: "Pipelines & stages",
+      body: "Kanban pipelines per role, custom stages, bulk actions, stale alerts — across every practice from one screen.",
+    },
+    {
+      title: (
+        <span className="inline-flex flex-wrap items-baseline gap-x-1.5">
+          <PracticeFitWordmark surface="light" className="text-[17px]" />
+          <span>+ DSOFit</span>
+        </span>
+      ),
+      body: "Two-sided fit scoring for clinical and corporate roles. Displayed, never used to auto-screen. Honest by design.",
+      hg: true,
+    },
+    {
+      title: "Automations & sequences",
+      body: "Stage-triggered rules, nurture sequences, interview reminders, weekly candidate drips.",
+    },
+    {
+      title: "Offer approvals & comp guardrails",
+      body: "Approval chains with held letters, comp bands per role and region, full audit trail.",
+    },
+    {
+      title: "Permissions & confidential searches",
+      body: "Per-teammate capabilities and database-enforced confidential roles for sensitive replacements.",
+      hg: true,
+    },
+    {
+      title: "Analytics & outcome proof",
+      body: "Funnel, source, time-to-fill, and fit-to-outcome curves — your hiring as a managed operation.",
+    },
+  ];
   return (
-    <section className="px-6 sm:px-14 py-24 max-w-[1240px] mx-auto">
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-12 lg:gap-20 items-center">
-        <div>
-          <div data-reveal className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
-            For Dental Groups
-          </div>
-          <h2
-            data-reveal
-            style={{ "--mk-delay": "70ms" } as React.CSSProperties}
-            className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink mb-6"
-          >
-            A real ATS underneath. Dental all the way down.
-          </h2>
-          <p
-            data-reveal
-            style={{ "--mk-delay": "140ms" } as React.CSSProperties}
-            className="text-base text-slate-body leading-[1.7] max-w-[520px] mb-8"
-          >
-            Not a job board with a dental filter — a full hiring platform
-            that happens to speak fluent dentistry. One flat monthly fee
-            replaces per-listing charges and the 15–25% placement fees
-            agencies take per hire.
-          </p>
-          <div
-            data-reveal
-            style={{ "--mk-delay": "200ms" } as React.CSSProperties}
-            className="flex flex-wrap gap-3.5"
-          >
-            <Link
-              href="/for-dental-groups"
-              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
-            >
-              Explore The Platform
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-            <Link
-              href="/pricing"
-              className="inline-flex items-center px-7 py-[13px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[1.8px] uppercase hover:border-ink hover:bg-cream transition-colors"
-            >
-              See Pricing
-            </Link>
-          </div>
+    <section className="bg-cream border-t border-[var(--rule)] px-6 sm:px-14 py-24">
+      <div className="max-w-[1240px] mx-auto">
+        <div
+          data-reveal
+          className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5"
+        >
+          The machine behind the marketplace
         </div>
+        <h2
+          data-reveal
+          style={{ "--mk-delay": "70ms" } as React.CSSProperties}
+          className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink mb-5"
+        >
+          A real ATS, not a job board with an inbox.
+        </h2>
+        <p
+          data-reveal
+          style={{ "--mk-delay": "140ms" } as React.CSSProperties}
+          className="text-base text-slate-body leading-[1.7] max-w-[640px]"
+        >
+          Legacy dental job boards hand you applicants and walk away. DSO Hire
+          is the operating system for the entire hire — and it&apos;s all
+          included in the flat fee.
+        </p>
 
-        <div className="grid grid-cols-1 gap-px bg-[var(--rule)] border border-[var(--rule)]">
-          {([
-            {
-              icon: Workflow,
-              title: "Pipeline, automations, offers — the whole machine",
-              body: "Realtime kanban, if-this-then-that rules, drip sequences, offer approval chains with comp guardrails, per-teammate permissions, confidential searches.",
-            },
-            {
-              icon: Stethoscope,
-              // The real two-tone wordmark, slightly oversize vs the heading
-              // type so the brand reads as a brand (Cam, Day 31).
-              title: (
-                <span className="inline-flex flex-wrap items-baseline gap-x-1.5">
-                  <span>Applicants arrive ranked by</span>
-                  <PracticeFitWordmark surface="light" tm className="text-[18px]" />
-                </span>
-              ),
-              body: "Schedule overlap, PMS fluency, clinical mix, commute — your strongest fits surface first on every opening, clinical or corporate.",
-            },
-            {
-              icon: Wand2,
-              title: "AI that already knows DDS from RDH",
-              body: "Dental-tuned job descriptions in seconds, compliant rejection-reason drafts, and an in-app assistant that answers from your live data.",
-            },
-          ] as Array<{
-            icon: React.ComponentType<{ className?: string }>;
-            title: React.ReactNode;
-            body: string;
-          }>).map((f, i) => (
-            <div
-              key={i}
-              data-reveal
-              style={{ "--mk-delay": `${i * 90}ms` } as React.CSSProperties}
-              className="bg-white p-7 flex gap-5"
-            >
-              <span
-                className="inline-flex items-center justify-center w-10 h-10 shrink-0 text-heritage-deep"
-                style={{ background: "var(--heritage-tint)" }}
-                aria-hidden
-              >
-                <f.icon className="h-5 w-5" />
-              </span>
-              <div>
-                <h3 className="text-[16px] font-extrabold tracking-[-0.3px] leading-tight text-ink mb-1.5">
-                  {f.title}
-                </h3>
-                <p className="text-[13.5px] text-slate-body leading-[1.6]">{f.body}</p>
+        <div
+          data-reveal
+          style={{ "--mk-delay": "200ms" } as React.CSSProperties}
+          className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-[var(--rule-strong)] border border-[var(--rule-strong)] mt-10"
+        >
+          {stats.map((s) => (
+            <div key={s.label} className="bg-ivory px-6 py-6">
+              <div className="text-[34px] font-extrabold tracking-[-1.5px] leading-none text-ink tabular-nums">
+                <CountUp to={s.value} duration={800} />
+                {s.suffix && <span className="text-heritage">{s.suffix}</span>}
+              </div>
+              <div className="mt-2 text-[10px] font-bold tracking-[1.4px] uppercase text-slate-meta leading-[1.5]">
+                {s.label}
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 mt-10">
+          {items.map((f, i) => (
+            <div
+              key={i}
+              data-reveal
+              style={{ "--mk-delay": `${i * 60}ms` } as React.CSSProperties}
+              className={`bg-white border border-[var(--rule-strong)] border-t-[3px] p-6 ${
+                f.hg ? "border-t-heritage" : "border-t-ink"
+              }`}
+            >
+              <h3 className="text-[15px] font-extrabold tracking-[-0.2px] leading-tight text-ink mb-1.5">
+                {f.title}
+              </h3>
+              <p className="text-[13px] text-slate-body leading-[1.65]">{f.body}</p>
+            </div>
+          ))}
+        </div>
+
+        <div
+          data-reveal
+          className="flex flex-wrap gap-3.5 mt-10"
+        >
+          <Link
+            href="/for-dental-groups"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+          >
+            Explore The Platform
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+          <Link
+            href="/pricing"
+            className="inline-flex items-center px-7 py-[13px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[1.8px] uppercase hover:border-ink hover:bg-cream transition-colors"
+          >
+            See Pricing
+          </Link>
         </div>
       </div>
     </section>
@@ -656,18 +685,26 @@ function CandidateStrip() {
    FOUNDER LINE — signed, human, brief (until /about ships)
 ═══════════════════════════════════════════════════════ */
 
-function OperatorLine() {
+function FounderLine() {
   return (
     <section className="px-6 sm:px-14 py-20">
       <div
         data-reveal
         className="max-w-[820px] mx-auto text-center border-l-2 border-heritage bg-cream/70 px-8 sm:px-12 py-10"
       >
-        <p className="text-lg sm:text-xl text-ink font-semibold leading-[1.6] tracking-[-0.2px] mb-4">
+        <p className="text-lg sm:text-xl text-ink font-semibold leading-[1.6] tracking-[-0.2px] mb-5">
           &ldquo;Dentistry professionalized everything except hiring. After
           ten years on the business side of this industry, we built the
           missing piece — no agencies, no $30,000 introductions.&rdquo;
         </p>
+        {/* Attribution. The real signature image slots in above this line
+            when Brand Assets/founder-signature/ is processed (Day 31 plan) —
+            keep it name-only until then; no faux script fonts. */}
+        <div className="mb-6 text-[11px] font-bold tracking-[1.8px] uppercase text-slate-meta">
+          <span className="text-heritage-deep">Cameron Eslinger</span>
+          <span className="mx-2 text-[var(--rule-strong)]">·</span>
+          Founder, DSO Hire
+        </div>
         <Link
           href="/about"
           className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[1.8px] uppercase text-heritage-deep hover:text-ink transition-colors"
