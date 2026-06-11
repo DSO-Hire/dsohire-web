@@ -44,6 +44,11 @@ const ROUTES: SitemapRoute[] = [
   { path: "/resume-templates", priority: 0.7, changeFrequency: "monthly" },
   // #115 FOH — dedicated home for the proprietary fit engine (PF + DSOFit).
   { path: "/practicefit", priority: 0.8, changeFrequency: "monthly" },
+  // #115 FOH-6 — trust + comparison net.
+  { path: "/security", priority: 0.6, changeFrequency: "monthly" },
+  { path: "/switch", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/vs/job-boards", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/vs/staffing-agencies", priority: 0.7, changeFrequency: "monthly" },
 
   // Role / audience landing pages — keep all of them indexable so each
   // role-specific search query has a tailored landing page to rank.

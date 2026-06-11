@@ -177,7 +177,9 @@ export function SiteFooter() {
           <FooterCol title="Dental Groups">
             <FooterLink href="/pricing">Pricing</FooterLink>
             <FooterLink href="/for-dental-groups">Why DSO Hire</FooterLink>
-            <FooterLink href="/pricing">Post a Job</FooterLink>
+            <FooterLink href="/switch">Switch to DSO Hire</FooterLink>
+            <FooterLink href="/vs/job-boards">vs Job Boards</FooterLink>
+            <FooterLink href="/vs/staffing-agencies">vs Staffing Agencies</FooterLink>
             <FooterLink href="/employer/sign-in">Sign In</FooterLink>
           </FooterCol>
 
@@ -194,6 +196,7 @@ export function SiteFooter() {
 
           <FooterCol title="Company">
             <FooterLink href="/about">About</FooterLink>
+            <FooterLink href="/security">Security &amp; Trust</FooterLink>
             <FooterLink href="/contact">Contact</FooterLink>
             <FooterLink href="/help">Help Center</FooterLink>
             <FooterLink href="/legal">All Policies</FooterLink>
