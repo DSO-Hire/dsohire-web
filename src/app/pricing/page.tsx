@@ -22,6 +22,7 @@ import {
 } from "@/lib/stripe/prices";
 import { BillingPeriodToggle } from "./billing-period-toggle";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
+import { MotionMount } from "@/components/marketing/motion";
 import { SALES_EMAIL } from "@/lib/contact";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
@@ -55,6 +56,10 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
   const authedNeedsCheckout = await employerNeedsCheckout();
   return (
     <div>
+      {/* #115 FOH-1 — /pricing doesn't use SiteShell (own minimal nav), so
+          the reveal observer must mount here explicitly. Without it,
+          [data-reveal] content stays hidden (the Day-31 "gray slab" bug). */}
+      <MotionMount />
       <PricingHero />
       <TierGrid
         tiers={tiers}

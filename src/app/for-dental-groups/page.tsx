@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
+import { DsoFitWordmark } from "@/components/practice-fit/brand/dsofit-wordmark";
 import { getAllTiers, type TierConfig } from "@/lib/stripe/prices";
 import { SiteShell, BrandLockup } from "@/components/marketing/site-shell";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
@@ -139,10 +140,10 @@ function Hero() {
           style={{ "--mk-delay": "60ms" } as React.CSSProperties}
           className="text-4xl sm:text-5xl md:text-7xl lg:text-[80px] font-extrabold tracking-[-0.025em] leading-[1.05] text-ink mb-12"
         >
-          Hire across every practice.{" "}
+          Every practice. Every role.{" "}
           <br className="hidden sm:inline" />
           <em className="not-italic relative lg:whitespace-nowrap text-heritage-light">
-            One flat monthly fee.
+            One pipeline.
             <span
               aria-hidden
               className="hidden lg:block absolute left-0 right-0 bottom-1.5 h-2 -z-10"
@@ -750,11 +751,12 @@ function RoiCard({
 function PracticeFitBand() {
   return (
     <section className="bg-white border-y border-[var(--rule)] px-6 sm:px-14 py-24">
-      <div className="max-w-[1240px] mx-auto grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-14 lg:gap-20 items-center">
+      <div className="max-w-[1240px] mx-auto grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-14 lg:gap-20 items-center">
         <div>
-          <div data-reveal className="flex items-center gap-2.5 mb-3.5">
-            <PracticeFitMark className="h-4 w-4" />
-            <PracticeFitWordmark surface="light" tm className="text-[17px]" />
+          {/* The wordmark IS the eyebrow — large and load-bearing. (It embeds
+              its own sparkle mark; never pair it with a standalone mark.) */}
+          <div data-reveal className="mb-5">
+            <PracticeFitWordmark surface="light" tm className="text-[30px]" />
           </div>
           <h2
             data-reveal
@@ -766,7 +768,7 @@ function PracticeFitBand() {
           <p
             data-reveal
             style={{ "--mk-delay": "140ms" } as React.CSSProperties}
-            className="text-base text-slate-body leading-[1.7] max-w-[560px] mb-8"
+            className="text-base text-slate-body leading-[1.7] max-w-[560px] mb-7"
           >
             Not keyword matching — a two-sided fit model built only for
             dentistry. Schedule overlap, PMS fluency, clinical mix, pace and
@@ -774,9 +776,30 @@ function PracticeFitBand() {
             your team starts with the strongest fits instead of a stack of
             résumés. Included on every tier.
           </p>
+
+          {/* Co-brand: the corporate half of the engine. */}
+          <div
+            data-reveal
+            style={{ "--mk-delay": "180ms" } as React.CSSProperties}
+            className="flex flex-wrap items-center gap-x-3 gap-y-2 border-l-2 border-heritage bg-cream/70 px-5 py-4 mb-8 max-w-[560px]"
+          >
+            <DsoFitWordmark surface="light" tm className="text-[17px]" />
+            <span className="text-[13.5px] text-slate-body leading-snug">
+              Hiring for HQ too? The same engine scores corporate candidates —
+              finance, ops, marketing, HR —{" "}
+              <Link
+                href="/for-corporate"
+                className="font-semibold text-heritage-deep hover:text-ink transition-colors underline underline-offset-2"
+              >
+                see DSOFit for corporate roles
+              </Link>
+              .
+            </span>
+          </div>
+
           <Link
             data-reveal
-            style={{ "--mk-delay": "200ms" } as React.CSSProperties}
+            style={{ "--mk-delay": "220ms" } as React.CSSProperties}
             href="#pricing"
             className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
           >
@@ -785,17 +808,50 @@ function PracticeFitBand() {
           </Link>
         </div>
 
+        {/* Right: the dial framed as the actual product surface — an
+            applicant card your team sees, not an abstract gauge. */}
         <div data-reveal style={{ "--mk-delay": "180ms" } as React.CSSProperties}>
-          <FitDial
-            score={92}
-            caption="Strong match"
-            dimensions={[
-              { label: "Schedule overlap", value: 94 },
-              { label: "PMS fluency", value: 88 },
-              { label: "Clinical mix", value: 91 },
-              { label: "Pace & culture", value: 86 },
-            ]}
-          />
+          <div
+            className="bg-white border border-[var(--rule-strong)] overflow-hidden"
+            style={{
+              boxShadow:
+                "0 30px 60px -30px rgba(7,15,28,0.18), 0 10px 24px -12px rgba(7,15,28,0.10)",
+            }}
+          >
+            <div className="flex items-start justify-between gap-4 px-6 py-4 bg-cream border-b border-[var(--rule)]">
+              <div className="min-w-0">
+                <div className="text-[9px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
+                  New Applicant · Hygienist — Maple &amp; 3rd
+                </div>
+                <div className="text-[16px] font-bold tracking-[-0.3px] text-ink leading-tight">
+                  Sarah Chen, RDH
+                </div>
+                <div className="text-[12px] text-slate-body mt-0.5">
+                  7 yrs · Eaglesoft · Westerville, OH
+                </div>
+              </div>
+              <span className="shrink-0 px-2 py-1 text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep border border-heritage/35" style={{ background: "var(--heritage-tint)" }}>
+                Strong Match
+              </span>
+            </div>
+            <div className="px-6 sm:px-8 py-8">
+              <FitDial
+                score={92}
+                caption="Strong match"
+                dimensions={[
+                  { label: "Schedule overlap", value: 94 },
+                  { label: "PMS fluency", value: 88 },
+                  { label: "Clinical mix", value: 91 },
+                  { label: "Pace & culture", value: 86 },
+                ]}
+              />
+            </div>
+            <div className="px-6 py-4 border-t border-[var(--rule)] bg-cream/50 text-[12.5px] text-slate-body leading-relaxed">
+              <strong className="text-heritage-deep font-bold">Why this match:</strong>{" "}
+              4-day week lines up with the schedule · Eaglesoft is her daily
+              driver · recall-heavy hygiene mix matches the book.
+            </div>
+          </div>
         </div>
       </div>
     </section>

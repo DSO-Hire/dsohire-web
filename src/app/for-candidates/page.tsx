@@ -49,8 +49,8 @@ import {
 import { SiteShell } from "@/components/marketing/site-shell";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import { FitDial } from "@/components/marketing/fit-dial";
-import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
+import { DsoFitWordmark } from "@/components/practice-fit/brand/dsofit-wordmark";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -137,10 +137,10 @@ function Hero() {
           style={{ "--mk-delay": "60ms" } as React.CSSProperties}
           className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[-1.6px] leading-[1.04] text-ink mb-10 max-w-[1080px]"
         >
-          Find your next dental role.{" "}
+          Find the dental practice{" "}
           <br className="hidden sm:inline" />
           <em className="not-italic relative text-heritage-light">
-            Directly with dental groups.
+            that actually fits you.
             <span
               aria-hidden
               className="hidden lg:block absolute left-0 right-0 bottom-1.5 h-2 -z-10"
@@ -158,10 +158,11 @@ function Hero() {
         {/* Left column */}
         <div data-reveal style={{ "--mk-delay": "130ms" } as React.CSSProperties}>
           <p className="text-lg sm:text-xl text-slate-body leading-[1.65] max-w-[560px] mb-10">
-            DSO Hire is the hiring platform built for dental professionals
-            applying to multi-location practices. You apply direct — no
-            agency middleman, no resume reselling, no placement fee skimmed
-            off your offer. Free for life.
+            Take the free PracticeFit assessment and browse real openings at
+            multi-location dental groups — every job scored against how you
+            actually like to work. You apply direct: no agency middleman, no
+            résumé reselling, and browsing stays private — your current
+            office never sees you looking.
           </p>
 
           <div className="flex flex-wrap items-center gap-3.5 mb-9">
@@ -209,23 +210,61 @@ function Hero() {
 function PracticeFitCandidateBand() {
   return (
     <section className="bg-white border-y border-[var(--rule)] px-6 sm:px-14 py-24">
-      <div className="max-w-[1240px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-14 lg:gap-20 items-center">
+      <div className="max-w-[1240px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_1.05fr] gap-14 lg:gap-20 items-center">
+        {/* The dial framed as the candidate's own product surface — your
+            score on a real opening, not an abstract gauge. */}
         <div data-reveal className="order-2 lg:order-1">
-          <FitDial
-            score={92}
-            caption="Strong match"
-            dimensions={[
-              { label: "Schedule fit", value: 94 },
-              { label: "Pace & culture", value: 88 },
-              { label: "Growth & mentorship", value: 91 },
-              { label: "Commute", value: 86 },
-            ]}
-          />
+          <div
+            className="bg-white border border-[var(--rule-strong)] overflow-hidden"
+            style={{
+              boxShadow:
+                "0 30px 60px -30px rgba(7,15,28,0.18), 0 10px 24px -12px rgba(7,15,28,0.10)",
+            }}
+          >
+            <div className="flex items-start justify-between gap-4 px-6 py-4 bg-cream border-b border-[var(--rule)]">
+              <div className="min-w-0">
+                <div className="text-[9px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
+                  Your Fit · Hygienist
+                </div>
+                <div className="text-[16px] font-bold tracking-[-0.3px] text-ink leading-tight">
+                  Greenfield Dental Group
+                </div>
+                <div className="text-[12px] text-slate-body mt-0.5">
+                  Westerville, OH · 4-day week · Posted pay range
+                </div>
+              </div>
+              <span
+                className="shrink-0 px-2 py-1 text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep border border-heritage/35"
+                style={{ background: "var(--heritage-tint)" }}
+              >
+                Strong Match
+              </span>
+            </div>
+            <div className="px-6 sm:px-8 py-8">
+              <FitDial
+                score={92}
+                caption="Strong match"
+                dimensions={[
+                  { label: "Schedule fit", value: 94 },
+                  { label: "Pace & culture", value: 88 },
+                  { label: "Growth & mentorship", value: 91 },
+                  { label: "Commute", value: 86 },
+                ]}
+              />
+            </div>
+            <div className="px-6 py-4 border-t border-[var(--rule)] bg-cream/50 text-[12.5px] text-slate-body leading-relaxed">
+              <strong className="text-heritage-deep font-bold">Why this match:</strong>{" "}
+              your 4-day week lines up · mentorship-forward team · 12-minute
+              commute from your preferred area.
+            </div>
+          </div>
         </div>
+
         <div className="order-1 lg:order-2">
-          <div data-reveal className="flex items-center gap-2.5 mb-3.5">
-            <PracticeFitMark className="h-4 w-4" />
-            <PracticeFitWordmark surface="light" tm className="text-[17px]" />
+          {/* The wordmark IS the eyebrow — large and load-bearing. (It embeds
+              its own sparkle mark; never pair it with a standalone mark.) */}
+          <div data-reveal className="mb-5">
+            <PracticeFitWordmark surface="light" tm className="text-[30px]" />
           </div>
           <h2
             data-reveal
@@ -237,7 +276,7 @@ function PracticeFitCandidateBand() {
           <p
             data-reveal
             style={{ "--mk-delay": "140ms" } as React.CSSProperties}
-            className="text-base text-slate-body leading-[1.7] max-w-[560px] mb-8"
+            className="text-base text-slate-body leading-[1.7] max-w-[560px] mb-7"
           >
             A five-minute assessment — your pace, your schedule, how you like
             to be mentored — and every opening gets a PracticeFit score
@@ -245,9 +284,30 @@ function PracticeFitCandidateBand() {
             practice is actually like to work in. Free, private, and your
             current office never sees you browsing.
           </p>
+
+          {/* Co-brand: the corporate track gets the same engine. */}
+          <div
+            data-reveal
+            style={{ "--mk-delay": "180ms" } as React.CSSProperties}
+            className="flex flex-wrap items-center gap-x-3 gap-y-2 border-l-2 border-heritage bg-cream/70 px-5 py-4 mb-8 max-w-[560px]"
+          >
+            <DsoFitWordmark surface="light" tm className="text-[17px]" />
+            <span className="text-[13.5px] text-slate-body leading-snug">
+              On the corporate track? DSOFit scores DSO HQ roles — finance,
+              ops, marketing, HR — the same way.{" "}
+              <Link
+                href="/for-corporate"
+                className="font-semibold text-heritage-deep hover:text-ink transition-colors underline underline-offset-2"
+              >
+                Explore corporate roles
+              </Link>
+              .
+            </span>
+          </div>
+
           <Link
             data-reveal
-            style={{ "--mk-delay": "200ms" } as React.CSSProperties}
+            style={{ "--mk-delay": "220ms" } as React.CSSProperties}
             href="/candidate/sign-up"
             className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-heritage text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-heritage-deep transition-colors"
           >

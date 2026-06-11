@@ -45,6 +45,10 @@ function prefersReducedMotion(): boolean {
 
 export function MotionMount() {
   useEffect(() => {
+    // Cancel the CSS auto-reveal safety net — this page HAS the observer,
+    // so below-fold elements keep their scroll-triggered entrances.
+    document.documentElement.classList.add("mk-armed");
+
     const els = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
     if (els.length === 0) return;
 

@@ -425,8 +425,23 @@ html, body {
       opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
       transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
     transition-delay: var(--mk-delay, 0ms);
+    /* Safety net: if a page carries [data-reveal] but never mounts
+       <MotionMount /> (the /pricing gray-slab incident), content fades
+       itself in after 2.5s instead of staying hidden forever. Pages WITH
+       the observer cancel this via html.mk-armed below, preserving the
+       scroll-triggered entrances. */
+    animation: mk-autoreveal 0.45s cubic-bezier(0.22, 1, 0.36, 1) 2.5s forwards;
+  }
+  html.mk-armed [data-reveal] {
+    animation: none;
   }
   [data-reveal].mk-in {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes mk-autoreveal {
+  to {
     opacity: 1;
     transform: none;
   }
