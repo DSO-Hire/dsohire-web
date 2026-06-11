@@ -8,6 +8,12 @@ import type { ChangelogEntry } from "./index";
 export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-11",
+    kind: "improved",
+    title: "Job health, per opening",
+    body: "Every active job on the dashboard now shows its pipeline funnel, days open, weekly application velocity, and a health dot that flags stalled candidates or overdue reviews — replacing the plain job leaderboard. The dashboard also loads with a true-to-layout skeleton, so nothing jumps when your numbers arrive.",
+  },
+  {
+    date: "2026-06-11",
     kind: "new",
     title: "Your dashboard is now live",
     body: "A realtime activity rail streams new applications, candidate replies, and teammate scorecards onto your dashboard the moment they happen — no refresh, across every practice you can see.",

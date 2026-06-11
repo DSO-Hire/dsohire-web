@@ -55,10 +55,12 @@ import { LivePulse } from "./live-pulse";
 import { NextBestActions } from "./next-best-actions";
 import { buildNextBestActions } from "@/lib/dashboard/next-best-actions";
 import { PipelineFunnel } from "@/components/dashboard/pipeline-funnel";
+// BOH Lane 2e — JobLeaderboard absorbed into JobHealth (velocity spark +
+// funnel + freshness per opening, Model 01's job-health band).
 import {
-  JobLeaderboard,
-  type LeaderboardJob,
-} from "@/components/dashboard/job-leaderboard";
+  JobHealth,
+  type JobHealthRow,
+} from "@/components/dashboard/job-health";
 import { DashboardMiniMap } from "@/components/dashboard/dashboard-mini-map";
 import { TodaysTopFits } from "@/components/dashboard/todays-top-fits";
 import { getTodaysTopFits } from "@/lib/talent-pool/smart-picks";
@@ -208,6 +210,13 @@ export default async function EmployerDashboard() {
   // ── BOH Lane 2c — offers out (sent, no candidate response yet) ──
   let offersOutCount = 0;
 
+  // ── BOH Lane 2e — job-health scaffolding (per-job funnel from the
+  // funnel rows + health dots from the stuck/stale row sets) ──
+  const perJobFunnel = new Map<string, Record<string, number>>();
+  const stuckJobIds = new Set<string>();
+  const staleJobIds = new Set<string>();
+  let jobHealthRows: JobHealthRow[] = [];
+
   // ── Pipeline funnel scaffolding (counts of CURRENT stage kind, last 30
   // days of submissions). v1: kind-snapshot funnel. A flow-based funnel
   // would require querying application_status_events. ───────────────
@@ -222,7 +231,6 @@ export default async function EmployerDashboard() {
     [];
 
   // ── Per-job velocity leaderboard scaffolding ───────────────────────
-  let leaderboardJobs: LeaderboardJob[] = [];
 
   // ── Mini-map scaffolding ───────────────────────────────────────────
   type MiniMapLocationRow = {
@@ -273,7 +281,7 @@ export default async function EmployerDashboard() {
     let jobsQuery = supabase
       .from("jobs")
       .select(
-        "id, title, status, role_category, employment_type, applications_count",
+        "id, title, status, role_category, employment_type, applications_count, posted_at",
       )
       .eq("dso_id", dsoId)
       .is("deleted_at", null);
@@ -291,6 +299,7 @@ export default async function EmployerDashboard() {
       role_category: string;
       employment_type: string;
       applications_count: number;
+      posted_at: string | null;
     };
     const jobs = (rawJobs ?? []) as JobWithStatus[];
     recentJobMap = new Map(
@@ -448,10 +457,12 @@ export default async function EmployerDashboard() {
             new Date(nowMs - STALE_STAGE_DAYS * 86400000).toISOString()
           )
           .order("stage_entered_at", { ascending: true }),
-        // Funnel: applications submitted in the last 30 days, by current kind.
+        // Funnel: applications submitted in the last 30 days, by current
+        // kind. job_id rides along (Lane 2e) so the same rows also build
+        // the per-job health funnels — no extra query.
         supabase
           .from("applications")
-          .select("id, stage:dso_pipeline_stages!stage_id(kind)")
+          .select("id, job_id, stage:dso_pipeline_stages!stage_id(kind)")
           .in("job_id", jobIds)
           .gte("created_at", thirtyDaysAgo.toISOString()),
         // Per-job leaderboard: 14-day window of application timestamps so
@@ -528,6 +539,7 @@ export default async function EmployerDashboard() {
       };
       const stuckRaw = (stuckRes.data ?? []) as unknown as StuckRow[];
       stuckTotalCount = stuckRaw.length;
+      for (const r of stuckRaw) stuckJobIds.add(r.job_id); // Lane 2e health
       stuckCandidates = stuckRaw.slice(0, 3).map((row) => {
         const job = recentJobMap.get(row.job_id);
         const days = Math.max(
@@ -566,6 +578,7 @@ export default async function EmployerDashboard() {
       };
       const staleRaw = (staleRes.data ?? []) as unknown as StaleRow[];
       staleTotalCount = staleRaw.length;
+      for (const r of staleRaw) staleJobIds.add(r.job_id); // Lane 2e health
       staleCandidates = staleRaw.slice(0, 3).map((row) => {
         const job = recentJobMap.get(row.job_id);
         const enteredMs = row.stage_entered_at
@@ -698,6 +711,7 @@ export default async function EmployerDashboard() {
 
       // ── Pipeline funnel ──────────────────────────────────────────
       type FunnelRow = {
+        job_id: string | null;
         stage: { kind: string } | Array<{ kind: string }> | null;
       };
       for (const row of (funnel30dRes.data ?? []) as unknown as FunnelRow[]) {
@@ -706,6 +720,17 @@ export default async function EmployerDashboard() {
         const kind = stageRow?.kind;
         if (kind && kind in stage30dCounts) {
           stage30dCounts[kind as keyof typeof stage30dCounts] += 1;
+        }
+        // Lane 2e — per-job funnel buckets from the same rows.
+        if (row.job_id && kind && kind !== "hired") {
+          const f =
+            perJobFunnel.get(row.job_id) ??
+            ({ open: 0, screen: 0, interview: 0, offer: 0 } as Record<
+              string,
+              number
+            >);
+          if (kind in f) f[kind] += 1;
+          perJobFunnel.set(row.job_id, f);
         }
       }
       // Hero stage strip — same data, different shape.
@@ -808,27 +833,65 @@ export default async function EmployerDashboard() {
         return `${locs.length} locations`;
       };
 
-      leaderboardJobs = jobs
+      // BOH Lane 2e — job health rows absorb the leaderboard: same
+      // velocity data (spark/thisWeek from perJob) plus the per-job
+      // funnel, days-open, and a health dot derived from the stuck/stale
+      // sets. Sorted by total active pipeline, busiest first.
+      jobHealthRows = jobs
         .filter((j) => j.status === "active")
-        .map((j): LeaderboardJob => {
+        .map((j): JobHealthRow => {
           const v = perJob.get(j.id) ?? {
             spark: Array(7).fill(0),
             thisWeek: 0,
             lastWeek: 0,
+          };
+          const f = perJobFunnel.get(j.id) ?? {
+            open: 0,
+            screen: 0,
+            interview: 0,
+            offer: 0,
           };
           return {
             id: j.id,
             title: j.title,
             subline: HUMAN_EMP[j.employment_type] ?? j.employment_type,
             locationLabel: buildLocationLabel(jobLocMap.get(j.id) ?? []),
+            daysOpen: j.posted_at
+              ? Math.max(
+                  0,
+                  Math.floor(
+                    (nowMs - new Date(j.posted_at).getTime()) / 86400000
+                  )
+                )
+              : null,
+            funnel: {
+              open: f.open ?? 0,
+              screen: f.screen ?? 0,
+              interview: f.interview ?? 0,
+              offer: f.offer ?? 0,
+            },
+            health: staleJobIds.has(j.id)
+              ? "hot"
+              : stuckJobIds.has(j.id)
+                ? "warn"
+                : "ok",
             spark: v.spark,
             thisWeek: v.thisWeek,
-            lastWeek: v.lastWeek,
             href: `/employer/jobs/${j.id}`,
           };
         })
-        .sort((a, b) => b.thisWeek - a.thisWeek)
-        .slice(0, 5);
+        .sort(
+          (a, b) =>
+            b.funnel.open +
+            b.funnel.screen +
+            b.funnel.interview +
+            b.funnel.offer -
+            (a.funnel.open +
+              a.funnel.screen +
+              a.funnel.interview +
+              a.funnel.offer)
+        )
+        .slice(0, 8);
     }
 
     // ── Mini-map: locations + per-location application count ────────
@@ -1309,12 +1372,10 @@ export default async function EmployerDashboard() {
         />
       </section>
 
-      {/* Two-column row — Leaderboard + Mini-map. */}
+      {/* Two-column row — Job health (Lane 2e, absorbs the leaderboard)
+          + Mini-map. */}
       <section className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-6 mb-6">
-        <JobLeaderboard
-          jobs={leaderboardJobs}
-          viewAllHref="/employer/jobs"
-        />
+        <JobHealth rows={jobHealthRows} viewAllHref="/employer/pipeline" />
         <DashboardMiniMap
           locations={miniMapLocations}
           href="/employer/locations"
