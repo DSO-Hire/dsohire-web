@@ -8,6 +8,12 @@ import type { ChangelogEntry } from "./index";
 export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-11",
+    kind: "improved",
+    title: "A sharper sidebar — and it collapses",
+    body: "The navigation rail got a redesign: the DSO Hire mark draws itself in on load, sections are named (Hire, Insight, Operate), the active page gets a settling green edge, and the footer tightened to one line. Best part: the tab on the rail's edge collapses it to a slim icon bar — tooltips on hover, more room for your pipeline — and it remembers your choice.",
+  },
+  {
+    date: "2026-06-11",
     kind: "new",
     title: "Review candidates without leaving the keyboard",
     body: "On any application, j and k now step you through every candidate in that job's pipeline — with a position marker so you always know where you are. Open the pipeline, hit j, and review the whole stack in one sitting.",

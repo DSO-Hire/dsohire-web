@@ -42,7 +42,6 @@ import {
   MapPin,
   CreditCard,
   Settings,
-  LogOut,
   Users as UsersIcon,
   UsersRound,
   BarChart3,
@@ -58,6 +57,7 @@ import {
   type Capability,
 } from "@/lib/permissions/capabilities";
 import { BrandLockup } from "@/components/marketing/site-shell";
+import { RailCollapse } from "./rail-collapse";
 import { getUnreadCount, getNewApplicationCount } from "@/lib/inbox/queries";
 import { NavBadgeRealtime } from "@/components/inbox/nav-badge-realtime";
 import { getMfaState } from "@/lib/auth/mfa";
@@ -152,6 +152,13 @@ const HELP_ITEM: NavItem = {
 };
 
 const GROUP_ORDER: ReadonlyArray<NavGroup> = ["work", "insight", "setup"];
+
+// Lane S (Model H) — named group eyebrows replace the bare dividers.
+const GROUP_LABELS: Record<NavGroup, string> = {
+  work: "Hire",
+  insight: "Insight",
+  setup: "Operate",
+};
 
 export async function EmployerShell({ children, active }: EmployerShellProps) {
   const supabase = await createSupabaseServerClient();
@@ -286,60 +293,95 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
            sticky top-0 + h-screen pins the rail to the viewport so the
            Help / Sign-out footer cluster stays in view even when the page
            content scrolls past the viewport height. */}
-      <aside className="hidden lg:flex w-[240px] flex-shrink-0 flex-col bg-ink text-ivory border-r border-white/10 sticky top-0 h-screen">
-        {/* Brand zone — cream backdrop so the locked Navy/Heritage lockup
-            reads with maximum legibility instead of relying on the dark-bg
-            variant. The cream→navy transition below is its own visual rule;
-            no explicit border needed. */}
-        <div className="p-6 bg-cream">
-          <Link
-            href="/employer/dashboard"
-            className="block"
-            aria-label="DSO Hire — dashboard"
-          >
-            <BrandLockup height={36} />
-          </Link>
-        </div>
+      {/* ── Desktop sidebar — Lane S, Model H (Day 32 verdict) ──
+           Navy throughout (cream brand band retired), drawn-on logo,
+           named groups, settle-edge active state, compact footer row,
+           collapse-to-72px icon rail. Chrome only — loaders, badges,
+           capability gating, and the location switcher are untouched. */}
+      <aside
+        id="employer-rail"
+        className="hidden lg:flex w-[240px] flex-shrink-0 flex-col bg-ink text-ivory border-r border-white/10 sticky top-0 h-screen relative transition-[width] duration-[450ms]"
+      >
+        <RailCollapse />
+        {/* Brand zone — the D-form mark drawn on in ivory + heritage
+            stroke (the FOH verb), wordmark beside it. */}
+        <Link
+          href="/employer/dashboard"
+          aria-label="DSO Hire — dashboard"
+          className="rail-brand flex items-center gap-3 px-5 pt-6 pb-4"
+        >
+          <svg width="40" height="40" viewBox="0 0 44 44" aria-hidden="true">
+            <path
+              className="rail-draw1"
+              d="M 5 5 L 28 5 Q 40 5 40 17 L 40 27 Q 40 39 28 39 L 5 39"
+              fill="none"
+              stroke="#F7F4ED"
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <line
+              className="rail-draw2"
+              x1="8"
+              y1="22"
+              x2="24"
+              y2="22"
+              stroke="#8db8a3"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+          </svg>
+          <span className="rail-word leading-none">
+            <span className="block text-[21px] font-extrabold tracking-[-0.5px] text-ivory">
+              DSO
+            </span>
+            <span className="block text-[8px] font-bold tracking-[4.5px] text-[#8db8a3] mt-[3px]">
+              HIRE
+            </span>
+          </span>
+        </Link>
 
-        {/* DSO context block + multi-location switcher (Phase 4.6.d) */}
-        <div className="border-b border-white/10 py-3 px-2 space-y-1">
-          <div className="flex items-center gap-2.5 px-2">
+        {/* Org card + multi-location switcher (Phase 4.6.d — logic untouched) */}
+        <div className="px-3.5 pb-1 space-y-1">
+          <div className="rail-org flex items-center gap-2.5 border border-white/[0.14] px-2.5 py-2">
             <Avatar
               name={dsoName}
               imageUrl={dsoLogo}
               size="sm"
               className="ring-1 ring-white/10"
             />
-            <div className="min-w-0 flex-1">
+            <div className="rail-org-meta min-w-0 flex-1">
               <div className="text-[12px] font-semibold text-ivory truncate leading-tight">
                 {dsoName}
               </div>
-              <div className="text-[9px] tracking-[1.5px] uppercase text-ivory/50 truncate">
+              <div className="text-[8.5px] font-bold tracking-[1.2px] uppercase text-[#8db8a3] truncate mt-0.5">
                 {role.replace("_", " ")} · {dsoStatus}
               </div>
             </div>
           </div>
-          <LocationSwitcher
-            locations={locations}
-            activeLocationId={activeLocationId}
-          />
+          <div className="rail-loc">
+            <LocationSwitcher
+              locations={locations}
+              activeLocationId={activeLocationId}
+            />
+          </div>
         </div>
 
         {/* Cmd-K universal search trigger (Phase 4.6.e) */}
-        <div className="px-3 pt-3">
+        <div className="rail-search px-3 pt-2">
           <CommandPaletteTrigger />
         </div>
 
-        {/* Grouped nav */}
-        <nav className="flex-1 overflow-y-auto px-3 py-2">
-          {groupedNav.map((group, idx) => (
-            <ul
-              key={group.group}
-              className={
-                "list-none space-y-0.5 " +
-                (idx > 0 ? "mt-3 pt-3 border-t border-white/10" : "")
-              }
-            >
+        {/* Grouped nav — named eyebrows replace bare dividers. */}
+        <nav className="rail-nav flex-1 overflow-y-auto px-3 py-1">
+          {groupedNav.map((group) => (
+            <ul key={group.group} className="list-none space-y-0.5">
+              <li
+                aria-hidden="true"
+                className="rail-glabel pt-3.5 pb-1.5 px-2.5 text-[8.5px] font-extrabold tracking-[2.8px] uppercase text-ivory/40"
+              >
+                {GROUP_LABELS[group.group]}
+              </li>
               {group.items.map((item) => (
                 <NavRow key={item.id} item={item} active={active} />
               ))}
@@ -347,17 +389,28 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
           ))}
         </nav>
 
-        {/* Footer cluster: Settings + Help + Sign out */}
-        <div className="border-t border-white/10 p-3 space-y-1">
-          <NavRow item={SETTINGS_ITEM} active={active} />
-          <NavRow item={HELP_ITEM} active={active} />
-          <form action="/employer/sign-out" method="post">
+        {/* Footer row — Settings · Help · Sign out → (Model H: three
+            stacked rows become one quiet line; sign out anchors the
+            corner, still the same POST form). */}
+        <div className="rail-foot border-t border-white/10 px-5 py-3.5 flex items-center gap-4">
+          <Link
+            href="/employer/settings"
+            className="rail-flink text-[9.5px] font-extrabold tracking-[1.5px] uppercase text-ivory/50 hover:text-ivory transition-colors"
+          >
+            Settings
+          </Link>
+          <Link
+            href="/employer/help"
+            className="rail-flink text-[9.5px] font-extrabold tracking-[1.5px] uppercase text-ivory/50 hover:text-ivory transition-colors"
+          >
+            Help
+          </Link>
+          <form action="/employer/sign-out" method="post" className="ml-auto">
             <button
               type="submit"
-              className="flex w-full items-center gap-3 px-3 py-2 text-[13px] font-semibold tracking-[0.5px] text-ivory/55 hover:text-ivory hover:bg-white/5 rounded transition-colors"
+              className="rail-out text-[9.5px] font-extrabold tracking-[1.5px] uppercase text-[#8db8a3] hover:text-ivory transition-colors"
             >
-              <LogOut className="h-4 w-4 flex-shrink-0" />
-              <span>Sign out</span>
+              Sign out →
             </button>
           </form>
         </div>
@@ -442,19 +495,20 @@ function NavRow({
     <li>
       <Link
         href={item.href}
+        data-tip={item.label}
         className={
-          "flex items-center gap-3 px-3 py-1.5 text-[13px] font-semibold tracking-[0.5px] rounded transition-colors " +
+          "rail-item group relative flex items-center gap-3 px-3 py-2 text-[13px] font-semibold tracking-[0.2px] border border-transparent transition-colors " +
           (isActive
-            ? "bg-white/10 text-ivory"
-            : "text-ivory/65 hover:bg-white/5 hover:text-ivory")
+            ? "rail-item-on bg-white/[0.08] text-ivory border-white/10"
+            : "text-ivory/60 hover:bg-white/5 hover:text-ivory")
         }
       >
-        <Icon className="h-4 w-4 flex-shrink-0" />
-        <span className="flex-1">{item.label}</span>
+        <Icon className="h-4 w-4 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-[2px] motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" />
+        <span className="rail-label flex-1">{item.label}</span>
         {item.badge && item.badge > 0 ? (
           <span
             aria-label={`${item.badge} unread`}
-            className="ml-2 inline-flex items-center justify-center rounded-full bg-heritage-deep px-1.5 py-0.5 text-[10px] font-bold text-ivory min-w-[18px]"
+            className="rail-badge ml-2 inline-flex items-center justify-center rounded-full bg-heritage-deep px-1.5 py-0.5 text-[10px] font-bold text-ivory min-w-[18px]"
           >
             {item.badge > 99 ? "99+" : item.badge}
           </span>
