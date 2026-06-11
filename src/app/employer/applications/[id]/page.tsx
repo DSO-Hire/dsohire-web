@@ -15,19 +15,8 @@ import {
   ExternalLink,
   FileText,
   FileSignature,
-  Calendar,
-  CheckSquare,
-  ListChecks,
-  ToggleLeft,
-  Hash,
-  SlidersHorizontal,
-  AlignLeft,
-  Type,
   Lock,
-  MapPin,
-  Phone,
   Sparkles,
-  Clock,
   MessageSquare,
   Star,
   StickyNote,
@@ -37,7 +26,6 @@ import {
   Layers,
   ShieldCheck,
 } from "lucide-react";
-import { Avatar } from "@/components/ui/avatar";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import {
   createSupabaseServerClient,
@@ -112,12 +100,20 @@ import {
 } from "@/lib/scorecards/rubric-library";
 import {
   KIND_DEFAULT_LABELS,
-  colorTripleFor,
   findStage,
-  isTerminalKind,
   type PipelineStage,
   type StageKind,
 } from "@/lib/applications/stages";
+// Lane 3 commit 1 — workspace chrome extracted from this file (markup
+// unchanged): hero, section shell, screening/verification rows, timeline.
+import { CandidateHero } from "./candidate-hero";
+import {
+  DetailRow,
+  DetailSection,
+  PracticeFitConsentOffBanner,
+} from "./detail-section";
+import { ScreeningResponseRow, VerificationRow } from "./screening-rows";
+import { ActivityTimeline } from "./activity-timeline";
 import { candidateDisplayName } from "@/lib/applications/candidate-display";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
 import { WhyThisMatch } from "@/components/practice-fit/why-this-match";
@@ -1376,113 +1372,28 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
         </Link>
       </div>
 
-      {/* Hero — avatar + name + meta + status pill + contact strip */}
-      <header className="mb-8 border border-[var(--rule)] bg-white p-6 sm:p-8">
-        <div className="flex flex-wrap items-start justify-between gap-6">
-          <div className="flex items-start gap-5 min-w-0 flex-1">
-            <Avatar
-              name={cand?.full_name ?? displayName}
-              imageUrl={cand?.avatar_url ?? null}
-              size="2xl"
-            />
-            <div className="min-w-0 flex-1">
-              <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
-                Application
-              </div>
-              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-[1.05] text-ink mb-2">
-                {displayName}
-              </h1>
-              {titleLine && (
-                <div className="text-[15px] text-slate-body">{titleLine}</div>
-              )}
-              {(headerMetaParts.length > 0 || candidateLocation) && (
-                <div className="text-[13px] text-slate-meta mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
-                  {candidateLocation && (
-                    <span className="inline-flex items-center gap-1">
-                      <MapPin className="h-3 w-3" />
-                      {candidateLocation}
-                    </span>
-                  )}
-                  {headerMetaParts.map((part, i) => (
-                    <span key={i}>{i === 0 && candidateLocation ? `· ${part}` : part}</span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-          <span
-            className={`text-[10px] font-bold tracking-[2px] uppercase px-3 py-2 ring-1 ring-inset ${statusBadgeClasses(currentKind)}`}
-          >
-            {currentStageLabel}
-          </span>
-        </div>
-
-        {/* Contact strip — replaces the old sidebar Contact card */}
-        <div className="mt-6 pt-5 border-t border-[var(--rule)] flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px]">
-          {candidateEmail ? (
-            <a
-              href={`mailto:${candidateEmail}?subject=${encodeURIComponent(
-                `Re: your application to ${job.title as string}`
-              )}`}
-              className="inline-flex items-center gap-1.5 text-heritage hover:text-heritage-deep font-semibold break-all"
-            >
-              <Mail className="h-3.5 w-3.5 flex-shrink-0" />
-              {candidateEmail}
-            </a>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 text-slate-meta italic">
-              <Mail className="h-3.5 w-3.5" />
-              Email unavailable
-            </span>
-          )}
-          {cand?.phone && (
-            <span className="inline-flex items-center gap-1.5 text-ink">
-              <Phone className="h-3.5 w-3.5 text-slate-meta" />
-              {cand.phone}
-            </span>
-          )}
-          {cand?.linkedin_url && (
-            <a
-              href={cand.linkedin_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-heritage hover:text-heritage-deep font-semibold"
-            >
-              <ExternalLink className="h-3.5 w-3.5" />
-              LinkedIn
-            </a>
-          )}
-          <span className="ml-auto text-slate-meta text-[12px]">
-            Replies to your email also route to this application.
-          </span>
-        </div>
-
-        {/* Job context bar */}
-        <div className="mt-5 pt-5 border-t border-[var(--rule)] flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-slate-body">
-          <Briefcase className="h-3.5 w-3.5 text-heritage-deep" />
-          <span>Applied to</span>
-          <Link
-            href={`/employer/jobs/${job.id}`}
-            className="font-bold text-ink hover:text-heritage-deep transition-colors"
-          >
-            {job.title as string}
-          </Link>
-          <span className="text-slate-meta">·</span>
-          <span>
-            {ROLE_LABELS[String(job.role_category)] ?? String(job.role_category)} ·{" "}
-            {String(job.employment_type).replace(/_/g, " ")}
-          </span>
-          <span className="text-slate-meta">·</span>
-          <span className="inline-flex items-center gap-1">
-            <Clock className="h-3 w-3 text-slate-meta" />
-            Submitted {submitted.toLocaleDateString()} at{" "}
-            {submitted.toLocaleTimeString([], {
-              hour: "numeric",
-              minute: "2-digit",
-            })}
-          </span>
-        </div>
-      </header>
+      {/* Hero — avatar + name + meta + status pill + contact strip
+          (extracted to CandidateHero, Lane 3 commit 1) */}
+      <CandidateHero
+        displayName={displayName}
+        avatarName={cand?.full_name ?? displayName}
+        avatarUrl={cand?.avatar_url ?? null}
+        titleLine={titleLine}
+        candidateLocation={candidateLocation}
+        headerMetaParts={headerMetaParts}
+        currentKind={currentKind}
+        currentStageLabel={currentStageLabel}
+        candidateEmail={candidateEmail}
+        candidatePhone={cand?.phone ?? null}
+        candidateLinkedinUrl={cand?.linkedin_url ?? null}
+        jobId={job.id as string}
+        jobTitle={String(job.title)}
+        roleLabel={
+          ROLE_LABELS[String(job.role_category)] ?? String(job.role_category)
+        }
+        employmentTypeLabel={String(job.employment_type).replace(/_/g, " ")}
+        submitted={submitted}
+      />
 
       {/* Two-column body — main 10-section column + sticky right-rail TOC */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_240px] gap-10">
@@ -1994,49 +1905,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             icon={History}
             subtitle="Every stage transition captured for this application."
           >
-            {events.length === 0 ? (
-              <p className="text-[14px] text-slate-meta italic">
-                No activity recorded yet.
-              </p>
-            ) : (
-              <ol className="list-none space-y-4 border-l-2 border-[var(--rule)] pl-5">
-                {events.map((ev) => {
-                  // Prefer the DSO-customized label snapshot (recorded
-                  // at event time) over the kind default. Events from
-                  // before the label-snapshot migration only have kind,
-                  // so we fall back gracefully.
-                  const fromLabel = ev.from_stage_label
-                    ? ev.from_stage_label
-                    : ev.from_stage_kind
-                      ? KIND_DEFAULT_LABELS[ev.from_stage_kind as StageKind] ??
-                        ev.from_stage_kind
-                      : null;
-                  const toLabel = ev.to_stage_label
-                    ? ev.to_stage_label
-                    : KIND_DEFAULT_LABELS[ev.to_stage_kind as StageKind] ??
-                      ev.to_stage_kind;
-                  return (
-                  <li key={ev.id} className="relative">
-                    <span className="absolute -left-[27px] top-1.5 block w-3 h-3 bg-ink rounded-full border-2 border-ivory" />
-                    <div className="text-[13px] font-bold text-ink">
-                      {fromLabel
-                        ? `${fromLabel} → ${toLabel}`
-                        : `Submitted as ${toLabel}`}
-                    </div>
-                    <div className="text-[12px] text-slate-meta mt-0.5">
-                      {ev.actor_type} ·{" "}
-                      {new Date(ev.created_at).toLocaleString()}
-                    </div>
-                    {ev.note && (
-                      <div className="text-[13px] text-slate-body mt-1 leading-snug">
-                        {ev.note}
-                      </div>
-                    )}
-                  </li>
-                  );
-                })}
-              </ol>
-            )}
+            <ActivityTimeline events={events} />
           </DetailSection>
             </div>
           </div>
@@ -2093,388 +1962,5 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
         </aside>
       </div>
     </EmployerShell>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────────
- * Section shell — numbered eyebrow + title + optional subtitle/badge,
- * with anchored scroll-margin so the right-rail TOC links land cleanly.
- * `tone` lets a section opt into the candidate-facing or internal visual
- * accent without us repeating the markup at every call site.
- * ───────────────────────────────────────────────────────────────────── */
-
-function DetailSection({
-  id,
-  num,
-  title,
-  subtitle,
-  icon,
-  tone,
-  badge,
-  children,
-}: {
-  id: string;
-  num: string;
-  title: React.ReactNode;
-  subtitle?: string;
-  icon: React.ComponentType<{ className?: string }>;
-  tone?: "candidate" | "internal";
-  badge?: string;
-  children: React.ReactNode;
-}) {
-  const Icon = icon;
-  const eyebrowColor =
-    tone === "internal"
-      ? "text-slate-meta"
-      : tone === "candidate"
-        ? "text-heritage-deep"
-        : "text-slate-meta";
-  return (
-    <section id={id} className="scroll-mt-6">
-      <header className="mb-4">
-        <div
-          className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] font-bold tracking-[2.5px] uppercase ${eyebrowColor} mb-1.5`}
-        >
-          <span className="inline-flex items-center gap-1.5">
-            {tone === "internal" && <Lock className="h-3 w-3" />}
-            <Icon className="h-3.5 w-3.5" />
-            <span>{num}</span>
-          </span>
-          {badge && (
-            <span className="text-[9px] font-bold tracking-[1.5px] uppercase px-2 py-0.5 bg-heritage/15 text-heritage-deep">
-              {badge}
-            </span>
-          )}
-        </div>
-        <h2 className="text-xl sm:text-2xl font-extrabold tracking-[-0.6px] text-ink leading-tight">
-          {title}
-        </h2>
-        {subtitle && (
-          <p className="text-[13px] text-slate-meta mt-2 leading-relaxed">
-            {subtitle}
-          </p>
-        )}
-      </header>
-      <div>{children}</div>
-    </section>
-  );
-}
-
-/**
- * PracticeFit placeholder banner. Per parity-sprint scope §6.4, we ship
- * the surface contract NOW with three sub-bars (Skills / Culture /
- * Logistics) showing a "coming Phase 5D" treatment. Schema reservations
- * (`applications.fit_score`, `applications.fit_breakdown`) are not yet
- * wired here — when 5D ships the matching, this component reads from
- * those columns and switches off the placeholder treatment.
- */
-/**
- * Fit-unavailable banner — appears when getPracticeFit returns null.
- * v1.2 made the copy honest about the multiple causes:
- *   • candidate has practice_fit_consent='off' (RLS blocks the read)
- *   • role-as-filter rejected the pair (candidate's desired_roles
- *     doesn't include this job's role_category, post-canonicalization)
- *   • score hasn't been computed yet (rare — first-render races)
- *
- * We don't disambiguate here because RLS prevents us from knowing
- * whether the candidate has consent off vs role-filtered without
- * leaking whether the candidate exists. Generic copy + neutral tone.
- */
-function PracticeFitConsentOffBanner() {
-  return (
-    <div className="border border-[var(--rule)] bg-cream/40 p-6">
-      <div className="flex items-start gap-3">
-        <Sparkles className="h-4 w-4 text-heritage-deep mt-0.5 shrink-0" />
-        <div>
-          <p className="text-[13px] font-semibold text-ink mb-1">
-            PracticeFit isn&apos;t available for this pair
-          </p>
-          <p className="text-[13px] text-slate-body leading-relaxed">
-            This can happen when the candidate&apos;s privacy settings
-            keep their score private, or when their role preferences
-            don&apos;t cover this posting. Their application stands on
-            its own — PracticeFit is informational only and never
-            gates hiring decisions.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DetailRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <div className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta mb-1">
-        {label}
-      </div>
-      <div className="text-[14px] text-ink leading-snug">{value}</div>
-    </div>
-  );
-}
-
-/**
- * Render the kanban-matched stage badge for the header. For non-terminal
- * kinds we resolve the kind's default color triple via colorTripleFor();
- * for terminal kinds (rejected/withdrawn) we use a muted slate treatment.
- */
-function statusBadgeClasses(kind: StageKind): string {
-  if (isTerminalKind(kind)) {
-    return "bg-slate-100 ring-slate-200 text-slate-600";
-  }
-  const c = colorTripleFor(null, kind);
-  return `${c.bg} ${c.ring} ${c.text}`;
-}
-
-const KIND_ICON: Record<
-  ScreeningQuestionKind,
-  React.ComponentType<{ className?: string }>
-> = {
-  short_text: Type,
-  long_text: AlignLeft,
-  yes_no: ToggleLeft,
-  single_select: CheckSquare,
-  multi_select: ListChecks,
-  number: Hash,
-  scale: SlidersHorizontal,
-};
-
-const KIND_LABEL: Record<ScreeningQuestionKind, string> = {
-  short_text: "Short text",
-  long_text: "Long text",
-  yes_no: "Yes / No",
-  single_select: "Single choice",
-  multi_select: "Multi choice",
-  number: "Number",
-  scale: "Scale",
-};
-
-function formatAnswer(
-  question: ScreeningQuestion,
-  answer: ExistingAnswer | null
-): { display: string; missing: boolean } {
-  if (!answer) return { display: "Not answered", missing: true };
-
-  switch (question.kind) {
-    case "short_text":
-    case "long_text": {
-      const v = (answer.answer_text ?? "").trim();
-      if (!v) return { display: "Not answered", missing: true };
-      return { display: v, missing: false };
-    }
-    case "yes_no": {
-      const v = (answer.answer_choice ?? "").trim();
-      if (v === "yes") return { display: "Yes", missing: false };
-      if (v === "no") return { display: "No", missing: false };
-      return { display: "Not answered", missing: true };
-    }
-    case "number": {
-      if (answer.answer_number === null || answer.answer_number === undefined) {
-        return { display: "Not answered", missing: true };
-      }
-      return { display: String(answer.answer_number), missing: false };
-    }
-    case "scale": {
-      // #71 — slider answer (1–5); show the value with its end labels.
-      if (answer.answer_number === null || answer.answer_number === undefined) {
-        return { display: "Not answered", missing: true };
-      }
-      const low = question.options?.find((o) => o.id === "low")?.label;
-      const high = question.options?.find((o) => o.id === "high")?.label;
-      const ends = low && high ? ` (${low} → ${high})` : "";
-      return { display: `${answer.answer_number} of 5${ends}`, missing: false };
-    }
-    case "single_select": {
-      const id = answer.answer_choice;
-      if (!id) return { display: "Not answered", missing: true };
-      const opt = question.options?.find((o) => o.id === id);
-      return { display: opt?.label ?? id, missing: false };
-    }
-    case "multi_select": {
-      const ids = answer.answer_choices ?? [];
-      if (ids.length === 0) return { display: "Not answered", missing: true };
-      const labels = ids.map(
-        (id) => question.options?.find((o) => o.id === id)?.label ?? id
-      );
-      return { display: labels.join(", "), missing: false };
-    }
-    default:
-      return { display: "Not answered", missing: true };
-  }
-}
-
-function ScreeningResponseRow({
-  question,
-  answer,
-}: {
-  question: ScreeningQuestion;
-  answer: ExistingAnswer | null;
-}) {
-  const Icon = KIND_ICON[question.kind] ?? Calendar;
-  const { display, missing } = formatAnswer(question, answer);
-
-  return (
-    <div className="p-5">
-      <div className="flex items-start gap-3">
-        <Icon className="h-4 w-4 text-heritage-deep flex-shrink-0 mt-0.5" />
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <div className="text-[14px] font-semibold text-ink leading-snug">
-              {question.prompt}
-            </div>
-            <span className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta">
-              {KIND_LABEL[question.kind]}
-            </span>
-            {question.required && (
-              <span className="text-[9px] font-bold tracking-[2px] uppercase text-heritage-deep">
-                Required
-              </span>
-            )}
-          </div>
-          {question.helper_text && (
-            <div className="text-[13px] text-slate-meta mt-0.5 leading-snug">
-              {question.helper_text}
-            </div>
-          )}
-          <div
-            className={`mt-2 text-[14px] leading-relaxed whitespace-pre-wrap ${
-              missing ? "italic text-slate-meta" : "text-ink"
-            }`}
-          >
-            {display}
-          </div>
-          {missing && question.required && (
-            <div className="mt-1.5 text-[12px] font-bold tracking-[1px] uppercase text-red-700">
-              Required question — no response
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ───────────────────────────────────────────────────────────────
- * Verification row (5G.e Tier 2)
- *
- * One row per job verification requirement. Mirrors ScreeningResponseRow's
- * structure + the required-but-blank red-flag treatment: a required
- * verification the candidate did not attest to gets the same uppercase
- * red callout.
- * ───────────────────────────────────────────────────────────── */
-
-interface VerificationRowData {
-  verificationType: string;
-  label: string;
-  required: boolean;
-  attested: boolean;
-  attestedAt: string | null;
-  linkedCredentials: Array<{
-    id: string;
-    type: string;
-    summary: string;
-    linkable: boolean;
-  }>;
-  note: string | null;
-}
-
-function formatAttestedAt(iso: string | null): string | null {
-  if (!iso) return null;
-  const d = new Date(iso);
-  if (isNaN(d.getTime())) return null;
-  return d.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
-
-function VerificationRow({ row }: { row: VerificationRowData }) {
-  const flagged = row.required && !row.attested;
-  const attestedDate = formatAttestedAt(row.attestedAt);
-
-  return (
-    <div className="p-5">
-      <div className="flex items-start gap-3">
-        <ShieldCheck className="h-4 w-4 text-heritage-deep flex-shrink-0 mt-0.5" />
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <div className="text-[14px] font-semibold text-ink leading-snug">
-              {row.label}
-            </div>
-            <span className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta">
-              Verification
-            </span>
-            {row.required && (
-              <span className="text-[9px] font-bold tracking-[2px] uppercase text-heritage-deep">
-                Required
-              </span>
-            )}
-          </div>
-
-          {/* Attestation status */}
-          <div
-            className={`mt-2 text-[14px] leading-relaxed ${
-              row.attested ? "text-ink" : "italic text-slate-meta"
-            }`}
-          >
-            {row.attested ? (
-              <span className="inline-flex items-center gap-1.5">
-                <span className="text-heritage-deep font-bold">✓</span>
-                Candidate attested
-                {attestedDate ? ` · ${attestedDate}` : ""}
-              </span>
-            ) : (
-              "Candidate did not attest"
-            )}
-          </div>
-
-          {/* Linked credential proof — 0..N (migration ...004). License /
-              certification entries deep-link to their row in the
-              Credentials section below, where the document + verify
-              controls live; education stays plain text. */}
-          {row.linkedCredentials.length > 0 && (
-            <div className="mt-1.5 text-[13px] text-slate-body leading-snug">
-              <span className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta mr-2">
-                Linked proof
-              </span>
-              {row.linkedCredentials.map((c, i) => (
-                <span key={`${c.type}-${c.id}`}>
-                  {i > 0 && "; "}
-                  {c.linkable ? (
-                    <a
-                      href={`#credential-${c.id}`}
-                      className="text-heritage-deep underline underline-offset-2 hover:text-ink"
-                    >
-                      {c.summary}
-                    </a>
-                  ) : (
-                    c.summary
-                  )}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Candidate note */}
-          {row.note && (
-            <div className="mt-1.5 text-[13px] text-slate-body leading-snug whitespace-pre-wrap">
-              <span className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta mr-2">
-                Note
-              </span>
-              {row.note}
-            </div>
-          )}
-
-          {/* Required-but-not-attested red flag — mirrors the screening
-              block's required-blank treatment. */}
-          {flagged && (
-            <div className="mt-1.5 text-[12px] font-bold tracking-[1px] uppercase text-red-700">
-              Required verification — not attested
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
   );
 }
