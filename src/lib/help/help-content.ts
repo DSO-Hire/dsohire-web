@@ -358,14 +358,16 @@ const INBOX: Record<string, HelpEntry> = {
 const SETTINGS: Record<string, HelpEntry> = {
   "billing.tiers": {
     title: "Plans & tiers",
-    tip: "Four plans — Solo, Growth, Scale, Enterprise. Every paying tier gets every feature in its tier; there's no feature gating beyond the plan you're on.",
+    tip: "Four plans — Solo, Growth, Scale, Enterprise. Every tier gets the full platform; tiers only change how much footprint you can run, and every cap we advertise is the cap the code enforces.",
     format: "disclosure",
     lens: "employer",
     bullets: [
-      "Solo — smaller groups getting started.",
-      "Growth — midsize, multi-location.",
-      "Scale — larger, multi-region operations.",
-      "Enterprise — the largest, most complex groups.",
+      "Solo — owner-operators: up to 5 active job openings and 5 team seats.",
+      "Growth — emerging groups: up to 20 openings and 15 seats, plus the per-teammate permissions editor and seat packs.",
+      "Scale — established DSOs: up to 100 openings and 50 seats, plus offer approval chains and confidential searches.",
+      "Enterprise — unlimited openings and seats.",
+      "Openings are counted as concurrent ACTIVE openings, not lifetime posts — closing a role frees its slot instantly.",
+      "You'll see a friendly nudge as you approach a cap, and a clear message (never a surprise charge) if you hit one. Downgrading with too many open roles pauses the overflow — you pick what stays live.",
     ],
   },
   "billing.annual": {
@@ -620,6 +622,7 @@ const CANDIDATE: Record<string, HelpEntry> = {
     lens: "candidate",
     bullets: [
       "Higher means a closer match to what you've told us you want.",
+      "Take the ~5-minute PracticeFit Assessment to sharpen scoring — including ranking what matters most to you, which tilts every score toward your priorities.",
       "Some jobs show no score when there isn't enough overlap data — that's not a no.",
       "It never blocks you from applying.",
     ],
@@ -775,7 +778,7 @@ const OFFER_ANALYTICS: Record<string, HelpEntry> = {
     steps: [
       {
         heading: "Who needs approval",
-        body: "By default, owners and admins send offers straight to the candidate. Recruiters and hiring managers have their offers held for an owner/admin to approve. You can grant a specific recruiter or hiring manager direct-send authority in Settings → Offer approvals.",
+        body: "By default, owners and admins send offers straight to the candidate, recruiters draft offers that route for approval, and hiring managers don't prepare offers at all. Both are per-teammate permissions — grant direct-send in Settings → Offer approvals, or adjust either capability from the Team page's permissions editor.",
       },
       {
         heading: "Pay guardrails",
@@ -841,6 +844,7 @@ const MISC: Record<string, HelpEntry> = {
     bullets: [
       "Awaiting review shows the oldest-waiting application and flags when it's past your SLA.",
       "Stuck = sitting in 'New' too long; Stale = no movement in a mid-pipeline stage. Both deep-link to the matching applications.",
+      "Today's top fits surfaces your strongest-scoring candidates across every open role; Interested in you highlights candidates who saved your jobs.",
       "Use the location switcher (top left) to scope the whole dashboard to one practice.",
     ],
   },
@@ -852,8 +856,9 @@ const MISC: Record<string, HelpEntry> = {
     bullets: [
       "Owner: full control, billing, and ownership transfer — typically your VP of HR / CPO.",
       "Admin: manage jobs, settings, and the team (no billing ownership).",
-      "Recruiter: works applications, messages, offers — no settings/billing.",
-      "Hiring manager: scoped to assigned locations only; never sees other practices' candidates.",
+      "Recruiter: works applications, messages, and drafts offers — no settings/billing. Sees compensation by default (you can change that).",
+      "Hiring manager: scoped to assigned locations only; reviews, scores, and moves candidates — doesn't message or make offers unless you grant it.",
+      "On Growth and up, fine-tune any individual teammate beyond their role preset — see Per-teammate permissions.",
     ],
   },
   "referrals.overview": {
@@ -878,6 +883,118 @@ const MISC: Record<string, HelpEntry> = {
   },
 };
 
+/* ────────────────────────────────────────────────────────────────────
+ * Day 25–32 feature wave (#81 refresh, 2026-06-11) — permissions &
+ * confidential search (#83), seat packs (#88), résumé builder (#87),
+ * DSOFit candidate side, the rebuilt apply wizard (#62), and Pipeline
+ * HQ (FOH-10). One banner section so the re-embed diff reads clean;
+ * fold entries into home sections on the next tidy pass.
+ * ─────────────────────────────────────────────────────────────────── */
+
+const DAY32: Record<string, HelpEntry> = {
+  "team.permissions": {
+    title: "Per-teammate permissions",
+    tip: "Every role comes with sensible defaults, and on Growth and up you can fine-tune what each individual teammate can do — from moving candidates to seeing pay to sending offers without approval.",
+    format: "drawer",
+    lens: "employer",
+    videoId: null,
+    steps: [
+      {
+        heading: "Roles are presets",
+        body: "Owner, Admin, Recruiter, and Hiring Manager each start with a sensible default capability set. Solo plans run these presets as-is; Growth and above unlock a per-teammate editor on the Team page.",
+      },
+      {
+        heading: "Fine-tune per person",
+        body: "Open Team, pick a teammate, and toggle individual capabilities — hide compensation from a recruiter, let a trusted hiring manager draft offers, or grant someone direct offer-sending. Changes apply immediately and are audit-logged.",
+      },
+      {
+        heading: "Some things never move",
+        body: "Billing, team management, and EEO report access can never be granted to recruiters or hiring managers — those stay owner/admin no matter what. Every rule is enforced on the server, not just hidden in the interface.",
+      },
+    ],
+  },
+  "jd.confidential": {
+    title: "Confidential searches",
+    tip: "Run a sensitive search — like replacing an incumbent — that only specific teammates can see. Everyone else won't find the job anywhere in the app; candidates still see the public posting normally.",
+    format: "disclosure",
+    lens: "employer",
+    bullets: [
+      "Turn on Confidential in the job wizard's Team Visibility step and pick who's in the loop — you're always included automatically.",
+      "Owners and admins always see confidential jobs; recruiters and hiring managers only if assigned.",
+      "Confidential controls TEAM visibility. The public posting, applications, and candidate experience are unaffected.",
+      "Enforced at the database level — the job and its applications simply don't exist for teammates outside the loop.",
+    ],
+  },
+  "pipeline.hq": {
+    title: "Pipeline HQ — every role, one board",
+    tip: "The cross-job kanban: every application across every practice and posting on a single board. Filter by job or minimum fit, and drag cards exactly like the per-job pipeline.",
+    format: "disclosure",
+    lens: "employer",
+    bullets: [
+      "Job chips along the top filter the board to one role; the lock icon marks confidential searches you're assigned to.",
+      "Min-fit filters to scored candidates at 70+ or 85+ — a quick quality pass across everything that's open.",
+      "Stage moves sync live for your whole team, and the same permissions apply as everywhere else.",
+      "The board shows your newest 500 applications; the Applications list remains the full archive.",
+    ],
+  },
+  "billing.seat_packs": {
+    title: "Seat packs",
+    tip: "Need a few more teammates without jumping tiers? Growth and Scale can add seats in packs of 3 for $99/month, prorated automatically.",
+    format: "disclosure",
+    lens: "employer",
+    bullets: [
+      "Add or remove packs from the Team or Billing page — takes effect immediately, billed prorated through Stripe.",
+      "Packs match your billing interval (monthly or annual).",
+      "Consistently near a cap? The next tier is usually better value — the Billing page does that math for you.",
+    ],
+  },
+  "cand.resume_builder": {
+    title: "Free résumé builder",
+    tip: "Build a polished, ATS-safe résumé from your DSO Hire profile in minutes — six templates, clean PDF download, yours to use anywhere. Free forever, no watermarks.",
+    format: "drawer",
+    lens: "candidate",
+    videoId: null,
+    steps: [
+      {
+        heading: "Built from your profile",
+        body: "The guided builder walks through contact, summary, experience, skills, education, and credentials — pre-filled from your profile, or built from zero if you're starting fresh. Add custom sections and reorder everything to taste.",
+      },
+      {
+        heading: "Six ATS-safe templates",
+        body: "Pick a template and switch anytime — Classic, Modern, Executive, Minimal, Compact, or Accent. All six are designed to parse cleanly through applicant tracking systems, including ours.",
+      },
+      {
+        heading: "Use it everywhere",
+        body: "Download the PDF, and it attaches automatically when you apply on DSO Hire. Mid-application without a résumé? The apply flow offers to build one free on the spot.",
+      },
+    ],
+  },
+  "cand.dsofit": {
+    title: "Your DSOFit score",
+    tip: "The corporate-side sibling of PracticeFit — for finance, ops, IT, marketing, and executive roles at dental organizations. Same honesty rules: it guides, it never gates.",
+    format: "disclosure",
+    lens: "candidate",
+    bullets: [
+      "Pick the corporate track (or both tracks) and take the ~5-minute DSOFit assessment to unlock scoring.",
+      "Scores only reflect what you've actually told us — a thin profile is never punished, and missing data shows as no score, not a low one.",
+      "Clinical-to-corporate movers are first-class citizens: a DDS eyeing an executive seat scores on the corporate dimensions that apply.",
+      "You can switch or add tracks anytime from your profile.",
+    ],
+  },
+  "cand.apply": {
+    title: "Applying on DSO Hire",
+    tip: "Applications are one clear question at a time — about three minutes, with your answers saving as you go. Upload or build a résumé and we pre-fill what we can, so you never type what we can read.",
+    format: "disclosure",
+    lens: "candidate",
+    bullets: [
+      "Progress saves automatically — leave mid-application and pick up where you stopped.",
+      "Résumé autofill pulls your experience and skills in; you review everything before it's used.",
+      "Some questions use sliders or tap-to-rank — answer honestly, they feed your fit scoring both ways.",
+      "Applying shares your profile with that employer only. Browsing stays private, and anonymous mode keeps masking you everywhere else.",
+    ],
+  },
+};
+
 /* ──────────────────────────────────────────────────────────────────── */
 
 export const HELP_CONTENT: Record<string, HelpEntry> = {
@@ -889,6 +1006,7 @@ export const HELP_CONTENT: Record<string, HelpEntry> = {
   ...OFFER_ANALYTICS,
   ...MISC,
   ...CANDIDATE,
+  ...DAY32,
 };
 
 export type HelpKey = keyof typeof HELP_CONTENT;

@@ -9,6 +9,12 @@ export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-11",
     kind: "improved",
+    title: "Help center caught up with everything new",
+    body: "Seven new help articles — per-teammate permissions, confidential searches, Pipeline HQ, seat packs, the résumé builder, DSOFit, and the new apply flow — plus refreshed plan and team guides. The in-app AI assistant learned all of it too.",
+  },
+  {
+    date: "2026-06-11",
+    kind: "improved",
     title: "The ROI calculator now counts job-board fees too",
     body: "Hiring spend is two channels, not one — agency placement fees AND per-listing job-board costs. A side-by-side spend picture shows your stack against our one flat line, and the math finally works for groups that never touch agencies.",
   },
