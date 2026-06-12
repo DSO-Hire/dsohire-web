@@ -70,6 +70,8 @@ import {
 } from "@/lib/messages/actions";
 import { RichCardRenderer } from "@/components/inbox/rich-cards";
 import type { ThreadNote } from "@/lib/inbox/types";
+import { useToast } from "@/components/app/toast";
+import { createApplicationComment } from "@/app/employer/applications/[id]/comments-actions";
 
 const EDIT_WINDOW_MS = 5 * 60 * 1000;
 const MAX_BODY = 5000;
@@ -96,8 +98,17 @@ export interface MessagesThreadProps {
    * (Lane 4 — Conversations 2.0). Employer surfaces only — candidate
    * surfaces must never pass this. Notes render amber + locked, take
    * no part in read/unread or realtime, and are never sent anywhere.
+   * Passing this prop also enables the composer's internal-note toggle.
    */
   notes?: ThreadNote[];
+  /**
+   * Job title for slash-template merge fields. Employer surfaces only;
+   * when absent, templates fall back to "this role".
+   */
+  jobTitle?: string;
+  /** Fired after the composer saves an internal note, so the owner of
+   * the `notes` prop can append it to the timeline without a refetch. */
+  onNoteAdded?: (note: ThreadNote) => void;
 }
 
 interface ThreadMessage extends ApplicationMessageRow {
@@ -166,6 +177,119 @@ function renderNoteBody(body: string): React.ReactNode[] {
   return nodes;
 }
 
+/* ───────────────────────────────────────────────────────────────
+ * Slash templates (Lane 4 — Composer 2.0). Employer-only quick
+ * replies: type "/" as the FIRST character to open the picker.
+ * Merge tokens render as chips in the preview and resolve to the
+ * REAL thread context at insert — what lands in the textarea is
+ * exactly what sends, no hidden substitution at send time.
+ *
+ * Honesty rules: no invented capabilities (no calendar links — we
+ * don't have scheduling links), no invented facts. Candidate name
+ * comes from the thread's display name, which is already anonymity-
+ * masked upstream — never resolve from raw candidate rows here.
+ * ───────────────────────────────────────────────────────────── */
+
+interface ComposerTemplate {
+  slug: string;
+  label: string;
+  description: string;
+  /** Body with {{candidate.name}} / {{job.title}} / {{sender.name}} tokens. */
+  body: string;
+}
+
+const COMPOSER_TEMPLATES: ComposerTemplate[] = [
+  {
+    slug: "interview-invite",
+    label: "/interview-invite",
+    description: "Propose interview times",
+    body: "Hi {{candidate.name}} — we'd love to set up an interview for the {{job.title}} role. Could you share a few days and times that work for you over the next week or so? We're happy to work around your schedule.\n\n{{sender.name}}",
+  },
+  {
+    slug: "screening-call",
+    label: "/screening-call",
+    description: "Invite to a quick screening call",
+    body: "Hi {{candidate.name}} — thanks for your application for {{job.title}}. We'd love to start with a quick 15-minute call to talk through the role and hear what you're looking for. What does your availability look like this week?\n\n{{sender.name}}",
+  },
+  {
+    slug: "interview-prep",
+    label: "/interview-prep",
+    description: "What to expect before an interview",
+    body: "Hi {{candidate.name}} — looking forward to your interview for {{job.title}}. A quick note on what to expect: we'll walk through your background, talk about the day-to-day of the role, and leave plenty of time for your questions. Nothing to prepare — come as you are.\n\nIf anything comes up beforehand, just reply here.\n\n{{sender.name}}",
+  },
+  {
+    slug: "gentle-nudge",
+    label: "/gentle-nudge",
+    description: "Re-engage a quiet candidate, no pressure",
+    body: "Hi {{candidate.name}} — just checking in on the {{job.title}} conversation. No rush at all on our end; if you're still interested, I'd love to keep things moving. And if your situation has changed, that's completely fine too — just let me know either way.\n\n{{sender.name}}",
+  },
+  {
+    slug: "next-steps",
+    label: "/next-steps",
+    description: "Where things stand + what happens next",
+    body: "Hi {{candidate.name}} — thanks for your patience on the {{job.title}} role. Quick update: your application is with our team and we'll be back in touch shortly with next steps. Feel free to reply here with any questions in the meantime.\n\n{{sender.name}}",
+  },
+];
+
+const TEMPLATE_TOKEN_REGEX =
+  /\{\{(candidate\.name|job\.title|sender\.name)\}\}/g;
+
+interface TemplateContext {
+  candidateName: string;
+  jobTitle: string;
+  senderName: string;
+}
+
+function resolveTemplate(body: string, ctx: TemplateContext): string {
+  return body.replace(TEMPLATE_TOKEN_REGEX, (_, token: string) => {
+    switch (token) {
+      case "candidate.name":
+        return ctx.candidateName;
+      case "job.title":
+        return ctx.jobTitle;
+      case "sender.name":
+        return ctx.senderName;
+      default:
+        return _;
+    }
+  });
+}
+
+const TOKEN_CHIP_LABELS: Record<string, string> = {
+  "candidate.name": "Candidate",
+  "job.title": "Job title",
+  "sender.name": "Your name",
+};
+
+/** Preview renderer — merge tokens become visible chips. */
+function renderTemplatePreview(body: string): React.ReactNode[] {
+  const nodes: React.ReactNode[] = [];
+  let lastIdx = 0;
+  let key = 0;
+  const re = new RegExp(TEMPLATE_TOKEN_REGEX.source, "g");
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(body)) !== null) {
+    if (match.index > lastIdx) {
+      nodes.push(
+        <span key={`t-${key++}`}>{body.slice(lastIdx, match.index)}</span>
+      );
+    }
+    nodes.push(
+      <span
+        key={`c-${key++}`}
+        className="inline-block px-1 py-0.5 -my-0.5 bg-heritage/15 text-heritage-deep text-[11px] font-semibold rounded-sm whitespace-nowrap"
+      >
+        {TOKEN_CHIP_LABELS[match[1]] ?? match[1]}
+      </span>
+    );
+    lastIdx = match.index + match[0].length;
+  }
+  if (lastIdx < body.length) {
+    nodes.push(<span key={`t-${key++}`}>{body.slice(lastIdx)}</span>);
+  }
+  return nodes;
+}
+
 function roleLabel(role: MessagesThreadRole): string {
   return role === "candidate" ? "Candidate" : "Hiring team";
 }
@@ -203,6 +327,8 @@ export function MessagesThread({
   otherPartyName,
   initialMessages,
   notes,
+  jobTitle,
+  onNoteAdded,
 }: MessagesThreadProps) {
   const [messages, setMessages] = useState<ThreadMessage[]>(() =>
     [...initialMessages].sort(
@@ -241,6 +367,30 @@ export function MessagesThread({
   const [composerError, setComposerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [stagedFiles, setStagedFiles] = useState<File[]>([]);
+
+  // ── Composer 2.0 (Lane 4) ──────────────────────────────────────
+  // Internal-note mode — only offered when the surface opted into the
+  // unified timeline (notes prop present) AND the viewer is employer-
+  // side. Slash templates are employer-only as well.
+  const toast = useToast();
+  const [noteMode, setNoteMode] = useState(false);
+  const noteModeAvailable =
+    currentUserRole === "employer" && notes !== undefined;
+  const slashEnabled = currentUserRole === "employer" && !noteMode;
+  const [slashIdx, setSlashIdx] = useState(0);
+  const slashOpen = slashEnabled && composerBody.startsWith("/");
+  const slashFilter = slashOpen
+    ? composerBody.slice(1).toLowerCase().trimStart()
+    : "";
+  const slashMatches = useMemo(() => {
+    if (!slashOpen) return [];
+    if (!slashFilter) return COMPOSER_TEMPLATES;
+    return COMPOSER_TEMPLATES.filter(
+      (t) =>
+        t.slug.includes(slashFilter) ||
+        t.description.toLowerCase().includes(slashFilter)
+    );
+  }, [slashOpen, slashFilter]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -380,14 +530,15 @@ export function MessagesThread({
     };
   }, [applicationId]);
 
-  /* ── Auto-scroll on new messages when user is near the bottom ── */
+  /* ── Auto-scroll on new messages/notes when user is near the bottom ── */
+  const notesLength = notes?.length ?? 0;
   useEffect(() => {
     const el = listRef.current;
     if (!el) return;
     if (wasNearBottomRef.current) {
       el.scrollTop = el.scrollHeight;
     }
-  }, [messages.length]);
+  }, [messages.length, notesLength]);
 
   function handleListScroll(): void {
     const el = listRef.current;
@@ -421,7 +572,69 @@ export function MessagesThread({
   ): void {
     setComposerBody(e.target.value);
     setComposerError(null);
+    setSlashIdx(0);
   }
+
+  /** Insert a slash template — resolved against the REAL thread context
+   * at insert time, so the textarea holds exactly what will send. */
+  function insertTemplate(template: ComposerTemplate): void {
+    const resolved = resolveTemplate(template.body, {
+      candidateName: otherPartyName,
+      jobTitle: jobTitle ?? "this role",
+      senderName: currentUserName,
+    });
+    setComposerBody(resolved);
+    setSlashIdx(0);
+    // Refocus + caret to end after React commits the new value.
+    requestAnimationFrame(() => {
+      const el = composerRef.current;
+      if (el) {
+        el.focus();
+        el.setSelectionRange(el.value.length, el.value.length);
+      }
+    });
+  }
+
+  /** Save the composer body as an internal team note (application_comments
+   * — the same write path as the application page's comments thread).
+   * Inert: never emailed, never visible to the candidate. */
+  const handleSaveNote = useCallback(async (): Promise<void> => {
+    const body = composerBody.trim();
+    if (!body) {
+      setComposerError("Note cannot be empty.");
+      return;
+    }
+    if (body.length > 4000) {
+      setComposerError("Note is too long (4000 character max).");
+      return;
+    }
+    setSubmitting(true);
+    setComposerError(null);
+    const result = await createApplicationComment({
+      applicationId,
+      body,
+      mentionedUserIds: [],
+    });
+    if (!result.ok) {
+      setComposerError(result.error);
+      setSubmitting(false);
+      return;
+    }
+    wasNearBottomRef.current = true;
+    onNoteAdded?.({
+      id: result.comment.id,
+      body: result.comment.body,
+      created_at: result.comment.created_at,
+      edited_at: result.comment.edited_at,
+      author_name: currentUserName,
+    });
+    setComposerBody("");
+    setSubmitting(false);
+    toast({
+      title: "Note saved",
+      body: "Visible to your team only — never sent to the candidate.",
+    });
+  }, [applicationId, composerBody, currentUserName, onNoteAdded, toast]);
 
   function handleEditChange(e: ChangeEvent<HTMLTextAreaElement>): void {
     setEditingBody(e.target.value);
@@ -636,10 +849,40 @@ export function MessagesThread({
   function handleComposerKeyDown(
     e: KeyboardEvent<HTMLTextAreaElement>
   ): void {
+    // Slash-template picker owns the keyboard while open.
+    if (slashOpen && slashMatches.length > 0) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSlashIdx((i) => (i + 1) % slashMatches.length);
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSlashIdx(
+          (i) => (i - 1 + slashMatches.length) % slashMatches.length
+        );
+        return;
+      }
+      if (e.key === "Enter" || e.key === "Tab") {
+        if (e.nativeEvent.isComposing) return;
+        e.preventDefault();
+        insertTemplate(slashMatches[Math.min(slashIdx, slashMatches.length - 1)]);
+        return;
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setComposerBody("");
+        return;
+      }
+    }
     if (e.key !== "Enter") return;
     if (e.shiftKey) return; // newline
     if (e.nativeEvent.isComposing) return; // IME compose — let it through
     e.preventDefault();
+    if (noteMode) {
+      void handleSaveNote();
+      return;
+    }
     void handleSubmit();
   }
 
@@ -1070,12 +1313,73 @@ export function MessagesThread({
       </div>
 
       {/* Composer — pinned to the bottom edge of the same window */}
-      <div className="shrink-0 border-t border-heritage/30 bg-cream/40 px-4 py-3">
-        {/* Compressed medical-info reminder — single line italic */}
-        <p className="text-[11px] italic text-heritage-deep/80 mb-2 leading-snug">
-          Don&apos;t share medical information here — discuss accommodations
-          directly with HR.
-        </p>
+      <div
+        className={`relative shrink-0 border-t px-4 py-3 transition-colors ${
+          noteMode
+            ? "border-amber-300 bg-amber-50/80"
+            : "border-heritage/30 bg-cream/40"
+        }`}
+      >
+        {/* Slash-template picker — floats above the composer row. */}
+        {slashOpen && (
+          <div className="absolute bottom-full left-2 right-2 mb-1 z-20 bg-white border border-heritage/40 shadow-[0_14px_30px_-12px_rgba(7,15,28,0.35)] max-h-72 overflow-y-auto">
+            {slashMatches.length === 0 ? (
+              <p className="px-3 py-2.5 text-[12px] text-slate-meta">
+                No templates match &ldquo;{slashFilter}&rdquo; — keep typing
+                to write your own message.
+              </p>
+            ) : (
+              <ul>
+                {slashMatches.map((t, i) => (
+                  <li key={t.slug}>
+                    <button
+                      type="button"
+                      onMouseEnter={() => setSlashIdx(i)}
+                      onClick={() => insertTemplate(t)}
+                      className={`w-full text-left px-3 py-2 border-b border-[var(--rule)] last:border-b-0 transition-colors ${
+                        i === slashIdx ? "bg-heritage/10" : "bg-white"
+                      }`}
+                    >
+                      <span className="flex items-baseline gap-2">
+                        <span className="font-mono text-[12px] font-bold text-heritage-deep shrink-0">
+                          {t.label}
+                        </span>
+                        <span className="text-[12px] text-slate-meta truncate">
+                          {t.description}
+                        </span>
+                      </span>
+                      {i === slashIdx && (
+                        <span className="block mt-1 text-[12px] leading-relaxed text-ink/80 whitespace-pre-wrap max-h-24 overflow-hidden">
+                          {renderTemplatePreview(t.body)}
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <p className="px-3 py-1.5 text-[10px] text-slate-meta border-t border-[var(--rule)] bg-cream/40">
+              <span className="font-mono">↑↓</span> choose ·{" "}
+              <span className="font-mono">↩</span> insert ·{" "}
+              <span className="font-mono">Esc</span> dismiss — fields fill
+              from this conversation
+            </p>
+          </div>
+        )}
+        {noteMode ? (
+          /* Note-mode strip replaces the medical reminder. */
+          <p className="flex items-center gap-1.5 text-[11px] font-semibold text-amber-800 mb-2 leading-snug">
+            <Lock className="h-3 w-3 shrink-0" aria-hidden />
+            Internal note — added to the timeline for your team only, never
+            sent to the candidate.
+          </p>
+        ) : (
+          /* Compressed medical-info reminder — single line italic */
+          <p className="text-[11px] italic text-heritage-deep/80 mb-2 leading-snug">
+            Don&apos;t share medical information here — discuss accommodations
+            directly with HR.
+          </p>
+        )}
         {stagedFiles.length > 0 && (
           <ul className="flex flex-wrap gap-2 mb-2">
             {stagedFiles.map((file, i) => {
@@ -1114,22 +1418,49 @@ export function MessagesThread({
             onChange={handleFilesPicked}
             className="hidden"
           />
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={
-              submitting || stagedFiles.length >= MAX_ATTACHMENTS_PER_MESSAGE
-            }
-            aria-label="Attach files"
-            title={
-              stagedFiles.length >= MAX_ATTACHMENTS_PER_MESSAGE
-                ? `Up to ${MAX_ATTACHMENTS_PER_MESSAGE} files per message`
-                : "Attach files (PDF, image, doc, txt — 25 MB max each)"
-            }
-            className="px-2 py-2 bg-white border border-heritage/40 text-heritage-deep hover:text-ink hover:border-heritage transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
-          >
-            <Paperclip className="h-4 w-4" />
-          </button>
+          {noteModeAvailable && (
+            <button
+              type="button"
+              onClick={() => {
+                setNoteMode((v) => !v);
+                setComposerError(null);
+              }}
+              aria-pressed={noteMode}
+              aria-label={
+                noteMode ? "Switch back to message" : "Switch to internal note"
+              }
+              title={
+                noteMode
+                  ? "Back to messaging the candidate"
+                  : "Internal note — visible to your team only"
+              }
+              className={`px-2 py-2 border transition-colors shrink-0 ${
+                noteMode
+                  ? "bg-amber-100 border-amber-400 text-amber-800"
+                  : "bg-white border-heritage/40 text-heritage-deep hover:text-ink hover:border-heritage"
+              }`}
+            >
+              <Lock className="h-4 w-4" />
+            </button>
+          )}
+          {!noteMode && (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={
+                submitting || stagedFiles.length >= MAX_ATTACHMENTS_PER_MESSAGE
+              }
+              aria-label="Attach files"
+              title={
+                stagedFiles.length >= MAX_ATTACHMENTS_PER_MESSAGE
+                  ? `Up to ${MAX_ATTACHMENTS_PER_MESSAGE} files per message`
+                  : "Attach files (PDF, image, doc, txt — 25 MB max each)"
+              }
+              className="px-2 py-2 bg-white border border-heritage/40 text-heritage-deep hover:text-ink hover:border-heritage transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+            >
+              <Paperclip className="h-4 w-4" />
+            </button>
+          )}
           <textarea
             ref={composerRef}
             value={composerBody}
@@ -1137,25 +1468,53 @@ export function MessagesThread({
             onKeyDown={handleComposerKeyDown}
             rows={2}
             maxLength={MAX_BODY}
-            placeholder={`Message ${otherPartyName}…`}
-            className="flex-1 px-3 py-2 bg-white border border-heritage/40 text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed resize-none"
+            placeholder={
+              noteMode
+                ? "Internal note for your team…"
+                : slashEnabled
+                  ? `Message ${otherPartyName}… ("/" for templates)`
+                  : `Message ${otherPartyName}…`
+            }
+            className={`flex-1 px-3 py-2 text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:ring-1 transition-colors leading-relaxed resize-none border ${
+              noteMode
+                ? "bg-amber-50 border-amber-400 focus:border-amber-500 focus:ring-amber-400"
+                : "bg-white border-heritage/40 focus:border-heritage focus:ring-heritage"
+            }`}
           />
           <button
             type="button"
-            onClick={() => void handleSubmit()}
+            onClick={() =>
+              noteMode ? void handleSaveNote() : void handleSubmit()
+            }
             disabled={
               submitting ||
-              (composerBody.trim().length === 0 && stagedFiles.length === 0)
+              (composerBody.trim().length === 0 &&
+                (noteMode || stagedFiles.length === 0))
             }
-            className="px-4 py-2 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed shrink-0"
+            className={`px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors disabled:opacity-60 disabled:cursor-not-allowed shrink-0 ${
+              noteMode
+                ? "bg-amber-600 text-white hover:bg-amber-700"
+                : "bg-ink text-ivory hover:bg-ink-soft"
+            }`}
           >
-            {submitting ? "Sending…" : "Send"}
+            {submitting
+              ? noteMode
+                ? "Saving…"
+                : "Sending…"
+              : noteMode
+                ? "Save note"
+                : "Send"}
           </button>
         </div>
         <div className="flex items-center gap-3 mt-1.5 text-[10px] text-slate-meta flex-wrap">
           <span>
-            <span className="font-mono">↩</span> sends,{" "}
+            <span className="font-mono">↩</span> {noteMode ? "saves" : "sends"},{" "}
             <span className="font-mono">Shift+↩</span> for newline
+            {slashEnabled && (
+              <>
+                , <span className="font-mono">/</span> for templates
+              </>
+            )}
           </span>
           <span className={remainingClass}>
             {remaining} characters left

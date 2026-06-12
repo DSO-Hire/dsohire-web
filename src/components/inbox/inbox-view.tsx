@@ -658,6 +658,16 @@ export function InboxView({
                   otherPartyName={activeThread.peer.display_name}
                   initialMessages={activeMessages}
                   notes={audience === "employer" ? activeNotes : undefined}
+                  jobTitle={
+                    audience === "employer"
+                      ? activeThread.job_title
+                      : undefined
+                  }
+                  onNoteAdded={
+                    audience === "employer"
+                      ? (note) => setActiveNotes((prev) => [...prev, note])
+                      : undefined
+                  }
                 />
               </div>
             </>

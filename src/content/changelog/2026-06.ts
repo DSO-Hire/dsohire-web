@@ -8,6 +8,12 @@ import type { ChangelogEntry } from "./index";
 export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-12",
+    kind: "new",
+    title: "Type \"/\" for message templates — and notes from the composer",
+    body: "The inbox composer learned two tricks. Type \"/\" to pick from ready-made replies — interview invites, screening calls, gentle nudges — with the candidate's name, the job title, and your name filled in from the conversation you're in. And a lock toggle flips the composer into internal-note mode: amber, team-only, saved straight into the timeline without ever touching the candidate.",
+  },
+  {
+    date: "2026-06-12",
     kind: "improved",
     title: "Your team's notes, right in the conversation",
     body: "The inbox thread is now a unified timeline: messages, stage changes, and your team's internal notes interleave in one stream, in order. Notes are unmistakably amber, marked Internal, and never sent — the candidate's view is unchanged. No more flipping to the application page to remember what your team said about the conversation you're reading.",
