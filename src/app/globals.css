@@ -796,22 +796,29 @@ html, body {
 @keyframes rail-ic-draw { from { stroke-dashoffset: 90; } to { stroke-dashoffset: 0; } }
 .rail-item:hover .rail-ic > * {
   stroke-dasharray: 90 1000;
-  animation: rail-ic-draw 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: rail-ic-draw 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-.rail-item:hover .rail-ic > *:nth-child(2) { animation-delay: 0.07s; }
-.rail-item:hover .rail-ic > *:nth-child(3) { animation-delay: 0.14s; }
-.rail-item:hover .rail-ic > *:nth-child(4) { animation-delay: 0.21s; }
-.rail-item:hover .rail-ic > *:nth-child(n + 5) { animation-delay: 0.28s; }
+.rail-item:hover .rail-ic > *:nth-child(2) { animation-delay: 0.12s; }
+.rail-item:hover .rail-ic > *:nth-child(3) { animation-delay: 0.24s; }
+.rail-item:hover .rail-ic > *:nth-child(4) { animation-delay: 0.36s; }
+.rail-item:hover .rail-ic > *:nth-child(n + 5) { animation-delay: 0.48s; }
 
-/* Inbox — the mail drops into the tray. */
+/* Inbox — the mail drops in from above, the tray thunks on landing. */
 @keyframes rail-mail-drop {
-  from { transform: translateY(-5px); opacity: 0; }
-  60% { opacity: 1; }
+  from { transform: translateY(-8px); opacity: 0; }
+  45% { opacity: 1; }
+  70% { transform: translateY(0.5px); }
   to { transform: translateY(0); opacity: 1; }
 }
+@keyframes rail-inbox-thunk {
+  0%, 55% { transform: translateY(0); }
+  70% { transform: translateY(1.5px); }
+  100% { transform: translateY(0); }
+}
+.rail-item:hover .rail-ic-inbox { animation: rail-inbox-thunk 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+.rail-item:hover .rail-ic-inbox > * { stroke-dasharray: none; animation: none; }
 .rail-item:hover .rail-ic-inbox > *:first-child {
-  stroke-dasharray: none;
-  animation: rail-mail-drop 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: rail-mail-drop 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* Analytics — the bars pump up from the baseline, staggered. */
@@ -849,4 +856,68 @@ html, body {
     animation: none !important;
     stroke-dasharray: none !important;
   }
+}
+
+/* Dashboard — the four tiles snap in one-by-one. */
+@keyframes rail-tile-pop {
+  0% { transform: scale(0.6); opacity: 0.3; }
+  70% { transform: scale(1.12); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.rail-item:hover .rail-ic-dashboard > * {
+  stroke-dasharray: none;
+  transform-origin: center;
+  animation: rail-tile-pop 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.rail-item:hover .rail-ic-dashboard > *:nth-child(2) { animation-delay: 0.09s; }
+.rail-item:hover .rail-ic-dashboard > *:nth-child(3) { animation-delay: 0.18s; }
+.rail-item:hover .rail-ic-dashboard > *:nth-child(4) { animation-delay: 0.27s; }
+
+/* Pipeline HQ — the kanban columns bob like cards shuffling. */
+@keyframes rail-kan-bob {
+  0% { transform: translateY(0); }
+  35% { transform: translateY(-2px); }
+  70% { transform: translateY(1px); }
+  100% { transform: translateY(0); }
+}
+.rail-item:hover .rail-ic-pipeline > * { stroke-dasharray: none; animation: none; }
+.rail-item:hover .rail-ic-pipeline > *:nth-child(n + 2) {
+  animation: rail-kan-bob 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.rail-item:hover .rail-ic-pipeline > *:nth-child(3) { animation-delay: 0.1s; }
+.rail-item:hover .rail-ic-pipeline > *:nth-child(4) { animation-delay: 0.2s; }
+
+/* Referrals — the plus pops in. */
+@keyframes rail-plus-pop {
+  0% { transform: scale(0); }
+  65% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+.rail-item:hover .rail-ic-referrals > * { stroke-dasharray: none; animation: none; }
+.rail-item:hover .rail-ic-referrals > *:nth-child(n + 3) {
+  transform-origin: center;
+  animation: rail-plus-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+}
+
+/* Billing — the card swipes through. */
+@keyframes rail-card-swipe {
+  0% { transform: translateX(-7px); opacity: 0.2; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+.rail-item:hover .rail-ic-billing > * { stroke-dasharray: none; animation: none; }
+.rail-item:hover .rail-ic-billing {
+  animation: rail-card-swipe 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Offer approvals — the checkmark draws itself in, then settles. */
+@keyframes rail-check-draw {
+  0% { stroke-dashoffset: 90; transform: scale(1); }
+  70% { stroke-dashoffset: 0; transform: scale(1.15); }
+  100% { stroke-dashoffset: 0; transform: scale(1); }
+}
+.rail-item:hover .rail-ic-offer-approvals > * { stroke-dasharray: none; animation: none; }
+.rail-item:hover .rail-ic-offer-approvals > *:last-child {
+  stroke-dasharray: 90 1000;
+  transform-origin: center;
+  animation: rail-check-draw 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
 }
