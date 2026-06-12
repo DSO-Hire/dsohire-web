@@ -51,11 +51,12 @@ import {
 import { Avatar } from "@/components/ui/avatar";
 import { MessagesThread } from "@/components/messaging/messages-thread";
 import type { ApplicationMessageRow } from "@/lib/messages/actions";
-import type { InboxThread } from "@/lib/inbox/types";
+import type { InboxThread, ThreadNote } from "@/lib/inbox/types";
 import {
   archiveThread,
   unarchiveThread,
   markThreadRead,
+  getThreadNotes,
 } from "@/lib/inbox/actions";
 
 type Audience = "employer" | "candidate";
@@ -93,6 +94,12 @@ export interface InboxViewProps {
   currentUserName: string;
   initialActiveApplicationId: string | null;
   initialActiveMessages: ApplicationMessageRow[];
+  /**
+   * Internal team notes for the initially-active thread (Lane 4 unified
+   * timeline). Employer audience only — the candidate inbox page never
+   * supplies this, and the notes fetch is audience-gated client-side too.
+   */
+  initialActiveNotes?: ThreadNote[];
 }
 
 export function InboxView({
@@ -102,6 +109,7 @@ export function InboxView({
   currentUserName,
   initialActiveApplicationId,
   initialActiveMessages,
+  initialActiveNotes,
 }: InboxViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -115,6 +123,11 @@ export function InboxView({
   const [threads, setThreads] = useState<InboxThread[]>(initialThreads);
   const [activeMessages, setActiveMessages] = useState<ApplicationMessageRow[]>(
     initialActiveMessages
+  );
+  // Internal team notes interleave into the unified timeline (employer
+  // only). Fetched per-thread via the RLS-scoped getThreadNotes action.
+  const [activeNotes, setActiveNotes] = useState<ThreadNote[]>(
+    initialActiveNotes ?? []
   );
   const [activeId, setActiveId] = useState<string | null>(
     initialActiveApplicationId
@@ -215,6 +228,14 @@ export function InboxView({
       // Fetch messages for the right pane.
       void fetchActiveMessages(thread.application_id);
 
+      // Internal notes for the unified timeline — employer side only.
+      // Clear first so a slow fetch never shows the previous thread's
+      // notes against the new thread's messages.
+      setActiveNotes([]);
+      if (audience === "employer") {
+        void getThreadNotes(thread.application_id).then(setActiveNotes);
+      }
+
       // Mark all incoming messages on this thread read, then refresh
       // so the shell-rendered inbox-unread badge picks up the new
       // count without requiring a navigation. (Cam ask: the inbox
@@ -225,7 +246,7 @@ export function InboxView({
         router.refresh();
       });
     },
-    [router, searchParams]
+    [router, searchParams, audience]
   );
 
   const fetchActiveMessages = useCallback(
@@ -280,6 +301,7 @@ export function InboxView({
   const goBackToList = () => {
     setActiveId(null);
     setActiveMessages([]);
+    setActiveNotes([]);
     const params = new URLSearchParams(searchParams);
     params.delete("app");
     const qs = params.toString();
@@ -635,6 +657,7 @@ export function InboxView({
                   currentUserName={currentUserName}
                   otherPartyName={activeThread.peer.display_name}
                   initialMessages={activeMessages}
+                  notes={audience === "employer" ? activeNotes : undefined}
                 />
               </div>
             </>

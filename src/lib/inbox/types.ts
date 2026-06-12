@@ -14,6 +14,20 @@ export interface InboxPeer {
   avatar_url: string | null;
 }
 
+/**
+ * Internal team note projected into the unified timeline (Lane 4 —
+ * Conversations 2.0). Sourced from `application_comments` (RLS: DSO
+ * members only — candidates structurally cannot read these). Inert in
+ * the thread: no unread tracking, never emailed, no realtime in v1.
+ */
+export interface ThreadNote {
+  id: string;
+  body: string;
+  created_at: string;
+  edited_at: string | null;
+  author_name: string;
+}
+
 export interface InboxThread {
   application_id: string;
   job_id: string;

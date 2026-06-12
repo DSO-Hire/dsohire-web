@@ -24,6 +24,8 @@ import {
   projectApplicationMessageRow,
 } from "@/lib/inbox/queries";
 import type { ApplicationMessageRow } from "@/lib/messages/actions";
+import type { ThreadNote } from "@/lib/inbox/types";
+import { getThreadNotes } from "@/lib/inbox/actions";
 import { InboxView } from "@/components/inbox/inbox-view";
 
 export const metadata: Metadata = { title: "Inbox · DSO Hire" };
@@ -61,6 +63,7 @@ export default async function EmployerInboxPage({ searchParams }: PageProps) {
   // If the URL points at an application id, prefetch the messages for
   // the right pane. Otherwise the right pane shows an empty state.
   let activeMessages: ApplicationMessageRow[] = [];
+  let activeNotes: ThreadNote[] = [];
   let activeApplicationId: string | null = null;
   if (appQuery) {
     const matchingThread = threads.find(
@@ -68,11 +71,18 @@ export default async function EmployerInboxPage({ searchParams }: PageProps) {
     );
     if (matchingThread) {
       activeApplicationId = appQuery;
-      const { data: msgRows, error: msgErr } = await supabase
-        .from("application_messages")
-        .select(APPLICATION_MESSAGE_SELECT)
-        .eq("application_id", appQuery)
-        .order("created_at", { ascending: true });
+      // Messages + internal team notes in parallel (Lane 4 unified
+      // timeline). Notes are employer-side only — the candidate inbox
+      // page never fetches them, and application_comments RLS would
+      // return zero rows to a candidate anyway.
+      const [{ data: msgRows, error: msgErr }, notes] = await Promise.all([
+        supabase
+          .from("application_messages")
+          .select(APPLICATION_MESSAGE_SELECT)
+          .eq("application_id", appQuery)
+          .order("created_at", { ascending: true }),
+        getThreadNotes(appQuery),
+      ]);
       if (msgErr) {
         console.error("[inbox] employer active-thread messages", msgErr);
       }
@@ -80,6 +90,7 @@ export default async function EmployerInboxPage({ searchParams }: PageProps) {
         (row) =>
           projectApplicationMessageRow(row) as unknown as ApplicationMessageRow
       );
+      activeNotes = notes;
     }
   }
 
@@ -92,6 +103,7 @@ export default async function EmployerInboxPage({ searchParams }: PageProps) {
         currentUserName={userName}
         initialActiveApplicationId={activeApplicationId}
         initialActiveMessages={activeMessages}
+        initialActiveNotes={activeNotes}
       />
     </EmployerShell>
   );

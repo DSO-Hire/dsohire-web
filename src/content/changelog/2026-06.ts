@@ -9,6 +9,12 @@ export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-12",
     kind: "improved",
+    title: "Your team's notes, right in the conversation",
+    body: "The inbox thread is now a unified timeline: messages, stage changes, and your team's internal notes interleave in one stream, in order. Notes are unmistakably amber, marked Internal, and never sent — the candidate's view is unchanged. No more flipping to the application page to remember what your team said about the conversation you're reading.",
+  },
+  {
+    date: "2026-06-12",
+    kind: "improved",
     title: "Stage moves now confirm themselves",
     body: "Move a candidate to a new stage and a quiet confirmation slides in — including when you mark someone rejected or withdrawn. Small thing, but you'll never wonder whether the click landed.",
   },

@@ -49,6 +49,7 @@ import {
   Paperclip,
   FileText,
   Image as ImageIcon,
+  Lock,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -68,6 +69,7 @@ import {
   type ApplicationMessageAttachment,
 } from "@/lib/messages/actions";
 import { RichCardRenderer } from "@/components/inbox/rich-cards";
+import type { ThreadNote } from "@/lib/inbox/types";
 
 const EDIT_WINDOW_MS = 5 * 60 * 1000;
 const MAX_BODY = 5000;
@@ -89,6 +91,13 @@ export interface MessagesThreadProps {
   /** Display name for the other party shown in the header. */
   otherPartyName: string;
   initialMessages: ApplicationMessageRow[];
+  /**
+   * Internal team notes interleaved into the timeline by created_at
+   * (Lane 4 — Conversations 2.0). Employer surfaces only — candidate
+   * surfaces must never pass this. Notes render amber + locked, take
+   * no part in read/unread or realtime, and are never sent anywhere.
+   */
+  notes?: ThreadNote[];
 }
 
 interface ThreadMessage extends ApplicationMessageRow {
@@ -115,6 +124,46 @@ function relativeTime(iso: string): string {
 
 function isWithinEditWindow(createdAtIso: string): boolean {
   return Date.now() - new Date(createdAtIso).getTime() < EDIT_WINDOW_MS;
+}
+
+/**
+ * Mention-token highlighter for internal notes — `@[Name](uuid)` →
+ * heritage chip. Mirrors the private renderBody in the application
+ * page's comments-thread.tsx (kept local there on purpose: importing
+ * across page boundaries would couple this shared client component to
+ * an app-route file). If the token format ever changes, update both.
+ */
+const NOTE_MENTION_REGEX =
+  /@\[([^\]]+)\]\(([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\)/gi;
+
+function renderNoteBody(body: string): React.ReactNode[] {
+  const nodes: React.ReactNode[] = [];
+  let lastIdx = 0;
+  let key = 0;
+  const re = new RegExp(NOTE_MENTION_REGEX.source, "gi");
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(body)) !== null) {
+    if (match.index > lastIdx) {
+      nodes.push(
+        <span key={`t-${key++}`}>{body.slice(lastIdx, match.index)}</span>
+      );
+    }
+    const display = match[1];
+    nodes.push(
+      <span
+        key={`m-${key++}`}
+        className="inline-block px-1 py-0.5 -my-0.5 bg-heritage/10 text-heritage-deep font-semibold rounded-sm"
+        title={display}
+      >
+        @{display}
+      </span>
+    );
+    lastIdx = match.index + match[0].length;
+  }
+  if (lastIdx < body.length) {
+    nodes.push(<span key={`t-${key++}`}>{body.slice(lastIdx)}</span>);
+  }
+  return nodes;
 }
 
 function roleLabel(role: MessagesThreadRole): string {
@@ -153,6 +202,7 @@ export function MessagesThread({
   currentUserName,
   otherPartyName,
   initialMessages,
+  notes,
 }: MessagesThreadProps) {
   const [messages, setMessages] = useState<ThreadMessage[]>(() =>
     [...initialMessages].sort(
@@ -626,9 +676,33 @@ export function MessagesThread({
         : "text-slate-meta";
 
   const visibleCount = useMemo(
-    () => messages.filter((m) => !m.deleted_at).length,
-    [messages]
+    () => messages.filter((m) => !m.deleted_at).length + (notes?.length ?? 0),
+    [messages, notes]
   );
+
+  // ── Unified timeline (Lane 4) ─────────────────────────────────
+  // Messages and internal notes interleave by created_at. Notes are
+  // inert overlays: they never touch read/unread, optimistic sends, or
+  // the realtime subscription (all of which operate on `messages`
+  // alone). Sort is stable, so equal timestamps keep messages first.
+  type TimelineItem =
+    | { kind: "message"; m: ThreadMessage }
+    | { kind: "note"; n: ThreadNote };
+  const timeline = useMemo<TimelineItem[]>(() => {
+    if (!notes || notes.length === 0) {
+      return messages.map((m) => ({ kind: "message" as const, m }));
+    }
+    const items: Array<TimelineItem & { ts: number }> = messages.map((m) => ({
+      kind: "message" as const,
+      m,
+      ts: Date.parse(m.created_at),
+    }));
+    for (const n of notes) {
+      items.push({ kind: "note" as const, n, ts: Date.parse(n.created_at) });
+    }
+    items.sort((a, b) => a.ts - b.ts);
+    return items;
+  }, [messages, notes]);
 
   /* ── Render ── */
 
@@ -679,7 +753,50 @@ export function MessagesThread({
           </div>
         ) : (
           <ul className="divide-y divide-[var(--rule)]">
-            {messages.map((m) => {
+            {timeline.map((item) => {
+              // Internal note — amber, locked, unmistakably not a message.
+              // Employer surfaces only (the `notes` prop is never passed on
+              // candidate surfaces; RLS would return zero rows regardless).
+              if (item.kind === "note") {
+                const n = item.n;
+                return (
+                  <li
+                    key={`note-${n.id}`}
+                    id={`note-${n.id}`}
+                    className="px-4 py-3 bg-amber-50/70"
+                  >
+                    <div className="border-l-2 border-amber-400 pl-3">
+                      <div className="flex items-baseline gap-2 mb-1 max-w-full">
+                        <Lock
+                          className="h-3 w-3 text-amber-700 self-center shrink-0"
+                          aria-hidden
+                        />
+                        <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-amber-800 shrink-0">
+                          Internal note
+                        </span>
+                        <span className="text-[14px] font-bold text-ink truncate">
+                          {n.author_name}
+                        </span>
+                        <span
+                          className="text-[12px] text-slate-meta whitespace-nowrap"
+                          title={new Date(n.created_at).toLocaleString()}
+                        >
+                          {relativeTime(n.created_at)}
+                          {n.edited_at ? " · edited" : ""}
+                        </span>
+                      </div>
+                      <div className="text-[14px] leading-relaxed text-ink whitespace-pre-wrap break-words">
+                        {renderNoteBody(n.body)}
+                      </div>
+                      <p className="mt-1 text-[11px] text-amber-700/80">
+                        Visible to your team only — never sent to the
+                        candidate.
+                      </p>
+                    </div>
+                  </li>
+                );
+              }
+              const m = item.m;
               if (m.deleted_at) {
                 return (
                   <li

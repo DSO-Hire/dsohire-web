@@ -19,6 +19,7 @@ import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
+import type { ThreadNote } from "./types";
 
 type Result =
   | { ok: true }
@@ -156,4 +157,63 @@ export async function markThreadRead(
   revalidatePath("/employer/inbox");
   revalidatePath("/candidate/inbox");
   return { ok: true };
+}
+
+/* ──────────────────────────────────────────────────────────────
+ * Thread notes (Lane 4 — Conversations 2.0 unified timeline)
+ *
+ * Internal team notes for the open thread, sourced from the existing
+ * `application_comments` table — zero schema change. The request-
+ * scoped client enforces RLS (SELECT = DSO members on their own
+ * applications), so a candidate calling this gets [] structurally,
+ * not by trust. Author names resolve through a second RLS-scoped
+ * read on dso_users (same two-step the application detail page uses).
+ * ─────────────────────────────────────────────────────────── */
+
+export async function getThreadNotes(
+  applicationId: string
+): Promise<ThreadNote[]> {
+  if (!applicationId) return [];
+  const ctx = await getUser();
+  if (!ctx.ok) return [];
+
+  // Loader SELECT includes every column the mapper reads (hard rule —
+  // untyped client returns null, not an error, on a mismatch).
+  const { data: rows, error } = await ctx.supabase
+    .from("application_comments")
+    .select("id, body, author_dso_user_id, created_at, edited_at")
+    .eq("application_id", applicationId)
+    .is("deleted_at", null)
+    .order("created_at", { ascending: true });
+  if (error) {
+    console.error("[inbox] getThreadNotes", error);
+    return [];
+  }
+  const noteRows = (rows ?? []) as Array<{
+    id: string;
+    body: string;
+    author_dso_user_id: string;
+    created_at: string;
+    edited_at: string | null;
+  }>;
+  if (noteRows.length === 0) return [];
+
+  const authorIds = [...new Set(noteRows.map((r) => r.author_dso_user_id))];
+  const { data: authors } = await ctx.supabase
+    .from("dso_users")
+    .select("id, full_name")
+    .in("id", authorIds);
+  const nameById = new Map(
+    ((authors ?? []) as Array<{ id: string; full_name: string | null }>).map(
+      (a) => [a.id, a.full_name ?? "Teammate"]
+    )
+  );
+
+  return noteRows.map((r) => ({
+    id: r.id,
+    body: r.body,
+    created_at: r.created_at,
+    edited_at: r.edited_at,
+    author_name: nameById.get(r.author_dso_user_id) ?? "Teammate",
+  }));
 }
