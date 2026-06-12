@@ -786,3 +786,4 @@ html, body {
   .rail-draw1, .rail-draw2 { animation: none; stroke-dashoffset: 0; }
   .rail-item-on::before { animation: none; height: 64%; }
 }
+.rail-slim .rail-brand svg { width: 40px; height: 40px; }

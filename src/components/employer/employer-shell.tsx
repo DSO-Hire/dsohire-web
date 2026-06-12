@@ -308,9 +308,9 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
         <Link
           href="/employer/dashboard"
           aria-label="DSO Hire — dashboard"
-          className="rail-brand flex items-center gap-3 px-5 pt-6 pb-4"
+          className="rail-brand flex flex-col items-center gap-2.5 px-5 pt-7 pb-5"
         >
-          <svg width="40" height="40" viewBox="0 0 44 44" aria-hidden="true">
+          <svg width="54" height="54" viewBox="0 0 44 44" aria-hidden="true">
             <path
               className="rail-draw1"
               d="M 5 5 L 28 5 Q 40 5 40 17 L 40 27 Q 40 39 28 39 L 5 39"
@@ -331,11 +331,11 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
               strokeLinecap="round"
             />
           </svg>
-          <span className="rail-word leading-none">
-            <span className="block text-[21px] font-extrabold tracking-[-0.5px] text-ivory">
+          <span className="rail-word leading-none text-center">
+            <span className="block text-[22px] font-extrabold tracking-[-0.5px] text-ivory">
               DSO
             </span>
-            <span className="block text-[8px] font-bold tracking-[4.5px] text-[#8db8a3] mt-[3px]">
+            <span className="block text-[8.5px] font-bold tracking-[5px] text-[#8db8a3] mt-[4px] ml-[5px]">
               HIRE
             </span>
           </span>
