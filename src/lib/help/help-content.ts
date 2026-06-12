@@ -842,7 +842,7 @@ const MISC: Record<string, HelpEntry> = {
     format: "disclosure",
     lens: "employer",
     bullets: [
-      "Awaiting review shows the oldest-waiting application and flags when it's past your SLA.",
+      "Awaiting review shows the oldest-waiting application and flags when it's past your response goal.",
       "Stuck = sitting in 'New' too long; Stale = no movement in a mid-pipeline stage. Both deep-link to the matching applications.",
       "Today's top fits surfaces your strongest-scoring candidates across every open role; Interested in you highlights candidates who saved your jobs.",
       "Use the location switcher (top left) to scope the whole dashboard to one practice.",

@@ -87,7 +87,7 @@ export const EMPLOYER_NOTIFICATION_EVENTS: ReadonlyArray<EmployerNotificationEve
       group: "Pipeline",
       title: "Stuck candidate alert",
       description:
-        "When an application sits in 'New' longer than your team's SLA threshold.",
+        "When an application sits in 'New' longer than your team's response goal.",
       channels: ["email", "in_app"],
       shipped: false,
     },

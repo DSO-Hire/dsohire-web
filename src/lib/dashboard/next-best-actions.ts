@@ -75,7 +75,7 @@ export function buildNextBestActions(input: NbaInput): NbaItem[] {
       id: `stuck-${s.applicationId}`,
       tone: "hot",
       title: `${s.candidateName} has waited ${s.daysWaiting} days unreviewed`,
-      why: `${s.jobTitle} — past your ${input.slaDays}-day first-response SLA. Same-day responders advance candidates at the highest rate.`,
+      why: `${s.jobTitle} — waiting past your ${input.slaDays}-day response goal. Same-day responders advance candidates at the highest rate.`,
       primary: {
         label: "Review now",
         href: `/employer/applications/${s.applicationId}`,

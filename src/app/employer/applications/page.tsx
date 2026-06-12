@@ -521,7 +521,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
           <p className="text-[15px] text-ink leading-relaxed mb-2">
             {sp.job || sp.status || sp.min_fit || wantStuck || wantStale
               ? wantStuck
-                ? "Nothing is stuck — no New-stage applications are past the SLA. Nice."
+                ? "Nothing is stuck — no New-stage applications are past your response goal. Nice."
                 : wantStale
                   ? "Nothing is stale — every active candidate has moved recently. Nice."
                   : "Nothing matches your current filters."

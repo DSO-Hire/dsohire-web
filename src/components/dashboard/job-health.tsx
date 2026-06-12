@@ -29,7 +29,7 @@ export interface JobHealthRow {
 
 const HEALTH_DOT: Record<JobHealthRow["health"], { cls: string; label: string }> = {
   ok: { cls: "bg-heritage", label: "Healthy" },
-  warn: { cls: "bg-[#b07d2e]", label: "New apps past SLA" },
+  warn: { cls: "bg-[#b07d2e]", label: "New apps past your response goal" },
   hot: { cls: "bg-[#b3543f]", label: "Stale candidates mid-pipeline" },
 };
 

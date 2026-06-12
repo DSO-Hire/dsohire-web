@@ -1037,7 +1037,7 @@ export default async function EmployerDashboard() {
       ? {
           label:
             oldestAwaitingDays >= STUCK_SLA_DAYS
-              ? `oldest waiting ${oldestAwaitingDays}d · past ${STUCK_SLA_DAYS}d SLA`
+              ? `oldest waiting ${oldestAwaitingDays}d · past your ${STUCK_SLA_DAYS}-day response goal`
               : `oldest waiting ${oldestAwaitingDays}d`,
           tone: oldestAwaitingDays >= STUCK_SLA_DAYS ? "breach" : "ok",
         }
