@@ -8,6 +8,12 @@ import type { ChangelogEntry } from "./index";
 export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-12",
+    kind: "new",
+    title: "⌘K search comes to the candidate side",
+    body: "Press ⌘K (or Ctrl+K) anywhere in your candidate workspace to search open jobs, your own applications, and shortcuts — résumé builder, assessments, privacy settings, and more — without touching the mouse. Same fast palette employers have had; now both sides of DSO Hire share it.",
+  },
+  {
+    date: "2026-06-12",
     kind: "improved",
     title: "Matches now lead with the why",
     body: "\"Roles that fit you\" — on your dashboard and both fit hubs — now shows why each role fits, not just the number: small chips naming the dimensions that genuinely scored strong for you (role match, schedule, compensation…). They come straight from the same engine that computed the score, with an honesty floor — a weak match gets no decorative chips.",

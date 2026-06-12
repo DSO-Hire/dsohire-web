@@ -31,6 +31,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { BrandLockup } from "@/components/marketing/site-shell";
 import { Avatar } from "@/components/ui/avatar";
 import { CandidateMobileNav } from "./candidate-mobile-nav";
+import { CandidateCommandPaletteTrigger } from "./command-palette";
 import { getUnreadCount } from "@/lib/inbox/queries";
 import { NavBadgeRealtime } from "@/components/inbox/nav-badge-realtime";
 import { SupportLauncher } from "@/components/support/support-launcher";
@@ -179,6 +180,12 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
               Candidate
             </div>
           </div>
+        </div>
+
+        {/* ⌘K universal search trigger (Lane 7 — palette unified with
+            the employer side via components/shared/command-palette). */}
+        <div className="px-3 pt-2">
+          <CandidateCommandPaletteTrigger />
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 py-4">
