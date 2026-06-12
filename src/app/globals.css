@@ -720,6 +720,25 @@ html, body {
   }
 }
 
+/* ── Lane 5 (Kanban 2.0): board modes — pure presentation ──
+   .kb-compact tightens cards for big pipelines (padding + headline);
+   .kb-focus dims every column except the one under the pointer.
+   Applied on the board container; drag machinery untouched. */
+.kb-compact .kb-card {
+  padding: 8px 10px;
+}
+.kb-compact .kb-card .kb-card-headline {
+  display: none;
+}
+.kb-focus .kb-col:not(:hover) {
+  opacity: 0.35;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .kb-focus .kb-col {
+    transition: opacity 0.18s ease-out;
+  }
+}
+
 /* ── FOH-9: in-app skeleton shimmer (loading.tsx surfaces) ── */
 .sk {
   position: relative;

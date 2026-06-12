@@ -106,8 +106,10 @@ export function KanbanCard({
   const ageEdgeClass = STAGE_AGE_EDGE_CLASSES[heat];
   const cand = application.candidate;
 
+  // kb-card / kb-card-headline are styling hooks for the Lane 5 board
+  // modes (globals.css: .kb-compact tightens padding + hides headlines).
   const baseClasses =
-    "relative block w-full text-left bg-white border p-3 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2";
+    "kb-card relative block w-full text-left bg-white border p-3 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2";
   const borderClass = selected
     ? "border-heritage ring-2 ring-heritage/40"
     : "border-[var(--rule)]";
@@ -182,7 +184,7 @@ export function KanbanCard({
       <div className="text-[14px] font-bold text-ink truncate mb-1 pr-6">
         {cand?.full_name ?? "Anonymous candidate"}
       </div>
-      <div className="text-[12px] text-slate-body truncate mb-2">
+      <div className="kb-card-headline text-[12px] text-slate-body truncate mb-2">
         {cand?.current_title || cand?.headline || "Profile minimal"}
       </div>
       {application.tags.length > 0 && (
