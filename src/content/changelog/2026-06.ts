@@ -9,6 +9,12 @@ export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-12",
     kind: "new",
+    title: "Start your next posting from your last one",
+    body: "Most dental postings are 90% repeats of one you've already written. The new-job page now offers your recent postings as starting points — one click duplicates everything (skills and screening questions included) into a fresh draft and drops you in the editor. Or start blank, same as always.",
+  },
+  {
+    date: "2026-06-12",
+    kind: "new",
     title: "Better postings, measurably",
     body: "Next to the job wizard's live preview there's now a Matchability meter: how many PracticeFit dimensions your posting gives the engine to work with, and exactly which field unlocks each missing one — add a pay range, name your PMS, pick the working days. It reads the same rules the matching engine runs, so what it promises is what gets scored. Practice-culture dimensions point you to your practice profile.",
   },

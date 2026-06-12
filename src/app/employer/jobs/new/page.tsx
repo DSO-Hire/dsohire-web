@@ -8,11 +8,12 @@
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, ArrowRight, Briefcase } from "lucide-react";
+import { ArrowLeft, ArrowRight, Briefcase, Copy } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getActiveSubscription } from "@/lib/billing/subscription";
 import { JobWizard, type LocationOption } from "../job-wizard";
+import { cloneJob } from "../actions";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Post a Job" };
@@ -214,6 +215,42 @@ export default async function NewJobPage() {
           <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
+
+      {/* Lane 6 — start from a previous posting. Each chip submits the
+          existing cloneJob server action: full draft copy (skills +
+          screening questions included), lands on the populated editor. */}
+      {recentJobs.length > 0 && (
+        <div className="mb-8 max-w-[820px]">
+          <p className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-2">
+            Start from
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {recentJobs.map((j) => (
+              <form key={j.id} action={cloneJob}>
+                <input type="hidden" name="job_id" value={j.id} />
+                <button
+                  type="submit"
+                  title={`Duplicate "${j.title}" as a new draft and open it in the editor`}
+                  className="inline-flex items-center gap-2 px-3 py-2 bg-white border border-[var(--rule-strong)] text-[12px] font-semibold text-ink hover:border-heritage hover:bg-heritage/5 transition-colors max-w-[320px]"
+                >
+                  <Copy className="h-3.5 w-3.5 text-heritage-deep shrink-0" />
+                  <span className="truncate">{j.title}</span>
+                  <span className="text-[10px] text-slate-meta whitespace-nowrap">
+                    {j.locationName ? `${j.locationName} · ` : ""}
+                    {new Date(j.createdAt).toLocaleDateString(undefined, {
+                      month: "short",
+                      year: "2-digit",
+                    })}
+                  </span>
+                </button>
+              </form>
+            ))}
+            <span className="self-center text-[11px] text-slate-meta">
+              — or start blank below
+            </span>
+          </div>
+        </div>
+      )}
 
       <JobWizard
         dsoId={dsoUser.dso_id}
