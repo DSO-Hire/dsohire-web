@@ -23,6 +23,7 @@
  */
 
 import { detectJobPms, detectJobCerts } from "./job-text-signals";
+import { isPercentModel, type CompModel } from "@/lib/comp/model";
 
 export type MatchabilityStep =
   | "basics"
@@ -58,6 +59,12 @@ export interface ClinicalMatchabilityInput {
   compType: string;
   compMin: string;
   compMax: string;
+  /** #128 — structured comp model. For percentage models the Pay dim
+   * lights off the est. annual range (the only comp fact the engine
+   * scores), not the legacy min/max. Omit/"simple" = legacy behavior. */
+  compModel?: string;
+  estAnnualMin?: string;
+  estAnnualMax?: string;
   skills: string[];
   specialty: string[];
   minYearsExperience: string;
@@ -83,9 +90,20 @@ export function computeClinicalMatchability(
   const certsFound =
     detectJobCerts(input.title, input.requirements, input.description)
       .length > 0;
-  const compOk =
-    input.compType !== "doe" &&
-    (input.compMin.trim() !== "" || input.compMax.trim() !== "");
+  // #128 — percentage models score Pay off the est. annual range
+  // (engine rule: percentages are never scored); simple models keep
+  // the legacy compType/min/max gate.
+  const percentModel = isPercentModel(
+    (input.compModel ?? "simple") as CompModel
+  );
+  const compOk = percentModel
+    ? (input.estAnnualMin ?? "").trim() !== "" ||
+      (input.estAnnualMax ?? "").trim() !== ""
+    : input.compType !== "doe" &&
+      (input.compMin.trim() !== "" || input.compMax.trim() !== "");
+  const compHint = percentModel
+    ? "Add the est. annual range — it's what makes a percentage deal comparable (and required to post in some states)"
+    : 'Add a pay range — "discussed at offer" hides this dimension';
   const p = input.profile;
 
   const dims: MatchabilityDim[] = [
@@ -117,7 +135,7 @@ export function computeClinicalMatchability(
       key: "compensation",
       label: "Pay",
       scoreable: compOk,
-      hint: 'Add a pay range — "discussed at offer" hides this dimension',
+      hint: compHint,
       where: "details",
     },
     {
