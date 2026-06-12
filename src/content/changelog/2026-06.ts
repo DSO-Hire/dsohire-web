@@ -8,6 +8,18 @@ import type { ChangelogEntry } from "./index";
 export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-12",
+    kind: "new",
+    title: "Your applications, as journeys",
+    body: "The candidate dashboard now shows each active application as a journey — the same stage stepper employers see, from Applied through Hired, with your current step marked. Each journey carries one honest status line: an offer waiting, a new message, or how fast this practice typically responds — a real median from their actual response history, shown only when there's enough of it to be honest (never a made-up reassurance). And per our long-standing rule, no \"stuck in review for 14 days\" anxiety timers — ever.",
+  },
+  {
+    date: "2026-06-12",
+    kind: "improved",
+    title: "Your dashboard now suggests one thing, not a checklist",
+    body: "The candidate dashboard's onboarding checklist is gone. In its place: a profile-strength ring with one suggestion at a time — the biggest unlock first, with an honest note on what it actually improves (\"location unlocks commute-distance matching,\" not vague points). Alongside it, a line of real facts from your own search: roles that fit you right now, unread replies, applications at interview or offer. Nothing gates, nothing guilts — your profile, your pace.",
+  },
+  {
+    date: "2026-06-12",
     kind: "improved",
     title: "Structured pay is now editable — and offers check against it",
     body: "Postings with structured compensation can now be edited on the job's edit page, not just at creation — same builder, same live behavior. And the offer composer's range check learned the new models: drafting an offer against a percentage-based posting now compares your base against the posting's estimated annual range instead of silently skipping the check.",

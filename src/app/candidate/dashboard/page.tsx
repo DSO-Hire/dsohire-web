@@ -6,7 +6,7 @@
  *   Header                       ← welcome, live pulse, today's date
  *   KPI grid                     ← adaptive hero + 4 tonal tiles
  *   Profile completion CTA       ← when profile <100%
- *   MyApplicationStages          ← personal kanban-lite (active apps only)
+ *   ApplicationJourneys          ← stage steppers + honest medians (Lane 7)
  *   ActivityFeed                 ← recent stage moves + employer messages
  *
  * The hero adapts based on what's most actionable for the candidate:
@@ -32,17 +32,22 @@ import {
   UserCircle,
 } from "lucide-react";
 import { CandidateShell } from "@/components/candidate/candidate-shell";
-import { OnboardingChecklist } from "@/components/onboarding/onboarding-checklist";
+// Lane 7 (Career HQ) — OnboardingChecklist retired from this page
+// (component kept on disk for revert); CareerStrength replaces it.
+import { CareerStrength } from "@/components/dashboard/career-strength";
 import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
 import { KpiTile } from "@/components/dashboard/kpi-tile";
 import { CandidateHero } from "@/components/dashboard/candidate-hero";
+// Lane 7 (Career HQ) — MyApplicationStages (kanban-lite) retired from
+// this page (kept on disk); ApplicationJourneys replaces it.
 import {
-  MyApplicationStages,
-  type MyApplicationCard,
-} from "@/components/dashboard/my-application-stages";
+  ApplicationJourneys,
+  type ApplicationJourney,
+} from "@/components/dashboard/application-journeys";
+import { getDsoResponseMedians } from "@/lib/applications/response-medians";
 import {
   ActivityFeed,
   type ActivityEvent,
@@ -248,6 +253,55 @@ export default async function CandidateDashboardPage() {
     },
   ];
 
+  // Lane 7 — the ONE next action, biggest unlock first. Order:
+  // top missing completeness item → unfinished assessment → privacy
+  // review. Payoffs are honest and qualitative (no invented counts).
+  const COMPLETENESS_PAYOFFS: Record<string, string> = {
+    photo: "Profiles with photos read as real people to hiring teams.",
+    headline: "Your headline is the first line recruiters see anywhere.",
+    summary: "A short summary gives your applications a voice.",
+    location: "Location unlocks commute-distance match scoring.",
+    work: "Work history powers experience matching and your free resume.",
+    license: "License details unlock license-match scoring on clinical roles.",
+    skills: "Skills feed a scored match dimension directly.",
+    language: "Languages help multilingual practices find you.",
+    job_prefs: "Preferences sharpen every match score you receive.",
+  };
+  const firstMissing = completeness.missing[0] ?? null;
+  // Both assessment kinds count — "assessment" (PracticeFit) and "dsofit";
+  // onboardingItems already ordered them primary-track-first.
+  const assessmentItem = onboardingItems.find(
+    (i) => (i.key === "assessment" || i.key === "dsofit") && !i.done
+  );
+  const privacyItem = onboardingItems.find(
+    (i) => (i.key === "visible" || i.key === "fit") && !i.done
+  );
+  const nextAction = firstMissing
+    ? {
+        label: firstMissing.label,
+        payoff:
+          COMPLETENESS_PAYOFFS[firstMissing.key] ??
+          "Strengthens your match scores.",
+        href: "/candidate/profile",
+        ctaLabel: "Add it now",
+      }
+    : assessmentItem
+      ? {
+          label: assessmentItem.label,
+          payoff:
+            "Sharpens schedule and culture matching — it never gates anything.",
+          href: assessmentItem.href,
+          ctaLabel: "Pick it up",
+        }
+      : privacyItem
+        ? {
+            label: privacyItem.label,
+            payoff: "Your visibility, your call — decide once, change anytime.",
+            href: privacyItem.href,
+            ctaLabel: "Review settings",
+          }
+        : null;
+
   // ── All applications ────────────────────────────────────────────────
   // RLS on dso_pipeline_stages is DSO-only, so the candidate's RLS-scoped
   // client can't read stage kinds via embed. Two-step: pull the
@@ -381,7 +435,13 @@ export default async function CandidateDashboardPage() {
   const { data: rawJobs } = jobIds.length
     ? await supabase
         .from("jobs")
-        .select("id, title, dso_id, role_category, employment_type")
+        // hide_stages_from_candidate was READ by the mapper but missing
+        // from this select since 2026-05-05 — untyped client returned
+        // undefined and the `?? false` default silently ignored the
+        // employer's toggle (loader-select-must-match-mapper rule).
+        .select(
+          "id, title, dso_id, role_category, employment_type, hide_stages_from_candidate"
+        )
         .in("id", jobIds)
     : { data: [] };
   type JobRow = {
@@ -578,9 +638,24 @@ export default async function CandidateDashboardPage() {
     },
   ];
 
-  // ── Application kanban cards (active only) ──────────────────────────
-  const kanbanCards: MyApplicationCard[] = activeApps.map(
-    (a): MyApplicationCard => {
+  // ── Application journeys (Lane 7, active only) ──────────────────────
+  // Honest per-practice response medians: service-role aggregate
+  // (≥5 responded apps in 90d or nothing), keyed by DSO. Derived
+  // number only — no cross-candidate rows reach the page.
+  const journeyDsoIds = Array.from(
+    new Set(
+      activeApps
+        .map((a) => jobMap.get(a.job_id)?.dso_id)
+        .filter((d): d is string => Boolean(d)),
+    ),
+  );
+  const responseMedians =
+    journeyDsoIds.length > 0
+      ? await getDsoResponseMedians(journeyDsoIds)
+      : new Map<string, number>();
+
+  const journeys: ApplicationJourney[] = activeApps.map(
+    (a): ApplicationJourney => {
       const job = jobMap.get(a.job_id);
       const days = Math.max(
         0,
@@ -591,11 +666,13 @@ export default async function CandidateDashboardPage() {
         role: job?.title ?? "Unknown role",
         dsoName: affiliationByAppId.get(a.id)?.name ?? "Hiring team",
         locationName: job ? locationByJobId.get(job.id) ?? null : null,
-        stage: a.kind as MyApplicationCard["stage"],
+        stage: a.kind as ApplicationJourney["stage"],
         daysSinceApplied: days,
+        hideStages: job?.hide_stages_from_candidate ?? false,
         hasUnreadMessage: (unreadByAppId.get(a.id) ?? 0) > 0,
         offerPending: a.kind === "offer",
-        hideStageBadge: job?.hide_stages_from_candidate ?? false,
+        medianResponseDays:
+          (job && responseMedians.get(job.dso_id)) ?? null,
         href: `/candidate/applications/${a.id}`,
       };
     },
@@ -610,6 +687,29 @@ export default async function CandidateDashboardPage() {
     day: "numeric",
     year: "numeric",
   });
+
+  // ── Strength facts (Lane 7) — real data only, never invented ────────
+  const strengthFacts: string[] = [];
+  if (rolesThatFitAll.length > 0) {
+    strengthFacts.push(
+      `${rolesThatFitAll.length} open role${rolesThatFitAll.length === 1 ? "" : "s"} fit${rolesThatFitAll.length === 1 ? "s" : ""} you right now`,
+    );
+  }
+  if (totalUnread > 0) {
+    strengthFacts.push(
+      `${totalUnread} unread repl${totalUnread === 1 ? "y" : "ies"} from employers`,
+    );
+  }
+  const winningCount = stageBreakdown.interview + stageBreakdown.offer;
+  if (winningCount > 0) {
+    strengthFacts.push(
+      `${winningCount} application${winningCount === 1 ? "" : "s"} at interview or offer`,
+    );
+  } else if (activeApps.length > 0) {
+    strengthFacts.push(
+      `${activeApps.length} active application${activeApps.length === 1 ? "" : "s"}`,
+    );
+  }
 
   // ── Mode selection ──────────────────────────────────────────────────
   type Mode = "new-replies" | "active-apps" | "setup";
@@ -652,12 +752,14 @@ export default async function CandidateDashboardPage() {
         </p>
       </header>
 
+      {/* Lane 7 (Career HQ) — strength ring + ONE computed next action
+          replaces the onboarding checklist (kept on disk). Facts and
+          payoffs are real-data-only; nothing gates, nothing guilts. */}
       <div className="mb-6">
-        <OnboardingChecklist
-          title="Get set up"
-          subtitle="A few quick steps to get the most out of DSO Hire — you can change anything later in Settings."
-          storageKey="candidate-onboarding-checklist-v1"
-          items={onboardingItems}
+        <CareerStrength
+          pct={profilePct}
+          facts={strengthFacts}
+          nextAction={nextAction}
         />
       </div>
 
@@ -802,10 +904,10 @@ export default async function CandidateDashboardPage() {
       {/* Roles that fit you — top open roles ranked by PracticeFit (B.1) */}
       <RolesThatFitCard roles={rolesThatFit} product={primaryFitProduct} />
 
-      {/* My Application Stages — personal kanban */}
+      {/* Your applications — as journeys (Lane 7, Model 06) */}
       {activeApps.length > 0 && (
         <section className="mb-6">
-          <MyApplicationStages cards={kanbanCards} />
+          <ApplicationJourneys journeys={journeys} />
         </section>
       )}
 
