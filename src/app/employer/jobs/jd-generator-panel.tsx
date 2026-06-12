@@ -51,6 +51,12 @@ export interface JdGeneratorDetailsContext {
   minYearsExperience?: string;
   specialty?: string;
   employmentType?: string;
+  // #128 — structured comp deal, pre-formatted by formatDealCard so the
+  // AI grounds on the canonical phrasing (never raw fields).
+  dealSummary?: string;
+  dealEstRange?: string;
+  dealChips?: string[];
+  workerClassification?: string;
 }
 
 interface JdGeneratorPanelProps {

@@ -1337,6 +1337,8 @@ export function JobWizard({
           <DescriptionStep
             description={description}
             onChange={setDescription}
+            dealCard={dealCard}
+            workerClassification={compModelState.workerClassification}
             roleCategory={roleCategory}
             roleLabel={
               ROLE_OPTIONS.find((r) => r.value === roleCategory)?.label ??
@@ -1857,6 +1859,8 @@ function BasicsStep({
 function DescriptionStep({
   description,
   onChange,
+  dealCard,
+  workerClassification,
   roleCategory,
   roleLabel,
   title,
@@ -1885,6 +1889,10 @@ function DescriptionStep({
 }: {
   description: string;
   onChange: (v: string) => void;
+  /** #128 — structured deal context for the AI generator (canonical
+   * phrasing from formatDealCard; null headline = simple model). */
+  dealCard: { headline: string | null; estRange: string | null; chips: string[] };
+  workerClassification: string;
   roleCategory: string;
   roleLabel: string;
   title: string;
@@ -1959,6 +1967,11 @@ function DescriptionStep({
           minYearsExperience,
           specialty,
           employmentType,
+          // #128 — structured deal grounding (canonical phrasing).
+          dealSummary: dealCard.headline ?? undefined,
+          dealEstRange: dealCard.estRange ?? undefined,
+          dealChips: dealCard.chips.length ? dealCard.chips : undefined,
+          workerClassification: workerClassification || undefined,
         }}
         onApplyTitle={(t) => onTitle(t)}
         onApplyDescription={(html) => onChange(html)}

@@ -56,6 +56,14 @@ const DetailsContextSchema = z
     minYearsExperience: z.string().optional(),
     specialty: z.string().optional(),
     employmentType: z.string().optional(),
+    // #128 — structured dental comp, pre-formatted by the SAME
+    // formatDealCard the preview + public page use, so the AI is
+    // grounded in the canonical phrasing ("$1,100/day draw → 30% of
+    // net collections"), never raw fields it could mis-assemble.
+    dealSummary: z.string().optional(),
+    dealEstRange: z.string().optional(),
+    dealChips: z.array(z.string()).optional(),
+    workerClassification: z.string().optional(),
   })
   .optional();
 
@@ -460,6 +468,38 @@ function buildJobContextBlock(
   if (!details) return "";
   const lines: string[] = [];
 
+  // #128 — structured dental comp deal. When present, this SUPERSEDES
+  // the legacy base-comp lines (those fields are empty on structured
+  // postings). The summary arrives pre-formatted by the same formatter
+  // the candidate-facing surfaces use — the model articulates it
+  // naturally but uses every figure VERBATIM: never convert a
+  // percentage into dollars, never estimate earnings beyond the
+  // employer's own stated range, never invent terms not listed.
+  const dealSummary = (details.dealSummary || "").trim();
+  if (dealSummary) {
+    lines.push(`- Compensation deal (use figures verbatim): ${dealSummary}`);
+    const estRange = (details.dealEstRange || "").trim();
+    if (estRange) {
+      lines.push(
+        `- Expected annual earnings (employer's good-faith estimate — present it as exactly that): ${estRange}`
+      );
+    }
+    const chips = (details.dealChips ?? []).filter(Boolean);
+    if (chips.length) {
+      lines.push(`- Deal terms: ${chips.join(" · ")}`);
+    }
+    lines.push(
+      `- Writing rule: weave the deal into the summary and whatWeOffer in fluent dental-recruiting language (production/collections-based comp is normal in dentistry — explain the deal plainly, don't apologize for it). Do NOT convert percentages to dollar figures or invent terms beyond the lines above.`
+    );
+  }
+  if (details.workerClassification === "w2") {
+    lines.push(`- Worker classification: W-2 employee`);
+  } else if (details.workerClassification === "c1099") {
+    lines.push(`- Worker classification: 1099 independent contractor`);
+  } else if (details.workerClassification === "either_negotiable") {
+    lines.push(`- Worker classification: W-2 or 1099 — negotiable`);
+  }
+
   // Compensation — text-format so the model sees the recruiter's intent
   // (range vs. hourly vs. salary, with optional variable / bonus / equity
   // overlays). Skip the block entirely if no comp data was filled.
@@ -510,10 +550,14 @@ function buildJobContextBlock(
   }
 
   if (details.employmentType) {
+    // #128 — "contract" no longer implies 1099: classification is its
+    // own posting field now (sent above when set). Keep this label as a
+    // pure schedule pattern so the AI never asserts a classification
+    // the recruiter didn't choose.
     const map: Record<string, string> = {
       full_time: "Full-time",
       part_time: "Part-time",
-      contract: "Contract / 1099",
+      contract: "Temporary / locum-style",
       per_diem: "Per diem",
       locum: "Locum tenens",
       temporary: "Temporary",

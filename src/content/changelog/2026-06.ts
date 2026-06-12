@@ -8,6 +8,12 @@ import type { ChangelogEntry } from "./index";
 export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-12",
+    kind: "improved",
+    title: "The AI job-description writer speaks the deal too",
+    body: "Draft a description for a posting with structured compensation and the AI now writes the deal the way a dental recruiter would — your exact guarantee, percentage, and basis, woven in naturally, figures used verbatim, never converted or embellished. It also stopped assuming \"contract\" means 1099 — worker classification is its own fact now, and the writer only states what you chose.",
+  },
+  {
+    date: "2026-06-12",
     kind: "new",
     title: "Post pay the way dentistry actually pays",
     body: "The job wizard now speaks dental compensation: straight percentage, daily guarantee plus percentage, draw against collections, or salary-versus-percentage — with the details that decide a deal: production vs. collections basis, whether hygiene exam fees count, the lab-fee policy, pay cadence, even basis exclusions. Add your good-faith estimated annual range so candidates can compare and matching can work. W-2 vs 1099 is now a posting field too. Candidates see the deal exactly as you define it — live in the preview as you build. Simple ranges still work exactly as before.",
