@@ -58,13 +58,28 @@ export default async function NewJobPage() {
     anonymizeName: (l.anonymize_name as boolean | null) ?? false,
   }));
 
-  // DSO name for the pre-publish name-leak nudge.
+  // DSO name for the pre-publish name-leak nudge + practice-profile
+  // completion flags for the Matchability meter (Lane 6). SELECT lists
+  // every column the mapper reads (hard rule).
   const { data: dsoRow } = await supabase
     .from("dsos")
-    .select("name")
+    .select(
+      "name, practice_pace, autonomy_level, mentorship_offered, ce_support, work_life_balance, patient_populations"
+    )
     .eq("id", dsoUser.dso_id)
     .maybeSingle();
   const dsoName = (dsoRow?.name as string | null) ?? undefined;
+  const dsoProfile = (dsoRow ?? {}) as Record<string, unknown>;
+  const profileFlags = {
+    practice_pace: dsoProfile.practice_pace != null,
+    autonomy_level: dsoProfile.autonomy_level != null,
+    mentorship_offered: dsoProfile.mentorship_offered != null,
+    ce_support: dsoProfile.ce_support != null,
+    work_life_balance: dsoProfile.work_life_balance != null,
+    patient_populations:
+      Array.isArray(dsoProfile.patient_populations) &&
+      (dsoProfile.patient_populations as unknown[]).length > 0,
+  };
 
   // #83 Phase 4 — team roster for the confidential-search assignee picker.
   const { data: rosterRows } = await supabase
@@ -109,6 +124,48 @@ export default async function NewJobPage() {
       </EmployerShell>
     );
   }
+
+  // Lane 6 — "Start from" chips. Most dental postings are 90% repeats;
+  // each chip submits the EXISTING cloneJob action (full copy incl.
+  // skills + screening questions, lands on the populated editor as a
+  // draft). Clinical postings only — the corporate wizard is its own
+  // flow. Drafts excluded ("start from" means a real past posting).
+  // Two shallow queries, NOT a jobs→job_locations→dso_locations chain —
+  // multi-level embeds are the GenericStringError Vercel build-breaker
+  // (feedback_supabase_nested_embed_generic_string_error).
+  const { data: recentRows } = await supabase
+    .from("jobs")
+    .select("id, title, created_at, status")
+    .eq("dso_id", dsoUser.dso_id)
+    .eq("scope", "location")
+    .neq("status", "draft")
+    .order("created_at", { ascending: false })
+    .limit(4);
+  const recentJobRows = ((recentRows ?? []) as Array<Record<string, unknown>>);
+  const recentIds = recentJobRows.map((r) => r.id as string);
+  const locByJob = new Map<string, string>();
+  if (recentIds.length > 0) {
+    const { data: jlRows } = await supabase
+      .from("job_locations")
+      .select("job_id, location:dso_locations(name)")
+      .in("job_id", recentIds);
+    for (const row of (jlRows ?? []) as Array<Record<string, unknown>>) {
+      const jobId = row.job_id as string;
+      if (locByJob.has(jobId)) continue; // first location wins
+      const loc = row.location as
+        | { name: string | null }
+        | Array<{ name: string | null }>
+        | null;
+      const name = Array.isArray(loc) ? loc[0]?.name : loc?.name;
+      if (name) locByJob.set(jobId, name);
+    }
+  }
+  const recentJobs = recentJobRows.map((r) => ({
+    id: r.id as string,
+    title: r.title as string,
+    locationName: locByJob.get(r.id as string) ?? null,
+    createdAt: r.created_at as string,
+  }));
 
   return (
     <EmployerShell active="jobs">
@@ -164,6 +221,7 @@ export default async function NewJobPage() {
         mode="create"
         dsoName={dsoName}
         teammates={teammates}
+        profileFlags={profileFlags}
       />
     </EmployerShell>
   );

@@ -41,6 +41,11 @@ import {
 import { RecommendedQuestionsPanel } from "./recommended-questions-panel";
 import { JdGeneratorPanel } from "./jd-generator-panel";
 import { PostingPreview } from "./posting-preview";
+import { MatchabilityMeter } from "./matchability-meter";
+import {
+  computeClinicalMatchability,
+  type MatchabilityProfileFlags,
+} from "@/lib/practice-fit/matchability";
 import { ChipArrayInput } from "@/app/candidate/profile/edit-sheet";
 import { CORPORATE_FUNCTIONS } from "@/lib/corporate/functions";
 import {
@@ -266,6 +271,9 @@ interface JobWizardProps {
   dsoName?: string;
   /** #83 Phase 4 — team roster for the confidential-search assignee picker. */
   teammates?: TeammateOption[];
+  /** Lane 6 — practice-profile completion flags for the Matchability
+   * meter (which culture dims the DSO's profile already unlocks). */
+  profileFlags?: MatchabilityProfileFlags;
 }
 
 /* ───── Constants ───── */
@@ -362,6 +370,7 @@ export function JobWizard({
   initialQuestions,
   dsoName,
   teammates = [],
+  profileFlags,
 }: JobWizardProps) {
   const [stepIdx, setStepIdx] = useState(0);
   // #97 (Day 28) — the clickable stepper let users jump FORWARD past unfilled
@@ -1042,6 +1051,46 @@ export function JobWizard({
     EMPLOYMENT_OPTIONS.find((e) => e.value === employmentType)?.label ??
     employmentType;
 
+  // Lane 6 — Matchability, recomputed per keystroke (pure fn over the
+  // engine's own gating rules + text detectors). Clinical track only —
+  // corporate jobs go through the corporate wizard.
+  const matchability = useMemo(
+    () =>
+      computeClinicalMatchability({
+        title,
+        description,
+        requirements,
+        compType,
+        compMin,
+        compMax,
+        skills,
+        specialty: Array.from(specialty),
+        minYearsExperience,
+        benefits,
+        scheduleDays: Array.from(scheduleDays),
+        profile: profileFlags,
+      }),
+    [
+      title,
+      description,
+      requirements,
+      compType,
+      compMin,
+      compMax,
+      skills,
+      specialty,
+      minYearsExperience,
+      benefits,
+      scheduleDays,
+      profileFlags,
+    ]
+  );
+  const STEP_INDEX: Record<string, number> = {
+    basics: 0,
+    details: 1,
+    description: 2,
+  };
+
   return (
     <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_400px] xl:gap-8 xl:items-start">
     <div className="space-y-8 max-w-[820px]">
@@ -1336,6 +1385,16 @@ export function JobWizard({
           skills={skills}
           descriptionHtml={description}
           questionCount={questions.length}
+        />
+        <MatchabilityMeter
+          result={matchability}
+          onJumpToStep={(step) => {
+            setError(null);
+            setStepIdx(STEP_INDEX[step] ?? 0);
+          }}
+          canJumpToStep={(step) =>
+            (STEP_INDEX[step] ?? 0) <= maxStepReached
+          }
         />
       </aside>
     </div>

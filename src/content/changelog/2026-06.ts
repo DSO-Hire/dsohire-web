@@ -9,6 +9,12 @@ export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-12",
     kind: "new",
+    title: "Better postings, measurably",
+    body: "Next to the job wizard's live preview there's now a Matchability meter: how many PracticeFit dimensions your posting gives the engine to work with, and exactly which field unlocks each missing one — add a pay range, name your PMS, pick the working days. It reads the same rules the matching engine runs, so what it promises is what gets scored. Practice-culture dimensions point you to your practice profile.",
+  },
+  {
+    date: "2026-06-12",
+    kind: "new",
     title: "See your posting form as you type it",
     body: "The job wizard now keeps a live preview beside the form on larger screens — title, pay, schedule, the opening lines of your description, and the screening-question count, rendered the way candidates will see them, updating with every keystroke. The first lines of your description are what candidates read in search results; now you're writing them with that view open.",
   },
