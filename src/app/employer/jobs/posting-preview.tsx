@@ -167,11 +167,10 @@ export function PostingPreview(props: PostingPreviewProps) {
         {deal && (
           <div className="mt-3 space-y-1.5">
             {deal.headline && (
+              // No DollarSign icon here — the headline always leads with
+              // its own $ figure (Cam screenshot: "$ $1,200/day" read
+              // doubled).
               <p className="text-[13px] font-bold text-heritage-deep leading-snug">
-                <DollarSign
-                  className="inline h-3.5 w-3.5 -mt-0.5"
-                  aria-hidden
-                />
                 {deal.headline}
               </p>
             )}
