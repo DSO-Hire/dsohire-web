@@ -7,7 +7,7 @@
  * via a child client component.
  */
 
-import { Calendar, Clock, MapPin, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Clock, MapPin, AlertCircle, CheckCircle2 } from "lucide-react";
 import {
   ProposeInterviewLauncher,
   RescheduleInterviewLauncher,
@@ -77,14 +77,12 @@ export function EmployerInterviewSection({
   const active = activeBooked ?? activePending ?? null;
 
   return (
-    <section className="border border-[var(--rule)] bg-white p-6">
-      <header className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-heritage-deep" aria-hidden />
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
-            Interview
-          </div>
-        </div>
+    <section>
+      {/* Card chrome + "Interviews" heading come from the pipeline-rail
+          card (Day 32 relayout) — this component keeps only the action
+          and the proposal state. Fixes the cramped double-header at
+          rail width (Cam, Day 32 night). */}
+      <header className="mb-3">
         <ProposeInterviewLauncher
           applicationId={applicationId}
           candidateName={candidateName}
