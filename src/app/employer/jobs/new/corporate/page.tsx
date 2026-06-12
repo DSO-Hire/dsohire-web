@@ -46,15 +46,19 @@ export default async function NewCorporateJobPage() {
 
   const { data: locations } = await supabase
     .from("dso_locations")
-    .select("id, name, city, state")
+    .select("id, name, city, state, public_dso_affiliation, anonymize_name")
     .eq("dso_id", dsoUser.dso_id)
     .order("name");
 
+  // Anonymity flags included (P0, Day 33) — the corporate wizard's live
+  // preview masks anonymized location names exactly like the public page.
   const locationOptions: LocationOption[] = (locations ?? []).map((l) => ({
     id: l.id as string,
     name: l.name as string,
     city: (l.city as string | null) ?? null,
     state: (l.state as string | null) ?? null,
+    publicDsoAffiliation: (l.public_dso_affiliation as boolean | null) ?? true,
+    anonymizeName: (l.anonymize_name as boolean | null) ?? false,
   }));
 
   // #83 Phase 4 — team roster for the confidential-search assignee picker.

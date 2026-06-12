@@ -287,16 +287,41 @@ interface JobWizardProps {
 // a single internal key before comparing — that's how an "assistant"
 // candidate now matches a "dental_assistant" job, instead of dropping
 // out of the chip pool.
+// #77 (2026-06-12) — practice-level role expansion per the locked
+// DSOFit_Spec_2026-06-09.md taxonomy. "Associate Dentist" → "Dentist"
+// (label only; the enum value 'dentist' was already right). Regional
+// Manager REMOVED from this create list per Cam — multi-site field
+// leadership posts through the corporate wizard now; a restored draft
+// carrying the legacy value gets it appended back at the select so the
+// draft stays editable.
 const ROLE_OPTIONS: Array<{ value: string; label: string }> = [
-  { value: "dentist", label: "Associate Dentist" },
+  // Clinical / chairside / lab
+  { value: "dentist", label: "Dentist" },
   { value: "specialist", label: "Specialist Dentist" },
   { value: "dental_hygienist", label: "Dental Hygienist" },
-  { value: "dental_assistant", label: "Dental Assistant" },
-  { value: "front_office", label: "Front Desk / Receptionist" },
+  { value: "dental_therapist", label: "Dental Therapist" },
+  { value: "dental_assistant", label: "Dental Assistant (RDA/CDA/EFDA)" },
+  { value: "sterilization_tech", label: "Sterilization Technician" },
+  { value: "lab_tech", label: "Dental Lab Technician" },
+  // Practice front office / admin
+  { value: "front_office", label: "Front Desk / Patient Coordinator" },
+  { value: "treatment_coordinator", label: "Treatment Coordinator" },
+  {
+    value: "financial_coordinator",
+    label: "Financial / Insurance Coordinator",
+  },
+  { value: "scheduling_coordinator", label: "Scheduling Coordinator" },
   { value: "office_manager", label: "Office Manager" },
-  { value: "regional_manager", label: "Regional Manager" },
+  { value: "practice_administrator", label: "Practice Administrator" },
   { value: "other", label: "Other" },
 ];
+
+/** Legacy escape hatch — only rendered when a restored draft already
+ * carries regional_manager (the value stays valid in the enum). */
+const RM_LEGACY_OPTION = {
+  value: "regional_manager",
+  label: "Regional Manager (use the corporate wizard for new posts)",
+};
 
 // v1.1 — mirrors SPECIALTIES in src/lib/candidate/canonical-lists.ts.
 // Inlined here to keep job-wizard a "use client" file without crossing
@@ -1042,9 +1067,29 @@ export function JobWizard({
   // Lane 6 — live posting preview (xl+). Pure derivation from the
   // wizard's own state; the aside is sticky against the page scroll
   // (no overflow ancestors on this chain — hard rule).
-  const selectedLocationNames = locations
-    .filter((l) => selectedLocationIds.has(l.id))
-    .map((l) => l.name);
+  //
+  // P0 (Cam, Day 33): the preview claims "what candidates will see," so
+  // it must mask EXACTLY like the public job page (publicLocName in
+  // app/jobs/[id]/page.tsx): an anonymize_name location renders
+  // "Dental Office in {city}" — never its real name — and the DSO name
+  // is suppressed when ANY selected location hides its affiliation or
+  // its name. Employer-only surfaces (the picker on the left) keep
+  // showing real names; the leak was only in the candidate-eye pane.
+  const selectedLocs = locations.filter((l) => selectedLocationIds.has(l.id));
+  const selectedLocationNames = selectedLocs.map((l) =>
+    l.anonymizeName
+      ? l.city
+        ? `Dental Office in ${l.city}`
+        : "A dental office"
+      : l.name
+  );
+  const previewDsoName =
+    selectedLocs.length === 0 ||
+    selectedLocs.every(
+      (l) => (l.publicDsoAffiliation ?? true) && !l.anonymizeName
+    )
+      ? dsoName
+      : undefined;
   const roleLabelForPreview =
     ROLE_OPTIONS.find((r) => r.value === roleCategory)?.label ?? roleCategory;
   const employmentLabelForPreview =
@@ -1371,7 +1416,7 @@ export function JobWizard({
           title={title}
           roleLabel={roleLabelForPreview}
           employmentTypeLabel={employmentLabelForPreview}
-          dsoName={dsoName}
+          dsoName={previewDsoName}
           locationNames={selectedLocationNames}
           compVisible={compVisible}
           compType={compType}
@@ -1475,7 +1520,11 @@ function BasicsStep({
             required
             value={roleCategory}
             onChange={onRoleCategory}
-            options={ROLE_OPTIONS}
+            options={
+              roleCategory === "regional_manager"
+                ? [...ROLE_OPTIONS, RM_LEGACY_OPTION]
+                : ROLE_OPTIONS
+            }
           />
         )}
         <Select

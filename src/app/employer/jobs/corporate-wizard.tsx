@@ -903,9 +903,17 @@ export function CorporateJobWizard({
 
   // Lane 6 — live preview + DSOFit matchability (xl+), mirrors the
   // clinical wizard. Pure derivations from existing state.
+  // P0 (Cam, Day 33): mask anonymized location names exactly like the
+  // public page — the preview pane is candidate-eye, not employer-eye.
   const selectedLocationNames = locations
     .filter((l) => selectedLocationIds.has(l.id))
-    .map((l) => l.name);
+    .map((l) =>
+      l.anonymizeName
+        ? l.city
+          ? `Dental Office in ${l.city}`
+          : "A dental office"
+        : l.name
+    );
   const employmentLabelForPreview =
     EMPLOYMENT_OPTIONS.find((e) => e.value === employmentType)?.label ??
     employmentType;
