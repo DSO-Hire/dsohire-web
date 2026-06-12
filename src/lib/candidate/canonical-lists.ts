@@ -26,12 +26,33 @@ export interface CanonicalOption {
 // ─────────────────────────────────────────────────────────────────────
 
 export const ROLE_CATEGORIES: ReadonlyArray<CanonicalOption> = [
-  { value: "associate_dentist", label: "Associate Dentist" },
+  // #77 (2026-06-12) — practice-level role expansion per the locked
+  // DSOFit_Spec_2026-06-09.md taxonomy. "Associate Dentist" → "Dentist"
+  // is a LABEL rename only; the stored value stays associate_dentist
+  // (candidate desired_roles rows already carry it). New roles use
+  // IDENTICAL slugs on both the candidate side and the jobs enum —
+  // no vocabulary drift for new values.
+  //
+  // ── Clinical / chairside / lab ──
+  { value: "associate_dentist", label: "Dentist" },
   { value: "specialist_dentist", label: "Specialist Dentist" },
   { value: "hygienist", label: "Dental Hygienist" },
-  { value: "assistant", label: "Dental Assistant" },
-  { value: "front_desk", label: "Front Desk / Receptionist" },
+  { value: "dental_therapist", label: "Dental Therapist" },
+  { value: "assistant", label: "Dental Assistant (RDA/CDA/EFDA)" },
+  { value: "sterilization_tech", label: "Sterilization Technician" },
+  { value: "lab_tech", label: "Dental Lab Technician" },
+  // ── Practice front office / admin ──
+  { value: "front_desk", label: "Front Desk / Patient Coordinator" },
+  { value: "treatment_coordinator", label: "Treatment Coordinator" },
+  {
+    value: "financial_coordinator",
+    label: "Financial / Insurance Coordinator",
+  },
+  { value: "scheduling_coordinator", label: "Scheduling Coordinator" },
   { value: "office_manager", label: "Office Manager" },
+  { value: "practice_administrator", label: "Practice Administrator" },
+  // ── Multi-site / HQ (DSOFit side — Cam 2026-06-12: regional moved
+  //    to the DSOFit category; kept here so candidates can desire it) ──
   { value: "regional_manager", label: "Regional Manager" },
   { value: "dso_corporate", label: "DSO Corporate / HQ" },
 ];
@@ -250,14 +271,101 @@ export const UNIVERSAL_DENTAL_SKILLS: ReadonlyArray<CanonicalOption> = [
   { value: "Team leadership", label: "Team leadership" },
 ];
 
+// #77 — skill suggestion lists for the expanded practice-level roles.
+const DENTAL_THERAPIST_SKILLS: ReadonlyArray<CanonicalOption> = [
+  { value: "Restorative procedures", label: "Restorative procedures" },
+  { value: "Preventive care", label: "Preventive care" },
+  { value: "Local anesthesia", label: "Local anesthesia" },
+  { value: "Pediatric care", label: "Pediatric care" },
+  { value: "Patient education", label: "Patient education" },
+  { value: "Radiographs", label: "Radiographs" },
+  { value: "Community / public health", label: "Community / public health" },
+];
+
+const STERILIZATION_TECH_SKILLS: ReadonlyArray<CanonicalOption> = [
+  {
+    value: "Instrument sterilization",
+    label: "Instrument sterilization",
+  },
+  { value: "Autoclave operation", label: "Autoclave operation" },
+  { value: "Infection control", label: "Infection control" },
+  { value: "OSHA compliance", label: "OSHA compliance" },
+  { value: "Operatory turnover", label: "Operatory turnover" },
+  { value: "Instrument tracking", label: "Instrument tracking" },
+  { value: "Inventory management", label: "Inventory management" },
+];
+
+const LAB_TECH_SKILLS: ReadonlyArray<CanonicalOption> = [
+  { value: "Crown & bridge", label: "Crown & bridge" },
+  { value: "Dentures", label: "Dentures" },
+  { value: "CAD/CAM design", label: "CAD/CAM design" },
+  { value: "CEREC milling", label: "CEREC milling" },
+  { value: "3D printing", label: "3D printing" },
+  { value: "Model & die work", label: "Model & die work" },
+  { value: "Shade matching", label: "Shade matching" },
+  { value: "Implant restorations", label: "Implant restorations" },
+];
+
+const TREATMENT_COORDINATOR_SKILLS: ReadonlyArray<CanonicalOption> = [
+  {
+    value: "Treatment plan presentation",
+    label: "Treatment plan presentation",
+  },
+  { value: "Case acceptance", label: "Case acceptance" },
+  { value: "Financing options", label: "Financing options" },
+  { value: "Insurance verification", label: "Insurance verification" },
+  { value: "Patient education", label: "Patient education" },
+  { value: "Follow-up coordination", label: "Follow-up coordination" },
+  { value: "CDT coding", label: "CDT coding" },
+];
+
+const FINANCIAL_COORDINATOR_SKILLS: ReadonlyArray<CanonicalOption> = [
+  { value: "Insurance billing", label: "Insurance billing" },
+  { value: "Claims processing", label: "Claims processing" },
+  { value: "CDT coding", label: "CDT coding" },
+  { value: "Payment collection", label: "Payment collection" },
+  { value: "AR management", label: "AR management" },
+  { value: "Payment plans", label: "Payment plans" },
+  { value: "EOB reconciliation", label: "EOB reconciliation" },
+  { value: "Pre-authorizations", label: "Pre-authorizations" },
+];
+
+const SCHEDULING_COORDINATOR_SKILLS: ReadonlyArray<CanonicalOption> = [
+  { value: "Patient scheduling", label: "Patient scheduling" },
+  { value: "Recall management", label: "Recall management" },
+  { value: "Schedule optimization", label: "Schedule optimization" },
+  { value: "Confirmation workflows", label: "Confirmation workflows" },
+  { value: "Multi-line phone systems", label: "Multi-line phone systems" },
+  { value: "Waitlist management", label: "Waitlist management" },
+  { value: "Provider block scheduling", label: "Provider block scheduling" },
+];
+
+const PRACTICE_ADMINISTRATOR_SKILLS: ReadonlyArray<CanonicalOption> = [
+  { value: "Practice operations", label: "Practice operations" },
+  { value: "Staff scheduling", label: "Staff scheduling" },
+  { value: "Hiring & onboarding", label: "Hiring & onboarding" },
+  { value: "Payroll", label: "Payroll" },
+  { value: "Production reporting", label: "Production reporting" },
+  { value: "Compliance management", label: "Compliance management" },
+  { value: "Vendor management", label: "Vendor management" },
+  { value: "Budgeting", label: "Budgeting" },
+];
+
 /** Map keyed by ROLE_CATEGORIES.value. */
 export const SKILLS_BY_ROLE: Record<string, ReadonlyArray<CanonicalOption>> = {
   associate_dentist: ASSOCIATE_DENTIST_SKILLS,
   specialist_dentist: SPECIALIST_DENTIST_SKILLS,
   hygienist: HYGIENIST_SKILLS,
+  dental_therapist: DENTAL_THERAPIST_SKILLS,
   assistant: ASSISTANT_SKILLS,
+  sterilization_tech: STERILIZATION_TECH_SKILLS,
+  lab_tech: LAB_TECH_SKILLS,
   front_desk: FRONT_DESK_SKILLS,
+  treatment_coordinator: TREATMENT_COORDINATOR_SKILLS,
+  financial_coordinator: FINANCIAL_COORDINATOR_SKILLS,
+  scheduling_coordinator: SCHEDULING_COORDINATOR_SKILLS,
   office_manager: OFFICE_MANAGER_SKILLS,
+  practice_administrator: PRACTICE_ADMINISTRATOR_SKILLS,
   regional_manager: REGIONAL_MANAGER_SKILLS,
   dso_corporate: DSO_CORPORATE_SKILLS,
 };

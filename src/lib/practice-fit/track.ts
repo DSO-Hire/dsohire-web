@@ -36,11 +36,25 @@ function trackOfCanonRole(canon: string): Track | null {
     case "specialist_dentist":
     case "hygienist":
     case "assistant":
+    // #77 (2026-06-12) — expanded clinical/chairside/lab roles.
+    case "dental_therapist":
+    case "sterilization_tech":
+    case "lab_tech":
       return "clinical";
     case "front_desk":
     case "office_manager":
-    case "regional_manager":
+    // #77 — expanded practice front-office/admin roles.
+    case "treatment_coordinator":
+    case "financial_coordinator":
+    case "scheduling_coordinator":
+    case "practice_administrator":
       return "admin";
+    // Cam 2026-06-12: regional manager is field-ops LEADERSHIP — the
+    // DSOFit side per the locked spec dividing line (single-practice vs
+    // multi-practice). Existing regional_manager jobs/candidates now
+    // gate + score on the corporate track (seniority/org-scale/
+    // leadership dims) instead of the practice-admin ladder.
+    case "regional_manager":
     case "dso_corporate":
       return "corporate";
     default:
@@ -100,6 +114,11 @@ const CLINICAL_CANON = new Set<string>([
   "specialist_dentist",
   "hygienist",
   "assistant",
+  // #77 — dental therapist is a LICENSED provider, so it counts toward
+  // the clinical→DSOFit bridge. Sterilization/lab techs are clinical-
+  // TRACK (trackOfCanonRole) but deliberately not bridge credentials —
+  // the bridge credits licensure-grade clinical backgrounds.
+  "dental_therapist",
 ]);
 
 /**

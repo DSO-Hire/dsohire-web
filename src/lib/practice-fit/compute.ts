@@ -66,7 +66,11 @@ import type {
  * hashed input field (e.g. the A.4 caps/boosters). It's folded into the
  * input hash so a logic-only change still invalidates the read-through cache.
  */
-const MODEL_VERSION = "2026-06-10-v7-coverage-cacheread";
+// #77 (2026-06-12) — v8: practice-level role expansion. Seven new
+// canonical roles + adjacency rewire + regional_manager moved
+// admin→corporate track (Cam's call). Bump invalidates every cached
+// score so role gating recomputes under the new taxonomy on next view.
+const MODEL_VERSION = "2026-06-12-v8-roles-expansion";
 
 /* ──────────────────────────────────────────────────────────────
  * v3 Phase B.2 — comp_priority re-weighting ("what matters MOST").

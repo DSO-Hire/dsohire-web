@@ -45,13 +45,35 @@ export const ROLE_ADJACENCY: Record<CanonicalRole, CanonicalRole[]> = {
   // Doctors — an associate and a specialist are clinically neighbouring.
   associate_dentist: ["specialist_dentist"],
   specialist_dentist: ["associate_dentist"],
-  // Clinical support — hygienist and assistant (incl. EFDA) overlap chairside.
-  hygienist: ["assistant"],
-  assistant: ["hygienist"],
-  // Administrative ladder — each rung neighbours the next, not across gaps.
-  front_desk: ["office_manager"],
-  office_manager: ["front_desk", "regional_manager"],
-  regional_manager: ["office_manager", "dso_corporate"],
+  // Clinical support — hygienist and assistant (incl. EFDA) overlap
+  // chairside. #77: dental therapist neighbours the hygienist (licensed
+  // preventive provider with overlapping scope) but deliberately NOT the
+  // dentist — symmetric adjacency would credit a therapist 60% on a
+  // dentist req they can't legally hold. Sterilization tech neighbours
+  // the assistant (sterile processing IS an assistant duty and the
+  // common entry path) and the lab tech (non-chairside technical
+  // support cluster). Lab tech stays two hops from the assistant — its
+  // bench craft doesn't transfer chairside.
+  hygienist: ["assistant", "dental_therapist"],
+  dental_therapist: ["hygienist"],
+  assistant: ["hygienist", "sterilization_tech"],
+  sterilization_tech: ["assistant", "lab_tech"],
+  lab_tech: ["sterilization_tech"],
+  // Administrative ladder — each rung neighbours the next, not across
+  // gaps. #77 expansion: the coordinator family sits beside the front
+  // desk (treatment/financing intertwine; scheduling is front-desk
+  // scope); practice administrator is the office manager's senior
+  // sibling. Cam 2026-06-12: regional manager MOVED to the corporate
+  // (DSOFit) track — its only neighbour now is dso_corporate (the
+  // track gate kills cross-track pairs regardless; the matrix stays
+  // track-pure so the symmetry test reads true to the model).
+  front_desk: ["office_manager", "treatment_coordinator", "scheduling_coordinator"],
+  treatment_coordinator: ["front_desk", "financial_coordinator"],
+  financial_coordinator: ["treatment_coordinator", "office_manager"],
+  scheduling_coordinator: ["front_desk"],
+  office_manager: ["front_desk", "financial_coordinator", "practice_administrator"],
+  practice_administrator: ["office_manager"],
+  regional_manager: ["dso_corporate"],
   dso_corporate: ["regional_manager"],
   // Unmappable — never a neighbour of anything.
   other: [],

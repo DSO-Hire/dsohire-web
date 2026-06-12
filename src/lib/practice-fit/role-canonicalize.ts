@@ -44,6 +44,15 @@ export type CanonicalRole =
   | "office_manager"
   | "regional_manager"
   | "dso_corporate"
+  // #77 (2026-06-12) — practice-level expansion. New values are
+  // IDENTICAL on the candidate side and the jobs enum (no drift).
+  | "dental_therapist"
+  | "sterilization_tech"
+  | "lab_tech"
+  | "treatment_coordinator"
+  | "financial_coordinator"
+  | "scheduling_coordinator"
+  | "practice_administrator"
   | "other";
 
 /**
@@ -72,6 +81,13 @@ export function canonicalizeRoleCategory(raw: string | null | undefined): Canoni
     case "office_manager":
     case "regional_manager":
     case "dso_corporate":
+    case "dental_therapist":
+    case "sterilization_tech":
+    case "lab_tech":
+    case "treatment_coordinator":
+    case "financial_coordinator":
+    case "scheduling_coordinator":
+    case "practice_administrator":
     case "other":
       return k as CanonicalRole;
   }
@@ -93,6 +109,28 @@ export function canonicalizeRoleCategory(raw: string | null | undefined): Canoni
     case "specialist":
       return "specialist_dentist";
   }
+
+  // #77 new-role synonyms — checked BEFORE the legacy loose chain so a
+  // "Treatment Coordinator" resume title can't fall through to a
+  // broader rule. Most-specific first.
+  if (k.includes("therapist")) return "dental_therapist";
+  if (k.includes("steril")) return "sterilization_tech";
+  if (k.includes("lab tech") || k.includes("laboratory") || k === "cdt") {
+    return "lab_tech";
+  }
+  if (k.includes("treatment coord")) return "treatment_coordinator";
+  if (
+    k.includes("financial coord") ||
+    k.includes("insurance coord") ||
+    k.includes("billing coord") ||
+    k.includes("insurance billing")
+  ) {
+    return "financial_coordinator";
+  }
+  if (k.includes("scheduling coord") || k.includes("schedule coord")) {
+    return "scheduling_coordinator";
+  }
+  if (k.includes("practice admin")) return "practice_administrator";
 
   // Common synonyms that surface from resume parsing or hand entry.
   if (k.includes("hygien")) return "hygienist";
@@ -133,12 +171,19 @@ export function isOtherRole(raw: string | null | undefined): boolean {
  * sync with canonical-lists.ts ROLE_CATEGORIES labels.
  */
 export const CANONICAL_ROLE_LABELS: Record<CanonicalRole, string> = {
-  associate_dentist: "Associate Dentist",
+  associate_dentist: "Dentist",
   specialist_dentist: "Specialist Dentist",
   hygienist: "Dental Hygienist",
-  assistant: "Dental Assistant",
-  front_desk: "Front Desk / Receptionist",
+  dental_therapist: "Dental Therapist",
+  assistant: "Dental Assistant (RDA/CDA/EFDA)",
+  sterilization_tech: "Sterilization Technician",
+  lab_tech: "Dental Lab Technician",
+  front_desk: "Front Desk / Patient Coordinator",
+  treatment_coordinator: "Treatment Coordinator",
+  financial_coordinator: "Financial / Insurance Coordinator",
+  scheduling_coordinator: "Scheduling Coordinator",
   office_manager: "Office Manager",
+  practice_administrator: "Practice Administrator",
   regional_manager: "Regional Manager",
   dso_corporate: "DSO Corporate / HQ",
   other: "Other",

@@ -4379,6 +4379,13 @@ export type Database = {
         | "regional_manager"
         | "specialist"
         | "other"
+        | "dental_therapist"
+        | "sterilization_tech"
+        | "lab_tech"
+        | "treatment_coordinator"
+        | "financial_coordinator"
+        | "scheduling_coordinator"
+        | "practice_administrator"
       screening_question_kind:
         | "short_text"
         | "long_text"
@@ -4561,6 +4568,13 @@ export const Constants = {
         "regional_manager",
         "specialist",
         "other",
+        "dental_therapist",
+        "sterilization_tech",
+        "lab_tech",
+        "treatment_coordinator",
+        "financial_coordinator",
+        "scheduling_coordinator",
+        "practice_administrator",
       ],
       screening_question_kind: [
         "short_text",

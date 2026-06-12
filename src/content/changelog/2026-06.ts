@@ -8,6 +8,12 @@ import type { ChangelogEntry } from "./index";
 export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-12",
+    kind: "new",
+    title: "The role list finally matches a real practice",
+    body: "Seven new practice-level roles across the platform: Dental Therapist, Sterilization Technician, and Dental Lab Technician on the clinical side; Treatment, Financial/Insurance, and Scheduling Coordinators plus Practice Administrator in the front office. \"Associate Dentist\" is now simply \"Dentist.\" Candidates can pick the new roles today; matching understands how they neighbor each other — a sterilization tech is one step from an assistant role, not a stranger to it. Regional Manager now lives on the DSO side, where multi-site leadership belongs.",
+  },
+  {
+    date: "2026-06-12",
     kind: "improved",
     title: "The corporate wizard gets the studio treatment too",
     body: "Corporate postings now build with the same live preview beside the form, plus a DSOFit Matchability meter tuned to corporate dimensions — seniority, domain, leadership scope, work mode, travel. Same idea: see what candidates will see, and know exactly which field sharpens your matches.",
