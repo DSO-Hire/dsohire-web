@@ -12,6 +12,9 @@ import Link from "next/link";
 
 export interface LocationPulseRow {
   id: string;
+  /** Practice name — the primary label (city alone is ambiguous when
+      multiple practices share a metro; Cam, Day 32 night). */
+  name: string;
   city: string | null;
   state: string | null;
   applicationCount: number;
@@ -49,16 +52,17 @@ export function LocationPulse({
       ) : (
         <div className="p-2.5">
           {ranked.map((l) => {
-            const label =
-              [l.city, l.state].filter(Boolean).join(", ") || "Location";
+            const cityState =
+              [l.city, l.state].filter(Boolean).join(", ") || null;
             return (
               <Link
                 key={l.id}
                 href={href}
+                title={cityState ?? undefined}
                 className="flex items-center gap-3 px-2.5 py-2.5 hover:bg-cream/70 transition-colors"
               >
                 <span className="text-[12.5px] font-bold text-ink w-[38%] truncate">
-                  {label}
+                  {l.name || cityState || "Location"}
                 </span>
                 <span className="flex-1 h-[10px] bg-cream relative">
                   <span

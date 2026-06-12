@@ -237,6 +237,7 @@ export default async function EmployerDashboard() {
   // ── Mini-map scaffolding ───────────────────────────────────────────
   type MiniMapLocationRow = {
     id: string;
+    name: string;
     city: string | null;
     state: string | null;
     latitude: number | null;
@@ -906,7 +907,7 @@ export default async function EmployerDashboard() {
     // matches the rest of their dashboard view.
     let locationsQuery = supabase
       .from("dso_locations")
-      .select("id, city, state, latitude, longitude")
+      .select("id, name, city, state, latitude, longitude")
       .eq("dso_id", dsoId);
     if (dsoUser?.role === "hiring_manager") {
       const { data: scopeRows2 } = await supabase
@@ -924,6 +925,7 @@ export default async function EmployerDashboard() {
     const { data: rawLocations } = await locationsQuery;
     type LocRow = {
       id: string;
+      name: string;
       city: string | null;
       state: string | null;
       latitude: number | null;
@@ -982,6 +984,7 @@ export default async function EmployerDashboard() {
 
       miniMapLocations = locs.map((l) => ({
         id: l.id,
+        name: l.name,
         city: l.city,
         state: l.state,
         latitude: l.latitude,
@@ -991,6 +994,7 @@ export default async function EmployerDashboard() {
     } else {
       miniMapLocations = locs.map((l) => ({
         id: l.id,
+        name: l.name,
         city: l.city,
         state: l.state,
         latitude: l.latitude,
