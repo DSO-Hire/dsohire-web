@@ -13,7 +13,10 @@
 
 import Link from "next/link";
 import { Check } from "lucide-react";
-import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
+import {
+  FitMark,
+  type FitProduct,
+} from "@/components/practice-fit/brand/fit-wordmark";
 import type {
   MatchabilityResult,
   MatchabilityStep,
@@ -23,8 +26,11 @@ export function MatchabilityMeter({
   result,
   onJumpToStep,
   canJumpToStep,
+  product = "practicefit",
 }: {
   result: MatchabilityResult;
+  /** Which fit product this posting scores under — drives mark + copy. */
+  product?: FitProduct;
   /** Jump the wizard to the step that owns a missing field. */
   onJumpToStep?: (step: Exclude<MatchabilityStep, "profile" | "always">) => void;
   /** Step-guard from the wizard (forward jumps past unfilled required
@@ -42,7 +48,7 @@ export function MatchabilityMeter({
       <div className="px-4 py-3 border-b border-[var(--rule)]">
         <div className="flex items-center justify-between gap-2">
           <span className="inline-flex items-center gap-1.5 text-[9px] font-bold tracking-[2px] uppercase text-heritage-deep">
-            <PracticeFitMark className="h-3 w-3" />
+            <FitMark product={product} className="h-3 w-3" />
             Matchability
           </span>
           <span className="text-[11px] font-bold text-ink tabular-nums">
@@ -57,8 +63,9 @@ export function MatchabilityMeter({
           />
         </div>
         <p className="mt-1.5 text-[10px] leading-snug text-slate-meta">
-          Every dimension this posting fills in gives PracticeFit more to
-          work with — sharper Smart Picks, better placement in fit-sorted
+          Every dimension this posting fills in gives{" "}
+          {product === "dsofit" ? "DSOFit" : "PracticeFit"} more to work
+          with — sharper Smart Picks, better placement in fit-sorted
           browsing.
         </p>
       </div>

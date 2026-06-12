@@ -8,6 +8,12 @@ import type { ChangelogEntry } from "./index";
 export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-12",
+    kind: "improved",
+    title: "The corporate wizard gets the studio treatment too",
+    body: "Corporate postings now build with the same live preview beside the form, plus a DSOFit Matchability meter tuned to corporate dimensions — seniority, domain, leadership scope, work mode, travel. Same idea: see what candidates will see, and know exactly which field sharpens your matches.",
+  },
+  {
+    date: "2026-06-12",
     kind: "new",
     title: "Start your next posting from your last one",
     body: "Most dental postings are 90% repeats of one you've already written. The new-job page now offers your recent postings as starting points — one click duplicates everything (skills and screening questions included) into a fresh draft and drops you in the editor. Or start blank, same as always.",

@@ -221,3 +221,126 @@ export function computeClinicalMatchability(
     total: dims.length,
   };
 }
+
+/* ──────────────────────────────────────────────────────────────
+ * Corporate (DSOFit) matchability — mirrors the engine's corporate
+ * signal mapping in get-or-compute.ts:
+ *   seniority_target  ← authority_level (set ⇒ scoreable)
+ *   org_scale_need    ← DSO location count (always derivable)
+ *   domain_preference ← explicit OR derived from industry_experience
+ *   leadership_required ← reports bands / authority level
+ *   work_mode / travel_required ← their wizard fields
+ * plus the shared posting facts (function, comp, years, benefits).
+ * ─────────────────────────────────────────────────────────── */
+
+export interface CorporateMatchabilityInput {
+  corporateFunction: string;
+  /** The DSO's location count — mapOrgScaleNeed returns null (dim
+   * excluded) for single-location orgs. */
+  locationCount: number;
+  authorityLevel: string;
+  industryExperience: string;
+  directReportsBand: string;
+  indirectReportsBand: string;
+  workMode: string;
+  travelExpectation: string;
+  compType: string;
+  compMin: string;
+  compMax: string;
+  minYears: string;
+  benefits: string[];
+}
+
+export function computeCorporateMatchability(
+  input: CorporateMatchabilityInput
+): MatchabilityResult {
+  const compOk =
+    input.compType !== "doe" &&
+    (input.compMin.trim() !== "" || input.compMax.trim() !== "");
+  // Mirrors mapLeadershipRequired (get-or-compute.ts): any reports band
+  // OR a vp/svp/c_suite authority resolves the dim (incl. "none" for
+  // explicit zero-report ICs — that's still a scoreable signal).
+  const leadershipOk =
+    input.directReportsBand.trim() !== "" ||
+    input.indirectReportsBand.trim() !== "" ||
+    ["vp", "svp", "c_suite"].includes(input.authorityLevel);
+
+  const dims: MatchabilityDim[] = [
+    {
+      key: "function_fit",
+      label: "Function",
+      scoreable: input.corporateFunction.trim() !== "",
+      hint: "Pick the corporate function",
+      where: "basics",
+    },
+    {
+      key: "org_scale",
+      label: "Org scale",
+      scoreable: input.locationCount > 1,
+      hint: "Applies once your organization has multiple locations",
+      where: "always",
+    },
+    {
+      key: "seniority",
+      label: "Seniority",
+      scoreable: input.authorityLevel.trim() !== "",
+      hint: "Set the role's authority level",
+      where: "details",
+    },
+    {
+      key: "domain_fit",
+      label: "Domain",
+      scoreable: input.industryExperience.trim() !== "",
+      hint: "Set the industry-experience expectation (dental / healthcare / open)",
+      where: "details",
+    },
+    {
+      key: "leadership_scope",
+      label: "Leadership",
+      scoreable: leadershipOk,
+      hint: "Set direct/indirect reports (skip for IC roles — that's correct)",
+      where: "details",
+    },
+    {
+      key: "work_mode",
+      label: "Work mode",
+      scoreable: input.workMode.trim() !== "",
+      hint: "Pick onsite / hybrid / remote",
+      where: "details",
+    },
+    {
+      key: "travel",
+      label: "Travel",
+      scoreable: input.travelExpectation.trim() !== "",
+      hint: "Set the travel expectation",
+      where: "details",
+    },
+    {
+      key: "compensation",
+      label: "Pay",
+      scoreable: compOk,
+      hint: 'Add a pay range — "discussed at offer" hides this dimension',
+      where: "details",
+    },
+    {
+      key: "years_experience",
+      label: "Experience",
+      scoreable: input.minYears.trim() !== "",
+      hint: "Set minimum years of corporate experience",
+      where: "details",
+    },
+    {
+      key: "benefits",
+      label: "Benefits",
+      scoreable: input.benefits.length > 0,
+      hint: "List the benefits you offer",
+      where: "details",
+    },
+  ];
+
+  return {
+    dims,
+    scoreable: dims.filter((d) => d.scoreable).length,
+    total: dims.length,
+  };
+}

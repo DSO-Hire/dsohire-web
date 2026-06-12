@@ -57,6 +57,9 @@ import { createCorporateJob, updateCorporateJob } from "./corporate-actions";
 // JobActionState comes straight from ./actions — never re-exported through a
 // "use server" module (that ReferenceErrors at request time).
 import type { JobActionState } from "./actions";
+import { PostingPreview } from "./posting-preview";
+import { MatchabilityMeter } from "./matchability-meter";
+import { computeCorporateMatchability } from "@/lib/practice-fit/matchability";
 import {
   KnockoutAuthoring,
   type LocationOption,
@@ -898,7 +901,55 @@ export function CorporateJobWizard({
 
   const currentStep = STEPS[stepIdx];
 
+  // Lane 6 — live preview + DSOFit matchability (xl+), mirrors the
+  // clinical wizard. Pure derivations from existing state.
+  const selectedLocationNames = locations
+    .filter((l) => selectedLocationIds.has(l.id))
+    .map((l) => l.name);
+  const employmentLabelForPreview =
+    EMPLOYMENT_OPTIONS.find((e) => e.value === employmentType)?.label ??
+    employmentType;
+  const matchability = useMemo(
+    () =>
+      computeCorporateMatchability({
+        corporateFunction,
+        locationCount: locations.length,
+        authorityLevel,
+        industryExperience,
+        directReportsBand,
+        indirectReportsBand,
+        workMode,
+        travelExpectation,
+        compType,
+        compMin,
+        compMax,
+        minYears,
+        benefits,
+      }),
+    [
+      corporateFunction,
+      locations.length,
+      authorityLevel,
+      industryExperience,
+      directReportsBand,
+      indirectReportsBand,
+      workMode,
+      travelExpectation,
+      compType,
+      compMin,
+      compMax,
+      minYears,
+      benefits,
+    ]
+  );
+  const STEP_INDEX: Record<string, number> = {
+    basics: 0,
+    details: 1,
+    description: 2,
+  };
+
   return (
+    <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_400px] xl:gap-8 xl:items-start">
     <div className="space-y-8 max-w-[820px]">
       {draftFound && !draftDismissed && (
         <div className="border border-[#3D5266]/50 bg-[#3D5266]/[0.08] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -1154,6 +1205,41 @@ export function CorporateJobWizard({
           </div>
         )}
       </WizardShell>
+    </div>
+
+      {/* Lane 6 — corporate studio pane (xl+). Same chain rule: no
+          overflow wrappers around the sticky aside. */}
+      <aside className="hidden xl:block sticky top-6 space-y-4">
+        <PostingPreview
+          title={title}
+          roleLabel={corporateFunction || "Corporate role"}
+          employmentTypeLabel={employmentLabelForPreview}
+          locationNames={selectedLocationNames}
+          compVisible={compVisible}
+          compType={compType}
+          compMin={compMin}
+          compMax={compMax}
+          compPeriod={compPeriod}
+          scheduleDays={[]}
+          scheduleEvenings={false}
+          scheduleWeekends={false}
+          benefits={benefits}
+          skills={[]}
+          descriptionHtml={description}
+          questionCount={questions.length}
+        />
+        <MatchabilityMeter
+          result={matchability}
+          product="dsofit"
+          onJumpToStep={(step) => {
+            setError(null);
+            setStepIdx(STEP_INDEX[step] ?? 0);
+          }}
+          canJumpToStep={(step) =>
+            (STEP_INDEX[step] ?? 0) <= maxStepReached
+          }
+        />
+      </aside>
     </div>
   );
 }
