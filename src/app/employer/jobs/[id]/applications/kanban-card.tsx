@@ -25,8 +25,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDraggable } from "@dnd-kit/core";
-import { MessageCircle, Star } from "lucide-react";
-import type { CSSProperties, MouseEvent, PointerEvent } from "react";
+import { ArrowRight, MessageCircle, Star } from "lucide-react";
+import type {
+  CSSProperties,
+  KeyboardEvent,
+  MouseEvent,
+  PointerEvent,
+  ReactNode,
+} from "react";
 import {
   daysInStage,
   stageHeatLevel,
@@ -60,6 +66,15 @@ interface KanbanCardProps {
   selected?: boolean;
   selectable?: boolean;
   onToggleSelect?: (id: string, shiftKey: boolean) => void;
+  /**
+   * Lane 5 — hover quick-actions (Message / Scorecards / Advance).
+   * `showQuickActions` gates the whole row (closed-lane cards + the
+   * drag overlay never get it). `quickAdvance` is the board-supplied
+   * move-to-next-stage action riding the SAME runMove path as drag —
+   * null when the card already sits in the last forward stage.
+   */
+  showQuickActions?: boolean;
+  quickAdvance?: { run: () => void; title: string } | null;
 }
 
 export function KanbanCard({
@@ -69,6 +84,8 @@ export function KanbanCard({
   selected = false,
   selectable = true,
   onToggleSelect,
+  showQuickActions = false,
+  quickAdvance,
 }: KanbanCardProps) {
   const router = useRouter();
   const {
@@ -108,8 +125,9 @@ export function KanbanCard({
 
   // kb-card / kb-card-headline are styling hooks for the Lane 5 board
   // modes (globals.css: .kb-compact tightens padding + hides headlines).
+  // `group` powers the hover quick-actions reveal.
   const baseClasses =
-    "kb-card relative block w-full text-left bg-white border p-3 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2";
+    "kb-card group relative block w-full text-left bg-white border p-3 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2";
   const borderClass = selected
     ? "border-heritage ring-2 ring-heritage/40"
     : "border-[var(--rule)]";
@@ -158,6 +176,42 @@ export function KanbanCard({
         router.push(`/employer/applications/${application.id}`);
       }}
     >
+      {/* Lane 5 — hover quick-actions. role="button" spans (NOT nested
+          <button>s — the HTML parser auto-closes nested buttons, which
+          would break SSR hydration; the selection checkbox precedent
+          uses the same stopPropagation pattern to stay drag-safe). */}
+      {showQuickActions && !isOverlay && !pending && (
+        <span
+          className="absolute right-8 top-1.5 z-10 flex gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity"
+          onPointerDown={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <QuickAction
+            title="Message candidate"
+            onAct={() =>
+              router.push(`/employer/inbox?app=${application.id}`)
+            }
+          >
+            <MessageCircle className="h-3 w-3" />
+          </QuickAction>
+          <QuickAction
+            title="Scorecards"
+            onAct={() =>
+              router.push(
+                `/employer/applications/${application.id}#scorecards`
+              )
+            }
+          >
+            <Star className="h-3 w-3" />
+          </QuickAction>
+          {quickAdvance && (
+            <QuickAction title={quickAdvance.title} onAct={quickAdvance.run}>
+              <ArrowRight className="h-3 w-3" />
+            </QuickAction>
+          )}
+        </span>
+      )}
       {selectable && !isOverlay && (
         <span
           className="absolute right-2 top-2 inline-flex items-center justify-center"
@@ -274,5 +328,43 @@ export function KanbanCard({
         </div>
       </div>
     </button>
+  );
+}
+
+/**
+ * Quick-action chip — a keyboard-operable span (role="button") because
+ * real <button>s can't nest inside the draggable card button (HTML
+ * parser auto-closes nested buttons → SSR hydration mismatch).
+ */
+function QuickAction({
+  title,
+  onAct,
+  children,
+}: {
+  title: string;
+  onAct: () => void;
+  children: ReactNode;
+}) {
+  function handleKeyDown(e: KeyboardEvent<HTMLSpanElement>) {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    e.stopPropagation();
+    onAct();
+  }
+  return (
+    <span
+      role="button"
+      tabIndex={0}
+      title={title}
+      aria-label={title}
+      onKeyDown={handleKeyDown}
+      onClick={(e) => {
+        e.stopPropagation();
+        onAct();
+      }}
+      className="inline-flex h-[22px] w-[22px] cursor-pointer items-center justify-center border border-[var(--rule-strong)] bg-cream text-slate-body hover:border-heritage hover:bg-heritage/10 hover:text-heritage-deep transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
+    >
+      {children}
+    </span>
   );
 }

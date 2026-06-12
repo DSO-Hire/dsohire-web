@@ -543,6 +543,31 @@ export function KanbanBoard({
     [applyOptimistic, commitLocal, stageById]
   );
 
+  // Lane 5 — hover quick-advance: moves a card one forward stage via
+  // the EXACT runMove path drag uses (optimistic move, server guard,
+  // error banner, offer-compose redirect all inherit). Null when the
+  // card already sits in the last forward column.
+  const quickAdvanceFor = useCallback(
+    (app: KanbanApplication) => {
+      const idx = kanbanStages.findIndex((s) => s.id === app.stage_id);
+      if (idx < 0 || idx >= kanbanStages.length - 1) return null;
+      const next = kanbanStages[idx + 1];
+      return {
+        title: `Advance to ${next.label}`,
+        run: () =>
+          runMove(
+            app.id,
+            next.id,
+            next.kind,
+            app.stage_id,
+            app.kind,
+            app.candidate?.full_name ?? "Anonymous candidate"
+          ),
+      };
+    },
+    [kanbanStages, runMove]
+  );
+
   const runBulkAction = useCallback(
     (
       actionFn: () => Promise<BulkActionResult>,
@@ -1310,6 +1335,7 @@ export function KanbanBoard({
                 onToggleSelect={handleToggleSelect}
                 dwellNorms={dwellNorms}
                 laneLabel={lanesOn ? laneAccessor : undefined}
+                quickAdvanceFor={quickAdvanceFor}
               />
             ))}
           </div>

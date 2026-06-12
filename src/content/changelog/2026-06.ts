@@ -9,6 +9,12 @@ export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-12",
     kind: "new",
+    title: "Act on a card without opening it",
+    body: "Hover any pipeline card and three quiet actions appear: jump into the conversation, open the scorecards, or advance the candidate one stage. Advancing this way behaves exactly like dragging — same confirmation, same permissions, and moving someone into Offer still takes you straight to the offer composer.",
+  },
+  {
+    date: "2026-06-12",
+    kind: "new",
     title: "Three ways to look at your board",
     body: "New board modes, remembered between visits: Compact squeezes more cards on screen for heavy pipelines, Focus dims every column except the one you're working, and on Pipeline HQ a Lanes toggle groups each column's cards by job — so a cross-practice pipeline stops reading like one big pile. Dragging works exactly the same in every mode.",
   },

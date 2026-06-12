@@ -41,6 +41,11 @@ interface KanbanColumnProps {
    * this accessor's value (e.g. job title on Pipeline HQ). Purely
    * visual: the droppable stays the whole column, drag is untouched. */
   laneLabel?: (app: KanbanApplication) => string;
+  /** Lane 5 quick-actions — board-supplied advance action per card
+   * (rides runMove). Presence also turns the hover action row on. */
+  quickAdvanceFor?: (
+    app: KanbanApplication
+  ) => { run: () => void; title: string } | null;
 }
 
 export function KanbanColumn({
@@ -51,6 +56,7 @@ export function KanbanColumn({
   onToggleSelect,
   dwellNorms,
   laneLabel,
+  quickAdvanceFor,
 }: KanbanColumnProps) {
   const colors = colorTripleFor(stage.color_class, stage.kind);
   const { isOver, setNodeRef } = useDroppable({
@@ -184,6 +190,8 @@ export function KanbanColumn({
                   pending={pendingApplicationIds.has(app.id)}
                   selected={selectedIds.has(app.id)}
                   onToggleSelect={onToggleSelect}
+                  showQuickActions={quickAdvanceFor !== undefined}
+                  quickAdvance={quickAdvanceFor?.(app) ?? null}
                 />
               ))}
             </div>
@@ -196,6 +204,8 @@ export function KanbanColumn({
               pending={pendingApplicationIds.has(app.id)}
               selected={selectedIds.has(app.id)}
               onToggleSelect={onToggleSelect}
+              showQuickActions={quickAdvanceFor !== undefined}
+              quickAdvance={quickAdvanceFor?.(app) ?? null}
             />
           ))
         )}
