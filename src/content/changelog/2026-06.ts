@@ -8,6 +8,12 @@ import type { ChangelogEntry } from "./index";
 export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-12",
+    kind: "new",
+    title: "Context, right beside the conversation",
+    body: "On larger screens the inbox now keeps a quiet context rail next to the thread: who you're talking to, the role and location, a pipeline journey with the real dates each stage was reached (and how long the current one has run), how fast this candidate typically replies — measured from this conversation, shown only when there's enough to measure — and a one-click jump to the full application.",
+  },
+  {
+    date: "2026-06-12",
     kind: "improved",
     title: "An inbox that knows whose turn it is",
     body: "Two new inbox filters: Awaiting — conversations where the candidate spoke last and the ball is in your court (stage moves don't count as replies) — and Notes, every thread your team has annotated. Rows now carry the candidate's stage and an \"Awaiting you\" chip, and when a team note is the freshest thing on a thread, the preview shows it.",

@@ -24,8 +24,8 @@ import {
   projectApplicationMessageRow,
 } from "@/lib/inbox/queries";
 import type { ApplicationMessageRow } from "@/lib/messages/actions";
-import type { ThreadNote } from "@/lib/inbox/types";
-import { getThreadNotes } from "@/lib/inbox/actions";
+import type { ThreadNote, ThreadStageStep } from "@/lib/inbox/types";
+import { getThreadNotes, getThreadStageJourney } from "@/lib/inbox/actions";
 import { InboxView } from "@/components/inbox/inbox-view";
 
 export const metadata: Metadata = { title: "Inbox · DSO Hire" };
@@ -64,6 +64,7 @@ export default async function EmployerInboxPage({ searchParams }: PageProps) {
   // the right pane. Otherwise the right pane shows an empty state.
   let activeMessages: ApplicationMessageRow[] = [];
   let activeNotes: ThreadNote[] = [];
+  let activeJourney: ThreadStageStep[] = [];
   let activeApplicationId: string | null = null;
   if (appQuery) {
     const matchingThread = threads.find(
@@ -71,18 +72,20 @@ export default async function EmployerInboxPage({ searchParams }: PageProps) {
     );
     if (matchingThread) {
       activeApplicationId = appQuery;
-      // Messages + internal team notes in parallel (Lane 4 unified
-      // timeline). Notes are employer-side only — the candidate inbox
-      // page never fetches them, and application_comments RLS would
-      // return zero rows to a candidate anyway.
-      const [{ data: msgRows, error: msgErr }, notes] = await Promise.all([
-        supabase
-          .from("application_messages")
-          .select(APPLICATION_MESSAGE_SELECT)
-          .eq("application_id", appQuery)
-          .order("created_at", { ascending: true }),
-        getThreadNotes(appQuery),
-      ]);
+      // Messages + internal team notes + stage journey in parallel
+      // (Lane 4 unified timeline + context rail). Notes/journey are
+      // employer-side only — the candidate inbox page never fetches
+      // them, and RLS would return zero rows to a candidate anyway.
+      const [{ data: msgRows, error: msgErr }, notes, journey] =
+        await Promise.all([
+          supabase
+            .from("application_messages")
+            .select(APPLICATION_MESSAGE_SELECT)
+            .eq("application_id", appQuery)
+            .order("created_at", { ascending: true }),
+          getThreadNotes(appQuery),
+          getThreadStageJourney(appQuery),
+        ]);
       if (msgErr) {
         console.error("[inbox] employer active-thread messages", msgErr);
       }
@@ -91,6 +94,7 @@ export default async function EmployerInboxPage({ searchParams }: PageProps) {
           projectApplicationMessageRow(row) as unknown as ApplicationMessageRow
       );
       activeNotes = notes;
+      activeJourney = journey;
     }
   }
 
@@ -104,6 +108,7 @@ export default async function EmployerInboxPage({ searchParams }: PageProps) {
         initialActiveApplicationId={activeApplicationId}
         initialActiveMessages={activeMessages}
         initialActiveNotes={activeNotes}
+        initialActiveJourney={activeJourney}
       />
     </EmployerShell>
   );

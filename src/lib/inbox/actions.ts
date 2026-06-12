@@ -19,7 +19,7 @@ import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
-import type { ThreadNote } from "./types";
+import type { ThreadNote, ThreadStageStep } from "./types";
 
 type Result =
   | { ok: true }
@@ -216,4 +216,60 @@ export async function getThreadNotes(
     edited_at: r.edited_at,
     author_name: nameById.get(r.author_dso_user_id) ?? "Teammate",
   }));
+}
+
+/* ──────────────────────────────────────────────────────────────
+ * Stage journey (Lane 4 — context rail stepper)
+ *
+ * Chronological list of pipeline stages this application has ENTERED,
+ * from application_status_events (RLS: DSO members only — the rail is
+ * employer-side). First-entry-per-kind wins so a bounce back into a
+ * stage doesn't duplicate the step. If the trigger never seeded an
+ * "open" event (older rows), we synthesize Applied from the
+ * application's real created_at — a true date, not an invention.
+ * ─────────────────────────────────────────────────────────── */
+
+export async function getThreadStageJourney(
+  applicationId: string
+): Promise<ThreadStageStep[]> {
+  if (!applicationId) return [];
+  const ctx = await getUser();
+  if (!ctx.ok) return [];
+
+  const [eventsResult, appResult] = await Promise.all([
+    ctx.supabase
+      .from("application_status_events")
+      .select("to_stage_kind, created_at")
+      .eq("application_id", applicationId)
+      .order("created_at", { ascending: true }),
+    ctx.supabase
+      .from("applications")
+      .select("id, created_at")
+      .eq("id", applicationId)
+      .maybeSingle(),
+  ]);
+  if (eventsResult.error) {
+    console.error("[inbox] getThreadStageJourney", eventsResult.error);
+    return [];
+  }
+
+  const steps: ThreadStageStep[] = [];
+  const seen = new Set<string>();
+  for (const r of (eventsResult.data ?? []) as Array<{
+    to_stage_kind: string;
+    created_at: string;
+  }>) {
+    if (seen.has(r.to_stage_kind)) continue;
+    seen.add(r.to_stage_kind);
+    steps.push({ kind: r.to_stage_kind, at: r.created_at });
+  }
+
+  const appCreatedAt =
+    ((appResult.data as { created_at?: string } | null)?.created_at as
+      | string
+      | undefined) ?? null;
+  if (!seen.has("open") && appCreatedAt) {
+    steps.unshift({ kind: "open", at: appCreatedAt });
+  }
+  return steps;
 }

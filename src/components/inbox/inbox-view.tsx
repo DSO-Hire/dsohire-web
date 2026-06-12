@@ -51,13 +51,19 @@ import {
 import { Avatar } from "@/components/ui/avatar";
 import { MessagesThread } from "@/components/messaging/messages-thread";
 import type { ApplicationMessageRow } from "@/lib/messages/actions";
-import type { InboxThread, ThreadNote } from "@/lib/inbox/types";
+import type {
+  InboxThread,
+  ThreadNote,
+  ThreadStageStep,
+} from "@/lib/inbox/types";
 import {
   archiveThread,
   unarchiveThread,
   markThreadRead,
   getThreadNotes,
+  getThreadStageJourney,
 } from "@/lib/inbox/actions";
+import { ContextRail } from "@/components/inbox/context-rail";
 
 type Audience = "employer" | "candidate";
 type Tab = "all" | "unread" | "awaiting" | "notes" | "archived";
@@ -100,6 +106,9 @@ export interface InboxViewProps {
    * supplies this, and the notes fetch is audience-gated client-side too.
    */
   initialActiveNotes?: ThreadNote[];
+  /** Stage journey for the initially-active thread (context rail).
+   * Employer audience only, same contract as initialActiveNotes. */
+  initialActiveJourney?: ThreadStageStep[];
 }
 
 export function InboxView({
@@ -110,6 +119,7 @@ export function InboxView({
   initialActiveApplicationId,
   initialActiveMessages,
   initialActiveNotes,
+  initialActiveJourney,
 }: InboxViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -128,6 +138,10 @@ export function InboxView({
   // only). Fetched per-thread via the RLS-scoped getThreadNotes action.
   const [activeNotes, setActiveNotes] = useState<ThreadNote[]>(
     initialActiveNotes ?? []
+  );
+  // Stage journey for the context rail (employer only).
+  const [activeJourney, setActiveJourney] = useState<ThreadStageStep[]>(
+    initialActiveJourney ?? []
   );
   const [activeId, setActiveId] = useState<string | null>(
     initialActiveApplicationId
@@ -216,6 +230,34 @@ export function InboxView({
     ? threads.find((t) => t.application_id === activeId) ?? null
     : null;
 
+  // Candidate reply rhythm for the context rail — median gap between an
+  // employer human message and the candidate's next human reply, in THIS
+  // conversation only. Needs ≥2 real samples; otherwise we say nothing
+  // (no invented numbers).
+  const replyRhythm = useMemo(() => {
+    if (audience !== "employer") return null;
+    const gaps: number[] = [];
+    let lastEmployerAt: number | null = null;
+    for (const m of activeMessages) {
+      if (m.deleted_at || m.event_kind) continue;
+      const at = Date.parse(m.created_at);
+      if (m.sender_role === "employer") {
+        lastEmployerAt = at;
+      } else if (m.sender_role === "candidate" && lastEmployerAt !== null) {
+        gaps.push(at - lastEmployerAt);
+        lastEmployerAt = null;
+      }
+    }
+    if (gaps.length < 2) return null;
+    gaps.sort((a, b) => a - b);
+    const median = gaps[Math.floor(gaps.length / 2)];
+    const minutes = Math.round(median / 60_000);
+    if (minutes < 60) return `~${Math.max(minutes, 1)}m`;
+    const hours = Math.round(minutes / 60);
+    if (hours < 48) return `~${hours}h`;
+    return `~${Math.round(hours / 24)}d`;
+  }, [audience, activeMessages]);
+
   const selectThread = useCallback(
     (thread: InboxThread) => {
       setActiveId(thread.application_id);
@@ -236,12 +278,16 @@ export function InboxView({
       // Fetch messages for the right pane.
       void fetchActiveMessages(thread.application_id);
 
-      // Internal notes for the unified timeline — employer side only.
-      // Clear first so a slow fetch never shows the previous thread's
-      // notes against the new thread's messages.
+      // Internal notes + stage journey — employer side only. Clear
+      // first so a slow fetch never shows the previous thread's data
+      // against the new thread's messages.
       setActiveNotes([]);
+      setActiveJourney([]);
       if (audience === "employer") {
         void getThreadNotes(thread.application_id).then(setActiveNotes);
+        void getThreadStageJourney(thread.application_id).then(
+          setActiveJourney
+        );
       }
 
       // Mark all incoming messages on this thread read, then refresh
@@ -310,6 +356,7 @@ export function InboxView({
     setActiveId(null);
     setActiveMessages([]);
     setActiveNotes([]);
+    setActiveJourney([]);
     const params = new URLSearchParams(searchParams);
     params.delete("app");
     const qs = params.toString();
@@ -681,6 +728,7 @@ export function InboxView({
                   MessagesThread owns its own scroll so the wrapper just
                   needs `min-h-0` for the flex overflow. */}
               <div className="flex-1 min-h-0 flex">
+                <div className="flex-1 min-h-0 flex min-w-0">
                 <MessagesThread
                   key={activeThread.application_id}
                   applicationId={activeThread.application_id}
@@ -721,6 +769,24 @@ export function InboxView({
                       : undefined
                   }
                 />
+                </div>
+                {/* Context rail — employer, xl+ only (Lane 4). Scrolls
+                    internally; the thread pane owns smaller widths. */}
+                {audience === "employer" && (
+                  <aside className="hidden xl:block w-[264px] shrink-0 min-h-0 border-l border-[var(--rule)]">
+                    <ContextRail
+                      applicationId={activeThread.application_id}
+                      candidateName={activeThread.peer.display_name}
+                      avatarUrl={activeThread.peer.avatar_url}
+                      jobTitle={activeThread.job_title}
+                      locationName={activeThread.location_name}
+                      stageKind={activeThread.stage}
+                      journey={activeJourney}
+                      replyRhythm={replyRhythm}
+                      notesCount={activeThread.notes_count}
+                    />
+                  </aside>
+                )}
               </div>
             </>
           ) : (
