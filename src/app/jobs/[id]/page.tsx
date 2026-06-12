@@ -53,6 +53,11 @@ import {
   INDUSTRY_EXPERIENCE_LABELS,
 } from "@/lib/corporate/job-fields";
 import { computeOte, formatUsd } from "@/lib/comp/ote";
+import {
+  formatDealCard,
+  isPercentModel,
+  type CompModel,
+} from "@/lib/comp/model";
 import { VERIFICATION_TYPE_LABELS } from "@/lib/verifications/types";
 import type { Metadata } from "next";
 
@@ -125,7 +130,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
   const { data: job } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, variable_comp_enabled, variable_comp_target, variable_comp_structure, bonus_enabled, bonus_target, benefits, requirements, posted_at, status, schedule_days, schedule_evenings, schedule_weekends, scope, external_links, corporate_function, work_mode, work_mode_detail, remote_state_restrictions, travel_expectation, travel_territory, reports_to, direct_reports_band, indirect_reports_band, authority_level, education_requirement, industry_experience, min_years_corporate_experience, max_years_corporate_experience, bonus_structure, equity_offered, equity_note, visibility"
+      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, variable_comp_enabled, variable_comp_target, variable_comp_structure, bonus_enabled, bonus_target, benefits, requirements, posted_at, status, schedule_days, schedule_evenings, schedule_weekends, scope, external_links, corporate_function, work_mode, work_mode_detail, remote_state_restrictions, travel_expectation, travel_territory, reports_to, direct_reports_band, indirect_reports_band, authority_level, education_requirement, industry_experience, min_years_corporate_experience, max_years_corporate_experience, bonus_structure, equity_offered, equity_note, visibility, comp_model, guarantee_kind, guarantee_amount, guarantee_duration, percent_rate_min, percent_rate_max, percent_basis, percent_tiers_note, hygiene_exam_credited, hygienist_work_credited, lab_fee_policy, basis_exclusions_note, pay_cadence, est_annual_min, est_annual_max, worker_classification"
     )
     .eq("id", id)
     .maybeSingle();
@@ -1091,6 +1096,64 @@ function formatComp(job: { [k: string]: unknown }): string {
  * the wizard's <CompensationSection> note always agree.
  */
 function CompensationGlance({ job }: { job: { [k: string]: unknown } }) {
+  // #128 — structured dental comp models render the deal card (shared
+  // formatter with the wizard preview — they cannot disagree). Simple/
+  // legacy postings fall through to the OTE/base rendering below.
+  const dealModel = (job.comp_model as CompModel | null) ?? null;
+  if (isPercentModel(dealModel)) {
+    const deal = formatDealCard({
+      compModel: dealModel as CompModel,
+      guaranteeKind: (job.guarantee_kind as never) ?? null,
+      guaranteeAmount: (job.guarantee_amount as number | null) ?? null,
+      guaranteeDuration: (job.guarantee_duration as never) ?? null,
+      percentRateMin: (job.percent_rate_min as number | null) ?? null,
+      percentRateMax: (job.percent_rate_max as number | null) ?? null,
+      percentBasis: (job.percent_basis as never) ?? null,
+      percentTiersNote: (job.percent_tiers_note as string | null) ?? null,
+      hygieneExamCredited:
+        (job.hygiene_exam_credited as boolean | null) ?? null,
+      hygienistWorkCredited:
+        (job.hygienist_work_credited as boolean | null) ?? null,
+      labFeePolicy: (job.lab_fee_policy as never) ?? null,
+      basisExclusionsNote:
+        (job.basis_exclusions_note as string | null) ?? null,
+      payCadence: (job.pay_cadence as never) ?? null,
+      estAnnualMin: (job.est_annual_min as number | null) ?? null,
+      estAnnualMax: (job.est_annual_max as number | null) ?? null,
+      workerClassification: (job.worker_classification as never) ?? null,
+    });
+    if (deal.headline || deal.estRange) {
+      return (
+        <div className="space-y-1.5">
+          {deal.headline && (
+            <div className="text-[17px] font-extrabold text-ivory leading-snug">
+              {deal.headline}
+            </div>
+          )}
+          {deal.estRange && (
+            <div className="text-[14px] text-ivory/90 font-semibold">
+              {deal.estRange}{" "}
+              <span className="font-normal text-ivory/60">
+                (employer estimate)
+              </span>
+            </div>
+          )}
+          {deal.chips.length > 0 && (
+            <div className="flex flex-wrap gap-1 pt-0.5">
+              {deal.chips.map((c) => (
+                <span
+                  key={c}
+                  className="px-1.5 py-0.5 text-[11px] font-semibold text-ivory/80 border border-ivory/25"
+                >
+                  {c}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+  }
   const variableEnabled = Boolean(job.variable_comp_enabled);
   const bonusEnabled = Boolean(job.bonus_enabled);
   const equityOffered = Boolean(job.equity_offered);

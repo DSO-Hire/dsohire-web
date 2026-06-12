@@ -36,6 +36,9 @@ import type { FitInputs, FitResult } from "./types";
 // ./job-text-signals so the wizard's Matchability meter reads the same
 // detection truth as this engine. Single source — edit there.
 import { detectJobPms, detectJobCerts } from "./job-text-signals";
+// #128 — same single-source rule as job-text-signals: the engine and
+// the wizard read percentage-model membership from ONE module.
+import { isPercentModel, type CompModel } from "@/lib/comp/model";
 
 const STALE_AFTER_DAYS = 7;
 
@@ -371,7 +374,7 @@ async function loadJobAndDso(
        authority_level, work_mode, travel_expectation, direct_reports_band, indirect_reports_band,
        industry_experience, domain_preference,
        compensation_min, compensation_max, compensation_period,
-       compensation_type,
+       compensation_type, comp_model, est_annual_min, est_annual_max,
        benefits,
        specialty, min_years_experience,
        schedule_days, schedule_evenings, schedule_weekends,
@@ -422,14 +425,35 @@ async function loadJobAndDso(
       role_category: (r.role_category as string) ?? "other",
       corporate_function: (r.corporate_function as string | null) ?? null,
       employment_type: (r.employment_type as string) ?? "full_time",
-      compensation_type:
-        (r.compensation_type as FitInputs["job"]["compensation_type"]) ??
-        "range",
-      compensation_min: (r.compensation_min as number | null) ?? null,
-      compensation_max: (r.compensation_max as number | null) ?? null,
-      compensation_period:
-        (r.compensation_period as FitInputs["job"]["compensation_period"]) ??
-        null,
+      // #128 — ENGINE RULE (memo §6): percentage comp models score the
+      // comp dim off est_annual_min/max ONLY — the engine never scores
+      // a percentage. Mapped through the EXISTING min/max path so no
+      // scoring logic changes (and no MODEL_VERSION bump: legacy jobs'
+      // inputs are byte-identical; structured jobs are new inputs).
+      // Percentage model WITHOUT an est. range = "doe" → dim excluded,
+      // exactly like a discussed-at-offer posting. The deal structure
+      // itself (rates, bases, policies) is display-only by design.
+      ...(isPercentModel(r.comp_model as CompModel | null)
+        ? {
+            compensation_type: (r.est_annual_min != null ||
+            r.est_annual_max != null
+              ? "range"
+              : "doe") as FitInputs["job"]["compensation_type"],
+            compensation_min: (r.est_annual_min as number | null) ?? null,
+            compensation_max: (r.est_annual_max as number | null) ?? null,
+            compensation_period:
+              "yearly" as FitInputs["job"]["compensation_period"],
+          }
+        : {
+            compensation_type:
+              (r.compensation_type as FitInputs["job"]["compensation_type"]) ??
+              "range",
+            compensation_min: (r.compensation_min as number | null) ?? null,
+            compensation_max: (r.compensation_max as number | null) ?? null,
+            compensation_period:
+              (r.compensation_period as FitInputs["job"]["compensation_period"]) ??
+              null,
+          }),
       locations,
       skills,
       // Phase A.3 — PMS need detected from the posting text.
