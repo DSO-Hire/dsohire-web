@@ -9,6 +9,12 @@ export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-12",
     kind: "new",
+    title: "See your posting form as you type it",
+    body: "The job wizard now keeps a live preview beside the form on larger screens — title, pay, schedule, the opening lines of your description, and the screening-question count, rendered the way candidates will see them, updating with every keystroke. The first lines of your description are what candidates read in search results; now you're writing them with that view open.",
+  },
+  {
+    date: "2026-06-12",
+    kind: "new",
     title: "The board explains itself",
     body: "A new Board insights drawer on every job's pipeline: the funnel with step-by-step conversion, plus plain-English callouts computed from your own numbers — which stage is the bottleneck (median dwell vs your 90-day norm, and how many candidates there have gone quiet) and which stage is outrunning your usual pace. When there isn't enough history to say something, it says that instead.",
   },

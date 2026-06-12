@@ -40,6 +40,7 @@ import {
 } from "./actions";
 import { RecommendedQuestionsPanel } from "./recommended-questions-panel";
 import { JdGeneratorPanel } from "./jd-generator-panel";
+import { PostingPreview } from "./posting-preview";
 import { ChipArrayInput } from "@/app/candidate/profile/edit-sheet";
 import { CORPORATE_FUNCTIONS } from "@/lib/corporate/functions";
 import {
@@ -1029,7 +1030,20 @@ export function JobWizard({
 
   const currentStep = STEPS[stepIdx];
 
+  // Lane 6 — live posting preview (xl+). Pure derivation from the
+  // wizard's own state; the aside is sticky against the page scroll
+  // (no overflow ancestors on this chain — hard rule).
+  const selectedLocationNames = locations
+    .filter((l) => selectedLocationIds.has(l.id))
+    .map((l) => l.name);
+  const roleLabelForPreview =
+    ROLE_OPTIONS.find((r) => r.value === roleCategory)?.label ?? roleCategory;
+  const employmentLabelForPreview =
+    EMPLOYMENT_OPTIONS.find((e) => e.value === employmentType)?.label ??
+    employmentType;
+
   return (
+    <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_400px] xl:gap-8 xl:items-start">
     <div className="space-y-8 max-w-[820px]">
       {/* v1.8 — draft autosave banner. Only on create mode (draftKey
           is null in edit mode). Renders until the user picks Restore
@@ -1297,6 +1311,33 @@ export function JobWizard({
           </div>
         )}
       </WizardShell>
+    </div>
+
+      {/* Lane 6 — the right pane IS the posting, updating per keystroke
+          (résumé-builder pattern). xl-only; the wizard stays the sole
+          column below that. Sticky rides the page scroll — keep this
+          chain free of overflow wrappers (hard rule). */}
+      <aside className="hidden xl:block sticky top-6 space-y-4">
+        <PostingPreview
+          title={title}
+          roleLabel={roleLabelForPreview}
+          employmentTypeLabel={employmentLabelForPreview}
+          dsoName={dsoName}
+          locationNames={selectedLocationNames}
+          compVisible={compVisible}
+          compType={compType}
+          compMin={compMin}
+          compMax={compMax}
+          compPeriod={compPeriod}
+          scheduleDays={Array.from(scheduleDays)}
+          scheduleEvenings={scheduleEvenings}
+          scheduleWeekends={scheduleWeekends}
+          benefits={benefits}
+          skills={skills}
+          descriptionHtml={description}
+          questionCount={questions.length}
+        />
+      </aside>
     </div>
   );
 }
