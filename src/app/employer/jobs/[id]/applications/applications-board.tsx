@@ -49,6 +49,11 @@ interface ApplicationsBoardProps {
    * Threads through to the kanban board's SelectionToolbar render.
    */
   canBulkAct?: boolean;
+  /**
+   * Lane 5 — trailing-90 dwell norms per stage kind (server-fetched).
+   * Pass-through to the kanban board's column-health headers.
+   */
+  dwellNorms?: Record<string, number>;
 }
 
 const VIEW_STORAGE_PREFIX = "dsohire.applications.view.";
@@ -61,6 +66,7 @@ export function ApplicationsBoard({
   aiSuggesterAvailable,
   aiSuggesterContextByAppId,
   canBulkAct = true,
+  dwellNorms,
 }: ApplicationsBoardProps) {
   const [view, setView] = useState<BoardView>(initialView);
   const [hydrated, setHydrated] = useState(false);
@@ -138,6 +144,7 @@ export function ApplicationsBoard({
           aiSuggesterAvailable={aiSuggesterAvailable}
           aiSuggesterContextByAppId={aiSuggesterContextByAppId}
           canBulkAct={canBulkAct}
+          dwellNorms={dwellNorms}
         />
       ) : isMobile ? (
         <MobileStageTabs
@@ -152,6 +159,7 @@ export function ApplicationsBoard({
           aiSuggesterAvailable={aiSuggesterAvailable}
           aiSuggesterContextByAppId={aiSuggesterContextByAppId}
           canBulkAct={canBulkAct}
+          dwellNorms={dwellNorms}
         />
       )}
     </div>

@@ -124,6 +124,20 @@ interface KanbanBoardProps {
    * from its applications (unchanged behavior).
    */
   realtimeJobIds?: string[];
+  /**
+   * Lane 5 — DSO trailing-90 median dwell per stage kind (lib/
+   * applications/stage-dwell). Drives the column-health header tone.
+   * Optional: absent → columns render neutral health.
+   */
+  dwellNorms?: Record<string, number>;
+  /**
+   * Lane 5 — swimlane accessor. When provided, the toolbar offers a
+   * "Lanes" toggle that visually groups each column's cards under
+   * dashed labels (purely presentational — droppables and drag are
+   * untouched). Pipeline HQ passes the job title; the per-job board
+   * omits this (no per-application location exists to lane by).
+   */
+  laneAccessor?: (app: KanbanApplication) => string;
 }
 
 interface OptimisticMove {
@@ -185,8 +199,47 @@ export function KanbanBoard({
   aiSuggesterContextByAppId,
   canBulkAct = true,
   realtimeJobIds,
+  dwellNorms,
+  laneAccessor,
 }: KanbanBoardProps) {
   const [closedExpanded, setClosedExpanded] = useState(false);
+
+  // ── Lane 5 board modes ─────────────────────────────────────────
+  // Density / focus / lanes are personal working preferences —
+  // persisted globally (not per job) in localStorage. SSR renders the
+  // defaults; the hydrate effect syncs after mount (the accepted
+  // expanded-SSR-flash pattern, same as the sidebar collapse).
+  const [density, setDensity] = useState<"comfy" | "compact">("comfy");
+  const [focusMode, setFocusMode] = useState(false);
+  const [lanesOn, setLanesOn] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.localStorage.getItem("dsohire.board.density") === "compact") {
+      setDensity("compact");
+    }
+    if (window.localStorage.getItem("dsohire.board.focus") === "on") {
+      setFocusMode(true);
+    }
+    if (window.localStorage.getItem("dsohire.board.lanes") === "on") {
+      setLanesOn(true);
+    }
+  }, []);
+  function selectDensity(next: "comfy" | "compact") {
+    setDensity(next);
+    window.localStorage.setItem("dsohire.board.density", next);
+  }
+  function toggleFocus() {
+    setFocusMode((v) => {
+      window.localStorage.setItem("dsohire.board.focus", v ? "off" : "on");
+      return !v;
+    });
+  }
+  function toggleLanes() {
+    setLanesOn((v) => {
+      window.localStorage.setItem("dsohire.board.lanes", v ? "off" : "on");
+      return !v;
+    });
+  }
   const [activeId, setActiveId] = useState<string | null>(null);
   // Set on drag start when the active card is part of a multi-select.
   // Frozen for the duration of the drag so the move uses the exact
@@ -959,7 +1012,11 @@ export function KanbanBoard({
       onDragCancel={handleDragCancel}
       accessibility={{ announcements }}
     >
-      <div className="space-y-4">
+      <div
+        className={`space-y-4 ${density === "compact" ? "kb-compact" : ""} ${
+          focusMode ? "kb-focus" : ""
+        }`}
+      >
         <div className="flex items-center justify-between gap-4">
           <LiveIndicator isConnected={isConnected} />
         </div>
@@ -1168,22 +1225,76 @@ export function KanbanBoard({
         />
 
 
-        {/* Lane 5 — aging legend. Pure chrome; mirrors the card edge +
-            pill thresholds (stageHeatLevel single source). */}
-        <div className="flex items-center justify-end gap-3 mb-2 text-[10px] text-slate-meta">
-          <span className="font-bold tracking-[1.5px] uppercase">Aging</span>
-          <span className="inline-flex items-center gap-1">
-            <span className="h-2 w-2 bg-heritage/70" aria-hidden />
-            &lt;4d
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <span className="h-2 w-2 bg-amber-500" aria-hidden />
-            4–10d
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <span className="h-2 w-2 bg-[#b3543f]" aria-hidden />
-            10d+
-          </span>
+        {/* Lane 5 — board toolbar: modes (left) + aging legend (right).
+            Pure chrome; mirrors the card edge + pill thresholds
+            (stageHeatLevel single source). */}
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 mb-2">
+          <div className="flex items-center gap-2">
+            <div
+              className="flex border border-[var(--rule-strong)] bg-white"
+              role="group"
+              aria-label="Board density"
+            >
+              {(["comfy", "compact"] as const).map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => selectDensity(d)}
+                  aria-pressed={density === d}
+                  className={`px-2.5 py-1 text-[9px] font-bold tracking-[1px] uppercase transition-colors ${
+                    density === d
+                      ? "bg-ink text-ivory"
+                      : "text-slate-body hover:bg-cream"
+                  }`}
+                >
+                  {d === "comfy" ? "Comfy" : "Compact"}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={toggleFocus}
+              aria-pressed={focusMode}
+              title="Focus — dim every column except the one under your pointer"
+              className={`px-2.5 py-1 text-[9px] font-bold tracking-[1px] uppercase border transition-colors ${
+                focusMode
+                  ? "bg-ink text-ivory border-ink"
+                  : "bg-white text-slate-body border-[var(--rule-strong)] hover:bg-cream"
+              }`}
+            >
+              Focus
+            </button>
+            {laneAccessor && (
+              <button
+                type="button"
+                onClick={toggleLanes}
+                aria-pressed={lanesOn}
+                title="Group each column's cards by job"
+                className={`px-2.5 py-1 text-[9px] font-bold tracking-[1px] uppercase border transition-colors ${
+                  lanesOn
+                    ? "bg-ink text-ivory border-ink"
+                    : "bg-white text-slate-body border-[var(--rule-strong)] hover:bg-cream"
+                }`}
+              >
+                Lanes · job
+              </button>
+            )}
+          </div>
+          <div className="flex items-center gap-3 text-[10px] text-slate-meta">
+            <span className="font-bold tracking-[1.5px] uppercase">Aging</span>
+            <span className="inline-flex items-center gap-1">
+              <span className="h-2 w-2 bg-heritage/70" aria-hidden />
+              &lt;4d
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="h-2 w-2 bg-amber-500" aria-hidden />
+              4–10d
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="h-2 w-2 bg-[#b3543f]" aria-hidden />
+              10d+
+            </span>
+          </div>
         </div>
 
         {/* Open stages — horizontal scroll on desktop if needed */}
@@ -1197,6 +1308,8 @@ export function KanbanBoard({
                 pendingApplicationIds={pendingIds}
                 selectedIds={selection.selected}
                 onToggleSelect={handleToggleSelect}
+                dwellNorms={dwellNorms}
+                laneLabel={lanesOn ? laneAccessor : undefined}
               />
             ))}
           </div>

@@ -33,6 +33,7 @@ import {
   type TagColor,
 } from "@/lib/applications/tags";
 import type { PipelineStage, StageKind } from "@/lib/applications/stages";
+import { getStageDwellNorms } from "@/lib/applications/stage-dwell";
 import { getPracticeFitForJob } from "@/lib/practice-fit/get-or-compute";
 import type { FitResult } from "@/lib/practice-fit/types";
 import { JobStatusActions, JobVisibilityToggle } from "./status-actions";
@@ -308,13 +309,16 @@ export default async function PerJobPipelinePage({
   const visibility = (job.visibility as string) ?? "public";
   const isInternalOnly = visibility === "internal_only";
 
-  // Phase 5C analytics + funnel + stage dwell + Phase 5D Smart Picks.
-  const [analytics, funnel, stageDwell, smartPicks] = await Promise.all([
-    getPerJobAnalytics(supabase, jobId),
-    getJobFunnel(supabase, jobId),
-    getJobStageDwell(supabase, jobId),
-    getSmartPicks(supabase, jobId, job.dso_id as string, 5),
-  ]);
+  // Phase 5C analytics + funnel + stage dwell + Phase 5D Smart Picks
+  // + Lane 5 DSO-wide trailing-90 dwell norms (column health baseline).
+  const [analytics, funnel, stageDwell, smartPicks, dwellNorms] =
+    await Promise.all([
+      getPerJobAnalytics(supabase, jobId),
+      getJobFunnel(supabase, jobId),
+      getJobStageDwell(supabase, jobId),
+      getSmartPicks(supabase, jobId, job.dso_id as string, 5),
+      getStageDwellNorms(supabase),
+    ]);
 
   // Job locations — drives the location pill row in the header.
   // Multi-location DSOs need to see which practice a job belongs to
@@ -496,6 +500,7 @@ export default async function PerJobPipelinePage({
           aiSuggesterAvailable={aiSuggesterAvailable}
           aiSuggesterContextByAppId={Object.fromEntries(aiContextByAppId)}
           canBulkAct={canBulkAct}
+          dwellNorms={dwellNorms}
         />
       </div>
 

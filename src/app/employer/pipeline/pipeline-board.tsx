@@ -43,6 +43,7 @@ export function PipelineHqBoard({
   aiSuggesterContextByAppId,
   canBulkAct,
   truncated,
+  dwellNorms,
 }: {
   applications: KanbanApplication[];
   stages: PipelineStage[];
@@ -52,6 +53,8 @@ export function PipelineHqBoard({
   aiSuggesterContextByAppId: Record<string, boolean>;
   canBulkAct: boolean;
   truncated: boolean;
+  /** Lane 5 — DSO trailing-90 dwell norms, pass-through to column health. */
+  dwellNorms?: Record<string, number>;
 }) {
   const [activeJob, setActiveJob] = useState<string>("all");
   const [minFit, setMinFit] = useState<number>(0);
@@ -140,6 +143,8 @@ export function PipelineHqBoard({
         aiSuggesterContextByAppId={aiSuggesterContextByAppId}
         canBulkAct={canBulkAct}
         realtimeJobIds={jobIds}
+        dwellNorms={dwellNorms}
+        laneAccessor={(a) => a.jobTitle}
       />
     </div>
   );

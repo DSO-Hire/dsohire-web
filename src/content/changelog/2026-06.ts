@@ -8,6 +8,12 @@ import type { ChangelogEntry } from "./index";
 export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-12",
+    kind: "new",
+    title: "Columns that know their own pace",
+    body: "Every pipeline column header now shows the median time its current candidates have been sitting there — compared against your own organization's trailing-90-day pace for that stage, not some arbitrary benchmark. Running 1.3× slower than your norm turns the header amber; 2× turns it rust. New stages without enough history stay neutral instead of guessing.",
+  },
+  {
+    date: "2026-06-12",
     kind: "improved",
     title: "Bottlenecks you can see from across the room",
     body: "Every card on the pipeline board now carries an aging edge — its left border stays green while a candidate is moving, warms to amber after 4 days in a stage, and turns rust at 10. The days-in-stage pill follows the same clock (it used to wait until 7 and 14 days — hiring moves faster than that). A small legend above the board keeps the scale honest.",

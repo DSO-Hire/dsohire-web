@@ -37,6 +37,7 @@ import {
 } from "@/lib/applications/tags";
 import type { KanbanApplication } from "../jobs/[id]/applications/kanban-board";
 import { PipelineHqBoard, type PipelineJobChip } from "./pipeline-board";
+import { getStageDwellNorms } from "@/lib/applications/stage-dwell";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Pipeline HQ" };
@@ -304,6 +305,9 @@ export default async function PipelineHqPage() {
     }))
     .filter((j) => j.count > 0 || j.status === "open");
 
+  // Lane 5 — DSO-wide trailing-90 dwell norms for column health.
+  const dwellNorms = await getStageDwellNorms(supabase);
+
   return (
     <EmployerShell active="pipeline">
       <PipelineHqBoard
@@ -315,6 +319,7 @@ export default async function PipelineHqPage() {
         aiSuggesterContextByAppId={aiContextByAppId}
         canBulkAct={canBulkAct}
         truncated={apps.length >= APP_LIMIT}
+        dwellNorms={dwellNorms}
       />
     </EmployerShell>
   );
