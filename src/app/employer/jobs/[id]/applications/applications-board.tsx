@@ -17,7 +17,9 @@ import {
 } from "./applications-list";
 import { KanbanBoard, type KanbanApplication } from "./kanban-board";
 import { MobileStageTabs } from "./mobile-stage-tabs";
+import { BoardInsights } from "./board-insights";
 import type { PipelineStage } from "@/lib/applications/stages";
+import type { JobFunnel } from "@/lib/analytics/metrics";
 
 export type BoardView = "list" | "kanban";
 
@@ -54,6 +56,12 @@ interface ApplicationsBoardProps {
    * Pass-through to the kanban board's column-health headers.
    */
   dwellNorms?: Record<string, number>;
+  /**
+   * Lane 5 — the page's existing getJobFunnel result. When present the
+   * header offers the Board-insights drawer (funnel + dwell narratives
+   * next to the work). Optional so older call sites keep compiling.
+   */
+  funnel?: JobFunnel;
 }
 
 const VIEW_STORAGE_PREFIX = "dsohire.applications.view.";
@@ -67,6 +75,7 @@ export function ApplicationsBoard({
   aiSuggesterContextByAppId,
   canBulkAct = true,
   dwellNorms,
+  funnel,
 }: ApplicationsBoardProps) {
   const [view, setView] = useState<BoardView>(initialView);
   const [hydrated, setHydrated] = useState(false);
@@ -122,13 +131,24 @@ export function ApplicationsBoard({
           </p>
         </div>
 
-        <ViewToggle
-          value={view}
-          onChange={selectView}
-          disabledKanbanReason={
-            isMobile ? "Kanban is desktop-only. List view stays here." : undefined
-          }
-        />
+        <div className="flex items-center gap-2">
+          {funnel && (
+            <BoardInsights
+              jobTitle={job.title}
+              stages={stages}
+              applications={initialApplications}
+              dwellNorms={dwellNorms}
+              funnel={funnel}
+            />
+          )}
+          <ViewToggle
+            value={view}
+            onChange={selectView}
+            disabledKanbanReason={
+              isMobile ? "Kanban is desktop-only. List view stays here." : undefined
+            }
+          />
+        </div>
       </header>
 
       {/* Render: list, kanban (desktop), or mobile stage tabs (kanban + small viewport) */}

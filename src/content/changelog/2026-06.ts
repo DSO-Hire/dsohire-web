@@ -9,6 +9,12 @@ export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-12",
     kind: "new",
+    title: "The board explains itself",
+    body: "A new Board insights drawer on every job's pipeline: the funnel with step-by-step conversion, plus plain-English callouts computed from your own numbers — which stage is the bottleneck (median dwell vs your 90-day norm, and how many candidates there have gone quiet) and which stage is outrunning your usual pace. When there isn't enough history to say something, it says that instead.",
+  },
+  {
+    date: "2026-06-12",
+    kind: "new",
     title: "Act on a card without opening it",
     body: "Hover any pipeline card and three quiet actions appear: jump into the conversation, open the scorecards, or advance the candidate one stage. Advancing this way behaves exactly like dragging — same confirmation, same permissions, and moving someone into Offer still takes you straight to the offer composer.",
   },

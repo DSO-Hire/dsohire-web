@@ -501,6 +501,7 @@ export default async function PerJobPipelinePage({
           aiSuggesterContextByAppId={Object.fromEntries(aiContextByAppId)}
           canBulkAct={canBulkAct}
           dwellNorms={dwellNorms}
+          funnel={funnel}
         />
       </div>
 
