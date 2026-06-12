@@ -33,6 +33,7 @@ import {
   type StageKind,
 } from "@/lib/applications/stages";
 import { moveApplicationStage } from "./actions";
+import { useToast } from "@/components/app/toast";
 import { rejectWithReason, withdrawWithReason } from "./reject-actions";
 import { RejectReasonAiSuggester } from "./reject-reason-ai-suggester";
 import {
@@ -102,6 +103,7 @@ export function StageSelector({
 }: StageSelectorProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const toast = useToast();
   const [error, setError] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
@@ -150,6 +152,9 @@ export function StageSelector({
         setError(result.error);
         return;
       }
+      // First toast consumer (Day 32) — the "committed" verb for the
+      // workspace's most common action.
+      toast({ kind: "commit", title: `Moved to ${stage.label}` });
       // OFFER-UX — landing the candidate in the Offer stage opens the offer
       // composer automatically (the section is far down the page; this saves
       // the hunt). Only when moving INTO offer from a different kind.
@@ -189,7 +194,15 @@ export function StageSelector({
       const result = await action(applicationId, reason);
       if (!result.ok) {
         setError(result.error);
+        return;
       }
+      toast({
+        kind: "commit",
+        title:
+          transition.toKind === "rejected"
+            ? "Marked rejected — candidate notified per your template"
+            : "Marked withdrawn",
+      });
     });
   }
 

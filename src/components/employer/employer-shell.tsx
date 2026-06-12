@@ -58,6 +58,7 @@ import {
 } from "@/lib/permissions/capabilities";
 import { BrandLockup } from "@/components/marketing/site-shell";
 import { RailCollapse } from "./rail-collapse";
+import { ToastProvider } from "@/components/app/toast";
 import { getUnreadCount, getNewApplicationCount } from "@/lib/inbox/queries";
 import { NavBadgeRealtime } from "@/components/inbox/nav-badge-realtime";
 import { getMfaState } from "@/lib/auth/mfa";
@@ -466,7 +467,11 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
           </div>
         )}
 
-        <main className="flex-1 px-6 sm:px-10 py-10">{children}</main>
+        {/* Toast system (Lane 1 kit) mounted at the shell — first
+            consumers land Day 32 night (stage changes). */}
+        <main className="flex-1 px-6 sm:px-10 py-10">
+          <ToastProvider>{children}</ToastProvider>
+        </main>
       </div>
 
       {/* Floating "?" support launcher (Tier 2 chat surface, Day 21 Phase C). */}

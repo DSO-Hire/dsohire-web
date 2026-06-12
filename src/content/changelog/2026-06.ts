@@ -9,6 +9,12 @@ export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-12",
     kind: "improved",
+    title: "Stage moves now confirm themselves",
+    body: "Move a candidate to a new stage and a quiet confirmation slides in — including when you mark someone rejected or withdrawn. Small thing, but you'll never wonder whether the click landed.",
+  },
+  {
+    date: "2026-06-12",
+    kind: "improved",
     title: "Job health you can actually read",
     body: "The job-health bars are now labeled mini-pipelines: New, Screening, Interview, and Offer counts for each opening, last 30 days. Click any strip to land on that job's board. And the application density map is gone — replaced by a ranked list of your locations by application volume, which says in one glance what the map never did.",
   },
