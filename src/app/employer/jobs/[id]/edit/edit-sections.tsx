@@ -73,14 +73,28 @@ import {
 
 /* ───── Constants ───── */
 
+// #77 (2026-06-12) — expanded practice-level roles (DSOFit_Spec
+// taxonomy). Regional Manager stays HERE — existing RM jobs must
+// remain editable (the create wizard no longer offers it; new
+// multi-site leadership posts go through the corporate wizard).
 const ROLE_OPTIONS: Array<{ value: string; label: string }> = [
   { value: "dentist", label: "Dentist" },
+  { value: "specialist", label: "Specialist Dentist" },
   { value: "dental_hygienist", label: "Dental Hygienist" },
-  { value: "dental_assistant", label: "Dental Assistant" },
-  { value: "front_office", label: "Front Office" },
+  { value: "dental_therapist", label: "Dental Therapist" },
+  { value: "dental_assistant", label: "Dental Assistant (RDA/CDA/EFDA)" },
+  { value: "sterilization_tech", label: "Sterilization Technician" },
+  { value: "lab_tech", label: "Dental Lab Technician" },
+  { value: "front_office", label: "Front Desk / Patient Coordinator" },
+  { value: "treatment_coordinator", label: "Treatment Coordinator" },
+  {
+    value: "financial_coordinator",
+    label: "Financial / Insurance Coordinator",
+  },
+  { value: "scheduling_coordinator", label: "Scheduling Coordinator" },
   { value: "office_manager", label: "Office Manager" },
+  { value: "practice_administrator", label: "Practice Administrator" },
   { value: "regional_manager", label: "Regional Manager" },
-  { value: "specialist", label: "Specialist" },
   { value: "other", label: "Other" },
 ];
 

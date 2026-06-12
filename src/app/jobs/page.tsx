@@ -54,27 +54,45 @@ export const metadata: Metadata = {
     "Browse jobs at multi-location dental groups (DSOs). Hygienist, associate dentist, office manager, and specialist roles posted directly on DSO Hire.",
 };
 
+// #77 (2026-06-12) — expanded practice-level roles in the public
+// browser's labels + filter.
 const ROLE_LABELS: Record<string, string> = {
   dentist: "Dentist",
+  specialist: "Specialist Dentist",
   dental_hygienist: "Hygienist",
+  dental_therapist: "Dental Therapist",
   dental_assistant: "Dental Assistant",
-  front_office: "Front Office",
+  sterilization_tech: "Sterilization Tech",
+  lab_tech: "Dental Lab Tech",
+  front_office: "Front Desk / Patient Coordinator",
+  treatment_coordinator: "Treatment Coordinator",
+  financial_coordinator: "Financial / Insurance Coordinator",
+  scheduling_coordinator: "Scheduling Coordinator",
   office_manager: "Office Manager",
+  practice_administrator: "Practice Administrator",
   regional_manager: "Regional Manager",
-  specialist: "Specialist",
   other: "Other",
 };
 
 // Display order for the /jobs Role filter dropdown — most-common roles first,
 // "Other" intentionally omitted (DSOs posting "other" doesn't map to a useful
 // candidate filter; those jobs still surface via keyword search).
+// regional_manager kept while existing practice-side RM postings live;
+// new RM roles post through the corporate wizard (Cam, 2026-06-12).
 const ROLE_FILTER_ORDER: ReadonlyArray<keyof typeof ROLE_LABELS> = [
   "dentist",
   "specialist",
   "dental_hygienist",
   "dental_assistant",
+  "dental_therapist",
   "front_office",
+  "treatment_coordinator",
+  "financial_coordinator",
+  "scheduling_coordinator",
   "office_manager",
+  "practice_administrator",
+  "sterilization_tech",
+  "lab_tech",
   "regional_manager",
 ];
 
