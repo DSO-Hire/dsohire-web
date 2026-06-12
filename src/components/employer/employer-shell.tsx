@@ -508,7 +508,9 @@ function NavRow({
             : "text-ivory/60 hover:bg-white/5 hover:text-ivory")
         }
       >
-        <Icon className="h-4 w-4 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-[2px] motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" />
+        {/* rail-ic-<id> lets globals.css give each icon its own
+            hover animation (inbox mail-drop, analytics bar-pump…). */}
+        <Icon className={`rail-ic rail-ic-${item.id} h-4 w-4 flex-shrink-0`} />
         <span className="rail-label flex-1">{item.label}</span>
         {item.badge && item.badge > 0 ? (
           <span

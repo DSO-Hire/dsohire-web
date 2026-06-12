@@ -787,3 +787,66 @@ html, body {
   .rail-item-on::before { animation: none; height: 64%; }
 }
 .rail-slim .rail-brand svg { width: 40px; height: 40px; }
+
+/* ── Rail icon micro-animations (Cam, Day 32 night) ───────────────
+   Default verb: every icon REDRAWS itself stroke-by-stroke on hover
+   (the same draw language as the logo), children staggered. Bespoke
+   verbs below for inbox / analytics / locations. */
+.rail-ic > * { transform-box: fill-box; }
+@keyframes rail-ic-draw { from { stroke-dashoffset: 90; } to { stroke-dashoffset: 0; } }
+.rail-item:hover .rail-ic > * {
+  stroke-dasharray: 90 1000;
+  animation: rail-ic-draw 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.rail-item:hover .rail-ic > *:nth-child(2) { animation-delay: 0.07s; }
+.rail-item:hover .rail-ic > *:nth-child(3) { animation-delay: 0.14s; }
+.rail-item:hover .rail-ic > *:nth-child(4) { animation-delay: 0.21s; }
+.rail-item:hover .rail-ic > *:nth-child(n + 5) { animation-delay: 0.28s; }
+
+/* Inbox — the mail drops into the tray. */
+@keyframes rail-mail-drop {
+  from { transform: translateY(-5px); opacity: 0; }
+  60% { opacity: 1; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.rail-item:hover .rail-ic-inbox > *:first-child {
+  stroke-dasharray: none;
+  animation: rail-mail-drop 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Analytics — the bars pump up from the baseline, staggered. */
+@keyframes rail-bar-pump {
+  0% { transform: scaleY(0.2); }
+  60% { transform: scaleY(1.15); }
+  100% { transform: scaleY(1); }
+}
+.rail-item:hover .rail-ic-reports > * {
+  stroke-dasharray: none;
+  transform-origin: center bottom;
+  animation: rail-bar-pump 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.rail-item:hover .rail-ic-reports > *:nth-child(2) { animation-delay: 0.08s; }
+.rail-item:hover .rail-ic-reports > *:nth-child(3) { animation-delay: 0.16s; }
+
+/* Locations — the pin hops. */
+@keyframes rail-pin-hop {
+  0% { transform: translateY(0); }
+  40% { transform: translateY(-3px); }
+  70% { transform: translateY(1px); }
+  100% { transform: translateY(0); }
+}
+.rail-item:hover .rail-ic-locations {
+  animation: rail-pin-hop 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.rail-item:hover .rail-ic-locations > * {
+  stroke-dasharray: none;
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-item:hover .rail-ic,
+  .rail-item:hover .rail-ic > * {
+    animation: none !important;
+    stroke-dasharray: none !important;
+  }
+}
