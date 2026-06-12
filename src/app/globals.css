@@ -899,14 +899,16 @@ html, body {
   animation: rail-plus-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
 }
 
-/* Billing — the card swipes through. */
-@keyframes rail-card-swipe {
-  0% { transform: translateX(-7px); opacity: 0.2; }
-  100% { transform: translateX(0); opacity: 1; }
+/* Billing — the card holds still, the stripe sweeps across it
+   (card-through-the-reader). */
+@keyframes rail-stripe-sweep {
+  from { stroke-dashoffset: 30; }
+  to { stroke-dashoffset: 0; }
 }
 .rail-item:hover .rail-ic-billing > * { stroke-dasharray: none; animation: none; }
-.rail-item:hover .rail-ic-billing {
-  animation: rail-card-swipe 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+.rail-item:hover .rail-ic-billing > *:last-child {
+  stroke-dasharray: 30 1000;
+  animation: rail-stripe-sweep 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
 }
 
 /* Offer approvals — the checkmark draws itself in, then settles. */
