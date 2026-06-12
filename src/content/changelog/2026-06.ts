@@ -9,6 +9,12 @@ export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-12",
     kind: "improved",
+    title: "Job health you can actually read",
+    body: "The job-health bars are now labeled mini-pipelines: New, Screening, Interview, and Offer counts for each opening, last 30 days. Click any strip to land on that job's board. And the application density map is gone — replaced by a ranked list of your locations by application volume, which says in one glance what the map never did.",
+  },
+  {
+    date: "2026-06-12",
+    kind: "improved",
     title: "Your dashboard greets you with what matters",
     body: "The dashboard headline now reacts to your real hiring state — a hire this week, offers awaiting answers, candidates past your response goal, a surge of applications, or a clean slate. Always true, never canned: it reads the same numbers the tiles show.",
   },

@@ -33,15 +33,19 @@ const HEALTH_DOT: Record<JobHealthRow["health"], { cls: string; label: string }>
   hot: { cls: "bg-[#b3543f]", label: "Stale candidates mid-pipeline" },
 };
 
+// Mini-kanban strip (Cam, Day 32 night: "what are the bars
+// representing?") — the abstract bars are replaced with LABELED stage
+// cells so the funnel reads without a legend. Same buckets, same data.
 const FUNNEL_STEPS: Array<{
   key: keyof JobHealthRow["funnel"];
+  label: string;
+  full: string;
   cls: string;
-  h: string;
 }> = [
-  { key: "open", cls: "bg-ink", h: "16px" },
-  { key: "screen", cls: "bg-ink-soft", h: "12px" },
-  { key: "interview", cls: "bg-heritage-light", h: "9px" },
-  { key: "offer", cls: "bg-heritage", h: "6px" },
+  { key: "open", label: "New", full: "New — awaiting review", cls: "bg-ink" },
+  { key: "screen", label: "Screen", full: "Screening", cls: "bg-[#5d6b85]" },
+  { key: "interview", label: "Int", full: "Interview", cls: "bg-heritage-light" },
+  { key: "offer", label: "Offer", full: "Offer", cls: "bg-heritage" },
 ];
 
 export function JobHealth({
@@ -52,17 +56,6 @@ export function JobHealth({
   viewAllHref: string;
 }) {
   if (rows.length === 0) return null;
-
-  // One shared scale so bars are comparable across rows.
-  const maxCount = Math.max(
-    1,
-    ...rows.flatMap((r) => [
-      r.funnel.open,
-      r.funnel.screen,
-      r.funnel.interview,
-      r.funnel.offer,
-    ])
-  );
 
   return (
     <section className="border border-[var(--rule)] bg-white">
@@ -100,24 +93,34 @@ export function JobHealth({
                   {r.thisWeek > 0 ? ` · ${r.thisWeek} apps this week` : ""}
                 </div>
               </div>
-              <div
-                className="hidden sm:flex items-end gap-[3px] h-4"
-                aria-label={`Pipeline: ${r.funnel.open} new, ${r.funnel.screen} screening, ${r.funnel.interview} interview, ${r.funnel.offer} offer`}
+              {/* Mini-kanban strip — labeled stage counts (last 30d).
+                  Clicking lands on this job's pipeline board. */}
+              <Link
+                href={r.href}
+                className="hidden sm:flex items-stretch gap-1 justify-self-start"
+                aria-label={`Pipeline: ${r.funnel.open} new, ${r.funnel.screen} screening, ${r.funnel.interview} interview, ${r.funnel.offer} offer — open the board`}
               >
-                {FUNNEL_STEPS.map((s) => (
-                  <span
-                    key={s.key}
-                    className={`block ${s.cls}`}
-                    style={{
-                      height: s.h,
-                      width: `${Math.max(
-                        4,
-                        (r.funnel[s.key] / maxCount) * 100
-                      )}px`,
-                    }}
-                  />
-                ))}
-              </div>
+                {FUNNEL_STEPS.map((s) => {
+                  const count = r.funnel[s.key];
+                  return (
+                    <span
+                      key={s.key}
+                      title={`${count} in ${s.full} (last 30 days)`}
+                      className={`flex flex-col items-center min-w-[46px] border border-[var(--rule)] bg-white hover:bg-cream transition-colors ${
+                        count === 0 ? "opacity-40" : ""
+                      }`}
+                    >
+                      <span className={`h-[3px] w-full ${s.cls}`} />
+                      <span className="text-[13px] font-extrabold text-ink leading-none pt-1.5 tabular-nums">
+                        {count}
+                      </span>
+                      <span className="text-[7.5px] font-bold tracking-[1px] uppercase text-slate-meta pb-1 pt-0.5">
+                        {s.label}
+                      </span>
+                    </span>
+                  );
+                })}
+              </Link>
               <span
                 className={`h-[9px] w-[9px] ${dot.cls}`}
                 title={dot.label}

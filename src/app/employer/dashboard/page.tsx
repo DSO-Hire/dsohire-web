@@ -62,7 +62,8 @@ import {
   JobHealth,
   type JobHealthRow,
 } from "@/components/dashboard/job-health";
-import { DashboardMiniMap } from "@/components/dashboard/dashboard-mini-map";
+// Density mini-map retired (Day 32 — "just a blob"); ranked list instead.
+import { LocationPulse } from "@/components/dashboard/location-pulse";
 import { TodaysTopFits } from "@/components/dashboard/todays-top-fits";
 import { getTodaysTopFits } from "@/lib/talent-pool/smart-picks";
 import { InterestedInYou } from "@/components/dashboard/interested-in-you";
@@ -1385,11 +1386,11 @@ export default async function EmployerDashboard() {
         />
       </section>
 
-      {/* Two-column row — Job health (Lane 2e, absorbs the leaderboard)
-          + Mini-map. */}
-      <section className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-6 mb-6">
+      {/* Two-column row — Job health (Lane 2e) + ranked location list
+          (replaces the density-map blob; component kept on disk). */}
+      <section className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-6 mb-6 items-start">
         <JobHealth rows={jobHealthRows} viewAllHref="/employer/pipeline" />
-        <DashboardMiniMap
+        <LocationPulse
           locations={miniMapLocations}
           href="/employer/locations"
         />
