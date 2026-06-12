@@ -856,6 +856,10 @@ export async function updateJobDetailsSection(
   );
   if (ptError) return { ok: false, error: ptError };
 
+  // #128 Phase D — the edit page's comp section now carries the
+  // structured model too (same parser as the wizard).
+  const comp128 = parseComp128(formData);
+
   const { error: updateError } = await supabase
     .from("jobs")
     .update({
@@ -864,6 +868,24 @@ export async function updateJobDetailsSection(
       compensation_period: compPeriodRaw || null,
       compensation_type: compTypeEdit,
       compensation_visible: compVisible,
+      // #128 — structured dental comp (null = legacy simple).
+      comp_model: comp128.compModel,
+      guarantee_kind: comp128.guaranteeKind,
+      guarantee_amount: comp128.guaranteeAmount,
+      guarantee_duration: comp128.guaranteeDuration,
+      percent_rate_min: comp128.percentRateMin,
+      percent_rate_max: comp128.percentRateMax,
+      percent_basis: comp128.percentBasis,
+      percent_tiers_note: comp128.percentTiersNote,
+      hygiene_exam_credited: comp128.hygieneExamCredited,
+      hygienist_work_credited: comp128.hygienistWorkCredited,
+      lab_fee_policy: comp128.labFeePolicy,
+      basis_exclusions_note: comp128.basisExclusionsNote,
+      reconciliation: comp128.reconciliation,
+      pay_cadence: comp128.payCadence,
+      est_annual_min: comp128.estAnnualMin,
+      est_annual_max: comp128.estAnnualMax,
+      worker_classification: comp128.workerClassification,
       // 2026-05-14 — composable compensation components.
       variable_comp_enabled: variableCompEnabledEdit,
       variable_comp_target: variableCompTargetEdit,
@@ -1908,25 +1930,14 @@ function parseCompTarget(
   return { value: parsed };
 }
 
-function parseJobFormData(
-  formData: FormData
-): ParsedJobInput | { error: string } {
-  const title = String(formData.get("title") ?? "").trim();
-  const description = String(formData.get("description") ?? "").trim();
-  const employmentType = String(formData.get("employment_type") ?? "full_time");
-  const roleCategory = String(formData.get("role_category") ?? "other");
-  const compMinRaw = String(formData.get("compensation_min") ?? "").trim();
-  const compMaxRaw = String(formData.get("compensation_max") ?? "").trim();
-  const compPeriod = String(formData.get("compensation_period") ?? "").trim();
-  // v1.8 — compensation_type drives display + Practice Fit comp dim.
-  const compTypeRaw = String(formData.get("compensation_type") ?? "range").trim();
-  const compType: "range" | "starting_at" | "up_to" | "exact" | "doe" =
-    ["range", "starting_at", "up_to", "exact", "doe"].includes(compTypeRaw)
-      ? (compTypeRaw as "range" | "starting_at" | "up_to" | "exact" | "doe")
-      : "range";
-  const compVisible = formData.get("compensation_visible") === "on";
-
-  // #128 — structured dental comp. Model gates the structured fields;
+/* #128 — shared structured-comp parser. Used by parseJobFormData
+ * (wizard create/update) AND updateJobDetailsSection (edit page comp
+ * section) so both write paths read the form identically. Module-local
+ * on purpose: this file is "use server" (async-exports-only rule). */
+function parseComp128(formData: FormData) {
+  // Model gates the structured fields; classification parses regardless
+  // (orthogonal). Tri-state booleans arrive as ""/"yes"/"no" strings.
+  // Reconciliation derives from the model — never trusted from the form.
   // classification parses regardless (orthogonal). Tri-state booleans
   // arrive as ""/"yes"/"no" strings from the builder. Reconciliation
   // derives from the model — never trusted from the form.
@@ -1934,7 +1945,7 @@ function parseJobFormData(
   const structured = compModel !== null && compModel !== "simple";
   const hygExamRaw = String(formData.get("hygiene_exam_credited") ?? "");
   const hygWorkRaw = String(formData.get("hygienist_work_credited") ?? "");
-  const comp128 = {
+  return {
     compModel,
     guaranteeKind: structured
       ? enumOrNull(formData.get("guarantee_kind"), VALID_GUARANTEE_KINDS)
@@ -2001,6 +2012,28 @@ function parseJobFormData(
       VALID_CLASSIFICATIONS
     ),
   };
+
+}
+
+function parseJobFormData(
+  formData: FormData
+): ParsedJobInput | { error: string } {
+  const title = String(formData.get("title") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const employmentType = String(formData.get("employment_type") ?? "full_time");
+  const roleCategory = String(formData.get("role_category") ?? "other");
+  const compMinRaw = String(formData.get("compensation_min") ?? "").trim();
+  const compMaxRaw = String(formData.get("compensation_max") ?? "").trim();
+  const compPeriod = String(formData.get("compensation_period") ?? "").trim();
+  // v1.8 — compensation_type drives display + Practice Fit comp dim.
+  const compTypeRaw = String(formData.get("compensation_type") ?? "range").trim();
+  const compType: "range" | "starting_at" | "up_to" | "exact" | "doe" =
+    ["range", "starting_at", "up_to", "exact", "doe"].includes(compTypeRaw)
+      ? (compTypeRaw as "range" | "starting_at" | "up_to" | "exact" | "doe")
+      : "range";
+  const compVisible = formData.get("compensation_visible") === "on";
+
+  const comp128 = parseComp128(formData);
 
   const hideStagesFromCandidate =
     formData.get("hide_stages_from_candidate") === "on";

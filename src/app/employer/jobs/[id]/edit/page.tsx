@@ -77,7 +77,7 @@ export default async function EditJobPage({ params }: PageProps) {
   const { data: job } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, variable_comp_enabled, variable_comp_target, variable_comp_structure, bonus_enabled, bonus_target, bonus_structure, equity_offered, equity_note, benefits, requirements, status, posted_at, expires_at, scheduled_publish_at, applications_count, views, hide_stages_from_candidate, scope, specialty, min_years_experience, schedule_days, schedule_evenings, schedule_weekends, corporate_function, external_links, confidential"
+      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, variable_comp_enabled, variable_comp_target, variable_comp_structure, bonus_enabled, bonus_target, bonus_structure, equity_offered, equity_note, benefits, requirements, status, posted_at, expires_at, scheduled_publish_at, applications_count, views, hide_stages_from_candidate, scope, specialty, min_years_experience, schedule_days, schedule_evenings, schedule_weekends, corporate_function, external_links, confidential, comp_model, guarantee_kind, guarantee_amount, guarantee_duration, percent_rate_min, percent_rate_max, percent_basis, percent_tiers_note, hygiene_exam_credited, hygienist_work_credited, lab_fee_policy, basis_exclusions_note, pay_cadence, est_annual_min, est_annual_max, worker_classification"
     )
     .eq("id", jobId)
     .eq("dso_id", dsoUser.dso_id)
@@ -191,12 +191,40 @@ export default async function EditJobPage({ params }: PageProps) {
         )
       : [];
 
+  // #128 Phase D — DB row → builder state (strings; nulls become "").
+  const n = (v: unknown) => (v == null ? "" : String(v));
+  const compModelState = {
+    compModel: ((job.comp_model as string | null) ?? "simple") as never,
+    guaranteeKind: n(job.guarantee_kind) as never,
+    guaranteeAmount: n(job.guarantee_amount),
+    guaranteeDuration: n(job.guarantee_duration) as never,
+    percentRateMin: n(job.percent_rate_min),
+    percentRateMax: n(job.percent_rate_max),
+    percentBasis: n(job.percent_basis) as never,
+    percentTiersNote: n(job.percent_tiers_note),
+    hygieneExamCredited: (job.hygiene_exam_credited == null
+      ? ""
+      : job.hygiene_exam_credited
+        ? "yes"
+        : "no") as never,
+    hygienistWorkCredited: (job.hygienist_work_credited === true
+      ? "yes"
+      : "") as never,
+    labFeePolicy: n(job.lab_fee_policy) as never,
+    basisExclusionsNote: n(job.basis_exclusions_note),
+    payCadence: n(job.pay_cadence) as never,
+    estAnnualMin: n(job.est_annual_min),
+    estAnnualMax: n(job.est_annual_max),
+    workerClassification: n(job.worker_classification) as never,
+  };
+
   const initial: EditSectionsInitial = {
     id: job.id as string,
     title: job.title as string,
     description: (job.description as string) ?? "",
     employment_type: job.employment_type as string,
     role_category: job.role_category as string,
+    comp_model_state: compModelState,
     compensation_min: (job.compensation_min as number | null) ?? null,
     compensation_max: (job.compensation_max as number | null) ?? null,
     compensation_period: (job.compensation_period as string | null) ?? null,

@@ -48,6 +48,12 @@ import { ChipArrayInput } from "@/app/candidate/profile/edit-sheet";
 import { CORPORATE_FUNCTIONS } from "@/lib/corporate/functions";
 import { ExternalLinksField } from "@/components/external-links-field";
 import { CompensationSection } from "../../compensation-section";
+// #128 Phase D — structured dental comp on the edit surface (same
+// builder + children-slot pattern as the create wizard).
+import {
+  CompModelBuilder,
+  type CompModelState,
+} from "../../comp-model-builder";
 import {
   evaluateJobPosting,
   describeRequirement,
@@ -146,6 +152,9 @@ export interface EditSectionsInitial {
   description: string;
   employment_type: string;
   role_category: string;
+  /** #128 — structured comp, pre-mapped by the page into builder state
+   * (strings). EMPTY_COMP_MODEL_STATE for legacy/simple jobs. */
+  comp_model_state: CompModelState;
   compensation_min: number | null;
   compensation_max: number | null;
   compensation_period: string | null;
@@ -228,6 +237,7 @@ export function EditSections({
         jobLocations={locations
           .filter((l) => initial.location_ids.includes(l.id))
           .map((l) => ({ state: l.state, city: l.city }))}
+        initialCompModelState={initial.comp_model_state}
         initialCompType={initial.compensation_type}
         initialCompMin={initial.compensation_min}
         initialCompMax={initial.compensation_max}
@@ -767,6 +777,7 @@ function DetailsSection({
   jobId,
   roleCategory,
   jobLocations,
+  initialCompModelState,
   initialCompType,
   initialCompMin,
   initialCompMax,
@@ -796,6 +807,7 @@ function DetailsSection({
   jobId: string;
   roleCategory: string;
   jobLocations: Array<{ state: string | null; city: string | null }>;
+  initialCompModelState: CompModelState;
   initialCompType: "range" | "starting_at" | "up_to" | "exact" | "doe";
   initialCompMin: number | null;
   initialCompMax: number | null;
@@ -857,6 +869,10 @@ function DetailsSection({
   const [bonusStructure, setBonusStructure] = useState(
     initialBonusStructure ?? ""
   );
+  // #128 — structured comp (single object, same shape as the wizard).
+  const [compModelState, setCompModelState] = useState<CompModelState>(
+    initialCompModelState
+  );
   const [equityOffered, setEquityOffered] = useState(initialEquityOffered);
   const [equityNote, setEquityNote] = useState(initialEquityNote ?? "");
   // v1.6 — string[] chip-picker, not legacy comma-string.
@@ -898,6 +914,7 @@ function DetailsSection({
     .join(",");
   const initialScheduleDaysKey = [...initialScheduleDays].sort().join(",");
   const initialSnapshot = {
+    compModelKey: JSON.stringify(initialCompModelState),
     compType: initialCompType,
     compMin: initialCompMin !== null ? String(initialCompMin) : "",
     compMax: initialCompMax !== null ? String(initialCompMax) : "",
@@ -946,7 +963,9 @@ function DetailsSection({
   const scheduleDaysKey = [...scheduleDays].sort().join(",");
   const externalLinksKey = JSON.stringify(externalLinks);
   const verificationKey = [...verificationRequirements].sort().join(",");
+  const compModelKey = JSON.stringify(compModelState);
   const dirty =
+    compModelKey !== snapshot.compModelKey ||
     compType !== snapshot.compType ||
     compMin !== snapshot.compMin ||
     compMax !== snapshot.compMax ||
@@ -1047,6 +1066,29 @@ function DetailsSection({
     fd.set("bonus_structure", bonusStructure);
     if (equityOffered) fd.set("equity_offered", "on");
     fd.set("equity_note", equityNote);
+    // #128 — structured dental comp (identical contract to the wizard's
+    // handleSubmit; parseComp128 reads both).
+    fd.set("comp_model", compModelState.compModel);
+    if (compModelState.compModel !== "simple") {
+      fd.set("guarantee_kind", compModelState.guaranteeKind);
+      fd.set("guarantee_amount", compModelState.guaranteeAmount);
+      fd.set("guarantee_duration", compModelState.guaranteeDuration);
+      fd.set("percent_rate_min", compModelState.percentRateMin);
+      fd.set("percent_rate_max", compModelState.percentRateMax);
+      fd.set("percent_basis", compModelState.percentBasis);
+      fd.set("percent_tiers_note", compModelState.percentTiersNote);
+      fd.set("hygiene_exam_credited", compModelState.hygieneExamCredited);
+      fd.set(
+        "hygienist_work_credited",
+        compModelState.hygienistWorkCredited
+      );
+      fd.set("lab_fee_policy", compModelState.labFeePolicy);
+      fd.set("basis_exclusions_note", compModelState.basisExclusionsNote);
+      fd.set("pay_cadence", compModelState.payCadence);
+      fd.set("est_annual_min", compModelState.estAnnualMin);
+      fd.set("est_annual_max", compModelState.estAnnualMax);
+    }
+    fd.set("worker_classification", compModelState.workerClassification);
     if (hideStages) fd.set("hide_stages_from_candidate", "on");
     // v1.6 — multi-value submission for chip-pickers.
     for (const s of skills) fd.append("skills", s);
@@ -1079,6 +1121,7 @@ function DetailsSection({
         return;
       }
       setSnapshot({
+        compModelKey,
         compType,
         compMin,
         compMax,
@@ -1119,6 +1162,23 @@ function DetailsSection({
             CompensationSection now OWNS the whole comp UI. Every setter is
             wrapped to also call touch() so the per-section dirty tracker
             lights up the Save button. */}
+        <CompModelBuilder
+          state={compModelState}
+          onState={(next) => {
+            setCompModelState(next);
+            touch();
+          }}
+          roleCategory={roleCategory}
+          specialty={specialty}
+          payTransparency={
+            payTransparency
+              ? {
+                  requiresRange: payTransparency.requiresRange,
+                  coveredLabel: payTransparency.coveredLabel,
+                }
+              : null
+          }
+        >
         <CompensationSection
           accent="heritage"
           roleCategory={roleCategory}
@@ -1201,6 +1261,7 @@ function DetailsSection({
             touch();
           }}
         />
+        </CompModelBuilder>
 
         <fieldset className="border border-[var(--rule)] p-5 bg-cream/40">
           <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">

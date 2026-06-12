@@ -9,6 +9,18 @@ export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-12",
     kind: "improved",
+    title: "Structured pay is now editable — and offers check against it",
+    body: "Postings with structured compensation can now be edited on the job's edit page, not just at creation — same builder, same live behavior. And the offer composer's range check learned the new models: drafting an offer against a percentage-based posting now compares your base against the posting's estimated annual range instead of silently skipping the check.",
+  },
+  {
+    date: "2026-06-12",
+    kind: "new",
+    title: "Hygienist pay, the way hygiene actually works",
+    body: "Posting a hygienist role and picking the percentage path now reads \"Hourly + production %\" — because that's the deal in hygiene: an hourly base (the field hints the $42–60 market band) plus a share of hygiene production above a threshold. Same honest preview, same matching rules.",
+  },
+  {
+    date: "2026-06-12",
+    kind: "improved",
     title: "Comp defaults tuned by people who've run DSOs",
     body: "Three refinements from operator review: day-rate guarantees now default to a ramp-up window (most are — permanent stays one click away) with honest market hints in the field ($750–1,000/day for GPs, specialty-aware); draw deals read candidate-first — the percentage leads and the day rate reads as an advance while collections ramp, not payroll jargon; and configuring a permanent day-rate floor against a percentage gets a quiet gut-check note about production incentives. Plus: the Matchability meter now carries the PracticeFit wordmark — DSOFit on corporate postings — because that's whose judgment it is.",
   },
