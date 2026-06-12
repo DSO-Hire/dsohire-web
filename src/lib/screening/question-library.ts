@@ -1457,6 +1457,705 @@ const REGIONAL_MANAGER_QUESTIONS: RecommendedQuestion[] = [
 ];
 
 /* ─────────────────────────────────────────────────────────────────
+ * #77 (2026-06-12) — expanded practice-level roles
+ * ────────────────────────────────────────────────────────────────*/
+
+const DENTAL_THERAPIST_QUESTIONS: RecommendedQuestion[] = [
+  // Qualifications
+  {
+    id: "dt_state_authorized",
+    prompt:
+      "Are you licensed or certified to practice dental therapy in the state where this position is located?",
+    helper_text:
+      "Dental therapy is authorized in a limited set of states — confirm before anything else.",
+    kind: "yes_no",
+    required: true,
+    knockout: true,
+    rationale:
+      "Dental therapy is only authorized in certain states; an unlicensed therapist can't see patients on day one.",
+    category: "qualification",
+  },
+  {
+    id: "dt_supervision_level",
+    prompt:
+      "What supervision arrangement have you practiced under (direct, indirect, collaborative agreement)?",
+    kind: "single_select",
+    options: [
+      { id: "dt_sup_direct", label: "Direct supervision" },
+      { id: "dt_sup_indirect", label: "Indirect / general supervision" },
+      { id: "dt_sup_collab", label: "Collaborative management agreement" },
+      { id: "dt_sup_mixed", label: "A mix — varies by setting" },
+    ],
+    required: false,
+    rationale:
+      "Supervision rules vary by state and practice model — match their experience to how your dentists actually work.",
+    category: "qualification",
+  },
+  // Experience
+  {
+    id: "dt_years_experience",
+    prompt: "How many years have you practiced as a dental therapist?",
+    kind: "single_select",
+    options: YEARS_OPTIONS,
+    required: false,
+    rationale:
+      "A young profession — many strong candidates have 1–3 years; calibrate expectations accordingly.",
+    category: "experience",
+  },
+  // Skills
+  {
+    id: "dt_procedures",
+    prompt: "Which procedures are within your trained scope?",
+    kind: "multi_select",
+    options: [
+      { id: "dt_proc_restorative", label: "Direct restorations" },
+      { id: "dt_proc_extractions", label: "Simple extractions" },
+      { id: "dt_proc_preventive", label: "Preventive care / prophylaxis" },
+      { id: "dt_proc_anesthesia", label: "Local anesthesia" },
+      { id: "dt_proc_ssc", label: "Stainless steel crowns" },
+      { id: "dt_proc_radiographs", label: "Radiographs" },
+    ],
+    required: false,
+    rationale:
+      "Therapist scope varies sharply by state and training program — pin down the actual procedure mix.",
+    category: "skills",
+  },
+  {
+    id: "dt_populations",
+    prompt:
+      "Have you worked with underserved or public-health populations (community clinics, FQHCs, school programs)?",
+    kind: "yes_no",
+    required: false,
+    rationale:
+      "Dental therapy grew out of the access-to-care movement — many of the best candidates come from public-health settings.",
+    category: "experience",
+  },
+  // Logistics
+  {
+    id: "dt_schedule",
+    prompt: "What schedule are you targeting?",
+    kind: "single_select",
+    options: SCHEDULE_OPTIONS,
+    required: false,
+    rationale:
+      "Schedule mismatch is the #1 reason interviews go nowhere — surface it first.",
+    category: "logistics",
+  },
+  // Compensation
+  {
+    id: "dt_comp_expectation",
+    prompt: "What hourly or annual compensation are you targeting?",
+    kind: "short_text",
+    required: false,
+    rationale:
+      "Therapist comp benchmarks are thin — getting the ask up front avoids a late-stage surprise.",
+    category: "compensation",
+  },
+  // Fit
+  {
+    id: "dt_why_therapy",
+    prompt:
+      "What drew you to dental therapy, and what kind of practice setting do you do your best work in?",
+    kind: "long_text",
+    required: false,
+    rationale:
+      "Open-ended fit read — therapists chose a newer path on purpose; the why tells you a lot.",
+    category: "fit",
+  },
+];
+
+const STERILIZATION_TECH_QUESTIONS: RecommendedQuestion[] = [
+  // Qualifications
+  {
+    id: "st_infection_control_training",
+    prompt:
+      "Have you completed formal infection-control training (OSHA bloodborne pathogens, CDC guidelines)?",
+    kind: "yes_no",
+    required: false,
+    rationale:
+      "Sterile processing is a compliance role at its core — formal training beats on-the-job-only backgrounds.",
+    category: "qualification",
+  },
+  {
+    id: "st_certification",
+    prompt:
+      "Do you hold a sterile-processing certification (CRCST, CSPDT, or similar)?",
+    kind: "yes_no",
+    required: false,
+    rationale:
+      "Certifications are uncommon in dental sterile processing — holding one signals a career tech, not a pass-through hire.",
+    category: "qualification",
+  },
+  // Experience
+  {
+    id: "st_years_experience",
+    prompt:
+      "How many years of sterilization / instrument-processing experience do you have?",
+    kind: "single_select",
+    options: YEARS_OPTIONS,
+    required: false,
+    rationale:
+      "Includes dental and medical sterile processing — both transfer well.",
+    category: "experience",
+  },
+  {
+    id: "st_setting",
+    prompt: "Where have you done sterile processing?",
+    kind: "multi_select",
+    options: [
+      { id: "st_set_dental", label: "Dental practice" },
+      { id: "st_set_oms", label: "Oral surgery / specialty office" },
+      { id: "st_set_hospital", label: "Hospital / surgery center" },
+      { id: "st_set_other", label: "Other clinical setting" },
+    ],
+    required: false,
+    rationale:
+      "Hospital-trained techs bring rigorous protocol habits; dental-trained techs know your instrument mix.",
+    category: "experience",
+  },
+  // Skills
+  {
+    id: "st_equipment",
+    prompt: "Which sterilization equipment have you operated?",
+    kind: "multi_select",
+    options: [
+      { id: "st_eq_autoclave", label: "Steam autoclave" },
+      { id: "st_eq_statim", label: "STATIM / cassette autoclave" },
+      { id: "st_eq_ultrasonic", label: "Ultrasonic cleaner" },
+      { id: "st_eq_washer", label: "Instrument washer" },
+      { id: "st_eq_biological", label: "Biological monitoring / spore testing" },
+    ],
+    required: false,
+    rationale:
+      "Equipment fluency = day-one productivity; spore-testing experience signals they ran the program, not just the machine.",
+    category: "skills",
+  },
+  {
+    id: "st_turnover_pace",
+    prompt:
+      "Are you comfortable turning operatories in a high-volume practice (10+ patients per day per chair)?",
+    kind: "yes_no",
+    required: false,
+    rationale:
+      "Turnover pace is where sterilization roles burn out — set the volume expectation honestly.",
+    category: "logistics",
+  },
+  // Logistics
+  {
+    id: "st_schedule",
+    prompt: "What schedule are you targeting?",
+    kind: "single_select",
+    options: SCHEDULE_OPTIONS,
+    required: false,
+    rationale:
+      "Schedule mismatch is the #1 reason interviews go nowhere — surface it first.",
+    category: "logistics",
+  },
+  // Fit
+  {
+    id: "st_process_improvement",
+    prompt:
+      "Tell us about a time you improved a sterilization or instrument-flow process.",
+    kind: "long_text",
+    required: false,
+    rationale:
+      "Separates techs who own the sterilization PROGRAM from those who run a machine.",
+    category: "fit",
+  },
+];
+
+const LAB_TECH_QUESTIONS: RecommendedQuestion[] = [
+  // Qualifications
+  {
+    id: "lt_cdt_certified",
+    prompt: "Are you a Certified Dental Technician (CDT), or working toward it?",
+    kind: "single_select",
+    options: [
+      { id: "lt_cdt_yes", label: "CDT certified" },
+      { id: "lt_cdt_progress", label: "Working toward CDT" },
+      { id: "lt_cdt_no", label: "Not pursuing certification" },
+    ],
+    required: false,
+    rationale:
+      "CDT is optional but meaningful — certified techs command premium pay and handle complex cases.",
+    category: "qualification",
+  },
+  // Experience
+  {
+    id: "lt_years_experience",
+    prompt: "How many years of dental lab experience do you have?",
+    kind: "single_select",
+    options: YEARS_OPTIONS,
+    required: false,
+    rationale: "Bench skill compounds with years — a quick calibration.",
+    category: "experience",
+  },
+  {
+    id: "lt_lab_setting",
+    prompt: "What kind of lab have you worked in?",
+    kind: "multi_select",
+    options: [
+      { id: "lt_set_inhouse", label: "In-house practice lab" },
+      { id: "lt_set_commercial", label: "Commercial dental lab" },
+      { id: "lt_set_milling", label: "Milling center" },
+      { id: "lt_set_ortho", label: "Orthodontic lab" },
+    ],
+    required: false,
+    rationale:
+      "In-house techs juggle chairside adjustments + same-day work; commercial techs go deeper on fewer products.",
+    category: "experience",
+  },
+  // Skills
+  {
+    id: "lt_products",
+    prompt: "Which products do you fabricate confidently?",
+    kind: "multi_select",
+    options: [
+      { id: "lt_prod_crown_bridge", label: "Crown & bridge" },
+      { id: "lt_prod_dentures", label: "Full / partial dentures" },
+      { id: "lt_prod_implant", label: "Implant restorations" },
+      { id: "lt_prod_nightguards", label: "Nightguards / splints" },
+      { id: "lt_prod_ortho", label: "Orthodontic appliances / aligners" },
+      { id: "lt_prod_ceramics", label: "Layered ceramics / aesthetics" },
+    ],
+    required: false,
+    rationale:
+      "Match the product mix to what your practice actually sends to the bench.",
+    category: "skills",
+  },
+  {
+    id: "lt_digital_workflow",
+    prompt: "Which digital workflows have you used?",
+    kind: "multi_select",
+    options: [
+      { id: "lt_dig_exocad", label: "exocad" },
+      { id: "lt_dig_3shape", label: "3Shape" },
+      { id: "lt_dig_cerec", label: "CEREC / chairside CAD-CAM" },
+      { id: "lt_dig_milling", label: "Milling units" },
+      { id: "lt_dig_printing", label: "3D printing" },
+      { id: "lt_dig_scanning", label: "Intraoral scan workflows" },
+      { id: "lt_dig_analog", label: "Primarily analog / traditional" },
+    ],
+    required: false,
+    rationale:
+      "Digital fluency is the dividing line in modern lab hiring — analog-only techs need ramp time on a digital bench.",
+    category: "skills",
+  },
+  {
+    id: "lt_turnaround",
+    prompt:
+      "Are you comfortable with same-day / next-day turnaround expectations for in-house cases?",
+    kind: "yes_no",
+    required: false,
+    rationale:
+      "In-house labs live on fast turnaround — commercial-lab veterans sometimes find the pace jarring.",
+    category: "logistics",
+  },
+  // Compensation
+  {
+    id: "lt_comp_expectation",
+    prompt: "What hourly or annual compensation are you targeting?",
+    kind: "short_text",
+    required: false,
+    rationale:
+      "Lab tech comp varies widely with digital skill + product mix — get the ask up front.",
+    category: "compensation",
+  },
+  // Fit
+  {
+    id: "lt_quality_story",
+    prompt:
+      "Walk us through how you handle a case that comes back for a remake.",
+    kind: "long_text",
+    required: false,
+    rationale:
+      "Remake handling reveals craftsmanship standards, ego, and how they work with doctors.",
+    category: "fit",
+  },
+];
+
+const TREATMENT_COORDINATOR_QUESTIONS: RecommendedQuestion[] = [
+  // Experience
+  {
+    id: "tc_years_experience",
+    prompt:
+      "How many years have you worked as a treatment coordinator (or presented treatment plans)?",
+    kind: "single_select",
+    options: YEARS_OPTIONS,
+    required: false,
+    rationale:
+      "Front-desk staff who 'also presented treatment' and dedicated TCs are different hires — this sorts them.",
+    category: "experience",
+  },
+  {
+    id: "tc_case_size",
+    prompt:
+      "What's the largest treatment plan value you've regularly presented?",
+    kind: "single_select",
+    options: [
+      { id: "tc_case_1k", label: "Under $1,000" },
+      { id: "tc_case_5k", label: "$1,000–5,000" },
+      { id: "tc_case_15k", label: "$5,000–15,000" },
+      { id: "tc_case_30k", label: "$15,000–30,000 (full-arch territory)" },
+      { id: "tc_case_30kp", label: "$30,000+" },
+    ],
+    required: false,
+    rationale:
+      "Presenting a $15K implant plan is a different skill than a $800 crown — match to your case mix.",
+    category: "experience",
+  },
+  // Skills
+  {
+    id: "tc_financing_tools",
+    prompt: "Which patient-financing tools have you presented?",
+    kind: "multi_select",
+    options: [
+      { id: "tc_fin_carecredit", label: "CareCredit" },
+      { id: "tc_fin_sunbit", label: "Sunbit" },
+      { id: "tc_fin_cherry", label: "Cherry" },
+      { id: "tc_fin_proceed", label: "Proceed / other third-party" },
+      { id: "tc_fin_inhouse", label: "In-house membership / payment plans" },
+    ],
+    required: false,
+    rationale:
+      "Financing fluency directly moves case acceptance on larger plans.",
+    category: "skills",
+  },
+  {
+    id: "tc_insurance_fluency",
+    prompt:
+      "Are you comfortable explaining insurance coverage, downgrades, and out-of-pocket estimates to patients?",
+    kind: "yes_no",
+    required: false,
+    rationale:
+      "The hardest TC conversations are coverage-gap conversations — confirm they've owned them.",
+    category: "skills",
+  },
+  {
+    id: "tc_pms_experience",
+    prompt: "Which practice management software have you used?",
+    kind: "multi_select",
+    options: PMS_OPTIONS,
+    required: false,
+    rationale:
+      "TCs live in the ledger and treatment-plan modules — same-PMS hires ramp dramatically faster.",
+    category: "skills",
+  },
+  // Logistics
+  {
+    id: "tc_schedule",
+    prompt: "What schedule are you targeting?",
+    kind: "single_select",
+    options: SCHEDULE_OPTIONS,
+    required: false,
+    rationale:
+      "Schedule mismatch is the #1 reason interviews go nowhere — surface it first.",
+    category: "logistics",
+  },
+  // Fit
+  {
+    id: "tc_objection_story",
+    prompt:
+      "Tell us about a time a patient declined a treatment plan — what did you do next?",
+    kind: "long_text",
+    required: false,
+    rationale:
+      "Follow-up behavior after a 'no' is the strongest predictor of TC performance.",
+    category: "fit",
+  },
+];
+
+const FINANCIAL_COORDINATOR_QUESTIONS: RecommendedQuestion[] = [
+  // Experience
+  {
+    id: "fc_years_experience",
+    prompt:
+      "How many years of dental billing / financial coordination experience do you have?",
+    kind: "single_select",
+    options: YEARS_OPTIONS,
+    required: false,
+    rationale:
+      "Dental billing is its own world (CDT codes, downgrades, frequencies) — general medical billing only partly transfers.",
+    category: "experience",
+  },
+  // Skills
+  {
+    id: "fc_claims_lifecycle",
+    prompt: "Which parts of the claims lifecycle have you owned?",
+    kind: "multi_select",
+    options: [
+      { id: "fc_cl_verify", label: "Benefits verification" },
+      { id: "fc_cl_submit", label: "Claims submission" },
+      { id: "fc_cl_attach", label: "Attachments / narratives" },
+      { id: "fc_cl_denials", label: "Denials & appeals" },
+      { id: "fc_cl_eob", label: "EOB posting & reconciliation" },
+      { id: "fc_cl_preauth", label: "Pre-authorizations" },
+    ],
+    required: false,
+    rationale:
+      "Denial-and-appeal experience is the high-value end of the lifecycle — many candidates stop at submission.",
+    category: "skills",
+  },
+  {
+    id: "fc_ar_experience",
+    prompt:
+      "Have you owned an accounts-receivable aging report (insurance + patient AR)?",
+    kind: "yes_no",
+    required: false,
+    rationale:
+      "Owning AR — not just posting payments — is what separates a financial coordinator from a biller.",
+    category: "skills",
+  },
+  {
+    id: "fc_insurance_types",
+    prompt: "Which insurance types have you regularly worked with?",
+    kind: "multi_select",
+    options: [
+      { id: "fc_ins_ppo", label: "PPO" },
+      { id: "fc_ins_hmo", label: "HMO / DHMO" },
+      { id: "fc_ins_medicaid", label: "Medicaid / state programs" },
+      { id: "fc_ins_medicare", label: "Medicare Advantage dental" },
+      { id: "fc_ins_inhouse", label: "In-house membership plans" },
+    ],
+    required: false,
+    rationale:
+      "Medicaid billing fluency is rare and valuable; PPO-only backgrounds need ramp on state programs.",
+    category: "skills",
+  },
+  {
+    id: "fc_collections_comfort",
+    prompt:
+      "Are you comfortable having balance-due conversations directly with patients?",
+    kind: "yes_no",
+    required: false,
+    rationale:
+      "Patient collections is the part of the job people quietly avoid — ask directly.",
+    category: "skills",
+  },
+  {
+    id: "fc_pms_experience",
+    prompt: "Which practice management software have you used for billing?",
+    kind: "multi_select",
+    options: PMS_OPTIONS,
+    required: false,
+    rationale:
+      "Ledger + claims modules differ sharply across PMS platforms — same-system hires ramp fastest.",
+    category: "skills",
+  },
+  // Logistics
+  {
+    id: "fc_schedule",
+    prompt: "What schedule are you targeting?",
+    kind: "single_select",
+    options: SCHEDULE_OPTIONS,
+    required: false,
+    rationale:
+      "Schedule mismatch is the #1 reason interviews go nowhere — surface it first.",
+    category: "logistics",
+  },
+  // Fit
+  {
+    id: "fc_denial_story",
+    prompt:
+      "Describe a stubborn denied claim you eventually got paid — what did it take?",
+    kind: "long_text",
+    required: false,
+    rationale:
+      "Appeal persistence is the single best signal for this seat.",
+    category: "fit",
+  },
+];
+
+const SCHEDULING_COORDINATOR_QUESTIONS: RecommendedQuestion[] = [
+  // Experience
+  {
+    id: "sc_years_experience",
+    prompt:
+      "How many years of dental scheduling experience do you have?",
+    kind: "single_select",
+    options: YEARS_OPTIONS,
+    required: false,
+    rationale:
+      "Dental schedules have provider-specific rhythms (hygiene columns, doctor blocks) — dental years count double.",
+    category: "experience",
+  },
+  {
+    id: "sc_provider_count",
+    prompt:
+      "What's the most providers you've scheduled for at once (doctors + hygienists)?",
+    kind: "single_select",
+    options: [
+      { id: "sc_prov_1_2", label: "1–2 providers" },
+      { id: "sc_prov_3_5", label: "3–5 providers" },
+      { id: "sc_prov_6_10", label: "6–10 providers" },
+      { id: "sc_prov_10p", label: "10+ / multi-location" },
+    ],
+    required: false,
+    rationale:
+      "A six-provider book is a logistics puzzle — calibrate to your practice's size.",
+    category: "experience",
+  },
+  // Skills
+  {
+    id: "sc_recall_systems",
+    prompt:
+      "Have you owned a hygiene recall / reactivation program (not just booked appointments)?",
+    kind: "yes_no",
+    required: false,
+    rationale:
+      "Recall ownership is the revenue lever in this seat — booking alone is table stakes.",
+    category: "skills",
+  },
+  {
+    id: "sc_no_show_strategies",
+    prompt:
+      "What tactics have you used to reduce no-shows and short-notice cancellations?",
+    kind: "multi_select",
+    options: [
+      { id: "sc_ns_confirm", label: "Multi-channel confirmations" },
+      { id: "sc_ns_deposits", label: "Deposits / reservation fees" },
+      { id: "sc_ns_waitlist", label: "ASAP / waitlist backfill" },
+      { id: "sc_ns_policy", label: "Written cancellation policy" },
+      { id: "sc_ns_relationship", label: "Personal outreach to repeat offenders" },
+    ],
+    required: false,
+    rationale:
+      "No-show management is where good schedulers prove out — tactics tell you their toolkit.",
+    category: "skills",
+  },
+  {
+    id: "sc_pms_experience",
+    prompt: "Which practice management software have you scheduled in?",
+    kind: "multi_select",
+    options: PMS_OPTIONS,
+    required: false,
+    rationale:
+      "Scheduler modules differ sharply by PMS — same-system hires ramp fastest.",
+    category: "skills",
+  },
+  // Logistics
+  {
+    id: "sc_schedule",
+    prompt: "What schedule are you targeting?",
+    kind: "single_select",
+    options: SCHEDULE_OPTIONS,
+    required: false,
+    rationale:
+      "Schedule mismatch is the #1 reason interviews go nowhere — surface it first.",
+    category: "logistics",
+  },
+  // Fit
+  {
+    id: "sc_full_book_story",
+    prompt:
+      "A doctor's day falls apart at 8am — two cancellations and an emergency walk-in. Walk us through your next 30 minutes.",
+    kind: "long_text",
+    required: false,
+    rationale:
+      "Live triage under pressure IS the job — this scenario shows their instincts.",
+    category: "fit",
+  },
+];
+
+const PRACTICE_ADMINISTRATOR_QUESTIONS: RecommendedQuestion[] = [
+  // Experience
+  {
+    id: "pa_years_experience",
+    prompt:
+      "How many years have you managed or administered a dental practice?",
+    kind: "single_select",
+    options: YEARS_OPTIONS,
+    required: false,
+    rationale:
+      "Practice administration is the senior single-site seat — most strong candidates grew out of office management.",
+    category: "experience",
+  },
+  {
+    id: "pa_team_size",
+    prompt: "What's the largest team you've directly managed?",
+    kind: "single_select",
+    options: [
+      { id: "pa_team_1_5", label: "1–5 people" },
+      { id: "pa_team_6_15", label: "6–15 people" },
+      { id: "pa_team_16_30", label: "16–30 people" },
+      { id: "pa_team_30p", label: "30+ people" },
+    ],
+    required: false,
+    rationale:
+      "Team scale changes the job — a 25-person practice needs real management infrastructure.",
+    category: "experience",
+  },
+  // Skills
+  {
+    id: "pa_pl_ownership",
+    prompt:
+      "Have you owned a practice P&L or operating budget (not just reported on it)?",
+    kind: "yes_no",
+    required: false,
+    rationale:
+      "Budget OWNERSHIP separates administrators from senior office managers.",
+    category: "skills",
+  },
+  {
+    id: "pa_kpis",
+    prompt: "Which practice KPIs have you actively managed?",
+    kind: "multi_select",
+    options: KPI_OPTIONS,
+    required: false,
+    rationale:
+      "KPI fluency shows which levers they've actually pulled — production, collections, recare.",
+    category: "skills",
+  },
+  {
+    id: "pa_hr_scope",
+    prompt: "Which HR functions have you owned?",
+    kind: "multi_select",
+    options: [
+      { id: "pa_hr_hiring", label: "Hiring & onboarding" },
+      { id: "pa_hr_payroll", label: "Payroll" },
+      { id: "pa_hr_reviews", label: "Performance reviews" },
+      { id: "pa_hr_discipline", label: "Corrective action / terminations" },
+      { id: "pa_hr_benefits", label: "Benefits administration" },
+    ],
+    required: false,
+    rationale:
+      "The uncomfortable HR work (corrective action) is where administrators earn the title.",
+    category: "skills",
+  },
+  {
+    id: "pa_compliance",
+    prompt:
+      "Have you owned a practice's OSHA / HIPAA compliance program (training, documentation, audits)?",
+    kind: "yes_no",
+    required: false,
+    rationale:
+      "Compliance program ownership — not just personal training — is a core administrator duty.",
+    category: "skills",
+  },
+  // Compensation
+  {
+    id: "pa_comp_expectation",
+    prompt: "What annual compensation are you targeting?",
+    kind: "short_text",
+    required: false,
+    rationale:
+      "Administrator comp often includes a performance bonus — get the full ask early.",
+    category: "compensation",
+  },
+  // Fit
+  {
+    id: "pa_turnaround_story",
+    prompt:
+      "Tell us about a practice problem you inherited (turnover, AR, schedule chaos) and how you turned it around.",
+    kind: "long_text",
+    required: false,
+    rationale:
+      "Turnaround stories reveal both diagnostic skill and follow-through — the administrator's core loop.",
+    category: "fit",
+  },
+];
+
+/* ─────────────────────────────────────────────────────────────────
  * Public map
  * ────────────────────────────────────────────────────────────────*/
 
@@ -1467,7 +2166,7 @@ const REGIONAL_MANAGER_QUESTIONS: RecommendedQuestion[] = [
  */
 export const ROLE_RECOMMENDATIONS: Record<string, RoleCategoryRecommendation> = {
   dentist: {
-    label: "Associate Dentist",
+    label: "Dentist",
     questions: DENTIST_QUESTIONS,
   },
   specialist: {
@@ -1478,17 +2177,46 @@ export const ROLE_RECOMMENDATIONS: Record<string, RoleCategoryRecommendation> = 
     label: "Dental Hygienist",
     questions: HYGIENIST_QUESTIONS,
   },
+  // #77 (2026-06-12) — expanded practice-level roles.
+  dental_therapist: {
+    label: "Dental Therapist",
+    questions: DENTAL_THERAPIST_QUESTIONS,
+  },
   dental_assistant: {
     label: "Dental Assistant",
     questions: DENTAL_ASSISTANT_QUESTIONS,
+  },
+  sterilization_tech: {
+    label: "Sterilization Technician",
+    questions: STERILIZATION_TECH_QUESTIONS,
+  },
+  lab_tech: {
+    label: "Dental Lab Technician",
+    questions: LAB_TECH_QUESTIONS,
   },
   front_office: {
     label: "Front Desk",
     questions: FRONT_OFFICE_QUESTIONS,
   },
+  treatment_coordinator: {
+    label: "Treatment Coordinator",
+    questions: TREATMENT_COORDINATOR_QUESTIONS,
+  },
+  financial_coordinator: {
+    label: "Financial / Insurance Coordinator",
+    questions: FINANCIAL_COORDINATOR_QUESTIONS,
+  },
+  scheduling_coordinator: {
+    label: "Scheduling Coordinator",
+    questions: SCHEDULING_COORDINATOR_QUESTIONS,
+  },
   office_manager: {
     label: "Office Manager",
     questions: OFFICE_MANAGER_QUESTIONS,
+  },
+  practice_administrator: {
+    label: "Practice Administrator",
+    questions: PRACTICE_ADMINISTRATOR_QUESTIONS,
   },
   regional_manager: {
     label: "Regional Manager",
