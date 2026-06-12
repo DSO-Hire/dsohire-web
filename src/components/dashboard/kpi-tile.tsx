@@ -52,8 +52,9 @@ interface KpiTileProps {
   deltaLabel?: string;
   /** Override trend intent. */
   trendIntent?: "positive" | "negative" | "neutral";
-  /** Background variant. Default tonal (cream + heritage left rule). */
-  tone?: "white" | "tonal";
+  /** Background variant. Default tonal (cream + heritage left rule);
+      "navy" = the pop tile (ink fill, ivory value, bright accents). */
+  tone?: "white" | "tonal" | "navy";
   /** When set, renders the tile as a Link with chevron + route label. */
   href?: string;
   /** Bottom CTA label, e.g. "Manage jobs". Only shown when href is set. */
@@ -80,38 +81,45 @@ export function KpiTile({
   // Tonal cream + heritage left rule is the default v3 look. The "white"
   // variant is kept as an escape hatch for the rare surface that wants
   // a flat treatment.
-  const baseBg =
-    tone === "tonal" ? "bg-cream border-l-4 border-heritage" : "bg-white";
-  const hoverBg =
-    tone === "tonal" ? "hover:bg-ivory-deep" : "hover:bg-cream/40";
+  const navy = tone === "navy";
+  const baseBg = navy
+    ? "bg-ink border-l-4 border-[#8db8a3]"
+    : tone === "tonal"
+      ? "bg-cream border-l-4 border-heritage"
+      : "bg-white";
+  const hoverBg = navy
+    ? "hover:bg-[#1a2c4e]"
+    : tone === "tonal"
+      ? "hover:bg-ivory-deep"
+      : "hover:bg-cream/40";
 
   const body = (
     <>
       {/* Chevron (top-right) — only on clickable tiles. The tile body itself
           handles the click; the chevron is just visual affordance. */}
       {isClickable && (
-        <ChevronRight className="absolute top-4 right-4 h-4 w-4 text-slate-meta group-hover:text-heritage group-hover:translate-x-1 transition-all" />
+        <ChevronRight className={`absolute top-4 right-4 h-4 w-4 group-hover:translate-x-1 transition-all ${navy ? "text-ivory/40 group-hover:text-[#8db8a3]" : "text-slate-meta group-hover:text-heritage"}`} />
       )}
 
       {/* Icon + label cluster */}
       <div className="flex items-center gap-2.5 mb-4">
-        <div className="h-7 w-7 bg-heritage/10 flex items-center justify-center flex-shrink-0">
-          <Icon className="h-3.5 w-3.5 text-heritage-deep" />
+        <div className={`h-7 w-7 flex items-center justify-center flex-shrink-0 ${navy ? "bg-white/10" : "bg-heritage/10"}`}>
+          <Icon className={`h-3.5 w-3.5 ${navy ? "text-[#8db8a3]" : "text-heritage-deep"}`} />
         </div>
-        <div className="text-[10px] font-extrabold tracking-[2.2px] uppercase text-heritage-deep">
+        <div className={`text-[10px] font-extrabold tracking-[2.2px] uppercase ${navy ? "text-[#8db8a3]" : "text-heritage-deep"}`}>
           {label}
         </div>
       </div>
 
       {/* Big value — FOH-9: integers count up on view (700ms, settles fast
           so daily users never wait); pre-formatted values render as-is. */}
-      <div className="text-[56px] font-black tracking-[-2.5px] leading-[0.95] text-ink mb-2 tabular-nums">
+      <div className={`text-[56px] font-black tracking-[-2.5px] leading-[0.95] mb-2 tabular-nums ${navy ? "text-ivory" : "text-ink"}`}>
         <StatValue value={value} />
       </div>
 
       {/* Optional secondary signal line */}
       {hint && (
-        <div className="text-[12px] text-slate-body tracking-[0.2px] leading-snug">
+        <div className={`text-[12px] tracking-[0.2px] leading-snug ${navy ? "text-ivory/70" : "text-slate-body"}`}>
           {hint}
         </div>
       )}
@@ -120,7 +128,12 @@ export function KpiTile({
       {(showSpark || showTrend) && (
         <div className="flex items-center gap-3 flex-wrap mt-3">
           {showSpark && (
-            <Sparkline data={spark as number[]} width={100} height={28} />
+            <Sparkline
+              data={spark as number[]}
+              width={100}
+              height={28}
+              stroke={navy ? "#8db8a3" : undefined}
+            />
           )}
           {showTrend && (
             <TrendPill
@@ -134,7 +147,7 @@ export function KpiTile({
 
       {/* Route label — only on clickable tiles. Pushes to the bottom. */}
       {isClickable && routeLabel && (
-        <div className="mt-auto pt-3.5 flex items-center gap-1.5 text-[9px] font-bold tracking-[1.6px] uppercase text-slate-meta group-hover:text-heritage-deep transition-colors border-t border-black/5">
+        <div className={`mt-auto pt-3.5 flex items-center gap-1.5 text-[9px] font-bold tracking-[1.6px] uppercase transition-colors ${navy ? "text-ivory/50 group-hover:text-[#8db8a3] border-t border-white/10" : "text-slate-meta group-hover:text-heritage-deep border-t border-black/5"}`}>
           {routeLabel}
           <ChevronRight className="h-2.5 w-2.5" strokeWidth={3} />
         </div>

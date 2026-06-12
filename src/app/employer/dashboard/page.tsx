@@ -1218,6 +1218,7 @@ export default async function EmployerDashboard() {
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-[var(--rule)] border border-[var(--rule)] mb-6">
         <KpiTile
           icon={Mail}
+          tone="navy"
           value={String(awaitingReviewCount)}
           label="Awaiting Review"
           hint={heroSlaChip ? heroSlaChip.label : heroHint}
