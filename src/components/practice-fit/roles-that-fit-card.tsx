@@ -21,6 +21,25 @@ function formatLocations(
   return locs.length > 1 ? `${first} +${locs.length - 1} more` : first;
 }
 
+/**
+ * Lane 7 (Model 06) — WHY chips: lead with the reason, not just the
+ * number. Reuses the engine's own top_factors (top scored dims by
+ * contribution) with an honesty floor: only dims that genuinely scored
+ * strong (raw ≥ 70) become chips. Weak matches show no chips rather
+ * than dressing up a low score.
+ */
+function whyChips(fit: RoleThatFits["fit"]): string[] {
+  const factors = fit.top_factors ?? [];
+  const chips: string[] = [];
+  for (const key of factors) {
+    const dim = fit.dimensions?.[key];
+    if (!dim || !dim.scored || dim.raw < 70) continue;
+    if (dim.label) chips.push(dim.label);
+    if (chips.length >= 2) break;
+  }
+  return chips;
+}
+
 export function RolesThatFitCard({
   roles,
   product = "practicefit",
@@ -54,6 +73,7 @@ export function RolesThatFitCard({
         {roles.map((r) => {
           const loc = formatLocations(r.locations);
           const sub = [r.dso_name, loc].filter(Boolean).join(" · ");
+          const chips = whyChips(r.fit);
           return (
             <Link
               key={r.job_id}
@@ -66,6 +86,18 @@ export function RolesThatFitCard({
                 </p>
                 {sub && (
                   <p className="text-[12px] text-slate-meta truncate">{sub}</p>
+                )}
+                {chips.length > 0 && (
+                  <span className="mt-1.5 hidden sm:flex items-center gap-1.5 flex-wrap">
+                    {chips.map((c) => (
+                      <span
+                        key={c}
+                        className="inline-flex items-center px-1.5 py-0.5 bg-heritage/10 text-heritage-deep text-[9.5px] font-bold tracking-[0.6px] uppercase"
+                      >
+                        {c}
+                      </span>
+                    ))}
+                  </span>
                 )}
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">

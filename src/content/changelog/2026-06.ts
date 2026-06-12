@@ -8,6 +8,12 @@ import type { ChangelogEntry } from "./index";
 export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-12",
+    kind: "improved",
+    title: "Matches now lead with the why",
+    body: "\"Roles that fit you\" — on your dashboard and both fit hubs — now shows why each role fits, not just the number: small chips naming the dimensions that genuinely scored strong for you (role match, schedule, compensation…). They come straight from the same engine that computed the score, with an honesty floor — a weak match gets no decorative chips.",
+  },
+  {
+    date: "2026-06-12",
     kind: "new",
     title: "Your applications, as journeys",
     body: "The candidate dashboard now shows each active application as a journey — the same stage stepper employers see, from Applied through Hired, with your current step marked. Each journey carries one honest status line: an offer waiting, a new message, or how fast this practice typically responds — a real median from their actual response history, shown only when there's enough of it to be honest (never a made-up reassurance). And per our long-standing rule, no \"stuck in review for 14 days\" anxiety timers — ever.",
