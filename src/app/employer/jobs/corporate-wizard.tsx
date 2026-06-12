@@ -127,7 +127,8 @@ function timeAgoShort(date: Date): string {
 const EMPLOYMENT_OPTIONS: Array<{ value: string; label: string }> = [
   { value: "full_time", label: "Full Time" },
   { value: "part_time", label: "Part Time" },
-  { value: "contract", label: "Contract" },
+  // #128 — relabel only; stored value untouched (classification field carries W-2/1099 now).
+  { value: "contract", label: "Temporary / locum-style (contract)" },
   { value: "prn", label: "PRN" },
   { value: "locum", label: "Locum" },
 ];

@@ -99,7 +99,7 @@ const ROLE_FILTER_ORDER: ReadonlyArray<keyof typeof ROLE_LABELS> = [
 const EMP_LABELS: Record<string, string> = {
   full_time: "Full Time",
   part_time: "Part Time",
-  contract: "Contract",
+  contract: "Temporary / locum-style",
   prn: "PRN",
   locum: "Locum",
 };

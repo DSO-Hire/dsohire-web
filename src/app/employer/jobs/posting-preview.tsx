@@ -20,6 +20,7 @@
  */
 
 import { Briefcase, Clock, DollarSign, Eye, MapPin } from "lucide-react";
+import type { DealCard } from "@/lib/comp/model";
 
 const DAY_LABELS: Record<string, string> = {
   mon: "Mon",
@@ -111,10 +112,18 @@ export interface PostingPreviewProps {
   /** Tiptap HTML — stripped to text for the opening lines. */
   descriptionHtml: string;
   questionCount: number;
+  /** #128 — structured comp deal card (shared formatter). A non-null
+   * headline REPLACES the simple comp chip; null = legacy display. */
+  dealCard?: DealCard | null;
 }
 
 export function PostingPreview(props: PostingPreviewProps) {
-  const comp = props.compVisible ? formatComp(props) : null;
+  // #128 — a structured deal card supersedes the simple comp chip.
+  const deal =
+    props.dealCard && (props.dealCard.headline || props.dealCard.estRange)
+      ? props.dealCard
+      : null;
+  const comp = !deal && props.compVisible ? formatComp(props) : null;
   const schedule = scheduleSummary(props.scheduleDays);
   const opening = stripHtml(props.descriptionHtml);
   const locationLine =
@@ -154,6 +163,40 @@ export function PostingPreview(props: PostingPreviewProps) {
           {props.dsoName && <span>· {props.dsoName}</span>}
           <span>· {props.employmentTypeLabel}</span>
         </p>
+
+        {deal && (
+          <div className="mt-3 space-y-1.5">
+            {deal.headline && (
+              <p className="text-[13px] font-bold text-heritage-deep leading-snug">
+                <DollarSign
+                  className="inline h-3.5 w-3.5 -mt-0.5"
+                  aria-hidden
+                />
+                {deal.headline}
+              </p>
+            )}
+            {deal.estRange && (
+              <p className="text-[12px] font-semibold text-ink">
+                {deal.estRange}{" "}
+                <span className="font-normal text-slate-meta">
+                  (employer estimate)
+                </span>
+              </p>
+            )}
+            {deal.chips.length > 0 && (
+              <p className="flex flex-wrap gap-1">
+                {deal.chips.map((c) => (
+                  <span
+                    key={c}
+                    className="px-1.5 py-0.5 bg-cream text-[10px] font-semibold text-slate-body border border-[var(--rule)]"
+                  >
+                    {c}
+                  </span>
+                ))}
+              </p>
+            )}
+          </div>
+        )}
 
         {(comp || schedule || props.scheduleEvenings || props.scheduleWeekends) && (
           <p className="mt-3 flex flex-wrap gap-1.5">

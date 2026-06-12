@@ -101,6 +101,7 @@ export interface SpecialtyCompDefault {
 }
 
 export const SPECIALTY_COMP_DEFAULTS: Record<string, SpecialtyCompDefault> = {
+  // Keys = the job wizard's SPECIALTY_OPTIONS values.
   endodontics: { percentRate: 40, basis: "collections" },
   periodontics: { percentRate: 37, basis: "collections" },
   oral_surgery: { percentRate: 37, basis: "collections" },
@@ -109,38 +110,22 @@ export const SPECIALTY_COMP_DEFAULTS: Record<string, SpecialtyCompDefault> = {
     basis: "case_starts",
     dailyGuarantee: [1200, 1400],
   },
-  pediatric: { percentRate: 30, basis: "collections", dailyGuarantee: [1100, 1300] },
+  pediatric_dentistry: {
+    percentRate: 30,
+    basis: "collections",
+    dailyGuarantee: [1100, 1300],
+  },
 };
 
 /** GP / unspecified-specialty default (memo: 30–32% band). */
 export const GP_PERCENT_DEFAULT = 30;
 
-/* ── Pay-transparency range-mandate states (memo decision 2: nudge is
- *    STATE-AWARE, never a hard block; state granularity only — city
- *    ordinances deliberately not modeled; review list at each build) ── */
-
-export const RANGE_MANDATE_STATES: ReadonlySet<string> = new Set([
-  "CA",
-  "CO",
-  "WA",
-  "NY",
-  "IL",
-  "MN",
-  "NJ",
-  "MA",
-  "VT",
-  "MD",
-  "HI",
-]);
-
-export function rangeMandateStatesIn(states: Array<string | null>): string[] {
-  const seen = new Set<string>();
-  for (const s of states) {
-    const k = (s ?? "").trim().toUpperCase();
-    if (k && RANGE_MANDATE_STATES.has(k)) seen.add(k);
-  }
-  return Array.from(seen);
-}
+/* ── Pay-transparency awareness: the memo planned a RANGE_MANDATE_STATES
+ *    constant here, but the platform already maintains a richer,
+ *    city/county-aware source — lib/compliance/pay-transparency.ts
+ *    (Day 24 gap N4), which the wizard already assesses per selected
+ *    location. The est-range nudge rides THAT assessment (one source
+ *    of truth); nothing comp-specific to maintain here. ── */
 
 /* ── Deal-card formatting (shared: wizard preview + public job page) ── */
 

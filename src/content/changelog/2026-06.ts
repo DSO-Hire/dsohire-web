@@ -9,6 +9,12 @@ export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-12",
     kind: "new",
+    title: "Post pay the way dentistry actually pays",
+    body: "The job wizard now speaks dental compensation: straight percentage, daily guarantee plus percentage, draw against collections, or salary-versus-percentage — with the details that decide a deal: production vs. collections basis, whether hygiene exam fees count, the lab-fee policy, pay cadence, even basis exclusions. Add your good-faith estimated annual range so candidates can compare and matching can work. W-2 vs 1099 is now a posting field too. Candidates see the deal exactly as you define it — live in the preview as you build. Simple ranges still work exactly as before.",
+  },
+  {
+    date: "2026-06-12",
+    kind: "new",
     title: "Screening questions that know the new roles",
     body: "Every new role ships with a curated screening set written in dental, not HR-speak: dental therapists get state-authorization and scope-of-practice questions, sterilization techs get equipment and spore-testing checks, lab techs get digital-workflow and remake-handling questions, coordinators get case-size, denial-appeal, and no-show-tactic questions, and practice administrators get P&L-ownership and compliance-program questions. One click adds any of them to your posting.",
   },

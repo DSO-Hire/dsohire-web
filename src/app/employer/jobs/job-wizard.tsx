@@ -46,6 +46,13 @@ import {
   computeClinicalMatchability,
   type MatchabilityProfileFlags,
 } from "@/lib/practice-fit/matchability";
+import {
+  CompModelBuilder,
+  EMPTY_COMP_MODEL_STATE,
+  dealCardInputFromState,
+  type CompModelState,
+} from "./comp-model-builder";
+import { formatDealCard } from "@/lib/comp/model";
 import { ChipArrayInput } from "@/app/candidate/profile/edit-sheet";
 import { CORPORATE_FUNCTIONS } from "@/lib/corporate/functions";
 import {
@@ -343,7 +350,8 @@ const SPECIALTY_OPTIONS: Array<{ value: string; label: string }> = [
 const EMPLOYMENT_OPTIONS: Array<{ value: string; label: string }> = [
   { value: "full_time", label: "Full Time" },
   { value: "part_time", label: "Part Time" },
-  { value: "contract", label: "Contract" },
+  // #128 — relabel only; stored value untouched (classification field carries W-2/1099 now).
+  { value: "contract", label: "Temporary / locum-style (contract)" },
   { value: "prn", label: "PRN" },
   { value: "locum", label: "Locum" },
 ];
@@ -462,6 +470,12 @@ export function JobWizard({
   );
   const [compVisible, setCompVisible] = useState(
     initial?.compensation_visible ?? true
+  );
+  // #128 — structured dental comp (one object: model + guarantee/percent/
+  // fine-print/est-range/classification). Create-mode starts simple; the
+  // edit surface (EditSections) carries its own parity rider.
+  const [compModelState, setCompModelState] = useState<CompModelState>(
+    EMPTY_COMP_MODEL_STATE
   );
   // Day 24 — pay-transparency: employer self-certifies an exemption (under
   // the size threshold) rather than us asserting coverage. Drives the hidden
@@ -633,6 +647,7 @@ export function JobWizard({
         verificationRequirements: [...verificationRequirements],
         externalLinks,
         corporateFunction,
+        compModelState,
         stepIdx,
       };
       try {
@@ -677,6 +692,7 @@ export function JobWizard({
     scheduleEvenings,
     scheduleWeekends,
     verificationRequirements,
+    compModelState,
     stepIdx,
   ]);
 
@@ -753,6 +769,13 @@ export function JobWizard({
         // #97 — a restored draft already passed validation up to its saved
         // step, so unlock stepper jumps up to there.
         setMaxStepReached((m) => Math.max(m, clamped));
+      }
+      // #128 — structured comp state (older drafts simply lack the key).
+      if (d.compModelState && typeof d.compModelState === "object") {
+        setCompModelState({
+          ...EMPTY_COMP_MODEL_STATE,
+          ...(d.compModelState as Partial<CompModelState>),
+        });
       }
     } catch {
       /* noop */
@@ -932,6 +955,40 @@ export function JobWizard({
     formData.set("bonus_structure", bonusStructure);
     if (equityOffered) formData.set("equity_offered", "on");
     formData.set("equity_note", equityNote);
+    // #128 — dental-native comp model. Only persisted when a structured
+    // model is chosen (simple keeps legacy fields ruling); classification
+    // is orthogonal and sent whenever set. Reconciliation derives from
+    // the model — no separate UI field.
+    formData.set("comp_model", compModelState.compModel);
+    if (compModelState.compModel !== "simple") {
+      formData.set("guarantee_kind", compModelState.guaranteeKind);
+      formData.set("guarantee_amount", compModelState.guaranteeAmount);
+      formData.set("guarantee_duration", compModelState.guaranteeDuration);
+      formData.set("percent_rate_min", compModelState.percentRateMin);
+      formData.set("percent_rate_max", compModelState.percentRateMax);
+      formData.set("percent_basis", compModelState.percentBasis);
+      formData.set("percent_tiers_note", compModelState.percentTiersNote);
+      formData.set(
+        "hygiene_exam_credited",
+        compModelState.hygieneExamCredited
+      );
+      formData.set(
+        "hygienist_work_credited",
+        compModelState.hygienistWorkCredited
+      );
+      formData.set("lab_fee_policy", compModelState.labFeePolicy);
+      formData.set(
+        "basis_exclusions_note",
+        compModelState.basisExclusionsNote
+      );
+      formData.set("pay_cadence", compModelState.payCadence);
+      formData.set("est_annual_min", compModelState.estAnnualMin);
+      formData.set("est_annual_max", compModelState.estAnnualMax);
+    }
+    formData.set(
+      "worker_classification",
+      compModelState.workerClassification
+    );
     // v1.1 — repeated `specialty` form entries; min_years_experience is
     // a single optional integer string.
     for (const sp of specialty) {
@@ -1108,6 +1165,9 @@ export function JobWizard({
         compType,
         compMin,
         compMax,
+        compModel: compModelState.compModel,
+        estAnnualMin: compModelState.estAnnualMin,
+        estAnnualMax: compModelState.estAnnualMax,
         skills,
         specialty: Array.from(specialty),
         minYearsExperience,
@@ -1122,6 +1182,9 @@ export function JobWizard({
       compType,
       compMin,
       compMax,
+      compModelState.compModel,
+      compModelState.estAnnualMin,
+      compModelState.estAnnualMax,
       skills,
       specialty,
       minYearsExperience,
@@ -1135,6 +1198,14 @@ export function JobWizard({
     details: 1,
     description: 2,
   };
+
+  // #128 — the deal card the candidate will see (shared formatter with
+  // the public page). Null headline for simple model = preview keeps
+  // its legacy comp chip.
+  const dealCard = useMemo(
+    () => formatDealCard(dealCardInputFromState(compModelState)),
+    [compModelState]
+  );
 
   return (
     <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_400px] xl:gap-8 xl:items-start">
@@ -1308,6 +1379,8 @@ export function JobWizard({
           <DetailsStep
             roleCategory={roleCategory}
             benchmarkState={benchmarkState}
+            compModelState={compModelState}
+            onCompModelState={setCompModelState}
             compType={compType}
             onCompType={setCompType}
             compMin={compMin}
@@ -1430,6 +1503,7 @@ export function JobWizard({
           skills={skills}
           descriptionHtml={description}
           questionCount={questions.length}
+          dealCard={dealCard}
         />
         <MatchabilityMeter
           result={matchability}
@@ -1926,6 +2000,8 @@ function DescriptionStep({
 function DetailsStep({
   roleCategory,
   benchmarkState,
+  compModelState,
+  onCompModelState,
   compType,
   onCompType,
   compMin,
@@ -1980,6 +2056,9 @@ function DetailsStep({
 }: {
   roleCategory: string;
   benchmarkState: string | null;
+  // #128 — structured dental comp (model picker + atoms).
+  compModelState: CompModelState;
+  onCompModelState: (next: CompModelState) => void;
   compType: CompensationType;
   onCompType: (v: CompensationType) => void;
   compMin: string;
@@ -2053,10 +2132,25 @@ function DetailsStep({
         </h2>
       </div>
 
-      {/* 2026-05-14 — composable compensation editor. Replaces the old
-          inline comp-type / min-max / show-pay fieldset; the shared
-          CompensationSection now OWNS the entire comp UI (base picker +
-          variable/bonus/equity components + OTE note + show-pay toggle). */}
+      {/* 2026-05-14 — composable compensation editor. #128 (2026-06-12):
+          wrapped by CompModelBuilder — "Simple range" renders this exact
+          section untouched via the children slot; structured dental
+          models (straight %, guarantee + %, draw, salary-vs-%) swap in
+          the dental atoms. */}
+      <CompModelBuilder
+        state={compModelState}
+        onState={onCompModelState}
+        roleCategory={roleCategory}
+        specialty={specialty}
+        payTransparency={
+          payTransparency
+            ? {
+                requiresRange: payTransparency.requiresRange,
+                coveredLabel: payTransparency.coveredLabel,
+              }
+            : null
+        }
+      >
       <CompensationSection
         accent="heritage"
         roleCategory={roleCategory}
@@ -2093,6 +2187,7 @@ function DetailsStep({
         equityNote={equityNote}
         onEquityNote={onEquityNote}
       />
+      </CompModelBuilder>
 
       <fieldset className="border border-[var(--rule)] p-6 bg-cream/40">
         <legend className="px-2 text-[13px] font-bold tracking-[2px] uppercase text-heritage-deep">

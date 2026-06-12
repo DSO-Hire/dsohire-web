@@ -174,6 +174,24 @@ export async function createJob(
       schedule_days: parsed.scheduleDays,
       schedule_evenings: parsed.scheduleEvenings,
       schedule_weekends: parsed.scheduleWeekends,
+      // #128 — structured dental comp (null = legacy simple).
+      comp_model: parsed.compModel,
+      guarantee_kind: parsed.guaranteeKind,
+      guarantee_amount: parsed.guaranteeAmount,
+      guarantee_duration: parsed.guaranteeDuration,
+      percent_rate_min: parsed.percentRateMin,
+      percent_rate_max: parsed.percentRateMax,
+      percent_basis: parsed.percentBasis,
+      percent_tiers_note: parsed.percentTiersNote,
+      hygiene_exam_credited: parsed.hygieneExamCredited,
+      hygienist_work_credited: parsed.hygienistWorkCredited,
+      lab_fee_policy: parsed.labFeePolicy,
+      basis_exclusions_note: parsed.basisExclusionsNote,
+      reconciliation: parsed.reconciliation,
+      pay_cadence: parsed.payCadence,
+      est_annual_min: parsed.estAnnualMin,
+      est_annual_max: parsed.estAnnualMax,
+      worker_classification: parsed.workerClassification,
       external_links: parsed.externalLinks,
       corporate_function: parsed.corporateFunction,
       scope: parsed.scope,
@@ -392,6 +410,24 @@ export async function updateJob(
       ...(parsed.externalLinksSubmitted
         ? { external_links: parsed.externalLinks }
         : {}),
+      // #128 — structured dental comp (null = legacy simple).
+      comp_model: parsed.compModel,
+      guarantee_kind: parsed.guaranteeKind,
+      guarantee_amount: parsed.guaranteeAmount,
+      guarantee_duration: parsed.guaranteeDuration,
+      percent_rate_min: parsed.percentRateMin,
+      percent_rate_max: parsed.percentRateMax,
+      percent_basis: parsed.percentBasis,
+      percent_tiers_note: parsed.percentTiersNote,
+      hygiene_exam_credited: parsed.hygieneExamCredited,
+      hygienist_work_credited: parsed.hygienistWorkCredited,
+      lab_fee_policy: parsed.labFeePolicy,
+      basis_exclusions_note: parsed.basisExclusionsNote,
+      reconciliation: parsed.reconciliation,
+      pay_cadence: parsed.payCadence,
+      est_annual_min: parsed.estAnnualMin,
+      est_annual_max: parsed.estAnnualMax,
+      worker_classification: parsed.workerClassification,
       corporate_function: parsed.corporateFunction,
       scope: parsed.scope,
       ...(submittedOpenings !== null ? { openings: submittedOpenings } : {}),
@@ -1748,6 +1784,87 @@ interface ParsedJobInput {
   // recruiter skipped the optional field). Server-side validated against
   // the closed set of 12 function slugs.
   corporateFunction: string | null;
+  // #128 (2026-06-12) — dental-native structured comp. All nullable;
+  // compModel null/"simple" = legacy compensation_* fields rule. Values
+  // whitelisted against the DB enums (bad input → null, never an enum
+  // cast error). Reconciliation derives from the model server-side.
+  compModel: string | null;
+  guaranteeKind: string | null;
+  guaranteeAmount: number | null;
+  guaranteeDuration: string | null;
+  percentRateMin: number | null;
+  percentRateMax: number | null;
+  percentBasis: string | null;
+  percentTiersNote: string | null;
+  hygieneExamCredited: boolean | null;
+  hygienistWorkCredited: boolean | null;
+  labFeePolicy: string | null;
+  basisExclusionsNote: string | null;
+  reconciliation: string | null;
+  payCadence: string | null;
+  estAnnualMin: number | null;
+  estAnnualMax: number | null;
+  workerClassification: string | null;
+}
+
+/* #128 — enum whitelists (mirror migration 20260612210000). */
+const VALID_COMP_MODELS = new Set([
+  "simple",
+  "guarantee_plus_percent",
+  "percent_only",
+  "draw_against_percent",
+  "salary_vs_percent",
+]);
+const VALID_GUARANTEE_KINDS = new Set([
+  "none",
+  "hourly",
+  "daily",
+  "per_period",
+  "annual_salary",
+]);
+const VALID_GUARANTEE_DURATIONS = new Set([
+  "permanent",
+  "intro_90d",
+  "intro_6mo",
+  "year_1",
+  "years_1_3",
+  "custom",
+]);
+const VALID_PERCENT_BASES = new Set([
+  "production",
+  "adjusted_production",
+  "collections",
+  "case_starts",
+]);
+const VALID_LAB_POLICIES = new Set([
+  "practice_paid",
+  "split_50",
+  "deducted",
+  "other",
+]);
+const VALID_CADENCES = new Set([
+  "weekly",
+  "biweekly",
+  "semimonthly",
+  "monthly",
+]);
+const VALID_CLASSIFICATIONS = new Set(["w2", "c1099", "either_negotiable"]);
+
+function enumOrNull(raw: FormDataEntryValue | null, valid: Set<string>): string | null {
+  const v = String(raw ?? "").trim();
+  return valid.has(v) ? v : null;
+}
+
+function numOrNull(raw: FormDataEntryValue | null): number | null {
+  const v = String(raw ?? "").trim().replace(/[$,%\s,]/g, "");
+  if (!v) return null;
+  const n = Number(v);
+  return Number.isFinite(n) && n >= 0 ? n : null;
+}
+
+function textOrNull(raw: FormDataEntryValue | null, max = 300): string | null {
+  const v = String(raw ?? "").trim();
+  return v ? v.slice(0, max) : null;
 }
 
 /** 5G.c — closed set; mirrors CORPORATE_FUNCTION_SLUGS in src/lib/corporate/functions.ts. */
@@ -1808,6 +1925,83 @@ function parseJobFormData(
       ? (compTypeRaw as "range" | "starting_at" | "up_to" | "exact" | "doe")
       : "range";
   const compVisible = formData.get("compensation_visible") === "on";
+
+  // #128 — structured dental comp. Model gates the structured fields;
+  // classification parses regardless (orthogonal). Tri-state booleans
+  // arrive as ""/"yes"/"no" strings from the builder. Reconciliation
+  // derives from the model — never trusted from the form.
+  const compModel = enumOrNull(formData.get("comp_model"), VALID_COMP_MODELS);
+  const structured = compModel !== null && compModel !== "simple";
+  const hygExamRaw = String(formData.get("hygiene_exam_credited") ?? "");
+  const hygWorkRaw = String(formData.get("hygienist_work_credited") ?? "");
+  const comp128 = {
+    compModel,
+    guaranteeKind: structured
+      ? enumOrNull(formData.get("guarantee_kind"), VALID_GUARANTEE_KINDS)
+      : null,
+    guaranteeAmount: structured
+      ? numOrNull(formData.get("guarantee_amount"))
+      : null,
+    guaranteeDuration: structured
+      ? enumOrNull(
+          formData.get("guarantee_duration"),
+          VALID_GUARANTEE_DURATIONS
+        )
+      : null,
+    percentRateMin: structured
+      ? numOrNull(formData.get("percent_rate_min"))
+      : null,
+    percentRateMax: structured
+      ? numOrNull(formData.get("percent_rate_max"))
+      : null,
+    percentBasis: structured
+      ? enumOrNull(formData.get("percent_basis"), VALID_PERCENT_BASES)
+      : null,
+    percentTiersNote: structured
+      ? textOrNull(formData.get("percent_tiers_note"))
+      : null,
+    hygieneExamCredited: !structured
+      ? null
+      : hygExamRaw === "yes"
+        ? true
+        : hygExamRaw === "no"
+          ? false
+          : null,
+    hygienistWorkCredited: !structured
+      ? null
+      : hygWorkRaw === "yes"
+        ? true
+        : null,
+    labFeePolicy: structured
+      ? enumOrNull(formData.get("lab_fee_policy"), VALID_LAB_POLICIES)
+      : null,
+    basisExclusionsNote: structured
+      ? textOrNull(formData.get("basis_exclusions_note"))
+      : null,
+    reconciliation: !structured
+      ? null
+      : compModel === "draw_against_percent"
+        ? "draw_against"
+        : compModel === "salary_vs_percent"
+          ? "greater_of"
+          : compModel === "guarantee_plus_percent"
+            ? "additive"
+            : null,
+    payCadence: structured
+      ? enumOrNull(formData.get("pay_cadence"), VALID_CADENCES)
+      : null,
+    estAnnualMin: structured
+      ? numOrNull(formData.get("est_annual_min"))
+      : null,
+    estAnnualMax: structured
+      ? numOrNull(formData.get("est_annual_max"))
+      : null,
+    workerClassification: enumOrNull(
+      formData.get("worker_classification"),
+      VALID_CLASSIFICATIONS
+    ),
+  };
+
   const hideStagesFromCandidate =
     formData.get("hide_stages_from_candidate") === "on";
   // v1.6 — skills + benefits are multi-value form keys (chip-picker)
@@ -2131,6 +2325,7 @@ function parseJobFormData(
     externalLinks,
     externalLinksSubmitted,
     corporateFunction,
+    ...comp128,
   };
 }
 
