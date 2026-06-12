@@ -9,6 +9,46 @@ export type OfferBasePeriod = "hourly" | "annual";
 /** jobs.compensation_period enum. */
 export type JobCompPeriod = "hourly" | "daily" | "annual";
 
+/**
+ * #128 Phase D — the job-side range for guardrail purposes. Percentage
+ * comp models carry no base min/max; their honest comparable is the
+ * posted est. annual range (same rule as the engine: we never reason
+ * about the percentage itself). One mapper for every guardrail call
+ * site, so the offer flow can't disagree with the engine or the
+ * posting. Percent model WITHOUT an est. range → nulls → the existing
+ * "no_range" behavior (nothing to check, nothing invented).
+ */
+export function jobRangeForGuardrail(job: {
+  compModel?: string | null;
+  compensationMin: number | null;
+  compensationMax: number | null;
+  compensationPeriod: JobCompPeriod | null;
+  estAnnualMin?: number | null;
+  estAnnualMax?: number | null;
+}): {
+  jobMin: number | null;
+  jobMax: number | null;
+  jobPeriod: JobCompPeriod | null;
+} {
+  const percent =
+    job.compModel === "percent_only" ||
+    job.compModel === "guarantee_plus_percent" ||
+    job.compModel === "draw_against_percent" ||
+    job.compModel === "salary_vs_percent";
+  if (percent) {
+    return {
+      jobMin: job.estAnnualMin ?? null,
+      jobMax: job.estAnnualMax ?? null,
+      jobPeriod: "annual",
+    };
+  }
+  return {
+    jobMin: job.compensationMin,
+    jobMax: job.compensationMax,
+    jobPeriod: job.compensationPeriod,
+  };
+}
+
 export type GuardrailSeverity = "ok" | "out_of_range" | "no_range";
 
 export interface GuardrailResult {

@@ -41,6 +41,7 @@ import {
 } from "@/lib/offers/tokens";
 import {
   evaluateOfferGuardrail,
+  jobRangeForGuardrail,
   type JobCompPeriod,
 } from "@/lib/offers/comp-guardrail";
 import {
@@ -108,7 +109,7 @@ export async function sendOffer(
   const { data: appRow, error: appErr } = await supabase
     .from("applications")
     .select(
-      "id, candidate_id, job_id, jobs:jobs!inner(id, dso_id, title, employment_type, compensation_min, compensation_max, compensation_period)"
+      "id, candidate_id, job_id, jobs:jobs!inner(id, dso_id, title, employment_type, compensation_min, compensation_max, compensation_period, comp_model, est_annual_min, est_annual_max)"
     )
     .eq("id", applicationId)
     .maybeSingle();
@@ -130,9 +131,21 @@ export async function sendOffer(
   const jobTitle = (jobRow?.title as string | null) ?? null;
   const jobEmploymentType =
     (jobRow?.employment_type as string | null) ?? null;
-  const jobCompMin = (jobRow?.compensation_min as number | null) ?? null;
-  const jobCompMax = (jobRow?.compensation_max as number | null) ?? null;
-  const jobCompPeriod = (jobRow?.compensation_period as string | null) ?? null;
+  // #128 Phase D — percentage comp models guardrail against the posted
+  // est. annual range (jobRangeForGuardrail = the single mapper).
+  const jobRange = jobRangeForGuardrail({
+    compModel: (jobRow?.comp_model as string | null) ?? null,
+    compensationMin: (jobRow?.compensation_min as number | null) ?? null,
+    compensationMax: (jobRow?.compensation_max as number | null) ?? null,
+    compensationPeriod:
+      (jobRow?.compensation_period as "hourly" | "daily" | "annual" | null) ??
+      null,
+    estAnnualMin: (jobRow?.est_annual_min as number | null) ?? null,
+    estAnnualMax: (jobRow?.est_annual_max as number | null) ?? null,
+  });
+  const jobCompMin = jobRange.jobMin;
+  const jobCompMax = jobRange.jobMax;
+  const jobCompPeriod = jobRange.jobPeriod;
   if (!jobDsoId || !candidateId) {
     return { ok: false, error: "Application missing scope context." };
   }

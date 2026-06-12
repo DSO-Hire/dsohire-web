@@ -114,6 +114,17 @@ function prefillFor(
   roleCategory: string,
   specialty: ReadonlySet<string>
 ): Partial<CompModelState> {
+  // #128 Phase D — hygienist variant: the market deal is HOURLY base +
+  // % of hygiene production above a threshold (memo appendix: base is
+  // the wage, not a ramp device → permanent; bonus band 20–30%).
+  if (roleCategory === "dental_hygienist" && model === "guarantee_plus_percent") {
+    return {
+      guaranteeKind: "hourly",
+      guaranteeDuration: "permanent",
+      percentRateMin: "25",
+      percentBasis: "production",
+    };
+  }
   const spec = Array.from(specialty).find((v) => SPECIALTY_COMP_DEFAULTS[v]);
   const d = spec ? SPECIALTY_COMP_DEFAULTS[spec] : null;
   const out: Partial<CompModelState> = {
@@ -128,16 +139,17 @@ function prefillFor(
     out.guaranteeDuration = "intro_90d";
   }
   if (model === "salary_vs_percent") out.guaranteeKind = "annual_salary";
-  void roleCategory;
   return out;
 }
 
 /** Market placeholder for the guarantee amount — Dave's GP band
- * ($750–1,000/day) unless the selected specialty carries its own. */
+ * ($750–1,000/day) unless the selected specialty carries its own;
+ * hygienist hourly base = $42–60 market (memo appendix). */
 function guaranteeAmountPlaceholder(
   kind: GuaranteeKind | "",
   specialty: ReadonlySet<string>
 ): string {
+  if (kind === "hourly") return "e.g. 42–60 market";
   if (kind !== "daily") return "amount";
   const spec = Array.from(specialty).find(
     (v) => SPECIALTY_COMP_DEFAULTS[v]?.dailyGuarantee
@@ -300,7 +312,12 @@ export function CompModelBuilder({
                   : "bg-white text-slate-body border-[var(--rule-strong)] hover:border-ink"
               }`}
             >
-              {m.label}
+              {/* Phase D — hygienists know this deal as "hourly + production
+                  %", not "daily guarantee" (same model, market-true label). */}
+              {roleCategory === "dental_hygienist" &&
+              m.value === "guarantee_plus_percent"
+                ? "Hourly + production %"
+                : m.label}
             </button>
           ))}
         </div>

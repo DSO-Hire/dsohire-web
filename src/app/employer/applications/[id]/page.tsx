@@ -81,6 +81,7 @@ import {
 } from "./offer-section";
 import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
 import { dsoCanUseOfferApprovals } from "@/lib/offers/approval-tier";
+import { jobRangeForGuardrail } from "@/lib/offers/comp-guardrail";
 import { dsoCanUseSequences } from "@/lib/sequences/tier";
 import {
   SequenceEnrollControl,
@@ -263,7 +264,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   // (RLS would block it anyway, but we want a clean 404 if not).
   const { data: job } = await supabase
     .from("jobs")
-    .select("id, title, dso_id, role_category, employment_type, compensation_min, compensation_max, compensation_period, benefits")
+    .select("id, title, dso_id, role_category, employment_type, compensation_min, compensation_max, compensation_period, benefits, comp_model, est_annual_min, est_annual_max")
     .eq("id", app.job_id)
     .maybeSingle();
   if (!job || (job.dso_id as string) !== (dsoUser.dso_id as string)) notFound();
@@ -1233,6 +1234,19 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   // see the response card with the typed-name soft-sig.
   const showOfferSection = onOfferStage || offerSends.length > 0;
 
+  // #128 Phase D — job-side range for the offer guardrail (percentage
+  // models → est. annual range; see lib/offers/comp-guardrail.ts).
+  const offerGuardrailRange = jobRangeForGuardrail({
+    compModel: (job.comp_model as string | null) ?? null,
+    compensationMin: (job.compensation_min as number | null) ?? null,
+    compensationMax: (job.compensation_max as number | null) ?? null,
+    compensationPeriod:
+      (job.compensation_period as "hourly" | "daily" | "annual" | null) ??
+      null,
+    estAnnualMin: (job.est_annual_min as number | null) ?? null,
+    estAnnualMax: (job.est_annual_max as number | null) ?? null,
+  });
+
   // N12 Phase 2 — offer-approval context for the OfferSection.
   // #83 Phase 2 — both flags now come from the capability model (role preset
   // + per-teammate overrides); the legacy can_send_offers_directly column is
@@ -1782,9 +1796,12 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 jobEmploymentType={offerSectionJobEmploymentType}
                 roleCategory={String(job.role_category)}
                 benchmarkState={offerSectionState}
-                jobCompMin={(job.compensation_min as number | null) ?? null}
-                jobCompMax={(job.compensation_max as number | null) ?? null}
-                jobCompPeriod={(job.compensation_period as string | null) ?? null}
+                // #128 Phase D — percentage comp models guardrail against
+                // the posted est. annual range (single mapper, same rule as
+                // the engine). Legacy/simple jobs pass through unchanged.
+                jobCompMin={offerGuardrailRange.jobMin}
+                jobCompMax={offerGuardrailRange.jobMax}
+                jobCompPeriod={offerGuardrailRange.jobPeriod}
                 jobBenefits={
                   // jobs.benefits is a text[] — join to a string for the
                   // offer benefits field (never cast the array `as string`,
