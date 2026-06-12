@@ -268,7 +268,12 @@ export function labelForStage(
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// Days-in-stage heat — unchanged from pre-Track-B
+// Days-in-stage heat
+//
+// Lane 5 (Kanban 2.0, Model 04): thresholds tightened 7/14 → 4/10 —
+// hiring moves in days, and a candidate sitting 10+ days IS the
+// bottleneck. Single source of truth: the card pill, the card's left
+// aging edge, and the mobile stage tabs all read the same level.
 // ─────────────────────────────────────────────────────────────────────
 
 export function daysInStage(stageEnteredAt: string | Date): number {
@@ -281,8 +286,8 @@ export function daysInStage(stageEnteredAt: string | Date): number {
 }
 
 export function stageHeatLevel(days: number): "cool" | "warm" | "hot" {
-  if (days < 7) return "cool";
-  if (days < 14) return "warm";
+  if (days < 4) return "cool";
+  if (days < 10) return "warm";
   return "hot";
 }
 
@@ -298,6 +303,20 @@ export const STAGE_HEAT_CLASSES: Record<
   cool: "bg-slate-100 text-slate-600",
   warm: "bg-amber-50 text-amber-700",
   hot: "bg-red-50 text-red-700 animate-pulse",
+};
+
+/**
+ * Left-edge aging treatment for kanban cards (Model 04's "visible from
+ * across the room" layer). Same level source as the pill; heritage
+ * green = moving, amber = warming, rust = stuck.
+ */
+export const STAGE_AGE_EDGE_CLASSES: Record<
+  ReturnType<typeof stageHeatLevel>,
+  string
+> = {
+  cool: "border-l-[3px] border-l-heritage/70",
+  warm: "border-l-[3px] border-l-amber-500",
+  hot: "border-l-[3px] border-l-[#b3543f]",
 };
 
 // ─────────────────────────────────────────────────────────────────────

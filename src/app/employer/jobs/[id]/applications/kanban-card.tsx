@@ -31,6 +31,7 @@ import {
   daysInStage,
   stageHeatLevel,
   STAGE_HEAT_CLASSES,
+  STAGE_AGE_EDGE_CLASSES,
 } from "@/lib/applications/stages";
 import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
 import { TAG_COLOR_CLASSES } from "@/lib/applications/tags";
@@ -100,6 +101,9 @@ export function KanbanCard({
   const days = daysInStage(application.stage_entered_at);
   const heat = stageHeatLevel(days);
   const heatClasses = STAGE_HEAT_CLASSES[heat];
+  // Lane 5 — aging edge: the card's left border warms as it sits
+  // (heritage → amber → rust), same level source as the pill below.
+  const ageEdgeClass = STAGE_AGE_EDGE_CLASSES[heat];
   const cand = application.candidate;
 
   const baseClasses =
@@ -139,7 +143,7 @@ export function KanbanCard({
       style={style}
       {...(isOverlay ? {} : listeners)}
       {...(isOverlay ? {} : attributes)}
-      className={`${baseClasses} ${borderClass} ${interactiveClasses} ${
+      className={`${baseClasses} ${borderClass} ${ageEdgeClass} ${interactiveClasses} ${
         settling ? "kb-settle" : ""
       }`}
       aria-roledescription="Draggable application card"

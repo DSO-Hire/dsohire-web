@@ -1168,6 +1168,24 @@ export function KanbanBoard({
         />
 
 
+        {/* Lane 5 — aging legend. Pure chrome; mirrors the card edge +
+            pill thresholds (stageHeatLevel single source). */}
+        <div className="flex items-center justify-end gap-3 mb-2 text-[10px] text-slate-meta">
+          <span className="font-bold tracking-[1.5px] uppercase">Aging</span>
+          <span className="inline-flex items-center gap-1">
+            <span className="h-2 w-2 bg-heritage/70" aria-hidden />
+            &lt;4d
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <span className="h-2 w-2 bg-amber-500" aria-hidden />
+            4–10d
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <span className="h-2 w-2 bg-[#b3543f]" aria-hidden />
+            10d+
+          </span>
+        </div>
+
         {/* Open stages — horizontal scroll on desktop if needed */}
         <div className="overflow-x-auto -mx-4 px-4 pb-2">
           <div className="flex gap-4 min-w-max">

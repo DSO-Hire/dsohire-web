@@ -8,6 +8,12 @@ import type { ChangelogEntry } from "./index";
 export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-12",
+    kind: "improved",
+    title: "Bottlenecks you can see from across the room",
+    body: "Every card on the pipeline board now carries an aging edge — its left border stays green while a candidate is moving, warms to amber after 4 days in a stage, and turns rust at 10. The days-in-stage pill follows the same clock (it used to wait until 7 and 14 days — hiring moves faster than that). A small legend above the board keeps the scale honest.",
+  },
+  {
+    date: "2026-06-12",
     kind: "new",
     title: "Context, right beside the conversation",
     body: "On larger screens the inbox now keeps a quiet context rail next to the thread: who you're talking to, the role and location, a pipeline journey with the real dates each stage was reached (and how long the current one has run), how fast this candidate typically replies — measured from this conversation, shown only when there's enough to measure — and a one-click jump to the full application.",
