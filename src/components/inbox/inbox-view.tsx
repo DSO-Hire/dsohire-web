@@ -60,7 +60,7 @@ import {
 } from "@/lib/inbox/actions";
 
 type Audience = "employer" | "candidate";
-type Tab = "all" | "unread" | "archived";
+type Tab = "all" | "unread" | "awaiting" | "notes" | "archived";
 
 // Keyed by stage kind (the system category snapshot delivered by the
 // inbox composer). The candidate-side surface uses CANDIDATE_KIND_LABELS
@@ -171,6 +171,10 @@ export function InboxView({
     return threads.filter((t) => {
       // Tab filter
       if (tab === "unread" && t.unread_count === 0) return false;
+      if (tab === "awaiting" && (!t.awaiting_reply || t.archived))
+        return false;
+      if (tab === "notes" && (t.notes_count === 0 || t.archived))
+        return false;
       if (tab === "archived" && !t.archived) return false;
       if (tab === "all" && t.archived) return false;
       // Search filter
@@ -192,15 +196,19 @@ export function InboxView({
   const tabCounts = useMemo(() => {
     let allCount = 0;
     let unreadCount = 0;
+    let awaitingCount = 0;
+    let notesCount = 0;
     let archivedCount = 0;
     for (const t of threads) {
       if (t.archived) archivedCount += 1;
       else {
         allCount += 1;
         if (t.unread_count > 0) unreadCount += 1;
+        if (t.awaiting_reply) awaitingCount += 1;
+        if (t.notes_count > 0) notesCount += 1;
       }
     }
-    return { allCount, unreadCount, archivedCount };
+    return { allCount, unreadCount, awaitingCount, notesCount, archivedCount };
   }, [threads]);
 
   // ── Active thread helpers ────────────────────────────────────
@@ -385,6 +393,10 @@ export function InboxView({
                 isIncoming && !isActive
                   ? existing.unread_count + 1
                   : existing.unread_count,
+              // Human messages flip the awaiting flag; system events
+              // leave it alone (a stage move isn't a reply).
+              awaiting_reply:
+                eventKind == null ? isIncoming : existing.awaiting_reply,
             };
             const without = prev.filter((t) => t.application_id !== appId);
             return [updated, ...without];
@@ -454,6 +466,22 @@ export function InboxView({
               onClick={() => setTab("unread")}
               badge
             />
+            {audience === "employer" && (
+              <>
+                <TabButton
+                  label="Awaiting"
+                  count={tabCounts.awaitingCount}
+                  active={tab === "awaiting"}
+                  onClick={() => setTab("awaiting")}
+                />
+                <TabButton
+                  label="Notes"
+                  count={tabCounts.notesCount}
+                  active={tab === "notes"}
+                  onClick={() => setTab("notes")}
+                />
+              </>
+            )}
             <TabButton
               label="Archived"
               count={tabCounts.archivedCount}
@@ -535,6 +563,10 @@ export function InboxView({
                   "No archived threads."
                 ) : tab === "unread" ? (
                   "Inbox zero. ✨"
+                ) : tab === "awaiting" ? (
+                  "Nothing waiting on you — every conversation has your reply."
+                ) : tab === "notes" ? (
+                  "No internal notes yet. Flip the lock in any composer to leave one for your team."
                 ) : (
                   <span>
                     No conversations yet.
@@ -665,7 +697,27 @@ export function InboxView({
                   }
                   onNoteAdded={
                     audience === "employer"
-                      ? (note) => setActiveNotes((prev) => [...prev, note])
+                      ? (note) => {
+                          setActiveNotes((prev) => [...prev, note]);
+                          // Keep the list row's note facets in step so
+                          // the Notes tab + "Note:" preview update live.
+                          setThreads((prev) =>
+                            prev.map((t) =>
+                              t.application_id ===
+                              activeThread.application_id
+                                ? {
+                                    ...t,
+                                    notes_count: t.notes_count + 1,
+                                    latest_note_preview: note.body
+                                      .trim()
+                                      .replace(/\s+/g, " ")
+                                      .slice(0, 140),
+                                    latest_note_at: note.created_at,
+                                  }
+                                : t
+                            )
+                          );
+                        }
                       : undefined
                   }
                 />
@@ -701,7 +753,7 @@ function TabButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex-1 px-3 py-2.5 text-[13px] font-semibold transition-colors border-b-2 ${
+      className={`flex-1 px-2 py-2.5 text-[12px] font-semibold whitespace-nowrap transition-colors border-b-2 ${
         active
           ? "border-heritage-deep text-ink bg-cream/40"
           : "border-transparent text-slate-meta hover:text-ink hover:bg-cream/20"
@@ -800,23 +852,58 @@ function ThreadRow({
         <p className="text-[11px] text-slate-meta truncate">
           {thread.job_title}
         </p>
-        {thread.last_message_preview && (
-          <p
-            className={`mt-1 text-[12px] truncate ${
-              thread.unread_count > 0 && !active
-                ? "text-ink"
-                : "text-slate-body"
-            } ${thread.last_message_event_kind ? "italic text-slate-meta" : ""}`}
-          >
-            {/* Skip the "You:" prefix on system messages — system isn't anyone */}
-            {thread.last_message_event_kind == null &&
-            thread.last_message_sender_role &&
-            isSelfSent(thread.last_message_sender_role, audience) ? (
-              <span className="text-slate-meta">You: </span>
-            ) : null}
-            {thread.last_message_preview}
-          </p>
-        )}
+        {(() => {
+          // Lane 4: when the latest internal note is newer than the last
+          // message, the row previews the NOTE — that's the freshest
+          // thing on the timeline. Amber prefix keeps it unmistakable.
+          const noteIsLatest =
+            audience === "employer" &&
+            thread.latest_note_at !== null &&
+            thread.latest_note_preview !== null &&
+            (thread.last_message_at === null ||
+              thread.latest_note_at > thread.last_message_at);
+          if (noteIsLatest) {
+            return (
+              <p className="mt-1 text-[12px] truncate text-slate-body">
+                <span className="font-semibold text-amber-700">Note: </span>
+                {thread.latest_note_preview}
+              </p>
+            );
+          }
+          if (!thread.last_message_preview) return null;
+          return (
+            <p
+              className={`mt-1 text-[12px] truncate ${
+                thread.unread_count > 0 && !active
+                  ? "text-ink"
+                  : "text-slate-body"
+              } ${thread.last_message_event_kind ? "italic text-slate-meta" : ""}`}
+            >
+              {/* Skip the "You:" prefix on system messages — system isn't anyone */}
+              {thread.last_message_event_kind == null &&
+              thread.last_message_sender_role &&
+              isSelfSent(thread.last_message_sender_role, audience) ? (
+                <span className="text-slate-meta">You: </span>
+              ) : null}
+              {thread.last_message_preview}
+            </p>
+          );
+        })()}
+        {audience === "employer" &&
+          (thread.stage || thread.awaiting_reply) && (
+            <p className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+              {thread.stage && (
+                <span className="inline-flex items-center px-1.5 py-0.5 border border-[var(--rule)] bg-cream/60 text-[9px] font-bold tracking-[1px] uppercase text-slate-700">
+                  {EMPLOYER_STAGE_LABELS[thread.stage] ?? thread.stage}
+                </span>
+              )}
+              {thread.awaiting_reply && !thread.archived && (
+                <span className="inline-flex items-center px-1.5 py-0.5 bg-heritage/10 text-[9px] font-bold tracking-[1px] uppercase text-heritage-deep">
+                  Awaiting you
+                </span>
+              )}
+            </p>
+          )}
       </div>
       <div className="flex flex-col items-end gap-1 shrink-0">
         {thread.unread_count > 0 && (

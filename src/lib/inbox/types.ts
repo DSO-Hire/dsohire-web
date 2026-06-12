@@ -28,6 +28,17 @@ export interface ThreadNote {
   author_name: string;
 }
 
+/**
+ * One reached pipeline step for the context rail's journey stepper
+ * (Lane 4). `kind` is the stage-kind snapshot from
+ * application_status_events; `at` = when the application entered it.
+ * Real dates only — unreached stages simply aren't in the list.
+ */
+export interface ThreadStageStep {
+  kind: string;
+  at: string;
+}
+
 export interface InboxThread {
   application_id: string;
   job_id: string;
@@ -52,4 +63,16 @@ export interface InboxThread {
   stage: string | null;
   location_id: string | null;
   location_name: string | null;
+
+  // ── Lane 4 (Conversations 2.0) facets ─────────────────────────
+  /** True when the latest HUMAN message (system events excluded) came
+   * from the other side — i.e. the ball is in this viewer's court. */
+  awaiting_reply: boolean;
+  /** Internal team notes on this application. Employer side only —
+   * always 0 on the candidate side (notes are never fetched there). */
+  notes_count: number;
+  /** Latest internal note snapshot — drives the "Note:" row preview
+   * when the note is newer than the last message. Employer only. */
+  latest_note_preview: string | null;
+  latest_note_at: string | null;
 }

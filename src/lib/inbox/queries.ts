@@ -88,6 +88,7 @@ export async function getEmployerInboxThreads(
     appsResult,
     messagesResult,
     archiveResult,
+    notesResult,
   ] = await Promise.all([
     supabase
       .from("applications")
@@ -107,6 +108,14 @@ export async function getEmployerInboxThreads(
       .from("inbox_archived_threads")
       .select("application_id")
       .eq("auth_user_id", authUserId),
+    // Internal team notes (Lane 4) — RLS scopes to DSO members; the
+    // candidate query builder never runs this. Ordered desc so the
+    // FIRST row per application is its latest note.
+    supabase
+      .from("application_comments")
+      .select("application_id, body, created_at")
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false }),
   ]);
 
   if (appsResult.error) {
@@ -125,6 +134,28 @@ export async function getEmployerInboxThreads(
       (r) => (r as Record<string, unknown>).application_id as string
     )
   );
+
+  // Latest-note + count per application (rows arrive newest-first).
+  const notesByApp = new Map<
+    string,
+    { count: number; latest_body: string; latest_at: string }
+  >();
+  for (const r of (notesResult.data ?? []) as Array<{
+    application_id: string;
+    body: string;
+    created_at: string;
+  }>) {
+    const existing = notesByApp.get(r.application_id);
+    if (existing) {
+      existing.count += 1;
+    } else {
+      notesByApp.set(r.application_id, {
+        count: 1,
+        latest_body: r.body,
+        latest_at: r.created_at,
+      });
+    }
+  }
 
   // Pull every job_location row for the jobs we just loaded so the
   // employer Location dropdown filter has names. Each application
@@ -166,6 +197,7 @@ export async function getEmployerInboxThreads(
     archivedSet,
     jobToLocation,
     audience: "employer",
+    notesByApp,
   });
 }
 
@@ -322,12 +354,19 @@ function composeThreads({
   archivedSet,
   jobToLocation,
   audience,
+  notesByApp,
 }: {
   apps: Array<Record<string, unknown>>;
   messages: MessageRowMin[];
   archivedSet: Set<string>;
   jobToLocation: Map<string, { id: string; name: string }>;
   audience: "candidate" | "employer";
+  /** Employer-only — latest internal note + count per application.
+   * Candidate callers omit this entirely (notes never cross the wall). */
+  notesByApp?: Map<
+    string,
+    { count: number; latest_body: string; latest_at: string }
+  >;
 }): InboxThread[] {
   // Bucket messages by application; first message in each bucket is the
   // most recent (queries.ts ordered desc).
@@ -354,6 +393,15 @@ function composeThreads({
     const unread = msgs.filter(
       (m) => m.sender_role === otherSide && m.read_at === null
     ).length;
+
+    // "Awaiting you" = the latest HUMAN message came from the other
+    // side. System events (event_kind non-null) don't count as a reply
+    // — moving a stage doesn't answer a candidate's question.
+    const lastHuman = msgs.find((m) => m.event_kind === null) ?? null;
+    const awaitingReply =
+      lastHuman !== null && lastHuman.sender_role === otherSide;
+
+    const noteInfo = notesByApp?.get(appId) ?? null;
 
     let peer: InboxThread["peer"];
     let stage: string | null = null;
@@ -412,6 +460,10 @@ function composeThreads({
       stage,
       location_id: locationId,
       location_name: locationName,
+      awaiting_reply: awaitingReply,
+      notes_count: noteInfo?.count ?? 0,
+      latest_note_preview: noteInfo ? preview(noteInfo.latest_body) : null,
+      latest_note_at: noteInfo?.latest_at ?? null,
     });
   }
 
