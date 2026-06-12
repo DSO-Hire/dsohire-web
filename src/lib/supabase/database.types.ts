@@ -3299,6 +3299,23 @@ export type Database = {
       }
       jobs: {
         Row: {
+          comp_model: Database["public"]["Enums"]["comp_model"] | null
+          guarantee_kind: Database["public"]["Enums"]["comp_guarantee_kind"] | null
+          guarantee_amount: number | null
+          guarantee_duration: Database["public"]["Enums"]["comp_guarantee_duration"] | null
+          percent_rate_min: number | null
+          percent_rate_max: number | null
+          percent_basis: Database["public"]["Enums"]["comp_percent_basis"] | null
+          percent_tiers_note: string | null
+          hygiene_exam_credited: boolean | null
+          hygienist_work_credited: boolean | null
+          lab_fee_policy: Database["public"]["Enums"]["comp_lab_fee_policy"] | null
+          basis_exclusions_note: string | null
+          reconciliation: Database["public"]["Enums"]["comp_reconciliation"] | null
+          pay_cadence: Database["public"]["Enums"]["comp_pay_cadence"] | null
+          est_annual_min: number | null
+          est_annual_max: number | null
+          worker_classification: Database["public"]["Enums"]["worker_classification"] | null
           applications_count: number
           authority_level: string | null
           benefits: string[] | null
@@ -3359,6 +3376,23 @@ export type Database = {
           work_mode_detail: string | null
         }
         Insert: {
+          comp_model?: Database["public"]["Enums"]["comp_model"] | null
+          guarantee_kind?: Database["public"]["Enums"]["comp_guarantee_kind"] | null
+          guarantee_amount?: number | null
+          guarantee_duration?: Database["public"]["Enums"]["comp_guarantee_duration"] | null
+          percent_rate_min?: number | null
+          percent_rate_max?: number | null
+          percent_basis?: Database["public"]["Enums"]["comp_percent_basis"] | null
+          percent_tiers_note?: string | null
+          hygiene_exam_credited?: boolean | null
+          hygienist_work_credited?: boolean | null
+          lab_fee_policy?: Database["public"]["Enums"]["comp_lab_fee_policy"] | null
+          basis_exclusions_note?: string | null
+          reconciliation?: Database["public"]["Enums"]["comp_reconciliation"] | null
+          pay_cadence?: Database["public"]["Enums"]["comp_pay_cadence"] | null
+          est_annual_min?: number | null
+          est_annual_max?: number | null
+          worker_classification?: Database["public"]["Enums"]["worker_classification"] | null
           applications_count?: number
           authority_level?: string | null
           benefits?: string[] | null
@@ -3419,6 +3453,23 @@ export type Database = {
           work_mode_detail?: string | null
         }
         Update: {
+          comp_model?: Database["public"]["Enums"]["comp_model"] | null
+          guarantee_kind?: Database["public"]["Enums"]["comp_guarantee_kind"] | null
+          guarantee_amount?: number | null
+          guarantee_duration?: Database["public"]["Enums"]["comp_guarantee_duration"] | null
+          percent_rate_min?: number | null
+          percent_rate_max?: number | null
+          percent_basis?: Database["public"]["Enums"]["comp_percent_basis"] | null
+          percent_tiers_note?: string | null
+          hygiene_exam_credited?: boolean | null
+          hygienist_work_credited?: boolean | null
+          lab_fee_policy?: Database["public"]["Enums"]["comp_lab_fee_policy"] | null
+          basis_exclusions_note?: string | null
+          reconciliation?: Database["public"]["Enums"]["comp_reconciliation"] | null
+          pay_cadence?: Database["public"]["Enums"]["comp_pay_cadence"] | null
+          est_annual_min?: number | null
+          est_annual_max?: number | null
+          worker_classification?: Database["public"]["Enums"]["worker_classification"] | null
           applications_count?: number
           authority_level?: string | null
           benefits?: string[] | null
@@ -4351,6 +4402,29 @@ export type Database = {
       candidate_availability: "immediate" | "2_weeks" | "1_month" | "passive"
       candidate_visibility: "hidden" | "recruiters_only" | "open_to_work"
       compensation_period: "hourly" | "daily" | "annual"
+      comp_model:
+        | "simple"
+        | "guarantee_plus_percent"
+        | "percent_only"
+        | "draw_against_percent"
+        | "salary_vs_percent"
+      comp_guarantee_kind: "none" | "hourly" | "daily" | "per_period" | "annual_salary"
+      comp_guarantee_duration:
+        | "permanent"
+        | "intro_90d"
+        | "intro_6mo"
+        | "year_1"
+        | "years_1_3"
+        | "custom"
+      comp_percent_basis:
+        | "production"
+        | "adjusted_production"
+        | "collections"
+        | "case_starts"
+      comp_lab_fee_policy: "practice_paid" | "split_50" | "deducted" | "other"
+      comp_reconciliation: "greater_of" | "draw_against" | "additive"
+      comp_pay_cadence: "weekly" | "biweekly" | "semimonthly" | "monthly"
+      worker_classification: "w2" | "c1099" | "either_negotiable"
       dso_affiliation_reveal_policy: "never" | "after_hire" | "per_application"
       dso_status: "pending" | "active" | "suspended" | "cancelled"
       dso_user_role: "owner" | "admin" | "recruiter" | "hiring_manager"
@@ -4538,6 +4612,32 @@ export const Constants = {
       candidate_availability: ["immediate", "2_weeks", "1_month", "passive"],
       candidate_visibility: ["hidden", "recruiters_only", "open_to_work"],
       compensation_period: ["hourly", "daily", "annual"],
+      comp_model: [
+        "simple",
+        "guarantee_plus_percent",
+        "percent_only",
+        "draw_against_percent",
+        "salary_vs_percent",
+      ],
+      comp_guarantee_kind: ["none", "hourly", "daily", "per_period", "annual_salary"],
+      comp_guarantee_duration: [
+        "permanent",
+        "intro_90d",
+        "intro_6mo",
+        "year_1",
+        "years_1_3",
+        "custom",
+      ],
+      comp_percent_basis: [
+        "production",
+        "adjusted_production",
+        "collections",
+        "case_starts",
+      ],
+      comp_lab_fee_policy: ["practice_paid", "split_50", "deducted", "other"],
+      comp_reconciliation: ["greater_of", "draw_against", "additive"],
+      comp_pay_cadence: ["weekly", "biweekly", "semimonthly", "monthly"],
+      worker_classification: ["w2", "c1099", "either_negotiable"],
       dso_affiliation_reveal_policy: ["never", "after_hire", "per_application"],
       dso_status: ["pending", "active", "suspended", "cancelled"],
       dso_user_role: ["owner", "admin", "recruiter", "hiring_manager"],
