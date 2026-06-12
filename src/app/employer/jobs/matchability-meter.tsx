@@ -14,7 +14,7 @@
 import Link from "next/link";
 import { Check } from "lucide-react";
 import {
-  FitMark,
+  FitWordmark,
   type FitProduct,
 } from "@/components/practice-fit/brand/fit-wordmark";
 import type {
@@ -46,10 +46,15 @@ export function MatchabilityMeter({
   return (
     <div className="border border-[var(--rule-strong)] bg-white">
       <div className="px-4 py-3 border-b border-[var(--rule)]">
+        {/* Cam (Day 33): the branded wordmark headlines the box — the
+            meter IS the fit product speaking, so let it sign its work.
+            PracticeFit on the clinical wizard, DSOFit on corporate. */}
         <div className="flex items-center justify-between gap-2">
-          <span className="inline-flex items-center gap-1.5 text-[9px] font-bold tracking-[2px] uppercase text-heritage-deep">
-            <FitMark product={product} className="h-3 w-3" />
-            Matchability
+          <span className="inline-flex items-baseline gap-2">
+            <FitWordmark product={product} className="text-[13px]" />
+            <span className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta">
+              Matchability
+            </span>
           </span>
           <span className="text-[11px] font-bold text-ink tabular-nums">
             {result.scoreable} of {result.total} dimensions

@@ -236,10 +236,19 @@ export function formatDealCard(input: DealCardInput): DealCard {
             : percentText;
       break;
     case "draw_against_percent":
+      // Dave (DDS/ex-DSO, 2026-06-12): the draw is internal accounting —
+      // the OUTWARD deal is the percentage. Candidate-facing copy leads
+      // with the %, and the advance reads as ramp support, not payroll
+      // jargon. (The contract-side mechanics belong to the offer.)
       headline =
         guarantee && percentText
-          ? `${guarantee} draw → ${percentText}`
-          : percentText;
+          ? durationNote
+            ? `${percentText} · ${guarantee} advance${durationNote}`
+            : `${percentText} · ${guarantee} advance while collections ramp`
+          : percentText ??
+            (guarantee
+              ? `${guarantee} advance while collections ramp`
+              : null);
       break;
     case "salary_vs_percent":
       headline =

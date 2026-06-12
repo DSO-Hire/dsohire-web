@@ -122,10 +122,30 @@ function prefillFor(
   };
   if (model === "guarantee_plus_percent" || model === "draw_against_percent") {
     out.guaranteeKind = "daily";
+    // Dave (DDS/ex-DSO, 2026-06-12): day guarantees are RAMP-UP devices
+    // — default the duration to an intro window instead of open-ended.
+    // Fully editable; "Permanent" stays one click away.
+    out.guaranteeDuration = "intro_90d";
   }
   if (model === "salary_vs_percent") out.guaranteeKind = "annual_salary";
   void roleCategory;
   return out;
+}
+
+/** Market placeholder for the guarantee amount — Dave's GP band
+ * ($750–1,000/day) unless the selected specialty carries its own. */
+function guaranteeAmountPlaceholder(
+  kind: GuaranteeKind | "",
+  specialty: ReadonlySet<string>
+): string {
+  if (kind !== "daily") return "amount";
+  const spec = Array.from(specialty).find(
+    (v) => SPECIALTY_COMP_DEFAULTS[v]?.dailyGuarantee
+  );
+  const band = spec ? SPECIALTY_COMP_DEFAULTS[spec].dailyGuarantee : null;
+  return band
+    ? `e.g. ${band[0].toLocaleString()}–${band[1].toLocaleString()} market`
+    : "e.g. 750–1,000 market";
 }
 
 /* ── Small field primitives (match wizard field styling) ── */
@@ -319,9 +339,10 @@ export function CompModelBuilder({
                 value={state.guaranteeAmount}
                 onChange={(v) => set({ guaranteeAmount: v })}
                 prefix="$"
-                placeholder={
-                  state.guaranteeKind === "daily" ? "e.g. 1200" : "amount"
-                }
+                placeholder={guaranteeAmountPlaceholder(
+                  state.guaranteeKind,
+                  specialty
+                )}
               />
               <Sel
                 label="For how long"
@@ -343,6 +364,25 @@ export function CompModelBuilder({
               />
             </div>
           )}
+          {/* Dave's incentive-design note (BLS-nudge pattern): a rich
+              PERMANENT day-rate floor against a percentage invites
+              coasting on the floor. Informational only — never blocks. */}
+          {hasGuarantee &&
+            state.guaranteeKind === "daily" &&
+            state.guaranteeDuration === "permanent" && (
+              <p className="flex items-start gap-1.5 -mt-2 text-[11px] leading-snug text-slate-meta">
+                <Info
+                  className="h-3.5 w-3.5 shrink-0 mt-px text-heritage-deep"
+                  aria-hidden
+                />
+                <span>
+                  Most day-rate guarantees cover a ramp-up window. A
+                  permanent floor above what the percentage typically
+                  yields can blunt the incentive to produce — worth a
+                  gut-check before posting.
+                </span>
+              </p>
+            )}
 
           {/* Percent layer */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">

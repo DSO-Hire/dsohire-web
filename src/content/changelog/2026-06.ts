@@ -9,6 +9,12 @@ export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-12",
     kind: "improved",
+    title: "Comp defaults tuned by people who've run DSOs",
+    body: "Three refinements from operator review: day-rate guarantees now default to a ramp-up window (most are — permanent stays one click away) with honest market hints in the field ($750–1,000/day for GPs, specialty-aware); draw deals read candidate-first — the percentage leads and the day rate reads as an advance while collections ramp, not payroll jargon; and configuring a permanent day-rate floor against a percentage gets a quiet gut-check note about production incentives. Plus: the Matchability meter now carries the PracticeFit wordmark — DSOFit on corporate postings — because that's whose judgment it is.",
+  },
+  {
+    date: "2026-06-12",
+    kind: "improved",
     title: "The AI job-description writer speaks the deal too",
     body: "Draft a description for a posting with structured compensation and the AI now writes the deal the way a dental recruiter would — your exact guarantee, percentage, and basis, woven in naturally, figures used verbatim, never converted or embellished. It also stopped assuming \"contract\" means 1099 — worker classification is its own fact now, and the writer only states what you chose.",
   },
