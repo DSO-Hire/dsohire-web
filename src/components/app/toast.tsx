@@ -109,11 +109,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={toast}>
       {children}
-      {/* Viewport — above content, below modals; offset clears the
-          support launcher's floating "?" button. */}
+      {/* Viewport — above the chat widget (z-[55]) so confirmations are
+          never hidden behind an open Messages panel; offset clears the
+          collapsed Messages bar + the "?" launcher. */}
       <div
         aria-live="polite"
-        className="fixed bottom-20 right-5 z-40 flex flex-col gap-2 w-[320px] max-w-[calc(100vw-40px)] pointer-events-none"
+        className="fixed bottom-24 right-5 z-[60] flex flex-col gap-2 w-[320px] max-w-[calc(100vw-40px)] pointer-events-none"
       >
         {items.map((t) => (
           <div
