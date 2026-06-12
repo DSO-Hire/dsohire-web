@@ -7,6 +7,12 @@ import type { ChangelogEntry } from "./index";
 
 export const entries: ChangelogEntry[] = [
   {
+    date: "2026-06-12",
+    kind: "improved",
+    title: "Your dashboard greets you with what matters",
+    body: "The dashboard headline now reacts to your real hiring state — a hire this week, offers awaiting answers, candidates past your response goal, a surge of applications, or a clean slate. Always true, never canned: it reads the same numbers the tiles show.",
+  },
+  {
     date: "2026-06-11",
     kind: "improved",
     title: "A sharper sidebar — and it collapses",

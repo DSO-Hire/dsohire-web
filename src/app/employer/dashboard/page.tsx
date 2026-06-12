@@ -53,6 +53,7 @@ import { LivePulse } from "./live-pulse";
 // Next Best Actions queue (their data feeds it; components kept on disk
 // for surgical revert).
 import { NextBestActions } from "./next-best-actions";
+import { buildGreeting } from "@/lib/dashboard/greeting";
 import { buildNextBestActions } from "@/lib/dashboard/next-best-actions";
 import { PipelineFunnel } from "@/components/dashboard/pipeline-funnel";
 // BOH Lane 2e — JobLeaderboard absorbed into JobHealth (velocity spark +
@@ -1149,8 +1150,19 @@ export default async function EmployerDashboard() {
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div className="min-w-0">
             <h1 className="text-xl sm:text-2xl font-extrabold tracking-[-0.6px] leading-snug text-ink">
-              Here&apos;s what moves hiring forward today,{" "}
-              {dsoUser?.full_name?.split(" ")[0] ?? "there"}.
+              {/* Reactive greeting (Cam, Day 32) — leads with the most
+                  newsworthy TRUE fact from data this page already
+                  loaded. Pure function, zero extra queries. */}
+              {buildGreeting({
+                firstName: dsoUser?.full_name?.split(" ")[0] ?? "there",
+                awaitingReview: awaitingReviewCount,
+                slaBreached: heroSlaChip?.tone === "breach",
+                appsThisWeek: appsThisWeekCount,
+                hiresThisWeek: hiresLast7Days.reduce((a, b) => a + b, 0),
+                offersOut: offersOutCount,
+                stalledCount: stuckTotalCount + staleTotalCount,
+                daySeed: Math.floor(Date.now() / 86400000),
+              })}
             </h1>
             <div className="mt-2 flex items-center gap-3.5 flex-wrap text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
               <span className="inline-flex items-center gap-2 text-heritage-deep">
