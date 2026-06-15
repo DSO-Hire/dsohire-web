@@ -116,6 +116,7 @@ import {
 import { ScreeningResponseRow, VerificationRow } from "./screening-rows";
 import { ActivityTimeline } from "./activity-timeline";
 import { WorkspaceTabs } from "./workspace-tabs";
+import { AssistantContextRegistrar } from "@/components/support/assistant-context-registrar";
 import { ReviewNav } from "./review-nav";
 import { candidateDisplayName } from "@/lib/applications/candidate-display";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
@@ -1374,6 +1375,14 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
 
   return (
     <EmployerShell active="applications">
+      {/* Lane 8: tell the support assistant what we're viewing (id verified
+          server-side under RLS; label is the already-masked display name). */}
+      <AssistantContextRegistrar
+        kind="application"
+        id={String(app.id)}
+        label={displayName}
+        secondary={`${String(job.title)} · ${currentStageLabel}`}
+      />
       {/* Top back-link strip */}
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-6">
         <Link

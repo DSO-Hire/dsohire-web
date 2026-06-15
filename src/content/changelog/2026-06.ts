@@ -7,6 +7,12 @@ import type { ChangelogEntry } from "./index";
 
 export const entries: ChangelogEntry[] = [
   {
+    date: "2026-06-15",
+    kind: "improved",
+    title: "The support assistant now knows what you're looking at",
+    body: "Open the \"?\" assistant from an application, job, or pipeline and it already knows the record you're viewing — ask \"why is her fit 84?\" or \"what's the status here?\" without pasting an id or re-explaining. A small \"Viewing:\" chip in the assistant shows exactly which record it's grounded on, and it only ever picks up records your account can already see.",
+  },
+  {
     date: "2026-06-12",
     kind: "new",
     title: "⌘K search comes to the candidate side",

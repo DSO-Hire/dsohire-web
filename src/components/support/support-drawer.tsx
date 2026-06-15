@@ -32,6 +32,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   ChevronRight,
+  Eye,
   Lightbulb,
   Loader2,
   MessageSquareWarning,
@@ -44,6 +45,7 @@ import {
   X,
 } from "lucide-react";
 import { HELP_CONTENT, type HelpEntry } from "@/lib/help/help-content";
+import { useAssistantContext } from "@/lib/support/assistant-context";
 import {
   clearConversation,
   loadConversation,
@@ -79,6 +81,7 @@ interface UiMessage {
 
 export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
   const pathname = usePathname() ?? "";
+  const pageContext = useAssistantContext();
   const [messages, setMessages] = useState<UiMessage[]>([]);
   const [requestId, setRequestId] = useState<string | null>(null);
   const [input, setInput] = useState("");
@@ -180,6 +183,14 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
               typeof window !== "undefined" ? window.location.href : null,
             page_title:
               typeof document !== "undefined" ? document.title : null,
+            page_context: pageContext
+              ? {
+                  kind: pageContext.kind,
+                  id: pageContext.id,
+                  label: pageContext.label,
+                  secondary: pageContext.secondary ?? null,
+                }
+              : null,
           }),
         });
 
@@ -344,7 +355,7 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
         setSending(false);
       }
     },
-    [input, requestId, sending, authUserId]
+    [input, requestId, sending, authUserId, pageContext]
   );
 
   const onEscalate = useCallback(async () => {
@@ -437,6 +448,15 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
             <h2 className="font-display text-lg font-extrabold tracking-[-0.4px] text-ink leading-tight">
               Ask anything about DSO Hire.
             </h2>
+            {pageContext && (
+              <div className="mt-2 inline-flex items-center gap-1.5 max-w-full bg-heritage/[0.10] border border-heritage/25 px-2 py-1 text-[10px] font-bold tracking-[0.4px] text-heritage-deep">
+                <Eye className="size-3 shrink-0" />
+                <span className="truncate">
+                  Viewing: {pageContext.label}
+                  {pageContext.secondary ? ` — ${pageContext.secondary}` : ""}
+                </span>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-1 shrink-0">
             {messages.length > 0 && !escalated && (

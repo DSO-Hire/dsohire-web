@@ -43,7 +43,7 @@ import { logUsage } from "@/lib/support/claude-usage";
 import { notifyKillSwitchTripped } from "@/lib/support/kill-switch-alert";
 import { formatHelpForPrompt, retrieveRelevantHelp } from "@/lib/support/rag";
 import { allToolSchemas, dispatchTool } from "@/lib/support/tools/dispatcher";
-import type { ToolContext } from "@/lib/support/tools/types";
+import type { ToolContext, ServerClient } from "@/lib/support/tools/types";
 import { autoFlagReason, isFirstHundredMode } from "@/lib/support/auto-flag";
 
 interface ChatBody {
@@ -51,6 +51,15 @@ interface ChatBody {
   request_id?: string | null;
   page_url?: string;
   page_title?: string;
+  /** Lane 8: the entity the user is currently viewing. The id is the
+   *  only field trusted for authority — verified server-side under RLS.
+   *  label/secondary are display-only (already masked by the page). */
+  page_context?: {
+    kind?: string;
+    id?: string;
+    label?: string;
+    secondary?: string | null;
+  } | null;
 }
 
 const SYSTEM_PROMPT_BASE = `You are DSO Hire's in-app support assistant. \
@@ -94,6 +103,12 @@ search_help_articles
 by NAME (not UUID), first call find_candidate_by_name or \
 find_job_by_title to get the id, THEN call the specific lookup tool \
 with that id. Don't ask the user for a UUID — find it yourself.
+
+**Focused entity:** if the User context block has a "Viewing right now" \
+line, the user is looking at that exact record and its ids are given \
+(application/job/candidate). Resolve "her", "this candidate", "this \
+application", "this job" to it and call tools with those ids directly — \
+never ask the user for an id you already have from the focus line.
 
 2. For general how-to questions ("how do I post a job", "what does \
 the kanban view do") answer from the help registry below. Relevant \
@@ -276,6 +291,9 @@ export async function POST(request: Request) {
     console.warn("[support/chat] RAG retrieval failed", err);
   }
 
+  // ── Resolve the focused entity (Lane 8 page context) under RLS ──
+  const pageFocus = await resolvePageContext(supabase, body.page_context);
+
   // ── Build system prompt + initial message list ──
   const userContextBlock = buildUserContextBlock({
     dsoName,
@@ -283,6 +301,7 @@ export async function POST(request: Request) {
     tier,
     pageUrl: body.page_url ?? null,
     pageTitle: body.page_title ?? null,
+    focus: pageFocus,
   });
 
   const systemPrompt = [
@@ -580,6 +599,7 @@ function buildUserContextBlock(args: {
   tier: TierKey;
   pageUrl: string | null;
   pageTitle: string | null;
+  focus: string | null;
 }): string {
   const lines: string[] = [];
   lines.push(`- DSO: ${args.dsoName ?? "(no DSO — candidate or pre-onboarding)"}`);
@@ -591,7 +611,65 @@ function buildUserContextBlock(args: {
   if (args.pageUrl && args.pageTitle) {
     lines.push(`  - URL: ${args.pageUrl}`);
   }
+  if (args.focus) {
+    lines.push(`- Viewing right now: ${args.focus}`);
+  }
   return lines.join("\n");
+}
+
+/** Cosmetic display text from the client — strip newlines, cap length. */
+function sanitizeContextText(s: string | null | undefined, max: number): string {
+  if (!s) return "";
+  return s.replace(/[\r\n]+/g, " ").trim().slice(0, max);
+}
+
+/**
+ * Resolve the client-supplied page context into a trustworthy "Viewing"
+ * line. The id is verified under the caller's RLS-scoped client (so Claude
+ * can only ever be pointed at a record the asking DSO can actually see);
+ * the label/secondary are display-only. Returns null (no context injected)
+ * if the id can't be verified or the kind is unknown.
+ */
+async function resolvePageContext(
+  supabase: ServerClient,
+  pc: ChatBody["page_context"]
+): Promise<string | null> {
+  if (!pc || !pc.id || !pc.kind) return null;
+  const id = String(pc.id);
+  // Cheap uuid-ish guard before hitting the DB.
+  if (!/^[0-9a-fA-F-]{16,}$/.test(id)) return null;
+
+  const label = sanitizeContextText(pc.label, 80);
+  const secondary = sanitizeContextText(pc.secondary, 80);
+  const display = secondary
+    ? `${label} — ${secondary}`
+    : label || "(this record)";
+
+  try {
+    if (pc.kind === "application") {
+      const { data } = await supabase
+        .from("applications")
+        .select("id, job_id, candidate_id")
+        .eq("id", id)
+        .maybeSingle();
+      if (!data) return null;
+      return `${display} (focus: application id=${id} job_id=${data.job_id} candidate_id=${data.candidate_id})`;
+    }
+    if (pc.kind === "job" || pc.kind === "board") {
+      const { data } = await supabase
+        .from("jobs")
+        .select("id")
+        .eq("id", id)
+        .maybeSingle();
+      if (!data) return null;
+      const kindLabel =
+        pc.kind === "board" ? "pipeline board for job" : "job";
+      return `${display} (focus: ${kindLabel} id=${id})`;
+    }
+  } catch (err) {
+    console.warn("[support/chat] resolvePageContext failed", err);
+  }
+  return null;
 }
 
 /** Split a string into chunks of ~size chars at word boundaries when possible. */
