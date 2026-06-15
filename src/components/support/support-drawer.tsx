@@ -27,7 +27,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -81,6 +81,8 @@ interface UiMessage {
   toolLabels?: string[];
   /** Sources the answer drew on — rendered as ✦ chips under the bubble. */
   citations?: MessageCitation[];
+  /** One-click in-app navigation buttons (#82). */
+  links?: Array<{ href: string; label: string }>;
   /** Server-assigned message id (after streaming completes). Powers
    *  the feedback buttons. */
   messageId?: string;
@@ -90,6 +92,7 @@ interface UiMessage {
 
 export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
   const pathname = usePathname() ?? "";
+  const router = useRouter();
   const pageContext = useAssistantContext();
   const [messages, setMessages] = useState<UiMessage[]>([]);
   const [requestId, setRequestId] = useState<string | null>(null);
@@ -298,6 +301,19 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
                   }
                   return next;
                 });
+              } else if (eventName === "links" && Array.isArray(parsed.links)) {
+                const links = parsed.links as Array<{
+                  href: string;
+                  label: string;
+                }>;
+                setMessages((prev) => {
+                  const next = [...prev];
+                  const last = next[next.length - 1];
+                  if (last && last.role === "assistant") {
+                    next[next.length - 1] = { ...last, links };
+                  }
+                  return next;
+                });
               } else if (eventName === "token" && typeof parsed.chunk === "string") {
                 assistantText += parsed.chunk;
                 setMessages((prev) => {
@@ -409,6 +425,14 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
     }
   }, [requestId, escalating, authUserId]);
 
+  const onNavigate = useCallback(
+    (href: string) => {
+      onClose();
+      router.push(href);
+    },
+    [onClose, router]
+  );
+
   const hasUserMessage = messages.some((m) => m.role === "user");
 
   const rateMessage = useCallback(
@@ -511,7 +535,12 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
           ) : (
             <>
               {messages.map((m, i) => (
-                <Bubble key={i} message={m} onRate={rateMessage} />
+                <Bubble
+                  key={i}
+                  message={m}
+                  onRate={rateMessage}
+                  onNavigate={onNavigate}
+                />
               ))}
             </>
           )}
@@ -618,9 +647,11 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
 function Bubble({
   message,
   onRate,
+  onNavigate,
 }: {
   message: UiMessage;
   onRate?: (messageId: string, rating: "up" | "down") => Promise<void>;
+  onNavigate?: (href: string) => void;
 }) {
   if (message.role === "system") {
     return (
@@ -669,6 +700,23 @@ function Bubble({
             <span className="inline-block w-2 h-4 align-text-bottom bg-heritage-deep/60 ml-0.5 animate-pulse" />
           )}
         </div>
+        {message.links && message.links.length > 0 && onNavigate && (
+          <div className="flex flex-wrap gap-1.5 pt-0.5">
+            {message.links.map((lnk, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => onNavigate(lnk.href)}
+                className="inline-flex items-center gap-1.5 border border-heritage bg-white text-heritage-deep text-[11px] font-bold px-2.5 py-1.5 hover:bg-heritage/[0.10]"
+              >
+                {lnk.label}
+                <span aria-hidden className="font-normal">
+                  ↗
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
         {message.citations && message.citations.length > 0 && (
           <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
             <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-slate-meta">

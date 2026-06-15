@@ -8,6 +8,12 @@ import type { ChangelogEntry } from "./index";
 export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-15",
+    kind: "new",
+    title: "The assistant can take you straight there",
+    body: "Ask the assistant where something lives and it now hands you a one-click button — \"Open the pipeline board ↗\", \"Open this application's messages ↗\", \"Open the résumé builder ↗\" — instead of a written click-path. It only ever links to pages inside DSO Hire that your account can open.",
+  },
+  {
+    date: "2026-06-15",
     kind: "improved",
     title: "Support answers now show their sources",
     body: "When the assistant answers, it now shows small \"✦ Sources\" chips beneath the reply — the help article it cited (tap to open it) and the parts of your account it looked at (your team, this application's status, your pipeline…). You can see exactly what an answer was grounded on, and help links read as clean titles instead of raw URLs.",

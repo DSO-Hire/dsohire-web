@@ -111,6 +111,13 @@ line, the user is looking at that exact record and its ids are given \
 application", "this job" to it and call tools with those ids directly — \
 never ask the user for an id you already have from the focus line.
 
+**Navigation:** when the helpful next step is to go somewhere in the app, \
+call build_deep_link to render a one-click button (the pipeline board, a \
+job, this application's messages, settings, the résumé builder, …) instead \
+of writing out a "go to X → Y" click path. Use the focused entity's id for \
+the record-specific targets. You can offer one or two buttons when they \
+genuinely help; don't force them when there's no relevant destination.
+
 2. For general how-to questions ("how do I post a job", "what does \
 the kanban view do") answer from the help registry below. Relevant \
 articles are pre-injected under "Relevant help articles." Cite the \
@@ -458,6 +465,9 @@ export async function POST(request: Request) {
   const citations = buildCitations(finalText, toolEventBuffer);
   finalText = cleanHelpLinks(finalText);
 
+  // ── Deep-link buttons (Lane 8 C3, #82) — from build_deep_link calls ──
+  const deepLinks = extractDeepLinks(toolEventBuffer);
+
   // ── Stream final text to client as SSE ──
   const encoder = new TextEncoder();
   const assistantId = randomUUID();
@@ -470,6 +480,7 @@ export async function POST(request: Request) {
   const capturedRequestId = requestId;
   const capturedToolEvents = toolEventBuffer;
   const capturedCitations = citations;
+  const capturedLinks = deepLinks;
 
   // Insert the assistant message FIRST so we have an id to attach
   // user feedback to. Update it with the streamed content + usage
@@ -534,6 +545,15 @@ export async function POST(request: Request) {
             `event: citations\ndata: ${JSON.stringify({
               citations: capturedCitations,
             })}\n\n`
+          )
+        );
+      }
+
+      // Emit deep-link buttons (#82).
+      if (capturedLinks.length > 0) {
+        controller.enqueue(
+          encoder.encode(
+            `event: links\ndata: ${JSON.stringify({ links: capturedLinks })}\n\n`
           )
         );
       }
@@ -765,6 +785,29 @@ function buildCitations(
  *  (the citation chip carries the link). Non-help links are left alone. */
 function cleanHelpLinks(text: string): string {
   return text.replace(/\[([^\]]+)\]\(\/help\/[^)]+\)/g, "$1");
+}
+
+/** Pull successful build_deep_link results from the tool buffer. Internal
+ *  hrefs only; deduped; capped so the bubble never floods with buttons. */
+function extractDeepLinks(
+  toolEvents: Array<{ name: string; output: unknown }>
+): Array<{ href: string; label: string }> {
+  const out: Array<{ href: string; label: string }> = [];
+  const seen = new Set<string>();
+  for (const t of toolEvents) {
+    if (t.name !== "build_deep_link") continue;
+    const o = t.output as { ok?: boolean; href?: string; label?: string } | null;
+    if (!o || o.ok !== true || typeof o.href !== "string") continue;
+    if (!o.href.startsWith("/")) continue; // internal only — no open redirect
+    if (seen.has(o.href)) continue;
+    seen.add(o.href);
+    out.push({
+      href: o.href,
+      label: typeof o.label === "string" && o.label ? o.label : "Open",
+    });
+    if (out.length >= 4) break;
+  }
+  return out;
 }
 
 /** Split a string into chunks of ~size chars at word boundaries when possible. */
