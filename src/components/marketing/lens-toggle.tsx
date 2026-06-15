@@ -33,8 +33,12 @@ const ROLE_LINKS = [
   { href: "/for-specialists", label: "For Specialists", eyebrow: "Endo · Perio · Pedo · OS · Ortho" },
   { href: "/for-hygienists", label: "For Hygienists", eyebrow: "RDH" },
   { href: "/for-dental-assistants", label: "For Dental Assistants", eyebrow: "DA · EFDA" },
+  { href: "/for-dental-therapists", label: "For Dental Therapists", eyebrow: "Expanded-scope clinical" },
   { href: "/for-front-desk", label: "For Front Desk + Treatment Coordinators", eyebrow: "Patient-facing ops" },
   { href: "/for-office-managers", label: "For Office Managers", eyebrow: "OM · Operations Leadership" },
+  { href: "/for-practice-administrators", label: "For Practice Administrators", eyebrow: "Non-clinical leadership" },
+  { href: "/for-dental-lab-technicians", label: "For Dental Lab Technicians", eyebrow: "CDT · Dental laboratory" },
+  { href: "/for-sterilization-technicians", label: "For Sterilization Technicians", eyebrow: "Instrument processing" },
   // Corporate / non-clinical seekers — the rename to "Job Candidates"
   // (2026-05-22) is partly to include these roles; give them a home here.
   { href: "/for-corporate", label: "Corporate & Administrative Roles", eyebrow: "Non-clinical · DSO support center" },
@@ -200,7 +204,7 @@ export function LensToggle() {
 
           <div
             role="menu"
-            className={`invisible opacity-0 absolute top-full right-0 mt-3 min-w-[360px] max-w-[calc(100vw-2rem)] bg-white border border-[var(--rule-strong)] ${MENU_SHADOW} group-hover/pros:visible group-hover/pros:opacity-100 transition-all duration-150 z-50`}
+            className={`invisible opacity-0 absolute top-full right-0 mt-3 min-w-[360px] max-w-[calc(100vw-2rem)] max-h-[calc(100vh-7rem)] overflow-y-auto bg-white border border-[var(--rule-strong)] ${MENU_SHADOW} group-hover/pros:visible group-hover/pros:opacity-100 transition-all duration-150 z-50`}
           >
             <MenuList links={ROLE_LINKS} />
           </div>
