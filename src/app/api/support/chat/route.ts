@@ -116,7 +116,11 @@ call build_deep_link to render a one-click button (the pipeline board, a \
 job, this application's messages, settings, the résumé builder, …) instead \
 of writing out a "go to X → Y" click path. Use the focused entity's id for \
 the record-specific targets. You can offer one or two buttons when they \
-genuinely help; don't force them when there's no relevant destination.
+genuinely help; don't force them when there's no relevant destination. \
+ALWAYS pair a button with a short sentence (e.g. "Here's the thread:") — \
+never reply with only a tool call and no text. And call build_deep_link \
+FRESH every time the user asks to go somewhere; never tell them to use a \
+button from an earlier message — they need a new one each time.
 
 2. For general how-to questions ("how do I post a job", "what does \
 the kanban view do") answer from the help registry below. Relevant \
@@ -452,21 +456,24 @@ export async function POST(request: Request) {
     }
   }
 
-  if (!finalText) {
-    finalText =
-      "I couldn't form a complete answer. Try rephrasing, or escalate to a human via the button below.";
+  // ── Citations (C2) + deep-link buttons (C3, #82) ──
+  // Computed BEFORE the empty-text fallback so the fallback can be
+  // link-aware: a model turn that produced a navigation button but no
+  // prose should read as a friendly lead-in, never "I couldn't answer."
+  // Citations: help links Claude wrote (resolved against the real registry
+  // — hallucinated /help/x gets no chip) + the data tools it called.
+  const citations = buildCitations(finalText, toolEventBuffer);
+  const deepLinks = extractDeepLinks(toolEventBuffer);
+
+  if (!finalText.trim()) {
+    finalText = deepLinks.length
+      ? "Here you go — the button below takes you there."
+      : "I couldn't form a complete answer. Try rephrasing, or escalate to a human via the button below.";
   }
 
-  // ── Citations: the sources the answer actually used (Lane 8 C2) ──
-  // Derived from help links Claude wrote (resolved against the real
-  // registry — hallucinated /help/x links get no chip) + the data tools
-  // it called. Then the raw /help/ markdown is collapsed to its label so
-  // the bubble reads clean (the chip carries the link).
-  const citations = buildCitations(finalText, toolEventBuffer);
+  // Collapse raw /help/ markdown to its label so the bubble reads clean
+  // (the citation chip carries the link).
   finalText = cleanHelpLinks(finalText);
-
-  // ── Deep-link buttons (Lane 8 C3, #82) — from build_deep_link calls ──
-  const deepLinks = extractDeepLinks(toolEventBuffer);
 
   // ── Stream final text to client as SSE ──
   const encoder = new TextEncoder();
