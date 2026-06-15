@@ -28,12 +28,14 @@ export function SmartPicksCard({ picks }: SmartPicksCardProps) {
 
   return (
     <section className="mb-10 border border-[var(--rule)] bg-white">
-      <header className="px-6 py-4 border-b border-[var(--rule)] flex items-center justify-between">
+      <header className="px-6 py-4 border-b border-[var(--rule)] flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
         <div className="flex items-center gap-2 text-heritage-deep">
           <span className="text-[10px] font-bold tracking-[2.5px] uppercase">
             Smart picks ·
           </span>
-          <FitWordmark product={product} surface="inherit" className="text-[14px]" />
+          {/* surface="light" renders the proper dual-tone lockup; "inherit"
+              made it pick up the parent heritage-green (flat one-color). */}
+          <FitWordmark product={product} surface="light" className="text-[14px]" />
         </div>
         <Link
           href="/employer/talent-pool"

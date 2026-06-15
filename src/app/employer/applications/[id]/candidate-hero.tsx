@@ -72,8 +72,10 @@ export function CandidateHero({
 }) {
   return (
     <header className="mb-8 border border-[var(--rule)] bg-white p-6 sm:p-8">
-      <div className="flex flex-wrap items-start justify-between gap-6">
-        <div className="flex items-start gap-5 min-w-0 flex-1">
+      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-6">
+        {/* Mobile: avatar stacks above the name so the name + meta get full
+            width (no thin squeezed column). Desktop: avatar left, name right. */}
+        <div className="flex flex-col items-start gap-3 min-w-0 sm:flex-row sm:gap-5 sm:flex-1">
           <Avatar name={avatarName} imageUrl={avatarUrl} size="2xl" />
           <div className="min-w-0 flex-1">
             <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
@@ -103,7 +105,7 @@ export function CandidateHero({
           </div>
         </div>
         <span
-          className={`text-[10px] font-bold tracking-[2px] uppercase px-3 py-2 ring-1 ring-inset ${statusBadgeClasses(currentKind)}`}
+          className={`self-start whitespace-nowrap text-[10px] font-bold tracking-[2px] uppercase px-3 py-2 ring-1 ring-inset ${statusBadgeClasses(currentKind)}`}
         >
           {currentStageLabel}
         </span>
