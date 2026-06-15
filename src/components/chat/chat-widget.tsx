@@ -20,6 +20,7 @@ import {
   REALTIME_POSTGRES_CHANGES_LISTEN_EVENT,
 } from "@supabase/supabase-js";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { setChatOpen, useSupportDrawerOpen } from "@/lib/ui/floating-ui";
 import { sendApplicationMessage } from "@/lib/messages/actions";
 import {
   listChatThreads, listTeammates, findOrCreateDmConversation,
@@ -45,6 +46,14 @@ type View = "list" | "thread" | "new";
 
 export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string }) {
   const [open, setOpen] = useState(false);
+  const supportDrawerOpen = useSupportDrawerOpen();
+
+  // Publish open state to the floating-UI coordinator (hides the "?" while
+  // the chat panel is open).
+  useEffect(() => {
+    setChatOpen(open);
+    return () => setChatOpen(false);
+  }, [open]);
   const [view, setView] = useState<View>("list");
   const [threads, setThreads] = useState<ChatThread[]>([]);
   const [active, setActive] = useState<ChatThread | null>(null);
@@ -219,7 +228,14 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
   const candThreads = filtered.filter((t) => t.kind === "candidate");
 
   return (
-    <div className="fixed bottom-0 right-6 z-[55] print:hidden">
+    <div
+      className={
+        "fixed bottom-0 right-6 z-[55] print:hidden" +
+        // Yield the corner while the support drawer is open — kept mounted
+        // (display:none) so realtime subscriptions + unread badge survive.
+        (supportDrawerOpen ? " hidden" : "")
+      }
+    >
       {open ? (
         <div className="w-[360px] max-w-[calc(100vw-2rem)] h-[540px] max-h-[calc(100vh-5rem)] bg-white border border-[var(--rule-strong)] border-b-0 shadow-2xl rounded-t-lg overflow-hidden flex flex-col">
           {/* Header */}

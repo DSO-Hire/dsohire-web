@@ -15,6 +15,10 @@
 import { useEffect, useState } from "react";
 import { HelpCircle } from "lucide-react";
 import { SupportDrawer } from "./support-drawer";
+import {
+  setSupportDrawerOpen,
+  useChatOpen,
+} from "@/lib/ui/floating-ui";
 
 interface Props {
   audience: "employer" | "candidate" | "both";
@@ -27,6 +31,14 @@ interface Props {
 
 export function SupportLauncher({ audience, authUserId, raised = false }: Props) {
   const [open, setOpen] = useState(false);
+  const chatOpen = useChatOpen();
+
+  // Tell the floating-UI coordinator when the help drawer is open so the
+  // Messages widget yields the corner; clear on unmount.
+  useEffect(() => {
+    setSupportDrawerOpen(open);
+    return () => setSupportDrawerOpen(false);
+  }, [open]);
 
   // Global "?" shortcut. Skip when the user is typing.
   useEffect(() => {
@@ -52,14 +64,14 @@ export function SupportLauncher({ audience, authUserId, raised = false }: Props)
 
   return (
     <>
-      {!open && (
+      {!open && !chatOpen && (
         <button
           type="button"
           onClick={() => setOpen(true)}
           aria-label="Open support"
           title="Get help — press ?"
           className={
-            "fixed right-5 z-30 size-12 rounded-full bg-ink text-ivory shadow-lg hover:bg-ink-soft transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2 flex items-center justify-center " +
+            "fixed right-5 z-30 size-12 rounded-full bg-ink text-ivory shadow-lg opacity-70 hover:opacity-100 focus-visible:opacity-100 hover:bg-ink-soft transition duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2 flex items-center justify-center " +
             (raised ? "bottom-[4.5rem]" : "bottom-5")
           }
         >
