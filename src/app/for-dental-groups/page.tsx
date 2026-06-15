@@ -66,7 +66,7 @@ export const metadata: Metadata = {
 
 export default function ForDsosPage() {
   return (
-    <SiteShell>
+    <SiteShell ctaIntent="dso">
       <Hero />
       <ProofStrip />
       <ProblemSection />

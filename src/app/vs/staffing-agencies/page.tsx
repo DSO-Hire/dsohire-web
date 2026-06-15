@@ -50,7 +50,7 @@ const ROWS: VsRow[] = [
 
 export default function VsStaffingAgenciesPage() {
   return (
-    <SiteShell>
+    <SiteShell ctaIntent="dso">
       <VsHero
         eyebrow="Compared · Staffing Agencies"
         title={

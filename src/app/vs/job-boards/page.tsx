@@ -59,7 +59,7 @@ const ROWS: VsRow[] = [
 
 export default function VsJobBoardsPage() {
   return (
-    <SiteShell>
+    <SiteShell ctaIntent="dso">
       <VsHero
         eyebrow="Compared · Per-Listing Job Boards"
         title={

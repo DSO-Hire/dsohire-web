@@ -46,7 +46,7 @@ const MIGRATES = [
 
 export default function SwitchPage() {
   return (
-    <SiteShell>
+    <SiteShell ctaIntent="dso">
       <section className="pt-[140px] pb-14 px-6 sm:px-14 max-w-[1240px] mx-auto">
         <div data-reveal className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
           Switching To DSO Hire

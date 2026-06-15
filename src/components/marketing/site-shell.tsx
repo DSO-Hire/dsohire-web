@@ -20,13 +20,28 @@ import { LensToggle } from "./lens-toggle";
 import { MotionMount } from "./motion";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 
-export function SiteShell({ children }: { children: React.ReactNode }) {
+export function SiteShell({
+  children,
+  ctaIntent = "candidate",
+}: {
+  children: React.ReactNode;
+  /**
+   * Which audience this page is courting — drives the SIGNED-OUT primary CTA.
+   * Defaults to "candidate" (Browse Jobs) because most public traffic is
+   * job-seekers, and a job-seeker landing on the home page WILL tap Browse
+   * Jobs. DSO-buyer pages (/for-dental-groups, /pricing, /vs/*, /switch) pass
+   * "dso" so prospects there still see "Post a Job" — a new DSO won't impulse-
+   * tap it on a candidate page anyway. Signed-in visitors always get the
+   * role-correct CTA regardless of this prop. (Cam, Day 34.)
+   */
+  ctaIntent?: "candidate" | "dso";
+}) {
   return (
     <>
       {/* #115 FOH-1 — one observer per page powers every [data-reveal]
           scroll-settle on the marketing surfaces. */}
       <MotionMount />
-      <SiteNav />
+      <SiteNav ctaIntent={ctaIntent} />
       <main className="flex-1">{children}</main>
       <SiteFooter />
     </>
@@ -35,8 +50,13 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
 
 /**
  * SiteNav is async so the primary CTA can be context-aware:
- *   - Logged out → "Post a Job" / /pricing (marketing surface that explains
- *     what posting means; also the monetization funnel for ambiguous visitors)
+ *   - Logged out → CTA follows the page's `ctaIntent` (Cam, Day 34):
+ *       · candidate-leaning pages (home default, /jobs, /for-[role]) →
+ *         "Browse Jobs" / /jobs. Most public traffic is job-seekers and a
+ *         hygienist landing on the home page WILL tap Browse Jobs.
+ *       · DSO-buyer pages (/for-dental-groups, /pricing, /vs/*, /switch) →
+ *         "Post a Job" / /pricing. That's where DSO prospects actually are;
+ *         a new DSO won't impulse-tap "Post a Job" off a candidate page.
  *   - Logged in with a DSO membership → "Post a Job" / /employer/jobs/new
  *     (skip the marketing detour; /employer/jobs/new will internally redirect
  *     to /employer/billing or /employer/onboarding if state isn't ready)
@@ -44,17 +64,26 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
  *     job seeker, not an employer — surfacing "Post a Job" to them is wrong
  *     (Cam, 5G.e stress test). Their primary action is finding roles.
  *
+ * Signed-in role ALWAYS overrides the page intent — a signed-in DSO sees
+ * "Post a Job" everywhere, a signed-in candidate sees "Browse Jobs" everywhere.
+ *
  * Sign-in button gets the same context awareness — once you're signed in,
  * "Sign In" becomes "Dashboard" and routes to your audience-specific home.
  */
-export async function SiteNav() {
+export async function SiteNav({
+  ctaIntent = "candidate",
+}: {
+  ctaIntent?: "candidate" | "dso";
+} = {}) {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let primaryCtaHref = "/pricing";
-  let primaryCtaLabel = "Post a Job";
+  // Signed-out default is candidate-first (Browse Jobs); DSO-buyer pages opt
+  // into "Post a Job" via ctaIntent="dso".
+  let primaryCtaHref = ctaIntent === "dso" ? "/pricing" : "/jobs";
+  let primaryCtaLabel = ctaIntent === "dso" ? "Post a Job" : "Browse Jobs";
   let signInHref: string = "/sign-in";
   let signInLabel: string = "Sign In";
 
@@ -74,8 +103,11 @@ export async function SiteNav() {
 
     if (dsoUser) {
       // Paid employer (or one in onboarding/billing) — let the destination
-      // handle any state-specific redirect.
+      // handle any state-specific redirect. Force "Post a Job" so a DSO on a
+      // candidate-leaning page (where the signed-out default is Browse Jobs)
+      // still gets their employer action.
       primaryCtaHref = "/employer/jobs/new";
+      primaryCtaLabel = "Post a Job";
       signInHref = "/employer/dashboard";
       signInLabel = "Dashboard";
     } else if (candidate) {
@@ -100,7 +132,13 @@ export async function SiteNav() {
             Client island (needs usePathname for active-lens state); the
             right segment is also the hover trigger for the role dropdown. */}
         <LensToggle />
-        <NavLink href="/jobs">Browse Jobs</NavLink>
+        {/* On candidate-leaning surfaces the primary CTA is already
+            "Browse Jobs" — drop the redundant text link so it doesn't sit
+            beside the button. On DSO pages (CTA = "Post a Job") the link
+            stays, keeping Browse Jobs one click away. */}
+        {primaryCtaLabel !== "Browse Jobs" && (
+          <NavLink href="/jobs">Browse Jobs</NavLink>
+        )}
         {/* #115 FOH (Cam, Day 31) — the proprietary wow-feature gets the nav
             slot: the trademarked PracticeFit wordmark links its dedicated
             page (which covers DSOFit too). Companies moved to the footer +
