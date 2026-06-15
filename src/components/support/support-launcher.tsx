@@ -18,6 +18,7 @@ import { SupportDrawer } from "./support-drawer";
 import {
   setSupportDrawerOpen,
   useChatOpen,
+  useInputFocused,
 } from "@/lib/ui/floating-ui";
 
 interface Props {
@@ -32,6 +33,7 @@ interface Props {
 export function SupportLauncher({ audience, authUserId, raised = false }: Props) {
   const [open, setOpen] = useState(false);
   const chatOpen = useChatOpen();
+  const inputFocused = useInputFocused();
 
   // Tell the floating-UI coordinator when the help drawer is open so the
   // Messages widget yields the corner; clear on unmount.
@@ -72,7 +74,10 @@ export function SupportLauncher({ audience, authUserId, raised = false }: Props)
           title="Get help — press ?"
           className={
             "fixed right-5 z-30 size-12 rounded-full bg-ink text-ivory shadow-lg opacity-70 hover:opacity-100 focus-visible:opacity-100 hover:bg-ink-soft transition duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2 flex items-center justify-center " +
-            (raised ? "bottom-[4.5rem]" : "bottom-5")
+            // Sit higher on mobile so it clears the wider docked Messages bar.
+            (raised ? "bottom-[5.5rem] lg:bottom-[4.5rem] " : "bottom-5 ") +
+            // Yield on phones when a text field is focused (keeps desktop).
+            (inputFocused ? "max-lg:hidden" : "")
           }
         >
           <HelpCircle className="size-5" />

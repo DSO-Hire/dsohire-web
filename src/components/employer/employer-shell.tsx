@@ -471,7 +471,9 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
 
         {/* Toast system (Lane 1 kit) mounted at the shell — first
             consumers land Day 32 night (stage changes). */}
-        <main className="flex-1 px-6 sm:px-10 py-10">
+        {/* Extra bottom padding on mobile so the fixed Messages bar never
+            covers the last row of content (lg keeps the original spacing). */}
+        <main className="flex-1 px-6 sm:px-10 pt-10 pb-28 lg:pb-10">
           <ToastProvider>{children}</ToastProvider>
         </main>
       </div>

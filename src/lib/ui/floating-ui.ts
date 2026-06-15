@@ -20,10 +20,21 @@ import { useSyncExternalStore } from "react";
 interface FloatingState {
   supportDrawerOpen: boolean;
   chatOpen: boolean;
+  /** A text input/textarea/contenteditable is focused — on mobile the
+   *  floating affordances should yield so they don't cover the field. */
+  inputFocused: boolean;
 }
 
-let state: FloatingState = { supportDrawerOpen: false, chatOpen: false };
-const SERVER_STATE: FloatingState = { supportDrawerOpen: false, chatOpen: false };
+let state: FloatingState = {
+  supportDrawerOpen: false,
+  chatOpen: false,
+  inputFocused: false,
+};
+const SERVER_STATE: FloatingState = {
+  supportDrawerOpen: false,
+  chatOpen: false,
+  inputFocused: false,
+};
 const listeners = new Set<() => void>();
 
 function emit() {
@@ -64,5 +75,42 @@ export function useChatOpen(): boolean {
     subscribe,
     () => state.chatOpen,
     () => SERVER_STATE.chatOpen
+  );
+}
+
+function setInputFocused(v: boolean) {
+  if (state.inputFocused === v) return;
+  state = { ...state, inputFocused: v };
+  emit();
+}
+
+/** One lazily-installed document listener tracks whether a text field is
+ *  focused. Installed on first useInputFocused() call. */
+let focusListenerInstalled = false;
+function isTextField(el: EventTarget | null): boolean {
+  const node = el as HTMLElement | null;
+  if (!node) return false;
+  const tag = node.tagName;
+  return tag === "INPUT" || tag === "TEXTAREA" || node.isContentEditable === true;
+}
+function ensureFocusListener() {
+  if (focusListenerInstalled || typeof document === "undefined") return;
+  focusListenerInstalled = true;
+  document.addEventListener("focusin", (e) => {
+    if (isTextField(e.target)) setInputFocused(true);
+  });
+  document.addEventListener("focusout", () => {
+    // Defer so focus moving between fields doesn't flicker the signal.
+    setTimeout(() => setInputFocused(isTextField(document.activeElement)), 0);
+  });
+}
+
+/** Subscribe to whether a text field is currently focused. */
+export function useInputFocused(): boolean {
+  ensureFocusListener();
+  return useSyncExternalStore(
+    subscribe,
+    () => state.inputFocused,
+    () => SERVER_STATE.inputFocused
   );
 }

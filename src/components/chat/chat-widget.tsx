@@ -20,7 +20,11 @@ import {
   REALTIME_POSTGRES_CHANGES_LISTEN_EVENT,
 } from "@supabase/supabase-js";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
-import { setChatOpen, useSupportDrawerOpen } from "@/lib/ui/floating-ui";
+import {
+  setChatOpen,
+  useInputFocused,
+  useSupportDrawerOpen,
+} from "@/lib/ui/floating-ui";
 import { sendApplicationMessage } from "@/lib/messages/actions";
 import {
   listChatThreads, listTeammates, findOrCreateDmConversation,
@@ -47,6 +51,7 @@ type View = "list" | "thread" | "new";
 export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string }) {
   const [open, setOpen] = useState(false);
   const supportDrawerOpen = useSupportDrawerOpen();
+  const inputFocused = useInputFocused();
 
   // Publish open state to the floating-UI coordinator (hides the "?" while
   // the chat panel is open).
@@ -233,7 +238,10 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
         "fixed bottom-0 right-6 z-[55] print:hidden" +
         // Yield the corner while the support drawer is open — kept mounted
         // (display:none) so realtime subscriptions + unread badge survive.
-        (supportDrawerOpen ? " hidden" : "")
+        (supportDrawerOpen ? " hidden" : "") +
+        // On mobile, get out of the way when a text field is focused so the
+        // bar never covers a composer/form field (desktop keeps it).
+        (inputFocused ? " max-lg:hidden" : "")
       }
     >
       {open ? (
