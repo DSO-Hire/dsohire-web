@@ -9,6 +9,12 @@ export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-15",
     kind: "improved",
+    title: "Support answers now show their sources",
+    body: "When the assistant answers, it now shows small \"✦ Sources\" chips beneath the reply — the help article it cited (tap to open it) and the parts of your account it looked at (your team, this application's status, your pipeline…). You can see exactly what an answer was grounded on, and help links read as clean titles instead of raw URLs.",
+  },
+  {
+    date: "2026-06-15",
+    kind: "improved",
     title: "The support assistant now knows what you're looking at",
     body: "Open the \"?\" assistant from an application, job, or pipeline and it already knows the record you're viewing — ask \"why is her fit 84?\" or \"what's the status here?\" without pasting an id or re-explaining. A small \"Viewing:\" chip in the assistant shows exactly which record it's grounded on, and it only ever picks up records your account can already see.",
   },

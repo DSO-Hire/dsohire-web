@@ -42,6 +42,7 @@ import {
 import { logUsage } from "@/lib/support/claude-usage";
 import { notifyKillSwitchTripped } from "@/lib/support/kill-switch-alert";
 import { formatHelpForPrompt, retrieveRelevantHelp } from "@/lib/support/rag";
+import { HELP_CONTENT } from "@/lib/help/help-content";
 import { allToolSchemas, dispatchTool } from "@/lib/support/tools/dispatcher";
 import type { ToolContext, ServerClient } from "@/lib/support/tools/types";
 import { autoFlagReason, isFirstHundredMode } from "@/lib/support/auto-flag";
@@ -133,6 +134,14 @@ something, walk them through how to do it themselves.
 6. Be warm but concise. Direct, expert, no fluff. Never use emojis.`;
 
 const MAX_TOOL_TURNS = 4; // Anthropic best practice — bounds the loop.
+
+/** A source the answer actually drew on — rendered as a chip in the drawer. */
+interface Citation {
+  type: "help" | "data";
+  label: string;
+  /** Internal href for help citations (the /help/<slug> deep link). */
+  href?: string;
+}
 
 interface AnthropicTextBlock {
   type: "text";
@@ -441,6 +450,14 @@ export async function POST(request: Request) {
       "I couldn't form a complete answer. Try rephrasing, or escalate to a human via the button below.";
   }
 
+  // ── Citations: the sources the answer actually used (Lane 8 C2) ──
+  // Derived from help links Claude wrote (resolved against the real
+  // registry — hallucinated /help/x links get no chip) + the data tools
+  // it called. Then the raw /help/ markdown is collapsed to its label so
+  // the bubble reads clean (the chip carries the link).
+  const citations = buildCitations(finalText, toolEventBuffer);
+  finalText = cleanHelpLinks(finalText);
+
   // ── Stream final text to client as SSE ──
   const encoder = new TextEncoder();
   const assistantId = randomUUID();
@@ -452,6 +469,7 @@ export async function POST(request: Request) {
   };
   const capturedRequestId = requestId;
   const capturedToolEvents = toolEventBuffer;
+  const capturedCitations = citations;
 
   // Insert the assistant message FIRST so we have an id to attach
   // user feedback to. Update it with the streamed content + usage
@@ -507,6 +525,17 @@ export async function POST(request: Request) {
         );
         // Tiny delay so it feels live, not pasted.
         await new Promise((r) => setTimeout(r, 12));
+      }
+
+      // Emit citations (sources actually used) after the text lands.
+      if (capturedCitations.length > 0) {
+        controller.enqueue(
+          encoder.encode(
+            `event: citations\ndata: ${JSON.stringify({
+              citations: capturedCitations,
+            })}\n\n`
+          )
+        );
       }
 
       // Persist tool messages + assistant message + log usage.
@@ -670,6 +699,72 @@ async function resolvePageContext(
     console.warn("[support/chat] resolvePageContext failed", err);
   }
   return null;
+}
+
+/**
+ * Resolve a /help/<slug> the way the real /help/[key] route does, so a
+ * citation chip only appears for an article that actually exists. Tolerant
+ * of slug↔key dotting (mirrors findEntry in app/help/[key]/page.tsx).
+ */
+function resolveHelpSlug(rawSlug: string): { title: string; slug: string } | null {
+  const slug = rawSlug.replace(/[._-]+$/, "");
+  const entry = HELP_CONTENT[slug] ?? HELP_CONTENT[slug.replace(/-/g, ".")];
+  if (!entry) return null;
+  return { title: entry.title, slug };
+}
+
+/** Noun-form source label for a data tool, or null to omit it as a citation. */
+function toolCitationLabel(name: string): string | null {
+  const map: Record<string, string> = {
+    lookup_user_recent_actions: "Your recent activity",
+    lookup_application_status: "This application's status",
+    lookup_candidate_email_history: "Email history",
+    lookup_job_details: "Job details",
+    lookup_dso_members: "Your team",
+    lookup_subscription_status: "Your plan",
+    list_active_jobs: "Your active jobs",
+    list_recent_applications: "Recent applicants",
+    count_applications_by_stage: "Your pipeline",
+  };
+  // find_*_by_* and the help lookups are plumbing, not sources — omit.
+  return map[name] ?? null;
+}
+
+/** Build citation chips from the help links Claude wrote + the data tools it ran. */
+function buildCitations(
+  text: string,
+  toolEvents: Array<{ name: string }>
+): Citation[] {
+  const out: Citation[] = [];
+  const seen = new Set<string>();
+
+  const re = /\/help\/([A-Za-z0-9._-]+)/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    const resolved = resolveHelpSlug(m[1]);
+    if (!resolved) continue;
+    const key = `help:${resolved.slug}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ type: "help", label: resolved.title, href: `/help/${resolved.slug}` });
+  }
+
+  for (const t of toolEvents) {
+    const label = toolCitationLabel(t.name);
+    if (!label) continue;
+    const key = `data:${label}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ type: "data", label });
+  }
+
+  return out;
+}
+
+/** Collapse `[label](/help/slug)` → `label` so the bubble reads clean
+ *  (the citation chip carries the link). Non-help links are left alone. */
+function cleanHelpLinks(text: string): string {
+  return text.replace(/\[([^\]]+)\]\(\/help\/[^)]+\)/g, "$1");
 }
 
 /** Split a string into chunks of ~size chars at word boundaries when possible. */

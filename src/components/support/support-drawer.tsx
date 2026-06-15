@@ -64,6 +64,13 @@ interface Props {
   authUserId: string | null;
 }
 
+interface MessageCitation {
+  type: "help" | "data";
+  label: string;
+  /** Internal href for help citations. */
+  href?: string;
+}
+
 interface UiMessage {
   role: "user" | "assistant" | "system";
   content: string;
@@ -72,6 +79,8 @@ interface UiMessage {
   /** Tool-use labels rendered as pills above the bubble while Claude is
    *  fetching real-data context. Set when tool_use SSE events arrive. */
   toolLabels?: string[];
+  /** Sources the answer drew on — rendered as ✦ chips under the bubble. */
+  citations?: MessageCitation[];
   /** Server-assigned message id (after streaming completes). Powers
    *  the feedback buttons. */
   messageId?: string;
@@ -276,6 +285,16 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
                       ...last,
                       toolLabels: [...(last.toolLabels ?? []), label],
                     };
+                  }
+                  return next;
+                });
+              } else if (eventName === "citations" && Array.isArray(parsed.citations)) {
+                const cites = parsed.citations as MessageCitation[];
+                setMessages((prev) => {
+                  const next = [...prev];
+                  const last = next[next.length - 1];
+                  if (last && last.role === "assistant") {
+                    next[next.length - 1] = { ...last, citations: cites };
                   }
                   return next;
                 });
@@ -650,6 +669,35 @@ function Bubble({
             <span className="inline-block w-2 h-4 align-text-bottom bg-heritage-deep/60 ml-0.5 animate-pulse" />
           )}
         </div>
+        {message.citations && message.citations.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+            <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+              Sources
+            </span>
+            {message.citations.map((c, i) =>
+              c.type === "help" && c.href ? (
+                <Link
+                  key={i}
+                  href={c.href}
+                  className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[0.3px] text-heritage-deep bg-heritage/[0.08] border border-heritage/20 px-2 py-0.5 hover:bg-heritage/[0.14]"
+                >
+                  <span aria-hidden>✦</span>
+                  {c.label}
+                </Link>
+              ) : (
+                <span
+                  key={i}
+                  className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[0.3px] text-slate-body bg-cream/70 border border-[var(--rule-strong)] px-2 py-0.5"
+                >
+                  <span aria-hidden className="text-heritage-deep">
+                    ✦
+                  </span>
+                  {c.label}
+                </span>
+              )
+            )}
+          </div>
+        )}
         {/* Feedback buttons — only when the message has finished streaming
             AND we have a server-assigned message id. */}
         {!message.streaming && message.messageId && message.content && onRate && (
