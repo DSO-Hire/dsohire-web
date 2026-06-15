@@ -10,7 +10,7 @@
  * passed straight through so it keeps working in both views.
  */
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { ArrowRight, Briefcase, LayoutGrid, List, MapPin } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
@@ -60,8 +60,48 @@ export function LocationsView({
     }
   }
 
+  // Geographic footprint — counts per state, busiest first. Useful for
+  // multi-market groups; hidden for tiny single-market DSOs.
+  const footprint = useMemo(() => {
+    const byState = new Map<string, number>();
+    for (const l of locations) {
+      const st = (l.state ?? "").trim().toUpperCase();
+      if (!st) continue;
+      byState.set(st, (byState.get(st) ?? 0) + 1);
+    }
+    const states = [...byState.entries()].sort(
+      (a, b) => b[1] - a[1] || a[0].localeCompare(b[0])
+    );
+    return { total: locations.length, stateCount: states.length, states };
+  }, [locations]);
+  const showFootprint =
+    footprint.stateCount >= 2 ||
+    (footprint.total >= 5 && footprint.stateCount >= 1);
+
   return (
     <>
+      {showFootprint && (
+        <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 border border-[var(--rule)] bg-white px-4 py-3">
+          <span className="inline-flex items-center gap-1.5 text-[12px] font-bold text-ink">
+            <MapPin className="h-3.5 w-3.5 text-heritage" />
+            {footprint.total} locations across {footprint.stateCount}{" "}
+            {footprint.stateCount === 1 ? "state" : "states"}
+          </span>
+          <span className="hidden h-3 w-px bg-[var(--rule-strong)] sm:block" />
+          <div className="flex flex-wrap gap-1.5">
+            {footprint.states.map(([st, n]) => (
+              <span
+                key={st}
+                className="inline-flex items-center gap-1 border border-[var(--rule)] bg-cream/70 px-2 py-0.5 text-[11px] font-semibold text-slate-body"
+              >
+                {st}
+                <span className="font-bold text-heritage-deep">{n}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="mb-3 flex items-center justify-between gap-3">
         <div
           className="inline-flex border border-[var(--rule-strong)] bg-white"
@@ -204,17 +244,18 @@ function LocationCard({ location }: { location: LocationCardData }) {
       {/* growing left accent on hover */}
       <span className="absolute left-0 top-0 bottom-0 w-[3px] origin-top scale-y-0 bg-heritage transition-transform duration-200 group-hover:scale-y-100" />
 
-      {/* header band — soft heritage wash, city/state overline */}
-      <div className="relative h-14 border-b border-[var(--rule)] bg-gradient-to-br from-heritage/[0.16] via-heritage/[0.06] to-cream">
+      {/* header band — soft heritage wash that fades into the white card
+          (no hard border, so the overlapping logo isn't bisected) */}
+      <div className="relative h-14 bg-gradient-to-b from-heritage/[0.16] via-heritage/[0.07] to-white">
         <div className="absolute left-4 top-2.5 inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[1.5px] text-heritage-deep">
           <MapPin className="h-3 w-3" />
           {cityState || "Address incomplete"}
         </div>
       </div>
 
-      {/* logo overlaps the band */}
+      {/* logo sits ON TOP of the band (z-10) with a white ring */}
       <div className="px-4">
-        <div className="-mt-6 mb-2">
+        <div className="relative z-10 -mt-6 mb-2">
           <Avatar
             name={location.name}
             imageUrl={location.logo_url}

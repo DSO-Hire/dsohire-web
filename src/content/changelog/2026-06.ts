@@ -10,7 +10,7 @@ export const entries: ChangelogEntry[] = [
     date: "2026-06-15",
     kind: "new",
     title: "See your locations as a grid",
-    body: "Your Locations page now has a List ⇄ Grid toggle. Grid view lays out every office as a card — logo, city and state, address, and how many active jobs are posted there — so multi-site groups can scan their whole footprint at a glance. Your choice is remembered, and sorting works the same in both views.",
+    body: "Your Locations page now has a List ⇄ Grid toggle. Grid view lays out every office as a card — logo, city and state, address, and how many active jobs are posted there — so multi-site groups can scan their whole footprint at a glance. A footprint summary up top tallies how many locations you run across how many states. Your choice is remembered, and sorting works the same in both views.",
   },
   {
     date: "2026-06-15",
