@@ -12,7 +12,6 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ArrowRight, Briefcase, LayoutGrid, List, MapPin, X } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 
@@ -34,11 +33,6 @@ export interface LocationCardData {
 type ViewMode = "list" | "grid";
 const STORAGE_KEY = "dsohire.locations.view";
 
-// Overview-map viewBox (fixed; the projection auto-fits the footprint).
-const MAP_W = 1000;
-const MAP_H = 260;
-const MAP_PAD = 46;
-
 export function LocationsView({
   locations,
   sortControl,
@@ -46,7 +40,6 @@ export function LocationsView({
   locations: LocationCardData[];
   sortControl?: ReactNode;
 }) {
-  const router = useRouter();
   // Default to list (matches prior behavior); hydrate the saved choice
   // after mount so server + first client render agree.
   const [view, setView] = useState<ViewMode>("list");
@@ -89,39 +82,6 @@ export function LocationsView({
     footprint.stateCount >= 2 ||
     (footprint.total >= 5 && footprint.stateCount >= 1);
 
-  // Geocoded pins, projected (equirectangular, auto-fit to the footprint
-  // bbox) onto a fixed viewBox — no map provider, no API key.
-  const located = useMemo(
-    () => locations.filter((l) => l.latitude != null && l.longitude != null),
-    [locations]
-  );
-  const mapPins = useMemo(() => {
-    if (located.length < 2) return [];
-    const lats = located.map((l) => l.latitude as number);
-    const lngs = located.map((l) => l.longitude as number);
-    let minLa = Math.min(...lats);
-    let maxLa = Math.max(...lats);
-    let minLo = Math.min(...lngs);
-    let maxLo = Math.max(...lngs);
-    const spanLa = Math.max(maxLa - minLa, 0.3);
-    const spanLo = Math.max(maxLo - minLo, 0.3);
-    minLa -= spanLa * 0.18;
-    maxLa += spanLa * 0.18;
-    minLo -= spanLo * 0.18;
-    maxLo += spanLo * 0.18;
-    return located.map((l) => ({
-      id: l.id,
-      name: l.name,
-      city: l.city,
-      state: (l.state ?? "").trim().toUpperCase(),
-      x: MAP_PAD + ((l.longitude as number) - minLo) / (maxLo - minLo) * (MAP_W - 2 * MAP_PAD),
-      y: MAP_PAD + (maxLa - (l.latitude as number)) / (maxLa - minLa) * (MAP_H - 2 * MAP_PAD),
-    }));
-  }, [located]);
-  const showMap =
-    mapPins.length >= 2 &&
-    (footprint.stateCount >= 2 || footprint.total >= 5);
-
   const filtered = useMemo(
     () =>
       activeState
@@ -134,54 +94,6 @@ export function LocationsView({
 
   return (
     <>
-      {showMap && (
-        <div className="mb-3 overflow-hidden border border-[var(--rule)] bg-gradient-to-br from-[#fbfaf6] to-[#f1efe7]">
-          <svg
-            viewBox={`0 0 ${MAP_W} ${MAP_H}`}
-            preserveAspectRatio="xMidYMid meet"
-            className="block h-auto w-full"
-            role="img"
-            aria-label="Map of your locations"
-          >
-            {Array.from({ length: 9 }).map((_, i) => {
-              const x = MAP_PAD + (i / 8) * (MAP_W - 2 * MAP_PAD);
-              return (
-                <line key={`v${i}`} x1={x} y1={MAP_PAD} x2={x} y2={MAP_H - MAP_PAD} stroke="rgba(20,35,63,0.06)" strokeWidth={1} />
-              );
-            })}
-            {Array.from({ length: 5 }).map((_, i) => {
-              const y = MAP_PAD + (i / 4) * (MAP_H - 2 * MAP_PAD);
-              return (
-                <line key={`h${i}`} x1={MAP_PAD} y1={y} x2={MAP_W - MAP_PAD} y2={y} stroke="rgba(20,35,63,0.06)" strokeWidth={1} />
-              );
-            })}
-            <rect x={MAP_PAD} y={MAP_PAD} width={MAP_W - 2 * MAP_PAD} height={MAP_H - 2 * MAP_PAD} fill="none" stroke="rgba(20,35,63,0.12)" />
-            {mapPins.map((p) => {
-              const dim = activeState != null && p.state !== activeState;
-              const hot = activeState != null && p.state === activeState;
-              return (
-                <circle
-                  key={p.id}
-                  cx={p.x}
-                  cy={p.y}
-                  r={hot ? 8 : 6}
-                  fill={hot ? "#14233F" : "#4D7A60"}
-                  stroke="#fff"
-                  strokeWidth={2}
-                  opacity={dim ? 0.3 : 1}
-                  style={{ cursor: "pointer" }}
-                  onClick={() => router.push(`/employer/locations/${p.id}`)}
-                >
-                  <title>
-                    {`${p.name} — ${[p.city, p.state].filter(Boolean).join(", ")}`}
-                  </title>
-                </circle>
-              );
-            })}
-          </svg>
-        </div>
-      )}
-
       {showFootprint && (
         <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 border border-[var(--rule)] bg-white px-4 py-3">
           <span className="inline-flex items-center gap-1.5 text-[12px] font-bold text-ink">
