@@ -911,7 +911,7 @@ function JobRow({
   return (
     <Link
       href={`/employer/jobs/${job.id}`}
-      className={`group grid grid-cols-[auto_1fr_auto_auto_auto_16px] gap-4 sm:gap-6 items-center px-5 sm:px-6 py-4 sm:py-5 hover:bg-ivory-deep transition-colors ${
+      className={`group grid grid-cols-[auto_1fr] items-start gap-x-4 gap-y-3 px-5 py-4 sm:px-6 sm:py-5 lg:grid-cols-[auto_1fr_auto_auto_auto_16px] lg:items-center lg:gap-6 hover:bg-ivory-deep transition-colors ${
         isLast ? "" : "border-b border-[var(--rule)]"
       }`}
     >
@@ -960,6 +960,11 @@ function JobRow({
         </div>
       </div>
 
+      {/* Stats group — on mobile this becomes a full-width row UNDER the title
+          (col-span-2) so the title gets the whole line; on lg it dissolves
+          (lg:contents) so sparkline / apps / views / chevron become the same
+          direct grid cells as before — desktop layout unchanged. */}
+      <div className="col-span-2 flex items-center justify-end gap-6 lg:contents">
       {/* Sparkline cell */}
       <div className="hidden sm:flex flex-col items-end gap-1 min-w-[88px]">
         {hasSparkSignal ? (
@@ -1003,6 +1008,7 @@ function JobRow({
       </div>
 
       <ChevronRight className="h-4 w-4 text-slate-meta group-hover:text-heritage group-hover:translate-x-1 transition-all" />
+      </div>
     </Link>
   );
 }
