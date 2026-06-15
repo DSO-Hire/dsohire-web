@@ -46,6 +46,7 @@ import {
 } from "lucide-react";
 import { HELP_CONTENT, type HelpEntry } from "@/lib/help/help-content";
 import { useAssistantContext } from "@/lib/support/assistant-context";
+import { commitAssistantAction } from "@/lib/support/assistant-actions";
 import {
   clearConversation,
   loadConversation,
@@ -71,6 +72,15 @@ interface MessageCitation {
   href?: string;
 }
 
+interface UiDraftAction {
+  action: "move_stage" | "add_internal_note" | "assign_application";
+  applicationId: string;
+  summary: string;
+  stageKind?: string;
+  note?: string;
+  assigneeDsoUserId?: string;
+}
+
 interface UiMessage {
   role: "user" | "assistant" | "system";
   content: string;
@@ -83,6 +93,8 @@ interface UiMessage {
   citations?: MessageCitation[];
   /** One-click in-app navigation buttons (#82). */
   links?: Array<{ href: string; label: string }>;
+  /** Drafted actions the user can one-click commit (C4). */
+  draftActions?: UiDraftAction[];
   /** Server-assigned message id (after streaming completes). Powers
    *  the feedback buttons. */
   messageId?: string;
@@ -298,6 +310,19 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
                   const last = next[next.length - 1];
                   if (last && last.role === "assistant") {
                     next[next.length - 1] = { ...last, citations: cites };
+                  }
+                  return next;
+                });
+              } else if (
+                eventName === "draft_action" &&
+                Array.isArray(parsed.draftActions)
+              ) {
+                const drafts = parsed.draftActions as UiDraftAction[];
+                setMessages((prev) => {
+                  const next = [...prev];
+                  const last = next[next.length - 1];
+                  if (last && last.role === "assistant") {
+                    next[next.length - 1] = { ...last, draftActions: drafts };
                   }
                   return next;
                 });
@@ -700,6 +725,13 @@ function Bubble({
             <span className="inline-block w-2 h-4 align-text-bottom bg-heritage-deep/60 ml-0.5 animate-pulse" />
           )}
         </div>
+        {message.draftActions && message.draftActions.length > 0 && (
+          <div className="space-y-2 pt-0.5">
+            {message.draftActions.map((d, i) => (
+              <DraftActionCard key={i} draft={d} />
+            ))}
+          </div>
+        )}
         {message.links && message.links.length > 0 && onNavigate && (
           <div className="flex flex-wrap gap-1.5 pt-0.5">
             {message.links.map((lnk, i) => (
@@ -855,6 +887,128 @@ function FeedbackButtons({
       >
         <ThumbsDown className="size-3.5" />
       </button>
+    </div>
+  );
+}
+
+/** Map a UI draft to the narrow server-action input, or null if incomplete. */
+function toCommitInput(
+  d: UiDraftAction
+):
+  | { action: "move_stage"; applicationId: string; stageKind: string }
+  | { action: "add_internal_note"; applicationId: string; note: string }
+  | { action: "assign_application"; applicationId: string; assigneeDsoUserId: string }
+  | null {
+  if (d.action === "move_stage" && d.stageKind) {
+    return { action: "move_stage", applicationId: d.applicationId, stageKind: d.stageKind };
+  }
+  if (d.action === "add_internal_note" && d.note) {
+    return { action: "add_internal_note", applicationId: d.applicationId, note: d.note };
+  }
+  if (d.action === "assign_application" && d.assigneeDsoUserId) {
+    return {
+      action: "assign_application",
+      applicationId: d.applicationId,
+      assigneeDsoUserId: d.assigneeDsoUserId,
+    };
+  }
+  return null;
+}
+
+/**
+ * Amber "Draft action — needs your click" card. The assistant drafted this
+ * (read-only); committing here calls the server-action choke point, which
+ * runs the same permission checks as the in-app button. The assistant
+ * never mutates on its own.
+ */
+function DraftActionCard({ draft }: { draft: UiDraftAction }) {
+  const [status, setStatus] = useState<
+    "idle" | "committing" | "done" | "cancelled" | "error"
+  >("idle");
+  const [error, setError] = useState<string | null>(null);
+
+  async function commit() {
+    const input = toCommitInput(draft);
+    if (!input) {
+      setError("This draft is missing details — try asking again.");
+      setStatus("error");
+      return;
+    }
+    setStatus("committing");
+    setError(null);
+    try {
+      const res = await commitAssistantAction(input);
+      if (res.ok) {
+        setStatus("done");
+      } else {
+        setError(res.error);
+        setStatus("error");
+      }
+    } catch {
+      setError("Something went wrong committing that. Try again.");
+      setStatus("error");
+    }
+  }
+
+  if (status === "done") {
+    return (
+      <div className="border border-heritage/30 border-l-[3px] border-l-heritage bg-heritage/[0.06] px-3 py-2.5 text-[12px] text-heritage-deep inline-flex items-center gap-2">
+        <CheckCircle2 className="size-4 shrink-0" />
+        <span className="font-semibold">Done — {draft.summary}.</span>
+      </div>
+    );
+  }
+  if (status === "cancelled") {
+    return (
+      <div className="border border-[var(--rule)] bg-cream/40 px-3 py-2 text-[12px] text-slate-meta">
+        Dismissed.
+      </div>
+    );
+  }
+
+  return (
+    <div className="border border-[var(--rule-strong)] border-l-[3px] border-l-amber-500 bg-amber-50 px-3 py-2.5">
+      <div className="text-[11px] font-bold tracking-[0.3px] uppercase text-amber-700">
+        Draft action — needs your click
+      </div>
+      <p className="mt-1 mb-2 text-[12.5px] text-ink leading-snug">
+        {draft.summary}.
+      </p>
+      {status === "error" && error && (
+        <p className="mb-2 text-[12px] text-red-700 leading-snug">{error}</p>
+      )}
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={commit}
+          disabled={status === "committing"}
+          className="inline-flex items-center gap-1.5 bg-ink text-ivory px-3.5 py-1.5 text-[11px] font-bold tracking-[1px] uppercase hover:bg-ink-soft disabled:opacity-50"
+        >
+          {status === "committing" ? (
+            <>
+              <Loader2 className="size-3 animate-spin" />
+              Committing…
+            </>
+          ) : status === "error" ? (
+            "Try again"
+          ) : (
+            "Commit"
+          )}
+        </button>
+        {status !== "committing" && (
+          <button
+            type="button"
+            onClick={() => setStatus("cancelled")}
+            className="px-3 py-1.5 text-[11px] font-bold tracking-[1px] uppercase text-slate-body border border-[var(--rule-strong)] hover:bg-cream/60"
+          >
+            Cancel
+          </button>
+        )}
+      </div>
+      <p className="mt-2 text-[10px] text-slate-meta leading-snug">
+        The assistant never makes changes itself — it drafts, you commit. Every
+        commit runs the same permission checks as the app.
+      </p>
     </div>
   );
 }

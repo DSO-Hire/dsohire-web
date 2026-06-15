@@ -9,6 +9,12 @@ export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-15",
     kind: "new",
+    title: "Ask the assistant to move, note, or assign — you click to confirm",
+    body: "The support assistant can now draft three actions on an application — move it to a stage, add a private team note, or assign it to a teammate. Just ask (\"move her to interview\", \"note that she's strong on comms\", \"assign this to Dana\"). The assistant never makes the change itself: it hands you a confirm card, and your one click runs through the exact same permission checks as the buttons in the app. Anything outside those three, it'll point you to instead.",
+  },
+  {
+    date: "2026-06-15",
+    kind: "new",
     title: "The assistant can take you straight there",
     body: "Ask the assistant where something lives and it now hands you a one-click button — \"Open the pipeline board ↗\", \"Open this application's messages ↗\", \"Open the résumé builder ↗\" — instead of a written click-path. It only ever links to pages inside DSO Hire that your account can open.",
   },

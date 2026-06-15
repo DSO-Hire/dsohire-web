@@ -138,9 +138,16 @@ don't have a confident answer on that — want me to pass this to the \
 team?" Don't invent details or speculate about features that might \
 not exist.
 
-5. You CANNOT take actions on the user's behalf in this version (no \
-sending emails, changing settings, etc.). If they ask you to do \
-something, walk them through how to do it themselves.
+5. You can DRAFT a few actions for the user to confirm with ONE CLICK — \
+you NEVER execute them yourself. Call propose_action for: move_stage \
+(move an application to a pipeline stage), add_internal_note (leave a \
+private team note on an application), or assign_application (assign it to \
+a teammate). It returns a draft the user must click "Commit" to apply, \
+which runs through the SAME permission checks as the buttons in the app. \
+Use the focused application's id. For ANYTHING ELSE they ask you to do \
+(send an email, change settings, post a job, edit a candidate, etc.) you \
+CANNOT do it — walk them through it or offer a deep link. Never claim you \
+performed an action; you only ever draft it.
 
 6. Be warm but concise. Direct, expert, no fluff. Never use emojis.`;
 
@@ -464,11 +471,18 @@ export async function POST(request: Request) {
   // — hallucinated /help/x gets no chip) + the data tools it called.
   const citations = buildCitations(finalText, toolEventBuffer);
   const deepLinks = extractDeepLinks(toolEventBuffer);
+  const draftActions = extractDraftActions(toolEventBuffer);
 
   if (!finalText.trim()) {
-    finalText = deepLinks.length
-      ? "Here you go — the button below takes you there."
-      : "I couldn't form a complete answer. Try rephrasing, or escalate to a human via the button below.";
+    if (draftActions.length) {
+      finalText =
+        "I've drafted that below — review and click Commit to apply it.";
+    } else if (deepLinks.length) {
+      finalText = "Here you go — the button below takes you there.";
+    } else {
+      finalText =
+        "I couldn't form a complete answer. Try rephrasing, or escalate to a human via the button below.";
+    }
   }
 
   // Collapse raw /help/ markdown to its label so the bubble reads clean
@@ -488,6 +502,7 @@ export async function POST(request: Request) {
   const capturedToolEvents = toolEventBuffer;
   const capturedCitations = citations;
   const capturedLinks = deepLinks;
+  const capturedDraftActions = draftActions;
 
   // Insert the assistant message FIRST so we have an id to attach
   // user feedback to. Update it with the streamed content + usage
@@ -561,6 +576,17 @@ export async function POST(request: Request) {
         controller.enqueue(
           encoder.encode(
             `event: links\ndata: ${JSON.stringify({ links: capturedLinks })}\n\n`
+          )
+        );
+      }
+
+      // Emit draft actions (move/note/assign) — confirm cards (C4).
+      if (capturedDraftActions.length > 0) {
+        controller.enqueue(
+          encoder.encode(
+            `event: draft_action\ndata: ${JSON.stringify({
+              draftActions: capturedDraftActions,
+            })}\n\n`
           )
         );
       }
@@ -813,6 +839,67 @@ function extractDeepLinks(
       label: typeof o.label === "string" && o.label ? o.label : "Open",
     });
     if (out.length >= 4) break;
+  }
+  return out;
+}
+
+/** A drafted action the user can one-click commit (C4). Mirrors the
+ *  CommitActionInput shape so the drawer can hand it straight back. */
+interface DraftAction {
+  action: "move_stage" | "add_internal_note" | "assign_application";
+  applicationId: string;
+  summary: string;
+  stageKind?: string;
+  note?: string;
+  assigneeDsoUserId?: string;
+}
+
+/** Pull successful propose_action drafts from the tool buffer. Deduped + capped. */
+function extractDraftActions(
+  toolEvents: Array<{ name: string; output: unknown }>
+): DraftAction[] {
+  const out: DraftAction[] = [];
+  const seen = new Set<string>();
+  for (const t of toolEvents) {
+    if (t.name !== "propose_action") continue;
+    const o = t.output as Record<string, unknown> | null;
+    if (!o || o.ok !== true) continue;
+    const action = o.action;
+    const applicationId = o.applicationId;
+    if (
+      (action !== "move_stage" &&
+        action !== "add_internal_note" &&
+        action !== "assign_application") ||
+      typeof applicationId !== "string"
+    ) {
+      continue;
+    }
+    const key = `${action}:${applicationId}:${String(o.stageKind ?? "")}:${String(
+      o.assigneeDsoUserId ?? ""
+    )}:${String(o.note ?? "").slice(0, 40)}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    const d: DraftAction = {
+      action: action as DraftAction["action"],
+      applicationId,
+      summary:
+        typeof o.summary === "string" ? o.summary : "Review this action",
+    };
+    if (action === "move_stage" && typeof o.stageKind === "string") {
+      d.stageKind = o.stageKind;
+    }
+    if (action === "add_internal_note" && typeof o.note === "string") {
+      d.note = o.note;
+    }
+    if (
+      action === "assign_application" &&
+      typeof o.assigneeDsoUserId === "string"
+    ) {
+      d.assigneeDsoUserId = o.assigneeDsoUserId;
+    }
+    out.push(d);
+    if (out.length >= 3) break;
   }
   return out;
 }

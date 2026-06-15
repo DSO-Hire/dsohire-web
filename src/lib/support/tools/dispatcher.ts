@@ -25,6 +25,7 @@ import { findCandidateByName } from "./find-candidate-by-name";
 import { findJobByTitle } from "./find-job-by-title";
 import { countApplicationsByStage } from "./count-applications-by-stage";
 import { buildDeepLink } from "./build-deep-link";
+import { proposeAction } from "./propose-action";
 import type { ToolContext, ToolHandler, ToolSchema } from "./types";
 
 const HANDLERS: Record<string, ToolHandler> = {
@@ -42,6 +43,7 @@ const HANDLERS: Record<string, ToolHandler> = {
   find_job_by_title: findJobByTitle,
   count_applications_by_stage: countApplicationsByStage,
   build_deep_link: buildDeepLink,
+  propose_action: proposeAction,
 };
 
 /** All tool schemas — passed to Anthropic so Claude knows what to call. */
