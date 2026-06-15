@@ -31,6 +31,8 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { ChevronDown } from "lucide-react";
+import { FitWordmark } from "@/components/practice-fit/brand/fit-wordmark";
 
 const ROLE_LINKS = [
   { href: "/for-candidates", label: "Overview" },
@@ -38,8 +40,12 @@ const ROLE_LINKS = [
   { href: "/for-specialists", label: "For Specialists" },
   { href: "/for-hygienists", label: "For Hygienists" },
   { href: "/for-dental-assistants", label: "For Dental Assistants" },
+  { href: "/for-dental-therapists", label: "For Dental Therapists" },
   { href: "/for-front-desk", label: "For Front Desk + Treatment Coordinators" },
   { href: "/for-office-managers", label: "For Office Managers" },
+  { href: "/for-practice-administrators", label: "For Practice Administrators" },
+  { href: "/for-dental-lab-technicians", label: "For Dental Lab Technicians" },
+  { href: "/for-sterilization-technicians", label: "For Sterilization Technicians" },
   { href: "/for-corporate", label: "Corporate & Administrative Roles" },
 ];
 
@@ -58,10 +64,6 @@ const DSO_SIZE_LINKS = [
 // segmented control.
 const PRIMARY_LINKS = [
   { href: "/jobs", label: "Browse Jobs" },
-  // #115 FOH (Cam, Day 31) — PracticeFit takes the headline slot (mirrors
-  // the desktop nav's wordmark link); Companies stays reachable here +
-  // in the footer.
-  { href: "/practicefit", label: "PracticeFit™" },
   { href: "/companies", label: "Companies" },
   { href: "/pricing", label: "Pricing" },
   { href: "/about", label: "About" },
@@ -151,46 +153,70 @@ export function MobileMenu({
               <div className="text-[10px] font-bold tracking-[1.8px] uppercase text-heritage-deep mb-3">
                 Choose your lens
               </div>
-              <div className="border border-[var(--rule-strong)]">
-                <Link
-                  href="/for-dental-groups"
-                  onClick={close}
-                  className="block px-4 py-3.5 text-[15px] font-semibold text-ink hover:bg-cream/60 transition-colors"
-                >
-                  Dental Groups
-                  <span className="block text-[12px] font-medium tracking-normal text-slate-body normal-case mt-0.5">
-                    Hiring for your practices
-                  </span>
-                </Link>
-                {/* Size→tier guidance — indented to read as belonging to the
-                    For DSOs lens (mirrors the desktop dropdown). */}
-                <ul className="list-none flex flex-col border-t border-[var(--rule)] bg-cream/40">
-                  {DSO_SIZE_LINKS.map((link) => (
-                    <li key={link.label}>
+              {/* Each lens is a collapsed accordion (native <details>) so the
+                  drawer stays short — tap to reveal the sub-links instead of
+                  scrolling past every role/size up front. Overview link sits
+                  first inside each (the summary toggles, it doesn't navigate). */}
+              <div className="border border-[var(--rule-strong)] divide-y divide-[var(--rule-strong)]">
+                <details className="group">
+                  <summary className="flex items-center justify-between gap-3 px-4 py-3.5 cursor-pointer list-none [&::-webkit-details-marker]:hidden hover:bg-cream/60 transition-colors">
+                    <span className="text-[15px] font-semibold text-ink">
+                      Dental Groups
+                      <span className="block text-[12px] font-medium text-slate-body mt-0.5">
+                        Hiring for your practices
+                      </span>
+                    </span>
+                    <ChevronDown
+                      className="size-4 shrink-0 text-slate-meta transition-transform group-open:rotate-180"
+                      aria-hidden
+                    />
+                  </summary>
+                  <ul className="list-none flex flex-col border-t border-[var(--rule)] bg-cream/40">
+                    <li>
                       <Link
-                        href={link.href}
+                        href="/for-dental-groups"
                         onClick={close}
-                        className="block pl-7 pr-4 py-2.5 text-[13px] font-semibold text-slate-body hover:text-heritage-deep transition-colors"
+                        className="block pl-7 pr-4 py-2.5 text-[13px] font-bold text-heritage-deep hover:text-ink transition-colors"
                       >
-                        {link.label}
+                        Overview →
                       </Link>
                     </li>
-                  ))}
-                </ul>
-                <div className="border-t border-[var(--rule-strong)]">
-                  <Link
-                    href="/for-candidates"
-                    onClick={close}
-                    className="block px-4 py-3.5 text-[15px] font-semibold text-ink hover:bg-cream/60 transition-colors"
-                  >
-                    Job Candidates
-                    <span className="block text-[12px] font-medium tracking-normal text-slate-body normal-case mt-0.5">
-                      Find your next role
+                    {DSO_SIZE_LINKS.map((link) => (
+                      <li key={link.label}>
+                        <Link
+                          href={link.href}
+                          onClick={close}
+                          className="block pl-7 pr-4 py-2.5 text-[13px] font-semibold text-slate-body hover:text-heritage-deep transition-colors"
+                        >
+                          {link.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+                <details className="group">
+                  <summary className="flex items-center justify-between gap-3 px-4 py-3.5 cursor-pointer list-none [&::-webkit-details-marker]:hidden hover:bg-cream/60 transition-colors">
+                    <span className="text-[15px] font-semibold text-ink">
+                      Job Candidates
+                      <span className="block text-[12px] font-medium text-slate-body mt-0.5">
+                        Find your next role
+                      </span>
                     </span>
-                  </Link>
-                  {/* Role-specific pages live under the Job Candidates lens —
-                      indented to read as belonging to it. */}
+                    <ChevronDown
+                      className="size-4 shrink-0 text-slate-meta transition-transform group-open:rotate-180"
+                      aria-hidden
+                    />
+                  </summary>
                   <ul className="list-none flex flex-col border-t border-[var(--rule)] bg-cream/40">
+                    <li>
+                      <Link
+                        href="/for-candidates"
+                        onClick={close}
+                        className="block pl-7 pr-4 py-2.5 text-[13px] font-bold text-heritage-deep hover:text-ink transition-colors"
+                      >
+                        Overview →
+                      </Link>
+                    </li>
                     {ROLE_LINKS.slice(1).map((link) => (
                       <li key={link.href}>
                         <Link
@@ -203,10 +229,26 @@ export function MobileMenu({
                       </li>
                     ))}
                   </ul>
+                </details>
+              </div>
+
+              {/* Fit products — the real PracticeFit + DSOFit lockups (dual-tone,
+                  both ™). Both link to /practicefit, which explains both. */}
+              <div className="mt-7 pt-5 border-t border-[var(--rule)]">
+                <div className="text-[10px] font-bold tracking-[1.8px] uppercase text-heritage-deep mb-3">
+                  Our fit products
+                </div>
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                  <Link href="/practicefit" onClick={close} aria-label="PracticeFit">
+                    <FitWordmark product="practicefit" surface="light" tm className="text-[15px]" />
+                  </Link>
+                  <Link href="/practicefit" onClick={close} aria-label="DSOFit">
+                    <FitWordmark product="dsofit" surface="light" tm className="text-[15px]" />
+                  </Link>
                 </div>
               </div>
 
-              <ul className="list-none flex flex-col gap-1 mt-7 pt-5 border-t border-[var(--rule)]">
+              <ul className="list-none flex flex-col gap-1 mt-6 pt-5 border-t border-[var(--rule)]">
                 {PRIMARY_LINKS.map((link) => (
                   <MobileMenuLink
                     key={link.href}
