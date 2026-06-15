@@ -76,7 +76,10 @@ export function JobHealth({
           return (
             <div
               key={r.id}
-              className="grid grid-cols-[1.4fr_2fr_auto_auto] items-center gap-4 px-5 py-3 border-t border-[var(--rule)] first:border-t-0"
+              // Mobile: 3 cols — the mini-strip column is hidden (display:none,
+              // so it's not a grid item) and the title takes the freed space.
+              // sm+: the original 4-col layout with the mini-strip.
+              className="grid grid-cols-[1fr_auto_auto] sm:grid-cols-[1.4fr_2fr_auto_auto] items-center gap-4 px-5 py-3 border-t border-[var(--rule)] first:border-t-0"
             >
               <div className="min-w-0">
                 <div className="text-[13px] font-extrabold tracking-[-0.2px] text-ink truncate">

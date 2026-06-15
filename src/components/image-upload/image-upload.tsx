@@ -348,14 +348,18 @@ export function ImageUpload({
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             {UploadButton}
             {RemoveButton}
-            <p className="min-w-0 flex-1 text-xs text-slate-500">
+            {/* Full-width on mobile so it drops below the buttons instead of
+                squeezing into a thin one-word-per-line column. */}
+            <p className="w-full text-xs text-slate-500 sm:w-auto sm:min-w-0 sm:flex-1">
               {hint} You can also drop a file anywhere on this row.
             </p>
           </div>
         </>
       ) : (
-        // Default layout: compact preview on the left, controls beside it.
-        <div className="flex items-start gap-5">
+        // Default layout: on mobile the preview stacks above full-width
+        // controls + hint (so the hint isn't squeezed into a thin column);
+        // sm+ keeps the compact preview-on-the-left layout.
+        <div className="flex flex-col items-start gap-3 sm:flex-row sm:gap-5">
           {PreviewBox}
           <div className="flex flex-1 flex-col gap-2">
             {UploadButton}
