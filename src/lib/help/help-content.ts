@@ -116,9 +116,9 @@ const JD: Record<string, HelpEntry> = {
     lens: "employer",
     bullets: [
       "Pick a model: a simple range, or a structured dental package — guarantee plus a percentage of production/collections, case-starts for ortho, or hourly-plus-production for hygiene.",
-      "Spell out the fine print that actually matters: lab-fee policy, what counts toward production, and how it reconciles (greater-of, draw-against).",
+      "Spell out the fine print: lab-fee policy, what counts toward production, and how it reconciles.",
       "Worker classification (W-2, 1099, or negotiable) shows neutrally — we surface it, we don't police it.",
-      "An estimated annual range is the one figure matching uses, and it powers the pay-transparency note in states that require a range. Percentages are never converted into a guessed salary.",
+      "An estimated annual range is the one figure matching uses, and it powers the pay-transparency note where states require it. Percentages are never converted to a guessed salary.",
     ],
   },
   "jd.skills": {
@@ -258,9 +258,9 @@ const INBOX: Record<string, HelpEntry> = {
     format: "disclosure",
     lens: "employer",
     bullets: [
-      "One thread per candidate; rich cards embed interviews and offers inline, and files attach right in the thread.",
-      "Switch the composer to a private internal note — your team only, the candidate never sees it — or type “/” to drop in a reusable template that fills in the candidate's details.",
-      "Tabs and chips flag who's awaiting a reply and which threads carry internal notes.",
+      "One thread per candidate; interview and offer cards embed inline, and files attach in-thread.",
+      "Switch the composer to a private internal note (your team only), or type “/” to drop in a template that fills in the candidate's details.",
+      "Tabs and chips flag who's awaiting a reply and which threads carry notes.",
       "The candidate gets an email when you message; they reply in-thread.",
     ],
   },
@@ -653,9 +653,9 @@ const CANDIDATE: Record<string, HelpEntry> = {
     lens: "candidate",
     bullets: [
       "Each application shows a stage-by-stage journey, not a black box.",
-      "When a practice has enough history, you'll see how fast it typically responds — a real median, shown only when there's enough of it to be honest (never a made-up reassurance).",
-      "If a job hides its internal stages, your journey shows a simple “In review” until there's real news.",
-      "No anxiety timers — we never count the days you've been waiting.",
+      "When a practice has enough history, you'll see how fast it typically responds — a real median, shown only when it's honest to (never a made-up number).",
+      "If a job hides its stages, your journey shows a simple “In review” until there's real news.",
+      "No anxiety timers — we never count the days you've waited.",
     ],
   },
   "cand.credentials": {
@@ -1013,22 +1013,22 @@ const DAY32: Record<string, HelpEntry> = {
 const DAY34: Record<string, HelpEntry> = {
   "support.assistant": {
     title: "What the AI assistant can do",
-    tip: "The “?” assistant answers from the help docs and your real account data, shows its sources, links you straight to the right page — and can even draft a few actions for you. It never makes a change on its own; you always click to confirm.",
+    tip: "The “?” assistant answers from the help docs and your real account data, shows its sources, links you to the right page — and can draft a few actions for you to confirm. It never changes anything on its own.",
     format: "drawer",
     lens: "both",
     videoId: null,
     steps: [
       {
         heading: "Grounded in your data",
-        body: "Ask about your team, a candidate, an application, your plan, or your pipeline and it looks up the real answer. Opened from a record, it already knows which one you're viewing — so “why is her fit 84?” just works. Every answer shows the sources it drew on.",
+        body: "Ask about your team, a candidate, an application, your plan, or your pipeline and it looks up the real answer — and when you open it from a record, it already knows which one you mean. Every answer shows its sources.",
       },
       {
         heading: "One-click navigation",
-        body: "Instead of describing where to click, it hands you a button that takes you straight there — the pipeline board, a job, a candidate's messages, or the right settings page.",
+        body: "Instead of telling you where to click, it gives you a button straight to the page — the board, a job, a candidate's messages, the right setting.",
       },
       {
         heading: "It drafts, you commit",
-        body: "It can prepare a short list of actions — move an application to a stage, leave a private internal note, or assign it to a teammate — but it only ever drafts them. You review and click Commit, which runs through the exact same permission checks as the buttons in the app. The assistant never acts on its own, and it can't do anything outside that list. For anything else, it shows you how or escalates to a human.",
+        body: "It can prepare three things — move an application's stage, leave a private team note, or assign it to a teammate — but only as a draft. You click Commit, which runs the same permission checks as the app. It never acts on its own, and can't do anything outside that list.",
       },
     ],
   },
@@ -1038,34 +1038,34 @@ const DAY34: Record<string, HelpEntry> = {
     format: "disclosure",
     lens: "employer",
     bullets: [
-      "Three views: compact (more cards on screen), focus (one stage at a time), and an HQ layout that lanes candidates by job.",
-      "Cards warm up visually the longer they sit in a stage, so aging applicants are easy to catch.",
-      "Each column shows how its pace compares to your own trailing-90-day norms — a column running slow stands out.",
-      "Hover a card for quick actions (message, scorecards, advance), and open the insights drawer for plain-language summaries. Your view choice is remembered.",
+      "Three views: compact, focus (one stage at a time), and an HQ layout that lanes candidates by job.",
+      "Cards warm up the longer they sit in a stage, so aging applicants stand out.",
+      "Each column shows its pace vs. your own 90-day norms — a slow column is obvious.",
+      "Hover a card to message, score, or advance; open the insights drawer for plain-language summaries. Your view is remembered.",
     ],
   },
   "jd.matchability": {
     title: "Live preview & Matchability",
-    tip: "As you build a job, a live preview shows exactly how the posting will look to candidates, and a Matchability meter shows how completely it'll score — which fields are still blank and what each one unlocks.",
+    tip: "While you build a job, a live preview shows how the posting will look to candidates, and a Matchability meter shows how completely it'll score — what's blank and what each field unlocks.",
     format: "disclosure",
     lens: "employer",
     bullets: [
-      "The preview updates as you type — there's no separate “preview” step.",
-      "The Matchability meter reflects the real matching engine: it names which dimensions can score and what's missing, not a vanity percentage.",
-      "It speaks only to the job's own fields — never to any individual candidate's score.",
-      "Start a new posting from an existing one with the start-from chips to skip the blank page.",
+      "The preview updates as you type — no separate step.",
+      "The meter reflects the real matching engine: which dimensions can score and what's missing, not a vanity number.",
+      "It speaks to the job's fields only — never any candidate's score.",
+      "Start from an existing posting with the start-from chips to skip the blank page.",
     ],
   },
   "jd.roles": {
     title: "Roles you can hire for",
-    tip: "DSO Hire speaks the whole dental org chart — clinical, front office, and corporate — so each posting's screening and matching are tuned to the actual role.",
+    tip: "DSO Hire speaks the whole dental org chart — clinical, front office, and corporate — so each posting's screening and matching fit the actual role.",
     format: "disclosure",
     lens: "employer",
     bullets: [
-      "Clinical: dentists and specialists, hygienists, assistants, dental therapists, sterilization techs, and lab techs.",
+      "Clinical: dentists and specialists, hygienists, assistants, therapists, sterilization and lab techs.",
       "Front office: treatment, financial, and scheduling coordinators, plus office and practice administrators.",
-      "Corporate / DSO: operations, finance, marketing, IT, HR, and executive roles — these route to DSOFit instead of PracticeFit.",
-      "Each role brings its own suggested skills and screening questions; pick the closest one and the rest of the wizard adapts.",
+      "Corporate / DSO: ops, finance, marketing, IT, HR, and executive roles — these route to DSOFit.",
+      "Each role brings its own suggested skills and questions; pick the closest and the wizard adapts.",
     ],
   },
 };
