@@ -22,6 +22,10 @@ import {
   Users,
   TrendingUp,
   Briefcase,
+  Activity,
+  ClipboardList,
+  FlaskConical,
+  ShieldCheck,
 } from "lucide-react";
 
 export interface RoleAdvantage {
@@ -470,6 +474,222 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     ],
     metaDescription:
       "Corporate and administrative jobs at dental groups and DSOs — finance, marketing, operations, people/HR, IT, revenue cycle, and business development. Build a career in dental without a clinical license. Browse open corporate roles on DSO Hire.",
+  },
+  {
+    slug: "dental-therapists",
+    label: "Dental Therapists",
+    eyebrow: "Dental Therapist · Expanded-Scope Clinical",
+    Icon: Activity,
+    hero: {
+      headline: "A new role, with room to grow into.",
+      headlineAccent: "room to grow into.",
+      sub: "Dental therapy is one of the newest expanded-scope clinical roles in the US — and multi-location DSOs are among the first to build real structure around it: supervision that's actually available, a defined scope, and a path that isn't improvised alone.",
+    },
+    advantages: [
+      {
+        title: "Supervision that's actually present",
+        body: "Therapists practice under dentist supervision. At a multi-doc DSO there's a supervising dentist on site or a sister practice a call away — not one solo owner booked solid with no bandwidth to back you up.",
+      },
+      {
+        title: "A defined, respected scope",
+        body: "DSOs that hire therapists write clear protocols for what you do — restorations, extractions, preventive care within your state's scope — so you practice at the top of your license instead of bouncing between assisting and therapy.",
+      },
+      {
+        title: "Access-driven, mission work",
+        body: "Therapists exist to widen care access. DSOs deploy them across practices and community programs where the need is highest — mission-driven work with a real employer and benefits behind it.",
+      },
+      {
+        title: "Benefits + paid licensure pathway",
+        body: "401(k), health, PTO, CE allowance, and reimbursement toward the certification/licensure path — the kind of support a single practice rarely offers for a brand-new role.",
+      },
+      {
+        title: "First-mover career path",
+        body: "Lead therapist, therapy-program coordinator across practices, clinical-education roles. Because the role is new, the people who join now help define the ladder rather than inherit it.",
+      },
+    ],
+    careerPath: {
+      title: "What growth looks like",
+      paragraphs: [
+        "Most dental therapists start chairside in their state's defined scope under a supervising dentist. From there the path is still being written — which is the opportunity. Early therapists move into lead-therapist roles (anchoring protocols, mentoring new hires), therapy-program coordination across a DSO's practices, and clinical-education roles helping the group's dentists work effectively alongside therapists.",
+        "Scope of practice varies a lot by state — what you can do in Minnesota differs from Arizona or Colorado. DSOs operating in therapy-friendly states are the ones building the operational playbooks, so you join with structure instead of inventing it on your own.",
+      ],
+    },
+    compensation: {
+      title: "How comp works at DSOs",
+      structure: "Salary or hourly base, scaling with scope + market",
+      notes:
+        "Dental therapist comp is still maturing as the role spreads state by state. Most DSO roles are salaried or hourly, with the rate reflecting your state's permitted scope (broader scope, higher value), metro market, and experience. Because the role expands access, some positions tie into community-health or grant-funded programs. Licensure support and the standard DSO benefits package add to total comp beyond the rate. Specific pay shows on each listing when the employer chooses to share it.",
+    },
+    jobsFilterHref: "/jobs?category=dental_therapist",
+    relatedRoles: [
+      { slug: "hygienists", label: "Hygienists" },
+      { slug: "dental-assistants", label: "Dental Assistants" },
+      { slug: "dentists", label: "Dentists" },
+    ],
+    metaDescription:
+      "Dental therapist jobs at multi-location DSOs. Real dentist supervision, a defined expanded-scope role, paid licensure support, and a first-mover career path in one of dentistry's newest clinical roles. Browse open dental therapy roles on DSO Hire.",
+  },
+  {
+    slug: "practice-administrators",
+    label: "Practice Administrators",
+    eyebrow: "Practice Administrator · Non-Clinical Leadership",
+    Icon: ClipboardList,
+    hero: {
+      headline: "Run the practice. Skip the chair.",
+      headlineAccent: "Skip the chair.",
+      sub: "Practice administrators keep multi-provider offices running — people, scheduling, compliance, vendors, patient experience. At a DSO you get documented systems, a support center behind you, and a path that scales past one building.",
+    },
+    advantages: [
+      {
+        title: "Systems instead of sticky notes",
+        body: "DSOs run on documented operating models — onboarding SOPs, compliance calendars, vendor management, KPI dashboards. You inherit years of operational learning instead of reinventing it for one office.",
+      },
+      {
+        title: "A support center at your back",
+        body: "HR escalation, finance, legal and compliance, IT, and recruiting are backed by a corporate function. A single-practice administrator absorbs all of that personally; at a DSO you escalate.",
+      },
+      {
+        title: "Clear KPIs + bonus math",
+        body: "Practice-level scorecards — production, collections, labor-cost percentage, patient retention — with bonus structures written on the offer letter, not a vague 'we'll figure out a bonus.'",
+      },
+      {
+        title: "A peer network",
+        body: "Administrators at sister practices to compare notes, troubleshoot, and share tactics. Running a single practice's admin is isolating; a multi-practice group gives you actual community.",
+      },
+      {
+        title: "A path past one practice",
+        body: "Administrator → multi-practice administrator → area / regional operations. The ladder exists because multi-location groups need it — you can grow without leaving.",
+      },
+    ],
+    careerPath: {
+      title: "What growth looks like",
+      paragraphs: [
+        "Practice administrators typically start running one office's non-clinical operations — staffing, scheduling, compliance, vendors, patient experience, and the team. From there, paths include multi-practice administrator (2–3 offices), area manager, and regional operations roles, plus support-center positions in people, RCM, or compliance for administrators who want to specialize.",
+        "The work shifts from running one practice well to building the systems and people that run several. Many regional operators and support-center leaders at DSOs came up through the administrator track — it's a non-clinical path into the heart of how multi-practice dentistry actually runs.",
+      ],
+    },
+    compensation: {
+      title: "How comp works at DSOs",
+      structure: "Salary + KPI bonus structure",
+      notes:
+        "Practice administrator comp is salaried, with bonus components tied to practice KPIs — collections, labor-cost percentage, patient retention, sometimes EBITDA. The standardized math is a real appeal versus single-practice administration: the formula is on the offer letter and the bonus actually shows up. Multi-practice and regional roles step up base and bonus and may add quarterly incentives tied to group-wide initiatives. Geographic and seniority variance is significant; specifics show on each listing when shared.",
+    },
+    jobsFilterHref: "/jobs?category=practice_administrator",
+    relatedRoles: [
+      { slug: "office-managers", label: "Office Managers" },
+      { slug: "front-desk", label: "Front Desk + Treatment Coordinators" },
+      { slug: "corporate", label: "Corporate & Administrative" },
+    ],
+    metaDescription:
+      "Practice administrator jobs at multi-location DSOs. Documented operating systems, a corporate support center behind you, clear KPI bonuses, and a path past one practice into regional operations. Browse open practice administrator roles on DSO Hire.",
+  },
+  {
+    slug: "dental-lab-technicians",
+    label: "Dental Lab Technicians",
+    eyebrow: "Dental Lab Technician · CDT",
+    Icon: FlaskConical,
+    hero: {
+      headline: "Lab work with modern tools and steady volume.",
+      headlineAccent: "modern tools and steady volume.",
+      sub: "Multi-location groups generate consistent case volume and invest in digital lab workflows — milling, 3D printing, design software — so you work with current technology instead of waiting years for an upgrade.",
+    },
+    advantages: [
+      {
+        title: "A digital lab at scale",
+        body: "CAD/CAM mills, 3D printers, and intraoral-scan workflows (exocad, 3Shape, Medit) bought at group scale. You work with current technology from day one instead of whatever was affordable a decade ago.",
+      },
+      {
+        title: "Steady, varied case volume",
+        body: "Multiple practices feeding one lab means consistent work across crowns, bridges, aligners, night guards, and surgical guides — not the feast-or-famine swings a small outsourced lab rides.",
+      },
+      {
+        title: "Benefits + CDT support",
+        body: "Health, PTO, and 401(k), plus reimbursement toward CDT certification and continuing education — support a small independent lab rarely offers a technician.",
+      },
+      {
+        title: "Direct line to the clinicians",
+        body: "An in-house lab sits close to the dentists you fabricate for — faster feedback, fewer remakes, and better outcomes than an arms-length lab you only reach by shipping label.",
+      },
+      {
+        title: "A path to lead + digital roles",
+        body: "Lead technician, digital-workflow specialist, and lab manager across the group's practices — real progression a one-bench operation can't structurally offer.",
+      },
+    ],
+    careerPath: {
+      title: "What growth looks like",
+      paragraphs: [
+        "Most lab technicians at a group start at the bench in their specialty — fixed, removable, or digital design. The biggest lever now is digital: technicians who own the scan-to-design-to-mill workflow become hard to replace. From there, paths include lead technician, digital-workflow specialist (running the group's CAD/CAM and printing pipeline), and lab manager overseeing fabrication for multiple practices.",
+        "As more of the lab goes digital, the role increasingly blends craft with software. Groups investing in in-house digital labs need technicians who can bridge both — which is exactly where the comp and the seniority are heading.",
+      ],
+    },
+    compensation: {
+      title: "How comp works at DSOs",
+      structure: "Hourly or salary, scaling with digital skills + CDT",
+      notes:
+        "Lab technician comp is typically hourly, moving to salary for lead and manager roles. Digital-workflow skills (CAD design, mill/printer operation, scan processing) and CDT certification command the higher end of the range. Production-linked incentives exist at some larger in-house labs. Benefits, CE, and certification support add to total comp beyond the hourly rate. Market variance is significant — specifics show on each listing when the employer shares them.",
+    },
+    jobsFilterHref: "/jobs?category=lab_tech",
+    relatedRoles: [
+      { slug: "dental-assistants", label: "Dental Assistants" },
+      { slug: "specialists", label: "Specialists" },
+      { slug: "dentists", label: "Dentists" },
+    ],
+    metaDescription:
+      "Dental lab technician jobs at multi-location DSOs. Digital lab workflows (CAD/CAM, 3D printing) at scale, steady case volume, CDT certification support, and a path to lead and digital-specialist roles. Browse open dental lab tech roles on DSO Hire.",
+  },
+  {
+    slug: "sterilization-technicians",
+    label: "Sterilization Technicians",
+    eyebrow: "Sterilization Technician · Instrument Processing",
+    Icon: ShieldCheck,
+    hero: {
+      headline: "The role that keeps the practice safe — and your foot in the door.",
+      headlineAccent: "your foot in the door.",
+      sub: "Sterilization is critical infection-control work, and at a DSO it comes with real training, OSHA/HIPAA certification support, and a documented path into assisting and clinical operations.",
+    },
+    advantages: [
+      {
+        title: "Real infection-control training",
+        body: "DSOs run formal protocols — instrument processing, autoclave validation, OSHA and HIPAA standards — so you learn the standard properly instead of 'watch once and copy.'",
+      },
+      {
+        title: "Certifications covered",
+        body: "OSHA, HIPAA, CPR/BLS, and infection-control credentials are typically DSO-funded. Becoming more credentialed isn't on your dime.",
+      },
+      {
+        title: "A genuine foot in the door",
+        body: "Many dental assistants, lead DAs, and clinical-ops leaders started in sterilization. A DSO has the role count to promote into; a single practice has one of everything and nowhere to move.",
+      },
+      {
+        title: "Benefits from day one",
+        body: "Health, PTO, and 401(k) — often unavailable to an entry-level role at a single small practice where the math doesn't work, but standard at a group with scale.",
+      },
+      {
+        title: "A defined role, not the catch-all",
+        body: "At a DSO sterilization is staffed as its own function with clear standards and accountability, not the thing whoever happens to be free does between patients.",
+      },
+    ],
+    careerPath: {
+      title: "What growth looks like",
+      paragraphs: [
+        "Sterilization technicians start owning instrument processing, autoclave operation, and infection-control compliance for a practice. It's one of the clearest on-ramps in dentistry: the common next step is dental assistant (often with the DSO funding the training), then EFDA in states that allow it, and on into lead clinical and operations roles.",
+        "If you want to stay in instrument processing, larger groups value experienced sterilization leads who set standards across practices. The difference from a single office is that the option to move up exists — you're not stuck because there's only one of each role.",
+      ],
+    },
+    compensation: {
+      title: "How comp works at DSOs",
+      structure: "Hourly base + certification-driven raises",
+      notes:
+        "Sterilization roles are paid hourly, with raises tied to certifications (OSHA, HIPAA, infection control) and to stepping up into lead or dental-assistant work. The benefits package — health, PTO, paid certifications — often adds meaningfully on top of the hourly rate, and the assisting path opens a clear route to higher pay. Geographic variance is significant; specifics show on each listing when shared.",
+    },
+    jobsFilterHref: "/jobs?category=sterilization_tech",
+    relatedRoles: [
+      { slug: "dental-assistants", label: "Dental Assistants" },
+      { slug: "hygienists", label: "Hygienists" },
+      { slug: "front-desk", label: "Front Desk + Treatment Coordinators" },
+    ],
+    metaDescription:
+      "Sterilization technician jobs at multi-location DSOs. Real infection-control training, paid OSHA/HIPAA certifications, benefits from day one, and a documented path into dental assisting and clinical operations. Browse open sterilization tech roles on DSO Hire.",
   },
 ];
 

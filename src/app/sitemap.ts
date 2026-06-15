@@ -60,6 +60,10 @@ const ROUTES: SitemapRoute[] = [
   { path: "/for-dental-assistants", priority: 0.6, changeFrequency: "monthly" },
   { path: "/for-front-desk", priority: 0.6, changeFrequency: "monthly" },
   { path: "/for-office-managers", priority: 0.6, changeFrequency: "monthly" },
+  { path: "/for-dental-therapists", priority: 0.6, changeFrequency: "monthly" },
+  { path: "/for-practice-administrators", priority: 0.6, changeFrequency: "monthly" },
+  { path: "/for-dental-lab-technicians", priority: 0.6, changeFrequency: "monthly" },
+  { path: "/for-sterilization-technicians", priority: 0.6, changeFrequency: "monthly" },
 
   // Legal — common policies the legal index page links to.
   { path: "/legal", priority: 0.3, changeFrequency: "yearly" },
