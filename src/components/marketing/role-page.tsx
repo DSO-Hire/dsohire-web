@@ -99,13 +99,23 @@ function Hero({ config }: { config: RoleConfig }) {
         <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[-1.5px] leading-[1.04] text-ink mb-7 max-w-[920px]">
           {before}
           {accent && (
-            <em className="not-italic relative whitespace-nowrap text-heritage-light">
+            // Highlighter effect drawn as a text background so it WRAPS
+            // cleanly on mobile (box-decoration-break: clone re-draws the bar
+            // on each line). The old absolute bar required whitespace-nowrap,
+            // which pushed long accent phrases off the right edge on phones.
+            <em
+              className="not-italic text-heritage-light"
+              style={{
+                backgroundImage:
+                  "linear-gradient(var(--heritage-tint), var(--heritage-tint))",
+                backgroundRepeat: "no-repeat",
+                backgroundSize: "100% 0.42em",
+                backgroundPosition: "0 82%",
+                WebkitBoxDecorationBreak: "clone",
+                boxDecorationBreak: "clone",
+              }}
+            >
               {accent}
-              <span
-                aria-hidden
-                className="absolute left-0 right-0 bottom-1.5 h-2 -z-10"
-                style={{ background: "var(--heritage-tint)" }}
-              />
             </em>
           )}
           {after}
