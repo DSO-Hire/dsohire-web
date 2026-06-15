@@ -332,12 +332,14 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
               strokeLinecap="round"
             />
           </svg>
-          <span className="rail-word leading-none">
-            <span className="block text-[23px] font-extrabold tracking-[-0.5px] text-ivory">
+          {/* Wordmark: HIRE justifies to span DSO's full width (matches the
+              true lockup). aria-hidden — the Link itself is labeled. */}
+          <span className="rail-word inline-flex flex-col leading-none" aria-hidden="true">
+            <span className="text-[23px] font-extrabold tracking-[-0.5px] text-ivory">
               DSO
             </span>
-            <span className="block text-[8.5px] font-bold tracking-[5px] text-[#8db8a3] mt-[3px]">
-              HIRE
+            <span className="block w-full text-[8.5px] font-bold text-[#8db8a3] mt-[3px] text-justify [text-align-last:justify]">
+              H I R E
             </span>
           </span>
         </Link>
