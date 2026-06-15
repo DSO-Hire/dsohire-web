@@ -9,6 +9,12 @@ export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-15",
     kind: "new",
+    title: "See your locations as a grid",
+    body: "Your Locations page now has a List ⇄ Grid toggle. Grid view lays out every office as a card — logo, city and state, address, and how many active jobs are posted there — so multi-site groups can scan their whole footprint at a glance. Your choice is remembered, and sorting works the same in both views.",
+  },
+  {
+    date: "2026-06-15",
+    kind: "new",
     title: "Ask the assistant to move, note, or assign — you click to confirm",
     body: "The support assistant can now draft three actions on an application — move it to a stage, add a private team note, or assign it to a teammate. Just ask (\"move her to interview\", \"note that she's strong on comms\", \"assign this to Dana\"). The assistant never makes the change itself: it hands you a confirm card, and your one click runs through the exact same permission checks as the buttons in the app. Anything outside those three, it'll point you to instead.",
   },

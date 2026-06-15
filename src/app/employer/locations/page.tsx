@@ -8,12 +8,12 @@
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, MapPin, Plus, Upload } from "lucide-react";
+import { MapPin, Plus, Upload } from "lucide-react";
 import { EmployerShell } from "@/components/employer/employer-shell";
 import { HelpDisclosure } from "@/components/help/help-disclosure";
-import { Avatar } from "@/components/ui/avatar";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ListSort } from "@/components/ui/list-sort";
+import { LocationsView, type LocationCardData } from "./locations-view";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Locations" };
@@ -107,6 +107,12 @@ export default async function EmployerLocationsPage({ searchParams }: PageProps)
     return sorted;
   })();
 
+  // Bake the active-job count onto each location for the view component.
+  const cards: LocationCardData[] = locationList.map((l) => ({
+    ...l,
+    activeJobs: jobTagCounts.get(l.id) ?? 0,
+  }));
+
   return (
     <EmployerShell active="locations">
       <header className="flex flex-wrap items-center justify-between gap-4 mb-8">
@@ -147,27 +153,19 @@ export default async function EmployerLocationsPage({ searchParams }: PageProps)
       {locationList.length === 0 ? (
         <EmptyState />
       ) : (
-        <>
-          {locationList.length > 1 && (
-            <div className="mb-3 flex items-center justify-end">
+        <LocationsView
+          locations={cards}
+          sortControl={
+            locationList.length > 1 ? (
               <ListSort
                 basePath="/employer/locations"
                 options={LOC_SORT_OPTIONS}
                 activeValue={sortKey}
                 defaultValue="name"
               />
-            </div>
-          )}
-          <ul className="list-none border-t border-[var(--rule)]">
-            {locationList.map((loc) => (
-              <LocationRowItem
-                key={loc.id}
-                location={loc}
-                activeJobs={jobTagCounts.get(loc.id) ?? 0}
-              />
-            ))}
-          </ul>
-        </>
+            ) : null
+          }
+        />
       )}
     </EmployerShell>
   );
@@ -183,65 +181,6 @@ interface LocationRow {
   postal_code: string | null;
   logo_url: string | null;
   created_at: string;
-}
-
-function LocationRowItem({
-  location,
-  activeJobs,
-}: {
-  location: LocationRow;
-  activeJobs: number;
-}) {
-  const cityState = [location.city, location.state].filter(Boolean).join(", ");
-  const street = [location.address_line1, location.address_line2]
-    .filter(Boolean)
-    .join(", ");
-
-  return (
-    <li className="border-b border-[var(--rule)]">
-      <Link
-        href={`/employer/locations/${location.id}`}
-        className="group block py-5 hover:bg-cream/40 transition-colors -mx-2 px-2"
-      >
-        <div className="flex items-start gap-5">
-          <Avatar
-            name={location.name}
-            imageUrl={location.logo_url}
-            size="lg"
-            className="flex-shrink-0 mt-0.5"
-          />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-1.5">
-              <MapPin className="h-3.5 w-3.5 text-heritage flex-shrink-0" />
-              <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
-                {cityState || "Address incomplete"}
-              </span>
-            </div>
-            <div className="text-[17px] font-extrabold tracking-[-0.3px] text-ink leading-tight mb-1 truncate">
-              {location.name}
-            </div>
-            {street && (
-              <div className="text-[13px] tracking-[0.3px] text-slate-meta truncate">
-                {street}
-                {location.postal_code ? ` · ${location.postal_code}` : ""}
-              </div>
-            )}
-          </div>
-          <div className="flex items-center gap-8 text-right flex-shrink-0">
-            <div>
-              <div className="text-[16px] font-extrabold text-ink leading-none">
-                {activeJobs}
-              </div>
-              <div className="text-[9px] font-semibold tracking-[1.5px] uppercase text-slate-meta mt-1">
-                {activeJobs === 1 ? "Job" : "Jobs"}
-              </div>
-            </div>
-            <ArrowRight className="h-4 w-4 text-slate-meta group-hover:text-heritage transition-colors" />
-          </div>
-        </div>
-      </Link>
-    </li>
-  );
 }
 
 function EmptyState() {
