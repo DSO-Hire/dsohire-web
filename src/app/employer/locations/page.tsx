@@ -56,7 +56,7 @@ export default async function EmployerLocationsPage({ searchParams }: PageProps)
   const { data: locations } = await supabase
     .from("dso_locations")
     .select(
-      "id, name, address_line1, address_line2, city, state, postal_code, logo_url, created_at"
+      "id, name, address_line1, address_line2, city, state, postal_code, logo_url, created_at, latitude, longitude"
     )
     .eq("dso_id", dsoUser.dso_id)
     .order("name", { ascending: true });
@@ -181,6 +181,8 @@ interface LocationRow {
   postal_code: string | null;
   logo_url: string | null;
   created_at: string;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 function EmptyState() {

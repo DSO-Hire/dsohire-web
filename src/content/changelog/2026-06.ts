@@ -9,8 +9,8 @@ export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-15",
     kind: "new",
-    title: "See your locations as a grid",
-    body: "Your Locations page now has a List ⇄ Grid toggle. Grid view lays out every office as a card — logo, city and state, address, and how many active jobs are posted there — so multi-site groups can scan their whole footprint at a glance. A footprint summary up top tallies how many locations you run across how many states. Your choice is remembered, and sorting works the same in both views.",
+    title: "See your locations as a grid — with a map and state filters",
+    body: "Your Locations page now has a List ⇄ Grid toggle plus a footprint panel up top: an overview map that drops a pin for every office (auto-zoomed to wherever you operate — click a pin to open that location), and a per-state tally you can click to filter the whole page down to one state. Grid view lays out each office as a card with its logo, city and state, address, and active-job count. Your view choice is remembered, and sorting works the same in both views.",
   },
   {
     date: "2026-06-15",
