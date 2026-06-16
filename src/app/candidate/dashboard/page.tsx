@@ -56,6 +56,8 @@ import {
   CredentialsCard,
   type CredItem,
 } from "@/components/dashboard/credentials-card";
+import { loadMarketRange } from "@/lib/comp/market";
+import { YourMarketCard } from "@/components/dashboard/your-market-card";
 import { getDsoResponseMedians } from "@/lib/applications/response-medians";
 import {
   ActivityFeed,
@@ -722,6 +724,15 @@ export default async function CandidateDashboardPage() {
     ),
   ];
 
+  // "Your market" — BLS OEWS band for the candidate's role + state. Returns
+  // null (card hidden) until the OEWS loader has populated comp_benchmarks
+  // or when the role/area can't be mapped — never a guessed number.
+  const marketRange = await loadMarketRange(supabase, {
+    roles: desiredRoles,
+    currentTitle: (c.current_title as string | null) ?? null,
+    state: (c.current_location_state as string | null) ?? null,
+  });
+
   const recentForFeed = apps.slice(0, 5);
 
   const today = new Date();
@@ -925,6 +936,7 @@ export default async function CandidateDashboardPage() {
             nextAction={nextAction}
             compact
           />
+          {marketRange && <YourMarketCard range={marketRange} />}
           <CredentialsCard items={credItems} />
         </div>
       </div>
