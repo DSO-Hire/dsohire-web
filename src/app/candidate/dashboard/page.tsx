@@ -1,18 +1,25 @@
 /**
  * /candidate/dashboard — landing page after candidate sign-in.
  *
- * v3 layout (locked 2026-05-05):
+ * v4 layout — "Command Center" (Direction A, Day 35, 2026-06-16):
  *
  *   Header                       ← welcome, live pulse, today's date
- *   KPI grid                     ← adaptive hero + 4 tonal tiles
- *   Profile completion CTA       ← when profile <100%
- *   ApplicationJourneys          ← stage steppers + honest medians (Lane 7)
- *   ActivityFeed                 ← recent stage moves + employer messages
+ *   Pipeline board (full width)  ← apps as Applied→Hired columns; the
+ *                                  one thing that needs the horizontal
+ *                                  room. Setup hero stands in at 0 apps.
+ *   Two-column:
+ *     LEFT  Offer moment / hero  ← offer in hand leads; else the adaptive
+ *           + PracticeFit summary   new-replies / active-apps hero
+ *           + Roles that fit
+ *     RIGHT Profile strength     ← compact rail; rises beside the offer
+ *           + Credentials & CE      (Your market card lands next commit)
+ *   ActivityFeed (full width)    ← recent moves; terminal apps live here
  *
- * The hero adapts based on what's most actionable for the candidate:
- *   - If unread employer replies → "New Replies" hero with reply previews
- *   - Else if active applications → "Active Applications" hero with stages
- *   - Else (fresh signup) → "Get Hired" 3-step setup hero
+ * The left-column hero adapts to what's most actionable:
+ *   - Offer extended → the green "offer in hand" moment (highest priority)
+ *   - Else unread employer replies → "New Replies" hero
+ *   - Else active applications → "Active Applications" hero
+ *   - Fresh signup (0 apps) → "Get Hired" 3-step setup hero (full width)
  *
  * Important UX rule (locked with Cam): we deliberately do NOT show
  * "days waiting in stage" anywhere on the candidate side. Stage
@@ -27,9 +34,7 @@ import {
   CheckCircle2,
   FileText,
   Mail,
-  Search,
   Send,
-  UserCircle,
 } from "lucide-react";
 import { CandidateShell } from "@/components/candidate/candidate-shell";
 // Lane 7 (Career HQ) — OnboardingChecklist retired from this page
@@ -39,14 +44,18 @@ import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
-import { KpiTile } from "@/components/dashboard/kpi-tile";
 import { CandidateHero } from "@/components/dashboard/candidate-hero";
-// Lane 7 (Career HQ) — MyApplicationStages (kanban-lite) retired from
-// this page (kept on disk); ApplicationJourneys replaces it.
+// Day 35 (Direction A v2.1) — the pipeline board replaces both the KPI
+// grid and the journeys stepper as the primary applications view.
+// ApplicationJourneys + KpiTile kept on disk for revert.
 import {
-  ApplicationJourneys,
-  type ApplicationJourney,
-} from "@/components/dashboard/application-journeys";
+  CandidatePipelineBoard,
+  type BoardCard,
+} from "@/components/dashboard/candidate-pipeline-board";
+import {
+  CredentialsCard,
+  type CredItem,
+} from "@/components/dashboard/credentials-card";
 import { getDsoResponseMedians } from "@/lib/applications/response-medians";
 import {
   ActivityFeed,
@@ -177,7 +186,6 @@ export default async function CandidateDashboardPage() {
     (c.avatar_url as string | null) ?? null,
   );
   const profilePct = Math.round((completeness.score / completeness.total) * 100);
-  const missingFields = completeness.missing.length;
 
   // #54 — the candidate's chosen track drives which fit product leads their
   // dashboard (matches feed, assessment nudge, prefs CTA). null → PracticeFit.
@@ -390,7 +398,6 @@ export default async function CandidateDashboardPage() {
       )
     : [];
   const rolesThatFit = rolesThatFitAll.slice(0, 4);
-  const fittingRolesCount = rolesThatFitAll.length;
 
   // Dimensions the candidate has ALREADY filled — used to suppress
   // "lift your match" nudges that would otherwise tell them to add data they
@@ -654,29 +661,66 @@ export default async function CandidateDashboardPage() {
       ? await getDsoResponseMedians(journeyDsoIds)
       : new Map<string, number>();
 
-  const journeys: ApplicationJourney[] = activeApps.map(
-    (a): ApplicationJourney => {
-      const job = jobMap.get(a.job_id);
-      const days = Math.max(
-        0,
-        Math.floor((nowMs - new Date(a.created_at).getTime()) / 86400000),
-      );
-      return {
-        id: a.id,
-        role: job?.title ?? "Unknown role",
-        dsoName: affiliationByAppId.get(a.id)?.name ?? "Hiring team",
-        locationName: job ? locationByJobId.get(job.id) ?? null : null,
-        stage: a.kind as ApplicationJourney["stage"],
-        daysSinceApplied: days,
-        hideStages: job?.hide_stages_from_candidate ?? false,
-        hasUnreadMessage: (unreadByAppId.get(a.id) ?? 0) > 0,
-        offerPending: a.kind === "offer",
-        medianResponseDays:
-          (job && responseMedians.get(job.dso_id)) ?? null,
-        href: `/candidate/applications/${a.id}`,
-      };
-    },
-  );
+  // ── Pipeline board cards (Direction A v2.1) ─────────────────────────
+  // All non-terminal apps INCLUDING hired (so the Hired column fills);
+  // rejected/withdrawn stay out of the board and surface in Recent
+  // Activity below. Same honest data as the old journeys — laid out as a
+  // board. The component enforces the locked rules (no days-in-stage,
+  // hide_stages collapse, real medians, masked affiliation).
+  const boardApps = apps.filter((a) => !isTerminalKind(a.kind));
+  const boardCards: BoardCard[] = boardApps.map((a): BoardCard => {
+    const job = jobMap.get(a.job_id);
+    const days = Math.max(
+      0,
+      Math.floor((nowMs - new Date(a.created_at).getTime()) / 86400000),
+    );
+    const fit = fitsByActiveAppId.get(a.id) ?? null;
+    return {
+      id: a.id,
+      role: job?.title ?? "Unknown role",
+      dsoName: affiliationByAppId.get(a.id)?.name ?? "Hiring team",
+      locationName: job ? locationByJobId.get(job.id) ?? null : null,
+      stage: a.kind as BoardCard["stage"],
+      daysSinceApplied: days,
+      hideStages: job?.hide_stages_from_candidate ?? false,
+      hasUnreadMessage: (unreadByAppId.get(a.id) ?? 0) > 0,
+      offerPending: a.kind === "offer",
+      medianResponseDays: (job && responseMedians.get(job.dso_id)) ?? null,
+      fitScore: fit?.score ?? null,
+      fitBucket: fit?.bucket ?? null,
+      href: `/candidate/applications/${a.id}`,
+    };
+  });
+
+  // The single most actionable moment: an offer in hand → it leads the
+  // left column (above matches), the rail rises beside it.
+  const offerApp = activeApps.find((a) => a.kind === "offer") ?? null;
+  const offerJob = offerApp ? jobMap.get(offerApp.job_id) : null;
+  const offerDsoName = offerApp
+    ? affiliationByAppId.get(offerApp.id)?.name ?? "A practice"
+    : null;
+  const offerLocation =
+    offerApp && offerJob ? locationByJobId.get(offerJob.id) ?? null : null;
+  const offerCount = stageBreakdown.offer;
+  const hasOffer = offerCount > 0;
+
+  // Credentials & CE rail card — straight off the data already loaded.
+  const credItems: CredItem[] = [
+    ...((rawLicenses ?? []) as Array<Record<string, unknown>>).map((l) => ({
+      id: l.id as string,
+      label: `${prettyCred((l.license_type as string | null) ?? null, "License")} License`,
+      detail: (l.state as string | null) ?? null,
+      expiresDate: (l.expires_date as string | null) ?? null,
+    })),
+    ...((rawCertifications ?? []) as Array<Record<string, unknown>>).map(
+      (ct) => ({
+        id: ct.id as string,
+        label: prettyCred((ct.kind as string | null) ?? null, "Certification"),
+        detail: (ct.level as string | null) ?? null,
+        expiresDate: (ct.expires_date as string | null) ?? null,
+      }),
+    ),
+  ];
 
   const recentForFeed = apps.slice(0, 5);
 
@@ -752,164 +796,136 @@ export default async function CandidateDashboardPage() {
         </p>
       </header>
 
-      {/* Lane 7 (Career HQ) — strength ring + ONE computed next action
-          replaces the onboarding checklist (kept on disk). Facts and
-          payoffs are real-data-only; nothing gates, nothing guilts. */}
-      <div className="mb-6">
-        <CareerStrength
-          pct={profilePct}
-          facts={strengthFacts}
-          nextAction={nextAction}
-        />
-      </div>
-
-      {/* KPI grid — adaptive hero + 4 tonal tiles */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr] gap-px bg-[var(--rule)] border border-[var(--rule)] mb-6">
-        <div className="lg:row-span-2">
-          {heroMode === "new-replies" ? (
-            <CandidateHero
-              mode="new-replies"
-              unreadCount={totalUnread}
-              replies={replyPreviews}
-              href="/candidate/inbox"
-              ctaLabel="Open inbox"
-            />
-          ) : heroMode === "active-apps" ? (
-            <CandidateHero
-              mode="active-apps"
-              activeCount={activeApps.length}
-              hint={buildActiveAppsHint(stageBreakdown)}
-              stages={heroStageStrip}
-              href="/candidate/applications"
-              ctaLabel="See applications"
-            />
-          ) : (
-            <CandidateHero
-              mode="setup"
-              totalSteps={3}
-              doneSteps={profilePct >= 100 ? 1 : 0}
-              hint="Most candidates who finish these three steps hear back from an employer within 5 days."
-              steps={[
-                {
-                  label: "Complete your profile",
-                  done: profilePct >= 100,
-                  upNext: profilePct < 100,
-                },
-                {
-                  label: "Apply to your first job",
-                  done: false,
-                  upNext: profilePct >= 100,
-                },
-                { label: "Watch employers respond", done: false },
-              ]}
-              href={profilePct < 100 ? "/candidate/profile" : "/candidate/jobs"}
-              ctaLabel={profilePct < 100 ? "Finish my profile" : "Browse jobs"}
-            />
-          )}
-        </div>
-
-        <KpiTile
-          icon={Mail}
-          value={String(totalUnread)}
-          label="Unread Replies"
-          hint={
-            totalUnread === 0
-              ? "Messages from employers land here."
-              : `${totalUnread} new repl${totalUnread === 1 ? "y" : "ies"} from employers.`
-          }
-          href="/candidate/inbox"
-          routeLabel="Open inbox"
-        />
-
-        <KpiTile
-          icon={UserCircle}
-          value={`${profilePct}%`}
-          label="Profile Completeness"
-          hint={
-            profilePct < 100
-              ? `Add ${missingFields} more field${missingFields === 1 ? "" : "s"} to stand out to employers.`
-              : "Profile complete — you're putting your best foot forward."
-          }
-          href="/candidate/profile"
-          routeLabel="Finish profile"
-        />
-
-        <KpiTile
-          icon={Search}
-          value={pfConsentOn ? String(fittingRolesCount) : "Off"}
-          label="Roles That Fit You"
-          hint={
-            !pfConsentOn
-              ? "Turn on PracticeFit to see roles matched to your profile."
-              : fittingRolesCount === 0
-                ? "No open roles fit you yet — we'll email you the moment one posts."
-                : "Ranked by PracticeFit across dental groups near you."
-          }
-          href="/candidate/practice-fit"
-          routeLabel={pfConsentOn ? "See your matches" : "Turn on PracticeFit"}
-        />
-
-        <KpiTile
-          icon={CheckCircle2}
-          value={String(apps.length)}
-          label="Total Apps · All Time"
-          hint={
-            apps.length === 0
-              ? "Your application history will show up here once you start applying."
-              : `${apps.length} submitted across ${jobs.length} role${jobs.length === 1 ? "" : "s"}.`
-          }
-          href="/candidate/applications"
-          routeLabel="See history"
-        />
-      </section>
-
-      {/* Profile completion CTA */}
-      {profilePct < 100 && (
-        <section className="mb-6 p-7 sm:p-8 bg-ink text-ivory border-l-4 border-heritage">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-5 items-center">
+      {/* Pipeline board — full width on top (needs the horizontal room).
+          Setup hero stands in when there are no applications yet. */}
+      {boardCards.length > 0 ? (
+        <section className="mb-8">
+          <div className="flex items-end justify-between gap-4 mb-4">
             <div>
-              <div className="text-[10px] font-extrabold tracking-[2.5px] uppercase text-heritage-light mb-2">
-                Finish Your Profile
-              </div>
-              <h3 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.6px] leading-tight mb-3">
-                {profilePct < 50
-                  ? "Most candidates with complete profiles hear back 3× faster."
-                  : "Almost there — finish strong."}
-              </h3>
-              <p className="text-[14px] text-ivory/70 leading-relaxed max-w-[560px]">
-                {profilePct < 50
-                  ? "Add your headline, target roles, location preferences, résumé, and availability — takes about 4 minutes."
-                  : "Just a few more fields and your profile is fully discoverable by employers."}
+              <h2 className="text-[11px] font-extrabold tracking-[2.5px] uppercase text-heritage-deep">
+                Your applications
+              </h2>
+              <p className="text-[12px] text-slate-meta mt-1">
+                Where each one stands — your whole search at a glance.
               </p>
             </div>
             <Link
-              href="/candidate/profile"
-              className="inline-flex items-center gap-2 px-7 py-3.5 bg-heritage text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-heritage-deep transition-colors flex-shrink-0"
+              href="/candidate/applications"
+              className="shrink-0 text-[10px] font-extrabold tracking-[1.5px] uppercase text-heritage hover:text-heritage-deep transition-colors"
             >
-              <UserCircle className="h-4 w-4" />
-              Continue Setup
-              <ArrowRight className="h-3.5 w-3.5" />
+              All applications →
             </Link>
           </div>
+          <CandidatePipelineBoard cards={boardCards} />
+          <p className="mt-3 text-[11px] text-slate-meta">
+            Honest by design — no “days-in-stage” countdowns. The only clock is
+            your own “applied X ago.”
+          </p>
+        </section>
+      ) : (
+        <section className="mb-8">
+          <CandidateHero
+            mode="setup"
+            totalSteps={3}
+            doneSteps={profilePct >= 100 ? 1 : 0}
+            hint="Most candidates who finish these three steps hear back from an employer within 5 days."
+            steps={[
+              {
+                label: "Complete your profile",
+                done: profilePct >= 100,
+                upNext: profilePct < 100,
+              },
+              {
+                label: "Apply to your first job",
+                done: false,
+                upNext: profilePct >= 100,
+              },
+              { label: "Watch employers respond", done: false },
+            ]}
+            href={profilePct < 100 ? "/candidate/profile" : "/candidate/jobs"}
+            ctaLabel={profilePct < 100 ? "Finish my profile" : "Browse jobs"}
+          />
         </section>
       )}
 
-      {/* PracticeFit summary — best match + lift-your-match nudges */}
-      <CandidateFitSummary
-        fitsByAppId={fitsByActiveAppId}
-        totalActiveApps={activeApps.length}
-        filledDims={filledDims}
-      />
+      {/* Lower: the moment + matches (left) · strength / credentials rail
+          (right). The offer card is constrained to the left column so the
+          rail rises up beside it (Cam, Day 35). */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_330px] gap-6 items-start">
+        <div className="min-w-0 space-y-6">
+          {boardCards.length > 0 &&
+            (hasOffer && offerApp ? (
+              <section className="relative overflow-hidden border border-heritage/30 bg-heritage text-ivory p-6 sm:p-7">
+                <div className="text-[10px] font-extrabold tracking-[2px] uppercase text-[#e9c873] mb-2">
+                  ★ Offer extended
+                  {offerCount > 1 ? ` · ${offerCount} offers` : ""}
+                </div>
+                <h3 className="text-xl sm:text-2xl font-extrabold tracking-[-0.4px] leading-tight">
+                  {offerDsoName} extended you an offer.
+                </h3>
+                <p className="mt-1.5 text-[13.5px] text-ivory/80">
+                  {offerJob?.title ?? "Role"}
+                  {offerLocation ? ` · ${offerLocation}` : ""} · no rush — it’s
+                  open.
+                </p>
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  <Link
+                    href={`/candidate/applications/${offerApp.id}`}
+                    className="inline-flex items-center gap-2 bg-[#e9c873] text-ink px-5 py-2.5 text-[12px] font-bold tracking-[1px] uppercase hover:bg-[#dcb95f] transition-colors"
+                  >
+                    Review &amp; respond
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                  <Link
+                    href="/candidate/inbox"
+                    className="inline-flex items-center gap-2 border border-white/25 bg-white/10 px-5 py-2.5 text-[12px] font-bold tracking-[1px] uppercase hover:bg-white/20 transition-colors"
+                  >
+                    Message the practice
+                  </Link>
+                </div>
+              </section>
+            ) : heroMode === "new-replies" ? (
+              <CandidateHero
+                mode="new-replies"
+                unreadCount={totalUnread}
+                replies={replyPreviews}
+                href="/candidate/inbox"
+                ctaLabel="Open inbox"
+              />
+            ) : (
+              <CandidateHero
+                mode="active-apps"
+                activeCount={activeApps.length}
+                hint={buildActiveAppsHint(stageBreakdown)}
+                stages={heroStageStrip}
+                href="/candidate/applications"
+                ctaLabel="See applications"
+              />
+            ))}
 
-      {/* Roles that fit you — top open roles ranked by PracticeFit (B.1) */}
-      <RolesThatFitCard roles={rolesThatFit} product={primaryFitProduct} />
+          {/* PracticeFit summary — best match + lift-your-match nudges */}
+          <CandidateFitSummary
+            fitsByAppId={fitsByActiveAppId}
+            totalActiveApps={activeApps.length}
+            filledDims={filledDims}
+          />
 
-      {/* Your applications — as journeys (Lane 7, Model 06) */}
-      {activeApps.length > 0 && (
-        <section className="mb-6">
-          <ApplicationJourneys journeys={journeys} />
-        </section>
-      )}
+          {/* Roles that fit you — top open roles ranked by PracticeFit */}
+          <RolesThatFitCard roles={rolesThatFit} product={primaryFitProduct} />
+        </div>
+
+        {/* Right rail — profile strength · credentials. (Your market card
+            lands in the follow-up commit.) */}
+        <div className="space-y-6">
+          <CareerStrength
+            pct={profilePct}
+            facts={strengthFacts}
+            nextAction={nextAction}
+            compact
+          />
+          <CredentialsCard items={credItems} />
+        </div>
+      </div>
 
       {/* Recent Activity */}
       <section className="mt-6">
@@ -1035,4 +1051,18 @@ function relativeDate(iso: string, nowMs: number): string {
     month: "short",
     day: "numeric",
   });
+}
+
+/** Tidy a credential slug for display: acronyms (≤3 chars) upper, words title-cased. */
+function prettyCred(s: string | null | undefined, fallback: string): string {
+  const raw = (s ?? "").trim();
+  if (!raw) return fallback;
+  return raw
+    .split(/[\s_]+/)
+    .map((w) =>
+      w.length <= 3
+        ? w.toUpperCase()
+        : w[0].toUpperCase() + w.slice(1).toLowerCase(),
+    )
+    .join(" ");
 }

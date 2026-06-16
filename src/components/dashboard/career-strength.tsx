@@ -29,6 +29,7 @@ export function CareerStrength({
   pct,
   facts,
   nextAction,
+  compact = false,
 }: {
   /** Profile strength 0–100 (completeness score). */
   pct: number;
@@ -36,6 +37,8 @@ export function CareerStrength({
   facts: string[];
   /** The single computed suggestion — null when fully tuned. */
   nextAction: NextAction | null;
+  /** Day 35 — rail variant: always stacks vertically to fit a narrow column. */
+  compact?: boolean;
 }) {
   // SVG ring: r=30, circumference ≈ 188.5.
   const C = 2 * Math.PI * 30;
@@ -43,7 +46,13 @@ export function CareerStrength({
   const dash = (filled / 100) * C;
 
   return (
-    <section className="border border-[var(--rule)] bg-white p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-7">
+    <section
+      className={
+        compact
+          ? "border border-[var(--rule)] bg-white p-5 flex flex-col items-start gap-4"
+          : "border border-[var(--rule)] bg-white p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-7"
+      }
+    >
       {/* Strength ring */}
       <div className="relative shrink-0 h-[88px] w-[88px]" aria-hidden>
         <svg viewBox="0 0 72 72" className="h-full w-full -rotate-90">
@@ -83,7 +92,13 @@ export function CareerStrength({
           </p>
         )}
         {nextAction ? (
-          <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+          <div
+            className={
+              compact
+                ? "mt-3 flex flex-col items-start gap-2"
+                : "mt-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4"
+            }
+          >
             <div className="min-w-0">
               <p className="text-[14px] font-bold text-ink leading-snug">
                 {nextAction.label}
