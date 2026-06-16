@@ -61,13 +61,34 @@ export interface MarketRange {
  */
 export async function loadMarketRange(
   supabase: SupabaseClient,
-  opts: { roles: string[]; currentTitle: string | null; state: string | null },
+  opts: {
+    roles: string[];
+    currentTitle: string | null;
+    state: string | null;
+    zip?: string | null;
+  },
 ): Promise<MarketRange | null> {
   const soc = socForRole(opts.roles, opts.currentTitle);
   if (!soc) return null;
   const unit: MarketRange["unit"] = ANNUAL_SOCS.has(soc) ? "annual" : "hourly";
 
-  const tryKeys: Array<{ level: "state" | "national"; code: string }> = [];
+  const tryKeys: Array<{
+    level: "metro" | "state" | "national";
+    code: string;
+  }> = [];
+
+  // ZIP → dominant CBSA → metro band (sharpest signal). Rural ZIPs aren't in
+  // the crosswalk, so we just fall through to state.
+  const zip = opts.zip?.replace(/\D/g, "").slice(0, 5);
+  if (zip && zip.length === 5) {
+    const { data: zc } = await supabase
+      .from("zip_cbsa")
+      .select("cbsa")
+      .eq("zip", zip)
+      .maybeSingle();
+    const cbsa = (zc as { cbsa: string } | null)?.cbsa ?? null;
+    if (cbsa) tryKeys.push({ level: "metro", code: cbsa });
+  }
   if (opts.state && opts.state.trim()) {
     tryKeys.push({ level: "state", code: opts.state.trim().toUpperCase() });
   }

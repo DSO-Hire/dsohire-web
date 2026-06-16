@@ -104,7 +104,7 @@ export default async function CandidateDashboardPage() {
   const { data: candidate } = await supabase
     .from("candidates")
     .select(
-      "id, first_name, last_name, salutation, full_name, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, desired_specialty, license_states, pms_systems, skills, languages, temp_or_perm, dso_size_preference, schedule_preferences, min_salary, salary_unit, cv_visibility, availability, resume_url, linkedin_url, avatar_url, practice_fit_consent, work_pace, autonomy_pref, mentorship_pref, practice_feel, ce_growth_importance, work_life_priority, benefit_priorities, patient_population_pref, assessment_completed_at, dsofit_assessment_completed_at, privacy_choices_reviewed_at, primary_fit_product",
+      "id, first_name, last_name, salutation, full_name, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, current_location_zip, desired_roles, desired_locations, desired_specialty, license_states, pms_systems, skills, languages, temp_or_perm, dso_size_preference, schedule_preferences, min_salary, salary_unit, cv_visibility, availability, resume_url, linkedin_url, avatar_url, practice_fit_consent, work_pace, autonomy_pref, mentorship_pref, practice_feel, ce_growth_importance, work_life_priority, benefit_priorities, patient_population_pref, assessment_completed_at, dsofit_assessment_completed_at, privacy_choices_reviewed_at, primary_fit_product",
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
@@ -747,6 +747,7 @@ export default async function CandidateDashboardPage() {
     roles: desiredRoles,
     currentTitle: (c.current_title as string | null) ?? null,
     state: (c.current_location_state as string | null) ?? null,
+    zip: (c.current_location_zip as string | null) ?? null,
   });
   // Offer comp-context (#2) — the candidate's local market band, shown on the
   // offer moment so they can weigh the offer against the market.
