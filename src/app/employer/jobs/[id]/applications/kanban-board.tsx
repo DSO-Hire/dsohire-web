@@ -95,6 +95,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { RejectReasonAiSuggester } from "@/app/employer/applications/[id]/reject-reason-ai-suggester";
+import { DispositionSelect } from "@/components/applications/disposition-select";
+import {
+  validateDisposition,
+  type DispositionKind,
+} from "@/lib/applications/disposition-reasons";
 import type { ApplicationTag } from "@/lib/applications/tags";
 
 export interface KanbanApplication extends ApplicationsListItem {
@@ -257,6 +262,17 @@ export function KanbanBoard({
   // Last broadcast body — lets the result banner's Retry resend to the
   // failed subset without re-opening the compose dialog.
   const lastBulkMessageBodyRef = useRef<string>("");
+  // #8 — remember the last reject/archive (reason, disposition) so a retry
+  // from the failure banner re-applies the same documented reason instead of
+  // closing candidates with no code (which the server now rejects).
+  const lastRejectRef = useRef<{ reason: string; code: string | null }>({
+    reason: "",
+    code: null,
+  });
+  const lastArchiveRef = useRef<{ reason: string; code: string | null }>({
+    reason: "",
+    code: null,
+  });
   const router = useRouter();
   const [, startTransition] = useTransition();
 
@@ -738,11 +754,12 @@ export function KanbanBoard({
     );
   }
 
-  function handleBulkReject(reason: string) {
+  function handleBulkReject(reason: string, dispositionCode: string | null) {
     setRejectDialogOpen(false);
     if (!rejectedStage) return;
+    lastRejectRef.current = { reason, code: dispositionCode };
     runBulkAction(
-      () => bulkRejectApplications(selectedIdsArray, reason),
+      () => bulkRejectApplications(selectedIdsArray, reason, dispositionCode),
       {
         nextStageId: rejectedStage.id,
         nextKind: "rejected",
@@ -753,13 +770,14 @@ export function KanbanBoard({
     );
   }
 
-  function handleBulkArchive(reason: string) {
+  function handleBulkArchive(reason: string, dispositionCode: string | null) {
     setArchiveDialogOpen(false);
     const withdrawnStage =
       terminalStages.find((s) => s.kind === "withdrawn") ?? null;
     if (!withdrawnStage) return;
+    lastArchiveRef.current = { reason, code: dispositionCode };
     runBulkAction(
-      () => bulkArchiveApplications(selectedIdsArray, reason),
+      () => bulkArchiveApplications(selectedIdsArray, reason, dispositionCode),
       {
         nextStageId: withdrawnStage.id,
         nextKind: "withdrawn",
@@ -1178,7 +1196,12 @@ export function KanbanBoard({
               } else if (banner.actionLabel === "Rejected") {
                 if (!rejectedStage) return;
                 runBulkAction(
-                  () => bulkRejectApplications(ids, ""),
+                  () =>
+                    bulkRejectApplications(
+                      ids,
+                      lastRejectRef.current.reason,
+                      lastRejectRef.current.code
+                    ),
                   {
                     nextStageId: rejectedStage.id,
                     nextKind: "rejected",
@@ -1192,7 +1215,12 @@ export function KanbanBoard({
                   terminalStages.find((s) => s.kind === "withdrawn") ?? null;
                 if (!withdrawnStage) return;
                 runBulkAction(
-                  () => bulkArchiveApplications(ids, ""),
+                  () =>
+                    bulkArchiveApplications(
+                      ids,
+                      lastArchiveRef.current.reason,
+                      lastArchiveRef.current.code
+                    ),
                   {
                     nextStageId: withdrawnStage.id,
                     nextKind: "withdrawn",
@@ -1217,6 +1245,8 @@ export function KanbanBoard({
           count={selection.count}
           confirmLabel="Reject"
           reasonHelper="This appears in your team's audit log; the candidate doesn't see it."
+          dispositionKind="rejected"
+          dispositionRequired
           onConfirm={handleBulkReject}
           aiSuggester={{
             available: aiSuggesterAvailable,
@@ -1239,6 +1269,7 @@ export function KanbanBoard({
           count={selection.count}
           confirmLabel="Archive"
           reasonHelper="Archiving moves these candidates out of the active pipeline. Visible to your team only."
+          dispositionKind="withdrawn"
           onConfirm={handleBulkArchive}
         />
 
@@ -1498,6 +1529,8 @@ function BulkConfirmDialog({
   reasonHelper,
   onConfirm,
   aiSuggester,
+  dispositionKind,
+  dispositionRequired = false,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -1506,22 +1539,34 @@ function BulkConfirmDialog({
   count: number;
   confirmLabel: string;
   reasonHelper: string;
-  onConfirm: (reason: string) => void;
+  onConfirm: (reason: string, dispositionCode: string | null) => void;
   aiSuggester?: {
     available: boolean;
     singleApplicationId: string | null;
     singleApplicationHasContext: boolean;
   };
+  /** When set, show the structured disposition picker (#8). */
+  dispositionKind?: DispositionKind;
+  dispositionRequired?: boolean;
 }) {
   const [reason, setReason] = useState("");
+  const [disposition, setDisposition] = useState("");
   useEffect(() => {
-    if (open) setReason("");
+    if (open) {
+      setReason("");
+      setDisposition("");
+    }
   }, [open]);
 
   const confirmClasses =
     variant === "destructive"
       ? "bg-red-700 text-white hover:bg-red-800 focus-visible:ring-red-700"
       : "bg-heritage text-white hover:bg-heritage-deep focus-visible:ring-heritage";
+
+  // Mirror the server gate so Confirm only enables on a valid (code, note) pair.
+  const dispositionError = dispositionKind
+    ? validateDisposition(dispositionKind, disposition || null, reason)
+    : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -1532,6 +1577,15 @@ function BulkConfirmDialog({
             {count} candidate{count === 1 ? "" : "s"} selected.
           </DialogDescription>
         </DialogHeader>
+        {dispositionKind && (
+          <DispositionSelect
+            kind={dispositionKind}
+            value={disposition}
+            onChange={setDisposition}
+            required={dispositionRequired}
+            id="bulk-disposition"
+          />
+        )}
         {aiSuggester &&
           (aiSuggester.singleApplicationId ? (
             <RejectReasonAiSuggester
@@ -1551,7 +1605,7 @@ function BulkConfirmDialog({
             htmlFor="bulk-reason"
             className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body"
           >
-            Reason (optional)
+            Note
           </label>
           <textarea
             id="bulk-reason"
@@ -1573,8 +1627,9 @@ function BulkConfirmDialog({
           </button>
           <button
             type="button"
-            onClick={() => onConfirm(reason)}
-            className={`inline-flex items-center justify-center px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${confirmClasses}`}
+            disabled={dispositionError !== null}
+            onClick={() => onConfirm(reason, disposition || null)}
+            className={`inline-flex items-center justify-center px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${confirmClasses}`}
           >
             {confirmLabel}
           </button>

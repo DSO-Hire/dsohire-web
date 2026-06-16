@@ -25,6 +25,7 @@
 import { moveApplicationStage } from "./actions";
 import { attachStatusEventNote } from "@/lib/applications/status-event-notes";
 import type { StageKind } from "@/lib/applications/stages";
+import { validateDisposition } from "@/lib/applications/disposition-reasons";
 
 export type RejectActionResult = { ok: true } | { ok: false; error: string };
 
@@ -33,20 +34,31 @@ const NOTE_MAX = 1000;
 async function moveAndAttachNote(
   applicationId: string,
   toKind: Extract<StageKind, "rejected" | "withdrawn">,
-  reason: string
+  reason: string,
+  dispositionCode: string | null
 ): Promise<RejectActionResult> {
   const trimmed = (reason ?? "").trim().slice(0, NOTE_MAX);
+  const code = (dispositionCode ?? "").trim() || null;
+
+  // #8 — disposition is required on rejections (ATS standard). Validate
+  // BEFORE moving the stage so a missing/invalid code never leaves the
+  // candidate in a closed state without a documented reason.
+  const invalid = validateDisposition(toKind, code, trimmed);
+  if (invalid) {
+    return { ok: false, error: invalid };
+  }
 
   const move = await moveApplicationStage(applicationId, { kind: toKind });
   if (!move.ok) {
     return { ok: false, error: move.error };
   }
 
-  if (trimmed) {
+  if (trimmed || code) {
     await attachStatusEventNote({
       applicationIds: [applicationId],
       toKind,
       note: trimmed,
+      dispositionCode: code,
     });
   }
 
@@ -55,14 +67,16 @@ async function moveAndAttachNote(
 
 export async function rejectWithReason(
   applicationId: string,
-  reason: string
+  reason: string,
+  dispositionCode?: string | null
 ): Promise<RejectActionResult> {
-  return moveAndAttachNote(applicationId, "rejected", reason);
+  return moveAndAttachNote(applicationId, "rejected", reason, dispositionCode ?? null);
 }
 
 export async function withdrawWithReason(
   applicationId: string,
-  reason: string
+  reason: string,
+  dispositionCode?: string | null
 ): Promise<RejectActionResult> {
-  return moveAndAttachNote(applicationId, "withdrawn", reason);
+  return moveAndAttachNote(applicationId, "withdrawn", reason, dispositionCode ?? null);
 }

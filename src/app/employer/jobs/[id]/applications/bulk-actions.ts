@@ -40,6 +40,7 @@ import { after } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { capabilityBlockError } from "@/lib/permissions/guard";
 import { attachStatusEventNote } from "@/lib/applications/status-event-notes";
+import { validateDisposition } from "@/lib/applications/disposition-reasons";
 import {
   KIND_DEFAULT_LABELS,
   STAGE_KINDS,
@@ -573,9 +574,19 @@ async function emitBulkAuditSummary(input: {
  */
 export async function bulkRejectApplications(
   applicationIds: string[],
-  reason: string
+  reason: string,
+  dispositionCode?: string | null
 ): Promise<BulkActionResult> {
   const trimmedReason = (reason ?? "").trim().slice(0, 1000);
+  const code = (dispositionCode ?? "").trim() || null;
+
+  // #8 — disposition required on bulk reject. Validate once for the batch
+  // before moving anyone.
+  const invalid = validateDisposition("rejected", code, trimmedReason);
+  if (invalid) {
+    return { succeeded: [], failed: applicationIds.map((id) => ({ id, error: invalid })) };
+  }
+
   const result = await bulkMoveApplicationsImpl(
     applicationIds,
     { kind: "rejected" },
@@ -583,11 +594,12 @@ export async function bulkRejectApplications(
     trimmedReason || undefined
   );
 
-  if (trimmedReason && result.succeeded.length > 0) {
+  if ((trimmedReason || code) && result.succeeded.length > 0) {
     await attachStatusEventNote({
       applicationIds: result.succeeded.map((r) => r.id),
       toKind: "rejected",
       note: trimmedReason,
+      dispositionCode: code,
     });
   }
 
@@ -603,9 +615,19 @@ export async function bulkRejectApplications(
  */
 export async function bulkArchiveApplications(
   applicationIds: string[],
-  reason: string
+  reason: string,
+  dispositionCode?: string | null
 ): Promise<BulkActionResult> {
   const trimmedReason = (reason ?? "").trim().slice(0, 1000);
+  const code = (dispositionCode ?? "").trim() || null;
+
+  // Withdrawn: code is optional, but if supplied it must be valid (+ honor
+  // requiresNote). validateDisposition returns null for a missing code here.
+  const invalid = validateDisposition("withdrawn", code, trimmedReason);
+  if (invalid) {
+    return { succeeded: [], failed: applicationIds.map((id) => ({ id, error: invalid })) };
+  }
+
   const result = await bulkMoveApplicationsImpl(
     applicationIds,
     { kind: "withdrawn" },
@@ -613,11 +635,12 @@ export async function bulkArchiveApplications(
     trimmedReason || undefined
   );
 
-  if (trimmedReason && result.succeeded.length > 0) {
+  if ((trimmedReason || code) && result.succeeded.length > 0) {
     await attachStatusEventNote({
       applicationIds: result.succeeded.map((r) => r.id),
       toKind: "withdrawn",
       note: trimmedReason,
+      dispositionCode: code,
     });
   }
 

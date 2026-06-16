@@ -885,6 +885,7 @@ export type Database = {
           actor_type: string
           application_id: string
           created_at: string
+          disposition_code: string | null
           from_stage_kind: string | null
           from_stage_label: string | null
           id: string
@@ -897,6 +898,7 @@ export type Database = {
           actor_type: string
           application_id: string
           created_at?: string
+          disposition_code?: string | null
           from_stage_kind?: string | null
           from_stage_label?: string | null
           id?: string
@@ -909,6 +911,7 @@ export type Database = {
           actor_type?: string
           application_id?: string
           created_at?: string
+          disposition_code?: string | null
           from_stage_kind?: string | null
           from_stage_label?: string | null
           id?: string

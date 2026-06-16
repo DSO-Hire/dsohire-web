@@ -12,6 +12,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { capabilityBlockError } from "@/lib/permissions/guard";
 import { toCsv, csvFilename } from "@/lib/analytics/csv";
+import { dispositionLabel } from "@/lib/applications/disposition-reasons";
 
 export const dynamic = "force-dynamic";
 
@@ -84,6 +85,26 @@ export async function GET(
   // authed candidates. Surfacing the auth email per row requires a
   // service-role lookup; defer to v2.
 
+  // #8 — latest structured disposition code per application (rejected/withdrawn).
+  const appIds = rows.map((r) => r.id);
+  const dispoByApp = new Map<string, string>();
+  if (appIds.length > 0) {
+    const { data: evRows } = await supabase
+      .from("application_status_events")
+      .select("application_id, disposition_code, created_at")
+      .in("application_id", appIds)
+      .not("disposition_code", "is", null)
+      .order("created_at", { ascending: false });
+    for (const e of (evRows ?? []) as Array<{
+      application_id: string;
+      disposition_code: string | null;
+    }>) {
+      if (e.disposition_code && !dispoByApp.has(e.application_id)) {
+        dispoByApp.set(e.application_id, e.disposition_code);
+      }
+    }
+  }
+
   const csvRows = rows.map((r) => {
     const cand = r.candidates?.[0];
     const stage = Array.isArray(r.stage) ? r.stage[0] : r.stage;
@@ -102,6 +123,7 @@ export async function GET(
       candidate_email: cand?.email ?? "",
       candidate_phone: cand?.phone ?? "",
       status,
+      disposition: dispositionLabel(dispoByApp.get(r.id) ?? null),
       source: r.source ?? "",
       applied_at: r.created_at,
       hired_at: r.hired_at ?? "",

@@ -36,6 +36,8 @@ import { moveApplicationStage } from "./actions";
 import { useToast } from "@/components/app/toast";
 import { rejectWithReason, withdrawWithReason } from "./reject-actions";
 import { RejectReasonAiSuggester } from "./reject-reason-ai-suggester";
+import { DispositionSelect } from "@/components/applications/disposition-select";
+import { validateDisposition } from "@/lib/applications/disposition-reasons";
 import {
   Dialog,
   DialogContent,
@@ -173,7 +175,11 @@ export function StageSelector({
     setClosedDialog(transition);
   }
 
-  function handleClosedConfirm(transition: ClosedTransition, reason: string) {
+  function handleClosedConfirm(
+    transition: ClosedTransition,
+    reason: string,
+    dispositionCode: string | null
+  ) {
     setClosedDialog(null);
     if (transition.toKind === optimisticState.kind) return;
     setError(null);
@@ -191,7 +197,7 @@ export function StageSelector({
       });
       const action =
         transition.toKind === "rejected" ? rejectWithReason : withdrawWithReason;
-      const result = await action(applicationId, reason);
+      const result = await action(applicationId, reason, dispositionCode);
       if (!result.ok) {
         setError(result.error);
         return;
@@ -332,13 +338,21 @@ function ClosedTransitionDialog({
   aiSuggesterAvailable: boolean;
   aiSuggesterHasContext: boolean;
   onCancel: () => void;
-  onConfirm: (transition: ClosedTransition, reason: string) => void;
+  onConfirm: (
+    transition: ClosedTransition,
+    reason: string,
+    dispositionCode: string | null
+  ) => void;
 }) {
   const [reason, setReason] = useState("");
+  const [disposition, setDisposition] = useState("");
   const open = transition !== null;
 
   useEffect(() => {
-    if (open) setReason("");
+    if (open) {
+      setReason("");
+      setDisposition("");
+    }
   }, [open]);
 
   if (!transition) return null;
@@ -349,6 +363,13 @@ function ClosedTransitionDialog({
       : "bg-heritage text-white hover:bg-heritage-deep focus-visible:ring-heritage";
 
   const showAiSuggester = transition.toKind === "rejected";
+  const dispositionRequired = transition.toKind === "rejected";
+  // Mirror the server gate so Confirm only enables on a valid (code, note) pair.
+  const dispositionError = validateDisposition(
+    transition.toKind,
+    disposition || null,
+    reason
+  );
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onCancel()}>
@@ -359,6 +380,13 @@ function ClosedTransitionDialog({
             {candidateName} · {jobTitle}
           </DialogDescription>
         </DialogHeader>
+        <DispositionSelect
+          kind={transition.toKind}
+          value={disposition}
+          onChange={setDisposition}
+          required={dispositionRequired}
+          id="single-disposition"
+        />
         {showAiSuggester && (
           <RejectReasonAiSuggester
             applicationId={applicationId}
@@ -372,7 +400,7 @@ function ClosedTransitionDialog({
             htmlFor="single-reason"
             className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body"
           >
-            Reason (optional)
+            Note
           </label>
           <textarea
             id="single-reason"
@@ -396,8 +424,11 @@ function ClosedTransitionDialog({
           </button>
           <button
             type="button"
-            onClick={() => onConfirm(transition, reason)}
-            className={`inline-flex items-center justify-center px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${confirmClasses}`}
+            disabled={dispositionError !== null}
+            onClick={() =>
+              onConfirm(transition, reason, disposition || null)
+            }
+            className={`inline-flex items-center justify-center px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${confirmClasses}`}
           >
             {transition.dialogConfirmLabel}
           </button>

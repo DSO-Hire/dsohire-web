@@ -31,18 +31,31 @@ export interface AttachStatusNoteOptions {
   toKind: StageKind;
   /**
    * Recruiter-supplied reason. Trimmed + capped at 1000 chars upstream; we
-   * write whatever caller passes verbatim. Empty string → caller should not
-   * have called us at all; we no-op for safety.
+   * write whatever caller passes verbatim. May be empty when only a
+   * structured disposition code is supplied.
    */
   note: string;
+  /**
+   * Structured disposition code (#8). Validated upstream against the taxonomy
+   * in disposition-reasons.ts. Internal/compliance only — never candidate-facing.
+   */
+  dispositionCode?: string | null;
 }
 
 export async function attachStatusEventNote({
   applicationIds,
   toKind,
   note,
+  dispositionCode,
 }: AttachStatusNoteOptions): Promise<void> {
-  if (!note || applicationIds.length === 0) return;
+  const trimmedNote = (note ?? "").trim();
+  const code = (dispositionCode ?? "").trim() || null;
+  // Nothing to persist, or no targets → no-op.
+  if ((!trimmedNote && !code) || applicationIds.length === 0) return;
+
+  const patch: { note?: string; disposition_code?: string } = {};
+  if (trimmedNote) patch.note = trimmedNote;
+  if (code) patch.disposition_code = code;
 
   const admin = createSupabaseServiceRoleClient();
   for (const appId of applicationIds) {
@@ -66,7 +79,7 @@ export async function attachStatusEventNote({
       const eventId = (events[0] as { id: string }).id;
       const { error: updErr } = await admin
         .from("application_status_events")
-        .update({ note })
+        .update(patch)
         .eq("id", eventId);
       if (updErr) {
         console.warn(
