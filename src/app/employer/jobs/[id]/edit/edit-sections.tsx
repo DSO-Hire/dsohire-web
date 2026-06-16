@@ -236,7 +236,7 @@ export function EditSections({
         roleCategory={initial.role_category}
         jobLocations={locations
           .filter((l) => initial.location_ids.includes(l.id))
-          .map((l) => ({ state: l.state, city: l.city }))}
+          .map((l) => ({ id: l.id, state: l.state, city: l.city }))}
         initialCompModelState={initial.comp_model_state}
         initialCompType={initial.compensation_type}
         initialCompMin={initial.compensation_min}
@@ -806,7 +806,7 @@ function DetailsSection({
   dsoId: string;
   jobId: string;
   roleCategory: string;
-  jobLocations: Array<{ state: string | null; city: string | null }>;
+  jobLocations: Array<{ id: string; state: string | null; city: string | null }>;
   initialCompModelState: CompModelState;
   initialCompType: "range" | "starting_at" | "up_to" | "exact" | "doe";
   initialCompMin: number | null;
@@ -1183,6 +1183,9 @@ function DetailsSection({
           accent="heritage"
           roleCategory={roleCategory}
           benchmarkState={jobLocations.find((l) => l.state)?.state ?? null}
+          benchmarkLocationId={
+            jobLocations.find((l) => l.state)?.id ?? jobLocations[0]?.id ?? null
+          }
           enforcement={
             payTransparency
               ? {

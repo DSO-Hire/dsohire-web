@@ -1046,6 +1046,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   let offerSectionDsoName: string = dsoNameForAffiliation;
   let offerSectionJobLocation: string = "";
   let offerSectionState: string | null = null;
+  let offerSectionLocationId: string | null = null;
   let offerSectionJobEmploymentType: string = "";
   {
     const [
@@ -1202,7 +1203,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     // Job location — "City, State" from the first linked dso_location.
     const { data: jobLocRow } = await supabase
       .from("job_locations")
-      .select("dso_locations:dso_locations(city, state)")
+      .select("dso_locations:dso_locations(id, city, state)")
       .eq("job_id", app.job_id as string)
       .limit(1)
       .maybeSingle();
@@ -1216,6 +1217,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
         const city = (loc.city as string | null) ?? "";
         const state = (loc.state as string | null) ?? "";
         offerSectionState = state || null;
+        offerSectionLocationId = (loc.id as string | null) ?? null;
         offerSectionJobLocation = [city, state]
           .filter(Boolean)
           .join(", ");
@@ -1805,6 +1807,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 jobEmploymentType={offerSectionJobEmploymentType}
                 roleCategory={String(job.role_category)}
                 benchmarkState={offerSectionState}
+                benchmarkLocationId={offerSectionLocationId}
                 // #128 Phase D — percentage comp models guardrail against
                 // the posted est. annual range (single mapper, same rule as
                 // the engine). Legacy/simple jobs pass through unchanged.

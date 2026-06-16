@@ -119,6 +119,8 @@ interface OfferSectionProps {
   /** Job role + state — drive the market-pay reference by the comp field (N4). */
   roleCategory: string;
   benchmarkState: string | null;
+  /** Job's first location id → metro-precise market benchmark. */
+  benchmarkLocationId: string | null;
   /** N12 — the job's POSTED comp range, for the offer guardrail banner. */
   jobCompMin: number | null;
   jobCompMax: number | null;
@@ -148,6 +150,7 @@ export function OfferSection({
   jobEmploymentType,
   roleCategory,
   benchmarkState,
+  benchmarkLocationId,
   jobCompMin,
   jobCompMax,
   jobCompPeriod,
@@ -300,6 +303,7 @@ export function OfferSection({
           jobEmploymentType={jobEmploymentType}
           roleCategory={roleCategory}
           benchmarkState={benchmarkState}
+          benchmarkLocationId={benchmarkLocationId}
           jobCompMin={jobCompMin}
           jobCompMax={jobCompMax}
           jobCompPeriod={jobCompPeriod}
@@ -938,6 +942,7 @@ function SendOfferModal({
   jobEmploymentType,
   roleCategory,
   benchmarkState,
+  benchmarkLocationId,
   jobCompMin,
   jobCompMax,
   jobCompPeriod,
@@ -957,6 +962,7 @@ function SendOfferModal({
   jobEmploymentType: string;
   roleCategory: string;
   benchmarkState: string | null;
+  benchmarkLocationId: string | null;
   jobCompMin: number | null;
   jobCompMax: number | null;
   jobCompPeriod: string | null;
@@ -1258,6 +1264,9 @@ function SendOfferModal({
                 onChange={setValues}
                 roleCategory={roleCategory}
                 benchmarkState={benchmarkState}
+                benchmarkLocationId={benchmarkLocationId}
+                baseAmount={baseAmount}
+                basePeriod={basePeriod}
               />
             </div>
           )}
@@ -1538,12 +1547,18 @@ function Step2FillFields({
   onChange,
   roleCategory,
   benchmarkState,
+  benchmarkLocationId,
+  baseAmount,
+  basePeriod,
 }: {
   template: OfferTemplateOption;
   values: Record<string, string>;
   onChange: (next: Record<string, string>) => void;
   roleCategory: string;
   benchmarkState: string | null;
+  benchmarkLocationId: string | null;
+  baseAmount: string;
+  basePeriod: "hourly" | "annual";
 }) {
   // Only ask for offer.* fields the template actually references. If a
   // template doesn't use offer.signing_bonus, we don't need to ask the
@@ -1574,9 +1589,10 @@ function Step2FillFields({
         <PayBenchmarkHint
           roleCategory={roleCategory}
           state={benchmarkState}
-          compMin=""
+          locationId={benchmarkLocationId}
+          compMin={baseAmount}
           compMax=""
-          compPeriod=""
+          compPeriod={basePeriod}
           accentText="text-heritage-deep"
         />
       )}
