@@ -2181,7 +2181,7 @@ function DetailsStep({
         roleCategory={roleCategory}
         benchmarkState={benchmarkState}
         benchmarkLocationId={benchmarkLocationId}
-        benchmarkSpecialty={specialty}
+        benchmarkSpecialty={Array.from(specialty)}
         enforcement={
           payTransparency
             ? { ...payTransparency, exempt: payExempt, onExempt: onPayExempt }
