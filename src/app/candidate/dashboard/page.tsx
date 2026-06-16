@@ -908,6 +908,8 @@ export default async function CandidateDashboardPage() {
             fitsByAppId={fitsByActiveAppId}
             totalActiveApps={activeApps.length}
             filledDims={filledDims}
+            pfAssessmentDone={pfAssessmentItem.done}
+            dsofitAssessmentDone={dsoAssessmentItem.done}
           />
 
           {/* Roles that fit you — top open roles ranked by PracticeFit */}
@@ -1053,16 +1055,24 @@ function relativeDate(iso: string, nowMs: number): string {
   });
 }
 
-/** Tidy a credential slug for display: acronyms (≤3 chars) upper, words title-cased. */
+/** Common dental credential acronyms that should stay fully capitalized. */
+const CRED_ACRONYMS = new Set([
+  "HIPAA", "OSHA", "CPR", "BLS", "ACLS", "PALS", "AED", "CDA", "RDA", "EFDA",
+  "DANB", "DEA", "NPI", "CE", "CDC", "DDS", "DMD", "RDH", "RDHAP", "OMFS",
+]);
+
+/** Tidy a credential slug for display: known acronyms upper, words title-cased. */
 function prettyCred(s: string | null | undefined, fallback: string): string {
   const raw = (s ?? "").trim();
   if (!raw) return fallback;
   return raw
     .split(/[\s_]+/)
-    .map((w) =>
-      w.length <= 3
-        ? w.toUpperCase()
-        : w[0].toUpperCase() + w.slice(1).toLowerCase(),
-    )
+    .map((w) => {
+      const up = w.toUpperCase();
+      if (CRED_ACRONYMS.has(up)) return up;
+      return w.length <= 3
+        ? up
+        : w[0].toUpperCase() + w.slice(1).toLowerCase();
+    })
     .join(" ");
 }

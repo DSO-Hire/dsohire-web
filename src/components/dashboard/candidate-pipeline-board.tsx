@@ -87,7 +87,7 @@ export function CandidatePipelineBoard({ cards }: { cards: BoardCard[] }) {
         return (
           <div
             key={col.kind}
-            className="rounded-xl border border-[var(--rule)] bg-cream/40 p-2.5 min-h-[120px]"
+            className="rounded-xl border border-[var(--rule)] bg-white p-2.5 min-h-[120px]"
           >
             <div className="flex items-center gap-2 px-1.5 pb-2.5 pt-1">
               <span className={`h-2 w-2 rounded-full ${DOT[col.tone]}`} />
@@ -124,8 +124,10 @@ function BoardCardItem({ card: c, tone }: { card: BoardCard; tone: ColTone }) {
   return (
     <Link
       href={c.href}
-      className={`block rounded-lg border bg-white p-3 shadow-[0_1px_2px_rgba(11,35,64,0.04)] transition-shadow hover:shadow-[0_8px_24px_rgba(11,35,64,0.12)] ${
-        isOffer ? "border-amber-300 bg-amber-50/40" : "border-[var(--rule)]"
+      className={`block rounded-lg border p-3 shadow-[0_1px_3px_rgba(11,35,64,0.07)] transition-shadow hover:shadow-[0_8px_24px_rgba(11,35,64,0.12)] ${
+        isOffer
+          ? "border-amber-300 bg-amber-50/50"
+          : "border-[var(--rule)] bg-cream/40"
       }`}
     >
       <div className="text-[13.5px] font-bold leading-tight text-ink">

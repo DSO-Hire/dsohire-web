@@ -43,6 +43,14 @@ export interface CandidateFitSummaryProps {
    * already provided (the Sarah-Chen "Add experience" bug).
    */
   filledDims?: Set<FitDimensionKey>;
+  /**
+   * Day 35 — suppress the "Take the assessment" lift nudge once the
+   * candidate has actually completed it. Without this, a single skipped
+   * optional assessment dimension re-adds the CTA even though the
+   * candidate already finished the assessment (Sarah-Chen case).
+   */
+  pfAssessmentDone?: boolean;
+  dsofitAssessmentDone?: boolean;
 }
 
 interface CommonGap {
@@ -57,6 +65,8 @@ export function CandidateFitSummary({
   fitsByAppId,
   totalActiveApps,
   filledDims,
+  pfAssessmentDone,
+  dsofitAssessmentDone,
 }: CandidateFitSummaryProps) {
   // No active apps → don't render. PracticeFit only makes sense in
   // the context of an application.
@@ -124,6 +134,21 @@ export function CandidateFitSummary({
       // Skip "job-side missing" gaps — the candidate can't act on those.
       if (!dim.cta_href || !dim.cta_label) continue;
       const key = keyRaw as FitDimensionKey;
+      // Don't nudge "Take the assessment" once the candidate has done it —
+      // a skipped optional assessment dim would otherwise re-add the CTA.
+      if (
+        dim.cta_href.includes("/candidate/dsofit-assessment") &&
+        dsofitAssessmentDone
+      ) {
+        continue;
+      }
+      if (
+        !dim.cta_href.includes("/candidate/dsofit-assessment") &&
+        dim.cta_href.includes("/candidate/assessment") &&
+        pfAssessmentDone
+      ) {
+        continue;
+      }
       // Skip anything the candidate has already filled — the gap is on the
       // job's side, not theirs. Never tell someone to add data they have.
       if (filledDims?.has(key)) continue;
