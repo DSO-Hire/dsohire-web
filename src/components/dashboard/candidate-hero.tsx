@@ -79,7 +79,25 @@ interface SetupProps extends CandidateHeroBaseProps {
   steps: SetupStep[];
 }
 
-type CandidateHeroProps = NewRepliesProps | ActiveAppsProps | SetupProps;
+interface InterviewItem {
+  /** Job title. */
+  role: string;
+  /** Masked-safe practice display name. */
+  dsoName: string;
+}
+
+interface InterviewProps extends CandidateHeroBaseProps {
+  mode: "interview";
+  interviewCount: number;
+  items: InterviewItem[];
+  hint: string;
+}
+
+type CandidateHeroProps =
+  | NewRepliesProps
+  | ActiveAppsProps
+  | SetupProps
+  | InterviewProps;
 
 export function CandidateHero(props: CandidateHeroProps) {
   return (
@@ -106,6 +124,7 @@ export function CandidateHero(props: CandidateHeroProps) {
 
       {props.mode === "new-replies" && <NewRepliesBody {...props} />}
       {props.mode === "active-apps" && <ActiveAppsBody {...props} />}
+      {props.mode === "interview" && <InterviewBody {...props} />}
       {props.mode === "setup" && <SetupBody {...props} />}
 
       {/* Shared CTA rail */}
@@ -235,6 +254,59 @@ function ActiveAppsBody({ activeCount, hint, stages }: ActiveAppsProps) {
           );
         })}
       </div>
+    </>
+  );
+}
+
+function InterviewBody({ interviewCount, items, hint }: InterviewProps) {
+  return (
+    <>
+      <div className="text-[10px] font-extrabold tracking-[2.5px] uppercase text-[#8db8a3] mb-1">
+        Interviewing
+      </div>
+      <div
+        className="inline-flex items-center gap-1.5 px-2 py-1 mb-5 self-start text-[9px] font-bold tracking-[1.5px] uppercase text-[#8db8a3]"
+        style={{ background: "rgba(141,184,163,0.18)" }}
+      >
+        <span
+          className="block w-1.5 h-1.5 rounded-full animate-pulse"
+          style={{ background: "#8db8a3" }}
+        />
+        In progress
+      </div>
+
+      <div className="flex items-baseline gap-3 flex-wrap mb-3">
+        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-ivory">
+          {interviewCount}
+        </div>
+        <span className="text-[24px] text-ivory/50">
+          interview{interviewCount === 1 ? "" : "s"}
+        </span>
+      </div>
+
+      <div className="text-[13px] leading-[1.55] max-w-[400px] text-ivory/70">
+        {hint}
+      </div>
+
+      <ul className="list-none mt-6">
+        {items.slice(0, 3).map((it, i) => (
+          <li
+            key={`${it.role}-${i}`}
+            className={`py-3 flex items-center gap-3 border-t border-ivory/10 ${
+              i === items.slice(0, 3).length - 1 ? "border-b border-ivory/10" : ""
+            }`}
+          >
+            <span
+              className="block w-1.5 h-1.5 rounded-full shrink-0"
+              style={{ background: "#8db8a3" }}
+            />
+            <div className="text-[13px] text-ivory leading-tight truncate">
+              <strong className="font-bold">{it.role}</strong>
+              <span className="text-ivory/55"> · {it.dsoName}</span>
+            </div>
+          </li>
+        ))}
+      </ul>
     </>
   );
 }

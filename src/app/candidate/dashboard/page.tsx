@@ -706,6 +706,18 @@ export default async function CandidateDashboardPage() {
   const offerCount = stageBreakdown.offer;
   const hasOffer = offerCount > 0;
 
+  // Interview hero state (#1) — apps the candidate is actively interviewing
+  // for. Uses the stage we already resolved; no extra query.
+  const interviewAppsList = activeApps.filter((a) => a.kind === "interview");
+  const interviewItems = interviewAppsList.map((a) => ({
+    role: jobMap.get(a.job_id)?.title ?? "Interview",
+    dsoName: affiliationByAppId.get(a.id)?.name ?? "Hiring team",
+  }));
+  const hasInterview = interviewItems.length > 0;
+  const firstInterviewHref = interviewAppsList[0]
+    ? `/candidate/applications/${interviewAppsList[0].id}`
+    : "/candidate/applications";
+
   // Credentials & CE rail card — straight off the data already loaded.
   const credItems: CredItem[] = [
     ...((rawLicenses ?? []) as Array<Record<string, unknown>>).map((l) => ({
@@ -732,6 +744,13 @@ export default async function CandidateDashboardPage() {
     currentTitle: (c.current_title as string | null) ?? null,
     state: (c.current_location_state as string | null) ?? null,
   });
+  // Offer comp-context (#2) — the candidate's local market band, shown on the
+  // offer moment so they can weigh the offer against the market.
+  const offerMarketBand = marketRange
+    ? marketRange.unit === "hourly"
+      ? `$${Math.round(marketRange.p25)}–$${Math.round(marketRange.p75)}/hr`
+      : `$${Math.round(marketRange.p25 / 1000)}K–$${Math.round(marketRange.p75 / 1000)}K`
+    : null;
 
   const recentForFeed = apps.slice(0, 5);
 
@@ -879,6 +898,13 @@ export default async function CandidateDashboardPage() {
                   {offerLocation ? ` · ${offerLocation}` : ""} · no rush — it’s
                   open.
                 </p>
+                {offerMarketBand && marketRange && (
+                  <p className="mt-2 text-[12.5px] text-ivory/70">
+                    For context, {marketRange.areaName} pay for your field runs{" "}
+                    <strong className="text-ivory">{offerMarketBand}</strong> —
+                    weigh your offer against it.
+                  </p>
+                )}
                 <div className="mt-4 flex flex-wrap items-center gap-3">
                   <Link
                     href={`/candidate/applications/${offerApp.id}`}
@@ -902,6 +928,15 @@ export default async function CandidateDashboardPage() {
                 replies={replyPreviews}
                 href="/candidate/inbox"
                 ctaLabel="Open inbox"
+              />
+            ) : hasInterview ? (
+              <CandidateHero
+                mode="interview"
+                interviewCount={interviewItems.length}
+                items={interviewItems}
+                hint="You're in the interview round. Review the role, line up your questions, and bring your best — details are on your application."
+                href={firstInterviewHref}
+                ctaLabel="Open interview"
               />
             ) : (
               <CandidateHero
