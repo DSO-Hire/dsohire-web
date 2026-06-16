@@ -7,6 +7,24 @@ import type { ChangelogEntry } from "./index";
 
 export const entries: ChangelogEntry[] = [
   {
+    date: "2026-06-16",
+    kind: "new",
+    title: "Every rejection now records a reason",
+    body: "When you reject or close out a candidate, you now choose a standardized reason — insufficient experience, schedule mismatch, stronger candidate selected, and so on. It's required on rejections (the way the big ATSs do it), stays internal to your team (the candidate never sees the code), and flows into your CSV export so you have clean, defensible records of why each applicant wasn't selected.",
+  },
+  {
+    date: "2026-06-16",
+    kind: "new",
+    title: "Stay ahead of expiring licenses and certifications",
+    body: "DSO Hire now watches credential expirations for the people you're hiring or have hired. Each candidate's page gets a hire-readiness checklist once they reach offer or hired (required verifications + credential status + anything expiring), your dashboard shows a \"Credentials expiring\" roll-up, and a once-a-week email gives owners and admins a heads-up when something is expired or expiring within 30 days — the details stay behind sign-in.",
+  },
+  {
+    date: "2026-06-16",
+    kind: "improved",
+    title: "Market pay now covers dental specialists and lab techs",
+    body: "Our market-pay guidance expanded from 5 dental roles to 10 — adding oral & maxillofacial surgeons, orthodontists, prosthodontists, other specialists (endo/perio/pedo), and dental lab technicians, with metro-level precision. It shows up everywhere pay does: the job builder, the offer builder, and a candidate's \"Your market.\"",
+  },
+  {
     date: "2026-06-15",
     kind: "new",
     title: "See your locations as a grid — and filter by state",
