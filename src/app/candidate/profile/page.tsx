@@ -44,7 +44,7 @@ export default async function CandidateProfilePage() {
     supabase
       .from("candidates")
       .select(
-        "id, full_name, first_name, last_name, salutation, phone, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, desired_roles, desired_locations, availability, linkedin_url, resume_url, is_searchable, avatar_url, desired_specialty, pms_systems, skills, languages, temp_or_perm, schedule_preferences, min_salary, salary_unit, cv_visibility, last_parsed_at, profile_accent_color, primary_fit_product"
+        "id, full_name, first_name, last_name, salutation, phone, headline, summary, current_title, years_experience, years_experience_dental, pronouns, current_location_city, current_location_state, current_location_zip, desired_roles, desired_locations, availability, linkedin_url, resume_url, is_searchable, avatar_url, desired_specialty, pms_systems, skills, languages, temp_or_perm, schedule_preferences, min_salary, salary_unit, cv_visibility, last_parsed_at, profile_accent_color, primary_fit_product"
       )
       .eq("auth_user_id", user.id)
       .maybeSingle(),
@@ -94,6 +94,7 @@ export default async function CandidateProfilePage() {
       current_location_city: (c.current_location_city as string | null) ?? null,
       current_location_state:
         (c.current_location_state as string | null) ?? null,
+      current_location_zip: (c.current_location_zip as string | null) ?? null,
       // Prefer dental-specific column; fall back to the generic legacy column
       // until 4.2.b form refactors writes (this page IS that refactor — but
       // existing rows may still only have years_experience populated).

@@ -118,6 +118,7 @@ export interface ProfileData {
     phone: string | null;
     current_location_city: string | null;
     current_location_state: string | null;
+    current_location_zip?: string | null;
     years_experience_dental: number | null;
     linkedin_url: string | null;
   };
@@ -509,6 +510,7 @@ function IdentityModal({
     phone: initial.phone ?? "",
     current_location_city: initial.current_location_city ?? "",
     current_location_state: initial.current_location_state ?? "",
+    current_location_zip: initial.current_location_zip ?? "",
     years_experience_dental: initial.years_experience_dental,
     linkedin_url: initial.linkedin_url ?? "",
   });
@@ -636,7 +638,7 @@ function IdentityModal({
           onPick={(text) => setV((p) => ({ ...p, summary: text }))}
         />
       </div>
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-4">
         <div className="sm:col-span-2">
           <LocationAutocompleteField
             label="Current location"
@@ -652,6 +654,19 @@ function IdentityModal({
             }
           />
         </div>
+        <TextField
+          label="ZIP code"
+          helper="Unlocks local pay data."
+          maxLength={5}
+          value={v.current_location_zip ?? ""}
+          onChange={(x) =>
+            setV((p) => ({
+              ...p,
+              current_location_zip: x.replace(/\D/g, "").slice(0, 5),
+            }))
+          }
+          autoComplete="postal-code"
+        />
         <TextField
           label="Years (dental)"
           type="number"

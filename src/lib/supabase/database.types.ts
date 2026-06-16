@@ -1589,6 +1589,7 @@ export type Database = {
           created_at: string
           current_location_city: string | null
           current_location_state: string | null
+          current_location_zip: string | null
           current_title: string | null
           cv_visibility: Database["public"]["Enums"]["candidate_visibility"]
           deleted_at: string | null
@@ -1665,6 +1666,7 @@ export type Database = {
           created_at?: string
           current_location_city?: string | null
           current_location_state?: string | null
+          current_location_zip?: string | null
           current_title?: string | null
           cv_visibility?: Database["public"]["Enums"]["candidate_visibility"]
           deleted_at?: string | null
@@ -1739,6 +1741,7 @@ export type Database = {
           created_at?: string
           current_location_city?: string | null
           current_location_state?: string | null
+          current_location_zip?: string | null
           current_title?: string | null
           cv_visibility?: Database["public"]["Enums"]["candidate_visibility"]
           deleted_at?: string | null

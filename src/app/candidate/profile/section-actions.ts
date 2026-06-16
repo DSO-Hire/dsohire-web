@@ -70,6 +70,7 @@ export interface IdentityInput {
   phone?: string | null;
   current_location_city?: string | null;
   current_location_state?: string | null;
+  current_location_zip?: string | null;
   years_experience_dental?: number | null;
   linkedin_url?: string | null;
 }
@@ -97,6 +98,8 @@ export async function upsertIdentity(input: IdentityInput): Promise<Result> {
       current_location_city: input.current_location_city?.trim() || null,
       current_location_state:
         input.current_location_state?.trim().toUpperCase().slice(0, 2) || null,
+      current_location_zip:
+        input.current_location_zip?.replace(/\D/g, "").slice(0, 5) || null,
       years_experience_dental:
         typeof input.years_experience_dental === "number"
           ? input.years_experience_dental
