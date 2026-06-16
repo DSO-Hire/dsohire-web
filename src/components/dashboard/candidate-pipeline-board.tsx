@@ -216,6 +216,15 @@ function statusFor(c: BoardCard): Status | null {
     };
   }
   if ((c.stage === "open" || c.stage === "screen") && c.medianResponseDays != null) {
+    // Follow-up coach: once the wait exceeds the practice's own typical
+    // reply window, turn waiting into agency (a supportive nudge, not a
+    // day-counter — uses the candidate's applied date, never stage dwell).
+    if (c.daysSinceApplied > c.medianResponseDays) {
+      return {
+        text: `Longer than their typical ~${c.medianResponseDays}-day reply — a polite follow-up is fair now.`,
+        tone: "move",
+      };
+    }
     return {
       text: `In review — typically replies in ~${c.medianResponseDays} day${
         c.medianResponseDays === 1 ? "" : "s"
