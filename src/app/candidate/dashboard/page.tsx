@@ -58,6 +58,10 @@ import {
 } from "@/components/dashboard/credentials-card";
 import { loadMarketRange } from "@/lib/comp/market";
 import { YourMarketCard } from "@/components/dashboard/your-market-card";
+import {
+  SavedJobsCard,
+  type SavedJobItem,
+} from "@/components/dashboard/saved-jobs-card";
 import { getDsoResponseMedians } from "@/lib/applications/response-medians";
 import {
   ActivityFeed,
@@ -752,6 +756,59 @@ export default async function CandidateDashboardPage() {
       : `$${Math.round(marketRange.p25 / 1000)}K–$${Math.round(marketRange.p75 / 1000)}K`
     : null;
 
+  // Saved jobs (#5) — active jobs the candidate bookmarked but hasn't applied
+  // to ("still exploring"). Title + city/state only (never a practice name, so
+  // a confidential posting can't leak here). Kept small.
+  const appliedJobIdSet = new Set(jobIds);
+  const { data: rawSaved } = await supabase
+    .from("saved_jobs")
+    .select("job_id, saved_at, job:jobs(id, title, status)")
+    .eq("candidate_id", candidate.id)
+    .order("saved_at", { ascending: false })
+    .limit(12);
+  const savedActive = ((rawSaved ?? []) as Array<Record<string, unknown>>)
+    .map((r) => {
+      const jr = r.job;
+      const j = (Array.isArray(jr) ? jr[0] : jr) as
+        | { id: string; title: string | null; status: string | null }
+        | null
+        | undefined;
+      if (!j) return null;
+      return { id: j.id, title: j.title ?? "Untitled role", status: j.status };
+    })
+    .filter(
+      (x): x is { id: string; title: string; status: string | null } =>
+        x !== null && x.status === "active" && !appliedJobIdSet.has(x.id),
+    )
+    .slice(0, 3);
+  const savedJobIds = savedActive.map((s) => s.id);
+  const savedLocByJobId = new Map<string, string>();
+  if (savedJobIds.length > 0) {
+    const { data: rawSavedLocs } = await supabase
+      .from("job_locations")
+      .select("job_id, location:dso_locations(city, state)")
+      .in("job_id", savedJobIds);
+    for (const rawRow of (rawSavedLocs ?? []) as unknown as Array<
+      Record<string, unknown>
+    >) {
+      const jid = rawRow.job_id as string;
+      if (savedLocByJobId.has(jid)) continue;
+      const locRaw = rawRow.location;
+      const loc = (Array.isArray(locRaw) ? locRaw[0] : locRaw) as
+        | { city: string | null; state: string | null }
+        | null
+        | undefined;
+      if (!loc) continue;
+      const cityState = [loc.city, loc.state].filter(Boolean).join(", ");
+      if (cityState) savedLocByJobId.set(jid, cityState);
+    }
+  }
+  const savedItems: SavedJobItem[] = savedActive.map((s) => ({
+    id: s.id,
+    title: s.title,
+    location: savedLocByJobId.get(s.id) ?? null,
+  }));
+
   const recentForFeed = apps.slice(0, 5);
 
   const today = new Date();
@@ -973,6 +1030,7 @@ export default async function CandidateDashboardPage() {
           />
           {marketRange && <YourMarketCard range={marketRange} />}
           <CredentialsCard items={credItems} />
+          <SavedJobsCard items={savedItems} />
         </div>
       </div>
 
