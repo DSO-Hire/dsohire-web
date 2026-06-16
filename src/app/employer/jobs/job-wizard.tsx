@@ -868,6 +868,15 @@ export function JobWizard({
     return null;
   }, [locations, selectedLocationIds]);
 
+  // First selected location id → metro-precise pay benchmark (the action
+  // resolves it to a ZIP → CBSA server-side). Null → falls back to state.
+  const benchmarkLocationId = useMemo(() => {
+    for (const l of locations) {
+      if (selectedLocationIds.has(l.id)) return l.id;
+    }
+    return null;
+  }, [locations, selectedLocationIds]);
+
   const payTransparency = useMemo(() => {
     if (payAssessment.covered.length === 0) return null;
     return {
@@ -1381,6 +1390,7 @@ export function JobWizard({
           <DetailsStep
             roleCategory={roleCategory}
             benchmarkState={benchmarkState}
+            benchmarkLocationId={benchmarkLocationId}
             compModelState={compModelState}
             onCompModelState={setCompModelState}
             compType={compType}
@@ -2013,6 +2023,7 @@ function DescriptionStep({
 function DetailsStep({
   roleCategory,
   benchmarkState,
+  benchmarkLocationId,
   compModelState,
   onCompModelState,
   compType,
@@ -2069,6 +2080,7 @@ function DetailsStep({
 }: {
   roleCategory: string;
   benchmarkState: string | null;
+  benchmarkLocationId: string | null;
   // #128 — structured dental comp (model picker + atoms).
   compModelState: CompModelState;
   onCompModelState: (next: CompModelState) => void;
@@ -2168,6 +2180,7 @@ function DetailsStep({
         accent="heritage"
         roleCategory={roleCategory}
         benchmarkState={benchmarkState}
+        benchmarkLocationId={benchmarkLocationId}
         enforcement={
           payTransparency
             ? { ...payTransparency, exempt: payExempt, onExempt: onPayExempt }

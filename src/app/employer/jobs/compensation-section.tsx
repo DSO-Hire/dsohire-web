@@ -138,6 +138,8 @@ export interface CompensationSectionProps {
    */
   roleCategory?: string | null;
   benchmarkState?: string | null;
+  /** Selected location id → metro-precise benchmark (resolved server-side). */
+  benchmarkLocationId?: string | null;
 
   // Base
   compType: CompensationType;
@@ -412,6 +414,7 @@ export function CompensationSection(props: CompensationSectionProps) {
         <PayBenchmarkHint
           roleCategory={props.roleCategory}
           state={props.benchmarkState ?? null}
+          locationId={props.benchmarkLocationId ?? null}
           compMin={props.compMin}
           compMax={props.compMax}
           compPeriod={props.compPeriod}

@@ -35,6 +35,7 @@ function formatSource(raw: string): string {
 export function PayBenchmarkHint({
   roleCategory,
   state,
+  locationId,
   compMin,
   compMax,
   compPeriod,
@@ -42,6 +43,8 @@ export function PayBenchmarkHint({
 }: {
   roleCategory: string | null | undefined;
   state: string | null | undefined;
+  /** Selected location id → resolves to a metro band server-side (sharpest). */
+  locationId?: string | null;
   compMin: string;
   compMax: string;
   compPeriod: string;
@@ -58,7 +61,7 @@ export function PayBenchmarkHint({
       return;
     }
     setLoading(true);
-    getMarketBenchmark(roleCategory, state ?? null)
+    getMarketBenchmark(roleCategory, state ?? null, locationId ?? null)
       .then((b) => {
         if (!cancelled) setBench(b);
       })
@@ -68,7 +71,7 @@ export function PayBenchmarkHint({
     return () => {
       cancelled = true;
     };
-  }, [roleCategory, state]);
+  }, [roleCategory, state, locationId]);
 
   if (!roleCategory || loading || !bench) return null;
   const marketHourly =
@@ -81,7 +84,11 @@ export function PayBenchmarkHint({
   const above = yourHourly != null && yourHourly > marketHourly * 1.1;
 
   const scopeLabel =
-    bench.scope === "state" && bench.state ? bench.state : "National";
+    bench.scope === "metro"
+      ? bench.area_name
+      : bench.scope === "state" && bench.state
+        ? bench.state
+        : "National";
 
   return (
     <div className="mt-4 border border-[var(--rule)] bg-white p-3.5" aria-live="polite">
@@ -104,6 +111,15 @@ export function PayBenchmarkHint({
           </span>
         )}
       </div>
+      {bench.p25_hourly != null && bench.p75_hourly != null && (
+        <div className="mt-0.5 text-[12px] text-slate-meta">
+          Typical range{" "}
+          <span className="font-semibold text-ink">
+            ${money(bench.p25_hourly)}–${money(bench.p75_hourly)}/hr
+          </span>{" "}
+          (25th–75th percentile)
+        </div>
+      )}
       {yourHourly != null && (
         <p
           className={
