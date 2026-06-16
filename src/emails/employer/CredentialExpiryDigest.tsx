@@ -1,11 +1,18 @@
 /**
  * CredentialExpiryDigest (employer) — #9d.
  *
- * Weekly heads-up listing hired/active candidates whose licenses or certs are
- * expired or expiring within 30 days. Sent via /api/cron/credential-expiry to
- * owner/admin users. Suppressed when a DSO has nothing urgent.
+ * Weekly heads-up that some hired/active candidates have licenses or certs
+ * that are expired or expiring within 30 days. Sent via
+ * /api/cron/credential-expiry to owner/admin users; suppressed when a DSO has
+ * nothing urgent.
  *
- * Reuses Layout + PrimaryButton + brand styles (mirrors WeeklyDigest).
+ * PRIVACY (locked Day 35): this email is intentionally CONTENTLESS — it
+ * carries only aggregate counts and a CTA, NEVER candidate names or which
+ * credential. All specifics live behind auth on the dashboard. Rationale: an
+ * email inbox is a softer target than the app; a leaked digest should reveal
+ * nothing about who or what. Keep it that way.
+ *
+ * Reuses Layout + PrimaryButton + brand styles.
  */
 
 import { Heading, Section, Text } from "@react-email/components";
@@ -13,21 +20,13 @@ import { Layout } from "../components/Layout";
 import { PrimaryButton } from "../components/PrimaryButton";
 import { brand } from "../lib/brand";
 
-export interface CredentialExpiryItem {
-  candidateName: string;
-  credentialLabel: string;
-  /** e.g. "Expired 4 days ago" / "Expires in 12 days". */
-  expiryText: string;
-  /** True = already expired (renders red); false = expiring soon (amber). */
-  expired: boolean;
-  /** Deep link to the candidate's hire-readiness section. */
-  url: string;
-}
-
 export interface CredentialExpiryDigestProps {
   recipientFirstName?: string;
   dsoName?: string;
-  items?: CredentialExpiryItem[];
+  /** Count of credentials already expired. */
+  expiredCount?: number;
+  /** Count of credentials expiring within 30 days (not yet expired). */
+  expiringCount?: number;
   dashboardUrl?: string;
   unsubscribeUrl?: string;
 }
@@ -35,26 +34,27 @@ export interface CredentialExpiryDigestProps {
 export function CredentialExpiryDigest({
   recipientFirstName = "there",
   dsoName = "your DSO",
-  items = [],
+  expiredCount = 0,
+  expiringCount = 0,
   dashboardUrl = "https://dsohire.com/employer/dashboard#credentials-expiring",
   unsubscribeUrl,
 }: CredentialExpiryDigestProps) {
-  const expiredCount = items.filter((i) => i.expired).length;
-  const soonCount = items.length - expiredCount;
+  const total = expiredCount + expiringCount;
 
   return (
     <Layout
-      previewText={`${items.length} credential${items.length === 1 ? "" : "s"} need attention at ${dsoName}`}
+      previewText={`${total} credential${total === 1 ? "" : "s"} need attention — sign in to review`}
     >
       <Text style={eyebrow}>Credential alert</Text>
       <Heading style={heading}>
-        {items.length} credential{items.length === 1 ? "" : "s"} need attention
+        {total} credential{total === 1 ? "" : "s"} need attention
       </Heading>
       <Text style={paragraph}>
-        Hi {recipientFirstName} — these licenses and certifications for people
+        Hi {recipientFirstName} — some licenses or certifications for people
         you&apos;re hiring or have hired at{" "}
         <strong style={strong}>{dsoName}</strong> are expired or expiring soon.
-        A current credential on file keeps you compliant and patient-ready.
+        For privacy, the specifics stay behind sign-in — open your dashboard to
+        see who and take action.
       </Text>
 
       <Section style={tilesRow}>
@@ -64,27 +64,13 @@ export function CredentialExpiryDigest({
         </Section>
         <Section style={tile}>
           <Text style={tileLabel}>Expiring ≤30d</Text>
-          <Text style={tileValue}>{soonCount}</Text>
+          <Text style={tileValue}>{expiringCount}</Text>
         </Section>
-      </Section>
-
-      <Section style={listSection}>
-        {items.map((it, i) => (
-          <Text key={`${it.url}-${i}`} style={listRow}>
-            <a href={it.url} style={inlineLinkBold}>
-              {it.candidateName}
-            </a>{" "}
-            <span style={listMeta}>· {it.credentialLabel} · </span>
-            <span style={it.expired ? metaExpired : metaSoon}>
-              {it.expiryText}
-            </span>
-          </Text>
-        ))}
       </Section>
 
       <Section style={buttonWrap}>
         <PrimaryButton href={dashboardUrl}>
-          Review credentials
+          Sign in to review
         </PrimaryButton>
       </Section>
 
@@ -190,32 +176,6 @@ const tileValue = {
   margin: "0",
 };
 
-const listSection = {
-  margin: "24px 0",
-  padding: "0",
-};
-
-const listRow = {
-  color: brand.ink,
-  fontSize: "14px",
-  lineHeight: "1.6",
-  margin: "0 0 6px",
-};
-
-const listMeta = {
-  color: brand.slate,
-};
-
-const metaExpired = {
-  color: "#b91c1c",
-  fontWeight: 700,
-};
-
-const metaSoon = {
-  color: "#b45309",
-  fontWeight: 700,
-};
-
 const buttonWrap = {
   margin: "28px 0 8px",
 };
@@ -230,10 +190,4 @@ const smallParagraph = {
 const inlineLink = {
   color: brand.heritageDeep,
   textDecoration: "underline",
-};
-
-const inlineLinkBold = {
-  color: brand.ink,
-  textDecoration: "underline",
-  fontWeight: 700,
 };

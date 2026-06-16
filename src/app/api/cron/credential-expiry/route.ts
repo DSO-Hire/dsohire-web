@@ -20,10 +20,7 @@ import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/send";
 import { getExpiringCredentials } from "@/lib/credentials/expiring-credentials";
 import { isUrgentExpiry } from "@/lib/credentials/expiry";
-import {
-  CredentialExpiryDigest,
-  type CredentialExpiryItem,
-} from "@/emails/employer/CredentialExpiryDigest";
+import { CredentialExpiryDigest } from "@/emails/employer/CredentialExpiryDigest";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -36,16 +33,6 @@ interface Report {
   emails_sent: number;
   emails_failed: number;
   errors: string[];
-}
-
-function expiryText(daysLeft: number): string {
-  if (daysLeft < 0) {
-    const ago = Math.abs(daysLeft);
-    return `Expired ${ago} day${ago === 1 ? "" : "s"} ago`;
-  }
-  return daysLeft === 0
-    ? "Expires today"
-    : `Expires in ${daysLeft} day${daysLeft === 1 ? "" : "s"}`;
 }
 
 export async function GET(request: Request) {
@@ -81,13 +68,12 @@ export async function GET(request: Request) {
         continue;
       }
 
-      const items: CredentialExpiryItem[] = rows.map((r) => ({
-        candidateName: r.candidateName,
-        credentialLabel: r.credentialLabel,
-        expiryText: expiryText(r.daysLeft),
-        expired: r.expiryState === "expired",
-        url: `${SITE_URL}/employer/applications/${r.applicationId}#hire-readiness`,
-      }));
+      // Aggregate counts only — no candidate names or credential details
+      // leave the app boundary in email (privacy: inbox is a soft target).
+      const expiredCount = rows.filter(
+        (r) => r.expiryState === "expired"
+      ).length;
+      const expiringCount = rows.length - expiredCount;
 
       const { data: members } = await admin
         .from("dso_users")
@@ -113,7 +99,8 @@ export async function GET(request: Request) {
             react: CredentialExpiryDigest({
               recipientFirstName: firstName ?? "there",
               dsoName: dso.name,
-              items,
+              expiredCount,
+              expiringCount,
               dashboardUrl: `${SITE_URL}/employer/dashboard#credentials-expiring`,
             }),
           });
