@@ -140,6 +140,8 @@ export interface CompensationSectionProps {
   benchmarkState?: string | null;
   /** Selected location id → metro-precise benchmark (resolved server-side). */
   benchmarkLocationId?: string | null;
+  /** Dental specialty (ortho/oral-surgery/etc.) → specialist SOC benchmark. */
+  benchmarkSpecialty?: string[] | null;
 
   // Base
   compType: CompensationType;
@@ -415,6 +417,7 @@ export function CompensationSection(props: CompensationSectionProps) {
           roleCategory={props.roleCategory}
           state={props.benchmarkState ?? null}
           locationId={props.benchmarkLocationId ?? null}
+          specialty={props.benchmarkSpecialty ?? null}
           compMin={props.compMin}
           compMax={props.compMax}
           compPeriod={props.compPeriod}

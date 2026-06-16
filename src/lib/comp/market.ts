@@ -20,14 +20,33 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 /** Keyword → SOC code. First match wins; order matters (specific first). */
 const SOC_BY_KEYWORD: ReadonlyArray<readonly [RegExp, string]> = [
   [/hygien/i, "29-1292"], // Dental Hygienists
-  [/dentist|\bdds\b|\bdmd\b/i, "29-1021"], // Dentists, General
+  [/lab.?tech|laboratory|ceramist|denturist/i, "51-9081"], // Dental Lab Techs
+  // Dental specialists — check BEFORE the general-dentist rule. Pass the
+  // candidate's/job's specialty first (callers do) so e.g. an ortho job tagged
+  // role="specialists" resolves to ortho, not the catch-all.
+  [/oral.?surg|maxillofacial|\boms\b/i, "29-1022"], // Oral & Maxillofacial Surgeons
+  [/orthodont/i, "29-1023"], // Orthodontists
+  [/prosthodont/i, "29-1024"], // Prosthodontists
+  // Endo/perio/pedo share BLS "Dentists, All Other Specialists". The anchored
+  // ^specialists?$ matches the controlled role slug without catching free-text
+  // like "patient care specialist".
+  [/endodont|periodont|pediatric\s*dent|pedodont|\bdental specialist\b|^specialists?$/i, "29-1029"],
+  [/dentist|\bdds\b|\bdmd\b/i, "29-1021"], // Dentists, General (fallback)
   [/assistant|\brda\b|\bcda\b|\befda\b|\bdanb\b/i, "31-9091"], // Dental Assistants
   [/front|reception|coordinat|billing|biller|secretary|schedul/i, "43-6013"], // Medical Secretaries
   [/manager|administrator|operations|practice lead/i, "11-9111"], // Medical & Health Services Managers
 ];
 
-// Dentist + manager are salaried/annual in dental; the rest are hourly.
-const ANNUAL_SOCS = new Set(["29-1021", "11-9111"]);
+// Salaried/annual in dental: general dentist, all specialists, and manager.
+// Hygienist / assistant / front-office / lab tech are hourly.
+const ANNUAL_SOCS = new Set([
+  "29-1021",
+  "29-1022",
+  "29-1023",
+  "29-1024",
+  "29-1029",
+  "11-9111",
+]);
 
 export function socForRole(
   roles: string[],

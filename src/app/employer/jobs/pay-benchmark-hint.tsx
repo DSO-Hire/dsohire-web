@@ -36,6 +36,7 @@ export function PayBenchmarkHint({
   roleCategory,
   state,
   locationId,
+  specialty,
   compMin,
   compMax,
   compPeriod,
@@ -45,12 +46,15 @@ export function PayBenchmarkHint({
   state: string | null | undefined;
   /** Selected location id → resolves to a metro band server-side (sharpest). */
   locationId?: string | null;
+  /** Dental specialty (ortho/oral-surgery/etc.) → picks the specialist SOC. */
+  specialty?: string[] | null;
   compMin: string;
   compMax: string;
   compPeriod: string;
   /** Tailwind text-color class for the accent (matches the wizard). */
   accentText: string;
 }) {
+  const specialtyKey = (specialty ?? []).join("|");
   const [bench, setBench] = useState<MarketBenchmark | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -61,7 +65,12 @@ export function PayBenchmarkHint({
       return;
     }
     setLoading(true);
-    getMarketBenchmark(roleCategory, state ?? null, locationId ?? null)
+    getMarketBenchmark(
+      roleCategory,
+      state ?? null,
+      locationId ?? null,
+      specialtyKey ? specialtyKey.split("|") : null,
+    )
       .then((b) => {
         if (!cancelled) setBench(b);
       })
@@ -71,7 +80,7 @@ export function PayBenchmarkHint({
     return () => {
       cancelled = true;
     };
-  }, [roleCategory, state, locationId]);
+  }, [roleCategory, state, locationId, specialtyKey]);
 
   if (!roleCategory || loading || !bench) return null;
   const marketHourly =

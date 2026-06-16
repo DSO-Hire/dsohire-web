@@ -744,7 +744,12 @@ export default async function CandidateDashboardPage() {
   // null (card hidden) until the OEWS loader has populated comp_benchmarks
   // or when the role/area can't be mapped — never a guessed number.
   const marketRange = await loadMarketRange(supabase, {
-    roles: desiredRoles,
+    // Specialty first so a specialist candidate resolves to their specialist
+    // SOC (ortho/OMS/etc.) before the general-dentist fallback.
+    roles: [
+      ...(((c.desired_specialty as string[] | null) ?? []) as string[]),
+      ...desiredRoles,
+    ],
     currentTitle: (c.current_title as string | null) ?? null,
     state: (c.current_location_state as string | null) ?? null,
     zip: (c.current_location_zip as string | null) ?? null,

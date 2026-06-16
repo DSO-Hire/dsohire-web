@@ -21,10 +21,15 @@ import { socForRole } from "@/lib/comp/market";
 
 const SOC_LABEL: Record<string, string> = {
   "29-1021": "Dentist",
+  "29-1022": "Oral & Maxillofacial Surgeon",
+  "29-1023": "Orthodontist",
+  "29-1024": "Prosthodontist",
+  "29-1029": "Dental Specialist",
   "29-1292": "Dental Hygienist",
   "31-9091": "Dental Assistant",
   "43-6013": "Front Office / Coordinator",
   "11-9111": "Practice Manager",
+  "51-9081": "Dental Lab Technician",
 };
 
 export interface MarketBenchmark {
@@ -50,8 +55,11 @@ export async function getMarketBenchmark(
   role: string,
   state: string | null,
   locationId?: string | null,
+  specialty?: string[] | null,
 ): Promise<MarketBenchmark | null> {
-  const soc = socForRole([role], null);
+  // Specialty first so an ortho job tagged role="specialists" resolves to the
+  // orthodontist SOC, not the catch-all.
+  const soc = socForRole([...(specialty ?? []), role], null);
   if (!soc) return null;
 
   const supabase = await createSupabaseServerClient();
