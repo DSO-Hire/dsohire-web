@@ -1186,6 +1186,7 @@ function DetailsSection({
           benchmarkLocationId={
             jobLocations.find((l) => l.state)?.id ?? jobLocations[0]?.id ?? null
           }
+          benchmarkSpecialty={Array.from(specialty)}
           enforcement={
             payTransparency
               ? {
