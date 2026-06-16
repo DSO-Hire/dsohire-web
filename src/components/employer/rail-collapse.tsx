@@ -9,29 +9,37 @@
  * itself stays a server component. Expanded SSR is the default, so
  * first paint may briefly show the full rail before the saved slim
  * preference applies — accepted v1 tradeoff.
+ *
+ * Day 35 — parameterized so the candidate rail can reuse it: pass a
+ * `targetId` (the <aside> id) + a `storageKey`. Defaults keep the
+ * employer call site (`<RailCollapse />`) byte-identical.
  */
 
 import { useEffect, useState } from "react";
 
-const KEY = "dsoh-rail-slim";
-
-export function RailCollapse() {
+export function RailCollapse({
+  targetId = "employer-rail",
+  storageKey = "dsoh-rail-slim",
+}: {
+  targetId?: string;
+  storageKey?: string;
+} = {}) {
   const [slim, setSlim] = useState(false);
 
   useEffect(() => {
-    if (localStorage.getItem(KEY) === "1") {
+    if (localStorage.getItem(storageKey) === "1") {
       setSlim(true);
-      document.getElementById("employer-rail")?.classList.add("rail-slim");
+      document.getElementById(targetId)?.classList.add("rail-slim");
     }
-  }, []);
+  }, [targetId, storageKey]);
 
   function toggle() {
     const next = !slim;
     setSlim(next);
     document
-      .getElementById("employer-rail")
+      .getElementById(targetId)
       ?.classList.toggle("rail-slim", next);
-    localStorage.setItem(KEY, next ? "1" : "0");
+    localStorage.setItem(storageKey, next ? "1" : "0");
   }
 
   return (

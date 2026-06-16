@@ -942,3 +942,86 @@ html, body {
   transform-origin: center;
   animation: rail-check-draw 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
 }
+
+/* ── Candidate rail: PREMIUM fit-mark animations (Day 35) ──────────
+   PracticeFit & DSOFit are the flagship products, so their nav marks
+   are alive at rest (a slow twinkle / breathe) and put on a show on
+   hover. The real brand glyphs are used as-is; this is pure CSS on the
+   svg + a wrapper for sparkle particles. Other candidate icons reuse
+   the employer verbs above. */
+.rail-ic-practicefit,
+.rail-ic-dsofit { transform-origin: center; }
+
+/* PracticeFit sparkle — idle twinkle, full spin-burst + glow on hover. */
+@keyframes pf-idle {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.9; }
+  50% { transform: scale(1.07) rotate(10deg); opacity: 1; }
+}
+@keyframes pf-burst {
+  0% { transform: scale(1) rotate(0deg); }
+  35% { transform: scale(1.4) rotate(165deg); }
+  68% { transform: scale(0.9) rotate(300deg); }
+  100% { transform: scale(1) rotate(360deg); }
+}
+.rail-ic-practicefit { animation: pf-idle 3.4s ease-in-out infinite; }
+.rail-item:hover .rail-ic-practicefit {
+  animation: pf-burst 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  filter: drop-shadow(0 0 4px rgba(141, 184, 163, 0.95))
+    drop-shadow(0 0 9px rgba(233, 200, 115, 0.55));
+}
+.rail-item:hover .rail-ic-practicefit > * { animation: none; stroke-dasharray: none; }
+
+/* Sparkle particles — two twinkles fire out of the mark on hover. */
+.rail-spark { position: relative; }
+.rail-spark::before,
+.rail-spark::after {
+  content: ""; position: absolute; width: 3px; height: 3px; border-radius: 50%;
+  opacity: 0; pointer-events: none;
+}
+.rail-spark::before { top: -1px; right: -1px; background: #e9c873; }
+.rail-spark::after { bottom: -1px; left: -1px; background: #8db8a3; }
+@keyframes pf-twinkle {
+  0% { opacity: 0; transform: scale(0); }
+  50% { opacity: 1; transform: scale(1.5); }
+  100% { opacity: 0; transform: scale(0); }
+}
+.rail-item:hover .rail-spark::before { animation: pf-twinkle 0.85s ease 0.12s; }
+.rail-item:hover .rail-spark::after { animation: pf-twinkle 0.85s ease 0.4s; }
+
+/* DSOFit portfolio tiles — idle breathe, springy stagger-assemble + glow. */
+@keyframes dsofit-idle {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+@keyframes dsofit-assemble {
+  0% { transform: scale(0) rotate(-14deg); opacity: 0; }
+  60% { transform: scale(1.22) rotate(5deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.rail-ic-dsofit { animation: dsofit-idle 3.6s ease-in-out infinite; }
+.rail-item:hover .rail-ic-dsofit {
+  filter: drop-shadow(0 0 4px rgba(141, 184, 163, 0.85));
+}
+.rail-item:hover .rail-ic-dsofit > * {
+  stroke-dasharray: none; transform-origin: center;
+  animation: dsofit-assemble 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.rail-item:hover .rail-ic-dsofit > *:nth-child(2) { animation-delay: 0.08s; }
+.rail-item:hover .rail-ic-dsofit > *:nth-child(3) { animation-delay: 0.16s; }
+.rail-item:hover .rail-ic-dsofit > *:nth-child(4) { animation-delay: 0.24s; }
+
+/* Candidate "also explore" link hides in the slim rail. */
+.rail-slim .rail-aside { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-ic-practicefit,
+  .rail-ic-dsofit { animation: none !important; }
+  .rail-item:hover .rail-ic-practicefit,
+  .rail-item:hover .rail-ic-dsofit,
+  .rail-item:hover .rail-ic-dsofit > *,
+  .rail-item:hover .rail-spark::before,
+  .rail-item:hover .rail-spark::after {
+    animation: none !important;
+    filter: none !important;
+  }
+}
