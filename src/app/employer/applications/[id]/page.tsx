@@ -70,6 +70,7 @@ import {
   type CredentialLicenseRow,
   type CredentialCertificationRow,
 } from "./credentials-section";
+import { HireReadinessChecklist } from "./hire-readiness";
 import {
   ReferencesSection,
   type ReferenceRequestRow,
@@ -1861,6 +1862,32 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             </div>
 
             <div className="space-y-10">
+
+          {/* #9 · Hire readiness — consolidated onboarding checklist; only
+                meaningful once an offer is on the table or the candidate is
+                hired. Sits above the actionable Credentials section. */}
+          {(currentKind === "offer" || currentKind === "hired") &&
+            (verificationRows.length > 0 ||
+              credentialLicenses.length > 0 ||
+              credentialCertifications.length > 0) && (
+              <DetailSection
+                id="hire-readiness"
+                title="Hire readiness"
+                icon={ShieldCheck}
+                tone="internal"
+                subtitle="What's left before this hire can start: required verifications, credential checks, and any expirations."
+              >
+                <HireReadinessChecklist
+                  verifications={verificationRows.map((v) => ({
+                    label: v.label,
+                    required: v.required,
+                    attested: v.attested,
+                  }))}
+                  licenses={credentialLicenses}
+                  certifications={credentialCertifications}
+                />
+              </DetailSection>
+            )}
 
           {/* 08 (or 07 when no Offer section) · Credentials — licenses + certifications with verification + document download */}
           <DetailSection

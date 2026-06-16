@@ -68,6 +68,8 @@ import { TodaysTopFits } from "@/components/dashboard/todays-top-fits";
 import { getTodaysTopFits } from "@/lib/talent-pool/smart-picks";
 import { InterestedInYou } from "@/components/dashboard/interested-in-you";
 import { getInterestedCandidates } from "@/lib/talent-pool/mutual-interest";
+import { CredentialsExpiring } from "@/components/dashboard/credentials-expiring";
+import { getExpiringCredentials } from "@/lib/credentials/expiring-credentials";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -170,6 +172,11 @@ export default async function EmployerDashboard() {
   // v3 Phase D — inbound mutual interest (candidates who saved your jobs).
   const interestedCandidates = dsoId
     ? await getInterestedCandidates(supabase, dsoId, 6)
+    : [];
+
+  // #9c — credential expiry roll-up across hired/active candidates.
+  const expiringCredentials = dsoId
+    ? await getExpiringCredentials(supabase, dsoId, 6)
     : [];
 
   // ── KPI scaffolding ────────────────────────────────────────────────
@@ -1361,6 +1368,12 @@ export default async function EmployerDashboard() {
       {/* v3 Phase C — Today's top fits (cross-job PracticeFit roll-up).
           Renders nothing when there are no scored fits yet. */}
       <TodaysTopFits fits={todaysTopFits} />
+
+      {/* #9c — credential expiry roll-up (hired/active). Renders nothing when
+          nothing is expired or expiring soon. */}
+      <div id="credentials-expiring" className="scroll-mt-24 mb-6">
+        <CredentialsExpiring items={expiringCredentials} />
+      </div>
 
       {/* Pipeline funnel — full-width. */}
       <section className="mb-6">
