@@ -15,6 +15,7 @@ import {
   loadNationalSalary,
   fmtAnnual,
   fmtHourly,
+  ownerCaveat,
 } from "@/lib/comp/salary";
 
 type Params = { role: string };
@@ -56,6 +57,9 @@ export default async function RoleSalaryIndex({ params }: { params: Promise<Para
               ? <>Nationally, the median {role.searchTitle.toLowerCase()} {natUnit === "annual" ? "earns" : "is paid"} <span className="font-bold text-ink">{natMed}{natUnit === "hourly" ? "/hr" : " a year"}</span>. Pick a state for local pay, ranges, and top-paying metros.</>
               : <>Pick a state below for {role.searchTitle.toLowerCase()} pay, ranges, and top-paying metros.</>}
           </p>
+          {ownerCaveat(role) && (
+            <p className="text-[13px] text-slate-meta italic leading-[1.6] mt-5 max-w-[760px]">{ownerCaveat(role)}</p>
+          )}
         </div>
       </section>
 

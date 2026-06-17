@@ -20,6 +20,7 @@ import {
   fmtAnnual,
   fmtHourly,
   metroShort,
+  ownerCaveat,
   type SalaryData,
   type PayTriple,
 } from "@/lib/comp/salary";
@@ -177,6 +178,12 @@ export default async function SalaryPage({ params }: { params: Promise<Params> }
           )}
         </div>
       </section>
+
+      {ownerCaveat(role) && (
+        <section className="px-6 sm:px-14 pb-10 -mt-4">
+          <p className="max-w-[1100px] mx-auto text-[13px] text-slate-meta italic leading-[1.6]">{ownerCaveat(role)}</p>
+        </section>
+      )}
 
       {/* TOP METROS */}
       {metros.length > 0 && (

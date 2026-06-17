@@ -19,14 +19,15 @@ export type SalaryRole = {
   soc: string;
   searchTitle: string; // the keyword phrase, e.g. "Dental Hygienist"
   hubHref: string; // the matching /for-[role] hub
+  ownerHeavy?: boolean; // high self-employment → OEWS undercounts (show caveat)
 };
 
 /** The dental roles that have a clean BLS SOC mapping (others are excluded). */
 export const SALARY_ROLES: readonly SalaryRole[] = [
   { slug: "hygienists", soc: "29-1292", searchTitle: "Dental Hygienist", hubHref: "/for-hygienists" },
   { slug: "dental-assistants", soc: "31-9091", searchTitle: "Dental Assistant", hubHref: "/for-dental-assistants" },
-  { slug: "dentists", soc: "29-1021", searchTitle: "Dentist", hubHref: "/for-dentists" },
-  { slug: "specialists", soc: "29-1029", searchTitle: "Dental Specialist", hubHref: "/for-specialists" },
+  { slug: "dentists", soc: "29-1021", searchTitle: "Dentist", hubHref: "/for-dentists", ownerHeavy: true },
+  { slug: "specialists", soc: "29-1029", searchTitle: "Dental Specialist", hubHref: "/for-specialists", ownerHeavy: true },
   { slug: "front-desk", soc: "43-6013", searchTitle: "Dental Front Office", hubHref: "/for-front-desk" },
   { slug: "office-managers", soc: "11-9111", searchTitle: "Dental Office Manager", hubHref: "/for-office-managers" },
   { slug: "practice-administrators", soc: "11-9111", searchTitle: "Dental Practice Administrator", hubHref: "/for-practice-administrators" },
@@ -202,4 +203,14 @@ export function resolveRoleState(roleSlug: string, stSlug: string) {
   const state = STATE_BY_SLUG[stSlug];
   if (!role || !state) return null;
   return { role, state };
+}
+
+/**
+ * Trust caveat for owner-heavy roles. BLS OEWS only covers W-2 employees, so
+ * for roles with high self-employment (dentists, specialists) the figures
+ * exclude practice owners and can read low — say so plainly.
+ */
+export function ownerCaveat(role: SalaryRole): string | null {
+  if (!role.ownerHeavy) return null;
+  return `Note: BLS figures reflect employed ${role.searchTitle.toLowerCase()}s. Many ${role.searchTitle.toLowerCase()}s own their practices, and owner earnings aren't included — which can make high-ownership areas read lower than you'd expect.`;
 }
