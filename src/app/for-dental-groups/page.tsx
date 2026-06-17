@@ -1231,9 +1231,9 @@ function FinalCta() {
           15-minute call. No demo gauntlet. No sales script.
         </h2>
         <p className="text-base text-slate-body leading-[1.7] mb-9">
-          Built by operators, for operators — same team that writes the
-          product answers the email. Ask the questions you actually want
-          answered.
+          Built for dental groups by people who know the business of
+          dentistry — the same team that writes the product answers the
+          email. Ask the questions you actually want answered.
         </p>
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Link
