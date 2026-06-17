@@ -21,6 +21,7 @@
  */
 
 import type { MetadataRoute } from "next";
+import { SALARY_ROLES, ALL_STATE_SLUGS } from "@/lib/comp/salary";
 
 const SITE_URL = "https://dsohire.com";
 
@@ -77,10 +78,20 @@ const ROUTES: SitemapRoute[] = [
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
-  return ROUTES.map((r) => ({
+  const base = ROUTES.map((r) => ({
     url: `${SITE_URL}${r.path}`,
     lastModified: now,
     changeFrequency: r.changeFrequency,
     priority: r.priority,
   }));
+  // Programmatic salary pages: each SOC-bearing role × every state.
+  const salary = SALARY_ROLES.flatMap((role) =>
+    ALL_STATE_SLUGS.map((state) => ({
+      url: `${SITE_URL}/salary/${role.slug}/${state}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
+    })),
+  );
+  return [...base, ...salary];
 }
