@@ -43,6 +43,7 @@ const ROUTES: SitemapRoute[] = [
   { path: "/contact", priority: 0.5, changeFrequency: "monthly" },
   { path: "/dental-hiring-report", priority: 0.7, changeFrequency: "monthly" },
   { path: "/resume-templates", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/salary", priority: 0.7, changeFrequency: "weekly" },
   // #115 FOH — dedicated home for the proprietary fit engine (PF + DSOFit).
   { path: "/practicefit", priority: 0.8, changeFrequency: "monthly" },
   // #115 FOH-6 — trust + comparison net.
@@ -84,7 +85,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: r.changeFrequency,
     priority: r.priority,
   }));
+  // Role-level salary hubs (/salary/[role]).
+  const salaryHubs = SALARY_ROLES.map((role) => ({
+    url: `${SITE_URL}/salary/${role.slug}`,
+    lastModified: now,
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  }));
   // Programmatic salary pages: each SOC-bearing role × every state.
+  // (Metro pages /salary/[role]/[state]/[metro] are discovered via internal
+  // links from the state pages rather than enumerated here.)
   const salary = SALARY_ROLES.flatMap((role) =>
     ALL_STATE_SLUGS.map((state) => ({
       url: `${SITE_URL}/salary/${role.slug}/${state}`,
@@ -93,5 +103,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.5,
     })),
   );
-  return [...base, ...salary];
+  return [...base, ...salaryHubs, ...salary];
 }

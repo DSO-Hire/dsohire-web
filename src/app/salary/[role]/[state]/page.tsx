@@ -137,6 +137,11 @@ export default async function SalaryPage({ params }: { params: Promise<Params> }
       {/* HERO */}
       <section className="pt-[140px] pb-12 px-6 sm:px-14">
         <div className="max-w-[1100px] mx-auto">
+          <nav className="text-[12px] text-slate-meta mb-5">
+            <Link href={`/salary/${role.slug}`} className="hover:text-heritage-deep underline underline-offset-2">{role.searchTitle} salary</Link>
+            <span className="mx-2">/</span>
+            <span className="text-ink">{state.name}</span>
+          </nav>
           <p className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-5">
             Dental Salary Data · {data.source} {data.vintage}
           </p>
@@ -190,11 +195,11 @@ export default async function SalaryPage({ params }: { params: Promise<Params> }
                 const t = m.annual ?? m.hourly!;
                 const u: "annual" | "hourly" = m.annual ? "annual" : "hourly";
                 return (
-                  <div key={m.name} className="grid grid-cols-12 px-5 py-4 border-t border-[var(--rule)] items-center">
+                  <Link key={m.name} href={`/salary/${role.slug}/${p.state}/${m.slug}`} className="grid grid-cols-12 px-5 py-4 border-t border-[var(--rule)] items-center hover:bg-cream transition-colors">
                     <div className="col-span-6 text-ink font-semibold">{metroShort(m.name)}</div>
                     <div className="col-span-3 text-right text-ink font-bold">{fmt(t.p50, u)}{u === "hourly" ? "/hr" : ""}</div>
                     <div className="col-span-3 text-right text-slate-meta text-sm">{fmt(t.p25, u)}–{fmt(t.p75, u)}</div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>

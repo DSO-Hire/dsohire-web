@@ -19,6 +19,7 @@ import {
   ROLE_BY_SLUG,
   type RoleConfig,
 } from "@/lib/roles/role-config";
+import { SALARY_ROLE_BY_SLUG, stateSlug } from "@/lib/comp/salary";
 
 export function RolePage({ config }: { config: RoleConfig }) {
   return (
@@ -27,6 +28,7 @@ export function RolePage({ config }: { config: RoleConfig }) {
       <Advantages config={config} />
       <CareerPath config={config} />
       <Compensation config={config} />
+      <SalaryByState config={config} />
       <RelatedRoles config={config} />
       <FinalCta config={config} />
     </SiteShell>
@@ -248,6 +250,47 @@ function Compensation({ config }: { config: RoleConfig }) {
 }
 
 /* ───────── Related roles cross-link ───────── */
+
+/* ───────── Salary by State (SEO cross-link) ───────── */
+
+function SalaryByState({ config }: { config: RoleConfig }) {
+  const salary = SALARY_ROLE_BY_SLUG[config.slug];
+  if (!salary) return null;
+  const featured = ["California", "Texas", "Florida", "New York", "Illinois", "Pennsylvania"];
+  return (
+    <section className="px-6 sm:px-14 py-16 bg-cream">
+      <div className="max-w-[1100px] mx-auto">
+        <p className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
+          What {config.label.toLowerCase()} earn
+        </p>
+        <h2 className="text-3xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-[1.1] text-ink mb-5">
+          {salary.searchTitle} salary, by state
+        </h2>
+        <p className="text-slate-body leading-[1.7] max-w-[680px] mb-7">
+          See median pay, the typical range, and top-paying metros — based on the latest BLS data.
+        </p>
+        <div className="flex flex-wrap gap-x-6 gap-y-2 mb-7">
+          {featured.map((n) => (
+            <Link
+              key={n}
+              href={`/salary/${salary.slug}/${stateSlug(n)}`}
+              className="text-ink hover:text-heritage-deep underline underline-offset-4 decoration-[var(--rule-strong)]"
+            >
+              {n}
+            </Link>
+          ))}
+        </div>
+        <Link
+          href={`/salary/${salary.slug}`}
+          className="inline-flex items-center gap-2 text-[12px] font-bold tracking-[2px] uppercase text-heritage-deep hover:text-ink"
+        >
+          View all {salary.searchTitle.toLowerCase()} salary data
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </div>
+    </section>
+  );
+}
 
 function RelatedRoles({ config }: { config: RoleConfig }) {
   if (config.relatedRoles.length === 0) return null;

@@ -128,14 +128,13 @@ export async function loadNationalSalary(
   return { areaName: f.areaName || "the United States", level: "national", annual: f.annual, hourly: f.hourly, vintage: f.vintage, source: f.source };
 }
 
-export type MetroPay = { name: string; annual: PayTriple | null; hourly: PayTriple | null };
+export type MetroPay = { name: string; slug: string; annual: PayTriple | null; hourly: PayTriple | null };
 
-/** Top metros (by median) within a state for a SOC. Metros carry the state in `area_name`. */
-export async function loadTopMetros(
+/** All metros within a state for a SOC, sorted by median desc. Metros carry the state in `area_name`. */
+export async function loadStateMetros(
   supabase: SupabaseClient,
   soc: string,
   stateCode: string,
-  limit = 6,
 ): Promise<MetroPay[]> {
   const res = await supabase
     .from("comp_benchmarks")
@@ -159,9 +158,24 @@ export async function loadTopMetros(
     else if (r.pay_unit === "hourly") cur.hourly = triple;
     byName.set(name, cur);
   }
-  const list: MetroPay[] = [...byName.entries()].map(([name, v]) => ({ name, annual: v.annual, hourly: v.hourly }));
+  const list: MetroPay[] = [...byName.entries()].map(([name, v]) => ({
+    name,
+    slug: metroCitySlug(name),
+    annual: v.annual,
+    hourly: v.hourly,
+  }));
   list.sort((a, b) => (b.annual?.p50 ?? b.hourly?.p50 ?? 0) - (a.annual?.p50 ?? a.hourly?.p50 ?? 0));
-  return list.slice(0, limit);
+  return list;
+}
+
+/** Top N metros (by median) within a state. */
+export async function loadTopMetros(
+  supabase: SupabaseClient,
+  soc: string,
+  stateCode: string,
+  limit = 6,
+): Promise<MetroPay[]> {
+  return (await loadStateMetros(supabase, soc, stateCode)).slice(0, limit);
 }
 
 export function fmtAnnual(n: number): string {
@@ -174,4 +188,18 @@ export function fmtHourly(n: number): string {
 export function metroShort(name: string): string {
   const i = name.lastIndexOf(",");
   return i > 0 ? name.slice(0, i) : name;
+}
+
+/** URL slug for a metro, derived from the city portion of its name. */
+export function metroCitySlug(name: string): string {
+  const city = name.split(",")[0] ?? name;
+  return city.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+/** Resolve a role slug + state slug to the canonical role/state, or null. */
+export function resolveRoleState(roleSlug: string, stSlug: string) {
+  const role = SALARY_ROLE_BY_SLUG[roleSlug];
+  const state = STATE_BY_SLUG[stSlug];
+  if (!role || !state) return null;
+  return { role, state };
 }
