@@ -248,39 +248,44 @@ export function ScaleSlider({
   const ticks = Array.from({ length: max - min + 1 }, (_, i) => min + i);
   return (
     <div className="space-y-2">
-      {/* Mobile sweep 2026-06-18 — on phones the two fixed-width (w-28) end-cap
-          labels ate ~40% of the row and crushed the slider track. Stack them
-          (low above / high below) so the track spans full width on mobile;
-          keep the flanked low | slider | high layout from sm up. */}
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
-        <span className="text-[13px] text-slate-meta sm:w-28 sm:text-right">{low}</span>
-        <div className="w-full sm:flex-1">
-          <input
-            type="range"
-            min={min}
-            max={max}
-            step={1}
-            value={current ?? mid}
-            onChange={(e) => onChange(Number(e.target.value))}
-            className={
-              (variant === "practicefit" ? "pf-slider" : "dso-slider") + " w-full"
-            }
-          />
-          <div className="mt-1 flex justify-between px-0.5" aria-hidden>
-            {ticks.map((t) => (
-              <span
-                key={t}
-                className={
-                  "text-[11px] tabular-nums " +
-                  (current === t ? "font-bold text-ink" : "text-slate-meta")
-                }
-              >
-                {t}
-              </span>
-            ))}
-          </div>
+      {/* Mobile sweep 2026-06-18 — on mobile both labels sit on ONE row above a
+          full-width track (the flanked w-28 labels crushed it); flanked
+          low | slider | high layout returns from sm up. */}
+      <div>
+        <div className="mb-1.5 flex items-center justify-between gap-3 text-[13px] text-slate-meta sm:hidden">
+          <span>{low}</span>
+          <span className="text-right">{high}</span>
         </div>
-        <span className="text-[13px] text-slate-meta sm:w-28">{high}</span>
+        <div className="flex items-center gap-3">
+          <span className="hidden w-28 text-right text-[13px] text-slate-meta sm:inline">{low}</span>
+          <div className="w-full sm:flex-1">
+            <input
+              type="range"
+              min={min}
+              max={max}
+              step={1}
+              value={current ?? mid}
+              onChange={(e) => onChange(Number(e.target.value))}
+              className={
+                (variant === "practicefit" ? "pf-slider" : "dso-slider") + " w-full"
+              }
+            />
+            <div className="mt-1 flex justify-between px-0.5" aria-hidden>
+              {ticks.map((t) => (
+                <span
+                  key={t}
+                  className={
+                    "text-[11px] tabular-nums " +
+                    (current === t ? "font-bold text-ink" : "text-slate-meta")
+                  }
+                >
+                  {t}
+                </span>
+              ))}
+            </div>
+          </div>
+          <span className="hidden w-28 text-[13px] text-slate-meta sm:inline">{high}</span>
+        </div>
       </div>
       <p className="text-center text-[12px] font-semibold text-slate-body">
         {current !== null

@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
 import { DsoFitMark } from "@/components/practice-fit/brand/dsofit-mark";
+import { FitWordmark } from "@/components/practice-fit/brand/fit-wordmark";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { BrandLockup } from "@/components/marketing/site-shell";
 import { Avatar } from "@/components/ui/avatar";
@@ -282,11 +283,20 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
               id: item.id,
               label: item.label,
               href: item.href,
-              // Pass the icon as a RENDERED node (not the component) — Server
-              // Components can't hand a component reference across the client
-              // boundary, but a ReactNode is fine. Gives the mobile menu the
-              // real PracticeFit / DSOFit marks + a glyph on every row.
+              // Icon as a RENDERED node (Server Components can't hand a component
+              // reference across the client boundary, but a ReactNode is fine).
               icon: <item.Icon className="size-5 flex-shrink-0" />,
+              // The flagship fit row shows the real DUAL-TONE wordmark (ivory
+              // "Practice" + heritage "Fit", or the DSOFit lockup) instead of a
+              // flat single-tone mark + plain text label.
+              node:
+                item.id === "practice-fit" ? (
+                  <FitWordmark
+                    product={isDso ? "dsofit" : "practicefit"}
+                    surface="dark"
+                    className="text-[14px]"
+                  />
+                ) : undefined,
             }))}
             help={{ id: HELP_ITEM.id, label: HELP_ITEM.label, href: HELP_ITEM.href }}
             user={{

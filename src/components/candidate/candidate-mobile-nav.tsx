@@ -31,6 +31,9 @@ export interface MobileNavItem {
   /** Pre-rendered icon node (passed from the server shell so the real
    *  PracticeFit / DSOFit marks survive the client boundary). */
   icon?: ReactNode;
+  /** Optional full-row node that REPLACES icon + label (e.g. the dual-tone
+   *  PracticeFit / DSOFit wordmark for the flagship fit row). */
+  node?: ReactNode;
 }
 
 interface CandidateMobileNavProps {
@@ -202,12 +205,18 @@ function MobileRow({
             : "text-ivory/65 hover:bg-white/5 hover:text-ivory")
         }
       >
-        {item.icon && (
-          <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center">
-            {item.icon}
-          </span>
+        {item.node ? (
+          item.node
+        ) : (
+          <>
+            {item.icon && (
+              <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center">
+                {item.icon}
+              </span>
+            )}
+            {item.label}
+          </>
         )}
-        {item.label}
       </Link>
     </li>
   );

@@ -576,41 +576,47 @@ function QuestionField({
         {q.type === "slider" && (
           <div className="space-y-2">
             {/* Mobile sweep 2026-06-18 — on phones the two fixed-width (w-28)
-                end-cap labels crushed the slider into the middle ~25%. Stack
-                them (low above / high below) so the track spans full width on
-                mobile; keep the flanked layout from sm up. */}
-            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
-              <span className="text-[12px] text-slate-meta sm:w-28 sm:text-right">
-                {q.sliderLabels?.low}
-              </span>
-              <div className="w-full sm:flex-1">
-                <input
-                  type="range"
-                  min={1}
-                  max={5}
-                  step={1}
-                  value={typeof value === "number" ? value : 3}
-                  onChange={(e) => onChange(q.key, Number(e.target.value))}
-                  className="pf-slider w-full"
-                />
-                {/* #101 (Day 28) — labeled ticks so the midpoints aren't vague. */}
-                <div className="mt-1 flex justify-between px-0.5" aria-hidden>
-                  {[1, 2, 3, 4, 5].map((t) => (
-                    <span
-                      key={t}
-                      className={
-                        "text-[11px] tabular-nums " +
-                        (value === t ? "font-bold text-ink" : "text-slate-meta")
-                      }
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
+                end-cap labels crushed the track. On mobile, both labels sit on
+                ONE row above a full-width track; flanked low | slider | high
+                from sm up. */}
+            <div>
+              <div className="mb-1.5 flex items-center justify-between gap-3 text-[12px] text-slate-meta sm:hidden">
+                <span>{q.sliderLabels?.low}</span>
+                <span className="text-right">{q.sliderLabels?.high}</span>
               </div>
-              <span className="text-[12px] text-slate-meta sm:w-28">
-                {q.sliderLabels?.high}
-              </span>
+              <div className="flex items-center gap-3">
+                <span className="hidden w-28 text-right text-[12px] text-slate-meta sm:inline">
+                  {q.sliderLabels?.low}
+                </span>
+                <div className="w-full sm:flex-1">
+                  <input
+                    type="range"
+                    min={1}
+                    max={5}
+                    step={1}
+                    value={typeof value === "number" ? value : 3}
+                    onChange={(e) => onChange(q.key, Number(e.target.value))}
+                    className="pf-slider w-full"
+                  />
+                  {/* #101 (Day 28) — labeled ticks so the midpoints aren't vague. */}
+                  <div className="mt-1 flex justify-between px-0.5" aria-hidden>
+                    {[1, 2, 3, 4, 5].map((t) => (
+                      <span
+                        key={t}
+                        className={
+                          "text-[11px] tabular-nums " +
+                          (value === t ? "font-bold text-ink" : "text-slate-meta")
+                        }
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <span className="hidden w-28 text-[12px] text-slate-meta sm:inline">
+                  {q.sliderLabels?.high}
+                </span>
+              </div>
             </div>
             <p className="text-center text-[12px] font-semibold text-slate-body">
               {typeof value === "number"
