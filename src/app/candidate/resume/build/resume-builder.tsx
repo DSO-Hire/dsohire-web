@@ -16,7 +16,7 @@
  * inserts and no need to change the shared actions.
  */
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronDown, ChevronUp, FileText, Plus, Trash2, X } from "lucide-react";
@@ -144,6 +144,14 @@ export function ResumeBuilder({
   const [index, setIndex] = useState(0);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+
+  // Mobile sweep 2026-06-18 — scroll to top on step change so phone users
+  // don't land mid-form when moving between résumé-builder sections.
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [index]);
 
   const [identity, setIdentity] = useState(data.identity);
   const [work, setWork] = useState<WorkEntry[]>(data.work);

@@ -22,6 +22,7 @@ import {
   LayoutDashboard,
   UserCircle,
   FileText,
+  ScrollText,
   Settings,
   Briefcase,
   LifeBuoy,
@@ -51,6 +52,7 @@ export type NavId =
   | "applications"
   | "inbox"
   | "profile"
+  | "resume"
   | "settings"
   | "help";
 
@@ -70,6 +72,7 @@ const NAV: ReadonlyArray<NavItem> = [
   { id: "applications", label: "Applications", href: "/candidate/applications", Icon: FileText },
   { id: "inbox", label: "Inbox", href: "/candidate/inbox", Icon: InboxIcon },
   { id: "profile", label: "Profile", href: "/candidate/profile", Icon: UserCircle },
+  { id: "resume", label: "Resume", href: "/candidate/resume", Icon: ScrollText },
 ];
 
 // Settings + Help live in the footer line (with Sign out), mirroring the

@@ -248,9 +248,13 @@ export function ScaleSlider({
   const ticks = Array.from({ length: max - min + 1 }, (_, i) => min + i);
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-3">
-        <span className="w-28 text-right text-[13px] text-slate-meta">{low}</span>
-        <div className="flex-1">
+      {/* Mobile sweep 2026-06-18 — on phones the two fixed-width (w-28) end-cap
+          labels ate ~40% of the row and crushed the slider track. Stack them
+          (low above / high below) so the track spans full width on mobile;
+          keep the flanked low | slider | high layout from sm up. */}
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
+        <span className="text-[13px] text-slate-meta sm:w-28 sm:text-right">{low}</span>
+        <div className="w-full sm:flex-1">
           <input
             type="range"
             min={min}
@@ -276,7 +280,7 @@ export function ScaleSlider({
             ))}
           </div>
         </div>
-        <span className="w-28 text-[13px] text-slate-meta">{high}</span>
+        <span className="text-[13px] text-slate-meta sm:w-28">{high}</span>
       </div>
       <p className="text-center text-[12px] font-semibold text-slate-body">
         {current !== null

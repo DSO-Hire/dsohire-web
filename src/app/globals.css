@@ -87,6 +87,18 @@ html {
   font-size: 18px;
 }
 
+/* iOS zoom guard (mobile sweep 2026-06-18) — Safari/Chrome on iOS zoom the
+   whole page whenever a FOCUSED input/select/textarea computes < 16px. Several
+   shared form fields use 15px, so force >= 16px on phones. Visually negligible
+   (15 -> 16); desktop is untouched (rule is max-width:767px only). */
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
 html, body {
   background: var(--color-ivory);
   color: var(--color-ink);

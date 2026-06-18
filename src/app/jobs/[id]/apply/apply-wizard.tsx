@@ -170,6 +170,15 @@ export function ApplyWizard(props: ApplyWizardProps) {
   const [restorePromptOpen, setRestorePromptOpen] = useState(false);
   const [savedDraft, setSavedDraft] = useState<WizardDraft | null>(null);
 
+  // Mobile sweep 2026-06-18 — return to the top on EVERY step change (next,
+  // back, jump, restore-to-saved-step). next() already scrolled, but back and
+  // jump did not, so some transitions left phone users stranded mid-page.
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [stepIdx]);
+
   // Candidate's linkable profile credentials. Seeded from the server prop,
   // but mutable: the Verifications step can furnish a new credential inline
   // (5G.e Tier 2 #2), which appends here so it's immediately pickable.
