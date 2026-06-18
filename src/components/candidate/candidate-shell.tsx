@@ -30,7 +30,6 @@ import {
 } from "lucide-react";
 import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
 import { DsoFitMark } from "@/components/practice-fit/brand/dsofit-mark";
-import { FitWordmark } from "@/components/practice-fit/brand/fit-wordmark";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { BrandLockup } from "@/components/marketing/site-shell";
 import { Avatar } from "@/components/ui/avatar";
@@ -40,6 +39,7 @@ import { CandidateCommandPaletteTrigger } from "./command-palette";
 import { getUnreadCount } from "@/lib/inbox/queries";
 import { NavBadgeRealtime } from "@/components/inbox/nav-badge-realtime";
 import { SupportLauncher } from "@/components/support/support-launcher";
+import { ToastProvider } from "@/components/app/toast";
 
 interface CandidateShellProps {
   children: React.ReactNode;
@@ -286,16 +286,36 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
               // Icon as a RENDERED node (Server Components can't hand a component
               // reference across the client boundary, but a ReactNode is fine).
               icon: <item.Icon className="size-5 flex-shrink-0" />,
-              // The flagship fit row shows the real DUAL-TONE wordmark (ivory
-              // "Practice" + heritage "Fit", or the DSOFit lockup) instead of a
-              // flat single-tone mark + plain text label.
+              // The flagship fit row keeps the standard icon + label COLUMNS (so
+              // the mark sizes and aligns exactly like every other row) but
+              // renders the mark in its brand accent + a dual-tone wordmark:
+              // PracticeFit = green, DSOFit = blue. Premium pop, no misalignment.
               node:
                 item.id === "practice-fit" ? (
-                  <FitWordmark
-                    product={isDso ? "dsofit" : "practicefit"}
-                    surface="dark"
-                    className="text-[14px]"
-                  />
+                  <>
+                    <span
+                      className={
+                        "flex h-5 w-5 flex-shrink-0 items-center justify-center " +
+                        (isDso ? "text-blue-400" : "text-heritage-light")
+                      }
+                    >
+                      {isDso ? (
+                        <DsoFitMark className="h-5 w-5" />
+                      ) : (
+                        <PracticeFitMark className="h-5 w-5" />
+                      )}
+                    </span>
+                    <span className="font-extrabold tracking-[-0.02em]">
+                      <span className="text-ivory">
+                        {isDso ? "DSO" : "Practice"}
+                      </span>
+                      <span
+                        className={isDso ? "text-blue-400" : "text-heritage-light"}
+                      >
+                        Fit
+                      </span>
+                    </span>
+                  </>
                 ) : undefined,
             }))}
             help={{ id: HELP_ITEM.id, label: HELP_ITEM.label, href: HELP_ITEM.href }}
@@ -307,7 +327,9 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
           />
         </header>
 
-        <main className="flex-1 px-6 sm:px-10 py-10">{children}</main>
+        <main className="flex-1 px-6 sm:px-10 py-10">
+          <ToastProvider>{children}</ToastProvider>
+        </main>
       </div>
 
       {/* Floating "?" support launcher (Tier 2 chat surface). */}

@@ -19,6 +19,7 @@
 import { useState, useTransition } from "react";
 import { Bookmark, BookmarkCheck, Loader2, AlertCircle } from "lucide-react";
 import { toggleSavedJob } from "./actions";
+import { useToast } from "@/components/app/toast";
 
 interface SaveJobButtonProps {
   jobId: string;
@@ -39,6 +40,9 @@ export function SaveJobButton({
   const [, startWork] = useTransition();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // No-op unless a ToastProvider is mounted above (it is inside CandidateShell,
+  // so saves on /candidate/jobs confirm with a toast; public /jobs stays silent).
+  const toast = useToast();
 
   if (!candidateAuthed) return null;
 
@@ -58,6 +62,9 @@ export function SaveJobButton({
       // Server confirms — usually matches our optimistic value, but if a
       // race + revalidation lands different state, trust the server.
       setSaved(result.saved);
+      toast({
+        title: result.saved ? "Job saved" : "Removed from saved",
+      });
     });
   };
 
