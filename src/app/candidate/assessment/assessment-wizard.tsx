@@ -575,11 +575,15 @@ function QuestionField({
 
         {q.type === "slider" && (
           <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <span className="w-28 text-right text-[12px] text-slate-meta">
+            {/* Mobile sweep 2026-06-18 — on phones the two fixed-width (w-28)
+                end-cap labels crushed the slider into the middle ~25%. Stack
+                them (low above / high below) so the track spans full width on
+                mobile; keep the flanked layout from sm up. */}
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
+              <span className="text-[12px] text-slate-meta sm:w-28 sm:text-right">
                 {q.sliderLabels?.low}
               </span>
-              <div className="flex-1">
+              <div className="w-full sm:flex-1">
                 <input
                   type="range"
                   min={1}
@@ -604,7 +608,7 @@ function QuestionField({
                   ))}
                 </div>
               </div>
-              <span className="w-28 text-[12px] text-slate-meta">
+              <span className="text-[12px] text-slate-meta sm:w-28">
                 {q.sliderLabels?.high}
               </span>
             </div>

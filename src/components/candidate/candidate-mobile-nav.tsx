@@ -18,7 +18,7 @@
  * drawer was rendering as just the top strip.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Menu, X, LifeBuoy, LogOut } from "lucide-react";
@@ -28,6 +28,9 @@ export interface MobileNavItem {
   id: string;
   label: string;
   href: string;
+  /** Pre-rendered icon node (passed from the server shell so the real
+   *  PracticeFit / DSOFit marks survive the client boundary). */
+  icon?: ReactNode;
 }
 
 interface CandidateMobileNavProps {
@@ -199,6 +202,11 @@ function MobileRow({
             : "text-ivory/65 hover:bg-white/5 hover:text-ivory")
         }
       >
+        {item.icon && (
+          <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center">
+            {item.icon}
+          </span>
+        )}
         {item.label}
       </Link>
     </li>

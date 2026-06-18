@@ -72,7 +72,7 @@ const NAV: ReadonlyArray<NavItem> = [
   { id: "applications", label: "Applications", href: "/candidate/applications", Icon: FileText },
   { id: "inbox", label: "Inbox", href: "/candidate/inbox", Icon: InboxIcon },
   { id: "profile", label: "Profile", href: "/candidate/profile", Icon: UserCircle },
-  { id: "resume", label: "Resume", href: "/candidate/resume", Icon: ScrollText },
+  { id: "resume", label: "Résumé", href: "/candidate/resume", Icon: ScrollText },
 ];
 
 // Settings + Help live in the footer line (with Sign out), mirroring the
@@ -282,6 +282,11 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
               id: item.id,
               label: item.label,
               href: item.href,
+              // Pass the icon as a RENDERED node (not the component) — Server
+              // Components can't hand a component reference across the client
+              // boundary, but a ReactNode is fine. Gives the mobile menu the
+              // real PracticeFit / DSOFit marks + a glyph on every row.
+              icon: <item.Icon className="size-5 flex-shrink-0" />,
             }))}
             help={{ id: HELP_ITEM.id, label: HELP_ITEM.label, href: HELP_ITEM.href }}
             user={{
