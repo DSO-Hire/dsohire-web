@@ -759,6 +759,8 @@ function Bubble({
                 <Link
                   key={i}
                   href={c.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[0.3px] text-heritage-deep bg-heritage/[0.08] border border-heritage/20 px-2 py-0.5 hover:bg-heritage/[0.14]"
                 >
                   <span aria-hidden>✦</span>
@@ -1041,10 +1043,14 @@ function EmptyState({
           <ul className="space-y-1">
             {suggestions.map(({ key, entry }) => (
               <li key={key}>
+                {/* Open help in a NEW TAB so the candidate never loses their
+                    place (Cam, Day 37: tapping an article bounced them out of
+                    the dashboard). Drawer stays open for the return trip. */}
                 <Link
                   href={`/help/${key.replace(/\./g, "-")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="group flex items-start gap-2 px-3 py-2 -mx-3 rounded hover:bg-cream/60 transition-colors"
-                  onClick={onClose}
                 >
                   <ChevronRight className="size-3.5 text-slate-meta mt-1 shrink-0 group-hover:text-heritage-deep group-hover:translate-x-0.5 transition-all" />
                   <div className="min-w-0 flex-1">
