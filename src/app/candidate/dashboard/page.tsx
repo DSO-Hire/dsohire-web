@@ -372,37 +372,38 @@ export default async function CandidateDashboardPage() {
     (a) => a.kind !== "hired" && !isTerminalKind(a.kind),
   );
 
-  // ── PracticeFit per active application (Phase 5D v1.2) ─────────────
-  // Compute in parallel; cached after first compute. Role-filtered or
-  // consent-off pairs return null — handled by the summary widget.
-  const fitsByActiveAppId = new Map<string, FitResult | null>();
-  if (activeApps.length > 0) {
-    const fits = await Promise.all(
-      activeApps.map((a) => getPracticeFit(candidateRowId, a.job_id))
-    );
-    activeApps.forEach((a, i) => fitsByActiveAppId.set(a.id, fits[i]));
-  }
-
-  // ── "Roles that fit you" feed (Phase B.1) ───────────────────────────
-  // Top open roles ranked by the candidate's PracticeFit. Role-filtered
-  // jobs drop out (relevance fix). Respect the opt-out: skip when the
-  // candidate set PracticeFit matching to off.
+  // ── PracticeFit scoring — the two heaviest passes ──────────────────
+  // Per-active-app fits and the "roles that fit you" scan are INDEPENDENT, so
+  // run them CONCURRENTLY rather than back-to-back (mobile-sweep perf, Day 37 —
+  // this was two serial scoring waterfalls on the dashboard's critical path).
+  // Cached after first compute; role-filtered / consent-off pairs return null
+  // (handled downstream). pfConsentOn respects the matching opt-out.
   const pfConsentOn =
     (((candidate as Record<string, unknown>).practice_fit_consent as
       | string
       | null) ?? "off") !== "off";
-  // Single source of truth for "matches": the PracticeFit role-gated open-role
-  // set. The KPI tile count AND the "Roles that fit you" card both derive from
-  // this list, so the dashboard can never show "0 matches" next to a populated
-  // fit list again (the contradiction Cam hit). Capped scan; top 4 in the card.
-  const rolesThatFitAll = pfConsentOn
-    ? await getTopFitJobsForCandidate(
-        candidateRowId,
-        24,
-        undefined,
-        primaryFitProduct
-      )
-    : [];
+  const [activeFits, rolesThatFitAll] = await Promise.all([
+    activeApps.length > 0
+      ? Promise.all(
+          activeApps.map((a) => getPracticeFit(candidateRowId, a.job_id))
+        )
+      : Promise.resolve([] as Array<FitResult | null>),
+    // Single source of truth for "matches": the PracticeFit role-gated
+    // open-role set, so the dashboard can never show "0 matches" next to a
+    // populated fit list again. Capped scan; top 4 in the card.
+    pfConsentOn
+      ? getTopFitJobsForCandidate(
+          candidateRowId,
+          24,
+          undefined,
+          primaryFitProduct
+        )
+      : Promise.resolve(
+          [] as Awaited<ReturnType<typeof getTopFitJobsForCandidate>>
+        ),
+  ]);
+  const fitsByActiveAppId = new Map<string, FitResult | null>();
+  activeApps.forEach((a, i) => fitsByActiveAppId.set(a.id, activeFits[i]));
   const rolesThatFit = rolesThatFitAll.slice(0, 4);
 
   // Dimensions the candidate has ALREADY filled — used to suppress
