@@ -18,6 +18,7 @@ import { SiteShell } from "@/components/marketing/site-shell";
 import { FitDial } from "@/components/marketing/fit-dial";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import { DsoFitWordmark } from "@/components/practice-fit/brand/dsofit-wordmark";
+import { candidateCtaHref } from "@/lib/marketing/candidate-cta";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -34,22 +35,25 @@ export const metadata: Metadata = {
   ],
 };
 
-export default function PracticeFitPage() {
+export default async function PracticeFitPage() {
+  // Auth-aware: a signed-in candidate taking their PracticeFit goes straight to
+  // the assessment, not the sign-up page (Cam, Day 37).
+  const assessmentHref = await candidateCtaHref("assessment");
   return (
     <SiteShell>
-      <Hero />
+      <Hero ctaHref={assessmentHref} />
       <TwoSides />
       <WhatItScores />
       <DsoFitBand />
       <HonestyBand />
-      <FinalCta />
+      <FinalCta ctaHref={assessmentHref} />
     </SiteShell>
   );
 }
 
 /* ───────── Hero ───────── */
 
-function Hero() {
+function Hero({ ctaHref }: { ctaHref: string }) {
   return (
     <section className="relative overflow-hidden pt-[140px] pb-24 px-6 sm:px-14">
       <div
@@ -102,7 +106,7 @@ function Hero() {
             className="flex flex-wrap items-center gap-3.5"
           >
             <Link
-              href="/candidate/sign-up"
+              href={ctaHref}
               className="inline-flex items-center gap-2.5 px-8 py-4 bg-heritage text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
             >
               <Stethoscope className="h-4 w-4" />
@@ -425,7 +429,7 @@ function HonestyBand() {
 
 /* ───────── Final CTA ───────── */
 
-function FinalCta() {
+function FinalCta({ ctaHref }: { ctaHref: string }) {
   return (
     <section className="px-6 sm:px-14 py-24">
       <div className="max-w-[820px] mx-auto text-center">
@@ -449,7 +453,7 @@ function FinalCta() {
           className="flex flex-col sm:flex-row gap-3.5 justify-center"
         >
           <Link
-            href="/candidate/sign-up"
+            href={ctaHref}
             className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-heritage text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
           >
             <Stethoscope className="h-4 w-4" />
