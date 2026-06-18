@@ -71,7 +71,7 @@ import {
 import { RichCardRenderer } from "@/components/inbox/rich-cards";
 import type { ThreadNote } from "@/lib/inbox/types";
 import { useToast } from "@/components/app/toast";
-import { createApplicationComment } from "@/app/employer/applications/[id]/comments-actions";
+import { createApplicationComment } from "@/app/employer/(app)/applications/[id]/comments-actions";
 
 const EDIT_WINDOW_MS = 5 * 60 * 1000;
 const MAX_BODY = 5000;

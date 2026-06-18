@@ -1,39 +1,26 @@
 /**
- * EmployerShell — auth-gated layout for /employer/dashboard, jobs,
- * applications, billing, settings, etc. (Phase 4.6 rewrite).
+ * EmployerShell — the presentational chrome for /employer/* (left rail,
+ * mobile header, command palette, location switcher, support launcher, chat).
  *
- * Sidebar nav restructured into 3 groups + footer cluster:
+ * The auth gate + data fetch now live ONE level up in the route group's
+ * layout (`src/app/employer/(app)/layout.tsx`), which renders this shell
+ * around its children. Because a layout persists across navigation, the nav
+ * no longer unmounts/remounts when moving between employer pages (the old
+ * "blink"), and the content-area BrandLoader (`(app)/loading.tsx`) shows with
+ * the nav still in place while a page's server data loads. The active
+ * highlight is derived from the URL via usePathname (EmployerRailNav /
+ * EmployerMobileNav) rather than a per-page `active` prop.
  *
- *   ┌─ Work ────────────┐
- *   │  Dashboard         │
- *   │  Jobs              │
- *   │  Applications      │
- *   │  Talent Pool       │
- *   │  Inbox             │
- *   ├─ Insight ──────────┤
- *   │  Reports           │
- *   ├─ Setup ────────────┤
- *   │  Locations         │
- *   │  Team              │
- *   │  Billing           │
- *   │  Settings          │
- *   └─ (footer cluster) ─┘
- *      avatar + DSO name
- *      Help & Support
- *      Sign out
+ * Sidebar nav: 3 groups (Hire / Insight / Operate) + a footer cluster
+ * (Settings · Help · Sign out). HM / recruiter visibility is capability-driven
+ * (effectivePermissions, resolved in the layout and passed in as `navPerms`).
  *
- * Per locked rule R13: visual gaps separate groups — no section
- * header copy. The breaks read on their own.
- *
- * HM persona hides: Reports / Locations / Team / Billing (locked spec).
- * Recruiter persona hides: Locations / Team / Billing.
- *
- * Mobile: hamburger drop-down opens the same items as desktop rail.
+ * This component is still a Server Component — it owns the NAV config and
+ * renders each icon to a NODE (icons can't cross to the client navs as
+ * component refs, but a rendered node carrying its `rail-ic-*` class is fine).
  */
 
 import Link from "next/link";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import {
   LayoutDashboard,
   Briefcase,
@@ -51,31 +38,18 @@ import {
   ClipboardCheck,
   SquareKanban,
 } from "lucide-react";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-import {
-  effectivePermissions,
-  type Capability,
-} from "@/lib/permissions/capabilities";
+import type { Capability } from "@/lib/permissions/capabilities";
 import { BrandLockup } from "@/components/marketing/site-shell";
 import { RailCollapse } from "./rail-collapse";
 import { ToastProvider } from "@/components/app/toast";
-import { getUnreadCount, getNewApplicationCount } from "@/lib/inbox/queries";
 import { NavBadgeRealtime } from "@/components/inbox/nav-badge-realtime";
-import { getMfaState } from "@/lib/auth/mfa";
-import { readMfaTrustCookie } from "@/lib/auth/mfa-trust";
 import { Avatar } from "@/components/ui/avatar";
 import { EmployerMobileNav } from "./employer-mobile-nav";
+import { EmployerRailNav, type RailNavGroup } from "./employer-rail-nav";
 import { LocationSwitcher } from "./location-switcher";
-import { getActiveLocationId } from "@/lib/employer/active-location";
 import { CommandPaletteTrigger } from "./command-palette";
 import { SupportLauncher } from "@/components/support/support-launcher";
 import { ChatWidget } from "@/components/chat/chat-widget";
-
-interface EmployerShellProps {
-  children: React.ReactNode;
-  /** Override which sidebar item shows as active. */
-  active?: NavId;
-}
 
 export type NavId =
   | "dashboard"
@@ -94,7 +68,7 @@ export type NavId =
   | "settings"
   | "help";
 
-type Role = "owner" | "admin" | "recruiter" | "hiring_manager";
+export type Role = "owner" | "admin" | "recruiter" | "hiring_manager";
 type NavGroup = "work" | "insight" | "setup";
 
 interface NavItem {
@@ -106,7 +80,6 @@ interface NavItem {
   /**
    * #83 Phase 2 — if set, show only when the viewer's EFFECTIVE permissions
    * (role preset + per-teammate overrides) include this capability.
-   * Replaces the old hard hideFromRoles lists.
    */
   requiresCap?: Capability;
   /** Optional unread/notification badge — heritage pill when > 0. */
@@ -136,20 +109,16 @@ const NAV: ReadonlyArray<NavItem> = [
 
 // Settings lives in the footer cluster with Help + Sign out (Cam, Day 26) —
 // it's an account-level destination, not a daily-work nav item.
-const SETTINGS_ITEM: NavItem = {
-  id: "settings",
+const SETTINGS_ITEM = {
+  id: "settings" as const,
   label: "Settings",
   href: "/employer/settings",
-  Icon: Settings,
-  group: "setup",
 };
 
-const HELP_ITEM: NavItem = {
-  id: "help",
+const HELP_ITEM = {
+  id: "help" as const,
   label: "Help & Support",
   href: "/employer/help",
-  Icon: LifeBuoy,
-  group: "setup",
 };
 
 const GROUP_ORDER: ReadonlyArray<NavGroup> = ["work", "insight", "setup"];
@@ -161,88 +130,48 @@ const GROUP_LABELS: Record<NavGroup, string> = {
   setup: "Operate",
 };
 
-export async function EmployerShell({ children, active }: EmployerShellProps) {
-  const supabase = await createSupabaseServerClient();
+export interface EmployerShellProps {
+  children: React.ReactNode;
+  /** Effective permissions (role preset + overrides) — resolved in the layout. */
+  navPerms: Partial<Record<Capability, boolean>>;
+  /** Nav badge counts — resolved server-side in the layout. */
+  inboxUnread: number;
+  newApplications: number;
+  pendingApprovals: number;
+  /** Identity / org for the rail org-card + mobile drawer header. */
+  role: Role;
+  dsoName: string;
+  dsoLogo: string | null;
+  dsoStatus: string;
+  userFullName: string;
+  /** Multi-location switcher data (Phase 4.6.d). */
+  locations: Array<{ id: string; name: string; subtitle: string | null }>;
+  activeLocationId: string | null;
+  activeLocation: { id: string; name: string; subtitle: string | null } | null;
+  /** Auth user id for the support launcher (Tier 2 chat). */
+  authUserId: string;
+  /** DSO id for the team + candidate chat widget. */
+  dsoId: string;
+}
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) redirect("/employer/sign-in");
-
-  const { data: dsoUser } = await supabase
-    .from("dso_users")
-    .select("id, dso_id, role, full_name, permission_overrides")
-    .eq("auth_user_id", user.id)
-    .maybeSingle();
-
-  if (!dsoUser) redirect("/employer/onboarding");
-
-  const { data: dso } = await supabase
-    .from("dsos")
-    .select("id, name, slug, status, logo_url, require_mfa, deleted_at")
-    .eq("id", dsoUser.dso_id)
-    .maybeSingle();
-
-  // ── Soft-deleted DSO guard (Phase 4.5.g) ──
-  // If the DSO is soft-deleted, every team member hits the restore
-  // landing page until the owner restores or the cron hard-deletes.
-  if ((dso as Record<string, unknown> | null)?.deleted_at) {
-    redirect("/employer/restore");
-  }
-
-  // ── MFA enforcement (Phase 4.5.d, refined Day 21) ──
-  // Per-DSO opt-in via dso.require_mfa. Enrolled users step up to aal2
-  // on each page hit UNLESS a valid 30-day trust-this-device cookie is
-  // present (mfa-trust.ts) — matches industry standard (Stripe / GitHub /
-  // Salesforce all do this). Sensitive actions still re-check via
-  // userNeedsMfaChallenge regardless of trust.
-  const mfaState = await getMfaState(supabase);
-  const dsoRequiresMfa = (dso?.require_mfa as boolean | null) === true;
-  if (mfaState.isEnrolled && mfaState.currentLevel !== "aal2") {
-    const cookieStore = await cookies();
-    const trusted = readMfaTrustCookie(cookieStore, {
-      authUserId: user.id,
-      verifiedFactorId: mfaState.verifiedFactorId,
-    });
-    if (!trusted) {
-      redirect("/auth/mfa/challenge?next=/employer/dashboard");
-    }
-  }
-  if (dsoRequiresMfa && !mfaState.isEnrolled) {
-    redirect("/auth/mfa/setup");
-  }
-
-  const role = dsoUser.role as Role;
-
-  // #83 Phase 2 — nav visibility is capability-driven (role preset +
-  // per-teammate overrides) instead of hard role lists.
-  const navPerms = effectivePermissions(
-    role,
-    (dsoUser as Record<string, unknown>).permission_overrides
-  );
-
-  // Inbox unread badge — counts messages from candidates that this user
-  // (or any DSO teammate) hasn't marked read.
-  // Applications new-count badge — Cam's sharpened ask 2026-05-15.
-  // Counts applications currently sitting in an `open`-kind pipeline
-  // stage. Both queries lean on RLS to scope to this DSO.
-  const [inboxUnread, newApplications] = await Promise.all([
-    getUnreadCount(supabase, "employer"),
-    getNewApplicationCount(supabase),
-  ]);
-
-  // N12 — pending-offer-approvals badge for approvers.
-  // RLS scopes application_offer_sends to this DSO via the join.
-  let pendingApprovals = 0;
-  if (navPerms["offers.approve"]) {
-    const { count } = await supabase
-      .from("application_offer_sends")
-      .select("id", { count: "exact", head: true })
-      .eq("approval_status", "pending");
-    pendingApprovals = count ?? 0;
-  }
-
+export function EmployerShell({
+  children,
+  navPerms,
+  inboxUnread,
+  newApplications,
+  pendingApprovals,
+  role,
+  dsoName,
+  dsoLogo,
+  dsoStatus,
+  userFullName,
+  locations,
+  activeLocationId,
+  activeLocation,
+  authUserId,
+  dsoId,
+}: EmployerShellProps) {
+  // #83 Phase 2 — nav visibility is capability-driven (resolved upstream).
   const visibleNav = NAV.filter(
     (item) => !item.requiresCap || navPerms[item.requiresCap]
   ).map((item) => {
@@ -251,54 +180,47 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
     if (item.id === "offer-approvals") return { ...item, badge: pendingApprovals };
     return item;
   });
-  const groupedNav = GROUP_ORDER.map((g) => ({
+
+  // Grouped + icon-rendered for the desktop rail. Icons become NODES here so
+  // they survive the client boundary into EmployerRailNav. The rail-ic-<id>
+  // class lets globals.css give each icon its own hover animation.
+  const railGroups: RailNavGroup[] = GROUP_ORDER.map((g) => ({
     group: g,
-    items: visibleNav.filter((item) => item.group === g),
+    label: GROUP_LABELS[g],
+    items: visibleNav
+      .filter((item) => item.group === g)
+      .map((item) => {
+        const Icon = item.Icon;
+        return {
+          id: item.id,
+          label: item.label,
+          href: item.href,
+          icon: (
+            <Icon className={`rail-ic rail-ic-${item.id} h-4 w-4 flex-shrink-0`} />
+          ),
+          badge: item.badge,
+        };
+      }),
   })).filter((group) => group.items.length > 0);
 
-  const dsoName = (dso?.name as string | undefined) ?? "Pending";
-  const dsoLogo = (dso?.logo_url as string | null) ?? null;
-  const dsoStatus = (dso?.status as string | undefined) ?? "pending";
-  const userFullName =
-    (dsoUser.full_name as string | null) ?? user.email ?? "You";
-
-  // ─── Multi-location switcher data (Phase 4.6.d) ───
-  const [activeLocationId, { data: locationRows }] = await Promise.all([
-    getActiveLocationId(),
-    supabase
-      .from("dso_locations")
-      .select("id, name, city, state")
-      .eq("dso_id", dsoUser.dso_id)
-      .order("name", { ascending: true }),
-  ]);
-  const locations = ((locationRows ?? []) as Array<{
-    id: string;
-    name: string;
-    city: string | null;
-    state: string | null;
-  }>).map((l) => ({
-    id: l.id,
-    name: l.name,
-    subtitle: [l.city, l.state].filter(Boolean).join(", ") || null,
-  }));
-  const activeLocation = activeLocationId
-    ? locations.find((l) => l.id === activeLocationId) ?? null
-    : null;
+  // Mobile drawer takes plain id/label/href groups (icons not shown there).
+  const mobileGroups = GROUP_ORDER.map((g) => ({
+    group: g,
+    items: visibleNav
+      .filter((item) => item.group === g)
+      .map((item) => ({ id: item.id, label: item.label, href: item.href })),
+  })).filter((group) => group.items.length > 0);
 
   return (
     <div className="min-h-screen flex bg-ivory">
       {/* Realtime listener — bumps the Inbox nav badge when a candidate
           message arrives without requiring navigation. */}
       <NavBadgeRealtime audience="employer" />
-      {/* ── Desktop sidebar ──
-           sticky top-0 + h-screen pins the rail to the viewport so the
-           Help / Sign-out footer cluster stays in view even when the page
-           content scrolls past the viewport height. */}
       {/* ── Desktop sidebar — Lane S, Model H (Day 32 verdict) ──
-           Navy throughout (cream brand band retired), drawn-on logo,
-           named groups, settle-edge active state, compact footer row,
-           collapse-to-72px icon rail. Chrome only — loaders, badges,
-           capability gating, and the location switcher are untouched. */}
+           Navy throughout, drawn-on logo, named groups, settle-edge active
+           state, compact footer row, collapse-to-72px icon rail. sticky top-0
+           + h-screen pins the rail so the footer cluster stays in view even
+           when content scrolls past the viewport height. */}
       <aside
         id="employer-rail"
         className="hidden lg:flex w-[240px] flex-shrink-0 flex-col bg-ink text-ivory border-r border-white/10 sticky top-0 h-screen relative transition-[width] duration-[450ms]"
@@ -375,26 +297,13 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
           <CommandPaletteTrigger />
         </div>
 
-        {/* Grouped nav — named eyebrows replace bare dividers. */}
+        {/* Grouped nav — active highlight derived from the URL (client). */}
         <nav className="rail-nav flex-1 overflow-y-auto px-3 py-1">
-          {groupedNav.map((group) => (
-            <ul key={group.group} className="list-none space-y-0.5">
-              <li
-                aria-hidden="true"
-                className="rail-glabel pt-3.5 pb-1.5 px-2.5 text-[8.5px] font-extrabold tracking-[2.8px] uppercase text-ivory/40"
-              >
-                {GROUP_LABELS[group.group]}
-              </li>
-              {group.items.map((item) => (
-                <NavRow key={item.id} item={item} active={active} />
-              ))}
-            </ul>
-          ))}
+          <EmployerRailNav groups={railGroups} />
         </nav>
 
-        {/* Footer row — Settings · Help · Sign out → (Model H: three
-            stacked rows become one quiet line; sign out anchors the
-            corner, still the same POST form). */}
+        {/* Footer row — Settings · Help · Sign out → (Model H: one quiet
+            line; sign out anchors the corner, still the same POST form). */}
         <div className="rail-foot border-t border-white/10 px-5 py-3.5 flex items-center gap-4">
           <Link
             href="/employer/settings"
@@ -427,25 +336,9 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
             <BrandLockup height={28} />
           </Link>
           <EmployerMobileNav
-            active={active}
-            groups={groupedNav.map((g) => ({
-              group: g.group,
-              items: g.items.map((item) => ({
-                id: item.id,
-                label: item.label,
-                href: item.href,
-              })),
-            }))}
-            settings={{
-              id: SETTINGS_ITEM.id,
-              label: SETTINGS_ITEM.label,
-              href: SETTINGS_ITEM.href,
-            }}
-            help={{
-              id: HELP_ITEM.id,
-              label: HELP_ITEM.label,
-              href: HELP_ITEM.href,
-            }}
+            groups={mobileGroups}
+            settings={SETTINGS_ITEM}
+            help={HELP_ITEM}
             user={{
               fullName: userFullName,
               role,
@@ -469,9 +362,8 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
           </div>
         )}
 
-        {/* Toast system (Lane 1 kit) mounted at the shell — first
-            consumers land Day 32 night (stage changes). */}
-        {/* Extra bottom padding on mobile so the fixed Messages bar never
+        {/* Toast system (Lane 1 kit) mounted at the shell.
+            Extra bottom padding on mobile so the fixed Messages bar never
             covers the last row of content (lg keeps the original spacing). */}
         <main className="flex-1 px-6 sm:px-10 pt-10 pb-28 lg:pb-10">
           <ToastProvider>{children}</ToastProvider>
@@ -479,52 +371,10 @@ export async function EmployerShell({ children, active }: EmployerShellProps) {
       </div>
 
       {/* Floating "?" support launcher (Tier 2 chat surface, Day 21 Phase C). */}
-      <SupportLauncher audience="employer" authUserId={user.id} raised />
+      <SupportLauncher audience="employer" authUserId={authUserId} raised />
 
       {/* Pop-up team + candidate chat (Day 24) — stacked above the support button. */}
-      <ChatWidget dsoId={dsoUser.dso_id as string} authId={user.id} />
+      <ChatWidget dsoId={dsoId} authId={authUserId} />
     </div>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────
- * Single nav row — shared between groups + the Help footer entry.
- * ────────────────────────────────────────────────────────── */
-
-function NavRow({
-  item,
-  active,
-}: {
-  item: NavItem;
-  active?: NavId;
-}) {
-  const isActive = active === item.id;
-  const Icon = item.Icon;
-  return (
-    <li>
-      <Link
-        href={item.href}
-        data-tip={item.label}
-        className={
-          "rail-item group relative flex items-center gap-3 px-3 py-2 text-[13px] font-semibold tracking-[0.2px] border border-transparent transition-colors " +
-          (isActive
-            ? "rail-item-on bg-white/[0.08] text-ivory border-white/10"
-            : "text-ivory/60 hover:bg-white/5 hover:text-ivory")
-        }
-      >
-        {/* rail-ic-<id> lets globals.css give each icon its own
-            hover animation (inbox mail-drop, analytics bar-pump…). */}
-        <Icon className={`rail-ic rail-ic-${item.id} h-4 w-4 flex-shrink-0`} />
-        <span className="rail-label flex-1">{item.label}</span>
-        {item.badge && item.badge > 0 ? (
-          <span
-            aria-label={`${item.badge} unread`}
-            className="rail-badge ml-2 inline-flex items-center justify-center rounded-full bg-heritage-deep px-1.5 py-0.5 text-[10px] font-bold text-ivory min-w-[18px]"
-          >
-            {item.badge > 99 ? "99+" : item.badge}
-          </span>
-        ) : null}
-      </Link>
-    </li>
   );
 }

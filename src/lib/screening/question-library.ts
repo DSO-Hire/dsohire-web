@@ -24,7 +24,7 @@
  *     be tagged.
  */
 
-import type { ScreeningQuestionKind } from "@/app/employer/jobs/job-wizard";
+import type { ScreeningQuestionKind } from "@/app/employer/(app)/jobs/job-wizard";
 
 export interface RecommendedOption {
   id: string;

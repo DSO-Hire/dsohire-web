@@ -13,9 +13,9 @@
  * executes" holds at the architecture level.
  */
 
-import { moveApplicationStage } from "@/app/employer/applications/[id]/actions";
-import { assignApplication } from "@/app/employer/applications/[id]/assign-actions";
-import { createApplicationComment } from "@/app/employer/applications/[id]/comments-actions";
+import { moveApplicationStage } from "@/app/employer/(app)/applications/[id]/actions";
+import { assignApplication } from "@/app/employer/(app)/applications/[id]/assign-actions";
+import { createApplicationComment } from "@/app/employer/(app)/applications/[id]/comments-actions";
 import { STAGE_KINDS, type StageKind } from "@/lib/applications/stages";
 
 export type CommitActionInput =

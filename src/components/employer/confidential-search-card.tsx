@@ -15,7 +15,7 @@ import {
 import {
   updateJobConfidentiality,
   type ConfidentialActionState,
-} from "@/app/employer/jobs/confidential-actions";
+} from "@/app/employer/(app)/jobs/confidential-actions";
 
 const INITIAL_STATE: ConfidentialActionState = { ok: false };
 

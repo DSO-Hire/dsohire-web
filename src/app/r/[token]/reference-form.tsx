@@ -17,7 +17,7 @@ import {
   REFERENCE_FIELDS,
   renderPrompt,
   type ReferenceFieldDef,
-} from "@/app/employer/applications/[id]/reference-data";
+} from "@/app/employer/(app)/applications/[id]/reference-data";
 import { submitReferenceResponse } from "./actions";
 
 interface ReferenceFormProps {

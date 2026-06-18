@@ -1,0 +1,507 @@
+/**
+ * /employer/billing — current subscription + invoice history.
+ *
+ * Shows the active subscription's tier, status, current period, and any
+ * special flags (cancel-at-period-end). Lists the most recent invoices
+ * with links to the Stripe-hosted invoice page (where the user can
+ * download a receipt PDF).
+ *
+ * "Manage Subscription" opens the Stripe Customer Portal — a Stripe-hosted
+ * page where the user can change card, change plan, or cancel. Cancel /
+ * plan-change events flow back to us via webhook.
+ */
+
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  ExternalLink,
+  Receipt,
+  Settings,
+} from "lucide-react";
+import { HelpDisclosure } from "@/components/help/help-disclosure";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  PRICING_TIERS,
+  periodFromStripePriceId,
+  seatPacksConfigured,
+  tierCanBuySeatPacks,
+  SEAT_PACK_SIZE,
+  SEAT_PACK_MONTHLY_PRICE,
+  SEAT_PACK_ANNUAL_PRICE,
+} from "@/lib/stripe/prices";
+import { getStripe } from "@/lib/stripe/server";
+import { getCapStatus } from "@/lib/billing/caps";
+import { SeatPackControl } from "@/components/billing/seat-pack-control";
+import { SUPPORT_EMAIL } from "@/lib/contact";
+import { openCustomerPortal } from "./actions";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Billing" };
+
+interface PageProps {
+  searchParams: Promise<{ portal_error?: string }>;
+}
+
+export default async function EmployerBillingPage({ searchParams }: PageProps) {
+  const sp = await searchParams;
+  const supabase = await createSupabaseServerClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/employer/sign-in");
+
+  const { data: dsoUser } = await supabase
+    .from("dso_users")
+    .select("dso_id, role")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+  if (!dsoUser) redirect("/employer/sign-up");
+
+  // Hiring managers don't see billing — owner/admin surface only.
+  if (dsoUser.role === "hiring_manager") redirect("/employer/dashboard");
+
+  const canManageBilling =
+    dsoUser.role === "owner" || dsoUser.role === "admin";
+
+  const { data: sub } = await supabase
+    .from("subscriptions")
+    .select(
+      "id, tier, status, current_period_start, current_period_end, cancel_at_period_end, stripe_customer_id, stripe_price_id, seat_pack_qty"
+    )
+    .eq("dso_id", dsoUser.dso_id)
+    .maybeSingle();
+
+  // Empty state if no subscription
+  if (!sub) {
+    return (
+      <>
+        <Header />
+        {sp.portal_error === "1" && <PortalErrorBanner />}
+        <NoSubscriptionEmpty />
+      </>
+    );
+  }
+
+  // Pull invoice history (most recent first)
+  const { data: rawInvoices } = await supabase
+    .from("invoices")
+    .select(
+      "id, stripe_invoice_id, amount_cents, currency, status, paid_at, hosted_invoice_url, invoice_pdf_url, period_start, period_end, created_at"
+    )
+    .eq("subscription_id", sub.id as string)
+    .order("created_at", { ascending: false })
+    .limit(24);
+
+  const subscription = sub as SubscriptionRow;
+  const invoices = (rawInvoices ?? []) as InvoiceRow[];
+  const tierConfig = PRICING_TIERS[subscription.tier as keyof typeof PRICING_TIERS] ?? null;
+  const billingPeriod = subscription.stripe_price_id
+    ? periodFromStripePriceId(subscription.stripe_price_id)
+    : null;
+  const card = await getCardSnapshot(subscription.stripe_customer_id);
+
+  // #88 — seat-pack management (owner/admin, eligible tier, packs configured).
+  const showSeatPacks =
+    canManageBilling &&
+    seatPacksConfigured() &&
+    tierCanBuySeatPacks(subscription.tier);
+  const seatCapStatus = showSeatPacks
+    ? await getCapStatus(supabase, dsoUser.dso_id as string)
+    : null;
+
+  return (
+    <>
+      <Header />
+      {sp.portal_error === "1" && <PortalErrorBanner />}
+
+      <HelpDisclosure helpKey="billing.tiers" className="mb-6" />
+
+      {/* Status warnings (past-due, canceling) */}
+      {subscription.status === "past_due" && (
+        <WarningBanner
+          title="Payment past due."
+          body="Your last invoice didn't go through. Update your payment method to keep your subscription active."
+        />
+      )}
+      {subscription.cancel_at_period_end && subscription.status === "active" && (
+        <WarningBanner
+          title="Subscription ends at period close."
+          body={`Your subscription is set to cancel on ${formatDate(subscription.current_period_end)}. You can resume it anytime before then in the Customer Portal.`}
+        />
+      )}
+      {subscription.status === "canceled" && (
+        <WarningBanner
+          title="Subscription canceled."
+          body={`You no longer have an active subscription. Reactivate via the Customer Portal or contact ${SUPPORT_EMAIL}.`}
+        />
+      )}
+
+      {/* Current plan card */}
+      <section className="mb-12">
+        <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+          Current Plan
+        </h2>
+        <div className="border border-[var(--rule-strong)] bg-cream/40 p-7 max-w-[820px]">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div>
+              <div className="flex items-center gap-3 mb-1.5">
+                <div className="text-2xl font-extrabold tracking-[-0.6px] text-ink">
+                  {tierConfig?.name ?? subscription.tier}
+                </div>
+                <StatusBadge status={subscription.status} />
+              </div>
+              {tierConfig && (
+                <div className="text-[14px] text-slate-body">
+                  $
+                  {(billingPeriod === "annual"
+                    ? tierConfig.annualMonthlyEquivalent
+                    : tierConfig.monthlyPrice
+                  ).toLocaleString()}
+                  /month
+                  {billingPeriod === "annual" ? " · billed annually" : ""} ·{" "}
+                  {tierConfig.tagline}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <dl className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 pt-6 border-t border-[var(--rule)]">
+            <Field
+              label="Current period"
+              value={
+                subscription.current_period_start && subscription.current_period_end
+                  ? `${formatDate(subscription.current_period_start)} → ${formatDate(subscription.current_period_end)}`
+                  : "—"
+              }
+            />
+            <Field
+              label="Renews / ends"
+              value={
+                subscription.cancel_at_period_end
+                  ? `Cancels ${formatDate(subscription.current_period_end)}`
+                  : subscription.current_period_end
+                    ? `Renews ${formatDate(subscription.current_period_end)}`
+                    : "—"
+              }
+            />
+            <Field
+              label="Billing"
+              value={
+                billingPeriod === "annual"
+                  ? "Annual"
+                  : billingPeriod === "monthly"
+                    ? "Monthly"
+                    : "—"
+              }
+            />
+            <Field
+              label="Payment method"
+              value={
+                card
+                  ? `${formatCardBrand(card.brand)} ending ${card.last4} · exp ${String(
+                      card.expMonth
+                    ).padStart(2, "0")}/${card.expYear}`
+                  : "No card on file"
+              }
+            />
+          </dl>
+
+          <form action={openCustomerPortal} className="mt-7">
+            <button
+              type="submit"
+              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+            >
+              <Settings className="h-4 w-4" />
+              Manage Subscription
+            </button>
+          </form>
+          <p className="mt-3 text-[13px] text-slate-meta">
+            Opens Stripe&apos;s Customer Portal. Update card, change plan,
+            cancel, or download receipts there.
+          </p>
+        </div>
+      </section>
+
+      {/* Seat packs (#88) */}
+      {showSeatPacks && seatCapStatus && (
+        <section className="mb-12">
+          <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+            Seats
+          </h2>
+          <SeatPackControl
+            currentPacks={subscription.seat_pack_qty ?? 0}
+            seatsUsed={seatCapStatus.seats.used}
+            seatCap={seatCapStatus.seats.cap}
+            packSize={SEAT_PACK_SIZE}
+            monthlyPrice={SEAT_PACK_MONTHLY_PRICE}
+            annualPrice={SEAT_PACK_ANNUAL_PRICE}
+            period={billingPeriod ?? "monthly"}
+          />
+        </section>
+      )}
+
+      {/* Invoice history */}
+      <section>
+        <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+          Invoice History
+        </h2>
+        {invoices.length === 0 ? (
+          <div className="border border-[var(--rule)] bg-cream p-8 max-w-[820px]">
+            <Receipt className="h-7 w-7 text-slate-meta mb-3" />
+            <p className="text-[14px] text-slate-body leading-relaxed">
+              No invoices yet. Your first invoice will appear here once
+              Stripe processes the next billing cycle.
+            </p>
+          </div>
+        ) : (
+          <ul className="list-none border-t border-[var(--rule)] max-w-[820px]">
+            {invoices.map((inv) => (
+              <InvoiceRowItem key={inv.id} invoice={inv} />
+            ))}
+          </ul>
+        )}
+      </section>
+    </>
+  );
+}
+
+interface SubscriptionRow {
+  id: string;
+  tier: string;
+  status: string;
+  current_period_start: string | null;
+  current_period_end: string | null;
+  cancel_at_period_end: boolean;
+  stripe_customer_id: string | null;
+  stripe_price_id: string | null;
+  seat_pack_qty: number | null;
+}
+
+interface CardSnapshot {
+  brand: string;
+  last4: string;
+  expMonth: number;
+  expYear: number;
+}
+
+interface InvoiceRow {
+  id: string;
+  stripe_invoice_id: string;
+  amount_cents: number;
+  currency: string;
+  status: string;
+  paid_at: string | null;
+  hosted_invoice_url: string | null;
+  invoice_pdf_url: string | null;
+  period_start: string | null;
+  period_end: string | null;
+  created_at: string;
+}
+
+/* ───── shared blocks ───── */
+
+function Header() {
+  return (
+    <header className="mb-10">
+      <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
+        Billing
+      </div>
+      <h1 className="text-3xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-tight text-ink">
+        Subscription &amp; invoices
+      </h1>
+      <p className="mt-3 text-[14px] text-slate-body max-w-[640px]">
+        Your current plan, billing cycle, and history. Card changes, plan
+        changes, and cancellations happen in the Stripe Customer Portal.
+      </p>
+    </header>
+  );
+}
+
+function PortalErrorBanner() {
+  return (
+    <div className="mb-8 max-w-[820px] bg-red-50 border-l-4 border-red-500 p-4">
+      <p className="text-[14px] text-red-900">
+        <strong className="font-semibold">Couldn&apos;t open the Customer Portal.</strong>{" "}
+        Refresh and try again, or email {SUPPORT_EMAIL} if it persists.
+      </p>
+    </div>
+  );
+}
+
+function WarningBanner({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="mb-8 max-w-[820px] bg-yellow-50 border-l-4 border-yellow-500 p-4 flex gap-3">
+      <AlertTriangle className="h-4 w-4 text-yellow-700 flex-shrink-0 mt-0.5" />
+      <div>
+        <p className="text-[14px] text-yellow-900 font-semibold">{title}</p>
+        <p className="mt-1 text-[13px] text-yellow-900/85 leading-relaxed">
+          {body}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function NoSubscriptionEmpty() {
+  return (
+    <div className="border border-[var(--rule)] bg-cream p-12 max-w-[640px]">
+      <CheckCircle2 className="h-10 w-10 text-slate-meta mb-5" />
+      <h2 className="text-2xl font-extrabold tracking-[-0.5px] text-ink mb-3">
+        Activate your subscription.
+      </h2>
+      <p className="text-[14px] text-slate-body leading-relaxed mb-7">
+        You need an active subscription to post jobs. Pick a plan, run
+        through Stripe Checkout (test mode for now), and you&apos;ll be
+        billed monthly.
+      </p>
+      <Link
+        href="/employer/checkout"
+        className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+      >
+        Start Checkout
+      </Link>
+    </div>
+  );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const map: Record<string, { label: string; cls: string }> = {
+    active: { label: "Active", cls: "bg-heritage text-ivory" },
+    trialing: { label: "Trialing", cls: "bg-cream text-ink border border-[var(--rule-strong)]" },
+    past_due: { label: "Past due", cls: "bg-yellow-100 text-yellow-900 border border-yellow-400" },
+    canceled: { label: "Canceled", cls: "bg-slate-meta text-ivory" },
+    incomplete: { label: "Incomplete", cls: "bg-cream text-slate-body border border-[var(--rule-strong)]" },
+    incomplete_expired: { label: "Expired", cls: "bg-cream text-slate-meta" },
+    unpaid: { label: "Unpaid", cls: "bg-red-100 text-red-900 border border-red-400" },
+  };
+  const m = map[status] ?? { label: status, cls: "bg-cream text-slate-body" };
+  return (
+    <span
+      className={`inline-flex items-center px-2 py-0.5 text-[9px] font-bold tracking-[1.5px] uppercase ${m.cls}`}
+    >
+      {m.label}
+    </span>
+  );
+}
+
+function Field({ label, value }: { label: React.ReactNode; value: React.ReactNode }) {
+  return (
+    <div>
+      <dt className="text-[10px] font-bold tracking-[1.8px] uppercase text-slate-meta mb-1">
+        {label}
+      </dt>
+      <dd className="text-[14px] text-ink">{value}</dd>
+    </div>
+  );
+}
+
+function InvoiceRowItem({ invoice }: { invoice: InvoiceRow }) {
+  const dollars = formatCurrency(invoice.amount_cents, invoice.currency);
+  const date = invoice.paid_at ?? invoice.created_at;
+
+  return (
+    <li className="border-b border-[var(--rule)] py-4 px-2 flex items-center gap-6 hover:bg-cream/40 transition-colors">
+      <Receipt className="h-4 w-4 text-slate-meta flex-shrink-0" />
+      <div className="flex-1 min-w-0">
+        <div className="text-[14px] font-semibold text-ink">
+          {dollars}
+        </div>
+        <div className="text-[12px] text-slate-meta tracking-[0.3px]">
+          {formatDate(date)} ·{" "}
+          <span
+            className={
+              invoice.status === "paid"
+                ? "text-heritage-deep font-semibold"
+                : invoice.status === "open"
+                  ? "text-yellow-800"
+                  : "text-slate-meta"
+            }
+          >
+            {invoice.status}
+          </span>
+        </div>
+      </div>
+
+      {invoice.hosted_invoice_url && (
+        <a
+          href={invoice.hosted_invoice_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink inline-flex items-center gap-1.5 transition-colors"
+        >
+          View
+          <ExternalLink className="h-3 w-3" />
+        </a>
+      )}
+    </li>
+  );
+}
+
+/* ───── formatters ───── */
+
+function formatDate(iso: string | null): string {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function formatCurrency(cents: number, currency: string): string {
+  const formatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: (currency || "usd").toUpperCase(),
+    minimumFractionDigits: 2,
+  });
+  return formatter.format(cents / 100);
+}
+
+/* ───── Stripe payment-method snapshot (E11.4) ───── */
+
+/**
+ * Read-only snapshot of the customer's card for the in-app billing page —
+ * a trust marker so owners can confirm which card is on file without leaving
+ * for the Stripe portal. Card changes still happen in the portal. Best-effort:
+ * any Stripe failure resolves to null and the page shows "No card on file".
+ */
+async function getCardSnapshot(
+  stripeCustomerId: string | null
+): Promise<CardSnapshot | null> {
+  if (!stripeCustomerId) return null;
+  try {
+    const stripe = getStripe();
+    const list = await stripe.paymentMethods.list({
+      customer: stripeCustomerId,
+      type: "card",
+      limit: 1,
+    });
+    const cardPm = list.data[0]?.card;
+    if (!cardPm) return null;
+    return {
+      brand: cardPm.brand,
+      last4: cardPm.last4,
+      expMonth: cardPm.exp_month,
+      expYear: cardPm.exp_year,
+    };
+  } catch (err) {
+    console.warn("[billing] card snapshot fetch failed:", err);
+    return null;
+  }
+}
+
+function formatCardBrand(brand: string): string {
+  const map: Record<string, string> = {
+    visa: "Visa",
+    mastercard: "Mastercard",
+    amex: "American Express",
+    discover: "Discover",
+    diners: "Diners Club",
+    jcb: "JCB",
+    unionpay: "UnionPay",
+  };
+  return map[brand] ?? brand.charAt(0).toUpperCase() + brand.slice(1);
+}

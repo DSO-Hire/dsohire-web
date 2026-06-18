@@ -11,10 +11,11 @@
  * Then redirect to /employer/dashboard.
  */
 
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { EmployerShell } from "@/components/employer/employer-shell";
+import { BrandLockup } from "@/components/marketing/site-shell";
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
 import { OnboardingForm } from "./onboarding-form";
 import type { Metadata } from "next";
@@ -62,8 +63,17 @@ export default async function OnboardingPage() {
     redirect("/employer/dashboard");
   }
 
+  // Chrome-less first-run wizard — deliberately OUTSIDE the (app) shell group
+  // (it's the redirect target for users with no DSO row, so nesting it under
+  // the shell layout would loop). A slim brand bar replaces the full nav.
   return (
-    <EmployerShell active="dashboard">
+    <div className="min-h-screen bg-ivory">
+      <div className="border-b border-[var(--rule)] bg-ivory/95 px-6 sm:px-10 h-[64px] flex items-center">
+        <Link href="/employer/dashboard" aria-label="DSO Hire">
+          <BrandLockup height={28} />
+        </Link>
+      </div>
+      <main className="px-6 sm:px-10 py-12">
       <header className="mb-10 max-w-[760px]">
         <div className="flex items-center gap-3 text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-4">
           <CheckCircle2 className="h-4 w-4 text-heritage" />
@@ -118,6 +128,7 @@ export default async function OnboardingPage() {
           </div>
         </aside>
       </div>
-    </EmployerShell>
+      </main>
+    </div>
   );
 }

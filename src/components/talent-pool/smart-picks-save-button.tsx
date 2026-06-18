@@ -10,7 +10,7 @@ import { Bookmark, BookmarkCheck, Loader2 } from "lucide-react";
 import {
   saveCandidateToPool,
   removeCandidateFromPool,
-} from "@/app/employer/talent-pool/actions";
+} from "@/app/employer/(app)/talent-pool/actions";
 
 interface SmartPicksSaveButtonProps {
   candidateId: string;

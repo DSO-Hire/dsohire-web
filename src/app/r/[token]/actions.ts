@@ -24,7 +24,7 @@ import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import {
   validateReferenceResponse,
   type ReferenceResponse,
-} from "@/app/employer/applications/[id]/reference-data";
+} from "@/app/employer/(app)/applications/[id]/reference-data";
 
 export async function submitReferenceResponse(
   token: string,

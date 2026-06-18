@@ -14,7 +14,7 @@ import Link from "next/link";
 import { ArrowRight, Mail, MessageSquare, BookOpen } from "lucide-react";
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
 import { HELP_CONTENT } from "@/lib/help/help-content";
-import { OpenSupportButton } from "@/app/employer/help/open-support-button";
+import { OpenSupportButton } from "@/app/employer/(app)/help/open-support-button";
 
 export const metadata: Metadata = { title: "Help & Support" };
 

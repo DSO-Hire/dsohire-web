@@ -13,7 +13,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Minus, Users } from "lucide-react";
-import { addSeatPack, removeSeatPack } from "@/app/employer/billing/seat-pack-actions";
+import { addSeatPack, removeSeatPack } from "@/app/employer/(app)/billing/seat-pack-actions";
 
 export function SeatPackControl({
   currentPacks,

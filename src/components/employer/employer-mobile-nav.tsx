@@ -16,8 +16,10 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X, LifeBuoy, LogOut, Settings as SettingsIcon } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
+import { isEmployerNavItemActive } from "./employer-nav-active";
 
 export interface MobileNavItem {
   id: string;
@@ -26,7 +28,6 @@ export interface MobileNavItem {
 }
 
 interface EmployerMobileNavProps {
-  active?: string;
   groups: Array<{ group: string; items: MobileNavItem[] }>;
   settings: MobileNavItem;
   help: MobileNavItem;
@@ -40,12 +41,14 @@ interface EmployerMobileNavProps {
 }
 
 export function EmployerMobileNav({
-  active,
   groups,
   settings,
   help,
   user,
 }: EmployerMobileNavProps) {
+  // Active item is derived from the URL (the shell is now a persistent layout
+  // that can't know which child renders) — shared rule with the desktop rail.
+  const pathname = usePathname() ?? "";
   const [open, setOpen] = useState(false);
   // Defer portal target until mount — server render has no document.
   // setState-in-effect lint fires here; this is the canonical React
@@ -146,7 +149,7 @@ export function EmployerMobileNav({
                     <MobileRow
                       key={item.id}
                       item={item}
-                      active={active}
+                      isActive={isEmployerNavItemActive(pathname, item)}
                       onSelect={() => setOpen(false)}
                     />
                   ))}
@@ -160,7 +163,7 @@ export function EmployerMobileNav({
                 onClick={() => setOpen(false)}
                 className={
                   "flex items-center gap-3 px-3 py-2.5 text-[13px] font-semibold rounded " +
-                  (active === settings.id
+                  (isEmployerNavItemActive(pathname, settings)
                     ? "bg-white/10 text-ivory"
                     : "text-ivory/65 hover:bg-white/5 hover:text-ivory")
                 }
@@ -173,7 +176,7 @@ export function EmployerMobileNav({
                 onClick={() => setOpen(false)}
                 className={
                   "flex items-center gap-3 px-3 py-2.5 text-[13px] font-semibold rounded " +
-                  (active === help.id
+                  (isEmployerNavItemActive(pathname, help)
                     ? "bg-white/10 text-ivory"
                     : "text-ivory/65 hover:bg-white/5 hover:text-ivory")
                 }
@@ -201,14 +204,13 @@ export function EmployerMobileNav({
 
 function MobileRow({
   item,
-  active,
+  isActive,
   onSelect,
 }: {
   item: MobileNavItem;
-  active?: string;
+  isActive: boolean;
   onSelect: () => void;
 }) {
-  const isActive = active === item.id;
   return (
     <li>
       <Link

@@ -21,7 +21,7 @@ import {
   Loader2,
   RotateCcw,
 } from "lucide-react";
-import { enrollTotp, verifyEnrollment } from "@/app/employer/settings/account/mfa-actions";
+import { enrollTotp, verifyEnrollment } from "@/app/employer/(app)/settings/account/mfa-actions";
 
 export function ForcedSetupWizard() {
   const router = useRouter();

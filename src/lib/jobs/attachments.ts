@@ -9,7 +9,7 @@
  */
 
 import type { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { JobAttachmentRow } from "@/app/employer/jobs/[id]/job-attachments-section";
+import type { JobAttachmentRow } from "@/app/employer/(app)/jobs/[id]/job-attachments-section";
 
 type SupabaseClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
 

@@ -9,7 +9,7 @@
 
 import { useState, useTransition } from "react";
 import { Sparkles, Loader2, RefreshCcw } from "lucide-react";
-import { summarizeAnalytics } from "@/app/employer/analytics/narrative-action";
+import { summarizeAnalytics } from "@/app/employer/(app)/analytics/narrative-action";
 
 export function AnalyticsNarrative({
   windowDays,
