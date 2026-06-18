@@ -485,6 +485,37 @@ html, body {
   to { opacity: 1; }
 }
 
+/* ── Brand loader (Day 37) — the D-mark draws itself on a loop while a route
+   is loading (components/brand/brand-loader.tsx). Fades in after a ~200ms
+   beat so fast loads never flash it; reduced-motion shows the static mark. ── */
+.bl-loader {
+  opacity: 0;
+  animation: bl-appear 0.3s ease-out 0.2s forwards;
+}
+.bl-arch {
+  stroke-dasharray: 96;
+  animation: bl-arch 1.6s ease-in-out infinite;
+}
+.bl-bar {
+  stroke-dasharray: 17;
+  animation: bl-bar 1.6s ease-in-out infinite;
+}
+@keyframes bl-appear { to { opacity: 1; } }
+@keyframes bl-arch {
+  0% { stroke-dashoffset: 96; }
+  50% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -96; }
+}
+@keyframes bl-bar {
+  0% { stroke-dashoffset: 17; }
+  50% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -17; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bl-loader { opacity: 1; animation: none; }
+  .bl-arch, .bl-bar { animation: none; stroke-dashoffset: 0; }
+}
+
 /* ── Living kanban (/for-dental-groups hero) ──
    Plays the page's own story ONCE on load: Dr. Chen's card lifts out
    of Screening, glides to the top of Interview, settles; the realtime
