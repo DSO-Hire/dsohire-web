@@ -19,6 +19,7 @@ import { MobileMenu } from "./mobile-menu";
 import { LensToggle } from "./lens-toggle";
 import { MotionMount } from "./motion";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
+import { ToastProvider } from "@/components/app/toast";
 
 export function SiteShell({
   children,
@@ -42,7 +43,13 @@ export function SiteShell({
           scroll-settle on the marketing surfaces. */}
       <MotionMount />
       <SiteNav ctaIntent={ctaIntent} />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1">
+        {/* Toast layer for public pages — the job-detail SaveJobButton lives
+            here (not under the candidate shell), so its "Job saved" toast had
+            no provider. The <main> is a sibling of the backdrop-blurred nav, so
+            the fixed toast viewport isn't trapped by a containing block. */}
+        <ToastProvider>{children}</ToastProvider>
+      </main>
       <SiteFooter />
     </>
   );

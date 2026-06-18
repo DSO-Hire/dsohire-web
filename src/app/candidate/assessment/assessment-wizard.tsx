@@ -55,11 +55,15 @@ const SECTION_LABEL: Record<string, string> = {
 export function AssessmentWizard({
   initial,
   completedBefore = false,
+  hasResume = false,
 }: {
   initial: Answers;
   /** #94 (Day 28) — true if the candidate has finished the assessment before.
    *  Re-takers skip the landing/intro and go straight into the questions. */
   completedBefore?: boolean;
+  /** C4-1 — true if the candidate already has a résumé on file, so the landing
+   *  confirms that instead of prompting an upload. */
+  hasResume?: boolean;
 }) {
   const router = useRouter();
   const [answers, setAnswers] = useState<Answers>(initial);
@@ -236,39 +240,52 @@ export function AssessmentWizard({
         </ul>
         {/* #41 — résumé autofill: parse once → prefills this assessment AND the
             full profile (+ saves the file for reuse). Optional; Start still works. */}
-        <div className="mt-6 rounded-lg border border-heritage/40 bg-heritage/[0.06] p-4">
-          <p className="text-[13px] font-bold text-ink">
-            Fastest start: autofill from your résumé
-          </p>
-          <p className="mt-1 text-[12px] leading-relaxed text-slate-meta">
-            Upload it once — we&apos;ll prefill this assessment <em>and</em> your
-            profile, so applying later is faster. You review everything as you go.
-          </p>
-          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
-            <input
-              type="file"
-              accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-              onChange={(e) => {
-                setResumeFile(e.target.files?.[0] ?? null);
-                setAutofillNote(null);
-              }}
-              className="block text-[13px] text-ink file:mr-3 file:cursor-pointer file:border-0 file:bg-ink file:px-4 file:py-2 file:text-[10px] file:font-bold file:uppercase file:tracking-[1.5px] file:text-ivory hover:file:bg-ink-soft"
-            />
-            <button
-              type="button"
-              onClick={autofillFromResume}
-              disabled={!resumeFile || parsing}
-              className="inline-flex items-center justify-center gap-2 border border-heritage-deep px-4 py-2 text-[12px] font-bold uppercase tracking-[1.5px] text-heritage-deep transition-colors hover:bg-heritage/10 disabled:opacity-40"
-            >
-              {parsing ? "Reading…" : "Autofill from résumé"}
-            </button>
-          </div>
-          {autofillNote && (
-            <p className="mt-2 text-[12px] font-semibold leading-relaxed text-heritage-deep">
-              {autofillNote}
+        {hasResume ? (
+          <div className="mt-6 rounded-lg border border-heritage/40 bg-heritage/[0.06] p-4">
+            <p className="flex items-center gap-2 text-[13px] font-bold text-ink">
+              <Check className="h-4 w-4 flex-shrink-0 text-heritage-deep" />
+              Your résumé is on file
             </p>
-          )}
-        </div>
+            <p className="mt-1 text-[12px] leading-relaxed text-slate-meta">
+              We&apos;ve prefilled your basics from it — just review as you go. You
+              can update your résumé anytime from the Résumé tab.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-6 rounded-lg border border-heritage/40 bg-heritage/[0.06] p-4">
+            <p className="text-[13px] font-bold text-ink">
+              Fastest start: autofill from your résumé
+            </p>
+            <p className="mt-1 text-[12px] leading-relaxed text-slate-meta">
+              Upload it once — we&apos;ll prefill this assessment <em>and</em> your
+              profile, so applying later is faster. You review everything as you go.
+            </p>
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                onChange={(e) => {
+                  setResumeFile(e.target.files?.[0] ?? null);
+                  setAutofillNote(null);
+                }}
+                className="block text-[13px] text-ink file:mr-3 file:cursor-pointer file:border-0 file:bg-ink file:px-4 file:py-2 file:text-[10px] file:font-bold file:uppercase file:tracking-[1.5px] file:text-ivory hover:file:bg-ink-soft"
+              />
+              <button
+                type="button"
+                onClick={autofillFromResume}
+                disabled={!resumeFile || parsing}
+                className="inline-flex items-center justify-center gap-2 border border-heritage-deep px-4 py-2 text-[12px] font-bold uppercase tracking-[1.5px] text-heritage-deep transition-colors hover:bg-heritage/10 disabled:opacity-40"
+              >
+                {parsing ? "Reading…" : "Autofill from résumé"}
+              </button>
+            </div>
+            {autofillNote && (
+              <p className="mt-2 text-[12px] font-semibold leading-relaxed text-heritage-deep">
+                {autofillNote}
+              </p>
+            )}
+          </div>
+        )}
 
         <div className="mt-7 flex flex-col items-start gap-3">
           <button

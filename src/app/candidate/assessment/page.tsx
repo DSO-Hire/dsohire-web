@@ -43,7 +43,7 @@ export default async function CandidateAssessmentPage() {
     .select(
       // Part 1 (résumé-prefilled basics) + Part 2 (v3 signal columns, so a
       // re-take shows prior answers).
-      "id, desired_roles, years_experience_dental, desired_specialty, pms_systems, temp_or_perm, min_salary, salary_unit, availability, work_pace, autonomy_pref, patient_facing_energy, mentorship_pref, procedures_confident, procedures_growth, practice_feel, ce_growth_importance, work_life_priority, career_trajectory, commute_max_minutes, comp_priority, comp_priorities, relocation_pref, assessment_note, pms_proficiency, team_size_pref, patient_population_pref, benefit_priorities, deal_breakers, assessment_completed_at"
+      "id, desired_roles, years_experience_dental, desired_specialty, pms_systems, temp_or_perm, min_salary, salary_unit, availability, work_pace, autonomy_pref, patient_facing_energy, mentorship_pref, procedures_confident, procedures_growth, practice_feel, ce_growth_importance, work_life_priority, career_trajectory, commute_max_minutes, comp_priority, comp_priorities, relocation_pref, assessment_note, pms_proficiency, team_size_pref, patient_population_pref, benefit_priorities, deal_breakers, assessment_completed_at, resume_url"
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
@@ -90,10 +90,18 @@ export default async function CandidateAssessmentPage() {
   // #94 (Day 28) — re-takers (already completed once) skip the intro/landing
   // and go straight back into the questions; first-timers see the landing.
   const completedBefore = Boolean(c.assessment_completed_at);
+  // C4-1 (mobile sweep) — the assessment never read resume_url, so it always
+  // showed "upload your résumé" even for candidates who already had one on file
+  // (e.g. uploaded during apply). Now the landing reflects what we have.
+  const hasResume = Boolean(c.resume_url);
 
   return (
     <CandidateShell active="practice-fit">
-      <AssessmentWizard initial={initial} completedBefore={completedBefore} />
+      <AssessmentWizard
+        initial={initial}
+        completedBefore={completedBefore}
+        hasResume={hasResume}
+      />
     </CandidateShell>
   );
 }
