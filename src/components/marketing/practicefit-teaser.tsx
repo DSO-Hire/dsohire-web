@@ -47,7 +47,11 @@ const QUESTIONS: TeaserQuestion[] = [
   },
 ];
 
-export function PracticeFitTeaser() {
+export function PracticeFitTeaser({
+  assessmentHref,
+}: {
+  assessmentHref: string;
+}) {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
 
@@ -161,7 +165,7 @@ export function PracticeFitTeaser() {
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <Link
-                href="/candidate/sign-up"
+                href={assessmentHref}
                 className="inline-flex items-center gap-2.5 px-6 py-3 bg-heritage text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-heritage-deep transition-colors"
               >
                 Take The Full Assessment

@@ -17,6 +17,7 @@ import type { Metadata } from "next";
 import { ArrowRight, Building2, MapPin, Clock } from "lucide-react";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { candidateCtaHref } from "@/lib/marketing/candidate-cta";
 import {
   CORPORATE_FUNCTIONS,
   CORPORATE_FUNCTION_SLUGS,
@@ -55,6 +56,10 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
   const { function: slug } = await params;
   const fn = getCorporateFunction(slug);
   if (!fn) notFound();
+
+  // Auth-aware CTA: a signed-in candidate goes to their dashboard, not back
+  // through sign-up (Cam, Day 37).
+  const ctaHref = await candidateCtaHref("dashboard");
 
   const supabase = await createSupabaseServerClient();
 
@@ -166,7 +171,7 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
               currently-open corporate roles.
             </p>
             <Link
-              href="/candidate/sign-up"
+              href={ctaHref}
               className="text-heritage underline underline-offset-2 hover:text-heritage-deep font-semibold text-[13px]"
             >
               Create a free candidate account

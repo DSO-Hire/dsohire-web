@@ -20,24 +20,34 @@ import {
   type RoleConfig,
 } from "@/lib/roles/role-config";
 import { SALARY_ROLE_BY_SLUG, stateSlug } from "@/lib/comp/salary";
+import { candidateCtaHref } from "@/lib/marketing/candidate-cta";
 
-export function RolePage({ config }: { config: RoleConfig }) {
+export async function RolePage({ config }: { config: RoleConfig }) {
+  // Auth-aware: a signed-in candidate's "Create a Free Profile" goes to their
+  // dashboard, never back to /candidate/sign-up (Cam, Day 37).
+  const ctaHref = await candidateCtaHref("dashboard");
   return (
     <SiteShell>
-      <Hero config={config} />
+      <Hero config={config} ctaHref={ctaHref} />
       <Advantages config={config} />
       <CareerPath config={config} />
       <Compensation config={config} />
       <SalaryByState config={config} />
       <RelatedRoles config={config} />
-      <FinalCta config={config} />
+      <FinalCta config={config} ctaHref={ctaHref} />
     </SiteShell>
   );
 }
 
 /* ───────── Hero ───────── */
 
-function Hero({ config }: { config: RoleConfig }) {
+function Hero({
+  config,
+  ctaHref,
+}: {
+  config: RoleConfig;
+  ctaHref: string;
+}) {
   const { hero, eyebrow, label, Icon, jobsFilterHref } = config;
 
   // Split the headline so we can wrap the accent phrase in a styled span.
@@ -136,7 +146,7 @@ function Hero({ config }: { config: RoleConfig }) {
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <Link
-            href="/candidate/sign-up"
+            href={ctaHref}
             className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:border-ink hover:bg-cream transition-colors"
           >
             Create a Free Profile
@@ -346,7 +356,13 @@ function RelatedRoles({ config }: { config: RoleConfig }) {
 
 /* ───────── Final CTA ───────── */
 
-function FinalCta({ config }: { config: RoleConfig }) {
+function FinalCta({
+  config,
+  ctaHref,
+}: {
+  config: RoleConfig;
+  ctaHref: string;
+}) {
   return (
     <section
       className="relative overflow-hidden px-6 sm:px-14 py-24 text-center"
@@ -384,7 +400,7 @@ function FinalCta({ config }: { config: RoleConfig }) {
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
-            href="/candidate/sign-up"
+            href={ctaHref}
             className="inline-flex items-center px-9 py-[15px] bg-heritage text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
           >
             Create a Free Profile

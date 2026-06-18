@@ -53,6 +53,7 @@ import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import { PracticeFitTeaser } from "@/components/marketing/practicefit-teaser";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import { DsoFitWordmark } from "@/components/practice-fit/brand/dsofit-wordmark";
+import { candidateCtaResolver } from "@/lib/marketing/candidate-cta";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -76,24 +77,32 @@ export const metadata: Metadata = {
   ],
 };
 
-export default function ForCandidatesPage() {
+export default async function ForCandidatesPage() {
+  // Auth-aware CTAs: a signed-in candidate is sent to the real product surface,
+  // never back to /candidate/sign-up (Cam, Day 37). One auth lookup, reused.
+  const resolve = await candidateCtaResolver();
+  const dashboardHref = resolve("dashboard");
+  const assessmentHref = resolve("assessment");
   return (
     <SiteShell>
-      <Hero />
-      <PracticeFitCandidateBand />
+      <Hero ctaHref={dashboardHref} />
+      <PracticeFitCandidateBand
+        ctaHref={assessmentHref}
+        assessmentHref={assessmentHref}
+      />
       <Promises />
       <RoleBreakdown />
       <HonestTake />
       <CandidateBenefits />
       <FAQ />
-      <FinalCta />
+      <FinalCta ctaHref={dashboardHref} />
     </SiteShell>
   );
 }
 
 /* ───────── Hero ───────── */
 
-function Hero() {
+function Hero({ ctaHref }: { ctaHref: string }) {
   return (
     <section className="relative overflow-hidden pt-[140px] pb-24 px-6 sm:px-14">
       {/* Heritage glow — soft, lighter than /for-dental-groups */}
@@ -176,7 +185,7 @@ function Hero() {
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
             <Link
-              href="/candidate/sign-up"
+              href={ctaHref}
               className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:border-ink hover:bg-cream transition-colors"
             >
               Create a Free Profile
@@ -209,7 +218,13 @@ function Hero() {
    the ivory rhythm (review §1.2a).
 ─────────────────────────────────────────────────────── */
 
-function PracticeFitCandidateBand() {
+function PracticeFitCandidateBand({
+  ctaHref,
+  assessmentHref,
+}: {
+  ctaHref: string;
+  assessmentHref: string;
+}) {
   return (
     <section className="bg-white border-y border-[var(--rule)] px-6 sm:px-14 py-24">
       <div className="max-w-[1240px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_1.05fr] gap-14 lg:gap-20 items-center">
@@ -217,7 +232,7 @@ function PracticeFitCandidateBand() {
             assembling, the full assessment behind the CTA. Replaced the
             static product card — trying beats looking. */}
         <div data-reveal className="order-2 lg:order-1">
-          <PracticeFitTeaser />
+          <PracticeFitTeaser assessmentHref={assessmentHref} />
         </div>
 
         <div className="order-1 lg:order-2">
@@ -268,7 +283,7 @@ function PracticeFitCandidateBand() {
           <Link
             data-reveal
             style={{ "--mk-delay": "220ms" } as React.CSSProperties}
-            href="/candidate/sign-up"
+            href={ctaHref}
             className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-heritage text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-heritage-deep transition-colors"
           >
             Take Your PracticeFit
@@ -854,7 +869,7 @@ function CandidateBenefits() {
 
 /* ───────── Final CTA ───────── */
 
-function FinalCta() {
+function FinalCta({ ctaHref }: { ctaHref: string }) {
   return (
     <section
       className="relative overflow-hidden px-6 sm:px-14 py-24 text-center"
@@ -895,7 +910,7 @@ function FinalCta() {
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
-            href="/candidate/sign-up"
+            href={ctaHref}
             className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:border-ink hover:bg-cream transition-colors"
           >
             Create a Free Profile

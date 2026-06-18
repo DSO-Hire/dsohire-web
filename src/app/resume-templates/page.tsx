@@ -15,6 +15,7 @@ import { SiteShell } from "@/components/marketing/site-shell";
 import { ResumeDocument } from "@/components/resume/resume-document";
 import type { ResumeData } from "@/lib/resume/resume-format";
 import { RESUME_TEMPLATE_LIST } from "@/lib/resume/resume-templates";
+import { candidateCtaHref } from "@/lib/marketing/candidate-cta";
 
 export const metadata: Metadata = {
   title: "Free Dental Résumé Templates (ATS-Friendly) | DSO Hire",
@@ -107,7 +108,10 @@ const SAMPLE: ResumeData = {
   sectionOrder: [],
 };
 
-export default function ResumeTemplatesLanding() {
+export default async function ResumeTemplatesLanding() {
+  // Auth-aware: a signed-in candidate building a résumé goes straight to the
+  // builder, not back through sign-up (Cam, Day 37).
+  const resumeHref = await candidateCtaHref("resume");
   return (
     <SiteShell>
       {/* Hero */}
@@ -127,7 +131,7 @@ export default function ResumeTemplatesLanding() {
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
-              href="/candidate/sign-up"
+              href={resumeHref}
               className="inline-flex items-center gap-2 bg-ink px-6 py-3 text-[13px] font-bold uppercase tracking-[1.5px] text-ivory hover:bg-ink-soft transition-colors"
             >
               Build mine free <ArrowRight className="h-4 w-4" />
@@ -185,7 +189,7 @@ export default function ResumeTemplatesLanding() {
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="text-[15px] font-bold text-ink">{tpl.name}</h3>
                   <Link
-                    href="/candidate/sign-up"
+                    href={resumeHref}
                     className="shrink-0 text-[12px] font-bold uppercase tracking-[1px] text-heritage-deep hover:text-ink"
                   >
                     Use this →
@@ -244,7 +248,7 @@ export default function ResumeTemplatesLanding() {
           </p>
           <div className="mt-8">
             <Link
-              href="/candidate/sign-up"
+              href={resumeHref}
               className="inline-flex items-center gap-2 bg-ivory px-6 py-3 text-[13px] font-bold uppercase tracking-[1.5px] text-ink hover:bg-cream transition-colors"
             >
               Build mine free <ArrowRight className="h-4 w-4" />
