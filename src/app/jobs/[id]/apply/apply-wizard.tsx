@@ -32,7 +32,7 @@ import {
 import {
   parseResumeAction,
   saveParsedResumeAction,
-} from "@/app/candidate/profile/import/actions";
+} from "@/app/candidate/(app)/profile/import/actions";
 import type { ParsedResume } from "@/lib/resume/parse";
 import { EeoSelfId } from "./eeo-self-id";
 import type {

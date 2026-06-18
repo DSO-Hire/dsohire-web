@@ -1,5 +1,13 @@
 /**
- * CandidateShell — auth-gated layout for /candidate/* .
+ * CandidateShell — the presentational chrome for /candidate/* (left rail,
+ * mobile header, command palette, support launcher).
+ *
+ * The auth gate + data fetch now live ONE level up in the route group's
+ * layout (`src/app/candidate/(app)/layout.tsx`), which renders this shell
+ * around its children. Because a layout persists across navigation, the nav
+ * no longer unmounts/remounts when moving between candidate pages (the old
+ * "blink"), and the active highlight is derived from the URL via usePathname
+ * (CandidateRailNav / CandidateMobileNav) rather than a per-page `active` prop.
  *
  * Day 35 — left rail brought to EMPLOYER PARITY (Model H): navy
  * throughout, centered drawn-on D-form logo, animated hover icons,
@@ -17,7 +25,6 @@
  */
 
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import {
   LayoutDashboard,
   UserCircle,
@@ -30,23 +37,31 @@ import {
 } from "lucide-react";
 import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
 import { DsoFitMark } from "@/components/practice-fit/brand/dsofit-mark";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { BrandLockup } from "@/components/marketing/site-shell";
 import { Avatar } from "@/components/ui/avatar";
 import { RailCollapse } from "@/components/employer/rail-collapse";
 import { CandidateMobileNav } from "./candidate-mobile-nav";
+import { CandidateRailNav, type RailNavItem } from "./candidate-rail-nav";
 import { CandidateCommandPaletteTrigger } from "./command-palette";
-import { getUnreadCount } from "@/lib/inbox/queries";
 import { NavBadgeRealtime } from "@/components/inbox/nav-badge-realtime";
 import { SupportLauncher } from "@/components/support/support-launcher";
 import { ToastProvider } from "@/components/app/toast";
 
 interface CandidateShellProps {
   children: React.ReactNode;
-  active?: NavId;
+  /** Display name for the identity card (falls back handled by the layout). */
+  candidateName: string;
+  candidateAvatar: string | null;
+  candidateSubtitle: string;
+  /** Inbox unread count for the nav badge (resolved server-side in the layout). */
+  inboxUnread: number;
+  /** Fit track — swaps the flagship nav slot PracticeFit↔DSOFit. */
+  isDso: boolean;
+  /** Auth user id for the support launcher (Tier 2 chat). */
+  authUserId: string;
 }
 
-export type NavId =
+type NavId =
   | "dashboard"
   | "practice-fit"
   | "jobs"
@@ -92,49 +107,18 @@ const HELP_ITEM: NavItem = {
   Icon: LifeBuoy,
 };
 
-export async function CandidateShell({ children, active }: CandidateShellProps) {
-  const supabase = await createSupabaseServerClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/candidate/sign-in");
-
-  const { data: candidate } = await supabase
-    .from("candidates")
-    .select(
-      "id, full_name, headline, current_title, is_searchable, avatar_url, deleted_at, primary_fit_product"
-    )
-    .eq("auth_user_id", user.id)
-    .maybeSingle();
-
-  if (!candidate) redirect("/candidate/sign-up");
-
-  // Soft-deleted accounts can't reach any candidate-area page — they
-  // hit the restore landing page until they restore or the 30-day
-  // grace period expires (after which the cron hard-deletes the row).
-  if ((candidate as Record<string, unknown>).deleted_at) {
-    redirect("/candidate/restore");
-  }
-
-  const candidateName =
-    (candidate.full_name as string | null) ?? user.email ?? "Candidate";
-  const candidateAvatar = (candidate.avatar_url as string | null) ?? null;
-  const candidateSubtitle =
-    (candidate.current_title as string | null) ??
-    (candidate.headline as string | null) ??
-    "Profile incomplete";
-
-  // Inbox unread badge — counts messages from the OTHER side that
-  // haven't been marked read. RLS scopes the query automatically.
-  const inboxUnread = await getUnreadCount(supabase, "candidate");
+export function CandidateShell({
+  children,
+  candidateName,
+  candidateAvatar,
+  candidateSubtitle,
+  inboxUnread,
+  isDso,
+  authUserId,
+}: CandidateShellProps) {
   // #54 — the fit nav slot swaps PracticeFit↔DSOFit by the candidate's chosen
-  // track (null → PracticeFit default). Same slot id ("practice-fit") so the
-  // `active` highlighting keeps working for both products.
-  const fitProduct =
-    ((candidate as Record<string, unknown>).primary_fit_product as string | null) ??
-    "practicefit";
-  const isDso = fitProduct === "dsofit";
+  // track. Same slot id ("practice-fit") so the active highlighting keeps
+  // working for both products.
   const navWithBadges = NAV.map((item) => {
     if (item.id === "inbox") return { ...item, badge: inboxUnread };
     if (item.id === "practice-fit")
@@ -145,6 +129,24 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
         Icon: isDso ? DsoFitMark : PracticeFitMark,
       };
     return item;
+  });
+
+  // Desktop rail rows — icons are pre-rendered here (with their rail-ic-*
+  // classes) so the real PracticeFit / DSOFit marks survive the boundary into
+  // the client nav, which owns the URL-derived active state.
+  const railItems: RailNavItem[] = navWithBadges.map((item) => {
+    const isFit = item.id === "practice-fit";
+    const iconClass = isFit
+      ? `rail-ic rail-ic-fit ${isDso ? "rail-ic-dsofit" : "rail-ic-practicefit"} h-4 w-4 flex-shrink-0`
+      : `rail-ic rail-ic-${item.id} h-4 w-4 flex-shrink-0`;
+    return {
+      id: item.id,
+      label: item.label,
+      href: item.href,
+      badge: item.badge,
+      isFit,
+      icon: <item.Icon className={iconClass} />,
+    };
   });
 
   return (
@@ -160,7 +162,7 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
            the soft-delete guard above are untouched. */}
       <aside
         id="candidate-rail"
-        className="hidden lg:flex w-[240px] flex-shrink-0 flex-col bg-ink text-ivory border-r border-white/10 sticky top-0 h-screen relative transition-[width] duration-[450ms]"
+        className="hidden lg:flex w-[240px] flex-shrink-0 flex-col bg-ink text-ivory border-r border-white/10 sticky top-0 h-screen relative transition-[width] duration-[450ms] print:hidden"
       >
         <RailCollapse targetId="candidate-rail" storageKey="dsoh-cand-rail-slim" />
 
@@ -229,20 +231,7 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
         </div>
 
         <nav className="rail-nav flex-1 overflow-y-auto px-3 py-1">
-          <ul className="list-none space-y-0.5 pt-2">
-            {navWithBadges.map((item) => (
-              <NavRow key={item.id} item={item} active={active} isDso={isDso} />
-            ))}
-            {/* #54 — crossover candidates can reach the other fit product. */}
-            <li className="mt-1 px-3">
-              <Link
-                href={isDso ? "/candidate/practice-fit" : "/candidate/dsofit"}
-                className="rail-aside block py-1.5 text-[11px] text-ivory/45 hover:text-ivory/80 transition-colors"
-              >
-                Also explore {isDso ? "PracticeFit" : "DSOFit"} →
-              </Link>
-            </li>
-          </ul>
+          <CandidateRailNav items={railItems} isDso={isDso} />
         </nav>
 
         {/* Footer line — Settings · Help · Sign out → (Model H parity). */}
@@ -273,12 +262,11 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
       {/* ── Main column ── */}
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Mobile top bar */}
-        <header className="lg:hidden sticky top-0 z-30 h-[64px] px-5 flex items-center justify-between border-b border-[var(--rule)] bg-ivory/95 backdrop-blur-md">
+        <header className="lg:hidden sticky top-0 z-30 h-[64px] px-5 flex items-center justify-between border-b border-[var(--rule)] bg-ivory/95 backdrop-blur-md print:hidden">
           <Link href="/candidate/dashboard">
             <BrandLockup height={28} />
           </Link>
           <CandidateMobileNav
-            active={active}
             items={[...navWithBadges, SETTINGS_ITEM].map((item) => ({
               id: item.id,
               label: item.label,
@@ -327,76 +315,16 @@ export async function CandidateShell({ children, active }: CandidateShellProps) 
           />
         </header>
 
-        <main className="flex-1 px-6 sm:px-10 py-10">
+        {/* print:p-0 — when a résumé is printed the shell chrome is hidden
+            (aside + mobile header above); zeroing the main padding lets the
+            sheet's own @page margins control the printed layout. */}
+        <main className="flex-1 px-6 sm:px-10 py-10 print:p-0">
           <ToastProvider>{children}</ToastProvider>
         </main>
       </div>
 
       {/* Floating "?" support launcher (Tier 2 chat surface). */}
-      <SupportLauncher audience="candidate" authUserId={user.id} />
+      <SupportLauncher audience="candidate" authUserId={authUserId} />
     </div>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────
- * Single nav row — Model H rail-item (animated icon + settle edge).
- * ────────────────────────────────────────────────────────── */
-
-function NavRow({
-  item,
-  active,
-  isDso,
-}: {
-  item: NavItem;
-  active?: NavId;
-  isDso?: boolean;
-}) {
-  const isActive = active === item.id;
-  const Icon = item.Icon;
-  const isFit = item.id === "practice-fit";
-  // The fit slot gets the premium glyph animation; everything else reuses
-  // the employer per-icon verbs (rail-ic-<id>).
-  const iconClass = isFit
-    ? `rail-ic rail-ic-fit ${isDso ? "rail-ic-dsofit" : "rail-ic-practicefit"} h-4 w-4 flex-shrink-0`
-    : `rail-ic rail-ic-${item.id} h-4 w-4 flex-shrink-0`;
-  return (
-    <li>
-      <Link
-        href={item.href}
-        data-tip={item.label}
-        className={
-          "rail-item group relative flex items-center gap-3 px-3 py-2 text-[13px] font-semibold tracking-[0.2px] border border-transparent transition-colors " +
-          (isActive
-            ? "rail-item-on bg-white/[0.08] text-ivory border-white/10"
-            : "text-ivory/60 hover:bg-white/5 hover:text-ivory")
-        }
-      >
-        {isFit ? (
-          <span className="rail-spark inline-flex flex-shrink-0">
-            <Icon className={iconClass} />
-          </span>
-        ) : (
-          <Icon className={iconClass} />
-        )}
-        <span className="rail-label flex-1">
-          {isFit ? (
-            <>
-              {item.label.replace(/Fit$/, "")}
-              <span className="text-heritage-light">Fit</span>
-            </>
-          ) : (
-            item.label
-          )}
-        </span>
-        {item.badge && item.badge > 0 ? (
-          <span
-            aria-label={`${item.badge} unread`}
-            className="rail-badge ml-2 inline-flex items-center justify-center rounded-full bg-heritage-deep px-1.5 py-0.5 text-[10px] font-bold text-ivory min-w-[18px]"
-          >
-            {item.badge > 99 ? "99+" : item.badge}
-          </span>
-        ) : null}
-      </Link>
-    </li>
   );
 }

@@ -94,7 +94,7 @@ import { CorporateRecommendedQuestionsPanel } from "./corporate-recommended-ques
 import { CompensationSection } from "./compensation-section";
 import { VerificationRequirements } from "./verification-requirements";
 import type { VerificationTypeValue } from "@/lib/verifications/types";
-import { ChipArrayInput } from "@/app/candidate/profile/edit-sheet";
+import { ChipArrayInput } from "@/app/candidate/(app)/profile/edit-sheet";
 import {
   getJobRequirementsPrioritized,
   BENEFITS,

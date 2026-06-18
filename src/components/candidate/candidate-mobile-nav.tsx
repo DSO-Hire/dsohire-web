@@ -21,8 +21,10 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X, LifeBuoy, LogOut } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
+import { isNavItemActive } from "./nav-active";
 
 export interface MobileNavItem {
   id: string;
@@ -37,7 +39,6 @@ export interface MobileNavItem {
 }
 
 interface CandidateMobileNavProps {
-  active?: string;
   items: MobileNavItem[];
   help: MobileNavItem;
   user: {
@@ -48,11 +49,13 @@ interface CandidateMobileNavProps {
 }
 
 export function CandidateMobileNav({
-  active,
   items,
   help,
   user,
 }: CandidateMobileNavProps) {
+  // Active item is derived from the URL (the shell is now a persistent layout
+  // that can't know which child renders) — shared rule with the desktop rail.
+  const pathname = usePathname() ?? "";
   const [open, setOpen] = useState(false);
   // Defer the portal target until after mount — Server Components
   // render this file too and document doesn't exist there.
@@ -127,7 +130,7 @@ export function CandidateMobileNav({
               <MobileRow
                 key={item.id}
                 item={item}
-                active={active}
+                pathname={pathname}
                 onSelect={() => setOpen(false)}
               />
             ))}
@@ -140,7 +143,7 @@ export function CandidateMobileNav({
             onClick={() => setOpen(false)}
             className={
               "flex items-center gap-3 px-3 py-2.5 text-[13px] font-semibold rounded " +
-              (active === help.id
+              (isNavItemActive(pathname, { id: help.id, href: help.href })
                 ? "bg-white/10 text-ivory"
                 : "text-ivory/65 hover:bg-white/5 hover:text-ivory")
             }
@@ -185,14 +188,14 @@ export function CandidateMobileNav({
 
 function MobileRow({
   item,
-  active,
+  pathname,
   onSelect,
 }: {
   item: MobileNavItem;
-  active?: string;
+  pathname: string;
   onSelect: () => void;
 }) {
-  const isActive = active === item.id;
+  const isActive = isNavItemActive(pathname, item);
   return (
     <li>
       <Link

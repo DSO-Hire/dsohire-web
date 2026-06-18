@@ -17,7 +17,7 @@
  * Pure module — no React, no DB. Server and client can both import.
  */
 
-import type { ProfileData } from "@/app/candidate/profile/profile-sections";
+import type { ProfileData } from "@/app/candidate/(app)/profile/profile-sections";
 
 export type CompletenessTier =
   | "beginner"

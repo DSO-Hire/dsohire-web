@@ -42,7 +42,7 @@ import {
   upsertCertificationEntry,
   deleteCertificationEntry,
   upsertSkillsLanguages,
-} from "@/app/candidate/profile/section-actions";
+} from "@/app/candidate/(app)/profile/section-actions";
 import {
   LICENSE_TYPES,
   CERTIFICATION_KINDS,

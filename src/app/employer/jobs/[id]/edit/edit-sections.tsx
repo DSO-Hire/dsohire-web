@@ -44,7 +44,7 @@ import {
 } from "../../actions";
 import { RecommendedQuestionsPanel } from "../../recommended-questions-panel";
 import { JdGeneratorPanel } from "../../jd-generator-panel";
-import { ChipArrayInput } from "@/app/candidate/profile/edit-sheet";
+import { ChipArrayInput } from "@/app/candidate/(app)/profile/edit-sheet";
 import { CORPORATE_FUNCTIONS } from "@/lib/corporate/functions";
 import { ExternalLinksField } from "@/components/external-links-field";
 import { CompensationSection } from "../../compensation-section";

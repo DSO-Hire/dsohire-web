@@ -78,7 +78,7 @@ import { ExternalLinksField } from "@/components/external-links-field";
 import { CompensationSection } from "../../../compensation-section";
 import { VerificationRequirements } from "../../../verification-requirements";
 import type { VerificationTypeValue } from "@/lib/verifications/types";
-import { ChipArrayInput } from "@/app/candidate/profile/edit-sheet";
+import { ChipArrayInput } from "@/app/candidate/(app)/profile/edit-sheet";
 import { getJobRequirementsPrioritized } from "@/lib/candidate/canonical-lists";
 import { CORPORATE_FUNCTIONS } from "@/lib/corporate/functions";
 import {

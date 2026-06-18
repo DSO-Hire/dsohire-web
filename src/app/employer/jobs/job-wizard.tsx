@@ -53,7 +53,7 @@ import {
   type CompModelState,
 } from "./comp-model-builder";
 import { formatDealCard } from "@/lib/comp/model";
-import { ChipArrayInput } from "@/app/candidate/profile/edit-sheet";
+import { ChipArrayInput } from "@/app/candidate/(app)/profile/edit-sheet";
 import { CORPORATE_FUNCTIONS } from "@/lib/corporate/functions";
 import {
   ExternalLinksField,
