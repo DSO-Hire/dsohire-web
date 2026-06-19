@@ -166,8 +166,8 @@ export function LocationAutocompleteField({
 
   return (
     <div>
-      {label && <span className="mb-1 block text-sm font-medium text-slate-800">{label}</span>}
-      {helper && <span className="mb-1.5 block text-xs text-slate-500">{helper}</span>}
+      {label && <span className="mb-1 block text-sm font-medium text-foreground">{label}</span>}
+      {helper && <span className="mb-1.5 block text-xs text-muted-foreground">{helper}</span>}
 
       {combinedName && selected && (
         <input type="hidden" name={combinedName} value={`${selected.city}, ${selected.state}`} />
@@ -176,8 +176,8 @@ export function LocationAutocompleteField({
       {stateName && <input type="hidden" name={stateName} value={selected?.state ?? ""} />}
 
       <div className="relative">
-        <div className="flex items-center gap-2 rounded border border-[var(--rule-strong,#cbd5e1)] bg-white px-3 py-2 focus-within:border-[#4D7A60]">
-          <MapPin className="size-4 shrink-0 text-slate-400" aria-hidden />
+        <div className="flex items-center gap-2 rounded border border-[var(--rule-strong,#cbd5e1)] bg-card px-3 py-2 focus-within:border-heritage">
+          <MapPin className="size-4 shrink-0 text-meta-foreground" aria-hidden />
           <input
             id={id}
             type="text"
@@ -188,7 +188,7 @@ export function LocationAutocompleteField({
             onBlur={() => setTimeout(() => setOpen(false), 120)}
             placeholder={placeholder}
             disabled={disabled}
-            className="w-full bg-transparent text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none disabled:opacity-60"
+            className="w-full bg-transparent text-sm text-foreground placeholder:text-meta-foreground focus:outline-none disabled:opacity-60"
             autoComplete="off"
             role="combobox"
             aria-expanded={open}
@@ -198,19 +198,19 @@ export function LocationAutocompleteField({
             <button
               type="button"
               onClick={clear}
-              className="shrink-0 text-slate-400 hover:text-[#14233F]"
+              className="shrink-0 text-meta-foreground hover:text-foreground"
               aria-label="Clear location"
             >
               <X className="size-3.5" />
             </button>
           )}
-          {loading && <Loader2 className="size-3.5 shrink-0 animate-spin text-slate-400" />}
+          {loading && <Loader2 className="size-3.5 shrink-0 animate-spin text-meta-foreground" />}
         </div>
 
         {open && suggestions.length > 0 && (
           <ul
             role="listbox"
-            className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded border border-slate-200 bg-white py-1 shadow-lg"
+            className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded border border-border bg-popover py-1 shadow-lg"
           >
             {suggestions.map((s, idx) => (
               <li
@@ -224,10 +224,10 @@ export function LocationAutocompleteField({
                 }}
                 className={
                   "flex cursor-pointer items-center gap-2 px-3 py-2 text-sm " +
-                  (idx === activeIdx ? "bg-[#4D7A60]/10 text-[#14233F]" : "text-slate-700")
+                  (idx === activeIdx ? "bg-heritage/10 text-foreground" : "text-foreground")
                 }
               >
-                <MapPin className="size-3.5 shrink-0 text-[#4D7A60]" aria-hidden />
+                <MapPin className="size-3.5 shrink-0 text-heritage" aria-hidden />
                 {s.label}
               </li>
             ))}
@@ -335,24 +335,24 @@ export function LocationAutocompleteInput({
 
   return (
     <div>
-      <span className="mb-1 block text-sm font-medium text-slate-800">{label}</span>
-      {helper && <span className="mb-1.5 block text-xs text-slate-500">{helper}</span>}
+      <span className="mb-1 block text-sm font-medium text-foreground">{label}</span>
+      {helper && <span className="mb-1.5 block text-xs text-muted-foreground">{helper}</span>}
 
       <div className="mb-2 flex flex-wrap gap-2">
         {values.length === 0 ? (
-          <span className="text-xs italic text-slate-400">None added yet.</span>
+          <span className="text-xs italic text-meta-foreground">None added yet.</span>
         ) : (
           values.map((v, i) => (
             <span
               key={`${v}-${i}`}
-              className="inline-flex items-center gap-1 rounded-full bg-[#4D7A60]/10 px-3 py-1 text-sm text-[#14233F]"
+              className="inline-flex items-center gap-1 rounded-full bg-heritage/10 px-3 py-1 text-sm text-foreground"
             >
               <MapPin className="size-3" aria-hidden />
               {v}
               <button
                 type="button"
                 onClick={() => remove(i)}
-                className="text-[#4D7A60] hover:text-[#14233F]"
+                className="text-heritage hover:text-foreground"
                 aria-label={`Remove ${v}`}
               >
                 <X className="size-3.5" />
@@ -363,8 +363,8 @@ export function LocationAutocompleteInput({
       </div>
 
       <div className="relative">
-        <div className="flex items-center gap-2 rounded border border-[var(--rule-strong,#cbd5e1)] bg-white px-3 py-2 focus-within:border-[#4D7A60]">
-          <MapPin className="size-4 shrink-0 text-slate-400" aria-hidden />
+        <div className="flex items-center gap-2 rounded border border-[var(--rule-strong,#cbd5e1)] bg-card px-3 py-2 focus-within:border-heritage">
+          <MapPin className="size-4 shrink-0 text-meta-foreground" aria-hidden />
           <input
             type="text"
             value={draft}
@@ -373,19 +373,19 @@ export function LocationAutocompleteInput({
             onFocus={() => suggestions.length > 0 && setOpen(true)}
             onBlur={() => setTimeout(() => setOpen(false), 120)}
             placeholder={placeholder}
-            className="w-full bg-transparent text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none"
+            className="w-full bg-transparent text-sm text-foreground placeholder:text-meta-foreground focus:outline-none"
             autoComplete="off"
             role="combobox"
             aria-expanded={open}
             aria-autocomplete="list"
           />
-          {loading && <Loader2 className="size-3.5 shrink-0 animate-spin text-slate-400" />}
+          {loading && <Loader2 className="size-3.5 shrink-0 animate-spin text-meta-foreground" />}
         </div>
 
         {open && suggestions.length > 0 && (
           <ul
             role="listbox"
-            className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded border border-slate-200 bg-white py-1 shadow-lg"
+            className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded border border-border bg-popover py-1 shadow-lg"
           >
             {suggestions.map((s, idx) => (
               <li
@@ -399,10 +399,10 @@ export function LocationAutocompleteInput({
                 }}
                 className={
                   "flex cursor-pointer items-center gap-2 px-3 py-2 text-sm " +
-                  (idx === activeIdx ? "bg-[#4D7A60]/10 text-[#14233F]" : "text-slate-700")
+                  (idx === activeIdx ? "bg-heritage/10 text-foreground" : "text-foreground")
                 }
               >
-                <MapPin className="size-3.5 shrink-0 text-[#4D7A60]" aria-hidden />
+                <MapPin className="size-3.5 shrink-0 text-heritage" aria-hidden />
                 {s.label}
               </li>
             ))}
@@ -410,7 +410,7 @@ export function LocationAutocompleteInput({
         )}
       </div>
       {!token && (
-        <span className="mt-1 block text-[11px] text-slate-400">
+        <span className="mt-1 block text-[11px] text-meta-foreground">
           Type a full “City, ST” and press Enter.
         </span>
       )}

@@ -17,10 +17,12 @@ export function BrandMark({
   dark,
   className,
 }: {
+  /** Force light ink for placement on a dark surface (e.g. the navy rail)
+   *  regardless of app theme. When omitted, the mark follows the theme
+   *  (navy in light, ivory in dark) via the `stroke-ink` token. */
   dark?: boolean;
   className?: string;
 }) {
-  const stroke = dark ? "#F7F4ED" : "#14233F";
   return (
     <svg
       width="32"
@@ -34,18 +36,19 @@ export function BrandMark({
       <path
         d="M 5 5 L 28 5 Q 40 5 40 17 L 40 27 Q 40 39 28 39 L 5 39"
         fill="none"
-        stroke={stroke}
+        className={dark ? undefined : "stroke-ink"}
+        stroke={dark ? "#F7F4ED" : undefined}
         strokeWidth="4"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      {/* Heritage crossbar — implied H */}
+      {/* Heritage crossbar — implied H (brightens in dark via the token) */}
       <line
         x1="8"
         y1="22"
         x2="24"
         y2="22"
-        stroke="#4D7A60"
+        className="stroke-heritage"
         strokeWidth="3"
         strokeLinecap="round"
       />

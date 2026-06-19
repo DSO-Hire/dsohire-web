@@ -115,7 +115,7 @@ export function MobileMenu({
             type="button"
             aria-label="Close menu"
             onClick={close}
-            className="absolute inset-0 bg-ink/35 backdrop-blur-sm"
+            className="absolute inset-0 bg-ink-1000/45 backdrop-blur-sm"
           />
 
           {/* Drawer panel */}
@@ -272,7 +272,7 @@ export function MobileMenu({
               <Link
                 href={primaryCtaHref}
                 onClick={close}
-                className="inline-flex items-center justify-center px-5 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+                className="inline-flex items-center justify-center px-5 py-3 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
               >
                 {primaryCtaLabel}
               </Link>

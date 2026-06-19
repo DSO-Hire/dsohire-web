@@ -154,7 +154,7 @@ export function LensToggle() {
 
   const baseSegment =
     "inline-flex items-center gap-1.5 px-3.5 h-9 text-[12px] font-semibold tracking-[1.8px] uppercase transition-colors";
-  const activeSegment = "bg-ink text-ivory";
+  const activeSegment = "bg-primary text-primary-foreground";
   const idleSegment = "text-slate-body hover:text-ink hover:bg-cream/60";
 
   return (
@@ -178,7 +178,7 @@ export function LensToggle() {
 
           <div
             role="menu"
-            className={`invisible opacity-0 absolute top-full left-0 mt-3 min-w-[320px] max-w-[calc(100vw-2rem)] bg-white border border-[var(--rule-strong)] ${MENU_SHADOW} group-hover/dsos:visible group-hover/dsos:opacity-100 transition-all duration-150 z-50`}
+            className={`invisible opacity-0 absolute top-full left-0 mt-3 min-w-[320px] max-w-[calc(100vw-2rem)] bg-popover border border-[var(--rule-strong)] ${MENU_SHADOW} group-hover/dsos:visible group-hover/dsos:opacity-100 transition-all duration-150 z-50`}
           >
             <MenuList links={DSO_SIZE_LINKS} />
           </div>
@@ -204,7 +204,7 @@ export function LensToggle() {
 
           <div
             role="menu"
-            className={`invisible opacity-0 absolute top-full right-0 mt-3 min-w-[360px] max-w-[calc(100vw-2rem)] max-h-[calc(100vh-7rem)] overflow-y-auto bg-white border border-[var(--rule-strong)] ${MENU_SHADOW} group-hover/pros:visible group-hover/pros:opacity-100 transition-all duration-150 z-50`}
+            className={`invisible opacity-0 absolute top-full right-0 mt-3 min-w-[360px] max-w-[calc(100vw-2rem)] max-h-[calc(100vh-7rem)] overflow-y-auto bg-popover border border-[var(--rule-strong)] ${MENU_SHADOW} group-hover/pros:visible group-hover/pros:opacity-100 transition-all duration-150 z-50`}
           >
             <MenuList links={ROLE_LINKS} />
           </div>

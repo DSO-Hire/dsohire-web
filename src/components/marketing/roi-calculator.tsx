@@ -158,7 +158,7 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
           </div>
 
           {/* Output */}
-          <div className="bg-ink text-ivory p-8 sm:p-10 flex flex-col">
+          <div className="bg-hero text-hero-foreground p-8 sm:p-10 flex flex-col">
             <div className="text-[10px] font-bold tracking-[3px] uppercase text-[var(--heritage-bright,#8db8a3)] mb-6">
               Your estimate
             </div>
@@ -172,7 +172,7 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
                 label={`Job-board spend / year (${listings} ${listings === 1 ? "listing" : "listings"})`}
                 value={fmtUsd(boardSpend)}
               />
-              <div className="border-t border-ivory/15 pt-4">
+              <div className="border-t border-hero-foreground/15 pt-4">
                 <OutputRow
                   label="Your hiring spend today / year"
                   value={fmtUsd(todayTotal)}
@@ -214,7 +214,7 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
                     title={`DSO Hire ${tier.name}: ${fmtUsd(dsoHireAnnual)}`}
                   />
                 </BarRow>
-                <div className="flex gap-4 mt-2 text-[9px] font-bold tracking-[1px] uppercase text-ivory/40">
+                <div className="flex gap-4 mt-2 text-[9px] font-bold tracking-[1px] uppercase text-hero-foreground/40">
                   <span className="inline-flex items-center gap-1.5">
                     <span className="w-2 h-2 bg-ivory/40" /> Agencies
                   </span>
@@ -232,8 +232,8 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
               </div>
             )}
 
-            <div className="border-t border-ivory/15 pt-4 mb-6">
-              <div className="text-[11px] font-bold tracking-[1.8px] uppercase text-ivory/50 mb-1">
+            <div className="border-t border-hero-foreground/15 pt-4 mb-6">
+              <div className="text-[11px] font-bold tracking-[1.8px] uppercase text-hero-foreground/50 mb-1">
                 {savings >= 0 ? "Estimated kept in your pocket" : "Difference"}
               </div>
               <div
@@ -241,22 +241,22 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
                 style={{ color: savings >= 0 ? "#8db8a3" : "#F7F4ED" }}
               >
                 {fmtUsd(Math.abs(savings))}
-                <span className="text-[16px] font-bold text-ivory/50 ml-1.5">/yr</span>
+                <span className="text-[16px] font-bold text-hero-foreground/50 ml-1.5">/yr</span>
               </div>
             </div>
 
             {/* Channel-aware payback line — strongest true claim wins. */}
-            <p className="text-[13px] text-ivory/70 leading-relaxed mb-7">
+            <p className="text-[13px] text-hero-foreground/70 leading-relaxed mb-7">
               {boardSpend >= dsoHireAnnual && listings > 0 ? (
                 <>
-                  Your job-board spend <strong className="text-ivory">alone</strong>{" "}
+                  Your job-board spend <strong className="text-hero-foreground">alone</strong>{" "}
                   more than covers {tier.name} — every avoided placement fee
                   after that is pure savings. Unlimited postings included.
                 </>
               ) : agencyHires > 0 ? (
                 <>
                   One avoided {fmtUsd(avgFee)} placement fee covers{" "}
-                  <strong className="text-ivory">
+                  <strong className="text-hero-foreground">
                     {feeYearsCovered >= 1
                       ? `${feeYearsCovered.toFixed(1)} years`
                       : `${Math.round(feeYearsCovered * 12)} months`}
@@ -266,7 +266,7 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
                     <>
                       {" "}
                       — and your listings spend already covers{" "}
-                      <strong className="text-ivory">{boardCoversPct}%</strong>{" "}
+                      <strong className="text-hero-foreground">{boardCoversPct}%</strong>{" "}
                       of it before that.
                     </>
                   ) : (
@@ -277,7 +277,7 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
                 <>
                   Trading {listings} per-listing fees for one flat subscription
                   covers{" "}
-                  <strong className="text-ivory">
+                  <strong className="text-hero-foreground">
                     {Math.min(boardCoversPct, 100)}%
                   </strong>{" "}
                   of {tier.name} — with unlimited postings across all{" "}
@@ -329,7 +329,7 @@ function BarRow({
 }) {
   return (
     <div className="flex items-center gap-3 mb-1.5">
-      <span className="w-[64px] shrink-0 text-[9px] font-bold tracking-[1.2px] uppercase text-ivory/50 text-right">
+      <span className="w-[64px] shrink-0 text-[9px] font-bold tracking-[1.2px] uppercase text-hero-foreground/50 text-right">
         {label}
       </span>
       <span className="flex-1 h-[16px] bg-ivory/[0.07] flex gap-px overflow-hidden">
@@ -391,10 +391,10 @@ function OutputRow({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-4">
-      <span className="text-[13px] text-ivory/65 leading-snug">{label}</span>
+      <span className="text-[13px] text-hero-foreground/65 leading-snug">{label}</span>
       <span
         className={`text-[20px] font-extrabold tracking-[-0.6px] tabular-nums whitespace-nowrap ${
-          accent ? "text-[var(--heritage-bright,#8db8a3)]" : "text-ivory"
+          accent ? "text-[var(--heritage-bright,#8db8a3)]" : "text-hero-foreground"
         }`}
       >
         {value}

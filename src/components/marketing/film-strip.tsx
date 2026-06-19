@@ -29,12 +29,12 @@ function FrameChrome({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-ink-1000 border border-ivory/15 shadow-[0_24px_50px_-20px_rgba(0,0,0,0.55)]">
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-ivory/10">
+    <div className="bg-ink-1000 border border-hero-foreground/15 shadow-[0_24px_50px_-20px_rgba(0,0,0,0.55)]">
+      <div className="flex items-center gap-2 px-3 py-2 border-b border-hero-foreground/10">
         <span className="w-2 h-2 rounded-full bg-ivory/20" aria-hidden />
         <span className="w-2 h-2 rounded-full bg-ivory/20" aria-hidden />
         <span className="w-2 h-2 rounded-full bg-ivory/20" aria-hidden />
-        <span className="ml-2 text-[9px] tracking-[0.6px] text-ivory/45 bg-ivory/5 px-2.5 py-0.5">
+        <span className="ml-2 text-[9px] tracking-[0.6px] text-hero-foreground/45 bg-hero-foreground/5 px-2.5 py-0.5">
           {url}
         </span>
       </div>
@@ -72,7 +72,7 @@ function KbCard({
 }) {
   return (
     <div
-      className={`bg-white border border-[var(--rule-strong)] p-2 mb-2 ${
+      className={`bg-card border border-[var(--rule-strong)] p-2 mb-2 ${
         active ? "shadow-[0_0_0_2px_rgba(77,122,96,0.5)]" : ""
       }`}
     >
@@ -96,7 +96,7 @@ function KbCard({
 
 function RuleCard({ when, what }: { when: string; what: string }) {
   return (
-    <div className="bg-white border border-[var(--rule-strong)] border-l-[3px] border-l-heritage px-3.5 py-3 mb-2.5 flex items-center justify-between gap-3">
+    <div className="bg-card border border-[var(--rule-strong)] border-l-[3px] border-l-heritage px-3.5 py-3 mb-2.5 flex items-center justify-between gap-3">
       <div>
         <div className="text-[8px] font-extrabold tracking-[1.2px] uppercase text-slate-meta">
           {when}
@@ -104,7 +104,7 @@ function RuleCard({ when, what }: { when: string; what: string }) {
         <div className="text-[10px] font-bold mt-0.5">{what}</div>
       </div>
       <span className="relative inline-block w-[26px] h-[14px] shrink-0 bg-heritage" aria-hidden>
-        <span className="absolute top-[2px] right-[2px] w-[10px] h-[10px] bg-white" />
+        <span className="absolute top-[2px] right-[2px] w-[10px] h-[10px] bg-card" />
       </span>
     </div>
   );
@@ -125,7 +125,7 @@ function ChainStep({
     <div className="flex items-start gap-3 py-2.5 border-b border-dashed border-[var(--rule-strong)] last:border-b-0">
       <span
         className={`flex items-center justify-center w-[22px] h-[22px] shrink-0 text-[10px] font-extrabold ${
-          done ? "bg-heritage text-white" : "bg-ivory-deep text-slate-meta"
+          done ? "bg-heritage text-primary-foreground" : "bg-ivory-deep text-slate-meta"
         }`}
       >
         {done ? "✓" : n}
@@ -245,7 +245,7 @@ function PermissionsFrame() {
                 <td
                   key={i}
                   className={`px-1.5 py-1.5 border-b border-[var(--rule)] font-extrabold ${
-                    c === "✗" ? "text-[#b3543f]" : "text-heritage-deep"
+                    c === "✗" ? "text-danger" : "text-heritage-deep"
                   }`}
                 >
                   {c}
@@ -331,7 +331,7 @@ export function FilmStrip() {
   };
 
   return (
-    <section className="relative bg-ink text-ivory py-24 overflow-hidden">
+    <section className="relative bg-hero text-hero-foreground py-24 overflow-hidden">
       {/* brand grid wash */}
       <div
         aria-hidden
@@ -361,7 +361,7 @@ export function FilmStrip() {
         <p
           data-reveal
           style={{ "--mk-delay": "140ms" } as React.CSSProperties}
-          className="text-[15px] text-ivory/60 leading-[1.7] max-w-[620px]"
+          className="text-[15px] text-hero-foreground/60 leading-[1.7] max-w-[620px]"
         >
           Behind every posting is a full hiring operating system — the same
           machinery enterprise recruiting teams pay five figures for, built
@@ -384,10 +384,10 @@ export function FilmStrip() {
             >
               {f.body}
               <div className="mt-3.5">
-                <div className="text-[15px] font-extrabold tracking-[-0.2px] text-ivory">
+                <div className="text-[15px] font-extrabold tracking-[-0.2px] text-hero-foreground">
                   {f.title}
                 </div>
-                <div className="text-[12.5px] text-ivory/55 leading-[1.6] mt-1">
+                <div className="text-[12.5px] text-hero-foreground/55 leading-[1.6] mt-1">
                   {f.caption}
                 </div>
               </div>
@@ -401,7 +401,7 @@ export function FilmStrip() {
               type="button"
               onClick={() => scroll(-1)}
               aria-label="Previous frame"
-              className="w-[42px] h-[42px] inline-flex items-center justify-center border border-ivory/30 text-ivory hover:bg-heritage hover:border-heritage transition-colors"
+              className="w-[42px] h-[42px] inline-flex items-center justify-center border border-hero-foreground/30 text-hero-foreground hover:bg-heritage hover:border-heritage transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
@@ -409,12 +409,12 @@ export function FilmStrip() {
               type="button"
               onClick={() => scroll(1)}
               aria-label="Next frame"
-              className="w-[42px] h-[42px] inline-flex items-center justify-center border border-ivory/30 text-ivory hover:bg-heritage hover:border-heritage transition-colors"
+              className="w-[42px] h-[42px] inline-flex items-center justify-center border border-hero-foreground/30 text-hero-foreground hover:bg-heritage hover:border-heritage transition-colors"
             >
               <ArrowRight className="h-4 w-4" />
             </button>
           </div>
-          <span className="text-[9px] tracking-[1.2px] uppercase text-ivory/35">
+          <span className="text-[9px] tracking-[1.2px] uppercase text-hero-foreground/35">
             Illustrations of the live product · sample data
           </span>
         </div>

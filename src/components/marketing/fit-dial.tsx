@@ -130,7 +130,7 @@ export function FitDial({
         {/* Sparkle — pops in once the score lands (mirrors the .pf-slider thumb mark) */}
         <span
           aria-hidden
-          className="mk-dial-sparkle absolute top-[22px] right-[26px] w-[26px] h-[26px] rounded-full bg-white border border-[var(--rule-strong)] flex items-center justify-center"
+          className="mk-dial-sparkle absolute top-[22px] right-[26px] w-[26px] h-[26px] rounded-full bg-card border border-[var(--rule-strong)] flex items-center justify-center"
         >
           <svg width="12" height="12" viewBox="0 0 14 14">
             <path

@@ -19,8 +19,9 @@ export function BrandLockup({
   dark?: boolean;
   height?: number;
 }) {
-  const ink = dark ? "#F7F4ED" : "#14233F";
-  const dividerColor = dark ? "rgba(247,244,237,0.18)" : "rgba(20,35,63,0.18)";
+  // `dark` forces light ink for placement on a dark surface (e.g. the navy
+  // rail) regardless of app theme. When omitted, the lockup follows the theme
+  // via the ink/heritage/border tokens (navy in light, ivory in dark).
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -33,7 +34,8 @@ export function BrandLockup({
       <path
         d="M 5 5 L 28 5 Q 40 5 40 17 L 40 27 Q 40 39 28 39 L 5 39"
         fill="none"
-        stroke={ink}
+        className={dark ? undefined : "stroke-ink"}
+        stroke={dark ? "#F7F4ED" : undefined}
         strokeWidth="4"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -43,11 +45,19 @@ export function BrandLockup({
         y1="22"
         x2="24"
         y2="22"
-        stroke="#4D7A60"
+        className="stroke-heritage"
         strokeWidth="3"
         strokeLinecap="round"
       />
-      <line x1="52" y1="6" x2="52" y2="38" stroke={dividerColor} strokeWidth="0.8" />
+      <line
+        x1="52"
+        y1="6"
+        x2="52"
+        y2="38"
+        className={dark ? undefined : "stroke-border-2"}
+        stroke={dark ? "rgba(247,244,237,0.18)" : undefined}
+        strokeWidth="0.8"
+      />
       <text
         x="58"
         y="28"
@@ -55,7 +65,8 @@ export function BrandLockup({
         fontSize="26"
         fontWeight="800"
         letterSpacing="-0.8"
-        fill={ink}
+        className={dark ? undefined : "fill-ink"}
+        fill={dark ? "#F7F4ED" : undefined}
         textLength="52"
         lengthAdjust="spacingAndGlyphs"
       >
@@ -67,7 +78,7 @@ export function BrandLockup({
         fontFamily="'Manrope', 'Helvetica Neue', Arial, sans-serif"
         fontSize="9.5"
         fontWeight="500"
-        fill="#4D7A60"
+        className="fill-heritage"
         textLength="52"
         lengthAdjust="spacing"
       >

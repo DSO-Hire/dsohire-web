@@ -172,7 +172,7 @@ export async function SiteNav({
         </Link>
         <Link
           href={primaryCtaHref}
-          className="px-5 py-2.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors"
+          className="px-5 py-2.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
         >
           {primaryCtaLabel}
         </Link>
@@ -207,12 +207,12 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
 
 export function SiteFooter() {
   return (
-    <footer className="bg-ink text-ivory px-6 sm:px-14 pt-16 pb-10 border-t border-white/10">
+    <footer className="bg-hero text-hero-foreground px-6 sm:px-14 pt-16 pb-10 border-t border-hero-foreground/10">
       <div className="max-w-[1240px] mx-auto">
-        <div className="grid grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-10 lg:gap-14 pb-12 border-b border-white/10 mb-9">
+        <div className="grid grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-10 lg:gap-14 pb-12 border-b border-hero-foreground/10 mb-9">
           <div>
             <BrandLockup dark height={56} />
-            <p className="text-[14px] text-ivory/55 leading-[1.7] mt-5 max-w-[280px]">
+            <p className="text-[14px] text-hero-foreground/55 leading-[1.7] mt-5 max-w-[280px]">
               Dental hiring, done direct. The hiring platform built for
               multi-location DSOs. One flat monthly fee, unlimited postings.
               Born from ten years inside the business of dentistry.
@@ -259,25 +259,25 @@ export function SiteFooter() {
         </div>
 
         <div className="flex flex-wrap justify-between items-center gap-4">
-          <div className="text-[12px] tracking-[0.5px] text-ivory/40">
+          <div className="text-[12px] tracking-[0.5px] text-hero-foreground/40">
             © {new Date().getFullYear()} DSO Hire LLC
           </div>
-          <div className="flex gap-6 text-[12px] text-ivory/40">
+          <div className="flex gap-6 text-[12px] text-hero-foreground/40">
             <Link
               href="/legal/privacy"
-              className="hover:text-ivory/70 transition-colors"
+              className="hover:text-hero-foreground/70 transition-colors"
             >
               Privacy
             </Link>
             <Link
               href="/legal/terms"
-              className="hover:text-ivory/70 transition-colors"
+              className="hover:text-hero-foreground/70 transition-colors"
             >
               Terms
             </Link>
             <Link
               href={SUPPORT_MAILTO}
-              className="hover:text-ivory/70 transition-colors"
+              className="hover:text-hero-foreground/70 transition-colors"
             >
               {SUPPORT_EMAIL}
             </Link>
@@ -304,7 +304,7 @@ function FooterLink({ href, children }: { href: string; children: React.ReactNod
     <li>
       <Link
         href={href}
-        className="text-[14px] text-ivory/60 hover:text-ivory transition-colors"
+        className="text-[14px] text-hero-foreground/60 hover:text-hero-foreground transition-colors"
       >
         {children}
       </Link>
@@ -339,10 +339,9 @@ export function BrandLockup({
    */
   draw?: boolean;
 }) {
-  const ink = dark ? "#F7F4ED" : "#14233F";
-  const dividerColor = dark
-    ? "rgba(247,244,237,0.18)"
-    : "rgba(20,35,63,0.18)";
+  // `dark` forces light ink for placement on a dark surface (e.g. the navy
+  // footer) regardless of app theme. When omitted (e.g. the page header,
+  // which goes dark in dark mode) the lockup follows the theme via tokens.
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -359,10 +358,10 @@ export function BrandLockup({
           then curves down and around to the bottom arm extending left from
           x=28 back to x=5 at y=39. */}
       <path
-        className="lockup-arch"
+        className={dark ? "lockup-arch" : "lockup-arch stroke-ink"}
         d="M 5 5 L 28 5 Q 40 5 40 17 L 40 27 Q 40 39 28 39 L 5 39"
         fill="none"
-        stroke={ink}
+        stroke={dark ? "#F7F4ED" : undefined}
         strokeWidth="4"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -371,36 +370,35 @@ export function BrandLockup({
           midpoint of the mark, extending from inside the open left side to
           just shy of the inner curve on the right. */}
       <line
-        className="lockup-bar"
+        className="lockup-bar stroke-heritage"
         x1="8"
         y1="22"
         x2="24"
         y2="22"
-        stroke="#4D7A60"
         strokeWidth="3"
         strokeLinecap="round"
       />
       {/* Vertical hairline divider between mark and wordmark */}
       <line
-        className="lockup-fade"
+        className={dark ? "lockup-fade" : "lockup-fade stroke-border-2"}
         x1="52"
         y1="6"
         x2="52"
         y2="38"
-        stroke={dividerColor}
+        stroke={dark ? "rgba(247,244,237,0.18)" : undefined}
         strokeWidth="0.8"
       />
       {/* DSO wordmark, heavy weight — explicit textLength locks the width
           so the HIRE underneath matches exactly regardless of font rendering. */}
       <text
-        className="lockup-fade"
+        className={dark ? "lockup-fade" : "lockup-fade fill-ink"}
         x="58"
         y="28"
         fontFamily="'Manrope', 'Helvetica Neue', Arial, sans-serif"
         fontSize="26"
         fontWeight="800"
         letterSpacing="-0.8"
-        fill={ink}
+        fill={dark ? "#F7F4ED" : undefined}
         textLength="52"
         lengthAdjust="spacingAndGlyphs"
       >
@@ -410,13 +408,12 @@ export function BrandLockup({
           means only inter-letter spacing is adjusted, not glyph widths. Drop
           letterSpacing so textLength is the only width driver. */}
       <text
-        className="lockup-fade"
+        className="lockup-fade fill-heritage"
         x="58"
         y="38"
         fontFamily="'Manrope', 'Helvetica Neue', Arial, sans-serif"
         fontSize="9.5"
         fontWeight="500"
-        fill="#4D7A60"
         textLength="52"
         lengthAdjust="spacing"
       >

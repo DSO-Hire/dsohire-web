@@ -140,7 +140,7 @@ function Hero({
         <div className="flex flex-wrap items-center gap-3.5">
           <Link
             href={jobsFilterHref}
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
           >
             Browse {label} Roles
             <ArrowRight className="h-3.5 w-3.5" />
@@ -243,7 +243,7 @@ function Compensation({ config }: { config: RoleConfig }) {
         <h2 className="text-3xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-[1.1] text-ink mb-6">
           {config.compensation.title}
         </h2>
-        <div className="inline-flex items-center gap-3 mb-5 px-4 py-2.5 bg-white/70 border border-heritage/40 text-[15px] font-semibold tracking-[-0.1px] text-heritage-deep">
+        <div className="inline-flex items-center gap-3 mb-5 px-4 py-2.5 bg-card/70 border border-heritage/40 text-[15px] font-semibold tracking-[-0.1px] text-heritage-deep">
           {config.compensation.structure}
         </div>
         <p className="text-[15px] text-ink leading-[1.75] max-w-[680px]">
@@ -394,14 +394,14 @@ function FinalCta({
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Link
             href={config.jobsFilterHref}
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
           >
             Browse {config.label} Roles
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
             href={ctaHref}
-            className="inline-flex items-center px-9 py-[15px] bg-heritage text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
+            className="inline-flex items-center px-9 py-[15px] bg-heritage text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
           >
             Create a Free Profile
           </Link>

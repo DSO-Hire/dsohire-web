@@ -61,13 +61,13 @@ export function VsTable({
   return (
     <section className="px-6 sm:px-14 pb-20 max-w-[1240px] mx-auto">
       <div data-reveal className="border border-[var(--rule-strong)] overflow-x-auto">
-        <table className="w-full min-w-[680px] border-collapse bg-white">
+        <table className="w-full min-w-[680px] border-collapse bg-card">
           <thead>
-            <tr className="bg-ink text-ivory">
+            <tr className="bg-hero text-hero-foreground">
               <th className="text-left px-6 py-4 text-[10px] font-bold tracking-[2.5px] uppercase w-[26%]">
                 What it means for you
               </th>
-              <th className="text-left px-6 py-4 text-[10px] font-bold tracking-[2.5px] uppercase w-[37%] text-ivory/70">
+              <th className="text-left px-6 py-4 text-[10px] font-bold tracking-[2.5px] uppercase w-[37%] text-hero-foreground/70">
                 {themLabel}
               </th>
               <th className="text-left px-6 py-4 text-[10px] font-bold tracking-[2.5px] uppercase w-[37%] text-[var(--heritage-bright,#8db8a3)]">
@@ -126,7 +126,7 @@ export function VsHonestNote({
 
 export function VsCta({ headline, sub }: { headline: string; sub: string }) {
   return (
-    <section className="bg-ink text-ivory px-6 sm:px-14 py-20">
+    <section className="bg-hero text-hero-foreground px-6 sm:px-14 py-20">
       <div className="max-w-[820px] mx-auto text-center">
         <h2 data-reveal className="text-3xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-[1.1] mb-4">
           {headline}
@@ -134,7 +134,7 @@ export function VsCta({ headline, sub }: { headline: string; sub: string }) {
         <p
           data-reveal
           style={{ "--mk-delay": "70ms" } as React.CSSProperties}
-          className="text-base text-ivory/65 leading-[1.7] max-w-[540px] mx-auto mb-9"
+          className="text-base text-hero-foreground/65 leading-[1.7] max-w-[540px] mx-auto mb-9"
         >
           {sub}
         </p>
@@ -152,7 +152,7 @@ export function VsCta({ headline, sub }: { headline: string; sub: string }) {
           </Link>
           <Link
             href="/switch"
-            className="inline-flex items-center justify-center px-9 py-4 border border-ivory/30 text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:border-ivory hover:bg-white/5 transition-colors"
+            className="inline-flex items-center justify-center px-9 py-4 border border-hero-foreground/30 text-hero-foreground text-[12px] font-bold tracking-[2px] uppercase hover:border-hero-foreground hover:bg-hero-foreground/5 transition-colors"
           >
             Free Migration
           </Link>

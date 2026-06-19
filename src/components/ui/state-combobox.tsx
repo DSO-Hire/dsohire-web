@@ -168,7 +168,7 @@ export function StateCombobox({
           <PopoverPrimitive.Content
             sideOffset={4}
             align="start"
-            className="z-50 w-(--radix-popover-trigger-width) min-w-[220px] bg-white border border-[var(--rule-strong)] shadow-[0_18px_44px_-22px_rgba(7,15,28,0.28)] data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0"
+            className="z-50 w-(--radix-popover-trigger-width) min-w-[220px] bg-popover border border-[var(--rule-strong)] shadow-[0_18px_44px_-22px_rgba(7,15,28,0.28)] data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0"
             onOpenAutoFocus={(e) => {
               // We focus the filter input ourselves via the effect above.
               e.preventDefault();
@@ -208,7 +208,7 @@ export function StateCombobox({
                     e.preventDefault();
                     commit(null);
                   }}
-                  className="flex items-center gap-2 px-3 py-2 text-[13px] tracking-[0.5px] uppercase font-semibold text-slate-meta hover:bg-cream cursor-pointer"
+                  className="flex items-center gap-2 px-3 py-2 text-[13px] tracking-[0.5px] uppercase font-semibold text-slate-meta hover:bg-muted cursor-pointer"
                 >
                   <X className="h-3 w-3" />
                   Clear selection
@@ -238,7 +238,7 @@ export function StateCombobox({
                       }}
                       className={cn(
                         "flex items-center gap-2 px-3 py-2 text-[14px] cursor-pointer",
-                        isActive ? "bg-cream" : "bg-white",
+                        isActive ? "bg-muted" : "bg-popover",
                         isSelected ? "text-ink font-semibold" : "text-ink"
                       )}
                     >

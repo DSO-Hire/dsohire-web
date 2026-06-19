@@ -68,7 +68,7 @@ export function ListSort({
         value={activeValue}
         onChange={(e) => onChange(e.currentTarget.value)}
         disabled={pending}
-        className="text-[12px] px-2.5 py-1.5 bg-white border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage min-w-[180px]"
+        className="text-[12px] px-2.5 py-1.5 bg-card border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage min-w-[180px]"
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>

@@ -24,21 +24,19 @@ export function BrandLoader({
     <span className="bl-loader inline-flex flex-col items-center gap-3">
       <svg width="52" height="52" viewBox="0 0 44 44" aria-hidden="true">
         <path
-          className="bl-arch"
+          className="bl-arch stroke-ink"
           d="M 5 5 L 28 5 Q 40 5 40 17 L 40 27 Q 40 39 28 39 L 5 39"
           fill="none"
-          stroke="#14233F"
           strokeWidth="4"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
         <line
-          className="bl-bar"
+          className="bl-bar stroke-heritage"
           x1="8"
           y1="22"
           x2="24"
           y2="22"
-          stroke="#4D7A60"
           strokeWidth="3"
           strokeLinecap="round"
         />

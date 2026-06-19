@@ -69,7 +69,7 @@ export function PracticeFitTeaser({
 
   return (
     <div
-      className="bg-white border border-[var(--rule-strong)] overflow-hidden"
+      className="bg-card border border-[var(--rule-strong)] overflow-hidden"
       style={{
         boxShadow:
           "0 30px 60px -30px rgba(7,15,28,0.18), 0 10px 24px -12px rgba(7,15,28,0.10)",
@@ -113,7 +113,7 @@ export function PracticeFitTeaser({
                 key={opt}
                 type="button"
                 onClick={() => pick(opt)}
-                className="text-left px-5 py-3.5 border border-[var(--rule-strong)] text-[14.5px] font-semibold text-ink bg-white hover:border-heritage hover:bg-cream/60 motion-safe:hover:-translate-y-0.5 transition-all"
+                className="text-left px-5 py-3.5 border border-[var(--rule-strong)] text-[14.5px] font-semibold text-ink bg-card hover:border-heritage hover:bg-cream/60 motion-safe:hover:-translate-y-0.5 transition-all"
               >
                 {opt}
               </button>
@@ -166,7 +166,7 @@ export function PracticeFitTeaser({
             <div className="flex flex-wrap items-center gap-3">
               <Link
                 href={assessmentHref}
-                className="inline-flex items-center gap-2.5 px-6 py-3 bg-heritage text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-heritage-deep transition-colors"
+                className="inline-flex items-center gap-2.5 px-6 py-3 bg-heritage text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-heritage-deep transition-colors"
               >
                 Take The Full Assessment
                 <ArrowRight className="h-3.5 w-3.5" />
