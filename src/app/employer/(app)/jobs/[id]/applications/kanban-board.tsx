@@ -1354,7 +1354,7 @@ export function KanbanBoard({
         </div>
 
         {/* Open stages — horizontal scroll on desktop if needed */}
-        <div className="overflow-x-auto -mx-4 px-4 pb-2">
+        <div className="dso-scroll overflow-x-auto -mx-4 px-4 pb-2">
           <div className="flex gap-4 min-w-max">
             {kanbanStages.map((stage) => (
               <KanbanColumn

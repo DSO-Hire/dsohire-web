@@ -272,10 +272,21 @@ function DoorwayPanel({
   revealDelay?: number;
 }) {
   const isInk = accent === "ink";
+  // The navy door stays navy in both modes → light text. The green door
+  // (bg-heritage) flips to LIGHT green in dark, so its text inverts to dark
+  // there — primary-foreground (light→dark) instead of hero-foreground
+  // (light→light, which washes out on the lighter green). Light mode is
+  // identical (both resolve to ivory there).
+  const fg = isInk ? "text-hero-foreground" : "text-primary-foreground";
+  const fg80 = isInk ? "text-hero-foreground/80" : "text-primary-foreground/80";
+  const fg65 = isInk ? "text-hero-foreground/65" : "text-primary-foreground/65";
+  const fg55 = isInk ? "text-hero-foreground/55" : "text-primary-foreground/55";
+  // Literal strings (not `hover:${fg}`) so Tailwind's scanner generates them.
+  const fgHover = isInk ? "hover:text-hero-foreground" : "hover:text-primary-foreground";
   return (
     <div
       data-reveal
-      className={`group relative flex flex-col p-7 sm:p-8 text-hero-foreground motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1 overflow-hidden ${
+      className={`group relative flex flex-col p-7 sm:p-8 ${fg} motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1 overflow-hidden ${
         isInk ? "bg-hero" : "bg-heritage"
       }`}
       style={
@@ -306,16 +317,16 @@ function DoorwayPanel({
         <Icon className="h-5 w-5" />
       </span>
 
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-hero-foreground/65 mb-1.5">
+      <div className={`text-[10px] font-bold tracking-[2.5px] uppercase ${fg65} mb-1.5`}>
         {eyebrow}
       </div>
-      <div className="text-[24px] sm:text-[28px] font-extrabold tracking-[-0.6px] leading-[1.08] text-hero-foreground mb-2.5">
+      <div className={`text-[24px] sm:text-[28px] font-extrabold tracking-[-0.6px] leading-[1.08] ${fg} mb-2.5`}>
         {title}
       </div>
-      <p className="text-[14px] text-hero-foreground/80 leading-[1.55] mb-3.5">{body}</p>
+      <p className={`text-[14px] ${fg80} leading-[1.55] mb-3.5`}>{body}</p>
 
       {/* Single-line proof — dot-separated keyword chips */}
-      <div className="text-[10.5px] font-bold tracking-[1.6px] uppercase text-hero-foreground/55">
+      <div className={`text-[10.5px] font-bold tracking-[1.6px] uppercase ${fg55}`}>
         {proof}
       </div>
 
@@ -337,7 +348,7 @@ function DoorwayPanel({
         {/* Secondary — the pitch/detail page, named for what it is. */}
         <Link
           href={secondaryHref}
-          className="mt-3.5 inline-flex items-center justify-center gap-1.5 text-[11px] font-bold tracking-[1.6px] uppercase text-hero-foreground/65 hover:text-hero-foreground transition-colors"
+          className={`mt-3.5 inline-flex items-center justify-center gap-1.5 text-[11px] font-bold tracking-[1.6px] uppercase ${fg65} ${fgHover} transition-colors`}
         >
           {secondaryLabel}
           <ArrowRight className="h-3 w-3" />
@@ -712,7 +723,7 @@ function FounderLine() {
           aria-hidden
           width={163}
           height={52}
-          className="mx-auto mb-3 -rotate-2 select-none"
+          className="mx-auto mb-3 -rotate-2 select-none dark:invert"
         />
         <div className="mb-6 text-[11px] font-bold tracking-[1.8px] uppercase text-slate-meta">
           <span className="text-heritage-deep">Cam Eslinger</span>

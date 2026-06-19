@@ -841,6 +841,27 @@ html, body {
    The strip itself is Tailwind (snap-x + overflow-x-auto in
    components/marketing/film-strip.tsx); only the scrollbar skin
    needs real CSS. */
+/* Neutral themed scrollbar for in-app scroll regions (e.g. the kanban
+   board's horizontal scroll). The default white/light bar stands out on a
+   dark surface; --border-2 flips (dark thumb on light, light thumb on dark). */
+.dso-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-2) transparent;
+}
+.dso-scroll::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+.dso-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dso-scroll::-webkit-scrollbar-thumb {
+  background: var(--border-2);
+}
+.dso-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--rule-strong);
+}
+
 .film-scroll {
   scrollbar-width: thin;
   scrollbar-color: var(--color-heritage) transparent;

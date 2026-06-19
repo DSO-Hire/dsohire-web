@@ -69,7 +69,7 @@ export function PracticeFitTeaser({
 
   return (
     <div
-      className="bg-card border border-[var(--rule-strong)] overflow-hidden"
+      className="bg-card border border-[var(--rule-strong)] border-t-[3px] border-t-heritage overflow-hidden"
       style={{
         boxShadow:
           "0 30px 60px -30px rgba(7,15,28,0.18), 0 10px 24px -12px rgba(7,15,28,0.10)",

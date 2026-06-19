@@ -928,10 +928,10 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                       !loc.anonymize_name;
                     return (
                       <li key={loc.id}>
-                        <div className="font-semibold text-ivory text-[15px]">
+                        <div className="font-semibold text-hero-foreground text-[15px]">
                           {publicLocName(loc)}
                         </div>
-                        <div className="text-[14px] text-ivory/70">
+                        <div className="text-[14px] text-hero-foreground/70">
                           {[loc.city, loc.state].filter(Boolean).join(", ")}
                         </div>
                         {showWebsite && (
@@ -955,14 +955,14 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
               <Detail icon={ShieldCheck} label="Verifications">
                 <ul className="space-y-1 mt-1">
                   {verificationTypes.map((vt) => (
-                    <li key={vt} className="text-[14px] text-ivory/85">
+                    <li key={vt} className="text-[14px] text-hero-foreground/85">
                       {VERIFICATION_TYPE_LABELS[
                         vt as keyof typeof VERIFICATION_TYPE_LABELS
                       ] ?? vt}
                     </li>
                   ))}
                 </ul>
-                <p className="mt-1.5 text-[12px] text-ivory/55 leading-snug">
+                <p className="mt-1.5 text-[12px] text-hero-foreground/55 leading-snug">
                   Applicants confirm these as part of applying.
                 </p>
               </Detail>
@@ -995,12 +995,12 @@ function Detail({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mb-5 pb-5 last:mb-0 last:pb-0 last:border-0 border-b border-ivory/15">
-      <div className="flex items-center gap-2 text-[11px] font-bold tracking-[2px] uppercase text-ivory/70 mb-2">
+    <div className="mb-5 pb-5 last:mb-0 last:pb-0 last:border-0 border-b border-hero-foreground/15">
+      <div className="flex items-center gap-2 text-[11px] font-bold tracking-[2px] uppercase text-hero-foreground/70 mb-2">
         <Icon className="h-3.5 w-3.5" />
         {label}
       </div>
-      <div className="text-[17px] font-semibold text-ivory leading-snug">
+      <div className="text-[17px] font-semibold text-hero-foreground leading-snug">
         {children}
       </div>
     </div>
@@ -1126,14 +1126,14 @@ function CompensationGlance({ job }: { job: { [k: string]: unknown } }) {
       return (
         <div className="space-y-1.5">
           {deal.headline && (
-            <div className="text-[17px] font-extrabold text-ivory leading-snug">
+            <div className="text-[17px] font-extrabold text-hero-foreground leading-snug">
               {deal.headline}
             </div>
           )}
           {deal.estRange && (
-            <div className="text-[14px] text-ivory/90 font-semibold">
+            <div className="text-[14px] text-hero-foreground/90 font-semibold">
               {deal.estRange}{" "}
-              <span className="font-normal text-ivory/60">
+              <span className="font-normal text-hero-foreground/60">
                 (employer estimate)
               </span>
             </div>
@@ -1143,7 +1143,7 @@ function CompensationGlance({ job }: { job: { [k: string]: unknown } }) {
               {deal.chips.map((c) => (
                 <span
                   key={c}
-                  className="px-1.5 py-0.5 text-[11px] font-semibold text-ivory/80 border border-ivory/25"
+                  className="px-1.5 py-0.5 text-[11px] font-semibold text-hero-foreground/80 border border-hero-foreground/25"
                 >
                   {c}
                 </span>
@@ -1187,7 +1187,7 @@ function CompensationGlance({ job }: { job: { [k: string]: unknown } }) {
     <div className="space-y-1.5">
       {ote.hasVariable && ote.ote != null ? (
         <>
-          <div className="text-[20px] font-extrabold text-ivory leading-tight">
+          <div className="text-[20px] font-extrabold text-hero-foreground leading-tight">
             {ote.isRange && ote.ote_low != null && ote.ote_high != null
               ? `~${formatUsd(ote.ote_low)}–${formatUsd(ote.ote_high)}`
               : `~${formatUsd(ote.ote)}`}
@@ -1195,28 +1195,28 @@ function CompensationGlance({ job }: { job: { [k: string]: unknown } }) {
               OTE / yr
             </span>
           </div>
-          <div className="text-[14px] text-ivory/70">
+          <div className="text-[14px] text-hero-foreground/70">
             {baseLine} base + {formatUsd(ote.variable)} target variable
           </div>
         </>
       ) : (
-        <div className="font-semibold text-ivory">{baseLine}</div>
+        <div className="font-semibold text-hero-foreground">{baseLine}</div>
       )}
 
       {variableEnabled && variableStructure && (
-        <div className="text-[14px] text-ivory/70">
-          <span className="font-semibold text-ivory">Variable:</span>{" "}
+        <div className="text-[14px] text-hero-foreground/70">
+          <span className="font-semibold text-hero-foreground">Variable:</span>{" "}
           {variableStructure}
         </div>
       )}
       {bonusEnabled && bonusStructure && (
-        <div className="text-[14px] text-ivory/70">
-          <span className="font-semibold text-ivory">Bonus:</span> {bonusStructure}
+        <div className="text-[14px] text-hero-foreground/70">
+          <span className="font-semibold text-hero-foreground">Bonus:</span> {bonusStructure}
         </div>
       )}
       {equityOffered && (
-        <div className="text-[14px] text-ivory/70">
-          <span className="font-semibold text-ivory">Equity:</span>{" "}
+        <div className="text-[14px] text-hero-foreground/70">
+          <span className="font-semibold text-hero-foreground">Equity:</span>{" "}
           {equityNote || "Offered"}
         </div>
       )}

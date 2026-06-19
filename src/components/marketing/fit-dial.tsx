@@ -101,7 +101,7 @@ export function FitDial({
       {/* The dial */}
       <div className="relative w-[220px] h-[220px] mx-auto md:mx-0">
         <svg width="220" height="220" viewBox="0 0 220 220" fill="none" className="-rotate-90">
-          <circle cx="110" cy="110" r={R} stroke="var(--ivory-deep)" strokeWidth="12" fill="none" />
+          <circle cx="110" cy="110" r={R} className="stroke-ivory-deep dark:stroke-hero-foreground/15" strokeWidth="12" fill="none" />
           <circle
             ref={arcRef}
             cx="110"
@@ -123,7 +123,7 @@ export function FitDial({
           >
             {score}
           </span>
-          <span className="mt-1 text-[10px] font-bold tracking-[2px] uppercase text-slate-meta">
+          <span className="mt-1 text-[10px] font-bold tracking-[2px] uppercase text-slate-meta dark:text-hero-foreground/70">
             PracticeFit · {caption}
           </span>
         </div>

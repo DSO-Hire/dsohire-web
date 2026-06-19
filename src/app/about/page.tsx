@@ -132,7 +132,7 @@ function FounderLetter() {
               aria-hidden
               width={176}
               height={56}
-              className="-rotate-2 select-none"
+              className="-rotate-2 select-none dark:invert"
             />
             <div className="mt-3 text-[10px] font-bold tracking-[1.8px] uppercase text-slate-meta">
               Cam Eslinger · Founder, DSO Hire

@@ -66,7 +66,7 @@ export function EmployerRailNav({ groups }: { groups: RailNavGroup[] }) {
                   {item.badge && item.badge > 0 ? (
                     <span
                       aria-label={`${item.badge} unread`}
-                      className="rail-badge ml-2 inline-flex items-center justify-center rounded-full bg-heritage-deep px-1.5 py-0.5 text-[10px] font-bold text-sidebar-foreground min-w-[18px]"
+                      className="rail-badge ml-2 inline-flex items-center justify-center rounded-full bg-heritage-deep px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground min-w-[18px]"
                     >
                       {item.badge > 99 ? "99+" : item.badge}
                     </span>
