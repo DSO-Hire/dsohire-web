@@ -91,7 +91,7 @@ export default function ContactPage() {
                 DSO Hire LLC
               </div>
               <p className="text-[14px] text-slate-body leading-[1.7]">
-                Founded 2026 · Operator-led, US-hosted, dental-focused.
+                Founded 2026 · Built for dental groups, US-hosted.
               </p>
             </div>
           </div>
