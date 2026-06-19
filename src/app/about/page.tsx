@@ -321,11 +321,11 @@ function Promises() {
             key={p.title}
             data-reveal
             style={{ "--mk-delay": `${i * 60}ms` } as React.CSSProperties}
-            className="bg-white border border-[var(--rule-strong)] p-6 flex gap-4 items-start"
+            className="bg-card border border-[var(--rule-strong)] p-6 flex gap-4 items-start"
           >
             <span
               aria-hidden
-              className="flex items-center justify-center w-[30px] h-[30px] shrink-0 bg-ink text-ivory text-[12px] font-extrabold"
+              className="flex items-center justify-center w-[30px] h-[30px] shrink-0 bg-primary text-primary-foreground text-[12px] font-extrabold"
             >
               {i + 1}
             </span>
@@ -348,7 +348,7 @@ function Promises() {
 
 function FinalCta() {
   return (
-    <section className="relative bg-ink text-ivory px-6 sm:px-14 py-24 overflow-hidden text-center">
+    <section className="relative bg-hero text-hero-foreground px-6 sm:px-14 py-24 overflow-hidden text-center">
       <div
         aria-hidden
         className="absolute pointer-events-none"
@@ -372,7 +372,7 @@ function FinalCta() {
         <p
           data-reveal
           style={{ "--mk-delay": "60ms" } as React.CSSProperties}
-          className="text-[15px] text-ivory/60 leading-[1.7] max-w-[540px] mx-auto mb-8"
+          className="text-[15px] text-hero-foreground/60 leading-[1.7] max-w-[540px] mx-auto mb-8"
         >
           Whichever side of the chair you&rsquo;re on, the door&rsquo;s open.
         </p>
@@ -400,7 +400,7 @@ function FinalCta() {
           </Link>
           <Link
             href="/jobs"
-            className="inline-flex items-center px-7 py-[13px] border border-ivory/35 text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:border-heritage-light hover:text-heritage-light transition-colors"
+            className="inline-flex items-center px-7 py-[13px] border border-hero-foreground/35 text-hero-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:border-heritage-light hover:text-heritage-light transition-colors"
           >
             Browse Dental Jobs
           </Link>

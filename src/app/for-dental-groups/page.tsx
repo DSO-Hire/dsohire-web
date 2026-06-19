@@ -173,7 +173,7 @@ function Hero() {
             <div className="flex flex-wrap items-center gap-3.5 mb-9">
               <Link
                 href="#pricing"
-                className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+                className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
               >
                 Start Posting Jobs
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -214,9 +214,9 @@ function Hero() {
 
 type HeatTone = "cool" | "warm" | "hot";
 const HEAT_PILL: Record<HeatTone, string> = {
-  cool: "bg-slate-100 text-slate-600",
-  warm: "bg-amber-50 text-amber-700",
-  hot: "bg-red-50 text-red-700",
+  cool: "bg-muted text-muted-foreground",
+  warm: "bg-warning-bg text-warning",
+  hot: "bg-danger-bg text-danger",
 };
 
 interface HeroCard {
@@ -243,8 +243,8 @@ const HERO_COLUMNS: HeroColumn[] = [
   {
     label: "New",
     dot: "bg-slate-400",
-    bg: "bg-slate-50",
-    text: "text-slate-700",
+    bg: "bg-muted",
+    text: "text-foreground",
     cards: [
       { name: "Maya Rodriguez RDH", role: "Hygienist", days: 2, heat: "cool" },
       { name: "Jordan Williams DA", role: "Dental Assistant", days: 3, heat: "cool", comments: 2 },
@@ -253,8 +253,8 @@ const HERO_COLUMNS: HeroColumn[] = [
   {
     label: "Screening",
     dot: "bg-amber-400",
-    bg: "bg-amber-50",
-    text: "text-amber-700",
+    bg: "bg-warning-bg",
+    text: "text-warning",
     cards: [
       { name: "Dr. Priya Patel", role: "Endodontist", days: 6, heat: "cool", comments: 3, score: "4.4" },
       { name: "Alex Thompson", role: "Front Desk Lead", days: 9, heat: "warm" },
@@ -277,8 +277,8 @@ const HERO_COLUMNS: HeroColumn[] = [
   {
     label: "Offer",
     dot: "bg-emerald-400",
-    bg: "bg-emerald-50",
-    text: "text-emerald-700",
+    bg: "bg-success-bg",
+    text: "text-success",
     cards: [
       { name: "Dr. Hannah Kim", role: "Pediatric Dentist", days: 4, heat: "cool", comments: 4, score: "4.9" },
     ],
@@ -294,7 +294,7 @@ function HeroKanbanPreview() {
   return (
     <div className="relative w-full max-w-[720px] mx-auto lg:ml-auto">
       <div
-        className="bg-white border border-[var(--rule)] overflow-hidden"
+        className="bg-card border border-[var(--rule)] overflow-hidden"
         style={{
           boxShadow:
             "0 30px 60px -30px rgba(7,15,28,0.18), 0 10px 24px -12px rgba(7,15,28,0.10)",
@@ -338,7 +338,7 @@ function HeroKanbanPreview() {
             (globals.css .hk-*); reduced-motion renders the resting state. */}
         <div className="relative grid grid-cols-4 gap-px bg-[var(--rule)]">
           {HERO_COLUMNS.map((col) => (
-            <div key={col.label} className="bg-white flex flex-col">
+            <div key={col.label} className="bg-card flex flex-col">
               <header
                 className={`${col.bg} px-2.5 py-2 border-t-2 border-current ${col.text} flex items-center justify-between`}
               >
@@ -385,12 +385,12 @@ function HeroKanbanPreview() {
           landing (globals.css .hk-notif). Rotation moved from inline style
           into the class so the animation composes with it. */}
       <div
-        className="hk-notif absolute -bottom-5 -left-6 bg-white border border-[var(--rule)] px-4 py-3.5 flex items-center gap-3 max-w-[260px]"
+        className="hk-notif absolute -bottom-5 -left-6 bg-card border border-[var(--rule)] px-4 py-3.5 flex items-center gap-3 max-w-[260px]"
         style={{
           boxShadow: "0 14px 28px -14px rgba(7,15,28,0.18)",
         }}
       >
-        <span className="flex items-center justify-center w-8 h-8 bg-heritage text-ivory font-extrabold text-[13px] tracking-[-0.3px]">
+        <span className="flex items-center justify-center w-8 h-8 bg-heritage text-primary-foreground font-extrabold text-[13px] tracking-[-0.3px]">
           M
         </span>
         <div className="text-[12px] text-ink leading-snug font-semibold">
@@ -406,7 +406,7 @@ function HeroKanbanPreview() {
 
 function HeroKanbanCard({ name, role, days, heat, comments, score }: HeroCard) {
   return (
-    <div className="bg-white border border-[var(--rule)] px-2 py-1.5">
+    <div className="bg-card border border-[var(--rule)] px-2 py-1.5">
       <div className="text-[10.5px] font-bold text-ink truncate leading-tight mb-0.5">
         {name}
       </div>
@@ -524,7 +524,7 @@ function ProblemSection() {
  */
 function AnswerCard() {
   return (
-    <div className="lg:col-span-2 relative bg-ink text-ivory p-10 lg:p-12 overflow-hidden">
+    <div className="lg:col-span-2 relative bg-hero text-hero-foreground p-10 lg:p-12 overflow-hidden">
       {/* Heritage hairline marks the rhetorical pivot from problem to answer. */}
       <span aria-hidden className="absolute top-0 inset-x-0 h-[3px] bg-heritage" />
       {/* Soft heritage glow for the same depth treatment used on /how-it-works. */}
@@ -548,7 +548,7 @@ function AnswerCard() {
           <h3 className="text-[26px] sm:text-[32px] font-extrabold tracking-[-0.8px] leading-tight mt-8 mb-4">
             A flat-fee hiring platform, built for dental groups.
           </h3>
-          <p className="text-[15px] text-ivory/70 leading-[1.7] max-w-[420px]">
+          <p className="text-[15px] text-hero-foreground/70 leading-[1.7] max-w-[420px]">
             Subscribe once, post across every practice you operate. One
             account, no per-listing fees, no placement fees, cancel anytime.
           </p>
@@ -563,7 +563,7 @@ function AnswerCard() {
           ].map((item, i) => (
             <li
               key={i}
-              className="flex items-start gap-2.5 text-[14px] text-ivory leading-[1.55]"
+              className="flex items-start gap-2.5 text-[14px] text-hero-foreground leading-[1.55]"
             >
               <Check
                 className="h-4 w-4 text-heritage-light flex-shrink-0 mt-0.5"
@@ -588,7 +588,7 @@ function ProblemCard({
   points: string[];
 }) {
   return (
-    <div className="bg-white p-10">
+    <div className="bg-card p-10">
       <h3 className="text-[22px] font-extrabold tracking-[-0.6px] text-ink mb-2">
         {heading}
       </h3>
@@ -673,7 +673,7 @@ function RoiMath() {
 
       <div
         data-reveal
-        className="mt-10 bg-ink text-ivory p-8 sm:p-10"
+        className="mt-10 bg-hero text-hero-foreground p-8 sm:p-10"
       >
         <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-light mb-3">
           Net difference
@@ -711,7 +711,7 @@ function RoiCard({
           ? ({ "--mk-delay": `${revealDelay}ms` } as React.CSSProperties)
           : undefined
       }
-      className="bg-white p-10"
+      className="bg-card p-10"
     >
       <div
         className={`text-[10px] font-bold tracking-[2.5px] uppercase mb-6 ${
@@ -754,7 +754,7 @@ function RoiCard({
 
 function PracticeFitBand() {
   return (
-    <section className="bg-white border-y border-[var(--rule)] px-6 sm:px-14 py-24">
+    <section className="bg-card border-y border-[var(--rule)] px-6 sm:px-14 py-24">
       <div className="max-w-[1240px] mx-auto grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-14 lg:gap-20 items-center">
         <div>
           {/* The wordmark IS the eyebrow — large and load-bearing. (It embeds
@@ -805,7 +805,7 @@ function PracticeFitBand() {
             data-reveal
             style={{ "--mk-delay": "220ms" } as React.CSSProperties}
             href="#pricing"
-            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
           >
             See It On Your Openings
             <ArrowRight className="h-3.5 w-3.5" />
@@ -816,7 +816,7 @@ function PracticeFitBand() {
             applicant card your team sees, not an abstract gauge. */}
         <div data-reveal style={{ "--mk-delay": "180ms" } as React.CSSProperties}>
           <div
-            className="bg-white border border-[var(--rule-strong)] overflow-hidden"
+            className="bg-card border border-[var(--rule-strong)] overflow-hidden"
             style={{
               boxShadow:
                 "0 30px 60px -30px rgba(7,15,28,0.18), 0 10px 24px -12px rgba(7,15,28,0.10)",
@@ -983,7 +983,7 @@ function FeatureCard({ feature }: { feature: ShowcaseFeature }) {
   const isLive = feature.status === "now";
   return (
     <div
-      className="relative bg-white border border-[var(--rule)] p-7 flex flex-col motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1 hover:border-[var(--rule-strong)] hover:shadow-[0_18px_36px_-20px_rgba(7,15,28,0.20)]"
+      className="relative bg-card border border-[var(--rule)] p-7 flex flex-col motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1 hover:border-[var(--rule-strong)] hover:shadow-[0_18px_36px_-20px_rgba(7,15,28,0.20)]"
     >
       {/* Status pill */}
       <span
@@ -1026,7 +1026,7 @@ function FeatureCard({ feature }: { feature: ShowcaseFeature }) {
 
 function HowItWorks() {
   return (
-    <section id="how" className="bg-ink text-ivory px-6 sm:px-14 py-28 relative overflow-hidden">
+    <section id="how" className="bg-hero text-hero-foreground px-6 sm:px-14 py-28 relative overflow-hidden">
       {/* Heritage glow */}
       <div
         aria-hidden
@@ -1046,10 +1046,10 @@ function HowItWorks() {
         <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage mb-3.5">
           How It Works
         </div>
-        <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ivory max-w-[720px] mb-5">
+        <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-hero-foreground max-w-[720px] mb-5">
           From subscription to staffed in three steps.
         </h2>
-        <p className="text-base text-ivory/60 max-w-[620px] leading-[1.7] mb-14">
+        <p className="text-base text-hero-foreground/60 max-w-[620px] leading-[1.7] mb-14">
           Most dental groups are posting their first role within an hour of signing up.
         </p>
 
@@ -1077,14 +1077,14 @@ function HowItWorks() {
 
 function HowStep({ n, title, body }: { n: string; title: string; body: string }) {
   return (
-    <div className="border-t border-white/10 pt-7">
+    <div className="border-t border-hero-foreground/10 pt-7">
       <div className="text-[12px] font-bold tracking-[2.5px] uppercase text-heritage mb-4">
         Step {n}
       </div>
-      <div className="text-[22px] font-extrabold tracking-[-0.6px] text-ivory mb-3.5 leading-tight">
+      <div className="text-[22px] font-extrabold tracking-[-0.6px] text-hero-foreground mb-3.5 leading-tight">
         {title}
       </div>
-      <div className="text-sm text-ivory/70 leading-[1.7]">{body}</div>
+      <div className="text-sm text-hero-foreground/70 leading-[1.7]">{body}</div>
     </div>
   );
 }
@@ -1096,7 +1096,7 @@ function HowStep({ n, title, body }: { n: string; title: string; body: string })
 function PricingTeaser() {
   const tiers = getAllTiers();
   return (
-    <section id="pricing" className="bg-white border-t border-[var(--rule)] px-6 sm:px-14 py-28">
+    <section id="pricing" className="bg-card border-t border-[var(--rule)] px-6 sm:px-14 py-28">
       <div className="max-w-[1240px] mx-auto">
         <SectionEyebrow>Pricing</SectionEyebrow>
         <SectionHeadline>One flat fee. Sized to your footprint.</SectionHeadline>
@@ -1132,26 +1132,26 @@ function PricingTier({ tier }: { tier: TierConfig }) {
     <div
       className={`relative p-9 flex flex-col motion-safe:transition-all motion-safe:duration-200 ${
         isFeatured
-          ? "bg-ink text-ivory"
-          : "bg-white text-ink motion-safe:hover:-translate-y-1 hover:shadow-[0_12px_28px_-14px_rgba(7,15,28,0.18)] hover:bg-cream/30"
+          ? "bg-hero text-hero-foreground"
+          : "bg-card text-ink motion-safe:hover:-translate-y-1 hover:shadow-[0_12px_28px_-14px_rgba(7,15,28,0.18)] hover:bg-cream/30"
       }`}
     >
       {isFeatured && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-heritage text-ivory text-[9px] font-bold tracking-[2px] uppercase whitespace-nowrap z-10">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-heritage text-primary-foreground text-[9px] font-bold tracking-[2px] uppercase whitespace-nowrap z-10">
           Most Popular
         </div>
       )}
 
       <div
         className={`text-2xl font-extrabold tracking-[-0.6px] mb-2 ${
-          isFeatured ? "text-ivory" : "text-ink"
+          isFeatured ? "text-hero-foreground" : "text-ink"
         }`}
       >
         {tier.name}
       </div>
       <div
         className={`text-xs mb-6 min-h-[34px] leading-snug ${
-          isFeatured ? "text-ivory/70" : "text-slate-body"
+          isFeatured ? "text-hero-foreground/70" : "text-slate-body"
         }`}
       >
         {tier.tagline}
@@ -1160,14 +1160,14 @@ function PricingTier({ tier }: { tier: TierConfig }) {
       <div className="flex items-baseline gap-1.5 mb-1.5">
         <div
           className={`text-[40px] font-extrabold tracking-[-1.5px] leading-none ${
-            isFeatured ? "text-ivory" : "text-ink"
+            isFeatured ? "text-hero-foreground" : "text-ink"
           }`}
         >
           ${tier.monthlyPrice.toLocaleString()}
         </div>
         <div
           className={`text-[14px] font-medium ${
-            isFeatured ? "text-ivory/70" : "text-slate-body"
+            isFeatured ? "text-hero-foreground/70" : "text-slate-body"
           }`}
         >
           / month
@@ -1175,7 +1175,7 @@ function PricingTier({ tier }: { tier: TierConfig }) {
       </div>
       <div
         className={`text-[12px] tracking-[0.4px] mb-7 min-h-[32px] leading-[1.45] ${
-          isFeatured ? "text-ivory/55" : "text-slate-meta"
+          isFeatured ? "text-hero-foreground/55" : "text-slate-meta"
         }`}
       >
         {tier.id === "solo" && "For privately-owned 2–5 location groups"}
@@ -1188,8 +1188,8 @@ function PricingTier({ tier }: { tier: TierConfig }) {
         href={`/employer/sign-up?tier=${tier.id}`}
         className={`block text-center px-4 py-3.5 text-[12px] font-bold tracking-[1.5px] uppercase mb-6 transition-colors border ${
           isFeatured
-            ? "bg-heritage text-ivory border-heritage hover:bg-heritage-deep hover:border-heritage-deep"
-            : "bg-ivory text-ink border-[var(--rule-strong)] hover:bg-ink hover:text-ivory hover:border-ink"
+            ? "bg-heritage text-primary-foreground border-heritage hover:bg-heritage-deep hover:border-heritage-deep"
+            : "bg-ivory text-ink border-[var(--rule-strong)] hover:bg-primary hover:text-primary-foreground hover:border-ink"
         }`}
       >
         {tier.id === "solo" && "Start with Solo"}
@@ -1200,14 +1200,14 @@ function PricingTier({ tier }: { tier: TierConfig }) {
 
       <ul
         className={`list-none border-t pt-4 ${
-          isFeatured ? "border-white/15" : "border-[var(--rule)]"
+          isFeatured ? "border-hero-foreground/15" : "border-[var(--rule)]"
         }`}
       >
         {tier.features.map((feature, i) => (
           <li
             key={i}
             className={`text-[13.5px] py-1.5 flex items-start gap-2 leading-snug ${
-              isFeatured ? "text-ivory/90" : "text-ink"
+              isFeatured ? "text-hero-foreground/90" : "text-ink"
             }`}
           >
             <span className="text-heritage-light font-extrabold flex-shrink-0">✓</span>
@@ -1238,7 +1238,7 @@ function FinalCta() {
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Link
             href="/contact"
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
           >
             Contact Us
             <ArrowRight className="h-3.5 w-3.5" />

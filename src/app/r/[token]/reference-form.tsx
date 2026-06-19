@@ -140,7 +140,7 @@ export function ReferenceForm({
       {error && (
         <div
           role="alert"
-          className="flex items-start gap-2 border border-red-200 bg-red-50 text-red-800 px-4 py-3 text-[13px]"
+          className="flex items-start gap-2 border border-danger bg-danger-bg text-danger px-4 py-3 text-[13px]"
         >
           <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
           <span>{error}</span>
@@ -154,7 +154,7 @@ export function ReferenceForm({
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center gap-2 bg-ink text-ivory px-6 py-3 text-[13px] font-bold tracking-[1.5px] uppercase hover:bg-ink-1000 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 text-[13px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {pending ? (
             <>
@@ -271,7 +271,7 @@ function FieldInput({
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
           maxLength={500}
-          className="w-full border border-[var(--rule-strong)] bg-white px-3 py-2.5 text-[14px] text-ink focus:outline-none focus:ring-2 focus:ring-heritage/40 disabled:bg-slate-50 disabled:cursor-not-allowed"
+          className="w-full border border-[var(--rule-strong)] bg-card px-3 py-2.5 text-[14px] text-ink focus:outline-none focus:ring-2 focus:ring-heritage/40 disabled:bg-muted disabled:cursor-not-allowed"
         />
       );
     case "long_text":
@@ -282,7 +282,7 @@ function FieldInput({
           disabled={disabled}
           maxLength={4000}
           rows={field.rows ?? 4}
-          className="w-full border border-[var(--rule-strong)] bg-white px-3 py-2.5 text-[14px] text-ink leading-relaxed focus:outline-none focus:ring-2 focus:ring-heritage/40 disabled:bg-slate-50 disabled:cursor-not-allowed resize-y"
+          className="w-full border border-[var(--rule-strong)] bg-card px-3 py-2.5 text-[14px] text-ink leading-relaxed focus:outline-none focus:ring-2 focus:ring-heritage/40 disabled:bg-muted disabled:cursor-not-allowed resize-y"
         />
       );
     case "scale_1_5":
@@ -298,8 +298,8 @@ function FieldInput({
                 onClick={() => onChange(String(n))}
                 className={`min-w-[44px] h-[40px] border text-[14px] font-bold transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
                   selected
-                    ? "border-ink bg-ink text-ivory"
-                    : "border-[var(--rule-strong)] bg-white text-ink hover:bg-cream"
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-[var(--rule-strong)] bg-card text-ink hover:bg-cream"
                 }`}
                 aria-pressed={selected}
               >
@@ -329,8 +329,8 @@ function FieldInput({
                 onClick={() => onChange(opt.v)}
                 className={`px-4 py-2 border text-[13px] font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
                   selected
-                    ? "border-ink bg-ink text-ivory"
-                    : "border-[var(--rule-strong)] bg-white text-ink hover:bg-cream"
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-[var(--rule-strong)] bg-card text-ink hover:bg-cream"
                 }`}
                 aria-pressed={selected}
               >

@@ -89,9 +89,9 @@ export function CompareMatrixAccordion({
       <div className="min-w-[860px] border border-[var(--rule-strong)]">
         {/* ── Sticky tier header ── */}
         <div
-          className={`${GRID} sticky top-[80px] z-20 bg-ink shadow-[0_4px_12px_-8px_rgba(7,15,28,0.25)]`}
+          className={`${GRID} sticky top-[80px] z-20 bg-hero shadow-[0_4px_12px_-8px_rgba(7,15,28,0.25)]`}
         >
-          <div className="py-5 pl-5 pr-4 flex items-end text-[10px] font-bold tracking-[2.5px] uppercase text-ivory/60">
+          <div className="py-5 pl-5 pr-4 flex items-end text-[10px] font-bold tracking-[2.5px] uppercase text-hero-foreground/60">
             Category
           </div>
           {tiers.map((t) => (
@@ -102,18 +102,18 @@ export function CompareMatrixAccordion({
               }`}
             >
               {t.featured && (
-                <span className="absolute top-2 right-2.5 inline-flex items-center px-2 py-0.5 bg-heritage text-ivory text-[8px] font-bold tracking-[1.5px] uppercase">
+                <span className="absolute top-2 right-2.5 inline-flex items-center px-2 py-0.5 bg-heritage text-primary-foreground text-[8px] font-bold tracking-[1.5px] uppercase">
                   Most Popular
                 </span>
               )}
-              <div className="text-[15px] font-extrabold tracking-[-0.4px] text-ivory mb-0.5">
+              <div className="text-[15px] font-extrabold tracking-[-0.4px] text-hero-foreground mb-0.5">
                 {t.name}
               </div>
-              <div className="text-[12px] font-semibold text-ivory/55">
+              <div className="text-[12px] font-semibold text-hero-foreground/55">
                 {t.priceLine}
               </div>
               {t.subLine && (
-                <div className="text-[9px] font-bold tracking-[1px] uppercase text-ivory/40 mt-0.5">
+                <div className="text-[9px] font-bold tracking-[1px] uppercase text-hero-foreground/40 mt-0.5">
                   {t.subLine}
                 </div>
               )}
@@ -158,7 +158,7 @@ export function CompareMatrixAccordion({
                     key={t.id}
                     className={`flex items-center py-4 px-4 text-[9px] font-bold tracking-[1.2px] uppercase ${
                       t.featured
-                        ? "bg-ink text-ivory/70 border-l-2 border-r-2 border-heritage"
+                        ? "bg-hero text-hero-foreground/70 border-l-2 border-r-2 border-heritage"
                         : "text-slate-meta"
                     }`}
                   >
@@ -171,7 +171,7 @@ export function CompareMatrixAccordion({
                 group.rows.map((row) => (
                   <div
                     key={row.feature}
-                    className={`${GRID} border-t border-[var(--rule)] bg-white hover:bg-cream/40 transition-colors`}
+                    className={`${GRID} border-t border-[var(--rule)] bg-card hover:bg-cream/40 transition-colors`}
                   >
                     <div className="text-[14px] text-ink py-3.5 pl-[42px] pr-6 leading-snug font-medium">
                       {row.feature}
@@ -204,7 +204,7 @@ function ValueCell({
   return (
     <div
       className={`flex items-center py-3.5 px-4 text-[14px] ${
-        featured ? "bg-ink border-l-2 border-r-2 border-heritage" : ""
+        featured ? "bg-hero border-l-2 border-r-2 border-heritage" : ""
       }`}
     >
       {typeof value === "boolean" ? (
@@ -212,7 +212,7 @@ function ValueCell({
           <>
             <Check
               aria-hidden="true"
-              className={`h-4 w-4 ${featured ? "text-ivory" : "text-heritage"}`}
+              className={`h-4 w-4 ${featured ? "text-hero-foreground" : "text-heritage"}`}
               strokeWidth={3}
             />
             <span className="sr-only">Included</span>
@@ -220,7 +220,7 @@ function ValueCell({
         ) : (
           <span
             className={`text-[18px] leading-none font-light ${
-              featured ? "text-ivory/30" : "text-slate-meta/30"
+              featured ? "text-hero-foreground/30" : "text-slate-meta/30"
             }`}
           >
             <span aria-hidden="true">—</span>
@@ -230,13 +230,13 @@ function ValueCell({
       ) : isSoft ? (
         <span
           className={`text-[10px] font-bold tracking-[1.5px] uppercase whitespace-nowrap ${
-            featured ? "text-ivory/55" : "text-slate-meta"
+            featured ? "text-hero-foreground/55" : "text-slate-meta"
           }`}
         >
           {value}
         </span>
       ) : (
-        <span className={`font-semibold ${featured ? "text-ivory" : "text-ink"}`}>
+        <span className={`font-semibold ${featured ? "text-hero-foreground" : "text-ink"}`}>
           {value}
         </span>
       )}

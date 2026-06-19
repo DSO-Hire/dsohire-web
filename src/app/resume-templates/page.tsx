@@ -132,7 +132,7 @@ export default async function ResumeTemplatesLanding() {
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
               href={resumeHref}
-              className="inline-flex items-center gap-2 bg-ink px-6 py-3 text-[13px] font-bold uppercase tracking-[1.5px] text-ivory hover:bg-ink-soft transition-colors"
+              className="inline-flex items-center gap-2 bg-primary px-6 py-3 text-[13px] font-bold uppercase tracking-[1.5px] text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               Build mine free <ArrowRight className="h-4 w-4" />
             </Link>
@@ -173,7 +173,7 @@ export default async function ResumeTemplatesLanding() {
           {RESUME_TEMPLATE_LIST.map((tpl) => (
             <div key={tpl.id} className="mx-auto w-[300px]">
               {/* Scaled, non-interactive thumbnail of the real template */}
-              <div className="h-[388px] w-[300px] overflow-hidden rounded-t-lg border border-[var(--rule)] bg-white shadow-sm">
+              <div className="h-[388px] w-[300px] overflow-hidden rounded-t-lg border border-[var(--rule)] bg-card shadow-sm">
                 <div
                   className="pointer-events-none"
                   style={{
@@ -185,7 +185,7 @@ export default async function ResumeTemplatesLanding() {
                   <ResumeDocument data={SAMPLE} template={tpl.id} />
                 </div>
               </div>
-              <div className="rounded-b-lg border border-t-0 border-[var(--rule)] bg-white p-4">
+              <div className="rounded-b-lg border border-t-0 border-[var(--rule)] bg-card p-4">
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="text-[15px] font-bold text-ink">{tpl.name}</h3>
                   <Link
@@ -237,12 +237,12 @@ export default async function ResumeTemplatesLanding() {
       </section>
 
       {/* Final CTA */}
-      <section className="bg-ink">
+      <section className="bg-hero">
         <div className="mx-auto max-w-[820px] px-6 py-16 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-[-0.6px] text-ivory">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-[-0.6px] text-hero-foreground">
             Your dental résumé, done in minutes.
           </h2>
-          <p className="mx-auto mt-3 max-w-[560px] text-[15px] leading-relaxed text-ivory/80">
+          <p className="mx-auto mt-3 max-w-[560px] text-[15px] leading-relaxed text-hero-foreground/80">
             Create a free DSO Hire profile, build your résumé, and apply to
             multi-location dental groups — all in one place.
           </p>

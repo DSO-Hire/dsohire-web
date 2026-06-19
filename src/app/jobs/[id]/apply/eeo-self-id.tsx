@@ -62,7 +62,7 @@ export function EeoSelfId({ applicationId }: { applicationId: string }) {
   // ── Recorded state ──
   if (done) {
     return (
-      <div className="mt-6 border border-[var(--rule)] bg-white p-6">
+      <div className="mt-6 border border-[var(--rule)] bg-card p-6">
         <div className="flex items-start gap-3">
           <Check className="mt-0.5 h-4 w-4 shrink-0 text-heritage" />
           <p className="text-[14px] leading-relaxed text-ink">
@@ -76,7 +76,7 @@ export function EeoSelfId({ applicationId }: { applicationId: string }) {
   }
 
   return (
-    <div className="mt-6 border border-[var(--rule)] bg-white">
+    <div className="mt-6 border border-[var(--rule)] bg-card">
       {/* Header / toggle */}
       <button
         type="button"
@@ -151,7 +151,7 @@ export function EeoSelfId({ applicationId }: { applicationId: string }) {
           </div>
 
           {error && (
-            <p className="mt-4 text-[13px] text-red-700" role="alert">
+            <p className="mt-4 text-[13px] text-danger" role="alert">
               {error}
             </p>
           )}
@@ -161,7 +161,7 @@ export function EeoSelfId({ applicationId }: { applicationId: string }) {
               type="button"
               onClick={handleSubmit}
               disabled={pending}
-              className="inline-flex items-center gap-2 bg-ink px-5 py-3 text-[12px] font-bold uppercase tracking-[2px] text-ivory transition-colors hover:bg-ink-soft disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-2 bg-primary px-5 py-3 text-[12px] font-bold uppercase tracking-[2px] text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {pending ? "Saving…" : "Submit responses"}
             </button>

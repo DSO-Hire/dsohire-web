@@ -500,7 +500,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
   // ── Submitted view ──────────────────────────────────────────
   if (submitted) {
     return (
-      <div className="border border-[var(--rule)] bg-white p-8 sm:p-10">
+      <div className="border border-[var(--rule)] bg-card p-8 sm:p-10">
         <div className="border-l-4 border-heritage bg-cream p-6">
           <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
             {submitted.alreadyApplied ? "Application updated" : "Application sent"}
@@ -512,7 +512,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
             {submitted.applicationId && (
               <Link
                 href={`/candidate/applications/${submitted.applicationId}`}
-                className="inline-flex items-center gap-2 px-5 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-3 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
               >
                 View Your Application
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -524,7 +524,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
                 "inline-flex items-center gap-2 px-5 py-3 text-[12px] font-bold tracking-[2px] uppercase transition-colors " +
                 (submitted.applicationId
                   ? "border border-[var(--rule-strong)] text-ink hover:bg-cream"
-                  : "bg-ink text-ivory hover:bg-ink-soft")
+                  : "bg-primary text-primary-foreground hover:bg-primary/90")
               }
             >
               View Dashboard
@@ -559,7 +559,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
             </p>
             <Link
               href="/candidate/assessment"
-              className="mt-4 inline-flex items-center gap-2 px-5 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+              className="mt-4 inline-flex items-center gap-2 px-5 py-3 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
             >
               Take the PracticeFit assessment
               <ArrowRight className="h-3.5 w-3.5" />
@@ -597,7 +597,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
                   setDraft(savedDraft);
                   setRestorePromptOpen(false);
                 }}
-                className="px-4 py-2 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors"
+                className="px-4 py-2 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
               >
                 Resume draft
               </button>
@@ -1468,7 +1468,7 @@ function InlineCredentialForm({
             type="file"
             accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="block w-full text-[13px] text-ink file:mr-3 file:px-4 file:py-2 file:border-0 file:text-[10px] file:font-bold file:tracking-[1.5px] file:uppercase file:bg-ink file:text-ivory hover:file:bg-ink-soft file:cursor-pointer file:transition-colors"
+            className="block w-full text-[13px] text-ink file:mr-3 file:px-4 file:py-2 file:border-0 file:text-[10px] file:font-bold file:tracking-[1.5px] file:uppercase file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 file:cursor-pointer file:transition-colors"
           />
           <p className="mt-1 text-[11px] text-slate-meta leading-relaxed">
             PDF, PNG, JPEG, or WebP. Max 10 MB. You can also add this later
@@ -1478,7 +1478,7 @@ function InlineCredentialForm({
       )}
 
       {error && (
-        <p className="text-[13px] text-red-700 leading-relaxed">{error}</p>
+        <p className="text-[13px] text-danger leading-relaxed">{error}</p>
       )}
 
       <div className="flex items-center gap-2 pt-1">
@@ -1486,7 +1486,7 @@ function InlineCredentialForm({
           type="button"
           onClick={handleSubmit}
           disabled={submitting}
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {submitting ? "Adding…" : "Add credential"}
           {!submitting && <Check className="h-3.5 w-3.5" />}
@@ -1678,7 +1678,7 @@ function ResumeStep({
             type="button"
             onClick={onAddCredentials}
             disabled={addingCreds}
-            className="mt-3 inline-flex items-center gap-2 bg-ink px-4 py-2.5 text-[12px] font-bold uppercase tracking-[1.5px] text-ivory transition-colors hover:bg-ink-soft disabled:opacity-50"
+            className="mt-3 inline-flex items-center gap-2 bg-primary px-4 py-2.5 text-[12px] font-bold uppercase tracking-[1.5px] text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
             <BrandMark dark className="h-4 w-4" />
             {addingCreds ? "Adding…" : "Add to my profile"}
@@ -1796,7 +1796,7 @@ function ReviewStep({
         {trimmedName ? (
           <p className="text-[14px] text-ink">{trimmedName}</p>
         ) : (
-          <p className="text-[14px] text-red-700">
+          <p className="text-[14px] text-danger">
             Missing — go back and add your full name before submitting.
           </p>
         )}

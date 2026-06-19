@@ -89,7 +89,7 @@ function SignInCard({
   secondaryLabel: string;
 }) {
   return (
-    <div className="bg-white p-8 sm:p-10 flex flex-col">
+    <div className="bg-card p-8 sm:p-10 flex flex-col">
       <div className="mb-5">{icon}</div>
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
         {eyebrow}
@@ -102,7 +102,7 @@ function SignInCard({
       </p>
       <Link
         href={primaryHref}
-        className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors mb-3"
+        className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors mb-3"
       >
         {primaryLabel}
         <ArrowRight className="h-3.5 w-3.5" />

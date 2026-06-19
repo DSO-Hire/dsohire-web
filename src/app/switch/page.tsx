@@ -78,7 +78,7 @@ export default function SwitchPage() {
               key={s.n}
               data-reveal
               style={{ "--mk-delay": `${i * 90}ms` } as React.CSSProperties}
-              className="bg-white p-8"
+              className="bg-card p-8"
             >
               <div className="text-[28px] font-extrabold tracking-[-1px] text-heritage/40 mb-3">
                 {s.n}
@@ -155,7 +155,7 @@ export default function SwitchPage() {
               key={c.title}
               data-reveal
               style={{ "--mk-delay": `${i * 90}ms` } as React.CSSProperties}
-              className="bg-white p-8"
+              className="bg-card p-8"
             >
               <span
                 className="inline-flex items-center justify-center w-10 h-10 mb-5 text-heritage-deep"
@@ -174,7 +174,7 @@ export default function SwitchPage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-ink text-ivory px-6 sm:px-14 py-20">
+      <section className="bg-hero text-hero-foreground px-6 sm:px-14 py-20">
         <div className="max-w-[820px] mx-auto text-center">
           <h2 data-reveal className="text-3xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-[1.1] mb-4">
             Tell us what you&apos;re moving from.
@@ -182,7 +182,7 @@ export default function SwitchPage() {
           <p
             data-reveal
             style={{ "--mk-delay": "70ms" } as React.CSSProperties}
-            className="text-base text-ivory/65 leading-[1.7] max-w-[520px] mx-auto mb-9"
+            className="text-base text-hero-foreground/65 leading-[1.7] max-w-[520px] mx-auto mb-9"
           >
             One conversation and we&apos;ll scope the whole move — what
             exports, what we rebuild, and how long it takes. Usually: days.
@@ -201,7 +201,7 @@ export default function SwitchPage() {
             </Link>
             <Link
               href="/pricing"
-              className="inline-flex items-center justify-center px-9 py-4 border border-ivory/30 text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:border-ivory hover:bg-white/5 transition-colors"
+              className="inline-flex items-center justify-center px-9 py-4 border border-hero-foreground/30 text-hero-foreground text-[12px] font-bold tracking-[2px] uppercase hover:border-hero-foreground hover:bg-hero-foreground/5 transition-colors"
             >
               See Pricing
             </Link>

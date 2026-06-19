@@ -27,8 +27,8 @@ export const metadata: Metadata = {
 
 const KIND_STYLES: Record<ChangelogKind, { label: string; className: string }> = {
   new: { label: "New", className: "text-heritage-deep bg-[var(--heritage-tint)]" },
-  improved: { label: "Improved", className: "text-ink bg-ink/10" },
-  fixed: { label: "Fixed", className: "text-[#8a5a26] bg-[#f3e2cf]" },
+  improved: { label: "Improved", className: "text-foreground bg-muted" },
+  fixed: { label: "Fixed", className: "text-warning bg-warning-bg" },
 };
 
 export default function ChangelogPage() {

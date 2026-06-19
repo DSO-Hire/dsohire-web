@@ -280,7 +280,7 @@ function HeadlineTile({
   secondary?: string;
 }) {
   return (
-    <div className="border border-[var(--rule)] bg-white p-5">
+    <div className="border border-[var(--rule)] bg-card p-5">
       <div className="flex items-center gap-1.5 text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-3">
         <Icon className="h-3 w-3" aria-hidden />
         {label}
@@ -322,7 +322,7 @@ function CompBandsTable({
         {title}
       </div>
       <div className="overflow-x-auto border border-[var(--rule)]">
-        <table className="w-full text-[13px] bg-white">
+        <table className="w-full text-[13px] bg-card">
           <thead>
             <tr className="text-left text-[10px] font-bold tracking-[2px] uppercase text-slate-meta border-b border-[var(--rule)]">
               <th className="px-4 py-3">Role</th>
@@ -369,7 +369,7 @@ function CompBandsTable({
 function RoleMixTable({ rows }: { rows: RoleVolumeRow[] }) {
   const maxApps = Math.max(...rows.map((r) => r.applications), 1);
   return (
-    <div className="overflow-x-auto border border-[var(--rule)] bg-white">
+    <div className="overflow-x-auto border border-[var(--rule)] bg-card">
       <table className="w-full text-[13px]">
         <thead>
           <tr className="text-left text-[10px] font-bold tracking-[2px] uppercase text-slate-meta border-b border-[var(--rule)]">
@@ -422,7 +422,7 @@ function RoleMixTable({ rows }: { rows: RoleVolumeRow[] }) {
 function StateActivityTable({ rows }: { rows: StateActivityRow[] }) {
   const maxApps = Math.max(...rows.map((r) => r.applications), 1);
   return (
-    <div className="overflow-x-auto border border-[var(--rule)] bg-white">
+    <div className="overflow-x-auto border border-[var(--rule)] bg-card">
       <table className="w-full text-[13px]">
         <thead>
           <tr className="text-left text-[10px] font-bold tracking-[2px] uppercase text-slate-meta border-b border-[var(--rule)]">
@@ -498,7 +498,7 @@ function CallToActionCard({
   return (
     <Link
       href={href}
-      className="block border border-[var(--rule)] bg-white p-6 hover:bg-cream/40 transition-colors"
+      className="block border border-[var(--rule)] bg-card p-6 hover:bg-cream/40 transition-colors"
     >
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
         {eyebrow}

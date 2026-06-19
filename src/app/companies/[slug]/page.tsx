@@ -309,7 +309,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
           {/* Logo + Name layout */}
           <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:gap-6">
             {dsoRow.logo_url && (
-              <div className="size-20 shrink-0 overflow-hidden border border-[var(--rule)] bg-white">
+              <div className="size-20 shrink-0 overflow-hidden border border-[var(--rule)] bg-card">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={dsoRow.logo_url}

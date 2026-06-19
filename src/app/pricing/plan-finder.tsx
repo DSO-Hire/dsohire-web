@@ -63,7 +63,7 @@ export function PlanFinder() {
     <section className="px-6 sm:px-14 pt-24 max-w-[1240px] mx-auto">
       <div
         data-reveal
-        className="relative max-w-[680px] mx-auto bg-ink text-ivory px-7 py-8 sm:px-9"
+        className="relative max-w-[680px] mx-auto bg-hero text-hero-foreground px-7 py-8 sm:px-9"
       >
         <span aria-hidden className="absolute top-0 inset-x-0 h-[3px] bg-heritage" />
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-light mb-4">
@@ -76,7 +76,7 @@ export function PlanFinder() {
             <span
               key={i}
               className={`h-[3px] flex-1 ${
-                done || i <= step ? "bg-heritage-light" : "bg-ivory/15"
+                done || i <= step ? "bg-heritage-light" : "bg-hero-foreground/15"
               }`}
             />
           ))}
@@ -95,8 +95,8 @@ export function PlanFinder() {
                   onClick={() => pick(i)}
                   className={`px-4 py-2.5 text-[13px] font-bold border transition-colors ${
                     answers[step] === i
-                      ? "bg-heritage border-heritage text-white"
-                      : "border-ivory/30 text-ivory hover:border-heritage-light hover:text-heritage-light"
+                      ? "bg-heritage border-heritage text-primary-foreground"
+                      : "border-hero-foreground/30 text-hero-foreground hover:border-heritage-light hover:text-heritage-light"
                   }`}
                 >
                   {opt}
@@ -107,7 +107,7 @@ export function PlanFinder() {
               <button
                 type="button"
                 onClick={() => setStep(step - 1)}
-                className="mt-4 text-[10px] font-bold tracking-[1.2px] uppercase text-ivory/45 hover:text-ivory"
+                className="mt-4 text-[10px] font-bold tracking-[1.2px] uppercase text-hero-foreground/45 hover:text-hero-foreground"
               >
                 ← Back
               </button>
@@ -123,7 +123,7 @@ export function PlanFinder() {
             <div className="text-[28px] font-extrabold tracking-[-0.8px] mb-2">
               {TIER_NAMES[rec]}
             </div>
-            <p className="text-[13px] text-ivory/65 leading-[1.65] max-w-[440px] mx-auto mb-5">
+            <p className="text-[13px] text-hero-foreground/65 leading-[1.65] max-w-[440px] mx-auto mb-5">
               {WHYS[TIER_NAMES[rec]]}
             </p>
             <a
@@ -136,7 +136,7 @@ export function PlanFinder() {
               <button
                 type="button"
                 onClick={reset}
-                className="mt-3.5 text-[10px] font-bold tracking-[1.2px] uppercase text-ivory/45 hover:text-ivory"
+                className="mt-3.5 text-[10px] font-bold tracking-[1.2px] uppercase text-hero-foreground/45 hover:text-hero-foreground"
               >
                 Start over
               </button>

@@ -129,14 +129,14 @@ export default async function MetroSalaryPage({ params }: { params: Promise<Para
       </section>
 
       <section className="px-6 sm:px-14 pb-14">
-        <div className="max-w-[1100px] mx-auto bg-ink p-8 sm:p-10">
+        <div className="max-w-[1100px] mx-auto bg-hero p-8 sm:p-10">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
             <Stat label="25th percentile" value={low} hint="Entry / lower range" />
             <Stat label="Median" value={med} hint="The typical pay" emphasis />
             <Stat label="75th percentile" value={high} hint="Experienced / upper range" />
           </div>
           {(vsState || vsNational) && (
-            <p className="text-[13px] text-heritage-light mt-8 pt-6 border-t border-white/10">
+            <p className="text-[13px] text-heritage-light mt-8 pt-6 border-t border-hero-foreground/10">
               {vsState && `${city} runs about ${vsState.pct}% ${vsState.dir} the ${state.name} median. `}
               {vsNational && `Versus the national median, it's about ${vsNational.pct}% ${vsNational.dir} average.`}
             </p>
@@ -158,7 +158,7 @@ export default async function MetroSalaryPage({ params }: { params: Promise<Para
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-1px] text-ink">Build a free résumé and get matched to practices that fit you.</h2>
           </div>
           <div className="flex flex-wrap gap-3 shrink-0">
-            <Link href="/resume-templates" className="inline-flex items-center px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors">Build a free résumé</Link>
+            <Link href="/resume-templates" className="inline-flex items-center px-7 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors">Build a free résumé</Link>
             <Link href="/jobs" className="inline-flex items-center px-7 py-3.5 border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors">Browse jobs</Link>
           </div>
         </div>
@@ -218,8 +218,8 @@ function Stat({ label, value, hint, emphasis }: { label: string; value: string; 
   return (
     <div>
       <p className="text-[11px] font-bold uppercase tracking-[2px] text-heritage-light mb-2">{label}</p>
-      <p className={`font-extrabold text-ivory tracking-[-1px] ${emphasis ? "text-4xl sm:text-5xl" : "text-3xl sm:text-4xl"}`}>{value}</p>
-      <p className="text-[12px] text-white/50 mt-1">{hint}</p>
+      <p className={`font-extrabold text-hero-foreground tracking-[-1px] ${emphasis ? "text-4xl sm:text-5xl" : "text-3xl sm:text-4xl"}`}>{value}</p>
+      <p className="text-[12px] text-hero-foreground/50 mt-1">{hint}</p>
     </div>
   );
 }

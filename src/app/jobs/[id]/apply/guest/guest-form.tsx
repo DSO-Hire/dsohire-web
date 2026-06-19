@@ -179,7 +179,7 @@ export function GuestApplyForm({
           type="file"
           name="resume"
           accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-          className="block w-full text-[14px] text-ink file:mr-3 file:rounded-md file:border-0 file:bg-ink file:px-3 file:py-2 file:text-[12px] file:font-bold file:tracking-[1.5px] file:uppercase file:text-ivory hover:file:bg-ink-soft"
+          className="block w-full text-[14px] text-ink file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-[12px] file:font-bold file:tracking-[1.5px] file:uppercase file:text-primary-foreground hover:file:bg-primary/90"
         />
       </fieldset>
 
@@ -256,8 +256,8 @@ export function GuestApplyForm({
       )}
 
       {state.error && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-4">
-          <p className="text-[14px] text-red-900">{state.error}</p>
+        <div className="bg-danger-bg border-l-4 border-danger p-4">
+          <p className="text-[14px] text-danger">{state.error}</p>
         </div>
       )}
 
@@ -265,7 +265,7 @@ export function GuestApplyForm({
         <button
           type="submit"
           disabled={submitting}
-          className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {submitting ? "Submitting…" : "Submit application"}
           {!submitting && <ArrowRight className="h-4 w-4" />}

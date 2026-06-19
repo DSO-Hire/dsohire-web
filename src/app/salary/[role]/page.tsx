@@ -79,10 +79,10 @@ export default async function RoleSalaryIndex({ params }: { params: Promise<Para
       <section className="px-6 sm:px-14 pb-16">
         <div className="max-w-[1100px] mx-auto bg-heritage p-8 sm:p-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div>
-            <p className="text-[10px] font-bold tracking-[3px] uppercase text-ivory/80 mb-2">Hiring {role.searchTitle.toLowerCase()}s?</p>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-1px] text-ivory">Fill roles across every location, faster.</h2>
+            <p className="text-[10px] font-bold tracking-[3px] uppercase text-primary-foreground/80 mb-2">Hiring {role.searchTitle.toLowerCase()}s?</p>
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-1px] text-primary-foreground">Fill roles across every location, faster.</h2>
           </div>
-          <Link href="/for-dental-groups" className="shrink-0 inline-flex items-center px-8 py-4 bg-ivory text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-white transition-colors">See how it works</Link>
+          <Link href="/for-dental-groups" className="shrink-0 inline-flex items-center px-8 py-4 bg-ivory text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-card transition-colors">See how it works</Link>
         </div>
       </section>
 

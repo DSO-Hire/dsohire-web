@@ -179,7 +179,7 @@ function Hero({ ctaHref }: { ctaHref: string }) {
           <div className="flex flex-wrap items-center gap-3.5 mb-9">
             <Link
               href="/jobs"
-              className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+              className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
             >
               Browse Open Roles
               <ArrowRight className="h-3.5 w-3.5" />
@@ -226,7 +226,7 @@ function PracticeFitCandidateBand({
   assessmentHref: string;
 }) {
   return (
-    <section className="bg-white border-y border-[var(--rule)] px-6 sm:px-14 py-24">
+    <section className="bg-card border-y border-[var(--rule)] px-6 sm:px-14 py-24">
       <div className="max-w-[1240px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_1.05fr] gap-14 lg:gap-20 items-center">
         {/* #115 FOH-5 — the INTERACTIVE teaser: three taps, a sample score
             assembling, the full assessment behind the CTA. Replaced the
@@ -284,7 +284,7 @@ function PracticeFitCandidateBand({
             data-reveal
             style={{ "--mk-delay": "220ms" } as React.CSSProperties}
             href={ctaHref}
-            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-heritage text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-heritage-deep transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-heritage text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-heritage-deep transition-colors"
           >
             Take Your PracticeFit
             <ArrowRight className="h-3.5 w-3.5" />
@@ -368,7 +368,7 @@ const STAGE_DISPLAY: Record<
   },
   offer: {
     label: "Offer received",
-    pill: "bg-heritage text-ivory",
+    pill: "bg-heritage text-primary-foreground",
     dot: "bg-ivory",
   },
 };
@@ -377,7 +377,7 @@ function CandidateApplicationsPreview() {
   return (
     <div className="relative">
       <div
-        className="bg-white border border-[var(--rule)] overflow-hidden"
+        className="bg-card border border-[var(--rule)] overflow-hidden"
         style={{
           boxShadow:
             "0 30px 60px -30px rgba(7,15,28,0.18), 0 10px 24px -12px rgba(7,15,28,0.10)",
@@ -413,7 +413,7 @@ function CandidateApplicationsPreview() {
               return (
                 <li
                   key={app.dso}
-                  className="border border-[var(--rule)] p-3 bg-white hover:border-heritage transition-colors"
+                  className="border border-[var(--rule)] p-3 bg-card hover:border-heritage transition-colors"
                 >
                   <div className="flex items-start justify-between gap-3 mb-1.5">
                     <span className="text-[13px] font-extrabold text-ink leading-tight truncate flex-1 min-w-0">
@@ -827,7 +827,7 @@ const CANDIDATE_PERKS = [
 
 function CandidateBenefits() {
   return (
-    <section className="bg-white px-6 sm:px-14 py-24 border-y border-[var(--rule)]">
+    <section className="bg-card px-6 sm:px-14 py-24 border-y border-[var(--rule)]">
       <div className="max-w-[1240px] mx-auto">
         <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
           On the Candidate Side
@@ -850,7 +850,7 @@ function CandidateBenefits() {
             >
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-9 w-9 rounded-full bg-heritage flex items-center justify-center flex-shrink-0">
-                  <Icon className="h-4 w-4 text-ivory" />
+                  <Icon className="h-4 w-4 text-primary-foreground" />
                 </div>
                 <h3 className="text-[16px] font-extrabold tracking-[-0.3px] text-ink">
                   {title}
@@ -904,7 +904,7 @@ function FinalCta({ ctaHref }: { ctaHref: string }) {
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Link
             href="/jobs"
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
           >
             Browse Open Roles
             <ArrowRight className="h-4 w-4" />

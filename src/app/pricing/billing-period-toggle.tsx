@@ -69,7 +69,7 @@ function Option({
       onClick={onClick}
       className={`px-5 py-2 text-[11px] font-bold tracking-[1.5px] uppercase transition-colors ${
         active
-          ? "bg-ink text-ivory"
+          ? "bg-primary text-primary-foreground"
           : "bg-transparent text-slate-body hover:text-ink"
       }`}
     >

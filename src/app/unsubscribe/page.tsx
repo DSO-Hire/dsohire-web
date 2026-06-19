@@ -92,7 +92,7 @@ export default async function UnsubscribePage({ searchParams }: PageProps) {
         <div className="mt-7">
           <Link
             href={settingsHref}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
           >
             Manage all preferences
           </Link>
@@ -113,7 +113,7 @@ export default async function UnsubscribePage({ searchParams }: PageProps) {
         <Eyebrow>Email preferences</Eyebrow>
         <Title>
           <span className="inline-flex items-center gap-2">
-            <AlertCircle className="h-7 w-7 text-red-600" />
+            <AlertCircle className="h-7 w-7 text-danger" />
             Something went wrong.
           </span>
         </Title>
@@ -131,7 +131,7 @@ export default async function UnsubscribePage({ searchParams }: PageProps) {
       <Eyebrow>Email preferences</Eyebrow>
       <Title>
         <span className="inline-flex items-start gap-2.5">
-          <span className="mt-1 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-heritage text-ivory">
+          <span className="mt-1 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-heritage text-primary-foreground">
             <Check className="h-4 w-4" strokeWidth={3} />
           </span>
           You&apos;ve been unsubscribed.
@@ -161,7 +161,7 @@ export default async function UnsubscribePage({ searchParams }: PageProps) {
         </form>
         <Link
           href={settingsHref}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
         >
           Manage all preferences
         </Link>
@@ -211,7 +211,7 @@ function ManageLinks() {
     <div className="mt-7 flex flex-wrap gap-3.5">
       <Link
         href="/employer/settings/notifications"
-        className="inline-flex items-center gap-2 px-6 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+        className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
       >
         Employer settings
       </Link>

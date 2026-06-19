@@ -449,7 +449,7 @@ function DsoCard({
   return (
     <Link
       href={`/companies/${dso.slug}`}
-      className="group relative block bg-white overflow-hidden hover:bg-cream motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-14px_rgba(7,15,28,0.18)] flex flex-col"
+      className="group relative block bg-card overflow-hidden hover:bg-cream motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-14px_rgba(7,15,28,0.18)] flex flex-col"
       style={{ ["--card-accent" as string]: accentColor }}
     >
       {/* Left-edge brand accent strip — full card height, 4px wide.
@@ -478,7 +478,7 @@ function DsoCard({
       {/* Top row: logo (or branded mark fallback) + member pill chip */}
       <div className="flex items-start justify-between gap-3 mb-4">
         {dso.logo_url ? (
-          <div className="size-12 shrink-0 overflow-hidden border border-[var(--rule)] bg-white flex items-center justify-center">
+          <div className="size-12 shrink-0 overflow-hidden border border-[var(--rule)] bg-card flex items-center justify-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={dso.logo_url}
@@ -570,7 +570,7 @@ function DsoCard({
       {recentJobs.length > 0 && (
         <div
           aria-hidden
-          className="absolute left-1 right-0 bottom-[72px] bg-white border-t-2 px-7 py-4 opacity-0 translate-y-2 transition-all duration-200 ease-out pointer-events-none [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:translate-y-0 shadow-[0_-8px_24px_-12px_rgba(7,15,28,0.15)]"
+          className="absolute left-1 right-0 bottom-[72px] bg-popover border-t-2 px-7 py-4 opacity-0 translate-y-2 transition-all duration-200 ease-out pointer-events-none [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:translate-y-0 shadow-[0_-8px_24px_-12px_rgba(7,15,28,0.15)]"
           style={{ borderTopColor: accentColor }}
         >
           <div
@@ -676,7 +676,7 @@ function FeaturedDsoSpotlight({
   return (
     <Link
       href={`/companies/${dso.slug}`}
-      className="group relative block bg-white overflow-hidden hover:bg-cream motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-18px_rgba(7,15,28,0.25)] border border-[var(--rule)] mb-6"
+      className="group relative block bg-card overflow-hidden hover:bg-cream motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-18px_rgba(7,15,28,0.25)] border border-[var(--rule)] mb-6"
       style={{ ["--card-accent" as string]: accentColor }}
     >
       {/* Left accent strip — wider (6px) than the regular grid cards to
@@ -720,7 +720,7 @@ function FeaturedDsoSpotlight({
         <div>
           <div className="flex items-start gap-5 mb-5">
             {dso.logo_url ? (
-              <div className="size-16 shrink-0 overflow-hidden border border-[var(--rule)] bg-white flex items-center justify-center">
+              <div className="size-16 shrink-0 overflow-hidden border border-[var(--rule)] bg-card flex items-center justify-center">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={dso.logo_url}
@@ -848,9 +848,9 @@ function CompaniesFilters({
   const chipBaseClass =
     "px-3 py-1.5 text-[12px] font-semibold border transition-colors whitespace-nowrap";
   const chipActiveClass =
-    "bg-heritage-deep text-ivory border-heritage-deep";
+    "bg-heritage-deep text-primary-foreground border-heritage-deep";
   const chipInactiveClass =
-    "bg-white text-ink border-[var(--rule-strong)] hover:border-heritage";
+    "bg-card text-ink border-[var(--rule-strong)] hover:border-heritage";
 
   return (
     <div className="mb-6 space-y-3">

@@ -160,8 +160,8 @@ const SURFACE_OPTIONS: Array<{
     value: "practice",
     label: "Practice Roles",
     scopes: ["location", "regional"],
-    activeClasses: "bg-heritage-deep text-ivory border-heritage-deep",
-    inactiveClasses: "bg-white text-ink border-[var(--rule-strong)] hover:border-heritage",
+    activeClasses: "bg-heritage-deep text-primary-foreground border-heritage-deep",
+    inactiveClasses: "bg-card text-ink border-[var(--rule-strong)] hover:border-heritage",
     chipBgClass: "bg-heritage-deep/10 text-heritage-deep",
     emptyHeading: "No practice roles match these filters.",
     emptyBody:
@@ -174,7 +174,7 @@ const SURFACE_OPTIONS: Array<{
     // Slate-blue accent per the spec — visually distinct from practice without
     // departing from the brand palette.
     activeClasses: "bg-[#3D5266] text-ivory border-[#3D5266]",
-    inactiveClasses: "bg-white text-ink border-[var(--rule-strong)] hover:border-[#3D5266]",
+    inactiveClasses: "bg-card text-ink border-[var(--rule-strong)] hover:border-[#3D5266]",
     chipBgClass: "bg-[#3D5266]/10 text-[#3D5266]",
     emptyHeading: "No corporate roles open right now.",
     emptyBody:
@@ -681,7 +681,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
                 "px-3 py-1.5 text-[12px] font-semibold border transition-colors " +
                 (activeFunctionSlug === null
                   ? "bg-[#3D5266] text-ivory border-[#3D5266]"
-                  : "bg-white text-ink border-[var(--rule-strong)] hover:border-[#3D5266]")
+                  : "bg-card text-ink border-[var(--rule-strong)] hover:border-[#3D5266]")
               }
             >
               All
@@ -696,7 +696,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
                     "px-3 py-1.5 text-[12px] font-semibold border transition-colors " +
                     (isActive
                       ? "bg-[#3D5266] text-ivory border-[#3D5266]"
-                      : "bg-white text-ink border-[var(--rule-strong)] hover:border-[#3D5266]")
+                      : "bg-card text-ink border-[var(--rule-strong)] hover:border-[#3D5266]")
                   }
                 >
                   {fn.label}
@@ -709,7 +709,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
         {/* Search bar */}
         <form
           method="get"
-          className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_auto] gap-px bg-[var(--rule)] border border-[var(--rule)] bg-white"
+          className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_auto] gap-px bg-[var(--rule)] border border-[var(--rule)] bg-card"
           style={{ boxShadow: "0 10px 30px -16px rgba(7,15,28,0.14)" }}
         >
           {showMap && <input type="hidden" name="view" value="map" />}
@@ -792,7 +792,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
           />
           <button
             type="submit"
-            className="inline-flex items-center justify-center gap-2 px-9 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors min-h-[80px]"
+            className="inline-flex items-center justify-center gap-2 px-9 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors min-h-[80px]"
           >
             <Search className="h-4 w-4" />
             Search
@@ -812,8 +812,8 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
             className={
               "px-3 py-1.5 text-[12px] font-semibold border transition-colors " +
               (postedFilterValue === null
-                ? "bg-heritage-deep text-ivory border-heritage-deep"
-                : "bg-white text-ink border-[var(--rule-strong)] hover:border-heritage")
+                ? "bg-heritage-deep text-primary-foreground border-heritage-deep"
+                : "bg-card text-ink border-[var(--rule-strong)] hover:border-heritage")
             }
           >
             All
@@ -827,8 +827,8 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
                 className={
                   "px-3 py-1.5 text-[12px] font-semibold border transition-colors " +
                   (isActive
-                    ? "bg-heritage-deep text-ivory border-heritage-deep"
-                    : "bg-white text-ink border-[var(--rule-strong)] hover:border-heritage")
+                    ? "bg-heritage-deep text-primary-foreground border-heritage-deep"
+                    : "bg-card text-ink border-[var(--rule-strong)] hover:border-heritage")
                 }
               >
                 {opt.label}
@@ -886,7 +886,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
             defaultValue={
               withinMilesParsed !== null ? String(withinMilesParsed) : "25"
             }
-            className="px-3 py-1.5 text-[12px] border border-[var(--rule-strong)] bg-white text-ink focus:outline-none focus:border-heritage"
+            className="px-3 py-1.5 text-[12px] border border-[var(--rule-strong)] bg-card text-ink focus:outline-none focus:border-heritage"
           >
             {WITHIN_MILES_OPTIONS.map((m) => (
               <option key={m} value={String(m)}>
@@ -896,7 +896,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
           </select>
           <button
             type="submit"
-            className="px-3 py-1.5 text-[12px] font-semibold bg-ink text-ivory hover:bg-ink-soft transition-colors"
+            className="px-3 py-1.5 text-[12px] font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             Apply
           </button>
@@ -906,7 +906,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
                 "/jobs",
                 filterParams.filter(([k]) => k !== "near" && k !== "within")
               )}
-              className="px-3 py-1.5 text-[12px] font-semibold border border-[var(--rule-strong)] text-slate-body bg-white hover:border-heritage transition-colors"
+              className="px-3 py-1.5 text-[12px] font-semibold border border-[var(--rule-strong)] text-slate-body bg-card hover:border-heritage transition-colors"
             >
               Clear
             </Link>
@@ -958,7 +958,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
                 className={`inline-flex items-center gap-2 px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors ${
                   showMap
                     ? "bg-cream text-slate-body hover:text-ink"
-                    : "bg-ink text-ivory"
+                    : "bg-primary text-primary-foreground"
                 }`}
                 aria-current={showMap ? undefined : "page"}
               >
@@ -969,7 +969,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
                 href={mapViewHref}
                 className={`inline-flex items-center gap-2 px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors border-l border-[var(--rule-strong)] ${
                   showMap
-                    ? "bg-ink text-ivory"
+                    ? "bg-primary text-primary-foreground"
                     : "bg-cream text-slate-body hover:text-ink"
                 }`}
                 aria-current={showMap ? "page" : undefined}
@@ -991,7 +991,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
             </p>
             <Link
               href={viewerIsCandidate ? "/candidate/jobs" : "/candidate/sign-up"}
-              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md bg-heritage px-4 py-2 text-[11px] font-bold uppercase tracking-[1px] text-ivory hover:bg-heritage-deep"
+              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md bg-heritage px-4 py-2 text-[11px] font-bold uppercase tracking-[1px] text-primary-foreground hover:bg-heritage-deep"
             >
               {viewerIsCandidate ? "Open your PracticeFit board" : "Sign up free"}
             </Link>
@@ -1080,7 +1080,7 @@ function JobCard({
   return (
     <Link
       href={`/jobs/${job.id}`}
-      className="group block bg-white p-7 hover:bg-cream motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-14px_rgba(7,15,28,0.18)] flex flex-col"
+      className="group block bg-card p-7 hover:bg-cream motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-14px_rgba(7,15,28,0.18)] flex flex-col"
     >
       <div className="flex items-center justify-between gap-2 mb-3">
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
@@ -1088,7 +1088,7 @@ function JobCard({
           {EMP_LABELS[job.employment_type] ?? job.employment_type}
         </div>
         {applied && (
-          <span className="inline-flex items-center px-2 py-0.5 bg-heritage text-ivory text-[10px] font-bold tracking-[1.2px] uppercase">
+          <span className="inline-flex items-center px-2 py-0.5 bg-heritage text-primary-foreground text-[10px] font-bold tracking-[1.2px] uppercase">
             Applied
           </span>
         )}

@@ -63,7 +63,7 @@ export default function NotFound() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
             <Link
               href="/for-dental-groups"
-              className="group bg-ink hover:bg-ink-soft text-ivory p-6 motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1"
+              className="group bg-hero hover:bg-hero/90 text-hero-foreground p-6 motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1"
               style={{
                 boxShadow: "0 18px 36px -18px rgba(7,15,28,0.30)",
               }}
@@ -71,13 +71,13 @@ export default function NotFound() {
               <span className="inline-flex items-center justify-center w-9 h-9 mb-3 bg-ivory text-ink" aria-hidden>
                 <Building2 className="h-4 w-4" />
               </span>
-              <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-ivory/65 mb-1">
+              <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-hero-foreground/65 mb-1">
                 Dental Groups
               </div>
-              <div className="text-[18px] font-extrabold tracking-[-0.4px] leading-tight text-ivory mb-4">
+              <div className="text-[18px] font-extrabold tracking-[-0.4px] leading-tight text-hero-foreground mb-4">
                 Hiring across your practices
               </div>
-              <span className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[1.8px] uppercase text-ivory/85 group-hover:text-ivory transition-colors">
+              <span className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[1.8px] uppercase text-hero-foreground/85 group-hover:text-hero-foreground transition-colors">
                 Go to /for-dental-groups
                 <ArrowRight className="h-3.5 w-3.5 motion-safe:transition-transform motion-safe:group-hover:translate-x-1" />
               </span>
@@ -85,7 +85,7 @@ export default function NotFound() {
 
             <Link
               href="/for-candidates"
-              className="group bg-heritage hover:bg-heritage-deep text-ivory p-6 motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1"
+              className="group bg-heritage hover:bg-heritage-deep text-hero-foreground p-6 motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1"
               style={{
                 boxShadow: "0 18px 36px -18px rgba(7,15,28,0.30)",
               }}
@@ -93,13 +93,13 @@ export default function NotFound() {
               <span className="inline-flex items-center justify-center w-9 h-9 mb-3 bg-ivory text-heritage-deep" aria-hidden>
                 <Stethoscope className="h-4 w-4" />
               </span>
-              <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-ivory/65 mb-1">
+              <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-hero-foreground/65 mb-1">
                 Job Candidates
               </div>
-              <div className="text-[18px] font-extrabold tracking-[-0.4px] leading-tight text-ivory mb-4">
+              <div className="text-[18px] font-extrabold tracking-[-0.4px] leading-tight text-hero-foreground mb-4">
                 Find your next dental role
               </div>
-              <span className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[1.8px] uppercase text-ivory/85 group-hover:text-ivory transition-colors">
+              <span className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[1.8px] uppercase text-hero-foreground/85 group-hover:text-hero-foreground transition-colors">
                 Go to /for-candidates
                 <ArrowRight className="h-3.5 w-3.5 motion-safe:transition-transform motion-safe:group-hover:translate-x-1" />
               </span>

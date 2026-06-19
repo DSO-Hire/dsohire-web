@@ -112,7 +112,7 @@ export default function SecurityPage() {
               key={p.title}
               data-reveal
               style={{ "--mk-delay": `${(i % 3) * 80}ms` } as React.CSSProperties}
-              className="bg-white p-8"
+              className="bg-card p-8"
             >
               <span
                 className="inline-flex items-center justify-center w-10 h-10 mb-5 text-heritage-deep"
@@ -199,7 +199,7 @@ export default function SecurityPage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-ink text-ivory px-6 sm:px-14 py-20">
+      <section className="bg-hero text-hero-foreground px-6 sm:px-14 py-20">
         <div className="max-w-[820px] mx-auto text-center">
           <h2 data-reveal className="text-3xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-[1.1] mb-4">
             Bring your compliance team.
@@ -207,7 +207,7 @@ export default function SecurityPage() {
           <p
             data-reveal
             style={{ "--mk-delay": "70ms" } as React.CSSProperties}
-            className="text-base text-ivory/65 leading-[1.7] max-w-[520px] mx-auto mb-9"
+            className="text-base text-hero-foreground/65 leading-[1.7] max-w-[520px] mx-auto mb-9"
           >
             We&apos;d rather answer the hard questions before you buy than
             after. Walk the platform with whoever signs off on vendors.

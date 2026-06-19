@@ -178,7 +178,7 @@ function HelpCategoryColumn({
 
 function SupportCTA() {
   return (
-    <div className="mt-16 border border-[var(--rule)] bg-white p-7 sm:p-8">
+    <div className="mt-16 border border-[var(--rule)] bg-card p-7 sm:p-8">
       <div className="flex items-start gap-4">
         <Mail className="size-5 text-heritage-deep mt-0.5 shrink-0" />
         <div className="flex-1 min-w-0">

@@ -292,7 +292,7 @@ function SoloStandoutCard({
     ? `/employer/checkout?${params.toString()}`
     : `/employer/sign-up?${params.toString()}`;
   return (
-    <div className="max-w-[920px] mx-auto border-2 border-heritage/40 bg-white shadow-[0_4px_24px_-12px_rgba(7,15,28,0.12)]">
+    <div className="max-w-[920px] mx-auto border-2 border-heritage/40 bg-card shadow-[0_4px_24px_-12px_rgba(7,15,28,0.12)]">
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
         {/* ── Left: tier name + price + CTA on heritage-tinted band ──
             Heritage-green tint (8% opacity) per Cam direction 2026-05-26 —
@@ -320,7 +320,7 @@ function SoloStandoutCard({
           </div>
           <Link
             href={ctaHref}
-            className="block text-center px-4 py-3.5 text-[12px] font-bold tracking-[1.5px] uppercase bg-ink text-ivory border border-ink hover:bg-heritage hover:border-heritage transition-colors"
+            className="block text-center px-4 py-3.5 text-[12px] font-bold tracking-[1.5px] uppercase bg-primary text-primary-foreground border border-primary hover:bg-heritage hover:border-heritage transition-colors"
           >
             Start with Solo
           </Link>
@@ -401,28 +401,28 @@ function TierCard({
     <div
       className={`relative p-9 flex flex-col flex-1 w-full motion-safe:transition-all motion-safe:duration-200 ${
         isFeatured
-          ? "bg-ink text-ivory"
-          : "bg-white text-ink motion-safe:hover:-translate-y-1 hover:shadow-[0_12px_28px_-14px_rgba(7,15,28,0.18)] hover:bg-cream/30"
+          ? "bg-hero text-hero-foreground"
+          : "bg-card text-ink motion-safe:hover:-translate-y-1 hover:shadow-[0_12px_28px_-14px_rgba(7,15,28,0.18)] hover:bg-cream/30"
       }`}
     >
       {/* Floats above the card top edge — doesn't push content down, so all
           four cards stay aligned at the eyebrow row. */}
       {isFeatured && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-heritage text-ivory text-[9px] font-bold tracking-[2px] uppercase whitespace-nowrap z-10">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-heritage text-primary-foreground text-[9px] font-bold tracking-[2px] uppercase whitespace-nowrap z-10">
           Most Popular
         </div>
       )}
 
       <div
         className={`text-2xl font-extrabold tracking-[-0.6px] mb-2 ${
-          isFeatured ? "text-ivory" : "text-ink"
+          isFeatured ? "text-hero-foreground" : "text-ink"
         }`}
       >
         {tier.name}
       </div>
       <div
         className={`text-xs mb-6 min-h-[34px] leading-snug ${
-          isFeatured ? "text-ivory/70" : "text-slate-body"
+          isFeatured ? "text-hero-foreground/70" : "text-slate-body"
         }`}
       >
         {tier.tagline}
@@ -431,14 +431,14 @@ function TierCard({
       <div className="flex items-baseline gap-1.5 mb-1.5">
         <div
           className={`text-[40px] font-extrabold tracking-[-1.5px] leading-none ${
-            isFeatured ? "text-ivory" : "text-ink"
+            isFeatured ? "text-hero-foreground" : "text-ink"
           }`}
         >
           ${headlinePrice.toLocaleString()}
         </div>
         <div
           className={`text-[14px] font-medium ${
-            isFeatured ? "text-ivory/70" : "text-slate-body"
+            isFeatured ? "text-hero-foreground/70" : "text-slate-body"
           }`}
         >
           / month
@@ -446,7 +446,7 @@ function TierCard({
       </div>
       <div
         className={`text-[12px] tracking-[0.4px] mb-7 min-h-[32px] leading-[1.45] ${
-          isFeatured ? "text-ivory/55" : "text-slate-meta"
+          isFeatured ? "text-hero-foreground/55" : "text-slate-meta"
         }`}
       >
         {isAnnual
@@ -458,8 +458,8 @@ function TierCard({
         href={ctaHref}
         className={`block text-center px-4 py-3.5 text-[12px] font-bold tracking-[1.5px] uppercase mb-6 transition-colors border ${
           isFeatured
-            ? "bg-heritage text-ivory border-heritage hover:bg-heritage-deep hover:border-heritage-deep"
-            : "bg-ivory text-ink border-[var(--rule-strong)] hover:bg-ink hover:text-ivory hover:border-ink"
+            ? "bg-heritage text-primary-foreground border-heritage hover:bg-heritage-deep hover:border-heritage-deep"
+            : "bg-ivory text-ink border-[var(--rule-strong)] hover:bg-primary hover:text-primary-foreground hover:border-primary"
         }`}
       >
         {ctaLabel[tier.id]}
@@ -467,14 +467,14 @@ function TierCard({
 
       <ul
         className={`list-none border-t pt-4 ${
-          isFeatured ? "border-white/15" : "border-[var(--rule)]"
+          isFeatured ? "border-hero-foreground/15" : "border-[var(--rule)]"
         }`}
       >
         {tier.features.map((feature, i) => (
           <li
             key={i}
             className={`text-[13.5px] py-1.5 flex items-start gap-2 leading-snug ${
-              isFeatured ? "text-ivory/90" : "text-ink"
+              isFeatured ? "text-hero-foreground/90" : "text-ink"
             }`}
           >
             <span
@@ -1069,7 +1069,7 @@ function FinalCta({ nextParam }: { nextParam: string | null }) {
                 ? `/employer/sign-up?next=${encodeURIComponent(nextParam)}`
                 : "/employer/sign-up"
             }
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
           >
             Sign Up
             <ArrowRight className="h-3.5 w-3.5" />

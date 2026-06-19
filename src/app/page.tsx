@@ -181,13 +181,13 @@ function MiniKanban() {
         { label: "Interview", bars: 1 },
         { label: "Offer", bars: 1 },
       ].map((col) => (
-        <div key={col.label} className="bg-ivory/10 border border-ivory/15 p-1.5">
-          <div className="text-[8px] font-bold tracking-[1.4px] uppercase text-ivory/55 mb-1.5">
+        <div key={col.label} className="bg-hero-foreground/10 border border-hero-foreground/15 p-1.5">
+          <div className="text-[8px] font-bold tracking-[1.4px] uppercase text-hero-foreground/55 mb-1.5">
             {col.label}
           </div>
           <div className="space-y-1.5">
             {Array.from({ length: col.bars }).map((_, i) => (
-              <div key={i} className="h-3.5 bg-ivory/20" />
+              <div key={i} className="h-3.5 bg-hero-foreground/20" />
             ))}
             {/* the traveling chip lives IN the Interview slot and slides in
                 from the column to its left — landing can't miss. */}
@@ -217,11 +217,11 @@ function MiniDial() {
             fill="none"
           />
         </svg>
-        <span className="mini-dial-num absolute inset-0 flex items-center justify-center text-[18px] font-extrabold tracking-[-0.5px] text-ivory">
+        <span className="mini-dial-num absolute inset-0 flex items-center justify-center text-[18px] font-extrabold tracking-[-0.5px] text-hero-foreground">
           92
         </span>
       </div>
-      <div className="text-[11px] leading-snug text-ivory/70">
+      <div className="text-[11px] leading-snug text-hero-foreground/70">
         {/* The real two-tone wordmark, on an ivory pill so it survives the
             green door (Cam, Day 31). It embeds its own sparkle mark. */}
         <span className="inline-flex items-center bg-ivory px-2 py-1 mb-1.5">
@@ -275,8 +275,8 @@ function DoorwayPanel({
   return (
     <div
       data-reveal
-      className={`group relative flex flex-col p-7 sm:p-8 text-ivory motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1 overflow-hidden ${
-        isInk ? "bg-ink" : "bg-heritage"
+      className={`group relative flex flex-col p-7 sm:p-8 text-hero-foreground motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1 overflow-hidden ${
+        isInk ? "bg-hero" : "bg-heritage"
       }`}
       style={
         {
@@ -306,16 +306,16 @@ function DoorwayPanel({
         <Icon className="h-5 w-5" />
       </span>
 
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-ivory/65 mb-1.5">
+      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-hero-foreground/65 mb-1.5">
         {eyebrow}
       </div>
-      <div className="text-[24px] sm:text-[28px] font-extrabold tracking-[-0.6px] leading-[1.08] text-ivory mb-2.5">
+      <div className="text-[24px] sm:text-[28px] font-extrabold tracking-[-0.6px] leading-[1.08] text-hero-foreground mb-2.5">
         {title}
       </div>
-      <p className="text-[14px] text-ivory/80 leading-[1.55] mb-3.5">{body}</p>
+      <p className="text-[14px] text-hero-foreground/80 leading-[1.55] mb-3.5">{body}</p>
 
       {/* Single-line proof — dot-separated keyword chips */}
-      <div className="text-[10.5px] font-bold tracking-[1.6px] uppercase text-ivory/55">
+      <div className="text-[10.5px] font-bold tracking-[1.6px] uppercase text-hero-foreground/55">
         {proof}
       </div>
 
@@ -337,7 +337,7 @@ function DoorwayPanel({
         {/* Secondary — the pitch/detail page, named for what it is. */}
         <Link
           href={secondaryHref}
-          className="mt-3.5 inline-flex items-center justify-center gap-1.5 text-[11px] font-bold tracking-[1.6px] uppercase text-ivory/65 hover:text-ivory transition-colors"
+          className="mt-3.5 inline-flex items-center justify-center gap-1.5 text-[11px] font-bold tracking-[1.6px] uppercase text-hero-foreground/65 hover:text-hero-foreground transition-colors"
         >
           {secondaryLabel}
           <ArrowRight className="h-3 w-3" />
@@ -445,7 +445,7 @@ function MarqueeCard({ job, ariaHidden }: { job: MarqueeJob; ariaHidden?: boolea
       href={`/jobs/${job.id}`}
       aria-hidden={ariaHidden || undefined}
       tabIndex={ariaHidden ? -1 : undefined}
-      className="group/card flex flex-col w-[280px] shrink-0 bg-white border border-[var(--rule)] px-5 py-4 hover:border-heritage hover:shadow-[0_14px_28px_-16px_rgba(7,15,28,0.22)] transition-all"
+      className="group/card flex flex-col w-[280px] shrink-0 bg-card border border-[var(--rule)] px-5 py-4 hover:border-heritage hover:shadow-[0_14px_28px_-16px_rgba(7,15,28,0.22)] transition-all"
     >
       <span className="inline-flex self-start items-center px-1.5 py-0.5 mb-2.5 text-[8.5px] font-bold tracking-[1.4px] uppercase text-heritage-deep border border-heritage/30" style={{ background: "var(--heritage-tint)" }}>
         {job.chip}
@@ -570,7 +570,7 @@ function MachineBand() {
               key={i}
               data-reveal
               style={{ "--mk-delay": `${i * 60}ms` } as React.CSSProperties}
-              className={`bg-white border border-[var(--rule-strong)] border-t-[3px] p-6 ${
+              className={`bg-card border border-[var(--rule-strong)] border-t-[3px] p-6 ${
                 f.hg ? "border-t-heritage" : "border-t-ink"
               }`}
             >
@@ -588,7 +588,7 @@ function MachineBand() {
         >
           <Link
             href="/for-dental-groups"
-            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
           >
             Explore The Platform
             <ArrowRight className="h-3.5 w-3.5" />
@@ -611,7 +611,7 @@ function MachineBand() {
 
 function CandidateStrip() {
   return (
-    <section className="bg-white border-y border-[var(--rule)] px-6 sm:px-14 py-24">
+    <section className="bg-card border-y border-[var(--rule)] px-6 sm:px-14 py-24">
       <div className="max-w-[1240px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-12 lg:gap-20 items-center">
         <div className="order-2 lg:order-1 grid grid-cols-1 gap-px bg-[var(--rule)] border border-[var(--rule)]">
           {[
@@ -669,7 +669,7 @@ function CandidateStrip() {
           >
             <Link
               href="/jobs"
-              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-heritage text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-heritage-deep transition-colors"
+              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-heritage text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-heritage-deep transition-colors"
             >
               Browse Dental Jobs
               <ArrowRight className="h-3.5 w-3.5" />
@@ -737,7 +737,7 @@ function FounderLine() {
 
 function ClosingDoorways() {
   return (
-    <section className="bg-ink text-ivory px-6 sm:px-14 py-24 relative overflow-hidden">
+    <section className="bg-hero text-hero-foreground px-6 sm:px-14 py-24 relative overflow-hidden">
       <div
         aria-hidden
         className="absolute pointer-events-none"
@@ -753,13 +753,13 @@ function ClosingDoorways() {
         }}
       />
       <div className="relative max-w-[820px] mx-auto text-center">
-        <h2 data-reveal className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.08] text-ivory mb-4">
+        <h2 data-reveal className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.08] text-hero-foreground mb-4">
           Pick your door.
         </h2>
         <p
           data-reveal
           style={{ "--mk-delay": "70ms" } as React.CSSProperties}
-          className="text-base text-ivory/60 leading-[1.7] max-w-[560px] mx-auto mb-10"
+          className="text-base text-hero-foreground/60 leading-[1.7] max-w-[560px] mx-auto mb-10"
         >
           Two audiences, one dental-only platform. Head to the side that fits —
           you can always switch.
@@ -778,7 +778,7 @@ function ClosingDoorways() {
           </Link>
           <Link
             href="/for-candidates"
-            className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-heritage text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
+            className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-heritage text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
           >
             <Stethoscope className="h-4 w-4" />
             I&apos;m a Dental Professional

@@ -69,7 +69,7 @@ export function HelpSearchClient({ entries }: Props) {
           }}
           onFocus={() => setOpen(true)}
           placeholder="Search help — try 'bulk locations' or 'two-factor'"
-          className="w-full border border-[var(--rule-strong)] bg-white pl-10 pr-10 py-3.5 text-[14px] text-ink placeholder:text-slate-meta focus:border-heritage focus:outline-none"
+          className="w-full border border-[var(--rule-strong)] bg-card pl-10 pr-10 py-3.5 text-[14px] text-ink placeholder:text-slate-meta focus:border-heritage focus:outline-none"
         />
         {query && (
           <button
@@ -87,7 +87,7 @@ export function HelpSearchClient({ entries }: Props) {
       </div>
 
       {open && query.trim() && (
-        <div className="absolute left-0 right-0 top-full mt-1 border border-[var(--rule-strong)] bg-white shadow-lg z-20 max-h-[360px] overflow-y-auto">
+        <div className="absolute left-0 right-0 top-full mt-1 border border-[var(--rule-strong)] bg-popover shadow-lg z-20 max-h-[360px] overflow-y-auto">
           {results.length === 0 ? (
             <div className="px-4 py-3 text-[13px] text-slate-meta italic">
               Nothing matched &ldquo;{query}&rdquo;. Try a different word, or

@@ -107,14 +107,14 @@ function Hero({ ctaHref }: { ctaHref: string }) {
           >
             <Link
               href={ctaHref}
-              className="inline-flex items-center gap-2.5 px-8 py-4 bg-heritage text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
+              className="inline-flex items-center gap-2.5 px-8 py-4 bg-heritage text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
             >
               <Stethoscope className="h-4 w-4" />
               Take Your PracticeFit
             </Link>
             <Link
               href="/for-dental-groups"
-              className="inline-flex items-center gap-2.5 px-8 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+              className="inline-flex items-center gap-2.5 px-8 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
             >
               <Building2 className="h-4 w-4" />
               See It On Your Openings
@@ -125,7 +125,7 @@ function Hero({ ctaHref }: { ctaHref: string }) {
         {/* The score, assembling itself — framed as the real product card. */}
         <div data-reveal style={{ "--mk-delay": "220ms" } as React.CSSProperties}>
           <div
-            className="bg-white border border-[var(--rule-strong)] overflow-hidden"
+            className="bg-card border border-[var(--rule-strong)] overflow-hidden"
             style={{
               boxShadow:
                 "0 30px 60px -30px rgba(7,15,28,0.18), 0 10px 24px -12px rgba(7,15,28,0.10)",
@@ -192,7 +192,7 @@ function TwoSides() {
         </h2>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-px bg-[var(--rule)] border border-[var(--rule)]">
-          <div data-reveal className="bg-white p-9">
+          <div data-reveal className="bg-card p-9">
             <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
               If you&apos;re a dental professional
             </div>
@@ -211,7 +211,7 @@ function TwoSides() {
           <div
             data-reveal
             style={{ "--mk-delay": "90ms" } as React.CSSProperties}
-            className="bg-white p-9"
+            className="bg-card p-9"
           >
             <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
               If you&apos;re hiring for a dental group
@@ -318,7 +318,7 @@ function WhatItScores() {
 
 function DsoFitBand() {
   return (
-    <section className="bg-white border-y border-[var(--rule)] px-6 sm:px-14 py-24">
+    <section className="bg-card border-y border-[var(--rule)] px-6 sm:px-14 py-24">
       <div className="max-w-[1240px] mx-auto">
         <div data-reveal className="mb-5">
           <DsoFitWordmark surface="light" tm className="text-[30px]" />
@@ -382,7 +382,7 @@ const PRINCIPLES = [
 
 function HonestyBand() {
   return (
-    <section className="bg-ink text-ivory px-6 sm:px-14 py-24 relative overflow-hidden">
+    <section className="bg-hero text-hero-foreground px-6 sm:px-14 py-24 relative overflow-hidden">
       <div
         aria-hidden
         className="absolute pointer-events-none"
@@ -403,22 +403,22 @@ function HonestyBand() {
         <h2
           data-reveal
           style={{ "--mk-delay": "70ms" } as React.CSSProperties}
-          className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ivory max-w-[720px] mb-12"
+          className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-hero-foreground max-w-[720px] mb-12"
         >
           Four rules the score can never break.
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-white/10 border border-white/10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-hero-foreground/10 border border-hero-foreground/10">
           {PRINCIPLES.map((p, i) => (
             <div
               key={p.title}
               data-reveal
               style={{ "--mk-delay": `${i * 70}ms` } as React.CSSProperties}
-              className="bg-ink p-8"
+              className="bg-hero p-8"
             >
-              <h3 className="text-[18px] font-extrabold tracking-[-0.4px] text-ivory mb-2.5">
+              <h3 className="text-[18px] font-extrabold tracking-[-0.4px] text-hero-foreground mb-2.5">
                 {p.title}
               </h3>
-              <p className="text-[14.5px] text-ivory/70 leading-[1.65]">{p.body}</p>
+              <p className="text-[14.5px] text-hero-foreground/70 leading-[1.65]">{p.body}</p>
             </div>
           ))}
         </div>
@@ -454,14 +454,14 @@ function FinalCta({ ctaHref }: { ctaHref: string }) {
         >
           <Link
             href={ctaHref}
-            className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-heritage text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
+            className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-heritage text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
           >
             <Stethoscope className="h-4 w-4" />
             Take Your PracticeFit
           </Link>
           <Link
             href="/pricing"
-            className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
           >
             <Building2 className="h-4 w-4" />
             Get It For Your Group

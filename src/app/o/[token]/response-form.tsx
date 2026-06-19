@@ -199,7 +199,7 @@ export function OfferResponseForm({
       {error && (
         <div
           role="alert"
-          className="mt-4 border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-800 flex items-start gap-2"
+          className="mt-4 border border-danger bg-danger-bg px-4 py-3 text-[13px] text-danger flex items-start gap-2"
         >
           <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
           <span>{error}</span>
@@ -239,7 +239,7 @@ function ChoicePane({
         <button
           type="button"
           onClick={onAccept}
-          className="inline-flex items-center justify-center gap-2 bg-ink text-ivory px-5 py-3 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-ink-1000 transition-colors"
+          className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-5 py-3 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
         >
           <CheckCircle2 className="h-3.5 w-3.5" />
           Accept offer
@@ -247,7 +247,7 @@ function ChoicePane({
         <button
           type="button"
           onClick={onDecline}
-          className="inline-flex items-center justify-center gap-2 bg-white text-ink border border-[#D4CCBB] px-5 py-3 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-ivory transition-colors"
+          className="inline-flex items-center justify-center gap-2 bg-card text-ink border border-border px-5 py-3 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-ivory transition-colors"
         >
           <X className="h-3.5 w-3.5" />
           Decline offer
@@ -275,7 +275,7 @@ function AcceptPane({
   pending: boolean;
 }) {
   return (
-    <div className="border border-heritage bg-[#F1F6F2] p-5 sm:p-6">
+    <div className="border border-heritage bg-success-bg p-5 sm:p-6">
       <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-2">
         Accept offer
       </div>
@@ -296,7 +296,7 @@ function AcceptPane({
           autoFocus
           placeholder="e.g. Jordan Reyes"
           disabled={pending}
-          className="w-full px-3 py-2.5 bg-white border border-[#D4CCBB] text-ink text-[15px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage disabled:opacity-60"
+          className="w-full px-3 py-2.5 bg-card border border-border text-ink text-[15px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage disabled:opacity-60"
         />
       </label>
       <div className="flex flex-col sm:flex-row gap-3">
@@ -304,7 +304,7 @@ function AcceptPane({
           type="button"
           onClick={onSubmit}
           disabled={pending}
-          className="inline-flex items-center justify-center gap-2 bg-ink text-ivory px-5 py-3 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-ink-1000 transition-colors disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-5 py-3 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60"
         >
           {pending ? (
             <>
@@ -354,7 +354,7 @@ function DeclinePane({
   pending: boolean;
 }) {
   return (
-    <div className="border border-[#D4CCBB] bg-white p-5 sm:p-6">
+    <div className="border border-border bg-card p-5 sm:p-6">
       <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-2">
         Decline offer
       </div>
@@ -371,7 +371,7 @@ function DeclinePane({
           value={reasonCode}
           onChange={(e) => onChangeCode(e.target.value)}
           disabled={pending}
-          className="w-full px-3 py-2.5 bg-cream border border-[#D4CCBB] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage disabled:opacity-60 mb-3"
+          className="w-full px-3 py-2.5 bg-cream border border-border text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage disabled:opacity-60 mb-3"
         >
           <option value="">Select a reason…</option>
           {DECLINE_REASONS.map((r) => (
@@ -393,7 +393,7 @@ function DeclinePane({
           autoFocus
           placeholder="e.g. Accepted a different offer · Compensation didn't fit · Location wasn't workable"
           disabled={pending}
-          className="w-full px-3 py-2.5 bg-cream border border-[#D4CCBB] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage resize-y disabled:opacity-60"
+          className="w-full px-3 py-2.5 bg-cream border border-border text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage resize-y disabled:opacity-60"
         />
         <div className="mt-1 text-[11px] text-slate-meta text-right">
           {reason.length} / 1000
@@ -404,7 +404,7 @@ function DeclinePane({
           type="button"
           onClick={onSubmit}
           disabled={pending}
-          className="inline-flex items-center justify-center gap-2 bg-ink text-ivory px-5 py-3 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-ink-1000 transition-colors disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-5 py-3 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60"
         >
           {pending ? (
             <>
@@ -483,7 +483,7 @@ function SuccessPane({
         className="inline-flex items-center justify-center h-12 w-12 rounded-full mb-4"
         style={{
           backgroundColor:
-            kind === "accepted" ? "#E8F1EC" : "var(--color-ivory)",
+            kind === "accepted" ? "var(--success-bg)" : "var(--color-ivory)",
         }}
       >
         {kind === "accepted" ? (

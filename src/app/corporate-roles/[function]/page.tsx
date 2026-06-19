@@ -132,7 +132,7 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
           {fn.subRoles.map((sr) => (
             <li
               key={sr}
-              className="px-3 py-1.5 text-[13px] font-semibold border border-[var(--rule-strong)] bg-white text-ink"
+              className="px-3 py-1.5 text-[13px] font-semibold border border-[var(--rule-strong)] bg-card text-ink"
             >
               {sr}
             </li>
@@ -188,7 +188,7 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
                 <Link
                   key={job.id}
                   href={`/jobs/${job.id}`}
-                  className="block bg-white hover:bg-cream/60 transition-colors p-6"
+                  className="block bg-card hover:bg-cream/60 transition-colors p-6"
                 >
                   <div
                     className="inline-flex items-center gap-1.5 mb-2 text-[10px] font-bold tracking-[2px] uppercase"
@@ -268,7 +268,7 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
             <li key={f.slug}>
               <Link
                 href={`/corporate-roles/${f.slug}`}
-                className="px-3 py-1.5 text-[13px] font-semibold border border-[var(--rule-strong)] bg-white text-ink hover:bg-cream/60 transition-colors inline-block"
+                className="px-3 py-1.5 text-[13px] font-semibold border border-[var(--rule-strong)] bg-card text-ink hover:bg-cream/60 transition-colors inline-block"
               >
                 {f.label}
               </Link>

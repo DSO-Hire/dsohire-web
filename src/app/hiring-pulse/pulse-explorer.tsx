@@ -20,7 +20,7 @@ export function PulseExplorer({ roles }: { roles: PulseRoleStat[] }) {
   const [active, setActive] = useState(0);
   if (roles.length === 0) {
     return (
-      <div className="bg-white border border-[var(--rule-strong)] px-8 py-12 text-center">
+      <div className="bg-card border border-[var(--rule-strong)] px-8 py-12 text-center">
         <div className="text-[15px] font-extrabold text-ink mb-2">
           Not enough data yet — and we won&rsquo;t guess.
         </div>
@@ -47,8 +47,8 @@ export function PulseExplorer({ roles }: { roles: PulseRoleStat[] }) {
             onClick={() => setActive(i)}
             className={`px-4 py-2 text-[12.5px] font-bold border transition-colors ${
               i === active
-                ? "bg-ink text-ivory border-ink"
-                : "bg-white text-slate-body border-[var(--rule-strong)] hover:border-ink hover:text-ink"
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-card text-slate-body border-[var(--rule-strong)] hover:border-ink hover:text-ink"
             }`}
           >
             {role.label}
@@ -56,7 +56,7 @@ export function PulseExplorer({ roles }: { roles: PulseRoleStat[] }) {
         ))}
       </div>
 
-      <div className="bg-white border border-[var(--rule-strong)] px-7 py-8 sm:px-9">
+      <div className="bg-card border border-[var(--rule-strong)] px-7 py-8 sm:px-9">
         <div className="flex flex-wrap items-baseline justify-between gap-2 mb-7">
           <span className="text-[17px] font-extrabold tracking-[-0.3px] text-ink">
             {r.label}

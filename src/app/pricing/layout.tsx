@@ -49,19 +49,19 @@ function PricingNav() {
 
 function PricingFooter() {
   return (
-    <footer className="bg-ink text-ivory px-6 sm:px-14 pt-10 pb-8 mt-16">
+    <footer className="bg-hero text-hero-foreground px-6 sm:px-14 pt-10 pb-8 mt-16">
       <div className="max-w-[1240px] mx-auto flex flex-wrap justify-between items-center gap-4">
-        <div className="text-[12px] tracking-[0.5px] text-ivory/40">
+        <div className="text-[12px] tracking-[0.5px] text-hero-foreground/40">
           © {new Date().getFullYear()} DSO Hire LLC
         </div>
-        <div className="flex gap-6 text-[12px] text-ivory/40">
-          <Link href="/legal/privacy" className="hover:text-ivory/70 transition-colors">
+        <div className="flex gap-6 text-[12px] text-hero-foreground/40">
+          <Link href="/legal/privacy" className="hover:text-hero-foreground/70 transition-colors">
             Privacy
           </Link>
-          <Link href="/legal/terms" className="hover:text-ivory/70 transition-colors">
+          <Link href="/legal/terms" className="hover:text-hero-foreground/70 transition-colors">
             Terms
           </Link>
-          <Link href={SALES_MAILTO} className="hover:text-ivory/70 transition-colors">
+          <Link href={SALES_MAILTO} className="hover:text-hero-foreground/70 transition-colors">
             {SALES_EMAIL}
           </Link>
         </div>

@@ -67,7 +67,7 @@ export default async function TierPage({ params }: PageProps) {
             Dental Groups · {t.name} plan
           </span>
           {t.badge && (
-            <span className="inline-flex items-center px-2.5 py-1 bg-heritage text-ivory text-[10px] font-bold tracking-[1.5px] uppercase">
+            <span className="inline-flex items-center px-2.5 py-1 bg-heritage text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase">
               {t.badge}
             </span>
           )}
@@ -107,7 +107,7 @@ export default async function TierPage({ params }: PageProps) {
         <div className="flex flex-wrap items-center gap-3.5">
           <Link
             href={checkoutHref}
-            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
           >
             Get started with {t.name}
             <ArrowRight className="h-3.5 w-3.5" />
@@ -191,7 +191,7 @@ export default async function TierPage({ params }: PageProps) {
               <Link
                 key={o}
                 href={`/pricing/${o}`}
-                className="group bg-white p-5 hover:bg-cream/50 transition-colors"
+                className="group bg-card p-5 hover:bg-cream/50 transition-colors"
               >
                 <div className="text-[15px] font-extrabold text-ink mb-0.5">
                   {ot.name}
@@ -209,7 +209,7 @@ export default async function TierPage({ params }: PageProps) {
       </section>
 
       {/* ── Final CTA ── */}
-      <section className="bg-ink text-ivory p-8 sm:p-10">
+      <section className="bg-hero text-hero-foreground p-8 sm:p-10">
         <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-light mb-3">
           Ready when you are
         </div>
@@ -226,7 +226,7 @@ export default async function TierPage({ params }: PageProps) {
           </Link>
           <Link
             href="/pricing"
-            className="inline-flex items-center gap-2.5 px-7 py-3.5 border border-white/25 text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-white/10 transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 border border-hero-foreground/25 text-hero-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-hero-foreground/10 transition-colors"
           >
             See the full comparison
           </Link>

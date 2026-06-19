@@ -33,7 +33,7 @@ export function ReferForm({
   const [done, setDone] = useState(false);
 
   const inputCls =
-    "w-full h-11 px-3.5 bg-white border border-[var(--rule-strong)] text-ink text-[15px] focus:outline-none focus:border-heritage";
+    "w-full h-11 px-3.5 bg-card border border-[var(--rule-strong)] text-ink text-[15px] focus:outline-none focus:border-heritage";
 
   const submit = () => {
     setError(null);
@@ -101,17 +101,17 @@ export function ReferForm({
           value={note}
           onChange={(e) => setNote(e.target.value)}
           rows={3}
-          className="mt-3 w-full px-3.5 py-2.5 bg-white border border-[var(--rule-strong)] text-ink text-[15px] focus:outline-none focus:border-heritage resize-y"
+          className="mt-3 w-full px-3.5 py-2.5 bg-card border border-[var(--rule-strong)] text-ink text-[15px] focus:outline-none focus:border-heritage resize-y"
         />
       </div>
 
-      {error && <p role="alert" className="text-[14px] text-red-700">{error}</p>}
+      {error && <p role="alert" className="text-[14px] text-danger">{error}</p>}
 
       <button
         type="button"
         onClick={submit}
         disabled={saving || !referrerName.trim() || !candidateName.trim()}
-        className="inline-flex items-center gap-2 px-6 py-3 bg-ink text-ivory text-[13px] font-bold tracking-[1px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-50"
+        className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-[13px] font-bold tracking-[1px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
       >
         {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
         Submit referral

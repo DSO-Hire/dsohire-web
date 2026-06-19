@@ -61,15 +61,15 @@ export function ContactForm() {
       </div>
 
       {state.error && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-4">
-          <p className="text-[14px] text-red-900">{state.error}</p>
+        <div className="bg-danger-bg border-l-4 border-danger p-4">
+          <p className="text-[14px] text-danger">{state.error}</p>
         </div>
       )}
 
       <button
         type="submit"
         disabled={pending}
-        className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {pending ? "Sending…" : "Send Message"}
         {!pending && <Send className="h-3.5 w-3.5" />}

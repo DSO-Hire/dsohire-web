@@ -249,7 +249,7 @@ function WarmingUp() {
         </p>
         <Link
           href="/jobs"
-          className="inline-flex items-center gap-2 mt-7 px-6 py-3 bg-ink text-ivory text-[11px] font-bold tracking-[1.6px] uppercase hover:bg-ink-soft transition-colors"
+          className="inline-flex items-center gap-2 mt-7 px-6 py-3 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1.6px] uppercase hover:bg-primary/90 transition-colors"
         >
           Browse Dental Jobs
           <ArrowRight className="h-3.5 w-3.5" />
@@ -261,7 +261,7 @@ function WarmingUp() {
 
 function ClosingCta() {
   return (
-    <section className="relative bg-ink text-ivory px-6 sm:px-14 py-20 text-center overflow-hidden">
+    <section className="relative bg-hero text-hero-foreground px-6 sm:px-14 py-20 text-center overflow-hidden">
       <div
         aria-hidden
         className="absolute pointer-events-none"
@@ -286,7 +286,7 @@ function ClosingCta() {
         <p
           data-reveal
           style={{ "--mk-delay": "60ms" } as React.CSSProperties}
-          className="text-[15px] text-ivory/60 leading-[1.7] max-w-[520px] mx-auto mb-9"
+          className="text-[15px] text-hero-foreground/60 leading-[1.7] max-w-[520px] mx-auto mb-9"
         >
           Every number on this page is a real opening at a real dental group —
           posted direct, no agencies. Join either side of it.
@@ -305,7 +305,7 @@ function ClosingCta() {
           </Link>
           <Link
             href="/for-dental-groups"
-            className="inline-flex items-center px-7 py-[13px] border border-ivory/35 text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:border-heritage-light hover:text-heritage-light transition-colors"
+            className="inline-flex items-center px-7 py-[13px] border border-hero-foreground/35 text-hero-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:border-heritage-light hover:text-heritage-light transition-colors"
           >
             Hire On DSO Hire
           </Link>

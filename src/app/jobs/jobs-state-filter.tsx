@@ -83,7 +83,7 @@ export function JobsStateFilter({ defaultValues }: JobsStateFilterProps) {
           <PopoverPrimitive.Content
             sideOffset={8}
             align="start"
-            className="z-50 w-(--radix-popover-trigger-width) min-w-[240px] border border-[var(--rule-strong)] bg-white shadow-[0_18px_44px_-22px_rgba(7,15,28,0.28)] data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0"
+            className="z-50 w-(--radix-popover-trigger-width) min-w-[240px] border border-[var(--rule-strong)] bg-popover shadow-[0_18px_44px_-22px_rgba(7,15,28,0.28)] data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0"
             onOpenAutoFocus={(e) => e.preventDefault()}
           >
             <div className="flex items-center gap-2 border-b border-[var(--rule)] p-2">
@@ -134,8 +134,8 @@ export function JobsStateFilter({ defaultValues }: JobsStateFilterProps) {
                         className={cn(
                           "flex h-4 w-4 shrink-0 items-center justify-center border",
                           isSelected
-                            ? "border-heritage-deep bg-heritage-deep text-white"
-                            : "border-[var(--rule-strong)] bg-white"
+                            ? "border-heritage-deep bg-heritage-deep text-primary-foreground"
+                            : "border-[var(--rule-strong)] bg-card"
                         )}
                       >
                         {isSelected && <Check className="h-3 w-3" />}

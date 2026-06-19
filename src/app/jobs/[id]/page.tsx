@@ -428,14 +428,14 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
             {existingApplicationId ? (
               <Link
                 href={`/candidate/applications/${existingApplicationId}`}
-                className="inline-flex items-center justify-center px-8 py-3.5 bg-heritage text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
+                className="inline-flex items-center justify-center px-8 py-3.5 bg-heritage text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
               >
                 View My Application
               </Link>
             ) : (
               <Link
                 href={`/jobs/${job.id as string}/apply`}
-                className="inline-flex items-center justify-center px-8 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+                className="inline-flex items-center justify-center px-8 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
               >
                 Apply for this Role
               </Link>
@@ -443,7 +443,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
             {!existingApplicationId && !candidateAuthed && (
               <Link
                 href={`/jobs/${job.id as string}/apply/guest`}
-                className="inline-flex items-center justify-center px-6 py-3.5 border border-[var(--rule-strong)] bg-white text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
+                className="inline-flex items-center justify-center px-6 py-3.5 border border-[var(--rule-strong)] bg-card text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
               >
                 Apply as guest
               </Link>
@@ -844,14 +844,14 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                 {existingApplicationId ? (
                   <Link
                     href={`/candidate/applications/${existingApplicationId}`}
-                    className="inline-flex items-center justify-center px-9 py-4 bg-heritage text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
+                    className="inline-flex items-center justify-center px-9 py-4 bg-heritage text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
                   >
                     View My Application
                   </Link>
                 ) : (
                   <Link
                     href={`/jobs/${job.id as string}/apply`}
-                    className="inline-flex items-center justify-center px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+                    className="inline-flex items-center justify-center px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
                   >
                     Apply for this Role
                   </Link>

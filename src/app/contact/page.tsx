@@ -39,7 +39,7 @@ export default function ContactPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-px bg-[var(--rule)] border border-[var(--rule)]">
           {/* Form column */}
-          <div className="bg-white p-8 sm:p-10">
+          <div className="bg-card p-8 sm:p-10">
             <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-5">
               Send a Message
             </div>
