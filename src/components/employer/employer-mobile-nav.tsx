@@ -18,6 +18,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, LifeBuoy, LogOut, Settings as SettingsIcon } from "lucide-react";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Avatar } from "@/components/ui/avatar";
 import { isEmployerNavItemActive } from "./employer-nav-active";
 
@@ -158,6 +159,12 @@ export function EmployerMobileNav({
             </nav>
 
             <div className="border-t border-sidebar-border p-3 space-y-1">
+              <div className="flex items-center justify-between px-3 py-2">
+                <span className="text-[11px] font-bold uppercase tracking-[1.5px] text-sidebar-muted">
+                  Theme
+                </span>
+                <ThemeToggle className="text-sidebar-foreground" />
+              </div>
               <Link
                 href={settings.href}
                 onClick={() => setOpen(false)}

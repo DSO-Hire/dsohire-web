@@ -26,7 +26,7 @@ const STATUS_LABEL: Record<string, string> = {
 };
 const STATUS_TONE: Record<string, string> = {
   submitted: "bg-cream text-ink border-[var(--rule-strong)]",
-  contacted: "bg-blue-50 text-blue-700 border-blue-200",
+  contacted: "bg-info-bg text-info border-info",
   interviewing: "bg-warning-bg text-warning border-warning",
   hired: "bg-heritage/15 text-heritage-deep border-heritage/30",
   closed: "bg-muted text-muted-foreground border-border",

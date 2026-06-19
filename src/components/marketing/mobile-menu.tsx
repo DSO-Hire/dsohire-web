@@ -33,6 +33,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import { FitWordmark } from "@/components/practice-fit/brand/fit-wordmark";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 const ROLE_LINKS = [
   { href: "/for-candidates", label: "Overview" },
@@ -262,6 +263,12 @@ export function MobileMenu({
             </nav>
 
             <div className="px-6 pb-7 pt-4 border-t border-[var(--rule)] flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold tracking-[2px] uppercase text-slate-meta">
+                  Theme
+                </span>
+                <ThemeToggle className="text-ink" />
+              </div>
               <Link
                 href={signInHref}
                 onClick={close}

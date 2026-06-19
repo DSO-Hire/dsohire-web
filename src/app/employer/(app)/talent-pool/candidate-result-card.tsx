@@ -58,7 +58,7 @@ const FIT_BUCKET_LABEL: Record<string, string> = {
 const FIT_BUCKET_COLOR: Record<string, string> = {
   excellent: "bg-heritage/15 text-heritage-deep ring-heritage/30",
   strong: "bg-success-bg text-success ring-success/40",
-  solid: "bg-blue-50 text-blue-700 ring-blue-200",
+  solid: "bg-info-bg text-info ring-info",
   light: "bg-warning-bg text-warning ring-warning/40",
   low: "bg-muted text-muted-foreground ring-border",
 };

@@ -682,7 +682,7 @@ function statusBadgeClass(kind: string): string {
     case "open":
       return "bg-cream text-ink";
     case "screen":
-      return "bg-blue-50 text-blue-900";
+      return "bg-info-bg text-info";
     case "interview":
       return "bg-heritage/10 text-heritage-deep";
     case "offer":

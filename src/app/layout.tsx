@@ -62,6 +62,17 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn("h-full", "antialiased", manrope.variable, "font-sans", geist.variable)}
     >
+      <head>
+        {/* No-flash theme init — runs BEFORE first paint so a dark-preference
+            load never flashes light. Reads the stored choice (dso-theme);
+            "system" or unset follows prefers-color-scheme. The ThemeToggle
+            owns it thereafter. Dependency-free + inline on purpose. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('dso-theme');var m=window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||((t==='system'||!t)&&m)){document.documentElement.classList.add('dark');}}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-ivory text-ink font-sans">
         {children}
       </body>

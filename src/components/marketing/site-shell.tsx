@@ -20,6 +20,7 @@ import { LensToggle } from "./lens-toggle";
 import { MotionMount } from "./motion";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import { ToastProvider } from "@/components/app/toast";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 export function SiteShell({
   children,
@@ -164,6 +165,7 @@ export async function SiteNav({
         <NavLink href="/contact">Contact</NavLink>
       </ul>
       <div className="flex items-center gap-3">
+        <ThemeToggle className="hidden sm:inline-flex text-slate-body" />
         <Link
           href={signInHref}
           className="hidden sm:inline-flex text-[12px] font-semibold tracking-[1.5px] uppercase text-slate-body hover:text-ink transition-colors"

@@ -137,9 +137,9 @@ function statusBadgeClass(kind: StageKind): string {
     case "open":
       return "bg-cream text-ink";
     case "screen":
-      return "bg-amber-50 text-amber-900";
+      return "bg-warning-bg text-warning";
     case "interview":
-      return "bg-blue-50 text-blue-900";
+      return "bg-info-bg text-info";
     case "offer":
     case "hired":
       return "bg-success-bg text-success";

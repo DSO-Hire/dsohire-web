@@ -45,6 +45,7 @@ import { CandidateRailNav, type RailNavItem } from "./candidate-rail-nav";
 import { CandidateCommandPaletteTrigger } from "./command-palette";
 import { NavBadgeRealtime } from "@/components/inbox/nav-badge-realtime";
 import { SupportLauncher } from "@/components/support/support-launcher";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { ToastProvider } from "@/components/app/toast";
 
 interface CandidateShellProps {
@@ -234,6 +235,10 @@ export function CandidateShell({
           <CandidateRailNav items={railItems} isDso={isDso} />
         </nav>
 
+        {/* Theme toggle — hidden in the slim rail (rail-flink slim rule). */}
+        <div className="rail-flink px-5 pt-3">
+          <ThemeToggle className="text-sidebar-foreground" />
+        </div>
         {/* Footer line — Settings · Help · Sign out → (Model H parity). */}
         <div className="rail-foot border-t border-sidebar-border px-5 py-3.5 flex items-center gap-4">
           <Link
