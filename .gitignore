@@ -43,3 +43,6 @@ next-env.d.ts
 # agent-run scratch logs
 .tsc-*.log
 .env*.local
+
+# Claude Code local workflow config (never committed)
+.claude/

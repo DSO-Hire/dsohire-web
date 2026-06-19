@@ -14,27 +14,38 @@
    Use bg-heritage/text-heritage in app code; shadcn internals stay
    on bg-accent/text-accent.
 ───────────────────────────────────────── */
-@theme {
-  /* Navy — primary structural color */
-  --color-ink: #14233F;
-  --color-ink-1000: #070F1C;
-  --color-ink-2: #1B2D4C;
-  --color-ink-3: #243854;
-  --color-ink-soft: #2D4262;
+:root {
+  /* ── Brand constants — RAW values (light). Mapped to --color-* via the
+     `@theme inline` block below, so the `.dark` block can override them
+     (same indirection shadcn already uses in this file).
 
-  /* Heritage — primary brand accent (was --color-accent, renamed) */
-  --color-heritage: #4D7A60;
-  --color-heritage-deep: #2F5D4F;
-  --color-heritage-light: #6B9279;
+     Each token's dark value is decided by its DOMINANT role (see `.dark`):
+     --ink is overwhelmingly body text, so it goes LIGHT in dark mode; its
+     off-role fills (bg-ink, the navy ink-scale) are re-pointed to
+     --sidebar / --hero / --primary during the migration. ── */
+  /* Navy — primary structural color */
+  --ink: #14233F;
+  --ink-1000: #070F1C;
+  --ink-2: #1B2D4C;
+  --ink-3: #243854;
+  --ink-soft: #2D4262;
+
+  /* Heritage — primary brand accent */
+  --heritage: #4D7A60;
+  --heritage-deep: #2F5D4F;
+  --heritage-light: #6B9279;
 
   /* Ivory — page paper, warmer than clinical white */
-  --color-ivory: #F7F4ED;
-  --color-ivory-deep: #ECE7DB;
-  --color-cream: #FAF7F1;
+  --ivory: #F7F4ED;
+  --ivory-deep: #ECE7DB;
+  --cream: #FAF7F1;
 
   /* Slate — body text on light */
-  --color-slate-body: #4A6278;
-  --color-slate-meta: #6E8395;
+  --slate-body: #4A6278;
+  --slate-meta: #6E8395;
+
+  /* Gold — sparkle / ★ accent */
+  --gold: #B8902F;
 }
 
 :root {
@@ -69,14 +80,41 @@
   --chart-4: #6B9279;
   --chart-5: #6E8395;
   --radius: 0;                       /* brand: no rounded corners on cards/buttons */
-  --sidebar: #F7F4ED;
-  --sidebar-foreground: #14233F;
-  --sidebar-primary: #14233F;
+  /* Sidebar / rail — the DSO *navy* rail (§3 "Sidebar / rail" role). This was
+     shadcn's ivory default, but the real rail is built navy (bg-ink today →
+     re-pointed to bg-sidebar in migration), so the token carries the navy. */
+  --sidebar: #14233F;
+  --sidebar-foreground: #F7F4ED;
+  --sidebar-muted: #93A2B8;
+  --sidebar-primary: #4D7A60;
   --sidebar-primary-foreground: #F7F4ED;
-  --sidebar-accent: #FAF7F1;
-  --sidebar-accent-foreground: #14233F;
-  --sidebar-border: rgba(20, 35, 63, 0.08);
+  --sidebar-accent: #1B2D4C;
+  --sidebar-accent-foreground: #F7F4ED;
+  --sidebar-border: rgba(237, 232, 219, 0.10);
   --sidebar-ring: #4D7A60;
+
+  /* ── New role tokens (theming layer) ── */
+  /* Hero — the navy feature panel (distinct from page bg + sidebar) */
+  --hero: #14233F;
+  --hero-foreground: #F7F4ED;
+
+  /* Tertiary / meta text (one step quieter than --muted-foreground) */
+  --meta-foreground: #6E8395;
+
+  /* Stronger structural rule */
+  --border-2: rgba(20, 35, 63, 0.18);
+
+  /* Status — semantic, carry meaning across modes (§5.4). Solid for
+     text/icon, -bg for the tinted fill, -foreground for text on the solid. */
+  --success: #2F6B4A;
+  --success-foreground: #FFFFFF;
+  --success-bg: rgba(77, 122, 96, 0.12);
+  --warning: #9A6B17;
+  --warning-foreground: #FFFFFF;
+  --warning-bg: rgba(184, 144, 47, 0.14);
+  --danger: #B42318;
+  --danger-foreground: #FFFFFF;
+  --danger-bg: rgba(180, 35, 24, 0.10);
 }
 
 html {
@@ -109,6 +147,38 @@ html, body {
   /* Force Tailwind's font-sans utility to Manrope (override Geist) */
   --font-heading: var(--font-manrope);
   --font-sans: var(--font-manrope);
+
+  /* ── Brand constants → indirection (so .dark overrides cascade) ── */
+  --color-ink: var(--ink);
+  --color-ink-1000: var(--ink-1000);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-soft: var(--ink-soft);
+  --color-heritage: var(--heritage);
+  --color-heritage-deep: var(--heritage-deep);
+  --color-heritage-light: var(--heritage-light);
+  --color-ivory: var(--ivory);
+  --color-ivory-deep: var(--ivory-deep);
+  --color-cream: var(--cream);
+  --color-slate-body: var(--slate-body);
+  --color-slate-meta: var(--slate-meta);
+  --color-gold: var(--gold);
+
+  /* ── New role tokens ── */
+  --color-hero: var(--hero);
+  --color-hero-foreground: var(--hero-foreground);
+  --color-meta-foreground: var(--meta-foreground);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-border-2: var(--border-2);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-bg: var(--success-bg);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-bg: var(--warning-bg);
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-danger-bg: var(--danger-bg);
 
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -151,38 +221,89 @@ html, body {
 }
 
 .dark {
-  /* dark mode — not used in v1 but keeping shadcn defaults so dark utilities don't error */
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  /* ═══════════════════════════════════════════════════════════════
+     DSO Hire — approved brand-dark palette (signed off 2026-06-18).
+     Every value extracted from Dark_Mode_Preview_2026-06-18.html (§3).
+     Each token's dark value is chosen by its DOMINANT role (§4): brand
+     constants flip by brightness; structural color flows through the
+     role tokens; off-role brand fills (bg-ink, text-ivory) are re-pointed
+     to role tokens during the migration, not solved here.
+  ═══════════════════════════════════════════════════════════════ */
+
+  /* ── Brand constants — keep identity, shift brightness ── */
+  --ink: #F1ECDF;          /* DOMINANT role is body text → goes light */
+  --ink-1000: #060E1B;
+  --ink-2: #18253C;        /* off-role navy fills stay navy (surface-2 ramp) */
+  --ink-3: #243854;
+  --ink-soft: #2D4262;
+  --heritage: #8DB8A3;
+  --heritage-deep: #A6CDB8;
+  --heritage-light: #A6CDB8;
+  --ivory: #0A1320;        /* page background */
+  --ivory-deep: #18253C;   /* surface-2 / muted / elevated */
+  --cream: #111E33;        /* surface / card */
+  --slate-body: #A6B7C7;
+  --slate-meta: #7E90A1;
+  --gold: #E9C873;
+
+  /* ── Inline-style-only helpers (used in CSS, not Tailwind classes) ── */
+  --heritage-tint: rgba(141, 184, 163, 0.14);
+  --heritage-glow: rgba(141, 184, 163, 0.14);
+  --rule: rgba(237, 232, 219, 0.11);
+  --rule-strong: rgba(237, 232, 219, 0.20);
+
+  /* ── shadcn semantic roles ── */
+  --background: #0A1320;
+  --foreground: #F1ECDF;
+  --card: #111E33;
+  --card-foreground: #F1ECDF;
+  --popover: #111E33;
+  --popover-foreground: #F1ECDF;
+  --primary: #EDE7D8;            /* primary button INVERTS to light */
+  --primary-foreground: #0F1B2E;
+  --secondary: #18253C;
+  --secondary-foreground: #F1ECDF;
+  --muted: #18253C;
+  --muted-foreground: #A6B7C7;
+  --accent: #18253C;            /* subtle hover bg in shadcn menus */
+  --accent-foreground: #F1ECDF;
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --border: rgba(237, 232, 219, 0.11);
+  --input: rgba(237, 232, 219, 0.20);
+  --ring: #8DB8A3;
+  --chart-1: #EDE7D8;
+  --chart-2: #8DB8A3;
+  --chart-3: #A6B7C7;
+  --chart-4: #6B9279;
+  --chart-5: #7E90A1;
+
+  /* ── Sidebar / rail ── */
+  --sidebar: #060E1B;
+  --sidebar-foreground: #EDE8DB;
+  --sidebar-muted: #7C8EA0;
+  --sidebar-primary: #8DB8A3;
+  --sidebar-primary-foreground: #0F1B2E;
+  --sidebar-accent: #18253C;
+  --sidebar-accent-foreground: #EDE8DB;
+  --sidebar-border: rgba(237, 232, 219, 0.11);
+  --sidebar-ring: #8DB8A3;
+
+  /* ── New role tokens ── */
+  --hero: #15273F;
+  --hero-foreground: #F1ECDF;
+  --meta-foreground: #7E90A1;
+  --border-2: rgba(237, 232, 219, 0.20);
+
+  /* ── Status — brightened + slightly desaturated for dark surfaces (§5.4) ── */
+  --success: #8DB8A3;
+  --success-foreground: #0F1B2E;
+  --success-bg: rgba(141, 184, 163, 0.16);
+  --warning: #E9C873;
+  --warning-foreground: #0F1B2E;
+  --warning-bg: rgba(233, 200, 115, 0.16);
+  --danger: #F2998E;
+  --danger-foreground: #0F1B2E;
+  --danger-bg: rgba(242, 153, 142, 0.16);
 }
 
 @layer base {
@@ -296,11 +417,11 @@ html, body {
   padding: 0;
   border-radius: 0;
   box-shadow: 0 4px 14px rgba(7, 15, 28, 0.18);
-  background: #FAF7F1; /* cream */
-  border: 1px solid rgba(20, 35, 63, 0.14);
+  background: var(--card); /* cream → themed surface */
+  border: 1px solid var(--border-2);
 }
 .dsohire-map-popup .mapboxgl-popup-tip {
-  border-top-color: #FAF7F1;
+  border-top-color: var(--card);
 }
 .dsohire-map-popup-card {
   padding: 10px 14px;
@@ -805,6 +926,15 @@ html, body {
 }
 @keyframes sk-shimmer {
   to { transform: translateX(100%); }
+}
+/* Dark: the bright-white sweep blinds on a dark surface — soften it. */
+.dark .sk::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.06),
+    transparent
+  );
 }
 
 /* ── Lane S: sidebar Model H (Day 32 verdict) ─────────────────────
