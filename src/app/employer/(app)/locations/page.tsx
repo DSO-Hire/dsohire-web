@@ -130,14 +130,14 @@ export default async function EmployerLocationsPage({ searchParams }: PageProps)
         <div className="flex items-center gap-2.5 flex-wrap">
           <Link
             href="/employer/locations/bulk"
-            className="inline-flex items-center gap-2 px-4 py-3.5 bg-white border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-cream/60 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-3.5 bg-card border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-cream/60 transition-colors"
           >
             <Upload className="h-3.5 w-3.5" />
             Bulk Import
           </Link>
           <Link
             href="/employer/locations/new"
-            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
           >
             <Plus className="h-4 w-4" />
             Add Location
@@ -198,7 +198,7 @@ function EmptyState() {
       </p>
       <Link
         href="/employer/locations/new"
-        className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+        className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
       >
         <Plus className="h-4 w-4" />
         Add Location

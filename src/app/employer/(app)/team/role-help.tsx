@@ -135,8 +135,8 @@ export function RoleHelp() {
         <span
           className={`flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold tracking-[1.5px] uppercase border transition-colors ${
             open
-              ? "bg-ink text-ivory border-ink"
-              : "bg-white text-ink border-[var(--rule-strong)] group-hover:bg-ink group-hover:text-ivory group-hover:border-ink"
+              ? "bg-primary text-primary-foreground border-primary"
+              : "bg-card text-ink border-[var(--rule-strong)] group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary"
           }`}
         >
           {open ? "Hide guide" : "See role guide"}
@@ -184,7 +184,7 @@ function RoleCard({
   role: (typeof ROLE_GUIDE)[number];
 }) {
   return (
-    <div className="bg-white border border-[var(--rule)] p-4">
+    <div className="bg-card border border-[var(--rule)] p-4">
       <div className="flex items-start gap-3">
         <div className="h-8 w-8 rounded-full bg-cream border border-[var(--rule-strong)] flex items-center justify-center flex-shrink-0 mt-0.5">
           <role.Icon className="h-4 w-4 text-heritage-deep" />

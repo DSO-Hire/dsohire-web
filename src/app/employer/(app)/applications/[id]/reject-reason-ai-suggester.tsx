@@ -132,7 +132,7 @@ export function RejectReasonAiSuggester({
           type="button"
           onClick={run}
           disabled={disabled}
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {pending ? (
             <>
@@ -165,8 +165,8 @@ export function RejectReasonAiSuggester({
       </div>
 
       {error && (
-        <div className="mt-3 flex items-start justify-between gap-3 border-l-4 border-red-500 bg-red-50 p-3">
-          <div className="flex items-start gap-2 text-[13px] text-red-900 leading-relaxed">
+        <div className="mt-3 flex items-start justify-between gap-3 border-l-4 border-danger bg-danger-bg p-3">
+          <div className="flex items-start gap-2 text-[13px] text-danger leading-relaxed">
             <AlertCircle
               className="h-3.5 w-3.5 mt-0.5 flex-shrink-0"
               aria-hidden="true"
@@ -177,7 +177,7 @@ export function RejectReasonAiSuggester({
             type="button"
             onClick={run}
             disabled={pending}
-            className="text-[10px] font-bold tracking-[1.5px] uppercase text-red-900 hover:text-red-700 transition-colors flex-shrink-0"
+            className="text-[10px] font-bold tracking-[1.5px] uppercase text-danger hover:text-danger transition-colors flex-shrink-0"
           >
             Try again
           </button>
@@ -191,7 +191,7 @@ export function RejectReasonAiSuggester({
             return (
               <li
                 key={i}
-                className={`border bg-white p-3 transition-colors ${
+                className={`border bg-card p-3 transition-colors ${
                   isApplied
                     ? "border-heritage ring-1 ring-inset ring-heritage/40"
                     : "border-[var(--rule-strong)]"

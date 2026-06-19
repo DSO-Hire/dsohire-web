@@ -113,28 +113,28 @@ interface BannerProps {
 function Banner({ tone, icon, title, body, ctaHref, ctaLabel }: BannerProps) {
   const toneClasses: Record<BannerProps["tone"], string> = {
     info: "bg-cream border-heritage",
-    warn: "bg-yellow-50 border-yellow-500",
-    alert: "bg-red-50 border-red-500",
+    warn: "bg-warning-bg border-warning",
+    alert: "bg-danger-bg border-danger",
   };
   const titleClasses: Record<BannerProps["tone"], string> = {
     info: "text-ink",
-    warn: "text-yellow-900",
-    alert: "text-red-900",
+    warn: "text-warning",
+    alert: "text-danger",
   };
   const bodyClasses: Record<BannerProps["tone"], string> = {
     info: "text-slate-body",
-    warn: "text-yellow-900/85",
-    alert: "text-red-900/85",
+    warn: "text-warning/85",
+    alert: "text-danger/85",
   };
   const iconClasses: Record<BannerProps["tone"], string> = {
     info: "text-heritage",
-    warn: "text-yellow-700",
-    alert: "text-red-700",
+    warn: "text-warning",
+    alert: "text-danger",
   };
   const ctaClasses: Record<BannerProps["tone"], string> = {
-    info: "bg-ink text-ivory hover:bg-ink-soft",
-    warn: "bg-yellow-700 text-white hover:bg-yellow-800",
-    alert: "bg-red-600 text-white hover:bg-red-700",
+    info: "bg-primary text-primary-foreground hover:bg-primary/90",
+    warn: "bg-warning text-warning-foreground hover:bg-warning/90",
+    alert: "bg-danger text-danger-foreground hover:bg-danger/90",
   };
 
   return (

@@ -82,9 +82,9 @@ export default async function EmployerDataPage() {
 
 function NonOwnerNotice() {
   return (
-    <section className="border border-amber-200 bg-amber-50/40 p-6">
+    <section className="border border-warning bg-warning-bg/40 p-6">
       <div className="flex items-start gap-3">
-        <ShieldAlert className="mt-0.5 size-5 shrink-0 text-amber-700" />
+        <ShieldAlert className="mt-0.5 size-5 shrink-0 text-warning" />
         <div>
           <h2 className="font-display text-base font-bold text-ink mb-1">
             Owner-only surface

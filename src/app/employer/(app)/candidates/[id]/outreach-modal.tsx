@@ -114,7 +114,7 @@ export function OutreachModal({
         if (e.target === e.currentTarget && !pending) onClose();
       }}
     >
-      <div className="bg-white border border-[var(--rule)] w-full max-w-2xl shadow-2xl mt-16">
+      <div className="bg-card border border-[var(--rule)] w-full max-w-2xl shadow-2xl mt-16">
         <header className="px-6 py-4 border-b border-[var(--rule)] flex items-center justify-between">
           <h2
             id="outreach-modal-title"
@@ -126,7 +126,7 @@ export function OutreachModal({
             type="button"
             onClick={onClose}
             disabled={pending}
-            className="rounded-md p-1 text-slate-400 hover:text-ink hover:bg-cream disabled:opacity-50"
+            className="rounded-md p-1 text-meta-foreground hover:text-ink hover:bg-cream disabled:opacity-50"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -149,7 +149,7 @@ export function OutreachModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 bg-ink text-ivory text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft"
+              className="px-5 py-2 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
             >
               Close
             </button>
@@ -257,7 +257,7 @@ export function OutreachModal({
             </div>
 
             {error && (
-              <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-800">
+              <div className="rounded-md border border-danger bg-danger-bg px-3 py-2 text-[13px] text-danger">
                 {error}
               </div>
             )}
@@ -270,7 +270,7 @@ export function OutreachModal({
               <button
                 type="submit"
                 disabled={pending || !subject.trim() || !body.trim()}
-                className="inline-flex items-center gap-2 px-5 py-2 bg-ink text-ivory text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft disabled:opacity-60 shrink-0"
+                className="inline-flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60 shrink-0"
               >
                 {pending ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -304,7 +304,7 @@ export function OutreachLauncher({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 px-4 py-2.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft"
+        className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
       >
         <Send className="h-3.5 w-3.5" aria-hidden />
         Message

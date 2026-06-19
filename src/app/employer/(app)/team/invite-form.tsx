@@ -88,7 +88,7 @@ export function InviteForm({ locations }: { locations: LocationRow[] }) {
           <button
             type="submit"
             disabled={pending}
-            className="inline-flex items-center justify-center gap-2 px-7 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed h-[48px] whitespace-nowrap"
+            className="inline-flex items-center justify-center gap-2 px-7 py-3 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed h-[48px] whitespace-nowrap"
           >
             {pending ? "Sending…" : "Send Invite"}
             {!pending && <Send className="h-3.5 w-3.5" />}
@@ -126,7 +126,7 @@ export function InviteForm({ locations }: { locations: LocationRow[] }) {
                 {locations.map((loc) => (
                   <label
                     key={loc.id}
-                    className="flex items-start gap-2 p-2 bg-white border border-[var(--rule)] hover:border-heritage cursor-pointer transition-colors"
+                    className="flex items-start gap-2 p-2 bg-card border border-[var(--rule)] hover:border-heritage cursor-pointer transition-colors"
                   >
                     <input
                       type="checkbox"
@@ -160,8 +160,8 @@ export function InviteForm({ locations }: { locations: LocationRow[] }) {
       )}
 
       {state.error && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-3">
-          <p className="text-[14px] text-red-900">{state.error}</p>
+        <div className="bg-danger-bg border-l-4 border-danger p-3">
+          <p className="text-[14px] text-danger">{state.error}</p>
         </div>
       )}
       {state.ok && state.message && (

@@ -143,7 +143,7 @@ export function ScreeningResponseRow({
             {display}
           </div>
           {missing && question.required && (
-            <div className="mt-1.5 text-[12px] font-bold tracking-[1px] uppercase text-red-700">
+            <div className="mt-1.5 text-[12px] font-bold tracking-[1px] uppercase text-danger">
               Required question — no response
             </div>
           )}
@@ -268,7 +268,7 @@ export function VerificationRow({ row }: { row: VerificationRowData }) {
           {/* Required-but-not-attested red flag — mirrors the screening
               block's required-blank treatment. */}
           {flagged && (
-            <div className="mt-1.5 text-[12px] font-bold tracking-[1px] uppercase text-red-700">
+            <div className="mt-1.5 text-[12px] font-bold tracking-[1px] uppercase text-danger">
               Required verification — not attested
             </div>
           )}

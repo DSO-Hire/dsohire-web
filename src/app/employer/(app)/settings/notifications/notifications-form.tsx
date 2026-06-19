@@ -96,7 +96,7 @@ export function EmployerNotificationsForm({
       {groups.map(({ group, events }) => (
         <section
           key={group}
-          className="border border-[var(--rule)] bg-white p-6 sm:p-8"
+          className="border border-[var(--rule)] bg-card p-6 sm:p-8"
         >
           <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
             {group}
@@ -115,10 +115,10 @@ export function EmployerNotificationsForm({
       ))}
 
       {/* Sticky save bar */}
-      <div className="sticky bottom-4 z-10 flex items-center justify-between border border-[var(--rule-strong)] bg-white/95 px-5 py-3 backdrop-blur shadow-md">
+      <div className="sticky bottom-4 z-10 flex items-center justify-between border border-[var(--rule-strong)] bg-card/95 px-5 py-3 backdrop-blur shadow-md">
         <div className="text-[13px]">
           {error ? (
-            <span className="inline-flex items-center gap-1.5 text-red-700">
+            <span className="inline-flex items-center gap-1.5 text-danger">
               <AlertCircle className="h-3.5 w-3.5" /> {error}
             </span>
           ) : savedFlash ? (
@@ -138,7 +138,7 @@ export function EmployerNotificationsForm({
           type="button"
           onClick={onSave}
           disabled={saving || dirty.length === 0}
-          className="inline-flex items-center gap-2 bg-ink px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ivory hover:bg-ink-soft disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="inline-flex items-center gap-2 bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           {saving ? (
             "Saving…"
@@ -182,7 +182,7 @@ function EventRow({
             </span>
           )}
           {!event.shipped && !event.forced && (
-            <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-bold tracking-[1px] uppercase text-slate-meta">
+            <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[9px] font-bold tracking-[1px] uppercase text-slate-meta">
               Coming soon
             </span>
           )}
@@ -240,13 +240,13 @@ function ChannelToggle({
         } ${disabled ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
       >
         <span
-          className={`absolute top-0.5 size-4 rounded-full bg-white transition ${
+          className={`absolute top-0.5 size-4 rounded-full bg-card transition ${
             enabled ? "left-[18px]" : "left-0.5"
           }`}
         />
         {enabled && (
           <Check
-            className="absolute left-1 top-0.5 size-4 text-white"
+            className="absolute left-1 top-0.5 size-4 text-primary-foreground"
             aria-hidden
           />
         )}

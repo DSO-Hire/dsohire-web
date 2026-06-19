@@ -214,9 +214,9 @@ export function PermissionsEditorButton({
                           key={m.key}
                           className={`flex items-start gap-3 p-3 transition-colors ${
                             disabled
-                              ? "bg-white opacity-70 cursor-not-allowed"
+                              ? "bg-card opacity-70 cursor-not-allowed"
                               : "cursor-pointer " +
-                                (on ? "bg-cream" : "bg-white hover:bg-cream/60")
+                                (on ? "bg-cream" : "bg-card hover:bg-cream/60")
                           }`}
                           title={
                             lockedGrant
@@ -259,7 +259,7 @@ export function PermissionsEditorButton({
               ))}
 
               {error && (
-                <div className="mb-4 px-3 py-2.5 bg-red-50 border border-red-200 text-[13px] text-red-900">
+                <div className="mb-4 px-3 py-2.5 bg-danger-bg border border-danger text-[13px] text-danger">
                   {error}
                 </div>
               )}
@@ -293,7 +293,7 @@ export function PermissionsEditorButton({
                     type="button"
                     onClick={onSave}
                     disabled={pending || !dirty}
-                    className="inline-flex items-center gap-1.5 px-5 py-2 bg-ink text-ivory text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 px-5 py-2 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
                   >
                     {pending ? (
                       "Saving…"

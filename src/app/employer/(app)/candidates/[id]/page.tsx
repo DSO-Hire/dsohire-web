@@ -292,7 +292,7 @@ export default async function CandidateDetailPage({ params }: PageProps) {
                 {outreachHistory.map((m) => (
                   <li
                     key={m.id}
-                    className="border border-[var(--rule)] bg-white p-4"
+                    className="border border-[var(--rule)] bg-card p-4"
                   >
                     <div className="flex items-baseline justify-between gap-3 mb-1">
                       <span className="text-[13px] font-bold text-ink">

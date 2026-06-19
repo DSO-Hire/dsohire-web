@@ -187,12 +187,12 @@ export function JobAttachmentsSection({
   }
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-6">
+    <section className="rounded-xl border border-border bg-card p-6">
       <header className="mb-4 flex items-start gap-3">
-        <Paperclip className="mt-0.5 h-5 w-5 text-[#4D7A60]" aria-hidden />
+        <Paperclip className="mt-0.5 h-5 w-5 text-heritage" aria-hidden />
         <div className="flex-1">
-          <h2 className="text-lg font-semibold text-[#14233F]">Attachments</h2>
-          <p className="mt-1 text-sm text-slate-600">
+          <h2 className="text-lg font-semibold text-foreground">Attachments</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
             Upload supporting documents candidates can review before they
             apply &mdash; pro forma comp models, benefits PDFs, practice
             tour decks, schedule templates. Use the &quot;hidden until
@@ -207,14 +207,14 @@ export function JobAttachmentsSection({
           {attachments.map((att, idx) => (
             <li
               key={att.id}
-              className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
+              className="flex items-center gap-3 rounded-lg border border-border bg-muted px-3 py-2"
             >
               <div className="flex w-8 flex-col gap-0.5">
                 <button
                   type="button"
                   onClick={() => handleMove(att.id, -1)}
                   disabled={idx === 0 || pending}
-                  className="rounded p-0.5 text-slate-400 hover:bg-slate-200 hover:text-[#14233F] disabled:opacity-30"
+                  className="rounded p-0.5 text-meta-foreground hover:bg-muted hover:text-foreground disabled:opacity-30"
                   aria-label="Move up"
                 >
                   <ChevronUp className="h-4 w-4" />
@@ -223,17 +223,17 @@ export function JobAttachmentsSection({
                   type="button"
                   onClick={() => handleMove(att.id, 1)}
                   disabled={idx === attachments.length - 1 || pending}
-                  className="rounded p-0.5 text-slate-400 hover:bg-slate-200 hover:text-[#14233F] disabled:opacity-30"
+                  className="rounded p-0.5 text-meta-foreground hover:bg-muted hover:text-foreground disabled:opacity-30"
                   aria-label="Move down"
                 >
                   <ChevronDown className="h-4 w-4" />
                 </button>
               </div>
               <div className="flex-1 min-w-0">
-                <div className="truncate text-sm font-medium text-[#14233F]">
+                <div className="truncate text-sm font-medium text-foreground">
                   {att.display_name}
                 </div>
-                <div className="mt-0.5 flex items-center gap-2 text-xs text-slate-500">
+                <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
                   <span>{mimeLabel(att.mime_type)}</span>
                   <span aria-hidden>&middot;</span>
                   <span>{formatSize(att.file_size_bytes)}</span>
@@ -246,14 +246,14 @@ export function JobAttachmentsSection({
                     style={
                       att.hide_until_applied
                         ? {
-                            color: "#B45309",
-                            backgroundColor: "#FEF3C7",
-                            boxShadow: "inset 0 0 0 1px #FDE68A",
+                            color: "var(--warning)",
+                            backgroundColor: "var(--warning-bg)",
+                            boxShadow: "inset 0 0 0 1px var(--warning)",
                           }
                         : {
-                            color: "#166534",
-                            backgroundColor: "#DCFCE7",
-                            boxShadow: "inset 0 0 0 1px #BBF7D0",
+                            color: "var(--success)",
+                            backgroundColor: "var(--success-bg)",
+                            boxShadow: "inset 0 0 0 1px var(--success)",
                           }
                     }
                   >
@@ -273,7 +273,7 @@ export function JobAttachmentsSection({
                 type="button"
                 onClick={() => handleDelete(att.id)}
                 disabled={pending}
-                className="rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
+                className="rounded-md p-1.5 text-meta-foreground hover:bg-danger-bg hover:text-danger disabled:opacity-50"
                 aria-label="Delete attachment"
               >
                 <Trash2 className="h-4 w-4" />
@@ -284,7 +284,7 @@ export function JobAttachmentsSection({
       )}
 
       {atCap ? (
-        <div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+        <div className="mb-4 flex items-start gap-2 rounded-lg border border-warning bg-warning-bg p-3 text-sm text-warning">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
           <div>
             <strong>{tierLabel}</strong> tier caps at {tierCap} attachments
@@ -297,7 +297,7 @@ export function JobAttachmentsSection({
           <div>
             <label
               htmlFor="job-attachment-file"
-              className="mb-1 block text-sm font-medium text-[#14233F]"
+              className="mb-1 block text-sm font-medium text-foreground"
             >
               Add a file
             </label>
@@ -308,9 +308,9 @@ export function JobAttachmentsSection({
               type="file"
               accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,image/png,image/jpeg,image/webp"
               required
-              className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-[#14233F] file:mr-3 file:rounded-md file:border-0 file:bg-[#14233F] file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white hover:file:bg-[#0e1a30]"
+              className="block w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-primary-foreground hover:file:bg-primary/90"
             />
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               PDF, Word, Excel, or image. Up to 20 MB.
             </p>
           </div>
@@ -318,9 +318,9 @@ export function JobAttachmentsSection({
           <div>
             <label
               htmlFor="job-attachment-name"
-              className="mb-1 block text-sm font-medium text-[#14233F]"
+              className="mb-1 block text-sm font-medium text-foreground"
             >
-              Display name <span className="text-slate-400">(optional)</span>
+              Display name <span className="text-meta-foreground">(optional)</span>
             </label>
             <input
               id="job-attachment-name"
@@ -329,20 +329,20 @@ export function JobAttachmentsSection({
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="e.g. Associate Comp Model 2026"
               maxLength={120}
-              className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-[#14233F] placeholder:text-slate-400"
+              className="block w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-meta-foreground"
             />
           </div>
 
-          <label className="flex items-start gap-2 text-sm text-[#14233F]">
+          <label className="flex items-start gap-2 text-sm text-foreground">
             <input
               type="checkbox"
               checked={hideUntilApplied}
               onChange={(e) => setHideUntilApplied(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#4D7A60] focus:ring-[#4D7A60]"
+              className="mt-0.5 h-4 w-4 rounded border-border text-heritage focus:ring-heritage"
             />
             <span>
               <span className="font-medium">Hide until applied.</span>{" "}
-              <span className="text-slate-600">
+              <span className="text-muted-foreground">
                 Visible only to candidates who&apos;ve submitted an
                 application. Use for sensitive comp models or anything
                 you&apos;d rather not surface to casual browsers.
@@ -354,7 +354,7 @@ export function JobAttachmentsSection({
             <button
               type="submit"
               disabled={pending}
-              className="inline-flex items-center gap-2 rounded-md bg-[#14233F] px-4 py-2 text-sm font-medium text-white hover:bg-[#0e1a30] disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
             >
               {pending ? (
                 <>
@@ -366,7 +366,7 @@ export function JobAttachmentsSection({
                 </>
               )}
             </button>
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-muted-foreground">
               {remaining} of {tierCap} {tierLabel} attachments remaining
             </span>
           </div>
@@ -374,12 +374,12 @@ export function JobAttachmentsSection({
       )}
 
       {error && (
-        <div className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+        <div className="mt-3 rounded-md border border-danger bg-danger-bg px-3 py-2 text-sm text-danger">
           {error}
         </div>
       )}
       {success && !error && (
-        <div className="mt-3 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
+        <div className="mt-3 rounded-md border border-success bg-success-bg px-3 py-2 text-sm text-success">
           {success}
         </div>
       )}

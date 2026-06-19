@@ -86,7 +86,7 @@ export function AuditFiltersBar({
           value={activeRange}
           onChange={(e) => setParam("range", e.currentTarget.value)}
           disabled={pending}
-          className="text-[12px] px-2 py-1.5 bg-white border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage"
+          className="text-[12px] px-2 py-1.5 bg-card border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage"
         >
           {RANGE_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -102,7 +102,7 @@ export function AuditFiltersBar({
           value={activeActor}
           onChange={(e) => setParam("actor", e.currentTarget.value || null)}
           disabled={pending}
-          className="text-[12px] px-2 py-1.5 bg-white border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage min-w-[160px]"
+          className="text-[12px] px-2 py-1.5 bg-card border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage min-w-[160px]"
         >
           <option value="">All teammates</option>
           {teammates.map((t) => (
@@ -117,7 +117,7 @@ export function AuditFiltersBar({
             type="button"
             onClick={clearAll}
             disabled={pending}
-            className="ml-auto text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta hover:text-red-700 transition-colors"
+            className="ml-auto text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta hover:text-danger transition-colors"
           >
             Clear filters
           </button>
@@ -139,8 +139,8 @@ export function AuditFiltersBar({
               className={
                 "text-[10px] font-semibold tracking-[0.5px] px-2 py-1 transition-colors " +
                 (active
-                  ? "bg-heritage text-ivory"
-                  : "bg-white text-ink border border-[var(--rule-strong)] hover:bg-cream")
+                  ? "bg-heritage text-primary-foreground"
+                  : "bg-card text-ink border border-[var(--rule-strong)] hover:bg-cream")
               }
             >
               {label}

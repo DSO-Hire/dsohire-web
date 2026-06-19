@@ -43,7 +43,7 @@ export function EmployerRailNav({ groups }: { groups: RailNavGroup[] }) {
         <ul key={group.group} className="list-none space-y-0.5">
           <li
             aria-hidden="true"
-            className="rail-glabel pt-3.5 pb-1.5 px-2.5 text-[8.5px] font-extrabold tracking-[2.8px] uppercase text-ivory/40"
+            className="rail-glabel pt-3.5 pb-1.5 px-2.5 text-[8.5px] font-extrabold tracking-[2.8px] uppercase text-sidebar-foreground/40"
           >
             {group.label}
           </li>
@@ -57,8 +57,8 @@ export function EmployerRailNav({ groups }: { groups: RailNavGroup[] }) {
                   className={
                     "rail-item group relative flex items-center gap-3 px-3 py-2 text-[13px] font-semibold tracking-[0.2px] border border-transparent transition-colors " +
                     (isActive
-                      ? "rail-item-on bg-white/[0.08] text-ivory border-white/10"
-                      : "text-ivory/60 hover:bg-white/5 hover:text-ivory")
+                      ? "rail-item-on bg-sidebar-foreground/[0.08] text-sidebar-foreground border-sidebar-border"
+                      : "text-sidebar-foreground/60 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground")
                   }
                 >
                   {item.icon}
@@ -66,7 +66,7 @@ export function EmployerRailNav({ groups }: { groups: RailNavGroup[] }) {
                   {item.badge && item.badge > 0 ? (
                     <span
                       aria-label={`${item.badge} unread`}
-                      className="rail-badge ml-2 inline-flex items-center justify-center rounded-full bg-heritage-deep px-1.5 py-0.5 text-[10px] font-bold text-ivory min-w-[18px]"
+                      className="rail-badge ml-2 inline-flex items-center justify-center rounded-full bg-heritage-deep px-1.5 py-0.5 text-[10px] font-bold text-sidebar-foreground min-w-[18px]"
                     >
                       {item.badge > 99 ? "99+" : item.badge}
                     </span>

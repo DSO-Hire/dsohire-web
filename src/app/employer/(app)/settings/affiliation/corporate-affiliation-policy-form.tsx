@@ -110,7 +110,7 @@ export function CorporateAffiliationPolicyForm({
                 "block border cursor-pointer transition-colors px-5 py-4 " +
                 (isSelected
                   ? "border-heritage bg-cream"
-                  : "border-[var(--rule-strong)] bg-white hover:bg-cream/50")
+                  : "border-[var(--rule-strong)] bg-card hover:bg-cream/50")
               }
             >
               <div className="flex items-start gap-3">
@@ -129,7 +129,7 @@ export function CorporateAffiliationPolicyForm({
                       {opt.label}
                     </span>
                     {isCurrent && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-heritage text-ivory text-[9px] font-bold tracking-[1.2px] uppercase">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-heritage text-primary-foreground text-[9px] font-bold tracking-[1.2px] uppercase">
                         <Check className="h-2.5 w-2.5" />
                         Current
                       </span>
@@ -157,9 +157,9 @@ export function CorporateAffiliationPolicyForm({
       </div>
 
       {state.error && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-3 flex items-start gap-2">
-          <AlertCircle className="h-4 w-4 text-red-700 mt-0.5 flex-shrink-0" />
-          <p className="text-[13px] text-red-900">{state.error}</p>
+        <div className="bg-danger-bg border-l-4 border-danger p-3 flex items-start gap-2">
+          <AlertCircle className="h-4 w-4 text-danger mt-0.5 flex-shrink-0" />
+          <p className="text-[13px] text-danger">{state.error}</p>
         </div>
       )}
       {state.ok && state.message && (
@@ -172,7 +172,7 @@ export function CorporateAffiliationPolicyForm({
         <button
           type="submit"
           disabled={pending || selected === effectivePolicy}
-          className="inline-flex items-center gap-2 px-7 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 px-7 py-3 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {pending ? "Saving…" : "Save policy"}
         </button>

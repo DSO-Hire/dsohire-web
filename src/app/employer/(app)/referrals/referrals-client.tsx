@@ -52,7 +52,7 @@ export function ShareLinkBox({ code }: { code: string | null }) {
       <button
         type="button"
         onClick={copy}
-        className="inline-flex items-center gap-1.5 h-9 px-3 bg-ink text-ivory text-[11px] font-bold tracking-[1px] uppercase hover:bg-ink-soft transition-colors"
+        className="inline-flex items-center gap-1.5 h-9 px-3 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1px] uppercase hover:bg-primary/90 transition-colors"
       >
         {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
         {copied ? "Copied" : "Copy"}
@@ -98,7 +98,7 @@ export function ReferralComposer({ jobs }: { jobs: JobOption[] }) {
   };
 
   const inputCls =
-    "w-full h-10 px-3 bg-white border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage";
+    "w-full h-10 px-3 bg-card border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage";
 
   if (!open) {
     return (
@@ -106,7 +106,7 @@ export function ReferralComposer({ jobs }: { jobs: JobOption[] }) {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-heritage text-ivory text-[12px] font-bold tracking-[1px] uppercase hover:bg-heritage-deep transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-heritage text-primary-foreground text-[12px] font-bold tracking-[1px] uppercase hover:bg-heritage-deep transition-colors"
         >
           <UserPlus className="h-4 w-4" />
           Refer someone
@@ -121,7 +121,7 @@ export function ReferralComposer({ jobs }: { jobs: JobOption[] }) {
   }
 
   return (
-    <div className="border border-[var(--rule-strong)] bg-white p-5 space-y-4 max-w-[680px]">
+    <div className="border border-[var(--rule-strong)] bg-card p-5 space-y-4 max-w-[680px]">
       <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
         Refer someone
       </div>
@@ -141,15 +141,15 @@ export function ReferralComposer({ jobs }: { jobs: JobOption[] }) {
         value={note}
         onChange={(e) => setNote(e.target.value)}
         rows={2}
-        className="w-full px-3 py-2 bg-white border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage resize-y"
+        className="w-full px-3 py-2 bg-card border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage resize-y"
       />
-      {error && <p role="alert" className="text-[13px] text-red-700">{error}</p>}
+      {error && <p role="alert" className="text-[13px] text-danger">{error}</p>}
       <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={submit}
           disabled={saving || !name.trim()}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-ink text-ivory text-[12px] font-bold tracking-[1px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
           Add referral
@@ -198,7 +198,7 @@ export function StatusSelect({
       value={value}
       disabled={pending}
       onChange={(e) => onChange(e.target.value)}
-      className="text-[12px] px-2 py-1 bg-white border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage"
+      className="text-[12px] px-2 py-1 bg-card border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage"
     >
       {STATUS_OPTIONS.map((o) => (
         <option key={o.value} value={o.value}>{o.label}</option>

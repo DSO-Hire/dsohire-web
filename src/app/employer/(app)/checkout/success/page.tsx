@@ -78,7 +78,7 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps) {
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
             href="/employer/onboarding"
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
           >
             Continue Setup
             <ArrowRight className="h-4 w-4" />

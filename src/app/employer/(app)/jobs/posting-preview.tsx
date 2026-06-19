@@ -134,7 +134,7 @@ export function PostingPreview(props: PostingPreviewProps) {
         : `${props.locationNames[0]} +${props.locationNames.length - 1} more`;
 
   return (
-    <div className="border border-[var(--rule-strong)] bg-white">
+    <div className="border border-[var(--rule-strong)] bg-card">
       <div className="flex items-center gap-2 px-4 py-2 border-b border-[var(--rule)] bg-cream/60">
         <Eye className="h-3.5 w-3.5 text-heritage-deep" aria-hidden />
         <span className="text-[9px] font-bold tracking-[2px] uppercase text-heritage-deep">
@@ -262,7 +262,7 @@ export function PostingPreview(props: PostingPreviewProps) {
                   props.questionCount === 1 ? "" : "s"
                 }`}
           </span>
-          <span className="px-3 py-1.5 bg-ink text-ivory text-[9px] font-bold tracking-[1.5px] uppercase select-none">
+          <span className="px-3 py-1.5 bg-primary text-primary-foreground text-[9px] font-bold tracking-[1.5px] uppercase select-none">
             Apply
           </span>
         </div>

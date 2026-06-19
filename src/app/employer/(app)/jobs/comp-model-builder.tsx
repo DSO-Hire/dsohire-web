@@ -164,7 +164,7 @@ function guaranteeAmountPlaceholder(
 
 const LABEL = "block text-[11px] font-bold tracking-[1px] uppercase text-slate-meta mb-1";
 const INPUT =
-  "w-full px-3 py-2 bg-white border border-[var(--rule-strong)] text-[14px] text-ink focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage";
+  "w-full px-3 py-2 bg-card border border-[var(--rule-strong)] text-[14px] text-ink focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage";
 
 function Sel({
   label,
@@ -308,8 +308,8 @@ export function CompModelBuilder({
               aria-pressed={state.compModel === m.value}
               className={`px-3 py-1.5 text-[11px] font-bold border transition-colors ${
                 state.compModel === m.value
-                  ? "bg-ink text-ivory border-ink"
-                  : "bg-white text-slate-body border-[var(--rule-strong)] hover:border-ink"
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-card text-slate-body border-[var(--rule-strong)] hover:border-ink"
               }`}
             >
               {/* Phase D — hygienists know this deal as "hourly + production
@@ -493,7 +493,7 @@ export function CompModelBuilder({
           <div
             className={`border p-4 space-y-3 ${
               estMissing
-                ? "border-amber-400/70 bg-amber-50/50"
+                ? "border-warning/70 bg-warning-bg/50"
                 : "border-[var(--rule)] bg-cream/40"
             }`}
           >
@@ -520,7 +520,7 @@ export function CompModelBuilder({
                 earn. It's what makes a percentage deal comparable — and
                 what PracticeFit matches on.
                 {estMissing && payTransparency?.requiresRange && (
-                  <strong className="text-amber-800">
+                  <strong className="text-warning">
                     {" "}
                     {payTransparency.coveredLabel} requires a posted pay
                     range for this posting's location(s).

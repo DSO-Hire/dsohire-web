@@ -95,7 +95,7 @@ export function LocationsView({
   return (
     <>
       {showFootprint && (
-        <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 border border-[var(--rule)] bg-white px-4 py-3">
+        <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 border border-[var(--rule)] bg-card px-4 py-3">
           <span className="inline-flex items-center gap-1.5 text-[12px] font-bold text-ink">
             <MapPin className="h-3.5 w-3.5 text-heritage" />
             {activeState
@@ -110,7 +110,7 @@ export function LocationsView({
               <button
                 type="button"
                 onClick={() => setActiveState(null)}
-                className="inline-flex items-center gap-1 border border-[var(--rule-strong)] bg-white px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.5px] text-slate-meta hover:text-ink"
+                className="inline-flex items-center gap-1 border border-[var(--rule-strong)] bg-card px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.5px] text-slate-meta hover:text-ink"
               >
                 <X className="h-3 w-3" /> All
               </button>
@@ -127,7 +127,7 @@ export function LocationsView({
                   className={
                     "inline-flex items-center gap-1 border px-2 py-0.5 text-[11px] font-semibold transition-colors " +
                     (on
-                      ? "border-ink bg-ink text-ivory"
+                      ? "border-primary bg-primary text-primary-foreground"
                       : "border-[var(--rule)] bg-cream/70 text-slate-body hover:border-heritage")
                   }
                 >
@@ -144,7 +144,7 @@ export function LocationsView({
 
       <div className="mb-3 flex items-center justify-between gap-3">
         <div
-          className="inline-flex border border-[var(--rule-strong)] bg-white"
+          className="inline-flex border border-[var(--rule-strong)] bg-card"
           role="group"
           aria-label="Choose layout"
         >
@@ -204,7 +204,7 @@ function ViewToggleButton({
       className={
         "px-2.5 py-2 transition-colors " +
         (active
-          ? "bg-ink text-ivory"
+          ? "bg-primary text-primary-foreground"
           : "text-slate-meta hover:text-ink hover:bg-cream/60")
       }
     >
@@ -279,14 +279,14 @@ function LocationCard({ location }: { location: LocationCardData }) {
   return (
     <Link
       href={`/employer/locations/${location.id}`}
-      className="group relative block overflow-hidden border border-[var(--rule)] bg-white transition-all hover:border-heritage/40 hover:shadow-[0_10px_28px_-14px_rgba(20,35,63,0.3)]"
+      className="group relative block overflow-hidden border border-[var(--rule)] bg-card transition-all hover:border-heritage/40 hover:shadow-[0_10px_28px_-14px_rgba(20,35,63,0.3)]"
     >
       {/* growing left accent on hover */}
       <span className="absolute left-0 top-0 bottom-0 w-[3px] origin-top scale-y-0 bg-heritage transition-transform duration-200 group-hover:scale-y-100" />
 
       {/* header band — soft heritage wash that fades into the white card
           (no hard border, so the overlapping logo isn't bisected) */}
-      <div className="relative h-14 bg-gradient-to-b from-heritage/[0.16] via-heritage/[0.07] to-white">
+      <div className="relative h-14 bg-gradient-to-b from-heritage/[0.16] via-heritage/[0.07] to-card">
         <div className="absolute left-4 top-2.5 inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[1.5px] text-heritage-deep">
           <MapPin className="h-3 w-3" />
           {cityState || "Address incomplete"}
@@ -300,7 +300,7 @@ function LocationCard({ location }: { location: LocationCardData }) {
             name={location.name}
             imageUrl={location.logo_url}
             size="xl"
-            className="ring-4 ring-white"
+            className="ring-4 ring-card"
           />
         </div>
         <div className="truncate text-[16px] font-extrabold tracking-[-0.3px] leading-tight text-ink">

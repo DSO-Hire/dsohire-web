@@ -131,7 +131,7 @@ export default async function AccountSettingsPage() {
         initial={profile}
       />
 
-      <section className="border border-[var(--rule)] bg-white p-7 sm:p-8">
+      <section className="border border-[var(--rule)] bg-card p-7 sm:p-8">
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Password
         </div>

@@ -1067,10 +1067,10 @@ export function KanbanBoard({
         {error && (
           <div
             role="alert"
-            className="flex items-start gap-3 border border-red-300 bg-red-50 px-4 py-3"
+            className="flex items-start gap-3 border border-danger bg-danger-bg px-4 py-3"
           >
-            <AlertCircle className="h-4 w-4 text-red-700 flex-shrink-0 mt-0.5" />
-            <div className="flex-1 text-[14px] text-red-900 leading-relaxed">
+            <AlertCircle className="h-4 w-4 text-danger flex-shrink-0 mt-0.5" />
+            <div className="flex-1 text-[14px] text-danger leading-relaxed">
               {error.kind === "network" ? (
                 <>
                   <span className="font-bold">Move failed.</span> Check your
@@ -1085,7 +1085,7 @@ export function KanbanBoard({
                   {error.reason && (
                     <>
                       {" "}
-                      <span className="block mt-1 text-[12px] text-red-800">
+                      <span className="block mt-1 text-[12px] text-danger">
                         Server said: {error.reason}
                       </span>
                     </>
@@ -1109,7 +1109,7 @@ export function KanbanBoard({
                     error.candidateName
                   );
                 }}
-                className="text-[10px] font-bold tracking-[1.5px] uppercase px-3 py-1.5 border border-red-300 text-red-700 hover:bg-red-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2"
+                className="text-[10px] font-bold tracking-[1.5px] uppercase px-3 py-1.5 border border-danger text-danger hover:bg-danger-bg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-danger focus-visible:ring-offset-2"
               >
                 Retry
               </button>
@@ -1118,7 +1118,7 @@ export function KanbanBoard({
               type="button"
               onClick={() => setError(null)}
               aria-label="Dismiss error"
-              className="text-red-700 hover:text-red-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2"
+              className="text-danger hover:text-danger focus:outline-none focus-visible:ring-2 focus-visible:ring-danger focus-visible:ring-offset-2"
             >
               <X className="h-4 w-4" />
             </button>
@@ -1287,7 +1287,7 @@ export function KanbanBoard({
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 mb-2">
           <div className="flex items-center gap-2">
             <div
-              className="flex border border-[var(--rule-strong)] bg-white"
+              className="flex border border-[var(--rule-strong)] bg-card"
               role="group"
               aria-label="Board density"
             >
@@ -1299,7 +1299,7 @@ export function KanbanBoard({
                   aria-pressed={density === d}
                   className={`px-2.5 py-1 text-[9px] font-bold tracking-[1px] uppercase transition-colors ${
                     density === d
-                      ? "bg-ink text-ivory"
+                      ? "bg-primary text-primary-foreground"
                       : "text-slate-body hover:bg-cream"
                   }`}
                 >
@@ -1314,8 +1314,8 @@ export function KanbanBoard({
               title="Focus — dim every column except the one under your pointer"
               className={`px-2.5 py-1 text-[9px] font-bold tracking-[1px] uppercase border transition-colors ${
                 focusMode
-                  ? "bg-ink text-ivory border-ink"
-                  : "bg-white text-slate-body border-[var(--rule-strong)] hover:bg-cream"
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-card text-slate-body border-[var(--rule-strong)] hover:bg-cream"
               }`}
             >
               Focus
@@ -1328,8 +1328,8 @@ export function KanbanBoard({
                 title="Group each column's cards by job"
                 className={`px-2.5 py-1 text-[9px] font-bold tracking-[1px] uppercase border transition-colors ${
                   lanesOn
-                    ? "bg-ink text-ivory border-ink"
-                    : "bg-white text-slate-body border-[var(--rule-strong)] hover:bg-cream"
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-card text-slate-body border-[var(--rule-strong)] hover:bg-cream"
                 }`}
               >
                 Lanes · job
@@ -1408,7 +1408,7 @@ function LiveIndicator({ isConnected }: { isConnected: boolean }) {
     <div
       role="status"
       aria-live="polite"
-      className="inline-flex items-center gap-2 px-2.5 py-1 border border-[var(--rule)] bg-white"
+      className="inline-flex items-center gap-2 px-2.5 py-1 border border-[var(--rule)] bg-card"
       title={
         isConnected
           ? "Live sync is active. Teammate moves appear within seconds."
@@ -1418,7 +1418,7 @@ function LiveIndicator({ isConnected }: { isConnected: boolean }) {
       <span
         className={`h-1.5 w-1.5 rounded-full ${
           isConnected
-            ? "bg-emerald-500 animate-pulse"
+            ? "bg-success animate-pulse"
             : "bg-slate-300"
         }`}
         aria-hidden="true"
@@ -1473,7 +1473,7 @@ function SelectionToolbar({
         <DropdownMenu open={moveMenuOpen} onOpenChange={onMoveMenuOpenChange}>
           <DropdownMenuTrigger
             disabled={disabled}
-            className={`${baseBtn} border-heritage/30 text-heritage-deep bg-white hover:bg-heritage/10`}
+            className={`${baseBtn} border-heritage/30 text-heritage-deep bg-card hover:bg-heritage/10`}
           >
             Move to…
             <ChevronDown className="h-3 w-3" aria-hidden="true" />
@@ -1494,7 +1494,7 @@ function SelectionToolbar({
           type="button"
           onClick={onOpenMessage}
           disabled={disabled}
-          className={`${baseBtn} border-heritage/30 text-heritage-deep bg-white hover:bg-heritage/10`}
+          className={`${baseBtn} border-heritage/30 text-heritage-deep bg-card hover:bg-heritage/10`}
         >
           Message…
         </button>
@@ -1502,7 +1502,7 @@ function SelectionToolbar({
           type="button"
           onClick={onOpenReject}
           disabled={disabled}
-          className={`${baseBtn} border-red-300 text-red-700 bg-white hover:bg-red-50`}
+          className={`${baseBtn} border-danger text-danger bg-card hover:bg-danger-bg`}
         >
           Reject…
         </button>
@@ -1510,7 +1510,7 @@ function SelectionToolbar({
           type="button"
           onClick={onOpenArchive}
           disabled={disabled}
-          className={`${baseBtn} border-slate-300 text-slate-body bg-white hover:bg-cream`}
+          className={`${baseBtn} border-border text-slate-body bg-card hover:bg-cream`}
         >
           Archive
         </button>
@@ -1560,8 +1560,8 @@ function BulkConfirmDialog({
 
   const confirmClasses =
     variant === "destructive"
-      ? "bg-red-700 text-white hover:bg-red-800 focus-visible:ring-red-700"
-      : "bg-heritage text-white hover:bg-heritage-deep focus-visible:ring-heritage";
+      ? "bg-danger text-danger-foreground hover:bg-danger/90 focus-visible:ring-danger"
+      : "bg-heritage text-primary-foreground hover:bg-heritage-deep focus-visible:ring-heritage";
 
   // Mirror the server gate so Confirm only enables on a valid (code, note) pair.
   const dispositionError = dispositionKind
@@ -1613,7 +1613,7 @@ function BulkConfirmDialog({
             onChange={(e) => setReason(e.target.value.slice(0, 1000))}
             rows={3}
             placeholder="Add context for your team's audit log…"
-            className="w-full resize-y border border-[var(--rule-strong)] bg-white px-3 py-2 text-[14px] text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
+            className="w-full resize-y border border-[var(--rule-strong)] bg-card px-3 py-2 text-[14px] text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
           />
           <p className="text-[12px] text-slate-meta">{reasonHelper}</p>
         </div>
@@ -1621,7 +1621,7 @@ function BulkConfirmDialog({
           <button
             type="button"
             onClick={() => onOpenChange(false)}
-            className="inline-flex items-center justify-center px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] bg-white text-slate-body hover:bg-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
+            className="inline-flex items-center justify-center px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] bg-card text-slate-body hover:bg-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
           >
             Cancel
           </button>
@@ -1680,7 +1680,7 @@ function BulkMessageDialog({
             onChange={(e) => setBody(e.target.value.slice(0, MAX))}
             rows={5}
             placeholder="Write the message your selected candidates will receive…"
-            className="w-full resize-y border border-[var(--rule-strong)] bg-white px-3 py-2 text-[14px] text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
+            className="w-full resize-y border border-[var(--rule-strong)] bg-card px-3 py-2 text-[14px] text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
           />
           <p className="text-[12px] text-slate-meta">
             Sent individually — candidates can&apos;t see who else received it.{" "}
@@ -1691,7 +1691,7 @@ function BulkMessageDialog({
           <button
             type="button"
             onClick={() => onOpenChange(false)}
-            className="inline-flex items-center justify-center px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] bg-white text-slate-body hover:bg-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
+            className="inline-flex items-center justify-center px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] bg-card text-slate-body hover:bg-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
           >
             Cancel
           </button>
@@ -1699,7 +1699,7 @@ function BulkMessageDialog({
             type="button"
             disabled={trimmed.length === 0}
             onClick={() => onConfirm(trimmed)}
-            className="inline-flex items-center justify-center px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase bg-heritage text-white hover:bg-heritage-deep focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center justify-center px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase bg-heritage text-primary-foreground hover:bg-heritage-deep focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Send to {count}
           </button>
@@ -1730,14 +1730,14 @@ function BulkResultDisplay({
       }
     : allFailed
       ? {
-          wrapper: "border-red-300 bg-red-50",
-          text: "text-red-900",
-          ring: "focus-visible:ring-red-700",
+          wrapper: "border-danger bg-danger-bg",
+          text: "text-danger",
+          ring: "focus-visible:ring-danger",
         }
       : {
-          wrapper: "border-amber-300 bg-amber-50",
-          text: "text-amber-900",
-          ring: "focus-visible:ring-amber-700",
+          wrapper: "border-warning bg-warning-bg",
+          text: "text-warning",
+          ring: "focus-visible:ring-warning",
         };
 
   const verbStem =
@@ -1843,9 +1843,9 @@ function ClosedLane({
   return (
     <div
       ref={setNodeRef}
-      className={`border bg-white transition-colors ${
+      className={`border bg-card transition-colors ${
         isOver
-          ? "border-red-400 ring-2 ring-inset ring-red-300/50"
+          ? "border-danger ring-2 ring-inset ring-danger/50"
           : "border-[var(--rule)]"
       }`}
     >
@@ -1995,19 +1995,19 @@ function BulkDragPreview({
       {/* Back shadow card — offset further */}
       <div
         aria-hidden
-        className="absolute inset-0 translate-x-2 translate-y-2 rounded-md border border-[var(--rule)] bg-white shadow-sm opacity-70"
+        className="absolute inset-0 translate-x-2 translate-y-2 rounded-md border border-[var(--rule)] bg-card shadow-sm opacity-70"
       />
       {/* Middle shadow card — offset less */}
       <div
         aria-hidden
-        className="absolute inset-0 translate-x-1 translate-y-1 rounded-md border border-[var(--rule)] bg-white shadow-sm opacity-90"
+        className="absolute inset-0 translate-x-1 translate-y-1 rounded-md border border-[var(--rule)] bg-card shadow-sm opacity-90"
       />
       {/* Front: the actual active card */}
       <div className="relative">
         <KanbanCard application={activeApp} isOverlay selected />
         {/* Count badge — top-right corner */}
         <div
-          className="absolute -top-2 -right-2 z-10 inline-flex items-center justify-center rounded-full bg-heritage-deep px-2 min-w-[24px] h-6 text-[11px] font-bold text-white shadow-md ring-2 ring-white"
+          className="absolute -top-2 -right-2 z-10 inline-flex items-center justify-center rounded-full bg-heritage-deep px-2 min-w-[24px] h-6 text-[11px] font-bold text-primary-foreground shadow-md ring-2 ring-card"
           aria-hidden
         >
           {count}

@@ -212,7 +212,7 @@ export default async function EmployerBillingPage({ searchParams }: PageProps) {
           <form action={openCustomerPortal} className="mt-7">
             <button
               type="submit"
-              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
             >
               <Settings className="h-4 w-4" />
               Manage Subscription
@@ -322,8 +322,8 @@ function Header() {
 
 function PortalErrorBanner() {
   return (
-    <div className="mb-8 max-w-[820px] bg-red-50 border-l-4 border-red-500 p-4">
-      <p className="text-[14px] text-red-900">
+    <div className="mb-8 max-w-[820px] bg-danger-bg border-l-4 border-danger p-4">
+      <p className="text-[14px] text-danger">
         <strong className="font-semibold">Couldn&apos;t open the Customer Portal.</strong>{" "}
         Refresh and try again, or email {SUPPORT_EMAIL} if it persists.
       </p>
@@ -333,11 +333,11 @@ function PortalErrorBanner() {
 
 function WarningBanner({ title, body }: { title: string; body: string }) {
   return (
-    <div className="mb-8 max-w-[820px] bg-yellow-50 border-l-4 border-yellow-500 p-4 flex gap-3">
-      <AlertTriangle className="h-4 w-4 text-yellow-700 flex-shrink-0 mt-0.5" />
+    <div className="mb-8 max-w-[820px] bg-warning-bg border-l-4 border-warning p-4 flex gap-3">
+      <AlertTriangle className="h-4 w-4 text-warning flex-shrink-0 mt-0.5" />
       <div>
-        <p className="text-[14px] text-yellow-900 font-semibold">{title}</p>
-        <p className="mt-1 text-[13px] text-yellow-900/85 leading-relaxed">
+        <p className="text-[14px] text-warning font-semibold">{title}</p>
+        <p className="mt-1 text-[13px] text-warning/85 leading-relaxed">
           {body}
         </p>
       </div>
@@ -359,7 +359,7 @@ function NoSubscriptionEmpty() {
       </p>
       <Link
         href="/employer/checkout"
-        className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+        className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
       >
         Start Checkout
       </Link>
@@ -369,13 +369,13 @@ function NoSubscriptionEmpty() {
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string }> = {
-    active: { label: "Active", cls: "bg-heritage text-ivory" },
+    active: { label: "Active", cls: "bg-heritage text-primary-foreground" },
     trialing: { label: "Trialing", cls: "bg-cream text-ink border border-[var(--rule-strong)]" },
-    past_due: { label: "Past due", cls: "bg-yellow-100 text-yellow-900 border border-yellow-400" },
+    past_due: { label: "Past due", cls: "bg-warning-bg text-warning border border-warning" },
     canceled: { label: "Canceled", cls: "bg-slate-meta text-ivory" },
     incomplete: { label: "Incomplete", cls: "bg-cream text-slate-body border border-[var(--rule-strong)]" },
     incomplete_expired: { label: "Expired", cls: "bg-cream text-slate-meta" },
-    unpaid: { label: "Unpaid", cls: "bg-red-100 text-red-900 border border-red-400" },
+    unpaid: { label: "Unpaid", cls: "bg-danger-bg text-danger border border-danger" },
   };
   const m = map[status] ?? { label: status, cls: "bg-cream text-slate-body" };
   return (
@@ -416,7 +416,7 @@ function InvoiceRowItem({ invoice }: { invoice: InvoiceRow }) {
               invoice.status === "paid"
                 ? "text-heritage-deep font-semibold"
                 : invoice.status === "open"
-                  ? "text-yellow-800"
+                  ? "text-warning"
                   : "text-slate-meta"
             }
           >

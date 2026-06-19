@@ -250,7 +250,7 @@ export function OfferSection({
           <button
             type="button"
             onClick={handleCtaClick}
-            className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C] transition-colors"
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
           >
             <Send className="h-3.5 w-3.5" />
             {ctaLabel}
@@ -350,17 +350,17 @@ function LatestSendCard({
   // pending → amber (action awaited on candidate side).
   const containerCls =
     resp?.kind === "accepted"
-      ? "border-emerald-200 bg-emerald-50/60"
+      ? "border-success bg-success-bg/60"
       : resp?.kind === "declined"
-        ? "border-slate-300 bg-slate-50/70"
-        : "border-amber-200 bg-amber-50/40";
+        ? "border-border bg-muted/70"
+        : "border-warning bg-warning-bg/40";
   return (
     <div className={`border ${containerCls}`}>
       <div className="px-4 py-3 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-700 shrink-0" />
-            <span className="text-[10px] font-bold tracking-[2px] uppercase text-emerald-800">
+            <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0" />
+            <span className="text-[10px] font-bold tracking-[2px] uppercase text-success">
               Offer sent
             </span>
             {prev && (
@@ -390,7 +390,7 @@ function LatestSendCard({
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-ink bg-white hover:bg-cream"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-ink bg-card hover:bg-cream"
         >
           {open ? (
             <>
@@ -415,7 +415,7 @@ function LatestSendCard({
       {resp && <OfferResponseStrip response={resp} />}
 
       {open && (
-        <div className="border-t border-emerald-200 bg-white">
+        <div className="border-t border-success bg-card">
           <SendBodyFrame html={send.body_html} />
         </div>
       )}
@@ -431,19 +431,19 @@ function OfferResponseStrip({
   const respondedAt = new Date(response.responded_at);
   const accepted = response.kind === "accepted";
   const stripCls = accepted
-    ? "border-emerald-300 bg-white"
-    : "border-slate-300 bg-white";
+    ? "border-success bg-card"
+    : "border-border bg-card";
   const eyebrowCls = accepted
-    ? "text-emerald-800"
-    : "text-slate-700";
+    ? "text-success"
+    : "text-foreground";
   const eyebrowLabel = accepted ? "Candidate accepted" : "Candidate declined";
   return (
     <div className={`border-t ${stripCls} px-4 py-3`}>
       <div className="flex items-start gap-2 mb-1">
         {accepted ? (
-          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-700 shrink-0 mt-0.5" />
+          <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0 mt-0.5" />
         ) : (
-          <X className="h-3.5 w-3.5 text-slate-600 shrink-0 mt-0.5" />
+          <X className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
         )}
         <div className="min-w-0">
           <div className={`text-[10px] font-bold tracking-[2px] uppercase ${eyebrowCls}`}>
@@ -511,7 +511,7 @@ function OfferDiff({
   const changes = diffOffers(prev, curr);
   const prevDate = new Date(prev.sent_at).toLocaleDateString();
   return (
-    <div className="border-t border-[var(--rule)] bg-white px-4 py-3">
+    <div className="border-t border-[var(--rule)] bg-card px-4 py-3">
       <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-2">
         What changed from the previous offer
         <span className="text-slate-meta font-semibold normal-case tracking-normal">
@@ -584,11 +584,11 @@ function PendingApprovalCard({
   }
 
   return (
-    <div className="border border-amber-300 bg-amber-50/50">
+    <div className="border border-warning bg-warning-bg/50">
       <div className="px-4 py-3">
         <div className="flex items-center gap-2 mb-1 flex-wrap">
-          <Clock className="h-3.5 w-3.5 text-amber-700 shrink-0" />
-          <span className="text-[10px] font-bold tracking-[2px] uppercase text-amber-800">
+          <Clock className="h-3.5 w-3.5 text-warning shrink-0" />
+          <span className="text-[10px] font-bold tracking-[2px] uppercase text-warning">
             Awaiting approval
           </span>
           {send.template_name && (
@@ -608,7 +608,7 @@ function PendingApprovalCard({
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-ink bg-white hover:bg-cream"
+          className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-ink bg-card hover:bg-cream"
         >
           {open ? (
             <>
@@ -625,12 +625,12 @@ function PendingApprovalCard({
       {prev && <OfferDiff prev={prev} curr={send} />}
 
       {open && (
-        <div className="border-t border-amber-200 bg-white">
+        <div className="border-t border-warning bg-card">
           <SendBodyFrame html={send.body_html} />
         </div>
       )}
 
-      <div className="border-t border-amber-200 bg-white px-4 py-3">
+      <div className="border-t border-warning bg-card px-4 py-3">
         {viewerCanApprove ? (
           <div className="space-y-3">
             <p className="text-[12px] text-slate-body leading-relaxed">
@@ -652,7 +652,7 @@ function PendingApprovalCard({
                     type="button"
                     onClick={doReject}
                     disabled={pending}
-                    className="inline-flex items-center gap-2 bg-[#7c2d12] text-[#F7F4ED] px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-[#5b210d] disabled:opacity-60"
+                    className="inline-flex items-center gap-2 bg-danger text-danger-foreground px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-danger/90 disabled:opacity-60"
                   >
                     {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ThumbsDown className="h-3.5 w-3.5" />}
                     Send back
@@ -676,7 +676,7 @@ function PendingApprovalCard({
                   type="button"
                   onClick={doApprove}
                   disabled={pending}
-                  className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C] disabled:opacity-60"
+                  className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
                 >
                   {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
                   Approve &amp; send
@@ -685,7 +685,7 @@ function PendingApprovalCard({
                   type="button"
                   onClick={() => setRejecting(true)}
                   disabled={pending}
-                  className="inline-flex items-center gap-2 border border-[var(--rule-strong)] text-ink bg-white px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-cream disabled:opacity-60"
+                  className="inline-flex items-center gap-2 border border-[var(--rule-strong)] text-ink bg-card px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-cream disabled:opacity-60"
                 >
                   <ThumbsDown className="h-3.5 w-3.5" />
                   Reject
@@ -700,7 +700,7 @@ function PendingApprovalCard({
           </p>
         )}
         {error && (
-          <div className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-800 flex items-start gap-2">
+          <div className="mt-3 rounded-md border border-danger bg-danger-bg px-3 py-2 text-[12px] text-danger flex items-start gap-2">
             <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
             <span>{error}</span>
           </div>
@@ -723,11 +723,11 @@ function RejectedOfferCard({
 }) {
   const decidedAt = new Date(send.sent_at);
   return (
-    <div className="border border-slate-300 bg-slate-50/70">
+    <div className="border border-border bg-muted/70">
       <div className="px-4 py-3">
         <div className="flex items-center gap-2 mb-1 flex-wrap">
-          <ThumbsDown className="h-3.5 w-3.5 text-slate-600 shrink-0" />
-          <span className="text-[10px] font-bold tracking-[2px] uppercase text-slate-700">
+          <ThumbsDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <span className="text-[10px] font-bold tracking-[2px] uppercase text-foreground">
             Not approved
           </span>
         </div>
@@ -737,14 +737,14 @@ function RejectedOfferCard({
           Nothing went to the candidate.
         </div>
         {send.approval_note && (
-          <div className="mt-2 border-l-2 border-slate-300 pl-3 text-[12px] text-slate-body italic">
+          <div className="mt-2 border-l-2 border-border pl-3 text-[12px] text-slate-body italic">
             “{send.approval_note}”
           </div>
         )}
         <button
           type="button"
           onClick={onRevise}
-          className="mt-3 inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C]"
+          className="mt-3 inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
         >
           <Send className="h-3.5 w-3.5" />
           Revise &amp; resubmit
@@ -777,7 +777,7 @@ function EarlierSendsAccordion({
         Offer history ({sends.length})
       </button>
       {open && (
-        <ul className="mt-2 border border-[var(--rule)] bg-white divide-y divide-[var(--rule)]">
+        <ul className="mt-2 border border-[var(--rule)] bg-card divide-y divide-[var(--rule)]">
           {sends.map((s) => {
             const prev = prevOf(s);
             const changes = prev ? diffOffers(prev, s) : [];
@@ -803,7 +803,7 @@ function EarlierSendsAccordion({
                     </span>
                   )}
                   {statusLabel && (
-                    <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-slate-600">
+                    <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-muted-foreground">
                       · {statusLabel}
                     </span>
                   )}
@@ -857,9 +857,9 @@ function ConfirmRevisionDialog({
         if (e.target === e.currentTarget) onCancel();
       }}
     >
-      <div className="w-full max-w-[480px] bg-white border border-[var(--rule)] shadow-xl">
+      <div className="w-full max-w-[480px] bg-card border border-[var(--rule)] shadow-xl">
         <header className="p-5 border-b border-[var(--rule)]">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-amber-700 mb-1 inline-flex items-center gap-2">
+          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-warning mb-1 inline-flex items-center gap-2">
             <AlertCircle className="h-3 w-3" />
             Already accepted
           </div>
@@ -890,7 +890,7 @@ function ConfirmRevisionDialog({
           <button
             type="button"
             onClick={onConfirm}
-            className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C]"
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
           >
             <Send className="h-3.5 w-3.5" />
             Continue
@@ -914,7 +914,7 @@ function NoticeBox({
 }) {
   const cls =
     tone === "warn"
-      ? "border-amber-200 bg-amber-50 text-amber-900"
+      ? "border-warning bg-warning-bg text-warning"
       : "border-[var(--rule)] bg-cream/40 text-ink";
   return (
     <div className={`border ${cls} p-4 text-[13px] leading-relaxed`}>
@@ -1203,7 +1203,7 @@ function SendOfferModal({
         if (e.target === e.currentTarget && !pending) onClose();
       }}
     >
-      <div className="w-full max-w-[720px] max-h-[92vh] bg-white border border-[var(--rule)] shadow-xl flex flex-col">
+      <div className="w-full max-w-[720px] max-h-[92vh] bg-card border border-[var(--rule)] shadow-xl flex flex-col">
         <header className="flex items-start justify-between p-5 border-b border-[var(--rule)]">
           <div>
             <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1 inline-flex items-center gap-2">
@@ -1300,7 +1300,7 @@ function SendOfferModal({
             />
           )}
           {error && !submittedPending && (
-            <div className="mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-800 flex items-start gap-2">
+            <div className="mt-4 rounded-md border border-danger bg-danger-bg px-3 py-2 text-[13px] text-danger flex items-start gap-2">
               <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
@@ -1317,7 +1317,7 @@ function SendOfferModal({
                   onClose();
                   router.refresh();
                 }}
-                className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C]"
+                className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
               >
                 Done
               </button>
@@ -1344,7 +1344,7 @@ function SendOfferModal({
                   type="button"
                   onClick={next}
                   disabled={pending}
-                  className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C] disabled:opacity-60"
+                  className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
                 >
                   Next
                   <ArrowRight className="h-3 w-3" />
@@ -1354,7 +1354,7 @@ function SendOfferModal({
                   type="button"
                   onClick={handleSubmit}
                   disabled={pending}
-                  className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C] disabled:opacity-60"
+                  className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
                 >
                   {pending ? (
                     <>
@@ -1407,7 +1407,7 @@ function Step1PickTemplate({
         Pick a template. You&apos;ll fill in the per-offer specifics
         (start date, comp, etc.) in the next step.
       </p>
-      <ul className="border border-[var(--rule)] bg-white divide-y divide-[var(--rule)]">
+      <ul className="border border-[var(--rule)] bg-card divide-y divide-[var(--rule)]">
         {templates.map((t) => {
           const selected = t.id === templateId;
           return (
@@ -1500,13 +1500,13 @@ function OfferBaseCompField({
             value={amount}
             onChange={(e) => onAmount(e.target.value)}
             placeholder={jobCompMin != null ? String(jobCompMin) : "Base amount"}
-            className="w-full pl-6 pr-3 py-2 border border-[var(--rule-strong)] bg-white text-ink text-sm focus:outline-none focus:border-heritage"
+            className="w-full pl-6 pr-3 py-2 border border-[var(--rule-strong)] bg-card text-ink text-sm focus:outline-none focus:border-heritage"
           />
         </div>
         <select
           value={period}
           onChange={(e) => onPeriod(e.target.value as "hourly" | "annual")}
-          className="px-3 py-2 border border-[var(--rule-strong)] bg-white text-ink text-sm focus:outline-none focus:border-heritage"
+          className="px-3 py-2 border border-[var(--rule-strong)] bg-card text-ink text-sm focus:outline-none focus:border-heritage"
         >
           <option value="hourly">per hour</option>
           <option value="annual">per year</option>
@@ -1518,7 +1518,7 @@ function OfferBaseCompField({
         </div>
       )}
       {guardrail.severity === "out_of_range" && guardrail.message && (
-        <div className="mt-2 flex items-start gap-2 rounded border border-amber-300 bg-amber-50 px-3 py-2 text-[12px] text-amber-900">
+        <div className="mt-2 flex items-start gap-2 rounded border border-warning bg-warning-bg px-3 py-2 text-[12px] text-warning">
           <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
           <span>
             {guardrail.message}{" "}
@@ -1717,7 +1717,7 @@ function DateOfferField({
           {field.label}
         </span>
         {field.required && (
-          <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-red-700">
+          <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-danger">
             Required
           </span>
         )}
@@ -1781,7 +1781,7 @@ function OfferField({
           {label}
         </span>
         {field.required && (
-          <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-red-700">
+          <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-danger">
             Required
           </span>
         )}
@@ -1860,7 +1860,7 @@ function Step3Preview({
             <button
               type="button"
               onClick={onPreview}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-ink bg-white hover:bg-cream"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-ink bg-card hover:bg-cream"
             >
               <CheckCircle2 className="h-3 w-3" /> Preview
             </button>
@@ -1868,7 +1868,7 @@ function Step3Preview({
             <button
               type="button"
               onClick={onStartEdit}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-ink bg-white hover:bg-cream"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-ink bg-card hover:bg-cream"
             >
               <FileSignature className="h-3 w-3" /> {hasEdits ? "Continue editing" : "Edit text"}
             </button>
@@ -1889,7 +1889,7 @@ function Step3Preview({
             onChange={(e) => onChangeText(e.target.value)}
             rows={18}
             spellCheck
-            className="w-full px-3 py-2.5 bg-white border border-[var(--rule-strong)] text-ink text-[13px] leading-relaxed font-mono focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage resize-y"
+            className="w-full px-3 py-2.5 bg-card border border-[var(--rule-strong)] text-ink text-[13px] leading-relaxed font-mono focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage resize-y"
           />
           <p className="mt-1.5 text-[11px] text-slate-meta leading-snug">
             Basic formatting: <code>##</code> heading, <code>**bold**</code>,

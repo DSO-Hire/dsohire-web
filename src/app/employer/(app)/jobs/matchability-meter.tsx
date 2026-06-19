@@ -44,7 +44,7 @@ export function MatchabilityMeter({
   const pct = Math.round((result.scoreable / result.total) * 100);
 
   return (
-    <div className="border border-[var(--rule-strong)] bg-white">
+    <div className="border border-[var(--rule-strong)] bg-card">
       <div className="px-4 py-3 border-b border-[var(--rule)]">
         {/* Cam (Day 33): the branded wordmark headlines the box — the
             meter IS the fit product speaking, so let it sign its work.

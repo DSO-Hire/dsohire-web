@@ -163,7 +163,7 @@ export function LivePulse({
   }, []);
 
   return (
-    <section className="border border-[var(--rule)] bg-white flex flex-col min-h-0">
+    <section className="border border-[var(--rule)] bg-card flex flex-col min-h-0">
       <header className="px-5 py-4 border-b border-[var(--rule)] flex items-center justify-between gap-3">
         <span className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
           <span className="relative flex h-2 w-2">

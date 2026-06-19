@@ -157,7 +157,7 @@ export default async function InviteAcceptPage({ params }: PageProps) {
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
             href={`/employer/sign-in?next=${encodeURIComponent(`/employer/invite/${token}`)}`}
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
           >
             Sign In to Accept
             <ArrowRight className="h-4 w-4" />
@@ -194,7 +194,7 @@ export default async function InviteAcceptPage({ params }: PageProps) {
           </p>
           <Link
             href="/employer/dashboard"
-            className="mt-8 inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+            className="mt-8 inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
           >
             Go to Dashboard
             <ArrowRight className="h-4 w-4" />
@@ -206,7 +206,7 @@ export default async function InviteAcceptPage({ params }: PageProps) {
     // Member of a DIFFERENT DSO — blocked
     return (
       <AcceptShell>
-        <AlertTriangle className="h-10 w-10 text-yellow-700 mb-5" />
+        <AlertTriangle className="h-10 w-10 text-warning mb-5" />
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.1] text-ink">
           You&apos;re already on another DSO&apos;s team.
         </h1>
@@ -244,7 +244,7 @@ export default async function InviteAcceptPage({ params }: PageProps) {
         <input type="hidden" name="token" value={token} />
         <button
           type="submit"
-          className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+          className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
         >
           Accept &amp; Join {dsoName}
           <ArrowRight className="h-4 w-4" />
@@ -319,7 +319,7 @@ function HmScopeBadge({ locations }: { locations: string[] }) {
         practice locations only. The team has assigned you to:
       </p>
       {locations.length === 0 ? (
-        <p className="text-[13px] text-amber-800">
+        <p className="text-[13px] text-warning">
           No locations have been assigned yet. The team can update your scope
           on the{" "}
           <span className="font-semibold">Team</span> page after you accept —
@@ -375,7 +375,7 @@ function ErrorScreen({
         {cta && (
           <Link
             href={cta.href}
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
           >
             {cta.label}
             <ArrowRight className="h-4 w-4" />

@@ -490,7 +490,7 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
                 id="fit_job"
                 name="fit_job"
                 defaultValue={fitJobId}
-                className="border border-[var(--rule)] bg-white px-2 py-1 text-[12px] text-ink"
+                className="border border-[var(--rule)] bg-card px-2 py-1 text-[12px] text-ink"
               >
                 <option value="">— pick a job —</option>
                 {fitJobOptions.map((j) => (
@@ -501,7 +501,7 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
               </select>
               <button
                 type="submit"
-                className="px-3 py-1 bg-ink text-ivory text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft"
+                className="px-3 py-1 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
               >
                 Apply
               </button>

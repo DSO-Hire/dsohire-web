@@ -364,11 +364,11 @@ export default async function EditJobPage({ params }: PageProps) {
       </header>
 
       {nameLeaks.length > 0 && (
-        <div className="mb-8 max-w-[820px] border-l-4 border-amber-400 bg-amber-50 p-4">
+        <div className="mb-8 max-w-[820px] border-l-4 border-warning bg-warning-bg p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 flex-shrink-0 text-amber-600 mt-0.5" />
+            <AlertTriangle className="h-5 w-5 flex-shrink-0 text-warning mt-0.5" />
             <div>
-              <p className="text-[14px] font-bold text-amber-900">
+              <p className="text-[14px] font-bold text-warning">
                 This listing is set to private, but the text still names{" "}
                 {nameLeaks.map((n, i) => (
                   <span key={n}>
@@ -378,7 +378,7 @@ export default async function EditJobPage({ params }: PageProps) {
                 ))}
                 .
               </p>
-              <p className="mt-1 text-[13px] leading-relaxed text-amber-900/80">
+              <p className="mt-1 text-[13px] leading-relaxed text-warning/80">
                 Candidates see{" "}
                 {nameLeaks.length === 1 ? "that name" : "those names"} in the
                 title or description even though the practice identity is masked
@@ -421,7 +421,7 @@ export default async function EditJobPage({ params }: PageProps) {
 
       {/* Soft-delete (separated from main form for safety) */}
       <section className="mt-16 pt-10 border-t border-[var(--rule)] max-w-[820px]">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-red-700 mb-2">
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-danger mb-2">
           Danger Zone
         </div>
         <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink mb-2">
@@ -435,7 +435,7 @@ export default async function EditJobPage({ params }: PageProps) {
           <input type="hidden" name="job_id" value={initial.id} />
           <button
             type="submit"
-            className="inline-flex items-center gap-2 px-5 py-2.5 border border-red-300 text-red-700 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-red-50 transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 border border-danger text-danger text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-danger-bg transition-colors"
           >
             <Trash2 className="h-3.5 w-3.5" />
             Delete Job

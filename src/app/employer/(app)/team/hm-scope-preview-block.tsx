@@ -174,7 +174,7 @@ export function HmScopePreviewBlock({
       )}
 
       {!data.ok && data.error && (
-        <p className="mt-2 text-[12px] text-amber-800">
+        <p className="mt-2 text-[12px] text-warning">
           Preview unavailable — proceed if the location list looks right.
         </p>
       )}

@@ -134,7 +134,7 @@ function computeExpiryState(expires: string | null): ExpiryState {
       kind: "no_date",
       label: "No expiry on file",
       pillClass:
-        "bg-slate-50 text-slate-meta ring-1 ring-inset ring-slate-200",
+        "bg-muted text-slate-meta ring-1 ring-inset ring-border",
       IconComp: Clock,
     };
   }
@@ -148,7 +148,7 @@ function computeExpiryState(expires: string | null): ExpiryState {
       kind: "no_date",
       label: "Expiry unknown",
       pillClass:
-        "bg-slate-50 text-slate-meta ring-1 ring-inset ring-slate-200",
+        "bg-muted text-slate-meta ring-1 ring-inset ring-border",
       IconComp: Clock,
     };
   }
@@ -163,7 +163,7 @@ function computeExpiryState(expires: string | null): ExpiryState {
       kind: "expired",
       label: `Expired ${ago} day${ago === 1 ? "" : "s"} ago · ${labelDate}`,
       pillClass:
-        "bg-red-50 text-red-800 ring-1 ring-inset ring-red-300",
+        "bg-danger-bg text-danger ring-1 ring-inset ring-danger",
       IconComp: AlertTriangle,
     };
   }
@@ -172,7 +172,7 @@ function computeExpiryState(expires: string | null): ExpiryState {
       kind: "future_imminent",
       label: `Expires in ${days} day${days === 1 ? "" : "s"} · ${labelDate}`,
       pillClass:
-        "bg-red-50 text-red-700 ring-1 ring-inset ring-red-200",
+        "bg-danger-bg text-danger ring-1 ring-inset ring-danger",
       IconComp: AlertTriangle,
     };
   }
@@ -181,7 +181,7 @@ function computeExpiryState(expires: string | null): ExpiryState {
       kind: "future_soon",
       label: `Expires in ${days} days · ${labelDate}`,
       pillClass:
-        "bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-200",
+        "bg-warning-bg text-warning ring-1 ring-inset ring-warning",
       IconComp: Clock,
     };
   }
@@ -189,7 +189,7 @@ function computeExpiryState(expires: string | null): ExpiryState {
     kind: "future_far",
     label: `Expires ${labelDate}`,
     pillClass:
-      "bg-emerald-50 text-emerald-800 ring-1 ring-inset ring-emerald-200",
+      "bg-success-bg text-success ring-1 ring-inset ring-success",
     IconComp: ShieldCheck,
   };
 }
@@ -210,7 +210,7 @@ function statusBadge(
       return {
         label: when ? `Verified · ${when}` : "Verified",
         pillClass:
-          "bg-emerald-50 text-emerald-800 ring-1 ring-inset ring-emerald-300",
+          "bg-success-bg text-success ring-1 ring-inset ring-success",
         IconComp: ShieldCheck,
       };
     }
@@ -218,21 +218,21 @@ function statusBadge(
       return {
         label: "Pending verification",
         pillClass:
-          "bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-300",
+          "bg-warning-bg text-warning ring-1 ring-inset ring-warning",
         IconComp: Clock,
       };
     case "expired":
       return {
         label: "Marked expired",
         pillClass:
-          "bg-red-50 text-red-800 ring-1 ring-inset ring-red-300",
+          "bg-danger-bg text-danger ring-1 ring-inset ring-danger",
         IconComp: AlertTriangle,
       };
     case "revoked":
       return {
         label: "Revoked",
         pillClass:
-          "bg-red-100 text-red-900 ring-1 ring-inset ring-red-400",
+          "bg-danger-bg text-danger ring-1 ring-inset ring-danger",
         IconComp: AlertTriangle,
       };
     case "unverified":
@@ -253,7 +253,7 @@ export function CredentialsSection({
   const isEmpty = licenses.length === 0 && certifications.length === 0;
 
   return (
-    <div className="border border-[var(--rule)] bg-white">
+    <div className="border border-[var(--rule)] bg-card">
       {isEmpty ? (
         <EmptyState />
       ) : (
@@ -321,7 +321,7 @@ function CredentialGroup({
   return (
     <div>
       <div className="px-5 py-3 bg-cream/40 border-b border-[var(--rule)] flex items-center justify-between">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-[#14233F]">
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-foreground">
           {title}
         </div>
         <div className="text-[11px] font-bold text-slate-meta">
@@ -553,7 +553,7 @@ function CredentialRowShell({
               type="button"
               onClick={openDocument}
               disabled={docPending}
-              className="inline-flex items-center gap-2 px-3 py-1.5 text-[11px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-[#14233F] bg-white hover:bg-cream transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-3 py-1.5 text-[11px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-foreground bg-card hover:bg-cream transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {docPending ? (
                 <Loader2 className="h-3 w-3 animate-spin" />
@@ -582,7 +582,7 @@ function CredentialRowShell({
                     new Date().toISOString()
                   )
                 }
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase bg-[#4D7A60] text-ivory hover:bg-[#3d6450] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase bg-heritage text-primary-foreground hover:bg-heritage-deep transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {pending ? (
                   <Loader2 className="h-3 w-3 animate-spin" />
@@ -603,7 +603,7 @@ function CredentialRowShell({
                     null
                   )
                 }
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-slate-body bg-white hover:bg-cream transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-slate-body bg-card hover:bg-cream transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {pending ? (
                   <Loader2 className="h-3 w-3 animate-spin" />
@@ -624,7 +624,7 @@ function CredentialRowShell({
                     verifiedAt
                   )
                 }
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-red-300 text-red-700 bg-white hover:bg-red-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-danger text-danger bg-card hover:bg-danger-bg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {pending ? (
                   <Loader2 className="h-3 w-3 animate-spin" />
@@ -639,7 +639,7 @@ function CredentialRowShell({
       </div>
 
       {error && (
-        <div className="mt-3 text-[12px] text-red-700 bg-red-50 border border-red-200 px-3 py-2">
+        <div className="mt-3 text-[12px] text-danger bg-danger-bg border border-danger px-3 py-2">
           {error}
         </div>
       )}

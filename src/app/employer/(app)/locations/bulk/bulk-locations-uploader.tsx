@@ -129,7 +129,7 @@ export function BulkLocationsUploader() {
         <button
           type="button"
           onClick={downloadSample}
-          className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-white px-3 py-2 text-[12px] font-semibold text-ink hover:bg-cream/60"
+          className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-2 text-[12px] font-semibold text-ink hover:bg-cream/60"
         >
           <Download className="size-3.5" />
           Download sample CSV
@@ -148,7 +148,7 @@ export function BulkLocationsUploader() {
           "border-2 border-dashed p-8 sm:p-10 text-center transition-colors " +
           (dragOver
             ? "border-heritage bg-heritage/[0.04]"
-            : "border-[var(--rule-strong)] bg-white")
+            : "border-[var(--rule-strong)] bg-card")
         }
       >
         {file ? (
@@ -169,7 +169,7 @@ export function BulkLocationsUploader() {
                   setError(null);
                   if (inputRef.current) inputRef.current.value = "";
                 }}
-                className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-white px-3 py-2 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
+                className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-2 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
               >
                 <Trash2 className="size-3.5" />
                 Pick a different file
@@ -178,7 +178,7 @@ export function BulkLocationsUploader() {
                 type="button"
                 onClick={onSubmit}
                 disabled={pending}
-                className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ivory hover:bg-ink-soft disabled:opacity-40"
+                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
               >
                 {pending ? (
                   <>
@@ -223,7 +223,7 @@ export function BulkLocationsUploader() {
 
       {/* Error from server */}
       {error && (
-        <div className="border border-red-300 bg-red-50 px-4 py-3 text-[13px] text-red-900 inline-flex items-start gap-2">
+        <div className="border border-danger bg-danger-bg px-4 py-3 text-[13px] text-danger inline-flex items-start gap-2">
           <AlertTriangle className="size-4 mt-0.5 shrink-0" />
           <span>{error}</span>
         </div>
@@ -255,8 +255,8 @@ function ResultCard({
         (allOk
           ? "border-heritage/40 bg-heritage/[0.06]"
           : noneOk
-            ? "border-red-300 bg-red-50"
-            : "border-amber-300 bg-amber-50")
+            ? "border-danger bg-danger-bg"
+            : "border-warning bg-warning-bg")
       }
     >
       <div className="flex items-start gap-3">
@@ -266,7 +266,7 @@ function ResultCard({
           <AlertTriangle
             className={
               "size-5 shrink-0 mt-0.5 " +
-              (noneOk ? "text-red-700" : "text-amber-700")
+              (noneOk ? "text-danger" : "text-warning")
             }
           />
         )}
@@ -277,8 +277,8 @@ function ResultCard({
               (allOk
                 ? "text-heritage-deep"
                 : noneOk
-                  ? "text-red-900"
-                  : "text-amber-900")
+                  ? "text-danger"
+                  : "text-warning")
             }
           >
             {allOk
@@ -297,7 +297,7 @@ function ResultCard({
         {succeededCount > 0 && (
           <Link
             href="/employer/locations"
-            className="inline-flex items-center gap-1.5 rounded-md bg-ink px-3 py-2 text-[11px] font-bold tracking-[1.5px] uppercase text-ivory hover:bg-ink-soft shrink-0"
+            className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-[11px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 shrink-0"
           >
             View all
             <ArrowRight className="size-3.5" />

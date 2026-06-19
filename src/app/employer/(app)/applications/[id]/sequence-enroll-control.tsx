@@ -89,14 +89,14 @@ export function SequenceEnrollControl({
             type="button"
             onClick={stop}
             disabled={pending}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[var(--rule-strong)] text-ink bg-white text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream disabled:opacity-60 shrink-0"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[var(--rule-strong)] text-ink bg-card text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream disabled:opacity-60 shrink-0"
           >
             {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
             Stop
           </button>
         </div>
         {error && (
-          <div className="mt-2 text-[12px] text-red-700 flex items-start gap-1.5">
+          <div className="mt-2 text-[12px] text-danger flex items-start gap-1.5">
             <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" /> {error}
           </div>
         )}
@@ -119,7 +119,7 @@ export function SequenceEnrollControl({
   }
 
   return (
-    <div className="border border-[var(--rule)] bg-white p-3">
+    <div className="border border-[var(--rule)] bg-card p-3">
       <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5 inline-flex items-center gap-1.5">
         <Mail className="h-3 w-3" /> Nurture sequence
       </div>
@@ -140,14 +140,14 @@ export function SequenceEnrollControl({
           type="button"
           onClick={start}
           disabled={pending || !picked}
-          className="inline-flex items-center gap-1.5 bg-[#14233F] text-[#F7F4ED] px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C] disabled:opacity-60"
+          className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
         >
           {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Mail className="h-3.5 w-3.5" />}
           Start sequence
         </button>
       </div>
       {error && (
-        <div className="mt-2 text-[12px] text-red-700 flex items-start gap-1.5">
+        <div className="mt-2 text-[12px] text-danger flex items-start gap-1.5">
           <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" /> {error}
         </div>
       )}

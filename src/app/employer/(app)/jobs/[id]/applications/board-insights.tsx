@@ -100,7 +100,7 @@ export function BoardInsights({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] bg-white text-ink hover:bg-cream transition-colors"
+        className="inline-flex items-center gap-2 px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] bg-card text-ink hover:bg-cream transition-colors"
       >
         <BarChart3 className="h-3.5 w-3.5 text-heritage" aria-hidden />
         Board insights
@@ -119,7 +119,7 @@ export function BoardInsights({
           <aside
             role="dialog"
             aria-label="Board insights"
-            className="fixed inset-y-0 right-0 z-[56] w-full max-w-[380px] bg-white border-l border-[var(--rule-strong)] shadow-[-18px_0_40px_-20px_rgba(7,15,28,0.35)] flex flex-col"
+            className="fixed inset-y-0 right-0 z-[56] w-full max-w-[380px] bg-card border-l border-[var(--rule-strong)] shadow-[-18px_0_40px_-20px_rgba(7,15,28,0.35)] flex flex-col"
           >
             <header className="shrink-0 flex items-start justify-between gap-3 px-5 py-4 border-b border-[var(--rule)]">
               <div className="min-w-0">

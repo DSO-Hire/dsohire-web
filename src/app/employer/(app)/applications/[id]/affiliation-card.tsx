@@ -142,15 +142,15 @@ export function AffiliationCard({
                 type="button"
                 onClick={onReveal}
                 disabled={pending}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-ink text-ivory text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Eye className="h-3 w-3" />
                 {pending ? "Revealing…" : `Reveal ${dsoName}`}
               </button>
               {error && (
-                <div className="mt-3 bg-red-50 border-l-4 border-red-500 p-2 flex items-start gap-2">
-                  <AlertCircle className="h-3.5 w-3.5 text-red-700 mt-0.5 flex-shrink-0" />
-                  <p className="text-[12px] text-red-900">{error}</p>
+                <div className="mt-3 bg-danger-bg border-l-4 border-danger p-2 flex items-start gap-2">
+                  <AlertCircle className="h-3.5 w-3.5 text-danger mt-0.5 flex-shrink-0" />
+                  <p className="text-[12px] text-danger">{error}</p>
                 </div>
               )}
             </>

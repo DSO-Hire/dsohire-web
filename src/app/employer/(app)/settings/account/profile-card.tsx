@@ -104,10 +104,10 @@ export function ProfileCard({ email, locations, initial }: ProfileCardProps) {
   const labelCls =
     "block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body mb-1.5";
   const inputCls =
-    "w-full text-[14px] px-3 py-2 bg-white border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage";
+    "w-full text-[14px] px-3 py-2 bg-card border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage";
 
   return (
-    <section className="border border-[var(--rule)] bg-white p-7 sm:p-8">
+    <section className="border border-[var(--rule)] bg-card p-7 sm:p-8">
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
         Your profile
       </div>
@@ -320,7 +320,7 @@ export function ProfileCard({ email, locations, initial }: ProfileCardProps) {
       </div>
 
       {error && (
-        <p role="alert" className="mb-3 text-sm text-red-700">
+        <p role="alert" className="mb-3 text-sm text-danger">
           {error}
         </p>
       )}
@@ -330,7 +330,7 @@ export function ProfileCard({ email, locations, initial }: ProfileCardProps) {
           type="button"
           onClick={onSave}
           disabled={saving}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-ink text-ivory text-[13px] font-bold tracking-[1px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-[13px] font-bold tracking-[1px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60"
         >
           {saving ? "Saving…" : "Save profile"}
         </button>

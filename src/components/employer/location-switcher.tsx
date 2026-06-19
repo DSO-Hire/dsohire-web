@@ -78,7 +78,7 @@ export function LocationSwitcher({
   // No locations to switch between → render a static badge.
   if (locations.length === 0) {
     return (
-      <div className="px-3 py-2 text-[10px] tracking-[1.5px] uppercase text-ivory/40 inline-flex items-center gap-1.5">
+      <div className="px-3 py-2 text-[10px] tracking-[1.5px] uppercase text-sidebar-foreground/40 inline-flex items-center gap-1.5">
         <MapPin className="size-3" />
         No locations yet
       </div>
@@ -94,7 +94,7 @@ export function LocationSwitcher({
         disabled={pending}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="w-full flex items-center gap-2 px-3 py-2 rounded text-left text-[12px] font-semibold text-ivory/85 hover:bg-white/5 hover:text-ivory transition-colors disabled:opacity-50"
+        className="w-full flex items-center gap-2 px-3 py-2 rounded text-left text-[12px] font-semibold text-sidebar-foreground/85 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground transition-colors disabled:opacity-50"
       >
         <MapPin className="size-3.5 flex-shrink-0 text-heritage" />
         <span className="flex-1 truncate">
@@ -103,7 +103,7 @@ export function LocationSwitcher({
         {pending ? (
           <Loader2 className="size-3 animate-spin flex-shrink-0" />
         ) : (
-          <ChevronsUpDown className="size-3 flex-shrink-0 text-ivory/50" />
+          <ChevronsUpDown className="size-3 flex-shrink-0 text-sidebar-foreground/50" />
         )}
       </button>
 
@@ -111,7 +111,7 @@ export function LocationSwitcher({
         <ul
           role="listbox"
           aria-label="Switch location"
-          className="absolute left-2 right-2 top-full mt-1 z-40 max-h-[320px] overflow-y-auto rounded border border-white/15 bg-ink-soft shadow-xl"
+          className="absolute left-2 right-2 top-full mt-1 z-40 max-h-[320px] overflow-y-auto rounded border border-sidebar-border bg-ink-soft shadow-xl"
         >
           <SwitcherOption
             label="All locations"
@@ -119,7 +119,7 @@ export function LocationSwitcher({
             isActive={activeLocationId === null}
             onSelect={() => onSelect(null)}
           />
-          <li className="border-t border-white/10 my-1" />
+          <li className="border-t border-sidebar-border my-1" />
           {locations.map((loc) => (
             <SwitcherOption
               key={loc.id}
@@ -156,8 +156,8 @@ function SwitcherOption({
         className={
           "w-full flex items-start gap-2 px-3 py-2 text-left transition-colors " +
           (isActive
-            ? "bg-white/10 text-ivory"
-            : "text-ivory/75 hover:bg-white/5 hover:text-ivory")
+            ? "bg-sidebar-foreground/10 text-sidebar-foreground"
+            : "text-sidebar-foreground/75 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground")
         }
       >
         <Check
@@ -171,7 +171,7 @@ function SwitcherOption({
             {label}
           </span>
           {subtitle && (
-            <span className="block text-[10px] tracking-[0.5px] text-ivory/50 truncate mt-0.5">
+            <span className="block text-[10px] tracking-[0.5px] text-sidebar-foreground/50 truncate mt-0.5">
               {subtitle}
             </span>
           )}

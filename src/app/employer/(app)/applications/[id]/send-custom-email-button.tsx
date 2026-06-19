@@ -107,7 +107,7 @@ export function SendCustomEmailButton({
       <button
         type="button"
         onClick={openDialog}
-        className="inline-flex items-center gap-2 rounded-md border border-[var(--rule-strong)] bg-white px-3 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ink hover:bg-cream/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
+        className="inline-flex items-center gap-2 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ink hover:bg-cream/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
       >
         <Mail className="size-3.5" />
         Send email
@@ -127,7 +127,7 @@ export function SendCustomEmailButton({
           </DialogHeader>
 
           {noTemplates ? (
-            <div className="border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            <div className="border border-warning bg-warning-bg p-4 text-sm text-warning">
               <p className="font-semibold mb-1">No custom templates yet.</p>
               <p className="leading-relaxed">
                 Build your first one — interview prep, offer follow-ups, no-show
@@ -159,7 +159,7 @@ export function SendCustomEmailButton({
                     setSent(false);
                     setSelectedId(e.target.value);
                   }}
-                  className="w-full rounded border border-[var(--rule-strong)] bg-white px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none"
+                  className="w-full rounded border border-[var(--rule-strong)] bg-card px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none"
                 >
                   {templates.map((t) => (
                     <option key={t.id} value={t.id}>
@@ -186,7 +186,7 @@ export function SendCustomEmailButton({
           )}
 
           {error && (
-            <div className="border border-red-300 bg-red-50 px-3 py-2 text-[13px] text-red-900 inline-flex items-start gap-2">
+            <div className="border border-danger bg-danger-bg px-3 py-2 text-[13px] text-danger inline-flex items-start gap-2">
               <AlertTriangle className="size-3.5 mt-0.5 shrink-0" />
               {error}
             </div>
@@ -203,7 +203,7 @@ export function SendCustomEmailButton({
               type="button"
               onClick={() => setOpen(false)}
               disabled={pending}
-              className="inline-flex items-center justify-center px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] bg-white text-slate-body hover:bg-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
+              className="inline-flex items-center justify-center px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] bg-card text-slate-body hover:bg-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
             >
               {sent ? "Close" : "Cancel"}
             </button>
@@ -212,7 +212,7 @@ export function SendCustomEmailButton({
                 type="button"
                 onClick={onSend}
                 disabled={pending || sent}
-                className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase text-ivory transition-colors hover:bg-ink-soft disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {pending ? (
                   <>
@@ -271,7 +271,7 @@ function PreviewPane({
 
   return (
     <div className="border border-[var(--rule)] bg-cream/30 overflow-hidden max-h-[320px] flex flex-col">
-      <div className="border-b border-[var(--rule)] bg-white px-4 py-2">
+      <div className="border-b border-[var(--rule)] bg-card px-4 py-2">
         <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-0.5">
           Preview · sample data
         </div>
@@ -281,7 +281,7 @@ function PreviewPane({
           )}
         </div>
       </div>
-      <div className="bg-white px-4 py-3 overflow-y-auto flex-1">
+      <div className="bg-card px-4 py-3 overflow-y-auto flex-1">
         {cleanBody ? (
           <div
             className="dso-prose text-[13px] text-ink"

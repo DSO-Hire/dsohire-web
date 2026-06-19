@@ -82,7 +82,7 @@ export function SavedEntryCard({
   }
 
   return (
-    <div className="relative border border-[var(--rule)] bg-white p-4 flex items-start gap-4 transition-colors hover:border-heritage/50 hover:bg-cream/30">
+    <div className="relative border border-[var(--rule)] bg-card p-4 flex items-start gap-4 transition-colors hover:border-heritage/50 hover:bg-cream/30">
       <Avatar fullName={fullName} avatarUrl={avatarUrl} />
 
       <div className="flex-1 min-w-0">
@@ -104,7 +104,7 @@ export function SavedEntryCard({
             type="button"
             onClick={handleRemove}
             disabled={pending}
-            className="relative z-10 rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
+            className="relative z-10 rounded-md p-1.5 text-meta-foreground hover:bg-danger-bg hover:text-danger disabled:opacity-50"
             aria-label="Remove from pool"
           >
             {pending ? (
@@ -158,7 +158,7 @@ export function SavedEntryCard({
                   type="button"
                   onClick={handleSaveNotes}
                   disabled={pending}
-                  className="px-3 py-1.5 bg-ink text-ivory text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft disabled:opacity-60"
+                  className="px-3 py-1.5 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
                 >
                   Save
                 </button>
@@ -194,7 +194,7 @@ export function SavedEntryCard({
         </div>
 
         {error && (
-          <div className="mt-2 text-[12px] text-red-700">{error}</div>
+          <div className="mt-2 text-[12px] text-danger">{error}</div>
         )}
       </div>
     </div>
@@ -225,7 +225,7 @@ function Avatar({
     .map((s) => s[0]?.toUpperCase())
     .join("");
   return (
-    <div className="h-12 w-12 rounded-full bg-heritage text-ivory flex items-center justify-center font-bold text-[14px] shrink-0">
+    <div className="h-12 w-12 rounded-full bg-heritage text-primary-foreground flex items-center justify-center font-bold text-[14px] shrink-0">
       {initials || "?"}
     </div>
   );

@@ -104,8 +104,8 @@ export function PipelineHqBoard({
               onClick={() => setMinFit(opt.value)}
               className={`px-3 py-1.5 text-[11px] font-bold border transition-colors ${
                 minFit === opt.value
-                  ? "bg-ink text-ivory border-ink"
-                  : "bg-white text-slate-body border-[var(--rule-strong)] hover:border-ink"
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-card text-slate-body border-[var(--rule-strong)] hover:border-ink"
               }`}
             >
               {opt.label}
@@ -170,11 +170,11 @@ function JobChip({
       aria-pressed={active}
       className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-[11.5px] font-bold border transition-colors max-w-[280px] ${
         active
-          ? "bg-ink text-ivory border-ink"
-          : "bg-white text-slate-body border-[var(--rule-strong)] hover:border-ink hover:text-ink"
+          ? "bg-primary text-primary-foreground border-primary"
+          : "bg-card text-slate-body border-[var(--rule-strong)] hover:border-ink hover:text-ink"
       }`}
     >
-      {confidential && <Lock className="h-3 w-3 shrink-0 text-[#8a5a26]" aria-label="Confidential search" />}
+      {confidential && <Lock className="h-3 w-3 shrink-0 text-warning" aria-label="Confidential search" />}
       <span className="truncate">{label}</span>
       {paused && (
         <span className="text-[8px] font-extrabold tracking-[0.8px] uppercase opacity-60">

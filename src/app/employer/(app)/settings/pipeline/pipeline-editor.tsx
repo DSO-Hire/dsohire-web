@@ -215,7 +215,7 @@ export function PipelineEditor({
       {globalError && (
         <div
           role="alert"
-          className="border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          className="border border-danger bg-danger-bg px-3 py-2 text-sm text-danger"
         >
           <span className="inline-flex items-center gap-1.5">
             <AlertTriangle className="size-3.5" />
@@ -233,7 +233,7 @@ export function PipelineEditor({
           items={sortedStages.map((s) => s.id)}
           strategy={verticalListSortingStrategy}
         >
-          <ul className="space-y-2 border border-[var(--rule)] bg-white">
+          <ul className="space-y-2 border border-[var(--rule)] bg-card">
             {sortedStages.map((stage) => (
               <StageRow
                 key={stage.id}
@@ -444,7 +444,7 @@ function StageRow({
       style={style}
       className={
         "flex items-center gap-3 border-b border-[var(--rule)] last:border-b-0 px-3 py-3 " +
-        (stage.is_hidden ? "bg-cream/30 opacity-70" : "bg-white")
+        (stage.is_hidden ? "bg-cream/30 opacity-70" : "bg-card")
       }
     >
       {/* Drag handle */}
@@ -479,7 +479,7 @@ function StageRow({
         />
         {colorOpen && canEdit && (
           <div
-            className="absolute z-20 top-8 left-0 grid grid-cols-5 gap-1.5 rounded border border-[var(--rule-strong)] bg-white p-2 shadow-lg"
+            className="absolute z-20 top-8 left-0 grid grid-cols-5 gap-1.5 rounded border border-[var(--rule-strong)] bg-popover p-2 shadow-lg"
           >
             <button
               type="button"
@@ -537,7 +537,7 @@ function StageRow({
                   cancelLabel();
                 }
               }}
-              className="w-full max-w-[300px] rounded border border-[var(--rule-strong)] bg-white px-2 py-1 text-sm text-ink focus:border-heritage focus:outline-none"
+              className="w-full max-w-[300px] rounded border border-[var(--rule-strong)] bg-card px-2 py-1 text-sm text-ink focus:border-heritage focus:outline-none"
             />
             {pending && (
               <Loader2 className="size-3.5 animate-spin text-slate-meta" />
@@ -560,7 +560,7 @@ function StageRow({
           </button>
         )}
         {rowError && (
-          <p className="mt-1 inline-flex items-center gap-1 text-[12px] text-red-700">
+          <p className="mt-1 inline-flex items-center gap-1 text-[12px] text-danger">
             <AlertTriangle className="size-3 shrink-0" />
             {rowError}
           </p>
@@ -661,7 +661,7 @@ function StageRow({
             </DialogDescription>
           </DialogHeader>
           {rowError && (
-            <p className="text-sm text-red-700 inline-flex items-center gap-1.5">
+            <p className="text-sm text-danger inline-flex items-center gap-1.5">
               <AlertTriangle className="size-3.5" />
               {rowError}
             </p>
@@ -670,7 +670,7 @@ function StageRow({
             <button
               type="button"
               onClick={() => setDeleteOpen(false)}
-              className="rounded-md border border-[var(--rule-strong)] bg-white px-3 py-2 text-sm font-semibold text-slate-body hover:bg-cream/60"
+              className="rounded-md border border-[var(--rule-strong)] bg-card px-3 py-2 text-sm font-semibold text-slate-body hover:bg-cream/60"
             >
               Cancel
             </button>
@@ -678,7 +678,7 @@ function StageRow({
               type="button"
               disabled={pending}
               onClick={confirmDelete}
-              className="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-40"
+              className="rounded-md bg-danger px-3 py-2 text-sm font-semibold text-danger-foreground hover:bg-danger/90 disabled:opacity-40"
             >
               {pending ? "Deleting..." : "Delete stage"}
             </button>
@@ -760,7 +760,7 @@ function AddStageForm({ canEdit, atCap, onAdded }: AddStageFormProps) {
   if (atCap) {
     return (
       <div className="flex items-center gap-2 border border-dashed border-[var(--rule)] bg-cream/30 px-4 py-3 text-[12px] text-slate-meta">
-        <AlertTriangle className="size-3.5 text-amber-700" />
+        <AlertTriangle className="size-3.5 text-warning" />
         You&apos;ve hit the {MAX_STAGES_PER_DSO}-stage limit. Delete or
         hide a stage to add a new one.
       </div>
@@ -772,7 +772,7 @@ function AddStageForm({ canEdit, atCap, onAdded }: AddStageFormProps) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 rounded border border-dashed border-[var(--rule-strong)] bg-white px-4 py-2.5 text-[13px] font-semibold text-ink hover:bg-cream/50"
+        className="inline-flex items-center gap-1.5 rounded border border-dashed border-[var(--rule-strong)] bg-card px-4 py-2.5 text-[13px] font-semibold text-ink hover:bg-cream/50"
       >
         <Plus className="size-3.5" />
         Add stage
@@ -783,7 +783,7 @@ function AddStageForm({ canEdit, atCap, onAdded }: AddStageFormProps) {
   return (
     <form
       onSubmit={onSubmit}
-      className="border border-[var(--rule-strong)] bg-white p-4 space-y-3"
+      className="border border-[var(--rule-strong)] bg-card p-4 space-y-3"
     >
       <div className="grid grid-cols-1 sm:grid-cols-[1fr_180px] gap-3">
         <div>
@@ -800,7 +800,7 @@ function AddStageForm({ canEdit, atCap, onAdded }: AddStageFormProps) {
             maxLength={40}
             placeholder="e.g. Working interview"
             onChange={(e) => setLabel(e.target.value)}
-            className="w-full rounded border border-[var(--rule-strong)] bg-white px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none"
+            className="w-full rounded border border-[var(--rule-strong)] bg-card px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none"
           />
         </div>
         <div>
@@ -815,7 +815,7 @@ function AddStageForm({ canEdit, atCap, onAdded }: AddStageFormProps) {
               id="add-stage-kind"
               value={kind}
               onChange={(e) => setKind(e.target.value as StageKind)}
-              className="w-full appearance-none rounded border border-[var(--rule-strong)] bg-white px-3 py-2 pr-8 text-sm text-ink focus:border-heritage focus:outline-none"
+              className="w-full appearance-none rounded border border-[var(--rule-strong)] bg-card px-3 py-2 pr-8 text-sm text-ink focus:border-heritage focus:outline-none"
             >
               {STAGE_KINDS.map((k) => (
                 <option key={k} value={k}>
@@ -872,7 +872,7 @@ function AddStageForm({ canEdit, atCap, onAdded }: AddStageFormProps) {
       </div>
 
       {error && (
-        <p className="text-sm text-red-700 inline-flex items-center gap-1.5">
+        <p className="text-sm text-danger inline-flex items-center gap-1.5">
           <AlertTriangle className="size-3.5" />
           {error}
         </p>
@@ -885,14 +885,14 @@ function AddStageForm({ canEdit, atCap, onAdded }: AddStageFormProps) {
             reset();
             setOpen(false);
           }}
-          className="inline-flex items-center gap-1 rounded-md border border-[var(--rule-strong)] bg-white px-3 py-2 text-[12px] font-semibold text-slate-body hover:bg-cream/60"
+          className="inline-flex items-center gap-1 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-2 text-[12px] font-semibold text-slate-body hover:bg-cream/60"
         >
           <X className="size-3.5" /> Cancel
         </button>
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center gap-1 rounded-md bg-heritage px-3 py-2 text-[12px] font-semibold text-white hover:bg-heritage-deep disabled:opacity-40"
+          className="inline-flex items-center gap-1 rounded-md bg-heritage px-3 py-2 text-[12px] font-semibold text-primary-foreground hover:bg-heritage-deep disabled:opacity-40"
         >
           {pending ? (
             <Loader2 className="size-3.5 animate-spin" />

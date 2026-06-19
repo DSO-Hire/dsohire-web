@@ -43,7 +43,7 @@ export default function Loading() {
 
         {/* Queue + live pulse */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-4 mb-6 items-start">
-          <div className="border border-[var(--rule)] bg-white">
+          <div className="border border-[var(--rule)] bg-card">
             <div className="px-6 py-4 border-b border-[var(--rule)]">
               <span className="sk block h-3 w-40" />
             </div>
@@ -57,7 +57,7 @@ export default function Loading() {
               ))}
             </div>
           </div>
-          <div className="border border-[var(--rule)] bg-white">
+          <div className="border border-[var(--rule)] bg-card">
             <div className="px-5 py-4 border-b border-[var(--rule)]">
               <span className="sk block h-3 w-44" />
             </div>
@@ -78,7 +78,7 @@ export default function Loading() {
 
         {/* Job health + mini-map */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-6">
-          <div className="border border-[var(--rule)] bg-white">
+          <div className="border border-[var(--rule)] bg-card">
             <div className="px-5 py-4 border-b border-[var(--rule)]">
               <span className="sk block h-3 w-56" />
             </div>

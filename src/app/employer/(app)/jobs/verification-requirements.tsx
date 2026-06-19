@@ -81,7 +81,7 @@ export function VerificationRequirements({
               key={vt.value}
               className={`flex items-start gap-3 p-3.5 border cursor-pointer transition-colors ${
                 checked ? a.tintBorder : "border-[var(--rule)]"
-              } bg-white`}
+              } bg-card`}
             >
               <input
                 type="checkbox"

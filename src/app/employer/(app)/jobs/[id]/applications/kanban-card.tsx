@@ -127,7 +127,7 @@ export function KanbanCard({
   // modes (globals.css: .kb-compact tightens padding + hides headlines).
   // `group` powers the hover quick-actions reveal.
   const baseClasses =
-    "kb-card group relative block w-full text-left bg-white border p-3 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2";
+    "kb-card group relative block w-full text-left bg-card border p-3 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2";
   const borderClass = selected
     ? "border-heritage ring-2 ring-heritage/40"
     : "border-[var(--rule)]";
@@ -270,7 +270,7 @@ export function KanbanCard({
                 key={idx}
                 title={`Knockout failed: ${prompt}`}
                 aria-label={`Knockout failed: ${prompt}`}
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-semibold border border-amber-400/60 bg-amber-50 text-amber-900 max-w-full"
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-semibold border border-warning bg-warning-bg text-warning max-w-full"
               >
                 <span className="flex-shrink-0">⚠</span>
                 <span className="truncate">
@@ -280,7 +280,7 @@ export function KanbanCard({
             ))}
           {(application.knockoutFailedQuestions ?? []).length > 2 && (
             <span
-              className="text-[10px] font-semibold text-amber-900/70 tracking-[0.3px]"
+              className="text-[10px] font-semibold text-warning/70 tracking-[0.3px]"
               title={`${(application.knockoutFailedQuestions ?? []).length - 2} more knockout failures — see application detail`}
             >
               +{(application.knockoutFailedQuestions ?? []).length - 2} more

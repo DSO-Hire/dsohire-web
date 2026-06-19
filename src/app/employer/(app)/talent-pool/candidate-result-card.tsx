@@ -57,10 +57,10 @@ const FIT_BUCKET_LABEL: Record<string, string> = {
 
 const FIT_BUCKET_COLOR: Record<string, string> = {
   excellent: "bg-heritage/15 text-heritage-deep ring-heritage/30",
-  strong: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+  strong: "bg-success-bg text-success ring-success/40",
   solid: "bg-blue-50 text-blue-700 ring-blue-200",
-  light: "bg-amber-50 text-amber-700 ring-amber-200",
-  low: "bg-slate-50 text-slate-600 ring-slate-200",
+  light: "bg-warning-bg text-warning ring-warning/40",
+  low: "bg-muted text-muted-foreground ring-border",
 };
 
 const AVAILABILITY_LABELS: Record<string, string> = {
@@ -116,7 +116,7 @@ export function CandidateResultCard({
   }
 
   return (
-    <div className="relative border border-[var(--rule)] bg-white p-4 flex items-start gap-4 transition-colors hover:border-heritage/50 hover:bg-cream/30">
+    <div className="relative border border-[var(--rule)] bg-card p-4 flex items-start gap-4 transition-colors hover:border-heritage/50 hover:bg-cream/30">
       <Avatar fullName={fullName} avatarUrl={avatarUrl} />
 
       <div className="flex-1 min-w-0">
@@ -136,8 +136,8 @@ export function CandidateResultCard({
             className={
               "relative z-10 inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold tracking-[1.5px] uppercase border transition-colors shrink-0 disabled:opacity-60 " +
               (saved
-                ? "bg-heritage text-ivory border-heritage hover:bg-heritage-deep"
-                : "bg-white text-ink border-slate-300 hover:bg-cream")
+                ? "bg-heritage text-primary-foreground border-heritage hover:bg-heritage-deep"
+                : "bg-card text-ink border-border hover:bg-cream")
             }
           >
             {pending ? (
@@ -210,7 +210,7 @@ export function CandidateResultCard({
         )}
 
         {error && (
-          <div className="mt-2 text-[12px] text-red-700">{error}</div>
+          <div className="mt-2 text-[12px] text-danger">{error}</div>
         )}
       </div>
     </div>
@@ -241,7 +241,7 @@ function Avatar({
     .map((s) => s[0]?.toUpperCase())
     .join("");
   return (
-    <div className="h-12 w-12 rounded-full bg-heritage text-ivory flex items-center justify-center font-bold text-[14px] shrink-0">
+    <div className="h-12 w-12 rounded-full bg-heritage text-primary-foreground flex items-center justify-center font-bold text-[14px] shrink-0">
       {initials || "?"}
     </div>
   );

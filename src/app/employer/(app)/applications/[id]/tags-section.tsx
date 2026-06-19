@@ -84,7 +84,7 @@ export function TagsSection({
   }
 
   return (
-    <section className="border border-[var(--rule)] bg-white p-5">
+    <section className="border border-[var(--rule)] bg-card p-5">
       <h3 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
         Tags
       </h3>
@@ -168,7 +168,7 @@ export function TagsSection({
             type="button"
             onClick={handleAdd}
             disabled={pending || label.trim().length === 0}
-            className="px-3 py-1.5 bg-ink text-ivory text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-50"
+            className="px-3 py-1.5 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
             {pending ? "Adding…" : "Add"}
           </button>
@@ -209,7 +209,7 @@ export function TagsSection({
       )}
 
       {error && (
-        <p role="alert" className="mt-2 text-[12px] text-red-700">
+        <p role="alert" className="mt-2 text-[12px] text-danger">
           {error}
         </p>
       )}

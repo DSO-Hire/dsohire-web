@@ -82,7 +82,7 @@ export function TemplatesManager({ initialTemplates }: TemplatesManagerProps) {
             type="button"
             onClick={() => setEditingId("new")}
             disabled={pending}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-ink text-ivory text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft disabled:opacity-60"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
           >
             <Plus className="h-3 w-3" /> New template
           </button>
@@ -122,7 +122,7 @@ export function TemplatesManager({ initialTemplates }: TemplatesManagerProps) {
             ) : (
               <li
                 key={t.id}
-                className="border border-[var(--rule)] bg-white p-4 flex items-start justify-between gap-4"
+                className="border border-[var(--rule)] bg-card p-4 flex items-start justify-between gap-4"
               >
                 <div className="flex-1 min-w-0">
                   <div className="text-[14px] font-bold text-ink mb-0.5">
@@ -151,7 +151,7 @@ export function TemplatesManager({ initialTemplates }: TemplatesManagerProps) {
                   <button
                     type="button"
                     onClick={() => setEditingId(t.id)}
-                    className="rounded-md p-1.5 text-slate-400 hover:bg-cream hover:text-ink"
+                    className="rounded-md p-1.5 text-meta-foreground hover:bg-cream hover:text-ink"
                     aria-label="Edit"
                   >
                     <Pencil className="h-4 w-4" />
@@ -159,7 +159,7 @@ export function TemplatesManager({ initialTemplates }: TemplatesManagerProps) {
                   <button
                     type="button"
                     onClick={() => handleDelete(t.id)}
-                    className="rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-700"
+                    className="rounded-md p-1.5 text-meta-foreground hover:bg-danger-bg hover:text-danger"
                     aria-label="Delete"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -197,7 +197,7 @@ function TemplateForm({
   return (
     <form
       onSubmit={onSubmit}
-      className="border border-[var(--rule-strong)] bg-white p-5 space-y-4"
+      className="border border-[var(--rule-strong)] bg-card p-5 space-y-4"
     >
       {template?.id && (
         <input type="hidden" name="id" value={template.id} />
@@ -283,7 +283,7 @@ function TemplateForm({
       </details>
 
       {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-800">
+        <div className="rounded-md border border-danger bg-danger-bg px-3 py-2 text-[13px] text-danger">
           {error}
         </div>
       )}
@@ -301,7 +301,7 @@ function TemplateForm({
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center gap-2 px-5 py-2 bg-ink text-ivory text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft disabled:opacity-60"
+          className="inline-flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
         >
           {pending ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />

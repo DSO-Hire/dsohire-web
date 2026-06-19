@@ -105,8 +105,8 @@ const ACCENT: Record<
 > = {
   heritage: {
     text: "text-heritage-deep",
-    activeBtn: "bg-heritage-deep text-ivory border-heritage-deep",
-    inactiveBtn: "bg-white text-ink border-[var(--rule)] hover:border-heritage",
+    activeBtn: "bg-heritage-deep text-primary-foreground border-heritage-deep",
+    inactiveBtn: "bg-card text-ink border-[var(--rule)] hover:border-heritage",
     check: "accent-heritage",
     ring: "focus:border-heritage focus:ring-heritage",
     tintBorder: "border-heritage/40",
@@ -114,8 +114,8 @@ const ACCENT: Record<
   },
   corporate: {
     text: "text-[#3D5266]",
-    activeBtn: "bg-[#3D5266] text-ivory border-[#3D5266]",
-    inactiveBtn: "bg-white text-ink border-[var(--rule)] hover:border-[#3D5266]",
+    activeBtn: "bg-[#3D5266] text-primary-foreground border-[#3D5266]",
+    inactiveBtn: "bg-card text-ink border-[var(--rule)] hover:border-[#3D5266]",
     check: "accent-[#3D5266]",
     ring: "focus:border-[#3D5266] focus:ring-[#3D5266]",
     tintBorder: "border-[#3D5266]/40",
@@ -226,7 +226,7 @@ function MoneyInput({
           placeholder={placeholder}
           value={display}
           onChange={(e) => onChange(e.target.value.replace(/[^\d]/g, ""))}
-          className={`w-full h-[44px] pl-7 pr-4 bg-white border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:ring-1 transition-colors ${ACCENT[accent].ring}`}
+          className={`w-full h-[44px] pl-7 pr-4 bg-card border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:ring-1 transition-colors ${ACCENT[accent].ring}`}
         />
       </div>
     </div>
@@ -400,7 +400,7 @@ export function CompensationSection(props: CompensationSectionProps) {
             <select
               value={props.compPeriod}
               onChange={(e) => props.onCompPeriod(e.target.value)}
-              className={`w-full h-[44px] px-4 bg-white border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:ring-1 transition-colors ${a.ring}`}
+              className={`w-full h-[44px] px-4 bg-card border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:ring-1 transition-colors ${a.ring}`}
             >
               <option value="">—</option>
               <option value="hourly">Per hour</option>
@@ -490,7 +490,7 @@ export function CompensationSection(props: CompensationSectionProps) {
                   onChange={(e) =>
                     props.onVariableCompStructure(e.target.value)
                   }
-                  className={`w-full h-[44px] px-4 bg-white border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:ring-1 transition-colors ${a.ring}`}
+                  className={`w-full h-[44px] px-4 bg-card border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:ring-1 transition-colors ${a.ring}`}
                 />
               </div>
             </div>
@@ -519,7 +519,7 @@ export function CompensationSection(props: CompensationSectionProps) {
                   placeholder="Annual company performance bonus · paid Q1"
                   value={props.bonusStructure}
                   onChange={(e) => props.onBonusStructure(e.target.value)}
-                  className={`w-full h-[44px] px-4 bg-white border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:ring-1 transition-colors ${a.ring}`}
+                  className={`w-full h-[44px] px-4 bg-card border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:ring-1 transition-colors ${a.ring}`}
                 />
               </div>
             </div>
@@ -540,7 +540,7 @@ export function CompensationSection(props: CompensationSectionProps) {
                 placeholder="0.1–0.3% with a 4-year vest · partnership buy-in eligible at year 2"
                 value={props.equityNote}
                 onChange={(e) => props.onEquityNote(e.target.value)}
-                className={`w-full px-4 py-3 bg-white border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:ring-1 transition-colors resize-vertical ${a.ring}`}
+                className={`w-full px-4 py-3 bg-card border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:ring-1 transition-colors resize-vertical ${a.ring}`}
               />
             </div>
           </ComponentRow>
@@ -610,7 +610,7 @@ function ComponentRow({
     <div
       className={`border ${
         enabled ? a.tintBorder : "border-[var(--rule)]"
-      } bg-white transition-colors`}
+      } bg-card transition-colors`}
     >
       <label className="flex items-start gap-3 p-4 cursor-pointer">
         <input

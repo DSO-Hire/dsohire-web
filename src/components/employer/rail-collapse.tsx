@@ -47,7 +47,7 @@ export function RailCollapse({
       type="button"
       onClick={toggle}
       aria-label={slim ? "Expand sidebar" : "Collapse sidebar"}
-      className="absolute top-8 -right-px z-10 flex h-[34px] w-[18px] items-center justify-center border border-r-0 border-white/15 bg-white/[0.08] text-[10px] text-ivory/60 transition-colors hover:bg-heritage-deep hover:text-ivory"
+      className="absolute top-8 -right-px z-10 flex h-[34px] w-[18px] items-center justify-center border border-r-0 border-sidebar-border bg-sidebar-foreground/[0.08] text-[10px] text-sidebar-foreground/60 transition-colors hover:bg-heritage-deep hover:text-sidebar-foreground"
     >
       {slim ? "›" : "‹"}
     </button>

@@ -145,7 +145,7 @@ export function HmRescopeButton({
               </p>
 
               {selected.size === 0 && (
-                <div className="mb-4 flex items-start gap-2 px-3 py-2.5 bg-red-50 border border-red-200 text-[13px] text-red-900">
+                <div className="mb-4 flex items-start gap-2 px-3 py-2.5 bg-danger-bg border border-danger text-[13px] text-danger">
                   <AlertCircle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
                   <span>
                     No locations selected — {hmName.split(" ")[0]} won&apos;t
@@ -166,7 +166,7 @@ export function HmRescopeButton({
                 <button
                   type="button"
                   onClick={clearAll}
-                  className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-red-700 transition-colors"
+                  className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-danger transition-colors"
                 >
                   Clear
                 </button>
@@ -174,7 +174,7 @@ export function HmRescopeButton({
 
               <div className="grid grid-cols-1 gap-px bg-[var(--rule)] border border-[var(--rule)]">
                 {locations.length === 0 ? (
-                  <div className="bg-white p-5 text-[14px] text-slate-meta italic text-center">
+                  <div className="bg-card p-5 text-[14px] text-slate-meta italic text-center">
                     No locations yet. Add some in the Locations section.
                   </div>
                 ) : (
@@ -184,7 +184,7 @@ export function HmRescopeButton({
                       <label
                         key={loc.id}
                         className={`flex items-start gap-3 p-3 cursor-pointer transition-colors ${
-                          checked ? "bg-cream" : "bg-white hover:bg-cream/60"
+                          checked ? "bg-cream" : "bg-card hover:bg-cream/60"
                         }`}
                       >
                         <input
@@ -227,7 +227,7 @@ export function HmRescopeButton({
                 type="button"
                 onClick={onSave}
                 disabled={pending}
-                className="inline-flex items-center gap-1.5 px-5 py-2 bg-ink text-ivory text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-5 py-2 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
               >
                 {pending ? (
                   "Saving…"

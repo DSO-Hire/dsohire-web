@@ -140,7 +140,7 @@ export default function HelpPage() {
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Link
             href={SUPPORT_MAILTO}
-            className="group border border-[var(--rule)] bg-white p-6 hover:border-heritage-deep transition-colors"
+            className="group border border-[var(--rule)] bg-card p-6 hover:border-heritage-deep transition-colors"
           >
             <Mail className="size-5 text-heritage-deep mb-3" />
             <h2 className="font-display text-lg font-bold text-ink mb-1">
@@ -156,7 +156,7 @@ export default function HelpPage() {
             </span>
           </Link>
 
-          <div className="border border-[var(--rule)] bg-white p-6">
+          <div className="border border-[var(--rule)] bg-card p-6">
             <MessageSquare className="size-5 text-heritage-deep mb-3" />
             <h2 className="font-display text-lg font-bold text-ink mb-1">
               In-app support

@@ -418,7 +418,7 @@ export default async function PerJobPipelinePage({
         <div className="flex flex-wrap items-center gap-2">
           <Link
             href={editHref}
-            className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-ink hover:bg-cream"
+            className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-ink hover:bg-cream"
           >
             <Pencil className="size-3.5" />
             Edit job
@@ -427,7 +427,7 @@ export default async function PerJobPipelinePage({
             <input type="hidden" name="job_id" value={jobId} />
             <button
               type="submit"
-              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-ink hover:bg-cream"
+              className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-ink hover:bg-cream"
               title="Create a new job from a copy of this one"
             >
               <Copy className="size-3.5" />
@@ -439,7 +439,7 @@ export default async function PerJobPipelinePage({
               href={`/jobs/${jobId}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-ink hover:bg-cream"
+              className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-ink hover:bg-cream"
             >
               <ExternalLink className="size-3.5" />
               View public posting
@@ -448,12 +448,12 @@ export default async function PerJobPipelinePage({
           {status === "active" && (
             <ShareToLinkedIn
               url={`${process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com"}/jobs/${jobId}`}
-              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-ink hover:bg-cream"
+              className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-ink hover:bg-cream"
             />
           )}
           <a
             href={`/api/employer/jobs/${jobId}/applications.csv`}
-            className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-ink hover:bg-cream"
+            className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-ink hover:bg-cream"
             title="Download applications as CSV"
           >
             <Download className="size-3.5" />

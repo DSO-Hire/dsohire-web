@@ -199,7 +199,7 @@ function ViewToggle({
     "inline-flex items-center gap-2 px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors border";
   return (
     <div
-      className="flex border border-[var(--rule-strong)] bg-white"
+      className="flex border border-[var(--rule-strong)] bg-card"
       role="tablist"
       aria-label="View"
     >
@@ -211,7 +211,7 @@ function ViewToggle({
         title={disabledKanbanReason}
         className={`${baseBtn} ${
           value === "kanban"
-            ? "bg-ink text-ivory border-ink"
+            ? "bg-primary text-primary-foreground border-primary"
             : "border-transparent text-ink hover:bg-cream"
         }`}
       >
@@ -225,7 +225,7 @@ function ViewToggle({
         onClick={() => onChange("list")}
         className={`${baseBtn} ${
           value === "list"
-            ? "bg-ink text-ivory border-ink"
+            ? "bg-primary text-primary-foreground border-primary"
             : "border-transparent text-ink hover:bg-cream"
         }`}
       >

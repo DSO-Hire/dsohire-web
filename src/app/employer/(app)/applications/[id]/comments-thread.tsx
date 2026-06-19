@@ -667,7 +667,7 @@ export function CommentsThread({
       <div
         ref={listRef}
         onScroll={handleListScroll}
-        className="border border-[var(--rule)] bg-white max-h-[420px] overflow-y-auto"
+        className="border border-[var(--rule)] bg-card max-h-[420px] overflow-y-auto"
       >
         {visibleComments.length === 0 ? (
           <div className="p-8 text-center">
@@ -737,7 +737,7 @@ export function CommentsThread({
                         {openMenuId === c.id && (
                           <div
                             onClick={(e) => e.stopPropagation()}
-                            className="absolute right-0 top-6 z-10 bg-white border border-[var(--rule-strong)] shadow-lg min-w-[120px] py-1"
+                            className="absolute right-0 top-6 z-10 bg-popover border border-[var(--rule-strong)] shadow-lg min-w-[120px] py-1"
                           >
                             <button
                               type="button"
@@ -749,7 +749,7 @@ export function CommentsThread({
                             <button
                               type="button"
                               onClick={() => void handleDelete(c.id)}
-                              className="block w-full text-left px-3 py-1.5 text-[13px] text-red-700 hover:bg-cream"
+                              className="block w-full text-left px-3 py-1.5 text-[13px] text-danger hover:bg-cream"
                             >
                               Delete
                             </button>
@@ -781,7 +781,7 @@ export function CommentsThread({
                         <button
                           type="button"
                           onClick={() => void handleEditSave()}
-                          className="px-3 py-1.5 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors"
+                          className="px-3 py-1.5 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
                         >
                           Save
                         </button>
@@ -793,7 +793,7 @@ export function CommentsThread({
                           Cancel
                         </button>
                         {editingError && (
-                          <span className="text-[13px] text-red-700">
+                          <span className="text-[13px] text-danger">
                             {editingError}
                           </span>
                         )}
@@ -834,7 +834,7 @@ export function CommentsThread({
             type="button"
             onClick={() => void handleSubmit()}
             disabled={submitting || composerBody.trim().length === 0}
-            className="px-5 py-2.5 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="px-5 py-2.5 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {submitting ? "Posting…" : "Post Comment"}
           </button>
@@ -843,7 +843,7 @@ export function CommentsThread({
             <span className="font-mono">@</span> to mention
           </span>
           {composerError && (
-            <span className="text-[13px] text-red-700">{composerError}</span>
+            <span className="text-[13px] text-danger">{composerError}</span>
           )}
         </div>
       </div>
@@ -869,7 +869,7 @@ function MentionPopover({
   onSelect: (user: CommentDsoUser) => void;
 }) {
   return (
-    <div className="absolute left-0 right-0 -top-1 -translate-y-full bg-white border border-[var(--rule-strong)] shadow-lg max-h-[220px] overflow-y-auto z-20">
+    <div className="absolute left-0 right-0 -top-1 -translate-y-full bg-popover border border-[var(--rule-strong)] shadow-lg max-h-[220px] overflow-y-auto z-20">
       <div className="px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-slate-meta border-b border-[var(--rule)]">
         Mention a teammate
       </div>

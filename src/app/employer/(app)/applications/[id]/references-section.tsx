@@ -106,7 +106,7 @@ export function ReferencesSection({
           <button
             type="button"
             onClick={() => setModalOpen(true)}
-            className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C] transition-colors"
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
           >
             <Plus className="h-3.5 w-3.5" />
             Request a reference
@@ -121,7 +121,7 @@ export function ReferencesSection({
       {requests.length === 0 ? (
         <EmptyState candidateName={candidateName} canRequest={canRequest} />
       ) : (
-        <div className="border border-[var(--rule)] bg-white divide-y divide-[var(--rule)]">
+        <div className="border border-[var(--rule)] bg-card divide-y divide-[var(--rule)]">
           {requests.map((req) => (
             <RequestRow
               key={req.id}
@@ -154,16 +154,16 @@ function StageGateNotice({ currentStageKind }: { currentStageKind: string }) {
   const isTerminal =
     currentStageKind === "rejected" || currentStageKind === "withdrawn";
   return (
-    <div className="border border-amber-200 bg-amber-50 p-4">
+    <div className="border border-warning bg-warning-bg p-4">
       <div className="flex items-start gap-3">
-        <AlertCircle className="h-4 w-4 text-amber-800 mt-0.5 shrink-0" />
+        <AlertCircle className="h-4 w-4 text-warning mt-0.5 shrink-0" />
         <div>
-          <p className="text-[13px] font-semibold text-amber-900 mb-1">
+          <p className="text-[13px] font-semibold text-warning mb-1">
             {isTerminal
               ? "This application is closed."
               : "References open after the screen stage."}
           </p>
-          <p className="text-[12px] text-amber-800 leading-relaxed">
+          <p className="text-[12px] text-warning leading-relaxed">
             {isTerminal
               ? "New reference requests are disabled on rejected or withdrawn applications. Existing requests stay visible for the audit trail."
               : "Move the candidate into Interview or later to start collecting references. Most DSOs hold references until after a successful screen."}
@@ -226,14 +226,14 @@ function statusBadge(status: string, completedAt: string | null): {
       return {
         label: "Sending…",
         className:
-          "bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-200",
+          "bg-warning-bg text-warning ring-1 ring-inset ring-warning",
         Icon: Loader2,
       };
     case "sent":
       return {
         label: "Awaiting response",
         className:
-          "bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-300",
+          "bg-warning-bg text-warning ring-1 ring-inset ring-warning",
         Icon: Mail,
       };
     case "completed": {
@@ -246,20 +246,20 @@ function statusBadge(status: string, completedAt: string | null): {
       return {
         label: when ? `Completed · ${when}` : "Completed",
         className:
-          "bg-emerald-50 text-emerald-800 ring-1 ring-inset ring-emerald-300",
+          "bg-success-bg text-success ring-1 ring-inset ring-success",
         Icon: CheckCircle2,
       };
     }
     case "declined":
       return {
         label: "Declined",
-        className: "bg-slate-100 text-slate-700 ring-1 ring-inset ring-slate-300",
+        className: "bg-muted text-foreground ring-1 ring-inset ring-border",
         Icon: Ban,
       };
     default:
       return {
         label: status,
-        className: "bg-slate-100 text-slate-700 ring-1 ring-inset ring-slate-300",
+        className: "bg-muted text-foreground ring-1 ring-inset ring-border",
         Icon: AlertCircle,
       };
   }
@@ -344,8 +344,8 @@ function RequestRow({
             <span className="text-[11px] text-slate-meta">{sentMeta}</span>
           </div>
           {req.status === "declined" && req.decline_reason && (
-            <div className="mt-2 text-[12px] text-slate-body bg-slate-50 border border-slate-200 px-3 py-2">
-              <span className="font-semibold text-slate-700">Reason: </span>
+            <div className="mt-2 text-[12px] text-slate-body bg-muted border border-border px-3 py-2">
+              <span className="font-semibold text-foreground">Reason: </span>
               {req.decline_reason}
             </div>
           )}
@@ -357,7 +357,7 @@ function RequestRow({
             <button
               type="button"
               onClick={() => setShowResponse((v) => !v)}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-[#14233F] bg-white hover:bg-cream transition-colors"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-foreground bg-card hover:bg-cream transition-colors"
             >
               {showResponse ? (
                 <>
@@ -378,7 +378,7 @@ function RequestRow({
                 type="button"
                 disabled={pending}
                 onClick={() => runAction(() => resendReferenceRequest(req.id))}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase bg-[#4D7A60] text-ivory hover:bg-[#3d6450] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase bg-heritage text-primary-foreground hover:bg-heritage-deep transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {pending ? (
                   <Loader2 className="h-3 w-3 animate-spin" />
@@ -391,7 +391,7 @@ function RequestRow({
                 type="button"
                 disabled={pending}
                 onClick={() => setDeclineOpen(true)}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-slate-body bg-white hover:bg-cream transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-slate-body bg-card hover:bg-cream transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <Ban className="h-3 w-3" />
                 Mark declined
@@ -402,7 +402,7 @@ function RequestRow({
             type="button"
             disabled={pending}
             onClick={onDelete}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-red-300 text-red-700 bg-white hover:bg-red-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-danger text-danger bg-card hover:bg-danger-bg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             <Trash2 className="h-3 w-3" />
             Delete
@@ -411,7 +411,7 @@ function RequestRow({
       </div>
 
       {error && (
-        <div className="mt-3 text-[12px] text-red-700 bg-red-50 border border-red-200 px-3 py-2">
+        <div className="mt-3 text-[12px] text-danger bg-danger-bg border border-danger px-3 py-2">
           {error}
         </div>
       )}
@@ -538,7 +538,7 @@ function RequestModal({
         if (e.target === e.currentTarget && !pending) onClose();
       }}
     >
-      <div className="w-full max-w-[520px] bg-white border border-[var(--rule)] shadow-xl">
+      <div className="w-full max-w-[520px] bg-card border border-[var(--rule)] shadow-xl">
         <header className="flex items-start justify-between p-5 border-b border-[var(--rule)]">
           <div>
             <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
@@ -599,7 +599,7 @@ function RequestModal({
           />
 
           {error && (
-            <div className="text-[12px] text-red-700 bg-red-50 border border-red-200 px-3 py-2">
+            <div className="text-[12px] text-danger bg-danger-bg border border-danger px-3 py-2">
               {error}
             </div>
           )}
@@ -614,14 +614,14 @@ function RequestModal({
               type="button"
               onClick={onClose}
               disabled={pending}
-              className="px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-slate-body bg-white hover:bg-cream transition-colors disabled:opacity-60"
+              className="px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-slate-body bg-card hover:bg-cream transition-colors disabled:opacity-60"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={pending}
-              className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C] transition-colors disabled:opacity-60"
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60"
             >
               {pending ? (
                 <>
@@ -663,7 +663,7 @@ function DeclineModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-[460px] bg-white border border-[var(--rule)] shadow-xl">
+      <div className="w-full max-w-[460px] bg-card border border-[var(--rule)] shadow-xl">
         <header className="flex items-start justify-between p-5 border-b border-[var(--rule)]">
           <div>
             <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-1">
@@ -697,7 +697,7 @@ function DeclineModal({
               onChange={(e) => setReason(e.target.value)}
               rows={3}
               maxLength={500}
-              className="w-full border border-[var(--rule-strong)] bg-white px-3 py-2 text-[13px] text-ink focus:outline-none focus:ring-2 focus:ring-[#4D7A60]/40 resize-y"
+              className="w-full border border-[var(--rule-strong)] bg-card px-3 py-2 text-[13px] text-ink focus:outline-none focus:ring-2 focus:ring-heritage/40 resize-y"
               placeholder="e.g., No response after 2 emails"
             />
           </label>
@@ -706,14 +706,14 @@ function DeclineModal({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-slate-body bg-white hover:bg-cream transition-colors"
+            className="px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-slate-body bg-card hover:bg-cream transition-colors"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={() => onConfirm(reason.trim() || null)}
-            className="px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase bg-slate-700 text-white hover:bg-slate-800 transition-colors"
+            className="px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase bg-foreground text-background hover:bg-foreground/90 transition-colors"
           >
             Mark declined
           </button>
@@ -767,7 +767,7 @@ function FormField({
         placeholder={placeholder}
         disabled={disabled}
         maxLength={maxLength}
-        className="w-full border border-[var(--rule-strong)] bg-white px-3 py-2 text-[14px] text-ink focus:outline-none focus:ring-2 focus:ring-[#4D7A60]/40 disabled:bg-slate-50 disabled:cursor-not-allowed"
+        className="w-full border border-[var(--rule-strong)] bg-card px-3 py-2 text-[14px] text-ink focus:outline-none focus:ring-2 focus:ring-heritage/40 disabled:bg-muted disabled:cursor-not-allowed"
       />
       {helper && (
         <div className="mt-1 text-[11px] text-slate-meta leading-snug">

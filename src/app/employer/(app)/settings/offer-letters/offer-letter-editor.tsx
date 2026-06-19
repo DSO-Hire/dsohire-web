@@ -111,7 +111,7 @@ export function OfferLetterEditor({
           <button
             type="button"
             onClick={() => setSelection({ kind: "new" })}
-            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-ink text-ivory text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft"
+            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
           >
             <Plus className="h-3 w-3" /> New template
           </button>
@@ -127,7 +127,7 @@ export function OfferLetterEditor({
             )}
           </div>
         ) : (
-          <ul className="border border-[var(--rule)] bg-white divide-y divide-[var(--rule)]">
+          <ul className="border border-[var(--rule)] bg-card divide-y divide-[var(--rule)]">
             {active.map((t) => (
               <TemplateListItem
                 key={t.id}
@@ -156,7 +156,7 @@ export function OfferLetterEditor({
               />
             </button>
             {showArchived && (
-              <ul className="mt-1 border border-[var(--rule)] bg-white divide-y divide-[var(--rule)]">
+              <ul className="mt-1 border border-[var(--rule)] bg-card divide-y divide-[var(--rule)]">
                 {archived.map((t) => (
                   <TemplateListItem
                     key={t.id}
@@ -378,7 +378,7 @@ function TemplateForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="border border-[var(--rule)] bg-white p-5 space-y-5"
+      className="border border-[var(--rule)] bg-card p-5 space-y-5"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
@@ -391,7 +391,7 @@ function TemplateForm({
                 type="button"
                 onClick={handleRestore}
                 disabled={pending}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-ink bg-white hover:bg-cream disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-ink bg-card hover:bg-cream disabled:opacity-60"
               >
                 <ArchiveRestore className="h-3 w-3" />
                 Restore
@@ -401,7 +401,7 @@ function TemplateForm({
                 type="button"
                 onClick={handleArchive}
                 disabled={pending}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-slate-body bg-white hover:bg-cream disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-slate-body bg-card hover:bg-cream disabled:opacity-60"
               >
                 <Archive className="h-3 w-3" />
                 Archive
@@ -411,7 +411,7 @@ function TemplateForm({
               type="button"
               onClick={handleDelete}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-red-300 text-red-700 bg-white hover:bg-red-50 disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-danger text-danger bg-card hover:bg-danger-bg disabled:opacity-60"
             >
               <Trash2 className="h-3 w-3" />
               Delete
@@ -469,7 +469,7 @@ function TemplateForm({
       />
 
       {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-800 flex items-start gap-2">
+        <div className="rounded-md border border-danger bg-danger-bg px-3 py-2 text-[13px] text-danger flex items-start gap-2">
           <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
           <span>{error}</span>
         </div>
@@ -490,7 +490,7 @@ function TemplateForm({
           <button
             type="submit"
             disabled={pending}
-            className="inline-flex items-center gap-2 px-5 py-2 bg-ink text-ivory text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft disabled:opacity-60"
+            className="inline-flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
           >
             {pending ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -535,7 +535,7 @@ function InsertMergeFieldDropdown({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep border border-[var(--rule)] bg-white hover:bg-cream"
+        className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep border border-[var(--rule)] bg-card hover:bg-cream"
         aria-haspopup="menu"
         aria-expanded={open}
       >
@@ -546,7 +546,7 @@ function InsertMergeFieldDropdown({
       {open && (
         <div
           role="menu"
-          className="absolute right-0 mt-1 z-30 w-[320px] max-w-[calc(100vw-2rem)] max-h-[400px] overflow-y-auto border border-[var(--rule-strong)] bg-white shadow-lg"
+          className="absolute right-0 mt-1 z-30 w-[320px] max-w-[calc(100vw-2rem)] max-h-[400px] overflow-y-auto border border-[var(--rule-strong)] bg-popover shadow-lg"
         >
           {grouped.map((g) => (
             <div key={g.id}>
@@ -625,7 +625,7 @@ function PreviewPanel({
         )}
       </div>
       {unknownTokens.length > 0 && (
-        <div className="px-4 py-2 border-t border-amber-200 bg-amber-50 text-[12px] text-amber-900">
+        <div className="px-4 py-2 border-t border-warning bg-warning-bg text-[12px] text-warning">
           <strong>Unknown tokens:</strong>{" "}
           {unknownTokens.map((t) => `{{${t}}}`).join(", ")}. These will render
           literally in the sent email — pick a real field from the dropdown.

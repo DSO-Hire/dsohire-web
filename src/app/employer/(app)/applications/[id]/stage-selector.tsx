@@ -219,7 +219,7 @@ export function StageSelector({
       <div
         role="radiogroup"
         aria-label="Pipeline stage"
-        className="inline-flex flex-wrap items-stretch gap-0 border border-[var(--rule-strong)] bg-white"
+        className="inline-flex flex-wrap items-stretch gap-0 border border-[var(--rule-strong)] bg-card"
       >
         {kanbanStages.map((stage) => {
           const active = onSegmentedControl && optimisticState.stageId === stage.id;
@@ -246,7 +246,7 @@ export function StageSelector({
               ) : (
                 <span
                   className={`h-1.5 w-1.5 rounded-full ${
-                    active ? color.text.replace("text-", "bg-") : "bg-slate-300"
+                    active ? color.text.replace("text-", "bg-") : "bg-meta-foreground"
                   }`}
                   aria-hidden="true"
                 />
@@ -272,7 +272,7 @@ export function StageSelector({
           {menuOpen && (
             <div
               role="menu"
-              className="absolute right-0 top-full mt-1 z-20 min-w-[180px] border border-[var(--rule-strong)] bg-white shadow-lg"
+              className="absolute right-0 top-full mt-1 z-20 min-w-[180px] border border-[var(--rule-strong)] bg-popover shadow-lg"
             >
               {CLOSED_TRANSITIONS.map((t) => {
                 const active = optimisticState.kind === t.toKind;
@@ -285,7 +285,7 @@ export function StageSelector({
                     onClick={() => handleClosedMenuItem(t)}
                     className={`block w-full text-left px-4 py-2.5 text-[13px] font-semibold transition-colors focus:outline-none focus-visible:bg-cream disabled:opacity-50 disabled:cursor-not-allowed ${
                       t.tone === "danger"
-                        ? "text-red-700 hover:bg-red-50"
+                        ? "text-danger hover:bg-danger-bg"
                         : "text-ink hover:bg-cream"
                     }`}
                   >
@@ -301,7 +301,7 @@ export function StageSelector({
       {error && (
         <p
           role="alert"
-          className="mt-3 text-[13px] text-red-700"
+          className="mt-3 text-[13px] text-danger"
         >
           {error}
         </p>
@@ -359,8 +359,8 @@ function ClosedTransitionDialog({
 
   const confirmClasses =
     transition.tone === "danger"
-      ? "bg-red-700 text-white hover:bg-red-800 focus-visible:ring-red-700"
-      : "bg-heritage text-white hover:bg-heritage-deep focus-visible:ring-heritage";
+      ? "bg-danger text-danger-foreground hover:bg-danger/90 focus-visible:ring-danger"
+      : "bg-heritage text-primary-foreground hover:bg-heritage-deep focus-visible:ring-heritage";
 
   const showAiSuggester = transition.toKind === "rejected";
   const dispositionRequired = transition.toKind === "rejected";
@@ -408,7 +408,7 @@ function ClosedTransitionDialog({
             onChange={(e) => setReason(e.target.value.slice(0, 1000))}
             rows={3}
             placeholder="Add context for your team's audit log…"
-            className="w-full resize-y border border-[var(--rule-strong)] bg-white px-3 py-2 text-[14px] text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
+            className="w-full resize-y border border-[var(--rule-strong)] bg-card px-3 py-2 text-[14px] text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
           />
           <p className="text-[12px] text-slate-meta">
             {transition.dialogReasonHelper}
@@ -418,7 +418,7 @@ function ClosedTransitionDialog({
           <button
             type="button"
             onClick={onCancel}
-            className="inline-flex items-center justify-center px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] bg-white text-slate-body hover:bg-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
+            className="inline-flex items-center justify-center px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] bg-card text-slate-body hover:bg-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
           >
             Cancel
           </button>

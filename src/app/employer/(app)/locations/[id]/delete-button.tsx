@@ -69,7 +69,7 @@ export function DeleteLocationButton({
           <button
             type="button"
             onClick={() => setConfirming(true)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 border border-red-300 text-red-700 text-[12px] font-bold tracking-[2px] uppercase hover:bg-red-50 transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 border border-danger text-danger text-[12px] font-bold tracking-[2px] uppercase hover:bg-danger-bg transition-colors"
           >
             <Trash2 className="h-3.5 w-3.5" />
             Delete Location
@@ -84,13 +84,13 @@ export function DeleteLocationButton({
             cannot be undone.
           </p>
           {state.error && (
-            <p className="text-[13px] text-red-700">{state.error}</p>
+            <p className="text-[13px] text-danger">{state.error}</p>
           )}
           <div className="flex gap-3">
             <button
               type="submit"
               disabled={pending}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white text-[12px] font-bold tracking-[2px] uppercase hover:bg-red-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-danger text-danger-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-danger/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <Trash2 className="h-3.5 w-3.5" />
               {pending ? "Deleting…" : "Yes, Delete"}

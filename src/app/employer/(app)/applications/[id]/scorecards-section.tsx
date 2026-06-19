@@ -603,7 +603,7 @@ export function ScorecardsSection({
               </span>
             )}
             {myStatus === "draft" && (
-              <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-amber-700">
+              <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-warning">
                 Draft · not yet submitted
               </span>
             )}
@@ -639,7 +639,7 @@ export function ScorecardsSection({
         )}
 
         {myStatus === "draft" && !editing && myScorecard && (
-          <div className="border border-[var(--rule)] bg-white p-5">
+          <div className="border border-[var(--rule)] bg-card p-5">
             <ReadOnlyScorecard
               scorecard={myScorecard}
               rubric={rubric}
@@ -649,14 +649,14 @@ export function ScorecardsSection({
               <button
                 type="button"
                 onClick={openEditor}
-                className="px-4 py-2 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors"
+                className="px-4 py-2 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
               >
                 Continue editing
               </button>
               <button
                 type="button"
                 onClick={() => setConfirmingDelete(true)}
-                className="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-red-700 transition-colors"
+                className="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-danger transition-colors"
               >
                 <Trash2 className="h-3 w-3" />
                 Discard draft
@@ -666,7 +666,7 @@ export function ScorecardsSection({
         )}
 
         {myStatus === "submitted" && myScorecard && (
-          <div className="border border-[var(--rule)] bg-white p-5">
+          <div className="border border-[var(--rule)] bg-card p-5">
             <ReadOnlyScorecard
               scorecard={myScorecard}
               rubric={rubric}
@@ -721,7 +721,7 @@ export function ScorecardsSection({
             {otherScorecards.map((sc) => (
               <li
                 key={sc.id}
-                className="border border-[var(--rule)] bg-white p-5"
+                className="border border-[var(--rule)] bg-card p-5"
               >
                 <ReadOnlyScorecard
                   scorecard={sc}
@@ -848,7 +848,7 @@ function NoteTakerModal({
         if (e.target === e.currentTarget && !pending) onClose();
       }}
     >
-      <div className="w-full max-w-[640px] max-h-[92vh] bg-white border border-[var(--rule)] shadow-xl flex flex-col">
+      <div className="w-full max-w-[640px] max-h-[92vh] bg-card border border-[var(--rule)] shadow-xl flex flex-col">
         <header className="flex items-start justify-between p-5 border-b border-[var(--rule)]">
           <div>
             <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1 inline-flex items-center gap-2">
@@ -890,7 +890,7 @@ function NoteTakerModal({
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={pending || reading}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[var(--rule-strong)] bg-white text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[var(--rule-strong)] bg-card text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream disabled:opacity-60"
             >
               {reading ? (
                 <>
@@ -919,7 +919,7 @@ function NoteTakerModal({
             actually cover get scored.
           </p>
           {error && (
-            <div className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-800 flex items-start gap-2">
+            <div className="mt-3 rounded-md border border-danger bg-danger-bg px-3 py-2 text-[12px] text-danger flex items-start gap-2">
               <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
@@ -939,7 +939,7 @@ function NoteTakerModal({
             type="button"
             onClick={generate}
             disabled={pending || chars < 40}
-            className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C] disabled:opacity-60"
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
           >
             {pending ? (
               <>
@@ -1039,7 +1039,7 @@ function ScoreBar({ value }: { value: number }) {
   const pct = (clamped / 5) * 100;
   return (
     <div
-      className="h-1.5 w-24 bg-slate-100 overflow-hidden"
+      className="h-1.5 w-24 bg-muted overflow-hidden"
       aria-hidden="true"
     >
       <div
@@ -1185,7 +1185,7 @@ function ScorecardForm({
   groupedAttributes,
 }: ScorecardFormProps) {
   return (
-    <div className="border border-[var(--rule-strong)] bg-white p-5 mt-4 space-y-6">
+    <div className="border border-[var(--rule-strong)] bg-card p-5 mt-4 space-y-6">
       <div>
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
           Rubric · {rubric.label}
@@ -1241,7 +1241,7 @@ function ScorecardForm({
                 className={`text-[10px] font-bold tracking-[1.5px] uppercase px-3 py-2 ring-1 ring-inset transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2 ${
                   active
                     ? `${c.bg} ${c.ring} ${c.text}`
-                    : "bg-white ring-[var(--rule-strong)] text-slate-body hover:bg-cream"
+                    : "bg-card ring-[var(--rule-strong)] text-slate-body hover:bg-cream"
                 }`}
               >
                 {RECOMMENDATION_LABELS[rec]}
@@ -1267,7 +1267,7 @@ function ScorecardForm({
       </div>
 
       {error && (
-        <div className="flex items-start gap-2 text-[13px] text-red-700">
+        <div className="flex items-start gap-2 text-[13px] text-danger">
           <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
           <span>{error}</span>
         </div>
@@ -1278,7 +1278,7 @@ function ScorecardForm({
           type="button"
           onClick={onSaveDraft}
           disabled={saving || submitting}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-ink text-[10px] font-bold tracking-[1.5px] uppercase ring-1 ring-inset ring-[var(--rule-strong)] hover:bg-cream transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-card text-ink text-[10px] font-bold tracking-[1.5px] uppercase ring-1 ring-inset ring-[var(--rule-strong)] hover:bg-cream transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {saving && <Loader2 className="h-3 w-3 animate-spin" />}
           Save Draft
@@ -1287,7 +1287,7 @@ function ScorecardForm({
           type="button"
           onClick={onRequestSubmit}
           disabled={saving || submitting}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {submitting && <Loader2 className="h-3 w-3 animate-spin" />}
           Submit Scorecard
@@ -1342,7 +1342,7 @@ function AttributeRow({
       <div
         role="radiogroup"
         aria-label={`Score for ${attribute.label}`}
-        className="inline-flex items-stretch gap-0 border border-[var(--rule-strong)] bg-white mb-2.5"
+        className="inline-flex items-stretch gap-0 border border-[var(--rule-strong)] bg-card mb-2.5"
       >
         {SCORE_VALUES.map((value) => {
           const active = score === value;
@@ -1357,7 +1357,7 @@ function AttributeRow({
               onClick={() => onScoreChange(value)}
               className={`px-4 py-2 text-[13px] font-bold tabular-nums border-r last:border-r-0 border-[var(--rule)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-inset ${
                 active
-                  ? "bg-heritage text-ivory"
+                  ? "bg-heritage text-primary-foreground"
                   : "text-slate-body hover:bg-cream"
               }`}
             >
@@ -1379,7 +1379,7 @@ function AttributeRow({
           onChange={(e) => onNoteChange(e.target.value)}
           maxLength={1000}
           placeholder="Optional note for this attribute"
-          className="w-full px-3 py-2 bg-white border border-[var(--rule)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+          className="w-full px-3 py-2 bg-card border border-[var(--rule)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
         />
       )}
     </div>
@@ -1418,7 +1418,7 @@ function ConfirmDialog({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white border border-[var(--rule-strong)] shadow-xl max-w-md w-full p-6"
+        className="bg-card border border-[var(--rule-strong)] shadow-xl max-w-md w-full p-6"
       >
         <h4
           id="scorecard-confirm-title"
@@ -1443,8 +1443,8 @@ function ConfirmDialog({
             disabled={confirmDisabled}
             className={`px-5 py-2.5 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
               confirmTone === "danger"
-                ? "bg-red-600 text-white hover:bg-red-700"
-                : "bg-ink text-ivory hover:bg-ink-soft"
+                ? "bg-danger text-danger-foreground hover:bg-danger/90"
+                : "bg-primary text-primary-foreground hover:bg-primary/90"
             }`}
           >
             {confirmLabel}

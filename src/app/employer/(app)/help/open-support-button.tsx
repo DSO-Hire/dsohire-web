@@ -29,7 +29,7 @@ export function OpenSupportButton() {
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-1.5 rounded-md bg-ink text-ivory px-3.5 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft"
+      className="inline-flex items-center gap-1.5 rounded-md bg-primary text-primary-foreground px-3.5 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
     >
       <MessageSquare className="size-3.5" />
       Open support

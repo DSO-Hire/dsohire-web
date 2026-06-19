@@ -1194,7 +1194,7 @@ export default async function EmployerDashboard() {
           {dsoUser?.role !== "hiring_manager" && (
             <Link
               href="/employer/jobs/new"
-              className="inline-flex items-center gap-2 px-5 py-3 bg-heritage text-ivory text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-heritage-deep transition-colors shrink-0"
+              className="inline-flex items-center gap-2 px-5 py-3 bg-heritage text-primary-foreground text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-heritage-deep transition-colors shrink-0"
             >
               <Plus className="size-4" strokeWidth={2.5} />
               Post a job
@@ -1307,20 +1307,20 @@ export default async function EmployerDashboard() {
 
       {/* Onboarding nudge — only when no locations on file. */}
       {(locationsCount ?? 0) === 0 && (
-        <section className="mb-6 p-7 sm:p-8 bg-ink text-ivory border-l-4 border-heritage">
+        <section className="mb-6 p-7 sm:p-8 bg-hero text-hero-foreground border-l-4 border-heritage">
           <div className="text-[10px] font-extrabold tracking-[2.5px] uppercase text-heritage mb-3">
             Finish Onboarding
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.6px] leading-tight mb-3">
             Add your first practice location to start posting jobs.
           </h2>
-          <p className="text-[14px] text-ivory/70 leading-relaxed max-w-[560px] mb-6">
+          <p className="text-[14px] text-hero-foreground/70 leading-relaxed max-w-[560px] mb-6">
             DSO Hire posts jobs across your locations in one flow. We need
             at least one location to enable job posting.
           </p>
           <Link
             href="/employer/onboarding"
-            className="inline-flex items-center gap-2 px-7 py-3.5 bg-heritage text-ivory text-[12px] font-extrabold tracking-[1.8px] uppercase hover:bg-heritage-deep transition-colors"
+            className="inline-flex items-center gap-2 px-7 py-3.5 bg-heritage text-primary-foreground text-[12px] font-extrabold tracking-[1.8px] uppercase hover:bg-heritage-deep transition-colors"
           >
             Continue Onboarding
             <ArrowRight className="h-3.5 w-3.5" />
@@ -1457,7 +1457,7 @@ function CommandTile({
   return (
     <Link
       href={href}
-      className="group bg-white p-5 sm:p-6 flex items-center gap-4 hover:bg-ivory-deep transition-colors"
+      className="group bg-card p-5 sm:p-6 flex items-center gap-4 hover:bg-ivory-deep transition-colors"
     >
       <div className="h-9 w-9 bg-ink text-ivory flex items-center justify-center flex-shrink-0">
         <Icon className="h-4 w-4" />
@@ -1495,7 +1495,7 @@ function HmScopeContextBar({
             Your Hiring-Manager Scope
           </div>
           {labels.length === 0 ? (
-            <p className="text-[13px] text-amber-800 leading-relaxed">
+            <p className="text-[13px] text-warning leading-relaxed">
               No locations assigned to you yet. Reach out to whoever invited
               you so they can update your scope on the Team page — until then,
               you&apos;ll only see corporate-scoped jobs.

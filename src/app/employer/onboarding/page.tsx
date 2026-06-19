@@ -91,7 +91,7 @@ export default async function OnboardingPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-px bg-[var(--rule)] border border-[var(--rule)] max-w-[1100px]">
         {/* Form */}
-        <div className="bg-white p-8 sm:p-10">
+        <div className="bg-card p-8 sm:p-10">
           <OnboardingForm dsoId={dsoUser.dso_id} />
         </div>
 

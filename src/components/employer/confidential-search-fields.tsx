@@ -52,7 +52,7 @@ export function ConfidentialSearchFields({
   };
 
   return (
-    <div className="border border-[var(--rule-strong)] bg-white">
+    <div className="border border-[var(--rule-strong)] bg-card">
       <label className="flex items-start gap-3 p-4 cursor-pointer">
         <input
           type="checkbox"
@@ -97,7 +97,7 @@ export function ConfidentialSearchFields({
                   <label
                     key={t.id}
                     className={`flex items-center gap-3 p-2.5 cursor-pointer transition-colors ${
-                      checked ? "bg-cream" : "bg-white hover:bg-cream/60"
+                      checked ? "bg-cream" : "bg-card hover:bg-cream/60"
                     }`}
                   >
                     <input

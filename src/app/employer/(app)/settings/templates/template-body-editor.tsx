@@ -231,7 +231,7 @@ function InsertVariableMenu({
         onClick={() => setOpen((v) => !v)}
         className={cn(
           "inline-flex items-center gap-1.5 px-2 h-8 text-[12px] font-semibold text-slate-body hover:bg-ivory-deep hover:text-ink rounded transition-colors",
-          open && "bg-ink text-ivory hover:bg-ink-soft hover:text-ivory",
+          open && "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground",
           disabled && "opacity-40 cursor-not-allowed"
         )}
       >
@@ -247,7 +247,7 @@ function InsertVariableMenu({
             className="fixed inset-0 z-40 cursor-default bg-transparent"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute left-0 top-full z-50 mt-1 w-[280px] max-w-[calc(100vw-2rem)] max-h-[360px] overflow-y-auto border border-[var(--rule-strong)] bg-white shadow-lg">
+          <div className="absolute left-0 top-full z-50 mt-1 w-[280px] max-w-[calc(100vw-2rem)] max-h-[360px] overflow-y-auto border border-[var(--rule-strong)] bg-popover shadow-lg">
             {groups.map((group) => (
               <div key={group.id}>
                 <div className="border-b border-t border-[var(--rule)] bg-cream/50 px-3 py-1.5 text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
@@ -300,7 +300,7 @@ function ToolbarButton({
       className={cn(
         "inline-flex h-8 w-8 items-center justify-center transition-colors",
         active
-          ? "bg-ink text-ivory"
+          ? "bg-primary text-primary-foreground"
           : "text-slate-body hover:bg-ivory-deep hover:text-ink",
         disabled && "opacity-40 cursor-not-allowed"
       )}

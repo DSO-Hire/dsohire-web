@@ -120,7 +120,7 @@ export default async function EditLocationPage({ params }: PageProps) {
       {/* Practice logo — persisted directly on upload, separate from
           the form's save path. Shown above the form so the visual
           identity is the first thing the admin manages. */}
-      <section className="mb-10 max-w-[720px] border border-[var(--rule)] bg-white p-6 sm:p-8">
+      <section className="mb-10 max-w-[720px] border border-[var(--rule)] bg-card p-6 sm:p-8">
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Practice Logo
         </div>

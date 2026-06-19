@@ -70,7 +70,7 @@ export function OfferApprovalsSettings({
       <HelpDisclosure helpKey="offers.approvals" />
 
       {disabled && (
-        <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-900 flex items-start gap-2">
+        <div className="rounded-md border border-warning bg-warning-bg px-4 py-3 text-[13px] text-warning flex items-start gap-2">
           <Lock className="h-4 w-4 mt-0.5 shrink-0" />
           <span>
             Approval routing is part of the <strong>Scale</strong> plan. On your
@@ -190,7 +190,7 @@ function PolicyForm({
             onChange={(e) => setCeiling(e.target.value)}
             disabled={disabled || pending}
             placeholder="e.g. 200000"
-            className="w-full pl-6 pr-3 py-2 border border-[var(--rule-strong)] bg-white text-ink text-sm focus:outline-none focus:border-heritage disabled:bg-cream/60 disabled:text-slate-meta"
+            className="w-full pl-6 pr-3 py-2 border border-[var(--rule-strong)] bg-card text-ink text-sm focus:outline-none focus:border-heritage disabled:bg-cream/60 disabled:text-slate-meta"
           />
         </div>
       </div>
@@ -200,7 +200,7 @@ function PolicyForm({
           type="button"
           onClick={save}
           disabled={disabled || pending}
-          className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C] disabled:opacity-60"
+          className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
         >
           {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
           Save pay rules
@@ -212,7 +212,7 @@ function PolicyForm({
         )}
       </div>
       {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-800 flex items-start gap-2">
+        <div className="rounded-md border border-danger bg-danger-bg px-3 py-2 text-[12px] text-danger flex items-start gap-2">
           <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
           <span>{error}</span>
         </div>
@@ -246,7 +246,7 @@ function TeammateGrants({
         </p>
       </div>
 
-      <ul className="border border-[var(--rule)] divide-y divide-[var(--rule)] bg-white">
+      <ul className="border border-[var(--rule)] divide-y divide-[var(--rule)] bg-card">
         {grantable.map((t) => (
           <TeammateGrantRow key={t.id} teammate={t} disabled={disabled} />
         ))}
@@ -312,7 +312,7 @@ function TeammateGrantRow({
           {ROLE_LABELS[teammate.role] ?? teammate.role}
           {on ? " · sends offers directly" : " · offers need approval"}
         </div>
-        {error && <div className="text-[11px] text-red-700 mt-0.5">{error}</div>}
+        {error && <div className="text-[11px] text-danger mt-0.5">{error}</div>}
       </div>
       <Switch checked={on} onChange={toggle} disabled={disabled || pending} />
     </li>
@@ -363,12 +363,12 @@ function Switch({
       onClick={() => onChange(!checked)}
       className={
         "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-50 " +
-        (checked ? "bg-[#14233F]" : "bg-slate-300")
+        (checked ? "bg-primary" : "bg-slate-300")
       }
     >
       <span
         className={
-          "inline-block h-4 w-4 transform rounded-full bg-white transition-transform " +
+          "inline-block h-4 w-4 transform rounded-full bg-card transition-transform " +
           (checked ? "translate-x-6" : "translate-x-1")
         }
       />

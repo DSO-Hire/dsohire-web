@@ -57,7 +57,7 @@ export function LocationLogoUpload({
         onRemove={() => persist(null)}
       />
       {savedFlash && (
-        <p role="status" className="text-xs font-medium text-[#4D7A60]">
+        <p role="status" className="text-xs font-medium text-heritage">
           {savedFlash}
         </p>
       )}

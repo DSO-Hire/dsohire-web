@@ -120,7 +120,7 @@ export function RailCard({
   return (
     <section
       id={id}
-      className="border border-[var(--rule)] bg-white p-4 scroll-mt-6"
+      className="border border-[var(--rule)] bg-card p-4 scroll-mt-6"
     >
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
         {label}

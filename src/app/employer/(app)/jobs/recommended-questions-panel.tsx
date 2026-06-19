@@ -230,14 +230,14 @@ function RecommendedCard({
   return (
     <div
       data-recid={rq.id}
-      className="border border-[var(--rule-strong)] bg-white p-4 transition-colors scroll-mt-24"
+      className="border border-[var(--rule-strong)] bg-card p-4 transition-colors scroll-mt-24"
     >
       <div className="flex flex-wrap items-center gap-1.5 mb-2">
         <span className="text-[13px] font-bold tracking-[2px] uppercase text-heritage-deep px-2 py-0.5 bg-heritage/[0.08]">
           {KIND_LABELS[rq.kind]}
         </span>
         {rq.knockout && (
-          <span className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[1.5px] uppercase text-red-700 px-2 py-0.5 bg-red-50 border border-red-200">
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[1.5px] uppercase text-danger px-2 py-0.5 bg-danger-bg border border-danger">
             <ShieldAlert className="h-3 w-3" />
             Knockout
           </span>
@@ -268,7 +268,7 @@ function RecommendedCard({
         <button
           type="button"
           onClick={onAdd}
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
         >
           <Plus className="h-3 w-3" />
           Add

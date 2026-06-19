@@ -67,7 +67,7 @@ export function ApplicationsList({
 }: ApplicationsListProps) {
   if (applications.length === 0) {
     return (
-      <div className="border border-[var(--rule)] bg-white p-12 text-center max-w-[680px]">
+      <div className="border border-[var(--rule)] bg-card p-12 text-center max-w-[680px]">
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
           No applications yet
         </div>
@@ -79,7 +79,7 @@ export function ApplicationsList({
   }
 
   return (
-    <div className="border border-[var(--rule)] bg-white">
+    <div className="border border-[var(--rule)] bg-card">
       {applications.map((app) => {
         const cand = app.candidate;
         const row = findStage(stages, app.stage_id);
@@ -142,10 +142,10 @@ function statusBadgeClass(kind: StageKind): string {
       return "bg-blue-50 text-blue-900";
     case "offer":
     case "hired":
-      return "bg-emerald-50 text-emerald-900";
+      return "bg-success-bg text-success";
     case "rejected":
     case "withdrawn":
-      return "bg-slate-100 text-slate-600";
+      return "bg-muted text-muted-foreground";
     default:
       return "bg-cream text-ink";
   }

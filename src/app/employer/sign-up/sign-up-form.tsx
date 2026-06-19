@@ -78,15 +78,15 @@ export function SignUpForm({
           </div>
 
           {verifyState.error && (
-            <div role="alert" className="bg-red-50 border-l-4 border-red-500 p-4">
-              <p className="text-[14px] text-red-900">{verifyState.error}</p>
+            <div role="alert" className="bg-danger-bg border-l-4 border-danger p-4">
+              <p className="text-[14px] text-danger">{verifyState.error}</p>
             </div>
           )}
 
           <button
             type="submit"
             disabled={verifying}
-            className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {verifying ? "Verifying…" : "Verify & Continue"}
             {!verifying && <ArrowRight className="h-4 w-4" />}
@@ -198,15 +198,15 @@ export function SignUpForm({
       />
 
       {formState.error && (
-        <div role="alert" className="bg-red-50 border-l-4 border-red-500 p-4">
-          <p className="text-[14px] text-red-900">{formState.error}</p>
+        <div role="alert" className="bg-danger-bg border-l-4 border-danger p-4">
+          <p className="text-[14px] text-danger">{formState.error}</p>
         </div>
       )}
 
       <button
         type="submit"
         disabled={submittingForm}
-        className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {submittingForm ? "Creating Account…" : "Create Account & Send Code"}
         {!submittingForm && <ArrowRight className="h-4 w-4" />}

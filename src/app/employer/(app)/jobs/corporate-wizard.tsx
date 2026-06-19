@@ -975,7 +975,7 @@ export function CorporateJobWizard({
             <button
               type="button"
               onClick={restoreDraft}
-              className="px-4 py-2 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors"
+              className="px-4 py-2 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
             >
               Restore draft
             </button>
@@ -1353,7 +1353,7 @@ function BasicsStep({
                 "flex items-center gap-3 px-4 py-2.5 border cursor-pointer transition-colors " +
                 (authorityLevel === opt.value
                   ? "bg-[#3D5266]/[0.08] border-[#3D5266]"
-                  : "bg-white border-[var(--rule-strong)] hover:bg-cream")
+                  : "bg-card border-[var(--rule-strong)] hover:bg-cream")
               }
             >
               <input
@@ -1390,7 +1390,7 @@ function BasicsStep({
                 <label
                   key={loc.id}
                   className={`flex items-start gap-3 p-4 cursor-pointer transition-colors ${
-                    checked ? "bg-cream" : "bg-white hover:bg-cream/60"
+                    checked ? "bg-cream" : "bg-card hover:bg-cream/60"
                   }`}
                 >
                   <input
@@ -1747,7 +1747,7 @@ function DetailsStep({
                 "flex items-start gap-3 px-4 py-3 border cursor-pointer transition-colors " +
                 (workMode === opt.value
                   ? "bg-[#3D5266]/[0.08] border-[#3D5266]"
-                  : "bg-white border-[var(--rule-strong)] hover:bg-cream")
+                  : "bg-card border-[var(--rule-strong)] hover:bg-cream")
               }
             >
               <input
@@ -1810,7 +1810,7 @@ function DetailsStep({
                     className={`px-2.5 py-1 text-[11px] font-bold tracking-[0.5px] border transition-colors ${
                       checked
                         ? "bg-[#3D5266] text-ivory border-[#3D5266]"
-                        : "bg-white text-ink border-[var(--rule)] hover:border-[#3D5266]"
+                        : "bg-card text-ink border-[var(--rule)] hover:border-[#3D5266]"
                     }`}
                   >
                     {st}
@@ -1841,7 +1841,7 @@ function DetailsStep({
               className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
                 travelExpectation === ""
                   ? "bg-[#3D5266] text-ivory border-[#3D5266]"
-                  : "bg-white text-ink border-[var(--rule)] hover:border-[#3D5266]"
+                  : "bg-card text-ink border-[var(--rule)] hover:border-[#3D5266]"
               }`}
             >
               Not specified
@@ -1856,7 +1856,7 @@ function DetailsStep({
                   className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
                     checked
                       ? "bg-[#3D5266] text-ivory border-[#3D5266]"
-                      : "bg-white text-ink border-[var(--rule)] hover:border-[#3D5266]"
+                      : "bg-card text-ink border-[var(--rule)] hover:border-[#3D5266]"
                   }`}
                 >
                   {opt.label}
@@ -1976,7 +1976,7 @@ function DetailsStep({
                 "flex items-start gap-3 px-4 py-2.5 border cursor-pointer transition-colors " +
                 (industryExperience === ""
                   ? "bg-[#3D5266]/[0.08] border-[#3D5266]"
-                  : "bg-white border-[var(--rule-strong)] hover:bg-cream")
+                  : "bg-card border-[var(--rule-strong)] hover:bg-cream")
               }
             >
               <input
@@ -1999,7 +1999,7 @@ function DetailsStep({
                   "flex items-start gap-3 px-4 py-2.5 border cursor-pointer transition-colors " +
                   (industryExperience === opt.value
                     ? "bg-[#3D5266]/[0.08] border-[#3D5266]"
-                    : "bg-white border-[var(--rule-strong)] hover:bg-cream")
+                    : "bg-card border-[var(--rule-strong)] hover:bg-cream")
                 }
               >
                 <input
@@ -2323,7 +2323,7 @@ function QuestionCard({
   return (
     <div
       id={`screening-q-${question.id}`}
-      className="border border-[var(--rule)] p-5 bg-white"
+      className="border border-[var(--rule)] p-5 bg-card"
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
@@ -2356,7 +2356,7 @@ function QuestionCard({
           <button
             type="button"
             onClick={onRemove}
-            className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 transition-colors"
+            className="p-1.5 text-danger hover:text-danger hover:bg-danger-bg transition-colors"
             aria-label="Remove question"
           >
             <Trash2 className="h-4 w-4" />
@@ -2387,7 +2387,7 @@ function QuestionCard({
                 </span>
               )}
               {question.knockout && (
-                <span className="text-[9px] font-bold tracking-[1.2px] uppercase text-amber-900 bg-amber-100 px-1.5 py-0.5">
+                <span className="text-[9px] font-bold tracking-[1.2px] uppercase text-warning bg-warning-bg px-1.5 py-0.5">
                   Knockout
                 </span>
               )}
@@ -2437,7 +2437,7 @@ function QuestionCard({
                       type="button"
                       onClick={() => removeOption(opt.id)}
                       disabled={(question.options ?? []).length <= 2}
-                      className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="p-2 text-danger hover:text-danger hover:bg-danger-bg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                       aria-label="Remove option"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -2714,7 +2714,7 @@ function PreviewStep({
           className={
             "rounded-full px-3.5 py-1.5 transition-colors " +
             (!viewAsCandidate
-              ? "bg-ink text-ivory"
+              ? "bg-primary text-primary-foreground"
               : "text-slate-body hover:text-ink")
           }
         >
@@ -2726,7 +2726,7 @@ function PreviewStep({
           className={
             "rounded-full px-3.5 py-1.5 transition-colors " +
             (viewAsCandidate
-              ? "bg-ink text-ivory"
+              ? "bg-primary text-primary-foreground"
               : "text-slate-body hover:text-ink")
           }
         >
@@ -2864,7 +2864,7 @@ function PreviewStep({
                   "flex items-center gap-3 px-4 py-2.5 border cursor-pointer transition-colors " +
                   (status === opt.value
                     ? "bg-[#3D5266]/[0.08] border-[#3D5266]"
-                    : "bg-white border-[var(--rule-strong)] hover:bg-cream")
+                    : "bg-card border-[var(--rule-strong)] hover:bg-cream")
                 }
               >
                 <input
@@ -2917,7 +2917,7 @@ function CorporateCandidatePreview({
   const chip =
     "rounded-full bg-cream px-3 py-1 text-[12px] font-semibold text-slate-body";
   return (
-    <div className="border border-[var(--rule)] bg-white p-6 sm:p-8">
+    <div className="border border-[var(--rule)] bg-card p-6 sm:p-8">
       <div className="mb-3 text-[10px] font-bold uppercase tracking-[2px] text-[#3D5266]">
         How candidates see this
       </div>

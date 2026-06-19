@@ -83,7 +83,7 @@ export default async function OfferLettersSettingsPage() {
       </header>
 
       {!canEdit && (
-        <div className="mb-5 border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-900">
+        <div className="mb-5 border border-warning bg-warning-bg px-4 py-3 text-[13px] text-warning">
           You can view and use these templates, but only DSO owners and
           admins can edit or archive them.
         </div>

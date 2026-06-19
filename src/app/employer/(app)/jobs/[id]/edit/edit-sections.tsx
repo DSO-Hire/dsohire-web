@@ -302,7 +302,7 @@ function SaveBar({
   return (
     <div className="mt-6 flex items-center justify-between gap-4 border-t border-[var(--rule)] pt-4">
       <div className="min-w-0 flex-1 text-sm">
-        {error && <p className="text-red-700">{error}</p>}
+        {error && <p className="text-danger">{error}</p>}
         {!error && saved && (
           <p className="inline-flex items-center gap-1.5 text-heritage-deep">
             <CheckCircle2 className="size-3.5" />
@@ -314,7 +314,7 @@ function SaveBar({
         type="button"
         onClick={onSave}
         disabled={!dirty || saving}
-        className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ivory transition-colors hover:bg-ink-soft disabled:cursor-not-allowed disabled:opacity-40"
+        className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {saving ? (
           <>
@@ -339,13 +339,13 @@ function SectionShell({
   children: React.ReactNode;
 }) {
   return (
-    <section className="border border-slate-200 bg-white p-6 sm:p-8">
+    <section className="border border-border bg-card p-6 sm:p-8">
       <header className="mb-5">
-        <h2 className="font-display text-lg font-bold text-[#14233F]">
+        <h2 className="font-display text-lg font-bold text-foreground">
           {title}
         </h2>
         {subtitle && (
-          <p className="mt-0.5 text-sm text-slate-600">{subtitle}</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>
         )}
       </header>
       <div>{children}</div>
@@ -523,7 +523,7 @@ function BasicsSection({
                 <label
                   key={loc.id}
                   className={`flex items-start gap-3 p-4 cursor-pointer transition-colors ${
-                    checked ? "bg-cream" : "bg-white hover:bg-cream/60"
+                    checked ? "bg-cream" : "bg-card hover:bg-cream/60"
                   }`}
                 >
                   <input
@@ -566,7 +566,7 @@ function BasicsSection({
                   "flex items-start gap-3 px-4 py-3 border cursor-pointer transition-colors " +
                   (scope === opt.value
                     ? "bg-heritage/[0.08] border-heritage"
-                    : "bg-white border-[var(--rule-strong)] hover:bg-cream")
+                    : "bg-card border-[var(--rule-strong)] hover:bg-cream")
                 }
               >
                 <input
@@ -616,7 +616,7 @@ function BasicsSection({
                 setCorporateFunction(e.target.value);
                 setSaved(false);
               }}
-              className="w-full max-w-[420px] h-[44px] px-3 bg-white border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+              className="w-full max-w-[420px] h-[44px] px-3 bg-card border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
             >
               <option value="">Not specified</option>
               {CORPORATE_FUNCTIONS.map((f) => (
@@ -1299,8 +1299,8 @@ function DetailsSection({
                     }}
                     className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
                       checked
-                        ? "bg-heritage-deep text-ivory border-heritage-deep"
-                        : "bg-white text-ink border-[var(--rule)] hover:border-heritage"
+                        ? "bg-heritage-deep text-primary-foreground border-heritage-deep"
+                        : "bg-card text-ink border-[var(--rule)] hover:border-heritage"
                     }`}
                   >
                     {opt.label}
@@ -1354,8 +1354,8 @@ function DetailsSection({
                     }}
                     className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
                       checked
-                        ? "bg-heritage-deep text-ivory border-heritage-deep"
-                        : "bg-white text-ink border-[var(--rule)] hover:border-heritage"
+                        ? "bg-heritage-deep text-primary-foreground border-heritage-deep"
+                        : "bg-card text-ink border-[var(--rule)] hover:border-heritage"
                     }`}
                   >
                     {opt.label}
@@ -1838,7 +1838,7 @@ function QuestionCard({
   return (
     <div
       id={`screening-q-${question.id}`}
-      className="border border-[var(--rule)] p-4 bg-white"
+      className="border border-[var(--rule)] p-4 bg-card"
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
@@ -1871,7 +1871,7 @@ function QuestionCard({
           <button
             type="button"
             onClick={onRemove}
-            className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 transition-colors"
+            className="p-1.5 text-danger hover:text-danger hover:bg-danger-bg transition-colors"
             aria-label="Remove question"
           >
             <Trash2 className="h-4 w-4" />
@@ -1906,7 +1906,7 @@ function QuestionCard({
                 </span>
               )}
               {question.knockout && (
-                <span className="text-[9px] font-bold tracking-[1.2px] uppercase text-amber-900 bg-amber-100 px-1.5 py-0.5">
+                <span className="text-[9px] font-bold tracking-[1.2px] uppercase text-warning bg-warning-bg px-1.5 py-0.5">
                   Knockout
                 </span>
               )}
@@ -1955,7 +1955,7 @@ function QuestionCard({
                     type="button"
                     onClick={() => removeOption(opt.id)}
                     disabled={(question.options ?? []).length <= 2}
-                    className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="p-2 text-danger hover:text-danger hover:bg-danger-bg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                     aria-label="Remove option"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -2270,7 +2270,7 @@ function StatusSection({
               "flex items-start gap-3 px-4 py-3 border cursor-pointer transition-colors " +
               (status === opt.value
                 ? "bg-heritage/[0.08] border-heritage"
-                : "bg-white border-[var(--rule-strong)] hover:bg-cream")
+                : "bg-card border-[var(--rule-strong)] hover:bg-cream")
             }
           >
             <input

@@ -87,7 +87,7 @@ export function JobsListControls({
         value={activeSort}
         onChange={(e) => setSort(e.currentTarget.value)}
         disabled={pending}
-        className="text-[12px] px-2.5 py-1.5 bg-white border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage min-w-[180px]"
+        className="text-[12px] px-2.5 py-1.5 bg-card border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage min-w-[180px]"
       >
         {sortOptions.map((opt) => (
           <option key={opt.value} value={opt.value}>
@@ -105,8 +105,8 @@ export function JobsListControls({
             className={
               "inline-flex items-center gap-2 text-[12px] px-3 py-1.5 border transition-colors " +
               (activeLocCount > 0
-                ? "bg-heritage text-ivory border-heritage"
-                : "bg-white text-ink border-[var(--rule-strong)] hover:bg-cream")
+                ? "bg-heritage text-primary-foreground border-heritage"
+                : "bg-card text-ink border-[var(--rule-strong)] hover:bg-cream")
             }
           >
             <MapPin className="h-3 w-3" />
@@ -123,7 +123,7 @@ export function JobsListControls({
                 onClick={() => setLocOpen(false)}
                 className="fixed inset-0 z-20"
               />
-              <div className="absolute right-0 top-full mt-1 z-30 w-[280px] max-w-[calc(100vw-2rem)] max-h-[360px] overflow-y-auto bg-white border border-[var(--rule-strong)] shadow-[0_8px_24px_-8px_rgba(7,15,28,0.15)]">
+              <div className="absolute right-0 top-full mt-1 z-30 w-[280px] max-w-[calc(100vw-2rem)] max-h-[360px] overflow-y-auto bg-popover border border-[var(--rule-strong)] shadow-[0_8px_24px_-8px_rgba(7,15,28,0.15)]">
                 <div className="px-3 py-2 border-b border-[var(--rule)] flex items-center justify-between">
                   <span className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
                     Filter by location
@@ -132,7 +132,7 @@ export function JobsListControls({
                     <button
                       type="button"
                       onClick={clearLocations}
-                      className="text-[10px] font-bold tracking-[1.2px] uppercase text-slate-meta hover:text-red-700"
+                      className="text-[10px] font-bold tracking-[1.2px] uppercase text-slate-meta hover:text-danger"
                     >
                       Clear
                     </button>

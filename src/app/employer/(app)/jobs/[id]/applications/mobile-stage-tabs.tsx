@@ -120,8 +120,8 @@ export function MobileStageTabs({
                 onClick={() => selectTab(tab)}
                 className={`px-3 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors border ${
                   isActive
-                    ? "bg-ink text-ivory border-ink"
-                    : "bg-white text-ink border-[var(--rule)] hover:bg-cream"
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-card text-ink border-[var(--rule)] hover:bg-cream"
                 }`}
               >
                 {label}
@@ -171,7 +171,7 @@ function MobileTabContent({
     // typically; honor the per-DSO label per row).
     const terminalById = new Map(terminalStages.map((s) => [s.id, s]));
     return (
-      <div className="border border-[var(--rule)] bg-white divide-y divide-[var(--rule)]">
+      <div className="border border-[var(--rule)] bg-card divide-y divide-[var(--rule)]">
         {applications.map((app) => {
           const stage = terminalById.get(app.stage_id);
           const stageLabel = stage?.label ?? KIND_DEFAULT_LABELS[app.kind];
@@ -213,7 +213,7 @@ function MobileTabContent({
           <Link
             key={app.id}
             href={`/employer/applications/${app.id}`}
-            className={`block bg-white border border-[var(--rule)] border-t-2 ${colors?.text ?? ""} p-3 hover:border-[var(--rule-strong)] transition-colors`}
+            className={`block bg-card border border-[var(--rule)] border-t-2 ${colors?.text ?? ""} p-3 hover:border-[var(--rule-strong)] transition-colors`}
           >
             <div className="text-[14px] font-bold text-ink truncate mb-1">
               {cand?.full_name ?? "Anonymous candidate"}

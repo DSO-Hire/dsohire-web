@@ -207,8 +207,8 @@ function TabLink({
       className={
         "px-5 py-2 rounded-md text-[12px] font-bold tracking-[1px] uppercase transition-colors " +
         (active
-          ? "bg-[#14233F] text-[#F7F4ED] shadow-sm"
-          : "text-slate-body hover:text-ink hover:bg-white/70")
+          ? "bg-primary text-primary-foreground shadow-sm"
+          : "text-slate-body hover:text-ink hover:bg-card/70")
       }
     >
       {children}

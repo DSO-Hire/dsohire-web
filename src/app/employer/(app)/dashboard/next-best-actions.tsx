@@ -71,7 +71,7 @@ export function NextBestActions({ items }: { items: NbaItem[] }) {
   if (visible.length === 0) return null;
 
   return (
-    <section className="mb-6 border border-[var(--rule)] bg-white">
+    <section className="mb-6 border border-[var(--rule)] bg-card">
       <header className="px-6 py-4 border-b border-[var(--rule)] flex items-center justify-between gap-3">
         <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
           Next best actions
@@ -88,7 +88,7 @@ export function NextBestActions({ items }: { items: NbaItem[] }) {
             role="listitem"
             onClick={() => setSel(i)}
             className={`flex items-start gap-3 border border-[var(--rule)] border-l-[3px] ${TONE_EDGE[item.tone]} bg-cream/70 p-3 mb-2 last:mb-0 cursor-default transition-shadow ${
-              i === sel ? "shadow-[0_0_0_2px_var(--color-heritage)] bg-white" : ""
+              i === sel ? "shadow-[0_0_0_2px_var(--color-heritage)] bg-card" : ""
             }`}
           >
             <span
@@ -107,14 +107,14 @@ export function NextBestActions({ items }: { items: NbaItem[] }) {
               <div className="flex flex-wrap gap-1.5 mt-2">
                 <Link
                   href={item.primary.href}
-                  className="bg-ink text-ivory text-[10px] font-extrabold px-2.5 py-1.5 hover:bg-ink-soft transition-colors"
+                  className="bg-primary text-primary-foreground text-[10px] font-extrabold px-2.5 py-1.5 hover:bg-primary/90 transition-colors"
                 >
                   {item.primary.label}
                 </Link>
                 {item.secondary && (
                   <Link
                     href={item.secondary.href}
-                    className="border border-[var(--rule-strong)] bg-white text-ink text-[10px] font-extrabold px-2.5 py-1.5 hover:border-heritage hover:text-heritage-deep transition-colors"
+                    className="border border-[var(--rule-strong)] bg-card text-ink text-[10px] font-extrabold px-2.5 py-1.5 hover:border-heritage hover:text-heritage-deep transition-colors"
                   >
                     {item.secondary.label}
                   </Link>

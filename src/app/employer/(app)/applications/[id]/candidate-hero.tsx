@@ -29,7 +29,7 @@ import {
  */
 export function statusBadgeClasses(kind: StageKind): string {
   if (isTerminalKind(kind)) {
-    return "bg-slate-100 ring-slate-200 text-slate-600";
+    return "bg-muted ring-border text-muted-foreground";
   }
   const c = colorTripleFor(null, kind);
   return `${c.bg} ${c.ring} ${c.text}`;
@@ -71,7 +71,7 @@ export function CandidateHero({
   submitted: Date;
 }) {
   return (
-    <header className="mb-8 border border-[var(--rule)] bg-white p-6 sm:p-8">
+    <header className="mb-8 border border-[var(--rule)] bg-card p-6 sm:p-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-6">
         {/* Mobile: avatar stacks above the name so the name + meta get full
             width (no thin squeezed column). Desktop: avatar left, name right. */}

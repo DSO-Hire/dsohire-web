@@ -149,7 +149,7 @@ export default async function PublicProfileSettingsPage({
       <EditPreviewTabs activeView={view} slug={data.slug} />
 
       {!canEdit && view === "edit" ? (
-        <div className="border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900 max-w-[820px]">
+        <div className="border border-warning bg-warning-bg p-5 text-sm text-warning max-w-[820px]">
           <strong className="font-semibold">View-only.</strong> Only DSO owners
           and admins can edit the public profile. Ask a teammate with access
           to make changes.
@@ -255,7 +255,7 @@ function TabLink({
 
 function ProfilePreviewPane({ slug }: { slug: string }) {
   return (
-    <div className="border border-[var(--rule)] bg-white overflow-hidden">
+    <div className="border border-[var(--rule)] bg-card overflow-hidden">
       <div className="border-b border-[var(--rule)] bg-cream/40 px-4 py-2 text-[11px] font-medium text-slate-body">
         Previewing <code className="font-mono">/companies/{slug}</code> as a
         logged-out visitor would see it. Saved changes appear here within a

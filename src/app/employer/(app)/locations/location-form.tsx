@@ -183,8 +183,8 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
               className={
                 "inline-flex items-center px-2 py-0.5 text-[10px] font-bold tracking-[1.2px] uppercase " +
                 ((initial?.public_dso_affiliation ?? true)
-                  ? "bg-heritage text-ivory"
-                  : "bg-ink text-ivory")
+                  ? "bg-heritage text-primary-foreground"
+                  : "bg-primary text-primary-foreground")
               }
             >
               {(initial?.public_dso_affiliation ?? true)
@@ -223,7 +223,7 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
               </p>
               {showDsoAffiliation !==
                 (initial?.public_dso_affiliation ?? true) && (
-                <p className="mt-2 text-[12px] text-amber-800 font-semibold">
+                <p className="mt-2 text-[12px] text-warning font-semibold">
                   Unsaved change. Click Save to persist.
                 </p>
               )}
@@ -253,8 +253,8 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
               className={
                 "inline-flex items-center px-2 py-0.5 text-[10px] font-bold tracking-[1.2px] uppercase " +
                 ((initial?.anonymize_name ?? false)
-                  ? "bg-ink text-ivory"
-                  : "bg-heritage text-ivory")
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-heritage text-primary-foreground")
               }
             >
               {(initial?.anonymize_name ?? false) ? "Name hidden" : "Name shown"}
@@ -282,7 +282,7 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
                 {dsoName ?? "DSO"} name above.
               </p>
               {anonymizeName !== (initial?.anonymize_name ?? false) && (
-                <p className="mt-2 text-[12px] text-amber-800 font-semibold">
+                <p className="mt-2 text-[12px] text-warning font-semibold">
                   Unsaved change. Click Save to persist.
                 </p>
               )}
@@ -297,8 +297,8 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
       )}
 
       {state.error && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-4">
-          <p className="text-[14px] text-red-900">{state.error}</p>
+        <div className="bg-danger-bg border-l-4 border-danger p-4">
+          <p className="text-[14px] text-danger">{state.error}</p>
         </div>
       )}
 
@@ -312,7 +312,7 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center gap-2.5 px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {pending
             ? mode === "create"

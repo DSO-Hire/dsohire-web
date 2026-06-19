@@ -288,7 +288,7 @@ export default async function EditCorporateJobPage({ params }: PageProps) {
 
       {/* Soft-delete (separated from main form for safety) */}
       <section className="mt-16 pt-10 border-t border-[var(--rule)] max-w-[820px]">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-red-700 mb-2">
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-danger mb-2">
           Danger Zone
         </div>
         <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink mb-2">
@@ -302,7 +302,7 @@ export default async function EditCorporateJobPage({ params }: PageProps) {
           <input type="hidden" name="job_id" value={initial.id} />
           <button
             type="submit"
-            className="inline-flex items-center gap-2 px-5 py-2.5 border border-red-300 text-red-700 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-red-50 transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 border border-danger text-danger text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-danger-bg transition-colors"
           >
             <Trash2 className="h-3.5 w-3.5" />
             Delete Job

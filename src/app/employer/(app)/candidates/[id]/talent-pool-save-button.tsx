@@ -58,8 +58,8 @@ export function TalentPoolSaveButton({
         className={
           "inline-flex items-center gap-2 px-4 py-2.5 text-[12px] font-bold tracking-[1.5px] uppercase border transition-colors disabled:opacity-60 " +
           (saved
-            ? "bg-heritage text-ivory border-heritage hover:bg-heritage-deep"
-            : "bg-white text-ink border-slate-300 hover:bg-cream")
+            ? "bg-heritage text-primary-foreground border-heritage hover:bg-heritage-deep"
+            : "bg-card text-ink border-border hover:bg-cream")
         }
       >
         {pending ? (
@@ -72,7 +72,7 @@ export function TalentPoolSaveButton({
         {saved ? "Saved to pool" : "Save to pool"}
       </button>
       {error && (
-        <div className="text-[11px] text-red-700">{error}</div>
+        <div className="text-[11px] text-danger">{error}</div>
       )}
     </div>
   );

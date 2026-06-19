@@ -288,7 +288,7 @@ export function JdGeneratorCorporatePanel({
                     // Seed the title too so Apply All has a starting value.
                     onApplyTitle(t.title_seed);
                   }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold border border-[var(--rule-strong)] bg-white text-ink transition-colors disabled:opacity-50 hover:bg-[var(--corp-tint)]"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold border border-[var(--rule-strong)] bg-card text-ink transition-colors disabled:opacity-50 hover:bg-[var(--corp-tint)]"
                   style={
                     {
                       "--corp-tint": `${CORP_ACCENT}10`,
@@ -335,7 +335,7 @@ export function JdGeneratorCorporatePanel({
           type="button"
           onClick={run}
           disabled={pending}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-ink text-ivory text-[10px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-[10px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {pending ? (
             <>
@@ -364,10 +364,10 @@ export function JdGeneratorCorporatePanel({
       </div>
 
       {error && (
-        <div className="mt-4 bg-red-50 border-l-4 border-red-500 p-4 flex items-start justify-between gap-3">
-          <p className="text-[14px] text-red-900">
+        <div className="mt-4 bg-danger-bg border-l-4 border-danger p-4 flex items-start justify-between gap-3">
+          <p className="text-[14px] text-danger">
             AI generation failed. Try again or simplify the brief.
-            <span className="block mt-1 text-[12px] text-red-800/80">
+            <span className="block mt-1 text-[12px] text-danger/80">
               {error}
             </span>
           </p>
@@ -375,7 +375,7 @@ export function JdGeneratorCorporatePanel({
             type="button"
             onClick={run}
             disabled={pending}
-            className="text-[10px] font-bold tracking-[1.5px] uppercase text-red-900 hover:text-red-700 transition-colors flex-shrink-0"
+            className="text-[10px] font-bold tracking-[1.5px] uppercase text-danger hover:text-danger/80 transition-colors flex-shrink-0"
           >
             Retry
           </button>
@@ -423,7 +423,7 @@ function ResultCard({
   onApplyAll: () => void;
 }) {
   return (
-    <div className="mt-5 border border-[var(--rule-strong)] bg-white p-5">
+    <div className="mt-5 border border-[var(--rule-strong)] bg-card p-5">
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[var(--rule)]">
         <div
           className="text-[10px] font-bold tracking-[2px] uppercase"
@@ -434,7 +434,7 @@ function ResultCard({
         <button
           type="button"
           onClick={onApplyAll}
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 text-ivory text-[10px] font-bold tracking-[1.5px] uppercase transition-colors"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase transition-colors"
           style={{ backgroundColor: CORP_ACCENT }}
         >
           <Check className="h-3 w-3" />

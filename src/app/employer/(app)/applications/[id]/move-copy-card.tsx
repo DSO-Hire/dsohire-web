@@ -60,7 +60,7 @@ export function MoveCopyCard({ applicationId }: { applicationId: string }) {
   const selectedTaken = targets?.find((t) => t.id === selected)?.taken ?? false;
 
   return (
-    <section className="border border-[var(--rule)] bg-white p-5">
+    <section className="border border-[var(--rule)] bg-card p-5">
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
           Move or copy to another job
@@ -114,7 +114,7 @@ export function MoveCopyCard({ applicationId }: { applicationId: string }) {
                 type="button"
                 onClick={() => handleTransfer("move")}
                 disabled={pending || !selected || selectedTaken}
-                className="inline-flex items-center gap-1.5 px-3 py-2 bg-ink text-ivory text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
               >
                 <ArrowRightLeft className="h-3.5 w-3.5" />
                 {pending ? "Working…" : "Move"}
@@ -132,7 +132,7 @@ export function MoveCopyCard({ applicationId }: { applicationId: string }) {
           ) : null}
 
           {error && (
-            <p role="alert" className="mt-2 text-[12px] text-red-700">
+            <p role="alert" className="mt-2 text-[12px] text-danger">
               {error}
             </p>
           )}

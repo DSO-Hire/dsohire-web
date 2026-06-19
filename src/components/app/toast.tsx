@@ -130,7 +130,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 setTimeout(() => dismiss(t.id), 1600)
               );
             }}
-            className={`pointer-events-auto bg-ink text-ivory border-l-[3px] ${KIND_ACCENT[t.kind ?? "commit"]} px-4 py-3 shadow-[0_14px_30px_-12px_rgba(7,15,28,0.45)] transition-all duration-200 ease-out motion-reduce:transition-none ${
+            className={`pointer-events-auto bg-sidebar text-sidebar-foreground border-l-[3px] ${KIND_ACCENT[t.kind ?? "commit"]} px-4 py-3 shadow-[0_14px_30px_-12px_rgba(7,15,28,0.45)] transition-all duration-200 ease-out motion-reduce:transition-none ${
               t.leaving
                 ? "opacity-0 translate-y-2"
                 : "opacity-100 translate-y-0"
@@ -144,13 +144,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 type="button"
                 aria-label="Dismiss"
                 onClick={() => dismiss(t.id)}
-                className="text-ivory/50 hover:text-ivory text-[12px] font-bold leading-none mt-0.5"
+                className="text-sidebar-foreground/50 hover:text-sidebar-foreground text-[12px] font-bold leading-none mt-0.5"
               >
                 ✕
               </button>
             </div>
             {t.body && (
-              <div className="text-[11.5px] text-ivory/65 leading-[1.55] mt-1">
+              <div className="text-[11.5px] text-sidebar-foreground/65 leading-[1.55] mt-1">
                 {t.body}
               </div>
             )}

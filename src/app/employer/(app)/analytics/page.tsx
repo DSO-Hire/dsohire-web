@@ -171,7 +171,7 @@ export default async function AnalyticsHubPage({ searchParams }: PageProps) {
         <div className="flex items-center gap-2 shrink-0">
           <a
             href="/api/employer/analytics.csv"
-            className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-ink hover:bg-cream"
+            className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-4 py-2.5 text-sm font-medium text-ink hover:bg-cream"
             title="Download per-practice analytics as CSV"
           >
             <Download className="size-3.5" />
@@ -179,7 +179,7 @@ export default async function AnalyticsHubPage({ searchParams }: PageProps) {
           </a>
           <a
             href="/api/employer/applications.csv"
-            className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-ink hover:bg-cream"
+            className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-4 py-2.5 text-sm font-medium text-ink hover:bg-cream"
             title="Download all applications as CSV"
           >
             <Download className="size-3.5" />
@@ -234,8 +234,8 @@ export default async function AnalyticsHubPage({ searchParams }: PageProps) {
                   className={
                     "px-3 py-1.5 text-[11px] font-semibold border transition-colors " +
                     (active
-                      ? "bg-ink text-ivory border-ink"
-                      : "bg-white text-slate-body border-[var(--rule-strong)] hover:border-ink")
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-card text-slate-body border-[var(--rule-strong)] hover:border-ink")
                   }
                 >
                   {w.label}
@@ -523,7 +523,7 @@ function BenchmarksTab({
     : 0;
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <section className="border border-[var(--rule)] bg-white p-6">
+      <section className="border border-[var(--rule)] bg-card p-6">
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
           Your pay vs. market
         </div>
@@ -561,7 +561,7 @@ function BenchmarksTab({
         </p>
       </section>
 
-      <section className="border border-[var(--rule)] bg-white p-6">
+      <section className="border border-[var(--rule)] bg-card p-6">
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
           Cost of open chairs
         </div>
@@ -629,7 +629,7 @@ function ReqAgingCard({
     { label: "90+d", n: b.d90_plus, color: "#D85A30" },
   ];
   return (
-    <section className="border border-[var(--rule)] bg-white p-6">
+    <section className="border border-[var(--rule)] bg-card p-6">
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
         Open requisitions by age
       </div>
@@ -700,7 +700,7 @@ function SourcePerformance({
 }) {
   const display = showAll ? rows : rows.slice(0, 8);
   return (
-    <section className="border border-[var(--rule)] bg-white p-6">
+    <section className="border border-[var(--rule)] bg-card p-6">
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
         Source performance
       </div>
@@ -751,7 +751,7 @@ function OfferBreakdown({
   offers: AnalyticsOverview["offers"];
 }) {
   return (
-    <section className="border border-[var(--rule)] bg-white p-6">
+    <section className="border border-[var(--rule)] bg-card p-6">
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
         Offers
       </div>

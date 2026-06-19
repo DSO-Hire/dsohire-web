@@ -140,7 +140,7 @@ export function SequencesManager({
                   ? "Send any steps due now instead of waiting for the hourly run"
                   : "No active enrollments to process"
               }
-              className="inline-flex items-center gap-2 border border-[var(--rule-strong)] text-ink bg-white px-3 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-cream disabled:opacity-50"
+              className="inline-flex items-center gap-2 border border-[var(--rule-strong)] text-ink bg-card px-3 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-cream disabled:opacity-50"
             >
               {running ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
               Run now
@@ -148,7 +148,7 @@ export function SequencesManager({
             <button
               type="button"
               onClick={() => setEditing("new")}
-              className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C]"
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
             >
               <Plus className="h-3.5 w-3.5" /> New sequence
             </button>
@@ -163,7 +163,7 @@ export function SequencesManager({
       )}
 
       {!canManage && (
-        <div className="mb-5 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-900 flex items-start gap-2">
+        <div className="mb-5 rounded-md border border-warning bg-warning-bg px-4 py-3 text-[13px] text-warning flex items-start gap-2">
           <Lock className="h-4 w-4 mt-0.5 shrink-0" />
           <span>
             Drip sequences are part of the <strong>Scale</strong> plan. Upgrade
@@ -237,7 +237,7 @@ function SequenceRow({
   }
 
   return (
-    <div className="border border-[var(--rule)] bg-white p-4">
+    <div className="border border-[var(--rule)] bg-card p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="text-[15px] font-extrabold tracking-[-0.3px] text-ink">
@@ -275,7 +275,7 @@ function SequenceRow({
               type="button"
               onClick={() => setConfirmDelete(true)}
               disabled={pending}
-              className="p-1.5 text-slate-meta hover:text-red-700 disabled:opacity-60"
+              className="p-1.5 text-slate-meta hover:text-danger disabled:opacity-60"
               aria-label="Delete sequence"
             >
               <Trash2 className="h-4 w-4" />
@@ -284,14 +284,14 @@ function SequenceRow({
         )}
       </div>
       {confirmDelete && (
-        <div className="mt-3 rounded border border-red-200 bg-red-50 px-3 py-2.5 text-[12px] text-red-900">
+        <div className="mt-3 rounded border border-danger bg-danger-bg px-3 py-2.5 text-[12px] text-danger">
           Delete &ldquo;{sequence.name}&rdquo;? Active enrollments stop immediately.
           <div className="mt-2 flex items-center gap-2">
             <button
               type="button"
               onClick={remove}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 bg-[#7c2d12] text-[#F7F4ED] px-3 py-1.5 text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-[#5b210d] disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 bg-danger text-danger-foreground px-3 py-1.5 text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-danger/90 disabled:opacity-60"
             >
               {pending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
               Delete
@@ -375,7 +375,7 @@ function SequenceEditor({
         if (e.target === e.currentTarget && !pending) onClose();
       }}
     >
-      <div className="w-full max-w-[680px] max-h-[92vh] bg-white border border-[var(--rule)] shadow-xl flex flex-col">
+      <div className="w-full max-w-[680px] max-h-[92vh] bg-card border border-[var(--rule)] shadow-xl flex flex-col">
         <header className="flex items-start justify-between p-5 border-b border-[var(--rule)]">
           <div>
             <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
@@ -442,7 +442,7 @@ function SequenceEditor({
           </p>
 
           {error && (
-            <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-800 flex items-start gap-2">
+            <div className="rounded-md border border-danger bg-danger-bg px-3 py-2 text-[12px] text-danger flex items-start gap-2">
               <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
@@ -462,7 +462,7 @@ function SequenceEditor({
             type="button"
             onClick={save}
             disabled={pending}
-            className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C] disabled:opacity-60"
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
           >
             {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
             Save sequence
@@ -549,7 +549,7 @@ function StepEditor({
           <button type="button" onClick={() => onMove(1)} disabled={index === total - 1 || pending}
             className="px-1.5 text-slate-meta hover:text-ink disabled:opacity-30 text-[12px]">↓</button>
           <button type="button" onClick={onRemove} disabled={total <= 1 || pending}
-            className="p-1 text-slate-meta hover:text-red-700 disabled:opacity-30" aria-label="Remove step">
+            className="p-1 text-slate-meta hover:text-danger disabled:opacity-30" aria-label="Remove step">
             <Trash2 className="h-3.5 w-3.5" />
           </button>
         </div>
@@ -564,7 +564,7 @@ function StepEditor({
           value={step.delay_days}
           onChange={(e) => onUpdate({ delay_days: Number(e.target.value) })}
           disabled={pending}
-          className="w-16 px-2 py-1 bg-white border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage"
+          className="w-16 px-2 py-1 bg-card border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage"
         />
         <span>
           {index === 0
@@ -574,7 +574,7 @@ function StepEditor({
       </div>
 
       {preview ? (
-        <div className="rounded border border-[var(--rule)] bg-white p-3">
+        <div className="rounded border border-[var(--rule)] bg-card p-3">
           <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-slate-meta">Subject</div>
           <div className="text-[13px] font-semibold text-ink mb-2">
             {fillPreview(step.subject) || "—"}
@@ -598,7 +598,7 @@ function StepEditor({
             maxLength={200}
             placeholder="Subject line"
             disabled={pending}
-            className="w-full px-3 py-2 mb-2 bg-white border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage"
+            className="w-full px-3 py-2 mb-2 bg-card border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage"
           />
           <TokenChips onInsert={insertBody} disabled={pending} target="message" />
           <textarea
@@ -609,7 +609,7 @@ function StepEditor({
             maxLength={4000}
             placeholder="Message body"
             disabled={pending}
-            className="w-full px-3 py-2 bg-white border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage resize-y"
+            className="w-full px-3 py-2 bg-card border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage resize-y"
           />
         </>
       )}

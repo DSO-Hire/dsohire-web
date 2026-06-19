@@ -156,7 +156,7 @@ export function WorkspaceTabs({
               <Icon className="h-3.5 w-3.5" />
               {t.label}
               {t.badge !== undefined && (
-                <span className="inline-flex items-center justify-center min-w-[18px] px-1.5 py-0.5 bg-heritage-deep text-ivory text-[10px] font-bold leading-none">
+                <span className="inline-flex items-center justify-center min-w-[18px] px-1.5 py-0.5 bg-heritage-deep text-primary-foreground text-[10px] font-bold leading-none">
                   {t.badge}
                 </span>
               )}

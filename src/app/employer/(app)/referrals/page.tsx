@@ -27,9 +27,9 @@ const STATUS_LABEL: Record<string, string> = {
 const STATUS_TONE: Record<string, string> = {
   submitted: "bg-cream text-ink border-[var(--rule-strong)]",
   contacted: "bg-blue-50 text-blue-700 border-blue-200",
-  interviewing: "bg-amber-50 text-amber-700 border-amber-200",
+  interviewing: "bg-warning-bg text-warning border-warning",
   hired: "bg-heritage/15 text-heritage-deep border-heritage/30",
-  closed: "bg-slate-100 text-slate-500 border-slate-200",
+  closed: "bg-muted text-muted-foreground border-border",
 };
 
 interface ReferralRow {

@@ -194,7 +194,7 @@ export function AutomationsManager({ rules, jobs, teammates, canManage }: Props)
         {canManage && editing === null && (
           <button
             onClick={() => setEditing("new")}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded bg-heritage px-3 py-2 text-sm font-semibold text-white hover:bg-heritage/90"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded bg-heritage px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-heritage/90"
           >
             <Plus className="size-4" /> New automation
           </button>
@@ -206,9 +206,9 @@ export function AutomationsManager({ rules, jobs, teammates, canManage }: Props)
       </div>
 
       {!canManage && (
-        <div className="mb-6 border border-amber-200 bg-amber-50 p-5 text-sm text-amber-950">
+        <div className="mb-6 border border-warning bg-warning-bg p-5 text-sm text-warning">
           <div className="flex items-start gap-3">
-            <Lock className="mt-0.5 size-4 shrink-0 text-amber-700" />
+            <Lock className="mt-0.5 size-4 shrink-0 text-warning" />
             <div className="flex-1">
               <strong className="inline-flex items-center gap-1.5 font-semibold">
                 <BrandMark className="size-3.5" /> Scale feature
@@ -219,7 +219,7 @@ export function AutomationsManager({ rules, jobs, teammates, canManage }: Props)
               </p>
               <a
                 href="/employer/billing"
-                className="mt-2 inline-block font-semibold text-amber-900 underline-offset-2 hover:underline"
+                className="mt-2 inline-block font-semibold text-warning underline-offset-2 hover:underline"
               >
                 Upgrade to Scale →
               </a>
@@ -309,7 +309,7 @@ function RuleRow({
   }
 
   return (
-    <div className="rounded-lg border border-ink/10 bg-white p-4">
+    <div className="rounded-lg border border-ink/10 bg-card p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
@@ -326,7 +326,7 @@ function RuleRow({
           <p className="mt-1.5 text-[11px] text-ink/40">
             Fired {rule.firedCount} {rule.firedCount === 1 ? "time" : "times"}
           </p>
-          {err && <p className="mt-1 text-[12px] text-rose-600">{err}</p>}
+          {err && <p className="mt-1 text-[12px] text-danger">{err}</p>}
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {canManage && (
@@ -342,7 +342,7 @@ function RuleRow({
             <button
               onClick={remove}
               disabled={pending}
-              className="rounded p-1.5 text-ink/50 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50"
+              className="rounded p-1.5 text-ink/50 hover:bg-danger-bg hover:text-danger disabled:opacity-50"
               title="Delete"
             >
               <Trash2 className="size-4" />
@@ -476,7 +476,7 @@ function RuleForm({
   const isStageTrigger = draft.trigger_kind === "application.stage_changed";
 
   return (
-    <div className="rounded-lg border-2 border-heritage/40 bg-white p-5">
+    <div className="rounded-lg border-2 border-heritage/40 bg-card p-5">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-ink">
           {existing ? "Edit automation" : "New automation"}
@@ -570,13 +570,13 @@ function RuleForm({
         </div>
       )}
 
-      {err && <p className="mt-3 text-[12px] text-rose-600">{err}</p>}
+      {err && <p className="mt-3 text-[12px] text-danger">{err}</p>}
 
       <div className="mt-5 flex items-center gap-2">
         <button
           onClick={save}
           disabled={pending}
-          className="rounded bg-heritage px-3 py-2 text-sm font-semibold text-white hover:bg-heritage/90 disabled:opacity-50"
+          className="rounded bg-heritage px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-heritage/90 disabled:opacity-50"
         >
           {existing ? "Save changes" : "Create automation"}
         </button>
@@ -703,7 +703,7 @@ function ConditionsEditor({
                       }}
                       className={
                         "rounded-full px-2.5 py-1 text-[12px] font-medium " +
-                        (selected ? "bg-heritage text-white" : "bg-ink/5 text-ink/60 hover:bg-ink/10")
+                        (selected ? "bg-heritage text-primary-foreground" : "bg-ink/5 text-ink/60 hover:bg-ink/10")
                       }
                     >
                       {opt.label}
@@ -716,7 +716,7 @@ function ConditionsEditor({
             <button
               type="button"
               onClick={() => remove(idx)}
-              className="rounded p-1 text-ink/40 hover:bg-rose-50 hover:text-rose-600"
+              className="rounded p-1 text-ink/40 hover:bg-danger-bg hover:text-danger"
               title="Remove condition"
             >
               <Trash2 className="size-3.5" />
@@ -869,7 +869,7 @@ function ActionsEditor({
               <button
                 type="button"
                 onClick={() => remove(idx)}
-                className="ml-auto rounded p-1 text-ink/40 hover:bg-rose-50 hover:text-rose-600"
+                className="ml-auto rounded p-1 text-ink/40 hover:bg-danger-bg hover:text-danger"
                 title="Remove action"
               >
                 <Trash2 className="size-3.5" />

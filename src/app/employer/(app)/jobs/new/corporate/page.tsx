@@ -107,14 +107,14 @@ export default async function NewCorporateJobPage() {
           reverse banner lives on /employer/jobs/new. Placed in the route
           page (not the wizard component) to keep corporate-wizard.tsx and
           job-wizard.tsx untouched by cross-linking concerns. */}
-      <div className="mb-8 max-w-[820px] border-l-4 border-heritage-deep bg-heritage text-ivory p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="mb-8 max-w-[820px] border-l-4 border-heritage-deep bg-heritage text-primary-foreground p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-start gap-3">
-          <Building2 className="h-5 w-5 text-ivory flex-shrink-0 mt-0.5" />
+          <Building2 className="h-5 w-5 text-primary-foreground flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-[14px] font-bold text-ivory mb-0.5">
+            <p className="text-[14px] font-bold text-primary-foreground mb-0.5">
               Hiring for a practice role instead?
             </p>
-            <p className="text-[12px] text-ivory/80 leading-relaxed">
+            <p className="text-[12px] text-primary-foreground/80 leading-relaxed">
               Dentists, hygienists, assistants, and front-office roles use
               the practice job wizard.
             </p>
@@ -122,7 +122,7 @@ export default async function NewCorporateJobPage() {
         </div>
         <Link
           href="/employer/jobs/new"
-          className="flex-shrink-0 inline-flex items-center gap-2 px-5 py-2.5 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors"
+          className="flex-shrink-0 inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
         >
           Practice job wizard
           <ArrowRight className="h-3.5 w-3.5" />

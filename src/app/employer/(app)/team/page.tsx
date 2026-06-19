@@ -470,7 +470,7 @@ function MemberRowItem({
         {isHm && (
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
             {scopedLocationIds.length === 0 ? (
-              <span className="text-[12px] tracking-[0.3px] text-red-700">
+              <span className="text-[12px] tracking-[0.3px] text-danger">
                 No locations assigned — this user can&apos;t see jobs except
                 corporate-scoped ones.
               </span>
@@ -527,7 +527,7 @@ function MemberRowItem({
           <button
             type="submit"
             aria-label="Remove teammate"
-            className="p-2 text-slate-meta hover:text-red-700 transition-colors"
+            className="p-2 text-slate-meta hover:text-danger transition-colors"
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -565,9 +565,9 @@ function RoleControl({
 function RoleBadge({ role }: { role: string }) {
   const cls =
     role === "owner"
-      ? "bg-ink text-ivory"
+      ? "bg-primary text-primary-foreground"
       : role === "admin"
-        ? "bg-heritage text-ivory"
+        ? "bg-heritage text-primary-foreground"
         : role === "hiring_manager"
           ? "bg-heritage-light text-ink border border-heritage"
           : "bg-cream text-ink border border-[var(--rule-strong)]";
@@ -634,7 +634,7 @@ function InviteRowItem({
         <button
           type="submit"
           aria-label="Revoke invitation"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-red-700 hover:bg-red-50 transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-danger hover:bg-danger-bg transition-colors"
         >
           <X className="h-3 w-3" />
           Revoke

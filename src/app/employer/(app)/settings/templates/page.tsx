@@ -137,7 +137,7 @@ export default async function EmailTemplatesPage() {
       </header>
 
       {!canEdit && (
-        <div className="border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
+        <div className="border border-warning bg-warning-bg p-5 text-sm text-warning">
           <strong className="font-semibold">View-only.</strong> Only DSO
           owners and admins can edit email templates.
         </div>
@@ -182,9 +182,9 @@ export default async function EmailTemplatesPage() {
         </div>
 
         {!tierUnlocked ? (
-          <div className="border border-amber-200 bg-amber-50 p-5 text-sm text-amber-950">
+          <div className="border border-warning bg-warning-bg p-5 text-sm text-warning">
             <div className="flex items-start gap-3">
-              <Lock className="size-4 mt-0.5 shrink-0 text-amber-700" />
+              <Lock className="size-4 mt-0.5 shrink-0 text-warning" />
               <div className="flex-1">
                 <strong className="font-semibold">Growth+ feature</strong>
                 <p className="mt-1.5 leading-relaxed">
@@ -194,7 +194,7 @@ export default async function EmailTemplatesPage() {
                 </p>
                 <Link
                   href="/employer/billing"
-                  className="mt-2 inline-block font-semibold text-amber-900 underline-offset-2 hover:underline"
+                  className="mt-2 inline-block font-semibold text-warning underline-offset-2 hover:underline"
                 >
                   See pricing →
                 </Link>

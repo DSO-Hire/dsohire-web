@@ -1236,7 +1236,7 @@ export function JobWizard({
             <button
               type="button"
               onClick={restoreDraft}
-              className="px-4 py-2 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors"
+              className="px-4 py-2 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
             >
               Restore draft
             </button>
@@ -1676,7 +1676,7 @@ function BasicsStep({
               <label
                 key={loc.id}
                 className={`flex items-start gap-3 p-4 cursor-pointer transition-colors ${
-                  checked ? "bg-cream" : "bg-white hover:bg-cream/60"
+                  checked ? "bg-cream" : "bg-card hover:bg-cream/60"
                 }`}
               >
                 <input
@@ -1774,7 +1774,7 @@ function BasicsStep({
                 "flex items-start gap-3 px-4 py-3 border cursor-pointer transition-colors " +
                 (scope === opt.value
                   ? "bg-heritage/[0.08] border-heritage"
-                  : "bg-white border-[var(--rule-strong)] hover:bg-cream")
+                  : "bg-card border-[var(--rule-strong)] hover:bg-cream")
               }
             >
               <input
@@ -1843,7 +1843,7 @@ function BasicsStep({
             id="corporate_function"
             value={corporateFunction}
             onChange={(e) => onCorporateFunction(e.target.value)}
-            className="w-full max-w-[420px] h-[44px] px-3 bg-white border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+            className="w-full max-w-[420px] h-[44px] px-3 bg-card border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
           >
             <option value="">Not specified</option>
             {CORPORATE_FUNCTIONS.map((f) => (
@@ -2244,8 +2244,8 @@ function DetailsStep({
                   }}
                   className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
                     checked
-                      ? "bg-heritage-deep text-ivory border-heritage-deep"
-                      : "bg-white text-ink border-[var(--rule)] hover:border-heritage"
+                      ? "bg-heritage-deep text-primary-foreground border-heritage-deep"
+                      : "bg-card text-ink border-[var(--rule)] hover:border-heritage"
                   }`}
                 >
                   {opt.label}
@@ -2295,8 +2295,8 @@ function DetailsStep({
                   }}
                   className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
                     checked
-                      ? "bg-heritage-deep text-ivory border-heritage-deep"
-                      : "bg-white text-ink border-[var(--rule)] hover:border-heritage"
+                      ? "bg-heritage-deep text-primary-foreground border-heritage-deep"
+                      : "bg-card text-ink border-[var(--rule)] hover:border-heritage"
                   }`}
                 >
                   {opt.label}
@@ -2679,7 +2679,7 @@ function QuestionCard({
   return (
     <div
       id={`screening-q-${question.id}`}
-      className="border border-[var(--rule)] p-5 bg-white"
+      className="border border-[var(--rule)] p-5 bg-card"
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
@@ -2712,7 +2712,7 @@ function QuestionCard({
           <button
             type="button"
             onClick={onRemove}
-            className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 transition-colors"
+            className="p-1.5 text-danger hover:text-danger hover:bg-danger-bg transition-colors"
             aria-label="Remove question"
           >
             <Trash2 className="h-4 w-4" />
@@ -2747,7 +2747,7 @@ function QuestionCard({
                 </span>
               )}
               {question.knockout && (
-                <span className="text-[9px] font-bold tracking-[1.2px] uppercase text-amber-900 bg-amber-100 px-1.5 py-0.5">
+                <span className="text-[9px] font-bold tracking-[1.2px] uppercase text-warning bg-warning-bg px-1.5 py-0.5">
                   Knockout
                 </span>
               )}
@@ -2797,7 +2797,7 @@ function QuestionCard({
                     type="button"
                     onClick={() => removeOption(opt.id)}
                     disabled={(question.options ?? []).length <= 2}
-                    className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="p-2 text-danger hover:text-danger hover:bg-danger-bg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                     aria-label="Remove option"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -2961,7 +2961,7 @@ export function KnockoutAuthoring({
           className="accent-amber-700"
         />
         <span>
-          Mark as <strong className="text-amber-900">knockout</strong> —
+          Mark as <strong className="text-warning">knockout</strong> —
           flag the application when the candidate&apos;s answer doesn&apos;t
           match.{" "}
           <span className="text-slate-meta font-normal">
@@ -2971,8 +2971,8 @@ export function KnockoutAuthoring({
       </label>
 
       {checked && (
-        <div className="mt-3 ml-7 border-l-2 border-amber-300 pl-4 py-1">
-          <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-amber-900 mb-2">
+        <div className="mt-3 ml-7 border-l-2 border-warning pl-4 py-1">
+          <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-warning mb-2">
             Correct answer
           </div>
 
@@ -3070,7 +3070,7 @@ export function KnockoutAuthoring({
               <select
                 value={String(ca.operator ?? ">=")}
                 onChange={(e) => patchCorrect({ operator: e.target.value })}
-                className="h-[36px] px-2 bg-white border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+                className="h-[36px] px-2 bg-card border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
               >
                 <option value=">=">≥ at least</option>
                 <option value="<=">≤ at most</option>
@@ -3085,7 +3085,7 @@ export function KnockoutAuthoring({
                     value: Number.isFinite(n) ? n : 0,
                   });
                 }}
-                className="h-[36px] w-32 px-3 bg-white border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+                className="h-[36px] w-32 px-3 bg-card border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
               />
             </div>
           )}
@@ -3200,7 +3200,7 @@ function PreviewStep({
           className={
             "rounded-full px-3.5 py-1.5 transition-colors " +
             (!viewAsCandidate
-              ? "bg-ink text-ivory"
+              ? "bg-primary text-primary-foreground"
               : "text-slate-body hover:text-ink")
           }
         >
@@ -3212,7 +3212,7 @@ function PreviewStep({
           className={
             "rounded-full px-3.5 py-1.5 transition-colors " +
             (viewAsCandidate
-              ? "bg-ink text-ivory"
+              ? "bg-primary text-primary-foreground"
               : "text-slate-body hover:text-ink")
           }
         >
@@ -3221,11 +3221,11 @@ function PreviewStep({
       </div>
 
       {leakedNames.length > 0 && (
-        <div className="border-l-4 border-amber-400 bg-amber-50 p-4">
+        <div className="border-l-4 border-warning bg-warning-bg p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-[14px] font-bold text-amber-900">
+              <p className="text-[14px] font-bold text-warning">
                 This listing is set to private, but the text still names{" "}
                 {leakedNames.map((n, i) => (
                   <span key={n}>
@@ -3235,7 +3235,7 @@ function PreviewStep({
                 ))}
                 .
               </p>
-              <p className="mt-1 text-[13px] text-amber-900/80 leading-relaxed">
+              <p className="mt-1 text-[13px] text-warning/80 leading-relaxed">
                 Candidates will still see{" "}
                 {leakedNames.length === 1 ? "that name" : "those names"} in the
                 title or description even though the practice identity is masked
@@ -3369,7 +3369,7 @@ function PreviewStep({
                   "flex items-center gap-3 px-4 py-2.5 border cursor-pointer transition-colors " +
                   (status === opt.value
                     ? "bg-heritage/[0.08] border-heritage"
-                    : "bg-white border-[var(--rule-strong)] hover:bg-cream")
+                    : "bg-card border-[var(--rule-strong)] hover:bg-cream")
                 }
               >
                 <input
@@ -3421,7 +3421,7 @@ function CandidateJobPreview({
   const chip =
     "rounded-full bg-cream px-3 py-1 text-[12px] font-semibold text-slate-body";
   return (
-    <div className="border border-[var(--rule)] bg-white p-6 sm:p-8">
+    <div className="border border-[var(--rule)] bg-card p-6 sm:p-8">
       <div className="mb-3 text-[10px] font-bold uppercase tracking-[2px] text-heritage-deep">
         How candidates see this
       </div>

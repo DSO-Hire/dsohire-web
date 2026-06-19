@@ -155,7 +155,7 @@ function TemplateCard({
   };
 
   return (
-    <section className="border border-[var(--rule)] bg-white">
+    <section className="border border-[var(--rule)] bg-card">
       <header
         className="flex items-start justify-between gap-4 p-5 sm:p-6 cursor-pointer"
         onClick={() => setOpen((v) => !v)}
@@ -216,7 +216,7 @@ function TemplateCard({
                 setSubject(e.target.value);
               }}
               maxLength={200}
-              className="w-full rounded border border-[var(--rule-strong)] bg-white px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta font-mono"
+              className="w-full rounded border border-[var(--rule-strong)] bg-card px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta font-mono"
             />
             <p className="mt-1.5 text-[11px] text-slate-meta">
               Mergefields work in the subject too — type{" "}
@@ -256,7 +256,7 @@ function TemplateCard({
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--rule)] pt-4">
             <div className="flex-1 min-w-0 text-sm">
               {error && (
-                <p className="inline-flex items-center gap-1.5 text-red-700">
+                <p className="inline-flex items-center gap-1.5 text-danger">
                   <AlertTriangle className="size-3.5 shrink-0" />
                   {error}
                 </p>
@@ -274,7 +274,7 @@ function TemplateCard({
                   type="button"
                   onClick={onRevert}
                   disabled={pending}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-white px-3 py-2 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink disabled:opacity-40"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-2 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink disabled:opacity-40"
                 >
                   <RotateCcw className="size-3.5" />
                   Revert to default
@@ -284,7 +284,7 @@ function TemplateCard({
                 type="button"
                 onClick={onSave}
                 disabled={!dirty || pending || !canEdit}
-                className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ivory transition-colors hover:bg-ink-soft disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {pending ? (
                   <>
@@ -363,7 +363,7 @@ function ReferencePanel({ groups }: { groups: readonly MergefieldGroup[] }) {
               {group.fields.map((f) => (
                 <div
                   key={f.token}
-                  className="flex items-baseline justify-between gap-2 px-2 py-1 rounded hover:bg-white/60"
+                  className="flex items-baseline justify-between gap-2 px-2 py-1 rounded hover:bg-card/60"
                 >
                   <code className="font-mono text-[11px] text-ink">
                     {`{{${f.token}}}`}
@@ -444,7 +444,7 @@ function PreviewPane({
       </div>
 
       {hasIssues && (
-        <div className="mb-3 border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-900">
+        <div className="mb-3 border border-warning bg-warning-bg px-3 py-2 text-[12px] text-warning">
           <div className="font-semibold inline-flex items-center gap-1.5 mb-1">
             <AlertTriangle className="size-3.5" />
             Unknown mergefields

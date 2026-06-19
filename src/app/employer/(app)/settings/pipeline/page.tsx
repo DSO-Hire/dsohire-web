@@ -96,9 +96,9 @@ export default async function PipelineSettingsPage() {
 
       {/* Tier gate banner */}
       {!tierUnlocked && (
-        <div className="mb-6 border border-amber-200 bg-amber-50 p-5 text-sm text-amber-950">
+        <div className="mb-6 border border-warning bg-warning-bg p-5 text-sm text-warning">
           <div className="flex items-start gap-3">
-            <Lock className="size-4 mt-0.5 shrink-0 text-amber-700" />
+            <Lock className="size-4 mt-0.5 shrink-0 text-warning" />
             <div className="flex-1">
               <strong className="font-semibold inline-flex items-center gap-1.5">
                 <BrandMark className="size-3.5" />
@@ -111,7 +111,7 @@ export default async function PipelineSettingsPage() {
               </p>
               <Link
                 href="/employer/billing"
-                className="mt-2 inline-block font-semibold text-amber-900 underline-offset-2 hover:underline"
+                className="mt-2 inline-block font-semibold text-warning underline-offset-2 hover:underline"
               >
                 Upgrade to Growth →
               </Link>
@@ -122,7 +122,7 @@ export default async function PipelineSettingsPage() {
 
       {/* Role-only gate (only show when tier is fine but role isn't) */}
       {tierUnlocked && !isAdmin && (
-        <div className="mb-6 border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
+        <div className="mb-6 border border-warning bg-warning-bg p-5 text-sm text-warning">
           <strong className="font-semibold">View-only.</strong> Only DSO
           owners and admins can edit pipeline stages.
         </div>

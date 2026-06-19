@@ -83,7 +83,7 @@ export function OfferApprovalsManager({
       </div>
 
       {!approvalsEnabled && (
-        <div className="mb-5 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-900 flex items-start gap-2">
+        <div className="mb-5 rounded-md border border-warning bg-warning-bg px-4 py-3 text-[13px] text-warning flex items-start gap-2">
           <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
           <span>
             Approval routing is a Scale feature and is currently off for your
@@ -152,11 +152,11 @@ function PendingOfferCard({ offer }: { offer: PendingOffer }) {
   }
 
   return (
-    <div className="border border-amber-300 bg-amber-50/40">
+    <div className="border border-warning bg-warning-bg/40">
       <div className="px-5 py-4">
         <div className="flex items-center gap-2 mb-1 flex-wrap">
-          <Clock className="h-3.5 w-3.5 text-amber-700 shrink-0" />
-          <span className="text-[10px] font-bold tracking-[2px] uppercase text-amber-800">
+          <Clock className="h-3.5 w-3.5 text-warning shrink-0" />
+          <span className="text-[10px] font-bold tracking-[2px] uppercase text-warning">
             Awaiting approval
           </span>
         </div>
@@ -186,7 +186,7 @@ function PendingOfferCard({ offer }: { offer: PendingOffer }) {
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-ink bg-white hover:bg-cream"
+          className="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-ink bg-card hover:bg-cream"
         >
           {open ? (
             <>
@@ -201,7 +201,7 @@ function PendingOfferCard({ offer }: { offer: PendingOffer }) {
       </div>
 
       {offer.revisedFromDate && (
-        <div className="border-t border-amber-200 bg-white px-5 py-3">
+        <div className="border-t border-warning bg-card px-5 py-3">
           <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-2">
             What changed from the previous offer
             <span className="text-slate-meta font-semibold normal-case tracking-normal">
@@ -228,7 +228,7 @@ function PendingOfferCard({ offer }: { offer: PendingOffer }) {
       )}
 
       {open && (
-        <div className="border-t border-amber-200 bg-white">
+        <div className="border-t border-warning bg-card">
           <iframe
             title={`Draft offer to ${offer.candidateName}`}
             srcDoc={`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{margin:0;padding:18px;font-family:'Manrope','Helvetica Neue',Arial,sans-serif;color:#14233F;font-size:14px;line-height:1.6;}p{margin:0 0 12px;}h2{font-size:18px;margin:22px 0 10px;}h3{font-size:16px;margin:18px 0 8px;}ul{margin:12px 0 16px;padding-left:22px;}</style></head><body>${offer.bodyHtml}</body></html>`}
@@ -239,7 +239,7 @@ function PendingOfferCard({ offer }: { offer: PendingOffer }) {
         </div>
       )}
 
-      <div className="border-t border-amber-200 bg-white px-5 py-4">
+      <div className="border-t border-warning bg-card px-5 py-4">
         {rejecting ? (
           <div className="space-y-2">
             <textarea
@@ -255,7 +255,7 @@ function PendingOfferCard({ offer }: { offer: PendingOffer }) {
                 type="button"
                 onClick={doReject}
                 disabled={pending}
-                className="inline-flex items-center gap-2 bg-[#7c2d12] text-[#F7F4ED] px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-[#5b210d] disabled:opacity-60"
+                className="inline-flex items-center gap-2 bg-danger text-danger-foreground px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-danger/90 disabled:opacity-60"
               >
                 {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ThumbsDown className="h-3.5 w-3.5" />}
                 Send back
@@ -279,7 +279,7 @@ function PendingOfferCard({ offer }: { offer: PendingOffer }) {
               type="button"
               onClick={doApprove}
               disabled={pending}
-              className="inline-flex items-center gap-2 bg-[#14233F] text-[#F7F4ED] px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-[#070F1C] disabled:opacity-60"
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
             >
               {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
               Approve &amp; send
@@ -288,7 +288,7 @@ function PendingOfferCard({ offer }: { offer: PendingOffer }) {
               type="button"
               onClick={() => setRejecting(true)}
               disabled={pending}
-              className="inline-flex items-center gap-2 border border-[var(--rule-strong)] text-ink bg-white px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-cream disabled:opacity-60"
+              className="inline-flex items-center gap-2 border border-[var(--rule-strong)] text-ink bg-card px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-cream disabled:opacity-60"
             >
               <ThumbsDown className="h-3.5 w-3.5" />
               Reject
@@ -296,7 +296,7 @@ function PendingOfferCard({ offer }: { offer: PendingOffer }) {
           </div>
         )}
         {error && (
-          <div className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-800 flex items-start gap-2">
+          <div className="mt-3 rounded-md border border-danger bg-danger-bg px-3 py-2 text-[12px] text-danger flex items-start gap-2">
             <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
             <span>{error}</span>
           </div>

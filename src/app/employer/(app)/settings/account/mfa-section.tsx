@@ -67,7 +67,7 @@ export function MfaSection({
   );
 
   return (
-    <section className="border border-[var(--rule)] bg-white p-7 sm:p-8 space-y-6">
+    <section className="border border-[var(--rule)] bg-card p-7 sm:p-8 space-y-6">
       <header>
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Security
@@ -92,7 +92,7 @@ export function MfaSection({
               <button
                 type="button"
                 onClick={() => setMode("wizard")}
-                className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ivory hover:bg-ink-soft"
+                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90"
               >
                 <ShieldCheck className="size-3.5" />
                 Set up 2FA
@@ -109,7 +109,7 @@ export function MfaSection({
                   <button
                     type="button"
                     onClick={() => setMode("regen")}
-                    className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-1.5 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
                   >
                     <RotateCcw className="size-3.5" />
                     Regenerate codes
@@ -117,7 +117,7 @@ export function MfaSection({
                   <button
                     type="button"
                     onClick={() => setMode("disable")}
-                    className="inline-flex items-center gap-1.5 rounded-md border border-red-200 bg-white px-3 py-1.5 text-[12px] font-semibold text-red-700 hover:bg-red-50"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-danger bg-card px-3 py-1.5 text-[12px] font-semibold text-danger hover:bg-danger-bg"
                   >
                     <Trash2 className="size-3.5" />
                     Disable 2FA
@@ -125,13 +125,13 @@ export function MfaSection({
                 </div>
               </div>
               {remainingCodes <= 3 && remainingCodes > 0 && (
-                <p className="text-[12px] text-amber-700 inline-flex items-center gap-1.5">
+                <p className="text-[12px] text-warning inline-flex items-center gap-1.5">
                   <AlertTriangle className="size-3.5" />
                   Only {remainingCodes} recovery {remainingCodes === 1 ? "code" : "codes"} left. Regenerate before you run out.
                 </p>
               )}
               {remainingCodes === 0 && (
-                <p className="text-[12px] text-red-700 inline-flex items-center gap-1.5">
+                <p className="text-[12px] text-danger inline-flex items-center gap-1.5">
                   <AlertTriangle className="size-3.5" />
                   No recovery codes left. Regenerate now to avoid losing access if your authenticator is lost.
                 </p>
@@ -290,8 +290,8 @@ function SetupWizard({
   if (step === "loading") {
     if (error) {
       return (
-        <div className="rounded border border-red-200 bg-red-50/60 p-5 space-y-3 text-sm">
-          <p className="inline-flex items-center gap-2 font-semibold text-red-800">
+        <div className="rounded border border-danger bg-danger-bg p-5 space-y-3 text-sm">
+          <p className="inline-flex items-center gap-2 font-semibold text-danger">
             <AlertTriangle className="size-4" />
             Couldn&apos;t start 2FA setup
           </p>
@@ -300,7 +300,7 @@ function SetupWizard({
             <button
               type="button"
               onClick={onCancelClick}
-              className="rounded-md border border-[var(--rule-strong)] bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
+              className="rounded-md border border-[var(--rule-strong)] bg-card px-3 py-1.5 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
             >
               Close
             </button>
@@ -329,7 +329,7 @@ function SetupWizard({
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-[200px_1fr]">
-          <div className="rounded border border-[var(--rule)] bg-white p-3">
+          <div className="rounded border border-[var(--rule)] bg-card p-3">
             {/* Supabase returns the QR as an SVG data URI in `qr_code`. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -344,7 +344,7 @@ function SetupWizard({
               Authenticator, etc.) and scan the QR code on the left, or
               enter the setup key manually:
             </p>
-            <div className="rounded border border-[var(--rule)] bg-white p-3 font-mono text-[12px] text-ink break-all">
+            <div className="rounded border border-[var(--rule)] bg-card p-3 font-mono text-[12px] text-ink break-all">
               {secret}
             </div>
             <CopyButton value={secret} label="Copy setup key" />
@@ -371,11 +371,11 @@ function SetupWizard({
               }}
               maxLength={6}
               placeholder="123456"
-              className="w-40 rounded border border-[var(--rule-strong)] bg-white px-3 py-2 font-mono text-[18px] tracking-[4px] text-ink focus:border-heritage focus:outline-none"
+              className="w-40 rounded border border-[var(--rule-strong)] bg-card px-3 py-2 font-mono text-[18px] tracking-[4px] text-ink focus:border-heritage focus:outline-none"
             />
           </div>
           {error && (
-            <p className="text-[12px] text-red-700 inline-flex items-center gap-1.5">
+            <p className="text-[12px] text-danger inline-flex items-center gap-1.5">
               <AlertTriangle className="size-3.5" />
               {error}
             </p>
@@ -385,7 +385,7 @@ function SetupWizard({
               type="button"
               onClick={onVerify}
               disabled={pending || code.length !== 6}
-              className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ivory hover:bg-ink-soft disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
             >
               {pending ? (
                 <>
@@ -426,7 +426,7 @@ function SetupWizard({
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 rounded border border-[var(--rule)] bg-white p-4 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-2 rounded border border-[var(--rule)] bg-card p-4 sm:grid-cols-2">
           {recoveryCodes.map((c) => (
             <code
               key={c}
@@ -446,7 +446,7 @@ function SetupWizard({
           <button
             type="button"
             onClick={onDoneCodes}
-            className="ml-auto inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ivory hover:bg-ink-soft"
+            className="ml-auto inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90"
           >
             I&apos;ve saved my codes
           </button>
@@ -488,7 +488,7 @@ function DisableDialog({
   };
 
   return (
-    <div className="rounded border border-red-200 bg-red-50/60 p-5 space-y-3">
+    <div className="rounded border border-danger bg-danger-bg p-5 space-y-3">
       <div>
         <h3 className="font-semibold text-ink">Disable 2FA?</h3>
         <p className="mt-1 text-[13px] text-slate-body leading-relaxed">
@@ -506,17 +506,17 @@ function DisableDialog({
           setCode(e.target.value.replace(/\D/g, "").slice(0, 6));
         }}
         placeholder="123456"
-        className="w-40 rounded border border-[var(--rule-strong)] bg-white px-3 py-2 font-mono text-[18px] tracking-[4px] text-ink focus:border-heritage focus:outline-none"
+        className="w-40 rounded border border-[var(--rule-strong)] bg-card px-3 py-2 font-mono text-[18px] tracking-[4px] text-ink focus:border-heritage focus:outline-none"
       />
       {error && (
-        <p className="text-[12px] text-red-700">{error}</p>
+        <p className="text-[12px] text-danger">{error}</p>
       )}
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={onSubmit}
           disabled={pending || code.length !== 6}
-          className="inline-flex items-center gap-2 rounded-md bg-red-700 px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-white hover:bg-red-800 disabled:opacity-40"
+          className="inline-flex items-center gap-2 rounded-md bg-danger px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-danger-foreground hover:bg-danger/90 disabled:opacity-40"
         >
           {pending ? (
             <>
@@ -582,7 +582,7 @@ function RegenerateDialog({
             the only time we&apos;ll show them.
           </p>
         </div>
-        <div className="grid grid-cols-2 gap-2 rounded border border-[var(--rule)] bg-white p-4 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-2 rounded border border-[var(--rule)] bg-card p-4 sm:grid-cols-2">
           {newCodes.map((c) => (
             <code key={c} className="font-mono text-[14px] tracking-[1px] text-ink">
               {c}
@@ -598,7 +598,7 @@ function RegenerateDialog({
           <button
             type="button"
             onClick={() => onComplete()}
-            className="ml-auto inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ivory hover:bg-ink-soft"
+            className="ml-auto inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90"
           >
             I&apos;ve saved them
           </button>
@@ -626,15 +626,15 @@ function RegenerateDialog({
           setCode(e.target.value.replace(/\D/g, "").slice(0, 6));
         }}
         placeholder="123456"
-        className="w-40 rounded border border-[var(--rule-strong)] bg-white px-3 py-2 font-mono text-[18px] tracking-[4px] text-ink focus:border-heritage focus:outline-none"
+        className="w-40 rounded border border-[var(--rule-strong)] bg-card px-3 py-2 font-mono text-[18px] tracking-[4px] text-ink focus:border-heritage focus:outline-none"
       />
-      {error && <p className="text-[12px] text-red-700">{error}</p>}
+      {error && <p className="text-[12px] text-danger">{error}</p>}
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={onSubmit}
           disabled={pending || code.length !== 6}
-          className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ivory hover:bg-ink-soft disabled:opacity-40"
+          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
         >
           {pending ? (
             <>
@@ -725,19 +725,19 @@ function OrgRequireMfaToggle({
           disabled={pending}
           className={
             "relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-40 " +
-            (enabled ? "bg-heritage-deep" : "bg-slate-300")
+            (enabled ? "bg-heritage-deep" : "bg-muted")
           }
         >
           <span
             className={
-              "inline-block h-4 w-4 transform rounded-full bg-white transition-transform " +
+              "inline-block h-4 w-4 transform rounded-full bg-card transition-transform " +
               (enabled ? "translate-x-6" : "translate-x-1")
             }
           />
         </button>
       </div>
       {error && (
-        <p className="text-[12px] text-red-700 inline-flex items-center gap-1.5">
+        <p className="text-[12px] text-danger inline-flex items-center gap-1.5">
           <AlertTriangle className="size-3.5" />
           {error}
         </p>
@@ -771,7 +771,7 @@ function CopyButton({ value, label }: { value: string; label: string }) {
     <button
       type="button"
       onClick={onCopy}
-      className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
+      className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-1.5 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
     >
       {copied ? (
         <>
@@ -810,7 +810,7 @@ function DownloadButton({
     <button
       type="button"
       onClick={onDownload}
-      className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
+      className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-1.5 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
     >
       <Download className="size-3.5" />
       Download .txt

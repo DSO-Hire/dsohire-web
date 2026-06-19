@@ -100,7 +100,7 @@ export function PayBenchmarkHint({
         : "National";
 
   return (
-    <div className="mt-4 border border-[var(--rule)] bg-white p-3.5" aria-live="polite">
+    <div className="mt-4 border border-[var(--rule)] bg-card p-3.5" aria-live="polite">
       <div className={`text-[10px] font-bold tracking-[1.5px] uppercase ${accentText}`}>
         Market pay · {bench.label} · {scopeLabel}
       </div>
@@ -133,7 +133,7 @@ export function PayBenchmarkHint({
         <p
           className={
             "mt-1 text-[12px] leading-snug " +
-            (below ? "text-amber-700" : above ? "text-heritage-deep" : "text-slate-body")
+            (below ? "text-warning" : above ? "text-heritage-deep" : "text-slate-body")
           }
         >
           {below

@@ -116,7 +116,7 @@ export default async function NewJobPage() {
           </p>
           <Link
             href="/employer/onboarding"
-            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
           >
             Add a Location
           </Link>
@@ -193,14 +193,14 @@ export default async function NewJobPage() {
       {/* Cross-link banner — over to the corporate job wizard. The reverse
           banner lives on /employer/jobs/new/corporate. Placed in the route
           page (not JobWizard) so job-wizard.tsx stays untouched. */}
-      <div className="mb-8 max-w-[820px] border-l-4 border-heritage bg-ink text-ivory p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="mb-8 max-w-[820px] border-l-4 border-heritage bg-hero text-hero-foreground p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-start gap-3">
           <Briefcase className="h-5 w-5 text-[var(--heritage-bright,#8db8a3)] flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-[14px] font-bold text-ivory mb-0.5">
+            <p className="text-[14px] font-bold text-hero-foreground mb-0.5">
               Hiring for a corporate role instead?
             </p>
-            <p className="text-[12px] text-ivory/70 leading-relaxed">
+            <p className="text-[12px] text-hero-foreground/70 leading-relaxed">
               DSO-wide leadership and corporate-function roles — finance,
               ops, marketing, HR — use the corporate job wizard.
             </p>
@@ -208,7 +208,7 @@ export default async function NewJobPage() {
         </div>
         <Link
           href="/employer/jobs/new/corporate"
-          className="flex-shrink-0 inline-flex items-center gap-2 px-5 py-2.5 bg-heritage text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-heritage-deep transition-colors"
+          className="flex-shrink-0 inline-flex items-center gap-2 px-5 py-2.5 bg-heritage text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-heritage-deep transition-colors"
         >
           Corporate job wizard
           <ArrowRight className="h-3.5 w-3.5" />
@@ -230,7 +230,7 @@ export default async function NewJobPage() {
                 <button
                   type="submit"
                   title={`Duplicate "${j.title}" as a new draft and open it in the editor`}
-                  className="inline-flex items-center gap-2 px-3 py-2 bg-white border border-[var(--rule-strong)] text-[12px] font-semibold text-ink hover:border-heritage hover:bg-heritage/5 transition-colors max-w-[320px]"
+                  className="inline-flex items-center gap-2 px-3 py-2 bg-card border border-[var(--rule-strong)] text-[12px] font-semibold text-ink hover:border-heritage hover:bg-heritage/5 transition-colors max-w-[320px]"
                 >
                   <Copy className="h-3.5 w-3.5 text-heritage-deep shrink-0" />
                   <span className="truncate">{j.title}</span>

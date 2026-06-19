@@ -133,7 +133,7 @@ export function ProfilePhotoGallery({
   const remaining = PROFILE_LIMITS.PHOTOS_MAX - sorted.length;
 
   return (
-    <section className="border border-[var(--rule)] bg-white p-6 sm:p-8">
+    <section className="border border-[var(--rule)] bg-card p-6 sm:p-8">
       <header className="mb-5">
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1.5">
           05 — Photo gallery
@@ -192,7 +192,7 @@ export function ProfilePhotoGallery({
         {(flash || error || busy) && (
           <div className="border-t border-[var(--rule)] pt-3 text-sm">
             {error ? (
-              <p className="text-red-700 inline-flex items-center gap-1.5">
+              <p className="text-danger inline-flex items-center gap-1.5">
                 <AlertTriangle className="size-3.5" />
                 {error}
               </p>
@@ -241,7 +241,7 @@ function PhotoRow({
   const captionDirty = caption !== (photo.caption ?? "");
 
   return (
-    <div className="grid grid-cols-[120px_1fr_auto] items-start gap-4 border border-[var(--rule)] bg-white p-3 sm:grid-cols-[160px_1fr_auto]">
+    <div className="grid grid-cols-[120px_1fr_auto] items-start gap-4 border border-[var(--rule)] bg-card p-3 sm:grid-cols-[160px_1fr_auto]">
       {/* Thumbnail */}
       <div className="aspect-square overflow-hidden bg-cream">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -264,14 +264,14 @@ function PhotoRow({
           rows={2}
           maxLength={140}
           placeholder="e.g. Our flagship Indianapolis practice"
-          className="w-full rounded border border-[var(--rule-strong)] bg-white px-3 py-2 text-sm text-ink leading-relaxed focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
+          className="w-full rounded border border-[var(--rule-strong)] bg-card px-3 py-2 text-sm text-ink leading-relaxed focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
         />
         {canEdit && captionDirty && (
           <button
             type="button"
             onClick={() => onSaveCaption(caption)}
             disabled={isBusy}
-            className="mt-2 rounded-md bg-ink px-3 py-1 text-[10px] font-bold uppercase tracking-[1.5px] text-ivory hover:bg-ink-soft disabled:opacity-40"
+            className="mt-2 rounded-md bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-[1.5px] text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
           >
             Save caption
           </button>
@@ -304,7 +304,7 @@ function PhotoRow({
             aria-label="Remove photo"
             onClick={onDelete}
             disabled={isBusy}
-            className="mt-2 rounded p-1 text-slate-meta hover:bg-red-50 hover:text-red-700 disabled:opacity-30"
+            className="mt-2 rounded p-1 text-slate-meta hover:bg-danger-bg hover:text-danger disabled:opacity-30"
           >
             <Trash2 className="size-4" />
           </button>

@@ -142,7 +142,7 @@ function SectionShell({
   children: React.ReactNode;
 }) {
   return (
-    <section className="border border-[var(--rule)] bg-white p-6 sm:p-8">
+    <section className="border border-[var(--rule)] bg-card p-6 sm:p-8">
       <header className="mb-5">
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1.5">
           {eyebrow}
@@ -180,7 +180,7 @@ function SaveBar({
     <div className="mt-6 flex items-center justify-between gap-4 border-t border-[var(--rule)] pt-4">
       <div className="min-w-0 flex-1 text-sm">
         {error && (
-          <p className="text-red-700 inline-flex items-center gap-1.5">
+          <p className="text-danger inline-flex items-center gap-1.5">
             <AlertTriangle className="size-3.5 shrink-0" />
             {error}
           </p>
@@ -196,7 +196,7 @@ function SaveBar({
         type="button"
         onClick={onSave}
         disabled={!dirty || saving || disabled}
-        className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ivory transition-colors hover:bg-ink-soft disabled:cursor-not-allowed disabled:opacity-40"
+        className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {saving ? (
           <>
@@ -367,7 +367,7 @@ function PracticeProfileSection({
                   className={
                     "rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition-colors disabled:opacity-50 " +
                     (active
-                      ? "border-heritage-deep bg-heritage-deep text-ivory"
+                      ? "border-heritage-deep bg-heritage-deep text-primary-foreground"
                       : "border-[var(--rule)] text-slate-body hover:border-heritage-deep")
                   }
                 >
@@ -415,7 +415,7 @@ function SelectRow({
         value={value ?? ""}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value ? e.target.value : null)}
-        className="w-full max-w-[520px] border border-[var(--rule)] bg-white px-3 py-2 text-[14px] text-ink focus:border-heritage focus:outline-none disabled:opacity-50"
+        className="w-full max-w-[520px] border border-[var(--rule)] bg-card px-3 py-2 text-[14px] text-ink focus:border-heritage focus:outline-none disabled:opacity-50"
       >
         <option value="">No preference / not set</option>
         {options.map((o) => (
@@ -462,8 +462,8 @@ function ScaleRow({
               className={
                 "h-9 w-9 border text-[13px] font-bold transition-colors disabled:opacity-50 " +
                 (active
-                  ? "border-heritage-deep bg-heritage-deep text-ivory"
-                  : "border-[var(--rule)] bg-white text-slate-body hover:border-heritage-deep")
+                  ? "border-heritage-deep bg-heritage-deep text-primary-foreground"
+                  : "border-[var(--rule)] bg-card text-slate-body hover:border-heritage-deep")
               }
             >
               {n}
@@ -584,7 +584,7 @@ function IdentitySection({
               setName(e.target.value);
             }}
             maxLength={100}
-            className="w-full rounded border border-[var(--rule-strong)] bg-white px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
+            className="w-full rounded border border-[var(--rule-strong)] bg-card px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
           />
           <p className="mt-1.5 text-xs text-slate-meta">
             Fix typos or casing here — changes apply everywhere candidates see
@@ -623,7 +623,7 @@ function IdentitySection({
                 setSlug(e.target.value.toLowerCase().replace(/\s+/g, "-"));
               }}
               maxLength={60}
-              className="flex-1 min-w-[180px] rounded border border-[var(--rule-strong)] bg-white px-3 py-2 font-mono text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
+              className="flex-1 min-w-[180px] rounded border border-[var(--rule-strong)] bg-card px-3 py-2 font-mono text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
             />
           </div>
           <p className="mt-1.5 text-xs text-slate-meta">
@@ -669,7 +669,7 @@ function SlugChangeConfirm({
   onCancel: () => void;
 }) {
   return (
-    <div className="border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+    <div className="border border-warning bg-warning-bg p-4 text-sm text-warning">
       <p className="font-semibold mb-2 inline-flex items-center gap-1.5">
         <AlertTriangle className="size-3.5" />
         Confirm slug change
@@ -685,7 +685,7 @@ function SlugChangeConfirm({
           type="button"
           onClick={onConfirm}
           disabled={saving}
-          className="rounded-md bg-ink px-4 py-1.5 text-xs font-bold uppercase tracking-[1.5px] text-ivory hover:bg-ink-soft disabled:opacity-40"
+          className="rounded-md bg-primary px-4 py-1.5 text-xs font-bold uppercase tracking-[1.5px] text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
         >
           {saving ? "Updating…" : "Yes, update"}
         </button>
@@ -693,7 +693,7 @@ function SlugChangeConfirm({
           type="button"
           onClick={onCancel}
           disabled={saving}
-          className="rounded-md border border-[var(--rule-strong)] bg-white px-4 py-1.5 text-xs font-bold uppercase tracking-[1.5px] text-ink hover:bg-cream disabled:opacity-40"
+          className="rounded-md border border-[var(--rule-strong)] bg-card px-4 py-1.5 text-xs font-bold uppercase tracking-[1.5px] text-ink hover:bg-cream disabled:opacity-40"
         >
           Cancel
         </button>
@@ -817,7 +817,7 @@ function CompanyDetailsSection({
             }}
             maxLength={PROFILE_LIMITS.WEBSITE_MAX}
             placeholder="yourdso.com"
-            className="w-full rounded border border-[var(--rule-strong)] bg-white px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
+            className="w-full rounded border border-[var(--rule-strong)] bg-card px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
           />
           <p className="mt-1.5 text-xs text-slate-meta">
             We&apos;ll add <code className="font-mono">https://</code> for you if
@@ -864,7 +864,7 @@ function CompanyDetailsSection({
             }}
             maxLength={254}
             placeholder="e.g. careers@yourpractice.com"
-            className="w-full rounded border border-[var(--rule-strong)] bg-white px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
+            className="w-full rounded border border-[var(--rule-strong)] bg-card px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
           />
           <p className="mt-1.5 text-[12px] text-slate-meta leading-relaxed">
             Where candidate replies to your automated emails land (application
@@ -892,7 +892,7 @@ function CompanyDetailsSection({
               setPracticeCount(e.target.value);
             }}
             placeholder="e.g. 12"
-            className="w-40 rounded border border-[var(--rule-strong)] bg-white px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
+            className="w-40 rounded border border-[var(--rule-strong)] bg-card px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
           />
           <p className="mt-1.5 text-xs text-slate-meta">
             Leave blank to hide. Shows as &ldquo;X practices&rdquo; on your
@@ -989,7 +989,7 @@ function AboutSection({
             rows={2}
             maxLength={PROFILE_LIMITS.MISSION_MAX}
             placeholder="e.g. Doctor-led general dentistry across the Midwest, focused on quality over throughput."
-            className="w-full rounded border border-[var(--rule-strong)] bg-white px-3 py-2 text-sm text-ink leading-relaxed focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
+            className="w-full rounded border border-[var(--rule-strong)] bg-card px-3 py-2 text-sm text-ink leading-relaxed focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
           />
           <p className="mt-1.5 text-xs text-slate-meta">
             {missionRemaining} characters remaining
@@ -1118,7 +1118,7 @@ function BrandVisualsSection({
       {(flash || error) && (
         <div className="mt-5 border-t border-[var(--rule)] pt-3 text-sm">
           {error ? (
-            <p className="text-red-700 inline-flex items-center gap-1.5">
+            <p className="text-danger inline-flex items-center gap-1.5">
               <AlertTriangle className="size-3.5" />
               {error}
             </p>
@@ -1314,7 +1314,7 @@ function WhyJoinUsBlockEditor({
               type="button"
               aria-label="Remove block"
               onClick={onRemove}
-              className="rounded p-1 text-slate-meta hover:bg-red-50 hover:text-red-700"
+              className="rounded p-1 text-slate-meta hover:bg-danger-bg hover:text-danger"
             >
               <Trash2 className="size-4" />
             </button>
@@ -1330,7 +1330,7 @@ function WhyJoinUsBlockEditor({
           onChange={(e) => onChange({ title: e.target.value })}
           placeholder="Title — e.g. Mentorship that actually scales"
           maxLength={PROFILE_LIMITS.WHY_BLOCK_TITLE_MAX}
-          className="w-full rounded border border-[var(--rule-strong)] bg-white px-3 py-2 text-sm font-semibold text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
+          className="w-full rounded border border-[var(--rule-strong)] bg-card px-3 py-2 text-sm font-semibold text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
         />
         <textarea
           value={block.body}
@@ -1339,7 +1339,7 @@ function WhyJoinUsBlockEditor({
           rows={3}
           maxLength={PROFILE_LIMITS.WHY_BLOCK_BODY_MAX}
           placeholder="2–3 sentences with specifics. What does it look like in practice?"
-          className="w-full rounded border border-[var(--rule-strong)] bg-white px-3 py-2 text-sm text-ink leading-relaxed focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
+          className="w-full rounded border border-[var(--rule-strong)] bg-card px-3 py-2 text-sm text-ink leading-relaxed focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
         />
       </div>
     </div>
@@ -1453,7 +1453,7 @@ function CultureSection({
                 }}
                 placeholder="#4D7A60"
                 maxLength={7}
-                className="w-28 rounded border border-[var(--rule-strong)] bg-white px-3 py-2 font-mono text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40"
+                className="w-28 rounded border border-[var(--rule-strong)] bg-card px-3 py-2 font-mono text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40"
               />
               {brandColor && canEdit && (
                 <button
@@ -1491,8 +1491,8 @@ function CultureSection({
                         className={
                           "rounded-full border px-3 py-1 text-[12px] font-semibold transition-colors disabled:cursor-not-allowed " +
                           (selected
-                            ? "border-ink bg-ink text-ivory hover:bg-ink-soft"
-                            : "border-[var(--rule-strong)] bg-white text-slate-body hover:border-ink hover:text-ink")
+                            ? "border-ink bg-primary text-primary-foreground hover:bg-primary/90"
+                            : "border-[var(--rule-strong)] bg-card text-slate-body hover:border-ink hover:text-ink")
                         }
                       >
                         {chip}
@@ -1585,7 +1585,7 @@ function ContactCtaSection({
             }}
             maxLength={PROFILE_LIMITS.CTA_LABEL_MAX}
             placeholder="e.g. Talk to our recruiter"
-            className="w-full rounded border border-[var(--rule-strong)] bg-white px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
+            className="w-full rounded border border-[var(--rule-strong)] bg-card px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
           />
         </div>
 
@@ -1612,7 +1612,7 @@ function ContactCtaSection({
                 setUrl(e.target.value);
               }}
               placeholder="mailto:careers@yourdso.com  ·  https://yourdso.com/careers"
-              className="w-full rounded border border-[var(--rule-strong)] bg-white pl-9 pr-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
+              className="w-full rounded border border-[var(--rule-strong)] bg-card pl-9 pr-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
             />
           </div>
           <p className="mt-1.5 text-xs text-slate-meta">

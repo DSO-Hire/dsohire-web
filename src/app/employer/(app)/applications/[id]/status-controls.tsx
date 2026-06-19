@@ -76,9 +76,9 @@ export function StatusControls({
           const Icon = ICONS[t.to];
           const className =
             t.tone === "primary"
-              ? "bg-ink text-ivory hover:bg-ink-soft"
+              ? "bg-primary text-primary-foreground hover:bg-primary/90"
               : t.tone === "danger"
-                ? "border border-red-300 text-red-700 hover:bg-red-50"
+                ? "border border-danger text-danger hover:bg-danger-bg"
                 : "border border-[var(--rule-strong)] text-ink hover:bg-cream";
           return (
             <form key={t.to} action={action}>
@@ -97,7 +97,7 @@ export function StatusControls({
         })}
       </div>
       {state.error && (
-        <p className="mt-3 text-[13px] text-red-700">{state.error}</p>
+        <p className="mt-3 text-[13px] text-danger">{state.error}</p>
       )}
       {state.ok && state.message && (
         <p className="mt-3 text-[13px] text-heritage-deep font-semibold">

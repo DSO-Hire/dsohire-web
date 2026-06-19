@@ -61,7 +61,7 @@ export function AssigneePicker({
           </option>
         ))}
       </select>
-      {err && <p className="mt-1 text-[12px] text-rose-600">{err}</p>}
+      {err && <p className="mt-1 text-[12px] text-danger">{err}</p>}
     </div>
   );
 }

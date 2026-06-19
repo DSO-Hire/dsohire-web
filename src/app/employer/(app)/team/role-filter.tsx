@@ -50,7 +50,7 @@ export function RoleFilter({ basePath, activeValue }: RoleFilterProps) {
         value={activeValue}
         onChange={(e) => onChange(e.currentTarget.value)}
         disabled={pending}
-        className="text-[12px] px-2.5 py-1.5 bg-white border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage"
+        className="text-[12px] px-2.5 py-1.5 bg-card border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage"
       >
         {ROLE_OPTIONS.map((opt) => (
           <option key={opt.value} value={opt.value}>

@@ -209,7 +209,7 @@ export default async function AuditSettingsPage({ searchParams }: PageProps) {
         activeRange={rangeKey}
       />
 
-      <div className="mt-6 border border-[var(--rule)] bg-white">
+      <div className="mt-6 border border-[var(--rule)] bg-card">
         {events.length === 0 ? (
           <div className="p-12 text-center">
             <History className="mx-auto h-7 w-7 text-slate-meta mb-3" />
@@ -273,7 +273,7 @@ function Paginator({
         {page < totalPages && (
           <a
             href={buildHref(page + 1)}
-            className="px-3 py-1.5 bg-ink text-ivory text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft"
+            className="px-3 py-1.5 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
           >
             Next
           </a>

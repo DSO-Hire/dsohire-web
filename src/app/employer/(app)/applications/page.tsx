@@ -454,7 +454,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
           />
           <button
             type="submit"
-            className="px-5 py-2.5 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors"
+            className="px-5 py-2.5 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
           >
             Apply
           </button>
@@ -471,8 +471,8 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
 
       {/* Workflow-alert active filter (arrived from a dashboard alert link). */}
       {(wantStuck || wantStale) && (
-        <div className="mb-6 flex flex-wrap items-center gap-3 border border-amber-300 bg-amber-50/60 px-4 py-3">
-          <span className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[1.5px] uppercase text-amber-800">
+        <div className="mb-6 flex flex-wrap items-center gap-3 border border-warning bg-warning-bg px-4 py-3">
+          <span className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[1.5px] uppercase text-warning">
             <AlertCircle className="h-3.5 w-3.5" />
             {wantStuck
               ? `Stuck — in "New" past ${STUCK_SLA_DAYS} days`
@@ -502,7 +502,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
             }
             className={`text-[10px] font-bold tracking-[1.5px] uppercase px-3 py-1.5 transition-colors ${
               sp.status === s
-                ? "bg-ink text-ivory"
+                ? "bg-primary text-primary-foreground"
                 : "bg-cream text-ink hover:bg-[var(--rule)]"
             }`}
           >
@@ -513,7 +513,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
 
       {/* List */}
       {apps.length === 0 ? (
-        <div className="border border-[var(--rule)] bg-white p-12 text-center max-w-[680px]">
+        <div className="border border-[var(--rule)] bg-card p-12 text-center max-w-[680px]">
           <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
             No applications yet
           </div>
@@ -537,7 +537,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
           </p>
         </div>
       ) : (
-        <div className="border border-[var(--rule)] bg-white">
+        <div className="border border-[var(--rule)] bg-card">
           {apps.map((app) => {
             const job = jobMap.get(app.job_id);
             const cand = candMap.get(app.candidate_id);
@@ -665,7 +665,7 @@ function FilterSelect({
       <select
         name={name}
         defaultValue={value}
-        className="px-3 py-2.5 bg-white border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+        className="px-3 py-2.5 bg-card border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -687,10 +687,10 @@ function statusBadgeClass(kind: string): string {
       return "bg-heritage/10 text-heritage-deep";
     case "offer":
     case "hired":
-      return "bg-emerald-50 text-emerald-900";
+      return "bg-success-bg text-success";
     case "rejected":
     case "withdrawn":
-      return "bg-slate-100 text-slate-600";
+      return "bg-muted text-muted-foreground";
     default:
       return "bg-cream text-ink";
   }

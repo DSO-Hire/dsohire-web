@@ -383,7 +383,7 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
     <>
       <CapNudge kind="jobs" usage={capStatus.jobs} tier={capStatus.tier} />
       {(autoPausedCount ?? 0) > 0 && (
-        <div className="mb-6 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-[13px] text-amber-900">
+        <div className="mb-6 rounded-md border border-warning bg-warning-bg px-4 py-3 text-[13px] text-warning">
           <strong>
             {autoPausedCount} listing{autoPausedCount === 1 ? "" : "s"} paused
             after your plan change.
@@ -422,7 +422,7 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
           {canPostJobs && (
             <Link
               href="/employer/jobs/new"
-              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
             >
               <Plus className="h-4 w-4" />
               Post a Job
@@ -432,8 +432,8 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
       </header>
 
       {notice === "no_post_permission" && (
-        <div className="mb-6 border-l-2 border-amber-400 bg-amber-50 px-4 py-3">
-          <p className="text-[13px] text-amber-900 leading-relaxed">
+        <div className="mb-6 border-l-2 border-warning bg-warning-bg px-4 py-3">
+          <p className="text-[13px] text-warning leading-relaxed">
             Posting jobs is limited to owners, admins, and recruiters. Your role
             can review applications and view jobs, but not create them — reach
             out to an owner or admin if you need posting access.
@@ -509,15 +509,15 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
               href={href}
               className={`inline-flex items-center gap-2 px-4 py-2.5 text-[10px] font-extrabold tracking-[1.6px] uppercase transition-colors border ${
                 isActive
-                  ? "bg-ink text-ivory border-ink"
-                  : "bg-white text-slate-body border-rule hover:border-rule-strong hover:text-ink"
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-card text-slate-body border-rule hover:border-rule-strong hover:text-ink"
               }`}
             >
               {filter.label}
               <span
                 className={`px-1.5 py-0 text-[9px] tracking-[-0.2px] ${
                   isActive
-                    ? "bg-white/15 text-ivory"
+                    ? "bg-primary-foreground/15 text-primary-foreground"
                     : "bg-cream text-slate-meta"
                 }`}
               >
@@ -572,7 +572,7 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
           That&apos;s your only {activeStatus === "all" ? "job" : `${activeStatus} job`} for now.
         </div>
       ) : (
-        <div className="bg-white border border-[var(--rule)]">
+        <div className="bg-card border border-[var(--rule)]">
           {listJobs.map((job, i) => {
             const v = velocityByJob.get(job.id) ?? {
               spark: [],
@@ -621,11 +621,11 @@ function SummaryTile({
   return (
     <Link
       href={href}
-      className="group bg-white p-4 sm:p-5 hover:bg-ivory-deep transition-colors flex flex-col"
+      className="group bg-card p-4 sm:p-5 hover:bg-ivory-deep transition-colors flex flex-col"
     >
       <div
         className={`flex items-center gap-2 text-[9px] font-extrabold tracking-[1.8px] uppercase mb-2.5 ${
-          warn ? "text-amber-700" : "text-heritage-deep"
+          warn ? "text-warning" : "text-heritage-deep"
         }`}
       >
         <Icon className="h-3 w-3" />
@@ -681,7 +681,7 @@ function HeroJobCard({
   return (
     <Link
       href={`/employer/jobs/${jobId}/applications`}
-      className="group relative overflow-hidden flex text-ivory bg-ink p-7 sm:p-8 hover:bg-ink-soft transition-colors mb-4"
+      className="group relative overflow-hidden flex text-hero-foreground bg-hero p-7 sm:p-8 hover:bg-hero/90 transition-colors mb-4"
       style={{
         backgroundImage:
           "radial-gradient(circle at 100% 0%, rgba(77,122,96,0.18), transparent 55%), radial-gradient(circle at 0% 100%, rgba(77,122,96,0.10), transparent 50%)",
@@ -696,7 +696,7 @@ function HeroJobCard({
         }}
         aria-hidden
       />
-      <ChevronRight className="absolute top-5 right-5 h-4 w-4 text-ivory/50 group-hover:text-[#8db8a3] group-hover:translate-x-1 transition-all" />
+      <ChevronRight className="absolute top-5 right-5 h-4 w-4 text-hero-foreground/50 group-hover:text-[#8db8a3] group-hover:translate-x-1 transition-all" />
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 lg:gap-10 w-full items-stretch">
         <div>
@@ -711,7 +711,7 @@ function HeroJobCard({
             <span
               className={`inline-flex items-center px-2 py-0.5 text-[9px] font-extrabold tracking-[1.5px] uppercase ${
                 status === "active"
-                  ? "bg-heritage text-ivory"
+                  ? "bg-heritage text-primary-foreground"
                   : "bg-ivory-deep text-ink"
               }`}
             >
@@ -724,7 +724,7 @@ function HeroJobCard({
               {employmentType}
             </span>
           </div>
-          <h2 className="text-[24px] font-extrabold tracking-[-0.6px] leading-tight text-ivory mb-1.5">
+          <h2 className="text-[24px] font-extrabold tracking-[-0.6px] leading-tight text-hero-foreground mb-1.5">
             {title}
           </h2>
           {/* Location pills — same shape as JobRow but tuned for the navy hero
@@ -736,7 +736,7 @@ function HeroJobCard({
               {locations.slice(0, 2).map((loc) => (
                 <span
                   key={loc.id}
-                  className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.3px] text-ivory border border-ivory/20"
+                  className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.3px] text-hero-foreground border border-hero-foreground/20"
                   style={{ background: "rgba(255,255,255,0.06)" }}
                 >
                   {loc.name}
@@ -744,22 +744,22 @@ function HeroJobCard({
                 </span>
               ))}
               {locations.length > 2 && (
-                <span className="text-[10px] font-semibold tracking-[0.3px] text-ivory/55">
+                <span className="text-[10px] font-semibold tracking-[0.3px] text-hero-foreground/55">
                   +{locations.length - 2} more
                 </span>
               )}
             </div>
           )}
-          <div className="text-[11px] text-ivory/55 tracking-[0.4px] mb-5">
+          <div className="text-[11px] text-hero-foreground/55 tracking-[0.4px] mb-5">
             Updated {updated.toLocaleDateString()}
           </div>
 
           <div className="flex gap-7 sm:gap-9 items-end">
             <div>
-              <div className="text-[9px] font-extrabold tracking-[1.6px] uppercase text-ivory/55">
+              <div className="text-[9px] font-extrabold tracking-[1.6px] uppercase text-hero-foreground/55">
                 Apps · 7d
               </div>
-              <div className="text-[36px] font-black tracking-[-1.2px] text-ivory leading-none mt-1">
+              <div className="text-[36px] font-black tracking-[-1.2px] text-hero-foreground leading-none mt-1">
                 {thisWeek}
               </div>
               {(thisWeek > 0 || lastWeek > 0) && (
@@ -775,18 +775,18 @@ function HeroJobCard({
               )}
             </div>
             <div>
-              <div className="text-[9px] font-extrabold tracking-[1.6px] uppercase text-ivory/55">
+              <div className="text-[9px] font-extrabold tracking-[1.6px] uppercase text-hero-foreground/55">
                 Total apps
               </div>
-              <div className="text-[36px] font-black tracking-[-1.2px] text-ivory leading-none mt-1">
+              <div className="text-[36px] font-black tracking-[-1.2px] text-hero-foreground leading-none mt-1">
                 {totalApps}
               </div>
             </div>
             <div>
-              <div className="text-[9px] font-extrabold tracking-[1.6px] uppercase text-ivory/55">
+              <div className="text-[9px] font-extrabold tracking-[1.6px] uppercase text-hero-foreground/55">
                 Views
               </div>
-              <div className="text-[36px] font-black tracking-[-1.2px] text-ivory leading-none mt-1">
+              <div className="text-[36px] font-black tracking-[-1.2px] text-hero-foreground leading-none mt-1">
                 {views}
               </div>
             </div>
@@ -1033,7 +1033,7 @@ function StatusBadge({
     );
   }
   const map: Record<string, { label: string; cls: string }> = {
-    active: { label: "Active", cls: "bg-heritage text-ivory" },
+    active: { label: "Active", cls: "bg-heritage text-primary-foreground" },
     draft: { label: "Draft", cls: "bg-ivory-deep text-ink" },
     paused: {
       label: "Paused",
@@ -1085,7 +1085,7 @@ function EmptyState({
       {canPostJobs && !hasJobsButFiltered && (
         <Link
           href="/employer/jobs/new"
-          className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ink-soft transition-colors"
+          className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
         >
           <Plus className="h-4 w-4" />
           Post a Job

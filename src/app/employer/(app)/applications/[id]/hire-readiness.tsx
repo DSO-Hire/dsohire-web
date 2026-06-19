@@ -67,13 +67,13 @@ interface CredRow {
 function expiryPill(state: CredentialExpiryState): string {
   switch (state) {
     case "expired":
-      return "bg-red-50 text-red-800 ring-1 ring-inset ring-red-300";
+      return "bg-danger-bg text-danger ring-1 ring-inset ring-danger";
     case "expiring_imminent":
-      return "bg-red-50 text-red-700 ring-1 ring-inset ring-red-200";
+      return "bg-danger-bg text-danger ring-1 ring-inset ring-danger";
     case "expiring_soon":
-      return "bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-200";
+      return "bg-warning-bg text-warning ring-1 ring-inset ring-warning";
     default:
-      return "bg-emerald-50 text-emerald-800 ring-1 ring-inset ring-emerald-200";
+      return "bg-success-bg text-success ring-1 ring-inset ring-success";
   }
 }
 
@@ -127,17 +127,17 @@ export function HireReadinessChecklist({
   if (verifications.length === 0 && credentials.length === 0) return null;
 
   return (
-    <div className="border border-[var(--rule)] bg-white">
+    <div className="border border-[var(--rule)] bg-card">
       {/* Summary banner */}
       <div
         className={`flex items-center gap-3 px-5 py-4 border-b border-[var(--rule)] ${
-          ready ? "bg-emerald-50/60" : "bg-amber-50/50"
+          ready ? "bg-success-bg/60" : "bg-warning-bg/50"
         }`}
       >
         {ready ? (
-          <ShieldCheck className="h-5 w-5 text-emerald-700 shrink-0" />
+          <ShieldCheck className="h-5 w-5 text-success shrink-0" />
         ) : (
-          <AlertTriangle className="h-5 w-5 text-amber-700 shrink-0" />
+          <AlertTriangle className="h-5 w-5 text-warning shrink-0" />
         )}
         <div className="min-w-0">
           <div className="text-[14px] font-bold text-ink">
@@ -168,22 +168,22 @@ export function HireReadinessChecklist({
         {/* Required verifications */}
         {requiredVerifs.length > 0 && (
           <div className="px-5 py-4">
-            <div className="text-[10px] font-bold tracking-[2px] uppercase text-[#14233F] mb-3">
+            <div className="text-[10px] font-bold tracking-[2px] uppercase text-foreground mb-3">
               Required verifications
             </div>
             <ul className="space-y-2">
               {requiredVerifs.map((v) => (
                 <li key={v.label} className="flex items-center gap-2.5 text-[13px]">
                   {v.attested ? (
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
                   ) : (
-                    <Circle className="h-4 w-4 text-amber-500 shrink-0" />
+                    <Circle className="h-4 w-4 text-warning shrink-0" />
                   )}
-                  <span className={v.attested ? "text-ink" : "text-amber-800 font-semibold"}>
+                  <span className={v.attested ? "text-ink" : "text-warning font-semibold"}>
                     {v.label}
                   </span>
                   {!v.attested && (
-                    <span className="text-[11px] text-amber-700">— not yet attested</span>
+                    <span className="text-[11px] text-warning">— not yet attested</span>
                   )}
                 </li>
               ))}
@@ -194,7 +194,7 @@ export function HireReadinessChecklist({
         {/* Credentials + expiry */}
         {credentials.length > 0 && (
           <div className="px-5 py-4">
-            <div className="text-[10px] font-bold tracking-[2px] uppercase text-[#14233F] mb-3">
+            <div className="text-[10px] font-bold tracking-[2px] uppercase text-foreground mb-3">
               Credentials on file
             </div>
             <ul className="space-y-2.5">
@@ -204,9 +204,9 @@ export function HireReadinessChecklist({
                   className="flex flex-wrap items-center gap-2 text-[13px]"
                 >
                   {c.verified ? (
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
                   ) : (
-                    <Circle className="h-4 w-4 text-slate-400 shrink-0" />
+                    <Circle className="h-4 w-4 text-meta-foreground shrink-0" />
                   )}
                   <span className="text-ink">{c.label}</span>
                   <span
@@ -229,7 +229,7 @@ export function HireReadinessChecklist({
               ))}
             </ul>
             {expiringCreds.length > 0 && (
-              <p className="mt-3 text-[12px] text-amber-800 leading-snug">
+              <p className="mt-3 text-[12px] text-warning leading-snug">
                 {expiringCreds.length} credential
                 {expiringCreds.length === 1 ? "" : "s"} expired or expiring soon —
                 ask {`the candidate`} to upload a current copy before their start date.
