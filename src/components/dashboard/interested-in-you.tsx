@@ -39,7 +39,7 @@ export function InterestedInYou({
   if (candidates.length === 0) return null;
 
   return (
-    <section className="mb-6 border border-[var(--rule)] bg-white">
+    <section className="mb-6 border border-[var(--rule)] bg-card">
       <header className="px-6 py-4 border-b border-[var(--rule)] flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-heritage-deep">
           <Hand className="h-3.5 w-3.5" />

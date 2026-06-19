@@ -245,12 +245,12 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
       }
     >
       {open ? (
-        <div className="w-[360px] max-w-[calc(100vw-2rem)] h-[540px] max-h-[calc(100vh-5rem)] bg-white border border-[var(--rule-strong)] border-b-0 shadow-2xl rounded-t-lg overflow-hidden flex flex-col">
+        <div className="w-[360px] max-w-[calc(100vw-2rem)] h-[540px] max-h-[calc(100vh-5rem)] bg-card border border-[var(--rule-strong)] border-b-0 shadow-2xl rounded-t-lg overflow-hidden flex flex-col">
           {/* Header */}
-          <div className="bg-ink text-ivory px-4 py-3 flex items-center gap-2 shrink-0">
+          <div className="bg-hero text-hero-foreground px-4 py-3 flex items-center gap-2 shrink-0">
             {view !== "list" ? (
               <button onClick={() => setView("list")} aria-label="Back"
-                className="text-ivory/80 hover:text-ivory"><ChevronLeft className="h-5 w-5" /></button>
+                className="text-hero-foreground/80 hover:text-hero-foreground"><ChevronLeft className="h-5 w-5" /></button>
             ) : (
               <MessageCircle className="h-4 w-4 text-[var(--heritage-bright,#8db8a3)]" />
             )}
@@ -260,7 +260,7 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
                   : view === "new" ? "New message" : "Messages"}
               </div>
               {view === "thread" && active && (
-                <div className="text-[10px] text-ivory/60 flex items-center gap-1.5">
+                <div className="text-[10px] text-hero-foreground/60 flex items-center gap-1.5">
                   {active.kind === "dm" && active.other_auth_id && online.has(active.other_auth_id) && (
                     <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--heritage-bright,#8db8a3)]" />
                   )}
@@ -271,11 +271,11 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
               )}
             </div>
             {view === "list" && (
-              <button onClick={openNew} aria-label="New message" className="text-ivory/80 hover:text-ivory">
+              <button onClick={openNew} aria-label="New message" className="text-hero-foreground/80 hover:text-hero-foreground">
                 <Plus className="h-5 w-5" />
               </button>
             )}
-            <button onClick={() => setOpen(false)} aria-label="Close" className="text-ivory/80 hover:text-ivory">
+            <button onClick={() => setOpen(false)} aria-label="Close" className="text-hero-foreground/80 hover:text-hero-foreground">
               <X className="h-5 w-5" />
             </button>
           </div>
@@ -314,7 +314,7 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
                     className={
                       "flex-1 py-1.5 text-[11px] font-bold tracking-[1px] uppercase rounded transition-colors " +
                       (newMode === m
-                        ? "bg-ink text-ivory"
+                        ? "bg-primary text-primary-foreground"
                         : "bg-cream text-slate-body hover:text-ink")
                     }
                   >
@@ -335,7 +335,7 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
                   <button
                     onClick={startGroup}
                     disabled={groupSel.length < 2 || creatingGroup}
-                    className="w-full py-2 bg-heritage text-ivory text-[12px] font-bold tracking-[1px] uppercase rounded disabled:opacity-50 hover:bg-heritage-deep transition-colors"
+                    className="w-full py-2 bg-heritage text-primary-foreground text-[12px] font-bold tracking-[1px] uppercase rounded disabled:opacity-50 hover:bg-heritage-deep transition-colors"
                   >
                     {creatingGroup
                       ? "Creating…"
@@ -374,7 +374,7 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
                         className={
                           "shrink-0 h-5 w-5 rounded-full border flex items-center justify-center " +
                           (picked
-                            ? "bg-heritage border-heritage text-ivory"
+                            ? "bg-heritage border-heritage text-primary-foreground"
                             : "border-[var(--rule-strong)]")
                         }
                       >
@@ -418,9 +418,9 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
                           </div>
                         )}
                         <div className={"px-3 py-2 text-[13px] leading-snug " +
-                          (m.mine ? "bg-heritage text-ivory" : "bg-white border border-[var(--rule)] text-ink")}>
+                          (m.mine ? "bg-heritage text-primary-foreground" : "bg-card border border-[var(--rule)] text-ink")}>
                           {m.body}
-                          <div className={"mt-0.5 text-[9px] " + (m.mine ? "text-ivory/60" : "text-slate-meta")}>
+                          <div className={"mt-0.5 text-[9px] " + (m.mine ? "text-primary-foreground/60" : "text-slate-meta")}>
                             {relTime(m.created_at)}
                           </div>
                         </div>
@@ -436,7 +436,7 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
                   className="flex-1 resize-none max-h-24 px-3 py-2 bg-cream border border-[var(--rule)] text-[13px] text-ink focus:outline-none focus:border-heritage" />
                 <button onClick={() => void send()} disabled={sending || !draft.trim()}
                   aria-label="Send"
-                  className="h-9 w-9 flex items-center justify-center bg-ink text-ivory hover:bg-ink-soft disabled:opacity-40 shrink-0">
+                  className="h-9 w-9 flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 shrink-0">
                   {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 </button>
               </div>
@@ -446,17 +446,17 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
       ) : (
         /* Docked bar (LinkedIn-style) — flush to the bottom edge. */
         <button onClick={() => setOpen(true)} aria-label="Open messages"
-          className="w-[260px] max-w-[calc(100vw-2rem)] bg-ink text-ivory rounded-t-lg shadow-xl flex items-center gap-2.5 px-4 py-3 hover:bg-ink-soft transition-colors">
+          className="w-[260px] max-w-[calc(100vw-2rem)] bg-primary text-primary-foreground rounded-t-lg shadow-xl flex items-center gap-2.5 px-4 py-3 hover:bg-primary/90 transition-colors">
           <MessageCircle className="h-4 w-4 text-[var(--heritage-bright,#8db8a3)] shrink-0" />
           <span className="text-[13px] font-bold tracking-[0.3px] flex-1 text-left">
             Messages
           </span>
           {totalUnread > 0 && (
-            <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-heritage text-ivory text-[11px] font-bold flex items-center justify-center">
+            <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-heritage text-primary-foreground text-[11px] font-bold flex items-center justify-center">
               {totalUnread > 99 ? "99+" : totalUnread}
             </span>
           )}
-          <ChevronUp className="h-4 w-4 text-ivory/70 shrink-0" />
+          <ChevronUp className="h-4 w-4 text-primary-foreground/70 shrink-0" />
         </button>
       )}
     </div>
@@ -494,7 +494,7 @@ function ThreadGroup({
                 {t.last_message ?? t.subtitle}
               </span>
               {t.unread > 0 && (
-                <span className="shrink-0 min-w-[18px] h-[18px] px-1 rounded-full bg-heritage text-ivory text-[10px] font-bold flex items-center justify-center">
+                <span className="shrink-0 min-w-[18px] h-[18px] px-1 rounded-full bg-heritage text-primary-foreground text-[10px] font-bold flex items-center justify-center">
                   {t.unread}
                 </span>
               )}
@@ -520,7 +520,7 @@ function Avatar({
   return (
     <div className="relative shrink-0">
       {isGroup ? (
-        <div className="h-9 w-9 rounded-full bg-heritage-deep text-ivory flex items-center justify-center">
+        <div className="h-9 w-9 rounded-full bg-heritage-deep text-primary-foreground flex items-center justify-center">
           <Users className="h-4 w-4" />
         </div>
       ) : imageUrl ? (
@@ -531,12 +531,12 @@ function Avatar({
           className="h-9 w-9 rounded-full object-cover"
         />
       ) : (
-        <div className="h-9 w-9 rounded-full bg-ink text-ivory flex items-center justify-center text-[12px] font-bold">
+        <div className="h-9 w-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[12px] font-bold">
           {initials}
         </div>
       )}
       {online && (
-        <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-[var(--heritage-bright,#8db8a3)] border-2 border-white" />
+        <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-[var(--heritage-bright,#8db8a3)] border-2 border-card" />
       )}
     </div>
   );
@@ -563,7 +563,7 @@ function MsgAvatar({
     .map((s) => s[0]?.toUpperCase() ?? "")
     .join("");
   return (
-    <div className="h-6 w-6 rounded-full bg-ink text-ivory flex items-center justify-center text-[9px] font-bold shrink-0">
+    <div className="h-6 w-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[9px] font-bold shrink-0">
       {initials || "?"}
     </div>
   );

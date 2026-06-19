@@ -47,7 +47,7 @@ export function RecruiterProductivityTable({
   const maxMoved = Math.max(...rows.map((r) => r.candidates_moved), 1);
 
   return (
-    <section className="border border-[var(--rule)] bg-white">
+    <section className="border border-[var(--rule)] bg-card">
       <header className="px-6 pt-5 pb-3 border-b border-[var(--rule)] flex items-center justify-between gap-4">
         <div>
           <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">

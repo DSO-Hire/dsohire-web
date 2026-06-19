@@ -62,7 +62,7 @@ export function TrendChart({
   };
 
   return (
-    <section className="border border-[var(--rule)] bg-white p-6">
+    <section className="border border-[var(--rule)] bg-card p-6">
       <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
           {title}
@@ -161,7 +161,7 @@ export function TrendChart({
           {/* Tooltip */}
           {hover != null && (
             <div
-              className="pointer-events-none absolute -top-1 z-10 -translate-x-1/2 whitespace-nowrap border border-[var(--rule-strong)] bg-ink text-ivory px-3 py-2 text-[11px] shadow-sm"
+              className="pointer-events-none absolute -top-1 z-10 -translate-x-1/2 whitespace-nowrap border border-[var(--rule-strong)] bg-hero text-hero-foreground px-3 py-2 text-[11px] shadow-sm"
               style={{ left: `${((hover + 0.5) / len) * 100}%` }}
             >
               <div className="font-bold tracking-[0.5px] mb-0.5">
@@ -176,7 +176,7 @@ export function TrendChart({
                   </span>
                 </div>
               ))}
-              <div className="mt-1 text-[9px] text-ivory/60 uppercase tracking-[1px]">
+              <div className="mt-1 text-[9px] text-hero-foreground/60 uppercase tracking-[1px]">
                 Click to open applications
               </div>
             </div>

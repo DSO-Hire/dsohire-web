@@ -45,8 +45,8 @@ export function SmartPicksSaveButton({
       className={
         "inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border transition-colors disabled:opacity-60 " +
         (saved
-          ? "bg-heritage text-ivory border-heritage hover:bg-heritage-deep"
-          : "bg-white text-ink border-slate-300 hover:bg-cream")
+          ? "bg-heritage text-primary-foreground border-heritage hover:bg-heritage-deep"
+          : "bg-card text-ink border-border hover:bg-cream")
       }
     >
       {pending ? (

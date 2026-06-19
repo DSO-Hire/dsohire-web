@@ -55,22 +55,22 @@ export function StuckAlert({
   const pillCandidates = candidates.slice(0, maxPills);
 
   return (
-    <div className="bg-amber-50 border border-amber-100 border-l-4 border-l-amber-700 p-5 sm:p-6 mb-6">
+    <div className="bg-warning-bg border border-warning border-l-4 border-l-warning p-5 sm:p-6 mb-6">
       <div className="grid grid-cols-[auto_1fr_auto] gap-4 sm:gap-5 items-start">
         {/* Alert icon */}
-        <div className="h-9 w-9 flex items-center justify-center flex-shrink-0 bg-amber-100 text-amber-700">
+        <div className="h-9 w-9 flex items-center justify-center flex-shrink-0 bg-warning-bg text-warning">
           <AlertTriangle className="h-4 w-4" strokeWidth={2} />
         </div>
 
         {/* Body */}
         <div>
-          <div className="text-[13px] font-extrabold leading-snug text-amber-900">
+          <div className="text-[13px] font-extrabold leading-snug text-warning">
             {totalCount === 1
               ? "1 candidate has"
               : `${totalCount} candidates have`}{" "}
             been awaiting review for {slaDays}+ days.
           </div>
-          <div className="text-[11px] mt-1 text-amber-700">
+          <div className="text-[11px] mt-1 text-warning">
             SLA threshold: {slaDays} days · adjustable in Settings
           </div>
 
@@ -79,7 +79,7 @@ export function StuckAlert({
               <Link
                 key={c.applicationId}
                 href={`/employer/applications/${c.applicationId}`}
-                className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-amber-100 hover:bg-amber-100 transition-colors text-[11px] text-ink"
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-card border border-warning hover:bg-warning-bg transition-colors text-[11px] text-ink"
               >
                 <span>
                   {c.candidateName} · {c.jobTitle}
@@ -90,7 +90,7 @@ export function StuckAlert({
                     </>
                   )}
                 </span>
-                <span className="font-extrabold text-amber-700">
+                <span className="font-extrabold text-warning">
                   {c.daysWaiting}d
                 </span>
               </Link>
@@ -101,7 +101,7 @@ export function StuckAlert({
         {/* CTA */}
         <Link
           href={reviewAllHref}
-          className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2.5 text-[10px] font-extrabold tracking-[1.6px] uppercase bg-amber-100 text-amber-900 hover:bg-white transition-colors flex-shrink-0"
+          className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2.5 text-[10px] font-extrabold tracking-[1.6px] uppercase bg-warning-bg text-warning hover:bg-card transition-colors flex-shrink-0"
         >
           Review all
           <ChevronRight className="h-2.5 w-2.5" strokeWidth={3} />
@@ -111,7 +111,7 @@ export function StuckAlert({
       {/* Mobile CTA — full-width below body */}
       <Link
         href={reviewAllHref}
-        className="sm:hidden mt-4 inline-flex items-center gap-1.5 px-4 py-2.5 text-[10px] font-extrabold tracking-[1.6px] uppercase bg-amber-100 text-amber-900 hover:bg-white transition-colors"
+        className="sm:hidden mt-4 inline-flex items-center gap-1.5 px-4 py-2.5 text-[10px] font-extrabold tracking-[1.6px] uppercase bg-warning-bg text-warning hover:bg-card transition-colors"
       >
         Review all
         <ChevronRight className="h-2.5 w-2.5" strokeWidth={3} />

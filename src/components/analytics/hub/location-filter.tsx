@@ -40,7 +40,7 @@ export function LocationFilter({
           if (loc) params.set("loc", loc);
           router.push(`/employer/analytics?${params.toString()}`);
         }}
-        className="h-8 max-w-[220px] px-2 bg-white border border-[var(--rule-strong)] text-ink text-[12px] focus:outline-none focus:border-ink"
+        className="h-8 max-w-[220px] px-2 bg-card border border-[var(--rule-strong)] text-ink text-[12px] focus:outline-none focus:border-ink"
       >
         <option value="">All practices</option>
         {locations.map((l) => (

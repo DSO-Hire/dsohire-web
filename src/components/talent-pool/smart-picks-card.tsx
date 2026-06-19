@@ -27,7 +27,7 @@ export function SmartPicksCard({ picks }: SmartPicksCardProps) {
   const fitName = product === "dsofit" ? "DSOFit" : "PracticeFit";
 
   return (
-    <section className="mb-10 border border-[var(--rule)] bg-white">
+    <section className="mb-10 border border-[var(--rule)] bg-card">
       <header className="px-6 py-4 border-b border-[var(--rule)] flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
         <div className="flex items-center gap-2 text-heritage-deep">
           <span className="text-[10px] font-bold tracking-[2.5px] uppercase">
@@ -130,7 +130,7 @@ function Avatar({
     .map((s) => s[0]?.toUpperCase())
     .join("");
   return (
-    <div className="h-11 w-11 rounded-full bg-heritage text-ivory flex items-center justify-center font-bold text-[13px] shrink-0">
+    <div className="h-11 w-11 rounded-full bg-heritage text-primary-foreground flex items-center justify-center font-bold text-[13px] shrink-0">
       {initials || "?"}
     </div>
   );

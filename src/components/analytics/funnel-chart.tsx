@@ -32,7 +32,7 @@ export function FunnelChart({
 
   if (max === 0) {
     return (
-      <section className="border border-[var(--rule)] bg-white p-6">
+      <section className="border border-[var(--rule)] bg-card p-6">
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
           {title}
         </div>
@@ -44,7 +44,7 @@ export function FunnelChart({
   }
 
   return (
-    <section className="border border-[var(--rule)] bg-white p-6">
+    <section className="border border-[var(--rule)] bg-card p-6">
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
         {title}
       </div>

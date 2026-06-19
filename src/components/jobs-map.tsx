@@ -1140,7 +1140,7 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
           <button
             type="submit"
             disabled={searching || !searchInput.trim()}
-            className="px-3 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 flex items-center gap-1.5"
+            className="px-3 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center gap-1.5"
           >
             {searching ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -1150,7 +1150,7 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
           </button>
         </form>
         {searchError && (
-          <div className="bg-red-50 border-l-2 border-red-500 px-3 py-2 text-[12px] text-red-900 max-w-[300px] shadow-sm">
+          <div className="bg-danger-bg border-l-2 border-danger px-3 py-2 text-[12px] text-danger max-w-[300px] shadow-sm">
             {searchError}
           </div>
         )}
@@ -1165,7 +1165,7 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
           {locating ? "Locating…" : "Use my location"}
         </button>
         {locateError && (
-          <div className="bg-red-50 border-l-2 border-red-500 px-3 py-2 text-[12px] text-red-900 max-w-[260px] shadow-sm">
+          <div className="bg-danger-bg border-l-2 border-danger px-3 py-2 text-[12px] text-danger max-w-[260px] shadow-sm">
             {locateError}
           </div>
         )}
@@ -1186,7 +1186,7 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
                 "px-3 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors " +
                 (idx > 0 ? "border-l border-[var(--rule-strong)] " : "") +
                 (mapStyleId === style.id
-                  ? "bg-ink text-ivory"
+                  ? "bg-primary text-primary-foreground"
                   : "text-slate-body hover:text-ink hover:bg-cream")
               }
             >
@@ -1211,7 +1211,7 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
             className={
               "px-3 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors flex items-center gap-1.5 " +
               (heatmapOn
-                ? "bg-heritage-deep text-ivory"
+                ? "bg-heritage-deep text-primary-foreground"
                 : "text-slate-body hover:text-ink hover:bg-cream")
             }
           >
@@ -1246,9 +1246,9 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
           first paint. Only renders while data is binding so it doesn't
           stick around as visual noise once the layer is up. */}
       {heatmapLoading && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase px-3 py-2 shadow-sm flex items-center gap-2 z-10">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase px-3 py-2 shadow-sm flex items-center gap-2 z-10">
           <span
-            className="inline-block w-1.5 h-1.5 rounded-full bg-ivory animate-pulse"
+            className="inline-block w-1.5 h-1.5 rounded-full bg-primary-foreground animate-pulse"
             aria-hidden="true"
           />
           Loading hiring density
@@ -1260,7 +1260,7 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
           displayed DSO name (affiliation-masked server-side). */}
       {drawerMetro && (
         <div
-          className="absolute top-0 right-0 bottom-0 w-full sm:w-[420px] bg-white border-l border-[var(--rule)] shadow-lg overflow-y-auto"
+          className="absolute top-0 right-0 bottom-0 w-full sm:w-[420px] bg-card border-l border-[var(--rule)] shadow-lg overflow-y-auto"
           role="dialog"
           aria-label={`Jobs in ${drawerMetro.city || "this metro"}`}
         >

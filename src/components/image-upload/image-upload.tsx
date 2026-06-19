@@ -227,7 +227,7 @@ export function ImageUpload({
           />
         </div>
         <div className="flex items-center gap-3">
-          <label className="flex-1 text-xs text-slate-600">
+          <label className="flex-1 text-xs text-muted-foreground">
             Zoom
             <input
               type="range"
@@ -243,7 +243,7 @@ export function ImageUpload({
           </label>
         </div>
         {error && (
-          <p role="alert" className="text-sm text-red-700">
+          <p role="alert" className="text-sm text-danger">
             {error}
           </p>
         )}
@@ -252,7 +252,7 @@ export function ImageUpload({
             type="button"
             onClick={cancelCrop}
             disabled={busy === "saving"}
-            className="text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-50"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground disabled:opacity-50"
           >
             Cancel
           </button>
@@ -260,7 +260,7 @@ export function ImageUpload({
             type="button"
             onClick={confirmCrop}
             disabled={busy === "saving"}
-            className="inline-flex items-center gap-2 rounded-md bg-[#14233F] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0d172b] disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
           >
             {busy === "saving" ? (
               <>
@@ -287,7 +287,7 @@ export function ImageUpload({
 
   const PreviewBox = (
     <div
-      className={`relative flex items-center justify-center overflow-hidden border border-slate-200 bg-slate-50 ${shapeConfig.sizeClass} ${shapeConfig.previewClass} ${isBanner ? "" : "shrink-0"}`}
+      className={`relative flex items-center justify-center overflow-hidden border border-border bg-muted ${shapeConfig.sizeClass} ${shapeConfig.previewClass} ${isBanner ? "" : "shrink-0"}`}
       aria-label={value ? "Current image preview" : "No image set"}
     >
       {value ? (
@@ -298,7 +298,7 @@ export function ImageUpload({
           className={`h-full w-full object-cover ${shapeConfig.previewClass}`}
         />
       ) : (
-        <ImageIcon className="size-7 text-slate-400" aria-hidden="true" />
+        <ImageIcon className="size-7 text-meta-foreground" aria-hidden="true" />
       )}
     </div>
   );
@@ -307,7 +307,7 @@ export function ImageUpload({
     <button
       type="button"
       onClick={() => fileInputRef.current?.click()}
-      className="inline-flex w-fit shrink-0 items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+      className="inline-flex w-fit shrink-0 items-center gap-2 rounded-md border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted"
     >
       <Camera className="size-4" />
       {buttonLabel ?? (value ? "Change photo" : "Upload photo")}
@@ -319,7 +319,7 @@ export function ImageUpload({
       <button
         type="button"
         onClick={onRemove}
-        className="inline-flex w-fit items-center gap-1 text-xs font-medium text-slate-500 hover:text-red-700"
+        className="inline-flex w-fit items-center gap-1 text-xs font-medium text-muted-foreground hover:text-danger"
       >
         <X className="size-3.5" />
         Remove
@@ -327,7 +327,7 @@ export function ImageUpload({
     ) : null;
 
   const HintText = (
-    <p className="text-xs text-slate-500">
+    <p className="text-xs text-muted-foreground">
       {hint} You can also drop a file anywhere on this row.
     </p>
   );
@@ -350,7 +350,7 @@ export function ImageUpload({
             {RemoveButton}
             {/* Full-width on mobile so it drops below the buttons instead of
                 squeezing into a thin one-word-per-line column. */}
-            <p className="w-full text-xs text-slate-500 sm:w-auto sm:min-w-0 sm:flex-1">
+            <p className="w-full text-xs text-muted-foreground sm:w-auto sm:min-w-0 sm:flex-1">
               {hint} You can also drop a file anywhere on this row.
             </p>
           </div>
@@ -377,7 +377,7 @@ export function ImageUpload({
         aria-label="Choose image file"
       />
       {error && (
-        <p role="alert" className="text-sm text-red-700">
+        <p role="alert" className="text-sm text-danger">
           {error}
         </p>
       )}

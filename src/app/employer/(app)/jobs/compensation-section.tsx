@@ -113,13 +113,13 @@ const ACCENT: Record<
     tintBg: "bg-heritage/[0.04]",
   },
   corporate: {
-    text: "text-[#3D5266]",
-    activeBtn: "bg-[#3D5266] text-primary-foreground border-[#3D5266]",
-    inactiveBtn: "bg-card text-ink border-[var(--rule)] hover:border-[#3D5266]",
-    check: "accent-[#3D5266]",
-    ring: "focus:border-[#3D5266] focus:ring-[#3D5266]",
-    tintBorder: "border-[#3D5266]/40",
-    tintBg: "bg-[#3D5266]/[0.04]",
+    text: "text-corporate",
+    activeBtn: "bg-corporate text-primary-foreground border-corporate",
+    inactiveBtn: "bg-card text-ink border-[var(--rule)] hover:border-corporate",
+    check: "accent-corporate",
+    ring: "focus:border-corporate focus:ring-corporate",
+    tintBorder: "border-corporate/40",
+    tintBg: "bg-corporate/[0.04]",
   },
 };
 

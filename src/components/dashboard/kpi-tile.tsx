@@ -83,10 +83,10 @@ export function KpiTile({
   // a flat treatment.
   const navy = tone === "navy";
   const baseBg = navy
-    ? "bg-ink border-l-4 border-[#8db8a3]"
+    ? "bg-hero border-l-4 border-[#8db8a3]"
     : tone === "tonal"
       ? "bg-cream border-l-4 border-heritage"
-      : "bg-white";
+      : "bg-card";
   const hoverBg = navy
     ? "hover:bg-[#1a2c4e]"
     : tone === "tonal"
@@ -98,12 +98,12 @@ export function KpiTile({
       {/* Chevron (top-right) — only on clickable tiles. The tile body itself
           handles the click; the chevron is just visual affordance. */}
       {isClickable && (
-        <ChevronRight className={`absolute top-4 right-4 h-4 w-4 group-hover:translate-x-1 transition-all ${navy ? "text-ivory/40 group-hover:text-[#8db8a3]" : "text-slate-meta group-hover:text-heritage"}`} />
+        <ChevronRight className={`absolute top-4 right-4 h-4 w-4 group-hover:translate-x-1 transition-all ${navy ? "text-hero-foreground/40 group-hover:text-[#8db8a3]" : "text-slate-meta group-hover:text-heritage"}`} />
       )}
 
       {/* Icon + label cluster */}
       <div className="flex items-center gap-2.5 mb-4">
-        <div className={`h-7 w-7 flex items-center justify-center flex-shrink-0 ${navy ? "bg-white/10" : "bg-heritage/10"}`}>
+        <div className={`h-7 w-7 flex items-center justify-center flex-shrink-0 ${navy ? "bg-hero-foreground/10" : "bg-heritage/10"}`}>
           <Icon className={`h-3.5 w-3.5 ${navy ? "text-[#8db8a3]" : "text-heritage-deep"}`} />
         </div>
         <div className={`text-[10px] font-extrabold tracking-[2.2px] uppercase ${navy ? "text-[#8db8a3]" : "text-heritage-deep"}`}>
@@ -113,13 +113,13 @@ export function KpiTile({
 
       {/* Big value — FOH-9: integers count up on view (700ms, settles fast
           so daily users never wait); pre-formatted values render as-is. */}
-      <div className={`text-[56px] font-black tracking-[-2.5px] leading-[0.95] mb-2 tabular-nums ${navy ? "text-ivory" : "text-ink"}`}>
+      <div className={`text-[56px] font-black tracking-[-2.5px] leading-[0.95] mb-2 tabular-nums ${navy ? "text-hero-foreground" : "text-ink"}`}>
         <StatValue value={value} />
       </div>
 
       {/* Optional secondary signal line */}
       {hint && (
-        <div className={`text-[12px] tracking-[0.2px] leading-snug ${navy ? "text-ivory/70" : "text-slate-body"}`}>
+        <div className={`text-[12px] tracking-[0.2px] leading-snug ${navy ? "text-hero-foreground/70" : "text-slate-body"}`}>
           {hint}
         </div>
       )}
@@ -147,7 +147,7 @@ export function KpiTile({
 
       {/* Route label — only on clickable tiles. Pushes to the bottom. */}
       {isClickable && routeLabel && (
-        <div className={`mt-auto pt-3.5 flex items-center gap-1.5 text-[9px] font-bold tracking-[1.6px] uppercase transition-colors ${navy ? "text-ivory/50 group-hover:text-[#8db8a3] border-t border-white/10" : "text-slate-meta group-hover:text-heritage-deep border-t border-black/5"}`}>
+        <div className={`mt-auto pt-3.5 flex items-center gap-1.5 text-[9px] font-bold tracking-[1.6px] uppercase transition-colors ${navy ? "text-hero-foreground/50 group-hover:text-[#8db8a3] border-t border-hero-foreground/10" : "text-slate-meta group-hover:text-heritage-deep border-t border-border"}`}>
           {routeLabel}
           <ChevronRight className="h-2.5 w-2.5" strokeWidth={3} />
         </div>

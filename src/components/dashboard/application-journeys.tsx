@@ -77,7 +77,7 @@ export function ApplicationJourneys({
 }) {
   if (journeys.length === 0) return null;
   return (
-    <div className="bg-white border border-[var(--rule)] p-5 sm:p-7">
+    <div className="bg-card border border-[var(--rule)] p-5 sm:p-7">
       <header className="flex items-baseline justify-between gap-4 mb-5 flex-wrap">
         <div>
           <h2 className="text-[11px] font-extrabold tracking-[2.5px] uppercase text-heritage-deep">
@@ -150,10 +150,10 @@ function JourneyRow({ journey: j }: { journey: ApplicationJourney }) {
                 <span
                   className={`grid place-items-center h-5 w-5 rounded-full border text-[9px] font-extrabold ${
                     done
-                      ? "bg-heritage border-heritage text-ivory"
+                      ? "bg-heritage border-heritage text-primary-foreground"
                       : current
-                        ? "bg-white border-heritage text-heritage-deep ring-2 ring-heritage/25"
-                        : "bg-white border-rule-strong text-slate-meta"
+                        ? "bg-card border-heritage text-heritage-deep ring-2 ring-heritage/25"
+                        : "bg-card border-rule-strong text-slate-meta"
                   }`}
                 >
                   {done ? <Check className="h-3 w-3" /> : i + 1}

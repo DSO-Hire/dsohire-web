@@ -13,11 +13,11 @@ import type { ExpiringCredential } from "@/lib/credentials/expiring-credentials"
 function pill(state: ExpiringCredential["expiryState"]): string {
   switch (state) {
     case "expired":
-      return "bg-red-50 text-red-800 ring-1 ring-inset ring-red-300";
+      return "bg-danger-bg text-danger ring-1 ring-inset ring-danger";
     case "expiring_imminent":
-      return "bg-red-50 text-red-700 ring-1 ring-inset ring-red-200";
+      return "bg-danger-bg text-danger ring-1 ring-inset ring-danger";
     default:
-      return "bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-200";
+      return "bg-warning-bg text-warning ring-1 ring-inset ring-warning";
   }
 }
 
@@ -33,11 +33,11 @@ export function CredentialsExpiring({ items }: { items: ExpiringCredential[] }) 
   if (items.length === 0) return null;
 
   return (
-    <section className="border border-[var(--rule)] bg-white">
+    <section className="border border-[var(--rule)] bg-card">
       <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--rule)] bg-cream/40">
         <div className="flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4 text-amber-700" />
-          <h2 className="text-[11px] font-bold tracking-[2px] uppercase text-[#14233F]">
+          <AlertTriangle className="h-4 w-4 text-warning" />
+          <h2 className="text-[11px] font-bold tracking-[2px] uppercase text-foreground">
             Credentials expiring
           </h2>
         </div>
@@ -56,7 +56,7 @@ export function CredentialsExpiring({ items }: { items: ExpiringCredential[] }) 
                 <div className="text-[13px] font-semibold text-ink truncate">
                   {c.candidateName}
                   {c.hired && (
-                    <span className="ml-2 text-[10px] font-bold tracking-[1px] uppercase text-emerald-700">
+                    <span className="ml-2 text-[10px] font-bold tracking-[1px] uppercase text-success">
                       Hired
                     </span>
                   )}

@@ -206,7 +206,7 @@ function ToolbarButton({
       className={cn(
         "inline-flex h-8 w-8 items-center justify-center transition-colors",
         active
-          ? "bg-ink text-ivory"
+          ? "bg-primary text-primary-foreground"
           : "text-slate-body hover:bg-ivory-deep hover:text-ink"
       )}
     >

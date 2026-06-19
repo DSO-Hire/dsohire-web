@@ -72,7 +72,7 @@ export function PortfolioTable({
   ];
 
   return (
-    <section className="border border-[var(--rule)] bg-white p-6 overflow-x-auto">
+    <section className="border border-[var(--rule)] bg-card p-6 overflow-x-auto">
       <div className="flex items-center justify-between mb-4">
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
           Practice comparison

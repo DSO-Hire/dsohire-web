@@ -58,16 +58,16 @@ export function TimezoneCard({
   }
 
   return (
-    <section className="border border-[var(--rule)] bg-white p-6 sm:p-8">
+    <section className="border border-[var(--rule)] bg-card p-6 sm:p-8">
       <header className="mb-4 flex items-start gap-3">
-        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-[#4D7A60]/10">
-          <Clock className="size-5 text-[#4D7A60]" aria-hidden />
+        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-heritage/10">
+          <Clock className="size-5 text-heritage" aria-hidden />
         </div>
         <div>
-          <h2 className="font-display text-lg font-bold text-[#14233F]">
+          <h2 className="font-display text-lg font-bold text-foreground">
             Display timezone
           </h2>
-          <p className="mt-0.5 text-sm text-slate-600">
+          <p className="mt-0.5 text-sm text-muted-foreground">
             Interview confirmations, slot pickers, and reminder emails will
             show times in this zone. Defaults to Central — change if you're
             elsewhere.
@@ -76,10 +76,10 @@ export function TimezoneCard({
       </header>
 
       <div className="space-y-3">
-        <label className="block text-sm font-semibold text-[#14233F]">
+        <label className="block text-sm font-semibold text-foreground">
           Timezone
           <select
-            className="mt-2 block w-full border border-[var(--rule)] bg-white px-3 py-2.5 text-sm text-[#14233F] focus:outline-none focus:ring-2 focus:ring-[#4D7A60]/40"
+            className="mt-2 block w-full border border-[var(--rule)] bg-card px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-heritage/40"
             value={value}
             disabled={isPending}
             onChange={(e) => {
@@ -123,7 +123,7 @@ export function TimezoneCard({
         {flash && (
           <p
             className={`text-xs font-semibold ${
-              flash.kind === "ok" ? "text-heritage-deep" : "text-red-600"
+              flash.kind === "ok" ? "text-heritage-deep" : "text-danger"
             }`}
             role="status"
             aria-live="polite"

@@ -73,7 +73,7 @@ export function SupportLauncher({ audience, authUserId, raised = false }: Props)
           aria-label="Open support"
           title="Get help — press ?"
           className={
-            "fixed right-5 z-30 size-12 rounded-full bg-ink text-ivory shadow-lg opacity-70 hover:opacity-100 focus-visible:opacity-100 hover:bg-ink-soft transition duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2 flex items-center justify-center " +
+            "fixed right-5 z-30 size-12 rounded-full bg-primary text-primary-foreground shadow-lg opacity-70 hover:opacity-100 focus-visible:opacity-100 hover:bg-primary/90 transition duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2 flex items-center justify-center " +
             // Sit higher on mobile so it clears the wider docked Messages bar.
             (raised ? "bottom-[5.5rem] lg:bottom-[4.5rem] " : "bottom-5 ") +
             // Yield on phones when a text field is focused (keeps desktop).

@@ -72,7 +72,7 @@ export function CredentialsCard({
     .slice(0, 5);
 
   return (
-    <section className="border border-[var(--rule)] bg-white p-5">
+    <section className="border border-[var(--rule)] bg-card p-5">
       <h3 className="mb-3.5 flex items-center gap-2 text-[10px] font-extrabold tracking-[2px] uppercase text-heritage-deep">
         <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
         Credentials &amp; CE
@@ -105,7 +105,7 @@ export function CredentialsCard({
                 className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg ${
                   st.tone === "ok"
                     ? "bg-heritage/10 text-heritage-deep"
-                    : "bg-amber-50 text-amber-700"
+                    : "bg-warning-bg text-warning"
                 }`}
               >
                 {st.tone === "ok" ? (
@@ -126,7 +126,7 @@ export function CredentialsCard({
               {st.action ? (
                 <Link
                   href={addHref}
-                  className="shrink-0 text-[11px] font-bold text-amber-700 hover:underline"
+                  className="shrink-0 text-[11px] font-bold text-warning hover:underline"
                 >
                   {st.action} →
                 </Link>

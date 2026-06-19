@@ -29,8 +29,8 @@ export function CapNudge({
   const noun = kind === "jobs" ? "active openings" : "admin seats";
   const next = tier ? NEXT_TIER[tier] : undefined;
   const tone = usage.atLimit
-    ? "border-red-300 bg-red-50 text-red-900"
-    : "border-amber-300 bg-amber-50 text-amber-900";
+    ? "border-danger bg-danger-bg text-danger"
+    : "border-warning bg-warning-bg text-warning";
 
   const message = usage.atLimit
     ? `You're using all ${usage.cap} ${noun} on your plan.${

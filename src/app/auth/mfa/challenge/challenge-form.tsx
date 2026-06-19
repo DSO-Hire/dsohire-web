@@ -44,7 +44,7 @@ export function ChallengeForm({ next }: { next: string | null }) {
             autoFocus
             placeholder="123456 or xxxx-xxxx-xxxx"
             maxLength={20}
-            className="w-full border border-[var(--rule-strong)] bg-white pl-9 pr-3 py-3 font-mono text-[16px] text-ink focus:border-heritage focus:outline-none"
+            className="w-full border border-[var(--rule-strong)] bg-card pl-9 pr-3 py-3 font-mono text-[16px] text-ink focus:border-heritage focus:outline-none"
           />
         </div>
         <p className="mt-1.5 text-[11px] text-slate-meta">
@@ -55,7 +55,7 @@ export function ChallengeForm({ next }: { next: string | null }) {
       {state.error && (
         <p
           role="alert"
-          className="inline-flex items-start gap-1.5 text-[13px] text-red-700"
+          className="inline-flex items-start gap-1.5 text-[13px] text-danger"
         >
           <AlertTriangle className="size-3.5 shrink-0 mt-0.5" />
           {state.error}
@@ -81,7 +81,7 @@ export function ChallengeForm({ next }: { next: string | null }) {
       <button
         type="submit"
         disabled={pending}
-        className="inline-flex w-full items-center justify-center gap-2 bg-ink px-4 py-3 text-[12px] font-bold tracking-[1.5px] uppercase text-ivory hover:bg-ink-soft disabled:opacity-40"
+        className="inline-flex w-full items-center justify-center gap-2 bg-primary px-4 py-3 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
       >
         {pending ? (
           <>

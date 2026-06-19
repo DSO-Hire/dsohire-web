@@ -25,7 +25,7 @@ export function TodaysTopFits({ fits }: { fits: TodaysTopFit[] }) {
   if (fits.length === 0) return null;
 
   return (
-    <section className="mb-6 border border-[var(--rule)] bg-white">
+    <section className="mb-6 border border-[var(--rule)] bg-card">
       <header className="px-6 py-4 border-b border-[var(--rule)] flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-heritage-deep">
           <span className="text-[10px] font-bold tracking-[2.5px] uppercase">

@@ -38,9 +38,9 @@ const ACCENT: Record<
     tintBorder: "border-heritage/40",
   },
   corporate: {
-    text: "text-[#3D5266]",
-    check: "accent-[#3D5266]",
-    tintBorder: "border-[#3D5266]/40",
+    text: "text-corporate",
+    check: "accent-corporate",
+    tintBorder: "border-corporate/40",
   },
 };
 

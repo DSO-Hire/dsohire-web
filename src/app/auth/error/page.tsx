@@ -32,7 +32,7 @@ export default async function AuthErrorPage({
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Link
             href="/sign-in"
-            className="inline-flex items-center px-9 py-4 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
           >
             Request a New Link
           </Link>

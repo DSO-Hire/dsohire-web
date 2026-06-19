@@ -46,7 +46,7 @@ import type {
 } from "./job-wizard";
 
 /** Slate-blue corporate accent — the corporate-wizard counterpart to heritage-green. */
-const CORP_ACCENT = "#3D5266";
+const CORP_ACCENT = "var(--corporate)";
 
 const KIND_LABELS: Record<ScreeningQuestionKind, string> = {
   short_text: "Short text",
@@ -235,7 +235,7 @@ function CorporateRecommendedCard({
       <div className="flex flex-wrap items-center gap-1.5 mb-2">
         <span
           className="text-[13px] font-bold tracking-[2px] uppercase px-2 py-0.5"
-          style={{ color: CORP_ACCENT, backgroundColor: "rgba(61,82,102,0.08)" }}
+          style={{ color: CORP_ACCENT, backgroundColor: "var(--corporate-bg)" }}
         >
           {KIND_LABELS[rq.kind]}
         </span>

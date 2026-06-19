@@ -173,9 +173,9 @@ const SURFACE_OPTIONS: Array<{
     scopes: ["corporate"],
     // Slate-blue accent per the spec — visually distinct from practice without
     // departing from the brand palette.
-    activeClasses: "bg-[#3D5266] text-ivory border-[#3D5266]",
-    inactiveClasses: "bg-card text-ink border-[var(--rule-strong)] hover:border-[#3D5266]",
-    chipBgClass: "bg-[#3D5266]/10 text-[#3D5266]",
+    activeClasses: "bg-corporate text-ivory border-corporate",
+    inactiveClasses: "bg-card text-ink border-[var(--rule-strong)] hover:border-corporate",
+    chipBgClass: "bg-corporate/10 text-corporate",
     emptyHeading: "No corporate roles open right now.",
     emptyBody:
       "DSO-wide leadership openings (CEO, CFO, regional director, etc.) post here. Check back — or browse Practice Roles for chairside + office hires.",
@@ -680,8 +680,8 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
               className={
                 "px-3 py-1.5 text-[12px] font-semibold border transition-colors " +
                 (activeFunctionSlug === null
-                  ? "bg-[#3D5266] text-ivory border-[#3D5266]"
-                  : "bg-card text-ink border-[var(--rule-strong)] hover:border-[#3D5266]")
+                  ? "bg-corporate text-ivory border-corporate"
+                  : "bg-card text-ink border-[var(--rule-strong)] hover:border-corporate")
               }
             >
               All
@@ -695,8 +695,8 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
                   className={
                     "px-3 py-1.5 text-[12px] font-semibold border transition-colors " +
                     (isActive
-                      ? "bg-[#3D5266] text-ivory border-[#3D5266]"
-                      : "bg-card text-ink border-[var(--rule-strong)] hover:border-[#3D5266]")
+                      ? "bg-corporate text-ivory border-corporate"
+                      : "bg-card text-ink border-[var(--rule-strong)] hover:border-corporate")
                   }
                 >
                   {fn.label}

@@ -448,7 +448,7 @@ export default async function CustomerSuccessDashboard() {
               {atRisk.map(({ dso, reason, tier, flag }) => (
                 <li
                   key={dso.id}
-                  className="flex items-start gap-3 border border-[var(--rule)] bg-white p-4"
+                  className="flex items-start gap-3 border border-[var(--rule)] bg-card p-4"
                 >
                   <RiskBadge flag={flag} />
                   <div className="flex-1 min-w-0">
@@ -478,7 +478,7 @@ export default async function CustomerSuccessDashboard() {
             subtitle="Which DSOs have touched which features"
             icon={BarChart3}
           />
-          <div className="border border-[var(--rule)] bg-white overflow-x-auto">
+          <div className="border border-[var(--rule)] bg-card overflow-x-auto">
             <table className="w-full text-[12px]">
               <thead className="bg-cream/40 border-b border-[var(--rule)]">
                 <tr>
@@ -560,7 +560,7 @@ export default async function CustomerSuccessDashboard() {
               body="Either it's been quiet or customers are finding what they need."
             />
           ) : (
-            <ul className="border border-[var(--rule)] bg-white divide-y divide-[var(--rule)]">
+            <ul className="border border-[var(--rule)] bg-card divide-y divide-[var(--rule)]">
               {topQuestions.map(([question, count], i) => (
                 <li
                   key={i}
@@ -588,7 +588,7 @@ export default async function CustomerSuccessDashboard() {
             subtitle="Drop-off between sign-up and first hire"
             icon={TrendingUp}
           />
-          <ul className="border border-[var(--rule)] bg-white divide-y divide-[var(--rule)]">
+          <ul className="border border-[var(--rule)] bg-card divide-y divide-[var(--rule)]">
             <FunnelStep label="Signed up (created a DSO)" count={fnSignedUp} total={fnSignedUp} />
             <FunnelStep label="Added a location" count={fnAddedLocation} total={fnSignedUp} />
             <FunnelStep label="Posted a job" count={fnPostedJob} total={fnSignedUp} />
@@ -621,8 +621,8 @@ function SummaryCard({
 }) {
   const toneClass =
     tone === "amber"
-      ? "border-amber-300 bg-amber-50"
-      : "border-[var(--rule)] bg-white";
+      ? "border-warning bg-warning-bg"
+      : "border-[var(--rule)] bg-card";
   return (
     <div className={"border p-4 " + toneClass}>
       <div className="flex items-center justify-between mb-1.5">
@@ -632,7 +632,7 @@ function SummaryCard({
         <Icon
           className={
             "size-3.5 " +
-            (tone === "amber" ? "text-amber-700" : "text-heritage-deep")
+            (tone === "amber" ? "text-warning" : "text-heritage-deep")
           }
         />
       </div>
@@ -682,7 +682,7 @@ function EmptyCard({
   const toneClass =
     tone === "heritage"
       ? "border-heritage/30 bg-heritage/[0.05]"
-      : "border-[var(--rule)] bg-white";
+      : "border-[var(--rule)] bg-card";
   const iconColor =
     tone === "heritage" ? "text-heritage-deep" : "text-slate-meta";
   return (
@@ -703,10 +703,10 @@ function RiskBadge({
 }) {
   const color =
     flag === "churn_risk"
-      ? "bg-red-100 text-red-700"
+      ? "bg-danger-bg text-danger"
       : flag === "stuck_onboarding"
-        ? "bg-amber-100 text-amber-700"
-        : "bg-slate-200 text-slate-700";
+        ? "bg-warning-bg text-warning"
+        : "bg-muted text-foreground";
   return (
     <div
       className={
@@ -732,10 +732,10 @@ function RiskLabel({
         : "Inactive";
   const color =
     flag === "churn_risk"
-      ? "bg-red-100 text-red-800"
+      ? "bg-danger-bg text-danger"
       : flag === "stuck_onboarding"
-        ? "bg-amber-100 text-amber-800"
-        : "bg-slate-200 text-slate-700";
+        ? "bg-warning-bg text-warning"
+        : "bg-muted text-foreground";
   return (
     <span
       className={

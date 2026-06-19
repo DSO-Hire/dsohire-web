@@ -152,7 +152,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
             }
             className={`text-[10px] font-bold tracking-[1.5px] uppercase px-3.5 py-1.5 transition-colors ${
               statusFilter === opt.value
-                ? "bg-ink text-ivory"
+                ? "bg-primary text-primary-foreground"
                 : "bg-cream text-ink hover:bg-[var(--rule)]"
             }`}
           >
@@ -255,7 +255,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
                     <input type="hidden" name="new_status" value="active" />
                     <button
                       type="submit"
-                      className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors"
+                      className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
                     >
                       Activate
                     </button>
@@ -273,8 +273,8 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
                         new Date(dso.featured_until).getTime() > Date.now();
                       if (isFeatured) {
                         return (
-                          <div className="border border-amber-300 bg-amber-50/60 px-3 py-2 flex flex-col gap-2">
-                            <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-amber-900">
+                          <div className="border border-warning bg-warning-bg px-3 py-2 flex flex-col gap-2">
+                            <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-warning">
                               ★ Featured until{" "}
                               {new Date(
                                 dso.featured_until!
@@ -289,7 +289,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
                               <input type="hidden" name="action" value="clear" />
                               <button
                                 type="submit"
-                                className="w-full inline-flex items-center justify-center px-3 py-1.5 border border-amber-400 text-amber-900 text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-amber-100 transition-colors"
+                                className="w-full inline-flex items-center justify-center px-3 py-1.5 border border-warning text-warning text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-warning-bg transition-colors"
                               >
                                 Remove from Spotlight
                               </button>
@@ -349,7 +349,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
                       />
                       <ConfirmSubmitButton
                         confirmMessage={`Suspend ${dso.name}? Their public page and active jobs will be taken down.`}
-                        className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 border border-red-300 text-red-700 text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-red-50 transition-colors"
+                        className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 border border-danger text-danger text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-danger-bg transition-colors"
                       >
                         Suspend
                       </ConfirmSubmitButton>
@@ -363,7 +363,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
                     <input type="hidden" name="new_status" value="active" />
                     <button
                       type="submit"
-                      className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors"
+                      className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
                     >
                       Reactivate
                     </button>
@@ -400,12 +400,12 @@ async function featureDsoAction(formData: FormData) {
 function statusBadgeClass(status: string): string {
   switch (status) {
     case "active":
-      return "bg-emerald-50 text-emerald-900";
+      return "bg-success-bg text-success";
     case "pending":
-      return "bg-amber-50 text-amber-900";
+      return "bg-warning-bg text-warning";
     case "suspended":
-      return "bg-red-50 text-red-900";
+      return "bg-danger-bg text-danger";
     default:
-      return "bg-slate-100 text-slate-700";
+      return "bg-muted text-foreground";
   }
 }

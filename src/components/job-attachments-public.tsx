@@ -67,7 +67,7 @@ export function JobAttachmentsPublic({ attachments }: JobAttachmentsPublicProps)
           return (
             <li
               key={att.id}
-              className="flex items-center gap-3 border border-[var(--rule)] bg-white px-4 py-3 hover:bg-cream/30 transition-colors"
+              className="flex items-center gap-3 border border-[var(--rule)] bg-card px-4 py-3 hover:bg-cream/30 transition-colors"
             >
               <Icon className="h-5 w-5 text-heritage-deep shrink-0" aria-hidden />
               <div className="flex-1 min-w-0">
@@ -81,7 +81,7 @@ export function JobAttachmentsPublic({ attachments }: JobAttachmentsPublicProps)
                   {att.hide_until_applied && (
                     <>
                       <span aria-hidden>&middot;</span>
-                      <span className="inline-flex items-center gap-1 text-amber-700">
+                      <span className="inline-flex items-center gap-1 text-warning">
                         <EyeOff className="h-3 w-3" />
                         Shared with applicants
                       </span>
@@ -101,7 +101,7 @@ export function JobAttachmentsPublic({ attachments }: JobAttachmentsPublicProps)
                   {isImage ? "View" : "Download"}
                 </a>
               ) : (
-                <span className="text-[12px] text-slate-400 italic shrink-0">
+                <span className="text-[12px] text-meta-foreground italic shrink-0">
                   Unavailable
                 </span>
               )}

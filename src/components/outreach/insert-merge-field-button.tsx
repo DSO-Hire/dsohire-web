@@ -80,8 +80,8 @@ export function InsertMergeFieldButton({
 
   const btnCls =
     size === "sm"
-      ? "inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep border border-[var(--rule)] bg-white hover:bg-cream"
-      : "inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep border border-[var(--rule-strong)] bg-white hover:bg-cream";
+      ? "inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep border border-[var(--rule)] bg-card hover:bg-cream"
+      : "inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep border border-[var(--rule-strong)] bg-card hover:bg-cream";
 
   return (
     <div ref={menuRef} className="relative inline-block">
@@ -99,7 +99,7 @@ export function InsertMergeFieldButton({
       {open && (
         <div
           role="menu"
-          className="absolute right-0 mt-1 z-30 min-w-[260px] max-w-[calc(100vw-2rem)] border border-[var(--rule-strong)] bg-white shadow-lg"
+          className="absolute right-0 mt-1 z-30 min-w-[260px] max-w-[calc(100vw-2rem)] border border-[var(--rule-strong)] bg-popover shadow-lg"
         >
           <ul className="py-1">
             {SUPPORTED_MERGE_FIELDS.map((f) => (

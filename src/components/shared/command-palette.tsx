@@ -83,11 +83,11 @@ export function SharedCommandPaletteTrigger({ config }: { config: PaletteConfig 
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="w-full flex items-center gap-2 px-3 py-2 rounded text-left text-[12px] font-semibold text-ivory/65 hover:bg-white/5 hover:text-ivory transition-colors"
+        className="w-full flex items-center gap-2 px-3 py-2 rounded text-left text-[12px] font-semibold text-hero-foreground/65 hover:bg-hero-foreground/5 hover:text-hero-foreground transition-colors"
       >
         <Search className="size-3.5 flex-shrink-0" />
         <span className="flex-1">Search…</span>
-        <kbd className="text-[10px] tracking-[0.5px] text-ivory/40 border border-white/15 rounded px-1.5 py-0.5 font-sans">
+        <kbd className="text-[10px] tracking-[0.5px] text-hero-foreground/40 border border-hero-foreground/15 rounded px-1.5 py-0.5 font-sans">
           ⌘K
         </kbd>
       </button>
@@ -226,7 +226,7 @@ function PaletteModal({
       />
 
       {/* Panel */}
-      <div className="relative w-full max-w-[600px] rounded-lg bg-white shadow-2xl border border-[var(--rule)] overflow-hidden">
+      <div className="relative w-full max-w-[600px] rounded-lg bg-popover shadow-2xl border border-[var(--rule)] overflow-hidden">
         <div className="flex items-center gap-3 border-b border-[var(--rule)] px-4 py-3">
           <Search className="size-4 text-slate-meta" />
           <input

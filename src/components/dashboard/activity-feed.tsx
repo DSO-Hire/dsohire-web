@@ -90,7 +90,7 @@ function ActivityRowContent({
     event.tone === "positive"
       ? "bg-heritage/15 text-heritage-deep"
       : event.tone === "warn"
-        ? "bg-amber-50 text-amber-700"
+        ? "bg-warning-bg text-warning"
         : "bg-cream text-slate-body";
   return (
     <>

@@ -31,7 +31,7 @@ export function BulletBar({
   // for attracting talent), meaningfully below = amber flag.
   const belowMarket =
     yourValue != null && marketValue != null && yourValue < marketValue * 0.95;
-  const barColor = belowMarket ? "#EF9F27" : "var(--color-heritage, #4D7A60)";
+  const barColor = belowMarket ? "var(--color-warning, #EF9F27)" : "var(--color-heritage, #4D7A60)";
 
   return (
     <div className="py-3 border-b border-[var(--rule)] last:border-0">

@@ -494,7 +494,7 @@ export function InboxView({
       <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6 h-[calc(100svh-200px)] max-h-[820px] min-h-[480px] [grid-template-rows:minmax(0,1fr)] overflow-hidden">
         {/* ─── List pane ─── */}
         <section
-          className={`border border-[var(--rule)] bg-white flex-col min-h-0 overflow-hidden ${
+          className={`border border-[var(--rule)] bg-card flex-col min-h-0 overflow-hidden ${
             activeId ? "hidden lg:flex" : "flex"
           }`}
         >
@@ -539,7 +539,7 @@ export function InboxView({
 
           {/* Search + filters */}
           <div className="border-b border-[var(--rule)] p-3 space-y-2">
-            <div className="flex items-center gap-2 rounded-md border border-slate-300 bg-cream px-3 py-2 text-sm focus-within:border-heritage focus-within:ring-1 focus-within:ring-heritage">
+            <div className="flex items-center gap-2 rounded-md border border-border bg-cream px-3 py-2 text-sm focus-within:border-heritage focus-within:ring-1 focus-within:ring-heritage">
               <SearchIcon className="size-4 text-slate-meta" />
               <input
                 type="text"
@@ -655,7 +655,7 @@ export function InboxView({
             MessagesThread's h-full resolves to the bounded section
             height rather than the intrinsic message-list height. */}
         <section
-          className={`border border-[var(--rule)] bg-white flex-col min-h-0 overflow-hidden ${
+          className={`border border-[var(--rule)] bg-card flex-col min-h-0 overflow-hidden ${
             activeId ? "flex" : "hidden lg:flex"
           }`}
         >
@@ -701,7 +701,7 @@ export function InboxView({
                     type="button"
                     onClick={() => onUnarchive(activeThread)}
                     disabled={busy}
-                    className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-700 hover:bg-cream disabled:opacity-50"
+                    className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1 text-xs font-medium text-foreground hover:bg-cream disabled:opacity-50"
                     title="Unarchive thread"
                   >
                     <ArchiveRestore className="size-3.5" />
@@ -712,7 +712,7 @@ export function InboxView({
                     type="button"
                     onClick={() => onArchive(activeThread)}
                     disabled={busy}
-                    className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-700 hover:bg-cream disabled:opacity-50"
+                    className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1 text-xs font-medium text-foreground hover:bg-cream disabled:opacity-50"
                     title="Archive thread"
                   >
                     <Archive className="size-3.5" />
@@ -830,8 +830,8 @@ function TabButton({
         <span
           className={`ml-1.5 inline-flex items-center justify-center rounded-full px-1.5 text-[10px] font-bold ${
             badge && count > 0 && !active
-              ? "bg-heritage-deep text-ivory"
-              : "bg-slate-100 text-slate-700"
+              ? "bg-heritage-deep text-primary-foreground"
+              : "bg-muted text-foreground"
           }`}
         >
           {count}
@@ -856,7 +856,7 @@ function FilterDropdown({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-700 hover:border-heritage focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
+      className="rounded-md border border-border bg-card px-2 py-1 text-xs font-medium text-foreground hover:border-heritage focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
     >
       <option value="">{label}: All</option>
       {options.map((o) => (
@@ -931,7 +931,7 @@ function ThreadRow({
           if (noteIsLatest) {
             return (
               <p className="mt-1 text-[12px] truncate text-slate-body">
-                <span className="font-semibold text-amber-700">Note: </span>
+                <span className="font-semibold text-warning">Note: </span>
                 {thread.latest_note_preview}
               </p>
             );
@@ -959,7 +959,7 @@ function ThreadRow({
           (thread.stage || thread.awaiting_reply) && (
             <p className="mt-1.5 flex items-center gap-1.5 flex-wrap">
               {thread.stage && (
-                <span className="inline-flex items-center px-1.5 py-0.5 border border-[var(--rule)] bg-cream/60 text-[9px] font-bold tracking-[1px] uppercase text-slate-700">
+                <span className="inline-flex items-center px-1.5 py-0.5 border border-[var(--rule)] bg-cream/60 text-[9px] font-bold tracking-[1px] uppercase text-foreground">
                   {EMPLOYER_STAGE_LABELS[thread.stage] ?? thread.stage}
                 </span>
               )}
@@ -973,7 +973,7 @@ function ThreadRow({
       </div>
       <div className="flex flex-col items-end gap-1 shrink-0">
         {thread.unread_count > 0 && (
-          <span className="inline-flex items-center justify-center rounded-full bg-heritage-deep px-1.5 py-0.5 text-[10px] font-bold text-ivory">
+          <span className="inline-flex items-center justify-center rounded-full bg-heritage-deep px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
             {thread.unread_count}
           </span>
         )}
@@ -984,7 +984,7 @@ function ThreadRow({
             thread.archived ? onUnarchive() : onArchive();
           }}
           disabled={busy}
-          className="opacity-0 group-hover:opacity-100 rounded-md p-1 text-slate-meta hover:bg-white hover:text-ink disabled:opacity-40 transition-opacity"
+          className="opacity-0 group-hover:opacity-100 rounded-md p-1 text-slate-meta hover:bg-card hover:text-ink disabled:opacity-40 transition-opacity"
           title={thread.archived ? "Unarchive" : "Archive"}
           aria-label={thread.archived ? "Unarchive thread" : "Archive thread"}
         >

@@ -125,13 +125,13 @@ export interface StageColorTriple {
  * app/globals.css as a Tailwind v4 CSS variable.
  */
 export const KIND_DEFAULT_COLORS: Record<StageKind, StageColorTriple> = {
-  open:       { bg: "bg-slate-50",    ring: "ring-slate-200",    text: "text-slate-700" },
-  screen:     { bg: "bg-amber-50",    ring: "ring-amber-200",    text: "text-amber-700" },
-  interview:  { bg: "bg-blue-50",     ring: "ring-blue-200",     text: "text-blue-700" },
-  offer:      { bg: "bg-emerald-50",  ring: "ring-emerald-200",  text: "text-emerald-700" },
+  open:       { bg: "bg-slate-50 dark:bg-slate-400/15",    ring: "ring-slate-200 dark:ring-slate-400/30",    text: "text-slate-700 dark:text-slate-300" },
+  screen:     { bg: "bg-amber-50 dark:bg-amber-500/15",    ring: "ring-amber-200 dark:ring-amber-500/30",    text: "text-amber-700 dark:text-amber-200" },
+  interview:  { bg: "bg-blue-50 dark:bg-blue-500/15",     ring: "ring-blue-200 dark:ring-blue-500/30",     text: "text-blue-700 dark:text-blue-200" },
+  offer:      { bg: "bg-emerald-50 dark:bg-emerald-500/15",  ring: "ring-emerald-200 dark:ring-emerald-500/30",  text: "text-emerald-700 dark:text-emerald-200" },
   hired:      { bg: "bg-heritage/10", ring: "ring-heritage/30",  text: "text-heritage" },
-  rejected:   { bg: "bg-rose-50",     ring: "ring-rose-200",     text: "text-rose-700" },
-  withdrawn:  { bg: "bg-slate-50",    ring: "ring-slate-200",    text: "text-slate-500" },
+  rejected:   { bg: "bg-rose-50 dark:bg-rose-500/15",     ring: "ring-rose-200 dark:ring-rose-500/30",     text: "text-rose-700 dark:text-rose-200" },
+  withdrawn:  { bg: "bg-slate-50 dark:bg-slate-400/15",    ring: "ring-slate-200 dark:ring-slate-400/30",    text: "text-slate-500 dark:text-slate-400" },
 };
 
 /**
@@ -170,16 +170,16 @@ export const STAGE_COLOR_OPTIONS = [
 export type StageColorPaletteName = (typeof STAGE_COLOR_OPTIONS)[number];
 
 export const STAGE_COLOR_PALETTE: Record<StageColorPaletteName, StageColorTriple> = {
-  slate:     { bg: "bg-slate-50",    ring: "ring-slate-200",    text: "text-slate-700" },
-  amber:     { bg: "bg-amber-50",    ring: "ring-amber-200",    text: "text-amber-700" },
-  blue:      { bg: "bg-blue-50",     ring: "ring-blue-200",     text: "text-blue-700" },
-  emerald:   { bg: "bg-emerald-50",  ring: "ring-emerald-200",  text: "text-emerald-700" },
+  slate:     { bg: "bg-slate-50 dark:bg-slate-400/15",    ring: "ring-slate-200 dark:ring-slate-400/30",    text: "text-slate-700 dark:text-slate-300" },
+  amber:     { bg: "bg-amber-50 dark:bg-amber-500/15",    ring: "ring-amber-200 dark:ring-amber-500/30",    text: "text-amber-700 dark:text-amber-200" },
+  blue:      { bg: "bg-blue-50 dark:bg-blue-500/15",     ring: "ring-blue-200 dark:ring-blue-500/30",     text: "text-blue-700 dark:text-blue-200" },
+  emerald:   { bg: "bg-emerald-50 dark:bg-emerald-500/15",  ring: "ring-emerald-200 dark:ring-emerald-500/30",  text: "text-emerald-700 dark:text-emerald-200" },
   heritage:  { bg: "bg-heritage/10", ring: "ring-heritage/30",  text: "text-heritage" },
-  rose:      { bg: "bg-rose-50",     ring: "ring-rose-200",     text: "text-rose-700" },
-  sky:       { bg: "bg-sky-50",      ring: "ring-sky-200",      text: "text-sky-700" },
-  violet:    { bg: "bg-violet-50",   ring: "ring-violet-200",   text: "text-violet-700" },
-  fuchsia:   { bg: "bg-fuchsia-50",  ring: "ring-fuchsia-200",  text: "text-fuchsia-700" },
-  teal:      { bg: "bg-teal-50",     ring: "ring-teal-200",     text: "text-teal-700" },
+  rose:      { bg: "bg-rose-50 dark:bg-rose-500/15",     ring: "ring-rose-200 dark:ring-rose-500/30",     text: "text-rose-700 dark:text-rose-200" },
+  sky:       { bg: "bg-sky-50 dark:bg-sky-500/15",      ring: "ring-sky-200 dark:ring-sky-500/30",      text: "text-sky-700 dark:text-sky-200" },
+  violet:    { bg: "bg-violet-50 dark:bg-violet-500/15",   ring: "ring-violet-200 dark:ring-violet-500/30",   text: "text-violet-700 dark:text-violet-200" },
+  fuchsia:   { bg: "bg-fuchsia-50 dark:bg-fuchsia-500/15",  ring: "ring-fuchsia-200 dark:ring-fuchsia-500/30",  text: "text-fuchsia-700 dark:text-fuchsia-200" },
+  teal:      { bg: "bg-teal-50 dark:bg-teal-500/15",     ring: "ring-teal-200 dark:ring-teal-500/30",     text: "text-teal-700 dark:text-teal-200" },
 };
 
 // ─────────────────────────────────────────────────────────────────────
@@ -300,9 +300,9 @@ export const STAGE_HEAT_CLASSES: Record<
   ReturnType<typeof stageHeatLevel>,
   string
 > = {
-  cool: "bg-slate-100 text-slate-600",
-  warm: "bg-amber-50 text-amber-700",
-  hot: "bg-red-50 text-red-700 animate-pulse",
+  cool: "bg-slate-100 text-slate-600 dark:bg-slate-400/15 dark:text-slate-300",
+  warm: "bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-200",
+  hot: "bg-red-50 text-red-700 dark:bg-red-500/15 dark:text-red-200 animate-pulse",
 };
 
 /**

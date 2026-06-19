@@ -221,7 +221,7 @@ export default async function AdminConversationPage({ params }: PageProps) {
               )}
             </div>
             {r.auto_flag_reason && (
-              <div className="text-red-800 inline-flex items-start gap-1.5">
+              <div className="text-danger inline-flex items-start gap-1.5">
                 <AlertTriangle className="size-3 mt-0.5" />
                 <span>
                   <strong>Auto-flag reason:</strong> {r.auto_flag_reason}
@@ -283,7 +283,7 @@ function TranscriptMessage({
             <div className="text-[10px] font-bold uppercase tracking-[1px] text-slate-meta mb-0.5">
               Input
             </div>
-            <pre className="font-mono text-[11px] bg-white border border-[var(--rule)] p-2 overflow-x-auto whitespace-pre-wrap break-all">
+            <pre className="font-mono text-[11px] bg-card border border-[var(--rule)] p-2 overflow-x-auto whitespace-pre-wrap break-all">
               {JSON.stringify(message.tool_input, null, 2)}
             </pre>
           </div>
@@ -291,7 +291,7 @@ function TranscriptMessage({
             <div className="text-[10px] font-bold uppercase tracking-[1px] text-slate-meta mb-0.5">
               Output
             </div>
-            <pre className="font-mono text-[11px] bg-white border border-[var(--rule)] p-2 overflow-x-auto whitespace-pre-wrap break-all max-h-[400px] overflow-y-auto">
+            <pre className="font-mono text-[11px] bg-card border border-[var(--rule)] p-2 overflow-x-auto whitespace-pre-wrap break-all max-h-[400px] overflow-y-auto">
               {JSON.stringify(message.tool_output, null, 2)}
             </pre>
           </div>
@@ -324,8 +324,8 @@ function TranscriptMessage({
           className={
             "px-3.5 py-2.5 text-[14px] leading-relaxed whitespace-pre-wrap rounded " +
             (isUser
-              ? "bg-ink text-ivory"
-              : "bg-white border border-[var(--rule)]")
+              ? "bg-hero text-hero-foreground"
+              : "bg-card border border-[var(--rule)]")
           }
         >
           {message.content || (
@@ -339,7 +339,7 @@ function TranscriptMessage({
                 key={i}
                 className={
                   "text-[11px] inline-flex items-start gap-1.5 " +
-                  (f.rating === "up" ? "text-heritage-deep" : "text-red-700")
+                  (f.rating === "up" ? "text-heritage-deep" : "text-danger")
                 }
               >
                 {f.rating === "up" ? (
@@ -383,7 +383,7 @@ function ReviewActions({
           rows={3}
           defaultValue={currentNotes ?? ""}
           placeholder="What was good or bad about this conversation?"
-          className="w-full px-3 py-2 border border-[var(--rule-strong)] bg-white text-[13px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+          className="w-full px-3 py-2 border border-[var(--rule-strong)] bg-card text-[13px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
         />
       </label>
       <div className="flex items-center gap-2 flex-wrap">
@@ -391,7 +391,7 @@ function ReviewActions({
           type="submit"
           name="next_status"
           value="reviewed"
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-heritage-deep text-white text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-heritage"
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-heritage-deep text-primary-foreground text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-heritage"
         >
           <CheckCircle2 className="size-3.5" />
           Mark reviewed
@@ -400,7 +400,7 @@ function ReviewActions({
           type="submit"
           name="next_status"
           value="flagged_bad"
-          className="inline-flex items-center gap-1.5 px-4 py-2 border border-red-700 text-red-700 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-red-50"
+          className="inline-flex items-center gap-1.5 px-4 py-2 border border-danger text-danger text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-danger-bg"
         >
           <AlertTriangle className="size-3.5" />
           Flag as bad answer
@@ -429,7 +429,7 @@ function ReviewBadge({
 }) {
   if (status === "flagged_bad") {
     return (
-      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-red-100 text-red-800 text-[10px] font-bold tracking-[1px] uppercase">
+      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-danger-bg text-danger text-[10px] font-bold tracking-[1px] uppercase">
         Flagged bad
       </span>
     );
@@ -442,7 +442,7 @@ function ReviewBadge({
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold tracking-[1px] uppercase">
+    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-warning-bg text-warning text-[10px] font-bold tracking-[1px] uppercase">
       Unreviewed
     </span>
   );

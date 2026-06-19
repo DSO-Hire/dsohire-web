@@ -49,8 +49,8 @@ export function CareerStrength({
     <section
       className={
         compact
-          ? "border border-[var(--rule)] bg-white p-5 flex flex-col items-start gap-4"
-          : "border border-[var(--rule)] bg-white p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-7"
+          ? "border border-[var(--rule)] bg-card p-5 flex flex-col items-start gap-4"
+          : "border border-[var(--rule)] bg-card p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-7"
       }
     >
       {/* Strength ring */}
@@ -109,7 +109,7 @@ export function CareerStrength({
             </div>
             <Link
               href={nextAction.href}
-              className="shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors"
+              className="shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
             >
               {nextAction.ctaLabel}
               <ArrowRight className="h-3.5 w-3.5" aria-hidden />

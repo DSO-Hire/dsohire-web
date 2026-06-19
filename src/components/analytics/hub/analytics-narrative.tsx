@@ -49,7 +49,7 @@ export function AnalyticsNarrative({
               type="button"
               onClick={run}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60"
             >
               {pending ? (
                 <>
@@ -78,7 +78,7 @@ export function AnalyticsNarrative({
             </p>
           )}
           {error && (
-            <p className="mt-2 text-[12px] text-red-700">{error}</p>
+            <p className="mt-2 text-[12px] text-danger">{error}</p>
           )}
         </div>
       </div>

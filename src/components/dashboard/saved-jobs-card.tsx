@@ -28,7 +28,7 @@ export function SavedJobsCard({
 }) {
   if (items.length === 0) return null;
   return (
-    <section className="border border-[var(--rule)] bg-white p-5">
+    <section className="border border-[var(--rule)] bg-card p-5">
       <h3 className="mb-3.5 flex items-center gap-2 text-[10px] font-extrabold tracking-[2px] uppercase text-heritage-deep">
         <Bookmark className="h-3.5 w-3.5" aria-hidden />
         Saved for later

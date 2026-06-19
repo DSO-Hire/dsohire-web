@@ -75,10 +75,10 @@ export const RECOMMENDATION_COLORS: Record<
     ring: "ring-heritage/40",
     text: "text-heritage-deep",
   },
-  yes: { bg: "bg-emerald-50", ring: "ring-emerald-200", text: "text-emerald-700" },
-  maybe: { bg: "bg-amber-50", ring: "ring-amber-200", text: "text-amber-700" },
-  no: { bg: "bg-slate-100", ring: "ring-slate-200", text: "text-slate-700" },
-  strong_no: { bg: "bg-red-50", ring: "ring-red-200", text: "text-red-700" },
+  yes: { bg: "bg-emerald-50 dark:bg-emerald-500/15", ring: "ring-emerald-200 dark:ring-emerald-500/30", text: "text-emerald-700 dark:text-emerald-200" },
+  maybe: { bg: "bg-amber-50 dark:bg-amber-500/15", ring: "ring-amber-200 dark:ring-amber-500/30", text: "text-amber-700 dark:text-amber-200" },
+  no: { bg: "bg-slate-100 dark:bg-slate-400/15", ring: "ring-slate-200 dark:ring-slate-400/30", text: "text-slate-700 dark:text-slate-300" },
+  strong_no: { bg: "bg-red-50 dark:bg-red-500/15", ring: "ring-red-200 dark:ring-red-500/30", text: "text-red-700 dark:text-red-200" },
 };
 
 export const SCORE_VALUES: readonly number[] = [1, 2, 3, 4, 5] as const;

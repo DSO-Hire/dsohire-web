@@ -91,7 +91,7 @@ export function HeroKpiTile({
   return (
     <Link
       href={href}
-      className="group relative overflow-hidden flex flex-col text-ivory bg-ink p-7 sm:p-8 hover:bg-ink-soft transition-colors"
+      className="group relative overflow-hidden flex flex-col text-hero-foreground bg-hero p-7 sm:p-8 hover:bg-ink-soft transition-colors"
       style={{
         backgroundImage:
           "radial-gradient(circle at 100% 0%, rgba(77,122,96,0.22), transparent 60%), radial-gradient(circle at 0% 100%, rgba(77,122,96,0.10), transparent 50%)",
@@ -109,7 +109,7 @@ export function HeroKpiTile({
       />
 
       {/* Chevron (top-right) — visual click affordance. */}
-      <ChevronRight className="absolute top-5 right-5 h-4 w-4 text-ivory/50 group-hover:text-[var(--heritage-bright,#8db8a3)] group-hover:translate-x-1 transition-all" />
+      <ChevronRight className="absolute top-5 right-5 h-4 w-4 text-hero-foreground/50 group-hover:text-[var(--heritage-bright,#8db8a3)] group-hover:translate-x-1 transition-all" />
 
       {/* Eyebrow */}
       <div className="text-[10px] font-extrabold tracking-[2.5px] uppercase text-[var(--heritage-bright,#8db8a3)] mb-1">
@@ -131,7 +131,7 @@ export function HeroKpiTile({
 
       {/* Giant value + SLA / delta pill — FOH-9: counts up on view. */}
       <div className="flex items-baseline gap-3 flex-wrap mb-3">
-        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-ivory tabular-nums">
+        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground tabular-nums">
           <StatValue value={value} duration={800} />
         </div>
         {slaChip && (
@@ -158,7 +158,7 @@ export function HeroKpiTile({
 
       {/* Hint */}
       {hint && (
-        <div className="text-[13px] leading-[1.55] max-w-[360px] text-ivory/70">
+        <div className="text-[13px] leading-[1.55] max-w-[360px] text-hero-foreground/70">
           {hint}
         </div>
       )}
@@ -169,10 +169,10 @@ export function HeroKpiTile({
       {showSpark && (
         <div className="mt-5">
           <div className="flex items-baseline justify-between mb-1.5">
-            <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-ivory/45">
+            <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-hero-foreground/45">
               {sparkLabel ?? "Trend · last 7 days"}
             </span>
-            <span className="text-[12px] font-bold text-ivory/80">
+            <span className="text-[12px] font-bold text-hero-foreground/80">
               {sparkTotal} total
             </span>
           </div>
@@ -184,7 +184,7 @@ export function HeroKpiTile({
           not a trend of the queue count above. */}
       {stageStrip && stageStrip.length > 0 && (
         <div className="mt-5">
-          <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-ivory/45">
+          <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-hero-foreground/45">
             Where your pipeline stands · last 30 days
           </div>
           <StageStrip stages={stageStrip} explicitMax={stageStripMax} />
@@ -192,7 +192,7 @@ export function HeroKpiTile({
       )}
 
       {/* CTA */}
-      <div className="mt-auto pt-5 inline-flex items-center gap-1.5 text-[11px] font-extrabold tracking-[2px] uppercase text-[var(--heritage-bright,#8db8a3)] border-t border-ivory/10">
+      <div className="mt-auto pt-5 inline-flex items-center gap-1.5 text-[11px] font-extrabold tracking-[2px] uppercase text-[var(--heritage-bright,#8db8a3)] border-t border-hero-foreground/10">
         <span className="pt-5">
           {ctaLabel}
         </span>
@@ -283,10 +283,10 @@ function StageStrip({
                 }}
               />
             </div>
-            <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-ivory/55">
+            <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-hero-foreground/55">
               {s.label}
             </div>
-            <div className="text-[14px] font-extrabold text-ivory mt-0.5">
+            <div className="text-[14px] font-extrabold text-hero-foreground mt-0.5">
               {s.count}
             </div>
           </div>

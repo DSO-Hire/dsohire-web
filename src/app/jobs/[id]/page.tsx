@@ -352,7 +352,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
               : null;
             // Slate-blue accent on corporate eyebrow + dots matches the
             // /jobs Corporate tab styling so the surface reads consistent.
-            const eyebrowColor = isCorporate ? "#3D5266" : undefined;
+            const eyebrowColor = isCorporate ? "var(--corporate)" : undefined;
             const dotBg = isCorporate
               ? eyebrowColor
               : "var(--heritage-deep, #3a5e4d)";

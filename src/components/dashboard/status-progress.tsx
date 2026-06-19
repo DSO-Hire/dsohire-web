@@ -66,7 +66,7 @@ export function StatusProgress({ status, hideStages }: StatusProgressProps) {
       <div className="flex items-center gap-1.5">
         {STAGES.map((stage) => (
           <div key={stage.key} className="flex items-center gap-1.5">
-            <span className="block w-1.5 h-1.5 rounded-full bg-slate-200" />
+            <span className="block w-1.5 h-1.5 rounded-full bg-border" />
           </div>
         ))}
         <span className="ml-2 text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
@@ -82,7 +82,7 @@ export function StatusProgress({ status, hideStages }: StatusProgressProps) {
       <div className="flex items-center gap-1.5">
         {STAGES.map((stage) => (
           <div key={stage.key} className="flex items-center gap-1.5">
-            <span className="block w-1.5 h-1.5 rounded-full bg-slate-200" />
+            <span className="block w-1.5 h-1.5 rounded-full bg-border" />
           </div>
         ))}
         <span className="ml-2 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
@@ -100,7 +100,7 @@ export function StatusProgress({ status, hideStages }: StatusProgressProps) {
         return (
           <div key={stage.key} className="flex items-center gap-1.5">
             {isPast ? (
-              <span className="flex items-center justify-center w-3.5 h-3.5 bg-heritage text-ivory">
+              <span className="flex items-center justify-center w-3.5 h-3.5 bg-heritage text-primary-foreground">
                 <Check className="h-2.5 w-2.5" strokeWidth={3} />
               </span>
             ) : isCurrent ? (
@@ -109,7 +109,7 @@ export function StatusProgress({ status, hideStages }: StatusProgressProps) {
                 <span className="relative w-2 h-2 bg-heritage" />
               </span>
             ) : (
-              <span className="block w-1.5 h-1.5 rounded-full bg-slate-200" />
+              <span className="block w-1.5 h-1.5 rounded-full bg-border" />
             )}
             {isCurrent && (
               <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep ml-0.5">

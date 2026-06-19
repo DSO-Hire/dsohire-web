@@ -29,8 +29,8 @@ export interface JobHealthRow {
 
 const HEALTH_DOT: Record<JobHealthRow["health"], { cls: string; label: string }> = {
   ok: { cls: "bg-heritage", label: "Healthy" },
-  warn: { cls: "bg-[#b07d2e]", label: "New apps past your response goal" },
-  hot: { cls: "bg-[#b3543f]", label: "Stale candidates mid-pipeline" },
+  warn: { cls: "bg-warning", label: "New apps past your response goal" },
+  hot: { cls: "bg-danger", label: "Stale candidates mid-pipeline" },
 };
 
 // Mini-kanban strip (Cam, Day 32 night: "what are the bars
@@ -43,7 +43,7 @@ const FUNNEL_STEPS: Array<{
   cls: string;
 }> = [
   { key: "open", label: "New", full: "New — awaiting review", cls: "bg-ink" },
-  { key: "screen", label: "Screen", full: "Screening", cls: "bg-[#5d6b85]" },
+  { key: "screen", label: "Screen", full: "Screening", cls: "bg-corporate" },
   { key: "interview", label: "Int", full: "Interview", cls: "bg-heritage-light" },
   { key: "offer", label: "Offer", full: "Offer", cls: "bg-heritage" },
 ];
@@ -58,7 +58,7 @@ export function JobHealth({
   if (rows.length === 0) return null;
 
   return (
-    <section className="border border-[var(--rule)] bg-white">
+    <section className="border border-[var(--rule)] bg-card">
       <header className="px-5 py-4 border-b border-[var(--rule)] flex items-center justify-between gap-3">
         <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
           Job health — funnel + freshness per opening
@@ -109,7 +109,7 @@ export function JobHealth({
                     <span
                       key={s.key}
                       title={`${count} in ${s.full} (last 30 days)`}
-                      className={`flex flex-col items-center min-w-[46px] border border-[var(--rule)] bg-white hover:bg-cream transition-colors ${
+                      className={`flex flex-col items-center min-w-[46px] border border-[var(--rule)] bg-card hover:bg-cream transition-colors ${
                         count === 0 ? "opacity-40" : ""
                       }`}
                     >

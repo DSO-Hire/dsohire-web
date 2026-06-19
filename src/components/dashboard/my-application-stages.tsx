@@ -81,7 +81,7 @@ export function MyApplicationStages({
   }));
 
   return (
-    <div className="bg-white border border-[var(--rule)] p-5 sm:p-7">
+    <div className="bg-card border border-[var(--rule)] p-5 sm:p-7">
       <header className="flex items-baseline justify-between gap-4 mb-5 flex-wrap">
         <div>
           <h2 className="text-[11px] font-extrabold tracking-[2.5px] uppercase text-heritage-deep">
@@ -134,7 +134,7 @@ function StageColumn({
           className={`text-[10px] font-extrabold tracking-[-0.2px] px-1.5 py-0.5 ${
             isEmpty
               ? "bg-cream text-slate-meta"
-              : "bg-heritage text-ivory"
+              : "bg-heritage text-primary-foreground"
           }`}
         >
           {cards.length}
@@ -161,7 +161,7 @@ function Card({ card }: { card: MyApplicationCard }) {
     : card.hasUnreadMessage
       ? "border-l-heritage"
       : card.needsCandidateAction
-        ? "border-l-amber-700"
+        ? "border-l-warning"
         : "border-l-rule-strong";
 
   return (
@@ -180,17 +180,17 @@ function Card({ card }: { card: MyApplicationCard }) {
       </div>
       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
         {card.offerPending ? (
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-heritage text-ivory text-[9px] font-bold tracking-[0.5px] uppercase">
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-heritage text-primary-foreground text-[9px] font-bold tracking-[0.5px] uppercase">
             <Star className="h-2.5 w-2.5" />
             Offer extended
           </span>
         ) : card.hasUnreadMessage ? (
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-heritage text-ivory text-[9px] font-bold tracking-[0.5px] uppercase">
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-heritage text-primary-foreground text-[9px] font-bold tracking-[0.5px] uppercase">
             <MessageCircle className="h-2.5 w-2.5" />
             New message
           </span>
         ) : card.needsCandidateAction ? (
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[9px] font-bold tracking-[0.5px] uppercase">
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-warning-bg text-warning text-[9px] font-bold tracking-[0.5px] uppercase">
             <Reply className="h-2.5 w-2.5" />
             Waiting on you
           </span>

@@ -503,7 +503,7 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
         aria-modal="true"
         aria-label="Support"
         className={
-          "fixed top-0 right-0 z-50 h-full w-full sm:w-[480px] bg-white shadow-2xl flex flex-col transition-transform duration-200 ease-out " +
+          "fixed top-0 right-0 z-50 h-full w-full sm:w-[480px] bg-card shadow-2xl flex flex-col transition-transform duration-200 ease-out " +
           (open ? "translate-x-0" : "translate-x-full")
         }
       >
@@ -573,7 +573,7 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
 
         {/* Reset confirmation */}
         {resetConfirmOpen && (
-          <div className="border-t border-[var(--rule)] bg-amber-50 px-5 py-3 text-[13px] text-amber-900 shrink-0">
+          <div className="border-t border-[var(--rule)] bg-warning-bg px-5 py-3 text-[13px] text-warning shrink-0">
             <p className="mb-2">
               Drop this conversation and start fresh? The current thread will
               be cleared from this browser.
@@ -582,14 +582,14 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
               <button
                 type="button"
                 onClick={onReset}
-                className="inline-flex items-center gap-1.5 rounded bg-amber-700 text-white px-3 py-1.5 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-amber-800"
+                className="inline-flex items-center gap-1.5 rounded bg-warning text-warning-foreground px-3 py-1.5 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-warning/90"
               >
                 Yes, start over
               </button>
               <button
                 type="button"
                 onClick={() => setResetConfirmOpen(false)}
-                className="inline-flex items-center gap-1.5 rounded border border-amber-300 px-3 py-1.5 text-[11px] font-bold tracking-[1.5px] uppercase text-amber-900 hover:bg-amber-100"
+                className="inline-flex items-center gap-1.5 rounded border border-warning px-3 py-1.5 text-[11px] font-bold tracking-[1.5px] uppercase text-warning hover:bg-warning-bg"
               >
                 Cancel
               </button>
@@ -601,7 +601,7 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
         {authUserId && !escalated && (
           <form
             onSubmit={onSubmit}
-            className="border-t border-[var(--rule)] p-4 space-y-2 shrink-0 bg-white"
+            className="border-t border-[var(--rule)] p-4 space-y-2 shrink-0 bg-card"
           >
             <textarea
               ref={textareaRef}
@@ -626,7 +626,7 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
                     onClick={onEscalate}
                     disabled={escalating || sending}
                     title="Hand off this conversation to a human at DSO Hire"
-                    className="inline-flex items-center gap-1.5 rounded border border-[var(--rule-strong)] bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink disabled:opacity-40"
+                    className="inline-flex items-center gap-1.5 rounded border border-[var(--rule-strong)] bg-card px-2.5 py-1.5 text-[11px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink disabled:opacity-40"
                   >
                     {escalating ? (
                       <Loader2 className="size-3.5 animate-spin" />
@@ -640,7 +640,7 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
               <button
                 type="submit"
                 disabled={sending || !input.trim()}
-                className="inline-flex items-center gap-1.5 bg-ink text-ivory px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft disabled:opacity-40 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {sending ? (
                   <>
@@ -680,7 +680,7 @@ function Bubble({
 }) {
   if (message.role === "system") {
     return (
-      <div className="border border-amber-200 bg-amber-50 px-3 py-2 text-[13px] text-amber-950 inline-flex items-start gap-2 max-w-full">
+      <div className="border border-warning bg-warning-bg px-3 py-2 text-[13px] text-warning inline-flex items-start gap-2 max-w-full">
         <AlertTriangle className="size-3.5 mt-0.5 shrink-0" />
         <div className="flex-1 leading-relaxed whitespace-pre-wrap">
           {message.content}
@@ -691,7 +691,7 @@ function Bubble({
   if (message.role === "user") {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[85%] bg-ink text-ivory px-3.5 py-2.5 text-[14px] leading-relaxed whitespace-pre-wrap rounded">
+        <div className="max-w-[85%] bg-primary text-primary-foreground px-3.5 py-2.5 text-[14px] leading-relaxed whitespace-pre-wrap rounded">
           {message.content}
         </div>
       </div>
@@ -739,7 +739,7 @@ function Bubble({
                 key={i}
                 type="button"
                 onClick={() => onNavigate(lnk.href)}
-                className="inline-flex items-center gap-1.5 border border-heritage bg-white text-heritage-deep text-[11px] font-bold px-2.5 py-1.5 hover:bg-heritage/[0.10]"
+                className="inline-flex items-center gap-1.5 border border-heritage bg-card text-heritage-deep text-[11px] font-bold px-2.5 py-1.5 hover:bg-heritage/[0.10]"
               >
                 {lnk.label}
                 <span aria-hidden className="font-normal">
@@ -848,7 +848,7 @@ function FeedbackButtons({
             else if (e.key === "Escape") setShowNote(false);
           }}
           placeholder="What didn't work? (optional)"
-          className="flex-1 px-2 py-1 text-[12px] border border-[var(--rule-strong)] bg-white focus:outline-none focus:border-heritage"
+          className="flex-1 px-2 py-1 text-[12px] border border-[var(--rule-strong)] bg-card focus:outline-none focus:border-heritage"
         />
         <button
           type="button"
@@ -885,7 +885,7 @@ function FeedbackButtons({
         disabled={pending}
         aria-label="Not helpful"
         title="Not helpful"
-        className="p-1 text-slate-meta hover:text-red-700 hover:bg-red-50 rounded disabled:opacity-40"
+        className="p-1 text-slate-meta hover:text-danger hover:bg-danger-bg rounded disabled:opacity-40"
       >
         <ThumbsDown className="size-3.5" />
       </button>
@@ -969,22 +969,22 @@ function DraftActionCard({ draft }: { draft: UiDraftAction }) {
   }
 
   return (
-    <div className="border border-[var(--rule-strong)] border-l-[3px] border-l-amber-500 bg-amber-50 px-3 py-2.5">
-      <div className="text-[11px] font-bold tracking-[0.3px] uppercase text-amber-700">
+    <div className="border border-[var(--rule-strong)] border-l-[3px] border-l-warning bg-warning-bg px-3 py-2.5">
+      <div className="text-[11px] font-bold tracking-[0.3px] uppercase text-warning">
         Draft action — needs your click
       </div>
       <p className="mt-1 mb-2 text-[12.5px] text-ink leading-snug">
         {draft.summary}.
       </p>
       {status === "error" && error && (
-        <p className="mb-2 text-[12px] text-red-700 leading-snug">{error}</p>
+        <p className="mb-2 text-[12px] text-danger leading-snug">{error}</p>
       )}
       <div className="flex items-center gap-2">
         <button
           type="button"
           onClick={commit}
           disabled={status === "committing"}
-          className="inline-flex items-center gap-1.5 bg-ink text-ivory px-3.5 py-1.5 text-[11px] font-bold tracking-[1px] uppercase hover:bg-ink-soft disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground px-3.5 py-1.5 text-[11px] font-bold tracking-[1px] uppercase hover:bg-primary/90 disabled:opacity-50"
         >
           {status === "committing" ? (
             <>

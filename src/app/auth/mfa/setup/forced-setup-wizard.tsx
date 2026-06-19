@@ -106,9 +106,9 @@ export function ForcedSetupWizard() {
     return (
       <div
         role="alert"
-        className="border border-red-200 bg-red-50 p-6 space-y-3"
+        className="border border-danger bg-danger-bg p-6 space-y-3"
       >
-        <div className="flex items-start gap-2 text-[13px] text-red-800">
+        <div className="flex items-start gap-2 text-[13px] text-danger">
           <AlertTriangle className="size-4 shrink-0 mt-0.5" />
           <div>
             <p className="font-semibold">We couldn&apos;t start your 2FA setup.</p>
@@ -121,7 +121,7 @@ export function ForcedSetupWizard() {
           type="button"
           onClick={() => startTransition(runEnroll)}
           disabled={pending}
-          className="inline-flex items-center gap-2 bg-ink px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ivory hover:bg-ink-soft disabled:opacity-40"
+          className="inline-flex items-center gap-2 bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
         >
           {pending ? (
             <>
@@ -152,7 +152,7 @@ export function ForcedSetupWizard() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-[200px_1fr]">
-          <div className="border border-[var(--rule)] bg-white p-3">
+          <div className="border border-[var(--rule)] bg-card p-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={qrCode}
@@ -192,12 +192,12 @@ export function ForcedSetupWizard() {
             }}
             maxLength={6}
             placeholder="123456"
-            className="w-40 border border-[var(--rule-strong)] bg-white px-3 py-2 font-mono text-[18px] tracking-[4px] text-ink focus:border-heritage focus:outline-none"
+            className="w-40 border border-[var(--rule-strong)] bg-card px-3 py-2 font-mono text-[18px] tracking-[4px] text-ink focus:border-heritage focus:outline-none"
           />
           {error && (
             <p
               role="alert"
-              className="text-[12px] text-red-700 inline-flex items-center gap-1.5"
+              className="text-[12px] text-danger inline-flex items-center gap-1.5"
             >
               <AlertTriangle className="size-3.5" />
               {error}
@@ -207,7 +207,7 @@ export function ForcedSetupWizard() {
             type="button"
             onClick={onVerify}
             disabled={pending || code.length !== 6}
-            className="inline-flex items-center gap-2 bg-ink px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ivory hover:bg-ink-soft disabled:opacity-40"
+            className="inline-flex items-center gap-2 bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
           >
             {pending ? (
               <>
@@ -260,7 +260,7 @@ export function ForcedSetupWizard() {
           <button
             type="button"
             onClick={onDone}
-            className="ml-auto inline-flex items-center gap-2 bg-ink px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ivory hover:bg-ink-soft"
+            className="ml-auto inline-flex items-center gap-2 bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90"
           >
             I&apos;ve saved my codes
           </button>
@@ -286,7 +286,7 @@ function CopyButton({ value, label }: { value: string; label: string }) {
           /* select-and-copy fallback */
         }
       }}
-      className="inline-flex items-center gap-1.5 border border-[var(--rule-strong)] bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
+      className="inline-flex items-center gap-1.5 border border-[var(--rule-strong)] bg-card px-3 py-1.5 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
     >
       {copied ? (
         <>
@@ -324,7 +324,7 @@ function DownloadButton({
         a.remove();
         URL.revokeObjectURL(url);
       }}
-      className="inline-flex items-center gap-1.5 border border-[var(--rule-strong)] bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
+      className="inline-flex items-center gap-1.5 border border-[var(--rule-strong)] bg-card px-3 py-1.5 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
     >
       <Download className="size-3.5" />
       Download .txt

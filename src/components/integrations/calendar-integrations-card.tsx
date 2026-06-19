@@ -131,7 +131,7 @@ function StatusBanner({
   return (
     <div
       role="alert"
-      className="mb-5 border-l-4 border-red-500 bg-red-50 text-red-800 px-4 py-3 text-[13px]"
+      className="mb-5 border-l-4 border-danger bg-danger-bg text-danger px-4 py-3 text-[13px]"
     >
       Couldn&apos;t connect calendar{message ? ` — ${message}` : "."}
     </div>
@@ -178,7 +178,7 @@ function ProviderCard({
   )}`;
 
   return (
-    <div className="border border-[var(--rule)] rounded-lg p-6 bg-white flex flex-col">
+    <div className="border border-[var(--rule)] rounded-lg p-6 bg-card flex flex-col">
       <div className="flex items-start gap-3 mb-3">
         <ProviderLogo provider={provider} />
         <div className="flex-1 min-w-0">
@@ -199,7 +199,7 @@ function ProviderCard({
             aria-hidden
             className={
               "inline-block h-2 w-2 rounded-full " +
-              (status.connected ? "bg-heritage-deep" : "bg-slate-300")
+              (status.connected ? "bg-heritage-deep" : "bg-meta-foreground")
             }
           />
           {status.connected ? (
@@ -233,7 +233,7 @@ function ProviderCard({
         ) : (
           <a
             href={connectHref}
-            className="inline-flex items-center gap-2 bg-heritage text-white hover:bg-heritage-deep px-4 py-2 rounded text-[13px] font-semibold"
+            className="inline-flex items-center gap-2 bg-heritage text-primary-foreground hover:bg-heritage-deep px-4 py-2 rounded text-[13px] font-semibold"
           >
             {provider === "google"
               ? "Connect Google Calendar"
@@ -242,7 +242,7 @@ function ProviderCard({
         )}
 
         {error && (
-          <div className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-800">
+          <div className="mt-3 rounded-md border border-danger bg-danger-bg px-3 py-2 text-[12px] text-danger">
             {error}
           </div>
         )}

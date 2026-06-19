@@ -72,7 +72,7 @@ export function StalePipelineAlert({
               <Link
                 key={c.applicationId}
                 href={`/employer/applications/${c.applicationId}`}
-                className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-[var(--rule-strong)] hover:bg-ivory-deep transition-colors text-[11px] text-ink"
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-card border border-[var(--rule-strong)] hover:bg-ivory-deep transition-colors text-[11px] text-ink"
               >
                 <span>
                   {c.candidateName} ·{" "}
@@ -89,7 +89,7 @@ export function StalePipelineAlert({
 
         <Link
           href={reviewAllHref}
-          className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2.5 text-[10px] font-extrabold tracking-[1.6px] uppercase bg-ivory-deep text-ink hover:bg-white transition-colors flex-shrink-0"
+          className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2.5 text-[10px] font-extrabold tracking-[1.6px] uppercase bg-ivory-deep text-ink hover:bg-card transition-colors flex-shrink-0"
         >
           Review all
           <ChevronRight className="h-2.5 w-2.5" strokeWidth={3} />
@@ -98,7 +98,7 @@ export function StalePipelineAlert({
 
       <Link
         href={reviewAllHref}
-        className="sm:hidden mt-4 inline-flex items-center gap-1.5 px-4 py-2.5 text-[10px] font-extrabold tracking-[1.6px] uppercase bg-ivory-deep text-ink hover:bg-white transition-colors"
+        className="sm:hidden mt-4 inline-flex items-center gap-1.5 px-4 py-2.5 text-[10px] font-extrabold tracking-[1.6px] uppercase bg-ivory-deep text-ink hover:bg-card transition-colors"
       >
         Review all
         <ChevronRight className="h-2.5 w-2.5" strokeWidth={3} />

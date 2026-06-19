@@ -38,7 +38,7 @@ export function ShareToLinkedIn({
       aria-label={label}
       className={
         className ??
-        "inline-flex items-center justify-center gap-2 px-6 py-3.5 border border-[var(--rule-strong)] bg-white text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
+        "inline-flex items-center justify-center gap-2 px-6 py-3.5 border border-[var(--rule-strong)] bg-card text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
       }
     >
       <svg

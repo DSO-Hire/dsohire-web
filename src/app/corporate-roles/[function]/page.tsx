@@ -106,10 +106,10 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
     <SiteShell>
       <section className="pt-[140px] pb-12 px-6 sm:px-14 max-w-[1240px] mx-auto">
         <div className="flex items-center gap-3.5 mb-6">
-          <span className="block w-7 h-px" style={{ background: "#3D5266" }} />
+          <span className="block w-7 h-px" style={{ background: "var(--corporate)" }} />
           <span
             className="text-[10px] font-bold tracking-[3.5px] uppercase"
-            style={{ color: "#3D5266" }}
+            style={{ color: "var(--corporate)" }}
           >
             Corporate Roles · {fn.label}
           </span>
@@ -153,7 +153,7 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
           <Link
             href="/jobs?surface=corporate"
             className="inline-flex items-center gap-1.5 text-[12px] font-bold tracking-[1.5px] uppercase hover:opacity-75"
-            style={{ color: "#3D5266" }}
+            style={{ color: "var(--corporate)" }}
           >
             View all Corporate Roles
             <ArrowRight className="h-3.5 w-3.5" />
@@ -192,7 +192,7 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
                 >
                   <div
                     className="inline-flex items-center gap-1.5 mb-2 text-[10px] font-bold tracking-[2px] uppercase"
-                    style={{ color: "#3D5266" }}
+                    style={{ color: "var(--corporate)" }}
                   >
                     <Building2 className="h-3 w-3" />
                     {fn.label}
@@ -212,8 +212,8 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
                         <span
                           className="px-2 py-0.5 text-[11px] font-semibold border"
                           style={{
-                            color: "#3D5266",
-                            borderColor: "#3D5266",
+                            color: "var(--corporate)",
+                            borderColor: "var(--corporate)",
                             background: "rgba(61,82,102,0.06)",
                           }}
                         >
@@ -226,8 +226,8 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
                         <span
                           className="px-2 py-0.5 text-[11px] font-semibold border"
                           style={{
-                            color: "#3D5266",
-                            borderColor: "#3D5266",
+                            color: "var(--corporate)",
+                            borderColor: "var(--corporate)",
                             background: "rgba(61,82,102,0.06)",
                           }}
                         >

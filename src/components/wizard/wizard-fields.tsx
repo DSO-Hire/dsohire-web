@@ -49,7 +49,7 @@ export function FieldShell({
         <p className="mt-1 text-[14px] leading-relaxed text-slate-meta">{help}</p>
       )}
       <div className="mt-3">{children}</div>
-      {error && <p className="mt-2 text-[12px] font-semibold text-red-700">{error}</p>}
+      {error && <p className="mt-2 text-[12px] font-semibold text-danger">{error}</p>}
     </fieldset>
   );
 }
@@ -85,7 +85,7 @@ export function OptionCards({
               "flex w-full items-center justify-between gap-3 border px-4 py-3 text-left text-[15px] transition-colors " +
               (active
                 ? "border-heritage-deep bg-heritage/10 font-semibold text-ink"
-                : "border-[var(--rule)] bg-white text-slate-body hover:border-heritage-deep")
+                : "border-[var(--rule)] bg-card text-slate-body hover:border-heritage-deep")
             }
           >
             <span>
@@ -140,7 +140,7 @@ export function MultiChips({
             className={
               "rounded-full border px-4 py-2 text-[14px] font-semibold transition-colors " +
               (active
-                ? "border-heritage-deep bg-heritage-deep text-ivory"
+                ? "border-heritage-deep bg-heritage-deep text-primary-foreground"
                 : "border-[var(--rule)] text-slate-body hover:border-heritage-deep")
             }
           >
@@ -195,12 +195,12 @@ export function RankCards({
                 ? "border-heritage-deep bg-heritage/10 font-semibold text-ink"
                 : full
                   ? "cursor-not-allowed border-[var(--rule)] bg-cream/40 text-slate-meta"
-                  : "border-[var(--rule)] bg-white text-slate-body hover:border-heritage-deep")
+                  : "border-[var(--rule)] bg-card text-slate-body hover:border-heritage-deep")
             }
           >
             <span>{opt.label}</span>
             {active && (
-              <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-heritage-deep text-[12px] font-bold text-ivory">
+              <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-heritage-deep text-[12px] font-bold text-primary-foreground">
                 {rank + 1}
               </span>
             )}
@@ -333,7 +333,7 @@ export function TextField({
         onChange={(e) => onChange(e.target.value)}
         className={
           widthClass +
-          " border border-[var(--rule)] bg-white px-3 py-2 text-[15px] text-ink focus:border-heritage focus:outline-none"
+          " border border-[var(--rule)] bg-card px-3 py-2 text-[15px] text-ink focus:border-heritage focus:outline-none"
         }
       />
       {suffix != null && <span className="text-[13px] text-slate-meta">{suffix}</span>}
@@ -365,7 +365,7 @@ export function TextAreaField({
       rows={rows}
       maxLength={maxLength}
       placeholder={placeholder}
-      className="w-full border border-[var(--rule)] bg-white px-3 py-2 text-[15px] text-ink focus:border-heritage focus:outline-none"
+      className="w-full border border-[var(--rule)] bg-card px-3 py-2 text-[15px] text-ink focus:border-heritage focus:outline-none"
     />
   );
 }
@@ -393,7 +393,7 @@ export function SelectField({
       onChange={(e) => onChange(e.target.value)}
       className={
         widthClass +
-        " border border-[var(--rule)] bg-white px-3 py-2 text-[15px] text-ink focus:border-heritage focus:outline-none"
+        " border border-[var(--rule)] bg-card px-3 py-2 text-[15px] text-ink focus:border-heritage focus:outline-none"
       }
     >
       {placeholder != null && <option value="">{placeholder}</option>}
@@ -435,15 +435,15 @@ export function CheckCard({
         "flex w-full items-start gap-3 border px-4 py-3 text-left text-[15px] transition-colors disabled:opacity-50 " +
         (checked
           ? "border-heritage-deep bg-heritage/10 text-ink"
-          : "border-[var(--rule)] bg-white text-slate-body hover:border-heritage-deep")
+          : "border-[var(--rule)] bg-card text-slate-body hover:border-heritage-deep")
       }
     >
       <span
         className={
           "mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border transition-colors " +
           (checked
-            ? "border-heritage-deep bg-heritage-deep text-ivory"
-            : "border-[var(--rule)] bg-white")
+            ? "border-heritage-deep bg-heritage-deep text-primary-foreground"
+            : "border-[var(--rule)] bg-card")
         }
       >
         {checked && <Check className="h-3.5 w-3.5" />}
@@ -486,7 +486,7 @@ export function FileField({
           "flex cursor-pointer items-center gap-3 border border-dashed px-4 py-4 text-[15px] transition-colors " +
           (shownName
             ? "border-heritage-deep bg-heritage/5 text-ink"
-            : "border-[var(--rule)] bg-white text-slate-body hover:border-heritage-deep")
+            : "border-[var(--rule)] bg-card text-slate-body hover:border-heritage-deep")
         }
       >
         <UploadCloud className="h-5 w-5 flex-shrink-0 text-heritage-deep" />

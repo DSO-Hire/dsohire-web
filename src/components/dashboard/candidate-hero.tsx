@@ -103,7 +103,7 @@ export function CandidateHero(props: CandidateHeroProps) {
   return (
     <Link
       href={props.href}
-      className="group relative overflow-hidden flex flex-col text-ivory bg-ink p-7 sm:p-8 hover:bg-ink-soft transition-colors min-h-[440px]"
+      className="group relative overflow-hidden flex flex-col text-hero-foreground bg-hero p-7 sm:p-8 hover:bg-ink-soft transition-colors min-h-[440px]"
       style={{
         backgroundImage:
           "radial-gradient(circle at 100% 0%, rgba(77,122,96,0.22), transparent 60%), radial-gradient(circle at 0% 100%, rgba(77,122,96,0.10), transparent 50%)",
@@ -120,7 +120,7 @@ export function CandidateHero(props: CandidateHeroProps) {
       />
 
       {/* Chevron (top-right) */}
-      <ChevronRight className="absolute top-5 right-5 h-4 w-4 text-ivory/50 group-hover:text-[#8db8a3] group-hover:translate-x-1 transition-all" />
+      <ChevronRight className="absolute top-5 right-5 h-4 w-4 text-hero-foreground/50 group-hover:text-[#8db8a3] group-hover:translate-x-1 transition-all" />
 
       {props.mode === "new-replies" && <NewRepliesBody {...props} />}
       {props.mode === "active-apps" && <ActiveAppsBody {...props} />}
@@ -128,7 +128,7 @@ export function CandidateHero(props: CandidateHeroProps) {
       {props.mode === "setup" && <SetupBody {...props} />}
 
       {/* Shared CTA rail */}
-      <div className="mt-auto pt-5 inline-flex items-center gap-1.5 text-[11px] font-extrabold tracking-[2px] uppercase text-[#8db8a3] border-t border-ivory/10">
+      <div className="mt-auto pt-5 inline-flex items-center gap-1.5 text-[11px] font-extrabold tracking-[2px] uppercase text-[#8db8a3] border-t border-hero-foreground/10">
         <span className="pt-5">{props.ctaLabel}</span>
         <ArrowRight className="h-3.5 w-3.5 mt-5 group-hover:translate-x-1 transition-transform" />
       </div>
@@ -156,7 +156,7 @@ function NewRepliesBody({ unreadCount, replies }: NewRepliesProps) {
       </div>
 
       <div className="flex items-baseline gap-3 flex-wrap mb-3">
-        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-ivory">
+        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground">
           {unreadCount}
         </div>
         <span
@@ -167,7 +167,7 @@ function NewRepliesBody({ unreadCount, replies }: NewRepliesProps) {
         </span>
       </div>
 
-      <div className="text-[13px] leading-[1.55] max-w-[400px] text-ivory/70 mb-5">
+      <div className="text-[13px] leading-[1.55] max-w-[400px] text-hero-foreground/70 mb-5">
         Employers replied to your applications. Open the inbox to read and
         respond before they move on to other candidates.
       </div>
@@ -177,8 +177,8 @@ function NewRepliesBody({ unreadCount, replies }: NewRepliesProps) {
           <li
             key={reply.id}
             className={`py-3 flex items-center gap-3.5 ${
-              i === 0 ? "border-t border-ivory/10" : "border-t border-ivory/10"
-            } ${i === replies.slice(0, 3).length - 1 ? "border-b border-ivory/10" : ""}`}
+              i === 0 ? "border-t border-hero-foreground/10" : "border-t border-hero-foreground/10"
+            } ${i === replies.slice(0, 3).length - 1 ? "border-b border-hero-foreground/10" : ""}`}
           >
             <Avatar
               name={reply.senderName}
@@ -186,11 +186,11 @@ function NewRepliesBody({ unreadCount, replies }: NewRepliesProps) {
               className="shrink-0"
             />
             <div className="flex-1 min-w-0">
-              <div className="text-[13px] text-ivory leading-tight truncate">
+              <div className="text-[13px] text-hero-foreground leading-tight truncate">
                 <strong className="font-bold">{reply.senderName}</strong>
-                <span className="text-ivory/55"> · {reply.dsoName}</span>
+                <span className="text-hero-foreground/55"> · {reply.dsoName}</span>
               </div>
-              <div className="text-[11px] text-ivory/55 mt-0.5 truncate">
+              <div className="text-[11px] text-hero-foreground/55 mt-0.5 truncate">
                 &ldquo;{reply.preview}&rdquo; · {reply.timestamp} · {reply.jobTitle}
               </div>
             </div>
@@ -220,12 +220,12 @@ function ActiveAppsBody({ activeCount, hint, stages }: ActiveAppsProps) {
       </div>
 
       <div className="flex items-baseline gap-3 flex-wrap mb-3">
-        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-ivory">
+        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground">
           {activeCount}
         </div>
       </div>
 
-      <div className="text-[13px] leading-[1.55] max-w-[400px] text-ivory/70">
+      <div className="text-[13px] leading-[1.55] max-w-[400px] text-hero-foreground/70">
         {hint}
       </div>
 
@@ -244,10 +244,10 @@ function ActiveAppsBody({ activeCount, hint, stages }: ActiveAppsProps) {
                   style={{ width: `${pct}%`, background: "#8db8a3" }}
                 />
               </div>
-              <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-ivory/55">
+              <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-hero-foreground/55">
                 {stage.label}
               </div>
-              <div className="text-[14px] font-extrabold text-ivory mt-0.5">
+              <div className="text-[14px] font-extrabold text-hero-foreground mt-0.5">
                 {stage.count}
               </div>
             </div>
@@ -276,15 +276,15 @@ function InterviewBody({ interviewCount, items, hint }: InterviewProps) {
       </div>
 
       <div className="flex items-baseline gap-3 flex-wrap mb-3">
-        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-ivory">
+        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground">
           {interviewCount}
         </div>
-        <span className="text-[24px] text-ivory/50">
+        <span className="text-[24px] text-hero-foreground/50">
           interview{interviewCount === 1 ? "" : "s"}
         </span>
       </div>
 
-      <div className="text-[13px] leading-[1.55] max-w-[400px] text-ivory/70">
+      <div className="text-[13px] leading-[1.55] max-w-[400px] text-hero-foreground/70">
         {hint}
       </div>
 
@@ -292,17 +292,17 @@ function InterviewBody({ interviewCount, items, hint }: InterviewProps) {
         {items.slice(0, 3).map((it, i) => (
           <li
             key={`${it.role}-${i}`}
-            className={`py-3 flex items-center gap-3 border-t border-ivory/10 ${
-              i === items.slice(0, 3).length - 1 ? "border-b border-ivory/10" : ""
+            className={`py-3 flex items-center gap-3 border-t border-hero-foreground/10 ${
+              i === items.slice(0, 3).length - 1 ? "border-b border-hero-foreground/10" : ""
             }`}
           >
             <span
               className="block w-1.5 h-1.5 rounded-full shrink-0"
               style={{ background: "#8db8a3" }}
             />
-            <div className="text-[13px] text-ivory leading-tight truncate">
+            <div className="text-[13px] text-hero-foreground leading-tight truncate">
               <strong className="font-bold">{it.role}</strong>
-              <span className="text-ivory/55"> · {it.dsoName}</span>
+              <span className="text-hero-foreground/55"> · {it.dsoName}</span>
             </div>
           </li>
         ))}
@@ -326,13 +326,13 @@ function SetupBody({ totalSteps, doneSteps, hint, steps }: SetupProps) {
       </div>
 
       <div className="flex items-baseline gap-3 flex-wrap mb-3">
-        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-ivory">
+        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground">
           {totalSteps}
         </div>
-        <span className="text-[32px] text-ivory/50">steps</span>
+        <span className="text-[32px] text-hero-foreground/50">steps</span>
       </div>
 
-      <div className="text-[13px] leading-[1.55] max-w-[420px] text-ivory/70">
+      <div className="text-[13px] leading-[1.55] max-w-[420px] text-hero-foreground/70">
         {hint}
       </div>
 
@@ -340,13 +340,13 @@ function SetupBody({ totalSteps, doneSteps, hint, steps }: SetupProps) {
         {steps.map((step, i) => (
           <div
             key={step.label}
-            className={`flex gap-3.5 items-center py-3 border-t border-ivory/10 ${
-              i === steps.length - 1 ? "border-b border-ivory/10" : ""
+            className={`flex gap-3.5 items-center py-3 border-t border-hero-foreground/10 ${
+              i === steps.length - 1 ? "border-b border-hero-foreground/10" : ""
             }`}
           >
             <div
               className={`w-6 h-6 grid place-items-center text-[11px] font-extrabold ${
-                step.done ? "text-ivory" : "text-ivory/50"
+                step.done ? "text-hero-foreground" : "text-hero-foreground/50"
               }`}
               style={{
                 background: step.done
@@ -359,16 +359,16 @@ function SetupBody({ totalSteps, doneSteps, hint, steps }: SetupProps) {
             <div
               className={`text-[13px] flex-1 ${
                 step.upNext
-                  ? "text-ivory font-bold"
+                  ? "text-hero-foreground font-bold"
                   : step.done
-                    ? "text-ivory/85"
-                    : "text-ivory/65"
+                    ? "text-hero-foreground/85"
+                    : "text-hero-foreground/65"
               }`}
             >
               {step.label}
             </div>
             {step.done && (
-              <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-ivory/40">
+              <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-hero-foreground/40">
                 Done
               </div>
             )}

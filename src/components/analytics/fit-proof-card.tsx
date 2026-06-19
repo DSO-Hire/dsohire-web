@@ -24,7 +24,7 @@ export function FitProofCard({ proof }: { proof: FitOutcomeProof }) {
   if (proof.total_scored === 0) return null;
 
   return (
-    <section className="mb-6 border border-[var(--rule)] bg-white p-6 sm:p-7">
+    <section className="mb-6 border border-[var(--rule)] bg-card p-6 sm:p-7">
       <header className="mb-4 flex items-center gap-2 text-heritage-deep">
         <span className="text-[10px] font-bold tracking-[2.5px] uppercase">
           Proof

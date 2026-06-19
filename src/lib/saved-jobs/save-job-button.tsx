@@ -80,8 +80,8 @@ export function SaveJobButton({
         aria-pressed={saved}
         className={`inline-flex size-8 items-center justify-center rounded-md transition ${
           saved
-            ? "bg-[#4D7A60]/10 text-[#4D7A60] hover:bg-[#4D7A60]/15"
-            : "text-slate-500 hover:bg-slate-100 hover:text-[#14233F]"
+            ? "bg-heritage/10 text-heritage hover:bg-heritage/15"
+            : "text-muted-foreground hover:bg-muted hover:text-foreground"
         } disabled:opacity-50`}
       >
         {busy ? (
@@ -102,8 +102,8 @@ export function SaveJobButton({
         aria-pressed={saved}
         className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition ${
           saved
-            ? "border-[#4D7A60]/40 bg-[#4D7A60]/10 text-[#14233F] hover:border-[#4D7A60]"
-            : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+            ? "border-heritage/40 bg-heritage/10 text-foreground hover:border-heritage"
+            : "border-border bg-card text-foreground hover:bg-muted"
         } disabled:opacity-50`}
       >
         {busy ? (
@@ -116,7 +116,7 @@ export function SaveJobButton({
       {error && (
         <span
           role="alert"
-          className="inline-flex items-center gap-1 text-xs text-red-700"
+          className="inline-flex items-center gap-1 text-xs text-danger"
         >
           <AlertCircle className="size-3" />
           {error}

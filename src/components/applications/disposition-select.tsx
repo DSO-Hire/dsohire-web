@@ -38,14 +38,14 @@ export function DispositionSelect({
         className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body"
       >
         {kind === "rejected" ? "Rejection reason" : "Reason"}
-        {required ? <span className="text-red-700"> *</span> : " (optional)"}
+        {required ? <span className="text-danger"> *</span> : " (optional)"}
       </label>
       <select
         id={id}
         value={value}
         required={required}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full border border-[var(--rule-strong)] bg-white px-3 py-2 text-[14px] text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
+        className="w-full border border-[var(--rule-strong)] bg-card px-3 py-2 text-[14px] text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
       >
         <option value="">Select a reason…</option>
         {options.map((o) => (

@@ -53,52 +53,52 @@ export function OnboardingChecklist({
   }
 
   return (
-    <section className="rounded-lg border border-[#4D7A60]/30 bg-gradient-to-br from-[#4D7A60]/[0.08] via-[#F7F4ED] to-white p-5 sm:p-6">
+    <section className="rounded-lg border border-heritage/30 bg-gradient-to-br from-heritage/[0.08] via-[#F7F4ED] to-white dark:via-card dark:to-card p-5 sm:p-6">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#4D7A60] text-[#F7F4ED]">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-heritage text-primary-foreground">
             <Rocket className="size-[18px]" aria-hidden />
           </div>
           <div>
-            <h2 className="font-display text-lg font-bold text-[#14233F]">{title}</h2>
-            <p className="mt-0.5 text-sm text-slate-600">{subtitle}</p>
+            <h2 className="font-display text-lg font-bold text-foreground">{title}</h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>
           </div>
         </div>
         <button
           type="button"
           onClick={dismiss}
-          className="shrink-0 rounded p-1 text-slate-400 hover:bg-black/5 hover:text-[#14233F]"
+          className="shrink-0 rounded p-1 text-meta-foreground hover:bg-black/5 hover:text-foreground"
           aria-label="Dismiss setup checklist"
         >
           <X className="size-4" />
         </button>
       </div>
 
-      <p className="mt-3 text-[11px] font-semibold uppercase tracking-wider text-[#4D7A60]">
+      <p className="mt-3 text-[11px] font-semibold uppercase tracking-wider text-heritage">
         {doneCount} of {items.length} done
       </p>
 
-      <ul className="mt-2 divide-y divide-[#4D7A60]/10">
+      <ul className="mt-2 divide-y divide-heritage/10">
         {items.map((item) =>
           item.done ? (
             <li
               key={item.key}
-              className="flex items-center gap-2 py-2.5 text-sm text-slate-400"
+              className="flex items-center gap-2 py-2.5 text-sm text-meta-foreground"
             >
-              <CheckCircle2 className="size-4 shrink-0 text-[#4D7A60]" />
+              <CheckCircle2 className="size-4 shrink-0 text-heritage" />
               <span className="line-through">{item.label}</span>
             </li>
           ) : (
             <li key={item.key}>
               <Link
                 href={item.href}
-                className="group flex items-center justify-between gap-3 py-2.5 text-sm text-slate-700 hover:text-[#14233F]"
+                className="group flex items-center justify-between gap-3 py-2.5 text-sm text-foreground hover:text-foreground"
               >
                 <span className="flex items-center gap-2">
-                  <Circle className="size-4 shrink-0 text-slate-300 group-hover:text-[#4D7A60]" />
+                  <Circle className="size-4 shrink-0 text-meta-foreground group-hover:text-heritage" />
                   {item.label}
                 </span>
-                <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#4D7A60] group-hover:text-[#14233F]">
+                <span className="inline-flex items-center gap-1 text-xs font-semibold text-heritage group-hover:text-foreground">
                   Do it
                   <ChevronRight className="size-3.5" />
                 </span>

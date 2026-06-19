@@ -124,9 +124,9 @@ export function EmployerInterviewSection({
                     className={
                       "uppercase text-[10px] font-bold tracking-[1.5px] px-1.5 py-0.5 " +
                       (p.status === "booked"
-                        ? "bg-green-100 text-green-800"
+                        ? "bg-success-bg text-success"
                         : p.status === "cancelled"
-                          ? "bg-red-50 text-red-700"
+                          ? "bg-danger-bg text-danger"
                           : "bg-cream text-slate-meta")
                     }
                   >
@@ -148,13 +148,13 @@ export function EmployerInterviewSection({
 
 function PendingView({ proposal }: { proposal: InterviewProposalState }) {
   return (
-    <div className="rounded-md border border-amber-200 bg-amber-50 p-3 mb-3">
+    <div className="rounded-md border border-warning bg-warning-bg p-3 mb-3">
       <div className="flex items-start gap-2 mb-2">
         <AlertCircle
-          className="h-4 w-4 text-amber-700 mt-0.5 shrink-0"
+          className="h-4 w-4 text-warning mt-0.5 shrink-0"
           aria-hidden
         />
-        <div className="text-[13px] text-amber-900 leading-relaxed">
+        <div className="text-[13px] text-warning leading-relaxed">
           Waiting on the candidate to pick a time. Sent{" "}
           {new Date(proposal.created_at).toLocaleDateString()}.
         </div>
@@ -163,13 +163,13 @@ function PendingView({ proposal }: { proposal: InterviewProposalState }) {
         {proposal.options.map((opt) => (
           <li
             key={opt.id}
-            className="text-[12px] text-amber-900 tabular-nums"
+            className="text-[12px] text-warning tabular-nums"
           >
             {formatSlot(opt.start_at)}
           </li>
         ))}
       </ul>
-      <div className="mt-3 pt-2 border-t border-amber-200 flex items-center gap-3 text-[11px] text-amber-900">
+      <div className="mt-3 pt-2 border-t border-warning flex items-center gap-3 text-[11px] text-warning">
         <span className="inline-flex items-center gap-1">
           <Clock className="h-3 w-3" />
           {proposal.duration_minutes} min
@@ -202,14 +202,14 @@ function BookedView({
   );
   if (!opt) return null;
   return (
-    <div className="rounded-md border border-green-200 bg-green-50 p-4">
+    <div className="rounded-md border border-success bg-success-bg p-4">
       <div className="flex items-start gap-2 mb-3">
         <CheckCircle2
-          className="h-4 w-4 text-green-800 mt-0.5 shrink-0"
+          className="h-4 w-4 text-success mt-0.5 shrink-0"
           aria-hidden
         />
         <div>
-          <div className="text-[14px] font-bold text-green-900 mb-0.5">
+          <div className="text-[14px] font-bold text-success mb-0.5">
             Interview confirmed
           </div>
           <div className="text-[15px] font-extrabold text-ink mt-1">
@@ -217,7 +217,7 @@ function BookedView({
           </div>
         </div>
       </div>
-      <div className="text-[12px] text-green-900 space-y-1 pl-6">
+      <div className="text-[12px] text-success space-y-1 pl-6">
         <div className="flex items-center gap-2">
           <Clock className="h-3 w-3" />
           {proposal.duration_minutes} minutes ·{" "}
@@ -230,8 +230,8 @@ function BookedView({
           </div>
         )}
         {proposal.booking.candidate_notes && (
-          <div className="mt-2 pt-2 border-t border-green-200">
-            <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-green-800 mb-1">
+          <div className="mt-2 pt-2 border-t border-success">
+            <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-success mb-1">
               Candidate&apos;s note
             </div>
             <p className="text-[12px] italic">
@@ -240,7 +240,7 @@ function BookedView({
           </div>
         )}
       </div>
-      <div className="mt-4 pt-3 border-t border-green-200 flex flex-wrap items-center gap-2">
+      <div className="mt-4 pt-3 border-t border-success flex flex-wrap items-center gap-2">
         <RescheduleInterviewLauncher
           applicationId={applicationId}
           candidateName={candidateName}

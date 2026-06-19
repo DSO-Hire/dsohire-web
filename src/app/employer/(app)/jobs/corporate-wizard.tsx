@@ -961,7 +961,7 @@ export function CorporateJobWizard({
     <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_400px] xl:gap-8 xl:items-start">
     <div className="space-y-8 max-w-[820px]">
       {draftFound && !draftDismissed && (
-        <div className="border border-[#3D5266]/50 bg-[#3D5266]/[0.08] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="border border-corporate/50 bg-corporate/[0.08] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
             <p className="text-[13px] font-bold text-ink mb-0.5">
               We saved a draft of an in-progress corporate job posting.
@@ -1207,7 +1207,7 @@ export function CorporateJobWizard({
         )}
 
         {savedFlash && mode === "edit" && (
-          <div className="mt-6 bg-cream border-l-4 border-[#3D5266] p-4">
+          <div className="mt-6 bg-cream border-l-4 border-corporate p-4">
             <p className="text-[14px] text-ink font-semibold">
               Saved. Changes are live.
             </p>
@@ -1287,7 +1287,7 @@ function BasicsStep({
   return (
     <div className="space-y-7">
       <div>
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-[#3D5266] mb-2">
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-corporate mb-2">
           Basics
         </div>
         <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
@@ -1343,7 +1343,7 @@ function BasicsStep({
 
       <div>
         <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
-          Authority level <span className="text-[#3D5266]">*</span>
+          Authority level <span className="text-corporate">*</span>
         </label>
         <div className="space-y-2">
           {AUTHORITY_LEVELS.map((opt) => (
@@ -1352,7 +1352,7 @@ function BasicsStep({
               className={
                 "flex items-center gap-3 px-4 py-2.5 border cursor-pointer transition-colors " +
                 (authorityLevel === opt.value
-                  ? "bg-[#3D5266]/[0.08] border-[#3D5266]"
+                  ? "bg-corporate/[0.08] border-corporate"
                   : "bg-card border-[var(--rule-strong)] hover:bg-cream")
               }
             >
@@ -1361,7 +1361,7 @@ function BasicsStep({
                 name="authority_level"
                 checked={authorityLevel === opt.value}
                 onChange={() => onAuthorityLevel(opt.value)}
-                className="accent-[#3D5266]"
+                className="accent-corporate"
               />
               <span className="text-[14px] text-ink font-semibold">
                 {opt.label}
@@ -1395,7 +1395,7 @@ function BasicsStep({
                 >
                   <input
                     type="checkbox"
-                    className="mt-0.5 accent-[#3D5266] flex-shrink-0"
+                    className="mt-0.5 accent-corporate flex-shrink-0"
                     checked={checked}
                     onChange={() => onToggleLocation(loc.id)}
                   />
@@ -1472,7 +1472,7 @@ function DescriptionStep({
   return (
     <div className="space-y-6">
       <div>
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-[#3D5266] mb-2">
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-corporate mb-2">
           Description
         </div>
         <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
@@ -1674,7 +1674,7 @@ function DetailsStep({
   return (
     <div className="space-y-7">
       <div>
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-[#3D5266] mb-2">
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-corporate mb-2">
           Compensation & sandbox
         </div>
         <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
@@ -1736,8 +1736,8 @@ function DetailsStep({
 
       {/* ── Work mode ── */}
       <fieldset className="border border-[var(--rule)] p-6 bg-cream/40">
-        <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-[#3D5266]">
-          Work mode <span className="text-[#3D5266]">*</span>
+        <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-corporate">
+          Work mode <span className="text-corporate">*</span>
         </legend>
         <div className="mt-2 space-y-2">
           {WORK_MODES.map((opt) => (
@@ -1746,7 +1746,7 @@ function DetailsStep({
               className={
                 "flex items-start gap-3 px-4 py-3 border cursor-pointer transition-colors " +
                 (workMode === opt.value
-                  ? "bg-[#3D5266]/[0.08] border-[#3D5266]"
+                  ? "bg-corporate/[0.08] border-corporate"
                   : "bg-card border-[var(--rule-strong)] hover:bg-cream")
               }
             >
@@ -1755,7 +1755,7 @@ function DetailsStep({
                 name="work_mode"
                 checked={workMode === opt.value}
                 onChange={() => onWorkMode(opt.value)}
-                className="mt-1 accent-[#3D5266]"
+                className="mt-1 accent-corporate"
               />
               <div className="flex-1">
                 <div className="text-[14px] font-bold text-ink">
@@ -1809,8 +1809,8 @@ function DetailsStep({
                     }}
                     className={`px-2.5 py-1 text-[11px] font-bold tracking-[0.5px] border transition-colors ${
                       checked
-                        ? "bg-[#3D5266] text-ivory border-[#3D5266]"
-                        : "bg-card text-ink border-[var(--rule)] hover:border-[#3D5266]"
+                        ? "bg-corporate text-ivory border-corporate"
+                        : "bg-card text-ink border-[var(--rule)] hover:border-corporate"
                     }`}
                   >
                     {st}
@@ -1824,7 +1824,7 @@ function DetailsStep({
 
       {/* ── Travel ── */}
       <fieldset className="border border-[var(--rule)] p-6 bg-cream/40">
-        <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-[#3D5266]">
+        <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-corporate">
           Travel{" "}
           <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
             (optional)
@@ -1840,8 +1840,8 @@ function DetailsStep({
               onClick={() => onTravelExpectation("")}
               className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
                 travelExpectation === ""
-                  ? "bg-[#3D5266] text-ivory border-[#3D5266]"
-                  : "bg-card text-ink border-[var(--rule)] hover:border-[#3D5266]"
+                  ? "bg-corporate text-ivory border-corporate"
+                  : "bg-card text-ink border-[var(--rule)] hover:border-corporate"
               }`}
             >
               Not specified
@@ -1855,8 +1855,8 @@ function DetailsStep({
                   onClick={() => onTravelExpectation(opt.value)}
                   className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
                     checked
-                      ? "bg-[#3D5266] text-ivory border-[#3D5266]"
-                      : "bg-card text-ink border-[var(--rule)] hover:border-[#3D5266]"
+                      ? "bg-corporate text-ivory border-corporate"
+                      : "bg-card text-ink border-[var(--rule)] hover:border-corporate"
                   }`}
                 >
                   {opt.label}
@@ -1877,7 +1877,7 @@ function DetailsStep({
 
       {/* ── Reporting structure (collapsible) ── */}
       <fieldset className="border border-[var(--rule)] p-6 bg-cream/40">
-        <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-[#3D5266]">
+        <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-corporate">
           Reporting structure{" "}
           <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
             (optional)
@@ -1887,7 +1887,7 @@ function DetailsStep({
           <button
             type="button"
             onClick={() => setReportingOpen(true)}
-            className="mt-2 inline-flex items-center gap-1.5 text-[12px] font-bold tracking-[1px] uppercase text-[#3D5266] hover:text-ink transition-colors"
+            className="mt-2 inline-flex items-center gap-1.5 text-[12px] font-bold tracking-[1px] uppercase text-corporate hover:text-ink transition-colors"
           >
             <Plus className="h-3.5 w-3.5" />
             Add reporting detail
@@ -1932,7 +1932,7 @@ function DetailsStep({
 
       {/* ── Experience & education ── */}
       <fieldset className="border border-[var(--rule)] p-6 bg-cream/40">
-        <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-[#3D5266]">
+        <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-corporate">
           Experience & education{" "}
           <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
             (optional)
@@ -1975,7 +1975,7 @@ function DetailsStep({
               className={
                 "flex items-start gap-3 px-4 py-2.5 border cursor-pointer transition-colors " +
                 (industryExperience === ""
-                  ? "bg-[#3D5266]/[0.08] border-[#3D5266]"
+                  ? "bg-corporate/[0.08] border-corporate"
                   : "bg-card border-[var(--rule-strong)] hover:bg-cream")
               }
             >
@@ -1984,7 +1984,7 @@ function DetailsStep({
                 name="industry_experience"
                 checked={industryExperience === ""}
                 onChange={() => onIndustryExperience("")}
-                className="mt-1 accent-[#3D5266]"
+                className="mt-1 accent-corporate"
               />
               <div className="flex-1">
                 <div className="text-[14px] font-bold text-ink">
@@ -1998,7 +1998,7 @@ function DetailsStep({
                 className={
                   "flex items-start gap-3 px-4 py-2.5 border cursor-pointer transition-colors " +
                   (industryExperience === opt.value
-                    ? "bg-[#3D5266]/[0.08] border-[#3D5266]"
+                    ? "bg-corporate/[0.08] border-corporate"
                     : "bg-card border-[var(--rule-strong)] hover:bg-cream")
                 }
               >
@@ -2007,7 +2007,7 @@ function DetailsStep({
                   name="industry_experience"
                   checked={industryExperience === opt.value}
                   onChange={() => onIndustryExperience(opt.value)}
-                  className="mt-1 accent-[#3D5266]"
+                  className="mt-1 accent-corporate"
                 />
                 <div className="flex-1">
                   <div className="text-[14px] font-bold text-ink">
@@ -2049,7 +2049,7 @@ function DetailsStep({
 
       {/* ── Candidate visibility ── */}
       <fieldset className="border border-[var(--rule)] p-6 bg-cream/40">
-        <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-[#3D5266]">
+        <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-corporate">
           Candidate visibility
         </legend>
         <label className="mt-2 flex items-start gap-2.5 text-[14px] text-ink cursor-pointer">
@@ -2057,7 +2057,7 @@ function DetailsStep({
             type="checkbox"
             checked={hideStagesFromCandidate}
             onChange={(e) => onHideStagesFromCandidate(e.target.checked)}
-            className="mt-1 accent-[#3D5266]"
+            className="mt-1 accent-corporate"
           />
           <div>
             <div className="font-bold mb-1">
@@ -2167,7 +2167,7 @@ function ScreeningStep({
   return (
     <div className="space-y-6">
       <div>
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-[#3D5266] mb-2">
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-corporate mb-2">
           Screening questions
         </div>
         <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
@@ -2330,7 +2330,7 @@ function QuestionCard({
           <span className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta">
             Q{index + 1}
           </span>
-          <span className="text-[10px] font-bold tracking-[2px] uppercase text-[#3D5266] px-2 py-1 bg-[#3D5266]/[0.08]">
+          <span className="text-[10px] font-bold tracking-[2px] uppercase text-corporate px-2 py-1 bg-corporate/[0.08]">
             {KIND_LABELS[question.kind]}
           </span>
         </div>
@@ -2382,7 +2382,7 @@ function QuestionCard({
             </div>
             <div className="flex items-center gap-1.5 flex-shrink-0">
               {question.required && (
-                <span className="text-[9px] font-bold tracking-[1.2px] uppercase text-[#3D5266]">
+                <span className="text-[9px] font-bold tracking-[1.2px] uppercase text-corporate">
                   Required
                 </span>
               )}
@@ -2391,7 +2391,7 @@ function QuestionCard({
                   Knockout
                 </span>
               )}
-              <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-[#3D5266] group-hover:text-ink transition-colors ml-2">
+              <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-corporate group-hover:text-ink transition-colors ml-2">
                 Edit →
               </span>
             </div>
@@ -2418,7 +2418,7 @@ function QuestionCard({
           {isSelect && (
             <div>
               <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
-                Options <span className="text-[#3D5266]">*</span>
+                Options <span className="text-corporate">*</span>
               </label>
               <div className="space-y-2">
                 {(question.options ?? []).map((opt, idx) => (
@@ -2431,7 +2431,7 @@ function QuestionCard({
                       value={opt.label}
                       onChange={(e) => updateOption(opt.id, e.target.value)}
                       placeholder={`Option ${idx + 1}`}
-                      className="flex-1 px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-[#3D5266] focus:ring-1 focus:ring-[#3D5266] transition-colors"
+                      className="flex-1 px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-corporate focus:ring-1 focus:ring-corporate transition-colors"
                     />
                     <button
                       type="button"
@@ -2448,7 +2448,7 @@ function QuestionCard({
               <button
                 type="button"
                 onClick={addOption}
-                className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[1.5px] uppercase text-[#3D5266] hover:text-ink transition-colors"
+                className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[1.5px] uppercase text-corporate hover:text-ink transition-colors"
               >
                 <Plus className="h-3 w-3" />
                 Add option
@@ -2491,7 +2491,7 @@ function QuestionCard({
               type="checkbox"
               checked={question.required}
               onChange={(e) => onUpdate({ required: e.target.checked })}
-              className="accent-[#3D5266]"
+              className="accent-corporate"
             />
             <span>Required — candidate must answer this to submit.</span>
           </label>
@@ -2504,7 +2504,7 @@ function QuestionCard({
             <button
               type="button"
               onClick={onToggleExpand}
-              className="text-[10px] font-bold tracking-[1.5px] uppercase text-[#3D5266] hover:text-ink transition-colors"
+              className="text-[10px] font-bold tracking-[1.5px] uppercase text-corporate hover:text-ink transition-colors"
             >
               ↑ Collapse this question
             </button>
@@ -2699,7 +2699,7 @@ function PreviewStep({
   return (
     <div className="space-y-6">
       <div>
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-[#3D5266] mb-2">
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-corporate mb-2">
           Preview & publish
         </div>
         <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
@@ -2836,7 +2836,7 @@ function PreviewStep({
                   {q.prompt || "(empty prompt)"}
                 </span>
                 {q.required && (
-                  <span className="ml-2 text-[10px] font-bold tracking-[1.5px] uppercase text-[#3D5266]">
+                  <span className="ml-2 text-[10px] font-bold tracking-[1.5px] uppercase text-corporate">
                     required
                   </span>
                 )}
@@ -2863,7 +2863,7 @@ function PreviewStep({
                 className={
                   "flex items-center gap-3 px-4 py-2.5 border cursor-pointer transition-colors " +
                   (status === opt.value
-                    ? "bg-[#3D5266]/[0.08] border-[#3D5266]"
+                    ? "bg-corporate/[0.08] border-corporate"
                     : "bg-card border-[var(--rule-strong)] hover:bg-cream")
                 }
               >
@@ -2872,11 +2872,11 @@ function PreviewStep({
                   name="status"
                   checked={status === opt.value}
                   onChange={() => onStatus(opt.value)}
-                  className="accent-[#3D5266]"
+                  className="accent-corporate"
                 />
                 <span className="text-[14px] text-ink">{opt.label}</span>
                 {opt.value === "active" && status === opt.value && (
-                  <Check className="h-3.5 w-3.5 text-[#3D5266] ml-auto" />
+                  <Check className="h-3.5 w-3.5 text-corporate ml-auto" />
                 )}
               </label>
             )
@@ -2918,7 +2918,7 @@ function CorporateCandidatePreview({
     "rounded-full bg-cream px-3 py-1 text-[12px] font-semibold text-slate-body";
   return (
     <div className="border border-[var(--rule)] bg-card p-6 sm:p-8">
-      <div className="mb-3 text-[10px] font-bold uppercase tracking-[2px] text-[#3D5266]">
+      <div className="mb-3 text-[10px] font-bold uppercase tracking-[2px] text-corporate">
         How candidates see this
       </div>
       <div className="text-[13px] font-semibold text-slate-meta">
@@ -2935,7 +2935,7 @@ function CorporateCandidatePreview({
         <span className={chip}>{employment}</span>
         {locationLabel && <span className={chip}>{locationLabel}</span>}
         {comp && (
-          <span className="rounded-full bg-[#3D5266]/10 px-3 py-1 text-[12px] font-semibold text-[#3D5266]">
+          <span className="rounded-full bg-corporate/10 px-3 py-1 text-[12px] font-semibold text-corporate">
             {comp}
           </span>
         )}
@@ -3002,7 +3002,7 @@ function ReviewBlock({
         <button
           type="button"
           onClick={onEdit}
-          className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[1.5px] uppercase text-[#3D5266] hover:text-ink transition-colors"
+          className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[1.5px] uppercase text-corporate hover:text-ink transition-colors"
         >
           <Pencil className="h-3 w-3" />
           Edit

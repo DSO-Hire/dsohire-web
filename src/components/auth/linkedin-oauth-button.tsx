@@ -98,7 +98,7 @@ export function LinkedInOAuthButton({
         type="button"
         onClick={handleClick}
         disabled={pending}
-        className="flex w-full items-center justify-center gap-2 border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-ink transition-colors hover:bg-cream disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 border border-border bg-card px-4 py-2.5 text-sm font-semibold text-ink transition-colors hover:bg-cream disabled:opacity-60"
       >
         {pending ? (
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
@@ -108,7 +108,7 @@ export function LinkedInOAuthButton({
         {label}
       </button>
       {error && (
-        <div className="border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+        <div className="border border-danger bg-danger-bg px-3 py-2 text-sm text-danger">
           {error}
         </div>
       )}

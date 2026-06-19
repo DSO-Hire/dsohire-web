@@ -46,7 +46,7 @@ export default async function ConfirmSignupPage({
           <div className="flex flex-wrap justify-center gap-3.5">
             <Link
               href="/employer/sign-up"
-              className="inline-flex items-center bg-ink px-9 py-4 text-[12px] font-bold uppercase tracking-[2px] text-ivory transition-colors hover:bg-ink-soft"
+              className="inline-flex items-center bg-primary px-9 py-4 text-[12px] font-bold uppercase tracking-[2px] text-primary-foreground transition-colors hover:bg-primary/90"
             >
               Employer sign-up
             </Link>
@@ -80,7 +80,7 @@ export default async function ConfirmSignupPage({
         </div>
 
         {errorMessage && (
-          <div className="mb-6 border border-rose-200 bg-rose-50 px-4 py-3 text-[13px] leading-relaxed text-rose-800">
+          <div className="mb-6 border border-danger bg-danger-bg px-4 py-3 text-[13px] leading-relaxed text-danger">
             {errorMessage}
           </div>
         )}
@@ -107,7 +107,7 @@ export default async function ConfirmSignupPage({
           </div>
           <button
             type="submit"
-            className="w-full bg-ink px-9 py-4 text-[12px] font-bold uppercase tracking-[2px] text-ivory transition-colors hover:bg-ink-soft"
+            className="w-full bg-primary px-9 py-4 text-[12px] font-bold uppercase tracking-[2px] text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Confirm &amp; continue
           </button>

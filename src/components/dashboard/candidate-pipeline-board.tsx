@@ -87,14 +87,14 @@ export function CandidatePipelineBoard({ cards }: { cards: BoardCard[] }) {
         return (
           <div
             key={col.kind}
-            className="rounded-xl border border-[var(--rule)] bg-white p-2.5 min-h-[120px]"
+            className="rounded-xl border border-[var(--rule)] bg-card p-2.5 min-h-[120px]"
           >
             <div className="flex items-center gap-2 px-1.5 pb-2.5 pt-1">
               <span className={`h-2 w-2 rounded-full ${DOT[col.tone]}`} />
               <span className="text-[11px] font-extrabold tracking-[1.2px] uppercase text-slate-meta">
                 {col.label}
               </span>
-              <span className="ml-auto grid h-5 min-w-[20px] place-items-center rounded-full border border-[var(--rule)] bg-white px-1 text-[11px] font-semibold text-ink">
+              <span className="ml-auto grid h-5 min-w-[20px] place-items-center rounded-full border border-[var(--rule)] bg-card px-1 text-[11px] font-semibold text-ink">
                 {items.length}
               </span>
             </div>
@@ -126,7 +126,7 @@ function BoardCardItem({ card: c, tone }: { card: BoardCard; tone: ColTone }) {
       href={c.href}
       className={`block rounded-lg border p-3 shadow-[0_1px_3px_rgba(11,35,64,0.07)] transition-shadow hover:shadow-[0_8px_24px_rgba(11,35,64,0.12)] ${
         isOffer
-          ? "border-amber-300 bg-amber-50/50"
+          ? "border-warning bg-warning-bg/50"
           : "border-[var(--rule)] bg-cream/40"
       }`}
     >
@@ -147,7 +147,7 @@ function BoardCardItem({ card: c, tone }: { card: BoardCard; tone: ColTone }) {
         <div
           className={`mt-2.5 flex items-start gap-1.5 text-[11.5px] leading-snug ${
             status.tone === "you"
-              ? "font-semibold text-amber-700"
+              ? "font-semibold text-warning"
               : status.tone === "move"
                 ? "font-semibold text-heritage-deep"
                 : "text-slate-body"
@@ -178,7 +178,7 @@ function FitPill({
     ? "bg-ink text-ivory"
     : strong
       ? "bg-heritage/12 text-heritage-deep"
-      : "bg-slate-100 text-slate-600";
+      : "bg-muted text-muted-foreground";
   const word = excellent
     ? "Excellent fit"
     : strong

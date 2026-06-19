@@ -61,8 +61,8 @@ export async function AdminShell({ children, active }: AdminShellProps) {
   return (
     <div className="min-h-screen bg-cream flex">
       {/* Sidebar */}
-      <aside className="w-[240px] bg-ink text-ivory flex flex-col">
-        <div className="px-6 py-6 border-b border-ivory/10">
+      <aside className="w-[240px] bg-hero text-hero-foreground flex flex-col">
+        <div className="px-6 py-6 border-b border-hero-foreground/10">
           <Link href="/admin" className="block" aria-label="Admin home">
             <BrandLockup dark height={32} />
           </Link>
@@ -79,8 +79,8 @@ export async function AdminShell({ children, active }: AdminShellProps) {
                   href={item.href}
                   className={`flex items-center gap-3 px-6 py-2.5 text-[14px] font-semibold transition-colors ${
                     active === item.id
-                      ? "bg-ivory/10 text-ivory border-l-2 border-heritage"
-                      : "text-ivory/70 hover:text-ivory hover:bg-ivory/5"
+                      ? "bg-hero-foreground/10 text-hero-foreground border-l-2 border-heritage"
+                      : "text-hero-foreground/70 hover:text-hero-foreground hover:bg-hero-foreground/5"
                   }`}
                 >
                   <item.Icon className="h-4 w-4" />
@@ -91,17 +91,17 @@ export async function AdminShell({ children, active }: AdminShellProps) {
           </ul>
         </nav>
 
-        <div className="p-6 border-t border-ivory/10">
-          <div className="text-[12px] text-ivory/50 mb-2">
+        <div className="p-6 border-t border-hero-foreground/10">
+          <div className="text-[12px] text-hero-foreground/50 mb-2">
             Signed in as
           </div>
-          <div className="text-[14px] text-ivory font-semibold mb-3 truncate">
+          <div className="text-[14px] text-hero-foreground font-semibold mb-3 truncate">
             {adminRow.full_name ?? user.email}
           </div>
           <form action="/employer/sign-out" method="post">
             <button
               type="submit"
-              className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[1.5px] uppercase text-ivory/60 hover:text-ivory transition-colors"
+              className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[1.5px] uppercase text-hero-foreground/60 hover:text-hero-foreground transition-colors"
             >
               <LogOut className="h-3.5 w-3.5" />
               Sign Out

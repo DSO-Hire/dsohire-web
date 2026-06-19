@@ -85,7 +85,7 @@ export function HelpTip({
           onMouseEnter={show}
           onMouseLeave={scheduleHide}
           className={
-            "absolute top-full z-50 mt-1.5 w-[280px] max-w-[78vw] rounded-md border border-[var(--rule-strong)] bg-white p-3 text-left shadow-lg " +
+            "absolute top-full z-50 mt-1.5 w-[280px] max-w-[78vw] rounded-md border border-[var(--rule-strong)] bg-popover p-3 text-left shadow-lg " +
             (align === "right" ? "right-0" : "left-0")
           }
         >

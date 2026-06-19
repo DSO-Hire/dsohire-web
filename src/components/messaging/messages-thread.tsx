@@ -913,9 +913,9 @@ export function MessagesThread({
   const remaining = MAX_BODY - composerBody.length;
   const remainingClass =
     remaining < 0
-      ? "text-red-700"
+      ? "text-danger"
       : remaining < 200
-        ? "text-amber-700"
+        ? "text-warning"
         : "text-slate-meta";
 
   const visibleCount = useMemo(
@@ -958,7 +958,7 @@ export function MessagesThread({
   const externalAudienceName = otherPartyName;
 
   return (
-    <div className="relative flex flex-col bg-white border-2 border-heritage/30 shadow-[0_0_0_1px_var(--heritage-glow),0_4px_20px_-8px_var(--heritage-glow)] h-full min-h-[480px] overflow-hidden">
+    <div className="relative flex flex-col bg-card border-2 border-heritage/30 shadow-[0_0_0_1px_var(--heritage-glow),0_4px_20px_-8px_var(--heritage-glow)] h-full min-h-[480px] overflow-hidden">
       {/* iMessage-style single-window layout. Top banner shrinks
           to a single condensed line; messages flex-grow + scroll;
           composer is pinned to the bottom edge of the same border.
@@ -984,7 +984,7 @@ export function MessagesThread({
       <div
         ref={listRef}
         onScroll={handleListScroll}
-        className="flex-1 min-h-0 overflow-y-auto bg-white"
+        className="flex-1 min-h-0 overflow-y-auto bg-card"
       >
         {visibleCount === 0 ? (
           <div className="p-8 text-center">
@@ -1006,15 +1006,15 @@ export function MessagesThread({
                   <li
                     key={`note-${n.id}`}
                     id={`note-${n.id}`}
-                    className="px-4 py-3 bg-amber-50/70"
+                    className="px-4 py-3 bg-warning-bg/70"
                   >
-                    <div className="border-l-2 border-amber-400 pl-3">
+                    <div className="border-l-2 border-warning pl-3">
                       <div className="flex items-baseline gap-2 mb-1 max-w-full">
                         <Lock
-                          className="h-3 w-3 text-amber-700 self-center shrink-0"
+                          className="h-3 w-3 text-warning self-center shrink-0"
                           aria-hidden
                         />
-                        <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-amber-800 shrink-0">
+                        <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-warning shrink-0">
                           Internal note
                         </span>
                         <span className="text-[14px] font-bold text-ink truncate">
@@ -1031,7 +1031,7 @@ export function MessagesThread({
                       <div className="text-[14px] leading-relaxed text-ink whitespace-pre-wrap break-words">
                         {renderNoteBody(n.body)}
                       </div>
-                      <p className="mt-1 text-[11px] text-amber-700/80">
+                      <p className="mt-1 text-[11px] text-warning/80">
                         Visible to your team only — never sent to the
                         candidate.
                       </p>
@@ -1185,7 +1185,7 @@ export function MessagesThread({
                           <button
                             type="button"
                             onClick={() => void handleEditSave()}
-                            className="px-3 py-1.5 bg-ink text-ivory text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors"
+                            className="px-3 py-1.5 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
                           >
                             Save
                           </button>
@@ -1197,7 +1197,7 @@ export function MessagesThread({
                             Cancel
                           </button>
                           {editingError && (
-                            <span className="text-[13px] text-red-700">
+                            <span className="text-[13px] text-danger">
                               {editingError}
                             </span>
                           )}
@@ -1227,7 +1227,7 @@ export function MessagesThread({
                                     onClick={() =>
                                       void handleAttachmentClick(att)
                                     }
-                                    className="w-full max-w-full text-left flex items-center gap-2 px-2 py-1.5 rounded-md bg-white/70 hover:bg-white border border-heritage/30 text-ink transition-colors"
+                                    className="w-full max-w-full text-left flex items-center gap-2 px-2 py-1.5 rounded-md bg-card/70 hover:bg-card border border-heritage/30 text-ink transition-colors"
                                     title={`Open ${att.file_name}`}
                                   >
                                     <Icon className="h-4 w-4 text-heritage-deep shrink-0" />
@@ -1282,7 +1282,7 @@ export function MessagesThread({
                             {openMenuId === m.id && (
                               <div
                                 onClick={(e) => e.stopPropagation()}
-                                className="absolute right-0 top-6 z-10 bg-white border border-[var(--rule-strong)] shadow-lg min-w-[120px] py-1"
+                                className="absolute right-0 top-6 z-10 bg-popover border border-[var(--rule-strong)] shadow-lg min-w-[120px] py-1"
                               >
                                 <button
                                   type="button"
@@ -1294,7 +1294,7 @@ export function MessagesThread({
                                 <button
                                   type="button"
                                   onClick={() => void handleDelete(m.id)}
-                                  className="block w-full text-left px-3 py-1.5 text-[13px] text-red-700 hover:bg-cream"
+                                  className="block w-full text-left px-3 py-1.5 text-[13px] text-danger hover:bg-cream"
                                 >
                                   Delete
                                 </button>
@@ -1316,13 +1316,13 @@ export function MessagesThread({
       <div
         className={`relative shrink-0 border-t px-4 py-3 transition-colors ${
           noteMode
-            ? "border-amber-300 bg-amber-50/80"
+            ? "border-warning bg-warning-bg/80"
             : "border-heritage/30 bg-cream/40"
         }`}
       >
         {/* Slash-template picker — floats above the composer row. */}
         {slashOpen && (
-          <div className="absolute bottom-full left-2 right-2 mb-1 z-20 bg-white border border-heritage/40 shadow-[0_14px_30px_-12px_rgba(7,15,28,0.35)] max-h-72 overflow-y-auto">
+          <div className="absolute bottom-full left-2 right-2 mb-1 z-20 bg-popover border border-heritage/40 shadow-[0_14px_30px_-12px_rgba(7,15,28,0.35)] max-h-72 overflow-y-auto">
             {slashMatches.length === 0 ? (
               <p className="px-3 py-2.5 text-[12px] text-slate-meta">
                 No templates match &ldquo;{slashFilter}&rdquo; — keep typing
@@ -1337,7 +1337,7 @@ export function MessagesThread({
                       onMouseEnter={() => setSlashIdx(i)}
                       onClick={() => insertTemplate(t)}
                       className={`w-full text-left px-3 py-2 border-b border-[var(--rule)] last:border-b-0 transition-colors ${
-                        i === slashIdx ? "bg-heritage/10" : "bg-white"
+                        i === slashIdx ? "bg-heritage/10" : "bg-popover"
                       }`}
                     >
                       <span className="flex items-baseline gap-2">
@@ -1368,7 +1368,7 @@ export function MessagesThread({
         )}
         {noteMode ? (
           /* Note-mode strip replaces the medical reminder. */
-          <p className="flex items-center gap-1.5 text-[11px] font-semibold text-amber-800 mb-2 leading-snug">
+          <p className="flex items-center gap-1.5 text-[11px] font-semibold text-warning mb-2 leading-snug">
             <Lock className="h-3 w-3 shrink-0" aria-hidden />
             Internal note — added to the timeline for your team only, never
             sent to the candidate.
@@ -1387,7 +1387,7 @@ export function MessagesThread({
               return (
                 <li
                   key={`${file.name}-${file.size}-${i}`}
-                  className="inline-flex items-center gap-2 px-2 py-1 rounded-md bg-white border border-heritage/30 max-w-[260px]"
+                  className="inline-flex items-center gap-2 px-2 py-1 rounded-md bg-card border border-heritage/30 max-w-[260px]"
                 >
                   <Icon className="h-3.5 w-3.5 text-heritage-deep shrink-0" />
                   <span className="truncate text-[12px] text-ink font-medium">
@@ -1436,8 +1436,8 @@ export function MessagesThread({
               }
               className={`px-2 py-2 border transition-colors shrink-0 ${
                 noteMode
-                  ? "bg-amber-100 border-amber-400 text-amber-800"
-                  : "bg-white border-heritage/40 text-heritage-deep hover:text-ink hover:border-heritage"
+                  ? "bg-warning-bg border-warning text-warning"
+                  : "bg-card border-heritage/40 text-heritage-deep hover:text-ink hover:border-heritage"
               }`}
             >
               <Lock className="h-4 w-4" />
@@ -1456,7 +1456,7 @@ export function MessagesThread({
                   ? `Up to ${MAX_ATTACHMENTS_PER_MESSAGE} files per message`
                   : "Attach files (PDF, image, doc, txt — 25 MB max each)"
               }
-              className="px-2 py-2 bg-white border border-heritage/40 text-heritage-deep hover:text-ink hover:border-heritage transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+              className="px-2 py-2 bg-card border border-heritage/40 text-heritage-deep hover:text-ink hover:border-heritage transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
             >
               <Paperclip className="h-4 w-4" />
             </button>
@@ -1477,8 +1477,8 @@ export function MessagesThread({
             }
             className={`flex-1 px-3 py-2 text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:ring-1 transition-colors leading-relaxed resize-none border ${
               noteMode
-                ? "bg-amber-50 border-amber-400 focus:border-amber-500 focus:ring-amber-400"
-                : "bg-white border-heritage/40 focus:border-heritage focus:ring-heritage"
+                ? "bg-warning-bg border-warning focus:border-warning focus:ring-warning"
+                : "bg-card border-heritage/40 focus:border-heritage focus:ring-heritage"
             }`}
           />
           <button
@@ -1493,8 +1493,8 @@ export function MessagesThread({
             }
             className={`px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors disabled:opacity-60 disabled:cursor-not-allowed shrink-0 ${
               noteMode
-                ? "bg-amber-600 text-white hover:bg-amber-700"
-                : "bg-ink text-ivory hover:bg-ink-soft"
+                ? "bg-warning text-warning-foreground hover:bg-warning/90"
+                : "bg-primary text-primary-foreground hover:bg-primary/90"
             }`}
           >
             {submitting
@@ -1525,7 +1525,7 @@ export function MessagesThread({
             </span>
           )}
           {composerError && (
-            <span className="text-[11px] text-red-700">{composerError}</span>
+            <span className="text-[11px] text-danger">{composerError}</span>
           )}
         </div>
       </div>

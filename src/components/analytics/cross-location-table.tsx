@@ -27,7 +27,7 @@ export function CrossLocationTable({ rows }: CrossLocationTableProps) {
   const maxHires = Math.max(...rows.map((r) => r.hires_quarter), 1);
 
   return (
-    <section className="border border-[var(--rule)] bg-white">
+    <section className="border border-[var(--rule)] bg-card">
       <header className="px-6 pt-5 pb-3 border-b border-[var(--rule)] flex items-center justify-between">
         <div>
           <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
@@ -67,7 +67,7 @@ export function CrossLocationTable({ rows }: CrossLocationTableProps) {
                   key={row.location_id}
                   className={
                     "border-b border-[var(--rule)] last:border-b-0 " +
-                    (i % 2 === 0 ? "bg-white" : "bg-cream/20")
+                    (i % 2 === 0 ? "bg-card" : "bg-cream/20")
                   }
                 >
                   <td className="px-6 py-4">

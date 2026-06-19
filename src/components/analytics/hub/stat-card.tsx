@@ -60,7 +60,7 @@ export function StatCard({
     tone === "good"
       ? "text-heritage-deep"
       : tone === "bad"
-        ? "text-red-700"
+        ? "text-danger"
         : "text-slate-meta";
   const DeltaIcon =
     delta?.direction === "up"
@@ -118,7 +118,7 @@ export function StatCard({
   );
 
   const base =
-    "block border border-[var(--rule)] bg-white p-5 transition-colors";
+    "block border border-[var(--rule)] bg-card p-5 transition-colors";
   if (href) {
     return (
       <Link href={href} className={`${base} hover:bg-cream/40 group`}>

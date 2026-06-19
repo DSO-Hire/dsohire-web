@@ -22,7 +22,7 @@ export function PerJobAnalyticsCard({ metrics }: PerJobAnalyticsCardProps) {
   const conversionPct = (metrics.conversion_rate * 100).toFixed(1);
 
   return (
-    <section className="mb-10 border border-[var(--rule)] bg-white">
+    <section className="mb-10 border border-[var(--rule)] bg-card">
       <header className="px-6 pt-5 pb-3 border-b border-[var(--rule)]">
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
           Performance · Last 30 days

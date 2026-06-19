@@ -48,7 +48,7 @@ export function ProposeInterviewLauncher({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 px-3 py-1.5 bg-ink text-ivory text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft"
+        className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
       >
         <Calendar className="h-3 w-3" aria-hidden />
         {hasActiveProposal ? "Propose new times" : "Propose times"}
@@ -102,7 +102,7 @@ export function CancelInterviewButton({ bookingId }: CancelInterviewButtonProps)
           router.refresh();
         }}
         disabled={busy}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-red-200 bg-white text-[11px] font-bold tracking-[1.5px] uppercase text-red-700 hover:bg-red-50 disabled:opacity-50"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-danger bg-card text-[11px] font-bold tracking-[1.5px] uppercase text-danger hover:bg-danger-bg disabled:opacity-50"
       >
         {busy ? (
           <Loader2 className="h-3 w-3 animate-spin" />
@@ -112,7 +112,7 @@ export function CancelInterviewButton({ bookingId }: CancelInterviewButtonProps)
         Cancel interview
       </button>
       {error && (
-        <p className="mt-1 text-[11px] text-red-700">{error}</p>
+        <p className="mt-1 text-[11px] text-danger">{error}</p>
       )}
     </>
   );
@@ -144,7 +144,7 @@ export function RescheduleInterviewLauncher({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-green-300 bg-white text-[11px] font-bold tracking-[1.5px] uppercase text-green-900 hover:bg-green-50"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-success bg-card text-[11px] font-bold tracking-[1.5px] uppercase text-success hover:bg-success-bg"
       >
         <Calendar className="h-3 w-3" aria-hidden />
         Reschedule
@@ -334,7 +334,7 @@ function ProposeInterviewModal({
         if (e.target === e.currentTarget && !pending) onClose();
       }}
     >
-      <div className="bg-white border border-[var(--rule)] w-full max-w-2xl shadow-2xl mt-4 mb-4 sm:mt-12 sm:mb-12">
+      <div className="bg-card border border-[var(--rule)] w-full max-w-2xl shadow-2xl mt-4 mb-4 sm:mt-12 sm:mb-12">
         <header className="px-6 py-4 border-b border-[var(--rule)] flex items-center justify-between">
           <h2 className="text-[14px] font-bold tracking-[-0.2px] text-ink">
             {isReschedule
@@ -345,7 +345,7 @@ function ProposeInterviewModal({
             type="button"
             onClick={onClose}
             disabled={pending}
-            className="rounded-md p-1 text-slate-400 hover:text-ink hover:bg-cream disabled:opacity-50"
+            className="rounded-md p-1 text-meta-foreground hover:text-ink hover:bg-cream disabled:opacity-50"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -369,7 +369,7 @@ function ProposeInterviewModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 bg-ink text-ivory text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft"
+              className="px-5 py-2 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
             >
               Close
             </button>
@@ -490,7 +490,7 @@ function ProposeInterviewModal({
                 <select
                   value={timezone}
                   onChange={(e) => setTimezone(e.target.value)}
-                  className="flex-1 min-w-0 px-2 py-1 bg-white border border-[var(--rule-strong)] text-ink text-[12px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+                  className="flex-1 min-w-0 px-2 py-1 bg-card border border-[var(--rule-strong)] text-ink text-[12px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
                   aria-label="Timezone for proposed times"
                 >
                   {/* If the browser TZ isn't in our US list, surface it as
@@ -535,7 +535,7 @@ function ProposeInterviewModal({
                       type="button"
                       onClick={() => removeSlot(s.id)}
                       disabled={slots.length <= 1}
-                      className="rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-700 disabled:opacity-30"
+                      className="rounded-md p-1.5 text-meta-foreground hover:bg-danger-bg hover:text-danger disabled:opacity-30"
                       aria-label="Remove slot"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -546,7 +546,7 @@ function ProposeInterviewModal({
             </div>
 
             {error && (
-              <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-800">
+              <div className="rounded-md border border-danger bg-danger-bg px-3 py-2 text-[13px] text-danger">
                 {error}
               </div>
             )}
@@ -563,7 +563,7 @@ function ProposeInterviewModal({
               <button
                 type="submit"
                 disabled={pending}
-                className="inline-flex items-center gap-2 px-5 py-2 bg-ink text-ivory text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft disabled:opacity-60"
+                className="inline-flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
               >
                 {pending ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />

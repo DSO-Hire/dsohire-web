@@ -62,7 +62,7 @@ export function JobLeaderboard({
   const rows = jobs.slice(0, maxRows);
 
   return (
-    <div className="bg-white border border-[var(--rule)] p-6 sm:p-7">
+    <div className="bg-card border border-[var(--rule)] p-6 sm:p-7">
       <header className="flex items-baseline justify-between gap-4 mb-3">
         <h2 className="text-[11px] font-extrabold tracking-[2.5px] uppercase text-heritage-deep">
           {title}

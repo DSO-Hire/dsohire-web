@@ -42,7 +42,7 @@ import {
 } from "@/lib/jd-templates/corporate-templates";
 
 /** Slate-blue corporate accent — the corporate wizard's analogue to heritage-green. */
-const CORP_ACCENT = "#3D5266";
+const CORP_ACCENT = "var(--corporate)";
 
 interface JdGeneratorCorporatePanelProps {
   /** A valid CorporateFunction slug (see src/lib/corporate/functions.ts). */
@@ -190,14 +190,14 @@ export function JdGeneratorCorporatePanel({
       aria-label="Draft with AI"
       className="border p-5 sm:p-6"
       style={{
-        borderColor: `${CORP_ACCENT}66`,
-        backgroundColor: `${CORP_ACCENT}0A`,
+        borderColor: `color-mix(in oklab, ${CORP_ACCENT} 40%, transparent)`,
+        backgroundColor: `color-mix(in oklab, ${CORP_ACCENT} 4%, transparent)`,
       }}
     >
       <div className="flex items-start gap-3">
         <div
           className="mt-0.5 flex h-8 w-8 items-center justify-center flex-shrink-0"
-          style={{ backgroundColor: `${CORP_ACCENT}26`, color: CORP_ACCENT }}
+          style={{ backgroundColor: `color-mix(in oklab, ${CORP_ACCENT} 15%, transparent)`, color: CORP_ACCENT }}
         >
           <Sparkles className="h-4 w-4" />
         </div>
@@ -291,7 +291,7 @@ export function JdGeneratorCorporatePanel({
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold border border-[var(--rule-strong)] bg-card text-ink transition-colors disabled:opacity-50 hover:bg-[var(--corp-tint)]"
                   style={
                     {
-                      "--corp-tint": `${CORP_ACCENT}10`,
+                      "--corp-tint": `color-mix(in oklab, ${CORP_ACCENT} 6%, transparent)`,
                     } as React.CSSProperties
                   }
                 >
@@ -446,7 +446,7 @@ function ResultCard({
         <div
           className="mt-3 px-3 py-2 border-l-2 text-[12.5px]"
           style={{
-            backgroundColor: `${CORP_ACCENT}1A`,
+            backgroundColor: `color-mix(in oklab, ${CORP_ACCENT} 10%, transparent)`,
             borderColor: CORP_ACCENT,
             color: CORP_ACCENT,
           }}

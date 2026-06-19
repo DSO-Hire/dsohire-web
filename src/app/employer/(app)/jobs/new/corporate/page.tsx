@@ -83,14 +83,14 @@ export default async function NewCorporateJobPage() {
     <>
       <Link
         href="/employer/jobs"
-        className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-[#3D5266] hover:text-ink transition-colors mb-6"
+        className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-corporate hover:text-ink transition-colors mb-6"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back to Jobs
       </Link>
 
       <header className="mb-8">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-[#3D5266] mb-2">
+        <div className="text-[10px] font-bold tracking-[3px] uppercase text-corporate mb-2">
           New Corporate Job Posting
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.1] text-ink">

@@ -33,7 +33,7 @@ export function LocationPulse({
   const max = Math.max(1, ...ranked.map((l) => l.applicationCount));
 
   return (
-    <section className="border border-[var(--rule)] bg-white flex flex-col">
+    <section className="border border-[var(--rule)] bg-card flex flex-col">
       <header className="px-5 py-4 border-b border-[var(--rule)] flex items-center justify-between gap-3">
         <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
           Applications by location — 30 days

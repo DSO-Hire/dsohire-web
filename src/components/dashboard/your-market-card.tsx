@@ -34,7 +34,7 @@ export function YourMarketCard({
   const band = `${money(range.p25, range.unit)}–${money(range.p75, range.unit)}`;
 
   return (
-    <section className="border border-[var(--rule)] bg-white p-5">
+    <section className="border border-[var(--rule)] bg-card p-5">
       <h3 className="mb-1 flex items-center gap-2 text-[10px] font-extrabold tracking-[2px] uppercase text-heritage-deep">
         <TrendingUp className="h-3.5 w-3.5" aria-hidden />
         Your market

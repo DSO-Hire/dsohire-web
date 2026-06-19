@@ -56,8 +56,8 @@ export const PRACTICEFIT_BUCKET_STYLES: Record<FitBucket, BucketStyle> = {
   excellent: { ...TAGLINES.excellent, bgClass: "bg-ink", textClass: "text-ivory", borderClass: "border-ink" },
   strong: { ...TAGLINES.strong, bgClass: "bg-ink/15", textClass: "text-ink", borderClass: "border-ink/40" },
   solid: { ...TAGLINES.solid, bgClass: "bg-ink/5", textClass: "text-ink/80", borderClass: "border-ink/20" },
-  light: { ...TAGLINES.light, bgClass: "bg-slate-100", textClass: "text-slate-700", borderClass: "border-slate-200" },
-  low: { ...TAGLINES.low, bgClass: "bg-slate-50", textClass: "text-slate-500", borderClass: "border-slate-200" },
+  light: { ...TAGLINES.light, bgClass: "bg-slate-100 dark:bg-slate-400/15", textClass: "text-slate-700 dark:text-slate-300", borderClass: "border-slate-200 dark:border-slate-400/30" },
+  low: { ...TAGLINES.low, bgClass: "bg-slate-50 dark:bg-slate-400/10", textClass: "text-slate-500 dark:text-slate-400", borderClass: "border-slate-200 dark:border-slate-400/30" },
 };
 
 /** DSOFit — heritage-green ramp (DSO / corporate roles). */
@@ -65,8 +65,8 @@ export const DSOFIT_BUCKET_STYLES: Record<FitBucket, BucketStyle> = {
   excellent: { ...TAGLINES.excellent, bgClass: "bg-heritage-deep", textClass: "text-ivory", borderClass: "border-heritage-deep" },
   strong: { ...TAGLINES.strong, bgClass: "bg-heritage/20", textClass: "text-heritage-deep", borderClass: "border-heritage/40" },
   solid: { ...TAGLINES.solid, bgClass: "bg-heritage/10", textClass: "text-heritage-deep", borderClass: "border-heritage/25" },
-  light: { ...TAGLINES.light, bgClass: "bg-slate-100", textClass: "text-slate-700", borderClass: "border-slate-200" },
-  low: { ...TAGLINES.low, bgClass: "bg-slate-50", textClass: "text-slate-500", borderClass: "border-slate-200" },
+  light: { ...TAGLINES.light, bgClass: "bg-slate-100 dark:bg-slate-400/15", textClass: "text-slate-700 dark:text-slate-300", borderClass: "border-slate-200 dark:border-slate-400/30" },
+  low: { ...TAGLINES.low, bgClass: "bg-slate-50 dark:bg-slate-400/10", textClass: "text-slate-500 dark:text-slate-400", borderClass: "border-slate-200 dark:border-slate-400/30" },
 };
 
 /** The right ramp for a result's product. Defaults to PracticeFit (navy). */

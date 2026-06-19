@@ -236,14 +236,14 @@ export default async function EditCorporateJobPage({ params }: PageProps) {
     <>
       <Link
         href={`/employer/jobs/${initial.id}`}
-        className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-[#3D5266] hover:text-ink transition-colors mb-6"
+        className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-corporate hover:text-ink transition-colors mb-6"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back to Pipeline
       </Link>
 
       <header className="mb-8">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-[#3D5266] mb-2">
+        <div className="text-[10px] font-bold tracking-[3px] uppercase text-corporate mb-2">
           Edit Corporate Job
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink">
@@ -254,7 +254,7 @@ export default async function EditCorporateJobPage({ params }: PageProps) {
             href={`/jobs/${job.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-3 inline-flex items-center gap-1 text-[13px] text-[#3D5266] hover:text-ink transition-colors font-semibold"
+            className="mt-3 inline-flex items-center gap-1 text-[13px] text-corporate hover:text-ink transition-colors font-semibold"
           >
             View public listing
             <ExternalLink className="h-3 w-3" />

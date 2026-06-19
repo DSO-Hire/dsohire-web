@@ -176,7 +176,7 @@ export function CandidateInterviewPicker({
       </div>
 
       {proposal.message_to_candidate && (
-        <div className="mb-4 px-3 py-2 bg-white border-l-2 border-[var(--rule)] text-[13px] text-ink italic leading-relaxed">
+        <div className="mb-4 px-3 py-2 bg-card border-l-2 border-[var(--rule)] text-[13px] text-ink italic leading-relaxed">
           “{proposal.message_to_candidate}”
         </div>
       )}
@@ -190,7 +190,7 @@ export function CandidateInterviewPicker({
           <select
             value={displayTz}
             onChange={(e) => setDisplayTz(e.target.value)}
-            className="px-2 py-1 bg-white border border-[var(--rule-strong)] text-ink text-[12px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+            className="px-2 py-1 bg-card border border-[var(--rule-strong)] text-ink text-[12px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
             aria-label="Display timezone"
           >
             {/* If the candidate's browser TZ isn't a standard US zone,
@@ -220,7 +220,7 @@ export function CandidateInterviewPicker({
                   "w-full text-left px-4 py-3 border-2 transition-all " +
                   (selected
                     ? "border-heritage bg-cream ring-2 ring-heritage/30 shadow-sm"
-                    : "border-[var(--rule)] bg-white hover:bg-cream/60 hover:border-heritage/40 cursor-pointer")
+                    : "border-[var(--rule)] bg-card hover:bg-cream/60 hover:border-heritage/40 cursor-pointer")
                 }
               >
                 <div className="flex items-center justify-between gap-3">
@@ -253,12 +253,12 @@ export function CandidateInterviewPicker({
           rows={3}
           maxLength={500}
           placeholder="Anything you'd like the team to know ahead of the call?"
-          className="mt-2 w-full px-3 py-2 bg-white border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage leading-relaxed resize-y"
+          className="mt-2 w-full px-3 py-2 bg-card border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage leading-relaxed resize-y"
         />
       </details>
 
       {error && (
-        <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-800 flex items-start gap-2">
+        <div className="mb-3 rounded-md border border-danger bg-danger-bg px-3 py-2 text-[13px] text-danger flex items-start gap-2">
           <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" aria-hidden />
           <span>{error}</span>
         </div>
@@ -274,7 +274,7 @@ export function CandidateInterviewPicker({
               ? "Pick a time above to enable this button"
               : undefined
           }
-          className="inline-flex items-center gap-2 px-6 py-2.5 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-ink"
+          className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary"
         >
           {pending ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />

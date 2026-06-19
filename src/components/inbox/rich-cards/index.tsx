@@ -156,7 +156,7 @@ function OfferLetterCard({
             href={responseUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-1.5 bg-ink text-ivory px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-ink-soft transition-colors"
+            className="inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
           >
             <CheckCircle2 className="size-3.5" />
             Review & Accept
@@ -319,7 +319,7 @@ function InterviewProposalCard({
                   type="button"
                   onClick={() => handleBook(optId)}
                   disabled={pending}
-                  className="inline-flex items-center justify-between gap-2 px-3 py-2 bg-white border border-[var(--rule-strong)] text-[13px] text-ink font-medium text-left hover:bg-cream hover:border-ink transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="inline-flex items-center justify-between gap-2 px-3 py-2 bg-card border border-[var(--rule-strong)] text-[13px] text-ink font-medium text-left hover:bg-cream hover:border-ink transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <span>
                     {new Date(slot.start_at).toLocaleString(undefined, {
@@ -344,7 +344,7 @@ function InterviewProposalCard({
           {error && (
             <p
               role="alert"
-              className="mt-2 text-[12px] text-red-700 leading-snug"
+              className="mt-2 text-[12px] text-danger leading-snug"
             >
               {error}
             </p>

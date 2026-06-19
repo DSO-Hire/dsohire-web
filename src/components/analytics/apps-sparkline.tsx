@@ -100,11 +100,11 @@ export function AppsSparkline({ data }: AppsSparklineProps) {
         role="img"
         aria-label={`Applications per day, last ${data.length} days, peak ${max}`}
       >
-        <path d={areaPath} fill="#4D7A60" fillOpacity="0.12" />
+        <path d={areaPath} className="fill-heritage" fillOpacity="0.12" />
         <path
           d={linePath}
           fill="none"
-          stroke="#4D7A60"
+          className="stroke-heritage"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -138,7 +138,7 @@ export function AppsSparkline({ data }: AppsSparklineProps) {
               cx={x}
               cy={y}
               r={shownIdx === i ? 4 : 2.5}
-              fill="#14233F"
+              className="fill-ink"
               stroke="#fff"
               strokeWidth={shownIdx === i ? 1.5 : 0}
             />
@@ -186,7 +186,7 @@ function SparkPopover({
       }}
     >
       <div
-        className="rounded-md bg-[#14233F] text-white px-3 py-2 text-[12px] shadow-lg whitespace-nowrap pointer-events-auto"
+        className="rounded-md bg-hero text-hero-foreground px-3 py-2 text-[12px] shadow-lg whitespace-nowrap pointer-events-auto"
         onClick={(e) => e.stopPropagation()}
         data-role="spark-dot"
       >
@@ -197,7 +197,7 @@ function SparkPopover({
         {isClicked && day.count === 1 ? (
           <Link
             href={`/employer/applications/${day.application_ids[0]}`}
-            className="text-[#A8D4B6] hover:text-white underline underline-offset-2"
+            className="text-[#A8D4B6] hover:text-hero-foreground underline underline-offset-2"
           >
             View application →
           </Link>
@@ -207,7 +207,7 @@ function SparkPopover({
               <li key={id}>
                 <Link
                   href={`/employer/applications/${id}`}
-                  className="text-[#A8D4B6] hover:text-white underline underline-offset-2"
+                  className="text-[#A8D4B6] hover:text-hero-foreground underline underline-offset-2"
                 >
                   Open application {i + 1}
                 </Link>

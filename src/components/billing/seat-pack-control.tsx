@@ -75,7 +75,7 @@ export function SeatPackControl({
               type="button"
               disabled={pending}
               onClick={() => run(addSeatPack)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-ink text-ivory text-[11px] font-bold tracking-[1.6px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1.6px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
             >
               <Plus className="h-3.5 w-3.5" />
               Add {packSize} seats
@@ -85,7 +85,7 @@ export function SeatPackControl({
                 type="button"
                 disabled={pending}
                 onClick={() => run(removeSeatPack)}
-                className="inline-flex items-center gap-1.5 px-3 py-2.5 text-[11px] font-bold tracking-[1.4px] uppercase text-slate-body hover:text-red-700 transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-2.5 text-[11px] font-bold tracking-[1.4px] uppercase text-slate-body hover:text-danger transition-colors disabled:opacity-50"
               >
                 <Minus className="h-3.5 w-3.5" />
                 Remove a pack
@@ -97,7 +97,7 @@ export function SeatPackControl({
             <p
               className={
                 "mt-3 text-[13px] " +
-                (msg.ok ? "text-heritage-deep" : "text-red-700")
+                (msg.ok ? "text-heritage-deep" : "text-danger")
               }
             >
               {msg.text}

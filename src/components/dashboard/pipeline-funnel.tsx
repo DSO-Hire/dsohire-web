@@ -96,7 +96,7 @@ export function PipelineFunnel({
   return (
     <Link
       href={href}
-      className="group block bg-white border border-[var(--rule)] p-6 sm:p-8 hover:bg-cream/30 transition-colors"
+      className="group block bg-card border border-[var(--rule)] p-6 sm:p-8 hover:bg-cream/30 transition-colors"
     >
       <header className="flex items-start justify-between gap-4 mb-6 flex-wrap">
         <div>
@@ -143,7 +143,7 @@ export function PipelineFunnel({
                   <>
                     <strong className="text-ink font-bold">{conv}%</strong>{" "}
                     from prev{isWorst && (
-                      <span className="text-red-700"> · biggest drop</span>
+                      <span className="text-danger"> · biggest drop</span>
                     )}
                   </>
                 ) : (
@@ -169,7 +169,7 @@ export function PipelineFunnel({
             <strong className="text-ink font-extrabold text-[14px] tracking-[-0.3px]">
               {conversions[worstIdx]}%
             </strong>{" "}
-            <span className="text-red-700">↘ biggest drop</span>
+            <span className="text-danger">↘ biggest drop</span>
           </div>
         )}
         <div className="flex gap-1.5 items-baseline">

@@ -271,7 +271,7 @@ function SaveBar({
       <div className="min-w-0 flex-1 text-sm">
         {error && <p className="text-danger">{error}</p>}
         {!error && saved && (
-          <p className="inline-flex items-center gap-1.5 text-[#3D5266]">
+          <p className="inline-flex items-center gap-1.5 text-corporate">
             <CheckCircle2 className="size-3.5" />
             <span className="font-semibold">Saved.</span>
           </p>
@@ -486,7 +486,7 @@ function BasicsSection({
 
         <div>
           <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
-            Authority level <span className="text-[#3D5266]">*</span>
+            Authority level <span className="text-corporate">*</span>
           </label>
           <div className="space-y-2">
             {AUTHORITY_LEVELS.map((opt) => (
@@ -495,7 +495,7 @@ function BasicsSection({
                 className={
                   "flex items-center gap-3 px-4 py-2.5 border cursor-pointer transition-colors " +
                   (authorityLevel === opt.value
-                    ? "bg-[#3D5266]/[0.08] border-[#3D5266]"
+                    ? "bg-corporate/[0.08] border-corporate"
                     : "bg-card border-[var(--rule-strong)] hover:bg-cream")
                 }
               >
@@ -507,7 +507,7 @@ function BasicsSection({
                     setAuthorityLevel(opt.value);
                     setSaved(false);
                   }}
-                  className="accent-[#3D5266]"
+                  className="accent-corporate"
                 />
                 <span className="text-[14px] text-ink font-semibold">
                   {opt.label}
@@ -519,7 +519,7 @@ function BasicsSection({
 
         <div>
           <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
-            Work mode <span className="text-[#3D5266]">*</span>
+            Work mode <span className="text-corporate">*</span>
           </label>
           <div className="space-y-2">
             {WORK_MODES.map((opt) => (
@@ -528,7 +528,7 @@ function BasicsSection({
                 className={
                   "flex items-start gap-3 px-4 py-3 border cursor-pointer transition-colors " +
                   (workMode === opt.value
-                    ? "bg-[#3D5266]/[0.08] border-[#3D5266]"
+                    ? "bg-corporate/[0.08] border-corporate"
                     : "bg-card border-[var(--rule-strong)] hover:bg-cream")
                 }
               >
@@ -540,7 +540,7 @@ function BasicsSection({
                     setWorkMode(opt.value);
                     setSaved(false);
                   }}
-                  className="mt-1 accent-[#3D5266]"
+                  className="mt-1 accent-corporate"
                 />
                 <div className="flex-1">
                   <div className="text-[14px] font-bold text-ink">
@@ -590,7 +590,7 @@ function BasicsSection({
                   >
                     <input
                       type="checkbox"
-                      className="mt-0.5 accent-[#3D5266] flex-shrink-0"
+                      className="mt-0.5 accent-corporate flex-shrink-0"
                       checked={checked}
                       onChange={() => toggleLocation(loc.id)}
                     />
@@ -1144,7 +1144,7 @@ function DetailsSection({
             remote. work_mode itself is edited in the Basics section. ── */}
         {savedWorkMode === "remote" && (
           <fieldset className="border border-[var(--rule)] p-5 bg-cream/40">
-            <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-[#3D5266]">
+            <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-corporate">
               Remote state restrictions{" "}
               <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
                 (optional)
@@ -1170,8 +1170,8 @@ function DetailsSection({
                     }}
                     className={`px-2.5 py-1 text-[11px] font-bold tracking-[0.5px] border transition-colors ${
                       checked
-                        ? "bg-[#3D5266] text-ivory border-[#3D5266]"
-                        : "bg-card text-ink border-[var(--rule)] hover:border-[#3D5266]"
+                        ? "bg-corporate text-ivory border-corporate"
+                        : "bg-card text-ink border-[var(--rule)] hover:border-corporate"
                     }`}
                   >
                     {st}
@@ -1184,7 +1184,7 @@ function DetailsSection({
 
         {/* ── Travel ── */}
         <fieldset className="border border-[var(--rule)] p-5 bg-cream/40">
-          <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-[#3D5266]">
+          <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-corporate">
             Travel{" "}
             <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
               (optional)
@@ -1203,8 +1203,8 @@ function DetailsSection({
                 }}
                 className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
                   travelExpectation === ""
-                    ? "bg-[#3D5266] text-ivory border-[#3D5266]"
-                    : "bg-card text-ink border-[var(--rule)] hover:border-[#3D5266]"
+                    ? "bg-corporate text-ivory border-corporate"
+                    : "bg-card text-ink border-[var(--rule)] hover:border-corporate"
                 }`}
               >
                 Not specified
@@ -1221,8 +1221,8 @@ function DetailsSection({
                     }}
                     className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
                       checked
-                        ? "bg-[#3D5266] text-ivory border-[#3D5266]"
-                        : "bg-card text-ink border-[var(--rule)] hover:border-[#3D5266]"
+                        ? "bg-corporate text-ivory border-corporate"
+                        : "bg-card text-ink border-[var(--rule)] hover:border-corporate"
                     }`}
                   >
                     {opt.label}
@@ -1246,7 +1246,7 @@ function DetailsSection({
 
         {/* ── Reporting structure (collapsible) ── */}
         <fieldset className="border border-[var(--rule)] p-5 bg-cream/40">
-          <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-[#3D5266]">
+          <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-corporate">
             Reporting structure{" "}
             <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
               (optional)
@@ -1256,7 +1256,7 @@ function DetailsSection({
             <button
               type="button"
               onClick={() => setReportingOpen(true)}
-              className="mt-2 inline-flex items-center gap-1.5 text-[12px] font-bold tracking-[1px] uppercase text-[#3D5266] hover:text-ink transition-colors"
+              className="mt-2 inline-flex items-center gap-1.5 text-[12px] font-bold tracking-[1px] uppercase text-corporate hover:text-ink transition-colors"
             >
               <Plus className="h-3.5 w-3.5" />
               Add reporting detail
@@ -1310,7 +1310,7 @@ function DetailsSection({
 
         {/* ── Experience & education ── */}
         <fieldset className="border border-[var(--rule)] p-5 bg-cream/40">
-          <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-[#3D5266]">
+          <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-corporate">
             Experience & education{" "}
             <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
               (optional)
@@ -1362,7 +1362,7 @@ function DetailsSection({
                 className={
                   "flex items-start gap-3 px-4 py-2.5 border cursor-pointer transition-colors " +
                   (industryExperience === ""
-                    ? "bg-[#3D5266]/[0.08] border-[#3D5266]"
+                    ? "bg-corporate/[0.08] border-corporate"
                     : "bg-card border-[var(--rule-strong)] hover:bg-cream")
                 }
               >
@@ -1374,7 +1374,7 @@ function DetailsSection({
                     setIndustryExperience("");
                     touch();
                   }}
-                  className="mt-1 accent-[#3D5266]"
+                  className="mt-1 accent-corporate"
                 />
                 <div className="flex-1">
                   <div className="text-[14px] font-bold text-ink">
@@ -1388,7 +1388,7 @@ function DetailsSection({
                   className={
                     "flex items-start gap-3 px-4 py-2.5 border cursor-pointer transition-colors " +
                     (industryExperience === opt.value
-                      ? "bg-[#3D5266]/[0.08] border-[#3D5266]"
+                      ? "bg-corporate/[0.08] border-corporate"
                       : "bg-card border-[var(--rule-strong)] hover:bg-cream")
                   }
                 >
@@ -1400,7 +1400,7 @@ function DetailsSection({
                       setIndustryExperience(opt.value);
                       touch();
                     }}
-                    className="mt-1 accent-[#3D5266]"
+                    className="mt-1 accent-corporate"
                   />
                   <div className="flex-1">
                     <div className="text-[14px] font-bold text-ink">
@@ -1448,7 +1448,7 @@ function DetailsSection({
         />
 
         <fieldset className="border border-[var(--rule)] p-5 bg-cream/40">
-          <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-[#3D5266]">
+          <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-corporate">
             Candidate visibility
           </legend>
           <label className="mt-2 flex items-start gap-2.5 text-[14px] text-ink cursor-pointer">
@@ -1459,7 +1459,7 @@ function DetailsSection({
                 setHideStages(e.target.checked);
                 touch();
               }}
-              className="mt-1 accent-[#3D5266]"
+              className="mt-1 accent-corporate"
             />
             <div>
               <div className="font-bold mb-1">
@@ -1850,7 +1850,7 @@ function QuestionCard({
           <span className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta">
             Q{index + 1}
           </span>
-          <span className="text-[10px] font-bold tracking-[2px] uppercase text-[#3D5266] px-2 py-1 bg-[#3D5266]/[0.08]">
+          <span className="text-[10px] font-bold tracking-[2px] uppercase text-corporate px-2 py-1 bg-corporate/[0.08]">
             {KIND_LABELS[question.kind]}
           </span>
         </div>
@@ -1902,7 +1902,7 @@ function QuestionCard({
             </div>
             <div className="flex items-center gap-1.5 flex-shrink-0">
               {question.required && (
-                <span className="text-[9px] font-bold tracking-[1.2px] uppercase text-[#3D5266]">
+                <span className="text-[9px] font-bold tracking-[1.2px] uppercase text-corporate">
                   Required
                 </span>
               )}
@@ -1911,7 +1911,7 @@ function QuestionCard({
                   Knockout
                 </span>
               )}
-              <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-[#3D5266] group-hover:text-ink transition-colors ml-2">
+              <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-corporate group-hover:text-ink transition-colors ml-2">
                 Edit →
               </span>
             </div>
@@ -1937,7 +1937,7 @@ function QuestionCard({
           {isSelect && (
             <div>
               <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
-                Options <span className="text-[#3D5266]">*</span>
+                Options <span className="text-corporate">*</span>
               </label>
               <div className="space-y-2">
                 {(question.options ?? []).map((opt, idx) => (
@@ -1950,7 +1950,7 @@ function QuestionCard({
                       value={opt.label}
                       onChange={(e) => updateOption(opt.id, e.target.value)}
                       placeholder={`Option ${idx + 1}`}
-                      className="flex-1 px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-[#3D5266] focus:ring-1 focus:ring-[#3D5266] transition-colors"
+                      className="flex-1 px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-corporate focus:ring-1 focus:ring-corporate transition-colors"
                     />
                     <button
                       type="button"
@@ -1967,7 +1967,7 @@ function QuestionCard({
               <button
                 type="button"
                 onClick={addOption}
-                className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[1.5px] uppercase text-[#3D5266] hover:text-ink transition-colors"
+                className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[1.5px] uppercase text-corporate hover:text-ink transition-colors"
               >
                 <Plus className="h-3 w-3" />
                 Add option
@@ -2002,7 +2002,7 @@ function QuestionCard({
               type="checkbox"
               checked={question.required}
               onChange={(e) => onUpdate({ required: e.target.checked })}
-              className="accent-[#3D5266]"
+              className="accent-corporate"
             />
             <span>Required — candidate must answer this to submit.</span>
           </label>
@@ -2014,7 +2014,7 @@ function QuestionCard({
             <button
               type="button"
               onClick={onToggleExpand}
-              className="text-[10px] font-bold tracking-[1.5px] uppercase text-[#3D5266] hover:text-ink transition-colors"
+              className="text-[10px] font-bold tracking-[1.5px] uppercase text-corporate hover:text-ink transition-colors"
             >
               ↑ Collapse this question
             </button>
@@ -2109,7 +2109,7 @@ function StatusSection({
             className={
               "flex items-start gap-3 px-4 py-3 border cursor-pointer transition-colors " +
               (status === opt.value
-                ? "bg-[#3D5266]/[0.08] border-[#3D5266]"
+                ? "bg-corporate/[0.08] border-corporate"
                 : "bg-card border-[var(--rule-strong)] hover:bg-cream")
             }
           >
@@ -2121,13 +2121,13 @@ function StatusSection({
                 setStatus(opt.value);
                 setSaved(false);
               }}
-              className="mt-1 accent-[#3D5266]"
+              className="mt-1 accent-corporate"
             />
             <div className="flex-1">
               <div className="text-[14px] font-bold text-ink flex items-center gap-2">
                 {opt.label}
                 {status === opt.value && opt.value === "active" && (
-                  <Check className="h-3.5 w-3.5 text-[#3D5266]" />
+                  <Check className="h-3.5 w-3.5 text-corporate" />
                 )}
               </div>
               <div className="text-[13px] text-slate-body mt-0.5">
@@ -2169,14 +2169,14 @@ function Input({
   return (
     <div>
       <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
-        {label} {required && <span className="text-[#3D5266]">*</span>}
+        {label} {required && <span className="text-corporate">*</span>}
       </label>
       <input
         type={type}
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-[#3D5266] focus:ring-1 focus:ring-[#3D5266] transition-colors"
+        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-corporate focus:ring-1 focus:ring-corporate transition-colors"
       />
     </div>
   );
@@ -2198,12 +2198,12 @@ function Select({
   return (
     <div>
       <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
-        {label} {required && <span className="text-[#3D5266]">*</span>}
+        {label} {required && <span className="text-corporate">*</span>}
       </label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-[#3D5266] focus:ring-1 focus:ring-[#3D5266] transition-colors"
+        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-corporate focus:ring-1 focus:ring-corporate transition-colors"
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>

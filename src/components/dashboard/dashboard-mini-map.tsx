@@ -117,7 +117,7 @@ export function DashboardMiniMap({
   return (
     <Link
       href={href}
-      className="group flex flex-col bg-white border border-[var(--rule)] overflow-hidden hover:border-rule-strong transition-colors"
+      className="group flex flex-col bg-card border border-[var(--rule)] overflow-hidden hover:border-rule-strong transition-colors"
     >
       <header className="flex items-baseline justify-between gap-3 px-6 py-4">
         <h2 className="text-[11px] font-extrabold tracking-[2.5px] uppercase text-heritage-deep">

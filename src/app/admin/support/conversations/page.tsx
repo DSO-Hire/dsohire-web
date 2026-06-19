@@ -175,7 +175,7 @@ export default async function AdminConversationsPage({ searchParams }: PageProps
             Every Claude support conversation across all customers. Click a row
             to read the transcript and mark it reviewed or flag it.{" "}
             {first100 ? (
-              <span className="inline-flex items-center gap-1.5 text-amber-800 font-semibold">
+              <span className="inline-flex items-center gap-1.5 text-warning font-semibold">
                 <Clock className="size-3" />
                 First-100 mode ON ({reviewedCount ?? 0} of 100 reviewed)
               </span>
@@ -211,7 +211,7 @@ export default async function AdminConversationsPage({ searchParams }: PageProps
         </nav>
 
         {rows.length === 0 ? (
-          <div className="border border-dashed border-[var(--rule-strong)] bg-white px-6 py-12 text-center text-[13px] text-slate-meta">
+          <div className="border border-dashed border-[var(--rule-strong)] bg-card px-6 py-12 text-center text-[13px] text-slate-meta">
             No conversations match this filter.
           </div>
         ) : (
@@ -224,7 +224,7 @@ export default async function AdminConversationsPage({ searchParams }: PageProps
                 <li key={r.id}>
                   <Link
                     href={`/admin/support/conversations/${r.id}`}
-                    className="group flex items-start gap-3 border border-[var(--rule)] bg-white p-4 hover:border-heritage transition-colors"
+                    className="group flex items-start gap-3 border border-[var(--rule)] bg-card p-4 hover:border-heritage transition-colors"
                   >
                     <StatusBadge status={r.review_status} />
                     <div className="flex-1 min-w-0 space-y-1">
@@ -245,7 +245,7 @@ export default async function AdminConversationsPage({ searchParams }: PageProps
                         {r.body}
                       </div>
                       {r.auto_flag_reason && (
-                        <div className="text-[11.5px] text-red-700 inline-flex items-center gap-1.5">
+                        <div className="text-[11.5px] text-danger inline-flex items-center gap-1.5">
                           <AlertTriangle className="size-3" />
                           {r.auto_flag_reason}
                         </div>
@@ -301,15 +301,15 @@ function FilterPill({
     "inline-flex items-center px-3 py-1.5 border text-[11px] font-bold tracking-[1px] uppercase ";
   const toneActive =
     tone === "red"
-      ? "border-red-700 bg-red-700 text-white"
+      ? "border-danger bg-danger text-danger-foreground"
       : tone === "amber"
-        ? "border-amber-700 bg-amber-700 text-white"
-        : "border-ink bg-ink text-white";
+        ? "border-warning bg-warning text-warning-foreground"
+        : "border-primary bg-primary text-primary-foreground";
   const toneIdle =
     tone === "red"
-      ? "border-red-300 text-red-800 hover:bg-red-50"
+      ? "border-danger text-danger hover:bg-danger-bg"
       : tone === "amber"
-        ? "border-amber-300 text-amber-900 hover:bg-amber-50"
+        ? "border-warning text-warning hover:bg-warning-bg"
         : "border-[var(--rule-strong)] text-slate-body hover:bg-cream/60";
   return (
     <Link href={href} className={base + (active ? toneActive : toneIdle)}>
@@ -325,8 +325,8 @@ function StatusBadge({
 }) {
   if (status === "flagged_bad") {
     return (
-      <div className="size-6 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-        <AlertTriangle className="size-3.5 text-red-700" />
+      <div className="size-6 rounded-full bg-danger-bg flex items-center justify-center shrink-0">
+        <AlertTriangle className="size-3.5 text-danger" />
       </div>
     );
   }
@@ -338,8 +338,8 @@ function StatusBadge({
     );
   }
   return (
-    <div className="size-6 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
-      <Clock className="size-3.5 text-amber-700" />
+    <div className="size-6 rounded-full bg-warning-bg flex items-center justify-center shrink-0">
+      <Clock className="size-3.5 text-warning" />
     </div>
   );
 }

@@ -92,7 +92,7 @@ export function ExternalLinksField({
             onChange={(e) => setField(idx, "label", e.target.value)}
             placeholder="Video tour"
             maxLength={80}
-            className="h-[40px] px-3 bg-white border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+            className="h-[40px] px-3 bg-card border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
           />
           <input
             type="url"
@@ -100,13 +100,13 @@ export function ExternalLinksField({
             value={row.url}
             onChange={(e) => setField(idx, "url", e.target.value)}
             placeholder="https://example.com/tour"
-            className="h-[40px] px-3 bg-white border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+            className="h-[40px] px-3 bg-card border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
           />
           <button
             type="button"
             onClick={() => removeRow(idx)}
             aria-label="Remove this link"
-            className="h-[40px] px-3 border border-[var(--rule-strong)] bg-white text-slate-meta hover:text-red-700 hover:border-red-300 transition-colors inline-flex items-center justify-center"
+            className="h-[40px] px-3 border border-[var(--rule-strong)] bg-card text-slate-meta hover:text-danger hover:border-danger transition-colors inline-flex items-center justify-center"
           >
             <X className="h-4 w-4" />
           </button>
@@ -117,7 +117,7 @@ export function ExternalLinksField({
         type="button"
         onClick={addRow}
         disabled={rows.length >= maxLinks}
-        className="mt-1 inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-semibold border border-[var(--rule-strong)] bg-white text-ink hover:border-heritage hover:bg-heritage/[0.06] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        className="mt-1 inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-semibold border border-[var(--rule-strong)] bg-card text-ink hover:border-heritage hover:bg-heritage/[0.06] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
       >
         <Plus className="h-3.5 w-3.5 text-heritage-deep" />
         {rows.length === 0 ? "Add a link" : "Add another link"}

@@ -117,7 +117,7 @@ export function ContextRail({
 
       {/* Reply rhythm — only when real samples exist */}
       {replyRhythm && (
-        <div className="flex items-center gap-2 border border-[var(--rule)] bg-white px-3 py-2">
+        <div className="flex items-center gap-2 border border-[var(--rule)] bg-card px-3 py-2">
           <Clock className="h-3.5 w-3.5 text-heritage-deep shrink-0" aria-hidden />
           <p className="text-[11px] text-slate-body leading-snug">
             Replies in <span className="font-bold text-ink">{replyRhythm}</span>{" "}
@@ -129,7 +129,7 @@ export function ContextRail({
       )}
 
       {/* Pipeline journey */}
-      <div className="border border-[var(--rule)] bg-white px-3 py-3">
+      <div className="border border-[var(--rule)] bg-card px-3 py-3">
         <p className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-2">
           Pipeline
         </p>
@@ -155,7 +155,7 @@ export function ContextRail({
                       ? "border-heritage-deep bg-heritage-deep"
                       : at
                         ? "border-heritage bg-heritage/30"
-                        : "border-[var(--rule)] bg-white"
+                        : "border-[var(--rule)] bg-card"
                   }`}
                   aria-hidden
                 />
@@ -202,7 +202,7 @@ export function ContextRail({
       )}
 
       {/* SMS — dormant until A2P approval */}
-      <div className="border border-dashed border-[var(--rule)] bg-white/60 px-3 py-2.5">
+      <div className="border border-dashed border-[var(--rule)] bg-card/60 px-3 py-2.5">
         <p className="flex items-center gap-1.5 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
           <MessageSquareOff className="h-3 w-3 shrink-0" aria-hidden />
           SMS · pending approval

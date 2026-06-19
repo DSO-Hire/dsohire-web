@@ -169,7 +169,7 @@ export function WizardShell({
                   className={
                     "rounded-full px-3 py-1 text-[12px] font-bold uppercase tracking-[1px] transition-colors " +
                     (active
-                      ? "bg-ink text-ivory"
+                      ? "bg-primary text-primary-foreground"
                       : jumpable
                         ? "bg-cream text-slate-body hover:bg-heritage/10 hover:text-ink"
                         : "bg-cream/50 text-slate-meta")
@@ -202,7 +202,7 @@ export function WizardShell({
 
       {/* Error */}
       {error && (
-        <div className="mt-5 border-l-4 border-red-500 bg-red-50 p-3 text-[13px] text-red-900">
+        <div className="mt-5 border-l-4 border-danger bg-danger-bg p-3 text-[13px] text-danger">
           {error}
         </div>
       )}
@@ -228,7 +228,7 @@ export function WizardShell({
           type="button"
           onClick={onNext}
           disabled={nextDisabled || busy}
-          className="inline-flex w-full sm:w-auto items-center justify-center gap-2 bg-ink px-6 py-3.5 sm:py-3 text-[12px] font-bold uppercase tracking-[1.5px] text-ivory transition-colors hover:bg-ink-soft disabled:opacity-60"
+          className="inline-flex w-full sm:w-auto items-center justify-center gap-2 bg-primary px-6 py-3.5 sm:py-3 text-[12px] font-bold uppercase tracking-[1.5px] text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
         >
           {busy ? "Saving…" : nextLabel}
           {isLast ? <Check className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}

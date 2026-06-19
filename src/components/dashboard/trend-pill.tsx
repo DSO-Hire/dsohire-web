@@ -37,7 +37,7 @@ export function TrendPill({
     resolvedIntent === "positive"
       ? "bg-heritage/10 text-heritage-deep"
       : resolvedIntent === "negative"
-        ? "bg-red-50 text-red-700"
+        ? "bg-danger-bg text-danger"
         : "bg-cream text-slate-meta";
 
   const Icon =

@@ -21,7 +21,7 @@ export function StageDwellCard({ rows }: StageDwellCardProps) {
   const hasAnyData = rows.some((r) => r.observed_transitions > 0);
 
   return (
-    <section className="border border-[var(--rule)] bg-white p-6">
+    <section className="border border-[var(--rule)] bg-card p-6">
       <div className="flex items-center gap-2 mb-4">
         <Clock className="h-4 w-4 text-heritage-deep" aria-hidden />
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
