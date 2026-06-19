@@ -206,22 +206,21 @@ function MiniDial() {
     <div className="mt-5 mb-1 flex items-center gap-4" aria-hidden>
       <div className="relative w-[64px] h-[64px] shrink-0">
         <svg width="64" height="64" viewBox="0 0 64 64" fill="none" className="-rotate-90">
-          <circle cx="32" cy="32" r="26" stroke="rgba(247,244,237,0.18)" strokeWidth="6" fill="none" />
+          <circle cx="32" cy="32" r="26" className="stroke-primary-foreground/20" strokeWidth="6" fill="none" />
           <circle
-            className="mini-dial-arc"
+            className="mini-dial-arc stroke-primary-foreground"
             cx="32"
             cy="32"
             r="26"
-            stroke="#F7F4ED"
             strokeWidth="6"
             fill="none"
           />
         </svg>
-        <span className="mini-dial-num absolute inset-0 flex items-center justify-center text-[18px] font-extrabold tracking-[-0.5px] text-hero-foreground">
+        <span className="mini-dial-num absolute inset-0 flex items-center justify-center text-[18px] font-extrabold tracking-[-0.5px] text-primary-foreground">
           92
         </span>
       </div>
-      <div className="text-[11px] leading-snug text-hero-foreground/70">
+      <div className="text-[11px] leading-snug text-primary-foreground/70">
         {/* The real two-tone wordmark, on an ivory pill so it survives the
             green door (Cam, Day 31). It embeds its own sparkle mark. */}
         <span className="inline-flex items-center bg-ivory px-2 py-1 mb-1.5">

@@ -98,35 +98,33 @@ export function FitDial({
       ref={rootRef}
       className="grid grid-cols-1 md:grid-cols-[auto_1fr] items-center gap-10 md:gap-14"
     >
-      {/* The dial */}
-      <div className="relative w-[220px] h-[220px] mx-auto md:mx-0">
-        <svg width="220" height="220" viewBox="0 0 220 220" fill="none" className="-rotate-90">
-          <circle cx="110" cy="110" r={R} className="stroke-ivory-deep dark:stroke-hero-foreground/15" strokeWidth="12" fill="none" />
-          <circle
-            ref={arcRef}
-            cx="110"
-            cy="110"
-            r={R}
-            stroke="var(--heritage)"
-            strokeWidth="12"
-            fill="none"
-            strokeDasharray={CIRC}
-            strokeDashoffset={CIRC * (1 - score / 100)}
-            style={{ transition: "stroke-dashoffset 1.4s cubic-bezier(0.22,1,0.36,1)" }}
-          />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span
-            ref={numRef}
-            className="text-[56px] font-extrabold tracking-[-2.5px] leading-none text-ink"
-            style={{ fontVariantNumeric: "tabular-nums" }}
-          >
-            {score}
-          </span>
-          <span className="mt-1 text-[10px] font-bold tracking-[2px] uppercase text-slate-meta dark:text-hero-foreground/70">
-            PracticeFit · {caption}
-          </span>
-        </div>
+      {/* The dial + caption (caption sits BELOW the ring, never across it) */}
+      <div className="flex flex-col items-center gap-3 mx-auto md:mx-0">
+        <div className="relative w-[220px] h-[220px]">
+          <svg width="220" height="220" viewBox="0 0 220 220" fill="none" className="-rotate-90">
+            <circle cx="110" cy="110" r={R} className="stroke-ivory-deep dark:stroke-hero-foreground/15" strokeWidth="12" fill="none" />
+            <circle
+              ref={arcRef}
+              cx="110"
+              cy="110"
+              r={R}
+              stroke="var(--heritage)"
+              strokeWidth="12"
+              fill="none"
+              strokeDasharray={CIRC}
+              strokeDashoffset={CIRC * (1 - score / 100)}
+              style={{ transition: "stroke-dashoffset 1.4s cubic-bezier(0.22,1,0.36,1)" }}
+            />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span
+              ref={numRef}
+              className="text-[56px] font-extrabold tracking-[-2.5px] leading-none text-ink"
+              style={{ fontVariantNumeric: "tabular-nums" }}
+            >
+              {score}
+            </span>
+          </div>
         {/* Sparkle — pops in once the score lands (mirrors the .pf-slider thumb mark) */}
         <span
           aria-hidden
@@ -138,6 +136,10 @@ export function FitDial({
               fill="var(--heritage)"
             />
           </svg>
+        </span>
+        </div>
+        <span className="text-[10.5px] font-bold tracking-[2px] uppercase text-slate-meta dark:text-hero-foreground/70">
+          PracticeFit · {caption}
         </span>
       </div>
 
