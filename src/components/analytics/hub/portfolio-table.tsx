@@ -19,11 +19,13 @@ type SortKey =
   | "hires_quarter"
   | "avg_time_to_fill_days";
 
+// Themed via CSS vars (valid in inline style) so the time-to-fill heatmap
+// flips in dark mode — the fixed dark text was illegible on the dark card.
 function ttfTone(days: number | null): { bg: string; text: string } {
-  if (days === null) return { bg: "transparent", text: "var(--slate-meta, #8a8676)" };
-  if (days <= 30) return { bg: "rgba(99,153,34,0.14)", text: "#3B6D11" };
-  if (days <= 60) return { bg: "rgba(239,159,39,0.16)", text: "#854F0B" };
-  return { bg: "rgba(216,90,48,0.16)", text: "#993C1D" };
+  if (days === null) return { bg: "transparent", text: "var(--slate-meta)" };
+  if (days <= 30) return { bg: "var(--success-bg)", text: "var(--success)" };
+  if (days <= 60) return { bg: "var(--warning-bg)", text: "var(--warning)" };
+  return { bg: "var(--danger-bg)", text: "var(--danger)" };
 }
 
 export function PortfolioTable({

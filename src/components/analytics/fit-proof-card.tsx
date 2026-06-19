@@ -9,12 +9,13 @@
 
 import type { FitOutcomeProof } from "@/lib/analytics/fit-outcomes";
 
+// Themed via CSS vars (valid in inline style) so the bars flip in dark mode.
 const BUCKET_META: Record<string, { label: string; bar: string }> = {
-  excellent: { label: "Excellent", bar: "#166534" },
-  strong: { label: "Strong", bar: "#2F7D4F" },
-  solid: { label: "Solid", bar: "#2F5D4F" },
-  light: { label: "Light", bar: "#B45309" },
-  low: { label: "Low", bar: "#B91C1C" },
+  excellent: { label: "Excellent", bar: "var(--success)" },
+  strong: { label: "Strong", bar: "var(--success)" },
+  solid: { label: "Solid", bar: "var(--heritage-deep)" },
+  light: { label: "Light", bar: "var(--warning)" },
+  low: { label: "Low", bar: "var(--danger)" },
 };
 
 const pct = (n: number) => `${Math.round(n * 100)}%`;

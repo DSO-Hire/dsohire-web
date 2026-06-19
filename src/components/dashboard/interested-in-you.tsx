@@ -13,12 +13,14 @@ import Link from "next/link";
 import { ArrowRight, EyeOff, Hand, Heart } from "lucide-react";
 import type { InterestedCandidate } from "@/lib/talent-pool/mutual-interest";
 
-const BUCKET_STYLE: Record<string, { label: string; bg: string; fg: string }> = {
-  excellent: { label: "Excellent fit", bg: "#DCFCE7", fg: "#166534" },
-  strong: { label: "Strong fit", bg: "#DCFCE7", fg: "#166534" },
-  solid: { label: "Solid fit", bg: "#E8EFEB", fg: "#2F5D4F" },
-  light: { label: "Light fit", bg: "#FEF3C7", fg: "#B45309" },
-  low: { label: "Low fit", bg: "#FEE2E2", fg: "#B91C1C" },
+// Token-based classes (themed) instead of inline-style hex, so the fit
+// buckets flip in dark mode like every other status color in the app.
+const BUCKET_STYLE: Record<string, { label: string; cls: string }> = {
+  excellent: { label: "Excellent fit", cls: "bg-success-bg text-success" },
+  strong: { label: "Strong fit", cls: "bg-success-bg text-success" },
+  solid: { label: "Solid fit", cls: "bg-heritage/10 text-heritage-deep" },
+  light: { label: "Light fit", cls: "bg-warning-bg text-warning" },
+  low: { label: "Low fit", cls: "bg-danger-bg text-danger" },
 };
 
 function relTime(iso: string): string {
@@ -107,8 +109,7 @@ export function InterestedInYou({
                 {style && c.fit ? (
                   <>
                     <span
-                      className="inline-flex items-center px-2 py-0.5 text-[11px] font-bold rounded-full"
-                      style={{ backgroundColor: style.bg, color: style.fg }}
+                      className={`inline-flex items-center px-2 py-0.5 text-[11px] font-bold rounded-full ${style.cls}`}
                     >
                       {style.label}
                     </span>
