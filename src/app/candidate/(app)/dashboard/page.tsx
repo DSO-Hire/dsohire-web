@@ -948,7 +948,7 @@ export default async function CandidateDashboardPage() {
         <div className="min-w-0 space-y-6">
           {boardCards.length > 0 &&
             (hasOffer && offerApp ? (
-              <section className="relative overflow-hidden border border-heritage/30 bg-heritage text-ivory p-6 sm:p-7">
+              <section className="relative overflow-hidden border border-heritage/30 bg-heritage text-primary-foreground p-6 sm:p-7">
                 <div className="text-[10px] font-extrabold tracking-[2px] uppercase text-[#e9c873] mb-2">
                   ★ Offer extended
                   {offerCount > 1 ? ` · ${offerCount} offers` : ""}
@@ -956,15 +956,15 @@ export default async function CandidateDashboardPage() {
                 <h3 className="text-xl sm:text-2xl font-extrabold tracking-[-0.4px] leading-tight">
                   {offerDsoName} extended you an offer.
                 </h3>
-                <p className="mt-1.5 text-[13.5px] text-ivory/80">
+                <p className="mt-1.5 text-[13.5px] text-primary-foreground/80">
                   {offerJob?.title ?? "Role"}
                   {offerLocation ? ` · ${offerLocation}` : ""} · no rush — it’s
                   open.
                 </p>
                 {offerMarketBand && marketRange && (
-                  <p className="mt-2 text-[12.5px] text-ivory/70">
+                  <p className="mt-2 text-[12.5px] text-primary-foreground/70">
                     For context, {marketRange.areaName} pay for your field runs{" "}
-                    <strong className="text-ivory">{offerMarketBand}</strong> —
+                    <strong className="text-primary-foreground">{offerMarketBand}</strong> —
                     weigh your offer against it.
                   </p>
                 )}
@@ -978,7 +978,7 @@ export default async function CandidateDashboardPage() {
                   </Link>
                   <Link
                     href="/candidate/inbox"
-                    className="inline-flex items-center gap-2 border border-white/25 bg-white/10 px-5 py-2.5 text-[12px] font-bold tracking-[1px] uppercase hover:bg-white/20 transition-colors"
+                    className="inline-flex items-center gap-2 border border-primary-foreground/25 bg-primary-foreground/10 px-5 py-2.5 text-[12px] font-bold tracking-[1px] uppercase hover:bg-primary-foreground/20 transition-colors"
                   >
                     Message the practice
                   </Link>
@@ -1069,7 +1069,7 @@ export default async function CandidateDashboardPage() {
             </p>
             <Link
               href="/candidate/jobs"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
             >
               <Briefcase className="h-4 w-4" />
               Browse Jobs

@@ -50,12 +50,12 @@ export function PasswordForm() {
       </div>
 
       {state.error && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-4">
-          <p className="text-[14px] text-red-900">{state.error}</p>
+        <div className="bg-danger-bg border-l-4 border-danger p-4">
+          <p className="text-[14px] text-danger">{state.error}</p>
         </div>
       )}
       {state.ok && state.message && (
-        <div className="bg-emerald-50 border-l-4 border-heritage p-4">
+        <div className="bg-success-bg border-l-4 border-heritage p-4">
           <p className="text-[14px] text-heritage-deep font-semibold">{state.message}</p>
         </div>
       )}
@@ -63,7 +63,7 @@ export function PasswordForm() {
       <button
         type="submit"
         disabled={pending}
-        className="inline-flex items-center gap-2.5 px-7 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        className="inline-flex items-center gap-2.5 px-7 py-3 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
         <KeyRound className="h-4 w-4" />
         {pending ? "Saving…" : "Update Password"}

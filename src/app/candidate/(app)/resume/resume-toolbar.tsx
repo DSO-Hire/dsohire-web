@@ -44,7 +44,7 @@ export function ResumeToolbar() {
         <div className="flex items-center gap-2.5">
           <a
             href="/candidate/resume/build"
-            className="inline-flex items-center gap-2 rounded-md border border-[var(--rule)] bg-white px-4 py-2 text-[13px] font-bold text-ink hover:border-heritage-deep transition-colors"
+            className="inline-flex items-center gap-2 rounded-md border border-[var(--rule)] bg-card px-4 py-2 text-[13px] font-bold text-ink hover:border-heritage-deep transition-colors"
           >
             Edit step-by-step
           </a>
@@ -52,7 +52,7 @@ export function ResumeToolbar() {
             type="button"
             onClick={onSave}
             disabled={pending}
-            className="inline-flex items-center gap-2 rounded-md border border-[var(--rule)] bg-white px-4 py-2 text-[13px] font-bold text-ink hover:border-heritage-deep transition-colors disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-md border border-[var(--rule)] bg-card px-4 py-2 text-[13px] font-bold text-ink hover:border-heritage-deep transition-colors disabled:opacity-60"
           >
             {pending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -63,7 +63,7 @@ export function ResumeToolbar() {
           </button>
           <a
             href="/candidate/resume/pdf"
-            className="inline-flex items-center gap-2 rounded-md bg-heritage-deep px-4 py-2 text-[13px] font-bold text-ivory hover:bg-ink transition-colors"
+            className="inline-flex items-center gap-2 rounded-md bg-heritage-deep px-4 py-2 text-[13px] font-bold text-primary-foreground hover:bg-ink transition-colors"
           >
             <Download className="h-4 w-4" />
             Download PDF
@@ -71,7 +71,7 @@ export function ResumeToolbar() {
         </div>
       </div>
       {error && (
-        <p className="mt-2 text-right text-[12px] text-red-600">{error}</p>
+        <p className="mt-2 text-right text-[12px] text-danger">{error}</p>
       )}
     </div>
   );

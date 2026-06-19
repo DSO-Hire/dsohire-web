@@ -122,7 +122,7 @@ const STEPS: WizardStepMeta[] = [
 ];
 
 const inputCls =
-  "w-full rounded-md border border-[var(--rule)] bg-white px-3 py-2 text-[14px] text-ink focus:border-heritage-deep focus:outline-none";
+  "w-full rounded-md border border-[var(--rule)] bg-card px-3 py-2 text-[14px] text-ink focus:border-heritage-deep focus:outline-none";
 const labelCls =
   "block text-[12px] font-bold uppercase tracking-[1px] text-slate-meta mb-1.5";
 
@@ -486,7 +486,7 @@ export function ResumeBuilder({
             <div className="space-y-5">
               <Title>Your experience.</Title>
               {work.map((w) => (
-                <div key={w.id} className="rounded-md border border-[var(--rule)] bg-white p-4">
+                <div key={w.id} className="rounded-md border border-[var(--rule)] bg-card p-4">
                   <div className="mb-3 flex justify-end">
                     <RemoveBtn onClick={() => setWork((p) => p.filter((x) => x.id !== w.id))} />
                   </div>
@@ -589,7 +589,7 @@ export function ResumeBuilder({
             <div className="space-y-5">
               <Title>Your education.</Title>
               {education.map((e) => (
-                <div key={e.id} className="rounded-md border border-[var(--rule)] bg-white p-4">
+                <div key={e.id} className="rounded-md border border-[var(--rule)] bg-card p-4">
                   <div className="mb-3 flex justify-end">
                     <RemoveBtn onClick={() => setEducation((p) => p.filter((x) => x.id !== e.id))} />
                   </div>
@@ -671,7 +671,7 @@ export function ResumeBuilder({
               <div className="space-y-4">
                 <h3 className="text-[13px] font-bold uppercase tracking-[1px] text-ink">Licenses</h3>
                 {licenses.map((l) => (
-                  <div key={l.id} className="rounded-md border border-[var(--rule)] bg-white p-4">
+                  <div key={l.id} className="rounded-md border border-[var(--rule)] bg-card p-4">
                     <div className="mb-3 flex justify-end">
                       <RemoveBtn onClick={() => setLicenses((p) => p.filter((x) => x.id !== l.id))} />
                     </div>
@@ -729,7 +729,7 @@ export function ResumeBuilder({
               <div className="space-y-4">
                 <h3 className="text-[13px] font-bold uppercase tracking-[1px] text-ink">Certifications</h3>
                 {certs.map((c) => (
-                  <div key={c.id} className="rounded-md border border-[var(--rule)] bg-white p-4">
+                  <div key={c.id} className="rounded-md border border-[var(--rule)] bg-card p-4">
                     <div className="mb-3 flex justify-end">
                       <RemoveBtn onClick={() => setCerts((p) => p.filter((x) => x.id !== c.id))} />
                     </div>
@@ -804,7 +804,7 @@ export function ResumeBuilder({
                   {order.map((key, i) => (
                     <div
                       key={key}
-                      className="flex items-center justify-between rounded-md border border-[var(--rule)] bg-white px-3 py-2"
+                      className="flex items-center justify-between rounded-md border border-[var(--rule)] bg-card px-3 py-2"
                     >
                       <span className="text-[14px] text-ink">{SECTION_LABELS[key] ?? key}</span>
                       <div className="flex items-center gap-1">
@@ -835,7 +835,7 @@ export function ResumeBuilder({
               <div className="space-y-4">
                 <label className={labelCls}>Custom sections</label>
                 {customSections.map((s, i) => (
-                  <div key={i} className="rounded-md border border-[var(--rule)] bg-white p-4">
+                  <div key={i} className="rounded-md border border-[var(--rule)] bg-card p-4">
                     <div className="mb-3 flex justify-end">
                       <RemoveBtn onClick={() => setCustomSections((p) => p.filter((_, j) => j !== i))} />
                     </div>
@@ -924,8 +924,8 @@ export function ResumeBuilder({
                   className={
                     "rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors " +
                     (active
-                      ? "border-heritage-deep bg-heritage-deep text-ivory"
-                      : "border-[var(--rule)] bg-white text-slate-body hover:border-heritage-deep")
+                      ? "border-heritage-deep bg-heritage-deep text-primary-foreground"
+                      : "border-[var(--rule)] bg-card text-slate-body hover:border-heritage-deep")
                   }
                 >
                   {tpl.name}
@@ -933,7 +933,7 @@ export function ResumeBuilder({
               );
             })}
           </div>
-          <div className="max-h-[80vh] overflow-auto rounded-md border border-[var(--rule)] bg-white shadow-sm">
+          <div className="max-h-[80vh] overflow-auto rounded-md border border-[var(--rule)] bg-card shadow-sm">
             <ResumeDocument data={preview} template={template} />
           </div>
         </div>
@@ -973,7 +973,7 @@ function RemoveBtn({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-1 text-[12px] font-semibold text-slate-meta hover:text-red-600 transition-colors"
+      className="inline-flex items-center gap-1 text-[12px] font-semibold text-slate-meta hover:text-danger transition-colors"
     >
       <Trash2 className="h-3.5 w-3.5" />
       Remove
@@ -1008,7 +1008,7 @@ function BulletEditor({
             <button
               type="button"
               onClick={() => update(lines.filter((_, j) => j !== i))}
-              className="text-slate-meta hover:text-red-600"
+              className="text-slate-meta hover:text-danger"
               aria-label="Remove bullet"
             >
               <X className="h-4 w-4" />

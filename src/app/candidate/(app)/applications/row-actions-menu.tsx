@@ -109,7 +109,7 @@ export function RowActionsMenu({
             setMenuOpen((v) => !v);
           }}
           disabled={busy}
-          className="inline-flex size-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-[#14233F] disabled:opacity-50"
+          className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"
           aria-label="Application actions"
           aria-expanded={menuOpen}
           aria-haspopup="menu"
@@ -123,7 +123,7 @@ export function RowActionsMenu({
         {menuOpen && (
           <div
             role="menu"
-            className="absolute right-0 top-full z-30 mt-1 w-56 overflow-hidden rounded-md border border-slate-200 bg-white shadow-xl"
+            className="absolute right-0 top-full z-30 mt-1 w-56 overflow-hidden rounded-md border border-border bg-popover shadow-xl"
             onClick={(e) => {
               // Stop the menu's click from bubbling up to the link card.
               e.preventDefault();
@@ -148,7 +148,7 @@ export function RowActionsMenu({
             {/* Withdraw — only when not already withdrawn/closed */}
             {!isClosed && (
               <MenuItem
-                icon={<XCircle className="size-4 text-red-700" />}
+                icon={<XCircle className="size-4 text-danger" />}
                 label="Withdraw application"
                 tone="danger"
                 onClick={() => {
@@ -158,7 +158,7 @@ export function RowActionsMenu({
               />
             )}
 
-            <div className="border-t border-slate-100" />
+            <div className="border-t border-border" />
 
             {/* Hide / Restore */}
             <MenuItem
@@ -221,11 +221,11 @@ function MenuItem({
       disabled={disabled}
       className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition ${
         tone === "danger"
-          ? "text-red-700 hover:bg-red-50"
-          : "text-slate-700 hover:bg-slate-50"
+          ? "text-danger hover:bg-danger-bg"
+          : "text-foreground hover:bg-muted"
       } disabled:cursor-not-allowed disabled:opacity-40`}
     >
-      <span className="text-slate-500">{icon}</span>
+      <span className="text-muted-foreground">{icon}</span>
       {label}
     </button>
   );
@@ -273,14 +273,14 @@ function WithdrawSheet({
 
   return (
     <Sheet onClose={busy ? () => {} : onClose} title="Withdraw application">
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-muted-foreground">
         The DSO will see your application moved to{" "}
-        <strong className="text-[#14233F]">Withdrawn</strong>. Your reason
+        <strong className="text-foreground">Withdrawn</strong>. Your reason
         below stays private — they never see why.
       </p>
       <div>
-        <p className="mb-2 text-sm font-medium text-slate-800">
-          Why are you withdrawing? <span className="text-slate-400">(optional)</span>
+        <p className="mb-2 text-sm font-medium text-foreground">
+          Why are you withdrawing? <span className="text-meta-foreground">(optional)</span>
         </p>
         <div className="flex flex-wrap gap-2">
           {WITHDRAW_REASON_CHIPS.map((chip) => {
@@ -293,8 +293,8 @@ function WithdrawSheet({
                 disabled={busy}
                 className={`rounded-full border px-3 py-1 text-sm transition ${
                   selected
-                    ? "border-[#4D7A60] bg-[#4D7A60]/10 text-[#14233F]"
-                    : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                    ? "border-heritage bg-heritage/10 text-foreground"
+                    : "border-border bg-card text-foreground hover:bg-muted"
                 } disabled:opacity-50`}
               >
                 {selected && <Check className="mr-1 inline size-3" />}
@@ -305,8 +305,8 @@ function WithdrawSheet({
         </div>
       </div>
       <label className="block">
-        <span className="mb-1 block text-sm font-medium text-slate-800">
-          Anything else? <span className="text-slate-400">(optional)</span>
+        <span className="mb-1 block text-sm font-medium text-foreground">
+          Anything else? <span className="text-meta-foreground">(optional)</span>
         </span>
         <textarea
           value={text}
@@ -314,24 +314,24 @@ function WithdrawSheet({
           rows={3}
           maxLength={500}
           placeholder="Helps us improve the platform — never shared with the DSO."
-          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+          className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
         />
       </label>
-      <div className="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-900">
+      <div className="rounded-md bg-warning-bg px-3 py-2 text-xs text-warning">
         <AlertCircle className="mr-1 inline size-3.5" />
         Re-applying to the same job is locked for 30 days after you withdraw.
       </div>
       {error && (
-        <p role="alert" className="text-sm text-red-700">
+        <p role="alert" className="text-sm text-danger">
           {error}
         </p>
       )}
-      <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-3">
+      <div className="flex items-center justify-end gap-3 border-t border-border pt-3">
         <button
           type="button"
           onClick={onClose}
           disabled={busy}
-          className="text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-50"
+          className="text-sm font-medium text-muted-foreground hover:text-foreground disabled:opacity-50"
         >
           Cancel
         </button>
@@ -339,7 +339,7 @@ function WithdrawSheet({
           type="button"
           onClick={onConfirm}
           disabled={busy}
-          className="inline-flex items-center gap-2 rounded-md bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-md bg-danger px-4 py-2 text-sm font-semibold text-danger-foreground hover:bg-danger/90 disabled:opacity-60"
         >
           {busy ? (
             <>
@@ -391,7 +391,7 @@ function SelfReportSheet({
 
   return (
     <Sheet onClose={busy ? () => {} : onClose} title="Update my status">
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-muted-foreground">
         Tell us where you are — the employer&apos;s view of your status
         doesn&apos;t change. Useful when you&apos;ve heard back outside the
         platform.
@@ -402,8 +402,8 @@ function SelfReportSheet({
             key={String(opt.value)}
             className={`block cursor-pointer rounded-md border p-3 text-sm transition ${
               selected === opt.value
-                ? "border-[#4D7A60] bg-[#4D7A60]/10 text-[#14233F]"
-                : "border-slate-300 bg-white hover:border-slate-400"
+                ? "border-heritage bg-heritage/10 text-foreground"
+                : "border-border bg-card hover:border-border-2"
             }`}
           >
             <input
@@ -418,16 +418,16 @@ function SelfReportSheet({
         ))}
       </div>
       {error && (
-        <p role="alert" className="text-sm text-red-700">
+        <p role="alert" className="text-sm text-danger">
           {error}
         </p>
       )}
-      <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-3">
+      <div className="flex items-center justify-end gap-3 border-t border-border pt-3">
         <button
           type="button"
           onClick={onClose}
           disabled={busy}
-          className="text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-50"
+          className="text-sm font-medium text-muted-foreground hover:text-foreground disabled:opacity-50"
         >
           Cancel
         </button>
@@ -435,7 +435,7 @@ function SelfReportSheet({
           type="button"
           onClick={onConfirm}
           disabled={busy}
-          className="inline-flex items-center gap-2 rounded-md bg-[#14233F] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0d172b] disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
         >
           {busy ? (
             <>
@@ -507,15 +507,15 @@ function Sheet({
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         tabIndex={-1}
       />
-      <div className="relative z-10 flex h-full w-full flex-col overflow-hidden bg-white shadow-2xl sm:h-auto sm:max-h-[90vh] sm:w-full sm:max-w-[520px] sm:rounded-lg">
-        <header className="flex shrink-0 items-start justify-between gap-4 border-b border-slate-200 px-5 py-4">
-          <h2 className="font-display text-lg font-bold text-[#14233F]">
+      <div className="relative z-10 flex h-full w-full flex-col overflow-hidden bg-card shadow-2xl sm:h-auto sm:max-h-[90vh] sm:w-full sm:max-w-[520px] sm:rounded-lg">
+        <header className="flex shrink-0 items-start justify-between gap-4 border-b border-border px-5 py-4">
+          <h2 className="font-display text-lg font-bold text-foreground">
             {title}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+            className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
             aria-label="Close"
           >
             <X className="size-5" />

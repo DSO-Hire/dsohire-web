@@ -114,15 +114,15 @@ export function CeTracker({ initial }: { initial: CeRow[] }) {
       />
 
       {grouped.length === 0 && !adding ? (
-        <div className="rounded-md border border-slate-200 bg-slate-50/40 p-6 text-center">
-          <p className="text-sm text-slate-700">
+        <div className="rounded-md border border-border bg-muted/40 p-6 text-center">
+          <p className="text-sm text-foreground">
             No CE entries yet. Track your continuing-education hours and
             attach certificates as you complete them.
           </p>
           <button
             type="button"
             onClick={() => setAdding(true)}
-            className="mt-4 inline-flex items-center gap-2 rounded-md bg-[#14233F] px-3 py-1.5 text-sm font-semibold text-white hover:bg-[#0d172b]"
+            className="mt-4 inline-flex items-center gap-2 rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
           >
             <Plus className="size-4" />
             Add your first CE
@@ -134,7 +134,7 @@ export function CeTracker({ initial }: { initial: CeRow[] }) {
         <div className="space-y-5">
           {grouped.map(({ year, rows }) => (
             <div key={year}>
-              <h3 className="mb-2 text-[11px] font-bold tracking-wider uppercase text-slate-500">
+              <h3 className="mb-2 text-[11px] font-bold tracking-wider uppercase text-muted-foreground">
                 {year}
               </h3>
               <ul className="space-y-2">
@@ -189,7 +189,7 @@ export function CeTracker({ initial }: { initial: CeRow[] }) {
           type="button"
           onClick={() => setAdding(true)}
           disabled={items.length >= 50}
-          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:border-[#4D7A60] hover:text-[#14233F] disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground hover:border-heritage hover:text-foreground disabled:opacity-50"
         >
           <Plus className="size-4" />
           Add CE entry
@@ -197,7 +197,7 @@ export function CeTracker({ initial }: { initial: CeRow[] }) {
       )}
 
       {items.length >= 50 && (
-        <p className="text-xs text-amber-700">
+        <p className="text-xs text-warning">
           You&apos;re at the 50-CE storage cap. Delete an old entry to add another.
         </p>
       )}
@@ -221,7 +221,7 @@ function SummaryCard({
   count: number;
 }) {
   return (
-    <div className="grid grid-cols-3 gap-3 rounded-md border border-[#4D7A60]/30 bg-[#F7F4ED] p-4 text-center">
+    <div className="grid grid-cols-3 gap-3 rounded-md border border-heritage/30 bg-card p-4 text-center">
       <Stat label="Total CE hours" value={totalHours.toFixed(1)} />
       <Stat label={`${thisYear} hours`} value={yearHours.toFixed(1)} />
       <Stat label="Entries" value={String(count)} />
@@ -232,8 +232,8 @@ function SummaryCard({
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="font-display text-2xl font-bold text-[#14233F]">{value}</p>
-      <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-[#4D7A60]">
+      <p className="font-display text-2xl font-bold text-foreground">{value}</p>
+      <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-heritage">
         {label}
       </p>
     </div>
@@ -314,17 +314,17 @@ function CeRowDisplay({
     : null;
 
   return (
-    <li className="rounded-md border border-slate-200 bg-white p-4">
+    <li className="rounded-md border border-border bg-card p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-[#14233F]">
+          <p className="text-sm font-semibold text-foreground">
             {row.course_name}
           </p>
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-600">
-            <span className="font-medium text-[#4D7A60]">
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+            <span className="font-medium text-heritage">
               {Number(row.hours_credit).toFixed(1)} hrs
             </span>
-            <span className="text-slate-300">·</span>
+            <span className="text-meta-foreground">·</span>
             <span>
               {new Date(`${row.completion_date}T00:00:00Z`).toLocaleDateString(
                 "en-US",
@@ -338,19 +338,19 @@ function CeRowDisplay({
             </span>
             {row.provider && (
               <>
-                <span className="text-slate-300">·</span>
+                <span className="text-meta-foreground">·</span>
                 <span>{row.provider}</span>
               </>
             )}
             {row.category && (
               <>
-                <span className="text-slate-300">·</span>
+                <span className="text-meta-foreground">·</span>
                 <span>{row.category}</span>
               </>
             )}
             {licenseTypeLabel && (
               <>
-                <span className="text-slate-300">·</span>
+                <span className="text-meta-foreground">·</span>
                 <span>{licenseTypeLabel}</span>
               </>
             )}
@@ -361,7 +361,7 @@ function CeRowDisplay({
                 <button
                   type="button"
                   onClick={onView}
-                  className="inline-flex items-center gap-1 rounded-md border border-[#4D7A60]/30 bg-[#F7F4ED] px-2 py-1 text-xs font-medium text-[#14233F] hover:border-[#4D7A60]"
+                  className="inline-flex items-center gap-1 rounded-md border border-heritage/30 bg-card px-2 py-1 text-xs font-medium text-foreground hover:border-heritage"
                 >
                   <Download className="size-3.5" />
                   View certificate
@@ -370,7 +370,7 @@ function CeRowDisplay({
                   type="button"
                   onClick={onFileRemove}
                   disabled={busy}
-                  className="text-xs text-slate-500 hover:text-red-700 disabled:opacity-50"
+                  className="text-xs text-muted-foreground hover:text-danger disabled:opacity-50"
                 >
                   Remove file
                 </button>
@@ -384,7 +384,7 @@ function CeRowDisplay({
           <button
             type="button"
             onClick={onEdit}
-            className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-[#14233F]"
+            className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
             aria-label="Edit"
           >
             <Pencil className="size-4" />
@@ -393,7 +393,7 @@ function CeRowDisplay({
             type="button"
             onClick={onDeleteClick}
             disabled={busy}
-            className="rounded-md p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
+            className="rounded-md p-1.5 text-muted-foreground hover:bg-danger-bg hover:text-danger disabled:opacity-50"
             aria-label="Delete"
           >
             <Trash2 className="size-4" />
@@ -401,7 +401,7 @@ function CeRowDisplay({
         </div>
       </div>
       {error && (
-        <p role="alert" className="mt-2 inline-flex items-center gap-1 text-xs text-red-700">
+        <p role="alert" className="mt-2 inline-flex items-center gap-1 text-xs text-danger">
           <AlertCircle className="size-3.5" />
           {error}
         </p>
@@ -419,7 +419,7 @@ function FilePicker({
 }) {
   return (
     <label
-      className={`inline-flex items-center gap-1 rounded-md border border-dashed border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-700 hover:border-[#4D7A60] hover:text-[#14233F] ${
+      className={`inline-flex items-center gap-1 rounded-md border border-dashed border-border bg-card px-2 py-1 text-xs font-medium text-foreground hover:border-heritage hover:text-foreground ${
         disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
       }`}
     >
@@ -522,15 +522,15 @@ function CeEditor({
   };
 
   return (
-    <div className="rounded-md border border-[#4D7A60]/40 bg-[#F7F4ED] p-4">
+    <div className="rounded-md border border-heritage/40 bg-card p-4">
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-sm font-semibold text-[#14233F]">
+        <p className="text-sm font-semibold text-foreground">
           {initial ? "Edit CE entry" : "Add CE entry"}
         </p>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md p-1 text-slate-500 hover:bg-white hover:text-[#14233F]"
+          className="rounded-md p-1 text-muted-foreground hover:bg-card hover:text-foreground"
           aria-label="Cancel"
         >
           <X className="size-4" />
@@ -538,8 +538,8 @@ function CeEditor({
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="block sm:col-span-2">
-          <span className="mb-1 block text-xs font-medium text-slate-700">
-            Course name <span className="text-red-600">*</span>
+          <span className="mb-1 block text-xs font-medium text-foreground">
+            Course name <span className="text-danger">*</span>
           </span>
           <input
             type="text"
@@ -547,12 +547,12 @@ function CeEditor({
             onChange={(e) => setCourseName(e.target.value)}
             placeholder="e.g. Implant placement masterclass"
             maxLength={200}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+            className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
           />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-700">
-            CE hours <span className="text-red-600">*</span>
+          <span className="mb-1 block text-xs font-medium text-foreground">
+            CE hours <span className="text-danger">*</span>
           </span>
           <input
             type="number"
@@ -563,22 +563,22 @@ function CeEditor({
             value={hours}
             onChange={(e) => setHours(e.target.value)}
             placeholder="2"
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+            className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
           />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-700">
-            Completion date <span className="text-red-600">*</span>
+          <span className="mb-1 block text-xs font-medium text-foreground">
+            Completion date <span className="text-danger">*</span>
           </span>
           <input
             type="date"
             value={completionDate}
             onChange={(e) => setCompletionDate(e.target.value)}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+            className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
           />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-700">
+          <span className="mb-1 block text-xs font-medium text-foreground">
             Provider
           </span>
           <input
@@ -587,11 +587,11 @@ function CeEditor({
             onChange={(e) => setProvider(e.target.value)}
             placeholder="AGD PACE · CE Zoom · …"
             maxLength={120}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+            className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
           />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-700">
+          <span className="mb-1 block text-xs font-medium text-foreground">
             Category
           </span>
           <input
@@ -601,7 +601,7 @@ function CeEditor({
             list="ce-categories"
             placeholder="Implants · Endo · Infection control · …"
             maxLength={80}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+            className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
           />
           <datalist id="ce-categories">
             {COMMON_CE_CATEGORIES.map((c) => (
@@ -610,13 +610,13 @@ function CeEditor({
           </datalist>
         </label>
         <label className="block sm:col-span-2">
-          <span className="mb-1 block text-xs font-medium text-slate-700">
+          <span className="mb-1 block text-xs font-medium text-foreground">
             Counts toward (optional)
           </span>
           <select
             value={licenseType}
             onChange={(e) => setLicenseType(e.target.value)}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+            className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
           >
             <option value="">Not tied to a specific license</option>
             {LICENSE_TYPES.map((lt) => (
@@ -630,7 +630,7 @@ function CeEditor({
       {error && (
         <p
           role="alert"
-          className="mt-3 inline-flex items-center gap-1 text-xs text-red-700"
+          className="mt-3 inline-flex items-center gap-1 text-xs text-danger"
         >
           <AlertCircle className="size-3.5" />
           {error}
@@ -640,7 +640,7 @@ function CeEditor({
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+          className="rounded-md border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted"
         >
           Cancel
         </button>
@@ -648,7 +648,7 @@ function CeEditor({
           type="button"
           onClick={onSave}
           disabled={saving}
-          className="inline-flex items-center gap-1 rounded-md bg-[#14233F] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d172b] disabled:opacity-50"
+          className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
         >
           {saving ? (
             "Saving…"
@@ -661,7 +661,7 @@ function CeEditor({
         </button>
       </div>
       {!initial && (
-        <p className="mt-2 inline-flex items-center gap-1 text-xs text-slate-500">
+        <p className="mt-2 inline-flex items-center gap-1 text-xs text-muted-foreground">
           <FileText className="size-3.5" />
           Add the entry first, then attach the certificate file from the row
           actions.

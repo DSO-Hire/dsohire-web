@@ -78,9 +78,9 @@ export default async function ClaimPage({ searchParams }: PageProps) {
             {sp.error === "1" && (
               <div
                 role="alert"
-                className="bg-red-50 border-l-4 border-red-500 p-4"
+                className="bg-danger-bg border-l-4 border-danger p-4"
               >
-                <p className="text-[14px] text-red-900 leading-relaxed">
+                <p className="text-[14px] text-danger leading-relaxed">
                   We couldn&apos;t send your magic link. Check your spam folder
                   for a recent email, wait a few minutes, or try again.
                 </p>
@@ -105,7 +105,7 @@ export default async function ClaimPage({ searchParams }: PageProps) {
             </div>
             <button
               type="submit"
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
             >
               <Mail className="h-4 w-4" />
               Send me a magic link

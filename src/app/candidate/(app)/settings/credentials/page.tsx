@@ -85,10 +85,10 @@ export default async function CandidateCredentialsPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h2 className="font-display text-xl font-bold text-[#14233F]">
+        <h2 className="font-display text-xl font-bold text-foreground">
           Your dental-ops dashboard
         </h2>
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="mt-1 text-sm text-muted-foreground">
           License + certification expiry monitoring, CE tracking, and saved
           job-search alerts. The dental-ops tab no other job board has.
         </p>
@@ -140,7 +140,7 @@ function LicensesSection({
 }) {
   return (
     <SectionCard
-      icon={<ShieldCheck className="size-5 text-[#4D7A60]" />}
+      icon={<ShieldCheck className="size-5 text-heritage" />}
       title={`Licenses${items.length > 0 ? ` (${items.length})` : ""}`}
       description="Color-coded by what's expiring soon. Red = under 30 days. Amber = 30-60 days. Green = 60+ days or no expiry on file."
     >
@@ -168,8 +168,8 @@ function LicensesSection({
           })}
         </ul>
       )}
-      <div className="mt-3 flex items-center gap-1.5 rounded-md bg-[#F7F4ED] px-3 py-2 text-xs text-slate-600">
-        <Clock className="size-3.5 text-[#4D7A60]" />
+      <div className="mt-3 flex items-center gap-1.5 rounded-md bg-muted px-3 py-2 text-xs text-muted-foreground">
+        <Clock className="size-3.5 text-heritage" />
         Reminder cadence (60 / 30 / 14 days before expiry) lands in the
         next Credentials sub-pass.
       </div>
@@ -193,7 +193,7 @@ function CertificationsSection({
 }) {
   return (
     <SectionCard
-      icon={<GraduationCap className="size-5 text-[#4D7A60]" />}
+      icon={<GraduationCap className="size-5 text-heritage" />}
       title={`Certifications${items.length > 0 ? ` (${items.length})` : ""}`}
       description="CPR/BLS, anesthesia, sedation, OSHA, HIPAA — same expiry color-coding as licenses."
     >
@@ -231,12 +231,12 @@ function CertificationsSection({
 function CeTrackingSection({ ceRows }: { ceRows: CeRow[] }) {
   return (
     <SectionCard
-      icon={<GraduationCap className="size-5 text-[#4D7A60]" />}
+      icon={<GraduationCap className="size-5 text-heritage" />}
       title={`Continuing education${ceRows.length > 0 ? ` (${ceRows.length})` : ""}`}
       description="Track CE hours, attach certificate files, and keep a year-by-year record. The dental-ops differentiator no other job board has."
     >
       <CeTracker initial={ceRows} />
-      <p className="mt-4 text-xs text-slate-500">
+      <p className="mt-4 text-xs text-muted-foreground">
         State-specific CE-requirement lookup (e.g. &ldquo;You&apos;ve got 12 of
         24 required hours for KS RDH renewal&rdquo;) lands in a follow-up.
       </p>
@@ -255,12 +255,12 @@ function SavedSearchesSection({
 }) {
   return (
     <SectionCard
-      icon={<Search className="size-5 text-[#4D7A60]" />}
+      icon={<Search className="size-5 text-heritage" />}
       title={`Saved searches${searches.length > 0 ? ` (${searches.length})` : ""}`}
       description="Get alerts when new jobs match a search you've saved. Manage frequency or pause alerts here."
     >
       <SavedSearches initial={searches} />
-      <p className="mt-3 text-xs text-slate-500">
+      <p className="mt-3 text-xs text-muted-foreground">
         Alert dispatch (the cron that compares new jobs against your saved
         searches and emails matches) lands in a follow-up. You can save +
         manage searches today; alerts start firing once the cron ships.
@@ -285,16 +285,16 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="border border-[var(--rule)] bg-white p-6 sm:p-8">
+    <section className="border border-[var(--rule)] bg-card p-6 sm:p-8">
       <header className="mb-4 flex items-start gap-3">
-        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-[#4D7A60]/10">
+        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-heritage/10">
           {icon}
         </div>
         <div>
-          <h2 className="font-display text-lg font-bold text-[#14233F]">
+          <h2 className="font-display text-lg font-bold text-foreground">
             {title}
           </h2>
-          <p className="mt-0.5 text-sm text-slate-600">{description}</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
         </div>
       </header>
       <div>{children}</div>
@@ -312,12 +312,12 @@ function EmptyHint({
   ctaLabel?: string;
 }) {
   return (
-    <div className="rounded-md border border-slate-200 bg-slate-50/40 p-4 text-center">
-      <p className="text-sm text-slate-600">{text}</p>
+    <div className="rounded-md border border-border bg-muted/40 p-4 text-center">
+      <p className="text-sm text-muted-foreground">{text}</p>
       {ctaHref && ctaLabel && (
         <Link
           href={ctaHref}
-          className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-[#14233F] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d172b]"
+          className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
         >
           {ctaLabel}
         </Link>
@@ -339,13 +339,13 @@ function ExpiryRow({
 }) {
   const status = expiryStatus(expiry);
   return (
-    <li className="flex items-start justify-between gap-3 rounded-md border border-slate-200 bg-slate-50/40 p-3">
+    <li className="flex items-start justify-between gap-3 rounded-md border border-border bg-muted/40 p-3">
       <div className="flex-1">
-        <p className="text-sm font-medium text-[#14233F]">{primary}</p>
+        <p className="text-sm font-medium text-foreground">{primary}</p>
         {secondary && (
-          <p className="text-xs text-slate-500">{secondary}</p>
+          <p className="text-xs text-muted-foreground">{secondary}</p>
         )}
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-muted-foreground">
           {expiry ? (
             <>
               Expires{" "}
@@ -356,7 +356,7 @@ function ExpiryRow({
                 timeZone: "UTC",
               })}
               {status.daysOut !== null && (
-                <span className="ml-1 text-slate-400">
+                <span className="ml-1 text-meta-foreground">
                   ({status.daysOut > 0 ? `${status.daysOut} days` : "expired"})
                 </span>
               )}
@@ -369,7 +369,7 @@ function ExpiryRow({
       <div className="flex flex-col items-end gap-1">
         <ExpiryBadge status={status} />
         {privateField && (
-          <span className="inline-flex items-center gap-1 text-[10px] text-slate-400">
+          <span className="inline-flex items-center gap-1 text-[10px] text-meta-foreground">
             <Lock className="size-3" />
             Number hidden
           </span>
@@ -386,7 +386,7 @@ function ExpiryBadge({
 }) {
   if (status.tier === "expired") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700">
+      <span className="inline-flex items-center gap-1 rounded-full bg-danger-bg px-2 py-0.5 text-xs font-medium text-danger">
         <AlertTriangle className="size-3" />
         Expired
       </span>
@@ -394,7 +394,7 @@ function ExpiryBadge({
   }
   if (status.tier === "soon") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700">
+      <span className="inline-flex items-center gap-1 rounded-full bg-danger-bg px-2 py-0.5 text-xs font-medium text-danger">
         <AlertTriangle className="size-3" />
         {status.daysOut}d
       </span>
@@ -402,20 +402,20 @@ function ExpiryBadge({
   }
   if (status.tier === "warning") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
+      <span className="inline-flex items-center gap-1 rounded-full bg-warning-bg px-2 py-0.5 text-xs font-medium text-warning">
         {status.daysOut}d
       </span>
     );
   }
   if (status.tier === "ok") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-800">
+      <span className="inline-flex items-center gap-1 rounded-full bg-success-bg px-2 py-0.5 text-xs font-medium text-success">
         {status.daysOut}d
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
+    <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
       No date
     </span>
   );

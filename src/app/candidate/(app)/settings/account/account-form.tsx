@@ -128,7 +128,7 @@ export function EmailChangeForm({
 
   return (
     <SectionCard
-      icon={<Mail className="size-5 text-[#4D7A60]" />}
+      icon={<Mail className="size-5 text-heritage" />}
       title="Email"
       description={
         currentEmail
@@ -138,12 +138,12 @@ export function EmailChangeForm({
     >
       {pending ? (
         <form onSubmit={onVerify} className="space-y-3">
-          <div className="rounded-md border border-[#4D7A60]/30 bg-[#F7F4ED] p-3 text-sm">
-            <p className="font-medium text-[#14233F]">
+          <div className="rounded-md border border-heritage/30 bg-card p-3 text-sm">
+            <p className="font-medium text-foreground">
               Code sent to{" "}
               <span className="font-semibold">{pending.new_email}</span>
             </p>
-            <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-slate-600">
+            <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground">
               <Clock className="size-3" />
               Expires{" "}
               {new Date(pending.expires_at).toLocaleTimeString([], {
@@ -153,7 +153,7 @@ export function EmailChangeForm({
             </p>
           </div>
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-800">
+            <span className="mb-1 block text-sm font-medium text-foreground">
               6-digit code
             </span>
             <input
@@ -166,7 +166,7 @@ export function EmailChangeForm({
               autoComplete="one-time-code"
               inputMode="numeric"
               maxLength={6}
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-center font-mono text-lg tracking-[8px] shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+              className="w-full rounded-md border border-border bg-card px-3 py-2 text-center font-mono text-lg tracking-[8px] shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
             />
           </label>
           <div className="flex items-center justify-between">
@@ -174,14 +174,14 @@ export function EmailChangeForm({
               type="button"
               onClick={onCancel}
               disabled={busy}
-              className="text-xs font-medium text-slate-500 hover:text-red-700 disabled:opacity-50"
+              className="text-xs font-medium text-muted-foreground hover:text-danger disabled:opacity-50"
             >
               Cancel this request
             </button>
             <button
               type="submit"
               disabled={busy || code.length !== 6}
-              className="inline-flex items-center gap-1.5 rounded-md bg-[#14233F] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d172b] disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               {busy ? "Verifying…" : "Verify and swap"}
             </button>
@@ -192,7 +192,7 @@ export function EmailChangeForm({
       ) : (
         <form onSubmit={onRequest} className="space-y-3">
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-800">
+            <span className="mb-1 block text-sm font-medium text-foreground">
               New email
             </span>
             <input
@@ -201,18 +201,18 @@ export function EmailChangeForm({
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@new-address.com"
               autoComplete="email"
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+              className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
             />
           </label>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-muted-foreground">
               We&apos;ll send a 6-digit code to the new address. Your current
               email stays active until you verify it.
             </span>
             <button
               type="submit"
               disabled={busy || email.trim().length === 0}
-              className="inline-flex items-center gap-1.5 rounded-md bg-[#14233F] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d172b] disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               {busy ? "Sending…" : "Send code"}
             </button>
@@ -283,13 +283,13 @@ export function PhoneForm({
 
   return (
     <SectionCard
-      icon={<Phone className="size-5 text-[#4D7A60]" />}
+      icon={<Phone className="size-5 text-heritage" />}
       title="Phone"
       description="For future SMS notifications when an employer moves you forward. We never call you — only opt-in texts."
     >
       <form onSubmit={onSubmit} className="space-y-3">
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-800">
+          <span className="mb-1 block text-sm font-medium text-foreground">
             Phone number
           </span>
           <input
@@ -300,17 +300,17 @@ export function PhoneForm({
             autoComplete="tel"
             inputMode="tel"
             maxLength={14}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+            className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
           />
         </label>
         <div className="flex items-center justify-between">
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-muted-foreground">
             SMS opt-in lands in a follow-up release.
           </span>
           <button
             type="submit"
             disabled={busy || !dirty}
-            className="inline-flex items-center gap-1.5 rounded-md bg-[#14233F] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d172b] disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
           >
             {busy ? "Saving…" : "Save"}
           </button>
@@ -329,18 +329,18 @@ export function PhoneForm({
 export function LanguageStub() {
   return (
     <SectionCard
-      icon={<Languages className="size-5 text-[#4D7A60]" />}
+      icon={<Languages className="size-5 text-heritage" />}
       title="Language"
       description="DSO Hire is English-only today. Additional languages are on the roadmap."
     >
       <div className="flex items-center gap-3">
         <select
           disabled
-          className="rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-500"
+          className="rounded-md border border-border bg-muted px-3 py-2 text-sm text-muted-foreground"
         >
           <option>English</option>
         </select>
-        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-600">
+        <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
           Coming soon
         </span>
       </div>
@@ -364,16 +364,16 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="border border-[var(--rule)] bg-white p-6 sm:p-8">
+    <section className="border border-[var(--rule)] bg-card p-6 sm:p-8">
       <header className="mb-4 flex items-start gap-3">
-        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-[#4D7A60]/10">
+        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-heritage/10">
           {icon}
         </div>
         <div>
-          <h2 className="font-display text-lg font-bold text-[#14233F]">
+          <h2 className="font-display text-lg font-bold text-foreground">
             {title}
           </h2>
-          <p className="mt-0.5 text-sm text-slate-600">{description}</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
         </div>
       </header>
       <div>{children}</div>
@@ -383,7 +383,7 @@ function SectionCard({
 
 function FlashError({ message }: { message: string }) {
   return (
-    <p role="alert" className="inline-flex items-center gap-1 text-sm text-red-700">
+    <p role="alert" className="inline-flex items-center gap-1 text-sm text-danger">
       <AlertCircle className="size-3.5" />
       {message}
     </p>
@@ -392,7 +392,7 @@ function FlashError({ message }: { message: string }) {
 
 function FlashSuccess({ message }: { message: string }) {
   return (
-    <p role="status" className="inline-flex items-center gap-1 text-sm text-[#4D7A60]">
+    <p role="status" className="inline-flex items-center gap-1 text-sm text-heritage">
       <Sparkles className="size-3.5" />
       {message}
     </p>

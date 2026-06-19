@@ -94,7 +94,7 @@ export function TrackChooser() {
         </div>
 
         {error && (
-          <p className="mt-6 text-center text-[14px] font-semibold text-red-700">
+          <p className="mt-6 text-center text-[14px] font-semibold text-danger">
             {error}
           </p>
         )}
@@ -125,27 +125,35 @@ function Panel({
   disabled: boolean;
   onClick: () => void;
 }) {
-  const bg = tone === "navy" ? "bg-ink" : "bg-heritage";
-  const ctaText = tone === "navy" ? "text-ink" : "text-heritage-deep";
+  const bg = tone === "navy" ? "bg-hero" : "bg-heritage";
+  // Per-tone foreground: the navy panel stays navy in both modes (light text);
+  // the heritage panel flips to light-green in dark, so its text inverts to
+  // dark. hero-foreground = light both; primary-foreground = light→dark.
+  const fg = tone === "navy" ? "text-hero-foreground" : "text-primary-foreground";
+  const fgFaint = tone === "navy" ? "text-hero-foreground/90" : "text-primary-foreground/90";
+  const fgCheck = tone === "navy" ? "text-hero-foreground/55" : "text-primary-foreground/55";
+  // The CTA pill is always a light/white surface, so its text is fixed dark in
+  // both modes (the ink/heritage-deep tokens would flip light and vanish).
+  const ctaText = tone === "navy" ? "text-[#14233F]" : "text-[#2F5D4F]";
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`group flex flex-col text-left ${bg} text-ivory rounded-xl p-9 sm:p-10 transition-all ${
+      className={`group flex flex-col text-left ${bg} ${fg} rounded-xl p-9 sm:p-10 transition-all ${
         disabled
           ? "opacity-50"
           : "hover:shadow-[0_18px_50px_-18px_rgba(20,35,63,0.55)] hover:-translate-y-1"
       }`}
     >
       <div className="mb-5">{wordmark}</div>
-      <p className="text-[19px] sm:text-[21px] font-bold text-ivory leading-snug mb-7">
+      <p className={`text-[19px] sm:text-[21px] font-bold ${fg} leading-snug mb-7`}>
         {tagline}
       </p>
       <ul className="list-none space-y-3 mb-9 flex-1">
         {examples.map((e) => (
-          <li key={e} className="flex items-start gap-2.5 text-[15px] sm:text-[16px] text-ivory/90">
-            <Check className="h-5 w-5 flex-shrink-0 mt-0.5 text-ivory/55" />
+          <li key={e} className={`flex items-start gap-2.5 text-[15px] sm:text-[16px] ${fgFaint}`}>
+            <Check className={`h-5 w-5 flex-shrink-0 mt-0.5 ${fgCheck}`} />
             <span>{e}</span>
           </li>
         ))}

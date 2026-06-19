@@ -52,17 +52,17 @@ export function SavedSearches({ initial }: { initial: SavedSearch[] }) {
 
   if (items.length === 0) {
     return (
-      <div className="rounded-md border border-slate-200 bg-slate-50/40 p-6 text-center">
-        <p className="text-sm text-slate-700">
+      <div className="rounded-md border border-border bg-muted/40 p-6 text-center">
+        <p className="text-sm text-foreground">
           You don&apos;t have any saved searches yet.
         </p>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-muted-foreground">
           Save searches from the jobs list to get alerts when new matching
           jobs land.
         </p>
         <Link
           href="/candidate/jobs"
-          className="mt-4 inline-flex items-center gap-2 rounded-md bg-[#14233F] px-3 py-1.5 text-sm font-semibold text-white hover:bg-[#0d172b]"
+          className="mt-4 inline-flex items-center gap-2 rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
         >
           Browse jobs
         </Link>
@@ -145,7 +145,7 @@ function SavedSearchRow({
   };
 
   return (
-    <li className="rounded-md border border-slate-200 bg-white p-4">
+    <li className="rounded-md border border-border bg-card p-4">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
           {editing ? (
@@ -156,13 +156,13 @@ function SavedSearchRow({
                 onChange={(e) => setDraftName(e.target.value)}
                 autoFocus
                 maxLength={80}
-                className="flex-1 rounded-md border border-slate-300 px-2 py-1 text-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+                className="flex-1 rounded-md border border-border px-2 py-1 text-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
               />
               <button
                 type="button"
                 onClick={onSaveName}
                 disabled={busy || !draftName.trim()}
-                className="rounded-md bg-[#14233F] px-2 py-1 text-xs font-semibold text-white disabled:opacity-50"
+                className="rounded-md bg-primary px-2 py-1 text-xs font-semibold text-primary-foreground disabled:opacity-50"
                 aria-label="Save name"
               >
                 <Check className="size-3.5" />
@@ -174,7 +174,7 @@ function SavedSearchRow({
                   setDraftName(search.name);
                 }}
                 disabled={busy}
-                className="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-600 disabled:opacity-50"
+                className="rounded-md border border-border px-2 py-1 text-xs text-muted-foreground disabled:opacity-50"
                 aria-label="Cancel rename"
               >
                 <X className="size-3.5" />
@@ -182,18 +182,18 @@ function SavedSearchRow({
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <p className="text-sm font-medium text-[#14233F]">{search.name}</p>
+              <p className="text-sm font-medium text-foreground">{search.name}</p>
               <button
                 type="button"
                 onClick={() => setEditing(true)}
-                className="text-slate-400 hover:text-slate-700"
+                className="text-meta-foreground hover:text-foreground"
                 aria-label="Rename"
               >
                 <Pencil className="size-3.5" />
               </button>
             </div>
           )}
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-muted-foreground">
             {summarizeFilters(search.filter_state)}
           </p>
         </div>
@@ -201,7 +201,7 @@ function SavedSearchRow({
           type="button"
           onClick={onDelete}
           disabled={busy}
-          className="text-slate-500 hover:text-red-700 disabled:opacity-50"
+          className="text-muted-foreground hover:text-danger disabled:opacity-50"
           aria-label="Delete saved search"
         >
           <Trash2 className="size-4" />
@@ -209,7 +209,7 @@ function SavedSearchRow({
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <span className="inline-flex items-center gap-1 text-xs text-slate-500">
+        <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
           {search.frequency === "off" ? (
             <BellOff className="size-3.5" />
           ) : (
@@ -225,8 +225,8 @@ function SavedSearchRow({
             disabled={busy}
             className={`rounded-full border px-2.5 py-0.5 text-xs ${
               search.frequency === opt.value
-                ? "border-[#4D7A60] bg-[#4D7A60]/10 text-[#14233F]"
-                : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                ? "border-heritage bg-heritage/10 text-foreground"
+                : "border-border bg-card text-muted-foreground hover:bg-muted"
             } disabled:opacity-50`}
           >
             {opt.label}
@@ -235,13 +235,13 @@ function SavedSearchRow({
       </div>
 
       {error && (
-        <p role="alert" className="mt-2 inline-flex items-center gap-1 text-xs text-red-700">
+        <p role="alert" className="mt-2 inline-flex items-center gap-1 text-xs text-danger">
           <AlertCircle className="size-3" /> {error}
         </p>
       )}
 
       {search.last_dispatched_at && (
-        <p className="mt-2 text-xs text-slate-400">
+        <p className="mt-2 text-xs text-meta-foreground">
           Last alert {new Date(search.last_dispatched_at).toLocaleDateString()}
         </p>
       )}

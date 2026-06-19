@@ -108,7 +108,7 @@ function RolesSection({ initial }: JobPreferencesFormProps) {
 
   return (
     <SectionCard
-      icon={<Briefcase className="size-5 text-[#4D7A60]" />}
+      icon={<Briefcase className="size-5 text-heritage" />}
       title="Roles + specialty"
       description="The role buckets you'd accept and any specialty match. Used for both job matching and Talent Pool browse."
     >
@@ -196,7 +196,7 @@ function LicenseStatesSection({ initial }: JobPreferencesFormProps) {
 
   return (
     <SectionCard
-      icon={<ShieldCheck className="size-5 text-[#4D7A60]" />}
+      icon={<ShieldCheck className="size-5 text-heritage" />}
       title="Licensure + DSO size"
       description="States you're licensed in (or willing to apply for) — picks the jobs where you can practice. DSO size is a fit preference."
     >
@@ -251,7 +251,7 @@ function LocationsSection({ initial }: JobPreferencesFormProps) {
 
   return (
     <SectionCard
-      icon={<MapPin className="size-5 text-[#4D7A60]" />}
+      icon={<MapPin className="size-5 text-heritage" />}
       title="Locations"
       description="Cities or metros you'd consider. We use these as a soft match — jobs anywhere are still browsable."
     >
@@ -317,12 +317,12 @@ function ScheduleSection({ initial }: JobPreferencesFormProps) {
 
   return (
     <SectionCard
-      icon={<Calendar className="size-5 text-[#4D7A60]" />}
+      icon={<Calendar className="size-5 text-heritage" />}
       title="Schedule + availability"
       description="Days you'd work, evenings, willingness to relocate, when you're free to start."
     >
       <div>
-        <p className="mb-2 text-sm font-medium text-slate-800">Available days</p>
+        <p className="mb-2 text-sm font-medium text-foreground">Available days</p>
         <div className="flex flex-wrap gap-2">
           {WEEKDAY_KEYS.map((d) => (
             <button
@@ -331,8 +331,8 @@ function ScheduleSection({ initial }: JobPreferencesFormProps) {
               onClick={() => toggleDay(d.key)}
               className={`rounded-full border px-3 py-1.5 text-sm transition ${
                 schedule[d.key]
-                  ? "border-[#4D7A60] bg-[#4D7A60]/10 text-[#14233F]"
-                  : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                  ? "border-heritage bg-heritage/10 text-foreground"
+                  : "border-border bg-card text-foreground hover:bg-muted"
               }`}
             >
               {d.label}
@@ -341,34 +341,34 @@ function ScheduleSection({ initial }: JobPreferencesFormProps) {
         </div>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
-        <label className="flex items-start gap-2 rounded-md border border-slate-300 bg-white p-3 hover:bg-slate-50">
+        <label className="flex items-start gap-2 rounded-md border border-border bg-card p-3 hover:bg-muted">
           <input
             type="checkbox"
             checked={Boolean(schedule.evenings)}
             onChange={() => toggleDay("evenings")}
-            className="mt-0.5 size-4 rounded border-slate-300"
+            className="mt-0.5 size-4 rounded border-border"
           />
           <span className="flex-1 text-sm">
-            <span className="block font-medium text-[#14233F]">
+            <span className="block font-medium text-foreground">
               Evenings OK
             </span>
-            <span className="mt-0.5 block text-xs text-slate-500">
+            <span className="mt-0.5 block text-xs text-muted-foreground">
               We&apos;ll surface jobs with evening shifts.
             </span>
           </span>
         </label>
-        <label className="flex items-start gap-2 rounded-md border border-slate-300 bg-white p-3 hover:bg-slate-50">
+        <label className="flex items-start gap-2 rounded-md border border-border bg-card p-3 hover:bg-muted">
           <input
             type="checkbox"
             checked={Boolean(schedule.willing_to_relocate)}
             onChange={() => toggleDay("willing_to_relocate")}
-            className="mt-0.5 size-4 rounded border-slate-300"
+            className="mt-0.5 size-4 rounded border-border"
           />
           <span className="flex-1 text-sm">
-            <span className="block font-medium text-[#14233F]">
+            <span className="block font-medium text-foreground">
               Willing to relocate
             </span>
-            <span className="mt-0.5 block text-xs text-slate-500">
+            <span className="mt-0.5 block text-xs text-muted-foreground">
               Lets jobs outside your locations match you.
             </span>
           </span>
@@ -387,7 +387,7 @@ function ScheduleSection({ initial }: JobPreferencesFormProps) {
         compact
       />
       <label className="block">
-        <span className="mb-1 block text-sm font-medium text-slate-800">
+        <span className="mb-1 block text-sm font-medium text-foreground">
           When you&apos;re free to start
         </span>
         <input
@@ -398,9 +398,9 @@ function ScheduleSection({ initial }: JobPreferencesFormProps) {
           }
           placeholder="Immediately · 2 weeks · After May 30 · …"
           maxLength={50}
-          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+          className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
         />
-        <span className="mt-1 block text-xs text-slate-500">
+        <span className="mt-1 block text-xs text-muted-foreground">
           Free text, but employers will see this. Keep it brief.
         </span>
       </label>
@@ -448,13 +448,13 @@ function CompensationSection({ initial }: JobPreferencesFormProps) {
 
   return (
     <SectionCard
-      icon={<DollarSign className="size-5 text-[#4D7A60]" />}
+      icon={<DollarSign className="size-5 text-heritage" />}
       title="Compensation"
       description="Your minimum acceptable comp. Used to filter jobs whose posted range is below your floor — never shown to employers."
     >
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-800">
+          <span className="mb-1 block text-sm font-medium text-foreground">
             Minimum
           </span>
           <input
@@ -468,11 +468,11 @@ function CompensationSection({ initial }: JobPreferencesFormProps) {
             }
             placeholder="50"
             min={0}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+            className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
           />
         </label>
         <div>
-          <span className="mb-1 block text-sm font-medium text-slate-800">
+          <span className="mb-1 block text-sm font-medium text-foreground">
             Unit
           </span>
           <div className="flex flex-wrap gap-2">
@@ -485,8 +485,8 @@ function CompensationSection({ initial }: JobPreferencesFormProps) {
                 }
                 className={`rounded-full border px-3 py-1.5 text-sm transition ${
                   unit === opt.value
-                    ? "border-[#4D7A60] bg-[#4D7A60]/10 text-[#14233F]"
-                    : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                    ? "border-heritage bg-heritage/10 text-foreground"
+                    : "border-border bg-card text-foreground hover:bg-muted"
                 }`}
               >
                 {opt.label}
@@ -529,16 +529,16 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="border border-[var(--rule)] bg-white p-6 sm:p-8">
+    <section className="border border-[var(--rule)] bg-card p-6 sm:p-8">
       <header className="mb-4 flex items-start gap-3">
-        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-[#4D7A60]/10">
+        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-heritage/10">
           {icon}
         </div>
         <div>
-          <h2 className="font-display text-lg font-bold text-[#14233F]">
+          <h2 className="font-display text-lg font-bold text-foreground">
             {title}
           </h2>
-          <p className="mt-0.5 text-sm text-slate-600">{description}</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
         </div>
       </header>
       <div className="space-y-4">{children}</div>
@@ -567,7 +567,7 @@ function ChipMultiSelect({
 
   return (
     <fieldset>
-      <legend className="mb-2 text-sm font-medium text-slate-800">
+      <legend className="mb-2 text-sm font-medium text-foreground">
         {legend}
       </legend>
       <div className="flex flex-wrap gap-2">
@@ -580,8 +580,8 @@ function ChipMultiSelect({
               onClick={() => toggle(opt.value)}
               className={`rounded-full border px-3 py-1.5 text-sm transition ${
                 active
-                  ? "border-[#4D7A60] bg-[#4D7A60]/10 text-[#14233F]"
-                  : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                  ? "border-heritage bg-heritage/10 text-foreground"
+                  : "border-border bg-card text-foreground hover:bg-muted"
               }`}
             >
               {opt.label}
@@ -636,7 +636,7 @@ function MultiStateChips({
 
   return (
     <fieldset>
-      <legend className="mb-2 text-sm font-medium text-slate-800">
+      <legend className="mb-2 text-sm font-medium text-foreground">
         {legend}
       </legend>
       {values.length > 0 ? (
@@ -645,13 +645,13 @@ function MultiStateChips({
             const state = US_STATES.find((s) => s.code === code);
             return (
               <li key={code}>
-                <span className="inline-flex items-center gap-1 rounded-full bg-[#4D7A60]/10 px-3 py-1 text-sm text-[#14233F]">
+                <span className="inline-flex items-center gap-1 rounded-full bg-heritage/10 px-3 py-1 text-sm text-foreground">
                   {state ? state.name : code}{" "}
-                  <span className="text-slate-500">({code})</span>
+                  <span className="text-muted-foreground">({code})</span>
                   <button
                     type="button"
                     onClick={() => remove(code)}
-                    className="text-slate-500 hover:text-red-700"
+                    className="text-muted-foreground hover:text-danger"
                     aria-label={`Remove ${state?.name ?? code}`}
                   >
                     <X className="size-3.5" />
@@ -663,8 +663,8 @@ function MultiStateChips({
         </ul>
       ) : null}
       <div className="relative">
-        <div className="flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus-within:border-[#4D7A60] focus-within:ring-1 focus-within:ring-[#4D7A60]">
-          <Search className="size-4 text-slate-400" />
+        <div className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm focus-within:border-heritage focus-within:ring-1 focus-within:ring-heritage">
+          <Search className="size-4 text-meta-foreground" />
           <input
             type="text"
             value={filter}
@@ -678,11 +678,11 @@ function MultiStateChips({
               window.setTimeout(() => setOpen(false), 150);
             }}
             placeholder="Search states…"
-            className="flex-1 outline-none placeholder:text-slate-400"
+            className="flex-1 outline-none placeholder:text-meta-foreground"
           />
         </div>
         {open && filtered.length > 0 && (
-          <div className="absolute z-20 mt-1 w-full overflow-y-auto rounded-md border border-slate-200 bg-white shadow-xl">
+          <div className="absolute z-20 mt-1 w-full overflow-y-auto rounded-md border border-border bg-popover shadow-xl">
             <ul className="max-h-64">
               {filtered.map((s) => (
                 <li key={s.code}>
@@ -692,12 +692,12 @@ function MultiStateChips({
                       e.preventDefault();
                       add(s.code);
                     }}
-                    className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-[#F7F4ED]"
+                    className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-muted"
                   >
-                    <span className="font-medium text-[#14233F]">
+                    <span className="font-medium text-foreground">
                       {s.name}
                     </span>
-                    <span className="text-xs text-slate-500">{s.code}</span>
+                    <span className="text-xs text-muted-foreground">{s.code}</span>
                   </button>
                 </li>
               ))}
@@ -738,19 +738,19 @@ function ChipArrayInput({
 
   return (
     <fieldset>
-      <legend className="mb-2 text-sm font-medium text-slate-800">
+      <legend className="mb-2 text-sm font-medium text-foreground">
         {legend}
       </legend>
       {values.length > 0 ? (
         <ul className="mb-2 flex flex-wrap gap-1.5">
           {values.map((v) => (
             <li key={v}>
-              <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-800">
+              <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-sm text-foreground">
                 {v}
                 <button
                   type="button"
                   onClick={() => remove(v)}
-                  className="text-slate-500 hover:text-red-700"
+                  className="text-muted-foreground hover:text-danger"
                   aria-label={`Remove ${v}`}
                 >
                   <X className="size-3.5" />
@@ -772,19 +772,19 @@ function ChipArrayInput({
             }
           }}
           placeholder={placeholder}
-          className="flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+          className="flex-1 rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
         />
         <button
           type="button"
           onClick={add}
-          className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 hover:border-[#4D7A60] hover:text-[#14233F]"
+          className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground hover:border-heritage hover:text-foreground"
         >
           <Plus className="size-4" />
           Add
         </button>
       </div>
       {helper && (
-        <p className="mt-1 text-xs text-slate-500">{helper}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{helper}</p>
       )}
     </fieldset>
   );
@@ -811,7 +811,7 @@ function RadioGroup<T extends string | null>({
 }) {
   return (
     <fieldset>
-      <legend className="mb-2 text-sm font-medium text-slate-800">
+      <legend className="mb-2 text-sm font-medium text-foreground">
         {legend}
       </legend>
       <div className={compact ? "flex flex-wrap gap-2" : "space-y-2"}>
@@ -829,8 +829,8 @@ function RadioGroup<T extends string | null>({
               }
               className={`rounded-full border px-3 py-1.5 text-sm transition ${
                 value === opt.value
-                  ? "border-[#4D7A60] bg-[#4D7A60]/10 text-[#14233F]"
-                  : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                  ? "border-heritage bg-heritage/10 text-foreground"
+                  : "border-border bg-card text-foreground hover:bg-muted"
               }`}
             >
               {opt.label}
@@ -840,8 +840,8 @@ function RadioGroup<T extends string | null>({
               key={opt.value}
               className={`block cursor-pointer rounded-md border p-3 text-sm transition ${
                 value === opt.value
-                  ? "border-[#4D7A60] bg-[#4D7A60]/10"
-                  : "border-slate-300 bg-white hover:border-slate-400"
+                  ? "border-heritage bg-heritage/10"
+                  : "border-border bg-card hover:border-border-2"
               }`}
             >
               <input
@@ -850,11 +850,11 @@ function RadioGroup<T extends string | null>({
                 onChange={() => onChange(opt.value as T)}
                 className="sr-only"
               />
-              <span className="block font-medium text-[#14233F]">
+              <span className="block font-medium text-foreground">
                 {opt.label}
               </span>
               {opt.description && (
-                <span className="mt-0.5 block text-xs text-slate-600">
+                <span className="mt-0.5 block text-xs text-muted-foreground">
                   {opt.description}
                 </span>
               )}
@@ -880,27 +880,27 @@ function SaveBar({
   onSave: () => void;
 }) {
   return (
-    <div className="flex items-center justify-between border-t border-slate-100 pt-4">
+    <div className="flex items-center justify-between border-t border-border pt-4">
       <div className="text-xs">
         {error ? (
-          <span className="inline-flex items-center gap-1 text-red-700">
+          <span className="inline-flex items-center gap-1 text-danger">
             <AlertCircle className="size-3.5" /> {error}
           </span>
         ) : savedFlash ? (
-          <span className="inline-flex items-center gap-1 text-[#4D7A60]">
+          <span className="inline-flex items-center gap-1 text-heritage">
             <Sparkles className="size-3.5" /> {savedFlash}
           </span>
         ) : dirty ? (
-          <span className="text-slate-600">Unsaved changes</span>
+          <span className="text-muted-foreground">Unsaved changes</span>
         ) : (
-          <span className="text-slate-400">Saved.</span>
+          <span className="text-meta-foreground">Saved.</span>
         )}
       </div>
       <button
         type="button"
         onClick={onSave}
         disabled={!dirty || saving}
-        className="inline-flex items-center gap-1.5 rounded-md bg-[#14233F] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d172b] disabled:opacity-50"
+        className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
       >
         {saving ? "Saving…" : (
           <>

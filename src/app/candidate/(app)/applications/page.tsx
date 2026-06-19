@@ -580,8 +580,8 @@ function TabBar({
                 href={tab === "all" ? "/candidate/applications" : `/candidate/applications?tab=${tab}`}
                 className={`inline-flex items-center gap-2 whitespace-nowrap border-b-2 px-3 py-3 text-sm font-medium transition ${
                   isActive
-                    ? "border-[#4D7A60] text-[#14233F]"
-                    : "border-transparent text-slate-600 hover:border-slate-300 hover:text-[#14233F]"
+                    ? "border-heritage text-foreground"
+                    : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
                 }`}
                 aria-current={isActive ? "page" : undefined}
               >
@@ -590,8 +590,8 @@ function TabBar({
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                       isActive
-                        ? "bg-[#4D7A60]/15 text-[#14233F]"
-                        : "bg-slate-100 text-slate-600"
+                        ? "bg-heritage/15 text-foreground"
+                        : "bg-muted text-muted-foreground"
                     }`}
                   >
                     {counts[tab]}
@@ -678,7 +678,7 @@ function ApplicationsList({
           <li key={app.id} className="relative">
             <Link
               href={`/candidate/applications/${app.id}`}
-              className="block rounded-md border border-[var(--rule)] bg-white p-5 transition hover:border-heritage-deep/40 hover:bg-cream/40"
+              className="block rounded-md border border-[var(--rule)] bg-card p-5 transition hover:border-heritage-deep/40 hover:bg-cream/40"
             >
               <div className="flex items-start justify-between gap-4 flex-wrap">
                 <div className="min-w-0 flex-1">
@@ -803,7 +803,7 @@ function SavedJobsList({
 }) {
   if (rows.length === 0) {
     return (
-      <div className="rounded-md border border-[var(--rule)] bg-white p-12 text-center max-w-[680px]">
+      <div className="rounded-md border border-[var(--rule)] bg-card p-12 text-center max-w-[680px]">
         <Bookmark className="mx-auto mb-4 size-8 text-slate-meta" strokeWidth={1.5} />
         <p className="mb-2 text-[15px] text-ink">
           You haven&apos;t saved any jobs yet.
@@ -813,7 +813,7 @@ function SavedJobsList({
         </p>
         <Link
           href="/candidate/jobs"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
         >
           Browse jobs
         </Link>
@@ -828,17 +828,17 @@ function SavedJobsList({
           <li key={row.id}>
             <Link
               href={`/jobs/${row.job.id}`}
-              className="block rounded-md border border-[var(--rule)] bg-white p-5 transition hover:border-heritage-deep/40 hover:bg-cream/40"
+              className="block rounded-md border border-[var(--rule)] bg-card p-5 transition hover:border-heritage-deep/40 hover:bg-cream/40"
             >
               <div className="flex items-start justify-between gap-4 flex-wrap">
                 <div className="min-w-0 flex-1">
                   <div className="mb-2 flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#4D7A60]/10 px-2 py-0.5 text-xs font-medium text-[#4D7A60]">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-heritage/10 px-2 py-0.5 text-xs font-medium text-heritage">
                       <Bookmark className="size-3" />
                       Saved
                     </span>
                     {row.job.status !== "active" && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-warning-bg px-2 py-0.5 text-xs font-medium text-warning">
                         {row.job.status}
                       </span>
                     )}
@@ -887,7 +887,7 @@ function EmptyState({
 }) {
   if (tab === "all" && totalApps === 0) {
     return (
-      <div className="rounded-md border border-[var(--rule)] bg-white p-12 text-center max-w-[680px]">
+      <div className="rounded-md border border-[var(--rule)] bg-card p-12 text-center max-w-[680px]">
         <Briefcase className="mx-auto mb-4 size-8 text-slate-meta" strokeWidth={1.5} />
         <p className="mb-2 text-[15px] text-ink">
           You haven&apos;t applied to any jobs yet.
@@ -897,7 +897,7 @@ function EmptyState({
         </p>
         <Link
           href="/jobs"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-ink text-ivory text-[12px] font-bold tracking-[2px] uppercase hover:bg-ink-soft transition-colors"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
         >
           Browse Jobs
         </Link>
@@ -905,7 +905,7 @@ function EmptyState({
     );
   }
   return (
-    <div className="rounded-md border border-[var(--rule)] bg-white p-10 text-center max-w-[680px]">
+    <div className="rounded-md border border-[var(--rule)] bg-card p-10 text-center max-w-[680px]">
       <p className="text-[14px] text-slate-body">
         Nothing in <strong>{TAB_LABELS[tab]}</strong> right now.
       </p>
@@ -943,13 +943,13 @@ function StatusPill({
 }
 
 const TONE_BY_KIND: Record<StageKind, string> = {
-  open: "bg-blue-50 text-blue-700",
-  screen: "bg-cyan-50 text-cyan-700",
-  interview: "bg-amber-50 text-amber-800",
-  offer: "bg-emerald-50 text-emerald-800",
-  hired: "bg-[#4D7A60] text-[#F7F4ED]",
-  rejected: "bg-red-50 text-red-700",
-  withdrawn: "bg-slate-100 text-slate-600",
+  open: "bg-muted text-muted-foreground",
+  screen: "bg-muted text-muted-foreground",
+  interview: "bg-warning-bg text-warning",
+  offer: "bg-success-bg text-success",
+  hired: "bg-heritage text-primary-foreground",
+  rejected: "bg-danger-bg text-danger",
+  withdrawn: "bg-muted text-muted-foreground",
 };
 
 // ─────────────────────────────────────────────────────────────────────
@@ -965,10 +965,10 @@ function SelfReportedChip({ status }: { status: SelfReportedStatus }) {
   };
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-full bg-[#4D7A60]/10 px-2 py-0.5 text-[11px] font-medium text-[#14233F]"
+      className="inline-flex items-center gap-1 rounded-full bg-heritage/10 px-2 py-0.5 text-[11px] font-medium text-foreground"
       title="Your self-reported status — employer doesn't see this label."
     >
-      <Sparkles className="size-3 text-[#4D7A60]" />
+      <Sparkles className="size-3 text-heritage" />
       {labels[status]}
     </span>
   );

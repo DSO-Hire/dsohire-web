@@ -40,19 +40,19 @@ export function CompletenessMeter({
   // All-Star — celebrate.
   if (report.tier === "all_star") {
     return (
-      <section className="border border-[#4D7A60]/40 bg-gradient-to-br from-[#4D7A60]/15 via-[#F7F4ED] to-white p-6 sm:p-8">
+      <section className="border border-heritage/40 bg-gradient-to-br from-heritage/15 via-muted to-card p-6 sm:p-8">
         <div className="flex items-start gap-4">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#4D7A60] text-[#F7F4ED]">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-heritage text-primary-foreground">
             <Sparkles className="size-5" aria-hidden />
           </div>
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[2.5px] text-[#4D7A60]">
+            <p className="text-[10px] font-semibold uppercase tracking-[2.5px] text-heritage">
               {meta.label}
             </p>
-            <h2 className="mt-1 font-display text-xl font-bold text-[#14233F]">
+            <h2 className="mt-1 font-display text-xl font-bold text-foreground">
               Your profile is dialed in.
             </h2>
-            <p className="mt-1 text-sm text-slate-600">{meta.copy}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{meta.copy}</p>
           </div>
         </div>
       </section>
@@ -60,25 +60,25 @@ export function CompletenessMeter({
   }
 
   return (
-    <section className="border border-slate-200 bg-white p-6 sm:p-8">
+    <section className="border border-border bg-card p-6 sm:p-8">
       <header className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[2.5px] text-[#4D7A60]">
+          <p className="text-[10px] font-semibold uppercase tracking-[2.5px] text-heritage">
             Profile strength
           </p>
-          <h2 className="mt-1 font-display text-lg font-bold text-[#14233F]">
+          <h2 className="mt-1 font-display text-lg font-bold text-foreground">
             {meta.label}
           </h2>
-          <p className="mt-0.5 text-sm text-slate-600">{meta.copy}</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">{meta.copy}</p>
         </div>
         <div className="text-right">
-          <p className="font-display text-2xl font-bold text-[#14233F]">
+          <p className="font-display text-2xl font-bold text-foreground">
             {report.score}
-            <span className="text-sm font-normal text-slate-400">
+            <span className="text-sm font-normal text-meta-foreground">
               /{report.total}
             </span>
           </p>
-          <p className="text-[10px] uppercase tracking-wider text-slate-400">
+          <p className="text-[10px] uppercase tracking-wider text-meta-foreground">
             steps done
           </p>
         </div>
@@ -97,22 +97,22 @@ export function CompletenessMeter({
             <div
               key={seg}
               className={`h-1.5 flex-1 rounded-full ${
-                filled ? "bg-[#4D7A60]" : "bg-slate-200"
+                filled ? "bg-heritage" : "bg-muted"
               }`}
             />
           );
         })}
       </div>
-      <p className="mt-1 text-right text-[10px] text-slate-400">
+      <p className="mt-1 text-right text-[10px] text-meta-foreground">
         {pct}% complete
       </p>
 
       {report.missing.length > 0 && (
         <>
-          <p className="mt-5 text-sm font-medium text-slate-800">
+          <p className="mt-5 text-sm font-medium text-foreground">
             Quick wins from here:
           </p>
-          <ul className="mt-2 divide-y divide-slate-100">
+          <ul className="mt-2 divide-y divide-border">
             {report.missing.map((item) => (
               <li key={item.key}>
                 <button
@@ -130,28 +130,28 @@ export function CompletenessMeter({
                           block: "start",
                         });
                         // Brief flash to draw the eye.
-                        el.classList.add("ring-2", "ring-[#4D7A60]/60");
+                        el.classList.add("ring-2", "ring-heritage/60");
                         window.setTimeout(
                           () =>
                             el.classList.remove(
                               "ring-2",
-                              "ring-[#4D7A60]/60"
+                              "ring-heritage/60"
                             ),
                           1600
                         );
                       }
                     }
                   }}
-                  className="group flex w-full items-center justify-between gap-3 py-3 text-left text-sm text-slate-700 hover:text-[#14233F]"
+                  className="group flex w-full items-center justify-between gap-3 py-3 text-left text-sm text-foreground hover:text-foreground"
                 >
                   <span className="flex items-center gap-2">
                     <span
-                      className="size-2 shrink-0 rounded-full bg-slate-300 group-hover:bg-[#4D7A60]"
+                      className="size-2 shrink-0 rounded-full bg-border group-hover:bg-heritage"
                       aria-hidden
                     />
                     {item.label}
                   </span>
-                  <span className="inline-flex items-center gap-1 text-xs font-medium text-[#4D7A60] group-hover:text-[#14233F]">
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-heritage group-hover:text-foreground">
                     Add now
                     <ChevronRight className="size-3.5" />
                   </span>
@@ -166,8 +166,8 @@ export function CompletenessMeter({
           summary so candidates can see progress without it dominating
           the surface. */}
       {report.score > 0 && report.score < report.total && (
-        <p className="mt-4 flex items-center gap-1 text-xs text-slate-500">
-          <CheckCircle2 className="size-3 text-[#4D7A60]" />
+        <p className="mt-4 flex items-center gap-1 text-xs text-muted-foreground">
+          <CheckCircle2 className="size-3 text-heritage" />
           {report.score} of {report.total} done
           {report.missing.length === 1
             ? " — just one to go!"

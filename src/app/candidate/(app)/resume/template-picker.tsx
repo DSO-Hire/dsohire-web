@@ -49,8 +49,8 @@ export function TemplatePicker({ current }: { current: ResumeTemplateId }) {
               className={
                 "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-semibold transition-colors disabled:opacity-60 " +
                 (active
-                  ? "border-heritage-deep bg-heritage-deep text-ivory"
-                  : "border-[var(--rule)] bg-white text-slate-body hover:border-heritage-deep")
+                  ? "border-heritage-deep bg-heritage-deep text-primary-foreground"
+                  : "border-[var(--rule)] bg-card text-slate-body hover:border-heritage-deep")
               }
             >
               {active && <Check className="h-3 w-3" />}

@@ -112,16 +112,16 @@ export default async function CandidateSettingsAccountPage() {
 // section-card style for visual consistency with Email + Phone.
 function PasswordSection() {
   return (
-    <section className="border border-[var(--rule)] bg-white p-6 sm:p-8">
+    <section className="border border-[var(--rule)] bg-card p-6 sm:p-8">
       <header className="mb-4 flex items-start gap-3">
-        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-[#4D7A60]/10">
+        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-heritage/10">
           <PasswordIcon />
         </div>
         <div>
-          <h2 className="font-display text-lg font-bold text-[#14233F]">
+          <h2 className="font-display text-lg font-bold text-foreground">
             Password
           </h2>
-          <p className="mt-0.5 text-sm text-slate-600">
+          <p className="mt-0.5 text-sm text-muted-foreground">
             Set or change your password. You can always fall back to an
             emailed code if you forget it.
           </p>
@@ -144,7 +144,7 @@ function PasswordIcon() {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="text-[#4D7A60]"
+      className="text-heritage"
       aria-hidden
     >
       <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />

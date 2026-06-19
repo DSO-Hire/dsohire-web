@@ -58,16 +58,16 @@ export function AiWriteHelper({ kind, context, onPick }: AiWriteHelperProps) {
         <button
           type="button"
           onClick={generate}
-          className="inline-flex items-center gap-1.5 rounded-md border border-[#4D7A60]/40 bg-[#F7F4ED] px-3 py-1.5 text-xs font-medium text-[#14233F] transition hover:border-[#4D7A60] hover:bg-[#F7F4ED]/70"
+          className="inline-flex items-center gap-1.5 rounded-md border border-heritage/40 bg-muted px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-heritage hover:bg-muted/70"
         >
-          <Sparkles className="size-3.5 text-[#4D7A60]" />
+          <Sparkles className="size-3.5 text-heritage" />
           Help me write
         </button>
       )}
 
       {busy && (
-        <div className="inline-flex items-center gap-2 rounded-md border border-[#4D7A60]/30 bg-[#F7F4ED]/60 px-3 py-1.5 text-xs text-slate-600">
-          <Loader2 className="size-3.5 animate-spin text-[#4D7A60]" />
+        <div className="inline-flex items-center gap-2 rounded-md border border-heritage/30 bg-muted/60 px-3 py-1.5 text-xs text-muted-foreground">
+          <Loader2 className="size-3.5 animate-spin text-heritage" />
           {kind === "headline"
             ? "Drafting a few headline options…"
             : "Drafting a few summary options…"}
@@ -75,19 +75,19 @@ export function AiWriteHelper({ kind, context, onPick }: AiWriteHelperProps) {
       )}
 
       {error && (
-        <p role="alert" className="text-xs text-red-700">
+        <p role="alert" className="text-xs text-danger">
           {error}
         </p>
       )}
 
       {suggestions && suggestions.length > 0 && (
-        <div className="rounded-md border border-[#4D7A60]/25 bg-white">
-          <div className="flex items-center justify-between gap-2 border-b border-slate-100 px-3 py-2">
-            <p className="text-xs font-medium text-slate-700">
+        <div className="rounded-md border border-heritage/25 bg-card">
+          <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2">
+            <p className="text-xs font-medium text-foreground">
               {suggestions.length === 1
                 ? "1 suggestion"
                 : `${suggestions.length} suggestions`}
-              <span className="ml-2 text-[10px] uppercase tracking-wider text-slate-400">
+              <span className="ml-2 text-[10px] uppercase tracking-wider text-meta-foreground">
                 Pick one and edit
               </span>
             </p>
@@ -95,23 +95,23 @@ export function AiWriteHelper({ kind, context, onPick }: AiWriteHelperProps) {
               type="button"
               onClick={generate}
               disabled={busy}
-              className="inline-flex items-center gap-1 text-xs font-medium text-[#4D7A60] hover:text-[#14233F] disabled:opacity-50"
+              className="inline-flex items-center gap-1 text-xs font-medium text-heritage hover:text-foreground disabled:opacity-50"
             >
               <RefreshCw className="size-3" />
               Regenerate
             </button>
           </div>
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-border">
             {suggestions.map((s, i) => (
               <li key={i} className="flex items-start gap-3 p-3">
-                <p className="flex-1 text-sm text-slate-700">{s}</p>
+                <p className="flex-1 text-sm text-foreground">{s}</p>
                 <button
                   type="button"
                   onClick={() => {
                     onPick(s);
                     setSuggestions(null);
                   }}
-                  className="inline-flex shrink-0 items-center gap-1 rounded-md bg-[#14233F] px-2.5 py-1 text-xs font-semibold text-white hover:bg-[#0d172b]"
+                  className="inline-flex shrink-0 items-center gap-1 rounded-md bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
                 >
                   <Check className="size-3" />
                   Use this

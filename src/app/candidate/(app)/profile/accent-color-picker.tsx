@@ -73,13 +73,13 @@ export function AccentColorPicker({ initial }: { initial: string | null }) {
       <h3 className="text-[12px] font-semibold text-ink">
         Profile header color
       </h3>
-      <p className="mt-0.5 mb-2.5 text-[12px] text-slate-500 leading-snug">
+      <p className="mt-0.5 mb-2.5 text-[12px] text-muted-foreground leading-snug">
         Personalize the banner at the top of your profile. Leave it blank for
         our default green.
       </p>
       <div className="flex flex-wrap items-center gap-2.5">
         <span
-          className="h-9 w-12 flex-shrink-0 rounded border border-slate-300"
+          className="h-9 w-12 flex-shrink-0 rounded border border-border"
           style={{ backgroundColor: swatch }}
           aria-hidden
         />
@@ -88,7 +88,7 @@ export function AccentColorPicker({ initial }: { initial: string | null }) {
           aria-label="Pick header color"
           value={HEX_RE.test(color) ? color : DEFAULT_GREEN}
           onChange={(e) => onColorChange(e.target.value)}
-          className="h-9 w-10 cursor-pointer rounded border border-slate-300 bg-white p-0.5"
+          className="h-9 w-10 cursor-pointer rounded border border-border bg-card p-0.5"
         />
         <input
           type="text"
@@ -102,29 +102,29 @@ export function AccentColorPicker({ initial }: { initial: string | null }) {
             setColor(e.target.value);
           }}
           onBlur={onHexBlur}
-          className="w-28 rounded-md border border-slate-300 bg-white px-3 py-2 font-mono text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+          className="w-28 rounded-md border border-border bg-card px-3 py-2 font-mono text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
         />
         {color && (
           <button
             type="button"
             onClick={reset}
-            className="text-[12px] font-medium text-slate-500 underline-offset-2 hover:text-ink hover:underline"
+            className="text-[12px] font-medium text-muted-foreground underline-offset-2 hover:text-ink hover:underline"
           >
             Reset to default
           </button>
         )}
         {saving && (
-          <span className="inline-flex items-center gap-1 text-[12px] text-slate-500">
+          <span className="inline-flex items-center gap-1 text-[12px] text-muted-foreground">
             <Loader2 className="size-3.5 animate-spin" /> Saving…
           </span>
         )}
         {saved && !saving && (
-          <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#4D7A60]">
+          <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-heritage">
             <Check className="size-3.5" /> Saved
           </span>
         )}
         {error && (
-          <span className="text-[12px] text-red-700">{error}</span>
+          <span className="text-[12px] text-danger">{error}</span>
         )}
       </div>
     </div>

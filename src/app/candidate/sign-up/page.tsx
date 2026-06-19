@@ -42,7 +42,7 @@ export default async function CandidateSignUpPage({ searchParams }: PageProps) {
         </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-px bg-[var(--rule)] border border-[var(--rule)]">
-          <div className="bg-white p-8 sm:p-10">
+          <div className="bg-card p-8 sm:p-10">
             <CandidateSignUpForm next={next} />
           </div>
 

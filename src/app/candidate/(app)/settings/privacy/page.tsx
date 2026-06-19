@@ -115,10 +115,10 @@ export default async function CandidatePrivacyPage() {
       {/* #103 — deep-link CTAs (#visibility / #practice-fit) scroll here. */}
       <ScrollToHash />
       <header className="mb-6">
-        <h2 className="font-display text-xl font-bold text-[#14233F]">
+        <h2 className="font-display text-xl font-bold text-foreground">
           Your privacy is the default
         </h2>
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="mt-1 text-sm text-muted-foreground">
           Five independent surfaces. Each one writes to its own setting —
           you don&apos;t lose changes elsewhere if you save one section.
         </p>

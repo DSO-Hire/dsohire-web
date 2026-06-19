@@ -20,8 +20,9 @@ interface SurfaceColors {
 const SURFACES: Record<DsoFitSurface, SurfaceColors> = {
   // On light: reversed palette — heritage "DSO", navy "Fit", navy mark.
   light: { dso: "text-heritage-deep", fit: "text-ink", mark: "text-ink", pillBg: "bg-ink/10" },
-  // On navy: ivory "DSO", light-blue "Fit" + mark.
-  dark: { dso: "text-ivory", fit: "text-blue-400", mark: "text-blue-400", pillBg: "bg-ivory/10" },
+  // On navy: ivory "DSO", light-blue "Fit" + mark. hero-foreground stays light
+  // in BOTH themes (text-ivory would flip dark in dark mode on this navy panel).
+  dark: { dso: "text-hero-foreground", fit: "text-blue-400", mark: "text-blue-400", pillBg: "bg-hero-foreground/10" },
   // On heritage/green (the chooser panel): ivory "DSO" + TRUE-NAVY "Fit" + mark
   // — our locked brand navy, mirroring PracticeFit's navy/green two-tone.
   heritage: { dso: "text-ivory", fit: "text-ink", mark: "text-ink", pillBg: "bg-ivory/15" },

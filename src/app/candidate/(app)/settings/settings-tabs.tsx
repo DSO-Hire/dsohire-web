@@ -42,8 +42,8 @@ export function SettingsTabs() {
                 href={tab.href}
                 className={`inline-block whitespace-nowrap border-b-2 px-3 py-3 text-sm font-medium transition ${
                   isActive
-                    ? "border-[#4D7A60] text-[#14233F]"
-                    : "border-transparent text-slate-600 hover:border-slate-300 hover:text-[#14233F]"
+                    ? "border-heritage text-foreground"
+                    : "border-transparent text-muted-foreground hover:border-border-2 hover:text-foreground"
                 }`}
                 aria-current={isActive ? "page" : undefined}
               >

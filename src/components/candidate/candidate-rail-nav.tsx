@@ -50,8 +50,8 @@ export function CandidateRailNav({
               className={
                 "rail-item group relative flex items-center gap-3 px-3 py-2 text-[13px] font-semibold tracking-[0.2px] border border-transparent transition-colors " +
                 (isActive
-                  ? "rail-item-on bg-white/[0.08] text-ivory border-white/10"
-                  : "text-ivory/60 hover:bg-white/5 hover:text-ivory")
+                  ? "rail-item-on bg-white/[0.08] text-sidebar-foreground border-sidebar-border"
+                  : "text-sidebar-foreground/60 hover:bg-white/5 hover:text-sidebar-foreground")
               }
             >
               {item.isFit ? (
@@ -74,7 +74,7 @@ export function CandidateRailNav({
               {item.badge && item.badge > 0 ? (
                 <span
                   aria-label={`${item.badge} unread`}
-                  className="rail-badge ml-2 inline-flex items-center justify-center rounded-full bg-heritage-deep px-1.5 py-0.5 text-[10px] font-bold text-ivory min-w-[18px]"
+                  className="rail-badge ml-2 inline-flex items-center justify-center rounded-full bg-heritage-deep px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground min-w-[18px]"
                 >
                   {item.badge > 99 ? "99+" : item.badge}
                 </span>
@@ -88,7 +88,7 @@ export function CandidateRailNav({
       <li className="mt-1 px-3">
         <Link
           href={isDso ? "/candidate/practice-fit" : "/candidate/dsofit"}
-          className="rail-aside block py-1.5 text-[11px] text-ivory/45 hover:text-ivory/80 transition-colors"
+          className="rail-aside block py-1.5 text-[11px] text-sidebar-foreground/45 hover:text-sidebar-foreground/80 transition-colors"
         >
           Also explore {isDso ? "PracticeFit" : "DSOFit"} →
         </Link>

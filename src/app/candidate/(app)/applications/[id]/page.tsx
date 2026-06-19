@@ -440,7 +440,7 @@ export default async function CandidateApplicationDetailPage({
         {/* Sidebar */}
         <aside className="space-y-8">
           {job && (
-            <section className="border border-[var(--rule)] bg-white p-5">
+            <section className="border border-[var(--rule)] bg-card p-5">
               <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
                 The Role
               </div>

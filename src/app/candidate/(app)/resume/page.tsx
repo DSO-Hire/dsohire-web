@@ -83,7 +83,7 @@ export default async function CandidateResumePage() {
             {/* Secondary — upload your own */}
             <Link
               href="/candidate/profile/import"
-              className="group block border border-[var(--rule)] bg-white p-5 transition-colors hover:border-heritage-deep"
+              className="group block border border-[var(--rule)] bg-card p-5 transition-colors hover:border-heritage-deep"
             >
               <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-meta">
                 <FileUp className="h-3.5 w-3.5" />
@@ -118,7 +118,7 @@ export default async function CandidateResumePage() {
   }
 
   return (
-    <div className="resume-screen-bg min-h-screen bg-slate-100 py-8">
+    <div className="resume-screen-bg min-h-screen bg-muted py-8">
       <style>{PRINT_CSS}</style>
 
       <ResumeToolbar />

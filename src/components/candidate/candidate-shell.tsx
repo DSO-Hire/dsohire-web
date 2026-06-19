@@ -162,7 +162,7 @@ export function CandidateShell({
            the soft-delete guard above are untouched. */}
       <aside
         id="candidate-rail"
-        className="hidden lg:flex w-[240px] flex-shrink-0 flex-col bg-ink text-ivory border-r border-white/10 sticky top-0 h-screen relative transition-[width] duration-[450ms] print:hidden"
+        className="hidden lg:flex w-[240px] flex-shrink-0 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border sticky top-0 h-screen relative transition-[width] duration-[450ms] print:hidden"
       >
         <RailCollapse targetId="candidate-rail" storageKey="dsoh-cand-rail-slim" />
 
@@ -195,7 +195,7 @@ export function CandidateShell({
             />
           </svg>
           <span className="rail-word inline-flex flex-col leading-none" aria-hidden="true">
-            <span className="text-[23px] font-extrabold tracking-[-0.5px] text-ivory">
+            <span className="text-[23px] font-extrabold tracking-[-0.5px] text-sidebar-foreground">
               DSO
             </span>
             <span className="block w-full text-[8.5px] font-bold text-[#8db8a3] mt-[3px] text-justify [text-align-last:justify]">
@@ -206,7 +206,7 @@ export function CandidateShell({
 
         {/* Identity card — avatar + name (mirrors the employer org card). */}
         <div className="px-3.5 pb-1 pt-1">
-          <div className="rail-org flex items-center gap-2.5 border border-white/[0.14] px-2.5 py-2">
+          <div className="rail-org flex items-center gap-2.5 border border-sidebar-border px-2.5 py-2">
             <Avatar
               name={candidateName}
               imageUrl={candidateAvatar}
@@ -214,7 +214,7 @@ export function CandidateShell({
               className="ring-1 ring-white/10"
             />
             <div className="rail-org-meta min-w-0 flex-1">
-              <div className="text-[12px] font-semibold text-ivory truncate leading-tight">
+              <div className="text-[12px] font-semibold text-sidebar-foreground truncate leading-tight">
                 {candidateName}
               </div>
               <div className="text-[8.5px] font-bold tracking-[1.2px] uppercase text-[#8db8a3] truncate mt-0.5">
@@ -235,23 +235,23 @@ export function CandidateShell({
         </nav>
 
         {/* Footer line — Settings · Help · Sign out → (Model H parity). */}
-        <div className="rail-foot border-t border-white/10 px-5 py-3.5 flex items-center gap-4">
+        <div className="rail-foot border-t border-sidebar-border px-5 py-3.5 flex items-center gap-4">
           <Link
             href="/candidate/settings"
-            className="rail-flink text-[9.5px] font-extrabold tracking-[1.5px] uppercase text-ivory/50 hover:text-ivory transition-colors"
+            className="rail-flink text-[9.5px] font-extrabold tracking-[1.5px] uppercase text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
           >
             Settings
           </Link>
           <Link
             href="/candidate/help"
-            className="rail-flink text-[9.5px] font-extrabold tracking-[1.5px] uppercase text-ivory/50 hover:text-ivory transition-colors"
+            className="rail-flink text-[9.5px] font-extrabold tracking-[1.5px] uppercase text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
           >
             Help
           </Link>
           <form action="/candidate/sign-out" method="post" className="ml-auto">
             <button
               type="submit"
-              className="rail-out text-[9.5px] font-extrabold tracking-[1.5px] uppercase text-[#8db8a3] hover:text-ivory transition-colors"
+              className="rail-out text-[9.5px] font-extrabold tracking-[1.5px] uppercase text-[#8db8a3] hover:text-sidebar-foreground transition-colors"
             >
               Sign out →
             </button>
@@ -294,7 +294,7 @@ export function CandidateShell({
                       )}
                     </span>
                     <span className="font-extrabold tracking-[-0.02em]">
-                      <span className="text-ivory">
+                      <span className="text-sidebar-foreground">
                         {isDso ? "DSO" : "Practice"}
                       </span>
                       <span

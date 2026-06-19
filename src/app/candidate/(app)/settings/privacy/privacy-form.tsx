@@ -198,7 +198,7 @@ function ProfileVisibilitySection({
   return (
     <SectionCard
       id="visibility"
-      icon={<Eye className="size-5 text-[#4D7A60]" />}
+      icon={<Eye className="size-5 text-heritage" />}
       title="Profile visibility"
       description="Three independent toggles — your profile, your resume, and your contact info."
     >
@@ -268,7 +268,7 @@ function CurrentEmployerSection({
 
   return (
     <SectionCard
-      icon={<EyeOff className="size-5 text-[#4D7A60]" />}
+      icon={<EyeOff className="size-5 text-heritage" />}
       title="Hide from current employer"
       description={
         hasCurrent
@@ -282,13 +282,13 @@ function CurrentEmployerSection({
           checked={enabled}
           onChange={(e) => onToggle(e.target.checked)}
           disabled={!hasCurrent || saving}
-          className="mt-0.5 size-4 rounded border-slate-300"
+          className="mt-0.5 size-4 rounded border-border"
         />
         <span className="flex-1 text-sm">
-          <span className="block font-medium text-[#14233F]">
+          <span className="block font-medium text-foreground">
             Hide my profile from my current employer
           </span>
-          <span className="mt-0.5 block text-xs text-slate-500">
+          <span className="mt-0.5 block text-xs text-muted-foreground">
             {hasCurrent
               ? "Recommended. Working hygienists tell us this is the #1 reason they hesitate to sign up."
               : "Add a current role on your profile first."}
@@ -368,24 +368,24 @@ function BlockListSection({ blocked }: { blocked: BlockedEmployer[] }) {
 
   return (
     <SectionCard
-      icon={<Lock className="size-5 text-[#4D7A60]" />}
+      icon={<Lock className="size-5 text-heritage" />}
       title={`Blocked DSOs${items.length > 0 ? ` (${items.length})` : ""}`}
       description="DSOs you don't want to surface to or be surfaced by. Up to 100. Practice-level only at launch — corporate-parent rollup ships in a follow-up."
     >
       <div className="relative">
-        <div className="flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus-within:border-[#4D7A60] focus-within:ring-1 focus-within:ring-[#4D7A60]">
-          <Search className="size-4 text-slate-400" />
+        <div className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm focus-within:border-heritage focus-within:ring-1 focus-within:ring-heritage">
+          <Search className="size-4 text-meta-foreground" />
           <input
             type="text"
             value={query}
             onChange={(e) => runSearch(e.target.value)}
             placeholder="Search a DSO by name…"
-            className="flex-1 outline-none placeholder:text-slate-400"
+            className="flex-1 outline-none placeholder:text-meta-foreground"
             disabled={items.length >= 100}
           />
         </div>
         {results.length > 0 && (
-          <div className="absolute z-20 mt-1 w-full overflow-y-auto rounded-md border border-slate-200 bg-white shadow-xl">
+          <div className="absolute z-20 mt-1 w-full overflow-y-auto rounded-md border border-border bg-popover shadow-xl">
             <ul className="max-h-64">
               {results.map((dso) => (
                 <li key={dso.id}>
@@ -393,13 +393,13 @@ function BlockListSection({ blocked }: { blocked: BlockedEmployer[] }) {
                     type="button"
                     onClick={() => onAdd(dso)}
                     disabled={busy}
-                    className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-[#F7F4ED] disabled:opacity-50"
+                    className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-muted disabled:opacity-50"
                   >
                     <span>
-                      <span className="block font-medium text-[#14233F]">
+                      <span className="block font-medium text-foreground">
                         {dso.name}
                       </span>
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-muted-foreground">
                         {[
                           dso.headquarters_city,
                           dso.headquarters_state,
@@ -411,7 +411,7 @@ function BlockListSection({ blocked }: { blocked: BlockedEmployer[] }) {
                           : ""}
                       </span>
                     </span>
-                    <span className="text-xs font-medium text-[#4D7A60]">
+                    <span className="text-xs font-medium text-heritage">
                       Block
                     </span>
                   </button>
@@ -423,20 +423,20 @@ function BlockListSection({ blocked }: { blocked: BlockedEmployer[] }) {
       </div>
 
       {items.length === 0 ? (
-        <p className="mt-3 text-sm italic text-slate-500">
+        <p className="mt-3 text-sm italic text-muted-foreground">
           No DSOs blocked yet.
         </p>
       ) : (
         <ul className="mt-3 flex flex-wrap gap-2">
           {items.map((item) => (
             <li key={item.id}>
-              <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-800">
+              <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-sm text-foreground">
                 {item.dso_name}
                 <button
                   type="button"
                   onClick={() => onRemove(item.id)}
                   disabled={busy || item.id.startsWith("pending-")}
-                  className="text-slate-500 hover:text-red-700 disabled:opacity-30"
+                  className="text-muted-foreground hover:text-danger disabled:opacity-30"
                   aria-label={`Remove ${item.dso_name} from block list`}
                 >
                   <X className="size-3.5" />
@@ -448,7 +448,7 @@ function BlockListSection({ blocked }: { blocked: BlockedEmployer[] }) {
       )}
 
       {items.length >= 100 && (
-        <p className="mt-3 text-xs text-amber-700">
+        <p className="mt-3 text-xs text-warning">
           Block list is at the 100-DSO cap. Remove one to add another.
         </p>
       )}
@@ -490,7 +490,7 @@ export function PracticeFitSection({
   return (
     <SectionCard
       id="practice-fit"
-      icon={<ShieldCheck className="size-5 text-[#4D7A60]" />}
+      icon={<ShieldCheck className="size-5 text-heritage" />}
       title={
         <span className="inline-flex items-baseline">
           <PracticeFitWordmark surface="light" tm className="text-[1.1em]" />
@@ -506,7 +506,7 @@ export function PracticeFitSection({
         options={PRACTICE_FIT_OPTIONS}
       />
       {consent === "off" && (
-        <div className="rounded-md border border-amber-200 bg-amber-50 px-3.5 py-3 text-[13px] leading-relaxed text-amber-900">
+        <div className="rounded-md border border-warning bg-warning-bg px-3.5 py-3 text-[13px] leading-relaxed text-warning">
           PracticeFit is one of the most useful things on DSO Hire — with it
           off, your roles stop ranking and dental groups can&apos;t find you by
           fit. Worried about your privacy? You can keep PracticeFit on and still
@@ -559,7 +559,7 @@ function AnonymousModeSection({ initial }: { initial: boolean }) {
 
   return (
     <SectionCard
-      icon={<EyeOff className="size-5 text-[#4D7A60]" />}
+      icon={<EyeOff className="size-5 text-heritage" />}
       title="Anonymous browsing"
       description="Stay discoverable to dental groups while hiding your name and photo until you choose to apply."
     >
@@ -568,16 +568,16 @@ function AnonymousModeSection({ initial }: { initial: boolean }) {
           type="checkbox"
           checked={enabled}
           onChange={(e) => setEnabled(e.currentTarget.checked)}
-          className="mt-1 h-4 w-4 flex-shrink-0 accent-[#4D7A60]"
+          className="mt-1 h-4 w-4 flex-shrink-0 accent-heritage"
         />
         <div>
-          <div className="text-[14px] font-semibold text-[#14233F]">
+          <div className="text-[14px] font-semibold text-foreground">
             Browse anonymously
           </div>
-          <p className="mt-1 text-[13px] leading-relaxed text-slate-600">
+          <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
             When on, employers searching the Talent Pool see a generic label
             like{" "}
-            <span className="font-semibold text-[#14233F]">
+            <span className="font-semibold text-foreground">
               &ldquo;Dental Assistant in Denver&rdquo;
             </span>{" "}
             instead of your name or photo. Your experience, skills, and
@@ -605,18 +605,18 @@ function AnonymousModeSection({ initial }: { initial: boolean }) {
 function ViewAsDsoCard() {
   return (
     <SectionCard
-      icon={<Eye className="size-5 text-[#4D7A60]" />}
+      icon={<Eye className="size-5 text-heritage" />}
       title="View as a DSO"
       description="See exactly what an employer sees before they get any of your contact info or full name."
     >
       <Link
         href="/candidate/profile?as=dso"
-        className="inline-flex items-center gap-2 rounded-md border border-[#4D7A60]/40 bg-[#F7F4ED] px-4 py-2 text-sm font-medium text-[#14233F] hover:border-[#4D7A60]"
+        className="inline-flex items-center gap-2 rounded-md border border-heritage/40 bg-card px-4 py-2 text-sm font-medium text-foreground hover:border-heritage"
       >
-        <ExternalLink className="size-4 text-[#4D7A60]" />
+        <ExternalLink className="size-4 text-heritage" />
         Open my profile in DSO view
       </Link>
-      <p className="mt-2 text-xs text-slate-500">
+      <p className="mt-2 text-xs text-muted-foreground">
         Coming soon — preview rendering ships in a follow-up. The link is
         live so you can bookmark it now.
       </p>
@@ -626,14 +626,14 @@ function ViewAsDsoCard() {
 
 function DataSharingCard() {
   return (
-    <section className="border border-[#4D7A60]/30 bg-[#F7F4ED] p-6 sm:p-8">
+    <section className="border border-heritage/30 bg-card p-6 sm:p-8">
       <div className="flex items-start gap-3">
-        <ShieldCheck className="mt-0.5 size-5 shrink-0 text-[#4D7A60]" />
+        <ShieldCheck className="mt-0.5 size-5 shrink-0 text-heritage" />
         <div>
-          <h2 className="font-display text-base font-bold text-[#14233F]">
+          <h2 className="font-display text-base font-bold text-foreground">
             What we share — and what we don&apos;t
           </h2>
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-700">
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-foreground">
             <li>
               <strong>We never sell candidate data.</strong> Not to data
               brokers, not to staffing agencies, not to anyone outside the
@@ -690,17 +690,17 @@ function SectionCard({
   return (
     <section
       id={id}
-      className="scroll-mt-24 border border-[var(--rule)] bg-white p-6 sm:p-8"
+      className="scroll-mt-24 border border-[var(--rule)] bg-card p-6 sm:p-8"
     >
       <header className="mb-4 flex items-start gap-3">
-        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-[#4D7A60]/10">
+        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-heritage/10">
           {icon}
         </div>
         <div>
-          <h2 className="font-display text-lg font-bold text-[#14233F]">
+          <h2 className="font-display text-lg font-bold text-foreground">
             {title}
           </h2>
-          <p className="mt-0.5 text-sm text-slate-600">{description}</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
         </div>
       </header>
       <div className="space-y-4">{children}</div>
@@ -725,7 +725,7 @@ function RadioGroup<T extends string>({
 }) {
   return (
     <fieldset>
-      <legend className="mb-2 text-sm font-medium text-slate-800">
+      <legend className="mb-2 text-sm font-medium text-foreground">
         {legend}
       </legend>
       <div className="space-y-2">
@@ -734,8 +734,8 @@ function RadioGroup<T extends string>({
             key={opt.value}
             className={`block cursor-pointer rounded-md border p-3 text-sm transition ${
               value === opt.value
-                ? "border-[#4D7A60] bg-[#4D7A60]/10"
-                : "border-slate-300 bg-white hover:border-slate-400"
+                ? "border-heritage bg-heritage/10"
+                : "border-border bg-card hover:border-border-2"
             }`}
           >
             <input
@@ -744,10 +744,10 @@ function RadioGroup<T extends string>({
               onChange={() => onChange(opt.value)}
               className="sr-only"
             />
-            <span className="block font-medium text-[#14233F]">
+            <span className="block font-medium text-foreground">
               {opt.label}
             </span>
-            <span className="mt-0.5 block text-xs text-slate-600">
+            <span className="mt-0.5 block text-xs text-muted-foreground">
               {opt.description}
             </span>
           </label>
@@ -771,27 +771,27 @@ function SaveBar({
   onSave: () => void;
 }) {
   return (
-    <div className="flex items-center justify-between border-t border-slate-100 pt-4">
+    <div className="flex items-center justify-between border-t border-border pt-4">
       <div className="text-xs">
         {error ? (
-          <span className="inline-flex items-center gap-1 text-red-700">
+          <span className="inline-flex items-center gap-1 text-danger">
             <AlertCircle className="size-3.5" /> {error}
           </span>
         ) : savedFlash ? (
-          <span className="inline-flex items-center gap-1 text-[#4D7A60]">
+          <span className="inline-flex items-center gap-1 text-heritage">
             <Sparkles className="size-3.5" /> {savedFlash}
           </span>
         ) : dirty ? (
-          <span className="text-slate-600">Unsaved changes</span>
+          <span className="text-muted-foreground">Unsaved changes</span>
         ) : (
-          <span className="text-slate-400">Saved.</span>
+          <span className="text-meta-foreground">Saved.</span>
         )}
       </div>
       <button
         type="button"
         onClick={onSave}
         disabled={!dirty || saving}
-        className="inline-flex items-center gap-1.5 rounded-md bg-[#14233F] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d172b] disabled:opacity-50"
+        className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
       >
         {saving ? "Saving…" : (
           <>
@@ -805,7 +805,7 @@ function SaveBar({
 
 function InlineError({ message }: { message: string }) {
   return (
-    <p role="alert" className="text-sm text-red-700">
+    <p role="alert" className="text-sm text-danger">
       <AlertCircle className="mr-1 inline size-3.5" />
       {message}
     </p>
@@ -814,7 +814,7 @@ function InlineError({ message }: { message: string }) {
 
 function InlineFlash({ message }: { message: string }) {
   return (
-    <p role="status" className="text-xs text-[#4D7A60]">
+    <p role="status" className="text-xs text-heritage">
       <Sparkles className="mr-1 inline size-3" />
       {message}
     </p>

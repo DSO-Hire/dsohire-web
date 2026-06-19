@@ -61,10 +61,10 @@ export default async function CandidateNotificationsPage() {
   return (
     <div>
       <header className="mb-6">
-        <h2 className="font-display text-xl font-bold text-[#14233F]">
+        <h2 className="font-display text-xl font-bold text-foreground">
           How we contact you
         </h2>
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="mt-1 text-sm text-muted-foreground">
           Toggle email + in-app notifications per event. SMS rolls out in a
           follow-up release. Your preferences here are the source of truth —
           we never override them.

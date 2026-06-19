@@ -153,7 +153,7 @@ export function CandidateProfileView({
   return (
     <div>
       {/* Header card — cover band + overlapping avatar, LinkedIn-style */}
-      <div className="border border-[var(--rule)] bg-white overflow-hidden">
+      <div className="border border-[var(--rule)] bg-card overflow-hidden">
         <div
           className="h-16 w-full sm:h-20"
           style={{
@@ -441,7 +441,7 @@ function CredentialRow({
 }) {
   const badge = credentialBadge(status);
   return (
-    <li className="flex items-start justify-between gap-3 border border-[var(--rule)] bg-white px-3.5 py-2.5">
+    <li className="flex items-start justify-between gap-3 border border-[var(--rule)] bg-card px-3.5 py-2.5">
       <div className="min-w-0">
         <div className="text-[13px] font-semibold text-ink leading-tight">
           {primary}
@@ -469,26 +469,26 @@ function credentialBadge(status: string): {
     case "verified":
       return {
         label: "Verified",
-        cls: "bg-emerald-50 text-emerald-800 ring-emerald-300",
+        cls: "bg-success-bg text-success ring-success",
         Icon: ShieldCheck,
       };
     case "expired":
       return {
         label: "Expired",
-        cls: "bg-red-50 text-red-800 ring-red-300",
+        cls: "bg-danger-bg text-danger ring-danger",
         Icon: AlertTriangle,
       };
     case "pending":
       return {
         label: "Pending",
-        cls: "bg-amber-50 text-amber-800 ring-amber-300",
+        cls: "bg-warning-bg text-warning ring-warning",
         Icon: Clock,
       };
     case "unverified":
     default:
       return {
         label: "Self-reported",
-        cls: "bg-slate-50 text-slate-600 ring-slate-300",
+        cls: "bg-muted text-muted-foreground ring-border",
         Icon: FileText,
       };
   }
@@ -550,7 +550,7 @@ function SidebarCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="border border-[var(--rule)] bg-white p-4">
+    <section className="border border-[var(--rule)] bg-card p-4">
       <h2 className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-2">
         {title}
       </h2>

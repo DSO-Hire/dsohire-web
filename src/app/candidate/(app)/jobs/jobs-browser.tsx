@@ -163,14 +163,14 @@ export function JobsBrowser({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search role or practice…"
-              className="w-full rounded-md border border-[var(--rule)] bg-white pl-9 pr-3 py-2 text-[13px] text-ink placeholder:text-slate-meta focus:border-heritage focus:outline-none"
+              className="w-full rounded-md border border-[var(--rule)] bg-card pl-9 pr-3 py-2 text-[13px] text-ink placeholder:text-slate-meta focus:border-heritage focus:outline-none"
             />
           </label>
           {stateOptions.length > 0 && (
             <select
               value={stateFilter}
               onChange={(e) => setStateFilter(e.target.value)}
-              className="rounded-md border border-[var(--rule)] bg-white px-3 py-2 text-[13px] text-ink focus:border-heritage focus:outline-none"
+              className="rounded-md border border-[var(--rule)] bg-card px-3 py-2 text-[13px] text-ink focus:border-heritage focus:outline-none"
             >
               <option value="">All states</option>
               {stateOptions.map((s) => (
@@ -219,7 +219,7 @@ export function JobsBrowser({
                   className={
                     "rounded-full border px-3 py-1 text-[11px] font-semibold tracking-[0.3px] transition-colors " +
                     (active
-                      ? "border-heritage-deep bg-heritage-deep text-ivory"
+                      ? "border-heritage-deep bg-heritage-deep text-primary-foreground"
                       : "border-[var(--rule)] text-slate-body hover:border-heritage-deep hover:text-heritage-deep")
                   }
                 >
@@ -331,7 +331,7 @@ function Row({ job }: { job: BrowseJob }) {
     <li className="border-b border-[var(--rule)]">
       <Link
         href={`/jobs/${job.id}`}
-        className="group relative block py-5 -mx-4 pl-5 pr-4 border-l-4 border-l-transparent transition-all duration-150 hover:border-l-heritage-deep hover:bg-white hover:shadow-[0_2px_18px_-12px_rgba(20,35,63,0.25)]"
+        className="group relative block py-5 -mx-4 pl-5 pr-4 border-l-4 border-l-transparent transition-all duration-150 hover:border-l-heritage-deep hover:bg-card hover:shadow-[0_2px_18px_-12px_rgba(20,35,63,0.25)]"
       >
         <div className="flex items-start justify-between gap-6">
           <div className="flex-1 min-w-0">
@@ -359,7 +359,7 @@ function Row({ job }: { job: BrowseJob }) {
                 </span>
               )}
               {job.applied && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-heritage text-ivory text-[10px] font-bold tracking-[1.2px] uppercase">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-heritage text-primary-foreground text-[10px] font-bold tracking-[1.2px] uppercase">
                   Applied
                 </span>
               )}
@@ -415,7 +415,7 @@ function PracticeFitOffBanner({
       </p>
       <Link
         href={product === "dsofit" ? "/candidate/dsofit" : "/candidate/practice-fit"}
-        className="inline-flex items-center gap-1.5 rounded-md bg-heritage px-3 py-2 text-[11px] font-bold tracking-[1px] uppercase text-ivory hover:bg-heritage-deep"
+        className="inline-flex items-center gap-1.5 rounded-md bg-heritage px-3 py-2 text-[11px] font-bold tracking-[1px] uppercase text-primary-foreground hover:bg-heritage-deep"
       >
         <FitMark product={product} className="h-3 w-3" />
         Turn on {name}

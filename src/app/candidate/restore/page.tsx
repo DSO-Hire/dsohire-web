@@ -75,8 +75,8 @@ export default async function CandidateRestorePage() {
           />
         </div>
 
-        <div className="border border-amber-200 bg-amber-50/40 p-6 sm:p-8">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-amber-900">
+        <div className="border border-warning bg-warning-bg/40 p-6 sm:p-8">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-warning-bg px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-warning">
             Account scheduled for deletion
           </div>
           <h1 className="font-display text-2xl font-extrabold tracking-[-0.5px] text-ink mb-3">

@@ -30,10 +30,10 @@ export default async function CandidateDataPage() {
   return (
     <div>
       <header className="mb-6">
-        <h2 className="font-display text-xl font-bold text-[#14233F]">
+        <h2 className="font-display text-xl font-bold text-foreground">
           Your data, your call
         </h2>
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="mt-1 text-sm text-muted-foreground">
           Download a copy, manage your applications, or delete your
           account. We make all of it cheap to do.
         </p>

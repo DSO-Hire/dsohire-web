@@ -174,7 +174,7 @@ export function CandidateFitSummary({
   return (
     <section className="mb-6">
       <SectionHeader product={best.product} />
-      <div className="border border-[var(--rule)] bg-white p-5">
+      <div className="border border-[var(--rule)] bg-card p-5">
         <div className="flex items-start gap-5 flex-wrap">
           {/* Best fit headline */}
           <div className="flex-1 min-w-[260px]">

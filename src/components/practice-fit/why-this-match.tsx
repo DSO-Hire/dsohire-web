@@ -159,7 +159,7 @@ export function WhyThisMatch({
 
   return (
     <section
-      className={`border ${style.borderClass} bg-white overflow-hidden`}
+      className={`border ${style.borderClass} bg-card overflow-hidden`}
     >
       <button
         type="button"
@@ -200,7 +200,7 @@ export function WhyThisMatch({
             (narrative.status === "loading" ||
               narrative.status === "ready" ||
               narrative.status === "error") && (
-              <li className="px-4 py-3 bg-[#FAF7F1]">
+              <li className="px-4 py-3 bg-muted">
                 {narrative.status === "loading" && (
                   <NarrativeSkeleton product={fit.product} />
                 )}
@@ -229,7 +229,7 @@ export function WhyThisMatch({
               />
             )
           )}
-          <li className="px-4 py-3 bg-slate-50/50">
+          <li className="px-4 py-3 bg-muted/50">
             <p className="text-[11px] text-slate-meta leading-relaxed">
               {fit.product === "dsofit" ? (
                 <>
@@ -276,9 +276,9 @@ function NarrativeSkeleton({ product }: { product?: "practicefit" | "dsofit" }) 
         Summarizing the match…
       </div>
       <div className="space-y-2 animate-pulse">
-        <div className="h-3 bg-slate-200/70 w-[92%] rounded-sm" />
-        <div className="h-3 bg-slate-200/70 w-[88%] rounded-sm" />
-        <div className="h-3 bg-slate-200/70 w-[60%] rounded-sm" />
+        <div className="h-3 bg-muted-foreground/20 w-[92%] rounded-sm" />
+        <div className="h-3 bg-muted-foreground/20 w-[88%] rounded-sm" />
+        <div className="h-3 bg-muted-foreground/20 w-[60%] rounded-sm" />
       </div>
     </div>
   );
@@ -307,7 +307,7 @@ function ScoredDimRow({
           +{Math.round(dim.contribution)} of {dim.weight}
         </span>
       </div>
-      <div className="h-1 bg-slate-100 overflow-hidden">
+      <div className="h-1 bg-muted overflow-hidden">
         <div
           className="h-full bg-heritage transition-all"
           style={{ width: `${fillPct}%` }}
@@ -340,7 +340,7 @@ function UnscoredDimRow({
   const isCandidate = audience === "candidate";
   const detail = isCandidate ? dim.detail : dim.detail_employer;
   return (
-    <li className="px-4 py-3 bg-slate-50/40">
+    <li className="px-4 py-3 bg-muted/40">
       <div className="flex items-baseline justify-between gap-3 mb-1">
         <p className="text-[13px] font-semibold text-slate-meta">
           {dim.label}

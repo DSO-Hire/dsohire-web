@@ -80,7 +80,7 @@ export function InlineDimEditor({ dimKey }: InlineDimEditorProps) {
   }
 
   return (
-    <div className="mt-3 border border-[var(--rule)] bg-white p-3">
+    <div className="mt-3 border border-[var(--rule)] bg-card p-3">
       <div className="flex flex-wrap items-end gap-2">
         {dimKey === "compensation" && (
           <>
@@ -103,7 +103,7 @@ export function InlineDimEditor({ dimKey }: InlineDimEditorProps) {
               <select
                 value={salaryUnit}
                 onChange={(e) => setSalaryUnit(e.target.value)}
-                className="w-full px-2 py-1.5 text-[13px] border border-[var(--rule)] focus:border-heritage focus:outline-none bg-white"
+                className="w-full px-2 py-1.5 text-[13px] border border-[var(--rule)] focus:border-heritage focus:outline-none bg-card"
               >
                 <option value="hourly">hour</option>
                 <option value="yearly">year</option>
@@ -148,8 +148,8 @@ export function InlineDimEditor({ dimKey }: InlineDimEditorProps) {
                   onClick={() => setTempOrPerm(opt.value)}
                   className={`px-2.5 py-1 text-[11px] font-medium border transition-colors ${
                     tempOrPerm === opt.value
-                      ? "bg-heritage-deep text-ivory border-heritage-deep"
-                      : "bg-white text-ink border-[var(--rule)] hover:border-heritage"
+                      ? "bg-heritage-deep text-primary-foreground border-heritage-deep"
+                      : "bg-card text-ink border-[var(--rule)] hover:border-heritage"
                   }`}
                 >
                   {opt.label}
@@ -177,8 +177,8 @@ export function InlineDimEditor({ dimKey }: InlineDimEditorProps) {
                   onClick={() => setDsoSize(opt.value)}
                   className={`px-2.5 py-1 text-[11px] font-medium border transition-colors ${
                     dsoSize === opt.value
-                      ? "bg-heritage-deep text-ivory border-heritage-deep"
-                      : "bg-white text-ink border-[var(--rule)] hover:border-heritage"
+                      ? "bg-heritage-deep text-primary-foreground border-heritage-deep"
+                      : "bg-card text-ink border-[var(--rule)] hover:border-heritage"
                   }`}
                 >
                   {opt.label}
@@ -192,7 +192,7 @@ export function InlineDimEditor({ dimKey }: InlineDimEditorProps) {
           type="button"
           onClick={handleSave}
           disabled={pending || saved}
-          className="px-3 py-1.5 text-[10px] font-bold tracking-[1.5px] uppercase bg-ink text-ivory hover:bg-ink-soft disabled:opacity-60 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-1.5"
+          className="px-3 py-1.5 text-[10px] font-bold tracking-[1.5px] uppercase bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-1.5"
         >
           {pending && <Loader2 className="h-3 w-3 animate-spin" />}
           {saved && <Check className="h-3 w-3" />}
@@ -200,7 +200,7 @@ export function InlineDimEditor({ dimKey }: InlineDimEditorProps) {
         </button>
       </div>
       {error && (
-        <p className="mt-2 text-[11px] text-red-700 leading-snug">{error}</p>
+        <p className="mt-2 text-[11px] text-danger leading-snug">{error}</p>
       )}
       {saved && (
         <p className="mt-2 text-[11px] text-heritage-deep leading-snug">

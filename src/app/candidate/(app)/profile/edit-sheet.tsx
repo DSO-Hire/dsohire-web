@@ -100,21 +100,21 @@ export function EditSheet({
       />
 
       {/* Sheet */}
-      <div className="relative z-10 flex h-full w-full flex-col overflow-hidden bg-white shadow-2xl sm:h-auto sm:max-h-[90vh] sm:w-full sm:max-w-[680px] sm:rounded-lg">
-        <header className="flex shrink-0 items-start justify-between gap-4 border-b border-slate-200 px-5 py-4 sm:px-6">
+      <div className="relative z-10 flex h-full w-full flex-col overflow-hidden bg-card shadow-2xl sm:h-auto sm:max-h-[90vh] sm:w-full sm:max-w-[680px] sm:rounded-lg">
+        <header className="flex shrink-0 items-start justify-between gap-4 border-b border-border px-5 py-4 sm:px-6">
           <div>
-            <h2 className="font-display text-lg font-bold text-[#14233F]">
+            <h2 className="font-display text-lg font-bold text-foreground">
               {title}
             </h2>
             {description && (
-              <p className="mt-0.5 text-sm text-slate-600">{description}</p>
+              <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
             )}
           </div>
           <button
             type="button"
             onClick={() => !saving && onClose()}
             disabled={saving}
-            className="rounded-md p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-50"
+            className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"
             aria-label="Close"
           >
             <X className="size-5" />
@@ -122,7 +122,7 @@ export function EditSheet({
         </header>
 
         {banner && (
-          <div className="shrink-0 border-b border-slate-200 px-5 py-3 sm:px-6">
+          <div className="shrink-0 border-b border-border px-5 py-3 sm:px-6">
             {banner}
           </div>
         )}
@@ -131,14 +131,14 @@ export function EditSheet({
           {children}
         </div>
 
-        <footer className="flex shrink-0 items-center justify-between gap-3 border-t border-slate-200 bg-slate-50 px-5 py-3 sm:px-6">
+        <footer className="flex shrink-0 items-center justify-between gap-3 border-t border-border bg-muted px-5 py-3 sm:px-6">
           <div>{footerLeft}</div>
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => !saving && onClose()}
               disabled={saving}
-              className="rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-50"
+              className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground disabled:opacity-50"
             >
               Cancel
             </button>
@@ -146,7 +146,7 @@ export function EditSheet({
               type="button"
               onClick={onSave}
               disabled={saving || saveDisabled}
-              className="rounded-md bg-[#14233F] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0d172b] disabled:opacity-60"
+              className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
             >
               {saving ? "Saving…" : saveLabel}
             </button>
@@ -174,12 +174,12 @@ export function TextField(props: {
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-sm font-medium text-slate-800">
+      <span className="mb-1 block text-sm font-medium text-foreground">
         {props.label}
-        {props.required && <span className="ml-0.5 text-red-700">*</span>}
+        {props.required && <span className="ml-0.5 text-danger">*</span>}
       </span>
       {props.helper && (
-        <span className="mb-1.5 block text-xs text-slate-500">
+        <span className="mb-1.5 block text-xs text-muted-foreground">
           {props.helper}
         </span>
       )}
@@ -190,7 +190,7 @@ export function TextField(props: {
         placeholder={props.placeholder}
         maxLength={props.maxLength}
         autoComplete={props.autoComplete}
-        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+        className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
       />
     </label>
   );
@@ -207,11 +207,11 @@ export function TextAreaField(props: {
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-sm font-medium text-slate-800">
+      <span className="mb-1 block text-sm font-medium text-foreground">
         {props.label}
       </span>
       {props.helper && (
-        <span className="mb-1.5 block text-xs text-slate-500">
+        <span className="mb-1.5 block text-xs text-muted-foreground">
           {props.helper}
         </span>
       )}
@@ -221,7 +221,7 @@ export function TextAreaField(props: {
         placeholder={props.placeholder}
         rows={props.rows ?? 3}
         maxLength={props.maxLength}
-        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+        className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
       />
     </label>
   );
@@ -302,28 +302,28 @@ export function ChipArrayInput(props: {
 
   return (
     <div>
-      <span className="mb-1 block text-sm font-medium text-slate-800">
+      <span className="mb-1 block text-sm font-medium text-foreground">
         {props.label}
       </span>
       {props.helper && (
-        <span className="mb-1.5 block text-xs text-slate-500">
+        <span className="mb-1.5 block text-xs text-muted-foreground">
           {props.helper}
         </span>
       )}
       <div className="mb-2 flex flex-wrap gap-2">
         {props.values.length === 0 ? (
-          <span className="text-xs italic text-slate-400">None added yet.</span>
+          <span className="text-xs italic text-meta-foreground">None added yet.</span>
         ) : (
           props.values.map((v, i) => (
             <span
               key={`${v}-${i}`}
-              className="inline-flex items-center gap-1 rounded-full bg-[#4D7A60]/10 px-3 py-1 text-sm text-[#14233F]"
+              className="inline-flex items-center gap-1 rounded-full bg-heritage/10 px-3 py-1 text-sm text-foreground"
             >
               {props.labelFor ? props.labelFor(v) : v}
               <button
                 type="button"
                 onClick={() => remove(i)}
-                className="text-[#4D7A60] hover:text-[#14233F]"
+                className="text-heritage hover:text-foreground"
                 aria-label={`Remove ${v}`}
               >
                 <X className="size-3.5" />
@@ -344,12 +344,12 @@ export function ChipArrayInput(props: {
             }
           }}
           placeholder={props.placeholder}
-          className="flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+          className="flex-1 rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
         />
         <button
           type="button"
           onClick={() => add(draft)}
-          className="inline-flex items-center gap-1 rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
         >
           <Plus className="size-4" />
           Add
@@ -357,7 +357,7 @@ export function ChipArrayInput(props: {
       </div>
       {remainingOptions && remainingOptions.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2 items-center">
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-muted-foreground">
             {isFiltering
               ? `Matching (${remainingOptions.length}):`
               : "Quick add:"}
@@ -367,7 +367,7 @@ export function ChipArrayInput(props: {
               key={opt.value}
               type="button"
               onClick={() => add(opt.value)}
-              className="rounded-full border border-dashed border-slate-300 px-2.5 py-0.5 text-xs text-slate-600 hover:border-[#4D7A60] hover:text-[#14233F]"
+              className="rounded-full border border-dashed border-border px-2.5 py-0.5 text-xs text-muted-foreground hover:border-heritage hover:text-foreground"
             >
               + {opt.label}
             </button>
@@ -380,7 +380,7 @@ export function ChipArrayInput(props: {
             <button
               type="button"
               onClick={() => setShowAll(true)}
-              className="text-xs font-semibold text-[#4D7A60] hover:text-[#14233F] underline underline-offset-2"
+              className="text-xs font-semibold text-heritage hover:text-foreground underline underline-offset-2"
             >
               Show all ({hiddenCount} more)
             </button>
@@ -389,7 +389,7 @@ export function ChipArrayInput(props: {
             <button
               type="button"
               onClick={() => setShowAll(false)}
-              className="text-xs font-semibold text-[#4D7A60] hover:text-[#14233F] underline underline-offset-2"
+              className="text-xs font-semibold text-heritage hover:text-foreground underline underline-offset-2"
             >
               Show less
             </button>
@@ -397,7 +397,7 @@ export function ChipArrayInput(props: {
         </div>
       )}
       {isFiltering && remainingOptions && remainingOptions.length === 0 && (
-        <p className="mt-3 text-xs italic text-slate-400">
+        <p className="mt-3 text-xs italic text-meta-foreground">
           {props.restrictToOptions
             ? "No matches. Pick from the list — custom values aren't allowed for this field."
             : `No matches — press Enter to add “${draft.trim()}” as a custom value.`}
@@ -441,34 +441,34 @@ export function ComboboxField(props: {
 
   return (
     <div ref={ref} className="relative">
-      <span className="mb-1 block text-sm font-medium text-slate-800">
+      <span className="mb-1 block text-sm font-medium text-foreground">
         {props.label}
-        {props.required && <span className="ml-0.5 text-red-700">*</span>}
+        {props.required && <span className="ml-0.5 text-danger">*</span>}
       </span>
       {props.helper && (
-        <span className="mb-1.5 block text-xs text-slate-500">
+        <span className="mb-1.5 block text-xs text-muted-foreground">
           {props.helper}
         </span>
       )}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between rounded-md border border-slate-300 bg-white px-3 py-2 text-left text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+        className="flex w-full items-center justify-between rounded-md border border-border bg-card px-3 py-2 text-left text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
       >
-        <span className={props.value ? "" : "text-slate-400"}>
+        <span className={props.value ? "" : "text-meta-foreground"}>
           {props.value ? currentLabel : "Select…"}
         </span>
-        <span className="text-xs text-slate-400">▾</span>
+        <span className="text-xs text-meta-foreground">▾</span>
       </button>
       {open && (
-        <div className="absolute z-30 mt-1 max-h-72 w-full overflow-y-auto rounded-md border border-slate-200 bg-white p-1 shadow-xl">
+        <div className="absolute z-30 mt-1 max-h-72 w-full overflow-y-auto rounded-md border border-border bg-popover p-1 shadow-xl">
           <input
             autoFocus
             type="text"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             placeholder="Filter…"
-            className="mb-1 w-full rounded-sm border border-slate-200 px-2 py-1 text-sm focus:border-[#4D7A60] focus:outline-none"
+            className="mb-1 w-full rounded-sm border border-border px-2 py-1 text-sm focus:border-heritage focus:outline-none"
           />
           {matched.map((opt) => (
             <button
@@ -479,10 +479,10 @@ export function ComboboxField(props: {
                 setOpen(false);
                 setFilter("");
               }}
-              className={`block w-full rounded-sm px-2 py-1.5 text-left text-sm hover:bg-[#F7F4ED] ${
+              className={`block w-full rounded-sm px-2 py-1.5 text-left text-sm hover:bg-muted ${
                 opt.value === props.value
-                  ? "bg-[#4D7A60]/10 font-medium text-[#14233F]"
-                  : "text-slate-700"
+                  ? "bg-heritage/10 font-medium text-foreground"
+                  : "text-foreground"
               }`}
             >
               {opt.label}
@@ -496,13 +496,13 @@ export function ComboboxField(props: {
                 setOpen(false);
                 setFilter("");
               }}
-              className="block w-full rounded-sm px-2 py-1.5 text-left text-sm text-slate-700 hover:bg-[#F7F4ED]"
+              className="block w-full rounded-sm px-2 py-1.5 text-left text-sm text-foreground hover:bg-muted"
             >
               Use custom: <strong>{filter.trim()}</strong>
             </button>
           )}
           {matched.length === 0 && !props.allowCustom && (
-            <p className="px-2 py-2 text-xs italic text-slate-500">
+            <p className="px-2 py-2 text-xs italic text-muted-foreground">
               No matches.
             </p>
           )}
@@ -515,7 +515,7 @@ export function ComboboxField(props: {
 export function InlineError({ message }: { message: string | null }) {
   if (!message) return null;
   return (
-    <p role="alert" className="text-sm text-red-700">
+    <p role="alert" className="text-sm text-danger">
       {message}
     </p>
   );

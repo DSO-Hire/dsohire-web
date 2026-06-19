@@ -69,7 +69,7 @@ export function RolesThatFitCard({
           Browse all
         </Link>
       </div>
-      <div className="border border-[var(--rule)] bg-white divide-y divide-[var(--rule)]">
+      <div className="border border-[var(--rule)] bg-card divide-y divide-[var(--rule)]">
         {roles.map((r) => {
           const loc = formatLocations(r.locations);
           const sub = [r.dso_name, loc].filter(Boolean).join(" · ");

@@ -175,7 +175,7 @@ export default async function CandidateProfilePage() {
           haven't imported yet; thin "Re-import" link once they have.
           Signal: `last_parsed_at` is set by the parse-and-confirm action. */}
       {hasImportedResume ? (
-        <div className="mb-6 flex max-w-[820px] items-center justify-between gap-4 border border-[var(--rule)] bg-white px-4 py-2.5">
+        <div className="mb-6 flex max-w-[820px] items-center justify-between gap-4 border border-[var(--rule)] bg-card px-4 py-2.5">
           <p className="text-[12px] text-slate-body leading-snug">
             <span className="font-semibold text-ink">Resume on file.</span>{" "}
             Edit any section below to update — or re-import if you have a
@@ -236,7 +236,7 @@ export default async function CandidateProfilePage() {
           "Add a photo" quick-win CTA) */}
       <div
         id="profile-photo"
-        className="mb-6 max-w-[820px] scroll-mt-24 border border-[var(--rule)] bg-white p-7 transition-shadow sm:p-10"
+        className="mb-6 max-w-[820px] scroll-mt-24 border border-[var(--rule)] bg-card p-7 transition-shadow sm:p-10"
       >
         <h2 className="mb-1 font-display text-lg font-bold text-ink">
           Profile photo &amp; header

@@ -143,7 +143,7 @@ export function ResumeImportWizard() {
     <div className="mx-auto max-w-3xl px-4 py-10">
       <Link
         href="/candidate/profile"
-        className="mb-6 inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900"
+        className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-4" />
         Back to profile
@@ -189,10 +189,10 @@ function DropState(props: {
 }) {
   return (
     <>
-      <h1 className="font-display text-3xl font-bold text-[#14233F]">
+      <h1 className="font-display text-3xl font-bold text-foreground">
         Import your resume
       </h1>
-      <p className="mt-2 text-base text-slate-600">
+      <p className="mt-2 text-base text-muted-foreground">
         Upload your resume and we&apos;ll fill in your profile automatically.
         You&apos;ll review every field before anything is saved.
       </p>
@@ -209,13 +209,13 @@ function DropState(props: {
         }}
         role="button"
         tabIndex={0}
-        className="mt-8 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#4D7A60]/40 bg-[#F7F4ED] px-6 py-16 text-center transition hover:border-[#4D7A60] hover:bg-[#F7F4ED]/70 focus:outline-none focus:ring-2 focus:ring-[#4D7A60] focus:ring-offset-2"
+        className="mt-8 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-heritage/40 bg-muted px-6 py-16 text-center transition hover:border-heritage hover:bg-muted/70 focus:outline-none focus:ring-2 focus:ring-heritage focus:ring-offset-2"
       >
-        <FileUp className="size-10 text-[#4D7A60]" />
-        <p className="mt-4 text-lg font-semibold text-[#14233F]">
+        <FileUp className="size-10 text-heritage" />
+        <p className="mt-4 text-lg font-semibold text-foreground">
           Drag your resume here
         </p>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           or click to browse — PDF or DOCX, up to 10MB
         </p>
         <input
@@ -231,7 +231,7 @@ function DropState(props: {
       {props.error && (
         <div
           role="alert"
-          className="mt-4 flex items-start gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+          className="mt-4 flex items-start gap-2 rounded-md border border-danger bg-danger-bg px-4 py-3 text-sm text-danger"
         >
           <CircleAlert className="mt-0.5 size-4 shrink-0" />
           <span>{props.error}</span>
@@ -245,14 +245,14 @@ function DropState(props: {
 
 function PrivacyDisclosure() {
   return (
-    <div className="mt-8 rounded-lg border border-[#4D7A60]/20 bg-white px-5 py-4">
+    <div className="mt-8 rounded-lg border border-heritage/20 bg-card px-5 py-4">
       <div className="flex items-start gap-3">
-        <ShieldCheck className="mt-0.5 size-5 shrink-0 text-[#4D7A60]" />
+        <ShieldCheck className="mt-0.5 size-5 shrink-0 text-heritage" />
         <div className="text-sm">
-          <p className="font-semibold text-[#14233F]">
+          <p className="font-semibold text-foreground">
             Privacy by default
           </p>
-          <p className="mt-1 text-slate-600">
+          <p className="mt-1 text-muted-foreground">
             Your resume is parsed by Anthropic&apos;s Claude model. We never
             collect Social Security numbers, dates of birth, or DEA
             registration — even if your resume mentions them. License
@@ -273,17 +273,17 @@ function ParsingState({ filename }: { filename: string }) {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
       <div className="relative">
-        <Loader2 className="size-12 animate-spin text-[#4D7A60]" />
-        <Sparkles className="absolute -right-2 -top-2 size-5 text-[#14233F]" />
+        <Loader2 className="size-12 animate-spin text-heritage" />
+        <Sparkles className="absolute -right-2 -top-2 size-5 text-foreground" />
       </div>
-      <h2 className="mt-6 font-display text-2xl font-bold text-[#14233F]">
+      <h2 className="mt-6 font-display text-2xl font-bold text-foreground">
         Reading your resume…
       </h2>
-      <p className="mt-2 max-w-md text-sm text-slate-600">
+      <p className="mt-2 max-w-md text-sm text-muted-foreground">
         Pulling out work history, education, licenses, and skills. This
         usually takes 3–7 seconds.
       </p>
-      <p className="mt-6 text-xs text-slate-400">{filename}</p>
+      <p className="mt-6 text-xs text-meta-foreground">{filename}</p>
     </div>
   );
 }
@@ -299,7 +299,7 @@ export function ConfidencePill({
 }) {
   if (confidence === "high") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-800">
+      <span className="inline-flex items-center gap-1 rounded-full bg-success-bg px-2 py-0.5 text-xs font-medium text-success">
         <CheckCircle2 className="size-3" />
         High confidence
       </span>
@@ -307,14 +307,14 @@ export function ConfidencePill({
   }
   if (confidence === "medium") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
+      <span className="inline-flex items-center gap-1 rounded-full bg-warning-bg px-2 py-0.5 text-xs font-medium text-warning">
         <CircleHelp className="size-3" />
         Please review
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-800">
+    <span className="inline-flex items-center gap-1 rounded-full bg-danger-bg px-2 py-0.5 text-xs font-medium text-danger">
       <CircleAlert className="size-3" />
       Low confidence
     </span>

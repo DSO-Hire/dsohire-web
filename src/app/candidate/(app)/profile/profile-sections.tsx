@@ -360,14 +360,14 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="border border-slate-200 bg-white p-6 sm:p-8">
+    <section className="border border-border bg-card p-6 sm:p-8">
       <header className="mb-4 flex items-start justify-between gap-3">
         <div>
-          <h2 className="font-display text-lg font-bold text-[#14233F]">
+          <h2 className="font-display text-lg font-bold text-foreground">
             {title}
           </h2>
           {subtitle && (
-            <p className="mt-0.5 text-sm text-slate-600">{subtitle}</p>
+            <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>
           )}
         </div>
         {action}
@@ -382,7 +382,7 @@ function EditButton({ onClick, label = "Edit" }: { onClick: () => void; label?: 
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+      className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted"
     >
       <Pencil className="size-3.5" />
       {label}
@@ -395,7 +395,7 @@ function AddButton({ onClick, label = "Add" }: { onClick: () => void; label?: st
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+      className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted"
     >
       <Plus className="size-3.5" />
       {label}
@@ -405,8 +405,8 @@ function AddButton({ onClick, label = "Add" }: { onClick: () => void; label?: st
 
 function EmptyHint({ text, icon }: { text: string; icon?: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-2 rounded-md bg-slate-50 px-4 py-3 text-sm text-slate-500">
-      {icon ?? <Sparkles className="size-4 text-[#4D7A60]" />}
+    <div className="flex items-center gap-2 rounded-md bg-muted px-4 py-3 text-sm text-muted-foreground">
+      {icon ?? <Sparkles className="size-4 text-heritage" />}
       <span>{text}</span>
     </div>
   );
@@ -437,25 +437,25 @@ function IdentityCard({
       action={<EditButton onClick={onEdit} />}
     >
       <div className="space-y-1.5 text-sm">
-        <p className="text-base font-semibold text-[#14233F]">
+        <p className="text-base font-semibold text-foreground">
           {composeName({
             salutation: data.salutation,
             first_name: data.first_name,
             last_name: data.last_name,
           }) || (
-            <span className="italic text-slate-400">No name set</span>
+            <span className="italic text-meta-foreground">No name set</span>
           )}
           {data.pronouns && (
-            <span className="ml-2 text-sm font-normal text-slate-500">
+            <span className="ml-2 text-sm font-normal text-muted-foreground">
               ({data.pronouns})
             </span>
           )}
         </p>
-        {data.headline && <p className="text-slate-700">{data.headline}</p>}
+        {data.headline && <p className="text-foreground">{data.headline}</p>}
         {data.summary && (
-          <p className="whitespace-pre-line text-slate-600">{data.summary}</p>
+          <p className="whitespace-pre-line text-muted-foreground">{data.summary}</p>
         )}
-        <dl className="mt-2 grid grid-cols-1 gap-2 text-xs text-slate-500 sm:grid-cols-2">
+        <dl className="mt-2 grid grid-cols-1 gap-2 text-xs text-muted-foreground sm:grid-cols-2">
           {location && (
             <Field label="Location" value={location} />
           )}
@@ -479,10 +479,10 @@ function IdentityCard({
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+      <dt className="text-[10px] font-semibold uppercase tracking-wider text-meta-foreground">
         {label}
       </dt>
-      <dd className="text-slate-700">{value}</dd>
+      <dd className="text-foreground">{value}</dd>
     </div>
   );
 }
@@ -541,7 +541,7 @@ function IdentityModal({
     >
       <div className="grid gap-4 sm:grid-cols-[7rem_1fr_1fr]">
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-800">
+          <span className="mb-1 block text-sm font-medium text-foreground">
             Title
           </span>
           <select
@@ -549,7 +549,7 @@ function IdentityModal({
             onChange={(e) =>
               setV((p) => ({ ...p, salutation: e.target.value || null }))
             }
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+            className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
           >
             <option value="">—</option>
             {SALUTATIONS.map((s) => (
@@ -576,7 +576,7 @@ function IdentityModal({
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-800">
+          <span className="mb-1 block text-sm font-medium text-foreground">
             Pronouns
           </span>
           <select
@@ -584,7 +584,7 @@ function IdentityModal({
             onChange={(e) =>
               setV((p) => ({ ...p, pronouns: e.target.value || null }))
             }
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+            className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
           >
             <option value="">—</option>
             {PRONOUN_OPTIONS.map((opt) => (
@@ -753,7 +753,7 @@ function ChipPreview({
     options?.find((o) => o.value === v)?.label ?? v;
   return (
     <div>
-      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-meta-foreground">
         {label}
       </p>
       {values.length === 0 ? (
@@ -763,7 +763,7 @@ function ChipPreview({
           {values.map((v) => (
             <span
               key={v}
-              className="inline-flex items-center rounded-full bg-[#4D7A60]/10 px-3 py-1 text-xs text-[#14233F]"
+              className="inline-flex items-center rounded-full bg-heritage/10 px-3 py-1 text-xs text-foreground"
             >
               {lookup(v)}
             </span>
@@ -842,7 +842,7 @@ function RolePreferencesModal({
         placeholder="Search specialties…"
       />
       <div>
-        <p className="mb-2 text-sm font-medium text-slate-800">
+        <p className="mb-2 text-sm font-medium text-foreground">
           Engagement type
         </p>
         <div className="flex flex-wrap gap-2">
@@ -855,8 +855,8 @@ function RolePreferencesModal({
               }
               className={`rounded-full border px-3 py-1.5 text-sm transition ${
                 tempOrPerm === opt.value
-                  ? "border-[#4D7A60] bg-[#4D7A60]/10 text-[#14233F]"
-                  : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                  ? "border-heritage bg-heritage/10 text-foreground"
+                  : "border-border bg-card text-foreground hover:bg-muted"
               }`}
             >
               {opt.label}
@@ -1016,16 +1016,16 @@ function WorkHistoryCard({
           {entries.map((e) => (
             <li
               key={e.id}
-              className="flex items-start justify-between gap-3 rounded-md border border-slate-200 bg-slate-50/40 p-4"
+              className="flex items-start justify-between gap-3 rounded-md border border-border bg-muted/40 p-4"
             >
               <div className="flex-1 text-sm">
-                <p className="font-semibold text-[#14233F]">{e.title}</p>
-                <p className="text-slate-700">{e.company_name}</p>
-                <p className="mt-0.5 text-xs text-slate-500">
+                <p className="font-semibold text-foreground">{e.title}</p>
+                <p className="text-foreground">{e.company_name}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
                   {formatDateRange(e.start_date, e.end_date, e.is_current)}
                 </p>
                 {e.description && (
-                  <p className="mt-1 line-clamp-2 text-xs text-slate-600">
+                  <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
                     {e.description}
                   </p>
                 )}
@@ -1033,7 +1033,7 @@ function WorkHistoryCard({
               <button
                 type="button"
                 onClick={() => onEdit(e.id)}
-                className="text-slate-500 hover:text-slate-900"
+                className="text-muted-foreground hover:text-foreground"
                 aria-label="Edit role"
               >
                 <Pencil className="size-4" />
@@ -1109,7 +1109,7 @@ function WorkHistoryModal({
             type="button"
             onClick={onDelete}
             disabled={saving}
-            className="inline-flex items-center gap-1 text-sm font-medium text-red-700 hover:text-red-900 disabled:opacity-50"
+            className="inline-flex items-center gap-1 text-sm font-medium text-danger hover:text-danger/80 disabled:opacity-50"
           >
             <Trash2 className="size-3.5" />
             Remove
@@ -1156,19 +1156,19 @@ function WorkHistoryModal({
               end_date: e.target.checked ? null : p.end_date,
             }))
           }
-          className="size-4 rounded border-slate-300"
+          className="size-4 rounded border-border"
         />
         I currently work here
       </label>
       {v.is_current && (
-        <label className="ml-6 inline-flex items-start gap-2 text-sm text-slate-600">
+        <label className="ml-6 inline-flex items-start gap-2 text-sm text-muted-foreground">
           <input
             type="checkbox"
             checked={v.auto_blocklisted}
             onChange={(e) =>
               setV((p) => ({ ...p, auto_blocklisted: e.target.checked }))
             }
-            className="mt-0.5 size-4 rounded border-slate-300"
+            className="mt-0.5 size-4 rounded border-border"
           />
           <span>
             Hide my profile from this employer (privacy default — recommended).
@@ -1176,7 +1176,7 @@ function WorkHistoryModal({
         </label>
       )}
       <div>
-        <p className="mb-2 text-sm font-medium text-slate-800">Was this a DSO?</p>
+        <p className="mb-2 text-sm font-medium text-foreground">Was this a DSO?</p>
         <div className="flex gap-2">
           {[
             { value: true, label: "Yes" },
@@ -1189,8 +1189,8 @@ function WorkHistoryModal({
               onClick={() => setV((p) => ({ ...p, is_dso: o.value }))}
               className={`rounded-full border px-3 py-1 text-sm ${
                 v.is_dso === o.value
-                  ? "border-[#4D7A60] bg-[#4D7A60]/10 text-[#14233F]"
-                  : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                  ? "border-heritage bg-heritage/10 text-foreground"
+                  : "border-border bg-card text-foreground hover:bg-muted"
               }`}
             >
               {o.label}
@@ -1248,19 +1248,19 @@ function EducationCard({
           {entries.map((e) => (
             <li
               key={e.id}
-              className="flex items-start justify-between gap-3 rounded-md border border-slate-200 bg-slate-50/40 p-4"
+              className="flex items-start justify-between gap-3 rounded-md border border-border bg-muted/40 p-4"
             >
               <div className="flex-1 text-sm">
-                <p className="font-semibold text-[#14233F]">
+                <p className="font-semibold text-foreground">
                   {e.school_name}
                 </p>
                 {(e.degree || e.field_of_study) && (
-                  <p className="text-slate-700">
+                  <p className="text-foreground">
                     {[e.degree, e.field_of_study].filter(Boolean).join(" · ")}
                   </p>
                 )}
                 {(e.start_year || e.end_year) && (
-                  <p className="mt-0.5 text-xs text-slate-500">
+                  <p className="mt-0.5 text-xs text-muted-foreground">
                     {e.start_year ?? "?"}–{e.end_year ?? "present"}
                   </p>
                 )}
@@ -1269,7 +1269,7 @@ function EducationCard({
                 type="button"
                 onClick={() => onEdit(e.id)}
                 aria-label="Edit education"
-                className="text-slate-500 hover:text-slate-900"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <Pencil className="size-4" />
               </button>
@@ -1340,7 +1340,7 @@ function EducationModal({
             type="button"
             onClick={onDelete}
             disabled={saving}
-            className="inline-flex items-center gap-1 text-sm font-medium text-red-700 hover:text-red-900 disabled:opacity-50"
+            className="inline-flex items-center gap-1 text-sm font-medium text-danger hover:text-danger/80 disabled:opacity-50"
           >
             <Trash2 className="size-3.5" /> Remove
           </button>
@@ -1434,18 +1434,18 @@ function LicensesCard({
             return (
               <li
                 key={e.id}
-                className="rounded-md border border-slate-200 bg-slate-50/40 p-4"
+                className="rounded-md border border-border bg-muted/40 p-4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 text-sm">
-                    <p className="font-semibold text-[#14233F]">{typeLabel}</p>
-                    <p className="text-slate-700">
+                    <p className="font-semibold text-foreground">{typeLabel}</p>
+                    <p className="text-foreground">
                       {e.state ? `Licensed in ${e.state}` : "State not set"}
                       {e.display_number && e.license_number
                         ? ` · #${e.license_number}`
                         : ""}
                     </p>
-                    <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500">
+                    <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
                       {e.expires_date ? (
                         <>
                           Expires {formatDate(e.expires_date)}
@@ -1466,7 +1466,7 @@ function LicensesCard({
                     type="button"
                     onClick={() => onEdit(e.id)}
                     aria-label="Edit license"
-                    className="text-slate-500 hover:text-slate-900"
+                    className="text-muted-foreground hover:text-foreground"
                   >
                     <Pencil className="size-4" />
                   </button>
@@ -1540,7 +1540,7 @@ function LicenseModal({
       saving={saving}
       title={entry ? "Edit license" : "Add license"}
       banner={
-        <p className="text-xs text-slate-600">
+        <p className="text-xs text-muted-foreground">
           License numbers stay private by default — toggle below to display.
         </p>
       }
@@ -1550,7 +1550,7 @@ function LicenseModal({
             type="button"
             onClick={onDelete}
             disabled={saving}
-            className="inline-flex items-center gap-1 text-sm font-medium text-red-700 hover:text-red-900 disabled:opacity-50"
+            className="inline-flex items-center gap-1 text-sm font-medium text-danger hover:text-danger/80 disabled:opacity-50"
           >
             <Trash2 className="size-3.5" /> Remove
           </button>
@@ -1609,7 +1609,7 @@ function LicenseModal({
           onChange={(e) =>
             setV((p) => ({ ...p, display_number: e.target.checked }))
           }
-          className="size-4 rounded border-slate-300"
+          className="size-4 rounded border-border"
         />
         Show my license number publicly
       </label>
@@ -1655,13 +1655,13 @@ function CertificationsCard({
             return (
               <li
                 key={e.id}
-                className="rounded-md border border-slate-200 bg-slate-50/40 p-4"
+                className="rounded-md border border-border bg-muted/40 p-4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 text-sm">
-                    <p className="font-semibold text-[#14233F]">{kindLabel}</p>
+                    <p className="font-semibold text-foreground">{kindLabel}</p>
                     {(e.level || e.expires_date) && (
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-muted-foreground">
                         {e.level && <span>{e.level}</span>}
                         {e.level && e.expires_date && " · "}
                         {e.expires_date && (
@@ -1674,7 +1674,7 @@ function CertificationsCard({
                     type="button"
                     onClick={() => onEdit(e.id)}
                     aria-label="Edit certification"
-                    className="text-slate-500 hover:text-slate-900"
+                    className="text-muted-foreground hover:text-foreground"
                   >
                     <Pencil className="size-4" />
                   </button>
@@ -1750,7 +1750,7 @@ function CertificationModal({
             type="button"
             onClick={onDelete}
             disabled={saving}
-            className="inline-flex items-center gap-1 text-sm font-medium text-red-700 hover:text-red-900 disabled:opacity-50"
+            className="inline-flex items-center gap-1 text-sm font-medium text-danger hover:text-danger/80 disabled:opacity-50"
           >
             <Trash2 className="size-3.5" /> Remove
           </button>
@@ -1879,7 +1879,7 @@ function CredentialFileControls({
       />
       {hasFile ? (
         <>
-          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-700">
+          <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 font-medium text-foreground">
             <Paperclip className="size-3" />
             Document on file
           </span>
@@ -1887,7 +1887,7 @@ function CredentialFileControls({
             type="button"
             onClick={handleView}
             disabled={busy}
-            className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-1 font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1 font-medium text-foreground hover:bg-muted disabled:opacity-50"
           >
             <Eye className="size-3" />
             View
@@ -1896,7 +1896,7 @@ function CredentialFileControls({
             type="button"
             onClick={handlePick}
             disabled={busy}
-            className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-1 font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1 font-medium text-foreground hover:bg-muted disabled:opacity-50"
           >
             <Upload className="size-3" />
             Replace
@@ -1905,7 +1905,7 @@ function CredentialFileControls({
             type="button"
             onClick={handleRemove}
             disabled={busy}
-            className="inline-flex items-center gap-1 rounded-md border border-red-200 bg-white px-2 py-1 font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-md border border-danger bg-card px-2 py-1 font-medium text-danger hover:bg-danger-bg disabled:opacity-50"
           >
             <X className="size-3" />
             Remove
@@ -1916,15 +1916,15 @@ function CredentialFileControls({
           type="button"
           onClick={handlePick}
           disabled={busy}
-          className="inline-flex items-center gap-1 rounded-md border border-dashed border-slate-300 bg-white px-2 py-1 font-medium text-slate-600 hover:border-slate-400 hover:bg-slate-50 disabled:opacity-50"
+          className="inline-flex items-center gap-1 rounded-md border border-dashed border-border bg-card px-2 py-1 font-medium text-muted-foreground hover:border-border-2 hover:bg-muted disabled:opacity-50"
         >
           <Upload className="size-3" />
           Upload document
         </button>
       )}
       <VerificationBadge status={verificationStatus} />
-      {busy && <span className="text-slate-400">Working…</span>}
-      {error && <span className="text-red-700">{error}</span>}
+      {busy && <span className="text-meta-foreground">Working…</span>}
+      {error && <span className="text-danger">{error}</span>}
     </div>
   );
 }
@@ -1932,7 +1932,7 @@ function CredentialFileControls({
 function VerificationBadge({ status }: { status: string }) {
   if (status === "verified") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-800">
+      <span className="inline-flex items-center gap-1 rounded-full bg-success-bg px-2 py-0.5 text-[11px] font-medium text-success">
         <ShieldCheck className="size-3" />
         Verified
       </span>
@@ -1940,21 +1940,21 @@ function VerificationBadge({ status }: { status: string }) {
   }
   if (status === "pending") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-800">
+      <span className="inline-flex items-center gap-1 rounded-full bg-warning-bg px-2 py-0.5 text-[11px] font-medium text-warning">
         Pending review
       </span>
     );
   }
   if (status === "revoked") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-medium text-red-700">
+      <span className="inline-flex items-center gap-1 rounded-full bg-danger-bg px-2 py-0.5 text-[11px] font-medium text-danger">
         Revoked
       </span>
     );
   }
   if (status === "expired") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-medium text-red-700">
+      <span className="inline-flex items-center gap-1 rounded-full bg-danger-bg px-2 py-0.5 text-[11px] font-medium text-danger">
         Expired
       </span>
     );
@@ -1995,12 +1995,12 @@ function JobPreferencesCard({
     >
       <div className="space-y-3 text-sm">
         {visibility && (
-          <div className="rounded-md bg-[#F7F4ED] p-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#4D7A60]">
+          <div className="rounded-md bg-muted p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-heritage">
               Visibility
             </p>
-            <p className="mt-0.5 font-medium text-[#14233F]">{visibility.label}</p>
-            <p className="mt-0.5 text-xs text-slate-600">
+            <p className="mt-0.5 font-medium text-foreground">{visibility.label}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
               {visibility.description}
             </p>
           </div>
@@ -2020,7 +2020,7 @@ function JobPreferencesCard({
           <Field label="Available days" value={days.join(", ")} />
         )}
         {data.schedule_preferences.willing_to_relocate && (
-          <p className="text-xs text-[#4D7A60]">
+          <p className="text-xs text-heritage">
             <CheckCircle2 className="mr-1 inline size-3" />
             Willing to relocate.
           </p>
@@ -2084,15 +2084,15 @@ function JobPreferencesModal({
       title="Edit job preferences"
     >
       <div>
-        <p className="mb-2 text-sm font-medium text-slate-800">Visibility</p>
+        <p className="mb-2 text-sm font-medium text-foreground">Visibility</p>
         <div className="space-y-2">
           {CV_VISIBILITY_OPTIONS.map((opt) => (
             <label
               key={opt.value}
               className={`block cursor-pointer rounded-md border p-3 text-sm transition ${
                 visibility === opt.value
-                  ? "border-[#4D7A60] bg-[#4D7A60]/10"
-                  : "border-slate-300 bg-white hover:border-slate-400"
+                  ? "border-heritage bg-heritage/10"
+                  : "border-border bg-card hover:border-border-2"
               }`}
             >
               <input
@@ -2102,10 +2102,10 @@ function JobPreferencesModal({
                 onChange={() => setVisibility(opt.value)}
                 className="sr-only"
               />
-              <span className="block font-medium text-[#14233F]">
+              <span className="block font-medium text-foreground">
                 {opt.label}
               </span>
-              <span className="mt-0.5 block text-xs text-slate-600">
+              <span className="mt-0.5 block text-xs text-muted-foreground">
                 {opt.description}
               </span>
             </label>
@@ -2129,7 +2129,7 @@ function JobPreferencesModal({
           }
         />
         <div>
-          <p className="mb-1 block text-sm font-medium text-slate-800">
+          <p className="mb-1 block text-sm font-medium text-foreground">
             Compensation unit
           </p>
           <div className="flex flex-wrap gap-2">
@@ -2142,8 +2142,8 @@ function JobPreferencesModal({
                 }
                 className={`rounded-full border px-3 py-1.5 text-sm ${
                   salaryUnit === opt.value
-                    ? "border-[#4D7A60] bg-[#4D7A60]/10 text-[#14233F]"
-                    : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                    ? "border-heritage bg-heritage/10 text-foreground"
+                    : "border-border bg-card text-foreground hover:bg-muted"
                 }`}
               >
                 {opt.label}
@@ -2153,7 +2153,7 @@ function JobPreferencesModal({
         </div>
       </div>
       <div>
-        <p className="mb-2 text-sm font-medium text-slate-800">Available days</p>
+        <p className="mb-2 text-sm font-medium text-foreground">Available days</p>
         <div className="flex flex-wrap gap-2">
           {WEEKDAY_KEYS.map((d) => (
             <button
@@ -2162,8 +2162,8 @@ function JobPreferencesModal({
               onClick={() => toggleDay(d.key)}
               className={`rounded-full border px-3 py-1.5 text-sm ${
                 schedule[d.key]
-                  ? "border-[#4D7A60] bg-[#4D7A60]/10 text-[#14233F]"
-                  : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                  ? "border-heritage bg-heritage/10 text-foreground"
+                  : "border-border bg-card text-foreground hover:bg-muted"
               }`}
             >
               {d.label}
@@ -2178,7 +2178,7 @@ function JobPreferencesModal({
           onChange={(e) =>
             setSchedule((p) => ({ ...p, evenings: e.target.checked }))
           }
-          className="size-4 rounded border-slate-300"
+          className="size-4 rounded border-border"
         />
         Available evenings
       </label>
@@ -2192,18 +2192,18 @@ function JobPreferencesModal({
               willing_to_relocate: e.target.checked,
             }))
           }
-          className="size-4 rounded border-slate-300"
+          className="size-4 rounded border-border"
         />
         Willing to relocate for the right role
       </label>
       <div>
-        <p className="mb-1 block text-sm font-medium text-slate-800">
+        <p className="mb-1 block text-sm font-medium text-foreground">
           Availability
         </p>
         <select
           value={availability ?? ""}
           onChange={(e) => setAvailability(e.target.value || null)}
-          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+          className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
         >
           <option value="">Not set</option>
           <option value="immediate">Immediately</option>
@@ -2231,7 +2231,7 @@ function PracticeFitCard({
 }) {
   const isDso = product === "dsofit";
   return (
-    <section className="border border-slate-200 bg-[#F7F4ED] p-6 sm:p-8">
+    <section className="border border-border bg-muted p-6 sm:p-8">
       <header className="mb-3">
         <h2 className="leading-none">
           {isDso ? (
@@ -2240,7 +2240,7 @@ function PracticeFitCard({
             <PracticeFitWordmark surface="light" tm className="text-2xl" />
           )}
         </h2>
-        <p className="mt-2 text-sm text-slate-600">
+        <p className="mt-2 text-sm text-muted-foreground">
           {isDso ? (
             <>
               DSOs already see how well you match their open roles — DSOFit is
@@ -2258,8 +2258,8 @@ function PracticeFitCard({
           )}
         </p>
       </header>
-      <div className="flex items-center gap-2 rounded-md bg-white px-4 py-3 text-xs text-slate-500">
-        <AlertCircle className="size-4 text-[#4D7A60]" />
+      <div className="flex items-center gap-2 rounded-md bg-card px-4 py-3 text-xs text-muted-foreground">
+        <AlertCircle className="size-4 text-heritage" />
         {isDso ? (
           <>
             Nothing to fill in here — keep your profile up to date and take

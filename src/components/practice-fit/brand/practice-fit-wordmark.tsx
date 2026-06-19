@@ -42,10 +42,12 @@ const SURFACES: Record<PracticeFitSurface, SurfaceColors> = {
     pillBg: "bg-heritage/15",
   },
   dark: {
-    practice: "text-ivory",
+    // On a permanently-navy/photo surface: use hero-foreground (stays light
+    // in BOTH themes) rather than text-ivory (which flips dark in dark mode).
+    practice: "text-hero-foreground",
     fit: "text-heritage-light",
     spark: "text-heritage-light",
-    pillBg: "bg-ivory/10",
+    pillBg: "bg-hero-foreground/10",
   },
   heritage: {
     practice: "text-ivory",

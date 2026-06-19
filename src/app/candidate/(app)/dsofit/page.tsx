@@ -81,7 +81,7 @@ export default async function CandidateDsoFitPage() {
           </span>
         </a>
       ) : (
-        <div className="mb-6 flex items-center justify-between gap-3 border border-[var(--rule)] bg-white px-4 py-3">
+        <div className="mb-6 flex items-center justify-between gap-3 border border-[var(--rule)] bg-card px-4 py-3">
           <span className="text-[13px] text-slate-body">
             Your DSOFit Assessment is complete — it&apos;s powering your matches.
           </span>
@@ -95,14 +95,14 @@ export default async function CandidateDsoFitPage() {
       )}
 
       {!consentOn ? (
-        <section className="mb-8 p-7 sm:p-8 bg-ink text-ivory border-l-4 border-heritage">
+        <section className="mb-8 p-7 sm:p-8 bg-hero text-hero-foreground border-l-4 border-heritage">
           <div className="text-[10px] font-extrabold tracking-[2.5px] uppercase text-heritage-light mb-2">
             Matching is off
           </div>
           <h2 className="text-2xl font-extrabold tracking-[-0.6px] leading-tight mb-3">
             Turn on matching to see DSO roles matched to you.
           </h2>
-          <p className="text-[14px] text-ivory/70 leading-relaxed max-w-[560px] mb-3">
+          <p className="text-[14px] text-hero-foreground/70 leading-relaxed max-w-[560px] mb-3">
             It ranks open DSO/corporate roles by how well they fit you and lets
             DSOs find you by fit. Flip it on in{" "}
             <a

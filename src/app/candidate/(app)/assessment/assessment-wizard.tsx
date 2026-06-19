@@ -268,7 +268,7 @@ export function AssessmentWizard({
                   setResumeFile(e.target.files?.[0] ?? null);
                   setAutofillNote(null);
                 }}
-                className="block text-[13px] text-ink file:mr-3 file:cursor-pointer file:border-0 file:bg-ink file:px-4 file:py-2 file:text-[10px] file:font-bold file:uppercase file:tracking-[1.5px] file:text-ivory hover:file:bg-ink-soft"
+                className="block text-[13px] text-ink file:mr-3 file:cursor-pointer file:border-0 file:bg-primary file:px-4 file:py-2 file:text-[10px] file:font-bold file:uppercase file:tracking-[1.5px] file:text-primary-foreground hover:file:bg-primary/90"
               />
               <button
                 type="button"
@@ -295,7 +295,7 @@ export function AssessmentWizard({
               if (typeof window !== "undefined")
                 window.scrollTo({ top: 0, behavior: "smooth" });
             }}
-            className="inline-flex items-center gap-2 bg-ink px-7 py-3.5 text-[13px] font-bold uppercase tracking-[1.5px] text-ivory transition-colors hover:bg-ink-soft"
+            className="inline-flex items-center gap-2 bg-primary px-7 py-3.5 text-[13px] font-bold uppercase tracking-[1.5px] text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Start now
             <ArrowRight className="h-4 w-4" />
@@ -328,7 +328,7 @@ export function AssessmentWizard({
                     if (typeof window !== "undefined")
                       window.scrollTo({ top: 0, behavior: "smooth" });
                   }}
-                  className="inline-flex items-center gap-2 rounded-full bg-heritage-deep px-5 py-2.5 text-[14px] font-bold text-ivory transition-colors hover:bg-heritage"
+                  className="inline-flex items-center gap-2 rounded-full bg-heritage-deep px-5 py-2.5 text-[14px] font-bold text-primary-foreground transition-colors hover:bg-heritage"
                 >
                   Take 5 minutes
                   <ArrowRight className="h-4 w-4" />
@@ -388,7 +388,7 @@ export function AssessmentWizard({
       </div>
 
       {error && (
-        <div className="mt-5 border-l-4 border-red-500 bg-red-50 p-3 text-[13px] text-red-900">
+        <div className="mt-5 border-l-4 border-danger bg-danger-bg p-3 text-[13px] text-danger">
           {error}
         </div>
       )}
@@ -408,7 +408,7 @@ export function AssessmentWizard({
           type="button"
           onClick={next}
           disabled={saving}
-          className="inline-flex items-center gap-2 bg-ink px-6 py-3 text-[12px] font-bold uppercase tracking-[1.5px] text-ivory transition-colors hover:bg-ink-soft disabled:opacity-60"
+          className="inline-flex items-center gap-2 bg-primary px-6 py-3 text-[12px] font-bold uppercase tracking-[1.5px] text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
         >
           {isLast ? (saving ? "Saving…" : "See my matches") : "Continue"}
           {isLast ? <Check className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
@@ -497,7 +497,7 @@ function QuestionField({
                     "flex w-full items-center justify-between gap-3 border px-4 py-3 text-left text-[14px] transition-colors " +
                     (active
                       ? "border-heritage-deep bg-heritage/10 font-semibold text-ink"
-                      : "border-[var(--rule)] bg-white text-slate-body hover:border-heritage-deep")
+                      : "border-[var(--rule)] bg-card text-slate-body hover:border-heritage-deep")
                   }
                 >
                   {opt.label}
@@ -531,7 +531,7 @@ function QuestionField({
                     className={
                       "rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition-colors " +
                       (active
-                        ? "border-heritage-deep bg-heritage-deep text-ivory"
+                        ? "border-heritage-deep bg-heritage-deep text-primary-foreground"
                         : "border-[var(--rule)] text-slate-body hover:border-heritage-deep")
                     }
                   >
@@ -572,12 +572,12 @@ function QuestionField({
                       ? "border-heritage-deep bg-heritage/10 font-semibold text-ink"
                       : full
                         ? "cursor-not-allowed border-[var(--rule)] bg-cream/40 text-slate-meta"
-                        : "border-[var(--rule)] bg-white text-slate-body hover:border-heritage-deep")
+                        : "border-[var(--rule)] bg-card text-slate-body hover:border-heritage-deep")
                   }
                 >
                   <span>{opt.label}</span>
                   {active && (
-                    <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-heritage-deep text-[12px] font-bold text-ivory">
+                    <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-heritage-deep text-[12px] font-bold text-primary-foreground">
                       {rank + 1}
                     </span>
                   )}
@@ -659,12 +659,12 @@ function QuestionField({
                 onChange(q.key, digits ? Number(digits) : null);
               }}
               placeholder="0"
-              className="w-40 border border-[var(--rule)] bg-white px-3 py-2 text-[14px] text-ink focus:border-heritage focus:outline-none"
+              className="w-40 border border-[var(--rule)] bg-card px-3 py-2 text-[14px] text-ink focus:border-heritage focus:outline-none"
             />
             <select
               value={(answers.salary_unit as string | undefined) ?? "hourly"}
               onChange={(e) => onChange("salary_unit", e.target.value)}
-              className="border border-[var(--rule)] bg-white px-2 py-2 text-[14px] text-ink focus:border-heritage focus:outline-none"
+              className="border border-[var(--rule)] bg-card px-2 py-2 text-[14px] text-ink focus:border-heritage focus:outline-none"
             >
               <option value="hourly">/ hour</option>
               <option value="yearly">/ year</option>
@@ -681,7 +681,7 @@ function QuestionField({
             rows={3}
             maxLength={600}
             placeholder="A sentence or two — totally optional."
-            className="w-full border border-[var(--rule)] bg-white px-3 py-2 text-[14px] text-ink focus:border-heritage focus:outline-none"
+            className="w-full border border-[var(--rule)] bg-card px-3 py-2 text-[14px] text-ink focus:border-heritage focus:outline-none"
           />
         )}
       </div>

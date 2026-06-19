@@ -99,16 +99,16 @@ export function ReviewForm({
 
   return (
     <div>
-      <h1 className="font-display text-3xl font-bold text-[#14233F]">
+      <h1 className="font-display text-3xl font-bold text-foreground">
         Review and confirm
       </h1>
-      <p className="mt-2 text-base text-slate-600">
+      <p className="mt-2 text-base text-muted-foreground">
         We&apos;ve filled in what we found. Edit anything that&apos;s off,
         then save to your profile.
       </p>
 
       {warnings.length > 0 && (
-        <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <div className="mt-4 rounded-md border border-warning bg-warning-bg px-4 py-3 text-sm text-warning">
           {warnings.map((w, i) => (
             <p key={i}>{w}</p>
           ))}
@@ -116,14 +116,14 @@ export function ReviewForm({
       )}
 
       {parsed.flagged_redactions.length > 0 && (
-        <div className="mt-4 flex items-start gap-3 rounded-md border border-[#4D7A60]/30 bg-[#F7F4ED] px-4 py-3 text-sm">
-          <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[#4D7A60]" />
+        <div className="mt-4 flex items-start gap-3 rounded-md border border-heritage/30 bg-muted px-4 py-3 text-sm">
+          <ShieldCheck className="mt-0.5 size-4 shrink-0 text-heritage" />
           <div>
-            <p className="font-semibold text-[#14233F]">
+            <p className="font-semibold text-foreground">
               We ignored {parsed.flagged_redactions.length} private item
               {parsed.flagged_redactions.length === 1 ? "" : "s"} on purpose
             </p>
-            <p className="mt-0.5 text-slate-600">
+            <p className="mt-0.5 text-muted-foreground">
               {summarizeRedactions(parsed.flagged_redactions)}
             </p>
           </div>
@@ -311,7 +311,7 @@ export function ReviewForm({
                       : w.end_date,
                   })
                 }
-                className="size-4 rounded border-slate-300"
+                className="size-4 rounded border-border"
               />
               I currently work here
             </label>
@@ -426,7 +426,7 @@ export function ReviewForm({
         {parsed.licenses.length === 0 && (
           <EmptyHint text="No licenses found." />
         )}
-        <p className="-mt-2 mb-3 text-xs text-slate-500">
+        <p className="-mt-2 mb-3 text-xs text-muted-foreground">
           License numbers stay private by default. You can opt to display
           them in your privacy settings later.
         </p>
@@ -604,12 +604,12 @@ export function ReviewForm({
       </Section>
 
       {/* ── Sticky save bar ──────────────────────────────────────── */}
-      <div className="sticky bottom-4 mt-10 flex items-center justify-between rounded-lg border border-[#14233F]/10 bg-white/95 px-5 py-4 shadow-lg backdrop-blur">
+      <div className="sticky bottom-4 mt-10 flex items-center justify-between rounded-lg border border-border bg-card/95 px-5 py-4 shadow-lg backdrop-blur">
         <button
           type="button"
           onClick={onCancel}
           disabled={isSaving}
-          className="text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-50"
+          className="text-sm font-medium text-muted-foreground hover:text-foreground disabled:opacity-50"
         >
           Cancel
         </button>
@@ -617,7 +617,7 @@ export function ReviewForm({
           type="button"
           onClick={() => onConfirm(parsed)}
           disabled={isSaving}
-          className="inline-flex items-center gap-2 rounded-md bg-[#14233F] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0d172b] disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"
         >
           {isSaving ? (
             <>
@@ -648,8 +648,8 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="mt-8 rounded-lg border border-slate-200 bg-white p-6">
-      <h2 className="font-display text-xl font-bold text-[#14233F]">
+    <section className="mt-8 rounded-lg border border-border bg-card p-6">
+      <h2 className="font-display text-xl font-bold text-foreground">
         {title}
       </h2>
       <div className="mt-4 space-y-4">{children}</div>
@@ -673,10 +673,10 @@ function FieldRow({
   return (
     <div className={compact ? "" : "space-y-1.5"}>
       <div className="flex items-center justify-between gap-3">
-        <label className="text-sm font-medium text-slate-800">{label}</label>
+        <label className="text-sm font-medium text-foreground">{label}</label>
         {confidence && <ConfidencePill confidence={confidence} />}
       </div>
-      {hint && <p className="text-xs text-slate-500">{hint}</p>}
+      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
       {children}
     </div>
   );
@@ -698,7 +698,7 @@ function TextInput(props: {
       placeholder={props.placeholder}
       maxLength={props.maxLength}
       disabled={props.disabled}
-      className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60] disabled:bg-slate-50 disabled:text-slate-500"
+      className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage disabled:bg-muted disabled:text-muted-foreground"
     />
   );
 }
@@ -713,7 +713,7 @@ function TextArea(props: {
       value={props.value}
       onChange={(e) => props.onChange(e.target.value)}
       rows={props.rows ?? 3}
-      className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+      className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
     />
   );
 }
@@ -728,7 +728,7 @@ function EntryCard({
   confidence?: "high" | "medium" | "low";
 }) {
   return (
-    <div className="rounded-md border border-slate-200 bg-slate-50/50 p-4">
+    <div className="rounded-md border border-border bg-muted p-4">
       <div className="mb-3 flex items-center justify-between">
         {confidence ? (
           <ConfidencePill confidence={confidence} />
@@ -738,7 +738,7 @@ function EntryCard({
         <button
           type="button"
           onClick={onRemove}
-          className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-red-700"
+          className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-danger"
           aria-label="Remove entry"
         >
           <Trash2 className="size-3.5" />
@@ -751,7 +751,7 @@ function EntryCard({
 }
 
 function EmptyHint({ text }: { text: string }) {
-  return <p className="text-sm italic text-slate-500">{text}</p>;
+  return <p className="text-sm italic text-muted-foreground">{text}</p>;
 }
 
 function ChipArrayEditor(props: {
@@ -779,13 +779,13 @@ function ChipArrayEditor(props: {
         {props.values.map((v, i) => (
           <span
             key={`${v}-${i}`}
-            className="inline-flex items-center gap-1 rounded-full bg-[#4D7A60]/10 px-3 py-1 text-sm text-[#14233F]"
+            className="inline-flex items-center gap-1 rounded-full bg-heritage/10 px-3 py-1 text-sm text-foreground"
           >
             {v}
             <button
               type="button"
               onClick={() => remove(i)}
-              className="text-[#4D7A60] hover:text-[#14233F]"
+              className="text-heritage hover:text-foreground"
               aria-label={`Remove ${v}`}
             >
               <X className="size-3.5" />
@@ -805,12 +805,12 @@ function ChipArrayEditor(props: {
             }
           }}
           placeholder={props.placeholder}
-          className="flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#4D7A60] focus:outline-none focus:ring-1 focus:ring-[#4D7A60]"
+          className="flex-1 rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
         />
         <button
           type="button"
           onClick={add}
-          className="inline-flex items-center gap-1 rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
         >
           <Plus className="size-4" />
           Add

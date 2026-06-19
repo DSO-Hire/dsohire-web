@@ -98,12 +98,12 @@ export function NotificationsForm({ initial }: NotificationsFormProps) {
       {groups.map(({ group, events }) => (
         <section
           key={group}
-          className="border border-[var(--rule)] bg-white p-6 sm:p-8"
+          className="border border-[var(--rule)] bg-card p-6 sm:p-8"
         >
-          <h2 className="font-display text-lg font-bold text-[#14233F]">
+          <h2 className="font-display text-lg font-bold text-foreground">
             {group}
           </h2>
-          <ul className="mt-4 divide-y divide-slate-100">
+          <ul className="mt-4 divide-y divide-border">
             {events.map((event) => (
               <EventRow
                 key={event.event_kind}
@@ -117,29 +117,29 @@ export function NotificationsForm({ initial }: NotificationsFormProps) {
       ))}
 
       {/* Sticky save bar — always visible, even on long pages. */}
-      <div className="sticky bottom-4 z-10 flex items-center justify-between rounded-lg border border-[#14233F]/10 bg-white/95 px-5 py-3 shadow-lg backdrop-blur">
+      <div className="sticky bottom-4 z-10 flex items-center justify-between rounded-lg border border-border bg-card/95 px-5 py-3 shadow-lg backdrop-blur">
         <div className="text-sm">
           {error ? (
-            <span className="inline-flex items-center gap-1 text-red-700">
+            <span className="inline-flex items-center gap-1 text-danger">
               <AlertCircle className="size-4" /> {error}
             </span>
           ) : savedFlash ? (
-            <span className="inline-flex items-center gap-1 text-[#4D7A60]">
+            <span className="inline-flex items-center gap-1 text-heritage">
               <Sparkles className="size-4" /> {savedFlash}
             </span>
           ) : dirty.length > 0 ? (
-            <span className="text-slate-700">
+            <span className="text-foreground">
               {dirty.length} unsaved change{dirty.length === 1 ? "" : "s"}
             </span>
           ) : (
-            <span className="text-slate-400">All preferences saved.</span>
+            <span className="text-meta-foreground">All preferences saved.</span>
           )}
         </div>
         <button
           type="button"
           onClick={onSave}
           disabled={saving || dirty.length === 0}
-          className="inline-flex items-center gap-2 rounded-md bg-[#14233F] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0d172b] disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
         >
           {saving ? (
             <>Saving…</>
@@ -172,14 +172,14 @@ function EventRow({
     <li className="flex items-start justify-between gap-6 py-4">
       <div className="flex-1">
         <div className="flex items-center gap-2">
-          <p className="text-sm font-medium text-[#14233F]">{event.title}</p>
+          <p className="text-sm font-medium text-foreground">{event.title}</p>
           {!event.shipped && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-600">
+            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
               Coming soon
             </span>
           )}
         </div>
-        <p className="mt-0.5 text-xs text-slate-500">{event.description}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">{event.description}</p>
       </div>
       <div className="flex shrink-0 gap-4">
         {event.channels.map((channel) => (
@@ -213,7 +213,7 @@ function ChannelToggle({
   onChange: () => void;
 }) {
   return (
-    <label className="flex flex-col items-center gap-1 text-[10px] uppercase tracking-wider text-slate-500">
+    <label className="flex flex-col items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground">
       <span>{label}</span>
       <button
         type="button"
@@ -222,7 +222,7 @@ function ChannelToggle({
         aria-label={`${label} ${channel} ${enabled ? "on" : "off"}`}
         onClick={onChange}
         className={`relative h-5 w-9 rounded-full transition ${
-          enabled ? "bg-[#4D7A60]" : "bg-slate-300"
+          enabled ? "bg-heritage" : "bg-slate-300"
         }`}
       >
         <span

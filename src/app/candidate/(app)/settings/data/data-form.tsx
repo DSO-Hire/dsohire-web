@@ -74,7 +74,7 @@ function DownloadMyDataSection() {
 
   return (
     <SectionCard
-      icon={<Download className="size-5 text-[#4D7A60]" />}
+      icon={<Download className="size-5 text-heritage" />}
       title="Download my data"
       description="Pull a ZIP with every row tied to your DSO Hire account — profile, work history, education, licenses, certifications, CE certificates, applications, notification preferences, saved searches, and your block list — plus your resume + CE certificate files + profile photo."
     >
@@ -83,7 +83,7 @@ function DownloadMyDataSection() {
           type="button"
           onClick={onDownload}
           disabled={busy}
-          className="inline-flex items-center gap-2 rounded-md bg-[#14233F] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0d172b] disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
         >
           {busy ? (
             <>
@@ -98,23 +98,23 @@ function DownloadMyDataSection() {
           )}
         </button>
         {downloadedAt && (
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-muted-foreground">
             Downloaded {downloadedAt.toLocaleTimeString()}.
           </span>
         )}
       </div>
       {error && (
-        <p role="alert" className="mt-3 text-sm text-red-700">
+        <p role="alert" className="mt-3 text-sm text-danger">
           {error}
         </p>
       )}
       {missingCount > 0 && (
-        <p role="status" className="mt-3 text-xs text-amber-700">
+        <p role="status" className="mt-3 text-xs text-warning">
           {missingCount} file{missingCount === 1 ? "" : "s"} couldn&apos;t be
           fetched. See MISSING_FILES.txt inside the ZIP for details.
         </p>
       )}
-      <p className="mt-3 text-xs text-slate-500">
+      <p className="mt-3 text-xs text-muted-foreground">
         Coming soon: async build via background job with a 24-hour download
         link emailed to you for very large exports. The sync ZIP works today
         for everyone under the 50-CE / 10MB-per-file caps.
@@ -142,13 +142,13 @@ function triggerZipDownload(zipBytes: ArrayBuffer, filename: string) {
 function ApplicationHistorySection() {
   return (
     <SectionCard
-      icon={<FileText className="size-5 text-[#4D7A60]" />}
+      icon={<FileText className="size-5 text-heritage" />}
       title="Application history"
       description="Every job you've applied to, with the current status."
     >
       <Link
         href="/candidate/applications"
-        className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted"
       >
         Open my applications
         <ArrowRight className="size-3.5" />
@@ -164,18 +164,18 @@ function ApplicationHistorySection() {
 function WithdrawApplicationsSection() {
   return (
     <SectionCard
-      icon={<X className="size-5 text-[#4D7A60]" />}
+      icon={<X className="size-5 text-heritage" />}
       title="Withdraw active applications"
       description="Pulled-in candidates and inactive seekers handle this differently. Use the per-application withdraw on the applications list."
     >
       <Link
         href="/candidate/applications?status=active"
-        className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted"
       >
         Open active applications
         <ArrowRight className="size-3.5" />
       </Link>
-      <p className="mt-2 text-xs text-slate-500">
+      <p className="mt-2 text-xs text-muted-foreground">
         Bulk withdraw lands in a follow-up. For now, withdraw
         per-application on the list view.
       </p>
@@ -191,16 +191,16 @@ function DeleteAccountSection({ name }: { name: string | null }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   return (
-    <section className="border border-red-200 bg-red-50/30 p-6 sm:p-8">
+    <section className="border border-danger bg-danger-bg p-6 sm:p-8">
       <header className="mb-3 flex items-start gap-3">
-        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-red-100">
-          <ShieldAlert className="size-5 text-red-700" />
+        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-danger-bg">
+          <ShieldAlert className="size-5 text-danger" />
         </div>
         <div>
-          <h2 className="font-display text-lg font-bold text-[#14233F]">
+          <h2 className="font-display text-lg font-bold text-foreground">
             Delete my account
           </h2>
-          <p className="mt-0.5 text-sm text-slate-600">
+          <p className="mt-0.5 text-sm text-muted-foreground">
             Soft-deleted immediately, hard-deleted 30 days later. You
             can&apos;t apply to jobs while soft-deleted, and your profile
             is hidden from every employer. Email {SUPPORT_EMAIL} within
@@ -211,7 +211,7 @@ function DeleteAccountSection({ name }: { name: string | null }) {
       <button
         type="button"
         onClick={() => setConfirmOpen(true)}
-        className="rounded-md border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 hover:border-red-400 hover:bg-red-50"
+        className="rounded-md border border-danger bg-card px-4 py-2 text-sm font-medium text-danger hover:border-danger hover:bg-danger-bg"
       >
         Delete account
       </button>
@@ -302,9 +302,9 @@ function DeleteAccountModal({
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         tabIndex={-1}
       />
-      <div className="relative z-10 w-full max-w-[480px] overflow-hidden rounded-lg bg-white shadow-2xl">
-        <header className="flex items-start justify-between border-b border-slate-200 px-5 py-4">
-          <h2 className="font-display text-lg font-bold text-[#14233F]">
+      <div className="relative z-10 w-full max-w-[480px] overflow-hidden rounded-lg bg-popover shadow-2xl">
+        <header className="flex items-start justify-between border-b border-border px-5 py-4">
+          <h2 className="font-display text-lg font-bold text-foreground">
             {step === "export-prompt"
               ? "First — download a copy?"
               : step === "confirm"
@@ -314,7 +314,7 @@ function DeleteAccountModal({
           <button
             type="button"
             onClick={closeAndRedirectIfDeleted}
-            className="rounded-md p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+            className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
             aria-label="Close"
           >
             <X className="size-5" />
@@ -324,7 +324,7 @@ function DeleteAccountModal({
         <div className="space-y-4 px-5 py-5">
           {step === "export-prompt" && (
             <>
-              <p className="text-sm text-slate-700">
+              <p className="text-sm text-foreground">
                 Once you delete, we can&apos;t restore your data after the
                 30-day grace period ends. Want to download a JSON copy
                 first?
@@ -334,7 +334,7 @@ function DeleteAccountModal({
                   type="button"
                   onClick={onExportFirst}
                   disabled={busy}
-                  className="inline-flex items-center gap-2 rounded-md bg-[#14233F] px-3 py-1.5 text-sm font-semibold text-white hover:bg-[#0d172b] disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
                 >
                   {busy ? (
                     <>
@@ -352,13 +352,13 @@ function DeleteAccountModal({
                   type="button"
                   onClick={onSkipExport}
                   disabled={busy}
-                  className="text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-50"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground disabled:opacity-50"
                 >
                   Skip — continue to delete
                 </button>
               </div>
               {error && (
-                <p role="alert" className="text-sm text-red-700">
+                <p role="alert" className="text-sm text-danger">
                   {error}
                 </p>
               )}
@@ -367,7 +367,7 @@ function DeleteAccountModal({
 
           {step === "confirm" && (
             <>
-              <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+              <div className="flex items-start gap-2 rounded-md border border-warning bg-warning-bg px-3 py-2 text-sm text-warning">
                 <AlertTriangle className="mt-0.5 size-4 shrink-0" />
                 <span>
                   {name ? `Hi ${name}. ` : ""}
@@ -376,19 +376,19 @@ function DeleteAccountModal({
                 </span>
               </div>
               <label className="block">
-                <span className="mb-1 block text-sm font-medium text-slate-800">
-                  Type <code className="rounded bg-slate-100 px-1 py-0.5 text-xs font-semibold text-red-700">DELETE</code> to confirm
+                <span className="mb-1 block text-sm font-medium text-foreground">
+                  Type <code className="rounded bg-muted px-1 py-0.5 text-xs font-semibold text-danger">DELETE</code> to confirm
                 </span>
                 <input
                   type="text"
                   value={confirmText}
                   onChange={(e) => setConfirmText(e.target.value)}
                   autoFocus
-                  className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-red-400 focus:outline-none focus:ring-1 focus:ring-red-400"
+                  className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm focus:border-danger focus:outline-none focus:ring-1 focus:ring-danger"
                 />
               </label>
               {error && (
-                <p role="alert" className="text-sm text-red-700">
+                <p role="alert" className="text-sm text-danger">
                   {error}
                 </p>
               )}
@@ -397,7 +397,7 @@ function DeleteAccountModal({
                   type="button"
                   onClick={closeAndRedirectIfDeleted}
                   disabled={busy}
-                  className="text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-50"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -405,7 +405,7 @@ function DeleteAccountModal({
                   type="button"
                   onClick={onConfirmDelete}
                   disabled={busy}
-                  className="inline-flex items-center gap-2 rounded-md bg-red-700 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-md bg-danger px-3 py-1.5 text-sm font-semibold text-danger-foreground hover:bg-danger/90 disabled:opacity-60"
                 >
                   {busy ? (
                     <>
@@ -422,7 +422,7 @@ function DeleteAccountModal({
 
           {step === "done" && hardDeleteOn && (
             <>
-              <p className="text-sm text-slate-700">
+              <p className="text-sm text-foreground">
                 Your account is soft-deleted. We&apos;ll hard-delete it on{" "}
                 <strong>
                   {new Date(hardDeleteOn).toLocaleDateString("en-US", {
@@ -443,7 +443,7 @@ function DeleteAccountModal({
               <button
                 type="button"
                 onClick={closeAndRedirectIfDeleted}
-                className="inline-flex items-center gap-2 rounded-md bg-[#14233F] px-3 py-1.5 text-sm font-semibold text-white hover:bg-[#0d172b]"
+                className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
               >
                 Got it — sign me out
               </button>
@@ -471,16 +471,16 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="border border-[var(--rule)] bg-white p-6 sm:p-8">
+    <section className="border border-[var(--rule)] bg-card p-6 sm:p-8">
       <header className="mb-4 flex items-start gap-3">
-        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-[#4D7A60]/10">
+        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-heritage/10">
           {icon}
         </div>
         <div>
-          <h2 className="font-display text-lg font-bold text-[#14233F]">
+          <h2 className="font-display text-lg font-bold text-foreground">
             {title}
           </h2>
-          <p className="mt-0.5 text-sm text-slate-600">{description}</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
         </div>
       </header>
       <div>{children}</div>

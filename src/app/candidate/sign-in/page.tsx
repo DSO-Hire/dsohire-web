@@ -37,7 +37,7 @@ export default async function CandidateSignInPage({ searchParams }: PageProps) {
           one-time sign-in link — no password to remember.
         </p>
 
-        <div className="border border-[var(--rule)] bg-white p-8 sm:p-10">
+        <div className="border border-[var(--rule)] bg-card p-8 sm:p-10">
           <CandidateSignInForm next={next} />
         </div>
 

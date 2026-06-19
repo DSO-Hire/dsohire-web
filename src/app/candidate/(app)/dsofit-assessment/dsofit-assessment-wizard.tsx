@@ -167,7 +167,7 @@ export function DsoFitAssessmentWizard({
             We&apos;ll save it to your profile and pre-fill what we can. PDF or
             Word — totally optional.
           </p>
-          <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-heritage-deep bg-white px-5 py-2.5 text-[14px] font-bold text-heritage-deep hover:bg-heritage/5 transition-colors">
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-heritage-deep bg-card px-5 py-2.5 text-[14px] font-bold text-heritage-deep hover:bg-heritage/5 transition-colors">
             {resumeFile ? "Choose a different file" : "Choose your résumé"}
             <input
               type="file"
@@ -185,7 +185,7 @@ export function DsoFitAssessmentWizard({
                 type="button"
                 onClick={autofillFromResume}
                 disabled={parsing}
-                className="inline-flex items-center gap-2 rounded-full bg-heritage-deep px-6 py-2.5 text-[14px] font-bold text-ivory disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-full bg-heritage-deep px-6 py-2.5 text-[14px] font-bold text-primary-foreground disabled:opacity-60"
               >
                 {parsing ? "Reading your résumé…" : "Use this résumé & start →"}
               </button>
@@ -200,7 +200,7 @@ export function DsoFitAssessmentWizard({
           <button
             type="button"
             onClick={() => setStarted(true)}
-            className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-[15px] font-bold text-ivory hover:bg-ink/90 transition-colors"
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-[15px] font-bold text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             Start without a résumé →
           </button>
@@ -234,7 +234,7 @@ export function DsoFitAssessmentWizard({
                   setSkipNudge(false);
                   setStarted(true);
                 }}
-                className="inline-flex items-center gap-2 rounded-full bg-heritage-deep px-5 py-2.5 text-[14px] font-bold text-ivory hover:bg-heritage transition-colors"
+                className="inline-flex items-center gap-2 rounded-full bg-heritage-deep px-5 py-2.5 text-[14px] font-bold text-primary-foreground hover:bg-heritage transition-colors"
               >
                 Take 5 minutes →
               </button>

@@ -119,7 +119,7 @@ export default async function CandidatePracticeFitPage() {
           </span>
         </a>
       ) : (
-        <div className="mb-6 flex items-center justify-between gap-3 border border-[var(--rule)] bg-white px-4 py-3">
+        <div className="mb-6 flex items-center justify-between gap-3 border border-[var(--rule)] bg-card px-4 py-3">
           <span className="text-[13px] text-slate-body">
             Your PracticeFit Assessment is complete — it&apos;s powering your
             matches.
@@ -134,14 +134,14 @@ export default async function CandidatePracticeFitPage() {
       )}
 
       {!consentOn ? (
-        <section className="mb-8 p-7 sm:p-8 bg-ink text-ivory border-l-4 border-heritage">
+        <section className="mb-8 p-7 sm:p-8 bg-hero text-hero-foreground border-l-4 border-heritage">
           <div className="text-[10px] font-extrabold tracking-[2.5px] uppercase text-heritage-light mb-2">
             PracticeFit is off
           </div>
           <h2 className="text-2xl font-extrabold tracking-[-0.6px] leading-tight mb-3">
             Turn on PracticeFit to see roles matched to you.
           </h2>
-          <p className="text-[14px] text-ivory/70 leading-relaxed max-w-[560px] mb-2">
+          <p className="text-[14px] text-hero-foreground/70 leading-relaxed max-w-[560px] mb-2">
             It&apos;s our dental-specific matching engine — it ranks open roles
             by how well they fit your profile and lets DSOs find you by fit.
             Flip it on below; you can change it anytime.

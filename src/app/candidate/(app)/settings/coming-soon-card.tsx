@@ -31,24 +31,24 @@ export function ComingSoonCard({
 }: ComingSoonCardProps) {
   return (
     <div className="space-y-6">
-      <section className="border border-[var(--rule)] bg-white p-7 sm:p-9">
-        <h2 className="font-display text-xl font-bold text-[#14233F]">
+      <section className="border border-[var(--rule)] bg-card p-7 sm:p-9">
+        <h2 className="font-display text-xl font-bold text-foreground">
           {title}
         </h2>
-        <p className="mt-1 text-sm text-slate-600">{description}</p>
-        <div className="mt-5 flex items-start gap-3 rounded-md border border-[#4D7A60]/30 bg-[#F7F4ED] p-4">
-          <Sparkles className="mt-0.5 size-4 shrink-0 text-[#4D7A60]" />
+        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+        <div className="mt-5 flex items-start gap-3 rounded-md border border-heritage/30 bg-muted p-4">
+          <Sparkles className="mt-0.5 size-4 shrink-0 text-heritage" />
           <div className="flex-1 text-sm">
-            <p className="font-semibold text-[#14233F]">
+            <p className="font-semibold text-foreground">
               We&apos;re building this tab.
             </p>
-            <p className="mt-0.5 text-slate-600">
+            <p className="mt-0.5 text-muted-foreground">
               The IA is locked, the schema&apos;s in place, and your
               preferences here will carry over once the tab ships. No need
               to come back and reconfigure.
             </p>
             {features && features.length > 0 && (
-              <ul className="mt-3 list-disc space-y-1 pl-5 text-slate-600">
+              <ul className="mt-3 list-disc space-y-1 pl-5 text-muted-foreground">
                 {features.map((f) => (
                   <li key={f}>{f}</li>
                 ))}

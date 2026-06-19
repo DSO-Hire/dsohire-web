@@ -50,7 +50,7 @@ export function RestoreForm() {
         type="button"
         onClick={onRestore}
         disabled={busy !== null}
-        className="inline-flex items-center gap-2 bg-ink px-4 py-2.5 text-sm font-semibold text-ivory hover:bg-ink-soft disabled:opacity-60"
+        className="inline-flex items-center gap-2 bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
       >
         {busy === "restore" ? (
           <>
@@ -68,14 +68,14 @@ export function RestoreForm() {
         type="button"
         onClick={onSignOut}
         disabled={busy !== null}
-        className="inline-flex items-center gap-2 border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+        className="inline-flex items-center gap-2 border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-60"
       >
         {busy === "signout" ? "Signing out…" : "No, sign me out"}
       </button>
       {error && (
         <p
           role="alert"
-          className="inline-flex items-center gap-1 text-sm text-red-700"
+          className="inline-flex items-center gap-1 text-sm text-danger"
         >
           <AlertCircle className="size-3.5" />
           {error}
