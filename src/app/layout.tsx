@@ -72,6 +72,17 @@ export default function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem('dso-theme');var m=window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||((t==='system'||!t)&&m)){document.documentElement.classList.add('dark');}}catch(e){}})();`,
           }}
         />
+        {/* Vantage analytics beacon — first-party, cookieless. Fires a pageview
+            on load and on every SPA navigation (patches history.pushState +
+            popstate). No cookies, no localStorage, no device storage of any
+            kind; sends only {n,u,r} with the query stripped to the attribution
+            whitelist. Skips automated browsers. Dependency-free + inline so it
+            runs before hydration; neutral path /p/e for ad-blocker resilience. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{if(navigator.webdriver)return;var A=['utm_source','utm_medium','utm_campaign','utm_term','utm_content','ref','source'];function s(){try{var p=new URLSearchParams(location.search),k=new URLSearchParams();for(var i=0;i<A.length;i++){var v=p.get(A[i]);if(v)k.set(A[i],v);}var q=k.toString(),u=location.pathname+(q?'?'+q:''),d=JSON.stringify({n:'pageview',u:u,r:document.referrer});if(navigator.sendBeacon){navigator.sendBeacon('/p/e',d);}else{var g=new Image();g.src='/p/e?n=pageview&u='+encodeURIComponent(u)+'&r='+encodeURIComponent(document.referrer);}}catch(e){}}s();var h=history.pushState;if(h){history.pushState=function(){h.apply(this,arguments);s();};addEventListener('popstate',s);}}catch(e){}})();`,
+          }}
+        />
       </head>
       <body className="min-h-full flex flex-col bg-ivory text-ink font-sans">
         {children}
