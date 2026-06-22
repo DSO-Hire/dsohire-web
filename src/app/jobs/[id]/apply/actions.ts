@@ -38,6 +38,7 @@ import { NewApplication } from "@/emails/employer/NewApplication";
 import type { ScreeningQuestion } from "./types";
 import { composeName } from "@/lib/candidate/name";
 import { isKnockoutFailure } from "@/lib/screening/evaluate-knockout";
+import { recordGoal } from "@/lib/analytics/record-goal";
 import {
   isVerificationType,
   getVerificationType,
@@ -533,6 +534,10 @@ export async function applyToJob(
       });
     });
   }
+
+  // Vantage goal — count only true first submissions, not re-submits. after()
+  // so the write survives the serverless freeze (fail-silent).
+  if (!alreadyApplied) after(() => recordGoal("apply_submit"));
 
   revalidatePath(`/candidate/dashboard`);
   revalidatePath(`/candidate/applications`);

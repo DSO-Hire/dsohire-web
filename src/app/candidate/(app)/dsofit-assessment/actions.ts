@@ -12,6 +12,8 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { recordGoal } from "@/lib/analytics/record-goal";
+import { after } from "next/server";
 
 // "use server" files may only EXPORT async functions — keep consts module-local.
 const DSOFIT_ASSESSMENT_VERSION = "2026-06-09-v1";
@@ -112,6 +114,10 @@ export async function saveDsoFitAssessment(answers: Answers): Promise<Result> {
     console.error("[dsofit-assessment] save failed", error);
     return { ok: false, error: "Couldn't save your assessment." };
   }
+
+  // Vantage goal — DSOFit assessment completed. after() survives the serverless
+  // freeze (fail-silent).
+  after(() => recordGoal("assessment_complete", { kind: "dsofit" }));
 
   revalidatePath("/candidate/dashboard");
   return { ok: true };

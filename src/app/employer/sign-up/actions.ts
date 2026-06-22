@@ -24,6 +24,9 @@ import {
   isBillingPeriod,
 } from "@/lib/stripe/prices";
 import { SUPPORT_EMAIL } from "@/lib/contact";
+import { getAcquisition } from "@/lib/analytics/acquisition";
+import { recordGoal } from "@/lib/analytics/record-goal";
+import { after } from "next/server";
 
 export interface SignUpState {
   ok: boolean;
@@ -177,6 +180,8 @@ export async function signUpEmployer(
 
   const authUserId = createdUser.user.id;
 
+  // Vantage §4.6 — stamp last-touch acquisition for the closed-loop funnel.
+  const acq = await getAcquisition();
   const { data: dso, error: dsoError } = await admin
     .from("dsos")
     .insert({
@@ -186,6 +191,8 @@ export async function signUpEmployer(
       headquarters_state: headquartersState,
       practice_count: practiceCount,
       status: "pending",
+      acquisition_channel: acq.channel,
+      acquisition_source: acq.source,
     })
     .select("id")
     .single();
@@ -218,6 +225,10 @@ export async function signUpEmployer(
         `Failed to link your account to the DSO. Please try again or contact ${SUPPORT_EMAIL}.`,
     };
   }
+
+  // Vantage goal — DSO created + owner linked. after() so the write survives the
+  // serverless freeze once this action returns (fail-silent, never blocks signup).
+  after(() => recordGoal("signup_employer", { channel: acq.channel, tier }));
 
   await admin.auth.admin.updateUserById(authUserId, {
     user_metadata: {

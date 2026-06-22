@@ -32,6 +32,8 @@ import {
   guardJobUpdatePublish,
 } from "@/lib/compliance/pay-transparency-guard";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { recordGoal } from "@/lib/analytics/record-goal";
+import { after } from "next/server";
 import { SUPPORT_EMAIL } from "@/lib/contact";
 import {
   scanScreeningQuestionForBias,
@@ -306,6 +308,15 @@ export async function createJob(
       location_count: parsed.locationIds.length,
     },
   });
+
+  // Vantage goal — job created. after() so the write survives the serverless
+  // freeze (after() callbacks still flush when redirect() throws). Fail-silent.
+  after(() =>
+    recordGoal("job_post_create", {
+      status: parsed.status,
+      role: parsed.roleCategory,
+    }),
+  );
 
   redirect(`/employer/jobs/${job.id}`);
 }

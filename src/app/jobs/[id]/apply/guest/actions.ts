@@ -32,6 +32,8 @@ import { NewApplication } from "@/emails/employer/NewApplication";
 import type { ScreeningQuestion } from "../types";
 import { isKnockoutFailure } from "@/lib/screening/evaluate-knockout";
 import { composeName } from "@/lib/candidate/name";
+import { recordGoal } from "@/lib/analytics/record-goal";
+import { after } from "next/server";
 
 export interface GuestApplyState {
   ok: boolean;
@@ -452,6 +454,10 @@ export async function submitGuestApplication(
       console.warn("[guest-apply] employer notify failed", err);
     }
   })();
+
+  // Vantage goal — guest application submitted. after() so the write survives
+  // the serverless freeze (fail-silent).
+  after(() => recordGoal("apply_submit", { guest: true }));
 
   revalidatePath(`/jobs/${jobId}`);
   return {

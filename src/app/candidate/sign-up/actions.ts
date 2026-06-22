@@ -17,6 +17,9 @@ import {
 } from "@/lib/supabase/server";
 import { SUPPORT_EMAIL } from "@/lib/contact";
 import { composeName, parseSalutation } from "@/lib/candidate/name";
+import { getAcquisition } from "@/lib/analytics/acquisition";
+import { recordGoal } from "@/lib/analytics/record-goal";
+import { after } from "next/server";
 
 const NEXT_ALLOWLIST = /^\/(candidate\/|jobs\/)/;
 
@@ -96,12 +99,16 @@ export async function signUpCandidate(
 
   const authUserId = createdUser.user.id;
 
+  // Vantage §4.6 — stamp last-touch acquisition for the closed-loop funnel.
+  const acq = await getAcquisition();
   const { error: candidateError } = await admin.from("candidates").insert({
     auth_user_id: authUserId,
     first_name: firstName,
     last_name: lastName,
     salutation,
     is_searchable: false,
+    acquisition_channel: acq.channel,
+    acquisition_source: acq.source,
   });
 
   if (candidateError) {
@@ -114,6 +121,10 @@ export async function signUpCandidate(
         `We couldn't create your candidate profile. Please try again or contact ${SUPPORT_EMAIL}.`,
     };
   }
+
+  // Vantage goal — candidate profile created. after() so the write survives the
+  // serverless freeze once this action returns (fail-silent, never blocks signup).
+  after(() => recordGoal("signup_candidate", { channel: acq.channel }));
 
   const supabase = await createSupabaseServerClient();
   const { error: otpError } = await supabase.auth.signInWithOtp({

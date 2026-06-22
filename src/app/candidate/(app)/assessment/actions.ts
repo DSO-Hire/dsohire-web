@@ -13,6 +13,8 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { recordGoal } from "@/lib/analytics/record-goal";
+import { after } from "next/server";
 
 // NOTE: a "use server" file may only EXPORT async functions, so this stays
 // module-local (not exported) — the build fails otherwise.
@@ -128,6 +130,10 @@ export async function saveAssessment(answers: Answers): Promise<Result> {
     console.error("[assessment] save failed", error);
     return { ok: false, error: "Couldn't save your assessment." };
   }
+
+  // Vantage goal — PracticeFit assessment completed. after() survives the
+  // serverless freeze (fail-silent).
+  after(() => recordGoal("assessment_complete", { kind: "practice_fit" }));
 
   revalidatePath("/candidate/practice-fit");
   revalidatePath("/candidate/dashboard");

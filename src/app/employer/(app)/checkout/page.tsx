@@ -27,6 +27,8 @@ import {
   type BillingPeriod,
 } from "@/lib/stripe/prices";
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
+import { getRequestVisitorId } from "@/lib/analytics/request-visitor";
+import { recordGoal } from "@/lib/analytics/record-goal";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -255,6 +257,13 @@ async function buildCheckoutUrl(params: BuildCheckoutParams): Promise<string | n
     const stripe = getStripe();
     const priceId = getStripePriceId(params.tier, params.period);
 
+    // Vantage: count checkout starts, and pass the anonymous visitor id through
+    // Stripe metadata so the webhook can attribute checkout_success back to the
+    // same visitor (the webhook itself has no user request context).
+    void recordGoal("checkout_start", { tier: params.tier });
+    const visitorId = await getRequestVisitorId();
+    const vantageVisitor = visitorId == null ? "" : visitorId.toString();
+
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
@@ -267,6 +276,7 @@ async function buildCheckoutUrl(params: BuildCheckoutParams): Promise<string | n
         auth_user_id: params.userId,
         tier: params.tier,
         billing_period: params.period,
+        vantage_visitor: vantageVisitor,
       },
       subscription_data: {
         metadata: {

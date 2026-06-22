@@ -23,7 +23,7 @@
  * stripe_invoice_id with onConflict, so duplicate Stripe deliveries are safe.
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import type Stripe from "stripe";
 import { getStripe } from "@/lib/stripe/server";
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
@@ -34,6 +34,7 @@ import {
   type PricingTier,
 } from "@/lib/stripe/prices";
 import { autoPauseOverflowForDowngrade } from "@/lib/billing/caps";
+import { recordEvent, EVENT_TYPE_GOAL } from "@/lib/analytics/record-event";
 
 // Raw body required for signature verification — opt out of any parsing.
 export const dynamic = "force-dynamic";
@@ -135,6 +136,38 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     subscription,
     stripeCustomerId: stripeCustomerId ?? null,
   });
+
+  // Vantage: attribute the paid conversion back to the anonymous visitor who
+  // started checkout (id passed through Stripe metadata — the webhook has no
+  // user request context of its own). Fail-silent; never affects provisioning.
+  const vantageVisitor = session.metadata?.vantage_visitor;
+  if (vantageVisitor) {
+    try {
+      const visitorId = BigInt(vantageVisitor);
+      const tier = session.metadata?.tier ?? null;
+      // after() so the write survives once this handler returns 200 to Stripe.
+      after(() =>
+        recordEvent({
+          eventType: EVENT_TYPE_GOAL,
+          eventName: "checkout_success",
+          visitorId,
+          sessionId: null,
+          path: null,
+          referrerHost: null,
+          channel: null,
+          utm: { source: null, medium: null, campaign: null, term: null, content: null },
+          browser: null,
+          os: null,
+          device: null,
+          country: null,
+          region: null,
+          props: { tier },
+        }),
+      );
+    } catch {
+      // bad/empty visitor id → skip silently
+    }
+  }
 }
 
 async function handleSubscriptionUpsert(subscription: Stripe.Subscription): Promise<void> {
