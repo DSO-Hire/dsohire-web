@@ -12,8 +12,10 @@
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { LayoutDashboard, Building2, LogOut } from "lucide-react";
+import { LayoutDashboard, Building2, BarChart3, LogOut } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { isSuperadminEmail } from "@/lib/admin/gate";
+import { ANALYTICS_PRODUCT_NAME } from "@/lib/analytics/product";
 import { BrandLockup } from "@/components/marketing/site-shell";
 
 interface AdminShellProps {
@@ -21,16 +23,25 @@ interface AdminShellProps {
   active?: AdminNavId;
 }
 
-type AdminNavId = "overview" | "dsos";
+type AdminNavId = "overview" | "dsos" | "vantage";
 
 const NAV: Array<{
   id: AdminNavId;
   label: string;
   href: string;
   Icon: React.ComponentType<{ className?: string }>;
+  /** Founder-only items (email allowlist), hidden from other admin staff. */
+  founderOnly?: boolean;
 }> = [
   { id: "overview", label: "Overview", href: "/admin", Icon: LayoutDashboard },
   { id: "dsos", label: "DSOs", href: "/admin/dsos", Icon: Building2 },
+  {
+    id: "vantage",
+    label: ANALYTICS_PRODUCT_NAME,
+    href: "/admin/analytics",
+    Icon: BarChart3,
+    founderOnly: true,
+  },
 ];
 
 export async function AdminShell({ children, active }: AdminShellProps) {
@@ -58,6 +69,11 @@ export async function AdminShell({ children, active }: AdminShellProps) {
     redirect("/employer/dashboard");
   }
 
+  // Founder-only nav items (e.g. Vantage analytics) show only to the superadmin
+  // allowlist — other admin staff don't see them. The pages enforce this too.
+  const founder = isSuperadminEmail(user.email);
+  const navItems = NAV.filter((item) => !item.founderOnly || founder);
+
   return (
     <div className="min-h-screen bg-cream flex">
       {/* Sidebar */}
@@ -73,7 +89,7 @@ export async function AdminShell({ children, active }: AdminShellProps) {
 
         <nav className="flex-1 py-5">
           <ul className="list-none">
-            {NAV.map((item) => (
+            {navItems.map((item) => (
               <li key={item.id}>
                 <Link
                   href={item.href}
