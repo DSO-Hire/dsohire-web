@@ -7,6 +7,12 @@ import type { ChangelogEntry } from "./index";
 
 export const entries: ChangelogEntry[] = [
   {
+    date: "2026-06-19",
+    kind: "new",
+    title: "Dark mode",
+    body: "DSO Hire now has a full dark mode. Use the Light / Dark / System toggle in the navigation (or your menu on mobile) — it remembers your choice and follows your device by default. It's built to our own palette, not a washed-out gray, and it loads instantly with no white flash.",
+  },
+  {
     date: "2026-06-16",
     kind: "new",
     title: "Every rejection now records a reason",
