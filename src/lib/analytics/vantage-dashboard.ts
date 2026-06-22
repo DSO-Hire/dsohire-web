@@ -146,3 +146,49 @@ export async function loadVantageLoop(): Promise<LoopRow[]> {
 export function goalVisitors(goals: GoalRow[], name: string): number {
   return goals.find((g) => g.event_name === name)?.visitors ?? 0;
 }
+
+export interface WeekStats {
+  visitors: number;
+  pageviews: number;
+  employer_signups: number;
+  candidate_signups: number;
+  paid: number;
+}
+export interface WeeklyCompare {
+  this_week: WeekStats;
+  prev_week: WeekStats;
+}
+
+const EMPTY_WEEK: WeekStats = {
+  visitors: 0,
+  pageviews: 0,
+  employer_signups: 0,
+  candidate_signups: 0,
+  paid: 0,
+};
+
+function weekStats(v: unknown): WeekStats {
+  const o = (v ?? {}) as Record<string, unknown>;
+  return {
+    visitors: Number(o.visitors ?? 0),
+    pageviews: Number(o.pageviews ?? 0),
+    employer_signups: Number(o.employer_signups ?? 0),
+    candidate_signups: Number(o.candidate_signups ?? 0),
+    paid: Number(o.paid ?? 0),
+  };
+}
+
+export async function loadVantageWeeklyCompare(): Promise<WeeklyCompare> {
+  try {
+    const admin = createSupabaseServiceRoleClient();
+    const { data, error } = await admin.rpc("vantage_weekly_compare");
+    if (error || !data) return { this_week: EMPTY_WEEK, prev_week: EMPTY_WEEK };
+    const d = data as Record<string, unknown>;
+    return {
+      this_week: weekStats(d.this_week),
+      prev_week: weekStats(d.prev_week),
+    };
+  } catch {
+    return { this_week: EMPTY_WEEK, prev_week: EMPTY_WEEK };
+  }
+}
