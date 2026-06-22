@@ -60,7 +60,7 @@ export default async function DsoAccount360({
       action: "admin.account.viewed",
       targetType: "dso",
       targetId: dso.id,
-      summary: `Viewed DSO ${dso.name}`,
+      summary: `Viewed DSO ${dso.id}`,
     });
   }
 

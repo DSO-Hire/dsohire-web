@@ -47,7 +47,7 @@ export default async function JobAccount360({
       action: "admin.account.viewed",
       targetType: "job",
       targetId: j.id,
-      summary: `Viewed job ${j.title ?? j.id}`,
+      summary: `Viewed job ${j.id}`,
     });
   }
 

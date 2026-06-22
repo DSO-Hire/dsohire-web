@@ -26,7 +26,10 @@ import {
   type VantageOverview,
 } from "@/lib/analytics/vantage-dashboard";
 
-export const metadata: Metadata = { title: `${ANALYTICS_PRODUCT_NAME} · Admin` };
+export const metadata: Metadata = {
+  title: `${ANALYTICS_PRODUCT_NAME} · Admin`,
+  robots: { index: false, follow: false },
+};
 export const dynamic = "force-dynamic";
 
 interface PageProps {

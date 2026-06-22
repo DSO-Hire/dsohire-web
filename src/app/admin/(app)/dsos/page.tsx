@@ -15,7 +15,11 @@
 
 import Link from "next/link";
 import { ArrowLeft, ExternalLink } from "lucide-react";
-import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
+import {
+  createSupabaseServerClient,
+  createSupabaseServiceRoleClient,
+} from "@/lib/supabase/server";
+import { isSuperadminEmail } from "@/lib/admin/gate";
 import { setDsoStatus, setDsoFeaturedUntil } from "./actions";
 import { ConfirmSubmitButton } from "./confirm-submit-button";
 import type { Metadata } from "next";
@@ -46,9 +50,18 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
 
   const admin = createSupabaseServiceRoleClient();
 
+  // Founder flag (Tier-2) — gates the destructive Suspend button per row,
+  // matching the DSO 360. (The layout already gates Tier-1 admin_users.)
+  const ssr = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await ssr.auth.getUser();
+  const founder = isSuperadminEmail(user?.email);
+
   let query = admin
     .from("dsos")
     .select("id, name, slug, status, created_at, featured_until")
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (statusFilter !== "all") {
@@ -339,20 +352,22 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
                         Revert to Pending
                       </button>
                     </form>
-                    <form action={activateDsoAction}>
-                      <input type="hidden" name="dso_id" value={dso.id} />
-                      <input
-                        type="hidden"
-                        name="new_status"
-                        value="suspended"
-                      />
-                      <ConfirmSubmitButton
-                        confirmMessage={`Suspend ${dso.name}? Their public page and active jobs will be taken down.`}
-                        className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 border border-danger text-danger text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-danger-bg transition-colors"
-                      >
-                        Suspend
-                      </ConfirmSubmitButton>
-                    </form>
+                    {founder && (
+                      <form action={activateDsoAction}>
+                        <input type="hidden" name="dso_id" value={dso.id} />
+                        <input
+                          type="hidden"
+                          name="new_status"
+                          value="suspended"
+                        />
+                        <ConfirmSubmitButton
+                          confirmMessage={`Suspend ${dso.name}? Their public page and active jobs will be taken down.`}
+                          className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 border border-danger text-danger text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-danger-bg transition-colors"
+                        >
+                          Suspend
+                        </ConfirmSubmitButton>
+                      </form>
+                    )}
                   </>
                 )}
 
