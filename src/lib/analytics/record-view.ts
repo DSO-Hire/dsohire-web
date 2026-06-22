@@ -9,12 +9,16 @@
  * anon clients can't insert into `job_view_events` — RLS only opens
  * SELECT to DSO members of the job's DSO.
  *
- * Dedup strategy:
- *   - `session_id` is a long-lived cookie that we read on the server.
- *     If absent, we mint one and the response sets the cookie via the
- *     `next/headers` cookies API. The view event is still recorded
- *     either way; aggregation queries can `COUNT(DISTINCT session_id)`
- *     for unique-visitor counts.
+ * Dedup strategy (Vantage §3a, 2026-06-22 — now COOKIELESS):
+ *   - `session_id` is the anonymous daily visitor hash (the same cookieless
+ *     identity the /p/e beacon uses — see request-visitor.ts), NOT a cookie.
+ *     This removes the old `dsohire-view-session` cookie so the "we do not use
+ *     cookies for analytics" privacy claim is literally true. The hash resets
+ *     daily, so `COUNT(DISTINCT session_id)` over a day = unique daily viewers
+ *     (the cookieless tradeoff: a multi-day window sums daily uniques rather
+ *     than tracking a stable browser — acceptable, and the privacy-correct
+ *     behavior). If no salt is available the view still records with a null
+ *     session_id — dedup is best-effort, never a blocker.
  *   - Self-views (DSO member viewing their own job, candidate viewing
  *     a job they own) are still recorded but flagged via the
  *     `is_authenticated` bit so dashboards can filter them out of
@@ -29,12 +33,9 @@
  * group at read time.
  */
 
-import { cookies, headers } from "next/headers";
-import { randomUUID } from "node:crypto";
+import { headers } from "next/headers";
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
-
-const SESSION_COOKIE_NAME = "dsohire-view-session";
-const SESSION_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
+import { getRequestVisitorId } from "./request-visitor";
 
 export interface RecordJobViewInput {
   jobId: string;
@@ -46,29 +47,11 @@ export interface RecordJobViewInput {
 
 export async function recordJobView(input: RecordJobViewInput): Promise<void> {
   try {
-    const cookieStore = await cookies();
     const hdrs = await headers();
 
-    let sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value ?? null;
-    if (!sessionId) {
-      sessionId = randomUUID();
-      // Best-effort cookie set. Some response paths (RSC, edge runtime)
-      // may not allow cookie writes; we ignore the failure and the
-      // visitor gets a fresh session id on next visit. View event
-      // still records — dedup is best-effort, not exact.
-      try {
-        cookieStore.set({
-          name: SESSION_COOKIE_NAME,
-          value: sessionId,
-          maxAge: SESSION_COOKIE_MAX_AGE,
-          httpOnly: true,
-          sameSite: "lax",
-          path: "/",
-        });
-      } catch {
-        // RSC contexts can't set cookies; OK to skip.
-      }
-    }
+    // Cookieless dedup key: the anonymous daily visitor hash (no cookie).
+    const visitorId = await getRequestVisitorId();
+    const sessionId = visitorId == null ? null : visitorId.toString();
 
     // Parse referer host (don't store full URL — privacy + size).
     const referer = hdrs.get("referer") ?? "";
@@ -104,32 +87,17 @@ export async function recordJobView(input: RecordJobViewInput): Promise<void> {
 /**
  * Apply-form START recorder (Analytics Phase 1). Fired when a candidate
  * reaches an apply page — the denominator for application completion rate
- * (submitted applications ÷ starts). Same service-role + session-cookie
- * pattern as recordJobView; fail-silent so it never blocks the apply page.
+ * (submitted applications ÷ starts). Same service-role + cookieless visitor
+ * hash as recordJobView; fail-silent so it never blocks the apply page.
  */
 export async function recordApplicationStart(jobId: string): Promise<void> {
   try {
-    const cookieStore = await cookies();
-    let sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value ?? null;
-    if (!sessionId) {
-      sessionId = randomUUID();
-      try {
-        cookieStore.set({
-          name: SESSION_COOKIE_NAME,
-          value: sessionId,
-          maxAge: SESSION_COOKIE_MAX_AGE,
-          httpOnly: true,
-          sameSite: "lax",
-          path: "/",
-        });
-      } catch {
-        // RSC contexts can't set cookies; OK to skip.
-      }
-    }
+    const visitorId = await getRequestVisitorId();
     const admin = createSupabaseServiceRoleClient();
-    await admin
-      .from("application_starts")
-      .insert({ job_id: jobId, session_id: sessionId });
+    await admin.from("application_starts").insert({
+      job_id: jobId,
+      session_id: visitorId == null ? null : visitorId.toString(),
+    });
   } catch (err) {
     console.warn("[record-start] insert failed", err);
   }
