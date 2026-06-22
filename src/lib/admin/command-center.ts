@@ -12,6 +12,7 @@
 
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { PRICING_TIERS, isPricingTier } from "@/lib/stripe/prices";
+import { EXPIRY_IMMINENT_DAYS } from "@/lib/credentials/expiry";
 
 export interface NorthStar {
   activeDsos: number;
@@ -31,7 +32,8 @@ export interface QueueRow {
   key: string;
   label: string;
   count: number;
-  href: string;
+  /** Optional drill-down. Omitted for informational counts with no admin surface yet. */
+  href?: string;
   /** "warn" tints rows that need attention (billing/support); "default" otherwise. */
   tone: "default" | "warn";
 }
@@ -111,6 +113,17 @@ export async function getCommandCenterSnapshot(): Promise<CommandCenterSnapshot>
     /* leave mrrCents at 0 */
   }
 
+  // Expiring-credential escalations (expired or within the imminent window).
+  let expiringCredentials = 0;
+  try {
+    const { data, error } = await admin.rpc("admin_expiring_credentials_count", {
+      p_within_days: EXPIRY_IMMINENT_DAYS,
+    });
+    if (!error) expiringCredentials = Number(data ?? 0);
+  } catch {
+    /* leave 0 */
+  }
+
   // Daily pageview series (zero-filled) for the traffic spark.
   let trafficSpark: number[] = [];
   let pageviews7d = 0;
@@ -146,6 +159,13 @@ export async function getCommandCenterSnapshot(): Promise<CommandCenterSnapshot>
       label: "Open support requests",
       count: openSupport,
       href: "/admin/support/conversations",
+      tone: "warn",
+    },
+    {
+      key: "expiring_credentials",
+      label: "Expiring credential escalations",
+      count: expiringCredentials,
+      // No admin drill-down surface yet — informational count.
       tone: "warn",
     },
   ];

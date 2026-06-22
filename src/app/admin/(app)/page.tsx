@@ -121,36 +121,43 @@ export default async function AdminCommandCenter() {
 
 function QueueItem({ row }: { row: QueueRow }) {
   const muted = row.count === 0;
+  const inner = (
+    <>
+      <div className="flex items-center gap-3">
+        <span
+          className={`inline-flex items-center justify-center min-w-[2.25rem] h-9 px-2 text-[15px] font-extrabold tabular-nums ${
+            muted
+              ? "text-slate-meta bg-cream"
+              : row.tone === "warn"
+                ? "text-danger bg-danger/10"
+                : "text-heritage-deep bg-heritage/10"
+          }`}
+        >
+          {row.count}
+        </span>
+        <span
+          className={`text-[14px] font-semibold ${
+            muted ? "text-slate-meta" : "text-ink"
+          }`}
+        >
+          {row.label}
+        </span>
+      </div>
+      {row.href && (
+        <ArrowRight className="h-4 w-4 text-slate-meta group-hover:text-ink transition-colors" />
+      )}
+    </>
+  );
+  const cls = "flex items-center justify-between gap-4 px-5 py-4 bg-card";
   return (
     <li>
-      <Link
-        href={row.href}
-        className={`flex items-center justify-between gap-4 px-5 py-4 transition-colors group ${
-          muted ? "bg-card hover:bg-cream/40" : "bg-card hover:bg-cream/60"
-        }`}
-      >
-        <div className="flex items-center gap-3">
-          <span
-            className={`inline-flex items-center justify-center min-w-[2.25rem] h-9 px-2 text-[15px] font-extrabold tabular-nums ${
-              muted
-                ? "text-slate-meta bg-cream"
-                : row.tone === "warn"
-                  ? "text-danger bg-danger/10"
-                  : "text-heritage-deep bg-heritage/10"
-            }`}
-          >
-            {row.count}
-          </span>
-          <span
-            className={`text-[14px] font-semibold ${
-              muted ? "text-slate-meta" : "text-ink"
-            }`}
-          >
-            {row.label}
-          </span>
-        </div>
-        <ArrowRight className="h-4 w-4 text-slate-meta group-hover:text-ink transition-colors" />
-      </Link>
+      {row.href ? (
+        <Link href={row.href} className={`${cls} hover:bg-cream/60 transition-colors group`}>
+          {inner}
+        </Link>
+      ) : (
+        <div className={cls}>{inner}</div>
+      )}
     </li>
   );
 }
