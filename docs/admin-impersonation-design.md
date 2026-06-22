@@ -98,5 +98,21 @@ block + the EEO-never rule + the audit trail.
 - Audit kinds already defined in `src/lib/admin/audit.ts`.
 
 ---
-**PAUSE — awaiting Cam's approval of (1) the mechanism and (2) Option A vs B
-before building Phase 4.1.**
+## Outcome (2026-06-22, post-approval)
+Cam approved the mechanism + Option A. **Implementation surfaced that Option A
+does not work here:** every candidate/employer *page* re-resolves the signed-in
+session via the RLS user-client and queries its own data (e.g.
+`applications/page.tsx`). A layout-level identity override therefore only swaps
+the shell chrome — the page bodies still render the founder's (empty) session.
+True Option A would need a session swap (rejected) or making dozens of pages
+impersonation-aware.
+
+**Decision: Option B (read-only mirror routes), candidate-first.** Shipped
+`/admin/view-as/candidate/[id]` — re-renders the candidate's profile +
+applications via service-role (Tier-2 gated, EEO never shown, deleted_at
+filtered, audited `admin.impersonation.start`). No cookie / proxy write-block /
+exit route needed (the mirror has no mutation forms — read-only by
+construction). The signed-cookie groundwork (`impersonation.ts`) is retained
+but currently UNUSED — kept for a possible future full-fidelity (session) path
+and the employer side. Employer-side mirror + deeper candidate screens (fit,
+resume) are tranche-2 follow-ons.
