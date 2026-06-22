@@ -346,6 +346,25 @@ async function upsertSubscription(params: UpsertParams): Promise<void> {
   );
   if (error) throw new TransientWebhookError(error.message);
 
+  // Auto-activate the DSO on a successful subscription so a paying customer is
+  // never stuck waiting on a manual founder click (decision 2026-06-22). Guard
+  // on status='pending': never resurrect a SUSPENDED dso on a renewal, and
+  // no-op an already-active one. Best-effort — a paid customer's provisioning
+  // must not fail if this flip hiccups (the next subscription event retries).
+  if (subscription.status === "active" || subscription.status === "trialing") {
+    const { error: activateError } = await admin
+      .from("dsos")
+      .update({ status: "active" })
+      .eq("id", dsoId)
+      .eq("status", "pending");
+    if (activateError) {
+      console.warn(
+        `[stripe-webhook] dso auto-activate failed for ${dsoId}`,
+        activateError
+      );
+    }
+  }
+
   // #88 — if this plan change leaves the DSO over its active-openings cap
   // (i.e. a downgrade), auto-pause the overflow. Recoverable: the jobs page
   // shows a "choose what to reactivate" banner. Best-effort — a failure here
