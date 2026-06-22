@@ -28,6 +28,10 @@ export interface CandidateMirror {
   location: string | null;
   isSearchable: boolean;
   anonymousMode: boolean;
+  resumeOnFile: boolean;
+  practiceFitDone: boolean;
+  dsoFitDone: boolean;
+  primaryFit: string | null;
   applications: MirrorApplication[];
 }
 
@@ -50,7 +54,7 @@ export async function getCandidateMirror(
   const { data: c, error } = await admin
     .from("candidates")
     .select(
-      "id, full_name, headline, current_title, current_location_city, current_location_state, is_searchable, anonymous_mode",
+      "id, full_name, headline, current_title, current_location_city, current_location_state, is_searchable, anonymous_mode, resume_url, assessment_completed_at, dsofit_assessment_completed_at, primary_fit_product",
     )
     .eq("id", id)
     .is("deleted_at", null)
@@ -139,6 +143,13 @@ export async function getCandidateMirror(
     location: city && state ? `${city}, ${state}` : city || state || null,
     isSearchable: Boolean(c.is_searchable),
     anonymousMode: Boolean(c.anonymous_mode),
+    resumeOnFile: Boolean(c.resume_url),
+    practiceFitDone: Boolean(c.assessment_completed_at),
+    dsoFitDone: Boolean(c.dsofit_assessment_completed_at),
+    primaryFit:
+      (c.primary_fit_product as string | null) === "dsofit"
+        ? "DSOFit"
+        : "PracticeFit",
     applications,
   };
 }
