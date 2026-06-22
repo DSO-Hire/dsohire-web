@@ -10,7 +10,7 @@
 
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, Eye } from "lucide-react";
 import type { Metadata } from "next";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { isSuperadminEmail } from "@/lib/admin/gate";
@@ -68,19 +68,29 @@ export default async function DsoAccount360({
     <>
       <BackLink />
 
-      <header className="mb-8">
-        <div className="flex items-center gap-3 flex-wrap">
-          <h1 className="text-3xl font-extrabold tracking-[-1px] text-ink">
-            {dso.name}
-          </h1>
-          <StatusChip status={dso.status} />
+      <header className="mb-8 flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-3xl font-extrabold tracking-[-1px] text-ink">
+              {dso.name}
+            </h1>
+            <StatusChip status={dso.status} />
+          </div>
+          {dso.slug && (
+            <Link
+              href={`/companies/${dso.slug}`}
+              className="inline-flex items-center gap-1.5 mt-2 text-[12px] text-heritage-deep hover:text-ink transition-colors"
+            >
+              /companies/{dso.slug} <ExternalLink className="h-3 w-3" />
+            </Link>
+          )}
         </div>
-        {dso.slug && (
+        {founder && (
           <Link
-            href={`/companies/${dso.slug}`}
-            className="inline-flex items-center gap-1.5 mt-2 text-[12px] text-heritage-deep hover:text-ink transition-colors"
+            href={`/admin/view-as/dso/${dso.id}`}
+            className="inline-flex items-center gap-2 px-3 py-1.5 text-[11px] font-bold tracking-[1px] uppercase border border-heritage-deep/40 text-heritage-deep hover:bg-heritage/10 transition-colors"
           >
-            /companies/{dso.slug} <ExternalLink className="h-3 w-3" />
+            <Eye className="h-3.5 w-3.5" /> View as (read-only)
           </Link>
         )}
       </header>
