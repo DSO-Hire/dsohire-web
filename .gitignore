@@ -46,3 +46,6 @@ next-env.d.ts
 
 # Claude Code local workflow config (never committed)
 .claude/
+
+# scoped temp tsconfig (agent verification only, never committed)
+tsconfig.scope.json
