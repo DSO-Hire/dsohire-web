@@ -35,6 +35,10 @@ function isGateExempt(pathname: string): boolean {
     pathname === "/coming-soon" ||
     pathname === "/api" ||
     pathname.startsWith("/api/") ||
+    // Vantage analytics beacon — a machine endpoint (like /api/*) that must
+    // fire without the preview cookie, so we capture pre-launch landing traffic
+    // too. Neutral path /p/e (not /api/*) for ad-blocker resilience.
+    pathname === "/p/e" ||
     pathname.startsWith("/unsubscribe") ||
     pathname === "/robots.txt" ||
     pathname === "/sitemap.xml" ||
