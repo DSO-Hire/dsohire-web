@@ -15,7 +15,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Activity, Globe, MousePointerClick, Users } from "lucide-react";
 import { requireSuperadmin } from "@/lib/admin/gate";
-import { AdminShell } from "@/components/admin/admin-shell";
 import { ANALYTICS_PRODUCT_NAME } from "@/lib/analytics/product";
 import {
   loadVantageOverview,
@@ -68,7 +67,6 @@ export default async function VantageDashboard({ searchParams }: PageProps) {
   ];
 
   return (
-    <AdminShell active="vantage">
     <div className="mx-auto max-w-[1100px]">
       {/* Header */}
       <div className="flex items-end justify-between gap-4 flex-wrap">
@@ -225,7 +223,6 @@ export default async function VantageDashboard({ searchParams }: PageProps) {
         is aggregate-only and never links anonymous browsing to an account.
       </p>
     </div>
-    </AdminShell>
   );
 }
 

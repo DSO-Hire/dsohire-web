@@ -9,13 +9,12 @@
  *   - Active job count
  *
  * Owner email comes from auth.users via service-role lookup. The page is
- * auth-gated by AdminShell (which checks admin_users membership) so the
+ * auth-gated by the /admin (app) layout (which checks admin_users membership) so the
  * service-role usage is safe.
  */
 
 import Link from "next/link";
 import { ArrowLeft, ExternalLink } from "lucide-react";
-import { AdminShell } from "@/components/admin/admin-shell";
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { setDsoStatus, setDsoFeaturedUntil } from "./actions";
 import { ConfirmSubmitButton } from "./confirm-submit-button";
@@ -122,7 +121,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
   );
 
   return (
-    <AdminShell active="dsos">
+    <>
       <Link
         href="/admin"
         className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-6"
@@ -374,7 +373,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
           ))}
         </div>
       )}
-    </AdminShell>
+    </>
   );
 }
 

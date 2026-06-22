@@ -5,7 +5,7 @@
  *
  * setDsoStatus flips a DSO's status (pending / active / suspended).
  * Auth gate: caller must be in admin_users. We re-check here as defense
- * in depth even though AdminShell already gates the page.
+ * in depth even though the /admin (app) layout already gates the page.
  *
  * Uses the service-role client because the dsos.update RLS policy is
  * scoped to DSO members; admins are not members so they can't write

@@ -7,7 +7,6 @@
 
 import Link from "next/link";
 import { ArrowRight, Building2 } from "lucide-react";
-import { AdminShell } from "@/components/admin/admin-shell";
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
 
@@ -37,7 +36,7 @@ export default async function AdminOverviewPage() {
     .eq("status", "active");
 
   return (
-    <AdminShell active="overview">
+    <>
       <header className="mb-10">
         <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
           Internal Admin
@@ -92,6 +91,6 @@ export default async function AdminOverviewPage() {
           </div>
         </Link>
       </div>
-    </AdminShell>
+    </>
   );
 }
