@@ -22,6 +22,7 @@
 
 import type { MetadataRoute } from "next";
 import { SALARY_ROLES, ALL_STATE_SLUGS } from "@/lib/comp/salary";
+import { getPublicJobsForDistribution } from "@/lib/distribution/public-jobs";
 
 const SITE_URL = "https://dsohire.com";
 
@@ -77,7 +78,7 @@ const ROUTES: SitemapRoute[] = [
   { path: "/legal/candidate-terms", priority: 0.3, changeFrequency: "yearly" },
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const base = ROUTES.map((r) => ({
     url: `${SITE_URL}${r.path}`,
@@ -103,5 +104,29 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.5,
     })),
   );
-  return [...base, ...salaryHubs, ...salary];
+  // Dynamic public job + company pages. getPublicJobsForDistribution() returns
+  // [] until distribution is live (and never includes demo/seed DSOs), so
+  // pre-launch this adds nothing and the noindex posture is preserved. Only
+  // public-affiliated jobs contribute a /companies/[slug] entry — a
+  // private-affiliation slug must never be exposed.
+  const publicJobs = await getPublicJobsForDistribution();
+  const jobPages = publicJobs.map((job) => ({
+    url: `${SITE_URL}/jobs/${job.id}`,
+    lastModified: job.postedAt ? new Date(job.postedAt) : now,
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
+  }));
+  const companySlugs = Array.from(
+    new Set(
+      publicJobs.filter((j) => j.isPublicAffiliated).map((j) => j.dsoSlug),
+    ),
+  ).filter(Boolean);
+  const companyPages = companySlugs.map((slug) => ({
+    url: `${SITE_URL}/companies/${slug}`,
+    lastModified: now,
+    changeFrequency: "weekly" as const,
+    priority: 0.5,
+  }));
+
+  return [...base, ...salaryHubs, ...salary, ...jobPages, ...companyPages];
 }
