@@ -33,6 +33,10 @@ import { ShareToLinkedIn } from "@/components/share-to-linkedin";
 import { loadJobAttachmentsWithUrls } from "@/lib/jobs/attachments";
 import { JobAttachmentsPublic } from "@/components/job-attachments-public";
 import { recordJobView } from "@/lib/analytics/record-view";
+import {
+  buildJobPostingJsonLd,
+  type PublicJob,
+} from "@/lib/distribution/public-jobs";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
 import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
 import {
@@ -85,14 +89,6 @@ const EMP_LABELS: Record<string, string> = {
   locum: "Locum",
 };
 
-const EMP_SCHEMA: Record<string, string> = {
-  full_time: "FULL_TIME",
-  part_time: "PART_TIME",
-  contract: "CONTRACTOR",
-  prn: "PER_DIEM",
-  locum: "TEMPORARY",
-};
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
   const supabase = await createSupabaseServerClient();
@@ -130,7 +126,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
   const { data: job } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, variable_comp_enabled, variable_comp_target, variable_comp_structure, bonus_enabled, bonus_target, benefits, requirements, posted_at, status, schedule_days, schedule_evenings, schedule_weekends, scope, external_links, corporate_function, work_mode, work_mode_detail, remote_state_restrictions, travel_expectation, travel_territory, reports_to, direct_reports_band, indirect_reports_band, authority_level, education_requirement, industry_experience, min_years_corporate_experience, max_years_corporate_experience, bonus_structure, equity_offered, equity_note, visibility, comp_model, guarantee_kind, guarantee_amount, guarantee_duration, percent_rate_min, percent_rate_max, percent_basis, percent_tiers_note, hygiene_exam_credited, hygienist_work_credited, lab_fee_policy, basis_exclusions_note, pay_cadence, est_annual_min, est_annual_max, worker_classification"
+      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, variable_comp_enabled, variable_comp_target, variable_comp_structure, bonus_enabled, bonus_target, benefits, requirements, posted_at, expires_at, status, schedule_days, schedule_evenings, schedule_weekends, scope, external_links, corporate_function, work_mode, work_mode_detail, remote_state_restrictions, travel_expectation, travel_territory, reports_to, direct_reports_band, indirect_reports_band, authority_level, education_requirement, industry_experience, min_years_corporate_experience, max_years_corporate_experience, bonus_structure, equity_offered, equity_note, visibility, comp_model, guarantee_kind, guarantee_amount, guarantee_duration, percent_rate_min, percent_rate_max, percent_basis, percent_tiers_note, hygiene_exam_credited, hygienist_work_credited, lab_fee_policy, basis_exclusions_note, pay_cadence, est_annual_min, est_annual_max, worker_classification"
     )
     .eq("id", id)
     .maybeSingle();
@@ -315,13 +311,42 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
   // parentOrganization extension — the corporate name must not leak
   // through indexed schema. We also drop the `sameAs` link to the
   // /companies/[slug] page since the slug exposes the corporate name.
-  const jsonLd = buildJobPostingJsonLd({
-    job,
-    dso: dso as DsoForSchema | null,
-    locations,
+  // Build the canonical public shape and hand it to the SHARED JobPosting
+  // builder (src/lib/distribution/public-jobs.ts) so the masking/comp rules and
+  // schema fields stay identical to the feed/API. displayedEmployerName +
+  // isPublicAffiliated are already masked above; locations drop the street
+  // address for anonymized practices so the masked name can't be resolved.
+  const publicJob: PublicJob = {
+    id: id,
+    slug: (job.slug as string | null) ?? null,
+    title: job.title as string,
+    descriptionHtml: (job.description as string) ?? "",
+    descriptionText: htmlToPlainText((job.description as string) ?? ""),
+    employmentType: job.employment_type as string,
+    roleCategory: (job.role_category as string | null) ?? "",
+    scope: jobScope,
+    postedAt: (job.posted_at as string | null) ?? null,
+    expiresAt: (job.expires_at as string | null) ?? null,
+    employerName: displayedEmployerName,
     isPublicAffiliated,
-    displayedEmployerName,
-  });
+    dsoSlug: (dso?.slug as string | null) ?? "",
+    locations: locations.map((loc) => ({
+      city: loc.city,
+      state: loc.state,
+      streetAddress: loc.anonymize_name ? null : loc.address_line1,
+      postalCode: loc.anonymize_name ? null : loc.postal_code,
+    })),
+    comp:
+      (job.compensation_visible as boolean) &&
+      (job.compensation_min as number | null) !== null
+        ? {
+            min: job.compensation_min as number,
+            max: (job.compensation_max as number | null) ?? null,
+            period: (job.compensation_period as string | null) ?? "annual",
+          }
+        : null,
+  };
+  const jsonLd = buildJobPostingJsonLd(publicJob);
 
   return (
     <SiteShell>
@@ -1232,87 +1257,4 @@ function timeAgo(date: Date): string {
   const hours = Math.floor(seconds / 3600);
   if (hours > 0) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
   return "Just now";
-}
-
-/* ───── JSON-LD ───── */
-
-interface DsoForSchema {
-  name: string;
-  slug: string;
-  description: string | null;
-}
-
-interface JobForSchema {
-  [k: string]: unknown;
-}
-
-interface LocationForSchema {
-  address_line1: string | null;
-  city: string | null;
-  state: string | null;
-  postal_code: string | null;
-}
-
-function buildJobPostingJsonLd({
-  job,
-  dso,
-  locations,
-  isPublicAffiliated,
-  displayedEmployerName,
-}: {
-  job: JobForSchema;
-  dso: DsoForSchema | null;
-  locations: LocationForSchema[];
-  isPublicAffiliated: boolean;
-  displayedEmployerName: string;
-}) {
-  return {
-    "@context": "https://schema.org/",
-    "@type": "JobPosting",
-    title: job.title as string,
-    description: htmlToPlainText((job.description as string) ?? ""),
-    datePosted: job.posted_at as string | null,
-    employmentType: EMP_SCHEMA[job.employment_type as string] ?? "OTHER",
-    hiringOrganization: dso
-      ? isPublicAffiliated
-        ? {
-            "@type": "Organization",
-            name: dso.name,
-            sameAs: `https://dsohire.com/companies/${dso.slug}`,
-          }
-        : {
-            // Private-affiliation: practice/multi-loc name only. No
-            // sameAs (would expose corporate slug). No parentOrganization
-            // (would expose corporate name through schema indexing).
-            "@type": "Organization",
-            name: displayedEmployerName,
-          }
-      : undefined,
-    jobLocation: locations.map((loc) => ({
-      "@type": "Place",
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: loc.address_line1 ?? undefined,
-        addressLocality: loc.city ?? undefined,
-        addressRegion: loc.state ?? undefined,
-        postalCode: loc.postal_code ?? undefined,
-        addressCountry: "US",
-      },
-    })),
-    baseSalary:
-      (job.compensation_visible as boolean) &&
-      (job.compensation_min as number | null) !== null
-        ? {
-            "@type": "MonetaryAmount",
-            currency: "USD",
-            value: {
-              "@type": "QuantitativeValue",
-              minValue: job.compensation_min as number,
-              maxValue:
-                (job.compensation_max as number | null) ?? (job.compensation_min as number),
-              unitText: ((job.compensation_period as string | null) ?? "annual").toUpperCase(),
-            },
-          }
-        : undefined,
-  };
 }

@@ -2584,6 +2584,7 @@ export type Database = {
           headquarters_city: string | null
           headquarters_state: string | null
           id: string
+          is_demo: boolean
           legal_name: string | null
           logo_url: string | null
           mission: string | null
@@ -2623,6 +2624,7 @@ export type Database = {
           headquarters_city?: string | null
           headquarters_state?: string | null
           id?: string
+          is_demo?: boolean
           legal_name?: string | null
           logo_url?: string | null
           mission?: string | null
@@ -2662,6 +2664,7 @@ export type Database = {
           headquarters_city?: string | null
           headquarters_state?: string | null
           id?: string
+          is_demo?: boolean
           legal_name?: string | null
           logo_url?: string | null
           mission?: string | null
@@ -3341,6 +3344,7 @@ export type Database = {
           deleted_at: string | null
           description: string
           direct_reports_band: string | null
+          distribution_enabled: boolean
           dso_id: string
           education_requirement: string | null
           employment_type: Database["public"]["Enums"]["employment_type"]
@@ -3418,6 +3422,7 @@ export type Database = {
           deleted_at?: string | null
           description?: string
           direct_reports_band?: string | null
+          distribution_enabled?: boolean
           dso_id: string
           education_requirement?: string | null
           employment_type?: Database["public"]["Enums"]["employment_type"]
@@ -3495,6 +3500,7 @@ export type Database = {
           deleted_at?: string | null
           description?: string
           direct_reports_band?: string | null
+          distribution_enabled?: boolean
           dso_id?: string
           education_requirement?: string | null
           employment_type?: Database["public"]["Enums"]["employment_type"]
@@ -4305,6 +4311,29 @@ export type Database = {
         Args: { p_job_id: string }
         Returns: boolean
       }
+      list_distribution_jobs: {
+        Args: { p_dso_slug?: string | null }
+        Returns: {
+          job_id: string
+          title: string
+          slug: string
+          description: string
+          employment_type: string
+          role_category: string
+          scope: string
+          posted_at: string | null
+          expires_at: string | null
+          compensation_min: number | null
+          compensation_max: number | null
+          compensation_period: string
+          compensation_visible: boolean
+          dso_id: string
+          dso_name: string
+          dso_slug: string
+          is_public_affiliated: boolean
+          locations: Json
+        }[]
+      }
       search_jobs_public: {
         Args: {
           category_filter?: Database["public"]["Enums"]["role_category"]
@@ -4337,6 +4366,7 @@ export type Database = {
           deleted_at: string | null
           description: string
           direct_reports_band: string | null
+          distribution_enabled: boolean
           dso_id: string
           education_requirement: string | null
           employment_type: Database["public"]["Enums"]["employment_type"]

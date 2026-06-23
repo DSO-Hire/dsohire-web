@@ -39,6 +39,7 @@ import {
   Bell,
   Mail,
   Send,
+  Megaphone,
   CreditCard,
   ShieldCheck,
   History,
@@ -88,6 +89,7 @@ const GROUPS: NavGroup[] = [
       { id: "notifications", label: "Notifications", href: "/employer/settings/notifications", Icon: Bell },
       { id: "templates", label: "Automated emails", href: "/employer/settings/templates", Icon: Mail },
       { id: "outreach-templates", label: "Candidate outreach", href: "/employer/settings/outreach-templates", Icon: Send },
+      { id: "careers", label: "Careers & Distribution", href: "/employer/settings/careers", Icon: Megaphone },
     ],
   },
   {
