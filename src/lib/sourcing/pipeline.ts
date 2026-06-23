@@ -15,6 +15,7 @@ import type { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   anonymousDisplayLabel,
   getDsoAppliedCandidateIds,
+  embeddedRow,
 } from "@/lib/candidate/anonymity";
 
 type ServerClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
@@ -103,6 +104,17 @@ export async function getProspectPipeline(
     .eq("dso_id", dsoId)
     .order("last_activity_at", { ascending: false });
 
+  type CandidateEmbed = {
+    full_name: string | null;
+    headline: string | null;
+    current_title: string | null;
+    years_experience: number | null;
+    avatar_url: string | null;
+    anonymous_mode: boolean | null;
+    desired_roles: string[] | null;
+    current_location_city: string | null;
+    current_location_state: string | null;
+  };
   const rows = (entries ?? []) as unknown as Array<{
     id: string;
     candidate_id: string;
@@ -110,17 +122,8 @@ export async function getProspectPipeline(
     tags: string[] | null;
     pipeline_stage: string | null;
     last_activity_at: string;
-    candidates: Array<{
-      full_name: string | null;
-      headline: string | null;
-      current_title: string | null;
-      years_experience: number | null;
-      avatar_url: string | null;
-      anonymous_mode: boolean | null;
-      desired_roles: string[] | null;
-      current_location_city: string | null;
-      current_location_state: string | null;
-    }> | null;
+    // PostgREST may hand this back as an object OR a one-element array.
+    candidates: CandidateEmbed | CandidateEmbed[] | null;
   }>;
   if (rows.length === 0) return [];
 
@@ -131,7 +134,7 @@ export async function getProspectPipeline(
   );
 
   return rows.map((r) => {
-    const c = r.candidates?.[0];
+    const c = embeddedRow(r.candidates);
     const isApplied = applied.has(r.candidate_id);
     const masked = Boolean(c?.anonymous_mode) && !isApplied;
     const stored = isValidProspectStage(r.pipeline_stage ?? "")

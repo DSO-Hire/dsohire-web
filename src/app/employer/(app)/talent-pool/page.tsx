@@ -29,6 +29,7 @@ import type { FitBucket } from "@/lib/practice-fit/types";
 import {
   anonymousDisplayLabel,
   getDsoAppliedCandidateIds,
+  embeddedRow,
 } from "@/lib/candidate/anonymity";
 import { getBlockedCandidateIdsForDso } from "@/lib/sourcing/blocklist";
 import { getProspectPipeline, type ProspectCard } from "@/lib/sourcing/pipeline";
@@ -110,23 +111,25 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
       )
       .eq("dso_id", dsoUser.dso_id as string)
       .order("created_at", { ascending: false });
+    type SavedCandidateEmbed = {
+      full_name: string | null;
+      headline: string | null;
+      current_title: string | null;
+      years_experience: number | null;
+      avatar_url: string | null;
+      anonymous_mode: boolean | null;
+      desired_roles: string[] | null;
+      current_location_city: string | null;
+      current_location_state: string | null;
+    };
     const savedRows = (entries ?? []) as unknown as Array<{
       id: string;
       candidate_id: string;
       notes: string | null;
       tags: string[] | null;
       created_at: string;
-      candidates: Array<{
-        full_name: string | null;
-        headline: string | null;
-        current_title: string | null;
-        years_experience: number | null;
-        avatar_url: string | null;
-        anonymous_mode: boolean | null;
-        desired_roles: string[] | null;
-        current_location_city: string | null;
-        current_location_state: string | null;
-      }>;
+      // PostgREST may hand this back as an object OR a one-element array.
+      candidates: SavedCandidateEmbed | SavedCandidateEmbed[] | null;
     }>;
     // Reveal candidates who've applied to one of our jobs (anonymity rule).
     const savedApplied = await getDsoAppliedCandidateIds(
@@ -135,7 +138,7 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
       savedRows.map((e) => e.candidate_id)
     );
     savedEntries = savedRows.map((e) => {
-      const c = e.candidates?.[0];
+      const c = embeddedRow(e.candidates);
       const masked =
         Boolean(c?.anonymous_mode) && !savedApplied.has(e.candidate_id);
       return {

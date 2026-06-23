@@ -6,12 +6,14 @@
  * exposes the candidate's email.
  */
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { sendProspectMessage } from "../../prospect-actions";
+import { InsertMergeFieldButton } from "@/components/outreach/insert-merge-field-button";
 
 export function ProspectComposer({ candidateId }: { candidateId: string }) {
   const router = useRouter();
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -32,10 +34,22 @@ export function ProspectComposer({ candidateId }: { candidateId: string }) {
 
   return (
     <div className="rounded-lg border border-[var(--rule)] bg-card p-3">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <span className="text-[11px] text-slate-meta">
+          Personalization fills in on send (left blank for anonymous
+          candidates).
+        </span>
+        <InsertMergeFieldButton
+          fieldRef={textareaRef}
+          onInsert={setBody}
+          label="Insert field"
+        />
+      </div>
       <textarea
+        ref={textareaRef}
         value={body}
         onChange={(e) => setBody(e.target.value)}
-        placeholder="Write a message… You can use {{candidate.first_name}} (blank for anonymous candidates)."
+        placeholder="Write a message…"
         rows={4}
         disabled={pending}
         className="w-full resize-none rounded border border-[var(--rule)] bg-cream/30 px-3 py-2 text-[14px] text-ink focus:outline-none focus:border-heritage-deep"

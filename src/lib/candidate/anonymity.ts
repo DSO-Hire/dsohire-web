@@ -25,6 +25,20 @@ export interface AnonymizableCandidate {
 }
 
 /**
+ * PostgREST returns a to-one embed (e.g. `candidates(...)` selected from a
+ * child row like dso_talent_pool_entries) as EITHER a single object OR a
+ * one-element array, depending on how it resolves the FK. An array-only
+ * `embed?.[0]` access silently yields `undefined` when PostgREST hands back an
+ * object — which drops the candidate entirely and renders every saved/applied
+ * prospect as the "Candidate" fallback with no name, title, or photo. Normalize
+ * to the single row (or undefined) so the masking decision runs on real data.
+ */
+export function embeddedRow<T>(v: T | T[] | null | undefined): T | undefined {
+  if (v == null) return undefined;
+  return Array.isArray(v) ? v[0] : v;
+}
+
+/**
  * The generic display name shown in place of a masked candidate's real name,
  * e.g. "Dental Office Manager in Denver". Falls back gracefully when role or
  * location is missing ("Dental professional in KS" / "Dental professional").
