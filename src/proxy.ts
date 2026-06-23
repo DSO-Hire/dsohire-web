@@ -39,6 +39,10 @@ function isGateExempt(pathname: string): boolean {
     // fire without the preview cookie, so we capture pre-launch landing traffic
     // too. Neutral path /p/e (not /api/*) for ad-blocker resilience.
     pathname === "/p/e" ||
+    // Job-distribution feeds — machine endpoints (Indeed/LinkedIn crawlers
+    // can't carry the preview cookie). They self-gate on the launch flag and
+    // serve an empty feed pre-launch, so exempting them never leaks data.
+    pathname.startsWith("/feeds/") ||
     pathname.startsWith("/unsubscribe") ||
     pathname === "/robots.txt" ||
     pathname === "/sitemap.xml" ||
