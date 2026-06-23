@@ -24,6 +24,7 @@ export type NotificationEventKind =
   | "candidate.stage_changed"               // application moved between pipeline stages (Phase 4.5.f registers as a kind; dispatch wiring lands when status-change emails ship)
   | "candidate.nurture"                     // N16 automation re-engagement message from an employer
   | "candidate.practice_fit_digest"         // B.2 weekly PracticeFit drip — top new high-fit roles
+  | "prospect.interested_nudge"             // Sourcing CRM — a DSO messaged a sourced (pre-application) prospect
   // Employer-facing (per-DSO-member)
   | "employer.new_application"              // candidate applied to a job
   | "employer.team_invite"                  // teammate invitation
@@ -60,6 +61,7 @@ export const EVENT_KIND_LABELS: Record<NotificationEventKind, string> = {
   "candidate.stage_changed": "Stage moved",
   "candidate.nurture": "Re-engagement message",
   "candidate.practice_fit_digest": "Weekly PracticeFit matches",
+  "prospect.interested_nudge": "Employer interest",
   "employer.new_application": "New application",
   "employer.team_invite": "Team invitation",
   "employer.comment_mention": "Comment @-mention",

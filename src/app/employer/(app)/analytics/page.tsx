@@ -44,6 +44,7 @@ import {
 } from "@/lib/analytics/benchmarks";
 import { FunnelChart } from "@/components/analytics/funnel-chart";
 import { RecruiterProductivityTable } from "@/components/analytics/recruiter-productivity-table";
+import { getSourcingFunnel, type SourcingFunnel } from "@/lib/sourcing/funnel";
 
 export const metadata: Metadata = { title: "Analytics" };
 export const dynamic = "force-dynamic";
@@ -52,6 +53,7 @@ type TabId =
   | "overview"
   | "funnel"
   | "sources"
+  | "sourcing"
   | "offers"
   | "locations"
   | "benchmarks";
@@ -59,6 +61,7 @@ const TABS: Array<{ id: TabId; label: string }> = [
   { id: "overview", label: "Overview" },
   { id: "funnel", label: "Funnel & velocity" },
   { id: "sources", label: "Sources" },
+  { id: "sourcing", label: "Sourcing" },
   { id: "offers", label: "Offers" },
   { id: "locations", label: "Locations" },
   { id: "benchmarks", label: "Benchmarks" },
@@ -143,6 +146,10 @@ export default async function AnalyticsHubPage({ searchParams }: PageProps) {
   // v3.2 Phase E — PracticeFit proof loop. Only the Overview tab shows it.
   const fitProof =
     tab === "overview" ? await getFitOutcomeProof(supabase, dsoId) : null;
+
+  // Sourcing funnel — loaded only when the Sourcing tab is active.
+  const sourcing =
+    tab === "sourcing" ? await getSourcingFunnel(supabase, dsoId) : null;
 
   const scopedLocation = loc
     ? crossLocationRows.find((r) => r.location_id === loc) ?? null
@@ -278,6 +285,7 @@ export default async function AnalyticsHubPage({ searchParams }: PageProps) {
         <FunnelTab overview={overview} funnel={overview.funnel} />
       )}
       {tab === "sources" && <SourcesTab overview={overview} />}
+      {tab === "sourcing" && <SourcingTab funnel={sourcing} />}
       {tab === "offers" && <OffersTab overview={overview} />}
       {tab === "locations" && (
         <LocationsTab rows={crossLocationRows} window={win.value} />
@@ -480,6 +488,80 @@ function SourcesTab({ overview }: { overview: AnalyticsOverview }) {
       <div className="max-w-[760px]">
         <SourcePerformance rows={overview.sources} showAll />
       </div>
+    </>
+  );
+}
+
+function SourcingTab({ funnel }: { funnel: SourcingFunnel | null }) {
+  if (!funnel || funnel.total === 0) {
+    return (
+      <p className="text-[13px] text-slate-meta italic">
+        No sourced prospects yet. Save candidates from Discover and reach out to
+        start the sourcing funnel.
+      </p>
+    );
+  }
+  const stages: Array<{ label: string; n: number }> = [
+    { label: "Sourced", n: funnel.sourced },
+    { label: "Contacted", n: funnel.contacted },
+    { label: "Responded", n: funnel.responded },
+    { label: "Nurturing", n: funnel.nurturing },
+    { label: "Converted", n: funnel.converted },
+  ];
+  const max = Math.max(1, ...stages.map((s) => s.n));
+  return (
+    <>
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <StatCard
+          label="Prospects"
+          value={funnel.total.toLocaleString()}
+          hint={`${funnel.archived} archived`}
+          href="/employer/talent-pool?tab=pipeline"
+        />
+        <StatCard label="Contacted" value={funnel.contacted.toLocaleString()} />
+        <StatCard
+          label="Response rate"
+          value={`${Math.round(funnel.responseRate * 100)}`}
+          unit="%"
+          hint="replied / contacted"
+        />
+        <StatCard
+          label="Avg time to response"
+          value={
+            funnel.avgResponseHours === null
+              ? "—"
+              : Math.round(funnel.avgResponseHours).toLocaleString()
+          }
+          unit={funnel.avgResponseHours === null ? undefined : "hrs"}
+        />
+      </section>
+      <section className="border border-[var(--rule)] bg-card p-6 max-w-[760px]">
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
+          Sourcing funnel
+        </div>
+        <div className="space-y-2.5">
+          {stages.map((s) => (
+            <div key={s.label} className="flex items-center gap-3">
+              <span className="w-24 shrink-0 text-[12px] font-semibold text-slate-body">
+                {s.label}
+              </span>
+              <div className="flex-1 h-5 bg-cream/50 overflow-hidden rounded">
+                <div
+                  className="h-full bg-heritage"
+                  style={{ width: `${(s.n / max) * 100}%` }}
+                />
+              </div>
+              <span className="w-10 shrink-0 text-right text-[13px] font-extrabold tabular-nums text-ink">
+                {s.n}
+              </span>
+            </div>
+          ))}
+        </div>
+        <p className="mt-4 text-[11px] text-slate-meta leading-snug">
+          Converted = the prospect applied. Counts reflect stored pipeline
+          stages and reconcile to the pipeline board.
+        </p>
+      </section>
     </>
   );
 }

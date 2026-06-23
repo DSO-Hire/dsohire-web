@@ -1,25 +1,19 @@
 "use server";
 
 /**
- * Talent-pool outreach send (E7.10 / Phase 5D Day 2, shipped 2026-05-11).
+ * Talent-pool outreach send — Sourcing CRM Phase 2.
  *
- * Sends an outbound message from a DSO recruiter to a candidate in
- * the talent pool. The candidate's email never appears in the
- * sender's view — the platform looks it up via service role and uses
- * Resend's reply-to to route candidate replies back to the recruiter.
+ * CHANGED: outreach no longer sends a one-shot email with reply-to = the
+ * recruiter's inbox (which leaked the candidate's email off-platform and broke
+ * anonymity). It now delegates to sendProspectMessage, which:
+ *   - opens / appends the on-platform prospect thread,
+ *   - masks the candidate (no real name written into the DSO-visible body),
+ *   - sends the email nudge with NO reply-to (platform no-reply); replies come
+ *     back in-app, never to the recruiter,
+ *   - enforces the block list.
  *
- * Sender flow:
- *   1. Recruiter opens the modal on /employer/candidates/[id]
- *   2. Types subject + body
- *   3. submit → this action
- *   4. Persist row in dso_outreach_messages
- *   5. Fire sendEmail() via Resend (transactional path, no
- *      user-preference suppression — sourcing is transactional from
- *      the platform's perspective)
- *   6. Audit log "talent_pool.outreach_sent"
- *
- * Errors surface to the modal; on success the modal closes and the
- * history card re-renders via revalidatePath.
+ * This wrapper keeps the existing modal contract (FormData in) plus the founder
+ * audit row + template usage stats.
  */
 
 import { revalidatePath } from "next/cache";
@@ -27,11 +21,8 @@ import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
-import { sendEmail } from "@/lib/email/send";
 import { recordAuditEvent } from "@/lib/audit/record";
-import { OutreachMessage } from "@/emails/employer/OutreachMessage";
-import { resolveMergeFields } from "@/lib/outreach/merge-fields";
-import { greetingFirstName } from "@/lib/candidate/name";
+import { sendProspectMessage } from "@/app/employer/(app)/talent-pool/prospect-actions";
 
 export interface SendOutreachResult {
   ok: boolean;
@@ -39,201 +30,68 @@ export interface SendOutreachResult {
   messageId?: string;
 }
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
-
-export async function sendOutreachToCandidate(formData: FormData): Promise<SendOutreachResult> {
+export async function sendOutreachToCandidate(
+  formData: FormData,
+): Promise<SendOutreachResult> {
   const candidateId = String(formData.get("candidate_id") ?? "").trim();
   const subject = String(formData.get("subject") ?? "").trim().slice(0, 200);
   const body = String(formData.get("body") ?? "").trim();
   const templateId = String(formData.get("template_id") ?? "").trim() || null;
 
   if (!candidateId) return { ok: false, error: "Missing candidate." };
-  if (!subject) return { ok: false, error: "Subject is required." };
   if (!body) return { ok: false, error: "Message body is required." };
   if (body.length > 8000) {
     return { ok: false, error: "Message is too long (max 8000 characters)." };
   }
 
+  // Delegate to the privacy-safe thread path (auth, role, block, masking, and
+  // the no-reply nudge are all enforced inside).
+  const result = await sendProspectMessage({ candidateId, subject, body });
+  if (!result.ok) return { ok: false, error: result.error };
+
+  // Best-effort continuity: founder audit + template usage stats.
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Not signed in." };
-
-  const { data: dsoUser } = await supabase
-    .from("dso_users")
-    .select("id, dso_id, full_name, role")
-    .eq("auth_user_id", user.id)
-    .maybeSingle();
-  if (!dsoUser) return { ok: false, error: "No DSO context." };
-  if (!["owner", "admin", "recruiter"].includes((dsoUser.role as string) ?? "")) {
-    return { ok: false, error: "Insufficient permissions." };
-  }
-
-  // Verify candidate is discoverable.
-  const { data: candidate } = await supabase
-    .from("candidates")
-    .select("id, first_name, full_name, cv_visibility, is_guest, deleted_at, auth_user_id")
-    .eq("id", candidateId)
-    .maybeSingle();
-  if (!candidate) {
-    return { ok: false, error: "Candidate not found." };
-  }
-  if (
-    (candidate.cv_visibility as string) === "hidden" ||
-    candidate.is_guest ||
-    candidate.deleted_at
-  ) {
-    return {
-      ok: false,
-      error:
-        "This candidate isn't reachable through the platform right now.",
-    };
-  }
-
-  // Look up the candidate's email via auth.users (service role).
-  const admin = createSupabaseServiceRoleClient();
-  const authUserId = candidate.auth_user_id as string | null;
-  if (!authUserId) {
-    return {
-      ok: false,
-      error: "Candidate has no contact channel yet.",
-    };
-  }
-  const { data: authUser } = await admin.auth.admin.getUserById(authUserId);
-  const candidateEmail = authUser?.user?.email ?? null;
-  if (!candidateEmail) {
-    return { ok: false, error: "Candidate email not on file." };
-  }
-
-  // Look up the sender's email for reply-to.
-  const { data: senderAuth } = await admin.auth.admin.getUserById(user.id);
-  const replyToEmail = senderAuth?.user?.email ?? "info@dsohire.com";
-
-  // Look up the DSO name for the email header.
-  const { data: dso } = await admin
-    .from("dsos")
-    .select("name")
-    .eq("id", dsoUser.dso_id as string)
-    .maybeSingle();
-  const dsoName = (dso?.name as string | undefined) ?? "A DSO";
-
-  // Resolve merge fields in subject + body. Even when no template was
-  // picked, employers can type tokens directly into the modal — so we
-  // always run the resolver, not just on template sends.
-  const mergeCtx = {
-    candidate: {
-      first_name: (candidate.first_name as string | null) ?? null,
-      full_name: (candidate.full_name as string | null) ?? null,
-    },
-    sender: { full_name: (dsoUser.full_name as string | null) ?? null },
-    dso: { name: dsoName },
-  };
-  const resolvedSubject = resolveMergeFields(subject, mergeCtx);
-  const resolvedBody = resolveMergeFields(body, mergeCtx);
-
-  // Persist the row first; if Resend fails we'll have a record + can
-  // retry. (vs send-first which would lose the message body on a row-
-  // insert failure.)
-  const { data: row, error: insertErr } = await admin
-    .from("dso_outreach_messages")
-    .insert({
-      dso_id: dsoUser.dso_id as string,
-      candidate_id: candidateId,
-      sent_by: dsoUser.id as string,
-      subject: resolvedSubject,
-      body: resolvedBody,
-    })
-    .select("id")
-    .single();
-  if (insertErr || !row) {
-    console.warn("[outreach] log insert failed", insertErr);
-    return { ok: false, error: "Couldn't save the message." };
-  }
-
-  // Send via Resend.
-  const result = await sendEmail({
-    to: candidateEmail,
-    subject: `${dsoName} · ${resolvedSubject}`,
-    template: "employer.outreach_message",
-    replyTo: replyToEmail,
-    relatedDsoId: dsoUser.dso_id as string,
-    relatedCandidateId: candidateId,
-    react: OutreachMessage({
-      candidateFirstName: greetingFirstName(
-        {
-          first_name: candidate.first_name as string | null,
-          full_name: candidate.full_name as string | null,
-        },
-        "",
-      ) || null,
-      dsoName,
-      senderName: (dsoUser.full_name as string | null) ?? null,
-      subject: resolvedSubject,
-      body: resolvedBody,
-      siteUrl: SITE_URL,
-    }),
-  });
-
-  if (!result.ok) {
-    return {
-      ok: false,
-      error:
-        result.error ??
-        "Email service rejected the send. The message is saved; you can retry.",
-    };
-  }
-
-  // Stash the resend message id back on the row for delivery tracking.
-  if (result.messageId) {
-    await admin
-      .from("dso_outreach_messages")
-      .update({ resend_message_id: result.messageId })
-      .eq("id", row.id as string);
-  }
-
-  // Bump template usage stats when a template drove the send.
-  if (templateId) {
-    const { data: prior } = await admin
-      .from("dso_outreach_templates")
-      .select("usage_count")
-      .eq("id", templateId)
-      .eq("dso_id", dsoUser.dso_id as string)
+  if (user) {
+    const { data: dsoUser } = await supabase
+      .from("dso_users")
+      .select("id, dso_id, full_name, role")
+      .eq("auth_user_id", user.id)
       .maybeSingle();
-    const nextCount = ((prior?.usage_count as number | undefined) ?? 0) + 1;
-    await admin
-      .from("dso_outreach_templates")
-      .update({
-        usage_count: nextCount,
-        last_used_at: new Date().toISOString(),
-      })
-      .eq("id", templateId)
-      .eq("dso_id", dsoUser.dso_id as string);
-  }
+    if (dsoUser) {
+      await recordAuditEvent({
+        dsoId: dsoUser.dso_id as string,
+        actorUserId: user.id,
+        actorDsoUserId: dsoUser.id as string,
+        actorName: (dsoUser.full_name as string | null) ?? null,
+        actorRole: (dsoUser.role as string | null) ?? null,
+        eventKind: "talent_pool.outreach_sent",
+        targetTable: "candidates",
+        targetId: candidateId,
+        summary: `Messaged a prospect (in-app thread)`,
+        metadata: { candidate_id: candidateId, thread_id: result.threadId },
+      });
 
-  await recordAuditEvent({
-    dsoId: dsoUser.dso_id as string,
-    actorUserId: user.id,
-    actorDsoUserId: dsoUser.id as string,
-    actorName: (dsoUser.full_name as string | null) ?? null,
-    actorRole: (dsoUser.role as string | null) ?? null,
-    eventKind: "talent_pool.outreach_sent",
-    targetTable: "candidates",
-    targetId: candidateId,
-    // Use the RESOLVED subject in the audit summary so the timeline
-    // reflects what the candidate actually saw (not the recruiter's
-    // raw template with unresolved mergefields like {{dso.name}}).
-    summary: `Sent outreach to ${
-      (candidate.full_name as string | null) ?? "a candidate"
-    }: "${resolvedSubject.slice(0, 60)}${resolvedSubject.length > 60 ? "…" : ""}"`,
-    metadata: {
-      candidate_id: candidateId,
-      message_id: row.id,
-      subject: resolvedSubject,
-      subject_template: subject,  // keep the raw for forensics
-    },
-  });
+      if (templateId) {
+        const admin = createSupabaseServiceRoleClient();
+        const { data: prior } = await admin
+          .from("dso_outreach_templates")
+          .select("usage_count")
+          .eq("id", templateId)
+          .eq("dso_id", dsoUser.dso_id as string)
+          .maybeSingle();
+        const nextCount = ((prior?.usage_count as number | undefined) ?? 0) + 1;
+        await admin
+          .from("dso_outreach_templates")
+          .update({ usage_count: nextCount, last_used_at: new Date().toISOString() })
+          .eq("id", templateId)
+          .eq("dso_id", dsoUser.dso_id as string);
+      }
+    }
+  }
 
   revalidatePath(`/employer/candidates/${candidateId}`);
-  return { ok: true, messageId: row.id as string };
+  return { ok: true, messageId: result.threadId };
 }

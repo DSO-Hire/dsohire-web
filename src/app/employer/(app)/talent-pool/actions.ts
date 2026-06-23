@@ -13,6 +13,7 @@
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { logProspectActivity } from "@/lib/sourcing/pipeline";
 
 export interface TalentPoolResult {
   ok: boolean;
@@ -102,6 +103,15 @@ export async function saveCandidateToPool(
       candidate_id: candidateId,
       entry_id: inserted.id,
     },
+  });
+
+  // Prospect timeline: a save starts the pipeline at 'sourced'. SILENT to the
+  // candidate (#52) — this is an internal CRM event, no outbound.
+  await logProspectActivity(supabase, {
+    dsoId: dsoUser.dso_id as string,
+    candidateId,
+    kind: "saved",
+    actorDsoUserId: dsoUser.id as string,
   });
 
   revalidatePath("/employer/talent-pool");

@@ -24,6 +24,7 @@ import {
   anonymousDisplayLabel,
   getDsoAppliedCandidateIds,
 } from "@/lib/candidate/anonymity";
+import { getBlockedCandidateIdsForDso } from "@/lib/sourcing/blocklist";
 
 type SupabaseClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
 
@@ -91,6 +92,12 @@ export async function getInterestedCandidates(
   const applicants = new Set<string>(
     ((appRows ?? []) as Array<{ candidate_id: string }>).map((a) => a.candidate_id)
   );
+
+  // Block-list (Phase 0): candidates who blocked this DSO are excluded. Merged
+  // into the skip set so the per-candidate collapse below drops them too.
+  for (const id of await getBlockedCandidateIdsForDso(supabase, dsoId)) {
+    applicants.add(id);
+  }
 
   // 4. Collapse to one entry per candidate: their most-recent save + the set of
   //    jobs they saved (for best-fit scoring).

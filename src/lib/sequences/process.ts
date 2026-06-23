@@ -19,6 +19,9 @@ import { dispatchNotification } from "@/lib/notifications/dispatcher";
 import { resolveCandidateReplyTo } from "@/lib/email/candidate-reply-to";
 import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
 import { NurtureMessage } from "@/emails/candidate/NurtureMessage";
+import { ProspectInterest } from "@/emails/candidate/ProspectInterest";
+import { getDsoAppliedCandidateIds } from "@/lib/candidate/anonymity";
+import { logProspectActivity } from "@/lib/sourcing/pipeline";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dsohire.com";
 const MAX_PER_RUN = 500;
@@ -38,11 +41,13 @@ export interface ProcessResult {
 interface EnrollmentRow {
   id: string;
   sequence_id: string;
-  application_id: string;
+  application_id: string | null;
   dso_id: string;
   enrolled_at: string;
   enrolled_stage_id: string | null;
   current_step: number;
+  subject_kind: string;
+  prospect_thread_id: string | null;
 }
 
 interface StepRow {
@@ -72,7 +77,7 @@ export async function processDueSequences(
   let query = admin
     .from("automation_sequence_enrollments")
     .select(
-      "id, sequence_id, application_id, dso_id, enrolled_at, enrolled_stage_id, current_step"
+      "id, sequence_id, application_id, dso_id, enrolled_at, enrolled_stage_id, current_step, subject_kind, prospect_thread_id"
     )
     .eq("status", "active")
     .lte("next_send_at", nowIso)
@@ -205,6 +210,8 @@ async function processOne(
 
 /** Returns an exit reason string if the sequence should stop, else null. */
 async function checkExit(admin: Admin, enr: EnrollmentRow): Promise<string | null> {
+  if (enr.subject_kind === "prospect") return checkProspectExit(admin, enr);
+
   const { data: app } = await admin
     .from("applications")
     .select("id, stage_id")
@@ -244,6 +251,8 @@ async function sendStep(
   enr: EnrollmentRow,
   step: StepRow
 ): Promise<SendOutcome> {
+  if (enr.subject_kind === "prospect") return sendProspectStep(admin, enr, step);
+
   // Candidate + job context (mirrors runNurtureEmail).
   const { data: app } = await admin
     .from("applications")
@@ -282,7 +291,7 @@ async function sendStep(
   try {
     const displayed = await getDisplayedDsoName({
       jobId: jobId ?? "",
-      viewer: { role: "candidate", applicationId: enr.application_id },
+      viewer: { role: "candidate", applicationId: enr.application_id as string },
     });
     if (displayed.name) dsoName = displayed.name;
   } catch (e) {
@@ -313,6 +322,201 @@ async function sendStep(
         jobTitle,
         messageBody: fill(step.body),
         applicationUrl,
+      }),
+    },
+  });
+  return "sent";
+}
+
+/* ───── Prospect (Sourcing CRM) branch ───── */
+
+/** Exit conditions for a prospect enrollment (no application context). */
+async function checkProspectExit(
+  admin: Admin,
+  enr: EnrollmentRow
+): Promise<string | null> {
+  if (!enr.prospect_thread_id) return "thread_gone";
+
+  const { data: thread } = await admin
+    .from("prospect_threads")
+    .select("id, candidate_id, dso_id, status")
+    .eq("id", enr.prospect_thread_id)
+    .maybeSingle();
+  if (!thread) return "thread_gone";
+
+  // Candidate muted or blocked → opted out (block also removes from discovery).
+  const status = (thread.status as string) ?? "active";
+  if (status === "muted" || status === "blocked") return "opted_out";
+
+  const candidateId = thread.candidate_id as string;
+  const dsoId = thread.dso_id as string;
+
+  // Candidate replied in the thread since enrollment.
+  const { count: replyCount } = await admin
+    .from("prospect_messages")
+    .select("id", { count: "exact", head: true })
+    .eq("thread_id", enr.prospect_thread_id)
+    .eq("sender_role", "candidate")
+    .gte("created_at", enr.enrolled_at);
+  if ((replyCount ?? 0) > 0) return "replied";
+
+  // Candidate applied to one of this DSO's jobs → convert + exit.
+  const applied = await getDsoAppliedCandidateIds(admin, dsoId, [candidateId]);
+  if (applied.has(candidateId)) {
+    await convertProspect(admin, thread.id as string, dsoId, candidateId);
+    return "applied";
+  }
+
+  // No longer discoverable (candidate hid their profile or left).
+  const { data: cand } = await admin
+    .from("candidates")
+    .select("cv_visibility, is_guest, deleted_at")
+    .eq("id", candidateId)
+    .maybeSingle();
+  if (
+    !cand ||
+    (cand.cv_visibility as string) === "hidden" ||
+    cand.is_guest === true ||
+    cand.deleted_at
+  ) {
+    return "not_discoverable";
+  }
+
+  return null;
+}
+
+/** Mark a prospect converted: link the application, flip thread + pool stage. */
+async function convertProspect(
+  admin: Admin,
+  threadId: string,
+  dsoId: string,
+  candidateId: string
+): Promise<void> {
+  // Find one of this DSO's applications from this candidate to associate.
+  const { data: jobRows } = await admin
+    .from("jobs")
+    .select("id")
+    .eq("dso_id", dsoId);
+  const jobIds = ((jobRows ?? []) as Array<{ id: string }>).map((j) => j.id);
+  let applicationId: string | null = null;
+  if (jobIds.length > 0) {
+    const { data: appRow } = await admin
+      .from("applications")
+      .select("id")
+      .eq("candidate_id", candidateId)
+      .in("job_id", jobIds)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    applicationId = (appRow?.id as string | null) ?? null;
+  }
+  await admin
+    .from("prospect_threads")
+    .update({
+      status: "converted",
+      application_id: applicationId,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", threadId);
+  await admin
+    .from("dso_talent_pool_entries")
+    .update({ pipeline_stage: "converted", last_activity_at: new Date().toISOString() })
+    .eq("dso_id", dsoId)
+    .eq("candidate_id", candidateId);
+  await logProspectActivity(admin, {
+    dsoId,
+    candidateId,
+    kind: "converted",
+    metadata: { thread_id: threadId, application_id: applicationId },
+  });
+}
+
+/** Deliver a prospect nurture step into the thread + a no-reply email nudge. */
+async function sendProspectStep(
+  admin: Admin,
+  enr: EnrollmentRow,
+  step: StepRow
+): Promise<SendOutcome> {
+  if (!enr.prospect_thread_id) return "no_recipient";
+  const { data: thread } = await admin
+    .from("prospect_threads")
+    .select("id, candidate_id, dso_id, candidate_revealed")
+    .eq("id", enr.prospect_thread_id)
+    .maybeSingle();
+  if (!thread) return "no_recipient";
+  const candidateId = thread.candidate_id as string;
+  const dsoId = thread.dso_id as string;
+
+  const { data: cand } = await admin
+    .from("candidates")
+    .select("first_name, full_name, auth_user_id, anonymous_mode")
+    .eq("id", candidateId)
+    .maybeSingle();
+  const authUserId = (cand?.auth_user_id as string | null) ?? null;
+  if (!authUserId) return "no_recipient";
+  const { data: authResp } = await admin.auth.admin.getUserById(authUserId);
+  const email = authResp?.user?.email;
+  if (!email) return "no_recipient";
+
+  // Masking: anonymous + not applied + not revealed → neutral greeting, never
+  // the real name in the DSO-visible thread message.
+  const applied = await getDsoAppliedCandidateIds(admin, dsoId, [candidateId]);
+  const masked =
+    Boolean(cand?.anonymous_mode) &&
+    !applied.has(candidateId) &&
+    !Boolean(thread.candidate_revealed);
+  const firstName = masked
+    ? "there"
+    : ((cand?.first_name as string | null) ??
+        ((cand?.full_name as string | null) ?? "").trim().split(/\s+/)[0] ??
+        "there");
+
+  // DSO name reveals to the candidate on outbound (the #52 first-outbound rule).
+  const { data: dso } = await admin
+    .from("dsos")
+    .select("name")
+    .eq("id", dsoId)
+    .maybeSingle();
+  const dsoName = (dso?.name as string | null) ?? "A dental group";
+
+  const fill = (s: string) =>
+    s
+      .replaceAll("{{first_name}}", firstName)
+      .replaceAll("{{last_name}}", "")
+      .replaceAll("{{job_title}}", "")
+      .replaceAll("{{practice_name}}", dsoName);
+  const filledBody = fill(step.body);
+
+  // In-app thread message (service role bypasses RLS).
+  await admin.from("prospect_messages").insert({
+    thread_id: enr.prospect_thread_id,
+    sender_role: "dso",
+    body: filledBody,
+  });
+  await admin
+    .from("prospect_threads")
+    .update({ last_message_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+    .eq("id", enr.prospect_thread_id);
+  await logProspectActivity(admin, {
+    dsoId,
+    candidateId,
+    kind: "outreach_sent",
+    metadata: { thread_id: enr.prospect_thread_id, sequence_id: enr.sequence_id },
+  });
+
+  // No-reply email nudge (replies happen in-app only).
+  await dispatchNotification({
+    userId: authUserId,
+    eventKind: "prospect.interested_nudge",
+    relatedDsoId: dsoId,
+    relatedCandidateId: candidateId,
+    email: {
+      to: email,
+      subject: fill(step.subject) || `${dsoName} is interested in you on DSO Hire`,
+      react: ProspectInterest({
+        dsoName,
+        messageBody: filledBody,
+        threadUrl: `${SITE_URL}/candidate/prospects/${enr.prospect_thread_id}`,
       }),
     },
   });

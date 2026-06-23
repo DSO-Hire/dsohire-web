@@ -17,7 +17,7 @@
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Users, Bookmark, Search } from "lucide-react";
+import { Users, Bookmark, Search, KanbanSquare } from "lucide-react";
 import type { Metadata } from "next";
 import { HelpDisclosure } from "@/components/help/help-disclosure";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -29,7 +29,11 @@ import type { FitBucket } from "@/lib/practice-fit/types";
 import {
   anonymousDisplayLabel,
   getDsoAppliedCandidateIds,
+  embeddedRow,
 } from "@/lib/candidate/anonymity";
+import { getBlockedCandidateIdsForDso } from "@/lib/sourcing/blocklist";
+import { getProspectPipeline, type ProspectCard } from "@/lib/sourcing/pipeline";
+import { PipelineBoard } from "./pipeline-board";
 
 export const metadata: Metadata = { title: "Talent Pool" };
 export const dynamic = "force-dynamic";
@@ -66,7 +70,12 @@ interface PageProps {
 
 export default async function TalentPoolPage({ searchParams }: PageProps) {
   const sp = searchParams ? await searchParams : {};
-  const tab = sp.tab === "saved" ? "saved" : "discover";
+  const tab =
+    sp.tab === "saved"
+      ? "saved"
+      : sp.tab === "pipeline"
+        ? "pipeline"
+        : "discover";
 
   const supabase = await createSupabaseServerClient();
   const {
@@ -102,23 +111,25 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
       )
       .eq("dso_id", dsoUser.dso_id as string)
       .order("created_at", { ascending: false });
+    type SavedCandidateEmbed = {
+      full_name: string | null;
+      headline: string | null;
+      current_title: string | null;
+      years_experience: number | null;
+      avatar_url: string | null;
+      anonymous_mode: boolean | null;
+      desired_roles: string[] | null;
+      current_location_city: string | null;
+      current_location_state: string | null;
+    };
     const savedRows = (entries ?? []) as unknown as Array<{
       id: string;
       candidate_id: string;
       notes: string | null;
       tags: string[] | null;
       created_at: string;
-      candidates: Array<{
-        full_name: string | null;
-        headline: string | null;
-        current_title: string | null;
-        years_experience: number | null;
-        avatar_url: string | null;
-        anonymous_mode: boolean | null;
-        desired_roles: string[] | null;
-        current_location_city: string | null;
-        current_location_state: string | null;
-      }>;
+      // PostgREST may hand this back as an object OR a one-element array.
+      candidates: SavedCandidateEmbed | SavedCandidateEmbed[] | null;
     }>;
     // Reveal candidates who've applied to one of our jobs (anonymity rule).
     const savedApplied = await getDsoAppliedCandidateIds(
@@ -127,7 +138,7 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
       savedRows.map((e) => e.candidate_id)
     );
     savedEntries = savedRows.map((e) => {
-      const c = e.candidates?.[0];
+      const c = embeddedRow(e.candidates);
       const masked =
         Boolean(c?.anonymous_mode) && !savedApplied.has(e.candidate_id);
       return {
@@ -145,6 +156,12 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
         created_at: e.created_at,
       };
     });
+  }
+
+  // Pipeline tab — masking-aware prospect cards grouped by stage.
+  let pipelineCards: ProspectCard[] = [];
+  if (tab === "pipeline") {
+    pipelineCards = await getProspectPipeline(supabase, dsoUser.dso_id as string);
   }
 
   // Discover tab — search candidates with is_searchable = true.
@@ -284,6 +301,17 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
           ? certCandidateIds
           : ["00000000-0000-0000-0000-000000000000"]
       );
+    }
+
+    // Block-list (Phase 0): a candidate who blocked this DSO must never appear
+    // in Discover. App-layer filter — the discoverable-read RLS intentionally
+    // doesn't carry the (candidate,dso) block.
+    const blockedIds = await getBlockedCandidateIdsForDso(
+      supabase,
+      dsoUser.dso_id as string
+    );
+    if (blockedIds.size > 0) {
+      q = q.not("id", "in", `(${Array.from(blockedIds).join(",")})`);
     }
 
     const { data, count, error } = await q;
@@ -435,6 +463,12 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
         <TabLink active={tab === "saved"} href="/employer/talent-pool?tab=saved">
           <Bookmark className="h-3.5 w-3.5" /> Saved ({savedEntries.length})
         </TabLink>
+        <TabLink
+          active={tab === "pipeline"}
+          href="/employer/talent-pool?tab=pipeline"
+        >
+          <KanbanSquare className="h-3.5 w-3.5" /> Pipeline
+        </TabLink>
       </div>
 
       {tab === "discover" && (
@@ -577,6 +611,30 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
                 </li>
               ))}
             </ul>
+          )}
+        </>
+      )}
+
+      {tab === "pipeline" && (
+        <>
+          {pipelineCards.length === 0 ? (
+            <div className="rounded-lg border border-[var(--rule)] bg-cream/30 px-6 py-10 text-center">
+              <p className="text-[14px] font-semibold text-ink">
+                No prospects yet
+              </p>
+              <p className="mt-1 text-[13px] text-slate-body">
+                Save candidates from{" "}
+                <a
+                  href="/employer/talent-pool"
+                  className="text-heritage-deep underline underline-offset-2 font-semibold"
+                >
+                  Discover
+                </a>{" "}
+                to start building your pipeline.
+              </p>
+            </div>
+          ) : (
+            <PipelineBoard initial={pipelineCards} />
           )}
         </>
       )}

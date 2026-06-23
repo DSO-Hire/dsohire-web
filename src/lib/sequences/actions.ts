@@ -19,6 +19,7 @@ import {
 } from "@/lib/supabase/server";
 import { dsoCanUseSequences } from "./tier";
 import { processDueSequences } from "./process";
+import { isBlocked } from "@/lib/sourcing/blocklist";
 import {
   effectivePermissions,
   type Capability,
@@ -291,6 +292,121 @@ export async function enrollInSequence(
   }
 
   revalidatePath(`/employer/applications/${applicationId}`);
+  return { ok: true };
+}
+
+/**
+ * Manually enroll a PROSPECT (non-applicant) into a sequence (Sourcing CRM
+ * Phase 3). Scale+ like applicant sequences. Binds to the prospect thread
+ * (created if needed) so steps deliver in-app + as a no-reply nudge, and exits
+ * auto-fire on reply / apply / opt-out / undiscoverable (see process.ts).
+ */
+export async function enrollProspectInSequence(
+  candidateId: string,
+  sequenceId: string
+): Promise<SeqResult> {
+  const who = await resolveActor();
+  if (!who.ok) return who;
+  // Enrolling a prospect in a drip is messaging them.
+  if (!who.perms["sourcing.message"]) {
+    return { ok: false, error: "You don't have permission to start sequences." };
+  }
+  const supabase = await createSupabaseServerClient();
+  if (!(await dsoCanUseSequences(supabase, who.dsoId))) {
+    return { ok: false, error: "Drip sequences are a Scale feature." };
+  }
+
+  // Candidate must be reachable + not blocking this DSO.
+  const { data: cand } = await supabase
+    .from("candidates")
+    .select("id, cv_visibility, is_guest, deleted_at")
+    .eq("id", candidateId)
+    .maybeSingle();
+  if (
+    !cand ||
+    (cand.cv_visibility as string) === "hidden" ||
+    cand.is_guest ||
+    cand.deleted_at
+  ) {
+    return { ok: false, error: "This candidate isn't reachable right now." };
+  }
+  if (await isBlocked(supabase, who.dsoId, candidateId)) {
+    return { ok: false, error: "This candidate isn't reachable right now." };
+  }
+
+  // Sequence must belong to the DSO, be enabled, and have steps.
+  const { data: seq } = await supabase
+    .from("automation_sequences")
+    .select("id, is_enabled")
+    .eq("id", sequenceId)
+    .eq("dso_id", who.dsoId)
+    .maybeSingle();
+  if (!seq || seq.is_enabled !== true) {
+    return { ok: false, error: "That sequence isn't available." };
+  }
+  const { data: steps } = await supabase
+    .from("automation_sequence_steps")
+    .select("delay_days, step_order")
+    .eq("sequence_id", sequenceId)
+    .order("step_order", { ascending: true });
+  const firstStep = (steps ?? [])[0] as { delay_days: number } | undefined;
+  if (!firstStep) return { ok: false, error: "That sequence has no steps yet." };
+
+  // Get-or-create the prospect thread to bind the enrollment to.
+  let threadId: string;
+  const { data: existing } = await supabase
+    .from("prospect_threads")
+    .select("id, status")
+    .eq("dso_id", who.dsoId)
+    .eq("candidate_id", candidateId)
+    .maybeSingle();
+  if (existing) {
+    if ((existing.status as string) === "blocked") {
+      return { ok: false, error: "This candidate isn't reachable right now." };
+    }
+    threadId = existing.id as string;
+  } else {
+    const { data: created, error: tErr } = await supabase
+      .from("prospect_threads")
+      .insert({
+        dso_id: who.dsoId,
+        candidate_id: candidateId,
+        created_by: who.dsoUserId,
+        status: "active",
+      })
+      .select("id")
+      .single();
+    if (tErr || !created) {
+      return { ok: false, error: "Couldn't open the conversation." };
+    }
+    threadId = created.id as string;
+  }
+
+  const admin = createSupabaseServiceRoleClient();
+  const nextSendAt = new Date(
+    Date.now() + Math.max(0, Number(firstStep.delay_days) || 0) * 86_400_000
+  ).toISOString();
+  const { error: enrErr } = await admin
+    .from("automation_sequence_enrollments")
+    .insert({
+      sequence_id: sequenceId,
+      subject_kind: "prospect",
+      prospect_thread_id: threadId,
+      application_id: null,
+      dso_id: who.dsoId,
+      enrolled_by_dso_user_id: who.dsoUserId,
+      status: "active",
+      current_step: 0,
+      next_send_at: nextSendAt,
+    });
+  if (enrErr) {
+    if (enrErr.code === "23505") {
+      return { ok: false, error: "This prospect is already in a sequence." };
+    }
+    return { ok: false, error: "Couldn't start the sequence. Try again." };
+  }
+
+  revalidatePath(`/employer/talent-pool/prospects/${candidateId}`);
   return { ok: true };
 }
 

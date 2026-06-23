@@ -49,7 +49,11 @@ export type Capability =
   | "billing.manage"
   | "integrations.manage"
   | "settings.manage"
-  | "analytics.view";
+  | "analytics.view"
+  // Sourcing (outbound candidate research / CRM)
+  | "sourcing.view"
+  | "sourcing.message"
+  | "sourcing.manage";
 
 export const ALL_CAPABILITIES: Capability[] = [
   "jobs.create",
@@ -72,6 +76,9 @@ export const ALL_CAPABILITIES: Capability[] = [
   "integrations.manage",
   "settings.manage",
   "analytics.view",
+  "sourcing.view",
+  "sourcing.message",
+  "sourcing.manage",
 ];
 
 /** UI grouping + human labels for the editor. */
@@ -103,6 +110,9 @@ export const CAPABILITY_META: CapabilityMeta[] = [
   { key: "integrations.manage", label: "Manage integrations & automations", group: "Admin" },
   { key: "settings.manage", label: "Manage practice settings", group: "Admin" },
   { key: "analytics.view", label: "View analytics & reports", group: "Admin" },
+  { key: "sourcing.view", label: "View sourcing pipeline", group: "Pipeline", help: "See sourced prospects + the pipeline board. Discovery itself is free." },
+  { key: "sourcing.message", label: "Message sourced candidates", group: "Pipeline", help: "Send double-blind outbound to prospects (Growth+ plan)." },
+  { key: "sourcing.manage", label: "Manage sourcing settings", group: "Admin" },
 ];
 
 /**
@@ -141,6 +151,9 @@ export const ROLE_DEFAULTS: Record<DsoRole, Record<Capability, boolean>> = {
     "integrations.manage": false,
     "settings.manage": false,
     "analytics.view": true,
+    "sourcing.view": true,
+    "sourcing.message": true,
+    "sourcing.manage": false,
   },
   hiring_manager: {
     "jobs.create": false,
@@ -163,6 +176,9 @@ export const ROLE_DEFAULTS: Record<DsoRole, Record<Capability, boolean>> = {
     "integrations.manage": false,
     "settings.manage": false,
     "analytics.view": false,
+    "sourcing.view": false,
+    "sourcing.message": false,
+    "sourcing.manage": false,
   },
 };
 
