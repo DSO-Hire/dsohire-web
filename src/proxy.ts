@@ -43,6 +43,10 @@ function isGateExempt(pathname: string): boolean {
     // can't carry the preview cookie). They self-gate on the launch flag and
     // serve an empty feed pre-launch, so exempting them never leaks data.
     pathname.startsWith("/feeds/") ||
+    // Embeddable careers surfaces — frameable iframe + widget.js + the public
+    // JSON API. Machine/cross-origin endpoints; they self-gate on the launch
+    // flag (empty/zero jobs pre-launch), so exemption never leaks data.
+    pathname.startsWith("/embed/") ||
     pathname.startsWith("/unsubscribe") ||
     pathname === "/robots.txt" ||
     pathname === "/sitemap.xml" ||

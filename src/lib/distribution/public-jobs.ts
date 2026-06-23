@@ -243,6 +243,37 @@ export function applyUrl(job: Pick<PublicJob, "id">, source: string): string {
   return `${SITE_URL}/jobs/${job.id}/apply?source=${encodeURIComponent(source)}`;
 }
 
+/** A single job location summarized as "City, ST". */
+export function locationLabel(loc: PublicJobLocation): string {
+  return [loc.city, loc.state].filter(Boolean).join(", ");
+}
+
+/**
+ * The public JSON shape served by the jobs.json API and consumed by the embed
+ * widget. Already-masked PublicJob in → safe, serializable object out. The
+ * apply/url links carry the given ?source= channel for Vantage attribution.
+ */
+export function publicJobToJson(
+  job: PublicJob,
+  source: string,
+): Record<string, unknown> {
+  const src = `?source=${encodeURIComponent(source)}`;
+  return {
+    id: job.id,
+    title: job.title,
+    employerName: job.employerName,
+    employmentType: job.employmentType,
+    roleCategory: job.roleCategory,
+    locations: job.locations.map((l) => ({ city: l.city, state: l.state })),
+    compensation: job.comp
+      ? { min: job.comp.min, max: job.comp.max, period: job.comp.period }
+      : null,
+    postedAt: job.postedAt,
+    url: `${jobUrl(job)}${src}`,
+    applyUrl: `${SITE_URL}/jobs/${job.id}/apply${src}`,
+  };
+}
+
 /**
  * Build the schema.org JobPosting object from a PublicJob. This is the canonical
  * mapping shared by /jobs/[id] (Google for Jobs JSON-LD) and any distribution
