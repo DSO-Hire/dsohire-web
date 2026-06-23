@@ -16,6 +16,7 @@ import {
   getDsoAppliedCandidateIds,
 } from "@/lib/candidate/anonymity";
 import { ProspectComposer } from "./composer";
+import { EnrollControl } from "./enroll-control";
 
 export const metadata: Metadata = { title: "Prospect · Talent Pool" };
 export const dynamic = "force-dynamic";
@@ -71,6 +72,14 @@ export default async function DsoProspectThreadPage({
       .order("created_at", { ascending: true });
     messages = (msgRows ?? []) as typeof messages;
   }
+
+  const { data: seqRows } = await supabase
+    .from("automation_sequences")
+    .select("id, name")
+    .eq("dso_id", dsoId)
+    .eq("is_enabled", true)
+    .order("name", { ascending: true });
+  const sequences = (seqRows ?? []) as Array<{ id: string; name: string }>;
 
   const applied = await getDsoAppliedCandidateIds(supabase, dsoId, [candidateId]);
   const revealed = Boolean(thread?.candidate_revealed);
@@ -140,7 +149,10 @@ export default async function DsoProspectThreadPage({
           This candidate has blocked your group. You can no longer message them.
         </div>
       ) : (
-        <ProspectComposer candidateId={candidateId} />
+        <>
+          <ProspectComposer candidateId={candidateId} />
+          <EnrollControl candidateId={candidateId} sequences={sequences} />
+        </>
       )}
     </div>
   );
