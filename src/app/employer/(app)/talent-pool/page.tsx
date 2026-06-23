@@ -30,6 +30,7 @@ import {
   anonymousDisplayLabel,
   getDsoAppliedCandidateIds,
 } from "@/lib/candidate/anonymity";
+import { getBlockedCandidateIdsForDso } from "@/lib/sourcing/blocklist";
 
 export const metadata: Metadata = { title: "Talent Pool" };
 export const dynamic = "force-dynamic";
@@ -284,6 +285,17 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
           ? certCandidateIds
           : ["00000000-0000-0000-0000-000000000000"]
       );
+    }
+
+    // Block-list (Phase 0): a candidate who blocked this DSO must never appear
+    // in Discover. App-layer filter — the discoverable-read RLS intentionally
+    // doesn't carry the (candidate,dso) block.
+    const blockedIds = await getBlockedCandidateIdsForDso(
+      supabase,
+      dsoUser.dso_id as string
+    );
+    if (blockedIds.size > 0) {
+      q = q.not("id", "in", `(${Array.from(blockedIds).join(",")})`);
     }
 
     const { data, count, error } = await q;

@@ -32,6 +32,7 @@ import { recordAuditEvent } from "@/lib/audit/record";
 import { OutreachMessage } from "@/emails/employer/OutreachMessage";
 import { resolveMergeFields } from "@/lib/outreach/merge-fields";
 import { greetingFirstName } from "@/lib/candidate/name";
+import { isBlocked } from "@/lib/sourcing/blocklist";
 
 export interface SendOutreachResult {
   ok: boolean;
@@ -84,6 +85,16 @@ export async function sendOutreachToCandidate(formData: FormData): Promise<SendO
     candidate.is_guest ||
     candidate.deleted_at
   ) {
+    return {
+      ok: false,
+      error:
+        "This candidate isn't reachable through the platform right now.",
+    };
+  }
+
+  // Block-list (Phase 0): if the candidate blocked this DSO, never contact them.
+  // isBlocked fails safe (treats unknown state as blocked).
+  if (await isBlocked(supabase, dsoUser.dso_id as string, candidateId)) {
     return {
       ok: false,
       error:

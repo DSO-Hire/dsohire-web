@@ -25,6 +25,7 @@ import {
   anonymousDisplayLabel,
   getDsoAppliedCandidateIds,
 } from "@/lib/candidate/anonymity";
+import { getBlockedCandidateIdsForDso } from "@/lib/sourcing/blocklist";
 
 type SupabaseClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
 
@@ -82,6 +83,13 @@ export async function getSmartPicks(
       (a) => a.candidate_id
     )
   );
+
+  // Block-list (Phase 0): candidates who blocked this DSO are excluded from
+  // recommendations. Merged into the exclusion set so the in-memory filter
+  // below catches them regardless of the in-query cap.
+  for (const id of await getBlockedCandidateIdsForDso(supabase, dsoId)) {
+    excludedCandidateIds.add(id);
+  }
 
   // 2. Opted-in candidates, capped, most-recently-active first.
   let q = supabase
