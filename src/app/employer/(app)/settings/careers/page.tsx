@@ -59,15 +59,48 @@ export default async function CareersSettingsPage() {
     .is("deleted_at", null)
     .order("title", { ascending: true });
 
-  const jobs: CareersJobRow[] = (
-    (jobRows ?? []) as Array<{
-      id: string;
-      title: string;
-      confidential: boolean | null;
-      visibility: string | null;
-      distribution_enabled: boolean | null;
-    }>
-  ).map((j) => {
+  const jobRowsTyped = (jobRows ?? []) as Array<{
+    id: string;
+    title: string;
+    confidential: boolean | null;
+    visibility: string | null;
+    distribution_enabled: boolean | null;
+  }>;
+
+  // Per-job location label so duplicate titles (e.g. four "Associate Dentist"
+  // across sites) are tellable apart. This is the DSO's own admin view, so we
+  // show the real city/state (no public masking needed here).
+  const jobIds = jobRowsTyped.map((j) => j.id);
+  const locationLabelByJob = new Map<string, string>();
+  if (jobIds.length > 0) {
+    const { data: jobLocRows } = await supabase
+      .from("job_locations")
+      .select("job_id, location:dso_locations(name, city, state)")
+      .in("job_id", jobIds);
+    const byJob = new Map<string, string[]>();
+    for (const row of (jobLocRows ?? []) as unknown as Array<{
+      job_id: string;
+      location: { name: string | null; city: string | null; state: string | null } | null;
+    }>) {
+      const loc = row.location;
+      if (!loc) continue;
+      const label =
+        [loc.city, loc.state].filter(Boolean).join(", ") || (loc.name ?? "");
+      if (!label) continue;
+      const list = byJob.get(row.job_id) ?? [];
+      list.push(label);
+      byJob.set(row.job_id, list);
+    }
+    for (const [jid, labels] of byJob) {
+      const summary =
+        labels.length === 1
+          ? labels[0]!
+          : `${labels[0]} +${labels.length - 1} more`;
+      locationLabelByJob.set(jid, summary);
+    }
+  }
+
+  const jobs: CareersJobRow[] = jobRowsTyped.map((j) => {
     const excludedReason =
       j.confidential === true
         ? "confidential"
@@ -79,6 +112,7 @@ export default async function CareersSettingsPage() {
       title: j.title,
       distributionEnabled: j.distribution_enabled !== false,
       excludedReason,
+      locationLabel: locationLabelByJob.get(j.id) ?? null,
     };
   });
 

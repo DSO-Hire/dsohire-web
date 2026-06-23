@@ -29,6 +29,8 @@ export interface CareersJobRow {
   distributionEnabled: boolean;
   /** When set, the job is excluded from distribution and the toggle is locked. */
   excludedReason: "confidential" | "internal" | null;
+  /** "City, ST" (or "City, ST +N more") to disambiguate same-titled roles. */
+  locationLabel: string | null;
 }
 
 export interface CareersEditorProps {
@@ -340,6 +342,11 @@ function JobToggleRow({ job }: { job: CareersJobRow }) {
       <div className="min-w-0">
         <p className="text-[14px] font-semibold text-ink truncate">
           {job.title}
+          {job.locationLabel && (
+            <span className="ml-2 font-normal text-slate-meta">
+              · {job.locationLabel}
+            </span>
+          )}
         </p>
         {locked ? (
           <span className="inline-flex items-center gap-1 mt-0.5 text-[11px] text-slate-meta">
