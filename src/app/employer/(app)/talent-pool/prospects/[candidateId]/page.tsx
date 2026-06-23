@@ -15,6 +15,7 @@ import {
   anonymousDisplayLabel,
   getDsoAppliedCandidateIds,
 } from "@/lib/candidate/anonymity";
+import { can } from "@/lib/permissions/capabilities";
 import { ProspectComposer } from "./composer";
 import { EnrollControl } from "./enroll-control";
 
@@ -35,10 +36,19 @@ export default async function DsoProspectThreadPage({
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("dso_id, role")
+    .select("dso_id, role, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) redirect("/employer/onboarding");
+  if (
+    !can(
+      dsoUser.role as string,
+      (dsoUser as Record<string, unknown>).permission_overrides,
+      "sourcing.view",
+    )
+  ) {
+    redirect("/employer/talent-pool");
+  }
   const dsoId = dsoUser.dso_id as string;
 
   const { data: candidate } = await supabase

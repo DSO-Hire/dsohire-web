@@ -37,7 +37,7 @@ export default async function CandidateProspectThreadPage({
 
   const { data: thread } = await supabase
     .from("prospect_threads")
-    .select("id, status, candidate_revealed, dsos(name)")
+    .select("id, status, candidate_revealed, dsos(name, slug)")
     .eq("id", threadId)
     .eq("candidate_id", candidate.id as string)
     .maybeSingle();
@@ -55,9 +55,11 @@ export default async function CandidateProspectThreadPage({
     body: string;
     created_at: string;
   }>;
-  const dsoName =
-    ((thread as unknown as { dsos: { name: string | null } | null }).dsos
-      ?.name) ?? "A dental group";
+  const dsoRel = (thread as unknown as {
+    dsos: { name: string | null; slug: string | null } | null;
+  }).dsos;
+  const dsoName = dsoRel?.name ?? "A dental group";
+  const dsoSlug = dsoRel?.slug ?? null;
 
   return (
     <div className="mx-auto max-w-[680px] px-4 py-8">
@@ -82,6 +84,21 @@ export default async function CandidateProspectThreadPage({
         revealed={Boolean(thread.candidate_revealed)}
         messages={messages}
       />
+
+      {/* Applying is the clearest reveal. ?source=sourcing credits the channel
+          in Vantage's closed-loop attribution. */}
+      <div className="mt-5 text-center">
+        <Link
+          href={
+            dsoSlug
+              ? `/companies/${dsoSlug}?source=sourcing`
+              : `/jobs?source=sourcing`
+          }
+          className="text-[13px] font-semibold text-heritage-deep hover:text-ink"
+        >
+          Explore open roles at {dsoName} →
+        </Link>
+      </div>
     </div>
   );
 }

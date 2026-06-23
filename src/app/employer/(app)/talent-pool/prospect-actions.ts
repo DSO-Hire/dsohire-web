@@ -27,6 +27,8 @@ import { logProspectActivity } from "@/lib/sourcing/pipeline";
 import { resolveMergeFields } from "@/lib/outreach/merge-fields";
 import { stripCandidateNameTokens } from "@/lib/sourcing/merge-masking";
 import { getDsoAppliedCandidateIds } from "@/lib/candidate/anonymity";
+import { can } from "@/lib/permissions/capabilities";
+import { dsoCanUseSourcingOutbound } from "@/lib/sourcing/tier";
 import { dispatchNotification } from "@/lib/notifications/dispatcher";
 import { ProspectInterest } from "@/emails/candidate/ProspectInterest";
 
@@ -58,15 +60,23 @@ export async function sendProspectMessage(input: {
 
   const { data: dsoUser } = await supabase
     .from("dso_users")
-    .select("id, dso_id, full_name, role")
+    .select("id, dso_id, full_name, role, permission_overrides")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!dsoUser) return { ok: false, error: "No DSO context." };
-  // Phase 4 swaps this for the sourcing.message capability.
-  if (!["owner", "admin", "recruiter"].includes((dsoUser.role as string) ?? "")) {
-    return { ok: false, error: "Insufficient permissions." };
+  // Capability gate (replaces the old hardcoded role array).
+  if (!can(dsoUser.role as string, dsoUser.permission_overrides, "sourcing.message")) {
+    return { ok: false, error: "You don't have permission to message prospects." };
   }
   const dsoId = dsoUser.dso_id as string;
+
+  // Tier gate — manual outbound is Growth+.
+  if (!(await dsoCanUseSourcingOutbound(supabase, dsoId))) {
+    return {
+      ok: false,
+      error: "Messaging sourced candidates is a Growth feature. Upgrade to reach out.",
+    };
+  }
 
   // Candidate reachability.
   const { data: candidate } = await supabase

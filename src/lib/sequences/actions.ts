@@ -307,8 +307,8 @@ export async function enrollProspectInSequence(
 ): Promise<SeqResult> {
   const who = await resolveActor();
   if (!who.ok) return who;
-  // Enrolling a prospect in a drip is messaging them (Phase 4: sourcing.message).
-  if (!who.perms["apps.message"]) {
+  // Enrolling a prospect in a drip is messaging them.
+  if (!who.perms["sourcing.message"]) {
     return { ok: false, error: "You don't have permission to start sequences." };
   }
   const supabase = await createSupabaseServerClient();
