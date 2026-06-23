@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test:distribution": "tsx --tsconfig tsconfig.json --test src/lib/distribution/public-jobs.test.ts",
+    "test:sourcing": "tsx --tsconfig tsconfig.json --test src/lib/sourcing/prospect-masking.test.ts",
     "email:dev": "email dev --dir src/emails --port 3001",
     "email:export": "email export --dir src/emails",
     "help-embeddings": "tsx scripts/generate-help-embeddings.ts"

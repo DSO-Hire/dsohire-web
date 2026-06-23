@@ -226,6 +226,16 @@ function Card({ card, overlay }: { card: ProspectCard; overlay?: boolean }) {
             {t}
           </span>
         ))}
+        <span className="flex-1" />
+        {!overlay && (
+          <a
+            href={`/employer/talent-pool/prospects/${card.candidateId}`}
+            onPointerDown={(e) => e.stopPropagation()}
+            className="text-[10px] font-bold uppercase tracking-[0.5px] text-heritage-deep hover:text-ink"
+          >
+            Message →
+          </a>
+        )}
       </div>
     </div>
   );

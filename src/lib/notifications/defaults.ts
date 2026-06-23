@@ -81,6 +81,15 @@ export const NOTIFICATION_DEFAULTS: DefaultsMap = {
     in_app: { enabled: false, frequency: "off" },
     sms: { enabled: false, frequency: "off" },
   },
+  "prospect.interested_nudge": {
+    // Sourcing CRM — a DSO reached out to a sourced (pre-application) prospect.
+    // Opt-out honored (candidate can mute/block the DSO from the thread); the
+    // email carries a one-click unsubscribe. Default on so the candidate hears
+    // about real interest.
+    email: { enabled: true, frequency: "instant" },
+    in_app: { enabled: true, frequency: "instant" },
+    sms: { enabled: false, frequency: "off" },
+  },
   "employer.new_application": {
     email: { enabled: true, frequency: "instant" },
     in_app: { enabled: true, frequency: "instant" },
