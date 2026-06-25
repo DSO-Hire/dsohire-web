@@ -35,16 +35,12 @@ export default async function CandidatePrivacyPage() {
 
   const candidateId = candidateRow.id as string;
 
-  // #92 follow-up (Day 28) — opening this page = the candidate has laid eyes on
-  // their privacy + matching choices, so the onboarding steps can complete even
-  // if they don't change a setting (the defaults may already suit them). Stamp
-  // once on first view; saving a section also stamps it (see actions.ts).
-  if (!(candidateRow as Record<string, unknown>).privacy_choices_reviewed_at) {
-    await supabase
-      .from("candidates")
-      .update({ privacy_choices_reviewed_at: new Date().toISOString() })
-      .eq("id", candidateId);
-  }
+  // Consent-based privacy — do NOT stamp privacy_choices_reviewed_at on mere
+  // page view. A deliberate choice is required: the stamp comes only from an
+  // explicit save in actions.ts (updateVisibility / updatePracticeFitConsent)
+  // or the first-run step (welcome/visibility). Stamping on view made the
+  // "reviewed" signal meaningless and silently auto-completed the dashboard
+  // onboarding checklist.
 
   // Pull blocked employers + work history in parallel.
   const [{ data: blockedRows }, { data: currentWork }] = await Promise.all([

@@ -132,6 +132,10 @@ export async function getInterestedCandidates(
     )
     .in("id", candidateIds)
     .in("cv_visibility", ["open_to_work", "recruiters_only"])
+    // Consent-based privacy (belt-and-suspenders): a candidate who hasn't made
+    // a deliberate visibility choice is never surfaced, even via the mutual-
+    // interest roll-up.
+    .not("privacy_choices_reviewed_at", "is", null)
     .eq("is_guest", false)
     .is("deleted_at", null);
   const candidates = (candRows ?? []) as Array<{

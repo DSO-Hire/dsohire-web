@@ -58,6 +58,8 @@ export interface SmartPick {
  *   - candidates already in a non-terminal stage on this job
  *     (they're "applicants" — show in the kanban, not Smart Picks)
  *   - candidates with cv_visibility = 'hidden'
+ *   - candidates who haven't made a deliberate visibility choice
+ *     (privacy_choices_reviewed_at IS NULL) — consent-based privacy
  *   - guests, soft-deleted
  *
  * Returns empty array when:
@@ -102,6 +104,12 @@ export async function getSmartPicks(
     .is("deleted_at", null)
     .order("updated_at", { ascending: false })
     .limit(CANDIDATE_POOL_CAP);
+  // Consent-based privacy (belt-and-suspenders): exclude anyone who hasn't made
+  // a deliberate visibility choice, so Smart Picks can never surface a private/
+  // un-chosen candidate even if a future default drift left them non-hidden.
+  // Applied as a reassignment (not inlined in the chain above) to keep the
+  // PostgREST builder's type instantiation under TS's depth limit.
+  q = q.not("privacy_choices_reviewed_at", "is", null);
   // Exclude existing applicants in-query when there are few enough IDs;
   // PostgREST's `not.in` accepts up to ~2K comma-separated values, but
   // we cap to 100 to avoid URL length issues. Past that, filter in-memory.

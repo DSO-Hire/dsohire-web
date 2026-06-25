@@ -106,6 +106,12 @@ export async function signUpCandidate(
     first_name: firstName,
     last_name: lastName,
     salutation,
+    // Consent-based privacy (Option 3): private by default. The DB default is
+    // now 'hidden', but we set it explicitly so a new candidate is never
+    // discoverable until they make a deliberate choice in the first-run
+    // visibility step (/candidate/welcome/visibility). Do NOT stamp
+    // privacy_choices_reviewed_at here — the choice hasn't been made yet.
+    cv_visibility: "hidden",
     is_searchable: false,
     acquisition_channel: acq.channel,
     acquisition_source: acq.source,
@@ -187,12 +193,16 @@ export async function verifySignUpCandidate(
     };
   }
 
-  // #53 (Day 29) — a brand-new candidate with no specific destination goes to
-  // the TRACK CHOOSER first (PracticeFit vs DSOFit). The chooser saves their
-  // choice and routes them into the right assessment, so every new candidate
-  // both self-identifies AND lays eyes on the matching tool. Intentful
-  // destinations (e.g. ?next=/jobs/[id]/apply) are respected and skip it.
-  const dest = next === "/candidate/dashboard" ? "/candidate/track-chooser" : next;
+  // Consent-based privacy — a brand-new candidate with no specific destination
+  // hits the FIRST-RUN VISIBILITY STEP first ("you're private by default,
+  // choose who can find you"), before any other nudge. That step stamps their
+  // choice and then routes onward to the track chooser (PracticeFit vs DSOFit)
+  // → matching assessment. Intentful destinations (e.g. ?next=/jobs/[id]/apply)
+  // are respected and skip it; those candidates still get gated into the
+  // visibility step the first time they enter the shelled /candidate app (see
+  // candidate/(app)/layout.tsx).
+  const dest =
+    next === "/candidate/dashboard" ? "/candidate/welcome/visibility" : next;
   redirect(dest);
 }
 

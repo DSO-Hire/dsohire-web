@@ -38,7 +38,7 @@ export default async function CandidateAppLayout({
   const { data: candidate } = await supabase
     .from("candidates")
     .select(
-      "id, full_name, headline, current_title, is_searchable, avatar_url, deleted_at, primary_fit_product"
+      "id, full_name, headline, current_title, is_searchable, avatar_url, deleted_at, primary_fit_product, privacy_choices_reviewed_at"
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
@@ -50,6 +50,18 @@ export default async function CandidateAppLayout({
   // grace period expires (after which the cron hard-deletes the row).
   if ((candidate as Record<string, unknown>).deleted_at) {
     redirect("/candidate/restore");
+  }
+
+  // Consent-based privacy first-run gate — a candidate who hasn't made a
+  // deliberate visibility choice (privacy_choices_reviewed_at is null) is
+  // private by default and must pass the prominent "choose who can find you"
+  // step before reaching any shelled surface. This catches candidates
+  // backfilled to private when we flipped to private-by-default, plus anyone
+  // who signed up via an intentful destination (e.g. ?next=/jobs/[id]/apply)
+  // and so skipped the post-verify redirect. The step lives OUTSIDE this route
+  // group, so redirecting to it doesn't re-trigger this layout (no loop).
+  if (!(candidate as Record<string, unknown>).privacy_choices_reviewed_at) {
+    redirect("/candidate/welcome/visibility");
   }
 
   const candidateName =
