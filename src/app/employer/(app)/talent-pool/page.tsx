@@ -249,15 +249,17 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
         { count: "exact" }
       )
       .in("cv_visibility", ["open_to_work", "recruiters_only"])
-      // Consent-based privacy (belt-and-suspenders): never surface a candidate
-      // who hasn't made a deliberate visibility choice, even if a future
-      // default drift left them non-hidden. cv_visibility is the live gate;
-      // this guards against it.
-      .not("privacy_choices_reviewed_at", "is", null)
       .eq("is_guest", false)
       .is("deleted_at", null)
       .order("updated_at", { ascending: false })
       .limit(40);
+    // Consent-based privacy (belt-and-suspenders): never surface a candidate who
+    // hasn't made a deliberate visibility choice, even if a future default drift
+    // left them non-hidden. cv_visibility is the live gate; this guards against
+    // it. Applied as a reassignment (not inlined in the chain above) to keep the
+    // PostgREST builder's type instantiation under TS's depth limit — inlining a
+    // 4th filter here tips the later q.not(...) block-list call over it.
+    q = q.not("privacy_choices_reviewed_at", "is", null);
 
     if (keyword) {
       // E7.7 boolean search over candidates.search_doc (generated FTS
