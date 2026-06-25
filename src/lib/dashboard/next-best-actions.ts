@@ -60,6 +60,8 @@ export interface NbaInput {
     jobTitle: string;
     score: number;
     interested: boolean;
+    /** Deep-link target — the candidate's fit detail, mirroring Today's Top Fits. */
+    candidateId: string;
   } | null;
   interestedCount: number;
 }
@@ -99,7 +101,10 @@ export function buildNextBestActions(input: NbaInput): NbaItem[] {
       why: f.interested
         ? `${f.jobTitle} — they raised a hand AND they score. Your warmest lead today.`
         : "Your strongest match on the board right now — high-fit candidates go cold the fastest.",
-      primary: { label: "See the fit", href: "/employer/talent-pool" },
+      primary: {
+        label: "See the fit",
+        href: `/employer/candidates/${f.candidateId}`,
+      },
     });
   }
 

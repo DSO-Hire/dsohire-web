@@ -1143,6 +1143,7 @@ export default async function EmployerDashboard() {
           jobTitle: bestFit.best_job_title,
           score: bestFit.fit.score,
           interested: bestFit.interested,
+          candidateId: bestFit.candidate_id,
         }
       : null,
     interestedCount: interestedCandidates.length,
@@ -1268,7 +1269,7 @@ export default async function EmployerDashboard() {
               ? "Awaiting candidate response"
               : "Sent offers awaiting reply show here"
           }
-          href="/employer/offer-approvals"
+          href="/employer/applications?status=offer"
           routeLabel="View offers"
         />
 
