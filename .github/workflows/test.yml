@@ -1,14 +1,15 @@
 name: test
 
-# Runs the unit test net on every PR to main, so a change that breaks a
+# Runs the unit test net on every push to main, so a change that breaks a
 # scoring / comp / billing / permissions / pipeline core fails here instead of
 # reaching a customer. Additive and fast — pure-logic tests, no DB.
+# (We ship straight to main — no PRs — so the net must run on push.)
 #
 # Node 22 matches the local dev toolchain; the unified `npm test` glob
 # (src/**/*.test.ts) relies on the test-runner glob support added in Node 21+.
 
 on:
-  pull_request:
+  push:
     branches: [main]
 
 jobs:
