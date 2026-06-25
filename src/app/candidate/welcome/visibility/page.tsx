@@ -15,7 +15,6 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { VisibilityForm } from "./visibility-form";
-import type { VisibilityChoice } from "./actions";
 
 export const metadata: Metadata = {
   title: "Choose who can find you",
@@ -30,7 +29,7 @@ export default async function WelcomeVisibilityPage() {
 
   const { data: c } = await supabase
     .from("candidates")
-    .select("cv_visibility, anonymous_mode, privacy_choices_reviewed_at")
+    .select("privacy_choices_reviewed_at")
     .eq("auth_user_id", user.id)
     .maybeSingle();
   if (!c) redirect("/candidate/sign-up");
@@ -41,16 +40,7 @@ export default async function WelcomeVisibilityPage() {
     redirect("/candidate/dashboard");
   }
 
-  // Pre-select the radio from any current value (a backfilled candidate may
-  // have had a real prior value; a fresh signup is 'hidden'). Default: private.
-  const cv = (c as Record<string, unknown>).cv_visibility as string | null;
-  const anon = Boolean((c as Record<string, unknown>).anonymous_mode);
-  const initial: VisibilityChoice =
-    cv === "hidden" || cv == null
-      ? "private"
-      : anon
-        ? "anonymous"
-        : "discoverable";
-
-  return <VisibilityForm initial={initial} />;
+  // No pre-selection — the candidate must make an explicit, deliberate choice
+  // (nothing pre-checked). Until they pick, they stay 'hidden' (private fallback).
+  return <VisibilityForm />;
 }

@@ -20,7 +20,23 @@ const OPTIONS: ReadonlyArray<{
   icon: React.ReactNode;
   label: string;
   description: string;
+  recommended?: boolean;
 }> = [
+  {
+    value: "anonymous",
+    icon: <VenetianMask className="h-6 w-6" />,
+    label: "Discoverable, but anonymous until I'm interested",
+    description:
+      "Verified employers can find you by fit and see your experience, license, skills, and match score — but never your name or photo — until you apply to one of their roles or choose to reveal. You get found for great-fit jobs without exposing who you are.",
+    recommended: true,
+  },
+  {
+    value: "discoverable",
+    icon: <Eye className="h-6 w-6" />,
+    label: "Discoverable to verified employers, with my name",
+    description:
+      "Signed-in DSO Hire employers can find your profile by fit and reach out, with your name and photo visible. Best if you're actively looking and want maximum visibility.",
+  },
   {
     value: "private",
     icon: <Lock className="h-6 w-6" />,
@@ -28,35 +44,23 @@ const OPTIONS: ReadonlyArray<{
     description:
       "You won't show up in any employer browse or search. You can still apply to jobs — applying reveals you to that practice only. Change this anytime.",
   },
-  {
-    value: "discoverable",
-    icon: <Eye className="h-6 w-6" />,
-    label: "Discoverable to verified employers, with my name",
-    description:
-      "Signed-in DSO Hire employers can find your profile by fit and reach out. Your name and photo are visible to them.",
-  },
-  {
-    value: "anonymous",
-    icon: <VenetianMask className="h-6 w-6" />,
-    label: "Discoverable, but anonymous until I'm interested",
-    description:
-      "Employers see a generic label like “Dental Hygienist in Denver” — never your name or photo — until you apply to one of their roles. Then your full profile reveals to that practice.",
-  },
 ];
 
-export function VisibilityForm({ initial }: { initial: VisibilityChoice }) {
+export function VisibilityForm() {
   const router = useRouter();
-  const [choice, setChoice] = useState<VisibilityChoice>(initial);
+  // Nothing pre-selected — the candidate must make a deliberate, explicit choice.
+  const [choice, setChoice] = useState<VisibilityChoice | null>(null);
   const [, start] = useTransition();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function submit() {
-    if (busy) return;
+    if (busy || !choice) return;
+    const selected = choice; // narrowed to non-null by the guard above
     setError(null);
     setBusy(true);
     start(async () => {
-      const r = await saveVisibilityChoice(choice);
+      const r = await saveVisibilityChoice(selected);
       if (r.ok && r.dest) {
         router.push(r.dest);
       } else {
@@ -79,7 +83,9 @@ export function VisibilityForm({ initial }: { initial: VisibilityChoice }) {
           </h1>
           <p className="mt-4 text-[16px] sm:text-[17px] text-slate-body max-w-[560px] mx-auto leading-relaxed">
             Right now, no employer can see you. Pick how discoverable you want to
-            be — you can change it anytime in Settings.
+            be — most people choose anonymous, so they get found for great-fit
+            roles without showing their name. You can change this anytime in
+            Settings.
           </p>
         </header>
 
@@ -113,8 +119,13 @@ export function VisibilityForm({ initial }: { initial: VisibilityChoice }) {
                   {opt.icon}
                 </span>
                 <span className="flex-1">
-                  <span className="block text-[16px] sm:text-[17px] font-bold text-foreground leading-snug">
+                  <span className="flex flex-wrap items-center gap-2 text-[16px] sm:text-[17px] font-bold text-foreground leading-snug">
                     {opt.label}
+                    {opt.recommended && (
+                      <span className="inline-flex items-center rounded-full bg-heritage px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-primary-foreground">
+                        Recommended
+                      </span>
+                    )}
                   </span>
                   <span className="mt-1 block text-[14px] text-muted-foreground leading-relaxed">
                     {opt.description}
@@ -142,7 +153,7 @@ export function VisibilityForm({ initial }: { initial: VisibilityChoice }) {
         <button
           type="button"
           onClick={submit}
-          disabled={busy}
+          disabled={busy || !choice}
           className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-heritage px-6 py-3.5 text-[15px] font-bold tracking-wide text-primary-foreground transition-colors hover:bg-heritage-deep disabled:opacity-60"
         >
           {busy ? "Saving…" : "Continue"}
