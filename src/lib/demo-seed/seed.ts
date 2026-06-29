@@ -36,6 +36,7 @@ import {
   CANDIDATE_METROS,
   CANDIDATE_ARCHETYPES,
   JOB_ARCHETYPES,
+  CORPORATE_ARCHETYPES,
   type DemoDsoDef,
   type JobArchetype,
   type Visibility,
@@ -313,8 +314,14 @@ export async function runDemoSeed(supa: Supa, opts: SeedOptions): Promise<SeedRe
   }
   log(`Inserted ${counts.jobs} jobs across DSOs`);
 
-  // ── Applications + live pipeline (hero-heavy) ─────────────────────────────
+  // ── Employer-side privacy demo (hero): affiliation masking + anonymize +
+  //    a confidential exec search. Appends to the hero's job list. ──
   const heroCtx = dsoCtxBySlug.get(HERO_SLUG)!;
+  const privacyJobs = await seedPrivacyDemoJobs(supa, now, heroCtx, bump);
+  jobsByDso.get(HERO_SLUG)!.push(...privacyJobs);
+  log(`Inserted ${privacyJobs.length} employer-privacy demo jobs (masked + confidential)`);
+
+  // ── Applications + live pipeline (hero-heavy) ─────────────────────────────
   const heroJobs = jobsByDso.get(HERO_SLUG)!;
   const seenPairs = new Set<string>();
   await seedPipeline(supa, now, heroCtx, heroJobs, candidates, bump, seenPairs);
@@ -671,16 +678,108 @@ async function seedCandidates(
  * Jobs
  * ─────────────────────────────────────────────────────────── */
 
+/** Practice-only palette. Corporate roles are placed deliberately per-DSO via
+ *  def.corporateRoles (so the Corporate tab is curated, not palette-cycled). */
 function jobPalette(def: DemoDsoDef): JobArchetype[] {
-  const clinical = JOB_ARCHETYPES.filter((a) => a.scope !== "corporate" || a.role_category === "office_manager");
+  const practice = JOB_ARCHETYPES.filter((a) => a.scope !== "corporate");
   if (def.jobPalette === "clinical_heavy") {
-    return JOB_ARCHETYPES.filter((a) => ["associate_dentist", "associate_dentist_new_grad", "hygienist", "dental_assistant"].includes(a.key));
+    return practice.filter((a) =>
+      ["associate_dentist", "associate_dentist_new_grad", "hygienist", "dental_assistant"].includes(a.key)
+    );
   }
-  if (def.jobPalette === "enterprise") {
-    return JOB_ARCHETYPES; // full spread incl. corporate
+  return practice; // balanced + enterprise draw the full practice spread
+}
+
+/** Lookup across practice + corporate archetypes (for def.corporateRoles keys). */
+const ARCHETYPE_BY_KEY: Map<string, JobArchetype> = new Map(
+  [...JOB_ARCHETYPES, ...CORPORATE_ARCHETYPES].map((a) => [a.key, a])
+);
+
+/**
+ * Insert one job from an archetype + its children (locations, skills, screening,
+ * verifications). `opts` overrides status / locations / confidential, etc. for
+ * the privacy-demo + corporate placements. Returns the JobCtx.
+ */
+async function insertJob(
+  supa: Supa,
+  now: Date,
+  ctx: DsoCtx,
+  arch: JobArchetype,
+  opts: {
+    slug: string;
+    status: string;
+    postedDaysAgo: number;
+    locationIds: string[];
+    confidential?: boolean;
+    titleOverride?: string;
+  },
+  bump: (k: string, n?: number) => void
+): Promise<JobCtx> {
+  const jobId = await insertOne(supa, "jobs", {
+    dso_id: ctx.id,
+    title: opts.titleOverride ?? arch.title,
+    slug: opts.slug,
+    description: arch.description,
+    requirements: arch.requirements,
+    role_category: arch.role_category,
+    employment_type: arch.employment_type,
+    scope: arch.scope,
+    visibility: "public",
+    status: opts.status,
+    confidential: opts.confidential ?? false,
+    specialty: arch.specialty,
+    benefits: arch.benefits,
+    min_years_experience: arch.minYears,
+    schedule_days: arch.scheduleDays,
+    schedule_evenings: arch.evenings,
+    schedule_weekends: arch.weekends,
+    corporate_function: arch.corporate_function ?? null,
+    authority_level: arch.authority_level ?? null,
+    work_mode: arch.work_mode ?? null,
+    travel_expectation: arch.travel_expectation ?? null,
+    direct_reports_band: arch.direct_reports_band ?? null,
+    indirect_reports_band: arch.indirect_reports_band ?? null,
+    industry_experience: arch.industry_experience ?? null,
+    domain_preference: arch.domain_preference ?? null,
+    openings: 1,
+    created_by: ctx.ownerDsoUserId,
+    posted_at: opts.status === "draft" ? null : daysAgo(now, opts.postedDaysAgo),
+    created_at: daysAgo(now, opts.postedDaysAgo + 1),
+    ...arch.comp,
+  });
+  bump("jobs");
+
+  if (opts.locationIds.length > 0) {
+    await insertRows(
+      supa,
+      "job_locations",
+      opts.locationIds.map((location_id) => ({ job_id: jobId, location_id }))
+    );
   }
-  // balanced (hero + growth + riverstone): clinical + the two corporate roles
-  return [...clinical, ...JOB_ARCHETYPES.filter((a) => a.scope === "corporate" && a.role_category !== "office_manager")];
+  await insertRows(supa, "job_skills", arch.skills.map((s) => ({ job_id: jobId, skill: s })));
+
+  const sqRows = arch.screening.map((q, qi) => ({
+    job_id: jobId,
+    prompt: q.prompt,
+    kind: q.kind,
+    required: q.required,
+    knockout: q.knockout ?? false,
+    options: q.options ?? null,
+    knockout_correct_answer: q.knockout_correct_answer ?? null,
+    sort_order: qi * 10,
+  }));
+  const insertedSq = await insertReturning(supa, "job_screening_questions", sqRows);
+  const firstScreeningQId = (insertedSq[0]?.id as string) ?? null;
+
+  if (arch.verifications.length > 0) {
+    await insertRows(
+      supa,
+      "job_verification_requirements",
+      arch.verifications.map((v) => ({ job_id: jobId, verification_type: v, required: true }))
+    );
+  }
+
+  return { id: jobId, dsoId: ctx.id, archetype: arch, firstScreeningQId };
 }
 
 async function seedJobsForDso(
@@ -694,76 +793,163 @@ async function seedJobsForDso(
   const rng = makeRng(def.slug.length * 7919 + def.practiceCount);
   const out: JobCtx[] = [];
 
+  // Practice roles from the palette.
   for (let i = 0; i < def.jobCount; i++) {
     const arch = palette[i % palette.length];
-    // status spread: mostly active, with a couple draft/paused/filled
     const status = i === 0 ? "active" : i % 9 === 4 ? "draft" : i % 9 === 7 ? "paused" : i % 11 === 10 ? "filled" : "active";
-    const postedDaysAgo = 3 + Math.floor(rng() * 75);
-    const jobId = await insertOne(supa, "jobs", {
-      dso_id: ctx.id,
-      title: arch.title,
+    const job = await insertJob(supa, now, ctx, arch, {
       slug: `${def.slug}-${arch.key}-${i + 1}`,
-      description: arch.description,
-      requirements: arch.requirements,
-      role_category: arch.role_category,
-      employment_type: arch.employment_type,
-      scope: arch.scope,
-      visibility: "public",
       status,
-      specialty: arch.specialty,
-      benefits: arch.benefits,
-      min_years_experience: arch.minYears,
-      schedule_days: arch.scheduleDays,
-      schedule_evenings: arch.evenings,
-      schedule_weekends: arch.weekends,
-      corporate_function: arch.corporate_function ?? null,
-      authority_level: arch.authority_level ?? null,
-      work_mode: arch.work_mode ?? null,
-      travel_expectation: arch.travel_expectation ?? null,
-      direct_reports_band: arch.direct_reports_band ?? null,
-      indirect_reports_band: arch.indirect_reports_band ?? null,
-      industry_experience: arch.industry_experience ?? null,
-      domain_preference: arch.domain_preference ?? null,
-      openings: 1,
-      created_by: ctx.ownerDsoUserId,
-      posted_at: status === "draft" ? null : daysAgo(now, postedDaysAgo),
-      created_at: daysAgo(now, postedDaysAgo + 1),
-      ...arch.comp,
-    });
-    bump("jobs");
-
-    // locations: tie to 1-2 of the DSO's locations
-    const locId = ctx.locationIds[i % ctx.locationIds.length];
-    await insertRows(supa, "job_locations", [{ job_id: jobId, location_id: locId }]);
-
-    // skills
-    await insertRows(supa, "job_skills", arch.skills.map((s) => ({ job_id: jobId, skill: s })));
-
-    // screening questions
-    const sqRows = arch.screening.map((q, qi) => ({
-      job_id: jobId,
-      prompt: q.prompt,
-      kind: q.kind,
-      required: q.required,
-      knockout: q.knockout ?? false,
-      options: q.options ?? null,
-      knockout_correct_answer: q.knockout_correct_answer ?? null,
-      sort_order: qi * 10,
-    }));
-    const insertedSq = await insertReturning(supa, "job_screening_questions", sqRows);
-    const firstScreeningQId = (insertedSq[0]?.id as string) ?? null;
-
-    // verification requirements
-    if (arch.verifications.length > 0) {
-      await insertRows(
-        supa,
-        "job_verification_requirements",
-        arch.verifications.map((v) => ({ job_id: jobId, verification_type: v, required: true }))
-      );
-    }
-
-    out.push({ id: jobId, dsoId: ctx.id, archetype: arch, firstScreeningQId });
+      postedDaysAgo: 3 + Math.floor(rng() * 75),
+      locationIds: [ctx.locationIds[i % ctx.locationIds.length]],
+    }, bump);
+    out.push(job);
   }
+
+  // Corporate/DSOFit roles — deliberate per-DSO list, scope='corporate' (→
+  // public Corporate tab). Linked to the HQ location for a city label.
+  for (const [ci, key] of (def.corporateRoles ?? []).entries()) {
+    const arch = ARCHETYPE_BY_KEY.get(key);
+    if (!arch) throw new Error(`[demo-seed] unknown corporate archetype key: ${key}`);
+    const job = await insertJob(supa, now, ctx, arch, {
+      slug: `${def.slug}-${arch.key}`,
+      status: "active",
+      postedDaysAgo: 4 + Math.floor(rng() * 40),
+      locationIds: [ctx.locationIds[0]],
+    }, bump);
+    out.push(job);
+    void ci;
+  }
+
+  return out;
+}
+
+/* ──────────────────────────────────────────────────────────────
+ * Employer-side privacy demo (hero). Three real demonstrations:
+ *   1. Affiliation masking — a practice role linked to a private-affiliation
+ *      location with a DISTINCT practice brand → public sees the practice
+ *      name ("Cherry Creek Dental Studio"), never "Bridgeway Dental Partners".
+ *   2. anonymize_name — a practice role at a location that opted into name
+ *      anonymization → public/candidate detail shows "Dental Office in Denver".
+ *   3. Confidential exec search — jobs.confidential=true + a job_team_access
+ *      grant (visible employer-side only to owner/admin + the assigned
+ *      recruiter, per RLS). Linked to two private locations → the public
+ *      employer name collapses to "Multiple locations".
+ * Bridgeway's affiliation_reveal_policy='per_application' means the real group
+ * name reveals to the DSO only after the candidate applies — the consent arc.
+ * ─────────────────────────────────────────────────────────── */
+
+async function seedPrivacyDemoJobs(
+  supa: Supa,
+  now: Date,
+  hero: DsoCtx,
+  bump: (k: string, n?: number) => void
+): Promise<JobCtx[]> {
+  const denver = METROS.denver;
+  // Distinct-brand, private-affiliation locations (NOT named "Bridgeway").
+  const maskedLocs = await insertReturning(
+    supa,
+    "dso_locations",
+    [
+      {
+        dso_id: hero.id,
+        name: "Cherry Creek Dental Studio",
+        address_line1: "240 Detroit St",
+        city: denver.city,
+        state: denver.state,
+        postal_code: denver.zip,
+        latitude: denver.lat,
+        longitude: denver.lng,
+        lat: denver.lat,
+        lng: denver.lng,
+        geocoded_at: daysAgo(now, 60),
+        public_dso_affiliation: false, // mask the group → show practice name
+        anonymize_name: false,
+      },
+      {
+        dso_id: hero.id,
+        name: "Riverfront Family Dental",
+        address_line1: "1700 Platte St",
+        city: denver.city,
+        state: denver.state,
+        postal_code: denver.zip,
+        latitude: denver.lat,
+        longitude: denver.lng,
+        lat: denver.lat,
+        lng: denver.lng,
+        geocoded_at: daysAgo(now, 60),
+        public_dso_affiliation: false,
+        anonymize_name: true, // → "Dental Office in Denver"
+      },
+    ],
+    "id, name"
+  );
+  bump("dso_locations", maskedLocs.length);
+  const cherryCreekId = maskedLocs[0].id as string;
+  const riverfrontId = maskedLocs[1].id as string;
+
+  const out: JobCtx[] = [];
+
+  // 1. Affiliation-masked practice role → shows "Cherry Creek Dental Studio".
+  out.push(
+    await insertJob(
+      supa,
+      now,
+      hero,
+      ARCHETYPE_BY_KEY.get("associate_dentist")!,
+      {
+        slug: `${hero.def.slug}-masked-associate`,
+        status: "active",
+        postedDaysAgo: 9,
+        locationIds: [cherryCreekId],
+      },
+      bump
+    )
+  );
+
+  // 2. anonymize_name practice role → detail shows "Dental Office in Denver".
+  out.push(
+    await insertJob(
+      supa,
+      now,
+      hero,
+      ARCHETYPE_BY_KEY.get("hygienist")!,
+      {
+        slug: `${hero.def.slug}-anon-hygienist`,
+        status: "active",
+        postedDaysAgo: 6,
+        locationIds: [riverfrontId],
+      },
+      bump
+    )
+  );
+
+  // 3. Confidential executive search → confidential=true + team-access grant,
+  //    two private locations so the public employer name → "Multiple locations".
+  const confidential = await insertJob(
+    supa,
+    now,
+    hero,
+    ARCHETYPE_BY_KEY.get("director_of_operations")!,
+    {
+      slug: `${hero.def.slug}-confidential-coo`,
+      status: "active",
+      postedDaysAgo: 5,
+      locationIds: [cherryCreekId, riverfrontId],
+      confidential: true,
+      titleOverride: "Chief Operating Officer (Confidential Search)",
+    },
+    bump
+  );
+  out.push(confidential);
+  // Grant the assigned recruiter access (owner/admin see confidential jobs
+  // implicitly; this demonstrates the explicit team-access assignment).
+  if (hero.recruiterDsoUserId) {
+    await insertRows(supa, "job_team_access", [
+      { job_id: confidential.id, dso_user_id: hero.recruiterDsoUserId },
+    ]);
+  }
+  bump("privacy_demo_jobs", out.length);
   return out;
 }
 
@@ -811,7 +997,7 @@ async function seedPipeline(
   const hygieneJob = jobOf("hygienist");
   const assistantJob = jobOf("dental_assistant");
   const omJob = jobOf("office_manager");
-  const rcmJob = jobOf("rcm_specialist");
+  const rcmJob = jobOf("revenue_cycle_manager");
 
   // pools
   const dentists = candidatesByArchetype(cands, "dentist");
@@ -1338,23 +1524,30 @@ async function prewarmFit(
   const client = supa as unknown as Parameters<typeof getPracticeFit>[2];
   let warmed = 0;
 
-  // Map candidate archetype → the hero job role_category it best matches.
+  // Map candidate archetype → a matching hero job. Clinical archetypes match by
+  // role_category; corporate archetypes (DSOFit) match by corporate_function so
+  // their scores compute against the right corporate posting.
+  const clinicalRole: Record<string, string> = {
+    dentist: "dentist",
+    hygienist: "dental_hygienist",
+    assistant: "dental_assistant",
+    office_manager: "office_manager",
+    treatment_coordinator: "treatment_coordinator",
+    front_office: "front_office",
+    endodontist: "specialist",
+    pediatric_dentist: "specialist",
+  };
+  const corporateFn: Record<string, string> = {
+    rcm: "finance-accounting",
+    finance: "finance-accounting",
+    regional_manager: "operations",
+  };
   const jobForArch = (arch: string): JobCtx | undefined => {
-    const map: Record<string, string> = {
-      dentist: "dentist",
-      hygienist: "dental_hygienist",
-      assistant: "dental_assistant",
-      office_manager: "office_manager",
-      treatment_coordinator: "treatment_coordinator",
-      front_office: "front_office",
-      endodontist: "specialist",
-      pediatric_dentist: "specialist",
-      rcm: "other",
-      regional_manager: "regional_manager",
-      finance: "other",
-    };
-    const rc = map[arch];
-    return heroJobs.find((j) => j.archetype.role_category === rc && (arch !== "rcm" || j.archetype.corporate_function === "revenue-cycle-management") && (arch !== "regional_manager" || j.archetype.role_category === "regional_manager"));
+    if (corporateFn[arch]) {
+      return heroJobs.find((j) => j.archetype.corporate_function === corporateFn[arch]);
+    }
+    const rc = clinicalRole[arch];
+    return rc ? heroJobs.find((j) => j.archetype.role_category === rc) : undefined;
   };
 
   for (const c of cands) {

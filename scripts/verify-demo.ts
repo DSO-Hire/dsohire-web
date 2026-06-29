@@ -57,13 +57,39 @@ async function main(): Promise<void> {
   // Jobs (clinical + corporate).
   const { data: jobs } = await supa
     .from("jobs")
-    .select("id, role_category, corporate_function, status")
+    .select("id, role_category, corporate_function, status, scope, confidential")
     .eq("dso_id", heroId);
-  const jobRows = (jobs ?? []) as { id: string; role_category: string; corporate_function: string | null; status: string }[];
+  const jobRows = (jobs ?? []) as {
+    id: string; role_category: string; corporate_function: string | null; status: string; scope: string; confidential: boolean;
+  }[];
   const jobIds = jobRows.map((j) => j.id);
   check("hero has many jobs", jobRows.length >= 12, `${jobRows.length} jobs`);
   check("hero has clinical jobs", jobRows.some((j) => ["dentist", "dental_hygienist", "dental_assistant", "specialist"].includes(j.role_category)));
   check("hero has corporate jobs (DSOFit)", jobRows.some((j) => !!j.corporate_function));
+  const heroCorporateActive = jobRows.filter((j) => j.scope === "corporate" && j.status === "active");
+  check("hero Corporate tab is rich (≥4 active corporate roles)", heroCorporateActive.length >= 4, `${heroCorporateActive.length}`);
+
+  // Corporate roles across the whole demo set (the public /jobs Corporate tab).
+  const { data: allCorp } = await supa
+    .from("jobs")
+    .select("id, dso_id, corporate_function, dsos!inner(seed_batch)")
+    .eq("scope", "corporate")
+    .eq("status", "active")
+    .eq("dsos.seed_batch", SEED_BATCH);
+  const corpRows = (allCorp ?? []) as { id: string; corporate_function: string | null }[];
+  const corpFns = new Set(corpRows.map((c) => c.corporate_function).filter(Boolean));
+  check("Corporate tab rich across DSOs (≥10 active corporate roles)", corpRows.length >= 10, `${corpRows.length} roles`);
+  check("corporate roles span ≥5 functions", corpFns.size >= 5, `${corpFns.size} functions`);
+
+  // Employer-side privacy: confidential search + affiliation masking.
+  check("≥1 confidential job (employer privacy)", jobRows.some((j) => j.confidential), `${jobRows.filter((j) => j.confidential).length}`);
+  const { data: maskedLocs } = await supa
+    .from("dso_locations")
+    .select("id, public_dso_affiliation, anonymize_name")
+    .eq("dso_id", heroId);
+  const ml = (maskedLocs ?? []) as { id: string; public_dso_affiliation: boolean; anonymize_name: boolean }[];
+  check("≥1 affiliation-masked location (private affiliation)", ml.some((l) => !l.public_dso_affiliation), `${ml.filter((l) => !l.public_dso_affiliation).length}`);
+  check("≥1 anonymize-name location", ml.some((l) => l.anonymize_name));
 
   // Stages.
   const { data: stages } = await supa

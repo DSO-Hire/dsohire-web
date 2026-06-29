@@ -56,8 +56,11 @@ export interface DemoDsoDef {
   };
   locations: DemoLocationDef[];
   jobCount: number;
-  /** Which job archetype keys to draw from for this DSO. */
+  /** Which job archetype keys to draw from for this DSO (practice roles only). */
   jobPalette: "clinical_heavy" | "balanced" | "enterprise";
+  /** Corporate/DSOFit archetype keys posted on top of the practice palette
+   *  (scope='corporate' → public /jobs Corporate tab). Weighted to bigger DSOs. */
+  corporateRoles?: string[];
   owner: DemoUserDef;
   recruiter?: DemoUserDef;
   /** true for the flagship hero DSO. */
@@ -180,6 +183,13 @@ export const DEMO_DSOS: DemoDsoDef[] = [
     ],
     jobCount: 19,
     jobPalette: "balanced",
+    corporateRoles: [
+      "director_of_operations",
+      "revenue_cycle_manager",
+      "hr_director",
+      "it_director",
+      "director_clinical_ops",
+    ],
     owner: {
       firstName: "Olivia",
       lastName: "Brandt",
@@ -233,6 +243,13 @@ export const DEMO_DSOS: DemoDsoDef[] = [
     ],
     jobCount: 8,
     jobPalette: "enterprise",
+    corporateRoles: [
+      "regional_ops_manager",
+      "controller_finance",
+      "talent_acquisition_manager",
+      "bd_ma_manager",
+      "compliance_credentialing_manager",
+    ],
     owner: {
       firstName: "Renée",
       lastName: "Castellano",
@@ -273,6 +290,7 @@ export const DEMO_DSOS: DemoDsoDef[] = [
     ],
     jobCount: 6,
     jobPalette: "balanced",
+    corporateRoles: ["marketing_manager", "procurement_manager"],
     owner: {
       firstName: "Priya",
       lastName: "Nayar",
@@ -643,11 +661,11 @@ export const JOB_ARCHETYPES: JobArchetype[] = [
     domain_preference: "dental_preferred",
   },
   {
-    key: "regional_manager",
+    key: "regional_ops_manager",
     title: "Regional Operations Manager",
     role_category: "regional_manager",
     employment_type: "full_time",
-    scope: "regional",
+    scope: "corporate",
     corporate_function: "operations",
     specialty: [],
     skills: ["Multi-site operations", "P&L management", "Team leadership", "KPIs", "Change management"],
@@ -662,7 +680,7 @@ export const JOB_ARCHETYPES: JobArchetype[] = [
     evenings: false,
     weekends: false,
     screening: STD_SCREENING,
-    verifications: [],
+    verifications: ["background_check_consent"],
     authority_level: "director",
     work_mode: "onsite",
     travel_expectation: "25_to_50",
@@ -671,6 +689,267 @@ export const JOB_ARCHETYPES: JobArchetype[] = [
     industry_experience: "dso_required",
     domain_preference: "dental_preferred",
   },
+];
+
+/* ──────────────────────────────────────────────────────────────
+ * Corporate / DSOFit archetypes (scope='corporate' → public Corporate tab).
+ * role_category is 'other' (or 'regional_manager' for ops) — the enum has no
+ * per-function value; the Corporate tab keys off scope, and DSOFit keys off
+ * corporate_function (a valid jobs_corporate_function_check value). Realistic
+ * seniority / reports / work-mode / comp on each.
+ * ─────────────────────────────────────────────────────────── */
+
+function corporateArchetype(a: {
+  key: string;
+  title: string;
+  fn: string;
+  roleCategory?: string;
+  employment_type?: string;
+  skills: string[];
+  benefits?: string[];
+  requirements: string;
+  description: string;
+  comp: CompSpec;
+  minYears: number;
+  authority_level: string;
+  work_mode: string;
+  travel_expectation: string;
+  direct_reports_band: string;
+  indirect_reports_band: string;
+  industry_experience: string;
+  domain_preference: string;
+}): JobArchetype {
+  return {
+    key: a.key,
+    title: a.title,
+    role_category: a.roleCategory ?? "other",
+    employment_type: a.employment_type ?? "full_time",
+    scope: "corporate",
+    corporate_function: a.fn,
+    specialty: [],
+    skills: a.skills,
+    benefits: a.benefits ?? [...COMMON_BENEFITS, "Annual bonus"],
+    requirements: a.requirements,
+    pms: "n/a",
+    description: a.description,
+    comp: a.comp,
+    minYears: a.minYears,
+    scheduleDays: WEEKDAYS,
+    evenings: false,
+    weekends: false,
+    screening: STD_SCREENING,
+    verifications: ["background_check_consent"],
+    authority_level: a.authority_level,
+    work_mode: a.work_mode,
+    travel_expectation: a.travel_expectation,
+    direct_reports_band: a.direct_reports_band,
+    indirect_reports_band: a.indirect_reports_band,
+    industry_experience: a.industry_experience,
+    domain_preference: a.domain_preference,
+  };
+}
+
+export const CORPORATE_ARCHETYPES: JobArchetype[] = [
+  corporateArchetype({
+    key: "director_of_operations",
+    title: "Director of Operations",
+    fn: "operations",
+    roleCategory: "regional_manager",
+    skills: ["Multi-site operations", "P&L ownership", "Provider productivity", "KPIs", "Standardization"],
+    requirements: "7+ years multi-site dental/healthcare operations leadership; full P&L ownership.",
+    description:
+      "Lead operations across the Front Range portfolio — staffing models, provider productivity, patient experience, and full P&L. Reports to the CEO.",
+    comp: salaryComp(140000, 185000, 35000),
+    minYears: 7,
+    authority_level: "director",
+    work_mode: "hybrid",
+    travel_expectation: "25_to_50",
+    direct_reports_band: "10_plus",
+    indirect_reports_band: "50_plus",
+    industry_experience: "dso_required",
+    domain_preference: "dental_preferred",
+  }),
+  corporateArchetype({
+    key: "revenue_cycle_manager",
+    title: "Revenue Cycle Manager",
+    fn: "finance-accounting",
+    skills: ["Dental RCM", "Denial management", "Payer contracting", "AR strategy", "Team leadership"],
+    requirements: "5+ years dental RCM with 2+ leading a billing team; multi-site payer mix.",
+    description:
+      "Own the central revenue cycle for 18 offices — claims, denials, payer performance, and a team of billers. Dental RCM leadership required.",
+    comp: salaryComp(95000, 125000, 15000),
+    minYears: 5,
+    authority_level: "manager",
+    work_mode: "hybrid",
+    travel_expectation: "under_10",
+    direct_reports_band: "4_9",
+    indirect_reports_band: "1_9",
+    industry_experience: "dso_required",
+    domain_preference: "dental_preferred",
+  }),
+  corporateArchetype({
+    key: "hr_director",
+    title: "Director of People & HR",
+    fn: "hr-recruiting",
+    skills: ["HR strategy", "Total rewards", "Employee relations", "Compliance", "HRIS"],
+    requirements: "8+ years HR leadership; multi-site, multi-state preferred.",
+    description:
+      "Build the people function for a fast-growing group — total rewards, employee relations, compliance, and culture across every practice.",
+    comp: salaryComp(135000, 175000, 30000),
+    minYears: 8,
+    authority_level: "vp",
+    work_mode: "hybrid",
+    travel_expectation: "10_to_25",
+    direct_reports_band: "4_9",
+    indirect_reports_band: "10_49",
+    industry_experience: "healthcare_adjacent",
+    domain_preference: "healthcare_adjacent",
+  }),
+  corporateArchetype({
+    key: "it_director",
+    title: "IT Director",
+    fn: "it-engineering",
+    skills: ["Systems architecture", "Network security", "PMS administration", "Vendor management", "HIPAA security"],
+    requirements: "8+ years IT leadership; healthcare/multi-site systems and security experience.",
+    description:
+      "Own the technology stack across 18 offices — networks, security, PMS administration, and the roadmap. HIPAA security accountability.",
+    comp: salaryComp(140000, 180000, 25000),
+    minYears: 8,
+    authority_level: "director",
+    work_mode: "hybrid",
+    travel_expectation: "10_to_25",
+    direct_reports_band: "1_3",
+    indirect_reports_band: "1_9",
+    industry_experience: "agnostic",
+    domain_preference: "agnostic",
+  }),
+  corporateArchetype({
+    key: "director_clinical_ops",
+    title: "Director of Clinical Operations",
+    fn: "clinical-operations",
+    roleCategory: "regional_manager",
+    skills: ["Clinical standards", "Provider mentorship", "Quality & compliance", "Care pathways", "Multi-site leadership"],
+    requirements: "Clinical background (DDS/DMD or RDH) + 5+ years multi-site clinical leadership.",
+    description:
+      "A clinician-turned-leader role: own clinical standards, provider mentorship, quality, and care pathways across the group. Clinical license + multi-site leadership required.",
+    comp: salaryComp(160000, 220000, 30000),
+    minYears: 6,
+    authority_level: "director",
+    work_mode: "hybrid",
+    travel_expectation: "25_to_50",
+    direct_reports_band: "4_9",
+    indirect_reports_band: "50_plus",
+    industry_experience: "dso_required",
+    domain_preference: "dental_preferred",
+  }),
+  corporateArchetype({
+    key: "controller_finance",
+    title: "Controller / Director of Finance",
+    fn: "finance-accounting",
+    skills: ["GAAP", "Multi-entity consolidation", "FP&A", "Audit", "Treasury"],
+    requirements: "CPA + 8+ years progressive accounting/finance leadership; multi-entity.",
+    description:
+      "Own accounting and financial reporting for a multi-state group — close, consolidation, FP&A, audit, and treasury. CPA required.",
+    comp: salaryComp(150000, 200000, 35000),
+    minYears: 8,
+    authority_level: "director",
+    work_mode: "hybrid",
+    travel_expectation: "under_10",
+    direct_reports_band: "4_9",
+    indirect_reports_band: "10_49",
+    industry_experience: "healthcare_adjacent",
+    domain_preference: "healthcare_adjacent",
+  }),
+  corporateArchetype({
+    key: "talent_acquisition_manager",
+    title: "Talent Acquisition Manager",
+    fn: "hr-recruiting",
+    skills: ["Full-cycle recruiting", "Clinical hiring", "Employer brand", "ATS", "Pipelining"],
+    requirements: "5+ years recruiting, ideally clinical/dental; multi-site volume hiring.",
+    description:
+      "Lead clinical and corporate hiring across a multi-state group — pipelines, employer brand, and a small recruiting team.",
+    comp: salaryComp(90000, 120000, 20000),
+    minYears: 5,
+    authority_level: "manager",
+    work_mode: "remote",
+    travel_expectation: "10_to_25",
+    direct_reports_band: "1_3",
+    indirect_reports_band: "zero",
+    industry_experience: "healthcare_adjacent",
+    domain_preference: "healthcare_adjacent",
+  }),
+  corporateArchetype({
+    key: "bd_ma_manager",
+    title: "Business Development & M&A Manager",
+    fn: "ma-corporate-development",
+    skills: ["Deal sourcing", "Practice valuation", "LOI & diligence", "Integration", "Financial modeling"],
+    requirements: "5+ years corp dev / M&A, ideally dental/healthcare practice acquisitions.",
+    description:
+      "Source and close practice acquisitions for an acquisitive group — pipeline, valuation, diligence, and integration. Dental M&A a plus.",
+    comp: salaryComp(120000, 160000, 40000),
+    minYears: 5,
+    authority_level: "manager",
+    work_mode: "hybrid",
+    travel_expectation: "25_to_50",
+    direct_reports_band: "zero",
+    indirect_reports_band: "zero",
+    industry_experience: "healthcare_adjacent",
+    domain_preference: "healthcare_adjacent",
+  }),
+  corporateArchetype({
+    key: "compliance_credentialing_manager",
+    title: "Compliance & Credentialing Manager",
+    fn: "legal-compliance",
+    skills: ["Provider credentialing", "Payer enrollment", "OIG/HIPAA compliance", "Licensure tracking", "Audits"],
+    requirements: "5+ years healthcare compliance + provider credentialing/enrollment.",
+    description:
+      "Own provider credentialing, payer enrollment, and compliance across a multi-state group — licensure tracking, audits, and policy.",
+    comp: salaryComp(85000, 115000, 12000),
+    minYears: 5,
+    authority_level: "manager",
+    work_mode: "remote",
+    travel_expectation: "none",
+    direct_reports_band: "1_3",
+    indirect_reports_band: "zero",
+    industry_experience: "dso_required",
+    domain_preference: "dental_preferred",
+  }),
+  corporateArchetype({
+    key: "marketing_manager",
+    title: "Marketing Manager",
+    fn: "marketing",
+    skills: ["Local SEO", "Paid acquisition", "Patient retention", "Brand", "Analytics"],
+    requirements: "5+ years marketing, ideally multi-location healthcare or services.",
+    description:
+      "Drive new-patient growth and retention across the group — local SEO, paid acquisition, brand, and reporting.",
+    comp: salaryComp(85000, 115000, 18000),
+    minYears: 5,
+    authority_level: "manager",
+    work_mode: "hybrid",
+    travel_expectation: "under_10",
+    direct_reports_band: "1_3",
+    indirect_reports_band: "zero",
+    industry_experience: "agnostic",
+    domain_preference: "agnostic",
+  }),
+  corporateArchetype({
+    key: "procurement_manager",
+    title: "Procurement Manager",
+    fn: "supply-chain-procurement",
+    skills: ["Dental supply sourcing", "Vendor contracts", "Inventory systems", "Cost control", "GPO management"],
+    requirements: "5+ years procurement/supply chain, ideally dental/healthcare supplies.",
+    description:
+      "Own dental supply sourcing and vendor contracts across the group — GPO relationships, inventory systems, and cost control.",
+    comp: salaryComp(80000, 110000, 12000),
+    minYears: 5,
+    authority_level: "manager",
+    work_mode: "hybrid",
+    travel_expectation: "under_10",
+    direct_reports_band: "zero",
+    indirect_reports_band: "zero",
+    industry_experience: "healthcare_adjacent",
+    domain_preference: "healthcare_adjacent",
+  }),
 ];
 
 /* ──────────────────────────────────────────────────────────────
