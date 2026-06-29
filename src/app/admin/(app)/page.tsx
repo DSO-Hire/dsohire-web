@@ -14,6 +14,9 @@ import {
   getCommandCenterSnapshot,
   type QueueRow,
 } from "@/lib/admin/command-center";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { isSuperadminEmail } from "@/lib/admin/gate";
+import { ResetDemoCard } from "./reset-demo-card";
 
 export const metadata: Metadata = {
   title: "Command · Admin",
@@ -39,6 +42,14 @@ function usd(cents: number): string {
 
 export default async function AdminCommandCenter() {
   const { northStar: n, queue, trafficSpark } = await getCommandCenterSnapshot();
+
+  // Founder-only demo controls (the layout already gates admin_users; the
+  // reset action re-checks isSuperadminEmail too).
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const isFounder = isSuperadminEmail(user?.email);
 
   return (
     <>
@@ -115,6 +126,8 @@ export default async function AdminCommandCenter() {
           </ul>
         )}
       </section>
+
+      {isFounder && <ResetDemoCard />}
     </>
   );
 }

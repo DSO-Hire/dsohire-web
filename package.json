@@ -20,7 +20,9 @@
     "test:sourcing-blocklist": "tsx --tsconfig tsconfig.json --test src/lib/sourcing/blocklist.test.ts",
     "email:dev": "email dev --dir src/emails --port 3001",
     "email:export": "email export --dir src/emails",
-    "help-embeddings": "tsx scripts/generate-help-embeddings.ts"
+    "help-embeddings": "tsx scripts/generate-help-embeddings.ts",
+    "seed:demo": "tsx --tsconfig tsconfig.json scripts/seed-demo.ts",
+    "verify:demo": "tsx --tsconfig tsconfig.json scripts/verify-demo.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.93.0",
