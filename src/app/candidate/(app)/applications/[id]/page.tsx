@@ -20,6 +20,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { EeoSelfId } from "@/app/jobs/[id]/apply/eeo-self-id";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
@@ -308,7 +309,7 @@ export default async function CandidateApplicationDetailPage({
       <div className="mb-6">
         <Link
           href="/candidate/applications"
-          className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-meta hover:text-ink transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to My Applications
@@ -326,10 +327,10 @@ export default async function CandidateApplicationDetailPage({
       )}
 
       <header className="mb-8">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
+        <Eyebrow className="mb-2">
           Application ·{" "}
           {STATUS_LABELS[app.status as StageKind] ?? app.status}
-        </div>
+        </Eyebrow>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-2">
           {job?.title ?? "Job removed"}
         </h1>
@@ -350,9 +351,7 @@ export default async function CandidateApplicationDetailPage({
         <div className="space-y-10">
           {/* Status + applied date */}
           <section className="border border-[var(--rule)] bg-cream p-6">
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
-              Status
-            </div>
+            <Eyebrow className="mb-2">Status</Eyebrow>
             <div className="text-xl font-bold text-ink mb-2">
               {STATUS_LABELS[app.status as StageKind] ?? app.status}
             </div>
@@ -405,7 +404,7 @@ export default async function CandidateApplicationDetailPage({
                     </p>
                     <Link
                       href="/candidate/profile#roles"
-                      className="inline-flex items-center gap-1.5 text-[12px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-heritage-deep hover:text-ink transition-colors"
                     >
                       Update preferred roles
                       <ArrowRight className="h-3 w-3" />
@@ -418,9 +417,9 @@ export default async function CandidateApplicationDetailPage({
 
           {/* Direct candidate ↔ DSO messages */}
           <section>
-            <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
+            <Eyebrow as="h2" className="mb-3">
               Messages
-            </h2>
+            </Eyebrow>
             <p className="text-[13px] text-slate-meta mb-3">
               Direct conversation with{" "}
               <span className="font-bold text-ink">{otherPartyName}</span>{" "}
@@ -441,9 +440,7 @@ export default async function CandidateApplicationDetailPage({
         <aside className="space-y-8">
           {job && (
             <section className="border border-[var(--rule)] bg-card p-5">
-              <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
-                The Role
-              </div>
+              <Eyebrow className="mb-3">The Role</Eyebrow>
               <Link
                 href={`/jobs/${job.id}`}
                 className="text-[15px] font-bold text-ink hover:text-heritage-deep transition-colors block mb-1.5"

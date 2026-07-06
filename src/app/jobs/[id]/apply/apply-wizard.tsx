@@ -65,6 +65,7 @@ import {
 } from "@/components/wizard";
 import { BrandMark } from "@/components/brand/brand-mark";
 import { BrandLockup } from "@/components/brand/brand-lockup";
+import { Eyebrow } from "@/components/brand/eyebrow";
 
 const AVAILABILITY_LABEL: Record<string, string> = {
   immediate: "Immediately",
@@ -502,9 +503,9 @@ export function ApplyWizard(props: ApplyWizardProps) {
     return (
       <div className="border border-[var(--rule)] bg-card p-8 sm:p-10">
         <div className="border-l-4 border-heritage bg-cream p-6">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+          <Eyebrow className="text-heritage-deep mb-2">
             {submitted.alreadyApplied ? "Application updated" : "Application sent"}
-          </div>
+          </Eyebrow>
           <p className="text-[15px] text-ink leading-relaxed mb-4">
             {submitted.message}
           </p>
@@ -512,31 +513,31 @@ export function ApplyWizard(props: ApplyWizardProps) {
             {submitted.applicationId && (
               <Link
                 href={`/candidate/applications/${submitted.applicationId}`}
-                className="inline-flex items-center gap-2 px-5 py-3 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-3 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
               >
-                View Your Application
+                View your application
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             )}
             <Link
               href="/candidate/dashboard"
               className={
-                "inline-flex items-center gap-2 px-5 py-3 text-[12px] font-bold tracking-[2px] uppercase transition-colors " +
+                "inline-flex items-center gap-2 px-5 py-3 text-sm font-bold transition-colors " +
                 (submitted.applicationId
                   ? "border border-[var(--rule-strong)] text-ink hover:bg-cream"
                   : "bg-primary text-primary-foreground hover:bg-primary/90")
               }
             >
-              View Dashboard
+              View dashboard
               {!submitted.applicationId && (
                 <ArrowRight className="h-3.5 w-3.5" />
               )}
             </Link>
             <Link
               href="/jobs"
-              className="inline-flex items-center gap-2 px-5 py-3 border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-3 border border-[var(--rule-strong)] text-ink text-sm font-bold hover:bg-cream transition-colors"
             >
-              Browse More Jobs
+              Browse more jobs
             </Link>
           </div>
         </div>
@@ -546,9 +547,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
             application, not a re-submit. */}
         {!submitted.alreadyApplied && (
           <div className="mt-6 border border-heritage/40 bg-heritage/[0.06] p-6">
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
-              Next: get matched
-            </div>
+            <Eyebrow className="text-heritage-deep mb-2">Next: get matched</Eyebrow>
             <h3 className="text-[17px] font-bold text-ink leading-snug">
               See which roles fit you best with PracticeFit
             </h3>
@@ -559,7 +558,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
             </p>
             <Link
               href="/candidate/assessment"
-              className="mt-4 inline-flex items-center gap-2 px-5 py-3 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+              className="mt-4 inline-flex items-center gap-2 px-5 py-3 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
             >
               Take the PracticeFit assessment
               <ArrowRight className="h-3.5 w-3.5" />
@@ -597,7 +596,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
                   setDraft(savedDraft);
                   setRestorePromptOpen(false);
                 }}
-                className="px-4 py-2 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
+                className="px-4 py-2 bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors"
               >
                 Resume draft
               </button>
@@ -608,7 +607,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
                   setRestorePromptOpen(false);
                   setSavedDraft(null);
                 }}
-                className="px-4 py-2 border border-[var(--rule-strong)] text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
+                className="px-4 py-2 border border-[var(--rule-strong)] text-ink text-xs font-semibold hover:bg-cream transition-colors"
               >
                 Start fresh
               </button>
@@ -625,9 +624,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
         eyebrow={
           <>
             <BrandLockup height={28} />
-            <span className="text-[12px] font-bold uppercase tracking-[2px] text-slate-meta">
-              application
-            </span>
+            <Eyebrow as="span">application</Eyebrow>
           </>
         }
         meterIcon={<BrandMark className="h-3.5 w-3.5" />}
@@ -808,9 +805,7 @@ function IntroStep({
   return (
     <div className="space-y-6">
       <div>
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
-          Before you begin
-        </div>
+        <Eyebrow className="mb-2">Before you begin</Eyebrow>
         <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight mb-3">
           You're applying as {trimmedName || userEmail || "yourself"}.
         </h2>
@@ -856,15 +851,11 @@ function IntroStep({
 
       {prefill.length > 0 && (
         <div className="bg-cream border border-[var(--rule)] p-5">
-          <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
-            From your profile
-          </div>
+          <Eyebrow className="mb-3">From your profile</Eyebrow>
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
             {prefill.map((row) => (
               <div key={row.label}>
-                <dt className="text-[12px] font-semibold tracking-[1px] uppercase text-slate-meta">
-                  {row.label}
-                </dt>
+                <Eyebrow as="dt">{row.label}</Eyebrow>
                 <dd className="text-[14px] text-ink mt-0.5">{row.value}</dd>
               </div>
             ))}
@@ -872,7 +863,7 @@ function IntroStep({
           <Link
             href="/candidate/profile"
             target="_blank"
-            className="inline-flex items-center gap-1.5 mt-4 text-[12px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+            className="inline-flex items-center gap-1.5 mt-4 text-xs font-semibold text-heritage-deep hover:text-ink transition-colors"
           >
             Update profile
             <ExternalLink className="h-3 w-3" />
@@ -903,9 +894,7 @@ function ScreeningStep({
   return (
     <div className="space-y-7">
       <div>
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
-          Screening
-        </div>
+        <Eyebrow className="mb-2">Screening</Eyebrow>
         <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           A few quick questions from the hiring team.
         </h2>
@@ -914,7 +903,7 @@ function ScreeningStep({
       {questions.map((q, idx) => (
         <div key={q.id} className="space-y-2">
           <label className="block text-[14px] font-semibold text-ink leading-snug">
-            <span className="text-slate-meta font-bold mr-2">{idx + 1}.</span>
+            <span className="text-slate-meta font-bold mr-2 tabular">{idx + 1}.</span>
             {q.prompt}
             {q.required && <span className="text-heritage ml-1">*</span>}
           </label>
@@ -1066,9 +1055,7 @@ function VerificationStep({
   return (
     <div className="space-y-7">
       <div>
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
-          Verifications
-        </div>
+        <Eyebrow className="mb-2">Verifications</Eyebrow>
         <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           Confirm what this role requires.
         </h2>
@@ -1104,7 +1091,7 @@ function VerificationStep({
             className="space-y-3 border border-[var(--rule)] p-5"
           >
             <div className="text-[14px] font-semibold text-ink leading-snug">
-              <span className="text-slate-meta font-bold mr-2">
+              <span className="text-slate-meta font-bold mr-2 tabular">
                 {idx + 1}.
               </span>
               {vt?.label ?? req.verification_type}
@@ -1123,12 +1110,12 @@ function VerificationStep({
                 profile credential source. */}
             {vt?.credentialSource && (
               <div>
-                <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+                <Eyebrow as="label" className="block mb-2">
                   Link credentials as proof{" "}
                   <span className="text-slate-meta font-medium normal-case tracking-normal text-[11px]">
                     (optional · pick any that apply)
                   </span>
-                </label>
+                </Eyebrow>
 
                 {linkable.length > 0 ? (
                   <div className="space-y-2">
@@ -1158,12 +1145,12 @@ function VerificationStep({
             )}
 
             <div>
-              <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+              <Eyebrow as="label" className="block mb-2">
                 Note{" "}
                 <span className="text-slate-meta font-medium normal-case tracking-normal text-[11px]">
                   (optional)
                 </span>
-              </label>
+              </Eyebrow>
               <TextAreaField
                 rows={2}
                 value={value.note}
@@ -1302,7 +1289,7 @@ function InlineCredentialForm({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="mt-2 inline-flex items-center gap-1.5 text-[12px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+        className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-heritage-deep hover:text-ink transition-colors"
       >
         <Plus className="h-3.5 w-3.5" />
         {addLabel}
@@ -1313,9 +1300,7 @@ function InlineCredentialForm({
   return (
     <div className="mt-3 border border-heritage/30 bg-heritage/[0.05] p-4 space-y-3">
       <div className="flex items-center justify-between">
-        <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
-          {addLabel}
-        </div>
+        <Eyebrow>{addLabel}</Eyebrow>
         <button
           type="button"
           onClick={() => {
@@ -1332,9 +1317,9 @@ function InlineCredentialForm({
       {kind === "license" && (
         <>
           <div>
-            <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-1.5">
+            <Eyebrow as="label" className="block mb-1.5">
               License type <span className="text-heritage">*</span>
-            </label>
+            </Eyebrow>
             <select
               value={licenseType}
               onChange={(e) => setLicenseType(e.target.value)}
@@ -1350,9 +1335,9 @@ function InlineCredentialForm({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-1.5">
+              <Eyebrow as="label" className="block mb-1.5">
                 State
-              </label>
+              </Eyebrow>
               <input
                 type="text"
                 value={licenseState}
@@ -1363,9 +1348,9 @@ function InlineCredentialForm({
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-1.5">
+              <Eyebrow as="label" className="block mb-1.5">
                 License number
-              </label>
+              </Eyebrow>
               <input
                 type="text"
                 value={licenseNumber}
@@ -1381,9 +1366,9 @@ function InlineCredentialForm({
       {kind === "certification" && (
         <>
           <div>
-            <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-1.5">
+            <Eyebrow as="label" className="block mb-1.5">
               Certification <span className="text-heritage">*</span>
-            </label>
+            </Eyebrow>
             <select
               value={certKind}
               onChange={(e) => setCertKind(e.target.value)}
@@ -1398,9 +1383,9 @@ function InlineCredentialForm({
             </select>
           </div>
           <div>
-            <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-1.5">
+            <Eyebrow as="label" className="block mb-1.5">
               Level / detail
-            </label>
+            </Eyebrow>
             <input
               type="text"
               value={certLevel}
@@ -1415,9 +1400,9 @@ function InlineCredentialForm({
       {kind === "education" && (
         <>
           <div>
-            <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-1.5">
+            <Eyebrow as="label" className="block mb-1.5">
               School <span className="text-heritage">*</span>
-            </label>
+            </Eyebrow>
             <input
               type="text"
               value={schoolName}
@@ -1428,9 +1413,9 @@ function InlineCredentialForm({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-1.5">
+              <Eyebrow as="label" className="block mb-1.5">
                 Degree
-              </label>
+              </Eyebrow>
               <input
                 type="text"
                 value={degree}
@@ -1440,9 +1425,9 @@ function InlineCredentialForm({
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-1.5">
+              <Eyebrow as="label" className="block mb-1.5">
                 Field of study
-              </label>
+              </Eyebrow>
               <input
                 type="text"
                 value={fieldOfStudy}
@@ -1457,18 +1442,18 @@ function InlineCredentialForm({
 
       {supportsFile && (
         <div>
-          <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-1.5">
+          <Eyebrow as="label" className="block mb-1.5">
             Supporting document{" "}
             <span className="text-slate-meta font-medium normal-case tracking-normal text-[11px]">
               (optional)
             </span>
-          </label>
+          </Eyebrow>
           <input
             ref={fileRef}
             type="file"
             accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="block w-full text-[13px] text-ink file:mr-3 file:px-4 file:py-2 file:border-0 file:text-[10px] file:font-bold file:tracking-[1.5px] file:uppercase file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 file:cursor-pointer file:transition-colors"
+            className="block w-full text-[13px] text-ink file:mr-3 file:px-4 file:py-2 file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 file:cursor-pointer file:transition-colors"
           />
           <p className="mt-1 text-[11px] text-slate-meta leading-relaxed">
             PDF, PNG, JPEG, or WebP. Max 10 MB. You can also add this later
@@ -1486,7 +1471,7 @@ function InlineCredentialForm({
           type="button"
           onClick={handleSubmit}
           disabled={submitting}
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {submitting ? "Adding…" : "Add credential"}
           {!submitting && <Check className="h-3.5 w-3.5" />}
@@ -1497,7 +1482,7 @@ function InlineCredentialForm({
             reset();
             setOpen(false);
           }}
-          className="px-4 py-2 border border-[var(--rule-strong)] text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
+          className="px-4 py-2 border border-[var(--rule-strong)] text-ink text-xs font-semibold hover:bg-cream transition-colors"
         >
           Cancel
         </button>
@@ -1557,9 +1542,7 @@ function ResumeStep({
   return (
     <div className="space-y-6">
       <div>
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
-          Resume
-        </div>
+        <Eyebrow className="mb-2">Resume</Eyebrow>
         <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           {hasSavedResume
             ? "Use your saved resume, or upload a fresh one."
@@ -1575,7 +1558,7 @@ function ResumeStep({
           </p>
           <Link
             href={buildHref}
-            className="shrink-0 whitespace-nowrap text-[12px] font-bold uppercase tracking-[1px] text-heritage-deep hover:text-ink"
+            className="shrink-0 whitespace-nowrap text-xs font-semibold text-heritage-deep hover:text-ink"
           >
             Build one free →
           </Link>
@@ -1645,7 +1628,7 @@ function ResumeStep({
             type="button"
             onClick={onAutofill}
             disabled={autofilling}
-            className="inline-flex items-center gap-2 border border-heritage-deep px-4 py-2.5 text-[12px] font-bold uppercase tracking-[1.5px] text-heritage-deep transition-colors hover:bg-heritage/10 disabled:opacity-50"
+            className="inline-flex items-center gap-2 border border-heritage-deep px-4 py-2.5 text-xs font-semibold text-heritage-deep transition-colors hover:bg-heritage/10 disabled:opacity-50"
           >
             <BrandMark className="h-4 w-4" />
             {autofilling
@@ -1667,7 +1650,7 @@ function ResumeStep({
       {canAddResumeCreds && (
         <div className="border border-heritage/40 bg-heritage/[0.05] p-4">
           <p className="text-[14px] font-semibold text-ink">
-            We spotted {resumeCredCount} credential
+            We spotted <span className="tabular">{resumeCredCount}</span> credential
             {resumeCredCount === 1 ? "" : "s"} on your résumé.
           </p>
           <p className="mt-1 text-[13px] leading-relaxed text-slate-meta">
@@ -1678,7 +1661,7 @@ function ResumeStep({
             type="button"
             onClick={onAddCredentials}
             disabled={addingCreds}
-            className="mt-3 inline-flex items-center gap-2 bg-primary px-4 py-2.5 text-[12px] font-bold uppercase tracking-[1.5px] text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+            className="mt-3 inline-flex items-center gap-2 bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
             <BrandMark dark className="h-4 w-4" />
             {addingCreds ? "Adding…" : "Add to my profile"}
@@ -1705,9 +1688,7 @@ function CoverLetterStep({
   return (
     <div className="space-y-5">
       <div>
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
-          Cover letter
-        </div>
+        <Eyebrow className="mb-2">Cover letter</Eyebrow>
         <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           Why are you a fit for this role?
         </h2>
@@ -1780,9 +1761,7 @@ function ReviewStep({
   return (
     <div className="space-y-6">
       <div>
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
-          Review
-        </div>
+        <Eyebrow className="mb-2">Review</Eyebrow>
         <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           Final check before you send.
         </h2>
@@ -1896,9 +1875,9 @@ function ReviewStep({
 
       {completeness.percent < 100 && (
         <div className="border-l-4 border-heritage bg-heritage/[0.06] p-4">
-          <div className="text-[12px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-1">
-            Your profile is {completeness.percent}% complete
-          </div>
+          <Eyebrow className="text-heritage-deep mb-1">
+            Your profile is <span className="tabular">{completeness.percent}%</span> complete
+          </Eyebrow>
           <p className="text-[13px] text-slate-body leading-relaxed">
             Adding {completeness.missing.join(", ")} to your profile lets future
             applications autofill in seconds.{" "}
@@ -1928,13 +1907,11 @@ function ReviewBlock({
   return (
     <div className="border border-[var(--rule)] p-5">
       <div className="flex items-center justify-between mb-3">
-        <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-body">
-          {label}
-        </div>
+        <Eyebrow>{label}</Eyebrow>
         <button
           type="button"
           onClick={onEdit}
-          className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+          className="inline-flex items-center gap-1 text-[10px] font-semibold text-heritage-deep hover:text-ink transition-colors"
         >
           <Pencil className="h-3 w-3" />
           Edit

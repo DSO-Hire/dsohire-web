@@ -19,6 +19,7 @@ import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { ArrowLeft, MapPin, Briefcase } from "lucide-react";
 import { SiteShell } from "@/components/marketing/site-shell";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ApplyWizard } from "./apply-wizard";
 import { recordApplicationStart } from "@/lib/analytics/record-view";
@@ -278,15 +279,13 @@ export default async function ApplyPage({ params, searchParams }: PageProps) {
       <section className="pt-[140px] pb-24 px-6 sm:px-14 max-w-[920px] mx-auto">
         <Link
           href={`/jobs/${jobId}`}
-          className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-8"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-heritage-deep hover:text-ink transition-colors mb-8"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Back to Job Details
+          Back to job details
         </Link>
 
-        <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3">
-          Applying to
-        </div>
+        <Eyebrow className="mb-3">Applying to</Eyebrow>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-4 max-w-[760px]">
           {job.title as string}
         </h1>
@@ -298,7 +297,7 @@ export default async function ApplyPage({ params, searchParams }: PageProps) {
             {EMP_LABELS[job.employment_type as string] ?? job.employment_type}
           </span>
           {locations.length > 0 && (
-            <span className="inline-flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-1.5 tabular">
               <MapPin className="h-3.5 w-3.5" />
               {formatLocations(locations)}
             </span>

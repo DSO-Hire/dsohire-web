@@ -33,6 +33,8 @@ import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
+import { Eyebrow } from "@/components/brand/eyebrow";
+import { Tag, type TagTone } from "@/components/brand/tag";
 import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
 import {
   PracticeFitPlaceholder,
@@ -505,10 +507,8 @@ export default async function CandidateApplicationsPage({
   return (
     <>
       <header className="mb-6">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
-          My Applications
-        </div>
-        <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink">
+        <Eyebrow className="mb-2">My Applications</Eyebrow>
+        <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink tabular">
           {countLabelForTab(activeTab, counts)}
         </h1>
       </header>
@@ -587,15 +587,7 @@ function TabBar({
               >
                 {TAB_LABELS[tab]}
                 {counts[tab] > 0 && (
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                      isActive
-                        ? "bg-heritage/15 text-foreground"
-                        : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {counts[tab]}
-                  </span>
+                  <Tag tone="neutral" className="tabular">{counts[tab]}</Tag>
                 )}
               </Link>
             </li>
@@ -708,10 +700,10 @@ function ApplicationsList({
                       );
                     })()}
                     {unreadCount > 0 && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-heritage/15 px-2 py-0.5 text-[11px] font-bold text-heritage-deep">
-                        <MessageCircle className="size-3" />
-                        {unreadCount} new
-                      </span>
+                      <Tag tone="info">
+                        <MessageCircle />
+                        <span className="tabular">{unreadCount}</span> new
+                      </Tag>
                     )}
                   </div>
 
@@ -813,7 +805,7 @@ function SavedJobsList({
         </p>
         <Link
           href="/candidate/jobs"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
         >
           Browse jobs
         </Link>
@@ -833,14 +825,12 @@ function SavedJobsList({
               <div className="flex items-start justify-between gap-4 flex-wrap">
                 <div className="min-w-0 flex-1">
                   <div className="mb-2 flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-heritage/10 px-2 py-0.5 text-xs font-medium text-heritage">
-                      <Bookmark className="size-3" />
+                    <Tag tone="neutral">
+                      <Bookmark />
                       Saved
-                    </span>
+                    </Tag>
                     {row.job.status !== "active" && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-warning-bg px-2 py-0.5 text-xs font-medium text-warning">
-                        {row.job.status}
-                      </span>
+                      <Tag tone="warning">{row.job.status}</Tag>
                     )}
                     {(() => {
                       const fit = fitsByJobId.get(row.job.id);
@@ -897,7 +887,7 @@ function EmptyState({
         </p>
         <Link
           href="/jobs"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
         >
           Browse Jobs
         </Link>
@@ -934,22 +924,20 @@ function StatusPill({
 
   const tone = TONE_BY_KIND[kind];
   return (
-    <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${tone}`}
-    >
+    <Tag tone={tone} accent>
       {renderLabel}
-    </span>
+    </Tag>
   );
 }
 
-const TONE_BY_KIND: Record<StageKind, string> = {
-  open: "bg-muted text-muted-foreground",
-  screen: "bg-muted text-muted-foreground",
-  interview: "bg-warning-bg text-warning",
-  offer: "bg-success-bg text-success",
-  hired: "bg-heritage text-primary-foreground",
-  rejected: "bg-danger-bg text-danger",
-  withdrawn: "bg-muted text-muted-foreground",
+const TONE_BY_KIND: Record<StageKind, TagTone> = {
+  open: "neutral",
+  screen: "neutral",
+  interview: "warning",
+  offer: "gold",
+  hired: "heritage",
+  rejected: "brick",
+  withdrawn: "neutral",
 };
 
 // ─────────────────────────────────────────────────────────────────────
@@ -964,13 +952,13 @@ function SelfReportedChip({ status }: { status: SelfReportedStatus }) {
     no_longer_interested: "Not interested",
   };
   return (
-    <span
-      className="inline-flex items-center gap-1 rounded-full bg-heritage/10 px-2 py-0.5 text-[11px] font-medium text-foreground"
+    <Tag
+      tone="neutral"
       title="Your self-reported status — employer doesn't see this label."
     >
-      <Sparkles className="size-3 text-heritage" />
+      <Sparkles />
       {labels[status]}
-    </span>
+    </Tag>
   );
 }
 
@@ -1017,7 +1005,7 @@ function ScopeChip({
   return (
     <span className="inline-flex items-center gap-1">
       <MapPin className="size-3.5 text-slate-meta" />
-      {real.length} locations
+      <span className="tabular">{real.length}</span> locations
     </span>
   );
 }

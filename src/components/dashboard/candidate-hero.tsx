@@ -21,6 +21,8 @@
 
 import Link from "next/link";
 import { ArrowRight, ChevronRight } from "lucide-react";
+
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { Avatar } from "@/components/ui/avatar";
 
 interface ReplyPreview {
@@ -114,13 +116,13 @@ export function CandidateHero(props: CandidateHeroProps) {
         className="absolute top-0 left-0 bottom-0 w-1"
         style={{
           backgroundImage:
-            "linear-gradient(to bottom, var(--color-heritage, #4D7A60), #8db8a3)",
+            "linear-gradient(to bottom, var(--color-heritage, #4D7A60), var(--color-heritage-bright))",
         }}
         aria-hidden
       />
 
       {/* Chevron (top-right) */}
-      <ChevronRight className="absolute top-5 right-5 h-4 w-4 text-hero-foreground/50 group-hover:text-[#8db8a3] group-hover:translate-x-1 transition-all" />
+      <ChevronRight className="absolute top-5 right-5 h-4 w-4 text-hero-foreground/50 group-hover:text-heritage-bright group-hover:translate-x-1 transition-all" />
 
       {props.mode === "new-replies" && <NewRepliesBody {...props} />}
       {props.mode === "active-apps" && <ActiveAppsBody {...props} />}
@@ -128,7 +130,7 @@ export function CandidateHero(props: CandidateHeroProps) {
       {props.mode === "setup" && <SetupBody {...props} />}
 
       {/* Shared CTA rail */}
-      <div className="mt-auto pt-5 inline-flex items-center gap-1.5 text-[11px] font-extrabold tracking-[2px] uppercase text-[#8db8a3] border-t border-hero-foreground/10">
+      <div className="mt-auto pt-5 inline-flex items-center gap-1.5 text-sm font-bold text-heritage-bright border-t border-hero-foreground/10">
         <span className="pt-5">{props.ctaLabel}</span>
         <ArrowRight className="h-3.5 w-3.5 mt-5 group-hover:translate-x-1 transition-transform" />
       </div>
@@ -141,28 +143,21 @@ export function CandidateHero(props: CandidateHeroProps) {
 function NewRepliesBody({ unreadCount, replies }: NewRepliesProps) {
   return (
     <>
-      <div className="text-[10px] font-extrabold tracking-[2.5px] uppercase text-[#8db8a3] mb-1">
+      <Eyebrow className="text-heritage-bright mb-1">
         New Replies
-      </div>
+      </Eyebrow>
       <div
-        className="inline-flex items-center gap-1.5 px-2 py-1 mb-5 self-start text-[9px] font-bold tracking-[1.5px] uppercase text-[#8db8a3]"
-        style={{ background: "rgba(141,184,163,0.18)" }}
+        className="inline-flex items-center gap-1.5 px-2 py-1 mb-5 self-start text-[10px] font-semibold text-heritage-bright bg-heritage-bright/15"
       >
-        <span
-          className="block w-1.5 h-1.5 rounded-full animate-pulse"
-          style={{ background: "#8db8a3" }}
-        />
+        <span className="block w-1.5 h-1.5 rounded-full animate-pulse bg-heritage-bright" />
         Live
       </div>
 
       <div className="flex items-baseline gap-3 flex-wrap mb-3">
-        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground">
+        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground tabular">
           {unreadCount}
         </div>
-        <span
-          className="px-2 py-1 text-[12px] font-bold tracking-[0.4px] text-[#8db8a3]"
-          style={{ background: "rgba(141,184,163,0.16)" }}
-        >
+        <span className="px-2 py-1 text-[12px] font-bold tracking-[0.4px] text-heritage-bright bg-heritage-bright/15">
           unread
         </span>
       </div>
@@ -205,22 +200,18 @@ function ActiveAppsBody({ activeCount, hint, stages }: ActiveAppsProps) {
   const max = Math.max(...stages.map((s) => s.count), 1);
   return (
     <>
-      <div className="text-[10px] font-extrabold tracking-[2.5px] uppercase text-[#8db8a3] mb-1">
+      <Eyebrow className="text-heritage-bright mb-1">
         Active Applications
-      </div>
+      </Eyebrow>
       <div
-        className="inline-flex items-center gap-1.5 px-2 py-1 mb-5 self-start text-[9px] font-bold tracking-[1.5px] uppercase text-[#8db8a3]"
-        style={{ background: "rgba(141,184,163,0.18)" }}
+        className="inline-flex items-center gap-1.5 px-2 py-1 mb-5 self-start text-[10px] font-semibold text-heritage-bright bg-heritage-bright/15"
       >
-        <span
-          className="block w-1.5 h-1.5 rounded-full animate-pulse"
-          style={{ background: "#8db8a3" }}
-        />
+        <span className="block w-1.5 h-1.5 rounded-full animate-pulse bg-heritage-bright" />
         In flight
       </div>
 
       <div className="flex items-baseline gap-3 flex-wrap mb-3">
-        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground">
+        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground tabular">
           {activeCount}
         </div>
       </div>
@@ -235,19 +226,16 @@ function ActiveAppsBody({ activeCount, hint, stages }: ActiveAppsProps) {
           const pct = max > 0 ? (stage.count / max) * 100 : 0;
           return (
             <div key={stage.key} className="flex-1 min-w-[60px]">
-              <div
-                className="h-1.5 mb-1.5 relative"
-                style={{ background: "rgba(247,244,237,0.14)" }}
-              >
+              <div className="h-1.5 mb-1.5 relative bg-hero-foreground/15">
                 <span
-                  className="absolute top-0 left-0 bottom-0"
-                  style={{ width: `${pct}%`, background: "#8db8a3" }}
+                  className="absolute top-0 left-0 bottom-0 bg-heritage-bright"
+                  style={{ width: `${pct}%` }}
                 />
               </div>
-              <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-hero-foreground/55">
+              <div className="text-[10px] font-semibold text-hero-foreground/55">
                 {stage.label}
               </div>
-              <div className="text-[14px] font-extrabold text-hero-foreground mt-0.5">
+              <div className="text-[14px] font-extrabold text-hero-foreground mt-0.5 tabular">
                 {stage.count}
               </div>
             </div>
@@ -261,22 +249,18 @@ function ActiveAppsBody({ activeCount, hint, stages }: ActiveAppsProps) {
 function InterviewBody({ interviewCount, items, hint }: InterviewProps) {
   return (
     <>
-      <div className="text-[10px] font-extrabold tracking-[2.5px] uppercase text-[#8db8a3] mb-1">
+      <Eyebrow className="text-heritage-bright mb-1">
         Interviewing
-      </div>
+      </Eyebrow>
       <div
-        className="inline-flex items-center gap-1.5 px-2 py-1 mb-5 self-start text-[9px] font-bold tracking-[1.5px] uppercase text-[#8db8a3]"
-        style={{ background: "rgba(141,184,163,0.18)" }}
+        className="inline-flex items-center gap-1.5 px-2 py-1 mb-5 self-start text-[10px] font-semibold text-heritage-bright bg-heritage-bright/15"
       >
-        <span
-          className="block w-1.5 h-1.5 rounded-full animate-pulse"
-          style={{ background: "#8db8a3" }}
-        />
+        <span className="block w-1.5 h-1.5 rounded-full animate-pulse bg-heritage-bright" />
         In progress
       </div>
 
       <div className="flex items-baseline gap-3 flex-wrap mb-3">
-        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground">
+        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground tabular">
           {interviewCount}
         </div>
         <span className="text-[24px] text-hero-foreground/50">
@@ -296,10 +280,7 @@ function InterviewBody({ interviewCount, items, hint }: InterviewProps) {
               i === items.slice(0, 3).length - 1 ? "border-b border-hero-foreground/10" : ""
             }`}
           >
-            <span
-              className="block w-1.5 h-1.5 rounded-full shrink-0"
-              style={{ background: "#8db8a3" }}
-            />
+            <span className="block w-1.5 h-1.5 rounded-full shrink-0 bg-heritage-bright" />
             <div className="text-[13px] text-hero-foreground leading-tight truncate">
               <strong className="font-bold">{it.role}</strong>
               <span className="text-hero-foreground/55"> · {it.dsoName}</span>
@@ -314,19 +295,18 @@ function InterviewBody({ interviewCount, items, hint }: InterviewProps) {
 function SetupBody({ totalSteps, doneSteps, hint, steps }: SetupProps) {
   return (
     <>
-      <div className="text-[10px] font-extrabold tracking-[2.5px] uppercase text-[#8db8a3] mb-1">
+      <Eyebrow className="text-heritage-bright mb-1">
         Get Hired
-      </div>
+      </Eyebrow>
       <div
-        className="inline-flex items-center gap-1.5 px-2 py-1 mb-5 self-start text-[9px] font-bold tracking-[1.5px] uppercase text-[#8db8a3]"
-        style={{ background: "rgba(141,184,163,0.16)" }}
+        className="inline-flex items-center gap-1.5 px-2 py-1 mb-5 self-start text-[10px] font-semibold text-heritage-bright bg-heritage-bright/15 tabular"
       >
-        <span className="block w-1.5 h-1.5 rounded-full" style={{ background: "#8db8a3" }} />
+        <span className="block w-1.5 h-1.5 rounded-full bg-heritage-bright" />
         {doneSteps} of {totalSteps} done
       </div>
 
       <div className="flex items-baseline gap-3 flex-wrap mb-3">
-        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground">
+        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground tabular">
           {totalSteps}
         </div>
         <span className="text-[32px] text-hero-foreground/50">steps</span>
@@ -368,12 +348,12 @@ function SetupBody({ totalSteps, doneSteps, hint, steps }: SetupProps) {
               {step.label}
             </div>
             {step.done && (
-              <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-hero-foreground/40">
+              <div className="text-[10px] font-semibold text-hero-foreground/40">
                 Done
               </div>
             )}
             {step.upNext && (
-              <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-[#8db8a3]">
+              <div className="text-[10px] font-semibold text-heritage-bright">
                 Up next
               </div>
             )}

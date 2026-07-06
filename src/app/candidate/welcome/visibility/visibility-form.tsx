@@ -14,6 +14,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, Eye, VenetianMask, ArrowRight, ShieldCheck } from "lucide-react";
 import { saveVisibilityChoice, type VisibilityChoice } from "./actions";
+import { Tag } from "@/components/brand/tag";
 
 const OPTIONS: ReadonlyArray<{
   value: VisibilityChoice;
@@ -74,7 +75,7 @@ export function VisibilityForm() {
     <div className="min-h-screen bg-ivory flex flex-col items-center justify-center px-5 py-16">
       <div className="w-full max-w-[680px]">
         <header className="text-center mb-10">
-          <span className="inline-flex items-center gap-2 rounded-full bg-heritage/10 px-3.5 py-1.5 text-[13px] font-semibold text-heritage">
+          <span className="inline-flex items-center gap-2 bg-heritage/10 px-3.5 py-1.5 text-[13px] font-semibold text-heritage">
             <ShieldCheck className="h-4 w-4" />
             You&apos;re private by default
           </span>
@@ -98,7 +99,7 @@ export function VisibilityForm() {
                 key={opt.value}
                 className={`flex cursor-pointer items-start gap-4 rounded-xl border-2 p-5 sm:p-6 transition-all ${
                   selected
-                    ? "border-heritage bg-heritage/[0.06] shadow-[0_10px_30px_-16px_rgba(47,93,79,0.5)]"
+                    ? "border-heritage bg-heritage/[0.06]"
                     : "border-[var(--rule)] bg-card hover:border-heritage/40"
                 }`}
               >
@@ -110,7 +111,7 @@ export function VisibilityForm() {
                   className="sr-only"
                 />
                 <span
-                  className={`mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${
+                  className={`mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center ${
                     selected
                       ? "bg-heritage text-primary-foreground"
                       : "bg-heritage/10 text-heritage"
@@ -122,9 +123,7 @@ export function VisibilityForm() {
                   <span className="flex flex-wrap items-center gap-2 text-[16px] sm:text-[17px] font-bold text-foreground leading-snug">
                     {opt.label}
                     {opt.recommended && (
-                      <span className="inline-flex items-center rounded-full bg-heritage px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-primary-foreground">
-                        Recommended
-                      </span>
+                      <Tag tone="heritage">Recommended</Tag>
                     )}
                   </span>
                   <span className="mt-1 block text-[14px] text-muted-foreground leading-relaxed">
@@ -154,7 +153,7 @@ export function VisibilityForm() {
           type="button"
           onClick={submit}
           disabled={busy || !choice}
-          className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-heritage px-6 py-3.5 text-[15px] font-bold tracking-wide text-primary-foreground transition-colors hover:bg-heritage-deep disabled:opacity-60"
+          className="mt-7 inline-flex w-full items-center justify-center gap-2 bg-heritage px-6 py-3.5 text-sm font-bold text-primary-foreground transition-colors hover:bg-heritage-deep disabled:opacity-60"
         >
           {busy ? "Saving…" : "Continue"}
           {!busy && <ArrowRight className="h-[18px] w-[18px]" />}

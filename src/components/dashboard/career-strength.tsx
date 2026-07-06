@@ -17,6 +17,8 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+import { Eyebrow } from "@/components/brand/eyebrow";
+
 export interface NextAction {
   label: string;
   /** The payoff, named honestly. */
@@ -76,16 +78,16 @@ export function CareerStrength({
           />
         </svg>
         <span className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-[19px] font-extrabold tracking-[-0.5px] text-ink leading-none">
+          <span className="text-[19px] font-extrabold tracking-[-0.5px] text-ink leading-none tabular">
             {filled}%
           </span>
         </span>
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="text-[9px] font-bold tracking-[2px] uppercase text-heritage-deep">
+        <Eyebrow as="p">
           Profile strength
-        </p>
+        </Eyebrow>
         {facts.length > 0 && (
           <p className="mt-1 text-[13px] text-slate-body leading-relaxed">
             {facts.join(" · ")}
@@ -109,7 +111,7 @@ export function CareerStrength({
             </div>
             <Link
               href={nextAction.href}
-              className="shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
+              className="shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
             >
               {nextAction.ctaLabel}
               <ArrowRight className="h-3.5 w-3.5" aria-hidden />

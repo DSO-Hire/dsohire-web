@@ -14,6 +14,8 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+import { Eyebrow } from "@/components/brand/eyebrow";
+
 export interface ActivityEvent {
   id: string;
   /** Lucide icon for this event type. */
@@ -43,9 +45,7 @@ export function ActivityFeed({
 }: ActivityFeedProps) {
   return (
     <section>
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
-        {title}
-      </div>
+      <Eyebrow className="mb-4">{title}</Eyebrow>
       {events.length === 0 ? (
         <div className="border border-[var(--rule)] bg-cream/40 p-6">
           <p className="text-[13px] text-slate-meta leading-relaxed">

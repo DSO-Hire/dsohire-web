@@ -28,6 +28,8 @@
 
 import Link from "next/link";
 
+import { Eyebrow } from "@/components/brand/eyebrow";
+
 interface MiniMapLocation {
   id: string;
   /** Display label for the pin chip. */
@@ -120,10 +122,8 @@ export function DashboardMiniMap({
       className="group flex flex-col bg-card border border-[var(--rule)] overflow-hidden hover:border-rule-strong transition-colors"
     >
       <header className="flex items-baseline justify-between gap-3 px-6 py-4">
-        <h2 className="text-[11px] font-extrabold tracking-[2.5px] uppercase text-heritage-deep">
-          {title}
-        </h2>
-        <span className="text-[10px] font-extrabold tracking-[1.5px] uppercase text-heritage group-hover:text-heritage-deep transition-colors">
+        <Eyebrow as="h2">{title}</Eyebrow>
+        <span className="text-xs font-semibold text-heritage group-hover:text-heritage-deep transition-colors">
           View locations →
         </span>
       </header>
@@ -136,7 +136,7 @@ export function DashboardMiniMap({
             preserveAspectRatio="xMidYMid slice"
             style={{
               background:
-                "radial-gradient(ellipse 380px 260px at 35% 50%, #e8e0c8 0%, transparent 70%), radial-gradient(ellipse 280px 200px at 70% 70%, #ddd4b8 0%, transparent 65%), var(--color-cream, #FAF7F1)",
+                "radial-gradient(ellipse 380px 260px at 35% 50%, var(--color-ivory-deep) 0%, transparent 70%), radial-gradient(ellipse 280px 200px at 70% 70%, var(--color-ivory-deep) 0%, transparent 65%), var(--color-cream, #FAF7F1)",
             }}
             role="img"
             aria-label={`Application density map across ${projected.length} locations`}
@@ -187,6 +187,7 @@ export function DashboardMiniMap({
                     x={0}
                     y={4}
                     textAnchor="middle"
+                    className="tabular"
                     fill="var(--color-ivory, #F7F4ED)"
                     fontFamily="Manrope, sans-serif"
                     fontWeight={800}

@@ -19,6 +19,9 @@
 
 import Link from "next/link";
 import { ChevronRight, Briefcase, MapPin } from "lucide-react";
+
+import { Eyebrow } from "@/components/brand/eyebrow";
+import { Tag } from "@/components/brand/tag";
 import { Sparkline } from "./sparkline";
 import { TrendPill } from "./trend-pill";
 
@@ -64,12 +67,10 @@ export function JobLeaderboard({
   return (
     <div className="bg-card border border-[var(--rule)] p-6 sm:p-7">
       <header className="flex items-baseline justify-between gap-4 mb-3">
-        <h2 className="text-[11px] font-extrabold tracking-[2.5px] uppercase text-heritage-deep">
-          {title}
-        </h2>
+        <Eyebrow as="h2">{title}</Eyebrow>
         <Link
           href={viewAllHref}
-          className="text-[10px] font-extrabold tracking-[1.5px] uppercase text-heritage hover:text-heritage-deep transition-colors"
+          className="text-xs font-semibold text-heritage hover:text-heritage-deep transition-colors"
         >
           View all jobs →
         </Link>
@@ -93,9 +94,9 @@ export function JobLeaderboard({
             const intent =
               delta > 0 ? "positive" : delta < 0 ? "negative" : "neutral";
             const sparkStroke =
-              delta < 0 ? "#b91c1c" : "var(--color-heritage, #4D7A60)";
+              delta < 0 ? "var(--color-danger)" : "var(--color-heritage, #4D7A60)";
             const sparkFill =
-              delta < 0 ? "rgba(185,28,28,0.10)" : "rgba(77,122,96,0.12)";
+              delta < 0 ? "var(--color-danger-bg)" : "rgba(77,122,96,0.12)";
             return (
               <li
                 key={j.id}
@@ -108,7 +109,7 @@ export function JobLeaderboard({
                   className="group grid grid-cols-[28px_1fr_auto_auto_16px] gap-3 sm:gap-4 items-center px-7 py-3 hover:bg-cream/40 transition-colors"
                 >
                   <span
-                    className={`text-[10px] font-extrabold tracking-[1.2px] ${
+                    className={`text-[10px] font-extrabold tracking-[1.2px] tabular ${
                       i === 0 ? "text-heritage" : "text-slate-meta"
                     }`}
                   >
@@ -120,13 +121,14 @@ export function JobLeaderboard({
                         {j.title}
                       </span>
                       {j.locationLabel && (
-                        <span
-                          className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-heritage/20 bg-heritage/[0.07] px-2 py-0.5 text-[10px] font-bold tracking-[0.5px] text-heritage-deep"
+                        <Tag
+                          tone="neutral"
+                          className="flex-shrink-0"
                           title={`Location: ${j.locationLabel}`}
                         >
-                          <MapPin className="h-2.5 w-2.5" strokeWidth={2.5} />
+                          <MapPin strokeWidth={2.5} />
                           {j.locationLabel}
-                        </span>
+                        </Tag>
                       )}
                     </div>
                     <div className="text-[10px] text-slate-meta tracking-[0.3px] mt-0.5">
@@ -142,7 +144,7 @@ export function JobLeaderboard({
                     showLastDot
                   />
                   <div className="flex flex-col items-end gap-1">
-                    <span className="text-[16px] font-extrabold tracking-[-0.5px] text-ink leading-none">
+                    <span className="text-[16px] font-extrabold tracking-[-0.5px] text-ink leading-none tabular">
                       {j.thisWeek}
                     </span>
                     {(j.thisWeek > 0 || j.lastWeek > 0) && (

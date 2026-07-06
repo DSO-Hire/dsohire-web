@@ -22,6 +22,7 @@ import type {
   JobVerificationRequirement,
 } from "../types";
 import { getVerificationType } from "@/lib/verifications/types";
+import { Eyebrow } from "@/components/brand/eyebrow";
 
 const initial: GuestApplyState = { ok: false };
 
@@ -84,17 +85,16 @@ export function GuestApplyForm({
 
       {/* Identity */}
       <fieldset className="space-y-5">
-        <legend className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
-          About you
-        </legend>
+        <Eyebrow as="legend" className="mb-4">About you</Eyebrow>
 
         <div>
-          <label
+          <Eyebrow
+            as="label"
             htmlFor="guest-first-name"
-            className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+            className="block text-slate-body mb-2"
           >
             First name <span className="text-heritage">*</span>
-          </label>
+          </Eyebrow>
           <input
             id="guest-first-name"
             type="text"
@@ -107,12 +107,13 @@ export function GuestApplyForm({
         </div>
 
         <div>
-          <label
+          <Eyebrow
+            as="label"
             htmlFor="guest-last-name"
-            className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+            className="block text-slate-body mb-2"
           >
             Last name <span className="text-heritage">*</span>
-          </label>
+          </Eyebrow>
           <input
             id="guest-last-name"
             type="text"
@@ -125,12 +126,13 @@ export function GuestApplyForm({
         </div>
 
         <div>
-          <label
+          <Eyebrow
+            as="label"
             htmlFor="guest-email"
-            className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+            className="block text-slate-body mb-2"
           >
             Email <span className="text-heritage">*</span>
-          </label>
+          </Eyebrow>
           <input
             id="guest-email"
             type="email"
@@ -146,12 +148,13 @@ export function GuestApplyForm({
         </div>
 
         <div>
-          <label
+          <Eyebrow
+            as="label"
             htmlFor="guest-phone"
-            className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+            className="block text-slate-body mb-2"
           >
             Phone <span className="text-slate-meta font-medium normal-case tracking-normal text-[11px]">(optional)</span>
-          </label>
+          </Eyebrow>
           <input
             id="guest-phone"
             type="tel"
@@ -165,29 +168,26 @@ export function GuestApplyForm({
 
       {/* Resume */}
       <fieldset className="space-y-3">
-        <legend className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
-          Resume
-        </legend>
-        <label
+        <Eyebrow as="legend" className="mb-3">Resume</Eyebrow>
+        <Eyebrow
+          as="label"
           htmlFor="guest-resume"
-          className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+          className="block text-slate-body mb-2"
         >
           Resume <span className="text-slate-meta font-medium normal-case tracking-normal text-[11px]">(PDF or Word, up to 10&nbsp;MB)</span>
-        </label>
+        </Eyebrow>
         <input
           id="guest-resume"
           type="file"
           name="resume"
           accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-          className="block w-full text-[14px] text-ink file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-[12px] file:font-bold file:tracking-[1.5px] file:uppercase file:text-primary-foreground hover:file:bg-primary/90"
+          className="block w-full text-[14px] text-ink file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-xs file:font-semibold file:text-primary-foreground hover:file:bg-primary/90"
         />
       </fieldset>
 
       {/* Cover letter */}
       <fieldset className="space-y-3">
-        <legend className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
-          Cover letter <span className="text-slate-meta font-medium normal-case tracking-normal text-[11px]">(optional)</span>
-        </legend>
+        <Eyebrow as="legend" className="mb-3">Cover letter <span className="text-slate-meta font-medium normal-case tracking-normal text-[11px]">(optional)</span></Eyebrow>
         <textarea
           name="cover_letter"
           rows={5}
@@ -199,9 +199,7 @@ export function GuestApplyForm({
       {/* Screening questions */}
       {questions.length > 0 && (
         <fieldset className="space-y-5 pt-2 border-t border-[var(--rule)]">
-          <legend className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mt-4 mb-3">
-            Screening questions
-          </legend>
+          <Eyebrow as="legend" className="mt-4 mb-3">Screening questions</Eyebrow>
           {questions.map((q) => (
             <ScreeningField key={q.id} question={q} />
           ))}
@@ -214,9 +212,7 @@ export function GuestApplyForm({
           account. No fields submitted, nothing persisted here. */}
       {verificationRequirements.length > 0 && (
         <fieldset className="space-y-3 pt-2 border-t border-[var(--rule)]">
-          <legend className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mt-4 mb-3">
-            What this role requires
-          </legend>
+          <Eyebrow as="legend" className="mt-4 mb-3">What this role requires</Eyebrow>
           <p className="text-[13px] text-slate-body leading-relaxed">
             The hiring team asks applicants to confirm the items below.
             You&apos;ll confirm these &mdash; and can link supporting
@@ -265,7 +261,7 @@ export function GuestApplyForm({
         <button
           type="submit"
           disabled={submitting}
-          className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {submitting ? "Submitting…" : "Submit application"}
           {!submitting && <ArrowRight className="h-4 w-4" />}

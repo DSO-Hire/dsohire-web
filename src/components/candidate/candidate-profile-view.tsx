@@ -28,6 +28,8 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { ROLE_CATEGORIES } from "@/lib/candidate/canonical-lists";
+import { Eyebrow } from "@/components/brand/eyebrow";
+import { Tag, type TagTone } from "@/components/brand/tag";
 
 const ROLE_LABELS: Record<string, string> = {
   // Job-side role_category enum values…
@@ -148,7 +150,7 @@ export function CandidateProfileView({
   const accent =
     data.accent_color && /^#[0-9a-fA-F]{6}$/.test(data.accent_color)
       ? data.accent_color
-      : "#4D7A60";
+      : "var(--heritage)";
 
   return (
     <div>
@@ -200,10 +202,10 @@ export function CandidateProfileView({
               </span>
             )}
             {openToWork && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-heritage/12 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.5px] text-heritage-deep ring-1 ring-inset ring-heritage/25">
+              <Tag tone="heritage">
                 <CheckCircle2 className="h-3 w-3" />
                 {openToWork}
-              </span>
+              </Tag>
             )}
           </div>
         </div>
@@ -226,7 +228,7 @@ export function CandidateProfileView({
                 {work.map((w) => (
                   <li key={w.id} className="flex gap-3.5">
                     <div
-                      className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-cream border border-[var(--rule)]"
+                      className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center bg-cream border border-[var(--rule)]"
                       aria-hidden
                     >
                       <Briefcase className="h-3.5 w-3.5 text-heritage-deep" />
@@ -260,7 +262,7 @@ export function CandidateProfileView({
                 {education.map((e) => (
                   <li key={e.id} className="flex gap-3.5">
                     <div
-                      className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-cream border border-[var(--rule)]"
+                      className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center bg-cream border border-[var(--rule)]"
                       aria-hidden
                     >
                       <GraduationCap className="h-3.5 w-3.5 text-heritage-deep" />
@@ -359,13 +361,10 @@ export function CandidateProfileView({
             <SidebarCard title="Licensed in">
               <div className="flex flex-wrap gap-1.5">
                 {(data.license_states ?? []).map((s) => (
-                  <span
-                    key={s}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-bold text-heritage-deep border border-[var(--rule)] bg-cream/60"
-                  >
-                    <Award className="h-2.5 w-2.5" aria-hidden />
+                  <Tag key={s} tone="neutral">
+                    <Award aria-hidden />
                     {s}
-                  </span>
+                  </Tag>
                 ))}
               </div>
             </SidebarCard>
@@ -450,45 +449,43 @@ function CredentialRow({
           <div className="text-[11.5px] text-slate-meta mt-0.5">{secondary}</div>
         )}
       </div>
-      <span
-        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.5px] ring-1 ring-inset shrink-0 ${badge.cls}`}
-      >
-        <badge.Icon className="h-2.5 w-2.5" aria-hidden />
+      <Tag tone={badge.tone} className="shrink-0">
+        <badge.Icon aria-hidden />
         {badge.label}
-      </span>
+      </Tag>
     </li>
   );
 }
 
 function credentialBadge(status: string): {
   label: string;
-  cls: string;
+  tone: TagTone;
   Icon: React.ComponentType<{ className?: string }>;
 } {
   switch (status) {
     case "verified":
       return {
         label: "Verified",
-        cls: "bg-success-bg text-success ring-success",
+        tone: "success",
         Icon: ShieldCheck,
       };
     case "expired":
       return {
         label: "Expired",
-        cls: "bg-danger-bg text-danger ring-danger",
+        tone: "danger",
         Icon: AlertTriangle,
       };
     case "pending":
       return {
         label: "Pending",
-        cls: "bg-warning-bg text-warning ring-warning",
+        tone: "warning",
         Icon: Clock,
       };
     case "unverified":
     default:
       return {
         label: "Self-reported",
-        cls: "bg-muted text-muted-foreground ring-border",
+        tone: "neutral",
         Icon: FileText,
       };
   }
@@ -534,9 +531,7 @@ function Section({
 }) {
   return (
     <section>
-      <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
-        {title}
-      </h2>
+      <Eyebrow as="h2" className="mb-3">{title}</Eyebrow>
       {children}
     </section>
   );
@@ -551,9 +546,7 @@ function SidebarCard({
 }) {
   return (
     <section className="border border-[var(--rule)] bg-card p-4">
-      <h2 className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-2">
-        {title}
-      </h2>
+      <Eyebrow as="h2" className="mb-2">{title}</Eyebrow>
       {children}
     </section>
   );
@@ -563,7 +556,7 @@ function SidebarRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-baseline justify-between gap-3 text-[13px] mb-1.5 last:mb-0">
       <span className="text-slate-body">{label}</span>
-      <span className="tabular-nums font-bold text-ink">{value}</span>
+      <span className="tabular font-bold text-ink">{value}</span>
     </div>
   );
 }
@@ -599,7 +592,7 @@ function Avatar({
   fullName: string | null;
   avatarUrl: string | null;
 }) {
-  const cls = "h-20 w-20 sm:h-24 sm:w-24 text-[24px] ring-4 ring-white";
+  const cls = "h-20 w-20 sm:h-24 sm:w-24 text-[24px] ring-4 ring-card";
   if (avatarUrl) {
     return (
       // eslint-disable-next-line @next/next/no-img-element

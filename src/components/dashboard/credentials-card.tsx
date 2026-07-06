@@ -15,6 +15,8 @@
 import Link from "next/link";
 import { ShieldCheck, AlertTriangle, Check, ArrowRight } from "lucide-react";
 
+import { Eyebrow } from "@/components/brand/eyebrow";
+
 export interface CredItem {
   id: string;
   /** Display name, e.g. "RDH License" or "CPR / BLS". */
@@ -73,10 +75,10 @@ export function CredentialsCard({
 
   return (
     <section className="border border-[var(--rule)] bg-card p-5">
-      <h3 className="mb-3.5 flex items-center gap-2 text-[10px] font-extrabold tracking-[2px] uppercase text-heritage-deep">
+      <Eyebrow as="h3" className="mb-3.5 flex items-center gap-2">
         <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
         Credentials &amp; CE
-      </h3>
+      </Eyebrow>
 
       {ranked.length === 0 ? (
         <div>
@@ -86,7 +88,7 @@ export function CredentialsCard({
           </p>
           <Link
             href={addHref}
-            className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[0.5px] uppercase text-heritage hover:text-heritage-deep transition-colors"
+            className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-heritage hover:text-heritage-deep transition-colors"
           >
             Add credentials
             <ArrowRight className="h-3.5 w-3.5" aria-hidden />

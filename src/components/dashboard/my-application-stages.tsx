@@ -25,6 +25,8 @@
 import Link from "next/link";
 import { MessageCircle, Reply, Star } from "lucide-react";
 
+import { Eyebrow } from "@/components/brand/eyebrow";
+
 export interface MyApplicationCard {
   id: string;
   /** Job title at the DSO. */
@@ -84,14 +86,14 @@ export function MyApplicationStages({
     <div className="bg-card border border-[var(--rule)] p-5 sm:p-7">
       <header className="flex items-baseline justify-between gap-4 mb-5 flex-wrap">
         <div>
-          <h2 className="text-[11px] font-extrabold tracking-[2.5px] uppercase text-heritage-deep">
+          <Eyebrow as="h2">
             {title}
-          </h2>
+          </Eyebrow>
           <div className="text-[12px] text-slate-meta mt-1">{subtitle}</div>
         </div>
         <Link
           href={viewAllHref}
-          className="text-[10px] font-extrabold tracking-[1.5px] uppercase text-heritage hover:text-heritage-deep transition-colors"
+          className="text-xs font-semibold text-heritage hover:text-heritage-deep transition-colors"
         >
           View all →
         </Link>
@@ -123,15 +125,11 @@ function StageColumn({
           isEmpty ? "border-rule-strong" : "border-heritage"
         }`}
       >
-        <div
-          className={`text-[10px] font-extrabold tracking-[1.5px] uppercase ${
-            isEmpty ? "text-slate-meta" : "text-heritage-deep"
-          }`}
-        >
+        <Eyebrow className={isEmpty ? undefined : "text-heritage-deep"}>
           {label}
-        </div>
+        </Eyebrow>
         <span
-          className={`text-[10px] font-extrabold tracking-[-0.2px] px-1.5 py-0.5 ${
+          className={`text-[10px] font-extrabold tracking-[-0.2px] px-1.5 py-0.5 tabular ${
             isEmpty
               ? "bg-cream text-slate-meta"
               : "bg-heritage text-primary-foreground"
@@ -180,17 +178,17 @@ function Card({ card }: { card: MyApplicationCard }) {
       </div>
       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
         {card.offerPending ? (
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-heritage text-primary-foreground text-[9px] font-bold tracking-[0.5px] uppercase">
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-stage-bronze/10 text-stage-bronze text-[10px] font-semibold">
             <Star className="h-2.5 w-2.5" />
             Offer extended
           </span>
         ) : card.hasUnreadMessage ? (
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-heritage text-primary-foreground text-[9px] font-bold tracking-[0.5px] uppercase">
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-info-bg text-info text-[10px] font-semibold">
             <MessageCircle className="h-2.5 w-2.5" />
             New message
           </span>
         ) : card.needsCandidateAction ? (
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-warning-bg text-warning text-[9px] font-bold tracking-[0.5px] uppercase">
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-warning-bg text-warning text-[10px] font-semibold">
             <Reply className="h-2.5 w-2.5" />
             Waiting on you
           </span>

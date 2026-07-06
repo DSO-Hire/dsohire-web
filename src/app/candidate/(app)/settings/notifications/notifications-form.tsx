@@ -222,7 +222,7 @@ function ChannelToggle({
         aria-label={`${label} ${channel} ${enabled ? "on" : "off"}`}
         onClick={onChange}
         className={`relative h-5 w-9 rounded-full transition ${
-          enabled ? "bg-heritage" : "bg-slate-300"
+          enabled ? "bg-heritage" : "bg-ink/20"
         }`}
       >
         <span

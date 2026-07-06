@@ -79,7 +79,7 @@ export function StalePipelineAlert({
                   <span className="text-slate-meta">{c.stageLabel}</span> ·{" "}
                   {c.jobTitle}
                 </span>
-                <span className="font-extrabold text-slate-body">
+                <span className="font-extrabold text-slate-body tabular">
                   {c.daysWaiting}d
                 </span>
               </Link>
@@ -89,7 +89,7 @@ export function StalePipelineAlert({
 
         <Link
           href={reviewAllHref}
-          className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2.5 text-[10px] font-extrabold tracking-[1.6px] uppercase bg-ivory-deep text-ink hover:bg-card transition-colors flex-shrink-0"
+          className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold bg-ivory-deep text-ink hover:bg-card transition-colors flex-shrink-0"
         >
           Review all
           <ChevronRight className="h-2.5 w-2.5" strokeWidth={3} />
@@ -98,7 +98,7 @@ export function StalePipelineAlert({
 
       <Link
         href={reviewAllHref}
-        className="sm:hidden mt-4 inline-flex items-center gap-1.5 px-4 py-2.5 text-[10px] font-extrabold tracking-[1.6px] uppercase bg-ivory-deep text-ink hover:bg-card transition-colors"
+        className="sm:hidden mt-4 inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold bg-ivory-deep text-ink hover:bg-card transition-colors"
       >
         Review all
         <ChevronRight className="h-2.5 w-2.5" strokeWidth={3} />

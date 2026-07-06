@@ -23,6 +23,8 @@
 import Link from "next/link";
 import { Check, MessageCircle, Star } from "lucide-react";
 
+import { Eyebrow } from "@/components/brand/eyebrow";
+
 export interface ApplicationJourney {
   id: string;
   /** Job title. */
@@ -80,16 +82,16 @@ export function ApplicationJourneys({
     <div className="bg-card border border-[var(--rule)] p-5 sm:p-7">
       <header className="flex items-baseline justify-between gap-4 mb-5 flex-wrap">
         <div>
-          <h2 className="text-[11px] font-extrabold tracking-[2.5px] uppercase text-heritage-deep">
+          <Eyebrow as="h2">
             Your applications — as journeys
-          </h2>
+          </Eyebrow>
           <div className="text-[12px] text-slate-meta mt-1">
             Where each one stands, start to finish.
           </div>
         </div>
         <Link
           href={viewAllHref}
-          className="text-[10px] font-extrabold tracking-[1.5px] uppercase text-heritage hover:text-heritage-deep transition-colors"
+          className="text-xs font-semibold text-heritage hover:text-heritage-deep transition-colors"
         >
           All applications →
         </Link>
@@ -159,7 +161,7 @@ function JourneyRow({ journey: j }: { journey: ApplicationJourney }) {
                   {done ? <Check className="h-3 w-3" /> : i + 1}
                 </span>
                 <span
-                  className={`text-[8.5px] font-bold tracking-[0.8px] uppercase whitespace-nowrap ${
+                  className={`text-[10px] font-semibold whitespace-nowrap ${
                     current
                       ? "text-heritage-deep"
                       : done

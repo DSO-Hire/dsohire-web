@@ -291,7 +291,7 @@ function WithdrawSheet({
                 type="button"
                 onClick={() => toggleChip(chip.value)}
                 disabled={busy}
-                className={`rounded-full border px-3 py-1 text-sm transition ${
+                className={`border px-3 py-1 text-sm transition ${
                   selected
                     ? "border-heritage bg-heritage/10 text-foreground"
                     : "border-border bg-card text-foreground hover:bg-muted"
@@ -314,7 +314,7 @@ function WithdrawSheet({
           rows={3}
           maxLength={500}
           placeholder="Helps us improve the platform — never shared with the DSO."
-          className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
+          className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm focus:border-heritage focus:outline-none focus:ring-1 focus:ring-heritage"
         />
       </label>
       <div className="rounded-md bg-warning-bg px-3 py-2 text-xs text-warning">

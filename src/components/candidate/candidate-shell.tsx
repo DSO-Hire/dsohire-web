@@ -38,6 +38,7 @@ import {
 import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
 import { DsoFitMark } from "@/components/practice-fit/brand/dsofit-mark";
 import { BrandLockup } from "@/components/marketing/site-shell";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { Avatar } from "@/components/ui/avatar";
 import { RailCollapse } from "@/components/employer/rail-collapse";
 import { CandidateMobileNav } from "./candidate-mobile-nav";
@@ -199,7 +200,7 @@ export function CandidateShell({
             <span className="text-[23px] font-extrabold tracking-[-0.5px] text-sidebar-foreground">
               DSO
             </span>
-            <span className="block w-full text-[8.5px] font-bold text-[#8db8a3] mt-[3px] text-justify [text-align-last:justify]">
+            <span className="block w-full text-[8.5px] font-bold text-heritage-bright mt-[3px] text-justify [text-align-last:justify]">
               H I R E
             </span>
           </span>
@@ -218,9 +219,7 @@ export function CandidateShell({
               <div className="text-[12px] font-semibold text-sidebar-foreground truncate leading-tight">
                 {candidateName}
               </div>
-              <div className="text-[8.5px] font-bold tracking-[1.2px] uppercase text-[#8db8a3] truncate mt-0.5">
-                Candidate
-              </div>
+              <Eyebrow className="text-[8.5px] tracking-[1.2px] text-heritage-bright truncate mt-0.5">Candidate</Eyebrow>
             </div>
           </div>
         </div>
@@ -243,20 +242,20 @@ export function CandidateShell({
         <div className="rail-foot border-t border-sidebar-border px-5 py-3.5 flex items-center gap-4">
           <Link
             href="/candidate/settings"
-            className="rail-flink text-[9.5px] font-extrabold tracking-[1.5px] uppercase text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
+            className="rail-flink text-[10px] font-semibold text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
           >
             Settings
           </Link>
           <Link
             href="/candidate/help"
-            className="rail-flink text-[9.5px] font-extrabold tracking-[1.5px] uppercase text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
+            className="rail-flink text-[10px] font-semibold text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
           >
             Help
           </Link>
           <form action="/candidate/sign-out" method="post" className="ml-auto">
             <button
               type="submit"
-              className="rail-out text-[9.5px] font-extrabold tracking-[1.5px] uppercase text-[#8db8a3] hover:text-sidebar-foreground transition-colors"
+              className="rail-out text-[10px] font-semibold text-heritage-bright hover:text-sidebar-foreground transition-colors"
             >
               Sign out →
             </button>
@@ -289,7 +288,7 @@ export function CandidateShell({
                     <span
                       className={
                         "flex h-5 w-5 flex-shrink-0 items-center justify-center " +
-                        (isDso ? "text-blue-400" : "text-heritage-light")
+                        (isDso ? "text-corporate" : "text-heritage-light")
                       }
                     >
                       {isDso ? (
@@ -303,7 +302,7 @@ export function CandidateShell({
                         {isDso ? "DSO" : "Practice"}
                       </span>
                       <span
-                        className={isDso ? "text-blue-400" : "text-heritage-light"}
+                        className={isDso ? "text-corporate" : "text-heritage-light"}
                       >
                         Fit
                       </span>

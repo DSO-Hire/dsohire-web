@@ -69,7 +69,7 @@ export function StatusProgress({ status, hideStages }: StatusProgressProps) {
             <span className="block w-1.5 h-1.5 rounded-full bg-border" />
           </div>
         ))}
-        <span className="ml-2 text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
+        <span className="ml-2 text-[10px] font-semibold text-heritage-deep">
           In review
         </span>
       </div>
@@ -85,7 +85,7 @@ export function StatusProgress({ status, hideStages }: StatusProgressProps) {
             <span className="block w-1.5 h-1.5 rounded-full bg-border" />
           </div>
         ))}
-        <span className="ml-2 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+        <span className="ml-2 text-[10px] font-semibold text-slate-meta">
           {closedLabel}
         </span>
       </div>
@@ -112,7 +112,7 @@ export function StatusProgress({ status, hideStages }: StatusProgressProps) {
               <span className="block w-1.5 h-1.5 rounded-full bg-border" />
             )}
             {isCurrent && (
-              <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep ml-0.5">
+              <span className="text-[10px] font-semibold text-heritage-deep ml-0.5">
                 {stage.label}
               </span>
             )}

@@ -9,6 +9,8 @@
 
 import Link from "next/link";
 import { TrendingUp, ArrowRight } from "lucide-react";
+
+import { Eyebrow } from "@/components/brand/eyebrow";
 import type { MarketRange } from "@/lib/comp/market";
 
 function money(n: number, unit: "hourly" | "annual"): string {
@@ -35,13 +37,13 @@ export function YourMarketCard({
 
   return (
     <section className="border border-[var(--rule)] bg-card p-5">
-      <h3 className="mb-1 flex items-center gap-2 text-[10px] font-extrabold tracking-[2px] uppercase text-heritage-deep">
+      <Eyebrow as="h3" className="mb-1 flex items-center gap-2">
         <TrendingUp className="h-3.5 w-3.5" aria-hidden />
         Your market
-      </h3>
+      </Eyebrow>
 
       <div className="mt-2 flex items-baseline gap-2">
-        <span className="text-[22px] font-extrabold tracking-[-0.5px] text-ink leading-none">
+        <span className="text-[22px] font-extrabold tracking-[-0.5px] text-ink leading-none tabular">
           {band}
           <span className="text-[13px] font-bold text-slate-meta">
             {unitLabel}
@@ -50,15 +52,15 @@ export function YourMarketCard({
       </div>
       <p className="mt-1 text-[12px] text-slate-meta">
         Typical 25th–75th percentile{AREA_SUFFIX[range.areaLevel]} · median{" "}
-        <span className="font-bold text-ink">
+        <span className="font-bold text-ink tabular">
           {money(range.p50, range.unit)}
           {unitLabel}
         </span>
       </p>
 
       {/* simple band visual */}
-      <div className="relative mt-3 h-2 rounded-full bg-ivory-deep">
-        <div className="absolute inset-y-0 left-[12%] right-[18%] rounded-full bg-gradient-to-r from-heritage to-[#c19a3e]" />
+      <div className="relative mt-3 h-2 bg-ivory-deep">
+        <div className="absolute inset-y-0 left-[12%] right-[18%] bg-gradient-to-r from-heritage to-gold" />
         <div className="absolute -top-1 left-[50%] h-4 w-[3px] -translate-x-1/2 rounded bg-ink" />
       </div>
 

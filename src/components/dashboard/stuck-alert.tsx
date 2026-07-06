@@ -90,7 +90,7 @@ export function StuckAlert({
                     </>
                   )}
                 </span>
-                <span className="font-extrabold text-warning">
+                <span className="font-extrabold text-warning tabular">
                   {c.daysWaiting}d
                 </span>
               </Link>
@@ -101,7 +101,7 @@ export function StuckAlert({
         {/* CTA */}
         <Link
           href={reviewAllHref}
-          className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2.5 text-[10px] font-extrabold tracking-[1.6px] uppercase bg-warning-bg text-warning hover:bg-card transition-colors flex-shrink-0"
+          className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold bg-warning-bg text-warning hover:bg-card transition-colors flex-shrink-0"
         >
           Review all
           <ChevronRight className="h-2.5 w-2.5" strokeWidth={3} />
@@ -111,7 +111,7 @@ export function StuckAlert({
       {/* Mobile CTA — full-width below body */}
       <Link
         href={reviewAllHref}
-        className="sm:hidden mt-4 inline-flex items-center gap-1.5 px-4 py-2.5 text-[10px] font-extrabold tracking-[1.6px] uppercase bg-warning-bg text-warning hover:bg-card transition-colors"
+        className="sm:hidden mt-4 inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold bg-warning-bg text-warning hover:bg-card transition-colors"
       >
         Review all
         <ChevronRight className="h-2.5 w-2.5" strokeWidth={3} />

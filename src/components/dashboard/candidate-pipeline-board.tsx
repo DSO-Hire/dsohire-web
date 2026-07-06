@@ -21,6 +21,9 @@
 
 import Link from "next/link";
 import { Check, MessageCircle, Star } from "lucide-react";
+
+import { Eyebrow } from "@/components/brand/eyebrow";
+import { Tag } from "@/components/brand/tag";
 import type { FitBucket } from "@/lib/practice-fit/types";
 
 export interface BoardCard {
@@ -60,9 +63,9 @@ const COLUMNS: ReadonlyArray<{
 ];
 
 const DOT: Record<ColTone, string> = {
-  wait: "bg-[#c4b59a]",
+  wait: "bg-stage-stone",
   move: "bg-heritage",
-  you: "bg-amber-500",
+  you: "bg-gold",
   done: "bg-heritage-deep",
 };
 
@@ -91,12 +94,10 @@ export function CandidatePipelineBoard({ cards }: { cards: BoardCard[] }) {
           >
             <div className="flex items-center gap-2 px-1.5 pb-2.5 pt-1">
               <span className={`h-2 w-2 rounded-full ${DOT[col.tone]}`} />
-              <span className="text-[11px] font-extrabold tracking-[1.2px] uppercase text-slate-meta">
-                {col.label}
-              </span>
-              <span className="ml-auto grid h-5 min-w-[20px] place-items-center rounded-full border border-[var(--rule)] bg-card px-1 text-[11px] font-semibold text-ink">
+              <Eyebrow>{col.label}</Eyebrow>
+              <Tag tone="neutral" className="ml-auto min-w-[20px] justify-center px-1 tabular">
                 {items.length}
-              </span>
+              </Tag>
             </div>
             <div className="flex flex-col gap-2.5">
               {items.length === 0 ? (
@@ -124,7 +125,7 @@ function BoardCardItem({ card: c, tone }: { card: BoardCard; tone: ColTone }) {
   return (
     <Link
       href={c.href}
-      className={`block rounded-lg border p-3 shadow-[0_1px_3px_rgba(11,35,64,0.07)] transition-shadow hover:shadow-[0_8px_24px_rgba(11,35,64,0.12)] ${
+      className={`block rounded-lg border p-3 transition-shadow hover:shadow-[0_8px_24px_rgba(11,35,64,0.12)] ${
         isOffer
           ? "border-warning bg-warning-bg/50"
           : "border-[var(--rule)] bg-cream/40"
@@ -174,11 +175,6 @@ function FitPill({
   const excellent = bucket === "excellent";
   const strong = bucket === "strong";
   const solid = bucket === "solid";
-  const cls = excellent
-    ? "bg-ink text-ivory"
-    : strong
-      ? "bg-heritage/12 text-heritage-deep"
-      : "bg-muted text-muted-foreground";
   const word = excellent
     ? "Excellent fit"
     : strong
@@ -187,12 +183,13 @@ function FitPill({
         ? "Solid fit"
         : null;
   return (
-    <span
-      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold ${cls}`}
+    <Tag
+      tone={excellent || strong ? "heritage" : "neutral"}
+      className={`tabular ${excellent ? "bg-ink text-ivory" : ""}`}
     >
       {(excellent || strong) && <span aria-hidden>✦</span>}
       {word ? `${word} · ${score}` : `Fit ${score}`}
-    </span>
+    </Tag>
   );
 }
 

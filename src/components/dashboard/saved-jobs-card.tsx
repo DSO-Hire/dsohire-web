@@ -13,6 +13,8 @@
 import Link from "next/link";
 import { Bookmark, ArrowRight } from "lucide-react";
 
+import { Eyebrow } from "@/components/brand/eyebrow";
+
 export interface SavedJobItem {
   id: string;
   title: string;
@@ -29,10 +31,10 @@ export function SavedJobsCard({
   if (items.length === 0) return null;
   return (
     <section className="border border-[var(--rule)] bg-card p-5">
-      <h3 className="mb-3.5 flex items-center gap-2 text-[10px] font-extrabold tracking-[2px] uppercase text-heritage-deep">
+      <Eyebrow as="h3" className="mb-3.5 flex items-center gap-2">
         <Bookmark className="h-3.5 w-3.5" aria-hidden />
         Saved for later
-      </h3>
+      </Eyebrow>
 
       <div className="flex flex-col">
         {items.map((it, i) => (
@@ -45,7 +47,7 @@ export function SavedJobsCard({
                 : ""
             }`}
           >
-            <span className="block h-1.5 w-1.5 shrink-0 rounded-full bg-[#9fb0c4]" />
+            <span className="block h-1.5 w-1.5 shrink-0 rounded-full bg-stage-mist" />
             <div className="min-w-0 flex-1">
               <div className="truncate text-[13.5px] font-bold leading-tight text-ink group-hover:text-heritage-deep transition-colors">
                 {it.title}
@@ -64,7 +66,7 @@ export function SavedJobsCard({
       </p>
       <Link
         href={viewAllHref}
-        className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[0.5px] uppercase text-heritage hover:text-heritage-deep transition-colors"
+        className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-heritage hover:text-heritage-deep transition-colors"
       >
         View all saved
       </Link>

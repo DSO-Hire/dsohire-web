@@ -17,6 +17,7 @@ import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { ArrowLeft, Briefcase, MapPin } from "lucide-react";
 import { SiteShell } from "@/components/marketing/site-shell";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { GuestApplyForm } from "./guest-form";
 import { recordApplicationStart } from "@/lib/analytics/record-view";
@@ -126,16 +127,14 @@ export default async function GuestApplyPage({ params, searchParams }: PageProps
       <div className="mx-auto max-w-3xl px-6 py-12 sm:py-16">
         <Link
           href={`/jobs/${jobId}`}
-          className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-6"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-heritage-deep hover:text-ink transition-colors mb-6"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to job
         </Link>
 
         <header className="mb-10">
-          <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
-            Apply as guest
-          </div>
+          <Eyebrow className="mb-3">Apply as guest</Eyebrow>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-[-1px] leading-[1.1] text-ink mb-3">
             {job.title as string}
           </h1>

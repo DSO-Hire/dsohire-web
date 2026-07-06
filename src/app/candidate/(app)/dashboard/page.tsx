@@ -39,6 +39,7 @@ import {
 // Lane 7 (Career HQ) — OnboardingChecklist retired from this page
 // (component kept on disk for revert); CareerStrength replaces it.
 import { CareerStrength } from "@/components/dashboard/career-strength";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
@@ -872,12 +873,12 @@ export default async function CandidateDashboardPage() {
             <span className="absolute inline-flex h-full w-full rounded-full bg-heritage opacity-75 animate-ping" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-heritage" />
           </span>
-          <span className="text-[10px] font-extrabold tracking-[3px] uppercase text-heritage-deep">
+          <Eyebrow as="span" className="text-heritage-deep">
             {heroMode === "setup" ? "Setup" : "Active search"}
-          </span>
-          <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta border-l border-rule pl-3.5">
+          </Eyebrow>
+          <Eyebrow as="span" className="border-l border-rule pl-3.5">
             {dateLabel}
-          </span>
+          </Eyebrow>
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink">
           {heroMode === "setup"
@@ -895,16 +896,16 @@ export default async function CandidateDashboardPage() {
         <section className="mb-8">
           <div className="flex items-end justify-between gap-4 mb-4">
             <div>
-              <h2 className="text-[11px] font-extrabold tracking-[2.5px] uppercase text-heritage-deep">
+              <Eyebrow as="h2">
                 Your applications
-              </h2>
+              </Eyebrow>
               <p className="text-[12px] text-slate-meta mt-1">
                 Where each one stands — your whole search at a glance.
               </p>
             </div>
             <Link
               href="/candidate/applications"
-              className="shrink-0 text-[10px] font-extrabold tracking-[1.5px] uppercase text-heritage hover:text-heritage-deep transition-colors"
+              className="shrink-0 text-xs font-semibold text-heritage hover:text-heritage-deep transition-colors"
             >
               All applications →
             </Link>
@@ -949,10 +950,10 @@ export default async function CandidateDashboardPage() {
           {boardCards.length > 0 &&
             (hasOffer && offerApp ? (
               <section className="relative overflow-hidden border border-heritage/30 bg-heritage text-primary-foreground p-6 sm:p-7">
-                <div className="text-[10px] font-extrabold tracking-[2px] uppercase text-[#e9c873] mb-2">
+                <Eyebrow className="text-gold mb-2">
                   ★ Offer extended
                   {offerCount > 1 ? ` · ${offerCount} offers` : ""}
-                </div>
+                </Eyebrow>
                 <h3 className="text-xl sm:text-2xl font-extrabold tracking-[-0.4px] leading-tight">
                   {offerDsoName} extended you an offer.
                 </h3>
@@ -964,21 +965,21 @@ export default async function CandidateDashboardPage() {
                 {offerMarketBand && marketRange && (
                   <p className="mt-2 text-[12.5px] text-primary-foreground/70">
                     For context, {marketRange.areaName} pay for your field runs{" "}
-                    <strong className="text-primary-foreground">{offerMarketBand}</strong> —
+                    <strong className="text-primary-foreground tabular">{offerMarketBand}</strong> —
                     weigh your offer against it.
                   </p>
                 )}
                 <div className="mt-4 flex flex-wrap items-center gap-3">
                   <Link
                     href={`/candidate/applications/${offerApp.id}`}
-                    className="inline-flex items-center gap-2 bg-[#e9c873] text-ink px-5 py-2.5 text-[12px] font-bold tracking-[1px] uppercase hover:bg-[#dcb95f] transition-colors"
+                    className="inline-flex items-center gap-2 bg-gold text-ink px-5 py-2.5 text-sm font-bold hover:bg-gold/90 transition-colors"
                   >
                     Review &amp; respond
                     <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
                   <Link
                     href="/candidate/inbox"
-                    className="inline-flex items-center gap-2 border border-primary-foreground/25 bg-primary-foreground/10 px-5 py-2.5 text-[12px] font-bold tracking-[1px] uppercase hover:bg-primary-foreground/20 transition-colors"
+                    className="inline-flex items-center gap-2 border border-primary-foreground/25 bg-primary-foreground/10 px-5 py-2.5 text-xs font-semibold hover:bg-primary-foreground/20 transition-colors"
                   >
                     Message the practice
                   </Link>
@@ -1043,13 +1044,11 @@ export default async function CandidateDashboardPage() {
       {/* Recent Activity */}
       <section className="mt-6">
         <div className="flex items-end justify-between gap-4 mb-4">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
-            Recent Activity
-          </div>
+          <Eyebrow>Recent Activity</Eyebrow>
           {apps.length > 0 && (
             <Link
               href="/candidate/applications"
-              className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage hover:text-heritage-deep transition-colors"
+              className="text-xs font-semibold text-heritage hover:text-heritage-deep transition-colors"
             >
               View all
             </Link>
@@ -1069,7 +1068,7 @@ export default async function CandidateDashboardPage() {
             </p>
             <Link
               href="/candidate/jobs"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
             >
               <Briefcase className="h-4 w-4" />
               Browse Jobs
