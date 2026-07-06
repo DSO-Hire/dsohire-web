@@ -213,7 +213,7 @@ export function ImageUpload({
   if (sourceUrl) {
     return (
       <div className="space-y-4">
-        <div className="relative h-80 w-full overflow-hidden rounded-md bg-slate-900">
+        <div className="relative h-80 w-full overflow-hidden rounded-md bg-ink-1000">
           <Cropper
             image={sourceUrl}
             crop={crop}

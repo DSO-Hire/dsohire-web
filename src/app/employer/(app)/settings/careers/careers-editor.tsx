@@ -373,10 +373,10 @@ function JobToggleRow({ job }: { job: CareersJobRow }) {
         disabled={locked || pending}
         className={`relative h-5 w-9 rounded-full transition shrink-0 ${
           locked
-            ? "bg-slate-200 cursor-not-allowed opacity-60"
+            ? "bg-ink/10 cursor-not-allowed opacity-60"
             : enabled
               ? "bg-heritage cursor-pointer"
-              : "bg-slate-300 cursor-pointer"
+              : "bg-ink/20 cursor-pointer"
         }`}
       >
         <span

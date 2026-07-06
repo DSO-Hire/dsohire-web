@@ -36,6 +36,7 @@ import { getStageDwellNorms } from "@/lib/applications/stage-dwell";
 import { getPracticeFitForJob } from "@/lib/practice-fit/get-or-compute";
 import type { FitResult } from "@/lib/practice-fit/types";
 import { JobStatusActions, JobVisibilityToggle } from "./status-actions";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { ShareToLinkedIn } from "@/components/share-to-linkedin";
 import { cloneJob } from "../actions";
 import {
@@ -347,26 +348,26 @@ export default async function PerJobPipelinePage({
     <>
       <Link
         href="/employer/jobs"
-        className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-6"
+        className="inline-flex items-center gap-2 text-xs font-semibold text-heritage-deep hover:text-ink transition-colors mb-6"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
-        Back to Jobs
+        Back to jobs
       </Link>
 
       {/* Header — title + status + counts + actions cluster */}
       <header className="mb-8 flex flex-wrap items-start justify-between gap-6">
         <div>
-          <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
+          <Eyebrow className="mb-2">
             {status === "draft"
-              ? "Draft Job"
+              ? "Draft job"
               : status === "active"
-                ? "Active Job"
+                ? "Active job"
                 : status === "closed"
-                  ? "Closed Job"
+                  ? "Closed job"
                   : status}
-          </div>
+          </Eyebrow>
           {isInternalOnly && (
-            <span className="mb-2 inline-flex items-center gap-1.5 border border-[var(--rule-strong)] bg-cream px-2.5 py-1 text-[10px] font-bold uppercase tracking-[1.5px] text-ink">
+            <span className="mb-2 inline-flex items-center gap-1.5 border border-[var(--rule-strong)] bg-cream px-2.5 py-1 text-xs font-semibold text-ink">
               <Lock className="h-3 w-3" />
               Internal-only · hidden from public
             </span>

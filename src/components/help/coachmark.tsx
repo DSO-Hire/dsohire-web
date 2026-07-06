@@ -102,7 +102,7 @@ export function Coachmark({
           <button
             type="button"
             onClick={dismiss}
-            className="text-[11px] font-bold uppercase tracking-[1.5px] text-heritage-deep underline-offset-2 hover:text-ink hover:underline"
+            className="text-xs font-semibold text-heritage-deep underline-offset-2 hover:text-ink hover:underline"
           >
             Got it
           </button>
