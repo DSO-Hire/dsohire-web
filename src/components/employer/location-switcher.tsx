@@ -78,7 +78,7 @@ export function LocationSwitcher({
   // No locations to switch between → render a static badge.
   if (locations.length === 0) {
     return (
-      <div className="px-3 py-2 text-[10px] tracking-[1.5px] uppercase text-sidebar-foreground/40 inline-flex items-center gap-1.5">
+      <div className="px-3 py-2 text-[11px] text-sidebar-foreground/40 inline-flex items-center gap-1.5">
         <MapPin className="size-3" />
         No locations yet
       </div>
@@ -154,9 +154,9 @@ function SwitcherOption({
         aria-selected={isActive}
         onClick={onSelect}
         className={
-          "w-full flex items-start gap-2 px-3 py-2 text-left transition-colors " +
+          "w-full flex items-start gap-2 px-3 py-2 text-left border-l-2 border-l-transparent transition-colors " +
           (isActive
-            ? "bg-sidebar-foreground/10 text-sidebar-foreground"
+            ? "border-l-heritage-bright text-sidebar-foreground"
             : "text-sidebar-foreground/75 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground")
         }
       >

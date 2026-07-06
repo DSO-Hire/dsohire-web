@@ -10,6 +10,8 @@
 
 import Link from "next/link";
 
+import { Eyebrow } from "@/components/brand/eyebrow";
+
 export interface LocationPulseRow {
   id: string;
   /** Practice name — the primary label (city alone is ambiguous when
@@ -35,12 +37,12 @@ export function LocationPulse({
   return (
     <section className="border border-[var(--rule)] bg-card flex flex-col">
       <header className="px-5 py-4 border-b border-[var(--rule)] flex items-center justify-between gap-3">
-        <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+        <Eyebrow as="span">
           Applications by location — 30 days
-        </span>
+        </Eyebrow>
         <Link
           href={href}
-          className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors shrink-0"
+          className="text-xs font-semibold text-heritage-deep hover:text-ink transition-colors shrink-0"
         >
           View locations →
         </Link>

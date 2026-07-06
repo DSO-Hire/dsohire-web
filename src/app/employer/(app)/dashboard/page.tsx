@@ -44,6 +44,7 @@ import {
   type StageKind,
 } from "@/lib/applications/stages";
 import { candidateDisplayName } from "@/lib/applications/candidate-display";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { KpiTile } from "@/components/dashboard/kpi-tile";
 // BOH Lane 2d — ActivityFeed retired from this page (the LivePulse rail
 // supersedes it, seeded from the same data + kept live via realtime).
@@ -1034,7 +1035,7 @@ export default async function EmployerDashboard() {
   // the hint no longer repeats the day count.
   const heroHint =
     awaitingReviewCount === 0
-      ? "Inbox is clear. New applications will appear here in real time as candidates apply."
+      ? "Inbox is clear. A good moment to source from the talent pool or keep interview-stage candidates moving."
       : "Clear the queue to keep candidates moving — each one is a real applicant waiting on you.";
 
   // SLA chip — the queue's decision-driving secondary stat. Replaces the old
@@ -1176,7 +1177,7 @@ export default async function EmployerDashboard() {
                 daySeed: Math.floor(Date.now() / 86400000),
               })}
             </h1>
-            <div className="mt-2 flex items-center gap-3.5 flex-wrap text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+            <div className="mt-2 flex items-center gap-3.5 flex-wrap text-xs font-medium text-slate-meta">
               <span className="inline-flex items-center gap-2 text-heritage-deep">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full rounded-full bg-heritage opacity-75 animate-ping" />
@@ -1185,7 +1186,7 @@ export default async function EmployerDashboard() {
                 {dso?.status === "active" ? "Active" : "Onboarding"}
               </span>
               <span className="border-l border-rule pl-3.5">{dateLabel}</span>
-              <span className="inline-flex items-center gap-1.5 border-l border-rule pl-3.5 text-ink">
+              <span className="inline-flex items-center gap-1.5 border-l border-rule pl-3.5 text-ink tabular">
                 <Briefcase className="size-3" />
                 {openJobsCount} {openJobsCount === 1 ? "job" : "jobs"} live
               </span>
@@ -1195,7 +1196,7 @@ export default async function EmployerDashboard() {
           {dsoUser?.role !== "hiring_manager" && (
             <Link
               href="/employer/jobs/new"
-              className="inline-flex items-center gap-2 px-5 py-3 bg-heritage text-primary-foreground text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-heritage-deep transition-colors shrink-0"
+              className="inline-flex items-center gap-2 px-5 py-3 bg-heritage text-primary-foreground text-sm font-bold hover:bg-heritage-deep transition-colors shrink-0"
             >
               <Plus className="size-4" strokeWidth={2.5} />
               Post a job
@@ -1309,9 +1310,7 @@ export default async function EmployerDashboard() {
       {/* Onboarding nudge — only when no locations on file. */}
       {(locationsCount ?? 0) === 0 && (
         <section className="mb-6 p-7 sm:p-8 bg-hero text-hero-foreground border-l-4 border-heritage">
-          <div className="text-[10px] font-extrabold tracking-[2.5px] uppercase text-heritage mb-3">
-            Finish Onboarding
-          </div>
+          <Eyebrow className="text-heritage-bright mb-3">Finish onboarding</Eyebrow>
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.6px] leading-tight mb-3">
             Add your first practice location to start posting jobs.
           </h2>
@@ -1321,9 +1320,9 @@ export default async function EmployerDashboard() {
           </p>
           <Link
             href="/employer/onboarding"
-            className="inline-flex items-center gap-2 px-7 py-3.5 bg-heritage text-primary-foreground text-[12px] font-extrabold tracking-[1.8px] uppercase hover:bg-heritage-deep transition-colors"
+            className="inline-flex items-center gap-2 px-7 py-3.5 bg-heritage text-primary-foreground text-sm font-bold hover:bg-heritage-deep transition-colors"
           >
-            Continue Onboarding
+            Continue onboarding
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </section>
@@ -1467,7 +1466,7 @@ function CommandTile({
         <div className="text-[14px] font-extrabold text-ink tracking-[-0.2px]">
           {title}
         </div>
-        <div className="text-[11px] text-slate-meta mt-0.5">{meta}</div>
+        <div className="text-[11px] text-slate-meta mt-0.5 tabular">{meta}</div>
       </div>
       <ArrowRight className="h-4 w-4 text-slate-meta group-hover:text-heritage group-hover:translate-x-1 transition-all flex-shrink-0" />
     </Link>
@@ -1492,9 +1491,7 @@ function HmScopeContextBar({
       <div className="flex items-start gap-2 flex-wrap">
         <MapPin className="h-3.5 w-3.5 text-heritage-deep mt-1 flex-shrink-0" />
         <div className="min-w-0 flex-1">
-          <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
-            Your Hiring-Manager Scope
-          </div>
+          <Eyebrow className="mb-1">Your hiring-manager scope</Eyebrow>
           {labels.length === 0 ? (
             <p className="text-[13px] text-warning leading-relaxed">
               No locations assigned to you yet. Reach out to whoever invited

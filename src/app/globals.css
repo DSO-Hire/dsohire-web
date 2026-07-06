@@ -34,6 +34,11 @@
   --heritage: #4D7A60;
   --heritage-deep: #2F5D4F;
   --heritage-light: #6B9279;
+  /* heritage-bright — the on-navy accent (rail active edge, navy KPI
+     tiles, door miniature). Long used as a literal #8db8a3 with
+     var(--heritage-bright, …) fallbacks; defined for real in the
+     2026-07-06 sweep. Same value in .dark — it only ever sits on navy. */
+  --heritage-bright: #8DB8A3;
 
   /* Ivory — page paper, warmer than clinical white */
   --ivory: #F7F4ED;
@@ -184,6 +189,7 @@ html, body {
   --color-heritage: var(--heritage);
   --color-heritage-deep: var(--heritage-deep);
   --color-heritage-light: var(--heritage-light);
+  --color-heritage-bright: var(--heritage-bright);
   --color-ivory: var(--ivory);
   --color-ivory-deep: var(--ivory-deep);
   --color-cream: var(--cream);

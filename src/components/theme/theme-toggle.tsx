@@ -75,7 +75,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
             aria-pressed={active}
             title={label}
             className={`inline-flex items-center justify-center p-1.5 transition-opacity ${
-              active ? "bg-current/10 opacity-100" : "opacity-50 hover:opacity-100"
+              active ? "opacity-100 shadow-[inset_0_-2px_0_0_var(--heritage-bright)]" : "opacity-50 hover:opacity-100"
             }`}
           >
             <Icon className="size-4" aria-hidden />

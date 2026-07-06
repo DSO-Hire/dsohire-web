@@ -24,6 +24,7 @@ import {
   REALTIME_POSTGRES_CHANGES_LISTEN_EVENT,
 } from "@supabase/supabase-js";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { Eyebrow } from "@/components/brand/eyebrow";
 
 export interface PulseSeedEvent {
   id: string;
@@ -40,7 +41,7 @@ interface PulseItem extends PulseSeedEvent {
 
 const KIND_DOT: Record<PulseSeedEvent["kind"], string> = {
   app: "bg-ink",
-  msg: "bg-[#b07d2e]",
+  msg: "bg-gold",
   score: "bg-heritage",
 };
 
@@ -165,7 +166,7 @@ export function LivePulse({
   return (
     <section className="border border-[var(--rule)] bg-card flex flex-col min-h-0">
       <header className="px-5 py-4 border-b border-[var(--rule)] flex items-center justify-between gap-3">
-        <span className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+        <Eyebrow as="span" className="inline-flex items-center gap-2">
           <span className="relative flex h-2 w-2">
             {isLive && (
               <span className="absolute inline-flex h-full w-full rounded-full bg-heritage opacity-60 animate-ping motion-reduce:animate-none" />
@@ -173,9 +174,9 @@ export function LivePulse({
             <span className="relative inline-flex rounded-full h-2 w-2 bg-heritage" />
           </span>
           Live across your practices
-        </span>
-        <span className="text-[9px] font-bold tracking-[1.2px] uppercase text-slate-meta">
-          {isLive ? "realtime" : "recent"}
+        </Eyebrow>
+        <span className="text-xs text-slate-meta">
+          {isLive ? "Realtime" : "Recent"}
         </span>
       </header>
       <div className="p-2 overflow-hidden">
@@ -200,7 +201,7 @@ export function LivePulse({
             <span className="text-[12px] leading-[1.5] text-ink min-w-0">
               {e.text}
             </span>
-            <span className="ml-auto text-[10px] text-slate-meta whitespace-nowrap pt-0.5">
+            <span className="ml-auto text-[10px] text-slate-meta whitespace-nowrap pt-0.5 tabular">
               {e.ago}
             </span>
           </Link>

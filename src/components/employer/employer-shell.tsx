@@ -39,6 +39,7 @@ import {
   SquareKanban,
 } from "lucide-react";
 import type { Capability } from "@/lib/permissions/capabilities";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { BrandLockup } from "@/components/marketing/site-shell";
 import { RailCollapse } from "./rail-collapse";
 import { ToastProvider } from "@/components/app/toast";
@@ -280,7 +281,7 @@ export function EmployerShell({
               <div className="text-[12px] font-semibold text-sidebar-foreground truncate leading-tight">
                 {dsoName}
               </div>
-              <div className="text-[8.5px] font-bold tracking-[1.2px] uppercase text-[#8db8a3] truncate mt-0.5">
+              <div className="text-[11px] font-semibold capitalize text-heritage-bright truncate mt-0.5">
                 {role.replace("_", " ")} · {dsoStatus}
               </div>
             </div>
@@ -312,20 +313,20 @@ export function EmployerShell({
         <div className="rail-foot border-t border-sidebar-border px-5 py-3.5 flex items-center gap-4">
           <Link
             href="/employer/settings"
-            className="rail-flink text-[9.5px] font-extrabold tracking-[1.5px] uppercase text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
+            className="rail-flink text-xs font-semibold text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors"
           >
             Settings
           </Link>
           <Link
             href="/employer/help"
-            className="rail-flink text-[9.5px] font-extrabold tracking-[1.5px] uppercase text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
+            className="rail-flink text-xs font-semibold text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors"
           >
             Help
           </Link>
           <form action="/employer/sign-out" method="post" className="ml-auto">
             <button
               type="submit"
-              className="rail-out text-[9.5px] font-extrabold tracking-[1.5px] uppercase text-[#8db8a3] hover:text-sidebar-foreground transition-colors"
+              className="rail-out text-xs font-semibold text-heritage-bright hover:text-sidebar-foreground transition-colors"
             >
               Sign out →
             </button>
@@ -357,9 +358,7 @@ export function EmployerShell({
         {/* Active-location badge — persistent reminder when not on "All locations". */}
         {activeLocation && (
           <div className="border-b border-[var(--rule)] bg-cream/60 px-6 sm:px-10 py-2 text-[12px] text-slate-body inline-flex items-center gap-2">
-            <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
-              Viewing
-            </span>
+            <Eyebrow as="span">Viewing</Eyebrow>
             <span className="font-semibold text-ink">{activeLocation.name}</span>
             {activeLocation.subtitle && (
               <span className="text-slate-meta">{activeLocation.subtitle}</span>

@@ -18,6 +18,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, LifeBuoy, LogOut, Settings as SettingsIcon } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Avatar } from "@/components/ui/avatar";
 import { isEmployerNavItemActive } from "./employer-nav-active";
@@ -123,7 +124,7 @@ export function EmployerMobileNav({
                   <div className="text-[13px] font-semibold text-sidebar-foreground truncate leading-tight">
                     {user.dsoName}
                   </div>
-                  <div className="text-[9px] tracking-[1.5px] uppercase text-sidebar-foreground/50 truncate">
+                  <div className="text-[11px] capitalize text-sidebar-foreground/50 truncate">
                     {user.role.replace("_", " ")} · {user.dsoStatus}
                   </div>
                 </div>
@@ -160,18 +161,18 @@ export function EmployerMobileNav({
 
             <div className="border-t border-sidebar-border p-3 space-y-1">
               <div className="flex items-center justify-between px-3 py-2">
-                <span className="text-[11px] font-bold uppercase tracking-[1.5px] text-sidebar-muted">
+                <Eyebrow as="span" className="text-sidebar-muted">
                   Theme
-                </span>
+                </Eyebrow>
                 <ThemeToggle className="text-sidebar-foreground" />
               </div>
               <Link
                 href={settings.href}
                 onClick={() => setOpen(false)}
                 className={
-                  "flex items-center gap-3 px-3 py-2.5 text-[13px] font-semibold rounded " +
+                  "flex items-center gap-3 px-3 py-2.5 text-[13px] font-semibold border-l-2 border-l-transparent transition-colors " +
                   (isEmployerNavItemActive(pathname, settings)
-                    ? "bg-sidebar-foreground/10 text-sidebar-foreground"
+                    ? "border-l-heritage-bright text-sidebar-foreground"
                     : "text-sidebar-foreground/65 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground")
                 }
               >
@@ -182,9 +183,9 @@ export function EmployerMobileNav({
                 href={help.href}
                 onClick={() => setOpen(false)}
                 className={
-                  "flex items-center gap-3 px-3 py-2.5 text-[13px] font-semibold rounded " +
+                  "flex items-center gap-3 px-3 py-2.5 text-[13px] font-semibold border-l-2 border-l-transparent transition-colors " +
                   (isEmployerNavItemActive(pathname, help)
-                    ? "bg-sidebar-foreground/10 text-sidebar-foreground"
+                    ? "border-l-heritage-bright text-sidebar-foreground"
                     : "text-sidebar-foreground/65 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground")
                 }
               >
@@ -224,9 +225,9 @@ function MobileRow({
         href={item.href}
         onClick={onSelect}
         className={
-          "flex items-center gap-3 px-3 py-2.5 text-[13px] font-semibold tracking-[0.5px] rounded transition-colors " +
+          "flex items-center gap-3 px-3 py-2.5 text-[13px] font-semibold tracking-[0.5px] border-l-2 border-l-transparent transition-colors " +
           (isActive
-            ? "bg-sidebar-foreground/10 text-sidebar-foreground"
+            ? "border-l-heritage-bright text-sidebar-foreground"
             : "text-sidebar-foreground/65 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground")
         }
       >

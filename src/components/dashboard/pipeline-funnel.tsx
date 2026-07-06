@@ -25,6 +25,7 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 
 interface PipelineFunnelProps {
   /** Absolute counts per stage. Order: submitted, reviewed, interview, offer, hired. */
@@ -100,14 +101,14 @@ export function PipelineFunnel({
     >
       <header className="flex items-start justify-between gap-4 mb-6 flex-wrap">
         <div>
-          <h2 className="text-[11px] font-extrabold tracking-[2.5px] uppercase text-heritage-deep">
+          <Eyebrow as="h2">
             Pipeline Funnel
-          </h2>
+          </Eyebrow>
           <div className="text-[12px] text-slate-meta mt-1">
             {windowLabel} · Where your pipeline leaks and where it converts.
           </div>
         </div>
-        <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold tracking-[1.5px] uppercase text-heritage group-hover:text-heritage-deep transition-colors">
+        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-heritage-deep group-hover:text-ink transition-colors">
           Open analytics
           <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
         </span>
@@ -122,7 +123,7 @@ export function PipelineFunnel({
           const isWorst = i === worstIdx && conv !== null && conv < 100;
           return (
             <div key={stage.key} className="flex flex-col">
-              <div className="text-[28px] sm:text-[32px] font-black tracking-[-1.2px] leading-none text-ink mb-2">
+              <div className="text-[28px] sm:text-[32px] font-black tracking-[-1.2px] leading-none text-ink mb-2 tabular">
                 {count}
               </div>
               <div className="h-4 bg-cream relative mb-2.5">
@@ -135,13 +136,13 @@ export function PipelineFunnel({
                   }}
                 />
               </div>
-              <div className="text-[10px] font-extrabold tracking-[1.6px] uppercase text-heritage-deep mb-0.5">
+              <Eyebrow as="div" className="mb-0.5">
                 {stage.label}
-              </div>
+              </Eyebrow>
               <div className="text-[11px] text-slate-meta">
                 {stage.showConv && conv !== null ? (
                   <>
-                    <strong className="text-ink font-bold">{conv}%</strong>{" "}
+                    <strong className="text-ink font-bold tabular">{conv}%</strong>{" "}
                     from prev{isWorst && (
                       <span className="text-danger"> · biggest drop</span>
                     )}
@@ -159,14 +160,14 @@ export function PipelineFunnel({
       <div className="mt-6 pt-5 border-t border-[var(--rule)] flex flex-wrap items-baseline gap-x-7 gap-y-2 text-[12px] text-slate-body">
         <div className="flex gap-1.5 items-baseline">
           Application → Hire{" "}
-          <strong className="text-ink font-extrabold text-[14px] tracking-[-0.3px]">
+          <strong className="text-ink font-extrabold text-[14px] tracking-[-0.3px] tabular">
             {e2ePct}%
           </strong>
         </div>
         {worstIdx >= 0 && conversions[worstIdx] !== null && (
           <div className="flex gap-1.5 items-baseline">
             {STAGES[worstIdx - 1].label} → {STAGES[worstIdx].label}{" "}
-            <strong className="text-ink font-extrabold text-[14px] tracking-[-0.3px]">
+            <strong className="text-ink font-extrabold text-[14px] tracking-[-0.3px] tabular">
               {conversions[worstIdx]}%
             </strong>{" "}
             <span className="text-danger">↘ biggest drop</span>
@@ -174,7 +175,7 @@ export function PipelineFunnel({
         )}
         <div className="flex gap-1.5 items-baseline">
           Median time to hire{" "}
-          <strong className="text-ink font-extrabold text-[14px] tracking-[-0.3px]">
+          <strong className="text-ink font-extrabold text-[14px] tracking-[-0.3px] tabular">
             {medianTimeToHireDays != null
               ? `${medianTimeToHireDays} day${medianTimeToHireDays === 1 ? "" : "s"}`
               : "—"}

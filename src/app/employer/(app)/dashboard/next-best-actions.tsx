@@ -18,14 +18,15 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { NbaItem, NbaTone } from "@/lib/dashboard/next-best-actions";
+import { Eyebrow } from "@/components/brand/eyebrow";
 
 const TONE_RANK: Record<NbaTone, string> = {
-  hot: "bg-[#b3543f]",
+  hot: "bg-stage-brick",
   fit: "bg-heritage",
   std: "bg-ink",
 };
 const TONE_EDGE: Record<NbaTone, string> = {
-  hot: "border-l-[#b3543f]",
+  hot: "border-l-stage-brick",
   fit: "border-l-heritage",
   std: "border-l-ink",
 };
@@ -73,9 +74,7 @@ export function NextBestActions({ items }: { items: NbaItem[] }) {
   return (
     <section className="mb-6 border border-[var(--rule)] bg-card">
       <header className="px-6 py-4 border-b border-[var(--rule)] flex items-center justify-between gap-3">
-        <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
-          Next best actions
-        </span>
+        <Eyebrow as="span">Next best actions</Eyebrow>
         <span className="hidden sm:block text-[10px] text-slate-meta">
           <b className="text-ink">j / k</b> move · <b className="text-ink">Enter</b> open ·
           ranked by impact × urgency
@@ -93,7 +92,7 @@ export function NextBestActions({ items }: { items: NbaItem[] }) {
           >
             <span
               aria-hidden
-              className={`flex-none w-[22px] h-[22px] ${TONE_RANK[item.tone]} text-ivory text-[10px] font-extrabold flex items-center justify-center`}
+              className={`flex-none w-[22px] h-[22px] ${TONE_RANK[item.tone]} text-ivory text-[10px] font-extrabold tabular flex items-center justify-center`}
             >
               {i + 1}
             </span>

@@ -8,6 +8,7 @@
 
 import Link from "next/link";
 import { AlertTriangle, Clock, ArrowRight } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import type { ExpiringCredential } from "@/lib/credentials/expiring-credentials";
 
 function pill(state: ExpiringCredential["expiryState"]): string {
@@ -37,11 +38,9 @@ export function CredentialsExpiring({ items }: { items: ExpiringCredential[] }) 
       <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--rule)] bg-cream/40">
         <div className="flex items-center gap-2">
           <AlertTriangle className="h-4 w-4 text-warning" />
-          <h2 className="text-[11px] font-bold tracking-[2px] uppercase text-foreground">
-            Credentials expiring
-          </h2>
+          <Eyebrow as="h2">Credentials expiring</Eyebrow>
         </div>
-        <span className="text-[11px] font-bold text-slate-meta">
+        <span className="text-[11px] font-bold text-slate-meta tabular">
           {items.length} to review
         </span>
       </div>
@@ -56,7 +55,7 @@ export function CredentialsExpiring({ items }: { items: ExpiringCredential[] }) 
                 <div className="text-[13px] font-semibold text-ink truncate">
                   {c.candidateName}
                   {c.hired && (
-                    <span className="ml-2 text-[10px] font-bold tracking-[1px] uppercase text-success">
+                    <span className="ml-2 text-[10px] font-semibold text-success">
                       Hired
                     </span>
                   )}
@@ -66,7 +65,7 @@ export function CredentialsExpiring({ items }: { items: ExpiringCredential[] }) 
                 </div>
               </div>
               <span
-                className={`inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold shrink-0 ${pill(c.expiryState)}`}
+                className={`inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold tabular shrink-0 ${pill(c.expiryState)}`}
               >
                 {c.expiryState === "expiring_soon" ? (
                   <Clock className="h-3 w-3" />

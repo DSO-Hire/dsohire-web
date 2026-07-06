@@ -37,7 +37,7 @@ export function Sparkline({
   width = 120,
   height = 32,
   stroke = "var(--color-heritage, #4D7A60)",
-  fill = "rgba(77,122,96,0.10)",
+  fill = "var(--heritage-glow)",
   strokeWidth = 1.5,
   showLastDot = true,
   ariaLabel,

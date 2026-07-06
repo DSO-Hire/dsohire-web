@@ -11,6 +11,7 @@
 
 import Link from "next/link";
 import { ArrowRight, EyeOff, Hand, Heart } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import type { InterestedCandidate } from "@/lib/talent-pool/mutual-interest";
 
 // Token-based classes (themed) instead of inline-style hex, so the fit
@@ -43,15 +44,13 @@ export function InterestedInYou({
   return (
     <section className="mb-6 border border-[var(--rule)] bg-card">
       <header className="px-6 py-4 border-b border-[var(--rule)] flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-heritage-deep">
+        <div className="flex items-center gap-2 text-slate-meta">
           <Hand className="h-3.5 w-3.5" />
-          <span className="text-[10px] font-bold tracking-[2.5px] uppercase">
-            Interested in you
-          </span>
+          <Eyebrow as="span">Interested in you</Eyebrow>
         </div>
         <Link
           href="/employer/talent-pool"
-          className="text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink inline-flex items-center gap-1 shrink-0"
+          className="text-xs font-semibold text-heritage-deep hover:text-ink inline-flex items-center gap-1 shrink-0"
         >
           Talent pool <ArrowRight className="h-3 w-3" />
         </Link>
@@ -80,7 +79,7 @@ export function InterestedInYou({
                   {c.mutual && (
                     <span
                       title="You saved them too"
-                      className="inline-flex items-center gap-1 rounded-full bg-heritage/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[1px] text-heritage-deep shrink-0"
+                      className="inline-flex items-center gap-1 bg-heritage/10 px-1.5 py-0.5 text-[10px] font-semibold text-heritage-deep shrink-0"
                     >
                       <Heart className="h-3 w-3" /> Mutual
                     </span>
@@ -88,7 +87,7 @@ export function InterestedInYou({
                   {c.anonymized && (
                     <span
                       title="Anonymous until they apply"
-                      className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[1px] text-slate-meta shrink-0"
+                      className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-meta shrink-0"
                     >
                       <EyeOff className="h-3 w-3" /> Anon
                     </span>
@@ -109,7 +108,7 @@ export function InterestedInYou({
                 {style && c.fit ? (
                   <>
                     <span
-                      className={`inline-flex items-center px-2 py-0.5 text-[11px] font-bold rounded-full ${style.cls}`}
+                      className={`inline-flex items-center px-2 py-0.5 text-[11px] font-bold ${style.cls}`}
                     >
                       {style.label}
                     </span>

@@ -13,6 +13,8 @@
 
 import Link from "next/link";
 
+import { Eyebrow } from "@/components/brand/eyebrow";
+
 export interface JobHealthRow {
   id: string;
   title: string;
@@ -60,12 +62,12 @@ export function JobHealth({
   return (
     <section className="border border-[var(--rule)] bg-card">
       <header className="px-5 py-4 border-b border-[var(--rule)] flex items-center justify-between gap-3">
-        <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+        <Eyebrow as="span">
           Job health — funnel + freshness per opening
-        </span>
+        </Eyebrow>
         <Link
           href={viewAllHref}
-          className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors shrink-0"
+          className="text-xs font-semibold text-heritage-deep hover:text-ink transition-colors shrink-0"
         >
           Pipeline HQ →
         </Link>
@@ -85,12 +87,12 @@ export function JobHealth({
                 <div className="text-[13px] font-extrabold tracking-[-0.2px] text-ink truncate">
                   {r.title}
                   {r.locationLabel && (
-                    <span className="ml-2 text-[9px] font-bold tracking-[0.8px] uppercase text-slate-meta">
+                    <span className="ml-2 text-[10px] font-semibold text-slate-meta">
                       {r.locationLabel}
                     </span>
                   )}
                 </div>
-                <div className="text-[10.5px] text-slate-meta mt-0.5">
+                <div className="text-[10.5px] text-slate-meta mt-0.5 tabular">
                   {r.daysOpen != null ? `${r.daysOpen} days open · ` : ""}
                   {r.subline}
                   {r.thisWeek > 0 ? ` · ${r.thisWeek} apps this week` : ""}
@@ -117,7 +119,7 @@ export function JobHealth({
                       <span className="text-[13px] font-extrabold text-ink leading-none pt-1.5 tabular-nums">
                         {count}
                       </span>
-                      <span className="text-[7.5px] font-bold tracking-[1px] uppercase text-slate-meta pb-1 pt-0.5">
+                      <span className="text-[10px] font-semibold text-slate-meta pb-1 pt-0.5">
                         {s.label}
                       </span>
                     </span>
@@ -131,7 +133,7 @@ export function JobHealth({
               />
               <Link
                 href={r.href}
-                className="text-[10px] font-bold tracking-[1px] uppercase text-heritage-deep hover:text-ink transition-colors"
+                className="text-xs font-semibold text-heritage-deep hover:text-ink transition-colors"
               >
                 Open
               </Link>

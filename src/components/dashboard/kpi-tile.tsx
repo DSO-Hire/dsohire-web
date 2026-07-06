@@ -31,6 +31,7 @@
 
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { Sparkline } from "./sparkline";
 import { TrendPill } from "./trend-pill";
 import { StatValue } from "@/components/marketing/motion";
@@ -83,12 +84,12 @@ export function KpiTile({
   // a flat treatment.
   const navy = tone === "navy";
   const baseBg = navy
-    ? "bg-hero border-l-4 border-[#8db8a3]"
+    ? "bg-hero border-l-4 border-heritage-bright"
     : tone === "tonal"
       ? "bg-cream border-l-4 border-heritage"
       : "bg-card";
   const hoverBg = navy
-    ? "hover:bg-[#1a2c4e]"
+    ? "hover:bg-[color-mix(in_srgb,var(--hero)_92%,white)]"
     : tone === "tonal"
       ? "hover:bg-ivory-deep"
       : "hover:bg-cream/40";
@@ -98,17 +99,17 @@ export function KpiTile({
       {/* Chevron (top-right) — only on clickable tiles. The tile body itself
           handles the click; the chevron is just visual affordance. */}
       {isClickable && (
-        <ChevronRight className={`absolute top-4 right-4 h-4 w-4 group-hover:translate-x-1 transition-all ${navy ? "text-hero-foreground/40 group-hover:text-[#8db8a3]" : "text-slate-meta group-hover:text-heritage"}`} />
+        <ChevronRight className={`absolute top-4 right-4 h-4 w-4 group-hover:translate-x-1 transition-all ${navy ? "text-hero-foreground/40 group-hover:text-heritage-bright" : "text-slate-meta group-hover:text-heritage"}`} />
       )}
 
       {/* Icon + label cluster */}
       <div className="flex items-center gap-2.5 mb-4">
         <div className={`h-7 w-7 flex items-center justify-center flex-shrink-0 ${navy ? "bg-hero-foreground/10" : "bg-heritage/10"}`}>
-          <Icon className={`h-3.5 w-3.5 ${navy ? "text-[#8db8a3]" : "text-heritage-deep"}`} />
+          <Icon className={`h-3.5 w-3.5 ${navy ? "text-heritage-bright" : "text-heritage-deep"}`} />
         </div>
-        <div className={`text-[10px] font-extrabold tracking-[2.2px] uppercase ${navy ? "text-[#8db8a3]" : "text-heritage-deep"}`}>
+        <Eyebrow as="div" className={navy ? "text-heritage-bright" : undefined}>
           {label}
-        </div>
+        </Eyebrow>
       </div>
 
       {/* Big value — FOH-9: integers count up on view (700ms, settles fast
@@ -119,7 +120,7 @@ export function KpiTile({
 
       {/* Optional secondary signal line */}
       {hint && (
-        <div className={`text-[12px] tracking-[0.2px] leading-snug ${navy ? "text-hero-foreground/70" : "text-slate-body"}`}>
+        <div className={`text-[12px] tracking-[0.2px] leading-snug tabular ${navy ? "text-hero-foreground/70" : "text-slate-body"}`}>
           {hint}
         </div>
       )}
@@ -132,7 +133,7 @@ export function KpiTile({
               data={spark as number[]}
               width={100}
               height={28}
-              stroke={navy ? "#8db8a3" : undefined}
+              stroke={navy ? "var(--heritage-bright)" : undefined}
             />
           )}
           {showTrend && (
@@ -147,7 +148,7 @@ export function KpiTile({
 
       {/* Route label — only on clickable tiles. Pushes to the bottom. */}
       {isClickable && routeLabel && (
-        <div className={`mt-auto pt-3.5 flex items-center gap-1.5 text-[9px] font-bold tracking-[1.6px] uppercase transition-colors ${navy ? "text-hero-foreground/50 group-hover:text-[#8db8a3] border-t border-hero-foreground/10" : "text-slate-meta group-hover:text-heritage-deep border-t border-border"}`}>
+        <div className={`mt-auto pt-3.5 flex items-center gap-1.5 text-[10px] font-semibold transition-colors ${navy ? "text-hero-foreground/50 group-hover:text-heritage-bright border-t border-hero-foreground/10" : "text-slate-meta group-hover:text-heritage-deep border-t border-[var(--rule)]"}`}>
           {routeLabel}
           <ChevronRight className="h-2.5 w-2.5" strokeWidth={3} />
         </div>

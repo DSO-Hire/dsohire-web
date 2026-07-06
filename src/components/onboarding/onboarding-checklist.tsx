@@ -14,6 +14,7 @@
 import { useEffect, useState } from "react";
 import { CheckCircle2, Circle, X, ChevronRight, Rocket } from "lucide-react";
 import Link from "next/link";
+import { Eyebrow } from "@/components/brand/eyebrow";
 
 export interface OnboardingItem {
   key: string;
@@ -53,10 +54,10 @@ export function OnboardingChecklist({
   }
 
   return (
-    <section className="rounded-lg border border-heritage/30 bg-gradient-to-br from-heritage/[0.08] via-[#F7F4ED] to-white dark:via-card dark:to-card p-5 sm:p-6">
+    <section className="rounded-lg border border-heritage/30 bg-gradient-to-br from-heritage/[0.08] via-ivory to-ivory dark:via-card dark:to-card p-5 sm:p-6">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-heritage text-primary-foreground">
+          <div className="flex size-9 shrink-0 items-center justify-center bg-heritage text-primary-foreground">
             <Rocket className="size-[18px]" aria-hidden />
           </div>
           <div>
@@ -67,16 +68,16 @@ export function OnboardingChecklist({
         <button
           type="button"
           onClick={dismiss}
-          className="shrink-0 rounded p-1 text-meta-foreground hover:bg-black/5 hover:text-foreground"
+          className="shrink-0 rounded p-1 text-meta-foreground hover:bg-ink/5 hover:text-foreground"
           aria-label="Dismiss setup checklist"
         >
           <X className="size-4" />
         </button>
       </div>
 
-      <p className="mt-3 text-[11px] font-semibold uppercase tracking-wider text-heritage">
+      <Eyebrow as="p" className="text-heritage-deep mt-3 tabular">
         {doneCount} of {items.length} done
-      </p>
+      </Eyebrow>
 
       <ul className="mt-2 divide-y divide-heritage/10">
         {items.map((item) =>

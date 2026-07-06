@@ -29,6 +29,7 @@ import {
   Loader2,
   Search,
 } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 
 export interface PaletteResult {
   group: string;
@@ -258,9 +259,7 @@ function PaletteModal({
             <ul ref={listRef} className="list-none py-2">
               {grouped.map((group) => (
                 <li key={group.meta.key} className="mb-2 last:mb-0">
-                  <div className="px-4 py-1 text-[10px] font-bold tracking-[2px] uppercase text-slate-meta">
-                    {group.meta.label}
-                  </div>
+                  <Eyebrow className="px-4 py-1">{group.meta.label}</Eyebrow>
                   <ul className="list-none">
                     {group.items.map((item) => {
                       const flatIndex = flat.indexOf(item);

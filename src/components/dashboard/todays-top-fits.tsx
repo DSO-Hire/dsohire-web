@@ -11,6 +11,7 @@
 
 import Link from "next/link";
 import { ArrowRight, EyeOff, Hand } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import type { TodaysTopFit } from "@/lib/talent-pool/smart-picks";
 
 // Token-based classes (themed) instead of inline-style hex, so the fit
@@ -29,14 +30,12 @@ export function TodaysTopFits({ fits }: { fits: TodaysTopFit[] }) {
   return (
     <section className="mb-6 border border-[var(--rule)] bg-card">
       <header className="px-6 py-4 border-b border-[var(--rule)] flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-heritage-deep">
-          <span className="text-[10px] font-bold tracking-[2.5px] uppercase">
-            Today&apos;s top fits
-          </span>
+        <div className="flex items-center gap-2">
+          <Eyebrow as="span">Today&apos;s top fits</Eyebrow>
         </div>
         <Link
           href="/employer/talent-pool"
-          className="text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink inline-flex items-center gap-1 shrink-0"
+          className="text-xs font-semibold text-heritage-deep hover:text-ink inline-flex items-center gap-1 shrink-0"
         >
           Talent pool <ArrowRight className="h-3 w-3" />
         </Link>
@@ -65,7 +64,7 @@ export function TodaysTopFits({ fits }: { fits: TodaysTopFit[] }) {
                   {p.anonymized && (
                     <span
                       title="Anonymous until they apply"
-                      className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[1px] text-slate-meta shrink-0"
+                      className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-meta shrink-0"
                     >
                       <EyeOff className="h-3 w-3" /> Anon
                     </span>
@@ -88,7 +87,7 @@ export function TodaysTopFits({ fits }: { fits: TodaysTopFit[] }) {
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <span
-                  className={`inline-flex items-center px-2 py-0.5 text-[11px] font-bold rounded-full ${style.cls}`}
+                  className={`inline-flex items-center px-2 py-0.5 text-[11px] font-bold ${style.cls}`}
                 >
                   {style.label}
                 </span>

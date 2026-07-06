@@ -154,7 +154,7 @@ function Banner({ tone, icon, title, body, ctaHref, ctaLabel }: BannerProps) {
       </div>
       <Link
         href={ctaHref}
-        className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 text-[10px] font-bold tracking-[1.8px] uppercase whitespace-nowrap transition-colors ${ctaClasses[tone]}`}
+        className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-semibold whitespace-nowrap transition-colors ${ctaClasses[tone]}`}
       >
         {ctaLabel}
         <ArrowRight className="h-3.5 w-3.5" />
