@@ -11,6 +11,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Mail, Loader2, AlertCircle, X } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { enrollInSequence, stopEnrollment } from "@/lib/sequences/actions";
 
 export interface ActiveEnrollmentView {
@@ -70,10 +71,10 @@ export function SequenceEnrollControl({
       <div className="border border-heritage/30 bg-heritage/[0.05] p-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="min-w-0">
-            <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-0.5 inline-flex items-center gap-1.5">
+            <Eyebrow className="mb-0.5 inline-flex items-center gap-1.5">
               <Mail className="h-3 w-3" /> In a nurture sequence
-            </div>
-            <div className="text-[13px] text-ink leading-snug">
+            </Eyebrow>
+            <div className="text-[13px] text-ink leading-snug tabular">
               <strong>{enrollment.sequenceName}</strong> · step{" "}
               {Math.min(enrollment.currentStep + 1, enrollment.totalSteps)} of{" "}
               {enrollment.totalSteps}
@@ -89,7 +90,7 @@ export function SequenceEnrollControl({
             type="button"
             onClick={stop}
             disabled={pending}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[var(--rule-strong)] text-ink bg-card text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream disabled:opacity-60 shrink-0"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[var(--rule-strong)] text-ink bg-card text-xs font-semibold hover:bg-cream disabled:opacity-60 shrink-0"
           >
             {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
             Stop
@@ -120,9 +121,9 @@ export function SequenceEnrollControl({
 
   return (
     <div className="border border-[var(--rule)] bg-card p-3">
-      <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5 inline-flex items-center gap-1.5">
+      <Eyebrow className="mb-1.5 inline-flex items-center gap-1.5">
         <Mail className="h-3 w-3" /> Nurture sequence
-      </div>
+      </Eyebrow>
       <div className="flex flex-wrap items-center gap-2">
         <select
           value={picked}
@@ -140,7 +141,7 @@ export function SequenceEnrollControl({
           type="button"
           onClick={start}
           disabled={pending || !picked}
-          className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
+          className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 text-xs font-semibold hover:bg-primary/90 disabled:opacity-60"
         >
           {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Mail className="h-3.5 w-3.5" />}
           Start sequence

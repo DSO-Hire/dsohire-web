@@ -28,9 +28,9 @@ export function NotesEditor({
         <button
           type="submit"
           disabled={pending}
-          className="px-5 py-2.5 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="px-5 py-2.5 bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {pending ? "Saving…" : "Save Notes"}
+          {pending ? "Saving…" : "Save notes"}
         </button>
         {state.error && (
           <span className="text-[13px] text-danger">{state.error}</span>

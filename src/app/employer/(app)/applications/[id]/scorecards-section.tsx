@@ -34,6 +34,7 @@ import {
   type ChangeEvent,
 } from "react";
 import { Star, Trash2, Lock, Loader2, AlertCircle, Sparkles, X, Upload } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import {
   REALTIME_LISTEN_TYPES,
@@ -593,24 +594,24 @@ export function ScorecardsSection({
       <div>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
           <div className="flex items-center gap-2">
-            <h3 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+            <Eyebrow as="h3">
               Your scorecard
-            </h3>
+            </Eyebrow>
             {myStatus === "submitted" && (
-              <span className="inline-flex items-center gap-1 text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-heritage-deep">
                 <Lock className="h-3 w-3" />
                 Submitted · locked
               </span>
             )}
             {myStatus === "draft" && (
-              <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-warning">
+              <span className="text-xs font-semibold text-warning">
                 Draft · not yet submitted
               </span>
             )}
           </div>
           <div className="flex items-center gap-3">
             {myStatus === "submitted" && myScorecard?.submitted_at && (
-              <span className="text-[12px] text-slate-meta">
+              <span className="text-[12px] text-slate-meta tabular">
                 Submitted {relativeTime(myScorecard.submitted_at)}
               </span>
             )}
@@ -618,7 +619,7 @@ export function ScorecardsSection({
               <button
                 type="button"
                 onClick={() => setShowNoteTaker(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-heritage/30 bg-heritage/[0.06] text-heritage-deep text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-heritage/10 transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-heritage/30 bg-heritage/[0.06] text-heritage-deep text-xs font-semibold hover:bg-heritage/10 transition-colors"
               >
                 <Sparkles className="h-3.5 w-3.5" />
                 Draft from notes
@@ -649,14 +650,14 @@ export function ScorecardsSection({
               <button
                 type="button"
                 onClick={openEditor}
-                className="px-4 py-2 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
+                className="px-4 py-2 bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors"
               >
                 Continue editing
               </button>
               <button
                 type="button"
                 onClick={() => setConfirmingDelete(true)}
-                className="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-danger transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-body hover:text-danger transition-colors"
               >
                 <Trash2 className="h-3 w-3" />
                 Discard draft
@@ -714,9 +715,9 @@ export function ScorecardsSection({
       {/* Other reviewers */}
       {otherScorecards.length > 0 && (
         <div>
-          <h3 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
-            Other reviewers · {otherScorecards.length}
-          </h3>
+          <Eyebrow as="h3" className="mb-3">
+            Other reviewers · <span className="tabular">{otherScorecards.length}</span>
+          </Eyebrow>
           <ul className="space-y-4">
             {otherScorecards.map((sc) => (
               <li
@@ -843,7 +844,7 @@ function NoteTakerModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#14233F]/60 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink-1000/60 backdrop-blur-sm p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget && !pending) onClose();
       }}
@@ -851,10 +852,10 @@ function NoteTakerModal({
       <div className="w-full max-w-[640px] max-h-[92vh] bg-card border border-[var(--rule)] shadow-xl flex flex-col">
         <header className="flex items-start justify-between p-5 border-b border-[var(--rule)]">
           <div>
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1 inline-flex items-center gap-2">
+            <Eyebrow className="mb-1 inline-flex items-center gap-2">
               <Sparkles className="h-3 w-3" />
               AI note-taker
-            </div>
+            </Eyebrow>
             <h2 className="text-[18px] font-extrabold tracking-[-0.4px] text-ink">
               Draft a scorecard from your interview notes
             </h2>
@@ -890,7 +891,7 @@ function NoteTakerModal({
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={pending || reading}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[var(--rule-strong)] bg-card text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[var(--rule-strong)] bg-card text-ink text-xs font-semibold hover:bg-cream disabled:opacity-60"
             >
               {reading ? (
                 <>
@@ -914,7 +915,7 @@ function NoteTakerModal({
             placeholder="Paste the interview transcript or your notes here…"
             className="w-full px-3 py-2.5 bg-cream border border-[var(--rule-strong)] text-ink text-[13px] leading-relaxed focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage resize-y disabled:opacity-60"
           />
-          <p className="mt-1.5 text-[11px] text-slate-meta">
+          <p className="mt-1.5 text-[11px] text-slate-meta tabular">
             {chars.toLocaleString()} characters · only attributes your notes
             actually cover get scored.
           </p>
@@ -931,7 +932,7 @@ function NoteTakerModal({
             type="button"
             onClick={onClose}
             disabled={pending}
-            className="px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-ink disabled:opacity-60"
+            className="px-4 py-2 text-xs font-semibold text-slate-body hover:text-ink disabled:opacity-60"
           >
             Cancel
           </button>
@@ -939,7 +940,7 @@ function NoteTakerModal({
             type="button"
             onClick={generate}
             disabled={pending || chars < 40}
-            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2 text-xs font-semibold hover:bg-primary/90 disabled:opacity-60"
           >
             {pending ? (
               <>
@@ -976,16 +977,16 @@ function AggregatePanel({
     <div className="border border-[var(--rule-strong)] bg-cream p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-3 mb-4">
         <div>
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
-            Aggregate · {aggregate.reviewerCount}{" "}
+          <Eyebrow className="mb-1">
+            Aggregate · <span className="tabular">{aggregate.reviewerCount}</span>{" "}
             {aggregate.reviewerCount === 1 ? "reviewer" : "reviewers"}
-          </div>
+          </Eyebrow>
           <div className="flex items-baseline gap-2">
             <Star className="h-5 w-5 text-heritage-deep self-center" />
             <span className="text-3xl font-extrabold tracking-[-1px] text-ink tabular-nums">
               {overall}
             </span>
-            <span className="text-[13px] text-slate-meta">/ 5.0</span>
+            <span className="text-[13px] text-slate-meta tabular">/ 5.0</span>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -996,7 +997,7 @@ function AggregatePanel({
             return (
               <span
                 key={rec}
-                className={`text-[10px] font-bold tracking-[1.5px] uppercase px-2 py-1 ring-1 ring-inset ${c.bg} ${c.ring} ${c.text}`}
+                className={`text-xs font-semibold tabular px-2 py-1 ring-1 ring-inset ${c.bg} ${c.ring} ${c.text}`}
               >
                 {count} {RECOMMENDATION_LABELS[rec]}
               </span>
@@ -1076,12 +1077,12 @@ function ReadOnlyScorecard({
                 {scorecard.reviewerName ?? "Teammate"}
               </span>
               {scorecard.reviewerRole && (
-                <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
+                <span className="text-xs font-semibold text-slate-meta">
                   {ROLE_LABELS[scorecard.reviewerRole]}
                 </span>
               )}
               {scorecard.submitted_at && (
-                <span className="text-[12px] text-slate-meta">
+                <span className="text-[12px] text-slate-meta tabular">
                   Submitted {relativeTime(scorecard.submitted_at)}
                 </span>
               )}
@@ -1092,12 +1093,12 @@ function ReadOnlyScorecard({
             <span className="text-2xl font-extrabold tracking-[-0.6px] text-ink tabular-nums">
               {overall !== null ? overall.toFixed(1) : "—"}
             </span>
-            <span className="text-[12px] text-slate-meta">/ 5.0</span>
+            <span className="text-[12px] text-slate-meta tabular">/ 5.0</span>
           </div>
         </div>
         {recommendation && recColor && (
           <span
-            className={`text-[10px] font-bold tracking-[1.5px] uppercase px-2.5 py-1.5 ring-1 ring-inset ${recColor.bg} ${recColor.ring} ${recColor.text}`}
+            className={`text-xs font-semibold px-2.5 py-1.5 ring-1 ring-inset ${recColor.bg} ${recColor.ring} ${recColor.text}`}
           >
             {RECOMMENDATION_LABELS[recommendation]}
           </span>
@@ -1133,9 +1134,9 @@ function ReadOnlyScorecard({
 
       {scorecard.overall_note && (
         <div className="mt-4 pt-4 border-t border-[var(--rule)]">
-          <div className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta mb-1">
+          <Eyebrow className="mb-1">
             Overall notes
-          </div>
+          </Eyebrow>
           <p className="text-[14px] text-ink leading-relaxed whitespace-pre-wrap">
             {scorecard.overall_note}
           </p>
@@ -1187,9 +1188,9 @@ function ScorecardForm({
   return (
     <div className="border border-[var(--rule-strong)] bg-card p-5 mt-4 space-y-6">
       <div>
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
+        <Eyebrow className="mb-1">
           Rubric · {rubric.label}
-        </div>
+        </Eyebrow>
         <p className="text-[13px] text-slate-meta leading-snug">
           {rubric.description}
         </p>
@@ -1198,9 +1199,9 @@ function ScorecardForm({
       <div className="space-y-6">
         {groupedAttributes.map(([category, attrs]) => (
           <fieldset key={category} className="space-y-4">
-            <legend className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta mb-2">
+            <Eyebrow as="legend" className="mb-2">
               {ATTRIBUTE_CATEGORY_LABELS[category]}
-            </legend>
+            </Eyebrow>
             {attrs.map((attr) => {
               const entry = scores[attr.id];
               return (
@@ -1220,9 +1221,9 @@ function ScorecardForm({
 
       {/* Overall recommendation */}
       <div className="pt-5 border-t border-[var(--rule)]">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+        <Eyebrow className="mb-3">
           Overall recommendation
-        </div>
+        </Eyebrow>
         <div
           role="radiogroup"
           aria-label="Overall recommendation"
@@ -1238,7 +1239,7 @@ function ScorecardForm({
                 role="radio"
                 aria-checked={active}
                 onClick={() => onRecommendationChange(rec)}
-                className={`text-[10px] font-bold tracking-[1.5px] uppercase px-3 py-2 ring-1 ring-inset transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2 ${
+                className={`text-xs font-semibold px-3 py-2 ring-1 ring-inset transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2 ${
                   active
                     ? `${c.bg} ${c.ring} ${c.text}`
                     : "bg-card ring-[var(--rule-strong)] text-slate-body hover:bg-cream"
@@ -1251,9 +1252,9 @@ function ScorecardForm({
         </div>
 
         <label className="block">
-          <span className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta mb-1.5 block">
+          <Eyebrow as="span" className="mb-1.5 block">
             Overall notes
-          </span>
+          </Eyebrow>
           <textarea
             value={overallNote}
             onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
@@ -1278,26 +1279,26 @@ function ScorecardForm({
           type="button"
           onClick={onSaveDraft}
           disabled={saving || submitting}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-card text-ink text-[10px] font-bold tracking-[1.5px] uppercase ring-1 ring-inset ring-[var(--rule-strong)] hover:bg-cream transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-card text-ink text-xs font-semibold ring-1 ring-inset ring-[var(--rule-strong)] hover:bg-cream transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {saving && <Loader2 className="h-3 w-3 animate-spin" />}
-          Save Draft
+          Save draft
         </button>
         <button
           type="button"
           onClick={onRequestSubmit}
           disabled={saving || submitting}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {submitting && <Loader2 className="h-3 w-3 animate-spin" />}
-          Submit Scorecard
+          Submit scorecard
         </button>
         {onCancel && (
           <button
             type="button"
             onClick={onCancel}
             disabled={saving || submitting}
-            className="px-3 py-2.5 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-ink transition-colors disabled:opacity-60"
+            className="px-3 py-2.5 text-xs font-semibold text-slate-body hover:text-ink transition-colors disabled:opacity-60"
           >
             Cancel
           </button>
@@ -1433,7 +1434,7 @@ function ConfirmDialog({
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-ink transition-colors"
+            className="px-4 py-2 text-xs font-semibold text-slate-body hover:text-ink transition-colors"
           >
             Cancel
           </button>
@@ -1441,7 +1442,7 @@ function ConfirmDialog({
             type="button"
             onClick={onConfirm}
             disabled={confirmDisabled}
-            className={`px-5 py-2.5 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
+            className={`px-5 py-2.5 text-xs font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
               confirmTone === "danger"
                 ? "bg-danger text-danger-foreground hover:bg-danger/90"
                 : "bg-primary text-primary-foreground hover:bg-primary/90"

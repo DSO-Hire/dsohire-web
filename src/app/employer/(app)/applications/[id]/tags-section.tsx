@@ -9,6 +9,7 @@
 
 import { useState, useTransition } from "react";
 import { X, Plus, Check } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import {
   TAG_COLORS,
   TAG_COLOR_CLASSES,
@@ -85,9 +86,9 @@ export function TagsSection({
 
   return (
     <section className="border border-[var(--rule)] bg-card p-5">
-      <h3 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+      <Eyebrow as="h3" className="mb-3">
         Tags
-      </h3>
+      </Eyebrow>
 
       <div className="flex flex-wrap items-center gap-2">
         {tags.map((tag) => (
@@ -168,7 +169,7 @@ export function TagsSection({
             type="button"
             onClick={handleAdd}
             disabled={pending || label.trim().length === 0}
-            className="px-3 py-1.5 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
+            className="px-3 py-1.5 bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
             {pending ? "Adding…" : "Add"}
           </button>

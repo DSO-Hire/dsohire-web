@@ -19,6 +19,7 @@
 
 import { useState, useTransition } from "react";
 import { Eye, EyeOff, Check, AlertCircle, Lock, ShieldCheck } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { revealDsoToCandidate } from "@/lib/dso/affiliation-reveal";
 
 interface AffiliationCardProps {
@@ -87,9 +88,9 @@ export function AffiliationCard({
           <EyeOff className="h-4 w-4 text-slate-meta mt-1 flex-shrink-0" />
         )}
         <div className="flex-1 min-w-0">
-          <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
+          <Eyebrow className="mb-1">
             DSO Affiliation
-          </div>
+          </Eyebrow>
 
           {policy === "never" && (
             <p className="text-[13px] text-slate-body leading-relaxed">
@@ -142,7 +143,7 @@ export function AffiliationCard({
                 type="button"
                 onClick={onReveal}
                 disabled={pending}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Eye className="h-3 w-3" />
                 {pending ? "Revealing…" : `Reveal ${dsoName}`}

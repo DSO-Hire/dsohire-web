@@ -9,11 +9,13 @@ import Link from "next/link";
 import { ChevronRight, MapPin, UserRound, AlertCircle } from "lucide-react";
 import { redirect } from "next/navigation";
 import { HelpDisclosure } from "@/components/help/help-disclosure";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { Avatar } from "@/components/ui/avatar";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { can } from "@/lib/permissions/capabilities";
 import {
   KANBAN_KINDS,
+  KIND_DEFAULT_COLORS,
   KIND_DEFAULT_LABELS,
   STAGE_KINDS,
   TERMINAL_KINDS,
@@ -389,9 +391,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
   return (
     <>
       <header className="mb-8">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
-          Application Inbox
-        </div>
+        <Eyebrow className="mb-2">Application Inbox</Eyebrow>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink">
           Applications
         </h1>
@@ -454,14 +454,14 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
           />
           <button
             type="submit"
-            className="px-5 py-2.5 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
+            className="px-5 py-2.5 bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors"
           >
             Apply
           </button>
           {(sp.job || sp.status || sp.min_fit || sp.sort || wantStuck || wantStale) && (
             <Link
               href="/employer/applications"
-              className="px-5 py-2.5 border border-[var(--rule-strong)] text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
+              className="px-5 py-2.5 border border-[var(--rule-strong)] text-ink text-xs font-semibold hover:bg-cream transition-colors"
             >
               Clear
             </Link>
@@ -472,18 +472,18 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
       {/* Workflow-alert active filter (arrived from a dashboard alert link). */}
       {(wantStuck || wantStale) && (
         <div className="mb-6 flex flex-wrap items-center gap-3 border border-warning bg-warning-bg px-4 py-3">
-          <span className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[1.5px] uppercase text-warning">
+          <span className="inline-flex items-center gap-2 text-xs font-semibold text-warning tabular">
             <AlertCircle className="h-3.5 w-3.5" />
             {wantStuck
               ? `Stuck — in "New" past ${STUCK_SLA_DAYS} days`
               : `Stale — no movement for ${STALE_STAGE_DAYS}+ days`}
           </span>
-          <span className="text-[12px] text-slate-body">
+          <span className="text-[12px] text-slate-body tabular">
             {apps.length} {apps.length === 1 ? "application" : "applications"} need attention.
           </span>
           <Link
             href="/employer/applications"
-            className="ml-auto text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:underline"
+            className="ml-auto text-xs font-semibold text-heritage-deep hover:underline"
           >
             Clear filter
           </Link>
@@ -500,10 +500,10 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                 ? "/employer/applications"
                 : `/employer/applications?status=${s}`
             }
-            className={`text-[10px] font-bold tracking-[1.5px] uppercase px-3 py-1.5 transition-colors ${
+            className={`text-xs font-semibold px-3 py-1.5 transition-colors tabular border-b-2 ${
               sp.status === s
-                ? "bg-primary text-primary-foreground"
-                : "bg-cream text-ink hover:bg-[var(--rule)]"
+                ? "border-b-heritage text-ink"
+                : "border-b-transparent text-slate-meta hover:text-ink"
             }`}
           >
             {KIND_DEFAULT_LABELS[s]} · {statusCounts[s]}
@@ -514,9 +514,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
       {/* List */}
       {apps.length === 0 ? (
         <div className="border border-[var(--rule)] bg-card p-12 text-center max-w-[680px]">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
-            No applications yet
-          </div>
+          <Eyebrow className="mb-3">No applications yet</Eyebrow>
           <p className="text-[15px] text-ink leading-relaxed mb-2">
             {sp.job || sp.status || sp.min_fit || wantStuck || wantStale
               ? wantStuck
@@ -581,7 +579,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                         {displayName}
                       </div>
                       <span
-                        className={`text-[9px] font-bold tracking-[1.5px] uppercase px-2.5 py-1 ${statusBadgeClass(app.kind)}`}
+                        className={`text-xs font-semibold px-2.5 py-1 ${statusBadgeClass(app.kind)}`}
                       >
                         {app.stageLabel}
                       </span>
@@ -593,7 +591,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                       )}
                       {app.assignedTo && assigneeMap.get(app.assignedTo) && (
                         <span
-                          className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-ink/15 bg-ink/[0.04] px-2 py-0.5 text-[10px] font-semibold tracking-[0.3px] text-ink/70"
+                          className="inline-flex flex-shrink-0 items-center gap-1 border border-ink/15 bg-ink/[0.04] px-2 py-0.5 text-[10px] font-semibold tracking-[0.3px] text-ink/70"
                           title={`Assigned to ${assigneeMap.get(app.assignedTo)}`}
                         >
                           <UserRound className="h-2.5 w-2.5" strokeWidth={2.5} />
@@ -616,7 +614,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                       )}
                       {locationLabel && (
                         <span
-                          className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-heritage/20 bg-heritage/[0.07] px-2 py-0.5 text-[10px] font-bold tracking-[0.5px] text-heritage-deep"
+                          className="inline-flex flex-shrink-0 items-center gap-1 border border-ink/15 bg-ink/[0.04] px-2 py-0.5 text-[10px] font-semibold tracking-[0.5px] text-ink/70 tabular"
                           title={`Practice: ${locationLabel}`}
                         >
                           <MapPin className="h-2.5 w-2.5" strokeWidth={2.5} />
@@ -624,7 +622,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                         </span>
                       )}
                     </div>
-                    <div className="text-[13px] text-slate-meta">
+                    <div className="text-[13px] text-slate-meta tabular">
                       {[cand?.current_title, cand?.headline]
                         .filter(Boolean)
                         .join(" · ") || "Profile minimal"}
@@ -659,9 +657,7 @@ function FilterSelect({
 }) {
   return (
     <div>
-      <div className="text-[9px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1.5">
-        {label}
-      </div>
+      <Eyebrow className="mb-1.5">{label}</Eyebrow>
       <select
         name={name}
         defaultValue={value}
@@ -677,21 +673,13 @@ function FilterSelect({
   );
 }
 
+/**
+ * Stage badge rides the SAME brand stage ramp as the kanban columns and
+ * the per-job list (KIND_DEFAULT_COLORS: stone → mist → navy → bronze →
+ * heritage · brick) so every employer surface tells one chromatic story.
+ */
 function statusBadgeClass(kind: string): string {
-  switch (kind) {
-    case "open":
-      return "bg-cream text-ink";
-    case "screen":
-      return "bg-info-bg text-info";
-    case "interview":
-      return "bg-heritage/10 text-heritage-deep";
-    case "offer":
-    case "hired":
-      return "bg-success-bg text-success";
-    case "rejected":
-    case "withdrawn":
-      return "bg-muted text-muted-foreground";
-    default:
-      return "bg-cream text-ink";
-  }
+  const triple = KIND_DEFAULT_COLORS[kind as StageKind];
+  if (!triple) return "bg-cream text-ink";
+  return `${triple.bg} ${triple.text}`;
 }

@@ -18,6 +18,7 @@ import {
 import { KanbanBoard, type KanbanApplication } from "./kanban-board";
 import { MobileStageTabs } from "./mobile-stage-tabs";
 import { BoardInsights } from "./board-insights";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import type { PipelineStage } from "@/lib/applications/stages";
 import type { JobFunnel } from "@/lib/analytics/metrics";
 
@@ -122,9 +123,9 @@ export function ApplicationsBoard({
           stay so the section still has context when the toggle is on. */}
       <header className="mb-8 flex flex-wrap items-end justify-between gap-6">
         <div className="min-w-0">
-          <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
+          <Eyebrow className="mb-2 tabular">
             Applications · {initialApplications.length}
-          </div>
+          </Eyebrow>
           <p className="mt-1 text-[14px] text-slate-body leading-relaxed max-w-[640px]">
             Pipeline view of every candidate who applied to this job. Click any
             card to review.
@@ -196,7 +197,7 @@ function ViewToggle({
   disabledKanbanReason?: string;
 }) {
   const baseBtn =
-    "inline-flex items-center gap-2 px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors border";
+    "inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold transition-colors border-b-2";
   return (
     <div
       className="flex border border-[var(--rule-strong)] bg-card"
@@ -211,8 +212,8 @@ function ViewToggle({
         title={disabledKanbanReason}
         className={`${baseBtn} ${
           value === "kanban"
-            ? "bg-primary text-primary-foreground border-primary"
-            : "border-transparent text-ink hover:bg-cream"
+            ? "border-b-heritage text-ink"
+            : "border-b-transparent text-slate-meta hover:text-ink hover:bg-cream"
         }`}
       >
         <LayoutGrid className="h-3.5 w-3.5" />
@@ -225,8 +226,8 @@ function ViewToggle({
         onClick={() => onChange("list")}
         className={`${baseBtn} ${
           value === "list"
-            ? "bg-primary text-primary-foreground border-primary"
-            : "border-transparent text-ink hover:bg-cream"
+            ? "border-b-heritage text-ink"
+            : "border-b-transparent text-slate-meta hover:text-ink hover:bg-cream"
         }`}
       >
         <List className="h-3.5 w-3.5" />

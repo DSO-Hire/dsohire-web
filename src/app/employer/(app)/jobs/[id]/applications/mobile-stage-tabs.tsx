@@ -118,14 +118,14 @@ export function MobileStageTabs({
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => selectTab(tab)}
-                className={`px-3 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors border ${
+                className={`px-3 py-2 text-[12px] font-semibold border-b-2 transition-colors ${
                   isActive
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-card text-ink border-[var(--rule)] hover:bg-cream"
+                    ? "border-b-heritage text-ink"
+                    : "border-b-transparent text-slate-meta hover:text-ink"
                 }`}
               >
                 {label}
-                <span className="ml-2 tabular-nums opacity-80">
+                <span className="ml-2 tabular opacity-80">
                   {counts.get(tab) ?? 0}
                 </span>
               </button>
@@ -185,7 +185,7 @@ function MobileTabContent({
                 <div className="text-[14px] font-bold text-ink truncate">
                   {app.candidate?.full_name ?? "Anonymous candidate"}
                 </div>
-                <div className="text-[12px] text-slate-meta truncate">
+                <div className="text-[12px] text-slate-meta truncate tabular">
                   {stageLabel} ·{" "}
                   {new Date(app.created_at).toLocaleDateString()}
                 </div>
@@ -223,7 +223,7 @@ function MobileTabContent({
             </div>
             <div className="flex items-center justify-between">
               <span
-                className={`text-[9px] font-bold tracking-[1px] uppercase px-1.5 py-0.5 ${heatClasses}`}
+                className={`text-[10px] font-semibold px-1.5 py-0.5 tabular ${heatClasses}`}
               >
                 {days}d in stage
               </span>

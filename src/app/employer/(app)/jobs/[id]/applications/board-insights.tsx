@@ -22,6 +22,7 @@ import {
   partitionStagesForKanban,
   type PipelineStage,
 } from "@/lib/applications/stages";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import type { JobFunnel } from "@/lib/analytics/metrics";
 import type { KanbanApplication } from "./kanban-board";
 
@@ -100,7 +101,7 @@ export function BoardInsights({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] bg-card text-ink hover:bg-cream transition-colors"
+        className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold border border-[var(--rule-strong)] bg-card text-ink hover:bg-cream transition-colors"
       >
         <BarChart3 className="h-3.5 w-3.5 text-heritage" aria-hidden />
         Board insights
@@ -123,9 +124,7 @@ export function BoardInsights({
           >
             <header className="shrink-0 flex items-start justify-between gap-3 px-5 py-4 border-b border-[var(--rule)]">
               <div className="min-w-0">
-                <p className="text-[9px] font-bold tracking-[2px] uppercase text-heritage-deep">
-                  Board insights
-                </p>
+                <Eyebrow as="p">Board insights</Eyebrow>
                 <p className="text-[14px] font-bold text-ink truncate">
                   {jobTitle}
                 </p>
@@ -143,9 +142,9 @@ export function BoardInsights({
             <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4 space-y-5">
               {/* Funnel — ever-reached counts + step conversion */}
               <section>
-                <p className="text-[9px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-2">
+                <Eyebrow as="p" className="mb-2">
                   Funnel · ever reached
-                </p>
+                </Eyebrow>
                 <ol className="space-y-1.5">
                   {funnel.rows.map((row, i) => {
                     const first = funnel.rows[0]?.count ?? 0;
@@ -176,7 +175,7 @@ export function BoardInsights({
                   })}
                 </ol>
                 {(funnel.rejected > 0 || funnel.withdrawn > 0) && (
-                  <p className="mt-2 text-[11px] text-slate-meta">
+                  <p className="mt-2 text-[11px] text-slate-meta tabular">
                     {funnel.rejected} rejected · {funnel.withdrawn} withdrawn
                   </p>
                 )}
@@ -184,11 +183,11 @@ export function BoardInsights({
 
               {/* Narratives — derived only */}
               {bottleneck ? (
-                <section className="border-l-2 border-[#b3543f] bg-amber-50/50 px-3 py-2.5">
-                  <p className="text-[9px] font-bold tracking-[1.5px] uppercase text-[#b3543f] mb-1">
+                <section className="border-l-2 border-stage-brick bg-stage-brick/5 px-3 py-2.5">
+                  <Eyebrow as="p" className="text-stage-brick mb-1">
                     Bottleneck · {bottleneck.label}
-                  </p>
-                  <p className="text-[12px] leading-relaxed text-ink">
+                  </Eyebrow>
+                  <p className="text-[12px] leading-relaxed text-ink tabular">
                     Median dwell here is{" "}
                     <span className="font-bold">{bottleneck.median}d</span> vs
                     your 90-day norm of{" "}
@@ -215,10 +214,10 @@ export function BoardInsights({
 
               {workingWell && (
                 <section className="border-l-2 border-heritage bg-cream/50 px-3 py-2.5">
-                  <p className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-1">
+                  <Eyebrow as="p" className="text-heritage-deep mb-1">
                     Working well · {workingWell.label}
-                  </p>
-                  <p className="text-[12px] leading-relaxed text-ink">
+                  </Eyebrow>
+                  <p className="text-[12px] leading-relaxed text-ink tabular">
                     Median dwell{" "}
                     <span className="font-bold">{workingWell.median}d</span> vs
                     your norm of{" "}

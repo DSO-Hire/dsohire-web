@@ -64,6 +64,7 @@ import {
   type PipelineStage,
   type StageKind,
 } from "@/lib/applications/stages";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { moveApplicationStage } from "@/app/employer/(app)/applications/[id]/actions";
 import {
   bulkMoveApplications,
@@ -1109,7 +1110,7 @@ export function KanbanBoard({
                     error.candidateName
                   );
                 }}
-                className="text-[10px] font-bold tracking-[1.5px] uppercase px-3 py-1.5 border border-danger text-danger hover:bg-danger-bg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-danger focus-visible:ring-offset-2"
+                className="text-xs font-semibold px-3 py-1.5 border border-danger text-danger hover:bg-danger-bg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-danger focus-visible:ring-offset-2"
               >
                 Retry
               </button>
@@ -1297,9 +1298,9 @@ export function KanbanBoard({
                   type="button"
                   onClick={() => selectDensity(d)}
                   aria-pressed={density === d}
-                  className={`px-2.5 py-1 text-[9px] font-bold tracking-[1px] uppercase transition-colors ${
+                  className={`px-2.5 py-1 text-xs font-semibold transition-colors ${
                     density === d
-                      ? "bg-primary text-primary-foreground"
+                      ? "text-ink shadow-[inset_0_-2px_0_0_var(--heritage)]"
                       : "text-slate-body hover:bg-cream"
                   }`}
                 >
@@ -1312,9 +1313,9 @@ export function KanbanBoard({
               onClick={toggleFocus}
               aria-pressed={focusMode}
               title="Focus — dim every column except the one under your pointer"
-              className={`px-2.5 py-1 text-[9px] font-bold tracking-[1px] uppercase border transition-colors ${
+              className={`px-2.5 py-1 text-xs font-semibold border transition-colors ${
                 focusMode
-                  ? "bg-primary text-primary-foreground border-primary"
+                  ? "bg-card text-ink border-[var(--rule-strong)] shadow-[inset_0_-2px_0_0_var(--heritage)]"
                   : "bg-card text-slate-body border-[var(--rule-strong)] hover:bg-cream"
               }`}
             >
@@ -1326,9 +1327,9 @@ export function KanbanBoard({
                 onClick={toggleLanes}
                 aria-pressed={lanesOn}
                 title="Group each column's cards by job"
-                className={`px-2.5 py-1 text-[9px] font-bold tracking-[1px] uppercase border transition-colors ${
+                className={`px-2.5 py-1 text-xs font-semibold border transition-colors ${
                   lanesOn
-                    ? "bg-primary text-primary-foreground border-primary"
+                    ? "bg-card text-ink border-[var(--rule-strong)] shadow-[inset_0_-2px_0_0_var(--heritage)]"
                     : "bg-card text-slate-body border-[var(--rule-strong)] hover:bg-cream"
                 }`}
               >
@@ -1336,18 +1337,18 @@ export function KanbanBoard({
               </button>
             )}
           </div>
-          <div className="flex items-center gap-3 text-[10px] text-slate-meta">
-            <span className="font-bold tracking-[1.5px] uppercase">Aging</span>
+          <div className="flex items-center gap-3 text-[10px] text-slate-meta tabular">
+            <Eyebrow as="span">Aging</Eyebrow>
             <span className="inline-flex items-center gap-1">
               <span className="h-2 w-2 bg-heritage/70" aria-hidden />
               &lt;4d
             </span>
             <span className="inline-flex items-center gap-1">
-              <span className="h-2 w-2 bg-amber-500" aria-hidden />
+              <span className="h-2 w-2 bg-warning" aria-hidden />
               4–10d
             </span>
             <span className="inline-flex items-center gap-1">
-              <span className="h-2 w-2 bg-[#b3543f]" aria-hidden />
+              <span className="h-2 w-2 bg-stage-brick" aria-hidden />
               10d+
             </span>
           </div>
@@ -1419,11 +1420,11 @@ function LiveIndicator({ isConnected }: { isConnected: boolean }) {
         className={`h-1.5 w-1.5 rounded-full ${
           isConnected
             ? "bg-success animate-pulse"
-            : "bg-slate-300"
+            : "bg-slate-meta"
         }`}
         aria-hidden="true"
       />
-      <span className="text-[10px] font-bold tracking-[2px] uppercase text-slate-body">
+      <span className="text-xs font-semibold text-slate-body">
         {isConnected ? "Live" : "Reconnecting…"}
       </span>
     </div>
@@ -1454,11 +1455,11 @@ function SelectionToolbar({
   onOpenArchive: () => void;
 }) {
   const baseBtn =
-    "inline-flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold tracking-[1.5px] uppercase border transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2";
+    "inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold border transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2";
   return (
     <div className="sticky top-[80px] z-30 flex flex-wrap items-center justify-between gap-3 border border-heritage/40 bg-heritage/[0.08] px-4 py-2.5">
       <div className="flex items-center gap-3 text-[14px] text-heritage-deep">
-        <span className="font-bold">{count} selected</span>
+        <span className="font-bold tabular">{count} selected</span>
         <span className="text-slate-meta">·</span>
         <button
           type="button"
@@ -1573,7 +1574,7 @@ function BulkConfirmDialog({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="tabular">
             {count} candidate{count === 1 ? "" : "s"} selected.
           </DialogDescription>
         </DialogHeader>
@@ -1601,12 +1602,9 @@ function BulkConfirmDialog({
             </p>
           ) : null)}
         <div className="grid gap-2">
-          <label
-            htmlFor="bulk-reason"
-            className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body"
-          >
+          <Eyebrow as="label" htmlFor="bulk-reason">
             Note
-          </label>
+          </Eyebrow>
           <textarea
             id="bulk-reason"
             value={reason}
@@ -1621,7 +1619,7 @@ function BulkConfirmDialog({
           <button
             type="button"
             onClick={() => onOpenChange(false)}
-            className="inline-flex items-center justify-center px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] bg-card text-slate-body hover:bg-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
+            className="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold border border-[var(--rule-strong)] bg-card text-slate-body hover:bg-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
           >
             Cancel
           </button>
@@ -1629,7 +1627,7 @@ function BulkConfirmDialog({
             type="button"
             disabled={dispositionError !== null}
             onClick={() => onConfirm(reason, disposition || null)}
-            className={`inline-flex items-center justify-center px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${confirmClasses}`}
+            className={`inline-flex items-center justify-center px-4 py-2 text-xs font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${confirmClasses}`}
           >
             {confirmLabel}
           </button>
@@ -1662,18 +1660,15 @@ function BulkMessageDialog({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Message candidates</DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="tabular">
             {count} candidate{count === 1 ? "" : "s"} selected. Each receives
             this in their application inbox and by email.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-2">
-          <label
-            htmlFor="bulk-message"
-            className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body"
-          >
+          <Eyebrow as="label" htmlFor="bulk-message">
             Message
-          </label>
+          </Eyebrow>
           <textarea
             id="bulk-message"
             value={body}
@@ -1682,7 +1677,7 @@ function BulkMessageDialog({
             placeholder="Write the message your selected candidates will receive…"
             className="w-full resize-y border border-[var(--rule-strong)] bg-card px-3 py-2 text-[14px] text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
           />
-          <p className="text-[12px] text-slate-meta">
+          <p className="text-[12px] text-slate-meta tabular">
             Sent individually — candidates can&apos;t see who else received it.{" "}
             {body.length}/{MAX}
           </p>
@@ -1691,7 +1686,7 @@ function BulkMessageDialog({
           <button
             type="button"
             onClick={() => onOpenChange(false)}
-            className="inline-flex items-center justify-center px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] bg-card text-slate-body hover:bg-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
+            className="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold border border-[var(--rule-strong)] bg-card text-slate-body hover:bg-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
           >
             Cancel
           </button>
@@ -1699,7 +1694,7 @@ function BulkMessageDialog({
             type="button"
             disabled={trimmed.length === 0}
             onClick={() => onConfirm(trimmed)}
-            className="inline-flex items-center justify-center px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase bg-heritage text-primary-foreground hover:bg-heritage-deep focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold tabular bg-heritage text-primary-foreground hover:bg-heritage-deep focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Send to {count}
           </button>
@@ -1766,9 +1761,9 @@ function BulkResultDisplay({
         aria-hidden="true"
       />
       <div className={`flex-1 text-[14px] ${tone.text} leading-relaxed`}>
-        <div className="font-bold">{summary}</div>
+        <div className="font-bold tabular">{summary}</div>
         {failed > 0 && (
-          <ul className="mt-1.5 space-y-0.5 text-[13px]">
+          <ul className="mt-1.5 space-y-0.5 text-[13px] tabular">
             {banner.failures.slice(0, 5).map((f) => (
               <li key={f.id}>
                 <span className="font-semibold">{f.candidateName}</span>
@@ -1787,7 +1782,7 @@ function BulkResultDisplay({
         <button
           type="button"
           onClick={onRetry}
-          className={`text-[10px] font-bold tracking-[1.5px] uppercase px-3 py-1.5 border ${tone.text} hover:bg-white/40 transition-colors focus:outline-none focus-visible:ring-2 ${tone.ring} focus-visible:ring-offset-2`}
+          className={`text-xs font-semibold px-3 py-1.5 border ${tone.text} hover:bg-ivory/40 transition-colors focus:outline-none focus-visible:ring-2 ${tone.ring} focus-visible:ring-offset-2`}
         >
           Retry
         </button>
@@ -1861,14 +1856,14 @@ function ClosedLane({
           ) : (
             <ChevronRight className="h-4 w-4 text-slate-meta" />
           )}
-          <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-body">
+          <span className="text-xs font-semibold text-slate-body">
             {isOver
               ? "Drop to reject"
               : expanded
                 ? "Hide closed"
                 : "Show closed"}
           </span>
-          <span className="text-[10px] font-bold text-slate-meta tabular-nums">
+          <span className="text-xs font-bold text-slate-meta tabular">
             {closedCount}
           </span>
         </div>
@@ -1922,10 +1917,8 @@ function ClosedSubsection({
   return (
     <section className="border-b border-[var(--rule)] last:border-0">
       <header className="px-5 py-2 bg-cream/40 flex items-center gap-3">
-        <span className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta">
-          {label}
-        </span>
-        <span className="text-[9px] font-bold text-slate-meta tabular-nums">
+        <Eyebrow as="span">{label}</Eyebrow>
+        <span className="text-[11px] font-bold text-slate-meta tabular">
           {apps.length}
         </span>
       </header>
@@ -1964,7 +1957,7 @@ function WithdrawnRow({ application }: { application: KanbanApplication }) {
         <div className="text-[14px] italic font-semibold text-slate-body truncate">
           {cand?.full_name ?? "Anonymous candidate"}
         </div>
-        <div className="text-[12px] text-slate-meta truncate">
+        <div className="text-[12px] text-slate-meta truncate tabular">
           Withdrawn · {new Date(application.created_at).toLocaleDateString()}
         </div>
       </div>
@@ -2007,7 +2000,7 @@ function BulkDragPreview({
         <KanbanCard application={activeApp} isOverlay selected />
         {/* Count badge — top-right corner */}
         <div
-          className="absolute -top-2 -right-2 z-10 inline-flex items-center justify-center rounded-full bg-heritage-deep px-2 min-w-[24px] h-6 text-[11px] font-bold text-primary-foreground shadow-md ring-2 ring-card"
+          className="absolute -top-2 -right-2 z-10 inline-flex items-center justify-center bg-heritage-deep px-2 min-w-[24px] h-6 text-[11px] font-bold text-primary-foreground tabular shadow-md ring-2 ring-card"
           aria-hidden
         >
           {count}

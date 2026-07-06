@@ -40,6 +40,7 @@ import {
   type KeyboardEvent,
 } from "react";
 import { MoreHorizontal, AtSign } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import {
   REALTIME_LISTEN_TYPES,
@@ -150,7 +151,7 @@ function renderBody(body: string): React.ReactNode[] {
     nodes.push(
       <span
         key={`m-${key++}`}
-        className="inline-block px-1 py-0.5 -my-0.5 bg-heritage/10 text-heritage-deep font-semibold rounded-sm"
+        className="inline-block px-1 py-0.5 -my-0.5 bg-ink/5 text-ink font-semibold"
         title={display}
       >
         @{display}
@@ -707,12 +708,12 @@ export function CommentsThread({
                         {c.authorName ?? "Teammate"}
                       </span>
                       {c.authorRole && (
-                        <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
+                        <span className="text-[10px] font-semibold text-slate-meta">
                           {ROLE_LABELS[c.authorRole]}
                         </span>
                       )}
                       <span
-                        className="text-[12px] text-slate-meta"
+                        className="text-[12px] text-slate-meta tabular"
                         title={new Date(c.created_at).toLocaleString()}
                       >
                         {relativeTime(c.created_at)}
@@ -781,14 +782,14 @@ export function CommentsThread({
                         <button
                           type="button"
                           onClick={() => void handleEditSave()}
-                          className="px-3 py-1.5 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
+                          className="px-3 py-1.5 bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors"
                         >
                           Save
                         </button>
                         <button
                           type="button"
                           onClick={cancelEdit}
-                          className="px-3 py-1.5 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-ink transition-colors"
+                          className="px-3 py-1.5 text-xs font-semibold text-slate-body hover:text-ink transition-colors"
                         >
                           Cancel
                         </button>
@@ -834,9 +835,9 @@ export function CommentsThread({
             type="button"
             onClick={() => void handleSubmit()}
             disabled={submitting || composerBody.trim().length === 0}
-            className="px-5 py-2.5 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="px-5 py-2.5 bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {submitting ? "Posting…" : "Post Comment"}
+            {submitting ? "Posting…" : "Post comment"}
           </button>
           <span className="text-[12px] text-slate-meta">
             <span className="font-mono">⌘↩</span> to post ·{" "}
@@ -870,9 +871,9 @@ function MentionPopover({
 }) {
   return (
     <div className="absolute left-0 right-0 -top-1 -translate-y-full bg-popover border border-[var(--rule-strong)] shadow-lg max-h-[220px] overflow-y-auto z-20">
-      <div className="px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-slate-meta border-b border-[var(--rule)]">
+      <Eyebrow className="px-3 py-2 border-b border-[var(--rule)]">
         Mention a teammate
-      </div>
+      </Eyebrow>
       <ul>
         {users.map((u, idx) => (
           <li key={u.id}>
@@ -891,7 +892,7 @@ function MentionPopover({
               <span className="text-[14px] font-semibold text-ink truncate">
                 {u.fullName ?? "Teammate"}
               </span>
-              <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
+              <span className="text-[10px] font-semibold text-slate-meta">
                 {ROLE_LABELS[u.role]}
               </span>
             </button>

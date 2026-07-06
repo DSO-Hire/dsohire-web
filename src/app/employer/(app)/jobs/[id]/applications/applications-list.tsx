@@ -17,11 +17,14 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import {
+  KIND_DEFAULT_COLORS,
   KIND_DEFAULT_LABELS,
   findStage,
   type PipelineStage,
   type StageKind,
 } from "@/lib/applications/stages";
+import { BrandMark } from "@/components/brand/brand-mark";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
 
 export interface ApplicationsListItem {
@@ -68,11 +71,11 @@ export function ApplicationsList({
   if (applications.length === 0) {
     return (
       <div className="border border-[var(--rule)] bg-card p-12 text-center max-w-[680px]">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
-          No applications yet
-        </div>
+        <BrandMark className="mx-auto mb-4 size-8 opacity-20" />
+        <Eyebrow className="mb-3">No applications yet</Eyebrow>
         <p className="text-[15px] text-ink leading-relaxed">
-          Once candidates start applying, they&rsquo;ll show up here.
+          Share the apply link with your practice network — clinicians who
+          apply land here the moment they submit.
         </p>
       </div>
     );
@@ -97,7 +100,7 @@ export function ApplicationsList({
                     {cand?.full_name ?? "Anonymous candidate"}
                   </div>
                   <span
-                    className={`text-[9px] font-bold tracking-[1.5px] uppercase px-2.5 py-1 ${statusBadgeClass(app.kind)}`}
+                    className={`text-xs font-semibold px-2.5 py-1 ${statusBadgeClass(app.kind)}`}
                   >
                     {label}
                   </span>
@@ -111,7 +114,7 @@ export function ApplicationsList({
                     <span className="font-semibold text-ink">{app.jobTitle}</span>
                   </div>
                 )}
-                <div className="text-[13px] text-slate-meta">
+                <div className="text-[13px] text-slate-meta tabular">
                   {[cand?.current_title, cand?.headline]
                     .filter(Boolean)
                     .join(" · ") || "Profile minimal"}
@@ -132,21 +135,15 @@ export function ApplicationsList({
   );
 }
 
+/**
+ * Stage badge rides the SAME brand stage ramp as the kanban columns
+ * (KIND_DEFAULT_COLORS: stone → mist → navy → bronze → heritage · brick)
+ * so list view and board view tell one chromatic story. Replaced the
+ * old semantic-family mishmash (warning amber on screening, info blue
+ * on interview) in the 2026-07-06 sweep — color is earned, and a stage
+ * chip's semantic IS its position in the ramp.
+ */
 function statusBadgeClass(kind: StageKind): string {
-  switch (kind) {
-    case "open":
-      return "bg-cream text-ink";
-    case "screen":
-      return "bg-warning-bg text-warning";
-    case "interview":
-      return "bg-info-bg text-info";
-    case "offer":
-    case "hired":
-      return "bg-success-bg text-success";
-    case "rejected":
-    case "withdrawn":
-      return "bg-muted text-muted-foreground";
-    default:
-      return "bg-cream text-ink";
-  }
+  const triple = KIND_DEFAULT_COLORS[kind];
+  return `${triple.bg} ${triple.text}`;
 }

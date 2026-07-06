@@ -9,6 +9,7 @@
 
 import { useState, useTransition } from "react";
 import { UserRound } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { assignApplication } from "./assign-actions";
 
 interface Teammate {
@@ -44,10 +45,10 @@ export function AssigneePicker({
 
   return (
     <div>
-      <label className="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-meta">
+      <Eyebrow as="label" className="mb-1.5 flex items-center gap-1.5">
         <UserRound className="h-3 w-3" strokeWidth={2.5} />
         Assigned to
-      </label>
+      </Eyebrow>
       <select
         value={value}
         disabled={pending}

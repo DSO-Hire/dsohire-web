@@ -59,11 +59,11 @@ export function ReviewNav({
   if (total < 2) return null;
 
   const linkCls =
-    "inline-flex items-center gap-1 text-[10px] font-bold tracking-[2px] uppercase transition-colors";
+    "inline-flex items-center gap-1 text-xs font-semibold transition-colors";
 
   return (
     <span className="ml-auto inline-flex items-center gap-3.5 border border-[var(--rule-strong)] bg-card px-3 py-1.5">
-      <span className="hidden sm:inline text-[9px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+      <span className="hidden sm:inline text-xs font-bold text-slate-meta">
         Review · j/k
       </span>
       {prevHref ? (
@@ -80,7 +80,7 @@ export function ReviewNav({
           Prev
         </span>
       )}
-      <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-ink whitespace-nowrap">
+      <span className="text-xs font-bold text-ink whitespace-nowrap tabular">
         {position} of {total}
       </span>
       {nextHref ? (

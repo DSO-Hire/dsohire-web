@@ -119,7 +119,7 @@ export function KanbanCard({
   const heat = stageHeatLevel(days);
   const heatClasses = STAGE_HEAT_CLASSES[heat];
   // Lane 5 — aging edge: the card's left border warms as it sits
-  // (heritage → amber → rust), same level source as the pill below.
+  // (heritage → warning gold → brick), same level source as the pill below.
   const ageEdgeClass = STAGE_AGE_EDGE_CLASSES[heat];
   const cand = application.candidate;
 
@@ -290,7 +290,7 @@ export function KanbanCard({
       )}
       <div className="flex items-center justify-between gap-2">
         <span
-          className={`text-[9px] font-bold tracking-[1px] uppercase px-1.5 py-0.5 ${heatClasses}`}
+          className={`text-[10px] font-semibold px-1.5 py-0.5 tabular ${heatClasses}`}
         >
           {days}d in stage
         </span>

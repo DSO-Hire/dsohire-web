@@ -147,7 +147,7 @@ export function WorkspaceTabs({
               role="tab"
               aria-selected={isActive}
               onClick={() => setActive(t.id)}
-              className={`inline-flex items-center gap-2 px-3.5 py-3 -mb-px border-b-2 text-[11px] font-bold tracking-[1.8px] uppercase transition-colors ${
+              className={`inline-flex items-center gap-2 px-3.5 py-3 -mb-px border-b-2 text-xs font-semibold transition-colors ${
                 isActive
                   ? "border-heritage text-ink"
                   : "border-transparent text-slate-meta hover:text-ink"
@@ -156,7 +156,7 @@ export function WorkspaceTabs({
               <Icon className="h-3.5 w-3.5" />
               {t.label}
               {t.badge !== undefined && (
-                <span className="inline-flex items-center justify-center min-w-[18px] px-1.5 py-0.5 bg-heritage-deep text-primary-foreground text-[10px] font-bold leading-none">
+                <span className="inline-flex items-center justify-center min-w-[18px] px-1.5 py-0.5 bg-ink text-ivory text-[10px] font-bold leading-none tabular">
                   {t.badge}
                 </span>
               )}

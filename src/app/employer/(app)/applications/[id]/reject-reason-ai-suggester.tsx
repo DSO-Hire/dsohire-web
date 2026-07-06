@@ -25,6 +25,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { Sparkles, RefreshCcw, Check, AlertCircle } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import {
   suggestRejectionReason,
   type RejectionSuggestion,
@@ -68,9 +69,9 @@ export function RejectReasonAiSuggester({
             <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
+            <Eyebrow>
               AI rejection-reason suggester
-            </div>
+            </Eyebrow>
             <p className="mt-1 text-[13px] text-slate-meta leading-relaxed">
               Available on Growth tier and above.{" "}
               <Link
@@ -117,9 +118,9 @@ export function RejectReasonAiSuggester({
           <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
+          <Eyebrow>
             Suggest with AI
-          </div>
+          </Eyebrow>
           <p className="mt-0.5 text-[13px] text-slate-meta leading-relaxed">
             Get 2-3 draft rejection reasons based on this candidate&apos;s
             screening answers and scorecards.
@@ -132,7 +133,7 @@ export function RejectReasonAiSuggester({
           type="button"
           onClick={run}
           disabled={disabled}
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {pending ? (
             <>
@@ -157,7 +158,7 @@ export function RejectReasonAiSuggester({
           </span>
         )}
         {usage && !pending && (
-          <span className="text-[10px] text-slate-meta tracking-[0.5px]">
+          <span className="text-[10px] text-slate-meta tracking-[0.5px] tabular">
             Generated in {(usage.elapsed_ms / 1000).toFixed(1)}s · ~$
             {usage.cost_usd.toFixed(4)}
           </span>
@@ -177,7 +178,7 @@ export function RejectReasonAiSuggester({
             type="button"
             onClick={run}
             disabled={pending}
-            className="text-[10px] font-bold tracking-[1.5px] uppercase text-danger hover:text-danger transition-colors flex-shrink-0"
+            className="text-xs font-semibold text-danger hover:text-danger transition-colors flex-shrink-0"
           >
             Try again
           </button>
@@ -198,7 +199,7 @@ export function RejectReasonAiSuggester({
                 }`}
               >
                 <div className="flex items-center justify-between gap-3">
-                  <span className="inline-flex items-center px-2 py-0.5 bg-heritage/10 text-heritage-deep text-[10px] font-bold tracking-[1.5px] uppercase">
+                  <span className="inline-flex items-center px-2 py-0.5 bg-heritage/10 text-heritage-deep text-[10px] font-semibold">
                     {s.label}
                   </span>
                   <button
@@ -207,7 +208,7 @@ export function RejectReasonAiSuggester({
                       onApply(s.body);
                       setAppliedIndex(i);
                     }}
-                    className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors flex-shrink-0"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-heritage-deep hover:text-ink transition-colors flex-shrink-0"
                   >
                     {isApplied ? (
                       <>

@@ -24,24 +24,31 @@ export interface ApplicationTag {
   color: TagColor;
 }
 
-/** Tailwind chip classes per color — core utilities only (no JIT-only values). */
+/**
+ * Chip classes per color — ⚠️ the KEYS are stored in the DB (CHECK
+ * constraint); never rename one. 2026-07-06 sweep: VALUES re-pointed
+ * from the Tailwind default rainbow to the curated brand stage palette
+ * (globals.css `--stage-*`, dark-adaptive — no `dark:` variants
+ * needed). Key names are legacy labels for the hue slot, not the
+ * rendered color — same convention as STAGE_COLOR_PALETTE.
+ */
 export const TAG_COLOR_CLASSES: Record<TagColor, string> = {
-  slate: "bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-400/15 dark:text-slate-300 dark:border-slate-400/30",
-  green: "bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-200 dark:border-emerald-500/30",
-  blue: "bg-sky-50 text-sky-800 border-sky-300 dark:bg-sky-500/15 dark:text-sky-200 dark:border-sky-500/30",
-  amber: "bg-amber-50 text-amber-900 border-amber-300 dark:bg-amber-500/15 dark:text-amber-200 dark:border-amber-500/30",
-  rose: "bg-rose-50 text-rose-800 border-rose-300 dark:bg-rose-500/15 dark:text-rose-200 dark:border-rose-500/30",
-  purple: "bg-violet-50 text-violet-800 border-violet-300 dark:bg-violet-500/15 dark:text-violet-200 dark:border-violet-500/30",
+  slate: "bg-stage-stone/10 text-stage-stone border-stage-stone/30",
+  green: "bg-stage-juniper/10 text-stage-juniper border-stage-juniper/30",
+  blue: "bg-stage-navy/10 text-stage-navy border-stage-navy/30",
+  amber: "bg-stage-bronze/10 text-stage-bronze border-stage-bronze/30",
+  rose: "bg-stage-brick/10 text-stage-brick border-stage-brick/30",
+  purple: "bg-stage-plum/10 text-stage-plum border-stage-plum/30",
 };
 
 /** Solid swatch classes for the color picker dots. */
 export const TAG_SWATCH_CLASSES: Record<TagColor, string> = {
-  slate: "bg-slate-400",
-  green: "bg-emerald-500",
-  blue: "bg-sky-500",
-  amber: "bg-amber-500",
-  rose: "bg-rose-500",
-  purple: "bg-violet-500",
+  slate: "bg-stage-stone",
+  green: "bg-stage-juniper",
+  blue: "bg-stage-navy",
+  amber: "bg-stage-bronze",
+  rose: "bg-stage-brick",
+  purple: "bg-stage-plum",
 };
 
 export function isTagColor(v: string): v is TagColor {

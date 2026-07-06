@@ -33,6 +33,7 @@ import {
   EyeOff,
   X,
 } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import {
   REFERENCE_FIELDS,
   formatReferenceAnswer,
@@ -106,7 +107,7 @@ export function ReferencesSection({
           <button
             type="button"
             onClick={() => setModalOpen(true)}
-            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-xs font-semibold hover:bg-primary/90 transition-colors"
           >
             <Plus className="h-3.5 w-3.5" />
             Request a reference
@@ -357,7 +358,7 @@ function RequestRow({
             <button
               type="button"
               onClick={() => setShowResponse((v) => !v)}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-foreground bg-card hover:bg-cream transition-colors"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold border border-[var(--rule-strong)] text-foreground bg-card hover:bg-cream transition-colors"
             >
               {showResponse ? (
                 <>
@@ -378,7 +379,7 @@ function RequestRow({
                 type="button"
                 disabled={pending}
                 onClick={() => runAction(() => resendReferenceRequest(req.id))}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase bg-heritage text-primary-foreground hover:bg-heritage-deep transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold bg-heritage text-primary-foreground hover:bg-heritage-deep transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {pending ? (
                   <Loader2 className="h-3 w-3 animate-spin" />
@@ -391,7 +392,7 @@ function RequestRow({
                 type="button"
                 disabled={pending}
                 onClick={() => setDeclineOpen(true)}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-slate-body bg-card hover:bg-cream transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold border border-[var(--rule-strong)] text-slate-body bg-card hover:bg-cream transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <Ban className="h-3 w-3" />
                 Mark declined
@@ -402,7 +403,7 @@ function RequestRow({
             type="button"
             disabled={pending}
             onClick={onDelete}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-danger text-danger bg-card hover:bg-danger-bg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold border border-danger text-danger bg-card hover:bg-danger-bg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             <Trash2 className="h-3 w-3" />
             Delete
@@ -533,7 +534,7 @@ function RequestModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#14233F]/60 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink-1000/60 backdrop-blur-sm p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget && !pending) onClose();
       }}
@@ -541,9 +542,7 @@ function RequestModal({
       <div className="w-full max-w-[520px] bg-card border border-[var(--rule)] shadow-xl">
         <header className="flex items-start justify-between p-5 border-b border-[var(--rule)]">
           <div>
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
-              Reference request
-            </div>
+            <Eyebrow className="mb-1">Reference request</Eyebrow>
             <h2 className="text-[18px] font-extrabold tracking-[-0.4px] text-ink">
               Request a reference
               {candidateName ? ` for ${candidateName}` : ""}
@@ -614,14 +613,14 @@ function RequestModal({
               type="button"
               onClick={onClose}
               disabled={pending}
-              className="px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-slate-body bg-card hover:bg-cream transition-colors disabled:opacity-60"
+              className="px-4 py-2 text-xs font-semibold border border-[var(--rule-strong)] text-slate-body bg-card hover:bg-cream transition-colors disabled:opacity-60"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={pending}
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60"
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2 text-xs font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60"
             >
               {pending ? (
                 <>
@@ -658,7 +657,7 @@ function DeclineModal({
   const [reason, setReason] = useState("");
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#14233F]/60 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink-1000/60 backdrop-blur-sm p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -666,9 +665,7 @@ function DeclineModal({
       <div className="w-full max-w-[460px] bg-card border border-[var(--rule)] shadow-xl">
         <header className="flex items-start justify-between p-5 border-b border-[var(--rule)]">
           <div>
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-1">
-              Mark declined
-            </div>
+            <Eyebrow className="mb-1">Mark declined</Eyebrow>
             <h2 className="text-[16px] font-extrabold tracking-[-0.3px] text-ink">
               Mark this request as declined?
             </h2>
@@ -689,7 +686,7 @@ function DeclineModal({
             <strong> declined</strong>; emails stop.
           </p>
           <label className="block">
-            <div className="text-[12px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
+            <div className="text-[12px] font-semibold text-ink mb-1.5">
               Reason (optional)
             </div>
             <textarea
@@ -706,14 +703,14 @@ function DeclineModal({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-slate-body bg-card hover:bg-cream transition-colors"
+            className="px-4 py-2 text-xs font-semibold border border-[var(--rule-strong)] text-slate-body bg-card hover:bg-cream transition-colors"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={() => onConfirm(reason.trim() || null)}
-            className="px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase bg-foreground text-background hover:bg-foreground/90 transition-colors"
+            className="px-5 py-2 text-xs font-semibold bg-foreground text-background hover:bg-foreground/90 transition-colors"
           >
             Mark declined
           </button>
@@ -751,11 +748,11 @@ function FormField({
   return (
     <label className="block">
       <div className="flex items-baseline gap-2 mb-1">
-        <span className="text-[12px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+        <span className="text-[12px] font-semibold text-ink">
           {label}
         </span>
         {required && (
-          <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
+          <span className="text-[11px] font-semibold text-slate-meta">
             Required
           </span>
         )}

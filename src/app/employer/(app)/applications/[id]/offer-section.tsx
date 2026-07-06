@@ -50,6 +50,7 @@ import {
   type OfferGateReason,
 } from "@/lib/offers/approval-policy";
 import { diffOffers, formatOfferBase } from "@/lib/offers/diff";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { PayBenchmarkHint } from "../../jobs/pay-benchmark-hint";
 import {
   OFFER_FIELDS,
@@ -237,7 +238,7 @@ export function OfferSection({
   return (
     <div ref={sectionRef} id="offer-composer" className="space-y-4 scroll-mt-24">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <p className="text-[13px] text-slate-meta leading-relaxed max-w-[520px]">
+        <p className="text-[13px] text-slate-meta leading-relaxed max-w-[520px] tabular">
           {sentCount > 0
             ? `${sentCount} offer${sentCount === 1 ? "" : "s"} sent to ${candidateName}.`
             : latestPending
@@ -250,7 +251,7 @@ export function OfferSection({
           <button
             type="button"
             onClick={handleCtaClick}
-            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-xs font-semibold hover:bg-primary/90 transition-colors"
           >
             <Send className="h-3.5 w-3.5" />
             {ctaLabel}
@@ -360,11 +361,11 @@ function LatestSendCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
             <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0" />
-            <span className="text-[10px] font-bold tracking-[2px] uppercase text-success">
+            <Eyebrow as="span" className="text-success">
               Offer sent
-            </span>
+            </Eyebrow>
             {prev && (
-              <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep border border-heritage/30 bg-heritage/[0.06] px-1.5 py-0.5 rounded">
+              <span className="text-[10px] font-semibold text-slate-meta border border-[var(--rule-strong)] px-1.5 py-0.5">
                 Revised
               </span>
             )}
@@ -390,7 +391,7 @@ function LatestSendCard({
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-ink bg-card hover:bg-cream"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold border border-[var(--rule-strong)] text-ink bg-card hover:bg-cream"
         >
           {open ? (
             <>
@@ -446,9 +447,9 @@ function OfferResponseStrip({
           <X className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
         )}
         <div className="min-w-0">
-          <div className={`text-[10px] font-bold tracking-[2px] uppercase ${eyebrowCls}`}>
+          <Eyebrow className={eyebrowCls}>
             {eyebrowLabel}
-          </div>
+          </Eyebrow>
           <div className="text-[13px] text-ink leading-snug">
             <strong>{respondedAt.toLocaleDateString()}</strong> at{" "}
             {respondedAt.toLocaleTimeString([], {
@@ -512,18 +513,18 @@ function OfferDiff({
   const prevDate = new Date(prev.sent_at).toLocaleDateString();
   return (
     <div className="border-t border-[var(--rule)] bg-card px-4 py-3">
-      <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-2">
+      <Eyebrow className="mb-2">
         What changed from the previous offer
         <span className="text-slate-meta font-semibold normal-case tracking-normal">
           {" "}· revised from {prevDate}
         </span>
-      </div>
+      </Eyebrow>
       {changes.length === 0 ? (
         <p className="text-[12px] text-slate-meta italic">
           No tracked terms changed — only the letter wording was edited.
         </p>
       ) : (
-        <ul className="space-y-1.5">
+        <ul className="space-y-1.5 tabular">
           {changes.map((c) => (
             <li key={c.label} className="text-[12px] leading-snug">
               <span className="font-semibold text-ink">{c.label}: </span>
@@ -588,9 +589,9 @@ function PendingApprovalCard({
       <div className="px-4 py-3">
         <div className="flex items-center gap-2 mb-1 flex-wrap">
           <Clock className="h-3.5 w-3.5 text-warning shrink-0" />
-          <span className="text-[10px] font-bold tracking-[2px] uppercase text-warning">
+          <Eyebrow as="span" className="text-warning">
             Awaiting approval
-          </span>
+          </Eyebrow>
           {send.template_name && (
             <span className="text-[11px] text-slate-meta">· {send.template_name}</span>
           )}
@@ -600,7 +601,7 @@ function PendingApprovalCard({
           {submittedAt.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
           {send.sender_name ? ` by ${send.sender_name}` : ""}.
         </div>
-        <div className="text-[12px] text-slate-meta mt-0.5">
+        <div className="text-[12px] text-slate-meta mt-0.5 tabular">
           Subject: {send.subject}
           {baseLabel ? ` · Base ${baseLabel}` : ""}
         </div>
@@ -608,7 +609,7 @@ function PendingApprovalCard({
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-ink bg-card hover:bg-cream"
+          className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold border border-[var(--rule-strong)] text-ink bg-card hover:bg-cream"
         >
           {open ? (
             <>
@@ -652,7 +653,7 @@ function PendingApprovalCard({
                     type="button"
                     onClick={doReject}
                     disabled={pending}
-                    className="inline-flex items-center gap-2 bg-danger text-danger-foreground px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-danger/90 disabled:opacity-60"
+                    className="inline-flex items-center gap-2 bg-danger text-danger-foreground px-4 py-2 text-xs font-semibold hover:bg-danger/90 disabled:opacity-60"
                   >
                     {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ThumbsDown className="h-3.5 w-3.5" />}
                     Send back
@@ -664,7 +665,7 @@ function PendingApprovalCard({
                       setError(null);
                     }}
                     disabled={pending}
-                    className="px-3 py-2 text-[11px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-ink disabled:opacity-60"
+                    className="px-3 py-2 text-xs font-semibold text-slate-body hover:text-ink disabled:opacity-60"
                   >
                     Cancel
                   </button>
@@ -676,7 +677,7 @@ function PendingApprovalCard({
                   type="button"
                   onClick={doApprove}
                   disabled={pending}
-                  className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
+                  className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-xs font-semibold hover:bg-primary/90 disabled:opacity-60"
                 >
                   {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
                   Approve &amp; send
@@ -685,7 +686,7 @@ function PendingApprovalCard({
                   type="button"
                   onClick={() => setRejecting(true)}
                   disabled={pending}
-                  className="inline-flex items-center gap-2 border border-[var(--rule-strong)] text-ink bg-card px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-cream disabled:opacity-60"
+                  className="inline-flex items-center gap-2 border border-[var(--rule-strong)] text-ink bg-card px-4 py-2 text-xs font-semibold hover:bg-cream disabled:opacity-60"
                 >
                   <ThumbsDown className="h-3.5 w-3.5" />
                   Reject
@@ -727,9 +728,9 @@ function RejectedOfferCard({
       <div className="px-4 py-3">
         <div className="flex items-center gap-2 mb-1 flex-wrap">
           <ThumbsDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-          <span className="text-[10px] font-bold tracking-[2px] uppercase text-foreground">
+          <Eyebrow as="span">
             Not approved
-          </span>
+          </Eyebrow>
         </div>
         <div className="text-[13px] text-ink leading-snug">
           Sent back on <strong>{decidedAt.toLocaleDateString()}</strong>
@@ -744,7 +745,7 @@ function RejectedOfferCard({
         <button
           type="button"
           onClick={onRevise}
-          className="mt-3 inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
+          className="mt-3 inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-xs font-semibold hover:bg-primary/90"
         >
           <Send className="h-3.5 w-3.5" />
           Revise &amp; resubmit
@@ -771,7 +772,7 @@ function EarlierSendsAccordion({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[1.5px] uppercase text-slate-meta hover:text-ink"
+        className="inline-flex items-center gap-2 text-xs font-semibold text-slate-meta hover:text-ink tabular"
       >
         {open ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
         Offer history ({sends.length})
@@ -798,22 +799,22 @@ function EarlierSendsAccordion({
                     minute: "2-digit",
                   })}
                   {prev && (
-                    <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep border border-heritage/30 bg-heritage/[0.06] px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] font-semibold text-slate-meta border border-[var(--rule-strong)] px-1.5 py-0.5">
                       Revised
                     </span>
                   )}
                   {statusLabel && (
-                    <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-muted-foreground">
+                    <span className="text-[11px] font-semibold text-muted-foreground">
                       · {statusLabel}
                     </span>
                   )}
                 </div>
-                <div className="text-slate-meta mt-0.5">
+                <div className="text-slate-meta mt-0.5 tabular">
                   To {s.recipient_email} · {s.template_name ?? "(template deleted)"}
                   {baseLabel ? ` · Base ${baseLabel}` : ""}
                 </div>
                 {prev && changes.length > 0 && (
-                  <ul className="mt-1.5 space-y-0.5">
+                  <ul className="mt-1.5 space-y-0.5 tabular">
                     {changes.map((c) => (
                       <li key={c.label} className="text-[11px] leading-snug">
                         <span className="font-semibold text-ink">{c.label}: </span>
@@ -852,17 +853,17 @@ function ConfirmRevisionDialog({
 }) {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#14233F]/60 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink-1000/60 backdrop-blur-sm p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) onCancel();
       }}
     >
       <div className="w-full max-w-[480px] bg-card border border-[var(--rule)] shadow-xl">
         <header className="p-5 border-b border-[var(--rule)]">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-warning mb-1 inline-flex items-center gap-2">
+          <Eyebrow className="text-warning mb-1 inline-flex items-center gap-2">
             <AlertCircle className="h-3 w-3" />
             Already accepted
-          </div>
+          </Eyebrow>
           <h2 className="text-[17px] font-extrabold tracking-[-0.4px] text-ink">
             Send a revised offer to {candidateName}?
           </h2>
@@ -883,14 +884,14 @@ function ConfirmRevisionDialog({
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-ink"
+            className="px-4 py-2 text-xs font-semibold text-slate-body hover:text-ink"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2 text-xs font-semibold hover:bg-primary/90"
           >
             <Send className="h-3.5 w-3.5" />
             Continue
@@ -1198,7 +1199,7 @@ function SendOfferModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#14233F]/60 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink-1000/60 backdrop-blur-sm p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget && !pending) onClose();
       }}
@@ -1206,14 +1207,14 @@ function SendOfferModal({
       <div className="w-full max-w-[720px] max-h-[92vh] bg-card border border-[var(--rule)] shadow-xl flex flex-col">
         <header className="flex items-start justify-between p-5 border-b border-[var(--rule)]">
           <div>
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1 inline-flex items-center gap-2">
+            <Eyebrow className="mb-1 inline-flex items-center gap-2">
               <FileSignature className="h-3 w-3" />
               Offer letter
-            </div>
+            </Eyebrow>
             <h2 className="text-[18px] font-extrabold tracking-[-0.4px] text-ink">
               Send an offer to {candidateName}
             </h2>
-            <div className="mt-1 text-[12px] text-slate-meta">
+            <div className="mt-1 text-[12px] text-slate-meta tabular">
               Step {step} of 4 ·{" "}
               {step === 1
                 ? "Pick a template"
@@ -1317,7 +1318,7 @@ function SendOfferModal({
                   onClose();
                   router.refresh();
                 }}
-                className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
+                className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2 text-xs font-semibold hover:bg-primary/90"
               >
                 Done
               </button>
@@ -1328,7 +1329,7 @@ function SendOfferModal({
                 type="button"
                 onClick={step === 1 ? onClose : back}
                 disabled={pending}
-                className="inline-flex items-center gap-2 px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-ink disabled:opacity-60"
+                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-slate-body hover:text-ink disabled:opacity-60"
               >
                 {step === 1 ? (
                   "Cancel"
@@ -1344,7 +1345,7 @@ function SendOfferModal({
                   type="button"
                   onClick={next}
                   disabled={pending}
-                  className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
+                  className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2 text-xs font-semibold hover:bg-primary/90 disabled:opacity-60"
                 >
                   Next
                   <ArrowRight className="h-3 w-3" />
@@ -1354,7 +1355,7 @@ function SendOfferModal({
                   type="button"
                   onClick={handleSubmit}
                   disabled={pending}
-                  className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
+                  className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2 text-xs font-semibold hover:bg-primary/90 disabled:opacity-60"
                 >
                   {pending ? (
                     <>
@@ -1417,7 +1418,9 @@ function Step1PickTemplate({
                 onClick={() => onPick(t.id)}
                 className={
                   "w-full text-left px-4 py-3 transition-colors " +
-                  (selected ? "bg-cream" : "hover:bg-cream/60")
+                  (selected
+                    ? "border-l-2 border-l-heritage text-ink bg-cream"
+                    : "border-l-2 border-l-transparent hover:bg-cream/60")
                 }
               >
                 <div className="flex items-center justify-between gap-3">
@@ -1481,9 +1484,9 @@ function OfferBaseCompField({
 
   return (
     <div className="rounded-md border border-[var(--rule)] bg-cream/40 p-4">
-      <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1">
+      <Eyebrow className="mb-1">
         Base compensation
-      </div>
+      </Eyebrow>
       <p className="text-[12px] text-slate-body leading-relaxed mb-2.5">
         The structured base we check against your posted range and use in offer
         analytics. The full pay details still go in the “Compensation” field below.
@@ -1713,11 +1716,11 @@ function DateOfferField({
   return (
     <label className="block sm:col-span-2">
       <div className="flex items-baseline gap-2 mb-1">
-        <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+        <Eyebrow as="span">
           {field.label}
-        </span>
+        </Eyebrow>
         {field.required && (
-          <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-danger">
+          <span className="text-[10px] font-semibold text-danger">
             Required
           </span>
         )}
@@ -1777,11 +1780,11 @@ function OfferField({
   return (
     <label className={`block ${wrapperClass}`}>
       <div className="flex items-baseline gap-2 mb-1">
-        <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+        <Eyebrow as="span">
           {label}
-        </span>
+        </Eyebrow>
         {field.required && (
-          <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-danger">
+          <span className="text-[10px] font-semibold text-danger">
             Required
           </span>
         )}
@@ -1851,7 +1854,7 @@ function Step3Preview({
             <button
               type="button"
               onClick={onReset}
-              className="text-[11px] font-bold tracking-[1px] uppercase text-slate-meta hover:text-ink"
+              className="text-xs font-semibold text-slate-meta hover:text-ink"
             >
               Reset to template
             </button>
@@ -1860,7 +1863,7 @@ function Step3Preview({
             <button
               type="button"
               onClick={onPreview}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-ink bg-card hover:bg-cream"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold border border-[var(--rule-strong)] text-ink bg-card hover:bg-cream"
             >
               <CheckCircle2 className="h-3 w-3" /> Preview
             </button>
@@ -1868,7 +1871,7 @@ function Step3Preview({
             <button
               type="button"
               onClick={onStartEdit}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-ink bg-card hover:bg-cream"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold border border-[var(--rule-strong)] text-ink bg-card hover:bg-cream"
             >
               <FileSignature className="h-3 w-3" /> {hasEdits ? "Continue editing" : "Edit text"}
             </button>
@@ -1960,9 +1963,9 @@ function Step4Confirm({
         )}
       </p>
       <label className="block">
-        <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
+        <Eyebrow className="mb-1.5">
           Subject
-        </div>
+        </Eyebrow>
         <input
           type="text"
           value={subject}
@@ -1993,8 +1996,8 @@ function PendingSubmittedPanel({
 }) {
   return (
     <div className="py-6 text-center">
-      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-heritage/10">
-        <Clock className="h-6 w-6 text-heritage-deep" />
+      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center bg-warning-bg">
+        <Clock className="h-6 w-6 text-warning" />
       </div>
       <h3 className="text-[17px] font-extrabold tracking-[-0.4px] text-ink">
         Submitted for approval

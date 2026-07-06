@@ -19,6 +19,7 @@ import {
   ToggleLeft,
   Type,
 } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import type {
   ExistingAnswer,
   ScreeningQuestion,
@@ -121,11 +122,11 @@ export function ScreeningResponseRow({
             <div className="text-[14px] font-semibold text-ink leading-snug">
               {question.prompt}
             </div>
-            <span className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta">
+            <span className="text-[11px] text-slate-meta">
               {KIND_LABEL[question.kind]}
             </span>
             {question.required && (
-              <span className="text-[9px] font-bold tracking-[2px] uppercase text-heritage-deep">
+              <span className="text-[11px] font-semibold text-slate-meta">
                 Required
               </span>
             )}
@@ -136,14 +137,14 @@ export function ScreeningResponseRow({
             </div>
           )}
           <div
-            className={`mt-2 text-[14px] leading-relaxed whitespace-pre-wrap ${
+            className={`mt-2 text-[14px] leading-relaxed whitespace-pre-wrap tabular ${
               missing ? "italic text-slate-meta" : "text-ink"
             }`}
           >
             {display}
           </div>
           {missing && question.required && (
-            <div className="mt-1.5 text-[12px] font-bold tracking-[1px] uppercase text-danger">
+            <div className="mt-1.5 text-[12px] font-semibold text-danger">
               Required question — no response
             </div>
           )}
@@ -201,11 +202,11 @@ export function VerificationRow({ row }: { row: VerificationRowData }) {
             <div className="text-[14px] font-semibold text-ink leading-snug">
               {row.label}
             </div>
-            <span className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta">
+            <span className="text-[11px] text-slate-meta">
               Verification
             </span>
             {row.required && (
-              <span className="text-[9px] font-bold tracking-[2px] uppercase text-heritage-deep">
+              <span className="text-[11px] font-semibold text-slate-meta">
                 Required
               </span>
             )}
@@ -234,9 +235,9 @@ export function VerificationRow({ row }: { row: VerificationRowData }) {
               controls live; education stays plain text. */}
           {row.linkedCredentials.length > 0 && (
             <div className="mt-1.5 text-[13px] text-slate-body leading-snug">
-              <span className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta mr-2">
+              <Eyebrow as="span" className="mr-2">
                 Linked proof
-              </span>
+              </Eyebrow>
               {row.linkedCredentials.map((c, i) => (
                 <span key={`${c.type}-${c.id}`}>
                   {i > 0 && "; "}
@@ -258,9 +259,9 @@ export function VerificationRow({ row }: { row: VerificationRowData }) {
           {/* Candidate note */}
           {row.note && (
             <div className="mt-1.5 text-[13px] text-slate-body leading-snug whitespace-pre-wrap">
-              <span className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta mr-2">
+              <Eyebrow as="span" className="mr-2">
                 Note
-              </span>
+              </Eyebrow>
               {row.note}
             </div>
           )}
@@ -268,7 +269,7 @@ export function VerificationRow({ row }: { row: VerificationRowData }) {
           {/* Required-but-not-attested red flag — mirrors the screening
               block's required-blank treatment. */}
           {flagged && (
-            <div className="mt-1.5 text-[12px] font-bold tracking-[1px] uppercase text-danger">
+            <div className="mt-1.5 text-[12px] font-semibold text-danger">
               Required verification — not attested
             </div>
           )}

@@ -32,6 +32,7 @@ import {
   type PipelineStage,
   type StageKind,
 } from "@/lib/applications/stages";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { moveApplicationStage } from "./actions";
 import { useToast } from "@/components/app/toast";
 import { rejectWithReason, withdrawWithReason } from "./reject-actions";
@@ -232,7 +233,7 @@ export function StageSelector({
               aria-checked={active}
               disabled={pending}
               onClick={() => moveToStage(stage)}
-              className={`relative inline-flex items-center gap-2 px-4 py-2.5 text-[10px] font-bold tracking-[1.5px] uppercase border-r last:border-r-0 border-[var(--rule)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-inset ${
+              className={`relative inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-r last:border-r-0 border-[var(--rule)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-inset ${
                 active
                   ? `${color.bg} ${color.text} ring-1 ring-inset ${color.ring}`
                   : "text-slate-body hover:bg-cream"
@@ -264,7 +265,7 @@ export function StageSelector({
             aria-haspopup="menu"
             aria-expanded={menuOpen}
             aria-label="More stage actions"
-            className="inline-flex items-center gap-1.5 px-3 py-2.5 text-[10px] font-bold tracking-[1.5px] uppercase border-l border-[var(--rule)] text-slate-body hover:bg-cream transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-inset"
+            className="inline-flex items-center gap-1.5 px-3 py-2.5 border-l border-[var(--rule)] text-slate-body hover:bg-cream transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-inset"
           >
             <MoreHorizontal className="h-3.5 w-3.5" />
             <ChevronDown className="h-3 w-3" />
@@ -396,12 +397,9 @@ function ClosedTransitionDialog({
           />
         )}
         <div className="grid gap-2">
-          <label
-            htmlFor="single-reason"
-            className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body"
-          >
+          <Eyebrow as="label" htmlFor="single-reason">
             Note
-          </label>
+          </Eyebrow>
           <textarea
             id="single-reason"
             value={reason}
@@ -418,7 +416,7 @@ function ClosedTransitionDialog({
           <button
             type="button"
             onClick={onCancel}
-            className="inline-flex items-center justify-center px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] bg-card text-slate-body hover:bg-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
+            className="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold border border-[var(--rule-strong)] bg-card text-slate-body hover:bg-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
           >
             Cancel
           </button>
@@ -428,7 +426,7 @@ function ClosedTransitionDialog({
             onClick={() =>
               onConfirm(transition, reason, disposition || null)
             }
-            className={`inline-flex items-center justify-center px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${confirmClasses}`}
+            className={`inline-flex items-center justify-center px-4 py-2 text-xs font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${confirmClasses}`}
           >
             {transition.dialogConfirmLabel}
           </button>

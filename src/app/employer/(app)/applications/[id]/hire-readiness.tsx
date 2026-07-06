@@ -20,6 +20,7 @@ import {
   Clock,
   ShieldCheck,
 } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import {
   LICENSE_TYPES,
   CERTIFICATION_KINDS,
@@ -73,7 +74,9 @@ function expiryPill(state: CredentialExpiryState): string {
     case "expiring_soon":
       return "bg-warning-bg text-warning ring-1 ring-inset ring-warning";
     default:
-      return "bg-success-bg text-success ring-1 ring-inset ring-success";
+      // Neutral, not success — a routine far-future expiry isn't a win
+      // moment. Kept in lockstep with credentials-section computeExpiryState.
+      return "bg-muted text-slate-meta ring-1 ring-inset ring-border";
   }
 }
 
@@ -140,12 +143,12 @@ export function HireReadinessChecklist({
           <AlertTriangle className="h-5 w-5 text-warning shrink-0" />
         )}
         <div className="min-w-0">
-          <div className="text-[14px] font-bold text-ink">
+          <div className="text-[14px] font-bold text-ink tabular">
             {ready
               ? "Ready to hire — all checks clear"
               : `${attention} item${attention === 1 ? "" : "s"} need attention before start`}
           </div>
-          <div className="text-[12px] text-slate-body mt-0.5">
+          <div className="text-[12px] text-slate-body mt-0.5 tabular">
             {requiredVerifs.length > 0 && (
               <>
                 {requiredVerifs.length - verifsOutstanding.length}/
@@ -168,9 +171,7 @@ export function HireReadinessChecklist({
         {/* Required verifications */}
         {requiredVerifs.length > 0 && (
           <div className="px-5 py-4">
-            <div className="text-[10px] font-bold tracking-[2px] uppercase text-foreground mb-3">
-              Required verifications
-            </div>
+            <Eyebrow className="mb-3">Required verifications</Eyebrow>
             <ul className="space-y-2">
               {requiredVerifs.map((v) => (
                 <li key={v.label} className="flex items-center gap-2.5 text-[13px]">
@@ -194,9 +195,7 @@ export function HireReadinessChecklist({
         {/* Credentials + expiry */}
         {credentials.length > 0 && (
           <div className="px-5 py-4">
-            <div className="text-[10px] font-bold tracking-[2px] uppercase text-foreground mb-3">
-              Credentials on file
-            </div>
+            <Eyebrow className="mb-3">Credentials on file</Eyebrow>
             <ul className="space-y-2.5">
               {credentials.map((c, i) => (
                 <li
@@ -210,7 +209,7 @@ export function HireReadinessChecklist({
                   )}
                   <span className="text-ink">{c.label}</span>
                   <span
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold ${expiryPill(c.expiryState)}`}
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold tabular ${expiryPill(c.expiryState)}`}
                   >
                     {c.expiryState === "expired" ||
                     c.expiryState === "expiring_imminent" ? (
@@ -229,7 +228,7 @@ export function HireReadinessChecklist({
               ))}
             </ul>
             {expiringCreds.length > 0 && (
-              <p className="mt-3 text-[12px] text-warning leading-snug">
+              <p className="mt-3 text-[12px] text-warning leading-snug tabular">
                 {expiringCreds.length} credential
                 {expiringCreds.length === 1 ? "" : "s"} expired or expiring soon —
                 ask {`the candidate`} to upload a current copy before their start date.

@@ -10,6 +10,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRightLeft, Copy, ArrowRight } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import {
   listMoveCopyTargets,
   transferApplication,
@@ -62,9 +63,9 @@ export function MoveCopyCard({ applicationId }: { applicationId: string }) {
   return (
     <section className="border border-[var(--rule)] bg-card p-5">
       <div className="flex items-center justify-between gap-3">
-        <h3 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+        <Eyebrow as="h3">
           Move or copy to another job
-        </h3>
+        </Eyebrow>
         {!open && (
           <button
             type="button"
@@ -114,7 +115,7 @@ export function MoveCopyCard({ applicationId }: { applicationId: string }) {
                 type="button"
                 onClick={() => handleTransfer("move")}
                 disabled={pending || !selected || selectedTaken}
-                className="inline-flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50"
               >
                 <ArrowRightLeft className="h-3.5 w-3.5" />
                 {pending ? "Working…" : "Move"}
@@ -123,7 +124,7 @@ export function MoveCopyCard({ applicationId }: { applicationId: string }) {
                 type="button"
                 onClick={() => handleTransfer("copy")}
                 disabled={pending || !selected || selectedTaken}
-                className="inline-flex items-center gap-1.5 px-3 py-2 border border-[var(--rule-strong)] text-ink text-[11px] font-bold tracking-[1.5px] uppercase hover:border-ink transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-2 border border-[var(--rule-strong)] text-ink text-xs font-semibold hover:border-ink transition-colors disabled:opacity-50"
               >
                 <Copy className="h-3.5 w-3.5" />
                 Copy

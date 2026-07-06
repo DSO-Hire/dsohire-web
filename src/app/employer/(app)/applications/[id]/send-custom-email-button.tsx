@@ -23,6 +23,7 @@ import {
   Mail,
   Sparkles,
 } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import {
   Dialog,
   DialogContent,
@@ -107,7 +108,7 @@ export function SendCustomEmailButton({
       <button
         type="button"
         onClick={openDialog}
-        className="inline-flex items-center gap-2 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ink hover:bg-cream/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
+        className="inline-flex items-center gap-2 border border-[var(--rule-strong)] bg-card px-3 py-2 text-xs font-semibold text-ink hover:bg-cream/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
       >
         <Mail className="size-3.5" />
         Send email
@@ -203,7 +204,7 @@ export function SendCustomEmailButton({
               type="button"
               onClick={() => setOpen(false)}
               disabled={pending}
-              className="inline-flex items-center justify-center px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] bg-card text-slate-body hover:bg-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
+              className="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold border border-[var(--rule-strong)] bg-card text-slate-body hover:bg-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
             >
               {sent ? "Close" : "Cancel"}
             </button>
@@ -212,7 +213,7 @@ export function SendCustomEmailButton({
                 type="button"
                 onClick={onSend}
                 disabled={pending || sent}
-                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex items-center gap-2 bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {pending ? (
                   <>
@@ -272,9 +273,7 @@ function PreviewPane({
   return (
     <div className="border border-[var(--rule)] bg-cream/30 overflow-hidden max-h-[320px] flex flex-col">
       <div className="border-b border-[var(--rule)] bg-card px-4 py-2">
-        <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-0.5">
-          Preview · sample data
-        </div>
+        <Eyebrow className="mb-0.5">Preview · sample data</Eyebrow>
         <div className="text-[13px] font-semibold text-ink truncate">
           {subjectResult.output || (
             <span className="text-slate-meta italic">(subject missing)</span>

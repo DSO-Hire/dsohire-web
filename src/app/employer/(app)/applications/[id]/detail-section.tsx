@@ -10,6 +10,8 @@
 
 import { Lock, Sparkles } from "lucide-react";
 
+import { Eyebrow } from "@/components/brand/eyebrow";
+
 export function DetailSection({
   id,
   num,
@@ -41,8 +43,8 @@ export function DetailSection({
   return (
     <section id={id} className="scroll-mt-6">
       <header className="mb-4">
-        <div
-          className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] font-bold tracking-[2.5px] uppercase ${eyebrowColor} mb-1.5`}
+        <Eyebrow
+          className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 ${eyebrowColor} mb-1.5`}
         >
           <span className="inline-flex items-center gap-1.5">
             {tone === "internal" && <Lock className="h-3 w-3" />}
@@ -50,11 +52,11 @@ export function DetailSection({
             {num && <span>{num}</span>}
           </span>
           {badge && (
-            <span className="text-[9px] font-bold tracking-[1.5px] uppercase px-2 py-0.5 bg-heritage/15 text-heritage-deep">
+            <span className="text-xs font-semibold normal-case tracking-normal px-2 py-0.5 bg-heritage/15 text-heritage-deep">
               {badge}
             </span>
           )}
-        </div>
+        </Eyebrow>
         <h2 className="text-xl sm:text-2xl font-extrabold tracking-[-0.6px] text-ink leading-tight">
           {title}
         </h2>
@@ -122,9 +124,9 @@ export function RailCard({
       id={id}
       className="border border-[var(--rule)] bg-card p-4 scroll-mt-6"
     >
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+      <Eyebrow className="mb-3">
         {label}
-      </div>
+      </Eyebrow>
       {children}
     </section>
   );
@@ -133,9 +135,9 @@ export function RailCard({
 export function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta mb-1">
+      <Eyebrow className="mb-1">
         {label}
-      </div>
+      </Eyebrow>
       <div className="text-[14px] text-ink leading-snug">{value}</div>
     </div>
   );

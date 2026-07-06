@@ -35,6 +35,7 @@ import {
   CheckCircle2,
   Undo2,
 } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import {
   LICENSE_TYPES,
   CERTIFICATION_KINDS,
@@ -189,7 +190,7 @@ function computeExpiryState(expires: string | null): ExpiryState {
     kind: "future_far",
     label: `Expires ${labelDate}`,
     pillClass:
-      "bg-success-bg text-success ring-1 ring-inset ring-success",
+      "bg-muted text-slate-meta ring-1 ring-inset ring-border",
     IconComp: ShieldCheck,
   };
 }
@@ -321,10 +322,8 @@ function CredentialGroup({
   return (
     <div>
       <div className="px-5 py-3 bg-cream/40 border-b border-[var(--rule)] flex items-center justify-between">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-foreground">
-          {title}
-        </div>
-        <div className="text-[11px] font-bold text-slate-meta">
+        <Eyebrow>{title}</Eyebrow>
+        <div className="text-[11px] font-bold text-slate-meta tabular">
           {count} on file
         </div>
       </div>
@@ -525,7 +524,7 @@ function CredentialRowShell({
           )}
           <div className="flex flex-wrap items-center gap-x-2 gap-y-2 mt-3">
             <span
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold ${expiry.pillClass}`}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold tabular ${expiry.pillClass}`}
             >
               <ExpiryIcon className="h-3 w-3" />
               {expiry.label}
@@ -553,7 +552,7 @@ function CredentialRowShell({
               type="button"
               onClick={openDocument}
               disabled={docPending}
-              className="inline-flex items-center gap-2 px-3 py-1.5 text-[11px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-foreground bg-card hover:bg-cream transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold border border-[var(--rule-strong)] text-foreground bg-card hover:bg-cream transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {docPending ? (
                 <Loader2 className="h-3 w-3 animate-spin" />
@@ -582,7 +581,7 @@ function CredentialRowShell({
                     new Date().toISOString()
                   )
                 }
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase bg-heritage text-primary-foreground hover:bg-heritage-deep transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold bg-heritage text-primary-foreground hover:bg-heritage-deep transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {pending ? (
                   <Loader2 className="h-3 w-3 animate-spin" />
@@ -603,7 +602,7 @@ function CredentialRowShell({
                     null
                   )
                 }
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-slate-body bg-card hover:bg-cream transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold border border-[var(--rule-strong)] text-slate-body bg-card hover:bg-cream transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {pending ? (
                   <Loader2 className="h-3 w-3 animate-spin" />
@@ -624,7 +623,7 @@ function CredentialRowShell({
                     verifiedAt
                   )
                 }
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-danger text-danger bg-card hover:bg-danger-bg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold border border-danger text-danger bg-card hover:bg-danger-bg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {pending ? (
                   <Loader2 className="h-3 w-3 animate-spin" />

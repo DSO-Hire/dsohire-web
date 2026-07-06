@@ -117,6 +117,7 @@ import { ScreeningResponseRow, VerificationRow } from "./screening-rows";
 import { ActivityTimeline } from "./activity-timeline";
 import { WorkspaceTabs } from "./workspace-tabs";
 import { AssistantContextRegistrar } from "@/components/support/assistant-context-registrar";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { ReviewNav } from "./review-nav";
 import { candidateDisplayName } from "@/lib/applications/candidate-display";
 import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
@@ -1389,14 +1390,14 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-6">
         <Link
           href="/employer/applications"
-          className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-heritage-deep hover:text-ink transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Back to All Applications
+          Back to all applications
         </Link>
         <Link
           href={`/employer/jobs/${job.id}`}
-          className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-heritage-deep hover:text-ink transition-colors"
         >
           View in {String(job.title)} pipeline →
         </Link>
@@ -1593,9 +1594,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             <div className="space-y-5">
               {app.cover_letter && (
                 <div className="border border-[var(--rule)] bg-cream/40 p-5">
-                  <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-2">
-                    Cover letter
-                  </div>
+                  <Eyebrow className="mb-2">Cover letter</Eyebrow>
                   <p className="text-[14px] text-ink leading-relaxed whitespace-pre-wrap">
                     {app.cover_letter}
                   </p>
@@ -1668,7 +1667,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                   ⚠
                 </span>
                 <div className="min-w-0 flex-1">
-                  <div className="text-[12px] font-bold tracking-[1.5px] uppercase text-warning mb-1.5">
+                  <div className="text-[13px] font-bold text-warning mb-1.5">
                     Knockout flagged · review the candidate&apos;s answers
                   </div>
                   <p className="text-[13px] text-warning/90 leading-relaxed mb-3">
@@ -1848,9 +1847,9 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               the green wash. */}
           <div className="-mx-4 sm:-mx-6 mt-10 px-4 sm:px-6 py-8 bg-heritage/15 border-y-2 border-heritage/40">
             <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-2 px-5 py-2 bg-heritage-deep text-primary-foreground text-[12px] font-extrabold tracking-[3px] uppercase">
+              <div className="inline-flex items-center gap-2 px-5 py-2 bg-heritage-deep text-primary-foreground text-[13px] font-bold">
                 <Lock className="h-3.5 w-3.5" />
-                Internal Workspace
+                Internal workspace
               </div>
               <p className="mt-3 text-[12px] text-slate-meta max-w-[480px] mx-auto leading-relaxed">
                 Only your team sees what&apos;s below. Credentials,

@@ -15,6 +15,7 @@ import {
   MapPin,
   Phone,
 } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { Avatar } from "@/components/ui/avatar";
 import {
   colorTripleFor,
@@ -78,9 +79,7 @@ export function CandidateHero({
         <div className="flex flex-col items-start gap-3 min-w-0 sm:flex-row sm:gap-5 sm:flex-1">
           <Avatar name={avatarName} imageUrl={avatarUrl} size="2xl" />
           <div className="min-w-0 flex-1">
-            <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
-              Application
-            </div>
+            <Eyebrow className="mb-2">Application</Eyebrow>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-[1.05] text-ink mb-2">
               {displayName}
             </h1>
@@ -105,7 +104,7 @@ export function CandidateHero({
           </div>
         </div>
         <span
-          className={`self-start whitespace-nowrap text-[10px] font-bold tracking-[2px] uppercase px-3 py-2 ring-1 ring-inset ${statusBadgeClasses(currentKind)}`}
+          className={`self-start whitespace-nowrap text-xs font-semibold px-3 py-2 ring-1 ring-inset ${statusBadgeClasses(currentKind)}`}
         >
           {currentStageLabel}
         </span>

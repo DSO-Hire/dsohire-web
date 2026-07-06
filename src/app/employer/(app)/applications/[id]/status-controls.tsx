@@ -87,7 +87,7 @@ export function StatusControls({
               <button
                 type="submit"
                 disabled={pending}
-                className={`inline-flex items-center gap-2 px-5 py-2.5 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${className}`}
+                className={`inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${className}`}
               >
                 {Icon && <Icon className="h-3.5 w-3.5" />}
                 {t.label}

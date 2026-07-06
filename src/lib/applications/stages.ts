@@ -316,23 +316,23 @@ export const STAGE_HEAT_CLASSES: Record<
   ReturnType<typeof stageHeatLevel>,
   string
 > = {
-  cool: "bg-slate-100 text-slate-600 dark:bg-slate-400/15 dark:text-slate-300",
-  warm: "bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-200",
-  hot: "bg-red-50 text-red-700 dark:bg-red-500/15 dark:text-red-200 animate-pulse",
+  cool: "bg-ink/5 text-slate-meta",
+  warm: "bg-warning-bg text-warning",
+  hot: "bg-stage-brick/15 text-stage-brick animate-pulse",
 };
 
 /**
  * Left-edge aging treatment for kanban cards (Model 04's "visible from
  * across the room" layer). Same level source as the pill; heritage
- * green = moving, amber = warming, rust = stuck.
+ * green = moving, warning gold = warming, brick = stuck.
  */
 export const STAGE_AGE_EDGE_CLASSES: Record<
   ReturnType<typeof stageHeatLevel>,
   string
 > = {
   cool: "border-l-[3px] border-l-heritage/70",
-  warm: "border-l-[3px] border-l-amber-500",
-  hot: "border-l-[3px] border-l-[#b3543f]",
+  warm: "border-l-[3px] border-l-warning",
+  hot: "border-l-[3px] border-l-stage-brick",
 };
 
 // ─────────────────────────────────────────────────────────────────────

@@ -15,6 +15,7 @@ import {
   daysInStage,
   type PipelineStage,
 } from "@/lib/applications/stages";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { KanbanCard } from "./kanban-card";
 import type { KanbanApplication } from "./kanban-board";
 
@@ -23,9 +24,9 @@ import type { KanbanApplication } from "./kanban-board";
  * norm — not arbitrary thresholds. No norm (thin history) → neutral. */
 const HEALTH_TONES = {
   ok: { bar: "bg-heritage", text: "text-heritage-deep" },
-  warn: { bar: "bg-amber-500", text: "text-amber-700" },
-  hot: { bar: "bg-[#b3543f]", text: "text-[#b3543f]" },
-  neutral: { bar: "bg-slate-300", text: "text-slate-meta" },
+  warn: { bar: "bg-warning", text: "text-warning" },
+  hot: { bar: "bg-stage-brick", text: "text-stage-brick" },
+  neutral: { bar: "bg-ink/20", text: "text-slate-meta" },
 } as const;
 
 interface KanbanColumnProps {
@@ -114,10 +115,10 @@ export function KanbanColumn({
         className={`${colors.bg} px-4 py-3 border-t-2 border-current ${colors.text}`}
       >
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-bold tracking-[2.5px] uppercase">
+          <Eyebrow as="span" className="text-inherit">
             {stage.label}
-          </span>
-          <span className="text-[10px] font-bold tabular-nums">
+          </Eyebrow>
+          <span className="text-[11px] font-bold tabular">
             {applications.length}
           </span>
         </div>
@@ -130,7 +131,7 @@ export function KanbanColumn({
                 : `Median ${currentMedian}d in stage right now — not enough history yet for a norm`
             }
           >
-            <span className="relative h-1 flex-1 bg-black/10 overflow-hidden">
+            <span className="relative h-1 flex-1 bg-ink/10 overflow-hidden">
               {ratio !== null && (
                 <span
                   className={`absolute inset-y-0 left-0 ${toneClasses.bar}`}
@@ -140,7 +141,7 @@ export function KanbanColumn({
               )}
             </span>
             <span
-              className={`text-[9px] font-semibold tabular-nums whitespace-nowrap ${toneClasses.text}`}
+              className={`text-[9px] font-semibold tabular whitespace-nowrap ${toneClasses.text}`}
             >
               median {currentMedian}d
               {ratio !== null && ratio >= 1.3
@@ -175,7 +176,7 @@ export function KanbanColumn({
           lanes.map((lane, idx) => (
             <div key={lane.label} className="space-y-2">
               <div
-                className={`text-[8.5px] font-extrabold tracking-[1px] uppercase text-slate-meta ${
+                className={`text-[10px] font-semibold text-slate-meta tabular ${
                   idx === 0
                     ? ""
                     : "pt-1.5 border-t border-dashed border-[var(--rule-strong)]"
