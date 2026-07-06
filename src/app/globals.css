@@ -380,6 +380,15 @@ html, body {
 }
 
 /* ─────────────────────────────────────────
+   .tabular — aligned numerals (house signature, 2026-07-06 sweep)
+   Apply to every KPI number, count, currency amount and table numeral.
+   Columns of figures that line up are the quietest premium signal.
+───────────────────────────────────────── */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─────────────────────────────────────────
    .dso-prose — shared rules for Tiptap output
    Used by both <JobDescriptionEditor /> (preview) and
    <RenderedJobDescription /> (public render). One source of truth.
