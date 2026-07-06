@@ -183,7 +183,7 @@ export function CareersEditor({
               key={previewSrc}
               src={previewSrc}
               title="Careers embed preview"
-              className="w-full h-[320px] bg-white"
+              className="w-full h-[320px] bg-cream"
             />
           </div>
           <p className="mt-2 text-[12px] text-slate-meta">

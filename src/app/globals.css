@@ -46,6 +46,21 @@
 
   /* Gold — sparkle / ★ accent */
   --gold: #B8902F;
+
+  /* ── Stage palette — curated categorical hues (2026-07-06) ──
+     For pipeline stage chips + the stage color picker. Desaturated,
+     editorial values derived from the navy/ivory/heritage system —
+     deliberately NOT the Tailwind default rainbow. stages.ts maps the
+     DB color_class keys onto these; dark values live in `.dark`. */
+  --stage-stone: #5C6B7A;   /* neutral intake */
+  --stage-mist: #4A7480;    /* cool evaluation */
+  --stage-navy: #3D5266;    /* corporate slate-blue (deck) */
+  --stage-bronze: #8C6D2F;  /* deep gold — offer/money */
+  --stage-juniper: #2F5D4F; /* heritage-deep green */
+  --stage-brick: #9A4B3C;   /* muted terracotta — rejected */
+  --stage-plum: #6A4E68;
+  --stage-orchid: #8A5470;
+  --stage-teal: #2F5D5D;
 }
 
 :root {
@@ -176,6 +191,17 @@ html, body {
   --color-slate-meta: var(--slate-meta);
   --color-gold: var(--gold);
 
+  /* ── Stage palette ── */
+  --color-stage-stone: var(--stage-stone);
+  --color-stage-mist: var(--stage-mist);
+  --color-stage-navy: var(--stage-navy);
+  --color-stage-bronze: var(--stage-bronze);
+  --color-stage-juniper: var(--stage-juniper);
+  --color-stage-brick: var(--stage-brick);
+  --color-stage-plum: var(--stage-plum);
+  --color-stage-orchid: var(--stage-orchid);
+  --color-stage-teal: var(--stage-teal);
+
   /* ── New role tokens ── */
   --color-hero: var(--hero);
   --color-hero-foreground: var(--hero-foreground);
@@ -262,6 +288,17 @@ html, body {
   --slate-body: #A6B7C7;
   --slate-meta: #7E90A1;
   --gold: #E9C873;
+
+  /* ── Stage palette — lifted for dark surfaces ── */
+  --stage-stone: #A6B4C0;
+  --stage-mist: #97BFC8;
+  --stage-navy: #93A9BD;
+  --stage-bronze: #D3B36A;
+  --stage-juniper: #8CB5A4;
+  --stage-brick: #CE8F80;
+  --stage-plum: #B295AF;
+  --stage-orchid: #C495AB;
+  --stage-teal: #83B3B3;
 
   /* ── Inline-style-only helpers (used in CSS, not Tailwind classes) ── */
   --heritage-tint: rgba(141, 184, 163, 0.14);

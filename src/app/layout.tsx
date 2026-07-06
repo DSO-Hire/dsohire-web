@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
-import { Manrope, Geist } from "next/font/google";
+import { Manrope } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
-
+// Geist (the Next.js template default) was removed 2026-07-06 — it was
+// dead weight: globals.css `@theme inline` already forces the font-sans
+// utility to Manrope, so Geist shipped bytes to every visitor and never
+// rendered. Manrope is the only UI typeface.
 const manrope = Manrope({
   variable: "--font-manrope",
   subsets: ["latin"],
@@ -60,7 +62,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("h-full", "antialiased", manrope.variable, "font-sans", geist.variable)}
+      className={cn("h-full", "antialiased", manrope.variable, "font-sans")}
     >
       <head>
         {/* No-flash theme init — runs BEFORE first paint so a dark-preference

@@ -120,18 +120,26 @@ export interface StageColorTriple {
 }
 
 /**
- * Default Tailwind color triples keyed by kind. Used as the fallback
- * when a stage row's `color_class` is null. `heritage` is exposed in
- * app/globals.css as a Tailwind v4 CSS variable.
+ * Default color triples keyed by kind — the BRAND stage ramp
+ * (2026-07-06, replaced the Tailwind default rainbow). Used as the
+ * fallback when a stage row's `color_class` is null.
+ *
+ * The `stage-*` tokens live in app/globals.css and are dark-adaptive
+ * (the raw var flips in `.dark`), so no `dark:` variants are needed —
+ * same pattern the heritage triple always used.
+ *
+ * The ramp tells the hiring story chromatically:
+ * stone (intake) → mist (evaluation) → navy (the serious room) →
+ * bronze/gold (money) → heritage green (earned) · brick (closed).
  */
 export const KIND_DEFAULT_COLORS: Record<StageKind, StageColorTriple> = {
-  open:       { bg: "bg-slate-50 dark:bg-slate-400/15",    ring: "ring-slate-200 dark:ring-slate-400/30",    text: "text-slate-700 dark:text-slate-300" },
-  screen:     { bg: "bg-amber-50 dark:bg-amber-500/15",    ring: "ring-amber-200 dark:ring-amber-500/30",    text: "text-amber-700 dark:text-amber-200" },
-  interview:  { bg: "bg-blue-50 dark:bg-blue-500/15",     ring: "ring-blue-200 dark:ring-blue-500/30",     text: "text-blue-700 dark:text-blue-200" },
-  offer:      { bg: "bg-emerald-50 dark:bg-emerald-500/15",  ring: "ring-emerald-200 dark:ring-emerald-500/30",  text: "text-emerald-700 dark:text-emerald-200" },
-  hired:      { bg: "bg-heritage/10", ring: "ring-heritage/30",  text: "text-heritage" },
-  rejected:   { bg: "bg-rose-50 dark:bg-rose-500/15",     ring: "ring-rose-200 dark:ring-rose-500/30",     text: "text-rose-700 dark:text-rose-200" },
-  withdrawn:  { bg: "bg-slate-50 dark:bg-slate-400/15",    ring: "ring-slate-200 dark:ring-slate-400/30",    text: "text-slate-500 dark:text-slate-400" },
+  open:       { bg: "bg-stage-stone/10",  ring: "ring-stage-stone/30",  text: "text-stage-stone" },
+  screen:     { bg: "bg-stage-mist/10",   ring: "ring-stage-mist/30",   text: "text-stage-mist" },
+  interview:  { bg: "bg-stage-navy/10",   ring: "ring-stage-navy/30",   text: "text-stage-navy" },
+  offer:      { bg: "bg-stage-bronze/10", ring: "ring-stage-bronze/30", text: "text-stage-bronze" },
+  hired:      { bg: "bg-heritage/10",     ring: "ring-heritage/30",     text: "text-heritage" },
+  rejected:   { bg: "bg-stage-brick/10",  ring: "ring-stage-brick/30",  text: "text-stage-brick" },
+  withdrawn:  { bg: "bg-stage-stone/5",   ring: "ring-stage-stone/20",  text: "text-stage-stone/70" },
 };
 
 /**
@@ -169,17 +177,25 @@ export const STAGE_COLOR_OPTIONS = [
 ] as const;
 export type StageColorPaletteName = (typeof STAGE_COLOR_OPTIONS)[number];
 
+/**
+ * ⚠️ The KEYS below are stored in dso_pipeline_stages.color_class —
+ * NEVER rename or remove one (existing rows would fall back to kind
+ * defaults). 2026-07-06: the VALUES were re-pointed from the Tailwind
+ * default rainbow to the curated brand stage palette (globals.css
+ * `--stage-*`, dark-adaptive — no `dark:` variants needed). Key names
+ * are legacy labels for the hue slot, not the rendered color.
+ */
 export const STAGE_COLOR_PALETTE: Record<StageColorPaletteName, StageColorTriple> = {
-  slate:     { bg: "bg-slate-50 dark:bg-slate-400/15",    ring: "ring-slate-200 dark:ring-slate-400/30",    text: "text-slate-700 dark:text-slate-300" },
-  amber:     { bg: "bg-amber-50 dark:bg-amber-500/15",    ring: "ring-amber-200 dark:ring-amber-500/30",    text: "text-amber-700 dark:text-amber-200" },
-  blue:      { bg: "bg-blue-50 dark:bg-blue-500/15",     ring: "ring-blue-200 dark:ring-blue-500/30",     text: "text-blue-700 dark:text-blue-200" },
-  emerald:   { bg: "bg-emerald-50 dark:bg-emerald-500/15",  ring: "ring-emerald-200 dark:ring-emerald-500/30",  text: "text-emerald-700 dark:text-emerald-200" },
-  heritage:  { bg: "bg-heritage/10", ring: "ring-heritage/30",  text: "text-heritage" },
-  rose:      { bg: "bg-rose-50 dark:bg-rose-500/15",     ring: "ring-rose-200 dark:ring-rose-500/30",     text: "text-rose-700 dark:text-rose-200" },
-  sky:       { bg: "bg-sky-50 dark:bg-sky-500/15",      ring: "ring-sky-200 dark:ring-sky-500/30",      text: "text-sky-700 dark:text-sky-200" },
-  violet:    { bg: "bg-violet-50 dark:bg-violet-500/15",   ring: "ring-violet-200 dark:ring-violet-500/30",   text: "text-violet-700 dark:text-violet-200" },
-  fuchsia:   { bg: "bg-fuchsia-50 dark:bg-fuchsia-500/15",  ring: "ring-fuchsia-200 dark:ring-fuchsia-500/30",  text: "text-fuchsia-700 dark:text-fuchsia-200" },
-  teal:      { bg: "bg-teal-50 dark:bg-teal-500/15",     ring: "ring-teal-200 dark:ring-teal-500/30",     text: "text-teal-700 dark:text-teal-200" },
+  slate:     { bg: "bg-stage-stone/10",   ring: "ring-stage-stone/30",   text: "text-stage-stone" },
+  amber:     { bg: "bg-stage-bronze/10",  ring: "ring-stage-bronze/30",  text: "text-stage-bronze" },
+  blue:      { bg: "bg-stage-navy/10",    ring: "ring-stage-navy/30",    text: "text-stage-navy" },
+  emerald:   { bg: "bg-stage-juniper/10", ring: "ring-stage-juniper/30", text: "text-stage-juniper" },
+  heritage:  { bg: "bg-heritage/10",      ring: "ring-heritage/30",      text: "text-heritage" },
+  rose:      { bg: "bg-stage-brick/10",   ring: "ring-stage-brick/30",   text: "text-stage-brick" },
+  sky:       { bg: "bg-stage-mist/10",    ring: "ring-stage-mist/30",    text: "text-stage-mist" },
+  violet:    { bg: "bg-stage-plum/10",    ring: "ring-stage-plum/30",    text: "text-stage-plum" },
+  fuchsia:   { bg: "bg-stage-orchid/10",  ring: "ring-stage-orchid/30",  text: "text-stage-orchid" },
+  teal:      { bg: "bg-stage-teal/10",    ring: "ring-stage-teal/30",    text: "text-stage-teal" },
 };
 
 // ─────────────────────────────────────────────────────────────────────
