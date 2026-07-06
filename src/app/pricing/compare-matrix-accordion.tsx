@@ -21,6 +21,9 @@
 import { useState } from "react";
 import { Check, ChevronRight } from "lucide-react";
 
+import { Eyebrow } from "@/components/brand/eyebrow";
+import { Tag } from "@/components/brand/tag";
+
 export interface MatrixRowData {
   feature: string;
   values: Record<string, string | boolean>;
@@ -91,9 +94,7 @@ export function CompareMatrixAccordion({
         <div
           className={`${GRID} sticky top-[80px] z-20 bg-hero shadow-[0_4px_12px_-8px_rgba(7,15,28,0.25)]`}
         >
-          <div className="py-5 pl-5 pr-4 flex items-end text-[10px] font-bold tracking-[2.5px] uppercase text-hero-foreground/60">
-            Category
-          </div>
+          <Eyebrow className="py-5 pl-5 pr-4 flex items-end text-hero-foreground/60">Category</Eyebrow>
           {tiers.map((t) => (
             <div
               key={t.id}
@@ -102,18 +103,18 @@ export function CompareMatrixAccordion({
               }`}
             >
               {t.featured && (
-                <span className="absolute top-2 right-2.5 inline-flex items-center px-2 py-0.5 bg-heritage text-primary-foreground text-[8px] font-bold tracking-[1.5px] uppercase">
-                  Most Popular
-                </span>
+                <Tag tone="heritage" className="absolute top-2 right-2.5 bg-heritage text-primary-foreground">
+                  Most popular
+                </Tag>
               )}
               <div className="text-[15px] font-extrabold tracking-[-0.4px] text-hero-foreground mb-0.5">
                 {t.name}
               </div>
-              <div className="text-[12px] font-semibold text-hero-foreground/55">
+              <div className="text-[12px] font-semibold text-hero-foreground/55 tabular">
                 {t.priceLine}
               </div>
               {t.subLine && (
-                <div className="text-[9px] font-bold tracking-[1px] uppercase text-hero-foreground/40 mt-0.5">
+                <div className="text-[10px] font-semibold text-hero-foreground/40 mt-0.5">
                   {t.subLine}
                 </div>
               )}
@@ -141,7 +142,7 @@ export function CompareMatrixAccordion({
                   isRoadmap ? { background: "var(--heritage-tint)" } : undefined
                 }
               >
-                <span className="flex items-center gap-2.5 py-4 pl-5 pr-4 text-[11px] font-bold tracking-[2px] uppercase text-heritage-deep">
+                <Eyebrow as="span" className="flex items-center gap-2.5 py-4 pl-5 pr-4 text-heritage-deep">
                   <ChevronRight
                     aria-hidden
                     className={`h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${
@@ -149,14 +150,14 @@ export function CompareMatrixAccordion({
                     }`}
                   />
                   {group.label}
-                  <span className="normal-case tracking-normal font-semibold text-slate-meta text-[11px]">
+                  <span className="normal-case tracking-normal font-semibold text-slate-meta text-[11px] tabular">
                     · {group.rows.length}
                   </span>
-                </span>
+                </Eyebrow>
                 {tiers.map((t) => (
                   <span
                     key={t.id}
-                    className={`flex items-center py-4 px-4 text-[9px] font-bold tracking-[1.2px] uppercase ${
+                    className={`flex items-center py-4 px-4 text-[10px] font-semibold tabular ${
                       t.featured
                         ? "bg-hero text-hero-foreground/70 border-l-2 border-r-2 border-heritage"
                         : "text-slate-meta"
@@ -229,14 +230,14 @@ function ValueCell({
         )
       ) : isSoft ? (
         <span
-          className={`text-[10px] font-bold tracking-[1.5px] uppercase whitespace-nowrap ${
+          className={`text-[10px] font-semibold whitespace-nowrap ${
             featured ? "text-hero-foreground/55" : "text-slate-meta"
           }`}
         >
           {value}
         </span>
       ) : (
-        <span className={`font-semibold ${featured ? "text-hero-foreground" : "text-ink"}`}>
+        <span className={`font-semibold tabular ${featured ? "text-hero-foreground" : "text-ink"}`}>
           {value}
         </span>
       )}

@@ -14,6 +14,8 @@
 
 import Link from "next/link";
 import { ArrowRight, Building2, Stethoscope } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
+import { Tag } from "@/components/brand/tag";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { FitDial } from "@/components/marketing/fit-dial";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
@@ -107,14 +109,14 @@ function Hero({ ctaHref }: { ctaHref: string }) {
           >
             <Link
               href={ctaHref}
-              className="inline-flex items-center gap-2.5 px-8 py-4 bg-heritage text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
+              className="inline-flex items-center gap-2.5 px-8 py-4 bg-heritage text-primary-foreground text-sm font-bold hover:bg-heritage-deep transition-colors"
             >
               <Stethoscope className="h-4 w-4" />
               Take Your PracticeFit
             </Link>
             <Link
               href="/for-dental-groups"
-              className="inline-flex items-center gap-2.5 px-8 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-2.5 px-8 py-4 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
             >
               <Building2 className="h-4 w-4" />
               See It On Your Openings
@@ -133,9 +135,9 @@ function Hero({ ctaHref }: { ctaHref: string }) {
           >
             <div className="flex items-start justify-between gap-4 px-6 py-4 bg-cream border-b border-[var(--rule)]">
               <div className="min-w-0">
-                <div className="text-[9px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
+                <Eyebrow className="text-heritage-deep mb-1">
                   Your Fit · Hygienist
-                </div>
+                </Eyebrow>
                 <div className="text-[16px] font-bold tracking-[-0.3px] text-ink leading-tight">
                   Greenfield Dental Group
                 </div>
@@ -143,12 +145,9 @@ function Hero({ ctaHref }: { ctaHref: string }) {
                   Westerville, OH · 4-day week · Posted pay range
                 </div>
               </div>
-              <span
-                className="shrink-0 px-2 py-1 text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep border border-heritage/35"
-                style={{ background: "var(--heritage-tint)" }}
-              >
-                Strong Match
-              </span>
+              <Tag tone="heritage" accent className="shrink-0">
+                Strong match
+              </Tag>
             </div>
             <div className="px-6 sm:px-8 py-8">
               <FitDial
@@ -180,9 +179,9 @@ function TwoSides() {
   return (
     <section className="bg-cream border-y border-[var(--rule)] px-6 sm:px-14 py-24">
       <div className="max-w-[1240px] mx-auto">
-        <div data-reveal className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
+        <Eyebrow data-reveal className="text-heritage-deep mb-3.5">
           Two Sides, One Score
-        </div>
+        </Eyebrow>
         <h2
           data-reveal
           style={{ "--mk-delay": "70ms" } as React.CSSProperties}
@@ -193,9 +192,9 @@ function TwoSides() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-px bg-[var(--rule)] border border-[var(--rule)]">
           <div data-reveal className="bg-card p-9">
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
+            <Eyebrow className="mb-4">
               If you&apos;re a dental professional
-            </div>
+            </Eyebrow>
             <p className="text-[15px] text-slate-body leading-[1.7] mb-4">
               Take the assessment once — your pace, your schedule, how you
               like to be mentored, what matters most to you. Every opening on
@@ -213,9 +212,9 @@ function TwoSides() {
             style={{ "--mk-delay": "90ms" } as React.CSSProperties}
             className="bg-card p-9"
           >
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
+            <Eyebrow className="mb-4">
               If you&apos;re hiring for a dental group
-            </div>
+            </Eyebrow>
             <p className="text-[15px] text-slate-body leading-[1.7] mb-4">
               Every applicant lands in your pipeline already scored against
               the role — schedule overlap, PMS fluency, clinical mix, commute,
@@ -259,9 +258,9 @@ const CORPORATE_DIMS = [
 function WhatItScores() {
   return (
     <section className="px-6 sm:px-14 py-24 max-w-[1240px] mx-auto">
-      <div data-reveal className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
+      <Eyebrow data-reveal className="text-heritage-deep mb-3.5">
         Under The Hood
-      </div>
+      </Eyebrow>
       <h2
         data-reveal
         style={{ "--mk-delay": "70ms" } as React.CSSProperties}
@@ -284,7 +283,7 @@ function WhatItScores() {
                 key={d}
                 className="py-3 border-b border-[var(--rule)] text-[14.5px] text-slate-body flex items-center gap-3"
               >
-                <span className="block w-1.5 h-1.5 bg-heritage rounded-full shrink-0" />
+                <span className="block w-1.5 h-1.5 bg-heritage shrink-0" />
                 {d}
               </li>
             ))}
@@ -303,7 +302,7 @@ function WhatItScores() {
                 key={d}
                 className="py-3 border-b border-[var(--rule)] text-[14.5px] text-slate-body flex items-center gap-3"
               >
-                <span className="block w-1.5 h-1.5 bg-heritage-deep rounded-full shrink-0" />
+                <span className="block w-1.5 h-1.5 bg-heritage-deep shrink-0" />
                 {d}
               </li>
             ))}
@@ -349,7 +348,7 @@ function DsoFitBand() {
           data-reveal
           style={{ "--mk-delay": "200ms" } as React.CSSProperties}
           href="/for-corporate"
-          className="inline-flex items-center gap-2.5 px-7 py-3.5 border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[1.8px] uppercase hover:border-ink hover:bg-cream transition-colors"
+          className="inline-flex items-center gap-2.5 px-7 py-3.5 border border-[var(--rule-strong)] text-ink text-xs font-semibold hover:border-ink hover:bg-cream transition-colors"
         >
           Explore Corporate Roles
           <ArrowRight className="h-3.5 w-3.5" />
@@ -392,14 +391,14 @@ function HonestyBand() {
           width: "560px",
           height: "560px",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(77,122,96,0.12), transparent 65%)",
+          background: "radial-gradient(circle, var(--heritage-glow), transparent 65%)",
           transform: "translateY(-50%)",
         }}
       />
       <div className="relative max-w-[1240px] mx-auto">
-        <div data-reveal className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-light mb-3.5">
+        <Eyebrow data-reveal className="text-heritage-bright mb-3.5">
           How We Keep It Honest
-        </div>
+        </Eyebrow>
         <h2
           data-reveal
           style={{ "--mk-delay": "70ms" } as React.CSSProperties}
@@ -454,14 +453,14 @@ function FinalCta({ ctaHref }: { ctaHref: string }) {
         >
           <Link
             href={ctaHref}
-            className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-heritage text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
+            className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-heritage text-primary-foreground text-sm font-bold hover:bg-heritage-deep transition-colors"
           >
             <Stethoscope className="h-4 w-4" />
             Take Your PracticeFit
           </Link>
           <Link
             href="/pricing"
-            className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
           >
             <Building2 className="h-4 w-4" />
             Get It For Your Group

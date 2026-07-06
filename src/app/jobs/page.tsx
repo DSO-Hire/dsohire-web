@@ -15,6 +15,8 @@
 
 import Link from "next/link";
 import { ArrowRight, MapPin, Search, List, Map as MapIcon } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
+import { Tag } from "@/components/brand/tag";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { JobsMap, type JobsMapLocation } from "@/components/jobs-map";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -158,9 +160,9 @@ const SURFACE_OPTIONS: Array<{
 }> = [
   {
     value: "practice",
-    label: "Practice Roles",
+    label: "Practice roles",
     scopes: ["location", "regional"],
-    activeClasses: "bg-heritage-deep text-primary-foreground border-heritage-deep",
+    activeClasses: "bg-card text-ink border-[var(--rule-strong)] border-b-2 border-b-heritage",
     inactiveClasses: "bg-card text-ink border-[var(--rule-strong)] hover:border-heritage",
     chipBgClass: "bg-heritage-deep/10 text-heritage-deep",
     emptyHeading: "No practice roles match these filters.",
@@ -169,11 +171,11 @@ const SURFACE_OPTIONS: Array<{
   },
   {
     value: "corporate",
-    label: "Corporate Roles",
+    label: "Corporate roles",
     scopes: ["corporate"],
     // Slate-blue accent per the spec — visually distinct from practice without
     // departing from the brand palette.
-    activeClasses: "bg-corporate text-ivory border-corporate",
+    activeClasses: "bg-card text-ink border-[var(--rule-strong)] border-b-2 border-b-corporate",
     inactiveClasses: "bg-card text-ink border-[var(--rule-strong)] hover:border-corporate",
     chipBgClass: "bg-corporate/10 text-corporate",
     emptyHeading: "No corporate roles open right now.",
@@ -602,9 +604,9 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
       <section className="pt-[140px] pb-12 px-6 sm:px-14 max-w-[1240px] mx-auto">
         <div className="flex items-center gap-3.5 mb-6">
           <span className="block w-7 h-px bg-heritage" />
-          <span className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep">
+          <Eyebrow className="text-heritage-deep">
             Open Roles at Multi-Location Dental Groups
-          </span>
+          </Eyebrow>
         </div>
         <h1 className="text-4xl sm:text-7xl font-extrabold tracking-[-2px] leading-[1.02] text-ink mb-5 max-w-[1080px]">
           Find your next dental role.{" "}
@@ -646,17 +648,15 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
                 href={buildSurfaceHref(surface.value)}
                 aria-current={isActive ? "page" : undefined}
                 className={
-                  "inline-flex items-center gap-2 px-5 py-2.5 text-[13px] font-bold tracking-[1.5px] uppercase border transition-colors " +
+                  "inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold border transition-colors " +
                   (isActive ? surface.activeClasses : surface.inactiveClasses)
                 }
               >
                 {surface.label}
                 <span
                   className={
-                    "inline-flex items-center justify-center min-w-[24px] h-[20px] px-1.5 text-[11px] font-extrabold tracking-[0.5px] " +
-                    (isActive
-                      ? "bg-ivory/15 text-ivory"
-                      : surface.chipBgClass)
+                    "inline-flex items-center justify-center min-w-[24px] h-[20px] px-1.5 text-[11px] font-extrabold tracking-[0.5px] tabular " +
+                    surface.chipBgClass
                   }
                 >
                   {count}
@@ -672,15 +672,13 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
             Corporate tab. Hidden on the Practice tab. */}
         {activeSurface === "corporate" && (
           <div className="mt-5 flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mr-2">
-              Function
-            </span>
+            <Eyebrow className="mr-2">Function</Eyebrow>
             <Link
               href={buildFunctionHref(null)}
               className={
                 "px-3 py-1.5 text-[12px] font-semibold border transition-colors " +
                 (activeFunctionSlug === null
-                  ? "bg-corporate text-ivory border-corporate"
+                  ? "bg-card text-ink border-[var(--rule-strong)] border-b-2 border-b-corporate"
                   : "bg-card text-ink border-[var(--rule-strong)] hover:border-corporate")
               }
             >
@@ -695,7 +693,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
                   className={
                     "px-3 py-1.5 text-[12px] font-semibold border transition-colors " +
                     (isActive
-                      ? "bg-corporate text-ivory border-corporate"
+                      ? "bg-card text-ink border-[var(--rule-strong)] border-b-2 border-b-corporate"
                       : "bg-card text-ink border-[var(--rule-strong)] hover:border-corporate")
                   }
                 >
@@ -710,7 +708,6 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
         <form
           method="get"
           className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_auto] gap-px bg-[var(--rule)] border border-[var(--rule)] bg-card"
-          style={{ boxShadow: "0 10px 30px -16px rgba(7,15,28,0.14)" }}
         >
           {showMap && <input type="hidden" name="view" value="map" />}
           {/* C1.10 — posted filter is chip-based (below the form). Hidden
@@ -769,9 +766,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
             defaultValue={sp.category}
           />
           <div className="px-7 py-5 border-r border-[var(--rule)]">
-            <div className="text-[9px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1.5">
-              State
-            </div>
+            <Eyebrow className="mb-1.5">State</Eyebrow>
             <JobsStateFilter
               defaultValues={selectedStates}
             />
@@ -792,7 +787,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
           />
           <button
             type="submit"
-            className="inline-flex items-center justify-center gap-2 px-9 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors min-h-[80px]"
+            className="inline-flex items-center justify-center gap-2 px-9 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors min-h-[80px]"
           >
             <Search className="h-4 w-4" />
             Search
@@ -804,15 +799,13 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
             through all other filter submissions via the hidden input
             above. */}
         <div className="mt-5 flex flex-wrap items-center gap-2">
-          <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mr-2">
-            Posted
-          </span>
+          <Eyebrow className="mr-2">Posted</Eyebrow>
           <Link
             href={buildPostedHref(null)}
             className={
               "px-3 py-1.5 text-[12px] font-semibold border transition-colors " +
               (postedFilterValue === null
-                ? "bg-heritage-deep text-primary-foreground border-heritage-deep"
+                ? "bg-card text-ink border-[var(--rule-strong)] border-b-2 border-b-heritage"
                 : "bg-card text-ink border-[var(--rule-strong)] hover:border-heritage")
             }
           >
@@ -827,7 +820,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
                 className={
                   "px-3 py-1.5 text-[12px] font-semibold border transition-colors " +
                   (isActive
-                    ? "bg-heritage-deep text-primary-foreground border-heritage-deep"
+                    ? "bg-card text-ink border-[var(--rule-strong)] border-b-2 border-b-heritage"
                     : "bg-card text-ink border-[var(--rule-strong)] hover:border-heritage")
                 }
               >
@@ -870,9 +863,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
           )}
           {showMap && <input type="hidden" name="view" value="map" />}
 
-          <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mr-2">
-            Near
-          </span>
+          <Eyebrow className="mr-2">Near</Eyebrow>
           <div className="min-w-[240px]">
             <LocationAutocompleteField
               combinedName="near"
@@ -925,19 +916,19 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
       {/* Results */}
       <section className="px-6 sm:px-14 pb-24 max-w-[1240px] mx-auto">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta">
+          <Eyebrow>
             {jobs.length === 0
               ? "No jobs found"
               : jobs.length === 1
                 ? "1 open role"
-                : `${jobs.length} open roles`}
+                : <><span className="tabular">{jobs.length}</span> open roles</>}
             {showMap && mapLocations.length > 0 && (
               <span className="ml-2 text-slate-body normal-case tracking-normal font-normal">
-                · across {mapLocations.length}{" "}
+                · across <span className="tabular">{mapLocations.length}</span>{" "}
                 {mapLocations.length === 1 ? "location" : "locations"}
               </span>
             )}
-          </div>
+          </Eyebrow>
 
           <div className="flex items-center gap-3">
             {!showMap && jobs.length > 1 && (
@@ -955,10 +946,10 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
               <div className="inline-flex border border-[var(--rule-strong)]">
                 <Link
                   href={listViewHref}
-                className={`inline-flex items-center gap-2 px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors ${
+                className={`inline-flex items-center gap-2 px-4 py-2 text-[10px] font-semibold transition-colors ${
                   showMap
                     ? "bg-cream text-slate-body hover:text-ink"
-                    : "bg-primary text-primary-foreground"
+                    : "bg-cream text-ink shadow-[inset_0_-2px_0_0_var(--heritage)]"
                 }`}
                 aria-current={showMap ? undefined : "page"}
               >
@@ -967,9 +958,9 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
               </Link>
               <Link
                 href={mapViewHref}
-                className={`inline-flex items-center gap-2 px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors border-l border-[var(--rule-strong)] ${
+                className={`inline-flex items-center gap-2 px-4 py-2 text-[10px] font-semibold transition-colors border-l border-[var(--rule-strong)] ${
                   showMap
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-cream text-ink shadow-[inset_0_-2px_0_0_var(--heritage)]"
                     : "bg-cream text-slate-body hover:text-ink"
                 }`}
                 aria-current={showMap ? "page" : undefined}
@@ -991,7 +982,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
             </p>
             <Link
               href={viewerIsCandidate ? "/candidate/jobs" : "/candidate/sign-up"}
-              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md bg-heritage px-4 py-2 text-[11px] font-bold uppercase tracking-[1px] text-primary-foreground hover:bg-heritage-deep"
+              className="inline-flex items-center gap-1.5 whitespace-nowrap bg-heritage px-4 py-2 text-sm font-bold text-primary-foreground hover:bg-heritage-deep"
             >
               {viewerIsCandidate ? "Open your PracticeFit board" : "Sign up free"}
             </Link>
@@ -1083,14 +1074,12 @@ function JobCard({
       className="group block bg-card p-7 hover:bg-cream motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-14px_rgba(7,15,28,0.18)] flex flex-col"
     >
       <div className="flex items-center justify-between gap-2 mb-3">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+        <Eyebrow>
           {ROLE_LABELS[job.role_category] ?? job.role_category} ·{" "}
           {EMP_LABELS[job.employment_type] ?? job.employment_type}
-        </div>
+        </Eyebrow>
         {applied && (
-          <span className="inline-flex items-center px-2 py-0.5 bg-heritage text-primary-foreground text-[10px] font-bold tracking-[1.2px] uppercase">
-            Applied
-          </span>
+          <Tag tone="heritage">Applied</Tag>
         )}
       </div>
       <div className="text-lg font-extrabold tracking-[-0.4px] text-ink mb-1 leading-tight">
@@ -1112,12 +1101,12 @@ function JobCard({
       <div className="mt-auto pt-4 border-t border-[var(--rule)] flex justify-between items-end">
         <div>
           {job.compensation_visible && job.compensation_min !== null && (
-            <div className="text-[14px] font-extrabold text-ink leading-none">
+            <div className="text-[14px] font-extrabold text-ink leading-none tabular">
               {formatCompensation(job)}
             </div>
           )}
           {job.compensation_visible && job.compensation_period && (
-            <div className="text-[9px] tracking-[1.2px] uppercase text-slate-meta mt-1.5 font-semibold">
+            <div className="text-[10px] font-semibold text-slate-meta mt-1.5">
               {compensationPeriodLabel(job.compensation_period)}
             </div>
           )}
@@ -1237,9 +1226,7 @@ function SearchField({
         noBorderRight ? "" : "border-r border-[var(--rule)]"
       }`}
     >
-      <div className="text-[9px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1.5">
-        {label}
-      </div>
+      <Eyebrow className="mb-1.5">{label}</Eyebrow>
       {select && options ? (
         <select
           name={name}

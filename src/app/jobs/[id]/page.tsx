@@ -22,6 +22,7 @@ import {
   Sparkles,
   ShieldCheck,
 } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { SiteShell } from "@/components/marketing/site-shell";
 import {
   RenderedJobDescription,
@@ -353,10 +354,10 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
       <article className="pt-[140px] pb-24 px-6 sm:px-14 max-w-[1100px] mx-auto">
         <Link
           href="/jobs"
-          className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-8"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-heritage-deep hover:text-ink transition-colors mb-8"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Back to All Jobs
+          Back to all jobs
         </Link>
 
         {/* Title block — eyebrow swaps for corporate scope:
@@ -380,13 +381,13 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
             const eyebrowColor = isCorporate ? "var(--corporate)" : undefined;
             const dotBg = isCorporate
               ? eyebrowColor
-              : "var(--heritage-deep, #3a5e4d)";
+              : "var(--heritage-deep)";
             return (
-              <div
+              <Eyebrow
                 className={
                   isCorporate
-                    ? "flex items-center gap-3 text-[10px] font-bold tracking-[2.5px] uppercase mb-3"
-                    : "flex items-center gap-3 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3"
+                    ? "flex items-center gap-3 mb-3"
+                    : "flex items-center gap-3 mb-3 text-heritage-deep"
                 }
                 style={isCorporate ? { color: eyebrowColor } : undefined}
               >
@@ -413,7 +414,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                 />
                 {EMP_LABELS[job.employment_type as string] ??
                   job.employment_type}
-              </div>
+              </Eyebrow>
             );
           })()}
           <h1 className="text-3xl sm:text-6xl font-extrabold tracking-[-1.8px] leading-[1.05] text-ink mb-5">
@@ -453,22 +454,22 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
             {existingApplicationId ? (
               <Link
                 href={`/candidate/applications/${existingApplicationId}`}
-                className="inline-flex items-center justify-center px-8 py-3.5 bg-heritage text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
+                className="inline-flex items-center justify-center px-8 py-3.5 bg-heritage text-primary-foreground text-sm font-bold hover:bg-heritage-deep transition-colors"
               >
-                View My Application
+                View my application
               </Link>
             ) : (
               <Link
                 href={`/jobs/${job.id as string}/apply`}
-                className="inline-flex items-center justify-center px-8 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+                className="inline-flex items-center justify-center px-8 py-3.5 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
               >
-                Apply for this Role
+                Apply for this role
               </Link>
             )}
             {!existingApplicationId && !candidateAuthed && (
               <Link
                 href={`/jobs/${job.id as string}/apply/guest`}
-                className="inline-flex items-center justify-center px-6 py-3.5 border border-[var(--rule-strong)] bg-card text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
+                className="inline-flex items-center justify-center px-6 py-3.5 border border-[var(--rule-strong)] bg-card text-ink text-sm font-semibold hover:bg-cream transition-colors"
               >
                 Apply as guest
               </Link>
@@ -518,7 +519,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                 </p>
                 <Link
                   href="/candidate/profile#roles"
-                  className="inline-flex items-center gap-1.5 text-[12px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-heritage-deep hover:text-ink transition-colors"
                 >
                   Update preferred roles
                   <ArrowRight className="h-3 w-3" />
@@ -553,8 +554,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                   {(job.benefits as string[]).map((b) => (
                     <li
                       key={b}
-                      className="px-3 py-1.5 text-[13px] font-semibold text-heritage-deep"
-                      style={{ background: "var(--heritage-tint)" }}
+                      className="px-3 py-1.5 text-[13px] font-semibold text-ink bg-cream border border-[var(--rule-strong)]"
                     >
                       {b}
                     </li>
@@ -657,8 +657,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                       {orderedDays.map((d) => (
                         <li
                           key={d}
-                          className="px-3 py-1.5 text-[13px] font-semibold text-heritage-deep"
-                          style={{ background: "var(--heritage-tint)" }}
+                          className="px-3 py-1.5 text-[13px] font-semibold text-ink bg-cream border border-[var(--rule-strong)]"
                         >
                           {DAY_LABELS[d] ?? d}
                         </li>
@@ -835,7 +834,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
               if (rows.length === 0) return null;
 
               return (
-                <section className="mt-10 p-6 sm:p-7 bg-[var(--heritage-tint)] border border-heritage/40">
+                <section className="mt-10 p-6 sm:p-7 bg-corporate-bg border border-corporate/40">
                   <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink mb-4">
                     Role details
                   </h2>
@@ -843,11 +842,11 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                     {rows.map((row) => (
                       <div
                         key={row.label}
-                        className="border-l-2 border-heritage/70 pl-3"
+                        className="border-l-2 border-corporate/70 pl-3"
                       >
-                        <dt className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta mb-1">
+                        <Eyebrow as="dt" className="mb-1">
                           {row.label}
-                        </dt>
+                        </Eyebrow>
                         <dd className="text-[14px] font-semibold text-ink">
                           {row.value}
                         </dd>
@@ -869,16 +868,16 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                 {existingApplicationId ? (
                   <Link
                     href={`/candidate/applications/${existingApplicationId}`}
-                    className="inline-flex items-center justify-center px-9 py-4 bg-heritage text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
+                    className="inline-flex items-center justify-center px-9 py-4 bg-heritage text-primary-foreground text-sm font-bold hover:bg-heritage-deep transition-colors"
                   >
-                    View My Application
+                    View my application
                   </Link>
                 ) : (
                   <Link
                     href={`/jobs/${job.id as string}/apply`}
-                    className="inline-flex items-center justify-center px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+                    className="inline-flex items-center justify-center px-9 py-4 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
                   >
-                    Apply for this Role
+                    Apply for this role
                   </Link>
                 )}
                 <SaveJobButton
@@ -898,9 +897,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
 
           {/* Sidebar */}
           <aside className="bg-ink-3 p-7 h-fit">
-            <div className="text-[12px] font-extrabold tracking-[2.5px] uppercase text-heritage-light mb-5">
-              At a Glance
-            </div>
+            <Eyebrow className="mb-5 text-heritage-bright">At a Glance</Eyebrow>
 
             <Detail icon={Briefcase} label="Employment">
               {EMP_LABELS[job.employment_type as string] ?? (job.employment_type as string)}
@@ -964,7 +961,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                             href={loc.website as string}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="mt-0.5 inline-block text-[13px] text-heritage hover:text-heritage-deep underline-offset-2 hover:underline"
+                            className="mt-0.5 inline-block text-[13px] text-heritage-bright hover:text-hero-foreground underline-offset-2 hover:underline"
                           >
                             Practice website →
                           </a>
@@ -1021,10 +1018,10 @@ function Detail({
 }) {
   return (
     <div className="mb-5 pb-5 last:mb-0 last:pb-0 last:border-0 border-b border-hero-foreground/15">
-      <div className="flex items-center gap-2 text-[11px] font-bold tracking-[2px] uppercase text-hero-foreground/70 mb-2">
+      <Eyebrow className="flex items-center gap-2 text-hero-foreground/70 mb-2">
         <Icon className="h-3.5 w-3.5" />
         {label}
-      </div>
+      </Eyebrow>
       <div className="text-[17px] font-semibold text-hero-foreground leading-snug">
         {children}
       </div>
@@ -1151,12 +1148,12 @@ function CompensationGlance({ job }: { job: { [k: string]: unknown } }) {
       return (
         <div className="space-y-1.5">
           {deal.headline && (
-            <div className="text-[17px] font-extrabold text-hero-foreground leading-snug">
+            <div className="tabular text-[17px] font-extrabold text-hero-foreground leading-snug">
               {deal.headline}
             </div>
           )}
           {deal.estRange && (
-            <div className="text-[14px] text-hero-foreground/90 font-semibold">
+            <div className="tabular text-[14px] text-hero-foreground/90 font-semibold">
               {deal.estRange}{" "}
               <span className="font-normal text-hero-foreground/60">
                 (employer estimate)
@@ -1212,20 +1209,20 @@ function CompensationGlance({ job }: { job: { [k: string]: unknown } }) {
     <div className="space-y-1.5">
       {ote.hasVariable && ote.ote != null ? (
         <>
-          <div className="text-[20px] font-extrabold text-hero-foreground leading-tight">
+          <div className="tabular text-[20px] font-extrabold text-hero-foreground leading-tight">
             {ote.isRange && ote.ote_low != null && ote.ote_high != null
               ? `~${formatUsd(ote.ote_low)}–${formatUsd(ote.ote_high)}`
               : `~${formatUsd(ote.ote)}`}
-            <span className="ml-1.5 text-[12px] font-semibold text-heritage">
+            <span className="ml-1.5 text-[12px] font-semibold text-gold">
               OTE / yr
             </span>
           </div>
-          <div className="text-[14px] text-hero-foreground/70">
+          <div className="tabular text-[14px] text-hero-foreground/70">
             {baseLine} base + {formatUsd(ote.variable)} target variable
           </div>
         </>
       ) : (
-        <div className="font-semibold text-hero-foreground">{baseLine}</div>
+        <div className="tabular font-semibold text-hero-foreground">{baseLine}</div>
       )}
 
       {variableEnabled && variableStructure && (

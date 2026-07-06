@@ -40,7 +40,7 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
               <span
                 className={`flex-shrink-0 w-7 h-7 mt-0.5 border flex items-center justify-center transition-all duration-200 ${
                   isOpen
-                    ? "bg-hero border-hero text-heritage rotate-45"
+                    ? "bg-hero border-hero text-heritage-bright rotate-45"
                     : "border-[var(--rule-strong)] text-ink group-hover:bg-hero group-hover:text-hero-foreground group-hover:border-hero"
                 }`}
                 aria-hidden="true"

@@ -37,6 +37,8 @@ import {
   Wand2,
   Workflow,
 } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
+import { Tag } from "@/components/brand/tag";
 import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import { DsoFitWordmark } from "@/components/practice-fit/brand/dsofit-wordmark";
@@ -117,7 +119,7 @@ function Hero() {
         <div className="mb-8">
           <span
             data-reveal
-            className="inline-flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold tracking-[1.8px] uppercase text-ink border border-heritage/35"
+            className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-ink border border-heritage/35"
             style={{
               background: "var(--heritage-tint)",
               boxShadow: "0 0 0 4px var(--heritage-glow)",
@@ -173,14 +175,14 @@ function Hero() {
             <div className="flex flex-wrap items-center gap-3.5 mb-9">
               <Link
                 href="#pricing"
-                className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+                className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
               >
                 Start Posting Jobs
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
               <Link
                 href="/contact"
-                className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
+                className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-sm font-bold hover:border-ink transition-colors"
               >
                 Contact Sales
               </Link>
@@ -189,7 +191,7 @@ function Hero() {
             <div className="flex items-center gap-2.5 text-xs text-slate-body tracking-[0.4px]">
               <span className="block w-1.5 h-1.5 bg-heritage rounded-full" />
               <span>
-                Plans from <strong className="text-ink font-bold">$399/mo</strong> · Multi-location native · No placement fees
+                Plans from <strong className="text-ink font-bold tabular">$399/mo</strong> · Multi-location native · No placement fees
               </span>
             </div>
           </div>
@@ -214,9 +216,9 @@ function Hero() {
 
 type HeatTone = "cool" | "warm" | "hot";
 const HEAT_PILL: Record<HeatTone, string> = {
-  cool: "bg-muted text-muted-foreground",
+  cool: "bg-ink/5 text-slate-meta",
   warm: "bg-warning-bg text-warning",
-  hot: "bg-danger-bg text-danger",
+  hot: "bg-stage-brick/15 text-stage-brick",
 };
 
 interface HeroCard {
@@ -242,9 +244,9 @@ interface HeroColumn {
 const HERO_COLUMNS: HeroColumn[] = [
   {
     label: "New",
-    dot: "bg-slate-400",
-    bg: "bg-muted",
-    text: "text-foreground",
+    dot: "bg-stage-stone",
+    bg: "bg-stage-stone/10",
+    text: "text-stage-stone",
     cards: [
       { name: "Maya Rodriguez RDH", role: "Hygienist", days: 2, heat: "cool" },
       { name: "Jordan Williams DA", role: "Dental Assistant", days: 3, heat: "cool", comments: 2 },
@@ -252,9 +254,9 @@ const HERO_COLUMNS: HeroColumn[] = [
   },
   {
     label: "Screening",
-    dot: "bg-amber-400",
-    bg: "bg-warning-bg",
-    text: "text-warning",
+    dot: "bg-stage-mist",
+    bg: "bg-stage-mist/10",
+    text: "text-stage-mist",
     cards: [
       { name: "Dr. Priya Patel", role: "Endodontist", days: 6, heat: "cool", comments: 3, score: "4.4" },
       { name: "Alex Thompson", role: "Front Desk Lead", days: 9, heat: "warm" },
@@ -262,9 +264,9 @@ const HERO_COLUMNS: HeroColumn[] = [
   },
   {
     label: "Interview",
-    dot: "bg-blue-400",
-    bg: "bg-blue-50",
-    text: "text-blue-700",
+    dot: "bg-stage-navy",
+    bg: "bg-stage-navy/10",
+    text: "text-stage-navy",
     // Dr. Sarah Chen is at the top of Interview because she just moved
     // there (days: 0 → "just now", matching the floating "Maya moved
     // Dr. Chen to Interview · Realtime sync · just now" notification).
@@ -276,9 +278,9 @@ const HERO_COLUMNS: HeroColumn[] = [
   },
   {
     label: "Offer",
-    dot: "bg-emerald-400",
-    bg: "bg-success-bg",
-    text: "text-success",
+    dot: "bg-stage-bronze",
+    bg: "bg-stage-bronze/10",
+    text: "text-stage-bronze",
     cards: [
       { name: "Dr. Hannah Kim", role: "Pediatric Dentist", days: 4, heat: "cool", comments: 4, score: "4.9" },
     ],
@@ -320,13 +322,13 @@ function HeroKanbanPreview() {
             Greenfield Dental Group is the same fictional DSO used in the
             /for-candidates mock card for cross-page continuity. */}
         <div className="px-5 pt-5 pb-3 border-b border-[var(--rule)]">
-          <div className="text-[9px] font-bold tracking-[3px] uppercase text-heritage-deep mb-1.5">
+          <Eyebrow className="text-[9px] text-heritage-deep mb-1.5">
             Pipeline · Live
-          </div>
+          </Eyebrow>
           <div className="text-[15px] font-bold tracking-[-0.3px] text-ink leading-tight">
             Greenfield Dental Group
           </div>
-          <div className="text-[12px] text-slate-body mt-0.5">
+          <div className="text-[12px] text-slate-body mt-0.5 tabular">
             8 candidates · 3 locations · 2 reviewers online
           </div>
         </div>
@@ -344,9 +346,9 @@ function HeroKanbanPreview() {
               >
                 <span className="flex items-center gap-1.5">
                   <span className={`block w-1.5 h-1.5 rounded-full ${col.dot}`} />
-                  <span className="text-[8.5px] font-bold tracking-[1.6px] uppercase">
+                  <Eyebrow as="span" className="text-[8.5px] text-inherit">
                     {col.label}
-                  </span>
+                  </Eyebrow>
                 </span>
                 <span className="text-[9px] font-bold tabular-nums">
                   {col.cards.length}
@@ -415,7 +417,7 @@ function HeroKanbanCard({ name, role, days, heat, comments, score }: HeroCard) {
       </div>
       <div className="flex items-center justify-between gap-1">
         <span
-          className={`text-[8px] font-bold tracking-[0.8px] uppercase px-1 py-0.5 ${HEAT_PILL[heat]}`}
+          className={`text-[8px] font-semibold px-1 py-0.5 tabular ${HEAT_PILL[heat]}`}
         >
           {days}d
         </span>
@@ -446,10 +448,10 @@ function ProofStrip() {
   return (
     <div className="bg-cream border-y border-[var(--rule)] px-6 sm:px-14 py-8">
       <div className="max-w-[1240px] mx-auto flex flex-wrap items-center justify-between gap-10">
-        <div className="text-[12px] font-bold tracking-[2.5px] uppercase text-slate-body">
+        <Eyebrow className="text-slate-body">
           Designed With{" "}
           <strong className="text-ink">Mid-Market Dental Group Operators</strong>
-        </div>
+        </Eyebrow>
         <div className="flex flex-wrap gap-9 items-center">
           <ProofTagline>Multi-Location Dental Groups</ProofTagline>
           <ProofTagline>No Per-Listing Fees</ProofTagline>
@@ -477,9 +479,9 @@ function ProblemSection() {
   return (
     <section className="bg-cream border-y border-[var(--rule)] px-6 sm:px-14 py-24">
       <div className="max-w-[1240px] mx-auto">
-        <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
+        <Eyebrow className="text-heritage-deep mb-3.5">
           The Math Today
-        </div>
+        </Eyebrow>
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink max-w-[760px] mb-6">
           The two options on the market weren&apos;t built for the way you actually hire.
         </h2>
@@ -537,7 +539,7 @@ function AnswerCard() {
           width: "520px",
           height: "520px",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(77,122,96,0.10), transparent 65%)",
+          background: "radial-gradient(circle, var(--heritage-glow), transparent 65%)",
           transform: "translateY(-50%)",
         }}
       />
@@ -617,9 +619,9 @@ function ProblemCard({
 function RoiMath() {
   return (
     <section className="px-6 sm:px-14 py-28 max-w-[1240px] mx-auto">
-      <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
+      <Eyebrow className="text-heritage-deep mb-3.5">
         Run The Numbers
-      </div>
+      </Eyebrow>
       <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink max-w-[760px] mb-6">
         For a 25-practice DSO, the cost case takes about a minute.
       </h2>
@@ -675,9 +677,9 @@ function RoiMath() {
         data-reveal
         className="mt-10 bg-hero text-hero-foreground p-8 sm:p-10"
       >
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-light mb-3">
+        <Eyebrow className="text-heritage-light mb-3">
           Net difference
-        </div>
+        </Eyebrow>
         <div className="text-2xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-tight">
           DSO Hire pays for itself in the first month, every month, on a single
           replaced agency hire.
@@ -713,13 +715,13 @@ function RoiCard({
       }
       className="bg-card p-10"
     >
-      <div
-        className={`text-[10px] font-bold tracking-[2.5px] uppercase mb-6 ${
+      <Eyebrow
+        className={`mb-6 ${
           accent === "heritage" ? "text-heritage-deep" : "text-slate-body"
         }`}
       >
         {label}
-      </div>
+      </Eyebrow>
       <ul className="list-none border-t border-[var(--rule)] pb-4">
         {rows.map((row, i) => (
           <li
@@ -727,17 +729,17 @@ function RoiCard({
             className="flex items-baseline justify-between gap-6 py-3.5 border-b border-[var(--rule)] text-[14px]"
           >
             <span className="text-slate-body">{row.item}</span>
-            <span className="font-bold text-ink whitespace-nowrap">
+            <span className="font-bold text-ink whitespace-nowrap tabular">
               {row.value}
             </span>
           </li>
         ))}
       </ul>
       <div className="pt-4 mt-2">
-        <div className="text-3xl font-extrabold tracking-[-1px] text-ink">
+        <div className="text-3xl font-extrabold tracking-[-1px] text-ink tabular">
           {total}
         </div>
-        <div className="text-[12px] font-semibold tracking-[1.5px] uppercase text-slate-meta mt-1">
+        <div className="text-xs font-semibold text-slate-meta mt-1 tabular">
           {totalLabel}
         </div>
       </div>
@@ -805,7 +807,7 @@ function PracticeFitBand() {
             data-reveal
             style={{ "--mk-delay": "220ms" } as React.CSSProperties}
             href="#pricing"
-            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
           >
             See It On Your Openings
             <ArrowRight className="h-3.5 w-3.5" />
@@ -824,19 +826,19 @@ function PracticeFitBand() {
           >
             <div className="flex items-start justify-between gap-4 px-6 py-4 bg-cream border-b border-[var(--rule)]">
               <div className="min-w-0">
-                <div className="text-[9px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
+                <Eyebrow className="text-[9px] text-heritage-deep mb-1">
                   New Applicant · Hygienist — Maple &amp; 3rd
-                </div>
+                </Eyebrow>
                 <div className="text-[16px] font-bold tracking-[-0.3px] text-ink leading-tight">
                   Sarah Chen, RDH
                 </div>
-                <div className="text-[12px] text-slate-body mt-0.5">
+                <div className="text-[12px] text-slate-body mt-0.5 tabular">
                   7 yrs · Eaglesoft · Westerville, OH
                 </div>
               </div>
-              <span className="shrink-0 px-2 py-1 text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep border border-heritage/35" style={{ background: "var(--heritage-tint)" }}>
+              <Tag tone="heritage" className="shrink-0">
                 Strong Match
-              </span>
+              </Tag>
             </div>
             <div className="px-6 sm:px-8 py-8">
               <FitDial
@@ -986,20 +988,12 @@ function FeatureCard({ feature }: { feature: ShowcaseFeature }) {
       className="relative bg-card border border-[var(--rule)] p-7 flex flex-col motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1 hover:border-[var(--rule-strong)] hover:shadow-[0_18px_36px_-20px_rgba(7,15,28,0.20)]"
     >
       {/* Status pill */}
-      <span
-        className={`absolute top-5 right-5 inline-flex items-center px-2 py-1 text-[9px] font-bold tracking-[1.6px] uppercase ${
-          isLive
-            ? "text-heritage-deep"
-            : "text-slate-meta"
-        }`}
-        style={
-          isLive
-            ? { background: "var(--heritage-tint)" }
-            : { background: "rgba(20, 35, 63, 0.05)" }
-        }
+      <Tag
+        tone={isLive ? "heritage" : "neutral"}
+        className="absolute top-5 right-5"
       >
         {isLive ? "Available now" : "Coming H2 2026"}
-      </span>
+      </Tag>
 
       {/* Heritage-tinted icon square */}
       <span
@@ -1037,15 +1031,15 @@ function HowItWorks() {
           width: "540px",
           height: "540px",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(77,122,96,0.08), transparent 65%)",
+          background: "radial-gradient(circle, var(--heritage-glow), transparent 65%)",
           transform: "translate(-50%, -50%)",
         }}
       />
 
       <div className="relative max-w-[1240px] mx-auto">
-        <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage mb-3.5">
+        <Eyebrow className="text-heritage mb-3.5">
           How It Works
-        </div>
+        </Eyebrow>
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-hero-foreground max-w-[720px] mb-5">
           From subscription to staffed in three steps.
         </h2>
@@ -1078,9 +1072,9 @@ function HowItWorks() {
 function HowStep({ n, title, body }: { n: string; title: string; body: string }) {
   return (
     <div className="border-t border-hero-foreground/10 pt-7">
-      <div className="text-[12px] font-bold tracking-[2.5px] uppercase text-heritage mb-4">
+      <Eyebrow className="text-heritage mb-4">
         Step {n}
-      </div>
+      </Eyebrow>
       <div className="text-[22px] font-extrabold tracking-[-0.6px] text-hero-foreground mb-3.5 leading-tight">
         {title}
       </div>
@@ -1137,7 +1131,7 @@ function PricingTier({ tier }: { tier: TierConfig }) {
       }`}
     >
       {isFeatured && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-heritage text-primary-foreground text-[9px] font-bold tracking-[2px] uppercase whitespace-nowrap z-10">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-heritage text-primary-foreground text-xs font-semibold whitespace-nowrap z-10">
           Most Popular
         </div>
       )}
@@ -1159,7 +1153,7 @@ function PricingTier({ tier }: { tier: TierConfig }) {
 
       <div className="flex items-baseline gap-1.5 mb-1.5">
         <div
-          className={`text-[40px] font-extrabold tracking-[-1.5px] leading-none ${
+          className={`text-[40px] font-extrabold tracking-[-1.5px] leading-none tabular ${
             isFeatured ? "text-hero-foreground" : "text-ink"
           }`}
         >
@@ -1186,7 +1180,7 @@ function PricingTier({ tier }: { tier: TierConfig }) {
 
       <Link
         href={`/employer/sign-up?tier=${tier.id}`}
-        className={`block text-center px-4 py-3.5 text-[12px] font-bold tracking-[1.5px] uppercase mb-6 transition-colors border ${
+        className={`block text-center px-4 py-3.5 text-sm font-bold mb-6 transition-colors border ${
           isFeatured
             ? "bg-heritage text-primary-foreground border-heritage hover:bg-heritage-deep hover:border-heritage-deep"
             : "bg-ivory text-ink border-[var(--rule-strong)] hover:bg-primary hover:text-primary-foreground hover:border-ink"
@@ -1238,14 +1232,14 @@ function FinalCta() {
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Link
             href="/contact"
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
           >
             Contact Us
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <Link
             href="/pricing"
-            className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
+            className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-sm font-bold hover:border-ink transition-colors"
           >
             See Pricing
           </Link>
@@ -1294,9 +1288,9 @@ function FAQ() {
   return (
     <section className="bg-cream border-y border-[var(--rule)] px-6 sm:px-14 pt-24 pb-24">
       <div className="max-w-[860px] mx-auto">
-        <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
+        <Eyebrow className="text-heritage-deep mb-3.5">
           FAQ
-        </div>
+        </Eyebrow>
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink mb-12">
           Operator questions, answered straight.
         </h2>
@@ -1311,11 +1305,7 @@ function FAQ() {
 ═══════════════════════════════════════════════════════ */
 
 function SectionEyebrow({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
-      {children}
-    </div>
-  );
+  return <Eyebrow className="text-heritage-deep mb-3.5">{children}</Eyebrow>;
 }
 
 function SectionHeadline({ children }: { children: React.ReactNode }) {

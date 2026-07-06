@@ -16,6 +16,8 @@
 
 import { useEffect, useRef } from "react";
 
+import { Eyebrow } from "@/components/brand/eyebrow";
+
 const R = 86;
 const CIRC = 2 * Math.PI * R;
 const EASE = (t: number) => 1 - Math.pow(1 - t, 4);
@@ -119,8 +121,7 @@ export function FitDial({
           <div className="absolute inset-0 flex items-center justify-center">
             <span
               ref={numRef}
-              className="text-[56px] font-extrabold tracking-[-2.5px] leading-none text-ink"
-              style={{ fontVariantNumeric: "tabular-nums" }}
+              className="text-[56px] font-extrabold tracking-[-2.5px] leading-none text-ink tabular"
             >
               {score}
             </span>
@@ -138,9 +139,9 @@ export function FitDial({
           </svg>
         </span>
         </div>
-        <span className="text-[10.5px] font-bold tracking-[2px] uppercase text-slate-meta dark:text-hero-foreground/70">
+        <Eyebrow as="span" className="dark:text-hero-foreground/70">
           PracticeFit · {caption}
-        </span>
+        </Eyebrow>
       </div>
 
       {/* Dimension bars */}
@@ -161,8 +162,7 @@ export function FitDial({
               />
             </span>
             <span
-              className="w-[30px] text-right text-[11px] font-bold text-heritage-deep"
-              style={{ fontVariantNumeric: "tabular-nums" }}
+              className="w-[30px] text-right text-[11px] font-bold text-heritage-deep tabular"
             >
               {d.value}
             </span>

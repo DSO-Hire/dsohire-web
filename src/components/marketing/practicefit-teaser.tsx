@@ -20,6 +20,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Check, RotateCcw } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
+import { Tag } from "@/components/brand/tag";
 import { FitDial } from "./fit-dial";
 
 interface TeaserQuestion {
@@ -78,9 +80,9 @@ export function PracticeFitTeaser({
       {/* Header */}
       <div className="flex items-center justify-between gap-4 px-6 py-4 bg-cream border-b border-[var(--rule)]">
         <div>
-          <div className="text-[9px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
+          <Eyebrow className="text-heritage-deep mb-1">
             Try it · 3 questions · 30 seconds
-          </div>
+          </Eyebrow>
           <div className="text-[15px] font-bold tracking-[-0.3px] text-ink leading-tight">
             {done ? "Here's how your score assembles" : "How do you like to work?"}
           </div>
@@ -101,9 +103,9 @@ export function PracticeFitTeaser({
       {/* Body */}
       {!done ? (
         <div className="px-6 sm:px-8 py-8">
-          <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-2">
+          <Eyebrow className="mb-2">
             {QUESTIONS[step].signal} · question {step + 1} of {QUESTIONS.length}
-          </div>
+          </Eyebrow>
           <div className="text-[19px] font-extrabold tracking-[-0.4px] text-ink mb-5">
             {QUESTIONS[step].prompt}
           </div>
@@ -126,12 +128,9 @@ export function PracticeFitTeaser({
       ) : (
         <div className="px-6 sm:px-8 py-8">
           {/* Sample disclaimer FIRST — the honesty floor, stated plainly. */}
-          <div
-            className="inline-flex items-center px-2 py-1 mb-5 text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep border border-heritage/35"
-            style={{ background: "var(--heritage-tint)" }}
-          >
+          <Tag tone="heritage" className="mb-5">
             Sample score · yours needs the full assessment
-          </div>
+          </Tag>
 
           <FitDial
             score={92}
@@ -146,9 +145,9 @@ export function PracticeFitTeaser({
 
           {/* Their real captured signals */}
           <div className="mt-7 border-t border-[var(--rule)] pt-5">
-            <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-3">
+            <Eyebrow className="mb-3">
               Captured — 3 of 25+ signals
-            </div>
+            </Eyebrow>
             <ul className="list-none space-y-1.5 mb-5">
               {QUESTIONS.map((q, i) => (
                 <li key={q.signal} className="flex items-center gap-2 text-[13.5px] text-ink">
@@ -166,15 +165,15 @@ export function PracticeFitTeaser({
             <div className="flex flex-wrap items-center gap-3">
               <Link
                 href={assessmentHref}
-                className="inline-flex items-center gap-2.5 px-6 py-3 bg-heritage text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-heritage-deep transition-colors"
+                className="inline-flex items-center gap-2.5 px-6 py-3 bg-heritage text-primary-foreground text-sm font-bold hover:bg-heritage-deep transition-colors"
               >
-                Take The Full Assessment
+                Take the full assessment
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
               <button
                 type="button"
                 onClick={reset}
-                className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[1.5px] uppercase text-slate-meta hover:text-ink transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-meta hover:text-ink transition-colors"
               >
                 <RotateCcw className="h-3 w-3" />
                 Start over

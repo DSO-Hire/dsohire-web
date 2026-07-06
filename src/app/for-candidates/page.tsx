@@ -48,6 +48,7 @@ import {
   Send,
   Briefcase,
 } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import { PracticeFitTeaser } from "@/components/marketing/practicefit-teaser";
@@ -138,9 +139,9 @@ function Hero({ ctaHref }: { ctaHref: string }) {
       <div className="relative z-10 max-w-[1240px] mx-auto">
         <div data-reveal className="flex items-center gap-3.5 mb-8">
           <span className="block w-7 h-px bg-heritage" />
-          <span className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep">
+          <Eyebrow as="span" className="text-heritage-deep">
             For Dental Professionals
-          </span>
+          </Eyebrow>
         </div>
 
         <h1
@@ -150,14 +151,16 @@ function Hero({ ctaHref }: { ctaHref: string }) {
         >
           Find the dental practice{" "}
           <br className="hidden sm:inline" />
+          that actually{" "}
           <em className="not-italic relative text-heritage-light">
-            that actually fits you.
+            fits
             <span
               aria-hidden
               className="hidden lg:block absolute left-0 right-0 bottom-1.5 h-2 -z-10"
               style={{ background: "var(--heritage-tint)" }}
             />
-          </em>
+          </em>{" "}
+          you.
         </h1>
       </div>
 
@@ -179,14 +182,14 @@ function Hero({ ctaHref }: { ctaHref: string }) {
           <div className="flex flex-wrap items-center gap-3.5 mb-9">
             <Link
               href="/jobs"
-              className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
             >
               Browse Open Roles
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
             <Link
               href={ctaHref}
-              className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:border-ink hover:bg-cream transition-colors"
+              className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-sm font-bold hover:border-ink hover:bg-cream transition-colors"
             >
               Create a Free Profile
             </Link>
@@ -284,7 +287,7 @@ function PracticeFitCandidateBand({
             data-reveal
             style={{ "--mk-delay": "220ms" } as React.CSSProperties}
             href={ctaHref}
-            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-heritage text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-heritage-deep transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-heritage text-primary-foreground text-sm font-bold hover:bg-heritage-deep transition-colors"
           >
             Take Your PracticeFit
             <ArrowRight className="h-3.5 w-3.5" />
@@ -386,9 +389,9 @@ function CandidateApplicationsPreview() {
       >
         {/* Browser-bar-style header */}
         <div className="flex items-center gap-1.5 px-3 py-2.5 border-b border-[var(--rule)] bg-cream/60">
-          <span className="block w-2 h-2 rounded-full bg-slate-300" />
-          <span className="block w-2 h-2 rounded-full bg-slate-300" />
-          <span className="block w-2 h-2 rounded-full bg-slate-300" />
+          <span className="block w-2 h-2 rounded-full bg-ink/10" />
+          <span className="block w-2 h-2 rounded-full bg-ink/10" />
+          <span className="block w-2 h-2 rounded-full bg-ink/10" />
           <span className="ml-3 text-[10px] tracking-[0.4px] text-slate-meta">
             dsohire.com / candidate / applications
           </span>
@@ -396,14 +399,14 @@ function CandidateApplicationsPreview() {
 
         <div className="p-5">
           <div className="flex items-baseline justify-between mb-1">
-            <div className="text-[11px] font-bold tracking-[2px] uppercase text-heritage-deep">
+            <Eyebrow className="text-heritage-deep">
               Your Applications
-            </div>
+            </Eyebrow>
             <div className="text-[10px] tracking-[0.5px] text-slate-meta">
               · Live
             </div>
           </div>
-          <div className="text-[12px] text-slate-meta mb-4">
+          <div className="text-[12px] text-slate-meta mb-4 tabular">
             {PREVIEW_APPS.length} active
           </div>
 
@@ -437,7 +440,7 @@ function CandidateApplicationsPreview() {
                       {app.city}, {app.state}
                     </span>
                     <span className="opacity-50">·</span>
-                    <span>
+                    <span className="tabular">
                       {app.daysAgo}d
                     </span>
                   </div>
@@ -448,7 +451,7 @@ function CandidateApplicationsPreview() {
 
           {/* Footer note — mirrors the "Realtime sync · just now" notification
               style from the landing kanban mock for visual consistency. */}
-          <div className="mt-4 pt-3 border-t border-[var(--rule)] flex items-center gap-2 text-[10px] text-slate-meta tracking-[0.3px]">
+          <div className="mt-4 pt-3 border-t border-[var(--rule)] flex items-center gap-2 text-[10px] text-slate-meta tracking-[0.3px] tabular">
             <Sparkles className="h-3 w-3 text-heritage" />
             <span>License renewal alert · 47 days · KS RDH-12345</span>
           </div>
@@ -487,9 +490,9 @@ function Promises() {
   return (
     <section className="bg-cream/60 border-y border-[var(--rule)] px-6 sm:px-14 py-24">
       <div className="max-w-[1240px] mx-auto">
-        <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
+        <Eyebrow className="text-heritage-deep mb-3.5">
           What's Different
-        </div>
+        </Eyebrow>
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink max-w-[760px] mb-4">
           Built around what dental pros actually want.
         </h2>
@@ -603,9 +606,9 @@ const ROLES = [
 function RoleBreakdown() {
   return (
     <section className="px-6 sm:px-14 py-24 max-w-[1240px] mx-auto">
-      <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
+      <Eyebrow className="text-heritage-deep mb-3.5">
         By Role
-      </div>
+      </Eyebrow>
       <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink max-w-[760px] mb-4">
         What's in it for you, by role.
       </h2>
@@ -627,9 +630,9 @@ function RoleBreakdown() {
                 <Icon className="h-4 w-4 text-heritage-deep" />
               </div>
               <div className="min-w-0">
-                <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
+                <Eyebrow className="text-heritage-deep">
                   {eyebrow}
-                </div>
+                </Eyebrow>
                 <h3 className="text-[16px] font-extrabold tracking-[-0.3px] text-ink leading-tight">
                   {title}
                 </h3>
@@ -651,7 +654,7 @@ function RoleBreakdown() {
                 </li>
               ))}
             </ul>
-            <div className="mt-auto pt-3 border-t border-[var(--rule)] inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep group-hover:text-ink transition-colors">
+            <div className="mt-auto pt-3 border-t border-[var(--rule)] inline-flex items-center gap-1.5 text-xs font-semibold text-heritage-deep group-hover:text-ink transition-colors">
               Learn more
               <ArrowRight className="h-3 w-3" />
             </div>
@@ -670,9 +673,9 @@ function RoleBreakdown() {
               <Briefcase className="h-4 w-4 text-heritage-deep" />
             </div>
             <div className="min-w-0">
-              <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
+              <Eyebrow className="text-heritage-deep">
                 Finance · HR · Marketing · Ops · Business Development
-              </div>
+              </Eyebrow>
               <h3 className="text-[16px] font-extrabold tracking-[-0.3px] text-ink leading-tight">
                 Corporate &amp; Administrative Roles
               </h3>
@@ -703,7 +706,7 @@ function RoleBreakdown() {
               </li>
             ))}
           </ul>
-          <div className="mt-auto pt-3 border-t border-[var(--rule)] inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep group-hover:text-ink transition-colors">
+          <div className="mt-auto pt-3 border-t border-[var(--rule)] inline-flex items-center gap-1.5 text-xs font-semibold text-heritage-deep group-hover:text-ink transition-colors">
             Learn more
             <ArrowRight className="h-3 w-3" />
           </div>
@@ -727,15 +730,15 @@ function HonestTake() {
         className="absolute -top-[20%] -right-[15%] w-[50vw] h-[50vw] pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle, rgba(77,122,96,0.18), transparent 60%)",
+            "radial-gradient(circle, var(--heritage-glow), transparent 60%)",
           filter: "blur(40px)",
         }}
       />
 
       <div className="relative max-w-[820px] mx-auto">
-        <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
+        <Eyebrow className="text-heritage-deep mb-3.5">
           The Honest Take
-        </div>
+        </Eyebrow>
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.08] text-ink mb-10 max-w-[720px]">
           An honest read on DSO life.
         </h2>
@@ -829,9 +832,9 @@ function CandidateBenefits() {
   return (
     <section className="bg-card px-6 sm:px-14 py-24 border-y border-[var(--rule)]">
       <div className="max-w-[1240px] mx-auto">
-        <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
+        <Eyebrow className="text-heritage-deep mb-3.5">
           On the Candidate Side
-        </div>
+        </Eyebrow>
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink max-w-[760px] mb-4">
           Built for you, not just the employer.
         </h2>
@@ -881,7 +884,7 @@ function FinalCta({ ctaHref }: { ctaHref: string }) {
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[60vw] pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle, rgba(77,122,96,0.22), transparent 60%)",
+            "radial-gradient(circle, var(--heritage-glow), transparent 60%)",
           filter: "blur(50px)",
         }}
       />
@@ -889,9 +892,9 @@ function FinalCta({ ctaHref }: { ctaHref: string }) {
       <div className="relative max-w-[760px] mx-auto">
         <div className="flex items-center justify-center gap-3.5 mb-6">
           <Briefcase className="h-4 w-4 text-heritage-deep" />
-          <span className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep">
+          <Eyebrow as="span" className="text-heritage-deep">
             Find your next DSO
-          </span>
+          </Eyebrow>
         </div>
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-5">
           Browse open roles, or just see what&apos;s out there.
@@ -904,14 +907,14 @@ function FinalCta({ ctaHref }: { ctaHref: string }) {
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Link
             href="/jobs"
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
           >
             Browse Open Roles
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
             href={ctaHref}
-            className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:border-ink hover:bg-cream transition-colors"
+            className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-sm font-bold hover:border-ink hover:bg-cream transition-colors"
           >
             Create a Free Profile
           </Link>
@@ -960,9 +963,9 @@ function FAQ() {
   return (
     <section className="bg-cream border-y border-[var(--rule)] px-6 sm:px-14 pt-24 pb-24">
       <div className="max-w-[860px] mx-auto">
-        <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
+        <Eyebrow className="text-heritage-deep mb-3.5">
           FAQ
-        </div>
+        </Eyebrow>
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink mb-12">
           The honest answers.
         </h2>

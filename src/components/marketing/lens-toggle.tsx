@@ -27,6 +27,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { Eyebrow } from "@/components/brand/eyebrow";
+
 const ROLE_LINKS = [
   { href: "/for-candidates", label: "For Dental Professionals", eyebrow: "Overview" },
   { href: "/for-dentists", label: "For Dentists", eyebrow: "DDS / DMD" },
@@ -135,9 +137,9 @@ function MenuList({
               paddingTop: i === 1 ? "10px" : undefined,
             }}
           >
-            <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-0.5">
+            <Eyebrow className="mb-0.5">
               {link.eyebrow}
-            </div>
+            </Eyebrow>
             <div className="text-[13px] font-semibold tracking-[-0.1px] text-ink">
               {link.label}
             </div>
@@ -153,8 +155,8 @@ export function LensToggle() {
   const lens = resolveLens(pathname);
 
   const baseSegment =
-    "inline-flex items-center gap-1.5 px-3.5 h-9 text-[12px] font-semibold tracking-[1.8px] uppercase transition-colors";
-  const activeSegment = "bg-primary text-primary-foreground";
+    "inline-flex items-center gap-1.5 px-3.5 h-9 text-xs font-semibold transition-colors";
+  const activeSegment = "text-ink font-bold shadow-[inset_0_-2px_0_0_var(--heritage)]";
   const idleSegment = "text-slate-body hover:text-ink hover:bg-cream/60";
 
   return (

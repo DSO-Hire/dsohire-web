@@ -23,6 +23,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+import { Eyebrow } from "@/components/brand/eyebrow";
+
 export interface RoiTierInfo {
   id: string;
   name: string;
@@ -83,9 +85,7 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
         <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_1fr]">
           {/* Inputs */}
           <div className="p-8 sm:p-10">
-            <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
-              Run Your Numbers
-            </div>
+            <Eyebrow className="text-heritage-deep mb-2">Run Your Numbers</Eyebrow>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] leading-[1.12] text-ink mb-7 max-w-[440px]">
               What does hiring cost you today?
             </h2>
@@ -159,9 +159,7 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
 
           {/* Output */}
           <div className="bg-hero text-hero-foreground p-8 sm:p-10 flex flex-col">
-            <div className="text-[10px] font-bold tracking-[3px] uppercase text-[var(--heritage-bright,#8db8a3)] mb-6">
-              Your estimate
-            </div>
+            <Eyebrow className="text-heritage-bright mb-6">Your estimate</Eyebrow>
 
             <div className="space-y-4 mb-6">
               <OutputRow
@@ -209,12 +207,12 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
                     className="h-full transition-all duration-500"
                     style={{
                       width: `${pct(dsoHireAnnual)}%`,
-                      background: "var(--heritage-bright, #8db8a3)",
+                      background: "var(--heritage-bright)",
                     }}
                     title={`DSO Hire ${tier.name}: ${fmtUsd(dsoHireAnnual)}`}
                   />
                 </BarRow>
-                <div className="flex gap-4 mt-2 text-[9px] font-bold tracking-[1px] uppercase text-hero-foreground/40">
+                <div className="flex gap-4 mt-2 text-[10px] font-semibold text-hero-foreground/40">
                   <span className="inline-flex items-center gap-1.5">
                     <span className="w-2 h-2 bg-ivory/40" /> Agencies
                   </span>
@@ -222,10 +220,7 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
                     <span className="w-2 h-2 bg-ivory/20" /> Job boards
                   </span>
                   <span className="inline-flex items-center gap-1.5">
-                    <span
-                      className="w-2 h-2"
-                      style={{ background: "var(--heritage-bright, #8db8a3)" }}
-                    />{" "}
+                    <span className="w-2 h-2 bg-heritage-bright" />{" "}
                     Flat fee
                   </span>
                 </div>
@@ -233,12 +228,12 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
             )}
 
             <div className="border-t border-hero-foreground/15 pt-4 mb-6">
-              <div className="text-[11px] font-bold tracking-[1.8px] uppercase text-hero-foreground/50 mb-1">
+              <div className="text-xs font-semibold text-hero-foreground/50 mb-1">
                 {savings >= 0 ? "Estimated kept in your pocket" : "Difference"}
               </div>
               <div
-                className="text-[44px] font-extrabold tracking-[-2px] leading-none tabular-nums"
-                style={{ color: savings >= 0 ? "#8db8a3" : "#F7F4ED" }}
+                className="text-[44px] font-extrabold tracking-[-2px] leading-none tabular"
+                style={{ color: savings >= 0 ? "var(--heritage-bright)" : "var(--ivory)" }}
               >
                 {fmtUsd(Math.abs(savings))}
                 <span className="text-[16px] font-bold text-hero-foreground/50 ml-1.5">/yr</span>
@@ -294,7 +289,7 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
 
             <Link
               href={`/employer/sign-up?tier=${tier.id}&period=annual`}
-              className="mt-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 bg-ivory text-ink text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ivory-deep transition-colors"
+              className="mt-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 bg-ivory text-ink text-sm font-bold hover:bg-ivory-deep transition-colors"
             >
               Start With {tier.name}
               <ArrowRight className="h-3.5 w-3.5" />
@@ -312,9 +307,7 @@ function ChannelLabel({ n, label }: { n: string; label: string }) {
       <span className="text-[9px] font-extrabold tracking-[1.5px] text-heritage-deep">
         {n}
       </span>
-      <span className="text-[11px] font-bold tracking-[2px] uppercase text-ink">
-        {label}
-      </span>
+      <Eyebrow as="span">{label}</Eyebrow>
       <span className="flex-1 h-px bg-heritage/25" />
     </div>
   );
@@ -329,9 +322,9 @@ function BarRow({
 }) {
   return (
     <div className="flex items-center gap-3 mb-1.5">
-      <span className="w-[64px] shrink-0 text-[9px] font-bold tracking-[1.2px] uppercase text-hero-foreground/50 text-right">
+      <Eyebrow as="span" className="w-[64px] shrink-0 text-[9px] tracking-[1.2px] text-right text-hero-foreground/50">
         {label}
-      </span>
+      </Eyebrow>
       <span className="flex-1 h-[16px] bg-ivory/[0.07] flex gap-px overflow-hidden">
         {children}
       </span>
@@ -359,10 +352,10 @@ function CalcSlider({
   return (
     <div className="mb-5">
       <div className="flex items-baseline justify-between gap-4 mb-2">
-        <label className="text-[12px] font-bold tracking-[1.2px] uppercase text-slate-body">
+        <label className="text-xs font-semibold text-slate-body">
           {label}
         </label>
-        <span className="text-[17px] font-extrabold tracking-[-0.4px] text-ink tabular-nums">
+        <span className="text-[17px] font-extrabold tracking-[-0.4px] text-ink tabular">
           {display}
         </span>
       </div>
@@ -393,8 +386,8 @@ function OutputRow({
     <div className="flex items-baseline justify-between gap-4">
       <span className="text-[13px] text-hero-foreground/65 leading-snug">{label}</span>
       <span
-        className={`text-[20px] font-extrabold tracking-[-0.6px] tabular-nums whitespace-nowrap ${
-          accent ? "text-[var(--heritage-bright,#8db8a3)]" : "text-hero-foreground"
+        className={`text-[20px] font-extrabold tracking-[-0.6px] tabular whitespace-nowrap ${
+          accent ? "text-heritage-bright" : "text-hero-foreground"
         }`}
       >
         {value}

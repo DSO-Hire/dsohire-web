@@ -39,6 +39,7 @@ import {
   MapPin,
   Stethoscope,
 } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { FilmStrip } from "@/components/marketing/film-strip";
 import { CountUp } from "@/components/marketing/motion";
@@ -108,7 +109,7 @@ function Hero() {
       <div className="relative z-10 max-w-[1180px] mx-auto text-center">
         <span
           data-reveal
-          className="inline-flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold tracking-[1.8px] uppercase text-ink border border-heritage/35 mb-5"
+          className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-ink border border-heritage/35 mb-5"
           style={{
             background: "var(--heritage-tint)",
             boxShadow: "0 0 0 4px var(--heritage-glow)",
@@ -145,7 +146,7 @@ function Hero() {
             body="Post across every practice on one flat monthly subscription, with an applicant pipeline built for the way dental groups hire."
             proof="Flat monthly fee · No per-listing fees · No placement charges"
             demo={<MiniKanban />}
-            ctaLabel="Explore Dental Group Hiring"
+            ctaLabel="Explore dental group hiring"
             ctaHref="/for-dental-groups"
             secondaryLabel="See pricing"
             secondaryHref="/pricing"
@@ -159,7 +160,7 @@ function Hero() {
             body="Real openings at multi-location dental groups — clinical and corporate, hygiene through specialist — scored to how you actually like to work."
             proof="Free forever · Direct apply · Private from your current office"
             demo={<MiniDial />}
-            ctaLabel="Browse Dental Jobs"
+            ctaLabel="Browse dental jobs"
             ctaHref="/jobs"
             secondaryLabel="How it works for candidates"
             secondaryHref="/for-candidates"
@@ -316,16 +317,16 @@ function DoorwayPanel({
         <Icon className="h-5 w-5" />
       </span>
 
-      <div className={`text-[10px] font-bold tracking-[2.5px] uppercase ${fg65} mb-1.5`}>
+      <Eyebrow className={`${fg65} mb-1.5`}>
         {eyebrow}
-      </div>
+      </Eyebrow>
       <div className={`text-[24px] sm:text-[28px] font-extrabold tracking-[-0.6px] leading-[1.08] ${fg} mb-2.5`}>
         {title}
       </div>
       <p className={`text-[14px] ${fg80} leading-[1.55] mb-3.5`}>{body}</p>
 
       {/* Single-line proof — dot-separated keyword chips */}
-      <div className={`text-[10.5px] font-bold tracking-[1.6px] uppercase ${fg55}`}>
+      <div className={`text-xs font-semibold ${fg55}`}>
         {proof}
       </div>
 
@@ -338,7 +339,7 @@ function DoorwayPanel({
       <div className="mt-auto pt-6 flex flex-col">
         <Link
           href={ctaHref}
-          className="inline-flex items-center justify-center gap-2.5 px-6 py-3 text-[12px] font-bold tracking-[1.8px] uppercase bg-ivory text-ink hover:bg-ivory-deep transition-colors"
+          className="inline-flex items-center justify-center gap-2.5 px-6 py-3 text-sm font-bold bg-ivory text-ink hover:bg-ivory-deep transition-colors"
         >
           {ctaLabel}
           <ArrowRight className="h-3.5 w-3.5 motion-safe:transition-transform motion-safe:group-hover:translate-x-1" />
@@ -347,7 +348,7 @@ function DoorwayPanel({
         {/* Secondary — the pitch/detail page, named for what it is. */}
         <Link
           href={secondaryHref}
-          className={`mt-3.5 inline-flex items-center justify-center gap-1.5 text-[11px] font-bold tracking-[1.6px] uppercase ${fg65} ${fgHover} transition-colors`}
+          className={`mt-3.5 inline-flex items-center justify-center gap-1.5 text-xs font-semibold ${fg65} ${fgHover} transition-colors`}
         >
           {secondaryLabel}
           <ArrowRight className="h-3 w-3" />
@@ -374,13 +375,13 @@ function LiveMarketBand({ live }: { live: HomeLiveSnapshot }) {
       <div className="max-w-[1240px] mx-auto px-6 sm:px-14">
         <div className="flex flex-wrap items-end justify-between gap-6 mb-8">
           <div>
-            <div data-reveal className="flex items-center gap-2 text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
+            <Eyebrow data-reveal className="flex items-center gap-2 text-heritage-deep mb-2">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-heritage opacity-60" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-heritage" />
               </span>
               On The Board Right Now
-            </div>
+            </Eyebrow>
             <h2
               data-reveal
               style={{ "--mk-delay": "70ms" } as React.CSSProperties}
@@ -399,10 +400,10 @@ function LiveMarketBand({ live }: { live: HomeLiveSnapshot }) {
               <LiveStat value={live.activeJobs} label="Open roles live" />
               <LiveStat value={live.states} label="States covered" />
               <div>
-                <div className="text-[34px] font-extrabold tracking-[-1.5px] leading-none text-heritage-deep tabular-nums">
+                <div className="text-[34px] font-extrabold tracking-[-1.5px] leading-none text-heritage-deep tabular">
                   $0
                 </div>
-                <div className="mt-1 text-[10px] font-bold tracking-[1.8px] uppercase text-slate-meta">
+                <div className="mt-1 text-xs font-semibold text-slate-meta">
                   Placement fees, ever
                 </div>
               </div>
@@ -424,7 +425,7 @@ function LiveMarketBand({ live }: { live: HomeLiveSnapshot }) {
           <div className="max-w-[1240px] mx-auto px-6 sm:px-14 mt-6">
             <Link
               href="/jobs"
-              className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[1.8px] uppercase text-heritage-deep hover:text-ink transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-heritage-deep hover:text-ink transition-colors"
             >
               Browse every opening
               <ArrowRight className="h-3 w-3" />
@@ -439,10 +440,10 @@ function LiveMarketBand({ live }: { live: HomeLiveSnapshot }) {
 function LiveStat({ value, label }: { value: number; label: string }) {
   return (
     <div>
-      <div className="text-[34px] font-extrabold tracking-[-1.5px] leading-none text-ink tabular-nums">
+      <div className="text-[34px] font-extrabold tracking-[-1.5px] leading-none text-ink tabular">
         <CountUp to={value} duration={800} />
       </div>
-      <div className="mt-1 text-[10px] font-bold tracking-[1.8px] uppercase text-slate-meta">
+      <div className="mt-1 text-xs font-semibold text-slate-meta">
         {label}
       </div>
     </div>
@@ -457,7 +458,7 @@ function MarqueeCard({ job, ariaHidden }: { job: MarqueeJob; ariaHidden?: boolea
       tabIndex={ariaHidden ? -1 : undefined}
       className="group/card flex flex-col w-[280px] shrink-0 bg-card border border-[var(--rule)] px-5 py-4 hover:border-heritage hover:shadow-[0_14px_28px_-16px_rgba(7,15,28,0.22)] transition-all"
     >
-      <span className="inline-flex self-start items-center px-1.5 py-0.5 mb-2.5 text-[8.5px] font-bold tracking-[1.4px] uppercase text-heritage-deep border border-heritage/30" style={{ background: "var(--heritage-tint)" }}>
+      <span className="inline-flex self-start items-center px-1.5 py-0.5 mb-2.5 text-[10px] font-semibold text-heritage-deep border border-heritage/30" style={{ background: "var(--heritage-tint)" }}>
         {job.chip}
       </span>
       <span className="text-[14.5px] font-extrabold tracking-[-0.3px] leading-snug text-ink mb-1.5 line-clamp-2">
@@ -469,7 +470,7 @@ function MarqueeCard({ job, ariaHidden }: { job: MarqueeJob; ariaHidden?: boolea
           <span className="truncate">{job.location ?? "Multiple locations"}</span>
         </span>
         {job.pay && (
-          <span className="font-bold text-heritage-deep whitespace-nowrap tabular-nums">
+          <span className="font-bold text-stage-bronze whitespace-nowrap tabular">
             {job.pay}
           </span>
         )}
@@ -533,12 +534,12 @@ function MachineBand() {
   return (
     <section className="bg-cream border-t border-[var(--rule)] px-6 sm:px-14 py-24">
       <div className="max-w-[1240px] mx-auto">
-        <div
+        <Eyebrow
           data-reveal
-          className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5"
+          className="text-heritage-deep mb-3.5"
         >
           The machine behind the marketplace
-        </div>
+        </Eyebrow>
         <h2
           data-reveal
           style={{ "--mk-delay": "70ms" } as React.CSSProperties}
@@ -563,11 +564,11 @@ function MachineBand() {
         >
           {stats.map((s) => (
             <div key={s.label} className="bg-ivory px-6 py-6">
-              <div className="text-[34px] font-extrabold tracking-[-1.5px] leading-none text-ink tabular-nums">
+              <div className="text-[34px] font-extrabold tracking-[-1.5px] leading-none text-ink tabular">
                 <CountUp to={s.value} duration={800} />
                 {s.suffix && <span className="text-heritage">{s.suffix}</span>}
               </div>
-              <div className="mt-2 text-[10px] font-bold tracking-[1.4px] uppercase text-slate-meta leading-[1.5]">
+              <div className="mt-2 text-xs font-semibold text-slate-meta leading-[1.5]">
                 {s.label}
               </div>
             </div>
@@ -598,16 +599,16 @@ function MachineBand() {
         >
           <Link
             href="/for-dental-groups"
-            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
           >
-            Explore The Platform
+            Explore the platform
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <Link
             href="/pricing"
-            className="inline-flex items-center px-7 py-[13px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[1.8px] uppercase hover:border-ink hover:bg-cream transition-colors"
+            className="inline-flex items-center px-7 py-[13px] border border-[var(--rule-strong)] text-ink text-sm font-semibold hover:border-ink hover:bg-cream transition-colors"
           >
-            See Pricing
+            See pricing
           </Link>
         </div>
       </div>
@@ -679,14 +680,14 @@ function CandidateStrip() {
           >
             <Link
               href="/jobs"
-              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-heritage text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-heritage-deep transition-colors"
+              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-heritage text-primary-foreground text-sm font-bold hover:bg-heritage-deep transition-colors"
             >
-              Browse Dental Jobs
+              Browse dental jobs
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
             <Link
               href="/practicefit"
-              className="inline-flex items-center px-7 py-[13px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[1.8px] uppercase hover:border-ink hover:bg-cream transition-colors"
+              className="inline-flex items-center px-7 py-[13px] border border-[var(--rule-strong)] text-ink text-sm font-semibold hover:border-ink hover:bg-cream transition-colors"
             >
               Meet PracticeFit
             </Link>
@@ -724,14 +725,14 @@ function FounderLine() {
           height={52}
           className="mx-auto mb-3 -rotate-2 select-none dark:invert"
         />
-        <div className="mb-6 text-[11px] font-bold tracking-[1.8px] uppercase text-slate-meta">
+        <Eyebrow className="mb-6">
           <span className="text-heritage-deep">Cam Eslinger</span>
           <span className="mx-2 text-[var(--rule-strong)]">·</span>
           Founder, DSO Hire
-        </div>
+        </Eyebrow>
         <Link
           href="/about"
-          className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[1.8px] uppercase text-heritage-deep hover:text-ink transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-heritage-deep hover:text-ink transition-colors"
         >
           More about us
           <ArrowRight className="h-3 w-3" />
@@ -758,7 +759,7 @@ function ClosingDoorways() {
           height: "620px",
           borderRadius: "50%",
           background:
-            "radial-gradient(circle, rgba(77,122,96,0.10), transparent 65%)",
+            "radial-gradient(circle, var(--heritage-glow), transparent 65%)",
           transform: "translate(-50%, -50%)",
         }}
       />
@@ -781,17 +782,17 @@ function ClosingDoorways() {
         >
           <Link
             href="/for-dental-groups"
-            className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-ivory text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-ivory-deep transition-colors"
+            className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-ivory text-ink text-sm font-bold hover:bg-ivory-deep transition-colors"
           >
             <Building2 className="h-4 w-4" />
-            I&apos;m a Dental Group
+            I&apos;m a dental group
           </Link>
           <Link
             href="/for-candidates"
-            className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-heritage text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
+            className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-heritage text-primary-foreground text-sm font-bold hover:bg-heritage-deep transition-colors"
           >
             <Stethoscope className="h-4 w-4" />
-            I&apos;m a Dental Professional
+            I&apos;m a dental professional
           </Link>
         </div>
       </div>

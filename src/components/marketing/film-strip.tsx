@@ -18,6 +18,7 @@
 
 import { useRef } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 
 /* ── shared drawn-UI atoms ───────────────────────────── */
 
@@ -48,7 +49,7 @@ function UiHead({ title, chip }: { title: string; chip: string }) {
     <div className="flex items-center justify-between mb-3">
       <span className="text-[12px] font-extrabold tracking-[-0.2px]">{title}</span>
       <span
-        className="text-[8px] font-bold tracking-[1px] uppercase px-2 py-0.5 text-heritage-deep"
+        className="text-[8px] font-semibold px-2 py-0.5 text-heritage-deep"
         style={{ background: "var(--heritage-tint)" }}
       >
         {chip}
@@ -73,7 +74,7 @@ function KbCard({
   return (
     <div
       className={`bg-card border border-[var(--rule-strong)] p-2 mb-2 ${
-        active ? "shadow-[0_0_0_2px_rgba(77,122,96,0.5)]" : ""
+        active ? "shadow-[0_0_0_2px_var(--heritage)]" : ""
       }`}
     >
       <div
@@ -98,9 +99,9 @@ function RuleCard({ when, what }: { when: string; what: string }) {
   return (
     <div className="bg-card border border-[var(--rule-strong)] border-l-[3px] border-l-heritage px-3.5 py-3 mb-2.5 flex items-center justify-between gap-3">
       <div>
-        <div className="text-[8px] font-extrabold tracking-[1.2px] uppercase text-slate-meta">
+        <Eyebrow className="text-[8px] tracking-[1.2px]">
           {when}
-        </div>
+        </Eyebrow>
         <div className="text-[10px] font-bold mt-0.5">{what}</div>
       </div>
       <span className="relative inline-block w-[26px] h-[14px] shrink-0 bg-heritage" aria-hidden>
@@ -141,8 +142,8 @@ function ChainStep({
 function Bar({ h, pct, label, hg }: { h: string; pct: string; label: string; hg?: boolean }) {
   return (
     <div className={`relative flex-1 ${hg ? "bg-heritage" : "bg-ink"}`} style={{ height: h }}>
-      <span className="absolute -top-4 inset-x-0 text-center text-[8px] font-extrabold">{pct}</span>
-      <span className="absolute -bottom-4 inset-x-0 text-center text-[7px] uppercase tracking-[0.5px] text-slate-meta">
+      <span className="absolute -top-4 inset-x-0 text-center text-[8px] font-extrabold tabular">{pct}</span>
+      <span className="absolute -bottom-4 inset-x-0 text-center text-[7px] font-semibold text-slate-meta">
         {label}
       </span>
     </div>
@@ -157,32 +158,32 @@ function PipelineFrame() {
       <UiHead title="Pipeline — every practice, every role" chip="Realtime" />
       <div className="grid grid-cols-4 gap-2.5">
         <div>
-          <div className="flex justify-between text-[8px] font-extrabold tracking-[1px] uppercase text-slate-meta mb-2">
+          <Eyebrow className="flex justify-between text-[8px] tracking-[1px] mb-2">
             <span>Applied</span>
-            <span>14</span>
-          </div>
+            <span className="tabular">14</span>
+          </Eyebrow>
           <KbCard name="Maria G." role="RDA · Chandler" fit={88} />
           <KbCard name="Candidate RDH-4821" role="Hygienist · Mesa" fit={91} masked />
         </div>
         <div>
-          <div className="flex justify-between text-[8px] font-extrabold tracking-[1px] uppercase text-slate-meta mb-2">
+          <Eyebrow className="flex justify-between text-[8px] tracking-[1px] mb-2">
             <span>Screening</span>
-            <span>6</span>
-          </div>
+            <span className="tabular">6</span>
+          </Eyebrow>
           <KbCard name="Devon P." role="Front Office · Tempe" fit={79} />
         </div>
         <div>
-          <div className="flex justify-between text-[8px] font-extrabold tracking-[1px] uppercase text-slate-meta mb-2">
+          <Eyebrow className="flex justify-between text-[8px] tracking-[1px] mb-2">
             <span>Interview</span>
-            <span>3</span>
-          </div>
+            <span className="tabular">3</span>
+          </Eyebrow>
           <KbCard name="Dr. Sarah Chen" role="Associate · Boise" fit={94} active />
         </div>
         <div>
-          <div className="flex justify-between text-[8px] font-extrabold tracking-[1px] uppercase text-slate-meta mb-2">
+          <Eyebrow className="flex justify-between text-[8px] tracking-[1px] mb-2">
             <span>Offer</span>
-            <span>1</span>
-          </div>
+            <span className="tabular">1</span>
+          </Eyebrow>
           <KbCard name="James R." role="Ops Manager · Corp" fit={86} />
         </div>
       </div>
@@ -228,12 +229,13 @@ function PermissionsFrame() {
         <thead>
           <tr>
             {["Capability", "Owner", "Recruiter", "Hiring Mgr"].map((h) => (
-              <th
+              <Eyebrow
+                as="th"
                 key={h}
-                className="text-left text-[7.5px] font-extrabold tracking-[0.8px] uppercase text-slate-meta px-1.5 py-1 border-b border-[var(--rule-strong)]"
+                className="text-left text-[7.5px] tracking-[0.8px] px-1.5 py-1 border-b border-[var(--rule-strong)]"
               >
                 {h}
-              </th>
+              </Eyebrow>
             ))}
           </tr>
         </thead>
@@ -338,17 +340,14 @@ export function FilmStrip() {
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(247,244,237,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(247,244,237,0.04) 1px, transparent 1px)",
+            "linear-gradient(color-mix(in srgb, var(--ivory) 4%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--ivory) 4%, transparent) 1px, transparent 1px)",
           backgroundSize: "80px 80px",
         }}
       />
       <div className="relative max-w-[1240px] mx-auto px-6 sm:px-14">
-        <div
-          data-reveal
-          className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-light"
-        >
+        <Eyebrow data-reveal className="text-heritage-bright">
           Walk the back office
-        </div>
+        </Eyebrow>
         <h2
           data-reveal
           style={{ "--mk-delay": "70ms" } as React.CSSProperties}
@@ -414,7 +413,7 @@ export function FilmStrip() {
               <ArrowRight className="h-4 w-4" />
             </button>
           </div>
-          <span className="text-[9px] tracking-[1.2px] uppercase text-hero-foreground/35">
+          <span className="text-[10px] font-semibold text-hero-foreground/35">
             Illustrations of the live product · sample data
           </span>
         </div>

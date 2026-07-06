@@ -13,6 +13,8 @@
 
 import { useState } from "react";
 
+import { Eyebrow } from "@/components/brand/eyebrow";
+
 const QUESTIONS: Array<{ q: string; opts: string[] }> = [
   {
     q: "How many practice locations are you hiring for?",
@@ -66,9 +68,7 @@ export function PlanFinder() {
         className="relative max-w-[680px] mx-auto bg-hero text-hero-foreground px-7 py-8 sm:px-9"
       >
         <span aria-hidden className="absolute top-0 inset-x-0 h-[3px] bg-heritage" />
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-light mb-4">
-          Not sure which tier? 30 seconds.
-        </div>
+        <Eyebrow className="text-heritage-bright mb-4">Not sure which tier? 30 seconds.</Eyebrow>
 
         {/* progress */}
         <div className="flex gap-1.5 mb-5" aria-hidden>
@@ -95,7 +95,7 @@ export function PlanFinder() {
                   onClick={() => pick(i)}
                   className={`px-4 py-2.5 text-[13px] font-bold border transition-colors ${
                     answers[step] === i
-                      ? "bg-heritage border-heritage text-primary-foreground"
+                      ? "border-heritage-bright text-heritage-bright shadow-[inset_0_-2px_0_0_var(--heritage-bright)]"
                       : "border-hero-foreground/30 text-hero-foreground hover:border-heritage-light hover:text-heritage-light"
                   }`}
                 >
@@ -107,7 +107,7 @@ export function PlanFinder() {
               <button
                 type="button"
                 onClick={() => setStep(step - 1)}
-                className="mt-4 text-[10px] font-bold tracking-[1.2px] uppercase text-hero-foreground/45 hover:text-hero-foreground"
+                className="mt-4 text-[10px] font-semibold text-hero-foreground/45 hover:text-hero-foreground"
               >
                 ← Back
               </button>
@@ -117,9 +117,7 @@ export function PlanFinder() {
 
         {done && rec !== null && (
           <div className="text-center py-1">
-            <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-light mb-1.5">
-              Your fit
-            </div>
+            <Eyebrow className="text-heritage-bright mb-1.5">Your fit</Eyebrow>
             <div className="text-[28px] font-extrabold tracking-[-0.8px] mb-2">
               {TIER_NAMES[rec]}
             </div>
@@ -128,7 +126,7 @@ export function PlanFinder() {
             </p>
             <a
               href="#tiers"
-              className="inline-block bg-ivory text-ink px-6 py-3 text-[11px] font-bold tracking-[1.6px] uppercase hover:bg-ivory-deep transition-colors"
+              className="inline-block bg-ivory text-ink px-6 py-3 text-sm font-bold hover:bg-ivory-deep transition-colors"
             >
               See the tier ↑
             </a>
@@ -136,7 +134,7 @@ export function PlanFinder() {
               <button
                 type="button"
                 onClick={reset}
-                className="mt-3.5 text-[10px] font-bold tracking-[1.2px] uppercase text-hero-foreground/45 hover:text-hero-foreground"
+                className="mt-3.5 text-[10px] font-semibold text-hero-foreground/45 hover:text-hero-foreground"
               >
                 Start over
               </button>

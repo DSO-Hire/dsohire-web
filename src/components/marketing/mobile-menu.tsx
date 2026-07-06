@@ -32,6 +32,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { FitWordmark } from "@/components/practice-fit/brand/fit-wordmark";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 
@@ -122,9 +123,7 @@ export function MobileMenu({
           {/* Drawer panel */}
           <div className="absolute top-0 right-0 bottom-0 w-[88vw] max-w-[400px] bg-ivory border-l border-[var(--rule-strong)] shadow-2xl flex flex-col">
             <div className="flex items-center justify-between h-[80px] px-6 border-b border-[var(--rule)]">
-              <span className="text-[10px] font-bold tracking-[1.8px] uppercase text-heritage-deep">
-                Menu
-              </span>
+              <Eyebrow as="span">Menu</Eyebrow>
               <button
                 type="button"
                 aria-label="Close menu"
@@ -151,9 +150,7 @@ export function MobileMenu({
                   presented as an obvious paired choice (mirrors the
                   desktop segmented control). Two bordered panels stacked
                   with a shared divider so they read as one switch. */}
-              <div className="text-[10px] font-bold tracking-[1.8px] uppercase text-heritage-deep mb-3">
-                Choose your lens
-              </div>
+              <Eyebrow className="mb-3">Choose your lens</Eyebrow>
               {/* Each lens is a collapsed accordion (native <details>) so the
                   drawer stays short — tap to reveal the sub-links instead of
                   scrolling past every role/size up front. Overview link sits
@@ -236,9 +233,7 @@ export function MobileMenu({
               {/* Fit products — the real PracticeFit + DSOFit lockups (dual-tone,
                   both ™). Both link to /practicefit, which explains both. */}
               <div className="mt-7 pt-5 border-t border-[var(--rule)]">
-                <div className="text-[10px] font-bold tracking-[1.8px] uppercase text-heritage-deep mb-3">
-                  Our fit products
-                </div>
+                <Eyebrow className="mb-3">Our fit products</Eyebrow>
                 <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
                   <Link href="/practicefit" onClick={close} aria-label="PracticeFit">
                     <FitWordmark product="practicefit" surface="light" tm className="text-[15px]" />
@@ -264,22 +259,20 @@ export function MobileMenu({
 
             <div className="px-6 pb-7 pt-4 border-t border-[var(--rule)] flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold tracking-[2px] uppercase text-slate-meta">
-                  Theme
-                </span>
+                <Eyebrow as="span">Theme</Eyebrow>
                 <ThemeToggle className="text-ink" />
               </div>
               <Link
                 href={signInHref}
                 onClick={close}
-                className="inline-flex items-center justify-center px-5 py-3 border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
+                className="inline-flex items-center justify-center px-5 py-3 border border-[var(--rule-strong)] text-ink text-xs font-semibold hover:border-ink transition-colors"
               >
                 {signInLabel}
               </Link>
               <Link
                 href={primaryCtaHref}
                 onClick={close}
-                className="inline-flex items-center justify-center px-5 py-3 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+                className="inline-flex items-center justify-center px-5 py-3 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
               >
                 {primaryCtaLabel}
               </Link>

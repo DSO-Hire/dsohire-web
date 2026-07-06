@@ -103,7 +103,7 @@ export function JobsStateFilter({ defaultValues }: JobsStateFilterProps) {
                     e.preventDefault();
                     setSelected([]);
                   }}
-                  className="flex shrink-0 items-center gap-1 px-2 py-1 text-[12px] font-semibold uppercase tracking-[0.5px] text-slate-meta hover:text-ink"
+                  className="flex shrink-0 items-center gap-1 px-2 py-1 text-[12px] font-semibold text-slate-meta hover:text-ink"
                   title="Clear all"
                 >
                   <X className="h-3 w-3" /> Clear

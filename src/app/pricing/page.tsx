@@ -23,6 +23,8 @@ import {
 import { BillingPeriodToggle } from "./billing-period-toggle";
 import { PlanFinder } from "./plan-finder";
 import { CompareMatrixAccordion } from "./compare-matrix-accordion";
+import { Eyebrow } from "@/components/brand/eyebrow";
+import { Tag } from "@/components/brand/tag";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import { MotionMount } from "@/components/marketing/motion";
 import { RoiCalculator } from "@/components/marketing/roi-calculator";
@@ -125,9 +127,7 @@ async function employerNeedsCheckout(): Promise<boolean> {
 function PricingHero() {
   return (
     <section className="pt-[120px] pb-12 px-6 sm:px-14 max-w-[1240px] mx-auto">
-      <div data-reveal className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
-        Pricing
-      </div>
+      <Eyebrow data-reveal className="text-heritage-deep mb-3.5">Pricing</Eyebrow>
       <h1
         data-reveal
         style={{ "--mk-delay": "70ms" } as React.CSSProperties}
@@ -177,9 +177,7 @@ function TierGrid({
       {soloTier && (
         <div className="mb-14">
           <div className="text-center max-w-[680px] mx-auto mb-7">
-            <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
-              Multi-location owner-operator?
-            </div>
+            <Eyebrow className="text-heritage-deep mb-3">Multi-location owner-operator?</Eyebrow>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink leading-[1.15] mb-3">
               Solo — for groups of 2 to 5 locations.
             </h2>
@@ -208,9 +206,7 @@ function TierGrid({
       {/* ── DSO 3-up (audience = multi-practice dental groups / DSOs) ── */}
       <div className="pt-12 border-t border-[var(--rule)]">
         <div className="text-center max-w-[640px] mx-auto mb-7">
-          <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
-            Scaling beyond a few practices?
-          </div>
+          <Eyebrow className="text-heritage-deep mb-3">Scaling beyond a few practices?</Eyebrow>
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink leading-[1.15] mb-3">
             Pick the tier that matches your footprint.
           </h2>
@@ -254,7 +250,7 @@ function TierGrid({
       {/* #115 Model 03 — caps honesty as a trust signal, not fine print. */}
       <p className="mt-3 text-center">
         <span
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 text-[10px] font-bold tracking-[1.4px] uppercase text-heritage-deep border border-heritage/30"
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold text-heritage-deep border border-heritage/30"
           style={{ background: "var(--heritage-tint)" }}
         >
           Every cap shown is the enforced cap — what we advertise is what the
@@ -292,35 +288,33 @@ function SoloStandoutCard({
     ? `/employer/checkout?${params.toString()}`
     : `/employer/sign-up?${params.toString()}`;
   return (
-    <div className="max-w-[920px] mx-auto border-2 border-heritage/40 bg-card shadow-[0_4px_24px_-12px_rgba(7,15,28,0.12)]">
+    <div className="max-w-[920px] mx-auto border-2 border-heritage/40 bg-card">
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
         {/* ── Left: tier name + price + CTA on heritage-tinted band ──
             Heritage-green tint (8% opacity) per Cam direction 2026-05-26 —
             visually distinguishes Solo from the navy-featured DSO tier below
             without competing with it. */}
         <div className="bg-heritage/[0.08] p-9 flex flex-col">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
-            {tier.name}
-          </div>
+          <Eyebrow className="text-heritage-deep mb-2">{tier.name}</Eyebrow>
           <div className="text-[14px] text-slate-body mb-7 leading-snug">
             {tier.tagline}
           </div>
           <div className="flex items-baseline gap-1.5 mb-1.5">
-            <div className="text-[44px] font-extrabold tracking-[-1.5px] leading-none text-ink">
+            <div className="text-[44px] font-extrabold tracking-[-1.5px] leading-none text-ink tabular">
               ${headlinePrice.toLocaleString()}
             </div>
             <div className="text-[14px] font-medium text-slate-body">
               / month
             </div>
           </div>
-          <div className="text-[12px] tracking-[0.4px] mb-7 leading-[1.45] text-slate-meta min-h-[18px]">
+          <div className="text-[12px] tracking-[0.4px] mb-7 leading-[1.45] text-slate-meta min-h-[18px] tabular">
             {isAnnual
               ? `Billed annually · $${tier.annualPrice.toLocaleString()}/yr`
               : "Billed monthly · cancel anytime"}
           </div>
           <Link
             href={ctaHref}
-            className="block text-center px-4 py-3.5 text-[12px] font-bold tracking-[1.5px] uppercase bg-primary text-primary-foreground border border-primary hover:bg-heritage hover:border-heritage transition-colors"
+            className="block text-center px-4 py-3.5 text-sm font-bold bg-primary text-primary-foreground border border-primary hover:bg-heritage hover:border-heritage transition-colors"
           >
             Start with Solo
           </Link>
@@ -332,9 +326,7 @@ function SoloStandoutCard({
 
         {/* ── Right: feature list ── */}
         <div className="p-9 lg:border-l border-[var(--rule)]">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-body mb-4">
-            What&apos;s included
-          </div>
+          <Eyebrow className="mb-4">What&apos;s included</Eyebrow>
           <ul className="list-none grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
             {tier.features.map((feature, i) => (
               <li
@@ -408,9 +400,9 @@ function TierCard({
       {/* Floats above the card top edge — doesn't push content down, so all
           four cards stay aligned at the eyebrow row. */}
       {isFeatured && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-heritage text-primary-foreground text-[9px] font-bold tracking-[2px] uppercase whitespace-nowrap z-10">
-          Most Popular
-        </div>
+        <Tag tone="heritage" className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 bg-heritage text-primary-foreground">
+          Most popular
+        </Tag>
       )}
 
       <div
@@ -430,7 +422,7 @@ function TierCard({
 
       <div className="flex items-baseline gap-1.5 mb-1.5">
         <div
-          className={`text-[40px] font-extrabold tracking-[-1.5px] leading-none ${
+          className={`text-[40px] font-extrabold tracking-[-1.5px] leading-none tabular ${
             isFeatured ? "text-hero-foreground" : "text-ink"
           }`}
         >
@@ -445,7 +437,7 @@ function TierCard({
         </div>
       </div>
       <div
-        className={`text-[12px] tracking-[0.4px] mb-7 min-h-[32px] leading-[1.45] ${
+        className={`text-[12px] tracking-[0.4px] mb-7 min-h-[32px] leading-[1.45] tabular ${
           isFeatured ? "text-hero-foreground/55" : "text-slate-meta"
         }`}
       >
@@ -456,7 +448,7 @@ function TierCard({
 
       <Link
         href={ctaHref}
-        className={`block text-center px-4 py-3.5 text-[12px] font-bold tracking-[1.5px] uppercase mb-6 transition-colors border ${
+        className={`block text-center px-4 py-3.5 text-sm font-bold mb-6 transition-colors border ${
           isFeatured
             ? "bg-heritage text-primary-foreground border-heritage hover:bg-heritage-deep hover:border-heritage-deep"
             : "bg-ivory text-ink border-[var(--rule-strong)] hover:bg-primary hover:text-primary-foreground hover:border-primary"
@@ -951,9 +943,7 @@ function CompareMatrix({
 
   return (
     <section className="px-6 sm:px-14 pt-28 pb-20 max-w-[1240px] mx-auto">
-      <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
-        Side By Side
-      </div>
+      <Eyebrow className="text-heritage-deep mb-3.5">Side By Side</Eyebrow>
       <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink max-w-[720px] mb-12">
         What you get at each tier.
       </h2>
@@ -969,9 +959,9 @@ function CompareMatrix({
           tier includes before you open it. Checkmarks = available today, and
           every capacity number is code-enforced. Anything not yet live for
           any tier sits in the final{" "}
-          <span className="font-bold tracking-[1px] uppercase text-[10px]">On the roadmap</span>{" "}
-          band — labeled <span className="font-bold tracking-[1px] uppercase text-[10px]">H2 2026</span>{" "}
-          (active roadmap) or <span className="font-bold tracking-[1px] uppercase text-[10px]">Phase 6+</span>{" "}
+          <span className="text-[10px] font-semibold">On the roadmap</span>{" "}
+          band — labeled <span className="text-[10px] font-semibold">H2 2026</span>{" "}
+          (active roadmap) or <span className="text-[10px] font-semibold">Phase 6+</span>{" "}
           (longer-term). We commit to features publicly so prospects see the
           platform&apos;s shape — and nothing roadmapped masquerades as shipped.
         </p>
@@ -1036,9 +1026,7 @@ function FAQ() {
   return (
     <section className="bg-cream border-y border-[var(--rule)] px-6 sm:px-14 pt-24 pb-24">
       <div className="max-w-[860px] mx-auto">
-        <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
-          FAQ
-        </div>
+        <Eyebrow className="text-heritage-deep mb-3.5">FAQ</Eyebrow>
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink mb-12">
           Common questions.
         </h2>
@@ -1069,16 +1057,16 @@ function FinalCta({ nextParam }: { nextParam: string | null }) {
                 ? `/employer/sign-up?next=${encodeURIComponent(nextParam)}`
                 : "/employer/sign-up"
             }
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
           >
-            Sign Up
+            Sign up
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <Link
             href="/contact"
-            className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
+            className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-sm font-semibold hover:border-ink transition-colors"
           >
-            Contact Us
+            Contact us
           </Link>
         </div>
       </div>

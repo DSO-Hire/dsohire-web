@@ -14,6 +14,7 @@
 
 import Link from "next/link";
 import { ArrowRight, ArrowLeft, Sparkles } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { SiteShell } from "@/components/marketing/site-shell";
 import {
   ROLE_BY_SLUG,
@@ -88,20 +89,18 @@ function Hero({
       <div className="relative z-10 max-w-[1100px] mx-auto">
         <Link
           href="/for-candidates"
-          className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-8"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-heritage-deep hover:text-ink transition-colors mb-8"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           All Dental Careers
         </Link>
 
         <div className="flex items-center gap-3.5 mb-6">
-          <div className="h-11 w-11 rounded-full bg-heritage/15 flex items-center justify-center flex-shrink-0">
+          <div className="h-11 w-11 bg-heritage/15 flex items-center justify-center flex-shrink-0">
             <Icon className="h-5 w-5 text-heritage-deep" />
           </div>
           <div>
-            <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep">
-              For {label}
-            </div>
+            <Eyebrow className="text-heritage-deep">For {label}</Eyebrow>
             <div className="text-[12px] tracking-[0.4px] text-slate-meta">
               {eyebrow}
             </div>
@@ -140,14 +139,14 @@ function Hero({
         <div className="flex flex-wrap items-center gap-3.5">
           <Link
             href={jobsFilterHref}
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
           >
-            Browse {label} Roles
+            Browse {label} roles
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <Link
             href={ctaHref}
-            className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:border-ink hover:bg-cream transition-colors"
+            className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-xs font-semibold hover:border-ink hover:bg-cream transition-colors"
           >
             Create a Free Profile
           </Link>
@@ -163,9 +162,7 @@ function Advantages({ config }: { config: RoleConfig }) {
   return (
     <section className="bg-cream/60 border-y border-[var(--rule)] px-6 sm:px-14 py-24">
       <div className="max-w-[1100px] mx-auto">
-        <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
-          Why a DSO
-        </div>
+        <Eyebrow className="text-heritage-deep mb-3.5">Why a DSO</Eyebrow>
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink mb-12 max-w-[760px]">
           What&apos;s in it for you, specifically.
         </h2>
@@ -177,7 +174,7 @@ function Advantages({ config }: { config: RoleConfig }) {
               className="bg-card p-7 sm:p-8 hover:bg-cream/30 transition-colors"
             >
               <div className="flex items-start gap-3.5">
-                <div className="h-7 w-7 rounded-full bg-heritage/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <div className="h-7 w-7 bg-heritage/15 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <span className="text-[11px] font-extrabold text-heritage-deep">
                     {i + 1}
                   </span>
@@ -204,9 +201,7 @@ function Advantages({ config }: { config: RoleConfig }) {
 function CareerPath({ config }: { config: RoleConfig }) {
   return (
     <section className="px-6 sm:px-14 py-24 max-w-[820px] mx-auto">
-      <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
-        Where it leads
-      </div>
+      <Eyebrow className="text-heritage-deep mb-3.5">Where it leads</Eyebrow>
       <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink mb-10">
         {config.careerPath.title}
       </h2>
@@ -232,18 +227,16 @@ function Compensation({ config }: { config: RoleConfig }) {
         className="absolute -bottom-[20%] -left-[15%] w-[50vw] h-[50vw] pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle, rgba(77,122,96,0.18), transparent 60%)",
+            "radial-gradient(circle, var(--heritage-glow), transparent 60%)",
           filter: "blur(40px)",
         }}
       />
       <div className="relative max-w-[820px] mx-auto">
-        <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
-          How compensation is structured
-        </div>
+        <Eyebrow className="text-heritage-deep mb-3.5">How compensation is structured</Eyebrow>
         <h2 className="text-3xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-[1.1] text-ink mb-6">
           {config.compensation.title}
         </h2>
-        <div className="inline-flex items-center gap-3 mb-5 px-4 py-2.5 bg-card/70 border border-heritage/40 text-[15px] font-semibold tracking-[-0.1px] text-heritage-deep">
+        <div className="inline-flex items-center gap-3 mb-5 px-4 py-2.5 bg-card/70 border border-gold/40 text-[15px] font-semibold tracking-[-0.1px] text-ink">
           {config.compensation.structure}
         </div>
         <p className="text-[15px] text-ink leading-[1.75] max-w-[680px]">
@@ -270,9 +263,9 @@ function SalaryByState({ config }: { config: RoleConfig }) {
   return (
     <section className="px-6 sm:px-14 py-16 bg-cream">
       <div className="max-w-[1100px] mx-auto">
-        <p className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
+        <Eyebrow as="p" className="text-heritage-deep mb-3">
           What {config.label.toLowerCase()} earn
-        </p>
+        </Eyebrow>
         <h2 className="text-3xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-[1.1] text-ink mb-5">
           {salary.searchTitle} salary, by state
         </h2>
@@ -292,7 +285,7 @@ function SalaryByState({ config }: { config: RoleConfig }) {
         </div>
         <Link
           href={`/salary/${salary.slug}`}
-          className="inline-flex items-center gap-2 text-[12px] font-bold tracking-[2px] uppercase text-heritage-deep hover:text-ink"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-heritage-deep hover:text-ink"
         >
           View all {salary.searchTitle.toLowerCase()} salary data
           <ArrowRight className="h-3.5 w-3.5" />
@@ -311,9 +304,7 @@ function RelatedRoles({ config }: { config: RoleConfig }) {
 
   return (
     <section className="px-6 sm:px-14 py-24 max-w-[1100px] mx-auto">
-      <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
-        Looking for a different role?
-      </div>
+      <Eyebrow className="text-heritage-deep mb-3.5">Looking for a different role?</Eyebrow>
       <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] leading-tight text-ink mb-10 max-w-[640px]">
         Other roles that often pair with this one.
       </h2>
@@ -325,13 +316,11 @@ function RelatedRoles({ config }: { config: RoleConfig }) {
             href={`/for-${r.slug}`}
             className="group bg-card p-6 hover:bg-cream/40 transition-colors flex items-center gap-4"
           >
-            <div className="h-10 w-10 rounded-full bg-heritage/15 flex items-center justify-center flex-shrink-0 group-hover:bg-heritage/25 transition-colors">
+            <div className="h-10 w-10 bg-heritage/15 flex items-center justify-center flex-shrink-0 group-hover:bg-heritage/25 transition-colors">
               <r.Icon className="h-4 w-4 text-heritage-deep" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-0.5">
-                {r.eyebrow}
-              </div>
+              <Eyebrow className="text-heritage-deep mb-0.5">{r.eyebrow}</Eyebrow>
               <div className="text-[15px] font-extrabold tracking-[-0.2px] text-ink leading-tight">
                 For {r.label}
               </div>
@@ -344,7 +333,7 @@ function RelatedRoles({ config }: { config: RoleConfig }) {
       <div className="mt-8">
         <Link
           href="/for-candidates"
-          className="inline-flex items-center gap-2 text-[12px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-heritage-deep hover:text-ink transition-colors"
         >
           See all dental careers on DSO Hire
           <ArrowRight className="h-3.5 w-3.5" />
@@ -373,16 +362,16 @@ function FinalCta({
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[60vw] pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle, rgba(77,122,96,0.22), transparent 60%)",
+            "radial-gradient(circle, var(--heritage-glow), transparent 60%)",
           filter: "blur(50px)",
         }}
       />
       <div className="relative max-w-[760px] mx-auto">
         <div className="flex items-center justify-center gap-3.5 mb-6">
           <Sparkles className="h-4 w-4 text-heritage-deep" />
-          <span className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep">
+          <Eyebrow as="span" className="text-heritage-deep">
             Find your next {config.label.toLowerCase().replace(/s$/, "")} role
-          </span>
+          </Eyebrow>
         </div>
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-5">
           Ready to see what&apos;s open?
@@ -394,14 +383,14 @@ function FinalCta({
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Link
             href={config.jobsFilterHref}
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
           >
-            Browse {config.label} Roles
+            Browse {config.label} roles
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
             href={ctaHref}
-            className="inline-flex items-center px-9 py-[15px] bg-heritage text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-heritage-deep transition-colors"
+            className="inline-flex items-center px-9 py-[15px] bg-heritage text-primary-foreground text-sm font-bold hover:bg-heritage-deep transition-colors"
           >
             Create a Free Profile
           </Link>

@@ -32,15 +32,15 @@ function PricingNav() {
       <div className="flex items-center gap-6">
         <Link
           href="/"
-          className="hidden sm:inline-flex text-[12px] font-semibold tracking-[1.5px] uppercase text-slate-body hover:text-ink transition-colors"
+          className="hidden sm:inline-flex text-xs font-semibold text-slate-body hover:text-ink transition-colors"
         >
-          Back to Home
+          Back to home
         </Link>
         <Link
           href="/employer/sign-in"
-          className="text-[12px] font-semibold tracking-[1.5px] uppercase text-slate-body hover:text-ink transition-colors"
+          className="text-xs font-semibold text-slate-body hover:text-ink transition-colors"
         >
-          Sign In
+          Sign in
         </Link>
       </div>
     </nav>

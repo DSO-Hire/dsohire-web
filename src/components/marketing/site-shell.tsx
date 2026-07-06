@@ -13,6 +13,7 @@
  */
 
 import Link from "next/link";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { INFO_EMAIL as SUPPORT_EMAIL, INFO_MAILTO as SUPPORT_MAILTO } from "@/lib/contact";
 import { MobileMenu } from "./mobile-menu";
@@ -91,9 +92,9 @@ export async function SiteNav({
   // Signed-out default is candidate-first (Browse Jobs); DSO-buyer pages opt
   // into "Post a Job" via ctaIntent="dso".
   let primaryCtaHref = ctaIntent === "dso" ? "/pricing" : "/jobs";
-  let primaryCtaLabel = ctaIntent === "dso" ? "Post a Job" : "Browse Jobs";
+  let primaryCtaLabel = ctaIntent === "dso" ? "Post a job" : "Browse jobs";
   let signInHref: string = "/sign-in";
-  let signInLabel: string = "Sign In";
+  let signInLabel: string = "Sign in";
 
   if (user) {
     const [{ data: dsoUser }, { data: candidate }] = await Promise.all([
@@ -115,7 +116,7 @@ export async function SiteNav({
       // candidate-leaning page (where the signed-out default is Browse Jobs)
       // still gets their employer action.
       primaryCtaHref = "/employer/jobs/new";
-      primaryCtaLabel = "Post a Job";
+      primaryCtaLabel = "Post a job";
       signInHref = "/employer/dashboard";
       signInLabel = "Dashboard";
     } else if (candidate) {
@@ -123,7 +124,7 @@ export async function SiteNav({
       // "Post a Job" CTA for "Browse Jobs", and point Sign In at their
       // own dashboard.
       primaryCtaHref = "/jobs";
-      primaryCtaLabel = "Browse Jobs";
+      primaryCtaLabel = "Browse jobs";
       signInHref = "/candidate/dashboard";
       signInLabel = "Dashboard";
     }
@@ -144,7 +145,7 @@ export async function SiteNav({
             "Browse Jobs" — drop the redundant text link so it doesn't sit
             beside the button. On DSO pages (CTA = "Post a Job") the link
             stays, keeping Browse Jobs one click away. */}
-        {primaryCtaLabel !== "Browse Jobs" && (
+        {primaryCtaLabel !== "Browse jobs" && (
           <NavLink href="/jobs">Browse Jobs</NavLink>
         )}
         {/* #115 FOH (Cam, Day 31) — the proprietary wow-feature gets the nav
@@ -168,13 +169,13 @@ export async function SiteNav({
         <ThemeToggle className="hidden sm:inline-flex text-slate-body" />
         <Link
           href={signInHref}
-          className="hidden sm:inline-flex text-[12px] font-semibold tracking-[1.5px] uppercase text-slate-body hover:text-ink transition-colors"
+          className="hidden sm:inline-flex text-xs font-semibold text-slate-body hover:text-ink transition-colors"
         >
           {signInLabel}
         </Link>
         <Link
           href={primaryCtaHref}
-          className="px-5 py-2.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
+          className="px-5 py-2.5 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
         >
           {primaryCtaLabel}
         </Link>
@@ -199,7 +200,7 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
     <li>
       <Link
         href={href}
-        className="text-[12px] font-semibold tracking-[1.8px] uppercase text-slate-body hover:text-ink transition-colors"
+        className="text-xs font-semibold text-slate-body hover:text-ink transition-colors"
       >
         {children}
       </Link>
@@ -227,7 +228,7 @@ export function SiteFooter() {
             <FooterLink href="/switch">Switch to DSO Hire</FooterLink>
             <FooterLink href="/vs/job-boards">vs Job Boards</FooterLink>
             <FooterLink href="/vs/staffing-agencies">vs Staffing Agencies</FooterLink>
-            <FooterLink href="/employer/sign-in">Sign In</FooterLink>
+            <FooterLink href="/employer/sign-in">Sign in</FooterLink>
           </FooterCol>
 
           <FooterCol title="For Candidates">
@@ -293,9 +294,7 @@ export function SiteFooter() {
 function FooterCol({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <div className="text-[9px] font-bold tracking-[2.5px] uppercase text-heritage mb-5">
-        {title}
-      </div>
+      <Eyebrow className="text-heritage-bright mb-5">{title}</Eyebrow>
       <ul className="list-none flex flex-col gap-3">{children}</ul>
     </div>
   );

@@ -12,6 +12,7 @@
 
 import Link from "next/link";
 import { ArrowRight, Check, Minus } from "lucide-react";
+import { Eyebrow } from "@/components/brand/eyebrow";
 
 export interface VsRow {
   dimension: string;
@@ -30,8 +31,8 @@ export function VsHero({
 }) {
   return (
     <section className="pt-[140px] pb-14 px-6 sm:px-14 max-w-[1240px] mx-auto">
-      <div data-reveal className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
-        {eyebrow}
+      <div data-reveal>
+        <Eyebrow className="text-heritage-deep mb-3.5">{eyebrow}</Eyebrow>
       </div>
       <h1
         data-reveal
@@ -64,14 +65,14 @@ export function VsTable({
         <table className="w-full min-w-[680px] border-collapse bg-card">
           <thead>
             <tr className="bg-hero text-hero-foreground">
-              <th className="text-left px-6 py-4 text-[10px] font-bold tracking-[2.5px] uppercase w-[26%]">
-                What it means for you
+              <th className="text-left px-6 py-4 w-[26%]">
+                <Eyebrow className="text-hero-foreground">What it means for you</Eyebrow>
               </th>
-              <th className="text-left px-6 py-4 text-[10px] font-bold tracking-[2.5px] uppercase w-[37%] text-hero-foreground/70">
-                {themLabel}
+              <th className="text-left px-6 py-4 w-[37%]">
+                <Eyebrow className="text-hero-foreground/70">{themLabel}</Eyebrow>
               </th>
-              <th className="text-left px-6 py-4 text-[10px] font-bold tracking-[2.5px] uppercase w-[37%] text-[var(--heritage-bright,#8db8a3)]">
-                DSO Hire
+              <th className="text-left px-6 py-4 w-[37%]">
+                <Eyebrow className="text-heritage-bright">DSO Hire</Eyebrow>
               </th>
             </tr>
           </thead>
@@ -145,14 +146,14 @@ export function VsCta({ headline, sub }: { headline: string; sub: string }) {
         >
           <Link
             href="/pricing"
-            className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-ivory text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-ivory-deep transition-colors"
+            className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-ivory text-ink text-sm font-bold hover:bg-ivory-deep transition-colors"
           >
-            See Pricing
+            See pricing
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <Link
             href="/switch"
-            className="inline-flex items-center justify-center px-9 py-4 border border-hero-foreground/30 text-hero-foreground text-[12px] font-bold tracking-[2px] uppercase hover:border-hero-foreground hover:bg-hero-foreground/5 transition-colors"
+            className="inline-flex items-center justify-center px-9 py-4 border border-hero-foreground/30 text-hero-foreground text-xs font-semibold hover:border-hero-foreground hover:bg-hero-foreground/5 transition-colors"
           >
             Free Migration
           </Link>
