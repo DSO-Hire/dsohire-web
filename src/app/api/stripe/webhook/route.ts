@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
 
       case "invoice.payment_succeeded":
       case "invoice.payment_failed":
-        await handleInvoiceEvent(event.data.object, event.type);
+        await handleInvoiceEvent(event.data.object, event.type, event.created);
         break;
 
       default:
@@ -103,6 +103,14 @@ export async function POST(req: NextRequest) {
 }
 
 class TransientWebhookError extends Error {}
+
+// How long we keep telling Stripe to retry an event whose subscription row
+// hasn't appeared yet. Genuine out-of-order races (first invoice landing
+// before checkout.session.completed) resolve in minutes; anything still
+// unresolved after this window is an orphan (e.g. a test-mode subscription
+// whose DSO was wiped by a demo reseed) and must be 200'd — otherwise the
+// endpoint 500s for days and Stripe disables it.
+const UNRECOVERABLE_AFTER_MS = 24 * 60 * 60 * 1000;
 
 /* ───────────────────────────────────────────────────────────────
  * Handlers
@@ -222,7 +230,8 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription): Pro
 
 async function handleInvoiceEvent(
   invoice: Stripe.Invoice,
-  eventType: "invoice.payment_succeeded" | "invoice.payment_failed"
+  eventType: "invoice.payment_succeeded" | "invoice.payment_failed",
+  eventCreated: number // unix seconds — Stripe keeps this constant across retries
 ): Promise<void> {
   const stripeSubId = getInvoiceSubscriptionId(invoice);
   if (!stripeSubId) return;
@@ -238,7 +247,21 @@ async function handleInvoiceEvent(
 
   if (!subRow) {
     // Subscription row may not exist yet on the very first invoice if events
-    // arrive out of order — this is transient, ask Stripe to retry.
+    // arrive out of order — that is transient, ask Stripe to retry. But bound
+    // the window: Stripe retries the SAME event (same `created`) for days, so
+    // an orphaned subscription (DSO deleted while the Stripe sub lives on)
+    // would otherwise 500 forever. Root-caused 2026-07-06: demo reseeds wiped
+    // DSOs whose test-mode subs kept renewing → retry loop → Stripe threatened
+    // to disable the endpoint.
+    const ageMs = Date.now() - eventCreated * 1000;
+    if (ageMs > UNRECOVERABLE_AFTER_MS) {
+      console.error(
+        `[stripe-webhook] no subscription row for stripe_subscription_id=${stripeSubId} ` +
+          `after ~${Math.round(ageMs / 3_600_000)}h of retries — unrecoverable ` +
+          `(orphaned sub? consider canceling it in Stripe). Returning 200.`
+      );
+      return;
+    }
     throw new TransientWebhookError(
       `Subscription row not found for stripe_subscription_id=${stripeSubId}`
     );
@@ -344,7 +367,22 @@ async function upsertSubscription(params: UpsertParams): Promise<void> {
     },
     { onConflict: "dso_id" }
   );
-  if (error) throw new TransientWebhookError(error.message);
+  if (error) {
+    if (error.code === "23503") {
+      // Foreign-key violation on dso_id: the DSO this Stripe subscription
+      // points at no longer exists (root-caused 2026-07-06: demo reseeds
+      // deleted DSOs whose test-mode subscriptions kept renewing in Stripe).
+      // Permanently unrecoverable — log and return 200 so Stripe stops
+      // retrying; throwing transient here 500s on every retry until Stripe
+      // disables the whole endpoint.
+      console.error(
+        `[stripe-webhook] dso ${dsoId} no longer exists for stripe sub ${subscription.id} — ` +
+          `skipping sync (orphaned subscription; consider canceling it in Stripe).`
+      );
+      return;
+    }
+    throw new TransientWebhookError(error.message);
+  }
 
   // Auto-activate the DSO on a successful subscription so a paying customer is
   // never stuck waiting on a manual founder click (decision 2026-06-22). Guard
