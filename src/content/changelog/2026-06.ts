@@ -7,6 +7,12 @@ import type { ChangelogEntry } from "./index";
 
 export const entries: ChangelogEntry[] = [
   {
+    date: "2026-06-29",
+    kind: "new",
+    title: "You're in control of who can find you",
+    body: "Candidates are now private by default. Right after you sign up, you choose how discoverable you want to be — stay private, be discoverable to verified employers with your name, or be discoverable but anonymous (employers see your experience, skills, and fit, never your name or photo, until you apply or choose to reveal). You can change it anytime in Settings, and your contact info and résumé always stay hidden until you apply.",
+  },
+  {
     date: "2026-06-19",
     kind: "new",
     title: "Dark mode",
