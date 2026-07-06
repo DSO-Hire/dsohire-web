@@ -21,6 +21,7 @@
 
 import { Sparkles } from "lucide-react";
 import { canonicalizeRoleCategory } from "@/lib/practice-fit/role-canonicalize";
+import { Tag } from "@/components/brand/tag";
 
 /**
  * Reason a PracticeFit chip is showing as a placeholder rather than a
@@ -72,12 +73,9 @@ export function PracticeFitPlaceholder({
       ? "This role isn't in your role preferences, so PracticeFit can't compare it. Update your preferred roles in your profile if your goals have changed."
       : "PracticeFit isn't ready for this pair yet. Add more to your profile to give us more to work with, or check back in a moment.";
   return (
-    <span
-      className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
-      title={tooltip}
-    >
+    <Tag tone="neutral" title={tooltip}>
       <Sparkles className="size-3" />
       {label}
-    </span>
+    </Tag>
   );
 }

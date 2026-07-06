@@ -7,8 +7,10 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { Trash2, Loader2, Tag } from "lucide-react";
+import { Trash2, Loader2, Tag as TagIcon } from "lucide-react";
 import { removeCandidateFromPool, updatePoolEntry } from "./actions";
+import { Eyebrow } from "@/components/brand/eyebrow";
+import { Tag } from "@/components/brand/tag";
 
 interface SavedEntryCardProps {
   entryId: string;
@@ -121,7 +123,7 @@ export function SavedEntryCard({
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-slate-meta mb-3">
           {currentTitle && <span>{currentTitle}</span>}
           {yearsExperience !== null && (
-            <span>
+            <span className="tabular">
               {yearsExperience} yr{yearsExperience === 1 ? "" : "s"} exp
             </span>
           )}
@@ -130,21 +132,16 @@ export function SavedEntryCard({
         {tags && tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-3">
             {tags.map((t) => (
-              <span
-                key={t}
-                className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold text-heritage-deep border border-[var(--rule)] bg-cream/60"
-              >
-                <Tag className="h-2.5 w-2.5" aria-hidden />
+              <Tag key={t} tone="neutral">
+                <TagIcon aria-hidden />
                 {t}
-              </span>
+              </Tag>
             ))}
           </div>
         )}
 
         <div className="relative z-10 mt-2 border-t border-[var(--rule)] pt-3">
-          <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
-            Notes
-          </div>
+          <Eyebrow className="mb-1.5">Notes</Eyebrow>
           {editingNotes ? (
             <div className="space-y-2">
               <textarea
@@ -158,7 +155,7 @@ export function SavedEntryCard({
                   type="button"
                   onClick={handleSaveNotes}
                   disabled={pending}
-                  className="px-3 py-1.5 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
+                  className="px-3 py-1.5 bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 disabled:opacity-60"
                 >
                   Save
                 </button>

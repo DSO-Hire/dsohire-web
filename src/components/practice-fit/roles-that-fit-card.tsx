@@ -8,6 +8,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { DsoFitWordmark } from "@/components/practice-fit/brand/dsofit-wordmark";
 import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
 import type { RoleThatFits } from "@/lib/practice-fit/roles-that-fit";
@@ -53,9 +54,9 @@ export function RolesThatFitCard({
     <section className="mb-6">
       <div className="flex items-end justify-between gap-4 mb-3">
         <div className="flex items-center gap-2 text-heritage-deep">
-          <span className="text-[10px] font-bold tracking-[2.5px] uppercase">
+          <Eyebrow as="span" className="text-heritage-deep">
             Roles that fit you ·
-          </span>
+          </Eyebrow>
           {product === "dsofit" ? (
             <DsoFitWordmark surface="light" className="text-[14px]" />
           ) : (
@@ -64,7 +65,7 @@ export function RolesThatFitCard({
         </div>
         <Link
           href="/candidate/jobs"
-          className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage hover:text-heritage-deep transition-colors"
+          className="text-xs font-semibold text-heritage hover:text-heritage-deep transition-colors"
         >
           Browse all
         </Link>
@@ -92,7 +93,7 @@ export function RolesThatFitCard({
                     {chips.map((c) => (
                       <span
                         key={c}
-                        className="inline-flex items-center px-1.5 py-0.5 bg-heritage/10 text-heritage-deep text-[9.5px] font-bold tracking-[0.6px] uppercase"
+                        className="inline-flex items-center px-1.5 py-0.5 bg-heritage/10 text-heritage-deep text-[10px] font-semibold"
                       >
                         {c}
                       </span>

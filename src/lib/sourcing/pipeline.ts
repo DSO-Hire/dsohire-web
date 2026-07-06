@@ -49,9 +49,9 @@ export const PROSPECT_BOARD_STAGES: ProspectStage[] = [
 export const PROSPECT_STAGE_ACCENT: Record<ProspectStage, string> = {
   sourced: "text-slate-meta",
   contacted: "text-heritage-deep",
-  responded: "text-amber-600",
+  responded: "text-warning",
   nurturing: "text-heritage-deep",
-  converted: "text-emerald-600",
+  converted: "text-heritage",
   archived: "text-slate-meta",
 };
 

@@ -8,6 +8,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { enrollProspectInSequence } from "@/lib/sequences/actions";
+import { Eyebrow } from "@/components/brand/eyebrow";
 
 export function EnrollControl({
   candidateId,
@@ -35,9 +36,7 @@ export function EnrollControl({
 
   return (
     <div className="mt-4 flex flex-wrap items-center gap-2">
-      <span className="text-[11px] font-bold uppercase tracking-[1px] text-slate-meta">
-        Nurture
-      </span>
+      <Eyebrow as="span">Nurture</Eyebrow>
       <select
         value={sequenceId}
         onChange={(e) => setSequenceId(e.target.value)}
@@ -54,7 +53,7 @@ export function EnrollControl({
         type="button"
         onClick={enroll}
         disabled={pending || !sequenceId}
-        className="border border-heritage-deep px-3 py-1.5 text-[12px] font-bold uppercase tracking-[1px] text-heritage-deep hover:bg-cream/60 disabled:opacity-40"
+        className="border border-heritage-deep px-3 py-1.5 text-xs font-semibold text-heritage-deep hover:bg-cream/60 disabled:opacity-40"
       >
         Enroll
       </button>

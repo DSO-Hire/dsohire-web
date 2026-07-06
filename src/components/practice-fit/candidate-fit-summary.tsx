@@ -27,6 +27,7 @@
 import Link from "next/link";
 import { ArrowRight, Plus } from "lucide-react";
 import { FitWordmark, FitMark } from "@/components/practice-fit/brand/fit-wordmark";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { bucketStyle } from "@/lib/practice-fit/buckets";
 import type { FitDimensionKey, FitResult } from "@/lib/practice-fit/types";
 
@@ -178,17 +179,17 @@ export function CandidateFitSummary({
         <div className="flex items-start gap-5 flex-wrap">
           {/* Best fit headline */}
           <div className="flex-1 min-w-[260px]">
-            <p className="text-[11px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-2">
+            <p className="text-xs font-semibold text-slate-meta mb-2">
               Best fit · jobs you&apos;ve applied to
             </p>
             <div className="flex items-center gap-2 mb-1">
               <span
-                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-bold tracking-wider uppercase ${bestStyle.bgClass} ${bestStyle.textClass} ${bestStyle.borderClass}`}
+                className={`inline-flex items-center gap-1.5 border border-l-2 px-3 py-1 text-xs font-semibold ${bestStyle.bgClass} ${bestStyle.textClass} ${bestStyle.borderClass}`}
               >
                 <FitMark product={best.product} className="h-3 w-3" />
                 {bestStyle.label}
               </span>
-              <span className="text-[12px] font-mono text-slate-meta">
+              <span className="text-[12px] tabular text-slate-meta">
                 {best.score}/100
               </span>
             </div>
@@ -200,16 +201,16 @@ export function CandidateFitSummary({
           {/* Average across active apps */}
           {scoredFits.length > 1 && (
             <div className="min-w-[140px]">
-              <p className="text-[11px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-2">
+              <p className="text-xs font-semibold text-slate-meta mb-2">
                 Average across active apps
               </p>
-              <p className="text-[28px] font-extrabold text-ink leading-none">
+              <p className="text-[28px] font-extrabold text-ink leading-none tabular">
                 {avgScore}
-                <span className="text-[14px] font-mono text-slate-meta ml-1">
+                <span className="text-[14px] tabular text-slate-meta ml-1">
                   /100
                 </span>
               </p>
-              <p className="text-[11px] text-slate-meta mt-1">
+              <p className="text-[11px] text-slate-meta mt-1 tabular">
                 {scoredFits.length} of {totalActiveApps} apps scored
               </p>
             </div>
@@ -221,9 +222,9 @@ export function CandidateFitSummary({
             gaps the candidate can act on. */}
         {topGaps.length > 0 && (
           <div className="mt-5 pt-4 border-t border-[var(--rule)]">
-            <p className="text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-1">
+            <Eyebrow as="p" className="text-heritage-deep mb-1">
               Lift your match
-            </p>
+            </Eyebrow>
             <p className="text-[12px] text-slate-meta mb-3">
               Each one sharpens your {best.product === "dsofit" ? "DSOFit" : "PracticeFit"} on
               every role you apply to.
@@ -257,7 +258,7 @@ function SectionHeader({ product }: { product?: "practicefit" | "dsofit" }) {
       </div>
       <Link
         href="/candidate/settings/privacy"
-        className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage hover:text-heritage-deep transition-colors"
+        className="text-xs font-semibold text-heritage hover:text-heritage-deep transition-colors"
       >
         Manage privacy
       </Link>

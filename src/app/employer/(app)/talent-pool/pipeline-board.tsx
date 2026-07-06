@@ -31,6 +31,7 @@ import {
   type ProspectCard,
   type ProspectStage,
 } from "@/lib/sourcing/pipeline";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { moveProspectStage } from "./pipeline-actions";
 
 export function PipelineBoard({ initial }: { initial: ProspectCard[] }) {
@@ -134,15 +135,10 @@ function Column({
       }
     >
       <div className="flex items-center justify-between px-1 py-1.5 mb-1">
-        <span
-          className={
-            "text-[10px] font-bold tracking-[1.5px] uppercase " +
-            PROSPECT_STAGE_ACCENT[stage]
-          }
-        >
+        <Eyebrow as="span" className={PROSPECT_STAGE_ACCENT[stage]}>
           {PROSPECT_STAGE_LABELS[stage]}
-        </span>
-        <span className="text-[11px] text-slate-meta">{cards.length}</span>
+        </Eyebrow>
+        <span className="text-[11px] text-slate-meta tabular">{cards.length}</span>
       </div>
       <div className="space-y-2">
         {cards.map((c) => (
@@ -197,7 +193,7 @@ function Card({ card, overlay }: { card: ProspectCard; overlay?: boolean }) {
               {card.currentTitle ?? card.headline}
             </p>
           )}
-          <p className="text-[11px] text-slate-meta mt-0.5">
+          <p className="text-[11px] text-slate-meta mt-0.5 tabular">
             {[
               card.location,
               card.yearsExperience != null
@@ -211,7 +207,7 @@ function Card({ card, overlay }: { card: ProspectCard; overlay?: boolean }) {
       </div>
       <div className="mt-2 flex items-center gap-2 flex-wrap">
         {card.applied && (
-          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600">
+          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-heritage">
             <CheckCircle2 className="h-3 w-3" /> Applied
           </span>
         )}
@@ -221,7 +217,7 @@ function Card({ card, overlay }: { card: ProspectCard; overlay?: boolean }) {
         {card.tags?.slice(0, 2).map((t) => (
           <span
             key={t}
-            className="rounded-full bg-cream px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.5px] text-slate-body"
+            className="bg-cream px-2 py-0.5 text-[10px] font-semibold text-slate-body"
           >
             {t}
           </span>
@@ -231,7 +227,7 @@ function Card({ card, overlay }: { card: ProspectCard; overlay?: boolean }) {
           <a
             href={`/employer/talent-pool/prospects/${card.candidateId}`}
             onPointerDown={(e) => e.stopPropagation()}
-            className="text-[10px] font-bold uppercase tracking-[0.5px] text-heritage-deep hover:text-ink"
+            className="text-[10px] font-semibold text-heritage-deep hover:text-ink"
           >
             Message →
           </a>

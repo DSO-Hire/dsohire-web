@@ -20,6 +20,7 @@ import { redirect } from "next/navigation";
 import { Users, Bookmark, Search, KanbanSquare } from "lucide-react";
 import type { Metadata } from "next";
 import { HelpDisclosure } from "@/components/help/help-disclosure";
+import { Eyebrow } from "@/components/brand/eyebrow";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { DiscoverFilters } from "./discover-filters";
 import { CandidateResultCard } from "./candidate-result-card";
@@ -446,9 +447,7 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
   return (
     <>
       <header className="mb-8 max-w-[820px]">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
-          Talent Pool
-        </div>
+        <Eyebrow className="mb-2">Talent pool</Eyebrow>
         <h1 className="font-display text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-3">
           Find candidates before they apply.
         </h1>
@@ -468,7 +467,8 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
           <Search className="h-3.5 w-3.5" /> Discover
         </TabLink>
         <TabLink active={tab === "saved"} href="/employer/talent-pool?tab=saved">
-          <Bookmark className="h-3.5 w-3.5" /> Saved ({savedEntries.length})
+          <Bookmark className="h-3.5 w-3.5" /> Saved (
+          <span className="tabular">{savedEntries.length}</span>)
         </TabLink>
         <TabLink
           active={tab === "pipeline"}
@@ -542,7 +542,7 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
               </select>
               <button
                 type="submit"
-                className="px-3 py-1 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
+                className="px-3 py-1 bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90"
               >
                 Apply
               </button>
@@ -557,7 +557,7 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
             </form>
           )}
 
-          <div className="mt-6 mb-4 text-[12px] text-slate-meta">
+          <div className="mt-6 mb-4 text-[12px] text-slate-meta tabular">
             {discoverResults.length === 0
               ? "No candidates match these filters."
               : `${discoverResults.length} candidate${discoverResults.length === 1 ? "" : "s"} shown${discoverTotal > discoverResults.length ? ` of ${discoverTotal} total` : ""}${fitJobSelected ? ` · ranked by fit against ${fitJobSelected.title}` : ""}`}
@@ -662,7 +662,7 @@ function TabLink({
     <Link
       href={href}
       className={
-        "inline-flex items-center gap-2 pb-3 -mb-px border-b-2 text-[11px] font-bold tracking-[1.5px] uppercase transition-colors " +
+        "inline-flex items-center gap-2 pb-3 -mb-px border-b-2 text-xs font-semibold transition-colors " +
         (active
           ? "border-heritage text-ink"
           : "border-transparent text-slate-meta hover:text-ink")
@@ -681,8 +681,9 @@ function EmptyDiscoverState() {
         aria-hidden
       />
       <p className="text-[14px] text-slate-body leading-relaxed max-w-[480px] mx-auto">
-        No candidates yet match these filters. As more candidates opt
-        into discoverability, this pool grows.
+        No candidates match these filters yet. Widen the search radius or
+        relax a credential filter — the pool grows as more clinicians opt
+        into discoverability.
       </p>
     </div>
   );

@@ -38,8 +38,8 @@ export interface BucketStyle {
  * DSOFit a HERITAGE-green ramp; in both, a darker shade = a stronger match.
  * So a talent-pool scan reads at a glance: navy chip = practice-level fit,
  * green chip = DSO/corporate fit, deeper color = better. Light/Low fall to
- * neutral slate in both (a weak match isn't "branded"). Always paired with a
- * track label/mark on the chip so color never carries the meaning alone.
+ * neutral ink-scale in both (a weak match isn't "branded"). Always paired with
+ * a track label/mark on the chip so color never carries the meaning alone.
  */
 const TAGLINES: Record<FitBucket, { label: string; tagline: string }> = {
   excellent: { label: "Excellent fit", tagline: "Hits every must-have." },
@@ -56,8 +56,8 @@ export const PRACTICEFIT_BUCKET_STYLES: Record<FitBucket, BucketStyle> = {
   excellent: { ...TAGLINES.excellent, bgClass: "bg-ink", textClass: "text-ivory", borderClass: "border-ink" },
   strong: { ...TAGLINES.strong, bgClass: "bg-ink/15", textClass: "text-ink", borderClass: "border-ink/40" },
   solid: { ...TAGLINES.solid, bgClass: "bg-ink/5", textClass: "text-ink/80", borderClass: "border-ink/20" },
-  light: { ...TAGLINES.light, bgClass: "bg-slate-100 dark:bg-slate-400/15", textClass: "text-slate-700 dark:text-slate-300", borderClass: "border-slate-200 dark:border-slate-400/30" },
-  low: { ...TAGLINES.low, bgClass: "bg-slate-50 dark:bg-slate-400/10", textClass: "text-slate-500 dark:text-slate-400", borderClass: "border-slate-200 dark:border-slate-400/30" },
+  light: { ...TAGLINES.light, bgClass: "bg-ink/10", textClass: "text-ink/70", borderClass: "border-ink/20" },
+  low: { ...TAGLINES.low, bgClass: "bg-ink/5", textClass: "text-ink/50", borderClass: "border-ink/15" },
 };
 
 /** DSOFit — heritage-green ramp (DSO / corporate roles). */
@@ -65,8 +65,8 @@ export const DSOFIT_BUCKET_STYLES: Record<FitBucket, BucketStyle> = {
   excellent: { ...TAGLINES.excellent, bgClass: "bg-heritage-deep", textClass: "text-ivory", borderClass: "border-heritage-deep" },
   strong: { ...TAGLINES.strong, bgClass: "bg-heritage/20", textClass: "text-heritage-deep", borderClass: "border-heritage/40" },
   solid: { ...TAGLINES.solid, bgClass: "bg-heritage/10", textClass: "text-heritage-deep", borderClass: "border-heritage/25" },
-  light: { ...TAGLINES.light, bgClass: "bg-slate-100 dark:bg-slate-400/15", textClass: "text-slate-700 dark:text-slate-300", borderClass: "border-slate-200 dark:border-slate-400/30" },
-  low: { ...TAGLINES.low, bgClass: "bg-slate-50 dark:bg-slate-400/10", textClass: "text-slate-500 dark:text-slate-400", borderClass: "border-slate-200 dark:border-slate-400/30" },
+  light: { ...TAGLINES.light, bgClass: "bg-ink/10", textClass: "text-ink/70", borderClass: "border-ink/20" },
+  low: { ...TAGLINES.low, bgClass: "bg-ink/5", textClass: "text-ink/50", borderClass: "border-ink/15" },
 };
 
 /** The right ramp for a result's product. Defaults to PracticeFit (navy). */

@@ -64,7 +64,7 @@ export function ProspectComposer({ candidateId }: { candidateId: string }) {
           type="button"
           onClick={send}
           disabled={pending || !body.trim()}
-          className="bg-primary px-4 py-2 text-[12px] font-bold uppercase tracking-[1px] text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
+          className="bg-primary px-4 py-2 text-sm font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
         >
           {pending ? "Sending…" : "Send"}
         </button>

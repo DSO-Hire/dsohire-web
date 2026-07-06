@@ -9,6 +9,8 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { FitWordmark } from "@/components/practice-fit/brand/fit-wordmark";
+import { Eyebrow } from "@/components/brand/eyebrow";
+import { Tag } from "@/components/brand/tag";
 import { bucketStyle } from "@/lib/practice-fit/buckets";
 import type { SmartPick } from "@/lib/talent-pool/smart-picks";
 import { SmartPicksSaveButton } from "./smart-picks-save-button";
@@ -30,16 +32,16 @@ export function SmartPicksCard({ picks }: SmartPicksCardProps) {
     <section className="mb-10 border border-[var(--rule)] bg-card">
       <header className="px-6 py-4 border-b border-[var(--rule)] flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
         <div className="flex items-center gap-2 text-heritage-deep">
-          <span className="text-[10px] font-bold tracking-[2.5px] uppercase">
+          <Eyebrow as="span" className="text-heritage-deep">
             Smart picks ·
-          </span>
+          </Eyebrow>
           {/* surface="light" renders the proper dual-tone lockup; "inherit"
               made it pick up the parent heritage-green (flat one-color). */}
           <FitWordmark product={product} surface="light" className="text-[14px]" />
         </div>
         <Link
           href="/employer/talent-pool"
-          className="text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink inline-flex items-center gap-1"
+          className="text-xs font-semibold text-heritage-deep hover:text-ink inline-flex items-center gap-1"
         >
           Open talent pool <ArrowRight className="h-3 w-3" />
         </Link>
@@ -73,7 +75,7 @@ export function SmartPicksCard({ picks }: SmartPicksCardProps) {
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-slate-meta mt-1">
                   {p.current_title && <span>{p.current_title}</span>}
                   {p.years_experience !== null && (
-                    <span>
+                    <span className="tabular">
                       {p.years_experience} yr
                       {p.years_experience === 1 ? "" : "s"} exp
                     </span>
@@ -83,12 +85,10 @@ export function SmartPicksCard({ picks }: SmartPicksCardProps) {
 
               <div className="flex flex-col items-end gap-1.5 shrink-0">
                 <div className="flex items-center gap-2">
-                  <span
-                    className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-bold ${style.bgClass} ${style.textClass} ${style.borderClass}`}
-                  >
+                  <Tag className={`border ${style.bgClass} ${style.textClass} ${style.borderClass}`}>
                     {style.label}
-                  </span>
-                  <span className="tabular-nums font-extrabold text-ink text-[14px]">
+                  </Tag>
+                  <span className="tabular font-extrabold text-ink text-[14px]">
                     {/* FOH-9 — fit scores assemble on view (snappy 600ms). */}
                     <CountUp to={Math.round(p.fit.score)} duration={600} />
                   </span>

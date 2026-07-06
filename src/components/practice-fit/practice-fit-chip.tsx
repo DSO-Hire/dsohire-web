@@ -42,13 +42,13 @@ export function PracticeFitChip({
   if (size === "sm") {
     return (
       <span
-        className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${style.bgClass} ${style.textClass} ${style.borderClass}`}
+        className={`inline-flex items-center gap-1 border border-l-2 px-2 py-0.5 text-[10px] font-semibold ${style.bgClass} ${style.textClass} ${style.borderClass}`}
         title={buildChipTooltip(fit, style.label, brand)}
       >
         {mark}
         {style.label}
         {showScore && (
-          <span className="font-mono text-[9px] opacity-70">{fit.score}</span>
+          <span className="tabular text-[9px] opacity-70">{fit.score}</span>
         )}
       </span>
     );
@@ -56,13 +56,13 @@ export function PracticeFitChip({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-bold tracking-wider uppercase ${style.bgClass} ${style.textClass} ${style.borderClass}`}
+      className={`inline-flex items-center gap-1.5 border border-l-2 px-3 py-1 text-xs font-semibold ${style.bgClass} ${style.textClass} ${style.borderClass}`}
       title={buildChipTooltip(fit, style.label, brand)}
     >
       {mark}
       {brand} · {style.label}
       {showScore && (
-        <span className="font-mono text-[10px] opacity-70">
+        <span className="tabular text-[10px] opacity-70">
           {fit.score}/100
         </span>
       )}

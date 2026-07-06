@@ -25,6 +25,7 @@ import { useState, useTransition } from "react";
 import { Check, Loader2 } from "lucide-react";
 import { updateInlineDim } from "@/lib/practice-fit/inline-edit-action";
 import type { FitDimensionKey } from "@/lib/practice-fit/types";
+import { Eyebrow } from "@/components/brand/eyebrow";
 
 export interface InlineDimEditorProps {
   dimKey: FitDimensionKey;
@@ -85,9 +86,9 @@ export function InlineDimEditor({ dimKey }: InlineDimEditorProps) {
         {dimKey === "compensation" && (
           <>
             <div className="flex-1 min-w-[120px]">
-              <label className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1">
+              <Eyebrow as="label" className="block mb-1">
                 Minimum
-              </label>
+              </Eyebrow>
               <input
                 type="number"
                 value={minSalary}
@@ -97,9 +98,9 @@ export function InlineDimEditor({ dimKey }: InlineDimEditorProps) {
               />
             </div>
             <div className="min-w-[120px]">
-              <label className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1">
+              <Eyebrow as="label" className="block mb-1">
                 Per
-              </label>
+              </Eyebrow>
               <select
                 value={salaryUnit}
                 onChange={(e) => setSalaryUnit(e.target.value)}
@@ -116,9 +117,9 @@ export function InlineDimEditor({ dimKey }: InlineDimEditorProps) {
 
         {dimKey === "years_experience" && (
           <div className="flex-1 min-w-[100px]">
-            <label className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1">
+            <Eyebrow as="label" className="block mb-1">
               Years
-            </label>
+            </Eyebrow>
             <input
               type="number"
               min={0}
@@ -133,9 +134,9 @@ export function InlineDimEditor({ dimKey }: InlineDimEditorProps) {
 
         {dimKey === "employment_type" && (
           <div className="flex-1 min-w-[200px]">
-            <label className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1">
+            <Eyebrow as="label" className="block mb-1">
               I want
-            </label>
+            </Eyebrow>
             <div className="flex flex-wrap gap-1.5">
               {[
                 { value: "perm", label: "Permanent" },
@@ -148,7 +149,7 @@ export function InlineDimEditor({ dimKey }: InlineDimEditorProps) {
                   onClick={() => setTempOrPerm(opt.value)}
                   className={`px-2.5 py-1 text-[11px] font-medium border transition-colors ${
                     tempOrPerm === opt.value
-                      ? "bg-heritage-deep text-primary-foreground border-heritage-deep"
+                      ? "border-heritage text-heritage-deep shadow-[inset_0_0_0_1px_var(--color-heritage)] bg-card"
                       : "bg-card text-ink border-[var(--rule)] hover:border-heritage"
                   }`}
                 >
@@ -161,9 +162,9 @@ export function InlineDimEditor({ dimKey }: InlineDimEditorProps) {
 
         {dimKey === "dso_size" && (
           <div className="flex-1 min-w-[240px]">
-            <label className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1">
+            <Eyebrow as="label" className="block mb-1">
               I prefer
-            </label>
+            </Eyebrow>
             <div className="flex flex-wrap gap-1.5">
               {[
                 { value: "small", label: "Small (1-9)" },
@@ -177,7 +178,7 @@ export function InlineDimEditor({ dimKey }: InlineDimEditorProps) {
                   onClick={() => setDsoSize(opt.value)}
                   className={`px-2.5 py-1 text-[11px] font-medium border transition-colors ${
                     dsoSize === opt.value
-                      ? "bg-heritage-deep text-primary-foreground border-heritage-deep"
+                      ? "border-heritage text-heritage-deep shadow-[inset_0_0_0_1px_var(--color-heritage)] bg-card"
                       : "bg-card text-ink border-[var(--rule)] hover:border-heritage"
                   }`}
                 >
@@ -192,7 +193,7 @@ export function InlineDimEditor({ dimKey }: InlineDimEditorProps) {
           type="button"
           onClick={handleSave}
           disabled={pending || saved}
-          className="px-3 py-1.5 text-[10px] font-bold tracking-[1.5px] uppercase bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-1.5"
+          className="px-3 py-1.5 text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-1.5"
         >
           {pending && <Loader2 className="h-3 w-3 animate-spin" />}
           {saved && <Check className="h-3 w-3" />}

@@ -14,6 +14,7 @@ import {
   removeCandidateFromPool,
 } from "./actions";
 import { CERTIFICATION_KINDS } from "@/lib/candidate/canonical-lists";
+import { Tag, type TagTone } from "@/components/brand/tag";
 
 const CERT_LABEL: Record<string, string> = Object.fromEntries(
   CERTIFICATION_KINDS.map((c) => [c.value, c.label])
@@ -55,12 +56,12 @@ const FIT_BUCKET_LABEL: Record<string, string> = {
   low: "Low fit",
 };
 
-const FIT_BUCKET_COLOR: Record<string, string> = {
-  excellent: "bg-heritage/15 text-heritage-deep ring-heritage/30",
-  strong: "bg-success-bg text-success ring-success/40",
-  solid: "bg-info-bg text-info ring-info",
-  light: "bg-warning-bg text-warning ring-warning/40",
-  low: "bg-muted text-muted-foreground ring-border",
+const FIT_BUCKET_TONE: Record<string, TagTone> = {
+  excellent: "heritage",
+  strong: "success",
+  solid: "info",
+  light: "warning",
+  low: "neutral",
 };
 
 const AVAILABILITY_LABELS: Record<string, string> = {
@@ -134,7 +135,7 @@ export function CandidateResultCard({
             onClick={handleToggle}
             disabled={pending}
             className={
-              "relative z-10 inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold tracking-[1.5px] uppercase border transition-colors shrink-0 disabled:opacity-60 " +
+              "relative z-10 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border transition-colors shrink-0 disabled:opacity-60 " +
               (saved
                 ? "bg-heritage text-primary-foreground border-heritage hover:bg-heritage-deep"
                 : "bg-card text-ink border-border hover:bg-cream")
@@ -153,15 +154,11 @@ export function CandidateResultCard({
 
         {(fitScore !== null && fitBucket) && (
           <div className="mb-1.5">
-            <span
-              className={`inline-flex items-center gap-1 rounded-full ring-1 px-2 py-0.5 text-[11px] font-bold tracking-[1px] uppercase ${
-                FIT_BUCKET_COLOR[fitBucket] ?? FIT_BUCKET_COLOR.low
-              }`}
-            >
-              <span>{fitScore}</span>
+            <Tag tone={FIT_BUCKET_TONE[fitBucket] ?? "neutral"} accent>
+              <span className="tabular">{fitScore}</span>
               <span aria-hidden>·</span>
               <span>{FIT_BUCKET_LABEL[fitBucket] ?? "Fit"}</span>
-            </span>
+            </Tag>
           </div>
         )}
         {headline && (
@@ -170,7 +167,7 @@ export function CandidateResultCard({
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-slate-meta">
           {currentTitle && <span>{currentTitle}</span>}
           {yearsExperience !== null && (
-            <span>
+            <span className="tabular">
               {yearsExperience} yr{yearsExperience === 1 ? "" : "s"} exp
             </span>
           )}
@@ -182,7 +179,7 @@ export function CandidateResultCard({
             </span>
           )}
           {availability && AVAILABILITY_LABELS[availability] && (
-            <span className="text-heritage-deep font-semibold">
+            <span className="text-ink font-semibold">
               {AVAILABILITY_LABELS[availability]}
             </span>
           )}
@@ -201,7 +198,7 @@ export function CandidateResultCard({
             {certKinds.slice(0, 5).map((k) => (
               <span
                 key={`cert-${k}`}
-                className="inline-flex items-center px-2 py-0.5 bg-heritage/10 border border-heritage/30 text-[10px] font-semibold tracking-[0.3px] text-heritage-deep"
+                className="inline-flex items-center px-2 py-0.5 bg-cream border border-[var(--rule-strong)] text-[10px] font-semibold tracking-[0.3px] text-ink"
               >
                 {CERT_LABEL[k] ?? k}
               </span>

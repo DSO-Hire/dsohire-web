@@ -18,6 +18,7 @@ import { Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { PMS_SYSTEMS, CERTIFICATION_KINDS } from "@/lib/candidate/canonical-lists";
+import { Eyebrow } from "@/components/brand/eyebrow";
 
 interface DiscoverFiltersProps {
   initial: {
@@ -187,7 +188,7 @@ export function DiscoverFilters({ initial, roleOptions }: DiscoverFiltersProps) 
       <div className="flex items-center gap-3 pt-1">
         <button
           type="submit"
-          className="inline-flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
+          className="inline-flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
         >
           <Search className="h-3.5 w-3.5" />
           Search
@@ -223,11 +224,9 @@ function ChipGroup({
   return (
     <div>
       <div className="flex items-baseline gap-2 mb-1.5">
-        <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
-          {label}
-        </span>
+        <Eyebrow as="span">{label}</Eyebrow>
         {selected.length > 0 && (
-          <span className="text-[10px] font-semibold text-heritage-deep">
+          <span className="text-[10px] font-semibold text-heritage-deep tabular">
             {selected.length} selected
           </span>
         )}
@@ -245,7 +244,7 @@ function ChipGroup({
               className={
                 "px-2.5 py-1 text-[12px] border transition-colors " +
                 (on
-                  ? "bg-heritage text-primary-foreground border-heritage"
+                  ? "bg-cream text-heritage-deep font-semibold border-heritage shadow-[inset_0_-2px_0_0_var(--heritage)]"
                   : "bg-cream text-ink border-[var(--rule-strong)] hover:border-heritage")
               }
             >
@@ -275,9 +274,9 @@ function FilterField({
 }) {
   return (
     <label className="block">
-      <span className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1">
+      <Eyebrow as="span" className="block mb-1">
         {label}
-      </span>
+      </Eyebrow>
       <input
         type={type}
         value={value}

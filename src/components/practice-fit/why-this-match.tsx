@@ -37,6 +37,7 @@ import type {
 import { generatePracticeFitNarrative } from "@/lib/practice-fit/narrative-action";
 import type { PracticeFitNarrativeAudience } from "@/lib/practice-fit/narrative-types";
 import { InlineDimEditor } from "@/components/practice-fit/inline-dim-editor";
+import { Eyebrow } from "@/components/brand/eyebrow";
 
 export interface WhyThisMatchProps {
   fit: FitResult;
@@ -174,7 +175,7 @@ export function WhyThisMatch({
           </span>
           <span className="text-[12px] opacity-80">· {style.tagline}</span>
           {partialCoverage && (
-            <span className="text-[11px] opacity-70 font-medium">
+            <span className="text-[11px] opacity-70 font-medium tabular">
               · {fit.coverage.scored_count} of {fit.coverage.total_count} dims
             </span>
           )}
@@ -271,10 +272,10 @@ export function WhyThisMatch({
 function NarrativeSkeleton({ product }: { product?: "practicefit" | "dsofit" }) {
   return (
     <div aria-hidden>
-      <div className="flex items-center gap-1.5 mb-2 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+      <Eyebrow className="flex items-center gap-1.5 mb-2">
         <FitMark product={product} className="h-3 w-3" />
         Summarizing the match…
-      </div>
+      </Eyebrow>
       <div className="space-y-2 animate-pulse">
         <div className="h-3 bg-muted-foreground/20 w-[92%] rounded-sm" />
         <div className="h-3 bg-muted-foreground/20 w-[88%] rounded-sm" />
@@ -303,7 +304,7 @@ function ScoredDimRow({
     <li className="px-4 py-3">
       <div className="flex items-baseline justify-between gap-3 mb-1">
         <p className="text-[13px] font-semibold text-ink">{dim.label}</p>
-        <span className="text-[11px] font-mono text-slate-meta">
+        <span className="text-[11px] tabular text-slate-meta">
           +{Math.round(dim.contribution)} of {dim.weight}
         </span>
       </div>
@@ -345,7 +346,7 @@ function UnscoredDimRow({
         <p className="text-[13px] font-semibold text-slate-meta">
           {dim.label}
         </p>
-        <span className="text-[11px] font-mono text-slate-meta opacity-70">
+        <span className="text-[11px] tabular text-slate-meta opacity-70">
           not scored
         </span>
       </div>
