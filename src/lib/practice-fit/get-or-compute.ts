@@ -170,6 +170,45 @@ export async function getPracticeFitForJob(
   return out;
 }
 
+/**
+ * Cached-only bulk getter (#91 perf pass, P0-A).
+ *
+ * Reads `practice_fit_scores` and returns ONLY fresh cached rows — never
+ * loads candidate/job inputs, never recomputes, never writes. One query,
+ * no matter how many candidates. The recompute variant above does a
+ * per-candidate input load even on cache hits (to compare input hashes),
+ * which is O(candidates) sequential roundtrips — fine for a job page with
+ * one job, catastrophic for the dashboard's cross-job roll-up.
+ *
+ * Trade-off, accepted for display-only dashboard panels: a row whose
+ * inputs drifted since compute is served as-is until it recomputes
+ * elsewhere (job page / pipeline view / weekly digest cron / the 7-day
+ * staleness window). Candidates with no fresh row are simply absent from
+ * the map — callers already treat missing as "no fit available."
+ */
+export async function getPracticeFitForJobCachedOnly(
+  jobId: string,
+  candidateIds: string[]
+): Promise<Map<string, FitResult>> {
+  const out = new Map<string, FitResult>();
+  if (!jobId || candidateIds.length === 0) return out;
+
+  const supabase = await createSupabaseServerClient();
+  const { data: rows } = await supabase
+    .from("practice_fit_scores")
+    .select(
+      "candidate_id, score, bucket, dimensions, top_factors, input_hash, computed_at"
+    )
+    .eq("job_id", jobId)
+    .in("candidate_id", candidateIds);
+
+  for (const r of (rows ?? []) as Array<Record<string, unknown>>) {
+    if (!isFresh(r.computed_at as string)) continue;
+    out.set(r.candidate_id as string, rowToResult(r));
+  }
+  return out;
+}
+
 /* ──────────────────────────────────────────────────────────────
  * Input loaders
  * ─────────────────────────────────────────────────────────── */

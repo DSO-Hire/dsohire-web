@@ -18,7 +18,7 @@
  */
 
 import type { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getPracticeFitForJob } from "@/lib/practice-fit/get-or-compute";
+import { getPracticeFitForJobCachedOnly } from "@/lib/practice-fit/get-or-compute";
 import type { FitResult } from "@/lib/practice-fit/types";
 import {
   anonymousDisplayLabel,
@@ -153,8 +153,11 @@ export async function getInterestedCandidates(
   if (candidates.length === 0) return [];
   const eligible = new Set(candidates.map((c) => c.id));
 
-  // 6. Best PracticeFit per candidate across the jobs they saved. Group by job
-  //    so each job is scored once for all its savers (cache-aware getter).
+  // 6. Best PracticeFit per candidate across the jobs they saved. Group by
+  //    job so each job reads once for all its savers. #91 P0-A — cached-only
+  //    read: this is a dashboard display surface (fit is context here, NEVER
+  //    a filter), so it must not score in the request path. A saver with no
+  //    fresh cached row keeps fit: null, exactly like a role mismatch.
   const saversByJob = new Map<string, string[]>();
   for (const [cid, agg] of byCandidate) {
     if (!eligible.has(cid)) continue;
@@ -165,8 +168,12 @@ export async function getInterestedCandidates(
     }
   }
   const bestFit = new Map<string, FitResult>();
-  for (const [jid, cids] of saversByJob) {
-    const fits = await getPracticeFitForJob(jid, cids);
+  const fitsPerJob = await Promise.all(
+    Array.from(saversByJob, ([jid, cids]) =>
+      getPracticeFitForJobCachedOnly(jid, cids)
+    )
+  );
+  for (const fits of fitsPerJob) {
     for (const [cid, fit] of fits) {
       const prior = bestFit.get(cid);
       if (!prior || fit.score > prior.score) bestFit.set(cid, fit);

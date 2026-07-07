@@ -19,7 +19,10 @@
  */
 
 import type { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getPracticeFitForJob } from "@/lib/practice-fit/get-or-compute";
+import {
+  getPracticeFitForJob,
+  getPracticeFitForJobCachedOnly,
+} from "@/lib/practice-fit/get-or-compute";
 import type { FitResult } from "@/lib/practice-fit/types";
 import {
   anonymousDisplayLabel,
@@ -73,7 +76,15 @@ export async function getSmartPicks(
   supabase: SupabaseClient,
   jobId: string,
   dsoId: string,
-  limit = 5
+  limit = 5,
+  opts?: {
+    /**
+     * #91 P0-A — read the pre-warmed fit cache only; never recompute in the
+     * request path. Set by the dashboard roll-up (getTodaysTopFits); the job
+     * page keeps the default recompute-on-view behavior.
+     */
+    cachedOnly?: boolean;
+  }
 ): Promise<SmartPick[]> {
   // 1. Existing applicants on this job — exclude.
   const { data: existingApps } = await supabase
@@ -133,9 +144,14 @@ export async function getSmartPicks(
     }>).filter((c) => !excludedCandidateIds.has(c.id));
   if (candidates.length === 0) return [];
 
-  // 3. Score them all via the existing bulk getter (cache-aware).
+  // 3. Score them all via the existing bulk getter (cache-aware). In
+  // cachedOnly mode we read fresh cached rows in ONE query instead —
+  // the recompute getter does a per-candidate input load even on cache
+  // hits, which is O(candidates) sequential roundtrips.
   const candidateIds = candidates.map((c) => c.id);
-  const fitsByCandidate = await getPracticeFitForJob(jobId, candidateIds);
+  const fitsByCandidate = opts?.cachedOnly
+    ? await getPracticeFitForJobCachedOnly(jobId, candidateIds)
+    : await getPracticeFitForJob(jobId, candidateIds);
   if (fitsByCandidate.size === 0) return [];
 
   // 4. Existing pool entries to mark which picks are already saved.
@@ -242,10 +258,17 @@ export async function getTodaysTopFits(
   // merge below only replaces on a strictly-higher score, so tie-breaking and
   // final results are identical to the serial version — just faster.
   const bestByCandidate = new Map<string, TodaysTopFit>();
+  // #91 P0-A — cachedOnly: the dashboard roll-up reads the pre-warmed fit
+  // cache and NEVER scores in the request path (the measured 11.9s dashboard
+  // render was dominated by this call recomputing per candidate). Cache
+  // misses degrade to "not shown today"; the job page / pipeline / digest
+  // cron keep the cache warm.
   const perJob = await Promise.all(
     jobs.map(async (job) => ({
       job,
-      picks: await getSmartPicks(supabase, job.id, dsoId, 5),
+      picks: await getSmartPicks(supabase, job.id, dsoId, 5, {
+        cachedOnly: true,
+      }),
     }))
   );
   for (const { job, picks } of perJob) {
