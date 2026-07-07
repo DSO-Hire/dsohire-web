@@ -1,14 +1,17 @@
-import { BrandLoader } from "@/components/brand/brand-loader";
-
 /**
  * Content-area loading fallback for shelled employer routes that don't ship
  * their own skeleton. The nav rail is supplied by the persistent layout, so
- * this is the INLINE BrandLoader (not fullScreen) — the branded D-mark draws
- * on inside the content column while a page's server data loads, with the nav
- * staying in place. Heavy routes (dashboard / applications / jobs / analytics
- * / pipeline) keep their own layout-parity skeletons (now content-only so they
- * slot inside the persistent shell instead of redrawing the rail).
+ * this renders inside the shell's <main>.
+ *
+ * #91 P0-B: upgraded from the lone inline BrandLoader to a full generic
+ * page skeleton — the D-mark alone read as a blank ivory page at
+ * full-screen scale (the measured "dead click" on six routes). Any future
+ * route now inherits visible click-landed feedback by default; heavy
+ * routes keep their own layout-parity skeletons.
  */
+
+import { GenericRouteSkeleton } from "@/components/brand/route-skeletons";
+
 export default function Loading() {
-  return <BrandLoader />;
+  return <GenericRouteSkeleton />;
 }

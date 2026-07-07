@@ -39,12 +39,13 @@ export const STUCK_SLA_DAYS = 5;
 export const STALE_STAGE_DAYS = 14;
 
 /**
- * #91 P1 instrumentation — per-loader wall-clock logging, kept on for the
- * measurement deploy so the "after" numbers land in Vercel logs when Cam
- * re-records the click path. Remove (or gate behind an env flag) once the
- * <1.5s first-paint / <4s all-panels targets are confirmed.
+ * #91 P1 instrumentation — per-loader wall-clock logging. Targets were
+ * confirmed on the 2026-07-07 measurement deploy (shell ~0.5s, worst panel
+ * ~1s on prod), so this is now SILENT unless PERF_LOG=1 is set in the
+ * environment — flip it on in Vercel for any future perf investigation.
  */
 async function timed<T>(label: string, fn: () => Promise<T>): Promise<T> {
+  if (process.env.PERF_LOG !== "1") return fn();
   const start = Date.now();
   try {
     return await fn();
