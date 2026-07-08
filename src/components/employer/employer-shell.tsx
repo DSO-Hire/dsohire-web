@@ -51,8 +51,7 @@ import { LocationSwitcher } from "./location-switcher";
 import { CommandPaletteTrigger } from "./command-palette";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { TextSizeToggle } from "@/components/theme/text-size-toggle";
-import { SupportLauncher } from "@/components/support/support-launcher";
-import { ChatWidget } from "@/components/chat/chat-widget";
+import { MessengerLauncher } from "@/components/messenger/messenger-launcher";
 
 export type NavId =
   | "dashboard"
@@ -376,11 +375,10 @@ export function EmployerShell({
         </main>
       </div>
 
-      {/* Floating "?" support launcher (Tier 2 chat surface, Day 21 Phase C). */}
-      <SupportLauncher audience="employer" authUserId={authUserId} raised />
-
-      {/* Pop-up team + candidate chat (Day 24) — stacked above the support button. */}
-      <ChatWidget dsoId={dsoId} authId={authUserId} />
+      {/* Merged messenger (Option B, 2026-07-08) — ONE bottom-right
+          launcher: Messages | Help tabs in a docked panel. Replaces the
+          separate ChatWidget FAB + "?" SupportLauncher. */}
+      <MessengerLauncher dsoId={dsoId} authId={authUserId} audience="employer" />
     </div>
   );
 }

@@ -1,30 +1,29 @@
 "use client";
 
 /**
- * ChatWidget — the bottom-right pop-up chat (Day 24). LinkedIn/Intercom-style:
- * a floating launcher with a live unread badge, opening a docked panel that
- * slides between a conversation LIST and a single CONVERSATION view. Handles
- * two thread kinds through one UI: teammate DMs (dm_* tables) and candidate
- * threads (application inbox). Live via Supabase realtime; teammate presence
- * via a realtime presence channel. Optimistic send, Enter-to-send.
+ * ChatPanel — the Messages surface (Day 24; Option B merge 2026-07-08).
+ * A docked panel that slides between a conversation LIST and a single
+ * CONVERSATION view. Handles two thread kinds through one UI: teammate DMs
+ * (dm_* tables) and candidate threads (application inbox). Live via Supabase
+ * realtime; teammate presence via a realtime presence channel. Optimistic
+ * send, Enter-to-send.
  *
- * Mounted once in EmployerShell, so it rides every employer page.
+ * Controlled component with NO launcher of its own — MessengerLauncher owns
+ * the FAB, the docked container, and the Messages | Help tabs. Keep it
+ * MOUNTED even while hidden (`visible={false}`) so the realtime
+ * subscriptions and the unread count (reported via onUnreadChange) stay
+ * live for the launcher badge.
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  MessageCircle, X, ChevronLeft, ChevronUp, Search, Plus, Send, Loader2, Users, Check,
+  MessageCircle, ChevronLeft, Search, Plus, Send, Loader2, Users, Check,
 } from "lucide-react";
 import {
   REALTIME_LISTEN_TYPES,
   REALTIME_POSTGRES_CHANGES_LISTEN_EVENT,
 } from "@supabase/supabase-js";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
-import {
-  setChatOpen,
-  useInputFocused,
-  useSupportDrawerOpen,
-} from "@/lib/ui/floating-ui";
 import { sendApplicationMessage } from "@/lib/messages/actions";
 import {
   listChatThreads, listTeammates, findOrCreateDmConversation,
@@ -48,17 +47,20 @@ function relTime(iso: string | null): string {
 
 type View = "list" | "thread" | "new";
 
-export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string }) {
-  const [open, setOpen] = useState(false);
-  const supportDrawerOpen = useSupportDrawerOpen();
-  const inputFocused = useInputFocused();
-
-  // Publish open state to the floating-UI coordinator (hides the "?" while
-  // the chat panel is open).
-  useEffect(() => {
-    setChatOpen(open);
-    return () => setChatOpen(false);
-  }, [open]);
+export function ChatPanel({
+  dsoId,
+  authId,
+  visible,
+  onUnreadChange,
+}: {
+  dsoId: string;
+  authId: string;
+  /** Render the panel content. When false the component stays mounted
+   *  (realtime + unread badge survive) but renders nothing. */
+  visible: boolean;
+  /** Reports the live total unread count for the launcher badge. */
+  onUnreadChange?: (n: number) => void;
+}) {
   const [view, setView] = useState<View>("list");
   const [threads, setThreads] = useState<ChatThread[]>([]);
   const [active, setActive] = useState<ChatThread | null>(null);
@@ -81,6 +83,11 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
   const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const totalUnread = threads.reduce((s, t) => s + t.unread, 0);
+
+  // Surface the unread count to the launcher (badge lives on the FAB).
+  useEffect(() => {
+    onUnreadChange?.(totalUnread);
+  }, [totalUnread, onUnreadChange]);
 
   const loadThreads = useCallback(async () => {
     setThreads(await listChatThreads());
@@ -232,21 +239,11 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
   const dmThreads = filtered.filter((t) => t.kind === "dm");
   const candThreads = filtered.filter((t) => t.kind === "candidate");
 
+  if (!visible) return null;
+
   return (
-    <div
-      className={
-        "fixed bottom-0 right-6 z-[55] print:hidden" +
-        // Yield the corner while the support drawer is open — kept mounted
-        // (display:none) so realtime subscriptions + unread badge survive.
-        (supportDrawerOpen ? " hidden" : "") +
-        // On mobile, get out of the way when a text field is focused so the
-        // bar never covers a composer/form field (desktop keeps it).
-        (inputFocused ? " max-lg:hidden" : "")
-      }
-    >
-      {open ? (
-        <div className="w-[360px] max-w-[calc(100vw-2rem)] h-[540px] max-h-[calc(100vh-5rem)] bg-card border border-[var(--rule-strong)] border-b-0 shadow-2xl rounded-t-lg overflow-hidden flex flex-col">
-          {/* Header */}
+    <div className="flex-1 min-h-0 bg-card overflow-hidden flex flex-col">
+      {/* Header */}
           <div className="bg-hero text-hero-foreground px-4 py-3 flex items-center gap-2 shrink-0">
             {view !== "list" ? (
               <button onClick={() => setView("list")} aria-label="Back"
@@ -275,9 +272,6 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
                 <Plus className="h-5 w-5" />
               </button>
             )}
-            <button onClick={() => setOpen(false)} aria-label="Close" className="text-hero-foreground/80 hover:text-hero-foreground">
-              <X className="h-5 w-5" />
-            </button>
           </div>
 
           {/* Body */}
@@ -442,23 +436,6 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
               </div>
             </>
           )}
-        </div>
-      ) : (
-        /* Docked bar (LinkedIn-style) — flush to the bottom edge. */
-        <button onClick={() => setOpen(true)} aria-label="Open messages"
-          className="w-[260px] max-w-[calc(100vw-2rem)] bg-primary text-primary-foreground rounded-t-lg shadow-xl flex items-center gap-2.5 px-4 py-3 hover:bg-primary/90 transition-colors">
-          <MessageCircle className="h-4 w-4 text-[var(--heritage-bright,#8db8a3)] shrink-0" />
-          <span className="text-xs font-bold tracking-[0.3px] flex-1 text-left">
-            Messages
-          </span>
-          {totalUnread > 0 && (
-            <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-heritage text-primary-foreground text-2xs font-bold flex items-center justify-center">
-              {totalUnread > 99 ? "99+" : totalUnread}
-            </span>
-          )}
-          <ChevronUp className="h-4 w-4 text-primary-foreground/70 shrink-0" />
-        </button>
-      )}
     </div>
   );
 }

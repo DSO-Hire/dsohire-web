@@ -65,6 +65,21 @@ interface Props {
   authUserId: string | null;
 }
 
+interface ContentProps {
+  audience: "employer" | "candidate" | "both";
+  /** Auth user id used to key the localStorage cache. Null = signed-out. */
+  authUserId: string | null;
+  /** Called when the surface should dismiss (link navigation, escalated-
+   *  success Close). The host — drawer or messenger panel — owns closing. */
+  onClose: () => void;
+  /** Whether the surface is currently shown — gates the localStorage
+   *  restore + textarea autofocus. The drawer stays mounted while hidden. */
+  active?: boolean;
+  /** Render the X in the content header. Off inside the messenger panel,
+   *  which supplies its own close affordance. */
+  showClose?: boolean;
+}
+
 interface MessageCitation {
   type: "help" | "data";
   label: string;
@@ -103,6 +118,61 @@ interface UiMessage {
 }
 
 export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
+  /* ── ESC to close (drawer chrome owns the key; the messenger panel has
+        its own listener) ── */
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  return (
+    <>
+      <div
+        onClick={onClose}
+        aria-hidden="true"
+        className={
+          "fixed inset-0 z-40 bg-black/40 transition-opacity " +
+          (open ? "opacity-100" : "opacity-0 pointer-events-none")
+        }
+      />
+      <aside
+        role="dialog"
+        aria-modal="true"
+        aria-label="Support"
+        className={
+          "fixed top-0 right-0 z-50 h-full w-full sm:w-[480px] bg-card shadow-2xl flex flex-col transition-transform duration-200 ease-out " +
+          (open ? "translate-x-0" : "translate-x-full")
+        }
+      >
+        <SupportContent
+          audience={audience}
+          authUserId={authUserId}
+          onClose={onClose}
+          active={open}
+          showClose
+        />
+      </aside>
+    </>
+  );
+}
+
+/**
+ * SupportContent — the drawer's inner help surface (context header, AI chat
+ * thread, suggested articles, signed-out prompt, composer) with no drawer
+ * chrome or positioning. Fills its parent as a flex column. Reused by the
+ * MessengerLauncher's Help tab.
+ */
+export function SupportContent({
+  audience,
+  authUserId,
+  onClose,
+  active = true,
+  showClose = false,
+}: ContentProps) {
   const pathname = usePathname() ?? "";
   const router = useRouter();
   const pageContext = useAssistantContext();
@@ -119,7 +189,7 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
 
   /* ── Load conversation from localStorage on first open ── */
   useEffect(() => {
-    if (!open || !authUserId) return;
+    if (!active || !authUserId) return;
     const stored = loadConversation(authUserId);
     if (stored && stored.messages.length > 0) {
       setMessages(
@@ -127,7 +197,7 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
       );
       setRequestId(stored.requestId);
     }
-  }, [open, authUserId]);
+  }, [active, authUserId]);
 
   /* ── Save conversation whenever messages or requestId change ── */
   useEffect(() => {
@@ -146,19 +216,12 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
     });
   }, [messages, requestId, authUserId]);
 
-  /* ── Focus textarea on open + ESC to close ── */
+  /* ── Focus textarea when shown ── */
   useEffect(() => {
-    if (!open) return;
+    if (!active) return;
     const t = setTimeout(() => textareaRef.current?.focus(), 150);
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    window.addEventListener("keydown", onKey);
-    return () => {
-      clearTimeout(t);
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [open, onClose]);
+    return () => clearTimeout(t);
+  }, [active]);
 
   /* ── Auto-scroll to bottom on new content ── */
   useEffect(() => {
@@ -489,25 +552,8 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
   );
 
   return (
-    <>
-      <div
-        onClick={onClose}
-        aria-hidden="true"
-        className={
-          "fixed inset-0 z-40 bg-black/40 transition-opacity " +
-          (open ? "opacity-100" : "opacity-0 pointer-events-none")
-        }
-      />
-      <aside
-        role="dialog"
-        aria-modal="true"
-        aria-label="Support"
-        className={
-          "fixed top-0 right-0 z-50 h-full w-full sm:w-[480px] bg-card shadow-2xl flex flex-col transition-transform duration-200 ease-out " +
-          (open ? "translate-x-0" : "translate-x-full")
-        }
-      >
-        <header className="flex items-start justify-between gap-3 p-5 border-b border-[var(--rule)] shrink-0">
+    <div className="flex-1 min-h-0 flex flex-col">
+      <header className="flex items-start justify-between gap-3 p-5 border-b border-[var(--rule)] shrink-0">
           <div className="min-w-0">
             <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1.5 inline-flex items-center gap-2">
               <Sparkles className="size-3" />
@@ -538,14 +584,16 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
                 <Trash2 className="size-4" />
               </button>
             )}
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close support"
-              className="p-1.5 rounded text-slate-meta hover:text-ink hover:bg-cream/60"
-            >
-              <X className="size-4" />
-            </button>
+            {showClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close support"
+                className="p-1.5 rounded text-slate-meta hover:text-ink hover:bg-cream/60"
+              >
+                <X className="size-4" />
+              </button>
+            )}
           </div>
         </header>
 
@@ -660,8 +708,7 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
             </p>
           </form>
         )}
-      </aside>
-    </>
+    </div>
   );
 }
 
