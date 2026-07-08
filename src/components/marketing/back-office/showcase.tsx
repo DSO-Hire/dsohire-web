@@ -21,7 +21,7 @@
  * House rules: no site-shell imports; no scroll-jacking; 300–600ms settles.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { ArrowLeft, ArrowRight, Pause, Play } from "lucide-react";
 import { Eyebrow } from "@/components/brand/eyebrow";
 import { FrameChrome } from "./ui";
@@ -39,23 +39,22 @@ const PANELS = [PipelineChapter, CompChapter, TwoSidedChapter, JdChapter, Sourci
 
 export function BackOfficeShowcase() {
   const player = usePlayer(DURATIONS);
-  const { current, enhanced, paused, playNonce, go, next, prev, toggle, setHover, sectionRef } =
-    player;
+  const {
+    current,
+    enhanced,
+    paused,
+    playNonce,
+    wipeKey,
+    go,
+    next,
+    prev,
+    toggle,
+    setHover,
+    sectionRef,
+  } = player;
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   // aria-live announces on text CHANGE, so deriving from `current` is enough.
   const announce = `Chapter ${current + 1} of ${CHAPTERS.length}: ${CHAPTERS[current].title}`;
-
-  // D-mark transition wipe — one-shot veil per chapter change (skips the
-  // initial play + reduced motion). Keyed by playNonce so the CSS draw
-  // restarts; unmounted after the 480ms animation completes.
-  const [wipeKey, setWipeKey] = useState<number | null>(null);
-  useEffect(() => {
-    if (!enhanced || playNonce < 2) return; // nonce 1 = initial play
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setWipeKey(playNonce);
-    const t = window.setTimeout(() => setWipeKey(null), 520);
-    return () => clearTimeout(t);
-  }, [playNonce, enhanced]);
 
   const onTablistKeyDown = (e: React.KeyboardEvent) => {
     const dir = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;

@@ -29,6 +29,10 @@ export interface Player {
   /** Nonce that bumps every time the current chapter (re)starts — chapters
    *  key their choreography off it so jumping back replays. */
   playNonce: number;
+  /** Non-null while the D-mark transition veil should render (keyed so the
+   *  CSS draw restarts per transition). The chapter swap happens ~180ms in,
+   *  BEHIND the veil — that's what kills the hard-cut flash. */
+  wipeKey: number | null;
   go: (i: number) => void;
   next: () => void;
   prev: () => void;
@@ -39,6 +43,10 @@ export interface Player {
   /** Attach one per chapter chip's progress-fill element. */
   barRefs: React.MutableRefObject<Array<HTMLElement | null>>;
 }
+
+/** Wipe choreography (ms) — keep in sync with the bo-veil CSS timings. */
+const WIPE_COMMIT_MS = 180; // chapter swap, hidden behind the veil
+const WIPE_TOTAL_MS = 780; // veil unmount (CSS animation is 760ms)
 
 export function usePlayer(durations: ReadonlyArray<number>): Player {
   const count = durations.length;
@@ -68,7 +76,12 @@ export function usePlayer(durations: ReadonlyArray<number>): Player {
     clock.current.enhanced = enhanced;
   }, [current, paused, enhanced]);
 
-  const go = useCallback(
+  const [wipeKey, setWipeKey] = useState<number | null>(null);
+  const wipeTimers = useRef<number[]>([]);
+
+  /** The actual chapter swap — runs bare when not enhanced (reduced motion /
+   *  pre-mount), or ~180ms into the veil so the cut is never visible. */
+  const commitGo = useCallback(
     (i: number) => {
       const n = ((i % count) + count) % count;
       clock.current.elapsed = 0;
@@ -81,6 +94,36 @@ export function usePlayer(durations: ReadonlyArray<number>): Player {
       setPlayNonce((x) => x + 1);
     },
     [count]
+  );
+
+  const go = useCallback(
+    (i: number) => {
+      if (!clock.current.enhanced) {
+        commitGo(i);
+        return;
+      }
+      // Freeze the dwell clock immediately (the outgoing chapter shouldn't
+      // keep burning time under the veil), start/restart the veil, and swap
+      // the chapter once covered. Rapid jumps supersede pending commits.
+      clock.current.elapsed = 0;
+      clock.current.last = 0;
+      wipeTimers.current.forEach(clearTimeout);
+      wipeTimers.current = [];
+      setWipeKey(Date.now());
+      wipeTimers.current.push(
+        window.setTimeout(() => commitGo(i), WIPE_COMMIT_MS),
+        window.setTimeout(() => setWipeKey(null), WIPE_TOTAL_MS)
+      );
+    },
+    [commitGo]
+  );
+
+  // Clear pending wipe timers on unmount.
+  useEffect(
+    () => () => {
+      wipeTimers.current.forEach(clearTimeout);
+    },
+    []
   );
 
   const next = useCallback(() => go(clock.current.current + 1), [go]);
@@ -158,6 +201,7 @@ export function usePlayer(durations: ReadonlyArray<number>): Player {
     paused,
     enhanced,
     playNonce,
+    wipeKey,
     go,
     next,
     prev,

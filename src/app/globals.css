@@ -969,29 +969,31 @@ html, body {
 }
 
 /* Chapter-transition wipe — the D-mark draws on over an ivory veil
-   (~480ms one-shot), so chapter changes read as the brand signing the
-   scene instead of a hard cut. Same draw language as the rail logo /
-   BrandLoader. The veil element is mounted per transition (keyed), so
-   the animations restart cleanly. */
+   (760ms one-shot; timings in sync with WIPE_* in use-player.ts), so
+   chapter changes read as the brand signing the scene instead of a hard
+   cut. Sequence: veil covers by ~120ms → chapter swaps BEHIND it at
+   ~180ms → arch draws 140-480ms, crossbar lands by ~670ms → veil
+   releases 590-760ms, just after the mark completes. Same draw language
+   as the rail logo / BrandLoader. */
 @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
   .bo-veil {
-    animation: bo-veil 480ms ease forwards;
+    animation: bo-veil 760ms ease forwards;
   }
   .bo-veil-arch {
     stroke-dasharray: 120;
     stroke-dashoffset: 120;
-    animation: rail-draw 300ms cubic-bezier(0.22, 1, 0.36, 1) 40ms forwards;
+    animation: rail-draw 340ms cubic-bezier(0.22, 1, 0.36, 1) 140ms forwards;
   }
   .bo-veil-bar {
     stroke-dasharray: 120;
     stroke-dashoffset: 120;
-    animation: rail-draw 180ms cubic-bezier(0.22, 1, 0.36, 1) 230ms forwards;
+    animation: rail-draw 200ms cubic-bezier(0.22, 1, 0.36, 1) 470ms forwards;
   }
 }
 @keyframes bo-veil {
   0% { opacity: 0; }
-  15% { opacity: 1; }
-  70% { opacity: 1; }
+  16% { opacity: 1; }
+  78% { opacity: 1; }
   100% { opacity: 0; }
 }
 
