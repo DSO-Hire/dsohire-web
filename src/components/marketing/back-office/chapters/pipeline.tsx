@@ -174,13 +174,15 @@ export function PipelineChapter({
         </div>
       </DndContext>
 
-      {/* Automation toast — maps to the LIVE stage_changed → email_candidate rule. */}
+      {/* Automation toast — maps to the LIVE stage_changed → email_candidate
+          rule. In-flow below the board on phones (an overlay covers cards at
+          2-col width — Cam's mobile review); floats bottom-right at sm+. */}
       <div
         role="status"
-        className={`absolute right-1 bottom-1 sm:right-3 sm:bottom-2 w-[290px] max-w-[85%] bg-hero text-hero-foreground border-l-[3px] border-l-heritage-bright px-4 py-3 shadow-[0_16px_40px_rgba(0,0,0,0.35)] transition-all duration-500 z-10 ${
+        className={`mt-3 w-full sm:mt-0 sm:w-[290px] sm:max-w-[85%] sm:absolute sm:right-3 sm:bottom-2 bg-hero text-hero-foreground border-l-[3px] border-l-heritage-bright px-4 py-3 shadow-[0_16px_40px_rgba(0,0,0,0.35)] transition-all duration-500 z-10 ${
           phase === "toast"
             ? "opacity-100 translate-y-0"
-            : "opacity-0 translate-y-[18px] pointer-events-none"
+            : "opacity-0 translate-y-[18px] pointer-events-none max-sm:hidden"
         }`}
         style={{ transitionTimingFunction: "cubic-bezier(0.22,1,0.36,1)" }}
       >

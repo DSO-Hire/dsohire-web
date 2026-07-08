@@ -166,9 +166,16 @@ export async function SiteNav({
         <NavLink href="/about">About</NavLink>
         <NavLink href="/contact">Contact</NavLink>
       </ul>
-      <div className="flex items-center gap-3">
-        <ThemeToggle className="hidden sm:inline-flex text-slate-body" />
-        <TextSizeToggle className="hidden sm:inline-flex text-slate-body" />
+      <div className="flex items-center gap-2.5 sm:gap-3">
+        {/* Toggles live in the hamburger drawer below lg — the top bar must
+            never crowd out the hamburger (Cam, 2026-07-08 mobile review).
+            Wrapper div owns the responsive hiding: the toggles' own root
+            classes set display, so a passed-in `hidden` loses the CSS-order
+            fight (the pre-existing bug that showed them on phones). */}
+        <div className="hidden lg:flex items-center gap-3">
+          <ThemeToggle className="text-slate-body" />
+          <TextSizeToggle className="text-slate-body" />
+        </div>
         <Link
           href={signInHref}
           className="hidden sm:inline-flex text-xs font-semibold text-slate-body hover:text-ink transition-colors"
@@ -177,7 +184,7 @@ export async function SiteNav({
         </Link>
         <Link
           href={primaryCtaHref}
-          className="px-5 py-2.5 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
+          className="px-3.5 py-2 text-xs sm:px-5 sm:py-2.5 sm:text-sm bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors whitespace-nowrap"
         >
           {primaryCtaLabel}
         </Link>

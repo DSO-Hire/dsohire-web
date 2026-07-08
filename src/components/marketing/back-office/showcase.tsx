@@ -130,8 +130,8 @@ export function BackOfficeShowcase() {
                     player.barRefs.current[i] = el;
                   }}
                   aria-hidden
-                  className="absolute left-0 bottom-0 h-[3px] bg-heritage-bright"
-                  style={{ width: 0 }}
+                  className="absolute left-0 bottom-0 h-[3px] w-full bg-heritage-bright origin-left"
+                  style={{ transform: "scaleX(0)" }}
                 />
               </button>
             );

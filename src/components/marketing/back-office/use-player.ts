@@ -75,10 +75,7 @@ export function usePlayer(durations: ReadonlyArray<number>): Player {
       clock.current.last = 0;
       // Reset every bar; the active one refills from the loop.
       for (const bar of barRefs.current) {
-        if (bar) {
-          bar.style.transition = "none";
-          bar.style.width = "0%";
-        }
+        if (bar) bar.style.transform = "scaleX(0)";
       }
       setCurrent(n);
       setPlayNonce((x) => x + 1);
@@ -147,7 +144,9 @@ export function usePlayer(durations: ReadonlyArray<number>): Player {
       c.elapsed += now - c.last;
       c.last = now;
       const bar = barRefs.current[c.current];
-      if (bar) bar.style.width = `${Math.min(100, (c.elapsed / dwell) * 100)}%`;
+      // scaleX (compositor-only) — a per-frame width write forces layout
+      // every frame for the whole dwell and reads as jank on phones.
+      if (bar) bar.style.transform = `scaleX(${Math.min(1, c.elapsed / dwell)})`;
       if (c.elapsed >= dwell) go(c.current + 1);
     };
     raf = requestAnimationFrame(loop);
