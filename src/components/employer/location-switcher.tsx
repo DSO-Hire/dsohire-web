@@ -78,7 +78,7 @@ export function LocationSwitcher({
   // No locations to switch between → render a static badge.
   if (locations.length === 0) {
     return (
-      <div className="px-3 py-2 text-2xs text-sidebar-foreground/40 inline-flex items-center gap-1.5">
+      <div className="px-3 py-2 text-2xs text-sidebar-foreground/55 inline-flex items-center gap-1.5">
         <MapPin className="size-3" />
         No locations yet
       </div>

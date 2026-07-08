@@ -314,13 +314,13 @@ export function EmployerShell({
         <div className="rail-foot border-t border-sidebar-border px-5 py-3.5 flex items-center gap-4">
           <Link
             href="/employer/settings"
-            className="rail-flink text-xs font-semibold text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors"
+            className="rail-flink text-xs font-semibold text-sidebar-foreground/80 hover:text-sidebar-foreground transition-colors"
           >
             Settings
           </Link>
           <Link
             href="/employer/help"
-            className="rail-flink text-xs font-semibold text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors"
+            className="rail-flink text-xs font-semibold text-sidebar-foreground/80 hover:text-sidebar-foreground transition-colors"
           >
             Help
           </Link>

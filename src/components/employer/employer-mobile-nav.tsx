@@ -180,7 +180,7 @@ export function EmployerMobileNav({
                   "flex items-center gap-3 px-3 py-2.5 text-xs font-semibold border-l-2 border-l-transparent transition-colors " +
                   (isEmployerNavItemActive(pathname, settings)
                     ? "border-l-heritage-bright text-sidebar-foreground"
-                    : "text-sidebar-foreground/65 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground")
+                    : "text-sidebar-foreground/80 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground")
                 }
               >
                 <SettingsIcon className="size-4 flex-shrink-0" />
@@ -193,7 +193,7 @@ export function EmployerMobileNav({
                   "flex items-center gap-3 px-3 py-2.5 text-xs font-semibold border-l-2 border-l-transparent transition-colors " +
                   (isEmployerNavItemActive(pathname, help)
                     ? "border-l-heritage-bright text-sidebar-foreground"
-                    : "text-sidebar-foreground/65 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground")
+                    : "text-sidebar-foreground/80 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground")
                 }
               >
                 <LifeBuoy className="size-4 flex-shrink-0" />
@@ -202,7 +202,7 @@ export function EmployerMobileNav({
               <form action="/employer/sign-out" method="post">
                 <button
                   type="submit"
-                  className="flex w-full items-center gap-3 px-3 py-2.5 text-xs font-semibold text-sidebar-foreground/55 hover:text-sidebar-foreground hover:bg-sidebar-foreground/5 rounded transition-colors"
+                  className="flex w-full items-center gap-3 px-3 py-2.5 text-xs font-semibold text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-foreground/5 rounded transition-colors"
                 >
                   <LogOut className="size-4 flex-shrink-0" />
                   Sign out
@@ -235,7 +235,7 @@ function MobileRow({
           "flex items-center gap-3 px-3 py-2.5 text-xs font-semibold tracking-[0.5px] border-l-2 border-l-transparent transition-colors " +
           (isActive
             ? "border-l-heritage-bright text-sidebar-foreground"
-            : "text-sidebar-foreground/65 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground")
+            : "text-sidebar-foreground/80 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground")
         }
       >
         {item.label}

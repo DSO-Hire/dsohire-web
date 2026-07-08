@@ -244,13 +244,13 @@ export function CandidateShell({
         <div className="rail-foot border-t border-sidebar-border px-5 py-3.5 flex items-center gap-4">
           <Link
             href="/candidate/settings"
-            className="rail-flink text-2xs font-semibold text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
+            className="rail-flink text-2xs font-semibold text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors"
           >
             Settings
           </Link>
           <Link
             href="/candidate/help"
-            className="rail-flink text-2xs font-semibold text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
+            className="rail-flink text-2xs font-semibold text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors"
           >
             Help
           </Link>

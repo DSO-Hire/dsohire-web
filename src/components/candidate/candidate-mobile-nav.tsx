@@ -159,7 +159,7 @@ export function CandidateMobileNav({
               "flex items-center gap-3 px-3 py-2.5 text-xs font-semibold rounded " +
               (isNavItemActive(pathname, { id: help.id, href: help.href })
                 ? "bg-white/10 text-sidebar-foreground"
-                : "text-sidebar-foreground/65 hover:bg-white/5 hover:text-sidebar-foreground")
+                : "text-sidebar-foreground/80 hover:bg-white/5 hover:text-sidebar-foreground")
             }
           >
             <LifeBuoy className="size-4 flex-shrink-0" />
@@ -168,7 +168,7 @@ export function CandidateMobileNav({
           <form action="/candidate/sign-out" method="post">
             <button
               type="submit"
-              className="flex w-full items-center gap-3 px-3 py-2.5 text-xs font-semibold text-sidebar-foreground/55 hover:text-sidebar-foreground hover:bg-white/5 rounded transition-colors"
+              className="flex w-full items-center gap-3 px-3 py-2.5 text-xs font-semibold text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-white/5 rounded transition-colors"
             >
               <LogOut className="size-4 flex-shrink-0" />
               Sign out
@@ -219,7 +219,7 @@ function MobileRow({
           "flex items-center gap-3 px-3 py-2.5 text-xs font-semibold tracking-[0.5px] rounded transition-colors " +
           (isActive
             ? "bg-white/10 text-sidebar-foreground"
-            : "text-sidebar-foreground/65 hover:bg-white/5 hover:text-sidebar-foreground")
+            : "text-sidebar-foreground/80 hover:bg-white/5 hover:text-sidebar-foreground")
         }
       >
         {item.node ? (

@@ -51,7 +51,7 @@ export function CandidateRailNav({
                 "rail-item group relative flex items-center gap-3 px-3 py-2 text-xs font-semibold tracking-[0.2px] border border-transparent transition-colors " +
                 (isActive
                   ? "rail-item-on bg-white/[0.08] text-sidebar-foreground border-sidebar-border"
-                  : "text-sidebar-foreground/60 hover:bg-white/5 hover:text-sidebar-foreground")
+                  : "text-sidebar-foreground/80 hover:bg-white/5 hover:text-sidebar-foreground")
               }
             >
               {item.isFit ? (
@@ -88,7 +88,7 @@ export function CandidateRailNav({
       <li className="mt-1 px-3">
         <Link
           href={isDso ? "/candidate/practice-fit" : "/candidate/dsofit"}
-          className="rail-aside block py-1.5 text-2xs text-sidebar-foreground/45 hover:text-sidebar-foreground/80 transition-colors"
+          className="rail-aside block py-1.5 text-2xs text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors"
         >
           Also explore {isDso ? "PracticeFit" : "DSOFit"} →
         </Link>

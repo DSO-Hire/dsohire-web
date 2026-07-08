@@ -45,7 +45,7 @@ export function EmployerRailNav({ groups }: { groups: RailNavGroup[] }) {
           <Eyebrow
             as="li"
             aria-hidden="true"
-            className="rail-glabel pt-3.5 pb-1.5 px-2.5 text-sidebar-foreground/40"
+            className="rail-glabel pt-3.5 pb-1.5 px-2.5 text-sidebar-foreground/55"
           >
             {group.label}
           </Eyebrow>
@@ -60,7 +60,7 @@ export function EmployerRailNav({ groups }: { groups: RailNavGroup[] }) {
                     "rail-item group relative flex items-center gap-3 px-3 py-2 text-xs font-semibold tracking-[0.2px] border border-transparent transition-colors " +
                     (isActive
                       ? "rail-item-on text-sidebar-foreground"
-                      : "text-sidebar-foreground/60 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground")
+                      : "text-sidebar-foreground/80 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground")
                   }
                 >
                   {item.icon}
