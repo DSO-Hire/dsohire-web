@@ -66,12 +66,20 @@ export default function RootLayout({
     >
       <head>
         {/* No-flash theme init — runs BEFORE first paint so a dark-preference
-            load never flashes light. Reads the stored choice (dso-theme);
-            "system" or unset follows prefers-color-scheme. The ThemeToggle
+            load never flashes light. Light is the hard default: dark applies
+            only when explicitly chosen (dso-theme='dark'). The ThemeToggle
             owns it thereafter. Dependency-free + inline on purpose. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('dso-theme');var m=window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||((t==='system'||!t)&&m)){document.documentElement.classList.add('dark');}}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('dso-theme');if(t==='dark'){document.documentElement.classList.add('dark');}}catch(e){}})();`,
+          }}
+        />
+        {/* No-flash text-size init — applies the stored text-scale multiplier
+            (dso-text-scale) before first paint so Large/Larger never flashes
+            at the default size. The TextSizeToggle owns it thereafter. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var s=localStorage.getItem('dso-text-scale');if(s==='1.11'||s==='1.22'){document.documentElement.style.setProperty('--text-scale',s);}}catch(e){}})();`,
           }}
         />
         {/* Vantage analytics beacon — first-party, cookieless. Fires a pageview
