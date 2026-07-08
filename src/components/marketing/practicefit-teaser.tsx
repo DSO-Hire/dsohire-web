@@ -71,14 +71,15 @@ export function PracticeFitTeaser({
 
   return (
     <div
-      className="bg-card border border-[var(--rule-strong)] border-t-[3px] border-t-heritage overflow-hidden"
+      className="bg-heritage/[0.07] border border-heritage/35 border-t-[3px] border-t-heritage overflow-hidden"
       style={{
         boxShadow:
           "0 30px 60px -30px rgba(7,15,28,0.18), 0 10px 24px -12px rgba(7,15,28,0.10)",
       }}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between gap-4 px-6 py-4 bg-cream border-b border-[var(--rule)]">
+      {/* Header — light heritage band (Cam 2026-07-08: the demo should read
+          green so it stands out on the ivory page). */}
+      <div className="flex items-center justify-between gap-4 px-6 py-4 bg-heritage/[0.12] border-b border-heritage/20">
         <div>
           <Eyebrow className="text-heritage-deep mb-1">
             Try it · 3 questions · 30 seconds
@@ -93,7 +94,7 @@ export function PracticeFitTeaser({
             <span
               key={i}
               className={`block w-5 h-1 transition-colors ${
-                i < step ? "bg-heritage" : "bg-ivory-deep"
+                i < step ? "bg-heritage" : "bg-heritage/20"
               }`}
             />
           ))}
@@ -115,7 +116,7 @@ export function PracticeFitTeaser({
                 key={opt}
                 type="button"
                 onClick={() => pick(opt)}
-                className="text-left px-5 py-3.5 border border-[var(--rule-strong)] text-[14.5px] font-semibold text-ink bg-card hover:border-heritage hover:bg-cream/60 motion-safe:hover:-translate-y-0.5 transition-all"
+                className="text-left px-5 py-3.5 border border-heritage/30 text-sm font-semibold text-ink bg-card hover:border-heritage hover:bg-cream/60 motion-safe:hover:-translate-y-0.5 transition-all"
               >
                 {opt}
               </button>
