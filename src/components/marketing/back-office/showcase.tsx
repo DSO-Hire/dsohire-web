@@ -21,7 +21,7 @@
  * House rules: no site-shell imports; no scroll-jacking; 300–600ms settles.
  */
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Pause, Play } from "lucide-react";
 import { Eyebrow } from "@/components/brand/eyebrow";
 import { FrameChrome } from "./ui";
@@ -44,6 +44,18 @@ export function BackOfficeShowcase() {
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   // aria-live announces on text CHANGE, so deriving from `current` is enough.
   const announce = `Chapter ${current + 1} of ${CHAPTERS.length}: ${CHAPTERS[current].title}`;
+
+  // D-mark transition wipe — one-shot veil per chapter change (skips the
+  // initial play + reduced motion). Keyed by playNonce so the CSS draw
+  // restarts; unmounted after the 480ms animation completes.
+  const [wipeKey, setWipeKey] = useState<number | null>(null);
+  useEffect(() => {
+    if (!enhanced || playNonce < 2) return; // nonce 1 = initial play
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setWipeKey(playNonce);
+    const t = window.setTimeout(() => setWipeKey(null), 520);
+    return () => clearTimeout(t);
+  }, [playNonce, enhanced]);
 
   const onTablistKeyDown = (e: React.KeyboardEvent) => {
     const dir = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
@@ -150,7 +162,7 @@ export function BackOfficeShowcase() {
                 tallest chapter's height — no layout jump when chapters
                 advance. Inactive panels are visibility-hidden (still in the
                 DOM for SSR/SEO, out of the a11y tree + not focusable). */}
-            <div className="grid">
+            <div className="relative grid">
               {PANELS.map((Panel, i) => (
                 <div
                   key={i}
@@ -163,6 +175,34 @@ export function BackOfficeShowcase() {
                   <Panel active={i === current} enhanced={enhanced} nonce={playNonce} />
                 </div>
               ))}
+              {/* D-mark wipe — the brand signs the scene change. */}
+              {wipeKey !== null && (
+                <div
+                  key={wipeKey}
+                  aria-hidden
+                  className="bo-veil absolute inset-0 z-20 bg-ivory/95 grid place-items-center pointer-events-none opacity-0"
+                >
+                  <svg width="56" height="56" viewBox="0 0 44 44">
+                    <path
+                      className="bo-veil-arch stroke-ink"
+                      d="M 5 5 L 28 5 Q 40 5 40 17 L 40 27 Q 40 39 28 39 L 5 39"
+                      fill="none"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <line
+                      className="bo-veil-bar stroke-heritage"
+                      x1="8"
+                      y1="22"
+                      x2="24"
+                      y2="22"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </div>
+              )}
             </div>
           </FrameChrome>
         </div>

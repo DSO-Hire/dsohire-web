@@ -968,6 +968,33 @@ html, body {
   100% { box-shadow: 0 0 0 0 rgba(141, 184, 163, 0); }
 }
 
+/* Chapter-transition wipe — the D-mark draws on over an ivory veil
+   (~480ms one-shot), so chapter changes read as the brand signing the
+   scene instead of a hard cut. Same draw language as the rail logo /
+   BrandLoader. The veil element is mounted per transition (keyed), so
+   the animations restart cleanly. */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .bo-veil {
+    animation: bo-veil 480ms ease forwards;
+  }
+  .bo-veil-arch {
+    stroke-dasharray: 120;
+    stroke-dashoffset: 120;
+    animation: rail-draw 300ms cubic-bezier(0.22, 1, 0.36, 1) 40ms forwards;
+  }
+  .bo-veil-bar {
+    stroke-dasharray: 120;
+    stroke-dashoffset: 120;
+    animation: rail-draw 180ms cubic-bezier(0.22, 1, 0.36, 1) 230ms forwards;
+  }
+}
+@keyframes bo-veil {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 .film-scroll {
   scrollbar-width: thin;
   scrollbar-color: var(--color-heritage) transparent;
