@@ -18,7 +18,7 @@ export default async function AuthErrorPage({
   return (
     <SiteShell>
       <section className="pt-[160px] pb-24 px-6 sm:px-14 max-w-[640px] mx-auto text-center">
-        <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-4">
+        <div className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-4">
           Sign-in problem
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.1] text-ink mb-5">
@@ -32,19 +32,19 @@ export default async function AuthErrorPage({
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Link
             href="/sign-in"
-            className="inline-flex items-center px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center px-9 py-4 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
           >
             Request a New Link
           </Link>
           <Link
             href="/contact"
-            className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
+            className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-xs font-bold tracking-[2px] uppercase hover:border-ink transition-colors"
           >
             Contact Support
           </Link>
         </div>
         {reason && (
-          <p className="mt-12 text-[12px] text-slate-meta tracking-[0.5px]">
+          <p className="mt-12 text-xs text-slate-meta tracking-[0.5px]">
             Error code: <code className="font-mono">{reason}</code>
           </p>
         )}

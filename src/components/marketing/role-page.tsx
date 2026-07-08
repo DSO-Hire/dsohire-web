@@ -101,7 +101,7 @@ function Hero({
           </div>
           <div>
             <Eyebrow className="text-heritage-deep">For {label}</Eyebrow>
-            <div className="text-[12px] tracking-[0.4px] text-slate-meta">
+            <div className="text-xs tracking-[0.4px] text-slate-meta">
               {eyebrow}
             </div>
           </div>
@@ -175,7 +175,7 @@ function Advantages({ config }: { config: RoleConfig }) {
             >
               <div className="flex items-start gap-3.5">
                 <div className="h-7 w-7 bg-heritage/15 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-[11px] font-extrabold text-heritage-deep">
+                  <span className="text-2xs font-extrabold text-heritage-deep">
                     {i + 1}
                   </span>
                 </div>
@@ -183,7 +183,7 @@ function Advantages({ config }: { config: RoleConfig }) {
                   <h3 className="text-[16px] font-extrabold tracking-[-0.3px] text-ink mb-2 leading-tight">
                     {adv.title}
                   </h3>
-                  <p className="text-[14px] text-slate-body leading-[1.7]">
+                  <p className="text-sm text-slate-body leading-[1.7]">
                     {adv.body}
                   </p>
                 </div>
@@ -236,13 +236,13 @@ function Compensation({ config }: { config: RoleConfig }) {
         <h2 className="text-3xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-[1.1] text-ink mb-6">
           {config.compensation.title}
         </h2>
-        <div className="inline-flex items-center gap-3 mb-5 px-4 py-2.5 bg-card/70 border border-gold/40 text-[15px] font-semibold tracking-[-0.1px] text-ink">
+        <div className="inline-flex items-center gap-3 mb-5 px-4 py-2.5 bg-card/70 border border-gold/40 text-sm font-semibold tracking-[-0.1px] text-ink">
           {config.compensation.structure}
         </div>
-        <p className="text-[15px] text-ink leading-[1.75] max-w-[680px]">
+        <p className="text-sm text-ink leading-[1.75] max-w-[680px]">
           {config.compensation.notes}
         </p>
-        <p className="mt-5 text-[13px] text-slate-meta italic leading-[1.6]">
+        <p className="mt-5 text-xs text-slate-meta italic leading-[1.6]">
           We don&apos;t publish dollar ranges — comp varies too much by region,
           DSO, and individual experience to anchor on. Every job listing on
           DSO Hire surfaces the specific comp the DSO chooses to share.
@@ -321,7 +321,7 @@ function RelatedRoles({ config }: { config: RoleConfig }) {
             </div>
             <div className="flex-1 min-w-0">
               <Eyebrow className="text-heritage-deep mb-0.5">{r.eyebrow}</Eyebrow>
-              <div className="text-[15px] font-extrabold tracking-[-0.2px] text-ink leading-tight">
+              <div className="text-sm font-extrabold tracking-[-0.2px] text-ink leading-tight">
                 For {r.label}
               </div>
             </div>
@@ -376,7 +376,7 @@ function FinalCta({
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-5">
           Ready to see what&apos;s open?
         </h2>
-        <p className="text-[15px] sm:text-[16px] text-slate-body leading-[1.7] mb-9 max-w-[560px] mx-auto">
+        <p className="text-sm sm:text-[16px] text-slate-body leading-[1.7] mb-9 max-w-[560px] mx-auto">
           Browse current {config.label.toLowerCase()} roles at multi-location DSOs,
           or create a free profile so the right openings find you.
         </p>

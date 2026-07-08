@@ -24,7 +24,7 @@ export function PerJobAnalyticsCard({ metrics }: PerJobAnalyticsCardProps) {
   return (
     <section className="mb-10 border border-[var(--rule)] bg-card">
       <header className="px-6 pt-5 pb-3 border-b border-[var(--rule)]">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep">
           Performance · Last 30 days
         </div>
       </header>
@@ -57,22 +57,22 @@ export function PerJobAnalyticsCard({ metrics }: PerJobAnalyticsCardProps) {
 
       <div className="px-6 py-5 border-t border-[var(--rule)] grid grid-cols-1 md:grid-cols-[1fr_220px] gap-6">
         <div>
-          <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-2">
+          <div className="text-2xs font-bold tracking-[2px] uppercase text-slate-meta mb-2">
             Applications · last 30 days
           </div>
           <AppsSparkline data={metrics.apps_per_day} />
         </div>
         <div>
-          <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-2">
+          <div className="text-2xs font-bold tracking-[2px] uppercase text-slate-meta mb-2">
             Top sources
           </div>
           {metrics.top_sources.length === 0 ? (
-            <div className="flex items-start gap-2 text-[12px] text-slate-meta leading-relaxed">
+            <div className="flex items-start gap-2 text-xs text-slate-meta leading-relaxed">
               <Globe className="h-3.5 w-3.5 mt-0.5 shrink-0" aria-hidden />
               <span>
                 Source attribution starts populating when candidates apply
                 via tagged links (e.g.{" "}
-                <code className="text-[11px] bg-cream px-1 py-0.5">
+                <code className="text-2xs bg-cream px-1 py-0.5">
                   ?source=indeed
                 </code>
                 ).
@@ -83,7 +83,7 @@ export function PerJobAnalyticsCard({ metrics }: PerJobAnalyticsCardProps) {
               {metrics.top_sources.map((s) => (
                 <li
                   key={s.source}
-                  className="flex items-center justify-between text-[13px] text-ink"
+                  className="flex items-center justify-between text-xs text-ink"
                 >
                   <span className="truncate">{s.source}</span>
                   <span className="font-semibold tabular-nums text-slate-body">
@@ -112,7 +112,7 @@ function Tile({
 }) {
   return (
     <div className="px-6 py-5 border-r border-[var(--rule)] last:border-r-0 [&:nth-child(2n)]:md:border-r [&:nth-child(2n)]:border-r-0 md:[&:nth-child(2n)]:border-r">
-      <div className="flex items-center gap-1.5 text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-2">
+      <div className="flex items-center gap-1.5 text-2xs font-bold tracking-[2px] uppercase text-slate-meta mb-2">
         <Icon className="h-3 w-3" aria-hidden />
         {label}
       </div>
@@ -120,7 +120,7 @@ function Tile({
         {value}
       </div>
       {secondary && (
-        <div className="text-[11px] text-slate-body">{secondary}</div>
+        <div className="text-2xs text-slate-body">{secondary}</div>
       )}
     </div>
   );

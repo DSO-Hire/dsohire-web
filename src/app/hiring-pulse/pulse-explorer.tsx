@@ -21,10 +21,10 @@ export function PulseExplorer({ roles }: { roles: PulseRoleStat[] }) {
   if (roles.length === 0) {
     return (
       <div className="bg-card border border-[var(--rule-strong)] px-8 py-12 text-center">
-        <div className="text-[15px] font-extrabold text-ink mb-2">
+        <div className="text-sm font-extrabold text-ink mb-2">
           Not enough data yet — and we won&rsquo;t guess.
         </div>
-        <p className="text-[13px] text-slate-body leading-[1.7] max-w-[440px] mx-auto">
+        <p className="text-xs text-slate-body leading-[1.7] max-w-[440px] mx-auto">
           Pay statistics publish once a role has at least 20 live postings
           with visible pay. As the marketplace grows, this explorer fills in.
         </p>
@@ -61,7 +61,7 @@ export function PulseExplorer({ roles }: { roles: PulseRoleStat[] }) {
           <span className="text-[17px] font-extrabold tracking-[-0.3px] text-ink">
             {r.label}
           </span>
-          <span className="text-[10px] font-bold tracking-[1.2px] uppercase text-slate-meta">
+          <span className="text-2xs font-bold tracking-[1.2px] uppercase text-slate-meta">
             n = {r.n} live postings with visible pay
           </span>
         </div>
@@ -82,26 +82,26 @@ export function PulseExplorer({ roles }: { roles: PulseRoleStat[] }) {
             className="absolute top-[28px] w-[3px] h-[30px] bg-ink transition-all duration-700"
             style={{ left: pct(r.median) }}
           >
-            <span className="absolute -top-[24px] left-1/2 -translate-x-1/2 whitespace-nowrap text-[15px] font-extrabold tabular-nums text-ink">
+            <span className="absolute -top-[24px] left-1/2 -translate-x-1/2 whitespace-nowrap text-sm font-extrabold tabular-nums text-ink">
               {fmt(r.median, r.unit)}
               {r.unit} median
             </span>
           </div>
           <span
-            className="absolute top-[56px] -translate-x-1/2 whitespace-nowrap text-[11px] font-bold text-slate-meta transition-all duration-700"
+            className="absolute top-[56px] -translate-x-1/2 whitespace-nowrap text-2xs font-bold text-slate-meta transition-all duration-700"
             style={{ left: pct(r.p25) }}
           >
             p25 · {fmt(r.p25, r.unit)}
           </span>
           <span
-            className="absolute top-[56px] -translate-x-1/2 whitespace-nowrap text-[11px] font-bold text-slate-meta transition-all duration-700"
+            className="absolute top-[56px] -translate-x-1/2 whitespace-nowrap text-2xs font-bold text-slate-meta transition-all duration-700"
             style={{ left: pct(r.p75) }}
           >
             p75 · {fmt(r.p75, r.unit)}
           </span>
         </div>
 
-        <div className="flex flex-wrap justify-between gap-2 border-t border-dashed border-[var(--rule-strong)] pt-4 mt-5 text-[11px] text-slate-meta leading-[1.6]">
+        <div className="flex flex-wrap justify-between gap-2 border-t border-dashed border-[var(--rule-strong)] pt-4 mt-5 text-2xs text-slate-meta leading-[1.6]">
           <span>Band = 25th–75th percentile of posted-range midpoints</span>
           <span>
             Posted ranges, not settled salaries — and nothing publishes under

@@ -79,16 +79,16 @@ export function VsTable({
           <tbody>
             {rows.map((r) => (
               <tr key={r.dimension} className="border-t border-[var(--rule)] align-top">
-                <td className="px-6 py-5 text-[14px] font-extrabold tracking-[-0.2px] text-ink">
+                <td className="px-6 py-5 text-sm font-extrabold tracking-[-0.2px] text-ink">
                   {r.dimension}
                 </td>
-                <td className="px-6 py-5 text-[14px] text-slate-body leading-[1.6]">
+                <td className="px-6 py-5 text-sm text-slate-body leading-[1.6]">
                   <span className="inline-flex gap-2">
                     <Minus className="h-3.5 w-3.5 text-slate-meta shrink-0 mt-1" aria-hidden />
                     <span>{r.them}</span>
                   </span>
                 </td>
-                <td className="px-6 py-5 text-[14px] text-slate-body leading-[1.6]" style={{ background: "var(--heritage-tint)" }}>
+                <td className="px-6 py-5 text-sm text-slate-body leading-[1.6]" style={{ background: "var(--heritage-tint)" }}>
                   <span className="inline-flex gap-2">
                     <Check className="h-3.5 w-3.5 text-heritage-deep shrink-0 mt-1" aria-hidden />
                     <span>{r.us}</span>

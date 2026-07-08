@@ -44,11 +44,11 @@ export default async function OutreachTemplatesPage() {
         <h2 className="text-2xl font-extrabold tracking-[-0.6px] text-ink mb-2">
           Outreach templates
         </h2>
-        <p className="text-[14px] text-slate-body leading-relaxed">
+        <p className="text-sm text-slate-body leading-relaxed">
           Save outreach messages you send often. Templates fill the
           modal&apos;s subject + body when you pick one. Merge fields
           like{" "}
-          <code className="text-[12px] bg-cream px-1 py-0.5 rounded">
+          <code className="text-xs bg-cream px-1 py-0.5 rounded">
             {"{{candidate.first_name}}"}
           </code>{" "}
           get resolved server-side at send time.

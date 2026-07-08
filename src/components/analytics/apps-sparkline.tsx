@@ -44,7 +44,7 @@ export function AppsSparkline({ data }: AppsSparklineProps) {
 
   if (data.length === 0 || data.every((d) => d.count === 0)) {
     return (
-      <div className="h-20 flex items-center text-[12px] text-slate-meta italic">
+      <div className="h-20 flex items-center text-xs text-slate-meta italic">
         No applications yet in this window.
       </div>
     );
@@ -147,7 +147,7 @@ export function AppsSparkline({ data }: AppsSparklineProps) {
       </svg>
 
       {/* X-axis labels */}
-      <div className="mt-1 flex justify-between text-[10px] text-slate-meta uppercase tracking-wide">
+      <div className="mt-1 flex justify-between text-2xs text-slate-meta uppercase tracking-wide">
         <span>{leftLabel}</span>
         <span>{midLabel}</span>
         <span>{rightLabel}</span>
@@ -186,7 +186,7 @@ function SparkPopover({
       }}
     >
       <div
-        className="rounded-md bg-hero text-hero-foreground px-3 py-2 text-[12px] shadow-lg whitespace-nowrap pointer-events-auto"
+        className="rounded-md bg-hero text-hero-foreground px-3 py-2 text-xs shadow-lg whitespace-nowrap pointer-events-auto"
         onClick={(e) => e.stopPropagation()}
         data-role="spark-dot"
       >
@@ -215,7 +215,7 @@ function SparkPopover({
             ))}
           </ul>
         ) : (
-          <div className="text-[#A8D4B6] text-[11px]">Click to open</div>
+          <div className="text-[#A8D4B6] text-2xs">Click to open</div>
         )}
       </div>
     </div>

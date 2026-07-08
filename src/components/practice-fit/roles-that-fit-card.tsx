@@ -58,9 +58,9 @@ export function RolesThatFitCard({
             Roles that fit you ·
           </Eyebrow>
           {product === "dsofit" ? (
-            <DsoFitWordmark surface="light" className="text-[14px]" />
+            <DsoFitWordmark surface="light" className="text-sm" />
           ) : (
-            <PracticeFitWordmark surface="light" className="text-[14px]" />
+            <PracticeFitWordmark surface="light" className="text-sm" />
           )}
         </div>
         <Link
@@ -82,18 +82,18 @@ export function RolesThatFitCard({
               className="group flex items-center justify-between gap-3 px-4 py-3 hover:bg-cream transition-colors"
             >
               <div className="min-w-0">
-                <p className="text-[14px] font-semibold text-ink truncate group-hover:text-heritage-deep transition-colors">
+                <p className="text-sm font-semibold text-ink truncate group-hover:text-heritage-deep transition-colors">
                   {r.title}
                 </p>
                 {sub && (
-                  <p className="text-[12px] text-slate-meta truncate">{sub}</p>
+                  <p className="text-xs text-slate-meta truncate">{sub}</p>
                 )}
                 {chips.length > 0 && (
                   <span className="mt-1.5 hidden sm:flex items-center gap-1.5 flex-wrap">
                     {chips.map((c) => (
                       <span
                         key={c}
-                        className="inline-flex items-center px-1.5 py-0.5 bg-heritage/10 text-heritage-deep text-[10px] font-semibold"
+                        className="inline-flex items-center px-1.5 py-0.5 bg-heritage/10 text-heritage-deep text-2xs font-semibold"
                       >
                         {c}
                       </span>

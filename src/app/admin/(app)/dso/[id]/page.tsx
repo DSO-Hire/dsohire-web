@@ -79,7 +79,7 @@ export default async function DsoAccount360({
           {dso.slug && (
             <Link
               href={`/companies/${dso.slug}`}
-              className="inline-flex items-center gap-1.5 mt-2 text-[12px] text-heritage-deep hover:text-ink transition-colors"
+              className="inline-flex items-center gap-1.5 mt-2 text-xs text-heritage-deep hover:text-ink transition-colors"
             >
               /companies/{dso.slug} <ExternalLink className="h-3 w-3" />
             </Link>
@@ -88,7 +88,7 @@ export default async function DsoAccount360({
         {founder && (
           <Link
             href={`/admin/view-as/dso/${dso.id}`}
-            className="inline-flex items-center gap-2 px-3 py-1.5 text-[11px] font-bold tracking-[1px] uppercase border border-heritage-deep/40 text-heritage-deep hover:bg-heritage/10 transition-colors"
+            className="inline-flex items-center gap-2 px-3 py-1.5 text-2xs font-bold tracking-[1px] uppercase border border-heritage-deep/40 text-heritage-deep hover:bg-heritage/10 transition-colors"
           >
             <Eye className="h-3.5 w-3.5" /> View as (read-only)
           </Link>
@@ -100,7 +100,7 @@ export default async function DsoAccount360({
           {dso.health.map((h) => (
             <span
               key={h}
-              className="inline-block px-2 py-1 text-[10px] font-bold tracking-[0.5px] uppercase text-danger bg-danger/10"
+              className="inline-block px-2 py-1 text-2xs font-bold tracking-[0.5px] uppercase text-danger bg-danger/10"
             >
               {h}
             </span>
@@ -171,7 +171,7 @@ export default async function DsoAccount360({
             )}
           </div>
           {!founder && (
-            <p className="mt-3 text-[11px] text-slate-meta">
+            <p className="mt-3 text-2xs text-slate-meta">
               Suspend / delete are founder-only.
             </p>
           )}
@@ -203,11 +203,11 @@ async function deleteAction(formData: FormData) {
 /* ───── presentational ───── */
 
 const SAFE_BTN =
-  "px-3 py-1.5 text-[11px] font-bold tracking-[1px] uppercase bg-primary text-primary-foreground hover:bg-primary/90 transition-colors";
+  "px-3 py-1.5 text-2xs font-bold tracking-[1px] uppercase bg-primary text-primary-foreground hover:bg-primary/90 transition-colors";
 const SUBTLE_BTN =
-  "px-3 py-1.5 text-[11px] font-bold tracking-[1px] uppercase border border-[var(--rule-strong)] text-slate-body hover:bg-cream/60 transition-colors";
+  "px-3 py-1.5 text-2xs font-bold tracking-[1px] uppercase border border-[var(--rule-strong)] text-slate-body hover:bg-cream/60 transition-colors";
 const DESTRUCTIVE_BTN =
-  "px-3 py-1.5 text-[11px] font-bold tracking-[1px] uppercase border border-danger/40 text-danger hover:bg-danger/10 transition-colors";
+  "px-3 py-1.5 text-2xs font-bold tracking-[1px] uppercase border border-danger/40 text-danger hover:bg-danger/10 transition-colors";
 
 function StatusForm({
   dsoId,
@@ -257,7 +257,7 @@ function BackLink() {
   return (
     <Link
       href="/admin/search"
-      className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-6"
+      className="inline-flex items-center gap-2 text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-6"
     >
       <ArrowLeft className="h-3.5 w-3.5" /> Search
     </Link>
@@ -272,7 +272,7 @@ function StatusChip({ status }: { status: string | null }) {
         ? "text-danger bg-danger/10"
         : "text-slate-body bg-cream";
   return (
-    <span className={`inline-block px-2 py-0.5 text-[10px] font-bold tracking-[1px] uppercase ${tone}`}>
+    <span className={`inline-block px-2 py-0.5 text-2xs font-bold tracking-[1px] uppercase ${tone}`}>
       {status ?? "—"}
     </span>
   );
@@ -281,7 +281,7 @@ function StatusChip({ status }: { status: string | null }) {
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="border border-[var(--rule)] bg-card p-5">
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+      <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
         {title}
       </div>
       {children}
@@ -291,7 +291,7 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
 
 function Row({ k, v }: { k: string; v: string }) {
   return (
-    <div className="flex items-center justify-between gap-4 py-1 text-[13px]">
+    <div className="flex items-center justify-between gap-4 py-1 text-xs">
       <span className="text-slate-meta">{k}</span>
       <span className="text-ink font-semibold text-right">{v}</span>
     </div>

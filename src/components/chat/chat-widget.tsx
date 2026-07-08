@@ -255,12 +255,12 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
               <MessageCircle className="h-4 w-4 text-[var(--heritage-bright,#8db8a3)]" />
             )}
             <div className="flex-1 min-w-0">
-              <div className="text-[13px] font-bold tracking-[0.3px] truncate">
+              <div className="text-xs font-bold tracking-[0.3px] truncate">
                 {view === "thread" && active ? active.title
                   : view === "new" ? "New message" : "Messages"}
               </div>
               {view === "thread" && active && (
-                <div className="text-[10px] text-hero-foreground/60 flex items-center gap-1.5">
+                <div className="text-2xs text-hero-foreground/60 flex items-center gap-1.5">
                   {active.kind === "dm" && active.other_auth_id && online.has(active.other_auth_id) && (
                     <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--heritage-bright,#8db8a3)]" />
                   )}
@@ -287,11 +287,11 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
                 <div className="relative">
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-meta" />
                   <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search conversations"
-                    className="w-full h-8 pl-8 pr-3 bg-cream border border-[var(--rule)] text-[13px] text-ink focus:outline-none focus:border-heritage" />
+                    className="w-full h-8 pl-8 pr-3 bg-cream border border-[var(--rule)] text-xs text-ink focus:outline-none focus:border-heritage" />
                 </div>
               </div>
               {threads.length === 0 ? (
-                <div className="p-6 text-center text-[13px] text-slate-meta">
+                <div className="p-6 text-center text-xs text-slate-meta">
                   No conversations yet. Tap + to message a teammate.
                 </div>
               ) : (
@@ -312,7 +312,7 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
                     key={m}
                     onClick={() => setNewMode(m)}
                     className={
-                      "flex-1 py-1.5 text-[11px] font-bold tracking-[1px] uppercase rounded transition-colors " +
+                      "flex-1 py-1.5 text-2xs font-bold tracking-[1px] uppercase rounded transition-colors " +
                       (newMode === m
                         ? "bg-primary text-primary-foreground"
                         : "bg-cream text-slate-body hover:text-ink")
@@ -330,28 +330,28 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
                     onChange={(e) => setGroupName(e.target.value)}
                     placeholder="Group name (optional)"
                     maxLength={80}
-                    className="w-full h-8 px-3 bg-cream border border-[var(--rule)] text-[13px] text-ink focus:outline-none focus:border-heritage"
+                    className="w-full h-8 px-3 bg-cream border border-[var(--rule)] text-xs text-ink focus:outline-none focus:border-heritage"
                   />
                   <button
                     onClick={startGroup}
                     disabled={groupSel.length < 2 || creatingGroup}
-                    className="w-full py-2 bg-heritage text-primary-foreground text-[12px] font-bold tracking-[1px] uppercase rounded disabled:opacity-50 hover:bg-heritage-deep transition-colors"
+                    className="w-full py-2 bg-heritage text-primary-foreground text-xs font-bold tracking-[1px] uppercase rounded disabled:opacity-50 hover:bg-heritage-deep transition-colors"
                   >
                     {creatingGroup
                       ? "Creating…"
                       : `Create group${groupSel.length ? ` (${groupSel.length})` : ""}`}
                   </button>
                   {groupSel.length === 1 && (
-                    <p className="text-[11px] text-slate-meta">Pick at least two teammates.</p>
+                    <p className="text-2xs text-slate-meta">Pick at least two teammates.</p>
                   )}
                 </div>
               )}
 
-              <div className="px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+              <div className="px-4 py-2 text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta">
                 {newMode === "group" ? "Add teammates" : "Your team"}
               </div>
               {teammates.length === 0 ? (
-                <div className="p-6 text-center text-[13px] text-slate-meta">No teammates yet.</div>
+                <div className="p-6 text-center text-xs text-slate-meta">No teammates yet.</div>
               ) : teammates.map((mate) => {
                 const picked = groupSel.includes(mate.dso_user_id);
                 return (
@@ -366,8 +366,8 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
                   >
                     <Avatar initials={mate.initials} imageUrl={mate.avatar_url} online={!!mate.auth_user_id && online.has(mate.auth_user_id)} />
                     <div className="min-w-0 flex-1">
-                      <div className="text-[13px] font-semibold text-ink truncate">{mate.name}</div>
-                      <div className="text-[11px] text-slate-meta truncate">{mate.title || mate.role}</div>
+                      <div className="text-xs font-semibold text-ink truncate">{mate.name}</div>
+                      <div className="text-2xs text-slate-meta truncate">{mate.title || mate.role}</div>
                     </div>
                     {newMode === "group" && (
                       <span
@@ -393,7 +393,7 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
                 {loadingMsgs ? (
                   <div className="flex justify-center py-6"><Loader2 className="h-4 w-4 animate-spin text-slate-meta" /></div>
                 ) : messages.length === 0 ? (
-                  <div className="text-center text-[12px] text-slate-meta py-6">
+                  <div className="text-center text-xs text-slate-meta py-6">
                     No messages yet. Say hello.
                   </div>
                 ) : messages.map((m) => {
@@ -413,11 +413,11 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
                       )}
                       <div className="max-w-[78%]">
                         {showSender && (
-                          <div className="text-[10px] font-semibold text-slate-meta mb-0.5 ml-0.5">
+                          <div className="text-2xs font-semibold text-slate-meta mb-0.5 ml-0.5">
                             {m.sender_name.split(" ")[0]}
                           </div>
                         )}
-                        <div className={"px-3 py-2 text-[13px] leading-snug " +
+                        <div className={"px-3 py-2 text-xs leading-snug " +
                           (m.mine ? "bg-heritage text-primary-foreground" : "bg-card border border-[var(--rule)] text-ink")}>
                           {m.body}
                           <div className={"mt-0.5 text-[9px] " + (m.mine ? "text-primary-foreground/60" : "text-slate-meta")}>
@@ -433,7 +433,7 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
                 <textarea value={draft} onChange={(e) => setDraft(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void send(); } }}
                   rows={1} placeholder="Write a message…"
-                  className="flex-1 resize-none max-h-24 px-3 py-2 bg-cream border border-[var(--rule)] text-[13px] text-ink focus:outline-none focus:border-heritage" />
+                  className="flex-1 resize-none max-h-24 px-3 py-2 bg-cream border border-[var(--rule)] text-xs text-ink focus:outline-none focus:border-heritage" />
                 <button onClick={() => void send()} disabled={sending || !draft.trim()}
                   aria-label="Send"
                   className="h-9 w-9 flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 shrink-0">
@@ -448,11 +448,11 @@ export function ChatWidget({ dsoId, authId }: { dsoId: string; authId: string })
         <button onClick={() => setOpen(true)} aria-label="Open messages"
           className="w-[260px] max-w-[calc(100vw-2rem)] bg-primary text-primary-foreground rounded-t-lg shadow-xl flex items-center gap-2.5 px-4 py-3 hover:bg-primary/90 transition-colors">
           <MessageCircle className="h-4 w-4 text-[var(--heritage-bright,#8db8a3)] shrink-0" />
-          <span className="text-[13px] font-bold tracking-[0.3px] flex-1 text-left">
+          <span className="text-xs font-bold tracking-[0.3px] flex-1 text-left">
             Messages
           </span>
           {totalUnread > 0 && (
-            <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-heritage text-primary-foreground text-[11px] font-bold flex items-center justify-center">
+            <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-heritage text-primary-foreground text-2xs font-bold flex items-center justify-center">
               {totalUnread > 99 ? "99+" : totalUnread}
             </span>
           )}
@@ -474,7 +474,7 @@ function ThreadGroup({
   if (items.length === 0) return null;
   return (
     <div>
-      <div className="px-4 pt-3 pb-1 text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
+      <div className="px-4 pt-3 pb-1 text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep">
         {label}
       </div>
       {items.map((t) => (
@@ -484,17 +484,17 @@ function ThreadGroup({
             online={t.kind === "dm" && !!t.other_auth_id && online.has(t.other_auth_id)} />
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
-              <span className={"text-[13px] truncate " + (t.unread > 0 ? "font-bold text-ink" : "font-semibold text-ink")}>
+              <span className={"text-xs truncate " + (t.unread > 0 ? "font-bold text-ink" : "font-semibold text-ink")}>
                 {t.title}
               </span>
-              <span className="text-[10px] text-slate-meta shrink-0">{relTime(t.last_at)}</span>
+              <span className="text-2xs text-slate-meta shrink-0">{relTime(t.last_at)}</span>
             </div>
             <div className="flex items-center justify-between gap-2">
-              <span className={"text-[11px] truncate " + (t.unread > 0 ? "text-ink" : "text-slate-meta")}>
+              <span className={"text-2xs truncate " + (t.unread > 0 ? "text-ink" : "text-slate-meta")}>
                 {t.last_message ?? t.subtitle}
               </span>
               {t.unread > 0 && (
-                <span className="shrink-0 min-w-[18px] h-[18px] px-1 rounded-full bg-heritage text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                <span className="shrink-0 min-w-[18px] h-[18px] px-1 rounded-full bg-heritage text-primary-foreground text-2xs font-bold flex items-center justify-center">
                   {t.unread}
                 </span>
               )}
@@ -531,7 +531,7 @@ function Avatar({
           className="h-9 w-9 rounded-full object-cover"
         />
       ) : (
-        <div className="h-9 w-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[12px] font-bold">
+        <div className="h-9 w-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">
           {initials}
         </div>
       )}

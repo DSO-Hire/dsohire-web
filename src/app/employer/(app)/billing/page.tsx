@@ -141,7 +141,7 @@ export default async function EmployerBillingPage({ searchParams }: PageProps) {
 
       {/* Current plan card */}
       <section className="mb-12">
-        <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+        <h2 className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
           Current Plan
         </h2>
         <div className="border border-[var(--rule-strong)] bg-cream/40 p-7 max-w-[820px]">
@@ -154,7 +154,7 @@ export default async function EmployerBillingPage({ searchParams }: PageProps) {
                 <StatusBadge status={subscription.status} />
               </div>
               {tierConfig && (
-                <div className="text-[14px] text-slate-body">
+                <div className="text-sm text-slate-body">
                   $
                   {(billingPeriod === "annual"
                     ? tierConfig.annualMonthlyEquivalent
@@ -212,13 +212,13 @@ export default async function EmployerBillingPage({ searchParams }: PageProps) {
           <form action={openCustomerPortal} className="mt-7">
             <button
               type="submit"
-              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-xs font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
             >
               <Settings className="h-4 w-4" />
               Manage Subscription
             </button>
           </form>
-          <p className="mt-3 text-[13px] text-slate-meta">
+          <p className="mt-3 text-xs text-slate-meta">
             Opens Stripe&apos;s Customer Portal. Update card, change plan,
             cancel, or download receipts there.
           </p>
@@ -228,7 +228,7 @@ export default async function EmployerBillingPage({ searchParams }: PageProps) {
       {/* Seat packs (#88) */}
       {showSeatPacks && seatCapStatus && (
         <section className="mb-12">
-          <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+          <h2 className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
             Seats
           </h2>
           <SeatPackControl
@@ -245,13 +245,13 @@ export default async function EmployerBillingPage({ searchParams }: PageProps) {
 
       {/* Invoice history */}
       <section>
-        <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+        <h2 className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
           Invoice History
         </h2>
         {invoices.length === 0 ? (
           <div className="border border-[var(--rule)] bg-cream p-8 max-w-[820px]">
             <Receipt className="h-7 w-7 text-slate-meta mb-3" />
-            <p className="text-[14px] text-slate-body leading-relaxed">
+            <p className="text-sm text-slate-body leading-relaxed">
               No invoices yet. Your first invoice will appear here once
               Stripe processes the next billing cycle.
             </p>
@@ -306,13 +306,13 @@ interface InvoiceRow {
 function Header() {
   return (
     <header className="mb-10">
-      <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
+      <div className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
         Billing
       </div>
       <h1 className="text-3xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-tight text-ink">
         Subscription &amp; invoices
       </h1>
-      <p className="mt-3 text-[14px] text-slate-body max-w-[640px]">
+      <p className="mt-3 text-sm text-slate-body max-w-[640px]">
         Your current plan, billing cycle, and history. Card changes, plan
         changes, and cancellations happen in the Stripe Customer Portal.
       </p>
@@ -323,7 +323,7 @@ function Header() {
 function PortalErrorBanner() {
   return (
     <div className="mb-8 max-w-[820px] bg-danger-bg border-l-4 border-danger p-4">
-      <p className="text-[14px] text-danger">
+      <p className="text-sm text-danger">
         <strong className="font-semibold">Couldn&apos;t open the Customer Portal.</strong>{" "}
         Refresh and try again, or email {SUPPORT_EMAIL} if it persists.
       </p>
@@ -336,8 +336,8 @@ function WarningBanner({ title, body }: { title: string; body: string }) {
     <div className="mb-8 max-w-[820px] bg-warning-bg border-l-4 border-warning p-4 flex gap-3">
       <AlertTriangle className="h-4 w-4 text-warning flex-shrink-0 mt-0.5" />
       <div>
-        <p className="text-[14px] text-warning font-semibold">{title}</p>
-        <p className="mt-1 text-[13px] text-warning/85 leading-relaxed">
+        <p className="text-sm text-warning font-semibold">{title}</p>
+        <p className="mt-1 text-xs text-warning/85 leading-relaxed">
           {body}
         </p>
       </div>
@@ -352,14 +352,14 @@ function NoSubscriptionEmpty() {
       <h2 className="text-2xl font-extrabold tracking-[-0.5px] text-ink mb-3">
         Activate your subscription.
       </h2>
-      <p className="text-[14px] text-slate-body leading-relaxed mb-7">
+      <p className="text-sm text-slate-body leading-relaxed mb-7">
         You need an active subscription to post jobs. Pick a plan, run
         through Stripe Checkout (test mode for now), and you&apos;ll be
         billed monthly.
       </p>
       <Link
         href="/employer/checkout"
-        className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
+        className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-xs font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
       >
         Start Checkout
       </Link>
@@ -390,10 +390,10 @@ function StatusBadge({ status }: { status: string }) {
 function Field({ label, value }: { label: React.ReactNode; value: React.ReactNode }) {
   return (
     <div>
-      <dt className="text-[10px] font-bold tracking-[1.8px] uppercase text-slate-meta mb-1">
+      <dt className="text-2xs font-bold tracking-[1.8px] uppercase text-slate-meta mb-1">
         {label}
       </dt>
-      <dd className="text-[14px] text-ink">{value}</dd>
+      <dd className="text-sm text-ink">{value}</dd>
     </div>
   );
 }
@@ -406,10 +406,10 @@ function InvoiceRowItem({ invoice }: { invoice: InvoiceRow }) {
     <li className="border-b border-[var(--rule)] py-4 px-2 flex items-center gap-6 hover:bg-cream/40 transition-colors">
       <Receipt className="h-4 w-4 text-slate-meta flex-shrink-0" />
       <div className="flex-1 min-w-0">
-        <div className="text-[14px] font-semibold text-ink">
+        <div className="text-sm font-semibold text-ink">
           {dollars}
         </div>
-        <div className="text-[12px] text-slate-meta tracking-[0.3px]">
+        <div className="text-xs text-slate-meta tracking-[0.3px]">
           {formatDate(date)} ·{" "}
           <span
             className={
@@ -430,7 +430,7 @@ function InvoiceRowItem({ invoice }: { invoice: InvoiceRow }) {
           href={invoice.hosted_invoice_url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink inline-flex items-center gap-1.5 transition-colors"
+          className="text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink inline-flex items-center gap-1.5 transition-colors"
         >
           View
           <ExternalLink className="h-3 w-3" />

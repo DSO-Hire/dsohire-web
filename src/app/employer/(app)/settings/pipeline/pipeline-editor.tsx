@@ -485,7 +485,7 @@ function StageRow({
               type="button"
               onClick={() => recolor(null)}
               title="Reset to default"
-              className="col-span-5 mb-1 text-[10px] tracking-[1px] uppercase font-semibold text-slate-meta hover:text-ink text-left"
+              className="col-span-5 mb-1 text-2xs tracking-[1px] uppercase font-semibold text-slate-meta hover:text-ink text-left"
             >
               Reset to default
             </button>
@@ -560,7 +560,7 @@ function StageRow({
           </button>
         )}
         {rowError && (
-          <p className="mt-1 inline-flex items-center gap-1 text-[12px] text-danger">
+          <p className="mt-1 inline-flex items-center gap-1 text-xs text-danger">
             <AlertTriangle className="size-3 shrink-0" />
             {rowError}
           </p>
@@ -569,7 +569,7 @@ function StageRow({
 
       {/* Kind badge */}
       <span
-        className="inline-flex items-center gap-1 rounded border border-[var(--rule)] bg-cream/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[1.5px] text-slate-meta"
+        className="inline-flex items-center gap-1 rounded border border-[var(--rule)] bg-cream/40 px-2 py-0.5 text-2xs font-bold uppercase tracking-[1.5px] text-slate-meta"
         title={`System kind: ${stage.kind}`}
       >
         {KIND_DEFAULT_LABELS[stage.kind]}
@@ -578,7 +578,7 @@ function StageRow({
       {/* Default marker */}
       {stage.is_default && (
         <span
-          className="inline-flex items-center gap-1 rounded border border-heritage/30 bg-heritage/5 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[1.5px] text-heritage"
+          className="inline-flex items-center gap-1 rounded border border-heritage/30 bg-heritage/5 px-1.5 py-0.5 text-2xs font-bold uppercase tracking-[1.5px] text-heritage"
           title="Default landing stage for this kind"
         >
           <Star className="size-3" />
@@ -589,7 +589,7 @@ function StageRow({
       {/* Hidden marker */}
       {stage.is_hidden && (
         <span
-          className="inline-flex items-center gap-1 rounded border border-[var(--rule)] bg-cream/50 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[1.5px] text-slate-meta"
+          className="inline-flex items-center gap-1 rounded border border-[var(--rule)] bg-cream/50 px-1.5 py-0.5 text-2xs font-bold uppercase tracking-[1.5px] text-slate-meta"
           title="Collapsed on kanban — applications already in this stage are unaffected"
         >
           <EyeOff className="size-3" />
@@ -744,11 +744,11 @@ function AddStageForm({ canEdit, atCap, onAdded }: AddStageFormProps) {
   if (!canEdit) {
     return (
       <div className="flex items-center justify-between border border-dashed border-[var(--rule)] bg-cream/30 px-4 py-3">
-        <span className="inline-flex items-center gap-2 text-[13px] text-slate-meta">
+        <span className="inline-flex items-center gap-2 text-xs text-slate-meta">
           <Plus className="size-3.5" /> Add stage
         </span>
         <span
-          className="text-[11px] text-slate-meta"
+          className="text-2xs text-slate-meta"
           title="Upgrade to Growth to customize"
         >
           Growth+ feature
@@ -759,7 +759,7 @@ function AddStageForm({ canEdit, atCap, onAdded }: AddStageFormProps) {
 
   if (atCap) {
     return (
-      <div className="flex items-center gap-2 border border-dashed border-[var(--rule)] bg-cream/30 px-4 py-3 text-[12px] text-slate-meta">
+      <div className="flex items-center gap-2 border border-dashed border-[var(--rule)] bg-cream/30 px-4 py-3 text-xs text-slate-meta">
         <AlertTriangle className="size-3.5 text-warning" />
         You&apos;ve hit the {MAX_STAGES_PER_DSO}-stage limit. Delete or
         hide a stage to add a new one.
@@ -772,7 +772,7 @@ function AddStageForm({ canEdit, atCap, onAdded }: AddStageFormProps) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 rounded border border-dashed border-[var(--rule-strong)] bg-card px-4 py-2.5 text-[13px] font-semibold text-ink hover:bg-cream/50"
+        className="inline-flex items-center gap-1.5 rounded border border-dashed border-[var(--rule-strong)] bg-card px-4 py-2.5 text-xs font-semibold text-ink hover:bg-cream/50"
       >
         <Plus className="size-3.5" />
         Add stage
@@ -789,7 +789,7 @@ function AddStageForm({ canEdit, atCap, onAdded }: AddStageFormProps) {
         <div>
           <label
             htmlFor="add-stage-label"
-            className="mb-1 block text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep"
+            className="mb-1 block text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep"
           >
             Label
           </label>
@@ -806,7 +806,7 @@ function AddStageForm({ canEdit, atCap, onAdded }: AddStageFormProps) {
         <div>
           <label
             htmlFor="add-stage-kind"
-            className="mb-1 block text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep"
+            className="mb-1 block text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep"
           >
             Kind
           </label>
@@ -829,7 +829,7 @@ function AddStageForm({ canEdit, atCap, onAdded }: AddStageFormProps) {
       </div>
 
       <div>
-        <span className="mb-1 block text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
+        <span className="mb-1 block text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep">
           Color
         </span>
         <div className="flex flex-wrap gap-1.5">
@@ -837,7 +837,7 @@ function AddStageForm({ canEdit, atCap, onAdded }: AddStageFormProps) {
             type="button"
             onClick={() => setColor(null)}
             className={
-              "rounded border px-2 py-1 text-[11px] " +
+              "rounded border px-2 py-1 text-2xs " +
               (color === null
                 ? "border-heritage text-ink font-semibold"
                 : "border-[var(--rule)] text-slate-meta hover:text-ink")
@@ -885,14 +885,14 @@ function AddStageForm({ canEdit, atCap, onAdded }: AddStageFormProps) {
             reset();
             setOpen(false);
           }}
-          className="inline-flex items-center gap-1 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-2 text-[12px] font-semibold text-slate-body hover:bg-cream/60"
+          className="inline-flex items-center gap-1 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-2 text-xs font-semibold text-slate-body hover:bg-cream/60"
         >
           <X className="size-3.5" /> Cancel
         </button>
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center gap-1 rounded-md bg-heritage px-3 py-2 text-[12px] font-semibold text-primary-foreground hover:bg-heritage-deep disabled:opacity-40"
+          className="inline-flex items-center gap-1 rounded-md bg-heritage px-3 py-2 text-xs font-semibold text-primary-foreground hover:bg-heritage-deep disabled:opacity-40"
         >
           {pending ? (
             <Loader2 className="size-3.5 animate-spin" />

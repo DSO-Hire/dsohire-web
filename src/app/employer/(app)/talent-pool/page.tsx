@@ -451,7 +451,7 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
         <h1 className="font-display text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-3">
           Find candidates before they apply.
         </h1>
-        <p className="text-[14px] text-slate-body leading-relaxed">
+        <p className="text-sm text-slate-body leading-relaxed">
           Search opt-in candidates across DSO Hire, save the best fits to
           your DSO&apos;s pool, and reach out when a matching role opens.
           Only candidates who&apos;ve enabled discoverability appear in
@@ -500,7 +500,7 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
             <form
               action="/employer/talent-pool"
               method="get"
-              className="mt-4 mb-2 flex flex-wrap items-center gap-2 text-[12px]"
+              className="mt-4 mb-2 flex flex-wrap items-center gap-2 text-xs"
             >
               {/* Persist current filter state so the picker doesn't wipe
                   active filter selections on submit. */}
@@ -531,7 +531,7 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
                 id="fit_job"
                 name="fit_job"
                 defaultValue={fitJobId}
-                className="border border-[var(--rule)] bg-card px-2 py-1 text-[12px] text-ink"
+                className="border border-[var(--rule)] bg-card px-2 py-1 text-xs text-ink"
               >
                 <option value="">— pick a job —</option>
                 {fitJobOptions.map((j) => (
@@ -549,7 +549,7 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
               {fitJobSelected && (
                 <Link
                   href="/employer/talent-pool"
-                  className="text-[11px] text-slate-meta hover:text-ink underline"
+                  className="text-2xs text-slate-meta hover:text-ink underline"
                 >
                   Clear ranking
                 </Link>
@@ -557,7 +557,7 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
             </form>
           )}
 
-          <div className="mt-6 mb-4 text-[12px] text-slate-meta tabular">
+          <div className="mt-6 mb-4 text-xs text-slate-meta tabular">
             {discoverResults.length === 0
               ? "No candidates match these filters."
               : `${discoverResults.length} candidate${discoverResults.length === 1 ? "" : "s"} shown${discoverTotal > discoverResults.length ? ` of ${discoverTotal} total` : ""}${fitJobSelected ? ` · ranked by fit against ${fitJobSelected.title}` : ""}`}
@@ -626,10 +626,10 @@ export default async function TalentPoolPage({ searchParams }: PageProps) {
         <>
           {pipelineCards.length === 0 ? (
             <div className="rounded-lg border border-[var(--rule)] bg-cream/30 px-6 py-10 text-center">
-              <p className="text-[14px] font-semibold text-ink">
+              <p className="text-sm font-semibold text-ink">
                 No prospects yet
               </p>
-              <p className="mt-1 text-[13px] text-slate-body">
+              <p className="mt-1 text-xs text-slate-body">
                 Save candidates from{" "}
                 <a
                   href="/employer/talent-pool"
@@ -680,7 +680,7 @@ function EmptyDiscoverState() {
         className="h-10 w-10 text-slate-meta mx-auto mb-3"
         aria-hidden
       />
-      <p className="text-[14px] text-slate-body leading-relaxed max-w-[480px] mx-auto">
+      <p className="text-sm text-slate-body leading-relaxed max-w-[480px] mx-auto">
         No candidates match these filters yet. Widen the search radius or
         relax a credential filter — the pool grows as more clinicians opt
         into discoverability.
@@ -696,7 +696,7 @@ function EmptySavedState() {
         className="h-10 w-10 text-slate-meta mx-auto mb-3"
         aria-hidden
       />
-      <p className="text-[14px] text-slate-body leading-relaxed max-w-[480px] mx-auto">
+      <p className="text-sm text-slate-body leading-relaxed max-w-[480px] mx-auto">
         No candidates saved yet. Discover candidates above and click
         &quot;Save to pool&quot; to start building your list.
       </p>

@@ -69,14 +69,14 @@ export function MfaSection({
   return (
     <section className="border border-[var(--rule)] bg-card p-7 sm:p-8 space-y-6">
       <header>
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Security
         </div>
         <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink mb-2 inline-flex items-center gap-2">
           <ShieldCheck className="size-5 text-heritage-deep" />
           Two-factor authentication
         </h2>
-        <p className="text-[14px] text-slate-body leading-relaxed max-w-[600px]">
+        <p className="text-sm text-slate-body leading-relaxed max-w-[600px]">
           Add a second step at sign-in using an authenticator app like 1Password,
           Authy, or Google Authenticator. We&apos;ll also issue 10 one-time recovery
           codes in case you lose access to your authenticator.
@@ -92,7 +92,7 @@ export function MfaSection({
               <button
                 type="button"
                 onClick={() => setMode("wizard")}
-                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90"
+                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90"
               >
                 <ShieldCheck className="size-3.5" />
                 Set up 2FA
@@ -109,7 +109,7 @@ export function MfaSection({
                   <button
                     type="button"
                     onClick={() => setMode("regen")}
-                    className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-1.5 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-1.5 text-xs font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
                   >
                     <RotateCcw className="size-3.5" />
                     Regenerate codes
@@ -117,7 +117,7 @@ export function MfaSection({
                   <button
                     type="button"
                     onClick={() => setMode("disable")}
-                    className="inline-flex items-center gap-1.5 rounded-md border border-danger bg-card px-3 py-1.5 text-[12px] font-semibold text-danger hover:bg-danger-bg"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-danger bg-card px-3 py-1.5 text-xs font-semibold text-danger hover:bg-danger-bg"
                   >
                     <Trash2 className="size-3.5" />
                     Disable 2FA
@@ -125,13 +125,13 @@ export function MfaSection({
                 </div>
               </div>
               {remainingCodes <= 3 && remainingCodes > 0 && (
-                <p className="text-[12px] text-warning inline-flex items-center gap-1.5">
+                <p className="text-xs text-warning inline-flex items-center gap-1.5">
                   <AlertTriangle className="size-3.5" />
                   Only {remainingCodes} recovery {remainingCodes === 1 ? "code" : "codes"} left. Regenerate before you run out.
                 </p>
               )}
               {remainingCodes === 0 && (
-                <p className="text-[12px] text-danger inline-flex items-center gap-1.5">
+                <p className="text-xs text-danger inline-flex items-center gap-1.5">
                   <AlertTriangle className="size-3.5" />
                   No recovery codes left. Regenerate now to avoid losing access if your authenticator is lost.
                 </p>
@@ -205,14 +205,14 @@ function StatusPill({
 }) {
   if (!enrolled) {
     return (
-      <div className="inline-flex items-center gap-2 rounded-full border border-[var(--rule)] bg-cream/50 px-3 py-1 text-[12px] font-semibold text-slate-meta">
+      <div className="inline-flex items-center gap-2 rounded-full border border-[var(--rule)] bg-cream/50 px-3 py-1 text-xs font-semibold text-slate-meta">
         <Lock className="size-3" />
         Not set up
       </div>
     );
   }
   return (
-    <div className="inline-flex items-center gap-2 rounded-full bg-heritage-deep/10 px-3 py-1 text-[12px] font-semibold text-heritage-deep">
+    <div className="inline-flex items-center gap-2 rounded-full bg-heritage-deep/10 px-3 py-1 text-xs font-semibold text-heritage-deep">
       <ShieldCheck className="size-3" />
       Enabled · {remainingRecoveryCodes} recovery{" "}
       {remainingRecoveryCodes === 1 ? "code" : "codes"} left
@@ -300,7 +300,7 @@ function SetupWizard({
             <button
               type="button"
               onClick={onCancelClick}
-              className="rounded-md border border-[var(--rule-strong)] bg-card px-3 py-1.5 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
+              className="rounded-md border border-[var(--rule-strong)] bg-card px-3 py-1.5 text-xs font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
             >
               Close
             </button>
@@ -320,7 +320,7 @@ function SetupWizard({
     return (
       <div className="rounded border border-[var(--rule-strong)] bg-cream/40 p-6 space-y-5">
         <div>
-          <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
+          <div className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
             Step 1 of 2
           </div>
           <h3 className="font-display text-lg font-bold text-ink">
@@ -339,12 +339,12 @@ function SetupWizard({
             />
           </div>
           <div className="space-y-3">
-            <p className="text-[13px] text-slate-body leading-relaxed">
+            <p className="text-xs text-slate-body leading-relaxed">
               Open your authenticator app (1Password, Authy, Google
               Authenticator, etc.) and scan the QR code on the left, or
               enter the setup key manually:
             </p>
-            <div className="rounded border border-[var(--rule)] bg-card p-3 font-mono text-[12px] text-ink break-all">
+            <div className="rounded border border-[var(--rule)] bg-card p-3 font-mono text-xs text-ink break-all">
               {secret}
             </div>
             <CopyButton value={secret} label="Copy setup key" />
@@ -355,7 +355,7 @@ function SetupWizard({
           <div>
             <label
               htmlFor="totp-code"
-              className="mb-1.5 block text-[12px] font-semibold text-ink"
+              className="mb-1.5 block text-xs font-semibold text-ink"
             >
               Enter the 6-digit code from your app
             </label>
@@ -375,7 +375,7 @@ function SetupWizard({
             />
           </div>
           {error && (
-            <p className="text-[12px] text-danger inline-flex items-center gap-1.5">
+            <p className="text-xs text-danger inline-flex items-center gap-1.5">
               <AlertTriangle className="size-3.5" />
               {error}
             </p>
@@ -385,7 +385,7 @@ function SetupWizard({
               type="button"
               onClick={onVerify}
               disabled={pending || code.length !== 6}
-              className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
             >
               {pending ? (
                 <>
@@ -399,7 +399,7 @@ function SetupWizard({
             <button
               type="button"
               onClick={onCancelClick}
-              className="rounded-md px-3 py-2 text-[12px] font-semibold text-slate-meta hover:text-ink"
+              className="rounded-md px-3 py-2 text-xs font-semibold text-slate-meta hover:text-ink"
             >
               Cancel
             </button>
@@ -413,14 +413,14 @@ function SetupWizard({
     return (
       <div className="rounded border-2 border-heritage-deep bg-cream/40 p-6 space-y-5">
         <div>
-          <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-1 inline-flex items-center gap-1.5">
+          <div className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep mb-1 inline-flex items-center gap-1.5">
             <CheckCircle2 className="size-3.5" />
             Step 2 of 2 · 2FA enabled
           </div>
           <h3 className="font-display text-lg font-bold text-ink">
             Save your recovery codes somewhere safe
           </h3>
-          <p className="mt-1.5 text-[13px] text-slate-body leading-relaxed">
+          <p className="mt-1.5 text-xs text-slate-body leading-relaxed">
             Each code works exactly once if you lose your authenticator.
             <strong className="text-ink"> This is the only time we&apos;ll show them.</strong>
           </p>
@@ -430,7 +430,7 @@ function SetupWizard({
           {recoveryCodes.map((c) => (
             <code
               key={c}
-              className="font-mono text-[14px] tracking-[1px] text-ink"
+              className="font-mono text-sm tracking-[1px] text-ink"
             >
               {c}
             </code>
@@ -446,7 +446,7 @@ function SetupWizard({
           <button
             type="button"
             onClick={onDoneCodes}
-            className="ml-auto inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90"
+            className="ml-auto inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90"
           >
             I&apos;ve saved my codes
           </button>
@@ -491,7 +491,7 @@ function DisableDialog({
     <div className="rounded border border-danger bg-danger-bg p-5 space-y-3">
       <div>
         <h3 className="font-semibold text-ink">Disable 2FA?</h3>
-        <p className="mt-1 text-[13px] text-slate-body leading-relaxed">
+        <p className="mt-1 text-xs text-slate-body leading-relaxed">
           Enter the current 6-digit code from your authenticator to confirm.
           Your recovery codes will also be wiped.
         </p>
@@ -509,14 +509,14 @@ function DisableDialog({
         className="w-40 rounded border border-[var(--rule-strong)] bg-card px-3 py-2 font-mono text-[18px] tracking-[4px] text-ink focus:border-heritage focus:outline-none"
       />
       {error && (
-        <p className="text-[12px] text-danger">{error}</p>
+        <p className="text-xs text-danger">{error}</p>
       )}
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={onSubmit}
           disabled={pending || code.length !== 6}
-          className="inline-flex items-center gap-2 rounded-md bg-danger px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-danger-foreground hover:bg-danger/90 disabled:opacity-40"
+          className="inline-flex items-center gap-2 rounded-md bg-danger px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-danger-foreground hover:bg-danger/90 disabled:opacity-40"
         >
           {pending ? (
             <>
@@ -530,7 +530,7 @@ function DisableDialog({
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md px-3 py-2 text-[12px] font-semibold text-slate-meta hover:text-ink"
+          className="rounded-md px-3 py-2 text-xs font-semibold text-slate-meta hover:text-ink"
         >
           Cancel
         </button>
@@ -577,14 +577,14 @@ function RegenerateDialog({
             <Sparkles className="size-3.5 text-heritage-deep" />
             New recovery codes
           </h3>
-          <p className="mt-1 text-[13px] text-slate-body leading-relaxed">
+          <p className="mt-1 text-xs text-slate-body leading-relaxed">
             Old codes are now invalid. Save these somewhere safe — this is
             the only time we&apos;ll show them.
           </p>
         </div>
         <div className="grid grid-cols-2 gap-2 rounded border border-[var(--rule)] bg-card p-4 sm:grid-cols-2">
           {newCodes.map((c) => (
-            <code key={c} className="font-mono text-[14px] tracking-[1px] text-ink">
+            <code key={c} className="font-mono text-sm tracking-[1px] text-ink">
               {c}
             </code>
           ))}
@@ -598,7 +598,7 @@ function RegenerateDialog({
           <button
             type="button"
             onClick={() => onComplete()}
-            className="ml-auto inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90"
+            className="ml-auto inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90"
           >
             I&apos;ve saved them
           </button>
@@ -611,7 +611,7 @@ function RegenerateDialog({
     <div className="rounded border border-[var(--rule-strong)] bg-cream/40 p-5 space-y-3">
       <div>
         <h3 className="font-semibold text-ink">Regenerate recovery codes?</h3>
-        <p className="mt-1 text-[13px] text-slate-body leading-relaxed">
+        <p className="mt-1 text-xs text-slate-body leading-relaxed">
           Your old codes will stop working immediately. Enter the current
           6-digit code from your authenticator to continue.
         </p>
@@ -628,13 +628,13 @@ function RegenerateDialog({
         placeholder="123456"
         className="w-40 rounded border border-[var(--rule-strong)] bg-card px-3 py-2 font-mono text-[18px] tracking-[4px] text-ink focus:border-heritage focus:outline-none"
       />
-      {error && <p className="text-[12px] text-danger">{error}</p>}
+      {error && <p className="text-xs text-danger">{error}</p>}
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={onSubmit}
           disabled={pending || code.length !== 6}
-          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
+          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
         >
           {pending ? (
             <>
@@ -648,7 +648,7 @@ function RegenerateDialog({
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md px-3 py-2 text-[12px] font-semibold text-slate-meta hover:text-ink"
+          className="rounded-md px-3 py-2 text-xs font-semibold text-slate-meta hover:text-ink"
         >
           Cancel
         </button>
@@ -711,7 +711,7 @@ function OrgRequireMfaToggle({
             <Eye className="size-3.5" />
             Require 2FA for the whole DSO
           </h3>
-          <p className="mt-1 text-[13px] text-slate-body leading-relaxed">
+          <p className="mt-1 text-xs text-slate-body leading-relaxed">
             When on, every member of your DSO must enable 2FA before they
             can use the app. Existing sessions are forced through enrollment
             at next sign-in. You can flip this off at any time.
@@ -737,13 +737,13 @@ function OrgRequireMfaToggle({
         </button>
       </div>
       {error && (
-        <p className="text-[12px] text-danger inline-flex items-center gap-1.5">
+        <p className="text-xs text-danger inline-flex items-center gap-1.5">
           <AlertTriangle className="size-3.5" />
           {error}
         </p>
       )}
       {flash && (
-        <p className="text-[12px] text-heritage-deep inline-flex items-center gap-1.5 font-semibold">
+        <p className="text-xs text-heritage-deep inline-flex items-center gap-1.5 font-semibold">
           <CheckCircle2 className="size-3.5" />
           {flash}
         </p>
@@ -771,7 +771,7 @@ function CopyButton({ value, label }: { value: string; label: string }) {
     <button
       type="button"
       onClick={onCopy}
-      className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-1.5 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
+      className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-1.5 text-xs font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
     >
       {copied ? (
         <>
@@ -810,7 +810,7 @@ function DownloadButton({
     <button
       type="button"
       onClick={onDownload}
-      className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-1.5 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
+      className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-1.5 text-xs font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
     >
       <Download className="size-3.5" />
       Download .txt

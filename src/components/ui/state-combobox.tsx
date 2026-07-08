@@ -153,7 +153,7 @@ export function StateCombobox({
             aria-expanded={open}
             aria-controls={open ? listboxId : undefined}
             className={cn(
-              "w-full flex items-center justify-between gap-2 px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+              "w-full flex items-center justify-between gap-2 px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
               !selected && "text-slate-meta",
               className
             )}
@@ -190,7 +190,7 @@ export function StateCombobox({
                     ? `${listboxId}-${filtered[activeIdx].code}`
                     : undefined
                 }
-                className="w-full px-3 py-2 bg-cream border border-[var(--rule)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage transition-colors"
+                className="w-full px-3 py-2 bg-cream border border-[var(--rule)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage transition-colors"
               />
             </div>
             <ul
@@ -208,14 +208,14 @@ export function StateCombobox({
                     e.preventDefault();
                     commit(null);
                   }}
-                  className="flex items-center gap-2 px-3 py-2 text-[13px] tracking-[0.5px] uppercase font-semibold text-slate-meta hover:bg-muted cursor-pointer"
+                  className="flex items-center gap-2 px-3 py-2 text-xs tracking-[0.5px] uppercase font-semibold text-slate-meta hover:bg-muted cursor-pointer"
                 >
                   <X className="h-3 w-3" />
                   Clear selection
                 </li>
               )}
               {filtered.length === 0 ? (
-                <li className="px-3 py-2 text-[13px] text-slate-meta italic">
+                <li className="px-3 py-2 text-xs text-slate-meta italic">
                   No states match.
                 </li>
               ) : (
@@ -237,7 +237,7 @@ export function StateCombobox({
                         commit(s);
                       }}
                       className={cn(
-                        "flex items-center gap-2 px-3 py-2 text-[14px] cursor-pointer",
+                        "flex items-center gap-2 px-3 py-2 text-sm cursor-pointer",
                         isActive ? "bg-muted" : "bg-popover",
                         isSelected ? "text-ink font-semibold" : "text-ink"
                       )}

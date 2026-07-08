@@ -116,7 +116,7 @@ export default async function EmailTemplatesPage() {
   return (
     <div className="space-y-10 max-w-[920px]">
       <header className="space-y-3 pb-2">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep">
           Email templates
         </div>
         <h1 className="font-display text-3xl font-extrabold tracking-[-0.8px] text-ink leading-tight">
@@ -125,11 +125,11 @@ export default async function EmailTemplatesPage() {
         <p className="text-sm text-slate-body leading-relaxed max-w-[640px]">
           Customize the candidate-facing emails the platform sends on your
           behalf. Use mergefields like{" "}
-          <code className="font-mono text-[12px] bg-cream/60 px-1 py-0.5 rounded border border-[var(--rule)]">
+          <code className="font-mono text-xs bg-cream/60 px-1 py-0.5 rounded border border-[var(--rule)]">
             {"{{candidate.first_name}}"}
           </code>{" "}
           and{" "}
-          <code className="font-mono text-[12px] bg-cream/60 px-1 py-0.5 rounded border border-[var(--rule)]">
+          <code className="font-mono text-xs bg-cream/60 px-1 py-0.5 rounded border border-[var(--rule)]">
             {"{{job.title}}"}
           </code>{" "}
           to personalize each send.
@@ -149,7 +149,7 @@ export default async function EmailTemplatesPage() {
           <h2 className="font-display text-xl font-bold tracking-[-0.4px] text-ink">
             Automatic emails
           </h2>
-          <p className="text-[13px] text-slate-meta leading-relaxed">
+          <p className="text-xs text-slate-meta leading-relaxed">
             Sent automatically when candidates apply, message you, or move
             between stages. Edit the subject and body to match your voice.
           </p>
@@ -168,12 +168,12 @@ export default async function EmailTemplatesPage() {
           <div className="space-y-1.5 flex-1 min-w-0">
             <h2 className="font-display text-xl font-bold tracking-[-0.4px] text-ink inline-flex items-center gap-2">
               Custom templates
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-heritage-deep/10 px-2 py-0.5 text-[10px] font-semibold tracking-[0.5px] uppercase text-heritage-deep">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-heritage-deep/10 px-2 py-0.5 text-2xs font-semibold tracking-[0.5px] uppercase text-heritage-deep">
                 <BrandMark className="size-3.5" />
                 Growth+
               </span>
             </h2>
-            <p className="text-[13px] text-slate-meta leading-relaxed max-w-[560px]">
+            <p className="text-xs text-slate-meta leading-relaxed max-w-[560px]">
               Build reusable templates for the emails you send ad-hoc — interview
               prep, offer details, no-show follow-ups. Send them on demand from
               any candidate&apos;s profile.

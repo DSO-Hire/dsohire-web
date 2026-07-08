@@ -1564,12 +1564,12 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               >
                 <FileText className="h-5 w-5 text-heritage-deep flex-shrink-0" />
                 <div className="min-w-0">
-                  <div className="text-[14px] font-semibold text-ink truncate">
+                  <div className="text-sm font-semibold text-ink truncate">
                     {displayName !== "Candidate"
                       ? `${displayName}'s resume`
                       : "Candidate resume"}
                   </div>
-                  <div className="text-[12px] text-slate-body">
+                  <div className="text-xs text-slate-body">
                     {resumeFileName
                       ? `${resumeFileName} · click to open · expires in 1 hour`
                       : "Click to open · expires in 1 hour"}
@@ -1578,7 +1578,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 <ExternalLink className="h-4 w-4 text-slate-meta ml-2" />
               </a>
             ) : (
-              <p className="text-[14px] text-slate-meta italic">
+              <p className="text-sm text-slate-meta italic">
                 No resume on file.
               </p>
             )}
@@ -1595,7 +1595,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               {app.cover_letter && (
                 <div className="border border-[var(--rule)] bg-cream/40 p-5">
                   <Eyebrow className="mb-2">Cover letter</Eyebrow>
-                  <p className="text-[14px] text-ink leading-relaxed whitespace-pre-wrap">
+                  <p className="text-sm text-ink leading-relaxed whitespace-pre-wrap">
                     {app.cover_letter}
                   </p>
                 </div>
@@ -1636,7 +1636,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 </div>
               )}
               {!app.cover_letter && !cand && (
-                <p className="text-[14px] text-slate-meta italic">
+                <p className="text-sm text-slate-meta italic">
                   No candidate snapshot data yet.
                 </p>
               )}
@@ -1667,10 +1667,10 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                   ⚠
                 </span>
                 <div className="min-w-0 flex-1">
-                  <div className="text-[13px] font-bold text-warning mb-1.5">
+                  <div className="text-xs font-bold text-warning mb-1.5">
                     Knockout flagged · review the candidate&apos;s answers
                   </div>
-                  <p className="text-[13px] text-warning/90 leading-relaxed mb-3">
+                  <p className="text-xs text-warning/90 leading-relaxed mb-3">
                     This candidate didn&apos;t meet the criteria you marked
                     as knockout questions. They&apos;re not auto-rejected —
                     review the answers below and decide whether the gap is
@@ -1683,7 +1683,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                     ).map((prompt, idx) => (
                       <li
                         key={idx}
-                        className="text-[13px] text-warning flex items-start gap-2"
+                        className="text-xs text-warning flex items-start gap-2"
                       >
                         <span className="text-warning mt-0.5">·</span>
                         <span className="font-medium">{prompt}</span>
@@ -1707,7 +1707,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             }
           >
             {visibleQuestions.length === 0 ? (
-              <p className="text-[14px] text-slate-meta italic">
+              <p className="text-sm text-slate-meta italic">
                 No screening questions on this job.
               </p>
             ) : (
@@ -1790,7 +1790,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 // #83 Phase 2 — comp.view gate: offer letters + amounts are
                 // compensation data. Masked server-side for viewers without
                 // the capability.
-                <p className="text-[14px] text-slate-meta italic">
+                <p className="text-sm text-slate-meta italic">
                   Offer and compensation details are hidden for your account.
                   An owner or admin can grant &ldquo;View compensation /
                   salary fields&rdquo; from the Team page.
@@ -1847,11 +1847,11 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               the green wash. */}
           <div className="-mx-4 sm:-mx-6 mt-10 px-4 sm:px-6 py-8 bg-heritage/15 border-y-2 border-heritage/40">
             <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-2 px-5 py-2 bg-heritage-deep text-primary-foreground text-[13px] font-bold">
+              <div className="inline-flex items-center gap-2 px-5 py-2 bg-heritage-deep text-primary-foreground text-xs font-bold">
                 <Lock className="h-3.5 w-3.5" />
                 Internal workspace
               </div>
-              <p className="mt-3 text-[12px] text-slate-meta max-w-[480px] mx-auto leading-relaxed">
+              <p className="mt-3 text-xs text-slate-meta max-w-[480px] mx-auto leading-relaxed">
                 Only your team sees what&apos;s below. Credentials,
                 references, scorecards, comments, and notes never reach
                 the candidate — keep anything candidate-bound in the

@@ -75,7 +75,7 @@ export function NextBestActions({ items }: { items: NbaItem[] }) {
     <section className="mb-6 border border-[var(--rule)] bg-card">
       <header className="px-6 py-4 border-b border-[var(--rule)] flex items-center justify-between gap-3">
         <Eyebrow as="span">Next best actions</Eyebrow>
-        <span className="hidden sm:block text-[10px] text-slate-meta">
+        <span className="hidden sm:block text-2xs text-slate-meta">
           <b className="text-ink">j / k</b> move · <b className="text-ink">Enter</b> open ·
           ranked by impact × urgency
         </span>
@@ -92,12 +92,12 @@ export function NextBestActions({ items }: { items: NbaItem[] }) {
           >
             <span
               aria-hidden
-              className={`flex-none w-[22px] h-[22px] ${TONE_RANK[item.tone]} text-ivory text-[10px] font-extrabold tabular flex items-center justify-center`}
+              className={`flex-none w-[22px] h-[22px] ${TONE_RANK[item.tone]} text-ivory text-2xs font-extrabold tabular flex items-center justify-center`}
             >
               {i + 1}
             </span>
             <div className="min-w-0 flex-1">
-              <div className="text-[13px] font-extrabold tracking-[-0.2px] text-ink leading-snug">
+              <div className="text-xs font-extrabold tracking-[-0.2px] text-ink leading-snug">
                 {item.title}
               </div>
               <div className="text-[11.5px] text-slate-body leading-[1.55] mt-0.5">
@@ -106,14 +106,14 @@ export function NextBestActions({ items }: { items: NbaItem[] }) {
               <div className="flex flex-wrap gap-1.5 mt-2">
                 <Link
                   href={item.primary.href}
-                  className="bg-primary text-primary-foreground text-[10px] font-extrabold px-2.5 py-1.5 hover:bg-primary/90 transition-colors"
+                  className="bg-primary text-primary-foreground text-2xs font-extrabold px-2.5 py-1.5 hover:bg-primary/90 transition-colors"
                 >
                   {item.primary.label}
                 </Link>
                 {item.secondary && (
                   <Link
                     href={item.secondary.href}
-                    className="border border-[var(--rule-strong)] bg-card text-ink text-[10px] font-extrabold px-2.5 py-1.5 hover:border-heritage hover:text-heritage-deep transition-colors"
+                    className="border border-[var(--rule-strong)] bg-card text-ink text-2xs font-extrabold px-2.5 py-1.5 hover:border-heritage hover:text-heritage-deep transition-colors"
                   >
                     {item.secondary.label}
                   </Link>
@@ -124,7 +124,7 @@ export function NextBestActions({ items }: { items: NbaItem[] }) {
                     e.stopPropagation();
                     setDoneIds((cur) => new Set(cur).add(item.id));
                   }}
-                  className="ml-auto text-[10px] font-extrabold text-slate-meta hover:text-ink px-2 py-1.5"
+                  className="ml-auto text-2xs font-extrabold text-slate-meta hover:text-ink px-2 py-1.5"
                   title="Hide from today's queue (view only — changes nothing)"
                 >
                   Dismiss

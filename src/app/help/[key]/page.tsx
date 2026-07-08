@@ -72,14 +72,14 @@ export default async function HelpEntryPage({ params }: PageProps) {
       <article className="mx-auto max-w-[760px] px-6 py-12 sm:py-16">
         <Link
           href="/help"
-          className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-slate-meta hover:text-ink mb-8"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-meta hover:text-ink mb-8"
         >
           <ArrowLeft className="size-3.5" />
           All help articles
         </Link>
 
         <header className="mb-8 pb-6 border-b border-[var(--rule)]">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2 inline-flex items-center gap-2">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2 inline-flex items-center gap-2">
             <ShieldCheck className="size-3" />
             {lensLabel(entry.lens)}
           </div>
@@ -123,7 +123,7 @@ export default async function HelpEntryPage({ params }: PageProps) {
         <footer className="mt-12 pt-6 border-t border-[var(--rule)] space-y-4">
           <Link
             href="/help"
-            className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-heritage-deep hover:text-ink"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-heritage-deep hover:text-ink"
           >
             <ArrowLeft className="size-3.5" />
             More help articles
@@ -131,7 +131,7 @@ export default async function HelpEntryPage({ params }: PageProps) {
           <div className="border border-[var(--rule)] bg-cream/30 px-5 py-4 flex items-start gap-3">
             <Mail className="size-4 text-heritage-deep mt-0.5 shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-[13px] text-slate-body leading-relaxed">
+              <p className="text-xs text-slate-body leading-relaxed">
                 Still stuck? Email{" "}
                 <a
                   href={SUPPORT_MAILTO}
@@ -144,7 +144,7 @@ export default async function HelpEntryPage({ params }: PageProps) {
             </div>
             <a
               href={SUPPORT_MAILTO}
-              className="inline-flex items-center gap-1 text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink whitespace-nowrap shrink-0"
+              className="inline-flex items-center gap-1 text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink whitespace-nowrap shrink-0"
             >
               Email
               <ArrowRight className="size-3" />

@@ -35,7 +35,7 @@ export function DispositionSelect({
     <div className="grid gap-2">
       <label
         htmlFor={id}
-        className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body"
+        className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-body"
       >
         {kind === "rejected" ? "Rejection reason" : "Reason"}
         {required ? <span className="text-danger"> *</span> : " (optional)"}
@@ -45,7 +45,7 @@ export function DispositionSelect({
         value={value}
         required={required}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full border border-[var(--rule-strong)] bg-card px-3 py-2 text-[14px] text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
+        className="w-full border border-[var(--rule-strong)] bg-card px-3 py-2 text-sm text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
       >
         <option value="">Select a reason…</option>
         {options.map((o) => (
@@ -54,7 +54,7 @@ export function DispositionSelect({
           </option>
         ))}
       </select>
-      <p className="text-[12px] text-slate-meta">
+      <p className="text-xs text-slate-meta">
         {selected?.requiresNote
           ? "Add a short note below — required for this reason."
           : "Internal compliance record. The candidate never sees this code."}

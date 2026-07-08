@@ -119,32 +119,32 @@ export function ScreeningResponseRow({
         <Icon className="h-4 w-4 text-heritage-deep flex-shrink-0 mt-0.5" />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <div className="text-[14px] font-semibold text-ink leading-snug">
+            <div className="text-sm font-semibold text-ink leading-snug">
               {question.prompt}
             </div>
-            <span className="text-[11px] text-slate-meta">
+            <span className="text-2xs text-slate-meta">
               {KIND_LABEL[question.kind]}
             </span>
             {question.required && (
-              <span className="text-[11px] font-semibold text-slate-meta">
+              <span className="text-2xs font-semibold text-slate-meta">
                 Required
               </span>
             )}
           </div>
           {question.helper_text && (
-            <div className="text-[13px] text-slate-meta mt-0.5 leading-snug">
+            <div className="text-xs text-slate-meta mt-0.5 leading-snug">
               {question.helper_text}
             </div>
           )}
           <div
-            className={`mt-2 text-[14px] leading-relaxed whitespace-pre-wrap tabular ${
+            className={`mt-2 text-sm leading-relaxed whitespace-pre-wrap tabular ${
               missing ? "italic text-slate-meta" : "text-ink"
             }`}
           >
             {display}
           </div>
           {missing && question.required && (
-            <div className="mt-1.5 text-[12px] font-semibold text-danger">
+            <div className="mt-1.5 text-xs font-semibold text-danger">
               Required question — no response
             </div>
           )}
@@ -199,14 +199,14 @@ export function VerificationRow({ row }: { row: VerificationRowData }) {
         <ShieldCheck className="h-4 w-4 text-heritage-deep flex-shrink-0 mt-0.5" />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <div className="text-[14px] font-semibold text-ink leading-snug">
+            <div className="text-sm font-semibold text-ink leading-snug">
               {row.label}
             </div>
-            <span className="text-[11px] text-slate-meta">
+            <span className="text-2xs text-slate-meta">
               Verification
             </span>
             {row.required && (
-              <span className="text-[11px] font-semibold text-slate-meta">
+              <span className="text-2xs font-semibold text-slate-meta">
                 Required
               </span>
             )}
@@ -214,7 +214,7 @@ export function VerificationRow({ row }: { row: VerificationRowData }) {
 
           {/* Attestation status */}
           <div
-            className={`mt-2 text-[14px] leading-relaxed ${
+            className={`mt-2 text-sm leading-relaxed ${
               row.attested ? "text-ink" : "italic text-slate-meta"
             }`}
           >
@@ -234,7 +234,7 @@ export function VerificationRow({ row }: { row: VerificationRowData }) {
               Credentials section below, where the document + verify
               controls live; education stays plain text. */}
           {row.linkedCredentials.length > 0 && (
-            <div className="mt-1.5 text-[13px] text-slate-body leading-snug">
+            <div className="mt-1.5 text-xs text-slate-body leading-snug">
               <Eyebrow as="span" className="mr-2">
                 Linked proof
               </Eyebrow>
@@ -258,7 +258,7 @@ export function VerificationRow({ row }: { row: VerificationRowData }) {
 
           {/* Candidate note */}
           {row.note && (
-            <div className="mt-1.5 text-[13px] text-slate-body leading-snug whitespace-pre-wrap">
+            <div className="mt-1.5 text-xs text-slate-body leading-snug whitespace-pre-wrap">
               <Eyebrow as="span" className="mr-2">
                 Note
               </Eyebrow>
@@ -269,7 +269,7 @@ export function VerificationRow({ row }: { row: VerificationRowData }) {
           {/* Required-but-not-attested red flag — mirrors the screening
               block's required-blank treatment. */}
           {flagged && (
-            <div className="mt-1.5 text-[12px] font-semibold text-danger">
+            <div className="mt-1.5 text-xs font-semibold text-danger">
               Required verification — not attested
             </div>
           )}

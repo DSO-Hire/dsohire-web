@@ -111,14 +111,14 @@ export function OfferLetterEditor({
           <button
             type="button"
             onClick={() => setSelection({ kind: "new" })}
-            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
+            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground text-2xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
           >
             <Plus className="h-3 w-3" /> New template
           </button>
         )}
 
         {active.length === 0 && archived.length === 0 ? (
-          <div className="border border-[var(--rule)] bg-cream/40 p-4 text-[12px] text-slate-meta leading-relaxed">
+          <div className="border border-[var(--rule)] bg-cream/40 p-4 text-xs text-slate-meta leading-relaxed">
             No templates yet.{" "}
             {canEdit ? (
               <>Click <strong>New template</strong> to author your first one.</>
@@ -146,7 +146,7 @@ export function OfferLetterEditor({
             <button
               type="button"
               onClick={() => setShowArchived((v) => !v)}
-              className="w-full inline-flex items-center justify-between px-3 py-2 text-[11px] font-bold tracking-[1.5px] uppercase text-slate-meta hover:text-ink"
+              className="w-full inline-flex items-center justify-between px-3 py-2 text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta hover:text-ink"
             >
               <span>Archived ({archived.length})</span>
               <ChevronDown
@@ -205,7 +205,7 @@ export function OfferLetterEditor({
         ) : (
           <div className="border border-dashed border-[var(--rule)] bg-cream/30 p-10 text-center">
             <FileSignature className="h-8 w-8 text-heritage-deep mx-auto mb-3" />
-            <p className="text-[14px] text-slate-body leading-relaxed max-w-[420px] mx-auto">
+            <p className="text-sm text-slate-body leading-relaxed max-w-[420px] mx-auto">
               No template selected. {canEdit ? (
                 <>Use <strong>New template</strong> on the left to start one.</>
               ) : (
@@ -244,13 +244,13 @@ function TemplateListItem({
       >
         <div
           className={
-            "text-[13px] font-semibold leading-snug truncate " +
+            "text-xs font-semibold leading-snug truncate " +
             (active ? "text-ink" : "text-ink")
           }
         >
           {t.name}
         </div>
-        <div className="text-[11px] text-slate-meta mt-0.5">
+        <div className="text-2xs text-slate-meta mt-0.5">
           Updated {new Date(t.updated_at).toLocaleDateString()}
         </div>
       </button>
@@ -381,7 +381,7 @@ function TemplateForm({
       className="border border-[var(--rule)] bg-card p-5 space-y-5"
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep">
           {template ? (isArchived ? "Archived template" : "Edit template") : "New template"}
         </div>
         {template && canEdit && (
@@ -391,7 +391,7 @@ function TemplateForm({
                 type="button"
                 onClick={handleRestore}
                 disabled={pending}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-ink bg-card hover:bg-cream disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-2xs font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-ink bg-card hover:bg-cream disabled:opacity-60"
               >
                 <ArchiveRestore className="h-3 w-3" />
                 Restore
@@ -401,7 +401,7 @@ function TemplateForm({
                 type="button"
                 onClick={handleArchive}
                 disabled={pending}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-slate-body bg-card hover:bg-cream disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-2xs font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-slate-body bg-card hover:bg-cream disabled:opacity-60"
               >
                 <Archive className="h-3 w-3" />
                 Archive
@@ -411,7 +411,7 @@ function TemplateForm({
               type="button"
               onClick={handleDelete}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-danger text-danger bg-card hover:bg-danger-bg disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-2xs font-bold tracking-[1.5px] uppercase border border-danger text-danger bg-card hover:bg-danger-bg disabled:opacity-60"
             >
               <Trash2 className="h-3 w-3" />
               Delete
@@ -421,7 +421,7 @@ function TemplateForm({
       </div>
 
       <div>
-        <label className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
+        <label className="block text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
           Template name
         </label>
         <input
@@ -432,7 +432,7 @@ function TemplateForm({
           maxLength={120}
           required
           disabled={readOnly || pending}
-          className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage disabled:opacity-60 disabled:cursor-not-allowed"
         />
       </div>
 
@@ -440,7 +440,7 @@ function TemplateForm({
         <div className="flex items-baseline justify-between mb-1.5 gap-3">
           <label
             htmlFor="offer-template-body"
-            className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta"
+            className="block text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta"
           >
             Body
           </label>
@@ -454,9 +454,9 @@ function TemplateForm({
           rows={18}
           required
           disabled={readOnly || pending}
-          className="w-full px-3 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage leading-relaxed resize-y font-mono disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full px-3 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-xs focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage leading-relaxed resize-y font-mono disabled:opacity-60 disabled:cursor-not-allowed"
         />
-        <p className="mt-2 text-[11px] text-slate-meta leading-relaxed">
+        <p className="mt-2 text-2xs text-slate-meta leading-relaxed">
           Markdown supported (## heading, **bold**, *italic*, - bullets). Use{" "}
           <code className="bg-cream px-1 py-0.5 rounded">{"{{token}}"}</code>{" "}
           for merge fields — see the dropdown above.
@@ -469,7 +469,7 @@ function TemplateForm({
       />
 
       {error && (
-        <div className="rounded-md border border-danger bg-danger-bg px-3 py-2 text-[13px] text-danger flex items-start gap-2">
+        <div className="rounded-md border border-danger bg-danger-bg px-3 py-2 text-xs text-danger flex items-start gap-2">
           <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
           <span>{error}</span>
         </div>
@@ -482,7 +482,7 @@ function TemplateForm({
               type="button"
               onClick={onCancel}
               disabled={pending}
-              className="px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-slate-meta hover:text-ink"
+              className="px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-slate-meta hover:text-ink"
             >
               Discard
             </button>
@@ -490,7 +490,7 @@ function TemplateForm({
           <button
             type="submit"
             disabled={pending}
-            className="inline-flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
+            className="inline-flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground text-xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
           >
             {pending ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -535,7 +535,7 @@ function InsertMergeFieldDropdown({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep border border-[var(--rule)] bg-card hover:bg-cream"
+        className="inline-flex items-center gap-1 px-2 py-1 text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep border border-[var(--rule)] bg-card hover:bg-cream"
         aria-haspopup="menu"
         aria-expanded={open}
       >
@@ -566,7 +566,7 @@ function InsertMergeFieldDropdown({
                       role="menuitem"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-[12px] font-bold text-ink">
+                        <span className="text-xs font-bold text-ink">
                           {f.label}
                         </span>
                         {f.required && (
@@ -575,7 +575,7 @@ function InsertMergeFieldDropdown({
                           </span>
                         )}
                       </div>
-                      <code className="mt-0.5 inline-block text-[10px] bg-cream px-1.5 py-0.5 rounded text-heritage-deep">
+                      <code className="mt-0.5 inline-block text-2xs bg-cream px-1.5 py-0.5 rounded text-heritage-deep">
                         {`{{${f.key}}}`}
                       </code>
                     </button>
@@ -605,10 +605,10 @@ function PreviewPanel({
     <div className="border border-[var(--rule)] bg-cream/40">
       <div className="px-4 py-2 border-b border-[var(--rule)] flex items-center gap-2">
         <Eye className="h-3.5 w-3.5 text-heritage-deep" />
-        <span className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
+        <span className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep">
           Preview
         </span>
-        <span className="text-[11px] text-slate-meta">
+        <span className="text-2xs text-slate-meta">
           (with placeholder values — actual sends pull from each candidate)
         </span>
       </div>
@@ -619,13 +619,13 @@ function PreviewPanel({
             dangerouslySetInnerHTML={{ __html: html }}
           />
         ) : (
-          <p className="text-[13px] text-slate-meta italic">
+          <p className="text-xs text-slate-meta italic">
             Empty template body.
           </p>
         )}
       </div>
       {unknownTokens.length > 0 && (
-        <div className="px-4 py-2 border-t border-warning bg-warning-bg text-[12px] text-warning">
+        <div className="px-4 py-2 border-t border-warning bg-warning-bg text-xs text-warning">
           <strong>Unknown tokens:</strong>{" "}
           {unknownTokens.map((t) => `{{${t}}}`).join(", ")}. These will render
           literally in the sent email — pick a real field from the dropdown.

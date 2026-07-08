@@ -74,14 +74,14 @@ export default async function CandidateSettingsAccountPage() {
       <LanguageStub />
 
       <section className="border border-[var(--rule)] bg-cream p-7">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
           Quick links
         </div>
         <ul className="list-none space-y-2">
           <li>
             <Link
               href="/candidate/profile"
-              className="text-[14px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
+              className="text-sm font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
             >
               Edit your profile →
             </Link>
@@ -89,7 +89,7 @@ export default async function CandidateSettingsAccountPage() {
           <li>
             <Link
               href="/legal/privacy"
-              className="text-[14px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
+              className="text-sm font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
             >
               Privacy policy →
             </Link>
@@ -97,7 +97,7 @@ export default async function CandidateSettingsAccountPage() {
           <li>
             <Link
               href="/legal/candidate-terms"
-              className="text-[14px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
+              className="text-sm font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
             >
               Candidate terms →
             </Link>

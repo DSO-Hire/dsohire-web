@@ -46,19 +46,19 @@ export default async function LegalDocPage({ params }: PageProps) {
       {/* Back to index */}
       <Link
         href="/legal"
-        className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-6"
+        className="inline-flex items-center gap-2 text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-6"
       >
         ← All policies
       </Link>
 
       {/* Title block */}
-      <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3">
+      <div className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3">
         Legal
       </div>
       <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.1] text-ink mb-3">
         {doc.title}
       </h1>
-      <div className="text-[12px] font-semibold tracking-[1.5px] uppercase text-slate-meta mb-10 pb-6 border-b border-[var(--rule)]">
+      <div className="text-xs font-semibold tracking-[1.5px] uppercase text-slate-meta mb-10 pb-6 border-b border-[var(--rule)]">
         Effective {doc.effectiveDate} · DSO Hire LLC
       </div>
 
@@ -69,7 +69,7 @@ export default async function LegalDocPage({ params }: PageProps) {
 
       {/* Footer note */}
       <div className="mt-16 pt-8 border-t border-[var(--rule)]">
-        <p className="text-[14px] text-slate-meta leading-relaxed">
+        <p className="text-sm text-slate-meta leading-relaxed">
           Questions? Email{" "}
           <a
             href={SUPPORT_MAILTO}

@@ -126,7 +126,7 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
         <div className="sm:col-span-2">
           <label
             htmlFor="loc-city"
-            className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+            className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2"
           >
             City &amp; state <span className="text-heritage"> *</span>
           </label>
@@ -170,7 +170,7 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
       {mode === "edit" && (
         <div className="border border-[var(--rule-strong)] bg-cream/50 px-5 py-4">
           <div className="flex items-center justify-between gap-3 mb-2">
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+            <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep">
               Public Branding
             </div>
             {/* Persistent at-a-glance status badge — reads from the
@@ -181,7 +181,7 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
                 pulls a fresh prop and this badge re-aligns. */}
             <span
               className={
-                "inline-flex items-center px-2 py-0.5 text-[10px] font-bold tracking-[1.2px] uppercase " +
+                "inline-flex items-center px-2 py-0.5 text-2xs font-bold tracking-[1.2px] uppercase " +
                 ((initial?.public_dso_affiliation ?? true)
                   ? "bg-heritage text-primary-foreground"
                   : "bg-primary text-primary-foreground")
@@ -201,21 +201,21 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
               className="mt-1 h-4 w-4 accent-heritage cursor-pointer flex-shrink-0"
             />
             <div className="min-w-0">
-              <div className="text-[14px] font-semibold text-ink">
+              <div className="text-sm font-semibold text-ink">
                 Display{" "}
                 <span className="text-heritage-deep">
                   {dsoName ?? "your DSO"}
                 </span>{" "}
                 on the public job page
               </div>
-              <p className="mt-1 text-[12px] text-slate-meta leading-relaxed">
+              <p className="mt-1 text-xs text-slate-meta leading-relaxed">
                 When off, candidates see this practice as a standalone
                 brand. They won&apos;t see {dsoName ?? "your DSO"}{" "}
                 anywhere — not on the job, the location page, the apply
                 flow, or in confirmation emails. Use this for acquired
                 practices that keep their original public brand.
               </p>
-              <p className="mt-2 text-[12px] text-slate-meta leading-relaxed">
+              <p className="mt-2 text-xs text-slate-meta leading-relaxed">
                 Multi-location jobs that include a private location will
                 also hide {dsoName ?? "the DSO name"} on every other
                 location they touch — &ldquo;most-private&rdquo;
@@ -223,7 +223,7 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
               </p>
               {showDsoAffiliation !==
                 (initial?.public_dso_affiliation ?? true) && (
-                <p className="mt-2 text-[12px] text-warning font-semibold">
+                <p className="mt-2 text-xs text-warning font-semibold">
                   Unsaved change. Click Save to persist.
                 </p>
               )}
@@ -246,12 +246,12 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
       {mode === "edit" && (
         <div className="border border-[var(--rule-strong)] bg-cream/50 px-5 py-4">
           <div className="flex items-center justify-between gap-3 mb-3">
-            <div className="text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
+            <div className="text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep">
               Practice-name anonymity
             </div>
             <span
               className={
-                "inline-flex items-center px-2 py-0.5 text-[10px] font-bold tracking-[1.2px] uppercase " +
+                "inline-flex items-center px-2 py-0.5 text-2xs font-bold tracking-[1.2px] uppercase " +
                 ((initial?.anonymize_name ?? false)
                   ? "bg-primary text-primary-foreground"
                   : "bg-heritage text-primary-foreground")
@@ -269,10 +269,10 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
               className="mt-1 h-4 w-4 accent-heritage cursor-pointer flex-shrink-0"
             />
             <div className="min-w-0">
-              <div className="text-[14px] font-semibold text-ink">
+              <div className="text-sm font-semibold text-ink">
                 Hide this practice&apos;s name on public + candidate views
               </div>
-              <p className="mt-1 text-[13px] text-slate-body leading-relaxed">
+              <p className="mt-1 text-xs text-slate-body leading-relaxed">
                 On masked listings, show a neutral{" "}
                 <span className="font-semibold text-ink">
                   &ldquo;Dental Office in {initial?.city ?? "your city"}&rdquo;
@@ -282,7 +282,7 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
                 {dsoName ?? "DSO"} name above.
               </p>
               {anonymizeName !== (initial?.anonymize_name ?? false) && (
-                <p className="mt-2 text-[12px] text-warning font-semibold">
+                <p className="mt-2 text-xs text-warning font-semibold">
                   Unsaved change. Click Save to persist.
                 </p>
               )}
@@ -298,13 +298,13 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
 
       {state.error && (
         <div className="bg-danger-bg border-l-4 border-danger p-4">
-          <p className="text-[14px] text-danger">{state.error}</p>
+          <p className="text-sm text-danger">{state.error}</p>
         </div>
       )}
 
       {state.ok && mode === "edit" && (
         <div className="bg-cream border-l-4 border-heritage p-4">
-          <p className="text-[14px] text-ink font-semibold">Saved.</p>
+          <p className="text-sm text-ink font-semibold">Saved.</p>
         </div>
       )}
 
@@ -312,7 +312,7 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {pending
             ? mode === "create"
@@ -330,7 +330,7 @@ export function LocationForm({ dsoId, mode, initial, dsoName }: LocationFormProp
         </button>
         <Link
           href="/employer/locations"
-          className="inline-flex items-center gap-2.5 px-7 py-4 border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
+          className="inline-flex items-center gap-2.5 px-7 py-4 border border-[var(--rule-strong)] text-ink text-xs font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
         >
           Cancel
         </Link>
@@ -368,7 +368,7 @@ function Field({
     <div>
       <label
         htmlFor={`loc-${name}`}
-        className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+        className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2"
       >
         {label}
         {required && <span className="text-heritage"> *</span>}
@@ -387,12 +387,12 @@ function Field({
         defaultValue={defaultValue}
         autoComplete={autoComplete}
         maxLength={maxLength}
-        className={`w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors ${
+        className={`w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors ${
           uppercase ? "uppercase" : ""
         }`}
       />
       {helper && (
-        <p className="mt-1.5 text-[12px] text-slate-meta leading-relaxed">
+        <p className="mt-1.5 text-xs text-slate-meta leading-relaxed">
           {helper}
         </p>
       )}

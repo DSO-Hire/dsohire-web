@@ -58,7 +58,7 @@ export function AdminNav({ founder }: { founder: boolean }) {
           <li key={item.href}>
             <Link
               href={item.href}
-              className={`flex items-center gap-3 px-6 py-2.5 text-[14px] font-semibold transition-colors ${
+              className={`flex items-center gap-3 px-6 py-2.5 text-sm font-semibold transition-colors ${
                 active
                   ? "bg-hero-foreground/10 text-hero-foreground border-l-2 border-heritage"
                   : "text-hero-foreground/70 hover:text-hero-foreground hover:bg-hero-foreground/5"

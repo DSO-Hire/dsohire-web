@@ -611,7 +611,7 @@ export function ScorecardsSection({
           </div>
           <div className="flex items-center gap-3">
             {myStatus === "submitted" && myScorecard?.submitted_at && (
-              <span className="text-[12px] text-slate-meta tabular">
+              <span className="text-xs text-slate-meta tabular">
                 Submitted {relativeTime(myScorecard.submitted_at)}
               </span>
             )}
@@ -632,7 +632,7 @@ export function ScorecardsSection({
           <button
             type="button"
             onClick={openEditor}
-            className="w-full px-5 py-4 border border-dashed border-[var(--rule-strong)] bg-cream text-ink text-[14px] font-semibold hover:bg-ivory transition-colors flex items-center justify-center gap-2"
+            className="w-full px-5 py-4 border border-dashed border-[var(--rule-strong)] bg-cream text-ink text-sm font-semibold hover:bg-ivory transition-colors flex items-center justify-center gap-2"
           >
             <Star className="h-4 w-4 text-heritage-deep" />
             Score this candidate
@@ -677,7 +677,7 @@ export function ScorecardsSection({
         )}
 
         {formIsOpen && aiBanner && (
-          <div className="mb-3 flex items-start gap-2 rounded border border-heritage/30 bg-heritage/[0.06] px-3 py-2.5 text-[12px] text-heritage-deep">
+          <div className="mb-3 flex items-start gap-2 rounded border border-heritage/30 bg-heritage/[0.06] px-3 py-2.5 text-xs text-heritage-deep">
             <Sparkles className="h-4 w-4 mt-0.5 shrink-0" />
             <span className="flex-1">{aiBanner}</span>
             <button
@@ -859,7 +859,7 @@ function NoteTakerModal({
             <h2 className="text-[18px] font-extrabold tracking-[-0.4px] text-ink">
               Draft a scorecard from your interview notes
             </h2>
-            <p className="mt-1 text-[12px] text-slate-meta leading-relaxed max-w-[460px]">
+            <p className="mt-1 text-xs text-slate-meta leading-relaxed max-w-[460px]">
               Paste the transcript or your rough notes. We&apos;ll draft scores +
               notes against the {`${rubricLabel.toLowerCase()} rubric`} for you
               to review and edit — nothing is submitted automatically. We
@@ -903,7 +903,7 @@ function NoteTakerModal({
                 </>
               )}
             </button>
-            <span className="text-[11px] text-slate-meta">
+            <span className="text-2xs text-slate-meta">
               .txt, .pdf, or .docx — or paste below
             </span>
           </div>
@@ -913,14 +913,14 @@ function NoteTakerModal({
             rows={14}
             disabled={pending || reading}
             placeholder="Paste the interview transcript or your notes here…"
-            className="w-full px-3 py-2.5 bg-cream border border-[var(--rule-strong)] text-ink text-[13px] leading-relaxed focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage resize-y disabled:opacity-60"
+            className="w-full px-3 py-2.5 bg-cream border border-[var(--rule-strong)] text-ink text-xs leading-relaxed focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage resize-y disabled:opacity-60"
           />
-          <p className="mt-1.5 text-[11px] text-slate-meta tabular">
+          <p className="mt-1.5 text-2xs text-slate-meta tabular">
             {chars.toLocaleString()} characters · only attributes your notes
             actually cover get scored.
           </p>
           {error && (
-            <div className="mt-3 rounded-md border border-danger bg-danger-bg px-3 py-2 text-[12px] text-danger flex items-start gap-2">
+            <div className="mt-3 rounded-md border border-danger bg-danger-bg px-3 py-2 text-xs text-danger flex items-start gap-2">
               <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
@@ -986,7 +986,7 @@ function AggregatePanel({
             <span className="text-3xl font-extrabold tracking-[-1px] text-ink tabular-nums">
               {overall}
             </span>
-            <span className="text-[13px] text-slate-meta tabular">/ 5.0</span>
+            <span className="text-xs text-slate-meta tabular">/ 5.0</span>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -1009,7 +1009,7 @@ function AggregatePanel({
         {aggregate.attributeRows.map((row) => (
           <li
             key={row.attribute.id}
-            className="flex items-center gap-4 text-[13px]"
+            className="flex items-center gap-4 text-xs"
           >
             <span className="flex-1 min-w-0 text-ink leading-snug">
               {row.attribute.label}
@@ -1023,7 +1023,7 @@ function AggregatePanel({
           </li>
         ))}
       </ul>
-      <p className="text-[12px] text-slate-meta mt-4 pt-3 border-t border-[var(--rule)]">
+      <p className="text-xs text-slate-meta mt-4 pt-3 border-t border-[var(--rule)]">
         Rubric: {rubric.label}. Averages computed across submitted scorecards
         only — drafts are private to the reviewer until submitted.
       </p>
@@ -1073,7 +1073,7 @@ function ReadOnlyScorecard({
         <div className="min-w-0">
           {showReviewer && (
             <div className="flex flex-wrap items-baseline gap-2 mb-1">
-              <span className="text-[14px] font-bold text-ink truncate">
+              <span className="text-sm font-bold text-ink truncate">
                 {scorecard.reviewerName ?? "Teammate"}
               </span>
               {scorecard.reviewerRole && (
@@ -1082,7 +1082,7 @@ function ReadOnlyScorecard({
                 </span>
               )}
               {scorecard.submitted_at && (
-                <span className="text-[12px] text-slate-meta tabular">
+                <span className="text-xs text-slate-meta tabular">
                   Submitted {relativeTime(scorecard.submitted_at)}
                 </span>
               )}
@@ -1093,7 +1093,7 @@ function ReadOnlyScorecard({
             <span className="text-2xl font-extrabold tracking-[-0.6px] text-ink tabular-nums">
               {overall !== null ? overall.toFixed(1) : "—"}
             </span>
-            <span className="text-[12px] text-slate-meta tabular">/ 5.0</span>
+            <span className="text-xs text-slate-meta tabular">/ 5.0</span>
           </div>
         </div>
         {recommendation && recColor && (
@@ -1111,12 +1111,12 @@ function ReadOnlyScorecard({
           return (
             <li
               key={attr.id}
-              className="flex items-start gap-3 text-[13px]"
+              className="flex items-start gap-3 text-xs"
             >
               <div className="flex-1 min-w-0">
                 <div className="text-ink leading-snug">{attr.label}</div>
                 {entry?.note && (
-                  <div className="text-[13px] text-slate-body mt-0.5 italic leading-snug whitespace-pre-wrap">
+                  <div className="text-xs text-slate-body mt-0.5 italic leading-snug whitespace-pre-wrap">
                     {entry.note}
                   </div>
                 )}
@@ -1137,7 +1137,7 @@ function ReadOnlyScorecard({
           <Eyebrow className="mb-1">
             Overall notes
           </Eyebrow>
-          <p className="text-[14px] text-ink leading-relaxed whitespace-pre-wrap">
+          <p className="text-sm text-ink leading-relaxed whitespace-pre-wrap">
             {scorecard.overall_note}
           </p>
         </div>
@@ -1191,7 +1191,7 @@ function ScorecardForm({
         <Eyebrow className="mb-1">
           Rubric · {rubric.label}
         </Eyebrow>
-        <p className="text-[13px] text-slate-meta leading-snug">
+        <p className="text-xs text-slate-meta leading-snug">
           {rubric.description}
         </p>
       </div>
@@ -1262,13 +1262,13 @@ function ScorecardForm({
             }
             rows={3}
             placeholder="Anything else hiring should know — strengths, concerns, follow-ups."
-            className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed"
+            className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed"
           />
         </label>
       </div>
 
       {error && (
-        <div className="flex items-start gap-2 text-[13px] text-danger">
+        <div className="flex items-start gap-2 text-xs text-danger">
           <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
           <span>{error}</span>
         </div>
@@ -1303,7 +1303,7 @@ function ScorecardForm({
             Cancel
           </button>
         )}
-        <span className="text-[12px] text-slate-meta">
+        <span className="text-xs text-slate-meta">
           Drafts are private to you. Submitting locks scores and shares with
           the hiring team.
         </span>
@@ -1332,10 +1332,10 @@ function AttributeRow({
   return (
     <div className="border border-[var(--rule)] bg-cream p-4">
       <div className="mb-2.5">
-        <div className="text-[14px] font-bold text-ink leading-snug">
+        <div className="text-sm font-bold text-ink leading-snug">
           {attribute.label}
         </div>
-        <div className="text-[13px] text-slate-meta leading-snug mt-0.5">
+        <div className="text-xs text-slate-meta leading-snug mt-0.5">
           {attribute.description}
         </div>
       </div>
@@ -1356,7 +1356,7 @@ function AttributeRow({
               aria-label={`${value} — ${SCORE_LABELS[value]}`}
               title={SCORE_LABELS[value]}
               onClick={() => onScoreChange(value)}
-              className={`px-4 py-2 text-[13px] font-bold tabular-nums border-r last:border-r-0 border-[var(--rule)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-inset ${
+              className={`px-4 py-2 text-xs font-bold tabular-nums border-r last:border-r-0 border-[var(--rule)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-inset ${
                 active
                   ? "bg-heritage text-primary-foreground"
                   : "text-slate-body hover:bg-cream"
@@ -1368,7 +1368,7 @@ function AttributeRow({
         })}
       </div>
       {score !== null && (
-        <div className="text-[12px] text-slate-meta mb-2">
+        <div className="text-xs text-slate-meta mb-2">
           {SCORE_LABELS[score]}
         </div>
       )}
@@ -1380,7 +1380,7 @@ function AttributeRow({
           onChange={(e) => onNoteChange(e.target.value)}
           maxLength={1000}
           placeholder="Optional note for this attribute"
-          className="w-full px-3 py-2 bg-card border border-[var(--rule)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+          className="w-full px-3 py-2 bg-card border border-[var(--rule)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
         />
       )}
     </div>
@@ -1427,7 +1427,7 @@ function ConfirmDialog({
         >
           {title}
         </h4>
-        <p className="text-[14px] text-slate-body leading-relaxed mb-5">
+        <p className="text-sm text-slate-body leading-relaxed mb-5">
           {body}
         </p>
         <div className="flex items-center justify-end gap-3">

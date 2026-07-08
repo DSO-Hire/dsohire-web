@@ -29,7 +29,7 @@ export function Eyebrow({
   return (
     <Comp
       className={cn(
-        "text-[11px] font-bold uppercase tracking-[1.5px] text-slate-meta",
+        "text-2xs font-bold uppercase tracking-[1.5px] text-slate-meta",
         className
       )}
       {...props}

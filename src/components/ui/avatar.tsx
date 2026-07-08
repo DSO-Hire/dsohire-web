@@ -37,7 +37,7 @@ export interface AvatarProps {
 }
 
 const SIZE_CLASS: Record<AvatarSize, string> = {
-  xs: "size-6 text-[10px]",
+  xs: "size-6 text-2xs",
   sm: "size-8 text-xs",
   md: "size-10 text-sm",
   lg: "size-12 text-base",

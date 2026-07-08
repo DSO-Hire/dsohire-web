@@ -182,18 +182,18 @@ export default async function AuditSettingsPage({ searchParams }: PageProps) {
   return (
     <section className="max-w-[920px]">
       <header className="mb-6">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Activity & Audit
         </div>
         <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] leading-[1.15] text-ink">
           Every action your team takes
         </h2>
-        <p className="mt-3 text-[14px] text-slate-body leading-relaxed">
+        <p className="mt-3 text-sm text-slate-body leading-relaxed">
           Stage moves, affiliation toggles, role changes, and other
           meaningful actions captured with actor + timestamp. Read-only;
           history can&apos;t be edited or deleted.
         </p>
-        <div className="mt-3 inline-flex items-center gap-2 text-[11px] text-slate-meta">
+        <div className="mt-3 inline-flex items-center gap-2 text-2xs text-slate-meta">
           <History className="h-3 w-3" />
           {tierRetentionDays === 0
             ? "Retention: indefinite (Enterprise)"
@@ -213,10 +213,10 @@ export default async function AuditSettingsPage({ searchParams }: PageProps) {
         {events.length === 0 ? (
           <div className="p-12 text-center">
             <History className="mx-auto h-7 w-7 text-slate-meta mb-3" />
-            <p className="text-[14px] text-ink mb-1">
+            <p className="text-sm text-ink mb-1">
               No events match these filters.
             </p>
-            <p className="text-[13px] text-slate-meta">
+            <p className="text-xs text-slate-meta">
               {totalCount === 0
                 ? "Your audit log will populate as your team uses DSO Hire."
                 : "Try widening the date range or clearing filters."}
@@ -257,7 +257,7 @@ function Paginator({
   const start = (page - 1) * PAGE_SIZE + 1;
   const end = Math.min(page * PAGE_SIZE, totalCount);
   return (
-    <div className="mt-4 flex items-center justify-between text-[12px] text-slate-meta">
+    <div className="mt-4 flex items-center justify-between text-xs text-slate-meta">
       <span>
         Showing {start}–{end} of {totalCount}
       </span>
@@ -265,7 +265,7 @@ function Paginator({
         {page > 1 && (
           <a
             href={buildHref(page - 1)}
-            className="px-3 py-1.5 border border-[var(--rule-strong)] text-ink text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-cream"
+            className="px-3 py-1.5 border border-[var(--rule-strong)] text-ink text-2xs font-bold tracking-[1.5px] uppercase hover:bg-cream"
           >
             Previous
           </a>
@@ -273,7 +273,7 @@ function Paginator({
         {page < totalPages && (
           <a
             href={buildHref(page + 1)}
-            className="px-3 py-1.5 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
+            className="px-3 py-1.5 bg-primary text-primary-foreground text-2xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
           >
             Next
           </a>
@@ -346,18 +346,18 @@ function AuditEventRow({ event }: { event: AuditEventRowData }) {
         <EventKindIcon eventKind={event.event_kind} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[14px] text-ink leading-snug">
+        <p className="text-sm text-ink leading-snug">
           <strong className="font-semibold">
             {event.actor_name ?? "(deleted user)"}
           </strong>{" "}
           <span className="text-slate-body">{event.summary}</span>
         </p>
         {reason && (
-          <p className="mt-1 text-[13px] text-slate-body italic leading-snug border-l-2 border-[var(--rule-strong)] pl-3">
+          <p className="mt-1 text-xs text-slate-body italic leading-snug border-l-2 border-[var(--rule-strong)] pl-3">
             &ldquo;{reason}&rdquo;
           </p>
         )}
-        <p className="mt-1 text-[11px] tracking-[0.3px] text-slate-meta">
+        <p className="mt-1 text-2xs tracking-[0.3px] text-slate-meta">
           {EVENT_KIND_LABELS[event.event_kind] ?? event.event_kind}
           {" · "}
           {event.actor_role

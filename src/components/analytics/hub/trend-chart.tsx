@@ -64,17 +64,17 @@ export function TrendChart({
   return (
     <section className="border border-[var(--rule)] bg-card p-6">
       <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep">
           {title}
         </div>
         <div className="flex items-center gap-4">
           {series.map((s) => (
             <span key={s.label} className="inline-flex items-center gap-1.5">
               <span className="inline-block h-2 w-2" style={{ background: s.color }} />
-              <span className="text-[11px] font-semibold text-slate-body">
+              <span className="text-2xs font-semibold text-slate-body">
                 {s.label}
               </span>
-              <span className="text-[11px] font-bold tabular-nums text-ink">
+              <span className="text-2xs font-bold tabular-nums text-ink">
                 {s.data.reduce((a, b) => a + b, 0).toLocaleString("en-US")}
               </span>
             </span>
@@ -83,7 +83,7 @@ export function TrendChart({
       </div>
 
       {totalAll === 0 ? (
-        <p className="text-[13px] text-slate-meta italic py-6 text-center">
+        <p className="text-xs text-slate-meta italic py-6 text-center">
           No activity in this window yet. Trends populate as candidates apply
           and you make hires.
         </p>
@@ -161,7 +161,7 @@ export function TrendChart({
           {/* Tooltip */}
           {hover != null && (
             <div
-              className="pointer-events-none absolute -top-1 z-10 -translate-x-1/2 whitespace-nowrap border border-[var(--rule-strong)] bg-hero text-hero-foreground px-3 py-2 text-[11px] shadow-sm"
+              className="pointer-events-none absolute -top-1 z-10 -translate-x-1/2 whitespace-nowrap border border-[var(--rule-strong)] bg-hero text-hero-foreground px-3 py-2 text-2xs shadow-sm"
               style={{ left: `${((hover + 0.5) / len) * 100}%` }}
             >
               <div className="font-bold tracking-[0.5px] mb-0.5">
@@ -183,7 +183,7 @@ export function TrendChart({
           )}
         </div>
       )}
-      <div className="mt-2 flex justify-between text-[10px] text-slate-meta">
+      <div className="mt-2 flex justify-between text-2xs text-slate-meta">
         <span>{len} days ago</span>
         <span>today</span>
       </div>

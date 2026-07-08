@@ -42,7 +42,7 @@ export function InviteForm({ locations }: { locations: LocationRow[] }) {
         <div>
           <label
             htmlFor="invite-email"
-            className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+            className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2"
           >
             Email
           </label>
@@ -54,14 +54,14 @@ export function InviteForm({ locations }: { locations: LocationRow[] }) {
               name="email"
               required
               placeholder="teammate@yourpractice.com"
-              className="w-full pl-10 pr-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+              className="w-full pl-10 pr-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
             />
           </div>
         </div>
         <div>
           <label
             htmlFor="invite-role"
-            className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+            className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2"
           >
             Role
           </label>
@@ -77,7 +77,7 @@ export function InviteForm({ locations }: { locations: LocationRow[] }) {
                   | "hiring_manager"
               )
             }
-            className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+            className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
           >
             <option value="recruiter">Recruiter</option>
             <option value="admin">Admin</option>
@@ -88,7 +88,7 @@ export function InviteForm({ locations }: { locations: LocationRow[] }) {
           <button
             type="submit"
             disabled={pending}
-            className="inline-flex items-center justify-center gap-2 px-7 py-3 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed h-[48px] whitespace-nowrap"
+            className="inline-flex items-center justify-center gap-2 px-7 py-3 bg-primary text-primary-foreground text-xs font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed h-[48px] whitespace-nowrap"
           >
             {pending ? "Sending…" : "Send Invite"}
             {!pending && <Send className="h-3.5 w-3.5" />}
@@ -101,12 +101,12 @@ export function InviteForm({ locations }: { locations: LocationRow[] }) {
         <div className="bg-cream/60 border border-[var(--rule-strong)] p-4 space-y-3">
           <div className="flex items-center gap-2">
             <MapPin className="h-3.5 w-3.5 text-heritage-deep" />
-            <label className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
+            <label className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep">
               Locations this hiring manager can access
             </label>
           </div>
           {locations.length === 0 ? (
-            <p className="text-[13px] text-slate-meta">
+            <p className="text-xs text-slate-meta">
               You don&apos;t have any locations yet. Add locations on{" "}
               <a
                 href="/employer/locations"
@@ -118,7 +118,7 @@ export function InviteForm({ locations }: { locations: LocationRow[] }) {
             </p>
           ) : (
             <>
-              <p className="text-[12px] text-slate-meta leading-relaxed">
+              <p className="text-xs text-slate-meta leading-relaxed">
                 The hiring manager will see jobs and applications tied to
                 these locations only. Pick at least one.
               </p>
@@ -138,11 +138,11 @@ export function InviteForm({ locations }: { locations: LocationRow[] }) {
                       className="mt-0.5 h-4 w-4 accent-heritage cursor-pointer"
                     />
                     <span className="flex-1 min-w-0">
-                      <span className="block text-[14px] font-semibold text-ink truncate">
+                      <span className="block text-sm font-semibold text-ink truncate">
                         {loc.name}
                       </span>
                       {(loc.city || loc.state) && (
-                        <span className="block text-[12px] text-slate-meta truncate">
+                        <span className="block text-xs text-slate-meta truncate">
                           {[loc.city, loc.state].filter(Boolean).join(", ")}
                         </span>
                       )}
@@ -161,16 +161,16 @@ export function InviteForm({ locations }: { locations: LocationRow[] }) {
 
       {state.error && (
         <div className="bg-danger-bg border-l-4 border-danger p-3">
-          <p className="text-[14px] text-danger">{state.error}</p>
+          <p className="text-sm text-danger">{state.error}</p>
         </div>
       )}
       {state.ok && state.message && (
         <div className="bg-cream border-l-4 border-heritage p-3">
-          <p className="text-[14px] text-ink font-semibold">{state.message}</p>
+          <p className="text-sm text-ink font-semibold">{state.message}</p>
         </div>
       )}
 
-      <p className="text-[12px] text-slate-meta leading-relaxed">
+      <p className="text-xs text-slate-meta leading-relaxed">
         <strong className="text-ink font-semibold">Recruiter</strong> — post
         and edit jobs, manage applications across the DSO.{" "}
         <strong className="text-ink font-semibold">Admin</strong> — everything

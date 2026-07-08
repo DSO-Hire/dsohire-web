@@ -58,7 +58,7 @@ export function TrendPill({
 
   return (
     <span
-      className={`inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-bold tracking-[0.6px] whitespace-nowrap tabular ${styles}`}
+      className={`inline-flex items-center gap-1 px-1.5 py-0.5 text-2xs font-bold tracking-[0.6px] whitespace-nowrap tabular ${styles}`}
     >
       <Icon className="h-3 w-3" />
       {formatted}

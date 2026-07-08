@@ -51,7 +51,7 @@ export default async function CandidateResumePage() {
           <h1 className="text-2xl font-extrabold tracking-tight text-ink">
             Let’s get your résumé ready
           </h1>
-          <p className="mt-2 text-[15px] leading-relaxed text-slate-body">
+          <p className="mt-2 text-sm leading-relaxed text-slate-body">
             You don’t have a résumé on file yet. Start whichever way is easier —
             you can switch anytime, and anything you add flows straight onto your
             profile.
@@ -63,18 +63,18 @@ export default async function CandidateResumePage() {
               href="/candidate/resume/build"
               className="group block border-2 border-heritage bg-heritage/[0.06] p-5 transition-colors hover:bg-heritage/10"
             >
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[1.5px] text-heritage-deep">
+              <span className="inline-flex items-center gap-1.5 text-2xs font-bold uppercase tracking-[1.5px] text-heritage-deep">
                 <Sparkles className="h-3.5 w-3.5" />
                 Free
               </span>
               <h2 className="mt-2 text-[17px] font-extrabold text-ink">
                 Build one for free
               </h2>
-              <p className="mt-1 text-[13px] leading-relaxed text-slate-body">
+              <p className="mt-1 text-xs leading-relaxed text-slate-body">
                 No résumé yet? We’ll guide you through a polished, ATS-ready
                 résumé in a few minutes — completely free.
               </p>
-              <span className="mt-3 inline-flex items-center gap-1 text-[13px] font-bold text-heritage-deep">
+              <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-heritage-deep">
                 Start building
                 <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
               </span>
@@ -85,25 +85,25 @@ export default async function CandidateResumePage() {
               href="/candidate/profile/import"
               className="group block border border-[var(--rule)] bg-card p-5 transition-colors hover:border-heritage-deep"
             >
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-meta">
+              <span className="inline-flex items-center gap-1.5 text-2xs font-bold uppercase tracking-[1.5px] text-slate-meta">
                 <FileUp className="h-3.5 w-3.5" />
                 Upload
               </span>
               <h2 className="mt-2 text-[17px] font-extrabold text-ink">
                 Upload your own
               </h2>
-              <p className="mt-1 text-[13px] leading-relaxed text-slate-body">
+              <p className="mt-1 text-xs leading-relaxed text-slate-body">
                 Already have one? Upload it and we’ll read it to fill in your
                 profile automatically — then refine it here.
               </p>
-              <span className="mt-3 inline-flex items-center gap-1 text-[13px] font-bold text-ink">
+              <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-ink">
                 Upload résumé
                 <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
               </span>
             </Link>
           </div>
 
-          <p className="mt-5 text-[13px] text-slate-meta">
+          <p className="mt-5 text-xs text-slate-meta">
             Prefer to type it in?{" "}
             <Link
               href="/candidate/profile"

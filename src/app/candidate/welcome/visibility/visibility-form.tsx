@@ -75,7 +75,7 @@ export function VisibilityForm() {
     <div className="min-h-screen bg-ivory flex flex-col items-center justify-center px-5 py-16">
       <div className="w-full max-w-[680px]">
         <header className="text-center mb-10">
-          <span className="inline-flex items-center gap-2 bg-heritage/10 px-3.5 py-1.5 text-[13px] font-semibold text-heritage">
+          <span className="inline-flex items-center gap-2 bg-heritage/10 px-3.5 py-1.5 text-xs font-semibold text-heritage">
             <ShieldCheck className="h-4 w-4" />
             You&apos;re private by default
           </span>
@@ -126,7 +126,7 @@ export function VisibilityForm() {
                       <Tag tone="heritage">Recommended</Tag>
                     )}
                   </span>
-                  <span className="mt-1 block text-[14px] text-muted-foreground leading-relaxed">
+                  <span className="mt-1 block text-sm text-muted-foreground leading-relaxed">
                     {opt.description}
                   </span>
                 </span>
@@ -135,7 +135,7 @@ export function VisibilityForm() {
           })}
         </fieldset>
 
-        <p className="mt-6 flex items-start gap-2 text-[13px] leading-relaxed text-slate-meta">
+        <p className="mt-6 flex items-start gap-2 text-xs leading-relaxed text-slate-meta">
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-heritage" />
           <span>
             Whatever you choose, your contact info and résumé stay hidden until
@@ -144,7 +144,7 @@ export function VisibilityForm() {
         </p>
 
         {error && (
-          <p className="mt-5 text-center text-[14px] font-semibold text-danger">
+          <p className="mt-5 text-center text-sm font-semibold text-danger">
             {error}
           </p>
         )}

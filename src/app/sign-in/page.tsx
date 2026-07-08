@@ -27,7 +27,7 @@ export default function SignInPickerPage() {
   return (
     <SiteShell>
       <section className="pt-[140px] pb-24 px-6 sm:px-14 max-w-[1100px] mx-auto">
-        <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-4">
+        <div className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-4">
           Sign In
         </div>
         <h1 className="text-4xl sm:text-7xl font-extrabold tracking-[-2px] leading-[1.02] text-ink mb-5 max-w-[820px]">
@@ -91,25 +91,25 @@ function SignInCard({
   return (
     <div className="bg-card p-8 sm:p-10 flex flex-col">
       <div className="mb-5">{icon}</div>
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+      <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
         {eyebrow}
       </div>
       <h2 className="text-2xl font-extrabold tracking-[-0.5px] text-ink leading-tight mb-3">
         {title}
       </h2>
-      <p className="text-[14px] text-slate-body leading-relaxed mb-8 flex-1">
+      <p className="text-sm text-slate-body leading-relaxed mb-8 flex-1">
         {blurb}
       </p>
       <Link
         href={primaryHref}
-        className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors mb-3"
+        className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors mb-3"
       >
         {primaryLabel}
         <ArrowRight className="h-3.5 w-3.5" />
       </Link>
       <Link
         href={secondaryHref}
-        className="text-[13px] text-heritage-deep hover:text-ink underline underline-offset-2 font-semibold text-center"
+        className="text-xs text-heritage-deep hover:text-ink underline underline-offset-2 font-semibold text-center"
       >
         {secondaryLabel}
       </Link>

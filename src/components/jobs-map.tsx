@@ -1079,10 +1079,10 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
     return (
       <div className="border border-[var(--rule)] bg-cream p-12 text-center">
         <MapPin className="h-6 w-6 text-heritage-deep mx-auto mb-3" />
-        <p className="text-[14px] text-ink font-semibold mb-1">
+        <p className="text-sm text-ink font-semibold mb-1">
           Map view isn&apos;t configured yet.
         </p>
-        <p className="text-[13px] text-slate-meta">
+        <p className="text-xs text-slate-meta">
           The map provider token is missing. Switch back to the list view to
           browse roles.
         </p>
@@ -1094,10 +1094,10 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
     return (
       <div className="border border-[var(--rule)] bg-cream p-12 text-center">
         <MapPin className="h-6 w-6 text-heritage-deep mx-auto mb-3" />
-        <p className="text-[14px] text-ink font-semibold mb-1">
+        <p className="text-sm text-ink font-semibold mb-1">
           No mapped locations yet.
         </p>
-        <p className="text-[13px] text-slate-meta">
+        <p className="text-xs text-slate-meta">
           Active job locations will show up here as soon as they&apos;re
           geocoded.
         </p>
@@ -1134,13 +1134,13 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
               if (searchError) setSearchError(null);
             }}
             placeholder="City, ZIP, or state"
-            className="flex-1 min-w-0 px-2 py-2.5 bg-transparent text-[13px] text-ink placeholder:text-slate-meta focus:outline-none"
+            className="flex-1 min-w-0 px-2 py-2.5 bg-transparent text-xs text-ink placeholder:text-slate-meta focus:outline-none"
             aria-label="Search by city, ZIP, or state"
           />
           <button
             type="submit"
             disabled={searching || !searchInput.trim()}
-            className="px-3 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center gap-1.5"
+            className="px-3 bg-primary text-primary-foreground text-2xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center gap-1.5"
           >
             {searching ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -1150,7 +1150,7 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
           </button>
         </form>
         {searchError && (
-          <div className="bg-danger-bg border-l-2 border-danger px-3 py-2 text-[12px] text-danger max-w-[300px] shadow-sm">
+          <div className="bg-danger-bg border-l-2 border-danger px-3 py-2 text-xs text-danger max-w-[300px] shadow-sm">
             {searchError}
           </div>
         )}
@@ -1159,13 +1159,13 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
           type="button"
           onClick={handleLocateMe}
           disabled={locating}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-ivory border border-[var(--rule-strong)] text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors shadow-sm disabled:opacity-60"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-ivory border border-[var(--rule-strong)] text-ink text-2xs font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors shadow-sm disabled:opacity-60"
         >
           <Locate className="h-3.5 w-3.5" />
           {locating ? "Locating…" : "Use my location"}
         </button>
         {locateError && (
-          <div className="bg-danger-bg border-l-2 border-danger px-3 py-2 text-[12px] text-danger max-w-[260px] shadow-sm">
+          <div className="bg-danger-bg border-l-2 border-danger px-3 py-2 text-xs text-danger max-w-[260px] shadow-sm">
             {locateError}
           </div>
         )}
@@ -1183,7 +1183,7 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
               onClick={() => setMapStyleId(style.id)}
               aria-pressed={mapStyleId === style.id}
               className={
-                "px-3 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors " +
+                "px-3 py-2 text-2xs font-bold tracking-[1.5px] uppercase transition-colors " +
                 (idx > 0 ? "border-l border-[var(--rule-strong)] " : "") +
                 (mapStyleId === style.id
                   ? "bg-primary text-primary-foreground"
@@ -1209,7 +1209,7 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
             onClick={() => setHeatmapOn((on) => !on)}
             aria-pressed={heatmapOn}
             className={
-              "px-3 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors flex items-center gap-1.5 " +
+              "px-3 py-2 text-2xs font-bold tracking-[1.5px] uppercase transition-colors flex items-center gap-1.5 " +
               (heatmapOn
                 ? "bg-heritage-deep text-primary-foreground"
                 : "text-slate-body hover:text-ink hover:bg-cream")
@@ -1233,8 +1233,8 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
       {/* Privacy chip — copy is contextual to the active view. With
           heatmap on, "Heat" replaces "Pins" so users understand the
           aggregation-level privacy guarantee applies to both. */}
-      <div className="absolute top-4 right-[60px] sm:right-4 sm:top-4 sm:bottom-auto bottom-4 left-4 sm:left-auto bg-ivory/95 backdrop-blur-sm border border-[var(--rule)] px-3 py-2 max-w-[320px] sm:max-w-[260px] text-[11px] text-slate-body leading-snug shadow-sm">
-        <span className="font-bold text-ink uppercase tracking-[1.5px] text-[10px] block mb-0.5">
+      <div className="absolute top-4 right-[60px] sm:right-4 sm:top-4 sm:bottom-auto bottom-4 left-4 sm:left-auto bg-ivory/95 backdrop-blur-sm border border-[var(--rule)] px-3 py-2 max-w-[320px] sm:max-w-[260px] text-2xs text-slate-body leading-snug shadow-sm">
+        <span className="font-bold text-ink uppercase tracking-[1.5px] text-2xs block mb-0.5">
           {heatmapOn ? "Hiring density" : "Metro view"}
         </span>
         {heatmapOn
@@ -1246,7 +1246,7 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
           first paint. Only renders while data is binding so it doesn't
           stick around as visual noise once the layer is up. */}
       {heatmapLoading && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase px-3 py-2 shadow-sm flex items-center gap-2 z-10">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-2xs font-bold tracking-[1.5px] uppercase px-3 py-2 shadow-sm flex items-center gap-2 z-10">
           <span
             className="inline-block w-1.5 h-1.5 rounded-full bg-primary-foreground animate-pulse"
             aria-hidden="true"
@@ -1274,7 +1274,7 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
               <X className="h-4 w-4" />
             </button>
 
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+            <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
               {drawerMetro.locations.length === 1
                 ? "Jobs in this metro"
                 : `Jobs across ${drawerMetro.locations.length} practices`}
@@ -1284,14 +1284,14 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
                 .filter(Boolean)
                 .join(", ") || "This metro"}
             </h2>
-            <p className="text-[13px] text-slate-meta tracking-[0.3px] mb-6">
+            <p className="text-xs text-slate-meta tracking-[0.3px] mb-6">
               {totalDrawerJobs === 1
                 ? "1 open role"
                 : `${totalDrawerJobs} open roles`}
             </p>
 
             {totalDrawerJobs === 0 ? (
-              <p className="text-[14px] text-slate-meta italic">
+              <p className="text-sm text-slate-meta italic">
                 No active jobs in this metro right now.
               </p>
             ) : drawerDsoGroups.length === 1 ? (
@@ -1303,15 +1303,15 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
                       href={`/jobs/${job.id}`}
                       className="block p-4 border border-[var(--rule)] hover:border-heritage hover:bg-cream/50 transition-colors group"
                     >
-                      <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
+                      <div className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
                         {ROLE_LABELS[job.role_category] ?? job.role_category} ·{" "}
                         {EMP_LABELS[job.employment_type] ?? job.employment_type}
                       </div>
-                      <div className="text-[15px] font-semibold text-ink leading-snug mb-1">
+                      <div className="text-sm font-semibold text-ink leading-snug mb-1">
                         {job.title}
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-[13px] text-slate-body">
+                        <span className="text-xs text-slate-body">
                           {drawerDsoGroups[0].dsoName}
                           {drawerMetro.locations.length > 1 &&
                             ` · ${job.locationName}`}
@@ -1331,10 +1331,10 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
                 {drawerDsoGroups.map((group) => (
                   <section key={group.dsoName}>
                     <header className="flex items-baseline justify-between gap-3 mb-3 pb-2 border-b border-[var(--rule)]">
-                      <h3 className="text-[15px] font-extrabold tracking-[-0.2px] text-ink">
+                      <h3 className="text-sm font-extrabold tracking-[-0.2px] text-ink">
                         {group.dsoName}
                       </h3>
-                      <span className="text-[11px] font-semibold tracking-[1.5px] uppercase text-heritage-deep shrink-0">
+                      <span className="text-2xs font-semibold tracking-[1.5px] uppercase text-heritage-deep shrink-0">
                         {group.jobs.length} role
                         {group.jobs.length === 1 ? "" : "s"}
                       </span>
@@ -1346,15 +1346,15 @@ export function JobsMap({ locations, mapboxToken, heatmapEnabled = false }: Jobs
                             href={`/jobs/${job.id}`}
                             className="block p-4 border border-[var(--rule)] hover:border-heritage hover:bg-cream/50 transition-colors group"
                           >
-                            <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
+                            <div className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
                               {ROLE_LABELS[job.role_category] ?? job.role_category} ·{" "}
                               {EMP_LABELS[job.employment_type] ?? job.employment_type}
                             </div>
-                            <div className="text-[15px] font-semibold text-ink leading-snug mb-1">
+                            <div className="text-sm font-semibold text-ink leading-snug mb-1">
                               {job.title}
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-[13px] text-slate-body">
+                              <span className="text-xs text-slate-body">
                                 {job.locationName}
                               </span>
                               <ArrowRight className="h-3.5 w-3.5 text-heritage-deep opacity-0 group-hover:opacity-100 transition-opacity" />

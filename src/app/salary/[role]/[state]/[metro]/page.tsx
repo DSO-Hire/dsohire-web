@@ -109,14 +109,14 @@ export default async function MetroSalaryPage({ params }: { params: Promise<Para
 
       <section className="pt-[140px] pb-12 px-6 sm:px-14">
         <div className="max-w-[1100px] mx-auto">
-          <nav className="text-[12px] text-slate-meta mb-5">
+          <nav className="text-xs text-slate-meta mb-5">
             <Link href={`/salary/${role.slug}`} className="hover:text-heritage-deep underline underline-offset-2">{role.searchTitle} salary</Link>
             <span className="mx-2">/</span>
             <Link href={`/salary/${role.slug}/${p.state}`} className="hover:text-heritage-deep underline underline-offset-2">{state.name}</Link>
             <span className="mx-2">/</span>
             <span className="text-ink">{city}</span>
           </nav>
-          <p className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-5">Dental Salary Data · BLS OEWS</p>
+          <p className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-5">Dental Salary Data · BLS OEWS</p>
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-[-1.5px] leading-[1.04] text-ink mb-6">
             {role.searchTitle} Salary in {city}
           </h1>
@@ -136,7 +136,7 @@ export default async function MetroSalaryPage({ params }: { params: Promise<Para
             <Stat label="75th percentile" value={high} hint="Experienced / upper range" />
           </div>
           {(vsState || vsNational) && (
-            <p className="text-[13px] text-heritage-light mt-8 pt-6 border-t border-hero-foreground/10">
+            <p className="text-xs text-heritage-light mt-8 pt-6 border-t border-hero-foreground/10">
               {vsState && `${city} runs about ${vsState.pct}% ${vsState.dir} the ${state.name} median. `}
               {vsNational && `Versus the national median, it's about ${vsNational.pct}% ${vsNational.dir} average.`}
             </p>
@@ -146,7 +146,7 @@ export default async function MetroSalaryPage({ params }: { params: Promise<Para
 
       {ownerCaveat(role) && (
         <section className="px-6 sm:px-14 pb-10 -mt-4">
-          <p className="max-w-[1100px] mx-auto text-[13px] text-slate-meta italic leading-[1.6]">{ownerCaveat(role)}</p>
+          <p className="max-w-[1100px] mx-auto text-xs text-slate-meta italic leading-[1.6]">{ownerCaveat(role)}</p>
         </section>
       )}
 
@@ -154,12 +154,12 @@ export default async function MetroSalaryPage({ params }: { params: Promise<Para
       <section className="px-6 sm:px-14 pb-16">
         <div className="max-w-[1100px] mx-auto bg-cream p-8 sm:p-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="max-w-[560px]">
-            <p className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">For dental pros in {city}</p>
+            <p className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-2">For dental pros in {city}</p>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-1px] text-ink">Build a free résumé and get matched to practices that fit you.</h2>
           </div>
           <div className="flex flex-wrap gap-3 shrink-0">
-            <Link href="/resume-templates" className="inline-flex items-center px-7 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors">Build a free résumé</Link>
-            <Link href="/jobs" className="inline-flex items-center px-7 py-3.5 border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors">Browse jobs</Link>
+            <Link href="/resume-templates" className="inline-flex items-center px-7 py-3.5 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors">Build a free résumé</Link>
+            <Link href="/jobs" className="inline-flex items-center px-7 py-3.5 border border-[var(--rule-strong)] text-ink text-xs font-bold tracking-[2px] uppercase hover:border-ink transition-colors">Browse jobs</Link>
           </div>
         </div>
       </section>
@@ -172,7 +172,7 @@ export default async function MetroSalaryPage({ params }: { params: Promise<Para
             {faq.map((f) => (
               <div key={f.q} className="py-5">
                 <h3 className="text-lg font-bold text-ink mb-2">{f.q}</h3>
-                <p className="text-slate-body leading-[1.7] text-[15px]">{f.a}</p>
+                <p className="text-slate-body leading-[1.7] text-sm">{f.a}</p>
               </div>
             ))}
           </div>
@@ -184,7 +184,7 @@ export default async function MetroSalaryPage({ params }: { params: Promise<Para
         <div className="max-w-[1100px] mx-auto grid grid-cols-1 sm:grid-cols-2 gap-10">
           {siblingMetros.length > 0 && (
             <div>
-              <p className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-4">Other {state.name} metros</p>
+              <p className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-4">Other {state.name} metros</p>
               <ul className="space-y-2">
                 {siblingMetros.map((m) => (
                   <li key={m.slug}>
@@ -197,7 +197,7 @@ export default async function MetroSalaryPage({ params }: { params: Promise<Para
             </div>
           )}
           <div>
-            <p className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-4">Other roles in {state.name}</p>
+            <p className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-4">Other roles in {state.name}</p>
             <ul className="space-y-2">
               {otherRoles.slice(0, 6).map((x) => (
                 <li key={x.slug}>
@@ -217,9 +217,9 @@ export default async function MetroSalaryPage({ params }: { params: Promise<Para
 function Stat({ label, value, hint, emphasis }: { label: string; value: string; hint: string; emphasis?: boolean }) {
   return (
     <div>
-      <p className="text-[11px] font-bold uppercase tracking-[2px] text-heritage-light mb-2">{label}</p>
+      <p className="text-2xs font-bold uppercase tracking-[2px] text-heritage-light mb-2">{label}</p>
       <p className={`font-extrabold text-hero-foreground tracking-[-1px] ${emphasis ? "text-4xl sm:text-5xl" : "text-3xl sm:text-4xl"}`}>{value}</p>
-      <p className="text-[12px] text-hero-foreground/50 mt-1">{hint}</p>
+      <p className="text-xs text-hero-foreground/50 mt-1">{hint}</p>
     </div>
   );
 }

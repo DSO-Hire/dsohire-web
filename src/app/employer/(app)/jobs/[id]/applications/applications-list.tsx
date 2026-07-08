@@ -73,7 +73,7 @@ export function ApplicationsList({
       <div className="border border-[var(--rule)] bg-card p-12 text-center max-w-[680px]">
         <BrandMark className="mx-auto mb-4 size-8 opacity-20" />
         <Eyebrow className="mb-3">No applications yet</Eyebrow>
-        <p className="text-[15px] text-ink leading-relaxed">
+        <p className="text-sm text-ink leading-relaxed">
           Share the apply link with your practice network — clinicians who
           apply land here the moment they submit.
         </p>
@@ -96,7 +96,7 @@ export function ApplicationsList({
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-3 mb-1.5 flex-wrap">
-                  <div className="text-[15px] font-bold text-ink truncate">
+                  <div className="text-sm font-bold text-ink truncate">
                     {cand?.full_name ?? "Anonymous candidate"}
                   </div>
                   <span
@@ -109,12 +109,12 @@ export function ApplicationsList({
                   )}
                 </div>
                 {!hideJobTitle && (
-                  <div className="text-[14px] text-slate-body mb-2">
+                  <div className="text-sm text-slate-body mb-2">
                     Applied to{" "}
                     <span className="font-semibold text-ink">{app.jobTitle}</span>
                   </div>
                 )}
-                <div className="text-[13px] text-slate-meta tabular">
+                <div className="text-xs text-slate-meta tabular">
                   {[cand?.current_title, cand?.headline]
                     .filter(Boolean)
                     .join(" · ") || "Profile minimal"}

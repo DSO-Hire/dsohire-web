@@ -506,7 +506,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
           <Eyebrow className="text-heritage-deep mb-2">
             {submitted.alreadyApplied ? "Application updated" : "Application sent"}
           </Eyebrow>
-          <p className="text-[15px] text-ink leading-relaxed mb-4">
+          <p className="text-sm text-ink leading-relaxed mb-4">
             {submitted.message}
           </p>
           <div className="flex flex-wrap gap-3">
@@ -551,7 +551,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
             <h3 className="text-[17px] font-bold text-ink leading-snug">
               See which roles fit you best with PracticeFit
             </h3>
-            <p className="mt-1.5 text-[14px] text-slate-body leading-relaxed">
+            <p className="mt-1.5 text-sm text-slate-body leading-relaxed">
               Take our quick ~5-minute assessment — we&apos;ll score how well
               every role and practice fits you and surface your best matches. It
               also helps practices find you by fit, not just keywords.
@@ -582,10 +582,10 @@ export function ApplyWizard(props: ApplyWizardProps) {
         <div className="border border-heritage/30 bg-heritage/[0.06] p-5 flex items-start gap-4">
           <Pencil className="h-4 w-4 text-heritage-deep flex-shrink-0 mt-1" />
           <div className="flex-1 min-w-0">
-            <div className="text-[14px] font-semibold text-ink leading-snug mb-1">
+            <div className="text-sm font-semibold text-ink leading-snug mb-1">
               Resume your draft from earlier?
             </div>
-            <div className="text-[13px] text-slate-body leading-relaxed mb-3">
+            <div className="text-xs text-slate-body leading-relaxed mb-3">
               We saved what you started typing on this device. You'll need to
               re-attach a resume if you uploaded one.
             </div>
@@ -745,7 +745,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
 
       </WizardShell>
 
-      <p className="text-[13px] text-slate-meta leading-relaxed">
+      <p className="text-xs text-slate-meta leading-relaxed">
         Your draft saves automatically on this device. Your application goes
         directly to the hiring team at this DSO. By submitting you agree to our{" "}
         <a
@@ -809,7 +809,7 @@ function IntroStep({
         <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight mb-3">
           You're applying as {trimmedName || userEmail || "yourself"}.
         </h2>
-        <p className="text-[14px] text-slate-body leading-relaxed">
+        <p className="text-sm text-slate-body leading-relaxed">
           {existingApplication
             ? `You already have an application on file for ${jobTitle} at ${dsoName}. Walking through these steps will update your existing application — it won't create a duplicate.`
             : `This wizard will walk you through screening questions, your resume, and a quick cover note for the hiring team at ${dsoName}.`}
@@ -843,7 +843,7 @@ function IntroStep({
             placeholder="Rivera"
           />
         </FieldShell>
-        <p className="text-[12px] leading-relaxed text-slate-meta sm:col-span-2">
+        <p className="text-xs leading-relaxed text-slate-meta sm:col-span-2">
           Required — the hiring team needs a real name on your application.
           We&apos;ll save this back to your profile.
         </p>
@@ -856,7 +856,7 @@ function IntroStep({
             {prefill.map((row) => (
               <div key={row.label}>
                 <Eyebrow as="dt">{row.label}</Eyebrow>
-                <dd className="text-[14px] text-ink mt-0.5">{row.value}</dd>
+                <dd className="text-sm text-ink mt-0.5">{row.value}</dd>
               </div>
             ))}
           </dl>
@@ -902,13 +902,13 @@ function ScreeningStep({
 
       {questions.map((q, idx) => (
         <div key={q.id} className="space-y-2">
-          <label className="block text-[14px] font-semibold text-ink leading-snug">
+          <label className="block text-sm font-semibold text-ink leading-snug">
             <span className="text-slate-meta font-bold mr-2 tabular">{idx + 1}.</span>
             {q.prompt}
             {q.required && <span className="text-heritage ml-1">*</span>}
           </label>
           {q.helper_text && (
-            <p className="text-[12px] text-slate-meta leading-relaxed">
+            <p className="text-xs text-slate-meta leading-relaxed">
               {q.helper_text}
             </p>
           )}
@@ -1030,7 +1030,7 @@ function QuestionInput({
  * ───────────────────────────────────────────────────────────── */
 
 const VERIFICATION_BASE_INPUT =
-  "w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed";
+  "w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed";
 
 function VerificationStep({
   requirements,
@@ -1059,7 +1059,7 @@ function VerificationStep({
         <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           Confirm what this role requires.
         </h2>
-        <p className="text-[14px] text-slate-body leading-relaxed mt-2">
+        <p className="text-sm text-slate-body leading-relaxed mt-2">
           The hiring team asked applicants to confirm the items below. Check
           each one you can attest to — and, where it helps, link one or more
           credentials as proof. The hiring team reviews what you provide; we
@@ -1090,7 +1090,7 @@ function VerificationStep({
             key={req.verification_type}
             className="space-y-3 border border-[var(--rule)] p-5"
           >
-            <div className="text-[14px] font-semibold text-ink leading-snug">
+            <div className="text-sm font-semibold text-ink leading-snug">
               <span className="text-slate-meta font-bold mr-2 tabular">
                 {idx + 1}.
               </span>
@@ -1112,7 +1112,7 @@ function VerificationStep({
               <div>
                 <Eyebrow as="label" className="block mb-2">
                   Link credentials as proof{" "}
-                  <span className="text-slate-meta font-medium normal-case tracking-normal text-[11px]">
+                  <span className="text-slate-meta font-medium normal-case tracking-normal text-2xs">
                     (optional · pick any that apply)
                   </span>
                 </Eyebrow>
@@ -1129,7 +1129,7 @@ function VerificationStep({
                     ))}
                   </div>
                 ) : (
-                  <p className="text-[12px] text-slate-meta leading-relaxed">
+                  <p className="text-xs text-slate-meta leading-relaxed">
                     No matching credential on your profile yet — you can still
                     attest above, or add one below without leaving this page.
                   </p>
@@ -1147,7 +1147,7 @@ function VerificationStep({
             <div>
               <Eyebrow as="label" className="block mb-2">
                 Note{" "}
-                <span className="text-slate-meta font-medium normal-case tracking-normal text-[11px]">
+                <span className="text-slate-meta font-medium normal-case tracking-normal text-2xs">
                   (optional)
                 </span>
               </Eyebrow>
@@ -1444,7 +1444,7 @@ function InlineCredentialForm({
         <div>
           <Eyebrow as="label" className="block mb-1.5">
             Supporting document{" "}
-            <span className="text-slate-meta font-medium normal-case tracking-normal text-[11px]">
+            <span className="text-slate-meta font-medium normal-case tracking-normal text-2xs">
               (optional)
             </span>
           </Eyebrow>
@@ -1453,9 +1453,9 @@ function InlineCredentialForm({
             type="file"
             accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="block w-full text-[13px] text-ink file:mr-3 file:px-4 file:py-2 file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 file:cursor-pointer file:transition-colors"
+            className="block w-full text-xs text-ink file:mr-3 file:px-4 file:py-2 file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 file:cursor-pointer file:transition-colors"
           />
-          <p className="mt-1 text-[11px] text-slate-meta leading-relaxed">
+          <p className="mt-1 text-2xs text-slate-meta leading-relaxed">
             PDF, PNG, JPEG, or WebP. Max 10 MB. You can also add this later
             from your profile.
           </p>
@@ -1463,7 +1463,7 @@ function InlineCredentialForm({
       )}
 
       {error && (
-        <p className="text-[13px] text-danger leading-relaxed">{error}</p>
+        <p className="text-xs text-danger leading-relaxed">{error}</p>
       )}
 
       <div className="flex items-center gap-2 pt-1">
@@ -1487,7 +1487,7 @@ function InlineCredentialForm({
           Cancel
         </button>
       </div>
-      <p className="text-[11px] text-slate-meta leading-relaxed">
+      <p className="text-2xs text-slate-meta leading-relaxed">
         This is saved to your profile as your own credential. The hiring team
         reviews it — DSO Hire doesn&apos;t verify or score it.
       </p>
@@ -1552,7 +1552,7 @@ function ResumeStep({
 
       {!hasSavedResume && (
         <div className="flex items-center justify-between gap-3 rounded-md border border-heritage/30 bg-heritage/5 px-4 py-3">
-          <p className="text-[13px] text-slate-body leading-snug">
+          <p className="text-xs text-slate-body leading-snug">
             No résumé handy? Build a clean, ATS-safe one free from your
             profile — we&apos;ll save it and attach it here.
           </p>
@@ -1635,12 +1635,12 @@ function ResumeStep({
               ? "Reading your résumé…"
               : "Autofill my details from this résumé"}
           </button>
-          <p className="mt-2 text-[13px] leading-relaxed text-slate-meta">
+          <p className="mt-2 text-xs leading-relaxed text-slate-meta">
             Optional — we&apos;ll read your name from the file to save you
             typing. You review everything before submitting.
           </p>
           {autofillNote && (
-            <p className="mt-2 text-[13px] font-semibold leading-relaxed text-heritage-deep">
+            <p className="mt-2 text-xs font-semibold leading-relaxed text-heritage-deep">
               {autofillNote}
             </p>
           )}
@@ -1649,11 +1649,11 @@ function ResumeStep({
 
       {canAddResumeCreds && (
         <div className="border border-heritage/40 bg-heritage/[0.05] p-4">
-          <p className="text-[14px] font-semibold text-ink">
+          <p className="text-sm font-semibold text-ink">
             We spotted <span className="tabular">{resumeCredCount}</span> credential
             {resumeCredCount === 1 ? "" : "s"} on your résumé.
           </p>
-          <p className="mt-1 text-[13px] leading-relaxed text-slate-meta">
+          <p className="mt-1 text-xs leading-relaxed text-slate-meta">
             Add your licenses, certifications, and education to your profile so
             you can attach them as proof in this application.
           </p>
@@ -1700,7 +1700,7 @@ function CoverLetterStep({
         rows={8}
         placeholder={`A short note to the hiring team. Mention what excites you about this ${jobTitle.toLowerCase()} role and what experience makes you a fit.`}
       />
-      <p className="text-[13px] text-slate-meta leading-relaxed">
+      <p className="text-xs text-slate-meta leading-relaxed">
         Optional, but recommended — personalized cover letters typically get
         2–3× more interview requests than generic applications.
       </p>
@@ -1765,7 +1765,7 @@ function ReviewStep({
         <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           Final check before you send.
         </h2>
-        <p className="text-[14px] text-slate-body leading-relaxed mt-2">
+        <p className="text-sm text-slate-body leading-relaxed mt-2">
           You're applying to <span className="font-semibold text-ink">{jobTitle}</span>{" "}
           at <span className="font-semibold text-ink">{dsoName}</span>.
         </p>
@@ -1773,9 +1773,9 @@ function ReviewStep({
 
       <ReviewBlock label="Your name" onEdit={() => onJumpTo("intro")}>
         {trimmedName ? (
-          <p className="text-[14px] text-ink">{trimmedName}</p>
+          <p className="text-sm text-ink">{trimmedName}</p>
         ) : (
-          <p className="text-[14px] text-danger">
+          <p className="text-sm text-danger">
             Missing — go back and add your full name before submitting.
           </p>
         )}
@@ -1789,10 +1789,10 @@ function ReviewStep({
           <ul className="space-y-3">
             {questions.map((q) => (
               <li key={q.id}>
-                <div className="text-[12px] font-semibold text-slate-meta mb-0.5">
+                <div className="text-xs font-semibold text-slate-meta mb-0.5">
                   {q.prompt}
                 </div>
-                <div className="text-[14px] text-ink">
+                <div className="text-sm text-ink">
                   {formatAnswer(q, answers[q.id]) || (
                     <span className="text-slate-meta italic">No answer</span>
                   )}
@@ -1817,13 +1817,13 @@ function ReviewStep({
                 .filter((c): c is CandidateCredential => Boolean(c));
               return (
                 <li key={req.verification_type}>
-                  <div className="text-[12px] font-semibold text-slate-meta mb-0.5">
+                  <div className="text-xs font-semibold text-slate-meta mb-0.5">
                     {vt?.label ?? req.verification_type}
                     {req.required && (
                       <span className="text-heritage ml-1">*</span>
                     )}
                   </div>
-                  <div className="text-[14px] text-ink">
+                  <div className="text-sm text-ink">
                     {v?.attested ? (
                       <>Confirmed</>
                     ) : (
@@ -1833,13 +1833,13 @@ function ReviewStep({
                     )}
                   </div>
                   {linkedCreds.length > 0 && (
-                    <div className="text-[13px] text-slate-body mt-0.5">
+                    <div className="text-xs text-slate-body mt-0.5">
                       Linked proof:{" "}
                       {linkedCreds.map((c) => c.label).join(", ")}
                     </div>
                   )}
                   {v?.note?.trim() && (
-                    <div className="text-[13px] text-slate-body mt-0.5 whitespace-pre-wrap">
+                    <div className="text-xs text-slate-body mt-0.5 whitespace-pre-wrap">
                       Note: {v.note.trim()}
                     </div>
                   )}
@@ -1851,7 +1851,7 @@ function ReviewStep({
       )}
 
       <ReviewBlock label="Resume" onEdit={() => onJumpTo("resume")}>
-        <p className="text-[14px] text-ink">
+        <p className="text-sm text-ink">
           {resumeChoice === "upload" && resumeFile
             ? `Uploading: ${resumeFile.name}`
             : resumeChoice === "saved" && savedResumeName
@@ -1862,11 +1862,11 @@ function ReviewStep({
 
       <ReviewBlock label="Cover letter" onEdit={() => onJumpTo("cover")}>
         {coverLetter.trim() ? (
-          <p className="text-[14px] text-ink whitespace-pre-wrap leading-relaxed">
+          <p className="text-sm text-ink whitespace-pre-wrap leading-relaxed">
             {coverLetter}
           </p>
         ) : (
-          <p className="text-[14px] text-slate-meta italic">
+          <p className="text-sm text-slate-meta italic">
             No cover letter — you can still submit, but personalized cover
             letters get more interviews.
           </p>
@@ -1878,7 +1878,7 @@ function ReviewStep({
           <Eyebrow className="text-heritage-deep mb-1">
             Your profile is <span className="tabular">{completeness.percent}%</span> complete
           </Eyebrow>
-          <p className="text-[13px] text-slate-body leading-relaxed">
+          <p className="text-xs text-slate-body leading-relaxed">
             Adding {completeness.missing.join(", ")} to your profile lets future
             applications autofill in seconds.{" "}
             <Link
@@ -1911,7 +1911,7 @@ function ReviewBlock({
         <button
           type="button"
           onClick={onEdit}
-          className="inline-flex items-center gap-1 text-[10px] font-semibold text-heritage-deep hover:text-ink transition-colors"
+          className="inline-flex items-center gap-1 text-2xs font-semibold text-heritage-deep hover:text-ink transition-colors"
         >
           <Pencil className="h-3 w-3" />
           Edit

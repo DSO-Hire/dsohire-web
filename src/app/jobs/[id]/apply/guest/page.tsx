@@ -138,7 +138,7 @@ export default async function GuestApplyPage({ params, searchParams }: PageProps
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-[-1px] leading-[1.1] text-ink mb-3">
             {job.title as string}
           </h1>
-          <div className="flex flex-wrap items-center gap-3 text-[13px] text-slate-body">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-body">
             <span className="inline-flex items-center gap-1.5">
               <Briefcase className="h-3.5 w-3.5" />
               {displayedEmployerName}
@@ -158,7 +158,7 @@ export default async function GuestApplyPage({ params, searchParams }: PageProps
           </div>
 
           <div className="mt-6 border-l-4 border-heritage bg-cream p-4 max-w-[640px]">
-            <p className="text-[13px] text-ink leading-relaxed">
+            <p className="text-xs text-ink leading-relaxed">
               <strong>No account required.</strong> Submit your application
               with just an email. After you apply, we&apos;ll send you a
               magic link to claim your account so you can track this and

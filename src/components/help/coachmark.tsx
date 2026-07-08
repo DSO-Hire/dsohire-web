@@ -97,7 +97,7 @@ export function Coachmark({
         <Info className="h-3.5 w-3.5 text-heritage-deep" />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-[13px] leading-relaxed text-ink">{message}</p>
+        <p className="text-xs leading-relaxed text-ink">{message}</p>
         <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
           <button
             type="button"
@@ -109,7 +109,7 @@ export function Coachmark({
           <button
             type="button"
             onClick={dismissAll}
-            className="text-[11px] font-medium tracking-[0.3px] text-slate-meta underline-offset-2 hover:text-ink hover:underline"
+            className="text-2xs font-medium tracking-[0.3px] text-slate-meta underline-offset-2 hover:text-ink hover:underline"
           >
             Don&apos;t show tips
           </button>

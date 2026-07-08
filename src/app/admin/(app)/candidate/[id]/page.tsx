@@ -62,13 +62,13 @@ export default async function CandidateAccount360({
             {c.fullName ?? "(no name)"}
           </h1>
           {c.currentTitle && (
-            <p className="mt-1 text-[14px] text-slate-body">{c.currentTitle}</p>
+            <p className="mt-1 text-sm text-slate-body">{c.currentTitle}</p>
           )}
         </div>
         {founder && (
           <Link
             href={`/admin/view-as/candidate/${c.id}`}
-            className="inline-flex items-center gap-2 px-3 py-1.5 text-[11px] font-bold tracking-[1px] uppercase border border-heritage-deep/40 text-heritage-deep hover:bg-heritage/10 transition-colors"
+            className="inline-flex items-center gap-2 px-3 py-1.5 text-2xs font-bold tracking-[1px] uppercase border border-heritage-deep/40 text-heritage-deep hover:bg-heritage/10 transition-colors"
           >
             <Eye className="h-3.5 w-3.5" /> View as (read-only)
           </Link>
@@ -91,7 +91,7 @@ export default async function CandidateAccount360({
         </Panel>
       </div>
 
-      <p className="mt-8 text-[11px] text-slate-meta leading-relaxed">
+      <p className="mt-8 text-2xs text-slate-meta leading-relaxed">
         Operator view. EEO responses are never shown here. Quick-actions for
         candidates are out of scope this tranche.
       </p>

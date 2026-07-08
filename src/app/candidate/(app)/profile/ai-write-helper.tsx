@@ -87,7 +87,7 @@ export function AiWriteHelper({ kind, context, onPick }: AiWriteHelperProps) {
               {suggestions.length === 1
                 ? "1 suggestion"
                 : `${suggestions.length} suggestions`}
-              <span className="ml-2 text-[10px] uppercase tracking-wider text-meta-foreground">
+              <span className="ml-2 text-2xs uppercase tracking-wider text-meta-foreground">
                 Pick one and edit
               </span>
             </p>

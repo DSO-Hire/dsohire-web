@@ -52,7 +52,7 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps) {
   return (
     <>
       <div className="max-w-[720px]">
-        <div className="flex items-center gap-3 text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-4">
+        <div className="flex items-center gap-3 text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-4">
           <CheckCircle2 className="h-4 w-4 text-heritage" />
           Subscription Activated
         </div>
@@ -67,7 +67,7 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps) {
 
         {sessionEmail && (
           <div className="mt-6 border-l-4 border-heritage bg-cream p-4">
-            <p className="text-[13px] text-slate-body">
+            <p className="text-xs text-slate-body">
               Receipt sent to{" "}
               <strong className="text-ink font-semibold">{sessionEmail}</strong>
               . You&apos;ll also get a copy at every renewal.
@@ -78,20 +78,20 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps) {
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
             href="/employer/onboarding"
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
           >
             Continue Setup
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
             href="/employer/dashboard"
-            className="inline-flex items-center gap-2.5 px-7 py-4 border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-4 border border-[var(--rule-strong)] text-ink text-xs font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
           >
             Go to Dashboard
           </Link>
         </div>
 
-        <p className="mt-10 text-[13px] text-slate-meta leading-relaxed max-w-[520px]">
+        <p className="mt-10 text-xs text-slate-meta leading-relaxed max-w-[520px]">
           Manage your subscription, view invoices, or change plan anytime under{" "}
           <Link
             href="/employer/billing"

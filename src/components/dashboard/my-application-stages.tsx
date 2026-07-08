@@ -89,7 +89,7 @@ export function MyApplicationStages({
           <Eyebrow as="h2">
             {title}
           </Eyebrow>
-          <div className="text-[12px] text-slate-meta mt-1">{subtitle}</div>
+          <div className="text-xs text-slate-meta mt-1">{subtitle}</div>
         </div>
         <Link
           href={viewAllHref}
@@ -129,7 +129,7 @@ function StageColumn({
           {label}
         </Eyebrow>
         <span
-          className={`text-[10px] font-extrabold tracking-[-0.2px] px-1.5 py-0.5 tabular ${
+          className={`text-2xs font-extrabold tracking-[-0.2px] px-1.5 py-0.5 tabular ${
             isEmpty
               ? "bg-cream text-slate-meta"
               : "bg-heritage text-primary-foreground"
@@ -141,7 +141,7 @@ function StageColumn({
 
       <div className="flex flex-col gap-2 flex-1">
         {isEmpty ? (
-          <div className="bg-cream text-center text-[11px] text-slate-meta px-3 py-5 leading-relaxed flex-1 grid place-items-center">
+          <div className="bg-cream text-center text-2xs text-slate-meta px-3 py-5 leading-relaxed flex-1 grid place-items-center">
             Nothing here right now.
           </div>
         ) : (
@@ -167,10 +167,10 @@ function Card({ card }: { card: MyApplicationCard }) {
       href={card.href}
       className={`block bg-cream hover:bg-ivory-deep transition-colors p-2.5 border-l-[3px] ${accent}`}
     >
-      <div className="text-[12px] font-bold text-ink leading-tight truncate">
+      <div className="text-xs font-bold text-ink leading-tight truncate">
         {card.role}
       </div>
-      <div className="text-[10px] text-slate-meta tracking-[0.3px] mt-0.5 truncate">
+      <div className="text-2xs text-slate-meta tracking-[0.3px] mt-0.5 truncate">
         {card.dsoName}
         {card.locationName && (
           <span className="text-slate-meta/80"> · {card.locationName}</span>
@@ -178,17 +178,17 @@ function Card({ card }: { card: MyApplicationCard }) {
       </div>
       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
         {card.offerPending ? (
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-stage-bronze/10 text-stage-bronze text-[10px] font-semibold">
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-stage-bronze/10 text-stage-bronze text-2xs font-semibold">
             <Star className="h-2.5 w-2.5" />
             Offer extended
           </span>
         ) : card.hasUnreadMessage ? (
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-info-bg text-info text-[10px] font-semibold">
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-info-bg text-info text-2xs font-semibold">
             <MessageCircle className="h-2.5 w-2.5" />
             New message
           </span>
         ) : card.needsCandidateAction ? (
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-warning-bg text-warning text-[10px] font-semibold">
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-warning-bg text-warning text-2xs font-semibold">
             <Reply className="h-2.5 w-2.5" />
             Waiting on you
           </span>

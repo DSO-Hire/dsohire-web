@@ -144,7 +144,7 @@ function SectionShell({
   return (
     <section className="border border-[var(--rule)] bg-card p-6 sm:p-8">
       <header className="mb-5">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1.5">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1.5">
           {eyebrow}
         </div>
         <h2 className="font-display text-lg font-bold text-ink">{title}</h2>
@@ -196,7 +196,7 @@ function SaveBar({
         type="button"
         onClick={onSave}
         disabled={!dirty || saving || disabled}
-        className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
+        className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {saving ? (
           <>
@@ -350,7 +350,7 @@ function PracticeProfileSection({
           <label className="block text-sm font-semibold text-ink mb-1.5">
             Patient populations you serve
           </label>
-          <p className="mb-2 text-[12px] text-slate-meta">
+          <p className="mb-2 text-xs text-slate-meta">
             Pick any that describe your patient base — we match these to the
             populations candidates tell us they most enjoy caring for.
           </p>
@@ -365,7 +365,7 @@ function PracticeProfileSection({
                   aria-pressed={active}
                   onClick={() => togglePopulation(opt.value)}
                   className={
-                    "rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition-colors disabled:opacity-50 " +
+                    "rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors disabled:opacity-50 " +
                     (active
                       ? "border-heritage-deep bg-heritage-deep text-primary-foreground"
                       : "border-[var(--rule)] text-slate-body hover:border-heritage-deep")
@@ -415,7 +415,7 @@ function SelectRow({
         value={value ?? ""}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value ? e.target.value : null)}
-        className="w-full max-w-[520px] border border-[var(--rule)] bg-card px-3 py-2 text-[14px] text-ink focus:border-heritage focus:outline-none disabled:opacity-50"
+        className="w-full max-w-[520px] border border-[var(--rule)] bg-card px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:opacity-50"
       >
         <option value="">No preference / not set</option>
         {options.map((o) => (
@@ -424,7 +424,7 @@ function SelectRow({
           </option>
         ))}
       </select>
-      {help && <p className="mt-1 text-[12px] text-slate-meta">{help}</p>}
+      {help && <p className="mt-1 text-xs text-slate-meta">{help}</p>}
     </div>
   );
 }
@@ -460,7 +460,7 @@ function ScaleRow({
               onClick={() => onChange(active ? null : n)}
               aria-pressed={active}
               className={
-                "h-9 w-9 border text-[13px] font-bold transition-colors disabled:opacity-50 " +
+                "h-9 w-9 border text-xs font-bold transition-colors disabled:opacity-50 " +
                 (active
                   ? "border-heritage-deep bg-heritage-deep text-primary-foreground"
                   : "border-[var(--rule)] bg-card text-slate-body hover:border-heritage-deep")
@@ -470,11 +470,11 @@ function ScaleRow({
             </button>
           );
         })}
-        <span className="ml-2 text-[12px] text-slate-meta">
+        <span className="ml-2 text-xs text-slate-meta">
           {value == null ? "Not set" : value <= 2 ? lowLabel : value >= 4 ? highLabel : "In between"}
         </span>
       </div>
-      <div className="mt-1 flex max-w-[260px] justify-between text-[11px] text-slate-meta">
+      <div className="mt-1 flex max-w-[260px] justify-between text-2xs text-slate-meta">
         <span>{lowLabel}</span>
         <span>{highLabel}</span>
       </div>
@@ -569,7 +569,7 @@ function IdentitySection({
         <div>
           <label
             htmlFor="dso-name"
-            className="mb-1.5 block text-[12px] font-semibold text-ink"
+            className="mb-1.5 block text-xs font-semibold text-ink"
           >
             DSO name
           </label>
@@ -606,7 +606,7 @@ function IdentitySection({
         <div>
           <label
             htmlFor="dso-slug"
-            className="mb-1.5 block text-[12px] font-semibold text-ink"
+            className="mb-1.5 block text-xs font-semibold text-ink"
           >
             URL slug
           </label>
@@ -802,7 +802,7 @@ function CompanyDetailsSection({
         <div>
           <label
             htmlFor="dso-website"
-            className="mb-1.5 block text-[12px] font-semibold text-ink"
+            className="mb-1.5 block text-xs font-semibold text-ink"
           >
             Website
           </label>
@@ -828,7 +828,7 @@ function CompanyDetailsSection({
         <div>
           <label
             htmlFor="dso-hq-city"
-            className="mb-1.5 block text-[12px] font-semibold text-ink"
+            className="mb-1.5 block text-xs font-semibold text-ink"
           >
             Headquarters city &amp; state
           </label>
@@ -849,7 +849,7 @@ function CompanyDetailsSection({
         <div>
           <label
             htmlFor="dso-candidate-reply-to"
-            className="mb-1.5 block text-[12px] font-semibold text-ink"
+            className="mb-1.5 block text-xs font-semibold text-ink"
           >
             Candidate reply-to email
           </label>
@@ -866,7 +866,7 @@ function CompanyDetailsSection({
             placeholder="e.g. careers@yourpractice.com"
             className="w-full rounded border border-[var(--rule-strong)] bg-card px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta"
           />
-          <p className="mt-1.5 text-[12px] text-slate-meta leading-relaxed">
+          <p className="mt-1.5 text-xs text-slate-meta leading-relaxed">
             Where candidate replies to your automated emails land (application
             confirmations, stage updates, re-engagement). Leave blank to use the
             account owner&apos;s email.
@@ -876,7 +876,7 @@ function CompanyDetailsSection({
         <div>
           <label
             htmlFor="dso-practice-count"
-            className="mb-1.5 block text-[12px] font-semibold text-ink"
+            className="mb-1.5 block text-xs font-semibold text-ink"
           >
             Number of practices
           </label>
@@ -973,7 +973,7 @@ function AboutSection({
         <div>
           <label
             htmlFor="dso-mission"
-            className="mb-1.5 block text-[12px] font-semibold text-ink"
+            className="mb-1.5 block text-xs font-semibold text-ink"
           >
             Mission / positioning
           </label>
@@ -997,7 +997,7 @@ function AboutSection({
         </div>
 
         <div>
-          <label className="mb-1.5 block text-[12px] font-semibold text-ink">
+          <label className="mb-1.5 block text-xs font-semibold text-ink">
             Description
           </label>
           <JobDescriptionEditor
@@ -1077,8 +1077,8 @@ function BrandVisualsSection({
         {/* Logo — small square preview */}
         <div>
           <div className="mb-2 flex items-baseline justify-between gap-2">
-            <h3 className="text-[12px] font-semibold text-ink">Logo</h3>
-            <span className="text-[11px] text-slate-meta">
+            <h3 className="text-xs font-semibold text-ink">Logo</h3>
+            <span className="text-2xs text-slate-meta">
               Square · PNG, JPG, or WebP up to 5MB
             </span>
           </div>
@@ -1097,8 +1097,8 @@ function BrandVisualsSection({
         {/* Banner — full-width 3:1 hero */}
         <div className="border-t border-[var(--rule)] pt-6">
           <div className="mb-2 flex items-baseline justify-between gap-2">
-            <h3 className="text-[12px] font-semibold text-ink">Banner</h3>
-            <span className="text-[11px] text-slate-meta">
+            <h3 className="text-xs font-semibold text-ink">Banner</h3>
+            <span className="text-2xs text-slate-meta">
               Wide 3:1 · JPG, PNG, or WebP up to 5MB
             </span>
           </div>
@@ -1244,7 +1244,7 @@ function WhyJoinUsSection({
           <button
             type="button"
             onClick={addBlock}
-            className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-[var(--rule-strong)] bg-cream/30 px-4 py-2 text-[12px] font-semibold uppercase tracking-[1.5px] text-heritage-deep hover:bg-cream/60"
+            className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-[var(--rule-strong)] bg-cream/30 px-4 py-2 text-xs font-semibold uppercase tracking-[1.5px] text-heritage-deep hover:bg-cream/60"
           >
             <Plus className="size-3.5" />
             Add block ({blocks.length}/{PROFILE_LIMITS.WHY_BLOCKS_MAX})
@@ -1287,7 +1287,7 @@ function WhyJoinUsBlockEditor({
   return (
     <div className="border border-[var(--rule)] bg-cream/30 p-4">
       <div className="mb-3 flex items-center justify-between">
-        <span className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta">
+        <span className="text-2xs font-bold tracking-[2px] uppercase text-slate-meta">
           Block {index + 1}
         </span>
         {canEdit && (
@@ -1427,7 +1427,7 @@ function CultureSection({
         {/* Brand color */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-[180px_1fr]">
           <div>
-            <label className="mb-1.5 block text-[12px] font-semibold text-ink">
+            <label className="mb-1.5 block text-xs font-semibold text-ink">
               Brand color
             </label>
             <div className="flex items-center gap-2">
@@ -1470,13 +1470,13 @@ function CultureSection({
 
         {/* Culture chips */}
         <div>
-          <label className="mb-3 block text-[12px] font-semibold text-ink">
+          <label className="mb-3 block text-xs font-semibold text-ink">
             Culture chips ({chips.size}/{MAX_CULTURE_CHIPS} selected)
           </label>
           <div className="space-y-4">
             {CULTURE_CHIP_GROUPS.map((group) => (
               <div key={group.id}>
-                <div className="mb-2 text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
+                <div className="mb-2 text-2xs font-bold tracking-[2px] uppercase text-heritage-deep">
                   {group.label}
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -1489,7 +1489,7 @@ function CultureSection({
                         onClick={() => toggleChip(chip)}
                         disabled={!canEdit}
                         className={
-                          "rounded-full border px-3 py-1 text-[12px] font-semibold transition-colors disabled:cursor-not-allowed " +
+                          "rounded-full border px-3 py-1 text-xs font-semibold transition-colors disabled:cursor-not-allowed " +
                           (selected
                             ? "border-ink bg-primary text-primary-foreground hover:bg-primary/90"
                             : "border-[var(--rule-strong)] bg-card text-slate-body hover:border-ink hover:text-ink")
@@ -1569,7 +1569,7 @@ function ContactCtaSection({
         <div>
           <label
             htmlFor="cta-label"
-            className="mb-1.5 block text-[12px] font-semibold text-ink"
+            className="mb-1.5 block text-xs font-semibold text-ink"
           >
             Button label
           </label>
@@ -1592,7 +1592,7 @@ function ContactCtaSection({
         <div>
           <label
             htmlFor="cta-url"
-            className="mb-1.5 block text-[12px] font-semibold text-ink"
+            className="mb-1.5 block text-xs font-semibold text-ink"
           >
             Destination URL
           </label>

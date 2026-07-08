@@ -90,7 +90,7 @@ function CardShell({ eyebrow, eyebrowIcon: Icon, accent, children }: CardShellPr
     <div className={`border ${borderColor} bg-cream/40 p-4 max-w-[520px]`}>
       <div className="flex items-center gap-1.5 mb-2.5">
         <Icon className={`size-3.5 ${eyebrowColor}`} aria-hidden />
-        <span className={`text-[10px] font-bold tracking-[2px] uppercase ${eyebrowColor}`}>
+        <span className={`text-2xs font-bold tracking-[2px] uppercase ${eyebrowColor}`}>
           {eyebrow}
         </span>
       </div>
@@ -102,7 +102,7 @@ function CardShell({ eyebrow, eyebrowIcon: Icon, accent, children }: CardShellPr
 function UnknownCard() {
   return (
     <CardShell eyebrow="Unsupported card" eyebrowIcon={FileText} accent="slate">
-      <p className="text-[13px] text-slate-body">
+      <p className="text-xs text-slate-body">
         This message couldn&apos;t be rendered. Please refresh the page.
       </p>
     </CardShell>
@@ -146,7 +146,7 @@ function OfferLetterCard({
       <div className="text-[14.5px] font-semibold text-ink mb-1.5 leading-snug">
         {payload.subject}
       </div>
-      <p className="text-[13px] text-slate-body leading-[1.55] mb-3">
+      <p className="text-xs text-slate-body leading-[1.55] mb-3">
         {payload.preview}
       </p>
 
@@ -156,7 +156,7 @@ function OfferLetterCard({
             href={responseUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 text-2xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
           >
             <CheckCircle2 className="size-3.5" />
             Review & Accept
@@ -165,7 +165,7 @@ function OfferLetterCard({
             href={responseUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-1.5 bg-transparent border border-[var(--rule-strong)] text-ink px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
+            className="inline-flex items-center justify-center gap-1.5 bg-transparent border border-[var(--rule-strong)] text-ink px-4 py-2 text-2xs font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
           >
             Review & Decline
           </Link>
@@ -173,13 +173,13 @@ function OfferLetterCard({
       )}
 
       {audience === "candidate" && !isPending && (
-        <p className="text-[12px] text-slate-meta italic">
+        <p className="text-xs text-slate-meta italic">
           You {payload.status} this offer. The hiring team has been notified.
         </p>
       )}
 
       {audience === "employer" && (
-        <div className="text-[12px] text-slate-meta">
+        <div className="text-xs text-slate-meta">
           {isPending && "Awaiting candidate response."}
           {isAccepted && "The candidate accepted this offer."}
           {isDeclined && "The candidate declined this offer."}
@@ -273,19 +273,19 @@ function InterviewProposalCard({
   return (
     <CardShell eyebrow={eyebrow} eyebrowIcon={Calendar} accent="ink">
       {payload.job_title && (
-        <div className="text-[14px] font-semibold text-ink mb-2">
+        <div className="text-sm font-semibold text-ink mb-2">
           {payload.job_title}
         </div>
       )}
       {payload.message && (
-        <p className="text-[13px] text-slate-body leading-[1.55] mb-3 italic">
+        <p className="text-xs text-slate-body leading-[1.55] mb-3 italic">
           &ldquo;{payload.message}&rdquo;
         </p>
       )}
 
       {/* Booked state — show the chosen slot with checkmark, regardless of audience. */}
       {payload.status === "booked" && (
-        <div className="flex items-center gap-2 text-[14px] text-heritage-deep font-semibold">
+        <div className="flex items-center gap-2 text-sm text-heritage-deep font-semibold">
           <CheckCircle2 className="size-4 shrink-0" aria-hidden />
           {selectedSlot
             ? `Booked: ${new Date(selectedSlot.start_at).toLocaleString()}`
@@ -295,7 +295,7 @@ function InterviewProposalCard({
 
       {/* Withdrawn state */}
       {payload.status === "withdrawn" && (
-        <p className="text-[13px] text-slate-meta italic">
+        <p className="text-xs text-slate-meta italic">
           The hiring team withdrew this proposal.
         </p>
       )}
@@ -305,7 +305,7 @@ function InterviewProposalCard({
           we render read-only + a dashboard fallback link. */}
       {payload.status === "proposed" && audience === "candidate" && !hasLegacySlots && (
         <div>
-          <div className="text-[11px] font-semibold tracking-[1px] uppercase text-slate-meta mb-2">
+          <div className="text-2xs font-semibold tracking-[1px] uppercase text-slate-meta mb-2">
             Pick a time
           </div>
           <div className="flex flex-col gap-1.5">
@@ -319,7 +319,7 @@ function InterviewProposalCard({
                   type="button"
                   onClick={() => handleBook(optId)}
                   disabled={pending}
-                  className="inline-flex items-center justify-between gap-2 px-3 py-2 bg-card border border-[var(--rule-strong)] text-[13px] text-ink font-medium text-left hover:bg-cream hover:border-ink transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="inline-flex items-center justify-between gap-2 px-3 py-2 bg-card border border-[var(--rule-strong)] text-xs text-ink font-medium text-left hover:bg-cream hover:border-ink transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <span>
                     {new Date(slot.start_at).toLocaleString(undefined, {
@@ -333,7 +333,7 @@ function InterviewProposalCard({
                   {isBookingThis ? (
                     <Loader2 className="size-3.5 animate-spin text-heritage-deep" aria-hidden />
                   ) : (
-                    <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
+                    <span className="text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep">
                       Book →
                     </span>
                   )}
@@ -344,7 +344,7 @@ function InterviewProposalCard({
           {error && (
             <p
               role="alert"
-              className="mt-2 text-[12px] text-danger leading-snug"
+              className="mt-2 text-xs text-danger leading-snug"
             >
               {error}
             </p>
@@ -357,15 +357,15 @@ function InterviewProposalCard({
           dashboard. */}
       {payload.status === "proposed" && audience === "candidate" && hasLegacySlots && (
         <div>
-          <div className="text-[11px] font-semibold tracking-[1px] uppercase text-slate-meta mb-1.5">
+          <div className="text-2xs font-semibold tracking-[1px] uppercase text-slate-meta mb-1.5">
             Times offered
           </div>
-          <ul className="list-none space-y-0.5 text-[13px] text-slate-body">
+          <ul className="list-none space-y-0.5 text-xs text-slate-body">
             {normalizedSlots.map((slot) => (
               <li key={slot.key}>{new Date(slot.start_at).toLocaleString()}</li>
             ))}
           </ul>
-          <p className="mt-2 text-[12px] text-slate-meta italic">
+          <p className="mt-2 text-xs text-slate-meta italic">
             Open this application on your dashboard to pick a slot.
           </p>
         </div>
@@ -374,15 +374,15 @@ function InterviewProposalCard({
       {/* Proposed state — employer sees the slots as read-only */}
       {payload.status === "proposed" && audience === "employer" && (
         <div>
-          <div className="text-[11px] font-semibold tracking-[1px] uppercase text-slate-meta mb-1.5">
+          <div className="text-2xs font-semibold tracking-[1px] uppercase text-slate-meta mb-1.5">
             Times offered
           </div>
-          <ul className="list-none space-y-0.5 text-[13px] text-slate-body">
+          <ul className="list-none space-y-0.5 text-xs text-slate-body">
             {normalizedSlots.map((slot) => (
               <li key={slot.key}>{new Date(slot.start_at).toLocaleString()}</li>
             ))}
           </ul>
-          <p className="mt-2 text-[12px] text-slate-meta italic">
+          <p className="mt-2 text-xs text-slate-meta italic">
             Waiting on the candidate to pick a slot.
           </p>
         </div>
@@ -399,8 +399,8 @@ function InterviewBookedCard({ payload }: { payload: InterviewBookedCardPayload 
       eyebrowIcon={CalendarCheck}
       accent="heritage"
     >
-      <p className="text-[14px] font-semibold text-ink mb-1.5">{when}</p>
-      <p className="text-[13px] text-slate-body leading-[1.55]">
+      <p className="text-sm font-semibold text-ink mb-1.5">{when}</p>
+      <p className="text-xs text-slate-body leading-[1.55]">
         {payload.duration_minutes}-minute {payload.interview_kind} interview
         {payload.location_text ? ` · ${payload.location_text}` : ""}.
       </p>
@@ -420,7 +420,7 @@ function ReferenceCompletedCard({
       eyebrowIcon={UserCheck}
       accent="heritage"
     >
-      <p className="text-[13px] text-slate-body leading-[1.55]">
+      <p className="text-xs text-slate-body leading-[1.55]">
         <span className="font-semibold text-ink">
           {payload.reference_display_name}
         </span>{" "}
@@ -434,18 +434,18 @@ function DocumentSharedCard({ payload }: { payload: DocumentSharedCardPayload })
   const sizeKb = Math.max(1, Math.round(payload.size_bytes / 1024));
   return (
     <CardShell eyebrow="Document shared" eyebrowIcon={Paperclip} accent="slate">
-      <p className="text-[14px] font-semibold text-ink mb-1 truncate">
+      <p className="text-sm font-semibold text-ink mb-1 truncate">
         {payload.file_name}
       </p>
-      <p className="text-[12px] text-slate-meta mb-2">
+      <p className="text-xs text-slate-meta mb-2">
         {payload.mime_type} · {sizeKb} KB
       </p>
       {payload.note && (
-        <p className="text-[13px] text-slate-body leading-[1.55] italic">
+        <p className="text-xs text-slate-body leading-[1.55] italic">
           &ldquo;{payload.note}&rdquo;
         </p>
       )}
-      <p className="text-[12px] text-slate-meta mt-2">
+      <p className="text-xs text-slate-meta mt-2">
         See attachment below to download.
       </p>
     </CardShell>

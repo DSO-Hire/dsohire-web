@@ -94,7 +94,7 @@ export function CandidateFitSummary({
     return (
       <section className="mb-6">
         <SectionHeader />
-        <div className="border border-[var(--rule)] bg-cream/40 p-5 text-[13px] text-slate-body leading-relaxed">
+        <div className="border border-[var(--rule)] bg-cream/40 p-5 text-xs text-slate-body leading-relaxed">
           PracticeFit isn&apos;t available on your active applications
           yet. This usually means your role preferences don&apos;t
           cover these postings, or compute hasn&apos;t finished. Update
@@ -189,11 +189,11 @@ export function CandidateFitSummary({
                 <FitMark product={best.product} className="h-3 w-3" />
                 {bestStyle.label}
               </span>
-              <span className="text-[12px] tabular text-slate-meta">
+              <span className="text-xs tabular text-slate-meta">
                 {best.score}/100
               </span>
             </div>
-            <p className="text-[12px] text-slate-body leading-snug">
+            <p className="text-xs text-slate-body leading-snug">
               {bestStyle.tagline}
             </p>
           </div>
@@ -206,11 +206,11 @@ export function CandidateFitSummary({
               </p>
               <p className="text-[28px] font-extrabold text-ink leading-none tabular">
                 {avgScore}
-                <span className="text-[14px] tabular text-slate-meta ml-1">
+                <span className="text-sm tabular text-slate-meta ml-1">
                   /100
                 </span>
               </p>
-              <p className="text-[11px] text-slate-meta mt-1 tabular">
+              <p className="text-2xs text-slate-meta mt-1 tabular">
                 {scoredFits.length} of {totalActiveApps} apps scored
               </p>
             </div>
@@ -225,7 +225,7 @@ export function CandidateFitSummary({
             <Eyebrow as="p" className="text-heritage-deep mb-1">
               Lift your match
             </Eyebrow>
-            <p className="text-[12px] text-slate-meta mb-3">
+            <p className="text-xs text-slate-meta mb-3">
               Each one sharpens your {best.product === "dsofit" ? "DSOFit" : "PracticeFit"} on
               every role you apply to.
             </p>
@@ -234,7 +234,7 @@ export function CandidateFitSummary({
                 <li key={g.cta_href ?? g.key}>
                   <Link
                     href={g.cta_href ?? "#"}
-                    className="group inline-flex items-center gap-2 text-[13px] text-ink hover:text-heritage-deep"
+                    className="group inline-flex items-center gap-2 text-xs text-ink hover:text-heritage-deep"
                   >
                     <Plus className="h-3.5 w-3.5 text-heritage-deep" />
                     <span className="font-semibold">{g.cta_label}</span>
@@ -254,7 +254,7 @@ function SectionHeader({ product }: { product?: "practicefit" | "dsofit" }) {
   return (
     <div className="flex items-end justify-between gap-4 mb-3">
       <div className="text-heritage-deep">
-        <FitWordmark product={product} surface="light" className="text-[14px]" />
+        <FitWordmark product={product} surface="light" className="text-sm" />
       </div>
       <Link
         href="/candidate/settings/privacy"

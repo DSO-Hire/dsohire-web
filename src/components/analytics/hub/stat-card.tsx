@@ -72,12 +72,12 @@ export function StatCard({
   const inner = (
     <>
       <div className="flex items-start justify-between gap-2">
-        <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+        <div className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta">
           {label}
         </div>
         {delta && (
           <span
-            className={`inline-flex items-center gap-0.5 text-[11px] font-bold ${toneClass}`}
+            className={`inline-flex items-center gap-0.5 text-2xs font-bold ${toneClass}`}
           >
             <DeltaIcon className="h-3 w-3" aria-hidden />
             {delta.label}
@@ -91,14 +91,14 @@ export function StatCard({
           <StatValue value={value} />
         </span>
         {unit && (
-          <span className="text-[13px] font-semibold text-slate-meta">
+          <span className="text-xs font-semibold text-slate-meta">
             {unit}
           </span>
         )}
       </div>
 
       {hint && (
-        <div className="mt-1.5 text-[11px] text-slate-body leading-snug">
+        <div className="mt-1.5 text-2xs text-slate-body leading-snug">
           {hint}
         </div>
       )}
@@ -110,7 +110,7 @@ export function StatCard({
       )}
 
       {benchmark && (
-        <div className="mt-2 text-[10px] font-semibold tracking-[0.3px] uppercase text-heritage-deep/70">
+        <div className="mt-2 text-2xs font-semibold tracking-[0.3px] uppercase text-heritage-deep/70">
           {benchmark}
         </div>
       )}

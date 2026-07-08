@@ -36,8 +36,8 @@ export function BulletBar({
   return (
     <div className="py-3 border-b border-[var(--rule)] last:border-0">
       <div className="flex items-baseline justify-between mb-2">
-        <span className="text-[13px] font-bold text-ink">{label}</span>
-        <span className="text-[12px] tabular-nums">
+        <span className="text-xs font-bold text-ink">{label}</span>
+        <span className="text-xs tabular-nums">
           {yourValue != null ? (
             <span className="font-bold text-ink">
               {fmt(yourValue)}
@@ -70,7 +70,7 @@ export function BulletBar({
           />
         )}
       </div>
-      <p className="mt-1.5 text-[11px] text-slate-meta leading-snug">{caption}</p>
+      <p className="mt-1.5 text-2xs text-slate-meta leading-snug">{caption}</p>
     </div>
   );
 }

@@ -65,7 +65,7 @@ export function EeoSelfId({ applicationId }: { applicationId: string }) {
       <div className="mt-6 border border-[var(--rule)] bg-card p-6">
         <div className="flex items-start gap-3">
           <Check className="mt-0.5 h-4 w-4 shrink-0 text-heritage" />
-          <p className="text-[14px] leading-relaxed text-ink">
+          <p className="text-sm leading-relaxed text-ink">
             Thanks — your voluntary self-identification has been recorded
             separately from your application. It is never shared with the
             hiring team and has no bearing on hiring decisions.
@@ -86,7 +86,7 @@ export function EeoSelfId({ applicationId }: { applicationId: string }) {
       >
         <span className="flex items-center gap-2.5">
           <ShieldCheck className="h-4 w-4 shrink-0 text-heritage" />
-          <span className="text-[10px] font-bold uppercase tracking-[2.5px] text-heritage-deep">
+          <span className="text-2xs font-bold uppercase tracking-[2.5px] text-heritage-deep">
             Voluntary self-identification
           </span>
         </span>
@@ -99,7 +99,7 @@ export function EeoSelfId({ applicationId }: { applicationId: string }) {
 
       {open && (
         <div className="border-t border-[var(--rule)] px-6 pb-6 pt-5">
-          <p className="mb-5 max-w-prose text-[13px] leading-relaxed text-ink-soft">
+          <p className="mb-5 max-w-prose text-xs leading-relaxed text-ink-soft">
             This information is requested on a voluntary basis. It is kept
             completely separate from your application, is{" "}
             <span className="font-semibold text-ink">never seen by anyone</span>{" "}
@@ -114,7 +114,7 @@ export function EeoSelfId({ applicationId }: { applicationId: string }) {
           <div className="space-y-6">
             {EEO_FIELDS.map((field) => (
               <fieldset key={field.key}>
-                <legend className="mb-2 text-[12px] font-semibold text-ink">
+                <legend className="mb-2 text-xs font-semibold text-ink">
                   {field.label}
                 </legend>
                 <div className="space-y-1.5">
@@ -126,7 +126,7 @@ export function EeoSelfId({ applicationId }: { applicationId: string }) {
                         key={id}
                         htmlFor={id}
                         className={
-                          "flex cursor-pointer items-start gap-2.5 border px-3 py-2 text-[13px] leading-snug transition-colors " +
+                          "flex cursor-pointer items-start gap-2.5 border px-3 py-2 text-xs leading-snug transition-colors " +
                           (checked
                             ? "border-heritage bg-heritage/[0.06] text-ink"
                             : "border-[var(--rule)] text-ink-soft hover:bg-cream")
@@ -151,7 +151,7 @@ export function EeoSelfId({ applicationId }: { applicationId: string }) {
           </div>
 
           {error && (
-            <p className="mt-4 text-[13px] text-danger" role="alert">
+            <p className="mt-4 text-xs text-danger" role="alert">
               {error}
             </p>
           )}
@@ -161,7 +161,7 @@ export function EeoSelfId({ applicationId }: { applicationId: string }) {
               type="button"
               onClick={handleSubmit}
               disabled={pending}
-              className="inline-flex items-center gap-2 bg-primary px-5 py-3 text-[12px] font-bold uppercase tracking-[2px] text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-2 bg-primary px-5 py-3 text-xs font-bold uppercase tracking-[2px] text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {pending ? "Saving…" : "Submit responses"}
             </button>
@@ -172,7 +172,7 @@ export function EeoSelfId({ applicationId }: { applicationId: string }) {
                 setDismissed(true);
               }}
               disabled={pending}
-              className="text-[12px] font-bold uppercase tracking-[2px] text-ink-soft transition-colors hover:text-ink disabled:opacity-60"
+              className="text-xs font-bold uppercase tracking-[2px] text-ink-soft transition-colors hover:text-ink disabled:opacity-60"
             >
               Skip this step
             </button>

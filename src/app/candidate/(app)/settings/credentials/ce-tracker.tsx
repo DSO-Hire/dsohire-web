@@ -134,7 +134,7 @@ export function CeTracker({ initial }: { initial: CeRow[] }) {
         <div className="space-y-5">
           {grouped.map(({ year, rows }) => (
             <div key={year}>
-              <h3 className="mb-2 text-[11px] font-bold tracking-wider uppercase text-muted-foreground">
+              <h3 className="mb-2 text-2xs font-bold tracking-wider uppercase text-muted-foreground">
                 {year}
               </h3>
               <ul className="space-y-2">
@@ -233,7 +233,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="font-display text-2xl font-bold text-foreground">{value}</p>
-      <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-heritage">
+      <p className="mt-0.5 text-2xs font-bold uppercase tracking-wider text-heritage">
         {label}
       </p>
     </div>

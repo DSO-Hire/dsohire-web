@@ -52,13 +52,13 @@ export function OfferApprovalsSettings({
   return (
     <div className="max-w-[720px] space-y-8">
       <header>
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
           Offer approvals
         </div>
         <h2 className="text-2xl font-extrabold tracking-[-0.6px] text-ink">
           Who can send offers, and when sign-off is required
         </h2>
-        <p className="mt-2 text-[14px] text-slate-body leading-relaxed">
+        <p className="mt-2 text-sm text-slate-body leading-relaxed">
           Offer letters are legally meaningful, so DSO Hire lets you put a
           checkpoint between &ldquo;a teammate drafts an offer&rdquo; and
           &ldquo;it reaches the candidate.&rdquo; Owners and admins always send
@@ -70,7 +70,7 @@ export function OfferApprovalsSettings({
       <HelpDisclosure helpKey="offers.approvals" />
 
       {disabled && (
-        <div className="rounded-md border border-warning bg-warning-bg px-4 py-3 text-[13px] text-warning flex items-start gap-2">
+        <div className="rounded-md border border-warning bg-warning-bg px-4 py-3 text-xs text-warning flex items-start gap-2">
           <Lock className="h-4 w-4 mt-0.5 shrink-0" />
           <span>
             Approval routing is part of the <strong>Scale</strong> plan. On your
@@ -82,10 +82,10 @@ export function OfferApprovalsSettings({
 
       {/* How it works — the plain-English model. */}
       <section className="rounded-md border border-[var(--rule)] bg-cream/40 p-5">
-        <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-2">
+        <div className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta mb-2">
           How approvals work
         </div>
-        <ul className="space-y-2 text-[13px] text-slate-body leading-relaxed">
+        <ul className="space-y-2 text-xs text-slate-body leading-relaxed">
           <li className="flex gap-2">
             <span className="text-heritage-deep font-bold">•</span>
             <span>
@@ -161,7 +161,7 @@ function PolicyForm({
 
   return (
     <section className="space-y-4">
-      <h3 className="text-[15px] font-extrabold tracking-[-0.3px] text-ink">
+      <h3 className="text-sm font-extrabold tracking-[-0.3px] text-ink">
         Pay-based rules
       </h3>
 
@@ -174,8 +174,8 @@ function PolicyForm({
       />
 
       <div className="rounded-md border border-[var(--rule)] p-4">
-        <div className="text-[13px] font-bold text-ink">Approval ceiling (optional)</div>
-        <p className="mt-1 text-[12px] text-slate-body leading-relaxed">
+        <div className="text-xs font-bold text-ink">Approval ceiling (optional)</div>
+        <p className="mt-1 text-xs text-slate-body leading-relaxed">
           Require approval for any offer whose <strong>annualized base</strong>{" "}
           is above this amount — even for people who normally send directly. An
           hourly base is annualized at 2,080 hours/year for the comparison.
@@ -200,19 +200,19 @@ function PolicyForm({
           type="button"
           onClick={save}
           disabled={disabled || pending}
-          className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2 text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
+          className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2 text-xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
         >
           {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
           Save pay rules
         </button>
         {savedAt && !pending && (
-          <span className="inline-flex items-center gap-1.5 text-[12px] text-heritage-deep font-semibold">
+          <span className="inline-flex items-center gap-1.5 text-xs text-heritage-deep font-semibold">
             <CheckCircle2 className="h-3.5 w-3.5" /> Saved
           </span>
         )}
       </div>
       {error && (
-        <div className="rounded-md border border-danger bg-danger-bg px-3 py-2 text-[12px] text-danger flex items-start gap-2">
+        <div className="rounded-md border border-danger bg-danger-bg px-3 py-2 text-xs text-danger flex items-start gap-2">
           <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
           <span>{error}</span>
         </div>
@@ -236,10 +236,10 @@ function TeammateGrants({
   return (
     <section className="space-y-4">
       <div>
-        <h3 className="text-[15px] font-extrabold tracking-[-0.3px] text-ink">
+        <h3 className="text-sm font-extrabold tracking-[-0.3px] text-ink">
           Per-teammate authority
         </h3>
-        <p className="mt-1 text-[13px] text-slate-body leading-relaxed">
+        <p className="mt-1 text-xs text-slate-body leading-relaxed">
           Turn a teammate&apos;s direct-send authority on or off. People with
           authority skip the approval step (the pay rules above still apply to
           everyone).
@@ -253,22 +253,22 @@ function TeammateGrants({
         {alwaysOn.map((t) => (
           <li key={t.id} className="flex items-center justify-between gap-3 px-4 py-3">
             <div className="min-w-0">
-              <div className="text-[14px] font-semibold text-ink">{t.name}</div>
-              <div className="text-[12px] text-slate-meta">{ROLE_LABELS[t.role] ?? t.role}</div>
+              <div className="text-sm font-semibold text-ink">{t.name}</div>
+              <div className="text-xs text-slate-meta">{ROLE_LABELS[t.role] ?? t.role}</div>
             </div>
-            <span className="text-[11px] font-bold tracking-[1px] uppercase text-heritage-deep shrink-0">
+            <span className="text-2xs font-bold tracking-[1px] uppercase text-heritage-deep shrink-0">
               Always — full authority
             </span>
           </li>
         ))}
         {grantable.length === 0 && alwaysOn.length === 0 && (
-          <li className="px-4 py-6 text-[13px] text-slate-meta text-center">
+          <li className="px-4 py-6 text-xs text-slate-meta text-center">
             No teammates yet.
           </li>
         )}
       </ul>
       {grantable.length === 0 && (
-        <p className="text-[12px] text-slate-meta">
+        <p className="text-xs text-slate-meta">
           You have no recruiters or hiring managers to grant. Invite teammates
           from the Team page.
         </p>
@@ -307,12 +307,12 @@ function TeammateGrantRow({
   return (
     <li className="flex items-center justify-between gap-3 px-4 py-3">
       <div className="min-w-0">
-        <div className="text-[14px] font-semibold text-ink">{teammate.name}</div>
-        <div className="text-[12px] text-slate-meta">
+        <div className="text-sm font-semibold text-ink">{teammate.name}</div>
+        <div className="text-xs text-slate-meta">
           {ROLE_LABELS[teammate.role] ?? teammate.role}
           {on ? " · sends offers directly" : " · offers need approval"}
         </div>
-        {error && <div className="text-[11px] text-danger mt-0.5">{error}</div>}
+        {error && <div className="text-2xs text-danger mt-0.5">{error}</div>}
       </div>
       <Switch checked={on} onChange={toggle} disabled={disabled || pending} />
     </li>
@@ -337,8 +337,8 @@ function ToggleRow({
   return (
     <div className="rounded-md border border-[var(--rule)] p-4 flex items-start justify-between gap-4">
       <div className="min-w-0">
-        <div className="text-[13px] font-bold text-ink">{title}</div>
-        <p className="mt-1 text-[12px] text-slate-body leading-relaxed">{description}</p>
+        <div className="text-xs font-bold text-ink">{title}</div>
+        <p className="mt-1 text-xs text-slate-body leading-relaxed">{description}</p>
       </div>
       <Switch checked={checked} onChange={onChange} disabled={disabled} />
     </div>

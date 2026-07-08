@@ -168,7 +168,7 @@ export default async function AdminConversationPage({ params }: PageProps) {
       <div className="mx-auto max-w-[820px] space-y-6">
         <Link
           href="/admin/support/conversations"
-          className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-slate-meta hover:text-ink"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-meta hover:text-ink"
         >
           <ArrowLeft className="size-3.5" />
           Back to conversations
@@ -178,7 +178,7 @@ export default async function AdminConversationPage({ params }: PageProps) {
           <h1 className="font-display text-2xl font-extrabold tracking-[-0.6px] text-ink leading-tight">
             {dsoName ?? "(no DSO)"} — Conversation
           </h1>
-          <div className="border-l-3 border-heritage bg-cream/40 px-4 py-3 text-[12px] space-y-1">
+          <div className="border-l-3 border-heritage bg-cream/40 px-4 py-3 text-xs space-y-1">
             <div>
               <strong>Author:</strong> {memberName ?? authorEmail ?? r.auth_user_id}{" "}
               {memberRole && <span className="text-slate-meta">({memberRole})</span>}
@@ -272,7 +272,7 @@ function TranscriptMessage({
 
   if (message.role === "tool") {
     return (
-      <details className="border border-[var(--rule)] bg-cream/30 px-4 py-2.5 text-[12px]">
+      <details className="border border-[var(--rule)] bg-cream/30 px-4 py-2.5 text-xs">
         <summary className="cursor-pointer inline-flex items-center gap-2 font-semibold text-heritage-deep">
           <Wrench className="size-3" />
           Tool call: <code className="font-mono">{message.tool_name}</code>
@@ -280,18 +280,18 @@ function TranscriptMessage({
         </summary>
         <div className="mt-2 space-y-2">
           <div>
-            <div className="text-[10px] font-bold uppercase tracking-[1px] text-slate-meta mb-0.5">
+            <div className="text-2xs font-bold uppercase tracking-[1px] text-slate-meta mb-0.5">
               Input
             </div>
-            <pre className="font-mono text-[11px] bg-card border border-[var(--rule)] p-2 overflow-x-auto whitespace-pre-wrap break-all">
+            <pre className="font-mono text-2xs bg-card border border-[var(--rule)] p-2 overflow-x-auto whitespace-pre-wrap break-all">
               {JSON.stringify(message.tool_input, null, 2)}
             </pre>
           </div>
           <div>
-            <div className="text-[10px] font-bold uppercase tracking-[1px] text-slate-meta mb-0.5">
+            <div className="text-2xs font-bold uppercase tracking-[1px] text-slate-meta mb-0.5">
               Output
             </div>
-            <pre className="font-mono text-[11px] bg-card border border-[var(--rule)] p-2 overflow-x-auto whitespace-pre-wrap break-all max-h-[400px] overflow-y-auto">
+            <pre className="font-mono text-2xs bg-card border border-[var(--rule)] p-2 overflow-x-auto whitespace-pre-wrap break-all max-h-[400px] overflow-y-auto">
               {JSON.stringify(message.tool_output, null, 2)}
             </pre>
           </div>
@@ -304,7 +304,7 @@ function TranscriptMessage({
   return (
     <div className={isUser ? "flex justify-end" : "flex justify-start"}>
       <div className="max-w-[85%] space-y-1">
-        <div className="text-[10px] text-slate-meta px-1 inline-flex items-center gap-2">
+        <div className="text-2xs text-slate-meta px-1 inline-flex items-center gap-2">
           <span className="font-bold uppercase tracking-[1px]">
             {message.role}
           </span>
@@ -322,7 +322,7 @@ function TranscriptMessage({
         </div>
         <div
           className={
-            "px-3.5 py-2.5 text-[14px] leading-relaxed whitespace-pre-wrap rounded " +
+            "px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap rounded " +
             (isUser
               ? "bg-hero text-hero-foreground"
               : "bg-card border border-[var(--rule)]")
@@ -338,7 +338,7 @@ function TranscriptMessage({
               <div
                 key={i}
                 className={
-                  "text-[11px] inline-flex items-start gap-1.5 " +
+                  "text-2xs inline-flex items-start gap-1.5 " +
                   (f.rating === "up" ? "text-heritage-deep" : "text-danger")
                 }
               >
@@ -375,7 +375,7 @@ function ReviewActions({
     <form action={reviewConversation} className="border-t border-[var(--rule)] pt-5 space-y-3">
       <input type="hidden" name="request_id" value={requestId} />
       <label className="block">
-        <span className="text-[10px] font-bold uppercase tracking-[1px] text-slate-body block mb-1.5">
+        <span className="text-2xs font-bold uppercase tracking-[1px] text-slate-body block mb-1.5">
           Reviewer notes (optional)
         </span>
         <textarea
@@ -383,7 +383,7 @@ function ReviewActions({
           rows={3}
           defaultValue={currentNotes ?? ""}
           placeholder="What was good or bad about this conversation?"
-          className="w-full px-3 py-2 border border-[var(--rule-strong)] bg-card text-[13px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+          className="w-full px-3 py-2 border border-[var(--rule-strong)] bg-card text-xs focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
         />
       </label>
       <div className="flex items-center gap-2 flex-wrap">
@@ -391,7 +391,7 @@ function ReviewActions({
           type="submit"
           name="next_status"
           value="reviewed"
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-heritage-deep text-primary-foreground text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-heritage"
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-heritage-deep text-primary-foreground text-2xs font-bold tracking-[1.5px] uppercase hover:bg-heritage"
         >
           <CheckCircle2 className="size-3.5" />
           Mark reviewed
@@ -400,7 +400,7 @@ function ReviewActions({
           type="submit"
           name="next_status"
           value="flagged_bad"
-          className="inline-flex items-center gap-1.5 px-4 py-2 border border-danger text-danger text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-danger-bg"
+          className="inline-flex items-center gap-1.5 px-4 py-2 border border-danger text-danger text-2xs font-bold tracking-[1.5px] uppercase hover:bg-danger-bg"
         >
           <AlertTriangle className="size-3.5" />
           Flag as bad answer
@@ -409,12 +409,12 @@ function ReviewActions({
           type="submit"
           name="next_status"
           value="unreviewed"
-          className="inline-flex items-center gap-1.5 px-4 py-2 border border-[var(--rule-strong)] text-slate-body text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-cream/60"
+          className="inline-flex items-center gap-1.5 px-4 py-2 border border-[var(--rule-strong)] text-slate-body text-2xs font-bold tracking-[1.5px] uppercase hover:bg-cream/60"
         >
           <Clock className="size-3.5" />
           Send back to queue
         </button>
-        <span className="text-[11px] text-slate-meta">
+        <span className="text-2xs text-slate-meta">
           Current: <ReviewBadge status={currentStatus} />
         </span>
       </div>
@@ -429,20 +429,20 @@ function ReviewBadge({
 }) {
   if (status === "flagged_bad") {
     return (
-      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-danger-bg text-danger text-[10px] font-bold tracking-[1px] uppercase">
+      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-danger-bg text-danger text-2xs font-bold tracking-[1px] uppercase">
         Flagged bad
       </span>
     );
   }
   if (status === "reviewed") {
     return (
-      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-heritage/[0.12] text-heritage-deep text-[10px] font-bold tracking-[1px] uppercase">
+      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-heritage/[0.12] text-heritage-deep text-2xs font-bold tracking-[1px] uppercase">
         Reviewed
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-warning-bg text-warning text-[10px] font-bold tracking-[1px] uppercase">
+    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-warning-bg text-warning text-2xs font-bold tracking-[1px] uppercase">
       Unreviewed
     </span>
   );

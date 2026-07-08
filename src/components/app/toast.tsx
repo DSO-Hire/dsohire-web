@@ -144,7 +144,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 type="button"
                 aria-label="Dismiss"
                 onClick={() => dismiss(t.id)}
-                className="text-sidebar-foreground/50 hover:text-sidebar-foreground text-[12px] font-bold leading-none mt-0.5"
+                className="text-sidebar-foreground/50 hover:text-sidebar-foreground text-xs font-bold leading-none mt-0.5"
               >
                 ✕
               </button>

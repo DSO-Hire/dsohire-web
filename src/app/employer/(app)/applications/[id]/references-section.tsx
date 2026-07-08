@@ -98,7 +98,7 @@ export function ReferencesSection({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-[13px] text-slate-meta leading-relaxed max-w-[480px]">
+        <p className="text-xs text-slate-meta leading-relaxed max-w-[480px]">
           {requests.length === 0
             ? `Ask 2-3 professional references about ${candidateName ?? "this candidate"}. They get an email with a private link to a short form (3-5 min). Responses show up here when they finish.`
             : `${requests.length} request${requests.length === 1 ? "" : "s"} on file. Responses appear here as they come in.`}
@@ -159,12 +159,12 @@ function StageGateNotice({ currentStageKind }: { currentStageKind: string }) {
       <div className="flex items-start gap-3">
         <AlertCircle className="h-4 w-4 text-warning mt-0.5 shrink-0" />
         <div>
-          <p className="text-[13px] font-semibold text-warning mb-1">
+          <p className="text-xs font-semibold text-warning mb-1">
             {isTerminal
               ? "This application is closed."
               : "References open after the screen stage."}
           </p>
-          <p className="text-[12px] text-warning leading-relaxed">
+          <p className="text-xs text-warning leading-relaxed">
             {isTerminal
               ? "New reference requests are disabled on rejected or withdrawn applications. Existing requests stay visible for the audit trail."
               : "Move the candidate into Interview or later to start collecting references. Most DSOs hold references until after a successful screen."}
@@ -191,10 +191,10 @@ function EmptyState({
       <div className="flex items-start gap-3">
         <Mail className="h-4 w-4 text-heritage-deep mt-0.5 shrink-0" />
         <div>
-          <p className="text-[13px] font-semibold text-ink mb-1">
+          <p className="text-xs font-semibold text-ink mb-1">
             No references requested yet
           </p>
-          <p className="text-[13px] text-slate-body leading-relaxed">
+          <p className="text-xs text-slate-body leading-relaxed">
             Most DSOs collect 2-3 references on a finalist.{" "}
             {canRequest ? (
               <>
@@ -322,30 +322,30 @@ function RequestRow({
     <div className="p-5">
       <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
         <div className="min-w-0 flex-1">
-          <div className="text-[14px] font-semibold text-ink leading-snug">
+          <div className="text-sm font-semibold text-ink leading-snug">
             {req.reference_name}
           </div>
-          <div className="text-[12px] text-slate-body mt-0.5 break-all">
+          <div className="text-xs text-slate-body mt-0.5 break-all">
             {req.reference_email}
           </div>
           {subtitleParts.length > 0 && (
-            <div className="text-[12px] text-slate-body mt-0.5">
+            <div className="text-xs text-slate-body mt-0.5">
               {subtitleParts.join(" · ")}
             </div>
           )}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mt-3">
             <span
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold ${badge.className}`}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-2xs font-semibold ${badge.className}`}
             >
               <BadgeIcon
                 className={`h-3 w-3 ${req.status === "pending" ? "animate-spin" : ""}`}
               />
               {badge.label}
             </span>
-            <span className="text-[11px] text-slate-meta">{sentMeta}</span>
+            <span className="text-2xs text-slate-meta">{sentMeta}</span>
           </div>
           {req.status === "declined" && req.decline_reason && (
-            <div className="mt-2 text-[12px] text-slate-body bg-muted border border-border px-3 py-2">
+            <div className="mt-2 text-xs text-slate-body bg-muted border border-border px-3 py-2">
               <span className="font-semibold text-foreground">Reason: </span>
               {req.decline_reason}
             </div>
@@ -412,7 +412,7 @@ function RequestRow({
       </div>
 
       {error && (
-        <div className="mt-3 text-[12px] text-danger bg-danger-bg border border-danger px-3 py-2">
+        <div className="mt-3 text-xs text-danger bg-danger-bg border border-danger px-3 py-2">
           {error}
         </div>
       )}
@@ -451,7 +451,7 @@ function ResponseExpander({
 }) {
   if (!response) {
     return (
-      <div className="mt-4 border border-[var(--rule)] bg-cream/30 p-5 text-[13px] text-slate-meta italic">
+      <div className="mt-4 border border-[var(--rule)] bg-cream/30 p-5 text-xs text-slate-meta italic">
         Response data is not available.
       </div>
     );
@@ -463,17 +463,17 @@ function ResponseExpander({
         const display = formatReferenceAnswer(field, value);
         return (
           <div key={field.key} className="p-4">
-            <div className="text-[12px] font-semibold text-ink leading-snug mb-1">
+            <div className="text-xs font-semibold text-ink leading-snug mb-1">
               {renderPrompt(field.promptTemplate, candidateName)}
             </div>
             {display ? (
               <div
-                className={`text-[13px] text-ink leading-relaxed ${field.kind === "long_text" ? "whitespace-pre-wrap" : ""}`}
+                className={`text-xs text-ink leading-relaxed ${field.kind === "long_text" ? "whitespace-pre-wrap" : ""}`}
               >
                 {display}
               </div>
             ) : (
-              <div className="text-[13px] text-slate-meta italic">
+              <div className="text-xs text-slate-meta italic">
                 {field.required ? "No answer provided" : "Not answered (optional)"}
               </div>
             )}
@@ -598,12 +598,12 @@ function RequestModal({
           />
 
           {error && (
-            <div className="text-[12px] text-danger bg-danger-bg border border-danger px-3 py-2">
+            <div className="text-xs text-danger bg-danger-bg border border-danger px-3 py-2">
               {error}
             </div>
           )}
 
-          <div className="text-[12px] text-slate-meta leading-relaxed">
+          <div className="text-xs text-slate-meta leading-relaxed">
             They&apos;ll get an email with a private link to a 7-question form
             (3-5 min). You&apos;ll see their answers here when they finish.
           </div>
@@ -680,13 +680,13 @@ function DeclineModal({
           </button>
         </header>
         <div className="p-5 space-y-4">
-          <p className="text-[13px] text-slate-body leading-relaxed">
+          <p className="text-xs text-slate-body leading-relaxed">
             <strong>{referenceName}</strong> didn&apos;t respond or isn&apos;t
             going to. The row stays in the audit trail with the status
             <strong> declined</strong>; emails stop.
           </p>
           <label className="block">
-            <div className="text-[12px] font-semibold text-ink mb-1.5">
+            <div className="text-xs font-semibold text-ink mb-1.5">
               Reason (optional)
             </div>
             <textarea
@@ -694,7 +694,7 @@ function DeclineModal({
               onChange={(e) => setReason(e.target.value)}
               rows={3}
               maxLength={500}
-              className="w-full border border-[var(--rule-strong)] bg-card px-3 py-2 text-[13px] text-ink focus:outline-none focus:ring-2 focus:ring-heritage/40 resize-y"
+              className="w-full border border-[var(--rule-strong)] bg-card px-3 py-2 text-xs text-ink focus:outline-none focus:ring-2 focus:ring-heritage/40 resize-y"
               placeholder="e.g., No response after 2 emails"
             />
           </label>
@@ -748,11 +748,11 @@ function FormField({
   return (
     <label className="block">
       <div className="flex items-baseline gap-2 mb-1">
-        <span className="text-[12px] font-semibold text-ink">
+        <span className="text-xs font-semibold text-ink">
           {label}
         </span>
         {required && (
-          <span className="text-[11px] font-semibold text-slate-meta">
+          <span className="text-2xs font-semibold text-slate-meta">
             Required
           </span>
         )}
@@ -764,10 +764,10 @@ function FormField({
         placeholder={placeholder}
         disabled={disabled}
         maxLength={maxLength}
-        className="w-full border border-[var(--rule-strong)] bg-card px-3 py-2 text-[14px] text-ink focus:outline-none focus:ring-2 focus:ring-heritage/40 disabled:bg-muted disabled:cursor-not-allowed"
+        className="w-full border border-[var(--rule-strong)] bg-card px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-heritage/40 disabled:bg-muted disabled:cursor-not-allowed"
       />
       {helper && (
-        <div className="mt-1 text-[11px] text-slate-meta leading-snug">
+        <div className="mt-1 text-2xs text-slate-meta leading-snug">
           {helper}
         </div>
       )}

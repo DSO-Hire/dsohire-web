@@ -147,7 +147,7 @@ export default async function InviteAcceptPage({ params }: PageProps) {
         {role === "hiring_manager" && (
           <HmScopeBadge locations={scopeLocationLabels} />
         )}
-        <p className="mt-6 text-[15px] text-slate-body leading-[1.7]">
+        <p className="mt-6 text-sm text-slate-body leading-[1.7]">
           Sign in or create an account first — the email you use must match{" "}
           <strong className="text-ink font-semibold">
             {invitation.email as string}
@@ -157,14 +157,14 @@ export default async function InviteAcceptPage({ params }: PageProps) {
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
             href={`/employer/sign-in?next=${encodeURIComponent(`/employer/invite/${token}`)}`}
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
           >
             Sign In to Accept
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
             href={`/employer/sign-up?next=${encodeURIComponent(`/employer/invite/${token}`)}`}
-            className="inline-flex items-center gap-2.5 px-7 py-4 border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-4 border border-[var(--rule-strong)] text-ink text-xs font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
           >
             New to DSO Hire? Sign Up
           </Link>
@@ -194,7 +194,7 @@ export default async function InviteAcceptPage({ params }: PageProps) {
           </p>
           <Link
             href="/employer/dashboard"
-            className="mt-8 inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+            className="mt-8 inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
           >
             Go to Dashboard
             <ArrowRight className="h-4 w-4" />
@@ -218,13 +218,13 @@ export default async function InviteAcceptPage({ params }: PageProps) {
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
             href="/employer/dashboard"
-            className="inline-flex items-center gap-2.5 px-7 py-4 border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-4 border border-[var(--rule-strong)] text-ink text-xs font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
           >
             Back to Current DSO
           </Link>
           <a
             href={`${SUPPORT_MAILTO}?subject=Invitation%20question`}
-            className="inline-flex items-center gap-2.5 px-7 py-4 text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-4 text-ink text-xs font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
           >
             Contact Support
           </a>
@@ -244,13 +244,13 @@ export default async function InviteAcceptPage({ params }: PageProps) {
         <input type="hidden" name="token" value={token} />
         <button
           type="submit"
-          className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+          className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
         >
           Accept &amp; Join {dsoName}
           <ArrowRight className="h-4 w-4" />
         </button>
       </form>
-      <p className="mt-4 text-[13px] text-slate-meta">
+      <p className="mt-4 text-xs text-slate-meta">
         Signed in as <strong className="text-ink">{user.email}</strong>.{" "}
         <Link
           href="/employer/sign-in"
@@ -289,7 +289,7 @@ function Header({
     <>
       <div className="flex items-center gap-3.5 mb-6">
         <span className="block w-7 h-px bg-heritage" />
-        <span className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep">
+        <span className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep">
           Team Invitation
         </span>
       </div>
@@ -310,16 +310,16 @@ function HmScopeBadge({ locations }: { locations: string[] }) {
     <div className="mt-7 border-l-2 border-heritage bg-cream/60 px-5 py-4 max-w-[640px]">
       <div className="flex items-center gap-2 mb-2">
         <MapPin className="h-3.5 w-3.5 text-heritage-deep" />
-        <span className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
+        <span className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep">
           What you&apos;ll see
         </span>
       </div>
-      <p className="text-[14px] text-slate-body leading-relaxed mb-3">
+      <p className="text-sm text-slate-body leading-relaxed mb-3">
         As a hiring manager, you&apos;ll review applications scoped to specific
         practice locations only. The team has assigned you to:
       </p>
       {locations.length === 0 ? (
-        <p className="text-[13px] text-warning">
+        <p className="text-xs text-warning">
           No locations have been assigned yet. The team can update your scope
           on the{" "}
           <span className="font-semibold">Team</span> page after you accept —
@@ -330,14 +330,14 @@ function HmScopeBadge({ locations }: { locations: string[] }) {
           {locations.map((label) => (
             <span
               key={label}
-              className="inline-flex items-center px-2.5 py-1 bg-ivory border border-[var(--rule-strong)] text-[11px] font-semibold tracking-[0.4px] text-ink"
+              className="inline-flex items-center px-2.5 py-1 bg-ivory border border-[var(--rule-strong)] text-2xs font-semibold tracking-[0.4px] text-ink"
             >
               {label}
             </span>
           ))}
         </div>
       )}
-      <p className="mt-3 text-[12px] text-slate-meta leading-relaxed">
+      <p className="mt-3 text-xs text-slate-meta leading-relaxed">
         You won&apos;t see jobs, candidates, or settings tied to other
         locations — even if they&apos;re part of the same DSO.
       </p>
@@ -375,7 +375,7 @@ function ErrorScreen({
         {cta && (
           <Link
             href={cta.href}
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
           >
             {cta.label}
             <ArrowRight className="h-4 w-4" />
@@ -383,7 +383,7 @@ function ErrorScreen({
         )}
         <a
           href={SUPPORT_MAILTO}
-          className="inline-flex items-center gap-2.5 px-7 py-4 border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
+          className="inline-flex items-center gap-2.5 px-7 py-4 border border-[var(--rule-strong)] text-ink text-xs font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
         >
           Contact Support
         </a>

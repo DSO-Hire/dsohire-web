@@ -47,7 +47,7 @@ function Hero() {
     <section className="pt-[140px] pb-12 px-6 sm:px-14 max-w-[1080px] mx-auto">
       <div data-reveal className="flex items-center gap-3.5 mb-8">
         <span className="block w-7 h-px bg-heritage" />
-        <span className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep">
+        <span className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep">
           About DSO Hire
         </span>
       </div>
@@ -85,13 +85,13 @@ function FounderLetter() {
           data-reveal
           className="bg-cream border border-[var(--rule-strong)] border-t-[3px] border-t-heritage px-7 py-10 sm:px-14 sm:py-13 shadow-[0_30px_60px_-40px_rgba(20,35,63,0.3)]"
         >
-          <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-5">
+          <div className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-5">
             A letter from the founder
           </div>
           <p className="text-[19px] font-extrabold tracking-[-0.3px] leading-[1.4] text-ink mb-6">
             Ten years on the business side of dentistry. One conclusion.
           </p>
-          <div className="space-y-4.5 text-[15px] text-ink leading-[1.85]">
+          <div className="space-y-4.5 text-sm text-ink leading-[1.85]">
             <p>
               For the past decade I&rsquo;ve worked with dentists and dental
               organizations across the country — through growth, through
@@ -134,12 +134,12 @@ function FounderLetter() {
               height={56}
               className="-rotate-2 select-none dark:invert"
             />
-            <div className="mt-3 text-[10px] font-bold tracking-[1.8px] uppercase text-slate-meta">
+            <div className="mt-3 text-2xs font-bold tracking-[1.8px] uppercase text-slate-meta">
               Cam Eslinger · Founder, DSO Hire
             </div>
           </div>
 
-          <p className="mt-7 pt-4 border-t border-dashed border-[var(--rule-strong)] text-[13px] text-slate-body leading-[1.7]">
+          <p className="mt-7 pt-4 border-t border-dashed border-[var(--rule-strong)] text-xs text-slate-body leading-[1.7]">
             P.S. — If you&rsquo;re a candidate: it&rsquo;s free, forever, and
             your current office can&rsquo;t see you here. That part is
             non-negotiable.
@@ -177,7 +177,7 @@ function SideFact({ n, label, delay }: { n: string; label: string; delay: number
       <div className="text-[30px] font-extrabold tracking-[-1px] leading-none text-ink tabular-nums">
         {n}
       </div>
-      <div className="mt-1.5 text-[10px] font-bold tracking-[1.4px] uppercase text-slate-meta leading-[1.5]">
+      <div className="mt-1.5 text-2xs font-bold tracking-[1.4px] uppercase text-slate-meta leading-[1.5]">
         {label}
       </div>
     </div>
@@ -224,7 +224,7 @@ function Timeline() {
       style={{ background: "var(--heritage-tint)" }}
     >
       <div className="max-w-[1080px] mx-auto">
-        <div data-reveal className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
+        <div data-reveal className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
           How we got here
         </div>
         <h2
@@ -248,7 +248,7 @@ function Timeline() {
                   t.now ? "bg-heritage" : "bg-ivory"
                 }`}
               />
-              <div className="text-[10px] font-bold tracking-[1.8px] uppercase text-heritage-deep">
+              <div className="text-2xs font-bold tracking-[1.8px] uppercase text-heritage-deep">
                 {t.yr}
               </div>
               <div className="text-[18px] font-extrabold tracking-[-0.2px] text-ink mt-1 mb-1.5">
@@ -297,7 +297,7 @@ const PROMISES = [
 function Promises() {
   return (
     <section className="px-6 sm:px-14 py-24 max-w-[1080px] mx-auto">
-      <div data-reveal className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
+      <div data-reveal className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
         The operating rules
       </div>
       <h2
@@ -310,7 +310,7 @@ function Promises() {
       <p
         data-reveal
         style={{ "--mk-delay": "120ms" } as React.CSSProperties}
-        className="text-[15px] text-slate-body leading-[1.7] max-w-[620px] mb-11"
+        className="text-sm text-slate-body leading-[1.7] max-w-[620px] mb-11"
       >
         These aren&rsquo;t values-page platitudes — they&rsquo;re engineering
         constraints. Several are enforced in the database itself.
@@ -325,7 +325,7 @@ function Promises() {
           >
             <span
               aria-hidden
-              className="flex items-center justify-center w-[30px] h-[30px] shrink-0 bg-primary text-primary-foreground text-[12px] font-extrabold"
+              className="flex items-center justify-center w-[30px] h-[30px] shrink-0 bg-primary text-primary-foreground text-xs font-extrabold"
             >
               {i + 1}
             </span>
@@ -372,7 +372,7 @@ function FinalCta() {
         <p
           data-reveal
           style={{ "--mk-delay": "60ms" } as React.CSSProperties}
-          className="text-[15px] text-hero-foreground/60 leading-[1.7] max-w-[540px] mx-auto mb-8"
+          className="text-sm text-hero-foreground/60 leading-[1.7] max-w-[540px] mx-auto mb-8"
         >
           Whichever side of the chair you&rsquo;re on, the door&rsquo;s open.
         </p>
@@ -393,14 +393,14 @@ function FinalCta() {
         >
           <Link
             href="/for-dental-groups"
-            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ivory text-ink text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ivory-deep transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ivory text-ink text-xs font-bold tracking-[1.8px] uppercase hover:bg-ivory-deep transition-colors"
           >
             Explore Dental Group Hiring
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <Link
             href="/jobs"
-            className="inline-flex items-center px-7 py-[13px] border border-hero-foreground/35 text-hero-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:border-heritage-light hover:text-heritage-light transition-colors"
+            className="inline-flex items-center px-7 py-[13px] border border-hero-foreground/35 text-hero-foreground text-xs font-bold tracking-[1.8px] uppercase hover:border-heritage-light hover:text-heritage-light transition-colors"
           >
             Browse Dental Jobs
           </Link>

@@ -43,14 +43,14 @@ export function RoleFilter({ basePath, activeValue }: RoleFilterProps) {
 
   return (
     <div className="inline-flex items-center gap-2">
-      <label className="text-[10px] font-bold tracking-[2px] uppercase text-slate-body">
+      <label className="text-2xs font-bold tracking-[2px] uppercase text-slate-body">
         Role
       </label>
       <select
         value={activeValue}
         onChange={(e) => onChange(e.currentTarget.value)}
         disabled={pending}
-        className="text-[12px] px-2.5 py-1.5 bg-card border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage"
+        className="text-xs px-2.5 py-1.5 bg-card border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage"
       >
         {ROLE_OPTIONS.map((opt) => (
           <option key={opt.value} value={opt.value}>

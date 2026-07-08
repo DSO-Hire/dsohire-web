@@ -63,7 +63,7 @@ export function StatusControls({
 
   if (transitions.length === 0) {
     return (
-      <div className="text-[13px] text-slate-meta italic">
+      <div className="text-xs text-slate-meta italic">
         No further transitions available from this status.
       </div>
     );
@@ -97,10 +97,10 @@ export function StatusControls({
         })}
       </div>
       {state.error && (
-        <p className="mt-3 text-[13px] text-danger">{state.error}</p>
+        <p className="mt-3 text-xs text-danger">{state.error}</p>
       )}
       {state.ok && state.message && (
-        <p className="mt-3 text-[13px] text-heritage-deep font-semibold">
+        <p className="mt-3 text-xs text-heritage-deep font-semibold">
           {state.message}
         </p>
       )}

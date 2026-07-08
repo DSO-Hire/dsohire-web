@@ -28,7 +28,7 @@ export function LocationFilter({
   const router = useRouter();
   if (locations.length < 2) return null;
   return (
-    <label className="inline-flex items-center gap-2 text-[11px] text-slate-meta">
+    <label className="inline-flex items-center gap-2 text-2xs text-slate-meta">
       <span className="font-semibold uppercase tracking-[0.5px]">Practice</span>
       <select
         value={value}
@@ -40,7 +40,7 @@ export function LocationFilter({
           if (loc) params.set("loc", loc);
           router.push(`/employer/analytics?${params.toString()}`);
         }}
-        className="h-8 max-w-[220px] px-2 bg-card border border-[var(--rule-strong)] text-ink text-[12px] focus:outline-none focus:border-ink"
+        className="h-8 max-w-[220px] px-2 bg-card border border-[var(--rule-strong)] text-ink text-xs focus:outline-none focus:border-ink"
       >
         <option value="">All practices</option>
         {locations.map((l) => (

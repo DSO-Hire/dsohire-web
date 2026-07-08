@@ -126,7 +126,7 @@ export function ApplicationsBoard({
           <Eyebrow className="mb-2 tabular">
             Applications · {initialApplications.length}
           </Eyebrow>
-          <p className="mt-1 text-[14px] text-slate-body leading-relaxed max-w-[640px]">
+          <p className="mt-1 text-sm text-slate-body leading-relaxed max-w-[640px]">
             Pipeline view of every candidate who applied to this job. Click any
             card to review.
           </p>

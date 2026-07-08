@@ -43,10 +43,10 @@ export function SignInForm({ next }: { next?: string }) {
     return (
       <div className="space-y-5">
         <div className="border-l-4 border-heritage bg-cream p-5">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1.5">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1.5">
             Check your inbox
           </div>
-          <p className="text-[14px] text-ink leading-relaxed">
+          <p className="text-sm text-ink leading-relaxed">
             {emailState.message}
           </p>
         </div>
@@ -58,7 +58,7 @@ export function SignInForm({ next }: { next?: string }) {
           <div>
             <label
               htmlFor="employer-otp"
-              className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+              className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2"
             >
               6-Digit Code <span className="text-heritage">*</span>
             </label>
@@ -73,20 +73,20 @@ export function SignInForm({ next }: { next?: string }) {
               maxLength={10}
               pattern="[0-9 ]{6,16}"
               placeholder="Enter code from email"
-              className="w-full px-4 py-4 bg-cream border border-[var(--rule-strong)] text-ink text-[22px] font-bold tracking-[6px] text-center placeholder:text-slate-meta placeholder:font-medium placeholder:text-[14px] placeholder:tracking-[1px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+              className="w-full px-4 py-4 bg-cream border border-[var(--rule-strong)] text-ink text-[22px] font-bold tracking-[6px] text-center placeholder:text-slate-meta placeholder:font-medium placeholder:text-sm placeholder:tracking-[1px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
             />
           </div>
 
           {verifyState.error && (
             <div role="alert" className="bg-danger-bg border-l-4 border-danger p-4">
-              <p className="text-[14px] text-danger">{verifyState.error}</p>
+              <p className="text-sm text-danger">{verifyState.error}</p>
             </div>
           )}
 
           <button
             type="submit"
             disabled={verifying}
-            className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {verifying ? "Verifying…" : "Verify & Sign In"}
           </button>
@@ -96,7 +96,7 @@ export function SignInForm({ next }: { next?: string }) {
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
           >
             <ArrowLeft className="h-3 w-3" />
             Wrong email? Start over
@@ -108,7 +108,7 @@ export function SignInForm({ next }: { next?: string }) {
             <button
               type="submit"
               disabled={sendingCode}
-              className="text-[13px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2 disabled:opacity-60"
+              className="text-xs font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2 disabled:opacity-60"
             >
               {sendingCode ? "Sending…" : "Send a new code"}
             </button>
@@ -130,7 +130,7 @@ export function SignInForm({ next }: { next?: string }) {
         <div>
           <label
             htmlFor="employer-email-code"
-            className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+            className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2"
           >
             Work Email <span className="text-heritage">*</span>
           </label>
@@ -143,20 +143,20 @@ export function SignInForm({ next }: { next?: string }) {
             autoFocus
             placeholder="you@yourdso.com"
             defaultValue={emailState.email ?? passwordState.email ?? ""}
-            className="w-full px-4 py-3.5 bg-cream border border-[var(--rule-strong)] text-ink text-[15px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+            className="w-full px-4 py-3.5 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
           />
         </div>
 
         {emailState.error && (
           <div role="alert" className="bg-danger-bg border-l-4 border-danger p-4">
-            <p className="text-[14px] text-danger">{emailState.error}</p>
+            <p className="text-sm text-danger">{emailState.error}</p>
           </div>
         )}
 
         <button
           type="submit"
           disabled={sendingCode}
-          className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {sendingCode ? "Sending Code…" : "Send Sign-In Code"}
           {!sendingCode && <Mail className="h-4 w-4" />}
@@ -166,7 +166,7 @@ export function SignInForm({ next }: { next?: string }) {
           <button
             type="button"
             onClick={() => setMode("password")}
-            className="text-[13px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
+            className="text-xs font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
           >
             ← Use password instead
           </button>
@@ -186,7 +186,7 @@ export function SignInForm({ next }: { next?: string }) {
       <div>
         <label
           htmlFor="employer-email-pw"
-          className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+          className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2"
         >
           Work Email <span className="text-heritage">*</span>
         </label>
@@ -199,14 +199,14 @@ export function SignInForm({ next }: { next?: string }) {
           autoFocus
           placeholder="you@yourdso.com"
           defaultValue={passwordState.email ?? ""}
-          className="w-full px-4 py-3.5 bg-cream border border-[var(--rule-strong)] text-ink text-[15px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+          className="w-full px-4 py-3.5 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
         />
       </div>
 
       <div>
         <label
           htmlFor="employer-password"
-          className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+          className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2"
         >
           Password <span className="text-heritage">*</span>
         </label>
@@ -217,20 +217,20 @@ export function SignInForm({ next }: { next?: string }) {
           required
           autoComplete="current-password"
           placeholder="Your password"
-          className="w-full px-4 py-3.5 bg-cream border border-[var(--rule-strong)] text-ink text-[15px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+          className="w-full px-4 py-3.5 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
         />
       </div>
 
       {passwordState.error && (
         <div role="alert" className="bg-danger-bg border-l-4 border-danger p-4">
-          <p className="text-[14px] text-danger">{passwordState.error}</p>
+          <p className="text-sm text-danger">{passwordState.error}</p>
         </div>
       )}
 
       <button
         type="submit"
         disabled={signingInPassword}
-        className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {signingInPassword ? "Signing In…" : "Sign In"}
         {!signingInPassword && <KeyRound className="h-4 w-4" />}
@@ -240,13 +240,13 @@ export function SignInForm({ next }: { next?: string }) {
         <button
           type="button"
           onClick={() => setMode("code")}
-          className="text-[13px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
+          className="text-xs font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
         >
           No password? Email me a sign-in code →
         </button>
       </div>
 
-      <p className="text-[12px] text-slate-meta leading-relaxed text-center pt-3 border-t border-[var(--rule)]">
+      <p className="text-xs text-slate-meta leading-relaxed text-center pt-3 border-t border-[var(--rule)]">
         Forgot your password? Sign in with a code, then reset it from{" "}
         <span className="font-semibold">Settings</span>.
       </p>

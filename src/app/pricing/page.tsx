@@ -181,7 +181,7 @@ function TierGrid({
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink leading-[1.15] mb-3">
               Solo — for groups of 2 to 5 locations.
             </h2>
-            <p className="text-[15px] text-slate-body leading-[1.65]">
+            <p className="text-sm text-slate-body leading-[1.65]">
               If you&apos;re running multiple practices under one ownership,
               Solo gives you the full hiring platform at owner pricing. DSO
               Hire is built for multi-location operators — single-practice
@@ -210,7 +210,7 @@ function TierGrid({
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink leading-[1.15] mb-3">
             Pick the tier that matches your footprint.
           </h2>
-          <p className="text-[15px] text-slate-body leading-[1.65]">
+          <p className="text-sm text-slate-body leading-[1.65]">
             Growth, Scale, and Enterprise unlock deeper pipeline tooling,
             per-location analytics, and governance the bigger you get. Cancel
             or change tiers anytime.
@@ -240,7 +240,7 @@ function TierGrid({
         </div>
       </div>
 
-      <p className="mt-10 text-[14px] text-slate-body text-center leading-relaxed">
+      <p className="mt-10 text-sm text-slate-body text-center leading-relaxed">
         Every tier includes multi-location posting, PracticeFit, candidate
         dashboards, and Stripe-secured billing.{" "}
         <strong className="text-ink font-bold">
@@ -296,18 +296,18 @@ function SoloStandoutCard({
             without competing with it. */}
         <div className="bg-heritage/[0.08] p-9 flex flex-col">
           <Eyebrow className="text-heritage-deep mb-2">{tier.name}</Eyebrow>
-          <div className="text-[14px] text-slate-body mb-7 leading-snug">
+          <div className="text-sm text-slate-body mb-7 leading-snug">
             {tier.tagline}
           </div>
           <div className="flex items-baseline gap-1.5 mb-1.5">
             <div className="text-[44px] font-extrabold tracking-[-1.5px] leading-none text-ink tabular">
               ${headlinePrice.toLocaleString()}
             </div>
-            <div className="text-[14px] font-medium text-slate-body">
+            <div className="text-sm font-medium text-slate-body">
               / month
             </div>
           </div>
-          <div className="text-[12px] tracking-[0.4px] mb-7 leading-[1.45] text-slate-meta min-h-[18px] tabular">
+          <div className="text-xs tracking-[0.4px] mb-7 leading-[1.45] text-slate-meta min-h-[18px] tabular">
             {isAnnual
               ? `Billed annually · $${tier.annualPrice.toLocaleString()}/yr`
               : "Billed monthly · cancel anytime"}
@@ -429,7 +429,7 @@ function TierCard({
           ${headlinePrice.toLocaleString()}
         </div>
         <div
-          className={`text-[14px] font-medium ${
+          className={`text-sm font-medium ${
             isFeatured ? "text-hero-foreground/70" : "text-slate-body"
           }`}
         >
@@ -437,7 +437,7 @@ function TierCard({
         </div>
       </div>
       <div
-        className={`text-[12px] tracking-[0.4px] mb-7 min-h-[32px] leading-[1.45] tabular ${
+        className={`text-xs tracking-[0.4px] mb-7 min-h-[32px] leading-[1.45] tabular ${
           isFeatured ? "text-hero-foreground/55" : "text-slate-meta"
         }`}
       >
@@ -953,15 +953,15 @@ function CompareMatrix({
           The consolidation above still runs server-side; the client
           component only owns open/close state. */}
       <div className="-mx-6 sm:-mx-14 px-6 sm:px-14 overflow-x-auto lg:overflow-visible">
-        <p className="text-[13px] text-slate-meta mb-5 max-w-[680px] leading-relaxed">
+        <p className="text-xs text-slate-meta mb-5 max-w-[680px] leading-relaxed">
           <strong className="text-ink font-semibold">Reading this matrix:</strong>{" "}
           expand a category — the chips on each band show how much of it a
           tier includes before you open it. Checkmarks = available today, and
           every capacity number is code-enforced. Anything not yet live for
           any tier sits in the final{" "}
-          <span className="text-[10px] font-semibold">On the roadmap</span>{" "}
-          band — labeled <span className="text-[10px] font-semibold">H2 2026</span>{" "}
-          (active roadmap) or <span className="text-[10px] font-semibold">Phase 6+</span>{" "}
+          <span className="text-2xs font-semibold">On the roadmap</span>{" "}
+          band — labeled <span className="text-2xs font-semibold">H2 2026</span>{" "}
+          (active roadmap) or <span className="text-2xs font-semibold">Phase 6+</span>{" "}
           (longer-term). We commit to features publicly so prospects see the
           platform&apos;s shape — and nothing roadmapped masquerades as shipped.
         </p>

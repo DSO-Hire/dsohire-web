@@ -57,7 +57,7 @@ export function EmployerRailNav({ groups }: { groups: RailNavGroup[] }) {
                   href={item.href}
                   data-tip={item.label}
                   className={
-                    "rail-item group relative flex items-center gap-3 px-3 py-2 text-[13px] font-semibold tracking-[0.2px] border border-transparent transition-colors " +
+                    "rail-item group relative flex items-center gap-3 px-3 py-2 text-xs font-semibold tracking-[0.2px] border border-transparent transition-colors " +
                     (isActive
                       ? "rail-item-on text-sidebar-foreground"
                       : "text-sidebar-foreground/60 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground")
@@ -68,7 +68,7 @@ export function EmployerRailNav({ groups }: { groups: RailNavGroup[] }) {
                   {item.badge && item.badge > 0 ? (
                     <span
                       aria-label={`${item.badge} unread`}
-                      className="rail-badge ml-2 inline-flex items-center justify-center bg-heritage-deep px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground min-w-[18px]"
+                      className="rail-badge ml-2 inline-flex items-center justify-center bg-heritage-deep px-1.5 py-0.5 text-2xs font-bold text-primary-foreground min-w-[18px]"
                     >
                       {item.badge > 99 ? "99+" : item.badge}
                     </span>

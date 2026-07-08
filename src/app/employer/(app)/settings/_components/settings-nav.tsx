@@ -128,7 +128,7 @@ export function SettingsNav() {
                 key={entry.id}
                 href={entry.href}
                 className={
-                  "group flex items-center gap-3 px-3 py-2 -mx-3 rounded text-[13px] transition-colors " +
+                  "group flex items-center gap-3 px-3 py-2 -mx-3 rounded text-xs transition-colors " +
                   (isActive
                     ? "bg-cream text-ink font-bold"
                     : "text-slate-body hover:bg-cream/60 hover:text-ink")

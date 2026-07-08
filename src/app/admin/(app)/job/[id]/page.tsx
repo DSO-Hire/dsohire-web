@@ -59,14 +59,14 @@ export default async function JobAccount360({
           <h1 className="text-3xl font-extrabold tracking-[-1px] text-ink">
             {j.title ?? "(untitled)"}
           </h1>
-          <span className="inline-block px-2 py-0.5 text-[10px] font-bold tracking-[1px] uppercase text-slate-body bg-cream">
+          <span className="inline-block px-2 py-0.5 text-2xs font-bold tracking-[1px] uppercase text-slate-body bg-cream">
             {j.status ?? "—"}
           </span>
         </div>
         {j.dsoId && (
           <Link
             href={`/admin/dso/${j.dsoId}`}
-            className="inline-flex items-center gap-1.5 mt-2 text-[12px] text-heritage-deep hover:text-ink transition-colors"
+            className="inline-flex items-center gap-1.5 mt-2 text-xs text-heritage-deep hover:text-ink transition-colors"
           >
             {j.dsoName ?? "DSO"} <ExternalLink className="h-3 w-3" />
           </Link>

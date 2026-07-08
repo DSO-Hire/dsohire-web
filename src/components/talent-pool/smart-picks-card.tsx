@@ -37,7 +37,7 @@ export function SmartPicksCard({ picks }: SmartPicksCardProps) {
           </Eyebrow>
           {/* surface="light" renders the proper dual-tone lockup; "inherit"
               made it pick up the parent heritage-green (flat one-color). */}
-          <FitWordmark product={product} surface="light" className="text-[14px]" />
+          <FitWordmark product={product} surface="light" className="text-sm" />
         </div>
         <Link
           href="/employer/talent-pool"
@@ -46,7 +46,7 @@ export function SmartPicksCard({ picks }: SmartPicksCardProps) {
           Open talent pool <ArrowRight className="h-3 w-3" />
         </Link>
       </header>
-      <div className="px-6 py-3 text-[12px] text-slate-meta border-b border-[var(--rule)]">
+      <div className="px-6 py-3 text-xs text-slate-meta border-b border-[var(--rule)]">
         Top {picks.length} opted-in candidates ranked by {fitName} for
         this role. Already-applied candidates are excluded.
       </div>
@@ -63,16 +63,16 @@ export function SmartPicksCard({ picks }: SmartPicksCardProps) {
               <div className="flex-1 min-w-0">
                 <Link
                   href={`/employer/candidates/${p.candidate_id}`}
-                  className="text-[14px] font-bold text-ink hover:text-heritage-deep truncate inline-block max-w-full"
+                  className="text-sm font-bold text-ink hover:text-heritage-deep truncate inline-block max-w-full"
                 >
                   {p.full_name ?? "Unnamed candidate"}
                 </Link>
                 {p.headline && (
-                  <div className="text-[12px] text-slate-body truncate mt-0.5">
+                  <div className="text-xs text-slate-body truncate mt-0.5">
                     {p.headline}
                   </div>
                 )}
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-slate-meta mt-1">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-2xs text-slate-meta mt-1">
                   {p.current_title && <span>{p.current_title}</span>}
                   {p.years_experience !== null && (
                     <span className="tabular">
@@ -88,7 +88,7 @@ export function SmartPicksCard({ picks }: SmartPicksCardProps) {
                   <Tag className={`border ${style.bgClass} ${style.textClass} ${style.borderClass}`}>
                     {style.label}
                   </Tag>
-                  <span className="tabular font-extrabold text-ink text-[14px]">
+                  <span className="tabular font-extrabold text-ink text-sm">
                     {/* FOH-9 — fit scores assemble on view (snappy 600ms). */}
                     <CountUp to={Math.round(p.fit.score)} duration={600} />
                   </span>
@@ -130,7 +130,7 @@ function Avatar({
     .map((s) => s[0]?.toUpperCase())
     .join("");
   return (
-    <div className="h-11 w-11 rounded-full bg-heritage text-primary-foreground flex items-center justify-center font-bold text-[13px] shrink-0">
+    <div className="h-11 w-11 rounded-full bg-heritage text-primary-foreground flex items-center justify-center font-bold text-xs shrink-0">
       {initials || "?"}
     </div>
   );

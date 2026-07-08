@@ -85,7 +85,7 @@ export function HelpDisclosure({
           <Info className="h-3.5 w-3.5 text-heritage-deep" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-[13px] font-bold tracking-[-0.1px] text-ink">
+          <span className="block text-xs font-bold tracking-[-0.1px] text-ink">
             {label}
           </span>
         </span>
@@ -104,7 +104,7 @@ export function HelpDisclosure({
           className="mt-2 border border-[var(--rule-strong)] bg-cream/60 p-5"
         >
           <div className="mb-3 flex items-start justify-between gap-4">
-            <h3 className="text-[14px] font-extrabold tracking-[-0.3px] text-ink">
+            <h3 className="text-sm font-extrabold tracking-[-0.3px] text-ink">
               {brandTitle(title)}
             </h3>
             <button
@@ -144,11 +144,11 @@ export function HelpBody({
           {entry.steps.map((s, i) => (
             <div key={i}>
               {s.heading && (
-                <div className="text-[12px] font-bold tracking-[0.2px] text-ink">
+                <div className="text-xs font-bold tracking-[0.2px] text-ink">
                   {s.heading}
                 </div>
               )}
-              <p className="mt-0.5 text-[13px] leading-relaxed text-slate-body">
+              <p className="mt-0.5 text-xs leading-relaxed text-slate-body">
                 {s.body}
               </p>
             </div>
@@ -161,7 +161,7 @@ export function HelpBody({
           {entry.bullets.map((b, i) => (
             <li
               key={i}
-              className="flex items-start gap-2 text-[13px] leading-snug text-slate-body"
+              className="flex items-start gap-2 text-xs leading-snug text-slate-body"
             >
               <span className="mt-[2px] flex-shrink-0 font-bold text-heritage-deep">
                 ·

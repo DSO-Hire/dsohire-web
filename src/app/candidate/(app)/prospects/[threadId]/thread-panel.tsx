@@ -69,7 +69,7 @@ export function ProspectThreadPanel({
     <div>
       <div className="space-y-3 mb-6">
         {messages.length === 0 && (
-          <p className="text-[13px] text-slate-meta">No messages yet.</p>
+          <p className="text-xs text-slate-meta">No messages yet.</p>
         )}
         {messages.map((m) => {
           const mine = m.sender_role === "candidate";
@@ -81,9 +81,9 @@ export function ProspectThreadPanel({
             >
               <div
                 className={
-                  "max-w-[85%] rounded-lg px-3.5 py-2.5 text-[14px] whitespace-pre-wrap " +
+                  "max-w-[85%] rounded-lg px-3.5 py-2.5 text-sm whitespace-pre-wrap " +
                   (system
-                    ? "bg-cream text-slate-body text-[12px] italic"
+                    ? "bg-cream text-slate-body text-xs italic"
                     : mine
                       ? "bg-heritage text-primary-foreground"
                       : "bg-card border border-[var(--rule)] text-ink")
@@ -97,7 +97,7 @@ export function ProspectThreadPanel({
       </div>
 
       {blocked ? (
-        <div className="rounded-lg border border-[var(--rule)] bg-cream/40 px-4 py-3 text-[13px] text-slate-body">
+        <div className="rounded-lg border border-[var(--rule)] bg-cream/40 px-4 py-3 text-xs text-slate-body">
           You&apos;ve blocked this employer. They can no longer find or message
           you.
         </div>
@@ -109,15 +109,15 @@ export function ProspectThreadPanel({
             placeholder="Write a reply…"
             rows={3}
             disabled={pending}
-            className="w-full resize-none rounded border border-[var(--rule)] bg-cream/30 px-3 py-2 text-[14px] text-ink focus:outline-none focus:border-heritage-deep"
+            className="w-full resize-none rounded border border-[var(--rule)] bg-cream/30 px-3 py-2 text-sm text-ink focus:outline-none focus:border-heritage-deep"
           />
-          {error && <p className="mt-1 text-[12px] text-danger">{error}</p>}
+          {error && <p className="mt-1 text-xs text-danger">{error}</p>}
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => reply(false)}
               disabled={pending || !body.trim()}
-              className="bg-primary px-3 py-2 text-[12px] font-bold uppercase tracking-[1px] text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
+              className="bg-primary px-3 py-2 text-xs font-bold uppercase tracking-[1px] text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
             >
               Reply anonymously
             </button>
@@ -126,7 +126,7 @@ export function ProspectThreadPanel({
                 type="button"
                 onClick={() => reply(true)}
                 disabled={pending || !body.trim()}
-                className="border border-heritage-deep px-3 py-2 text-[12px] font-bold uppercase tracking-[1px] text-heritage-deep hover:bg-cream/60 disabled:opacity-40"
+                className="border border-heritage-deep px-3 py-2 text-xs font-bold uppercase tracking-[1px] text-heritage-deep hover:bg-cream/60 disabled:opacity-40"
               >
                 Reply &amp; share my profile
               </button>
@@ -137,7 +137,7 @@ export function ProspectThreadPanel({
                 type="button"
                 onClick={mute}
                 disabled={pending}
-                className="text-[12px] text-slate-meta hover:text-ink underline underline-offset-2"
+                className="text-xs text-slate-meta hover:text-ink underline underline-offset-2"
               >
                 Mute
               </button>
@@ -146,12 +146,12 @@ export function ProspectThreadPanel({
               type="button"
               onClick={block}
               disabled={pending}
-              className="text-[12px] text-danger hover:underline underline-offset-2"
+              className="text-xs text-danger hover:underline underline-offset-2"
             >
               Block
             </button>
           </div>
-          <p className="mt-2 text-[11px] text-slate-meta">
+          <p className="mt-2 text-2xs text-slate-meta">
             Replying anonymously keeps your name hidden. The employer never sees
             your email address.
           </p>

@@ -103,30 +103,30 @@ export default async function CandidatePracticeFitPage() {
           href="/candidate/assessment"
           className="group mb-8 block border-l-4 border-heritage bg-cream/50 p-6 sm:p-7 transition-colors hover:bg-cream"
         >
-          <div className="mb-1.5 text-[10px] font-extrabold tracking-[2.5px] uppercase text-heritage-deep">
+          <div className="mb-1.5 text-2xs font-extrabold tracking-[2.5px] uppercase text-heritage-deep">
             Take the PracticeFit Assessment · about 5 min
           </div>
           <h2 className="text-lg sm:text-xl font-extrabold tracking-[-0.4px] text-ink">
             Answer a few questions and your matches get a lot sharper.
           </h2>
-          <p className="mt-2 text-[14px] text-slate-body max-w-[560px]">
+          <p className="mt-2 text-sm text-slate-body max-w-[560px]">
             Pace, autonomy, the procedures you love, the kind of team you thrive
             on — the things no résumé captures. Mostly taps, and you can stop
             anytime.
           </p>
-          <span className="mt-3 inline-flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-[1.5px] text-heritage-deep group-hover:gap-2.5 transition-all">
+          <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[1.5px] text-heritage-deep group-hover:gap-2.5 transition-all">
             Start now →
           </span>
         </a>
       ) : (
         <div className="mb-6 flex items-center justify-between gap-3 border border-[var(--rule)] bg-card px-4 py-3">
-          <span className="text-[13px] text-slate-body">
+          <span className="text-xs text-slate-body">
             Your PracticeFit Assessment is complete — it&apos;s powering your
             matches.
           </span>
           <a
             href="/candidate/assessment"
-            className="flex-shrink-0 text-[12px] font-bold uppercase tracking-[1.5px] text-heritage-deep hover:text-heritage underline underline-offset-2"
+            className="flex-shrink-0 text-xs font-bold uppercase tracking-[1.5px] text-heritage-deep hover:text-heritage underline underline-offset-2"
           >
             Update
           </a>
@@ -135,13 +135,13 @@ export default async function CandidatePracticeFitPage() {
 
       {!consentOn ? (
         <section className="mb-8 p-7 sm:p-8 bg-hero text-hero-foreground border-l-4 border-heritage">
-          <div className="text-[10px] font-extrabold tracking-[2.5px] uppercase text-heritage-light mb-2">
+          <div className="text-2xs font-extrabold tracking-[2.5px] uppercase text-heritage-light mb-2">
             PracticeFit is off
           </div>
           <h2 className="text-2xl font-extrabold tracking-[-0.6px] leading-tight mb-3">
             Turn on PracticeFit to see roles matched to you.
           </h2>
-          <p className="text-[14px] text-hero-foreground/70 leading-relaxed max-w-[560px] mb-2">
+          <p className="text-sm text-hero-foreground/70 leading-relaxed max-w-[560px] mb-2">
             It&apos;s our dental-specific matching engine — it ranks open roles
             by how well they fit your profile and lets DSOs find you by fit.
             Flip it on below; you can change it anytime.
@@ -154,11 +154,11 @@ export default async function CandidatePracticeFitPage() {
       ) : (
         <section className="mb-8">
           <div className="flex items-center gap-2 text-heritage-deep mb-3">
-            <span className="text-[10px] font-bold tracking-[2.5px] uppercase">
+            <span className="text-2xs font-bold tracking-[2.5px] uppercase">
               Roles that fit you
             </span>
           </div>
-          <div className="border border-[var(--rule)] bg-cream/40 p-6 text-[14px] text-slate-body leading-relaxed">
+          <div className="border border-[var(--rule)] bg-cream/40 p-6 text-sm text-slate-body leading-relaxed">
             No open roles fit you just yet. Widen your preferences below — or
             we&apos;ll email you the moment a fitting role posts.
           </div>
@@ -171,7 +171,7 @@ export default async function CandidatePracticeFitPage() {
           <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink">
             What you&apos;re looking for
           </h2>
-          <p className="mt-1 text-[14px] text-slate-body max-w-[640px]">
+          <p className="mt-1 text-sm text-slate-body max-w-[640px]">
             These drive your PracticeFit matches and let DSOs find you by fit.
             Each section saves on its own. What employers see on your profile is
             set on{" "}
@@ -190,7 +190,7 @@ export default async function CandidatePracticeFitPage() {
       {/* PracticeFit on/off — mirrored from Privacy for convenience. */}
       <section className="mb-6">
         <PracticeFitSection initial={consent} />
-        <p className="mt-2 text-[12px] text-slate-meta">
+        <p className="mt-2 text-xs text-slate-meta">
           Manage all privacy and visibility controls in{" "}
           <a
             href="/candidate/settings/privacy"

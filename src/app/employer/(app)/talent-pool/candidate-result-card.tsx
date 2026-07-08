@@ -126,7 +126,7 @@ export function CandidateResultCard({
               controls below carry `relative z-10` to stay above it. */}
           <Link
             href={`/employer/candidates/${candidateId}`}
-            className="text-[14px] font-bold text-ink hover:text-heritage-deep truncate after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-heritage/40"
+            className="text-sm font-bold text-ink hover:text-heritage-deep truncate after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-heritage/40"
           >
             {fullName ?? "Unnamed candidate"}
           </Link>
@@ -162,9 +162,9 @@ export function CandidateResultCard({
           </div>
         )}
         {headline && (
-          <div className="text-[13px] text-ink mb-1.5">{headline}</div>
+          <div className="text-xs text-ink mb-1.5">{headline}</div>
         )}
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-slate-meta">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-meta">
           {currentTitle && <span>{currentTitle}</span>}
           {yearsExperience !== null && (
             <span className="tabular">
@@ -190,7 +190,7 @@ export function CandidateResultCard({
             {(pmsSystems ?? []).slice(0, 4).map((p) => (
               <span
                 key={`pms-${p}`}
-                className="inline-flex items-center px-2 py-0.5 bg-cream border border-[var(--rule-strong)] text-[10px] font-semibold tracking-[0.3px] text-ink"
+                className="inline-flex items-center px-2 py-0.5 bg-cream border border-[var(--rule-strong)] text-2xs font-semibold tracking-[0.3px] text-ink"
               >
                 {p}
               </span>
@@ -198,7 +198,7 @@ export function CandidateResultCard({
             {certKinds.slice(0, 5).map((k) => (
               <span
                 key={`cert-${k}`}
-                className="inline-flex items-center px-2 py-0.5 bg-cream border border-[var(--rule-strong)] text-[10px] font-semibold tracking-[0.3px] text-ink"
+                className="inline-flex items-center px-2 py-0.5 bg-cream border border-[var(--rule-strong)] text-2xs font-semibold tracking-[0.3px] text-ink"
               >
                 {CERT_LABEL[k] ?? k}
               </span>
@@ -207,7 +207,7 @@ export function CandidateResultCard({
         )}
 
         {error && (
-          <div className="mt-2 text-[12px] text-danger">{error}</div>
+          <div className="mt-2 text-xs text-danger">{error}</div>
         )}
       </div>
     </div>
@@ -238,7 +238,7 @@ function Avatar({
     .map((s) => s[0]?.toUpperCase())
     .join("");
   return (
-    <div className="h-12 w-12 rounded-full bg-heritage text-primary-foreground flex items-center justify-center font-bold text-[14px] shrink-0">
+    <div className="h-12 w-12 rounded-full bg-heritage text-primary-foreground flex items-center justify-center font-bold text-sm shrink-0">
       {initials || "?"}
     </div>
   );

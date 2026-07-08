@@ -66,15 +66,15 @@ export default async function OfferLettersSettingsPage() {
         <h2 className="text-2xl font-extrabold tracking-[-0.6px] text-ink mb-2">
           Offer letters
         </h2>
-        <p className="text-[14px] text-slate-body leading-relaxed max-w-[680px]">
+        <p className="text-sm text-slate-body leading-relaxed max-w-[680px]">
           Build a library of offer-letter templates your team can pick from
           when a candidate reaches the offer stage. Templates support merge
           fields like{" "}
-          <code className="text-[12px] bg-cream px-1 py-0.5 rounded">
+          <code className="text-xs bg-cream px-1 py-0.5 rounded">
             {"{{candidate.full_name}}"}
           </code>{" "}
           and{" "}
-          <code className="text-[12px] bg-cream px-1 py-0.5 rounded">
+          <code className="text-xs bg-cream px-1 py-0.5 rounded">
             {"{{offer.start_date}}"}
           </code>
           . Sender-filled fields (start date, compensation, etc.) are
@@ -83,7 +83,7 @@ export default async function OfferLettersSettingsPage() {
       </header>
 
       {!canEdit && (
-        <div className="mb-5 border border-warning bg-warning-bg px-4 py-3 text-[13px] text-warning">
+        <div className="mb-5 border border-warning bg-warning-bg px-4 py-3 text-xs text-warning">
           You can view and use these templates, but only DSO owners and
           admins can edit or archive them.
         </div>

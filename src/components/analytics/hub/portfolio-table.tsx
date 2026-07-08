@@ -76,16 +76,16 @@ export function PortfolioTable({
   return (
     <section className="border border-[var(--rule)] bg-card p-6 overflow-x-auto">
       <div className="flex items-center justify-between mb-4">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep">
           Practice comparison
         </div>
-        <span className="text-[10px] text-slate-meta uppercase tracking-[1px]">
+        <span className="text-2xs text-slate-meta uppercase tracking-[1px]">
           Click a row to scope the hub to that practice
         </span>
       </div>
-      <table className="w-full text-[13px] min-w-[560px]">
+      <table className="w-full text-xs min-w-[560px]">
         <thead>
-          <tr className="text-[10px] font-bold tracking-[1px] uppercase text-slate-meta border-b border-[var(--rule)]">
+          <tr className="text-2xs font-bold tracking-[1px] uppercase text-slate-meta border-b border-[var(--rule)]">
             {cols.map((c) => (
               <th
                 key={c.key}
@@ -117,7 +117,7 @@ export function PortfolioTable({
                     {r.name}
                   </div>
                   {(r.city || r.state) && (
-                    <div className="text-[11px] text-slate-meta">
+                    <div className="text-2xs text-slate-meta">
                       {[r.city, r.state].filter(Boolean).join(", ")}
                     </div>
                   )}
@@ -133,7 +133,7 @@ export function PortfolioTable({
                 </td>
                 <td className="py-2.5 text-right">
                   <span
-                    className="inline-block px-2 py-0.5 text-[12px] font-bold tabular-nums"
+                    className="inline-block px-2 py-0.5 text-xs font-bold tabular-nums"
                     style={{ background: tone.bg, color: tone.text }}
                   >
                     {r.avg_time_to_fill_days !== null

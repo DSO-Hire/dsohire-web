@@ -708,17 +708,17 @@ function ApplicationsList({
                   </div>
 
                   {/* Title + employer */}
-                  <p className="text-[15px] font-bold text-ink">
+                  <p className="text-sm font-bold text-ink">
                     {job?.title ?? "Job removed"}
                   </p>
-                  <p className="text-[13px] text-slate-body">
+                  <p className="text-xs text-slate-body">
                     {displayedNameByAppId.get(app.id) ??
                       dso?.name ??
                       "Unknown employer"}
                   </p>
 
                   {/* Meta line — scope chip + dates */}
-                  <div className="mt-2 flex flex-wrap items-center gap-2 text-[12px] text-slate-meta">
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-meta">
                     <ScopeChip locs={locs} />
                     <span>·</span>
                     <span>Applied {formatDate(app.created_at)}</span>
@@ -797,10 +797,10 @@ function SavedJobsList({
     return (
       <div className="rounded-md border border-[var(--rule)] bg-card p-12 text-center max-w-[680px]">
         <Bookmark className="mx-auto mb-4 size-8 text-slate-meta" strokeWidth={1.5} />
-        <p className="mb-2 text-[15px] text-ink">
+        <p className="mb-2 text-sm text-ink">
           You haven&apos;t saved any jobs yet.
         </p>
-        <p className="mb-6 text-[14px] text-slate-body">
+        <p className="mb-6 text-sm text-slate-body">
           Click <strong>Save</strong> on any job page to bookmark it for later.
         </p>
         <Link
@@ -844,13 +844,13 @@ function SavedJobsList({
                       return null;
                     })()}
                   </div>
-                  <p className="text-[15px] font-bold text-ink">{row.job.title}</p>
-                  <p className="text-[13px] text-slate-body">
+                  <p className="text-sm font-bold text-ink">{row.job.title}</p>
+                  <p className="text-xs text-slate-body">
                     {displayedNameByJobId.get(row.job.id) ??
                       row.job.dsos?.name ??
                       "Employer"}
                   </p>
-                  <p className="mt-2 text-[12px] text-slate-meta">
+                  <p className="mt-2 text-xs text-slate-meta">
                     Saved {timeAgo(new Date(row.saved_at))}
                   </p>
                 </div>
@@ -879,10 +879,10 @@ function EmptyState({
     return (
       <div className="rounded-md border border-[var(--rule)] bg-card p-12 text-center max-w-[680px]">
         <Briefcase className="mx-auto mb-4 size-8 text-slate-meta" strokeWidth={1.5} />
-        <p className="mb-2 text-[15px] text-ink">
+        <p className="mb-2 text-sm text-ink">
           You haven&apos;t applied to any jobs yet.
         </p>
-        <p className="mb-6 text-[14px] text-slate-body">
+        <p className="mb-6 text-sm text-slate-body">
           Browse open roles at multi-location dental groups.
         </p>
         <Link
@@ -896,7 +896,7 @@ function EmptyState({
   }
   return (
     <div className="rounded-md border border-[var(--rule)] bg-card p-10 text-center max-w-[680px]">
-      <p className="text-[14px] text-slate-body">
+      <p className="text-sm text-slate-body">
         Nothing in <strong>{TAB_LABELS[tab]}</strong> right now.
       </p>
     </div>

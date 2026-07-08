@@ -36,13 +36,13 @@ export default async function AdminSearch({
   return (
     <>
       <header className="mb-6">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
           Operator search
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink">
           Search
         </h1>
-        <p className="mt-3 text-[14px] text-slate-body leading-relaxed max-w-[640px]">
+        <p className="mt-3 text-sm text-slate-body leading-relaxed max-w-[640px]">
           Find any DSO, candidate, job, or application (paste an app id). Opens
           its Account 360.
         </p>
@@ -57,20 +57,20 @@ export default async function AdminSearch({
             defaultValue={query}
             autoFocus
             placeholder="Name, slug, email, job title, or application id…"
-            className="flex-1 bg-transparent text-[14px] text-ink placeholder:text-slate-meta outline-none"
+            className="flex-1 bg-transparent text-sm text-ink placeholder:text-slate-meta outline-none"
           />
         </div>
       </form>
 
       {query.length >= 2 && (
-        <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-3">
+        <div className="text-2xs font-bold tracking-[2px] uppercase text-slate-meta mb-3">
           {results.length} result{results.length === 1 ? "" : "s"} for
           &ldquo;{query}&rdquo;
         </div>
       )}
 
       {query.length >= 2 && results.length === 0 ? (
-        <p className="text-[13px] text-slate-meta italic">
+        <p className="text-xs text-slate-meta italic">
           Nothing matched. Try a name, slug, email, job title, or a full
           application id.
         </p>
@@ -87,17 +87,17 @@ export default async function AdminSearch({
                     <span className="inline-block px-1.5 py-0.5 text-[9px] font-bold tracking-[1px] uppercase text-heritage-deep bg-heritage/10 shrink-0">
                       {TYPE_LABEL[r.type]}
                     </span>
-                    <span className="text-[14px] text-ink font-semibold truncate">
+                    <span className="text-sm text-ink font-semibold truncate">
                       {r.title}
                     </span>
                     {r.status && (
-                      <span className="text-[10px] font-bold tracking-[0.5px] uppercase text-slate-meta shrink-0">
+                      <span className="text-2xs font-bold tracking-[0.5px] uppercase text-slate-meta shrink-0">
                         · {r.status}
                       </span>
                     )}
                   </div>
                   {r.subtitle && (
-                    <div className="text-[12px] text-slate-meta truncate mt-0.5">
+                    <div className="text-xs text-slate-meta truncate mt-0.5">
                       {r.subtitle}
                     </div>
                   )}

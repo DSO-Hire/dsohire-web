@@ -149,23 +149,29 @@
   --info-bg: rgba(37, 99, 235, 0.10);
 }
 
+:root {
+  /* Text-size toggle multiplier (Default 1 / Large 1.11 / Larger 1.22).
+     Set by the no-flash script in the root layout + TextSizeToggle. */
+  --text-scale: 1;
+}
+
 html {
-  /* Base font-size — bumped from browser default 16px to 18px (12.5% larger).
-     Every rem-based size in the app (Tailwind's text-base, text-lg, headings,
-     spacing scales) inherits from this — the whole app scales up. Tweak here
-     if "make everything a little bigger / smaller" comes up later. */
-  font-size: 18px;
+  /* Base font-size — bumped from browser default 16px to 18px (12.5% larger),
+     multiplied by the user's text-size choice. Every rem-based size in the
+     app (Tailwind's text-base, text-lg, headings, spacing scales) inherits
+     from this — the whole app scales in lockstep. */
+  font-size: calc(18px * var(--text-scale, 1));
 }
 
 /* iOS zoom guard (mobile sweep 2026-06-18) — Safari/Chrome on iOS zoom the
-   whole page whenever a FOCUSED input/select/textarea computes < 16px. Several
-   shared form fields use 15px, so force >= 16px on phones. Visually negligible
-   (15 -> 16); desktop is untouched (rule is max-width:767px only). */
+   whole page whenever a FOCUSED input/select/textarea computes < 16px. max()
+   keeps the >=16px guarantee while still letting the text-size toggle scale
+   inputs up. Desktop is untouched (rule is max-width:767px only). */
 @media (max-width: 767px) {
   input,
   select,
   textarea {
-    font-size: 16px !important;
+    font-size: max(16px, 1rem) !important;
   }
 }
 
@@ -179,6 +185,18 @@ html, body {
   /* Force Tailwind's font-sans utility to Manrope (override Geist) */
   --font-heading: var(--font-manrope);
   --font-sans: var(--font-manrope);
+
+  /* ── Typography scale (readability pass 2026-07-08) ──
+     Raised the small end so meta/labels clear the ~14px readability floor
+     without touching headers. New --text-2xs is the hard floor for
+     micro-labels. All rem so the text-size toggle (--text-scale) scales them. */
+  --text-2xs: 0.7rem; /* 12.6px @18 root (NEW) */
+  --text-2xs--line-height: 1.4;
+  --text-xs: 0.8rem; /* 14.4px (was 0.75rem/13.5px) */
+  --text-xs--line-height: 1.4;
+  --text-sm: 0.9rem; /* 16.2px (was 0.875rem/15.75px) */
+  --text-sm--line-height: 1.45;
+  /* --text-base and up: Tailwind defaults (headers unchanged) */
 
   /* ── Brand constants → indirection (so .dark overrides cascade) ── */
   --color-ink: var(--ink);

@@ -138,12 +138,12 @@ export default async function SalaryPage({ params }: { params: Promise<Params> }
       {/* HERO */}
       <section className="pt-[140px] pb-12 px-6 sm:px-14">
         <div className="max-w-[1100px] mx-auto">
-          <nav className="text-[12px] text-slate-meta mb-5">
+          <nav className="text-xs text-slate-meta mb-5">
             <Link href={`/salary/${role.slug}`} className="hover:text-heritage-deep underline underline-offset-2">{role.searchTitle} salary</Link>
             <span className="mx-2">/</span>
             <span className="text-ink">{state.name}</span>
           </nav>
-          <p className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-5">
+          <p className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-5">
             Dental Salary Data · {data.source} {data.vintage}
           </p>
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-[-1.5px] leading-[1.04] text-ink mb-6">
@@ -171,7 +171,7 @@ export default async function SalaryPage({ params }: { params: Promise<Params> }
             <Stat label="75th percentile" value={high} hint="Experienced / upper range" />
           </div>
           {data.annual && data.hourly && (
-            <p className="text-[13px] text-heritage-light mt-8 pt-6 border-t border-hero-foreground/10">
+            <p className="text-xs text-heritage-light mt-8 pt-6 border-t border-hero-foreground/10">
               That&apos;s roughly {fmtAnnual(data.annual.p50)} per year or {fmtHourly(data.hourly.p50)}/hr at the median.
               {compare && ` ${state.name} runs about ${compare.pct}% ${compare.dir} the national median.`}
             </p>
@@ -181,7 +181,7 @@ export default async function SalaryPage({ params }: { params: Promise<Params> }
 
       {ownerCaveat(role) && (
         <section className="px-6 sm:px-14 pb-10 -mt-4">
-          <p className="max-w-[1100px] mx-auto text-[13px] text-slate-meta italic leading-[1.6]">{ownerCaveat(role)}</p>
+          <p className="max-w-[1100px] mx-auto text-xs text-slate-meta italic leading-[1.6]">{ownerCaveat(role)}</p>
         </section>
       )}
 
@@ -193,7 +193,7 @@ export default async function SalaryPage({ params }: { params: Promise<Params> }
               Top-paying metros in {state.name}
             </h2>
             <div className="border border-[var(--rule)]">
-              <div className="grid grid-cols-12 px-5 py-3 bg-cream text-[11px] font-bold uppercase tracking-[1.5px] text-slate-meta">
+              <div className="grid grid-cols-12 px-5 py-3 bg-cream text-2xs font-bold uppercase tracking-[1.5px] text-slate-meta">
                 <div className="col-span-6">Metro area</div>
                 <div className="col-span-3 text-right">Median</div>
                 <div className="col-span-3 text-right">Typical range</div>
@@ -210,7 +210,7 @@ export default async function SalaryPage({ params }: { params: Promise<Params> }
                 );
               })}
             </div>
-            <p className="text-[12px] text-slate-meta mt-3">Source: {data.source}, {data.vintage}. Figures are gross wages, not adjusted for cost of living.</p>
+            <p className="text-xs text-slate-meta mt-3">Source: {data.source}, {data.vintage}. Figures are gross wages, not adjusted for cost of living.</p>
           </div>
         </section>
       )}
@@ -232,16 +232,16 @@ export default async function SalaryPage({ params }: { params: Promise<Params> }
             </p>
           </div>
           <div className="bg-cream p-8">
-            <p className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-3">For dental pros</p>
+            <p className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-3">For dental pros</p>
             <h3 className="text-xl font-extrabold text-ink mb-3">Know your worth, then go get it</h3>
-            <p className="text-slate-body leading-[1.7] mb-6 text-[15px]">
+            <p className="text-slate-body leading-[1.7] mb-6 text-sm">
               Build a free, ATS-ready résumé and get matched to practices that fit how you want to work — in {state.name} and beyond.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link href="/resume-templates" className="inline-flex items-center px-7 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors">
+              <Link href="/resume-templates" className="inline-flex items-center px-7 py-3.5 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors">
                 Build a free résumé
               </Link>
-              <Link href="/jobs" className="inline-flex items-center px-7 py-3.5 border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:border-ink transition-colors">
+              <Link href="/jobs" className="inline-flex items-center px-7 py-3.5 border border-[var(--rule-strong)] text-ink text-xs font-bold tracking-[2px] uppercase hover:border-ink transition-colors">
                 Browse dental jobs
               </Link>
             </div>
@@ -259,7 +259,7 @@ export default async function SalaryPage({ params }: { params: Promise<Params> }
             {faq.map((f) => (
               <div key={f.q} className="py-5">
                 <h3 className="text-lg font-bold text-ink mb-2">{f.q}</h3>
-                <p className="text-slate-body leading-[1.7] text-[15px]">{f.a}</p>
+                <p className="text-slate-body leading-[1.7] text-sm">{f.a}</p>
               </div>
             ))}
           </div>
@@ -270,10 +270,10 @@ export default async function SalaryPage({ params }: { params: Promise<Params> }
       <section className="px-6 sm:px-14 pb-16">
         <div className="max-w-[1100px] mx-auto bg-heritage p-8 sm:p-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div>
-            <p className="text-[10px] font-bold tracking-[3px] uppercase text-primary-foreground/80 mb-2">Hiring in {state.name}?</p>
+            <p className="text-2xs font-bold tracking-[3px] uppercase text-primary-foreground/80 mb-2">Hiring in {state.name}?</p>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-1px] text-primary-foreground">Fill {role.searchTitle.toLowerCase()} roles across every location.</h2>
           </div>
-          <Link href="/for-dental-groups" className="shrink-0 inline-flex items-center px-8 py-4 bg-ivory text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-card transition-colors">
+          <Link href="/for-dental-groups" className="shrink-0 inline-flex items-center px-8 py-4 bg-ivory text-ink text-xs font-bold tracking-[2px] uppercase hover:bg-card transition-colors">
             See how it works
           </Link>
         </div>
@@ -283,7 +283,7 @@ export default async function SalaryPage({ params }: { params: Promise<Params> }
       <section className="px-6 sm:px-14 pb-24">
         <div className="max-w-[1100px] mx-auto grid grid-cols-1 sm:grid-cols-2 gap-10">
           <div>
-            <p className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-4">Other roles in {state.name}</p>
+            <p className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-4">Other roles in {state.name}</p>
             <ul className="space-y-2">
               {otherRoles.map((x) => (
                 <li key={x.slug}>
@@ -295,7 +295,7 @@ export default async function SalaryPage({ params }: { params: Promise<Params> }
             </ul>
           </div>
           <div>
-            <p className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-4">{role.searchTitle} salary by state</p>
+            <p className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-4">{role.searchTitle} salary by state</p>
             <ul className="space-y-2">
               {otherStates.map((n) => (
                 <li key={n}>
@@ -315,9 +315,9 @@ export default async function SalaryPage({ params }: { params: Promise<Params> }
 function Stat({ label, value, hint, emphasis }: { label: string; value: string; hint: string; emphasis?: boolean }) {
   return (
     <div>
-      <p className="text-[11px] font-bold uppercase tracking-[2px] text-heritage-light mb-2">{label}</p>
+      <p className="text-2xs font-bold uppercase tracking-[2px] text-heritage-light mb-2">{label}</p>
       <p className={`font-extrabold text-hero-foreground tracking-[-1px] ${emphasis ? "text-4xl sm:text-5xl" : "text-3xl sm:text-4xl"}`}>{value}</p>
-      <p className="text-[12px] text-hero-foreground/50 mt-1">{hint}</p>
+      <p className="text-xs text-hero-foreground/50 mt-1">{hint}</p>
     </div>
   );
 }

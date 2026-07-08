@@ -32,14 +32,14 @@ export function ComingSoon({
 }: ComingSoonProps) {
   return (
     <div className="border border-[var(--rule)] bg-cream/40 p-7 sm:p-8 max-w-[760px]">
-      <div className="flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+      <div className="flex items-center gap-2 text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
         <Sparkles className="h-3.5 w-3.5" />
         <span>{phaseTag}</span>
       </div>
       <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink mb-3">
         {title}
       </h2>
-      <p className="text-[14px] text-slate-body leading-relaxed mb-5 max-w-[600px]">
+      <p className="text-sm text-slate-body leading-relaxed mb-5 max-w-[600px]">
         {description}
       </p>
       {bullets && bullets.length > 0 && (
@@ -47,7 +47,7 @@ export function ComingSoon({
           {bullets.map((b, i) => (
             <li
               key={i}
-              className="flex items-start gap-2.5 text-[13px] text-ink leading-relaxed"
+              className="flex items-start gap-2.5 text-xs text-ink leading-relaxed"
             >
               <span className="mt-1 size-1.5 rounded-full bg-heritage-deep flex-shrink-0" />
               <span>{b}</span>

@@ -509,7 +509,7 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
       >
         <header className="flex items-start justify-between gap-3 p-5 border-b border-[var(--rule)] shrink-0">
           <div className="min-w-0">
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1.5 inline-flex items-center gap-2">
+            <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1.5 inline-flex items-center gap-2">
               <Sparkles className="size-3" />
               Support — AI-assisted
             </div>
@@ -517,7 +517,7 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
               Ask anything about DSO Hire.
             </h2>
             {pageContext && (
-              <div className="mt-2 inline-flex items-center gap-1.5 max-w-full bg-heritage/[0.10] border border-heritage/25 px-2 py-1 text-[10px] font-bold tracking-[0.4px] text-heritage-deep">
+              <div className="mt-2 inline-flex items-center gap-1.5 max-w-full bg-heritage/[0.10] border border-heritage/25 px-2 py-1 text-2xs font-bold tracking-[0.4px] text-heritage-deep">
                 <Eye className="size-3 shrink-0" />
                 <span className="truncate">
                   Viewing: {pageContext.label}
@@ -573,7 +573,7 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
 
         {/* Reset confirmation */}
         {resetConfirmOpen && (
-          <div className="border-t border-[var(--rule)] bg-warning-bg px-5 py-3 text-[13px] text-warning shrink-0">
+          <div className="border-t border-[var(--rule)] bg-warning-bg px-5 py-3 text-xs text-warning shrink-0">
             <p className="mb-2">
               Drop this conversation and start fresh? The current thread will
               be cleared from this browser.
@@ -582,14 +582,14 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
               <button
                 type="button"
                 onClick={onReset}
-                className="inline-flex items-center gap-1.5 rounded bg-warning text-warning-foreground px-3 py-1.5 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-warning/90"
+                className="inline-flex items-center gap-1.5 rounded bg-warning text-warning-foreground px-3 py-1.5 text-2xs font-bold tracking-[1.5px] uppercase hover:bg-warning/90"
               >
                 Yes, start over
               </button>
               <button
                 type="button"
                 onClick={() => setResetConfirmOpen(false)}
-                className="inline-flex items-center gap-1.5 rounded border border-warning px-3 py-1.5 text-[11px] font-bold tracking-[1.5px] uppercase text-warning hover:bg-warning-bg"
+                className="inline-flex items-center gap-1.5 rounded border border-warning px-3 py-1.5 text-2xs font-bold tracking-[1.5px] uppercase text-warning hover:bg-warning-bg"
               >
                 Cancel
               </button>
@@ -616,7 +616,7 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
               rows={2}
               placeholder="Ask anything — bulk locations, MFA, sending a custom email…"
               disabled={sending}
-              className="w-full resize-y min-h-[60px] max-h-[180px] px-3 py-2 bg-cream/30 border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage disabled:opacity-60"
+              className="w-full resize-y min-h-[60px] max-h-[180px] px-3 py-2 bg-cream/30 border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage disabled:opacity-60"
             />
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
@@ -626,7 +626,7 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
                     onClick={onEscalate}
                     disabled={escalating || sending}
                     title="Hand off this conversation to a human at DSO Hire"
-                    className="inline-flex items-center gap-1.5 rounded border border-[var(--rule-strong)] bg-card px-2.5 py-1.5 text-[11px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink disabled:opacity-40"
+                    className="inline-flex items-center gap-1.5 rounded border border-[var(--rule-strong)] bg-card px-2.5 py-1.5 text-2xs font-semibold text-slate-body hover:bg-cream/60 hover:text-ink disabled:opacity-40"
                   >
                     {escalating ? (
                       <Loader2 className="size-3.5 animate-spin" />
@@ -640,7 +640,7 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
               <button
                 type="submit"
                 disabled={sending || !input.trim()}
-                className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 text-2xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {sending ? (
                   <>
@@ -655,7 +655,7 @@ export function SupportDrawer({ open, onClose, audience, authUserId }: Props) {
                 )}
               </button>
             </div>
-            <p className="text-[10px] text-slate-meta">
+            <p className="text-2xs text-slate-meta">
               Enter to send · Shift+Enter for new line · {input.length}/{MAX_INPUT}
             </p>
           </form>
@@ -680,7 +680,7 @@ function Bubble({
 }) {
   if (message.role === "system") {
     return (
-      <div className="border border-warning bg-warning-bg px-3 py-2 text-[13px] text-warning inline-flex items-start gap-2 max-w-full">
+      <div className="border border-warning bg-warning-bg px-3 py-2 text-xs text-warning inline-flex items-start gap-2 max-w-full">
         <AlertTriangle className="size-3.5 mt-0.5 shrink-0" />
         <div className="flex-1 leading-relaxed whitespace-pre-wrap">
           {message.content}
@@ -691,7 +691,7 @@ function Bubble({
   if (message.role === "user") {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[85%] bg-primary text-primary-foreground px-3.5 py-2.5 text-[14px] leading-relaxed whitespace-pre-wrap rounded">
+        <div className="max-w-[85%] bg-primary text-primary-foreground px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap rounded">
           {message.content}
         </div>
       </div>
@@ -706,7 +706,7 @@ function Bubble({
             {message.toolLabels.map((label, i) => (
               <span
                 key={i}
-                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-heritage-deep bg-heritage/[0.08] border border-heritage/20 px-2 py-0.5 rounded"
+                className="inline-flex items-center gap-1.5 text-2xs font-semibold text-heritage-deep bg-heritage/[0.08] border border-heritage/20 px-2 py-0.5 rounded"
               >
                 <Sparkles className="size-2.5" />
                 {label}
@@ -714,7 +714,7 @@ function Bubble({
             ))}
           </div>
         )}
-        <div className="bg-cream/40 border border-[var(--rule)] px-3.5 py-2.5 text-[14px] leading-relaxed whitespace-pre-wrap rounded">
+        <div className="bg-cream/40 border border-[var(--rule)] px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap rounded">
           {message.content || (
             <span className="inline-flex items-center gap-2 text-slate-meta italic">
               <Loader2 className="size-3 animate-spin" />
@@ -739,7 +739,7 @@ function Bubble({
                 key={i}
                 type="button"
                 onClick={() => onNavigate(lnk.href)}
-                className="inline-flex items-center gap-1.5 border border-heritage bg-card text-heritage-deep text-[11px] font-bold px-2.5 py-1.5 hover:bg-heritage/[0.10]"
+                className="inline-flex items-center gap-1.5 border border-heritage bg-card text-heritage-deep text-2xs font-bold px-2.5 py-1.5 hover:bg-heritage/[0.10]"
               >
                 {lnk.label}
                 <span aria-hidden className="font-normal">
@@ -761,7 +761,7 @@ function Bubble({
                   href={c.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[0.3px] text-heritage-deep bg-heritage/[0.08] border border-heritage/20 px-2 py-0.5 hover:bg-heritage/[0.14]"
+                  className="inline-flex items-center gap-1 text-2xs font-bold tracking-[0.3px] text-heritage-deep bg-heritage/[0.08] border border-heritage/20 px-2 py-0.5 hover:bg-heritage/[0.14]"
                 >
                   <span aria-hidden>✦</span>
                   {c.label}
@@ -769,7 +769,7 @@ function Bubble({
               ) : (
                 <span
                   key={i}
-                  className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[0.3px] text-slate-body bg-cream/70 border border-[var(--rule-strong)] px-2 py-0.5"
+                  className="inline-flex items-center gap-1 text-2xs font-bold tracking-[0.3px] text-slate-body bg-cream/70 border border-[var(--rule-strong)] px-2 py-0.5"
                 >
                   <span aria-hidden className="text-heritage-deep">
                     ✦
@@ -828,7 +828,7 @@ function FeedbackButtons({
 
   if (rated) {
     return (
-      <div className="flex items-center gap-1.5 text-[11px] text-slate-meta px-1 pt-0.5">
+      <div className="flex items-center gap-1.5 text-2xs text-slate-meta px-1 pt-0.5">
         <CheckCircle2 className="size-3 text-heritage-deep" />
         Thanks — feedback saved.
       </div>
@@ -848,13 +848,13 @@ function FeedbackButtons({
             else if (e.key === "Escape") setShowNote(false);
           }}
           placeholder="What didn't work? (optional)"
-          className="flex-1 px-2 py-1 text-[12px] border border-[var(--rule-strong)] bg-card focus:outline-none focus:border-heritage"
+          className="flex-1 px-2 py-1 text-xs border border-[var(--rule-strong)] bg-card focus:outline-none focus:border-heritage"
         />
         <button
           type="button"
           onClick={submitDown}
           disabled={pending}
-          className="text-[10px] font-bold tracking-[1px] uppercase text-ink hover:text-heritage-deep disabled:opacity-40 px-1.5"
+          className="text-2xs font-bold tracking-[1px] uppercase text-ink hover:text-heritage-deep disabled:opacity-40 px-1.5"
         >
           {pending ? "…" : "Send"}
         </button>
@@ -954,7 +954,7 @@ function DraftActionCard({ draft }: { draft: UiDraftAction }) {
 
   if (status === "done") {
     return (
-      <div className="border border-heritage/30 border-l-[3px] border-l-heritage bg-heritage/[0.06] px-3 py-2.5 text-[12px] text-heritage-deep inline-flex items-center gap-2">
+      <div className="border border-heritage/30 border-l-[3px] border-l-heritage bg-heritage/[0.06] px-3 py-2.5 text-xs text-heritage-deep inline-flex items-center gap-2">
         <CheckCircle2 className="size-4 shrink-0" />
         <span className="font-semibold">Done — {draft.summary}.</span>
       </div>
@@ -962,7 +962,7 @@ function DraftActionCard({ draft }: { draft: UiDraftAction }) {
   }
   if (status === "cancelled") {
     return (
-      <div className="border border-[var(--rule)] bg-cream/40 px-3 py-2 text-[12px] text-slate-meta">
+      <div className="border border-[var(--rule)] bg-cream/40 px-3 py-2 text-xs text-slate-meta">
         Dismissed.
       </div>
     );
@@ -970,21 +970,21 @@ function DraftActionCard({ draft }: { draft: UiDraftAction }) {
 
   return (
     <div className="border border-[var(--rule-strong)] border-l-[3px] border-l-warning bg-warning-bg px-3 py-2.5">
-      <div className="text-[11px] font-bold tracking-[0.3px] uppercase text-warning">
+      <div className="text-2xs font-bold tracking-[0.3px] uppercase text-warning">
         Draft action — needs your click
       </div>
       <p className="mt-1 mb-2 text-[12.5px] text-ink leading-snug">
         {draft.summary}.
       </p>
       {status === "error" && error && (
-        <p className="mb-2 text-[12px] text-danger leading-snug">{error}</p>
+        <p className="mb-2 text-xs text-danger leading-snug">{error}</p>
       )}
       <div className="flex items-center gap-2">
         <button
           type="button"
           onClick={commit}
           disabled={status === "committing"}
-          className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground px-3.5 py-1.5 text-[11px] font-bold tracking-[1px] uppercase hover:bg-primary/90 disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground px-3.5 py-1.5 text-2xs font-bold tracking-[1px] uppercase hover:bg-primary/90 disabled:opacity-50"
         >
           {status === "committing" ? (
             <>
@@ -1001,13 +1001,13 @@ function DraftActionCard({ draft }: { draft: UiDraftAction }) {
           <button
             type="button"
             onClick={() => setStatus("cancelled")}
-            className="px-3 py-1.5 text-[11px] font-bold tracking-[1px] uppercase text-slate-body border border-[var(--rule-strong)] hover:bg-cream/60"
+            className="px-3 py-1.5 text-2xs font-bold tracking-[1px] uppercase text-slate-body border border-[var(--rule-strong)] hover:bg-cream/60"
           >
             Cancel
           </button>
         )}
       </div>
-      <p className="mt-2 text-[10px] text-slate-meta leading-snug">
+      <p className="mt-2 text-2xs text-slate-meta leading-snug">
         The assistant never makes changes itself — it drafts, you commit. Every
         commit runs the same permission checks as the app.
       </p>
@@ -1024,7 +1024,7 @@ function EmptyState({
 }) {
   return (
     <div className="space-y-5">
-      <div className="border border-heritage/30 bg-heritage/[0.05] px-4 py-3 text-[13px] text-heritage-deep leading-relaxed inline-flex items-start gap-2">
+      <div className="border border-heritage/30 bg-heritage/[0.05] px-4 py-3 text-xs text-heritage-deep leading-relaxed inline-flex items-start gap-2">
         <ShieldCheck className="size-4 mt-0.5 shrink-0" />
         <div>
           Type a question below. I&apos;ll answer from the help docs and
@@ -1036,7 +1036,7 @@ function EmptyState({
 
       {suggestions.length > 0 && (
         <section>
-          <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2 inline-flex items-center gap-1.5">
+          <div className="text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2 inline-flex items-center gap-1.5">
             <Lightbulb className="size-3 text-heritage-deep" />
             Common questions for this page
           </div>
@@ -1054,7 +1054,7 @@ function EmptyState({
                 >
                   <ChevronRight className="size-3.5 text-slate-meta mt-1 shrink-0 group-hover:text-heritage-deep group-hover:translate-x-0.5 transition-all" />
                   <div className="min-w-0 flex-1">
-                    <div className="font-semibold text-ink text-[13px] leading-tight">
+                    <div className="font-semibold text-ink text-xs leading-tight">
                       {entry.title}
                     </div>
                     <p className="mt-0.5 text-[11.5px] text-slate-meta leading-snug line-clamp-2">
@@ -1080,7 +1080,7 @@ function SignedOutPrompt() {
       <h3 className="font-display text-lg font-bold text-ink mb-2">
         Sign in to use AI support.
       </h3>
-      <p className="text-[13px] text-slate-body leading-relaxed max-w-[320px] mx-auto mb-6">
+      <p className="text-xs text-slate-body leading-relaxed max-w-[320px] mx-auto mb-6">
         Or email{" "}
         <a
           href="mailto:support@dsohire.com"
@@ -1103,7 +1103,7 @@ function EscalatedSuccess({ onClose }: { onClose: () => void }) {
       <h3 className="font-display text-lg font-bold text-ink mb-2">
         Handed off to a human.
       </h3>
-      <p className="text-[13px] text-slate-body leading-relaxed max-w-[320px] mx-auto mb-6">
+      <p className="text-xs text-slate-body leading-relaxed max-w-[320px] mx-auto mb-6">
         Someone from the DSO Hire team will reply directly to your email
         within one business day. Your conversation is saved and attached
         so we have the full context.
@@ -1111,7 +1111,7 @@ function EscalatedSuccess({ onClose }: { onClose: () => void }) {
       <button
         type="button"
         onClick={onClose}
-        className="inline-flex items-center justify-center px-5 py-2.5 border border-[var(--rule-strong)] text-ink text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-cream/60"
+        className="inline-flex items-center justify-center px-5 py-2.5 border border-[var(--rule-strong)] text-ink text-2xs font-bold tracking-[1.5px] uppercase hover:bg-cream/60"
       >
         Close
       </button>

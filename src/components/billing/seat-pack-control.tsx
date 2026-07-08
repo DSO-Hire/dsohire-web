@@ -55,8 +55,8 @@ export function SeatPackControl({
       <div className="flex items-start gap-3">
         <Users className="h-5 w-5 text-heritage-deep shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">
-          <div className="text-[15px] font-bold text-ink">Need more seats?</div>
-          <p className="mt-1 text-[13px] text-slate-body leading-relaxed">
+          <div className="text-sm font-bold text-ink">Need more seats?</div>
+          <p className="mt-1 text-xs text-slate-body leading-relaxed">
             Add a {packSize}-seat pack for {priceLabel} — billed on your current
             cycle, prorated. Cancel anytime.{" "}
             {seatCap !== null && (
@@ -75,7 +75,7 @@ export function SeatPackControl({
               type="button"
               disabled={pending}
               onClick={() => run(addSeatPack)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1.6px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-2xs font-bold tracking-[1.6px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
             >
               <Plus className="h-3.5 w-3.5" />
               Add {packSize} seats
@@ -85,7 +85,7 @@ export function SeatPackControl({
                 type="button"
                 disabled={pending}
                 onClick={() => run(removeSeatPack)}
-                className="inline-flex items-center gap-1.5 px-3 py-2.5 text-[11px] font-bold tracking-[1.4px] uppercase text-slate-body hover:text-danger transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-2.5 text-2xs font-bold tracking-[1.4px] uppercase text-slate-body hover:text-danger transition-colors disabled:opacity-50"
               >
                 <Minus className="h-3.5 w-3.5" />
                 Remove a pack
@@ -96,7 +96,7 @@ export function SeatPackControl({
           {msg && (
             <p
               className={
-                "mt-3 text-[13px] " +
+                "mt-3 text-xs " +
                 (msg.ok ? "text-heritage-deep" : "text-danger")
               }
             >

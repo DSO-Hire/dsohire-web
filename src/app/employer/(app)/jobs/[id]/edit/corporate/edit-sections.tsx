@@ -281,7 +281,7 @@ function SaveBar({
         type="button"
         onClick={onSave}
         disabled={!dirty || saving}
-        className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
+        className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {saving ? (
           <>
@@ -485,7 +485,7 @@ function BasicsSection({
         </div>
 
         <div>
-          <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+          <label className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
             Authority level <span className="text-corporate">*</span>
           </label>
           <div className="space-y-2">
@@ -509,7 +509,7 @@ function BasicsSection({
                   }}
                   className="accent-corporate"
                 />
-                <span className="text-[14px] text-ink font-semibold">
+                <span className="text-sm text-ink font-semibold">
                   {opt.label}
                 </span>
               </label>
@@ -518,7 +518,7 @@ function BasicsSection({
         </div>
 
         <div>
-          <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+          <label className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
             Work mode <span className="text-corporate">*</span>
           </label>
           <div className="space-y-2">
@@ -543,11 +543,11 @@ function BasicsSection({
                   className="mt-1 accent-corporate"
                 />
                 <div className="flex-1">
-                  <div className="text-[14px] font-bold text-ink">
+                  <div className="text-sm font-bold text-ink">
                     {opt.label}
                   </div>
                   {opt.hint && (
-                    <div className="text-[13px] text-slate-body mt-0.5 leading-relaxed">
+                    <div className="text-xs text-slate-body mt-0.5 leading-relaxed">
                       {opt.hint}
                     </div>
                   )}
@@ -571,7 +571,7 @@ function BasicsSection({
         </div>
 
         <div>
-          <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+          <label className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
             Anchor location{" "}
             <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
               (optional)
@@ -595,10 +595,10 @@ function BasicsSection({
                       onChange={() => toggleLocation(loc.id)}
                     />
                     <div className="min-w-0">
-                      <div className="text-[14px] font-semibold text-ink">
+                      <div className="text-sm font-semibold text-ink">
                         {loc.name}
                       </div>
-                      <div className="text-[13px] text-slate-meta tracking-[0.3px]">
+                      <div className="text-xs text-slate-meta tracking-[0.3px]">
                         {[loc.city, loc.state].filter(Boolean).join(", ") ||
                           "Address not set"}
                       </div>
@@ -608,12 +608,12 @@ function BasicsSection({
               })}
             </div>
           ) : (
-            <p className="text-[13px] text-slate-meta italic border border-dashed border-[var(--rule-strong)] p-4 bg-cream/40">
+            <p className="text-xs text-slate-meta italic border border-dashed border-[var(--rule-strong)] p-4 bg-cream/40">
               No practice locations on file. Corporate roles don&apos;t
               require one.
             </p>
           )}
-          <p className="mt-2 text-[12px] text-slate-meta">
+          <p className="mt-2 text-xs text-slate-meta">
             Corporate roles are DSO-wide. Pick anchor practices if the role
             reports out of them, or leave blank. Zero, one, or several are
             all valid.
@@ -714,7 +714,7 @@ function DescriptionSection({
           }}
         />
         {initialTitle.trim() && (
-          <p className="text-[12px] text-slate-meta">
+          <p className="text-xs text-slate-meta">
             Editing description for{" "}
             <span className="font-bold text-ink">{initialTitle}</span>.
           </p>
@@ -729,7 +729,7 @@ function DescriptionSection({
             placeholder="Describe the role, scope, what success looks like, and what makes this DSO a great place to work…"
           />
         </div>
-        <p className="text-[12px] text-slate-meta">
+        <p className="text-xs text-slate-meta">
           Headings, bold/italic, lists, links, and blockquotes supported.
           Skip H1 — that&apos;s reserved for the page title.
         </p>
@@ -1144,13 +1144,13 @@ function DetailsSection({
             remote. work_mode itself is edited in the Basics section. ── */}
         {savedWorkMode === "remote" && (
           <fieldset className="border border-[var(--rule)] p-5 bg-cream/40">
-            <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-corporate">
+            <legend className="px-2 text-2xs font-bold tracking-[2px] uppercase text-corporate">
               Remote state restrictions{" "}
               <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
                 (optional)
               </span>
             </legend>
-            <p className="mt-2 text-[12px] text-slate-meta leading-relaxed mb-3">
+            <p className="mt-2 text-xs text-slate-meta leading-relaxed mb-3">
               Pick the states a remote hire must reside in, for tax /
               compliance reasons. Leave blank for no restriction.
             </p>
@@ -1168,7 +1168,7 @@ function DetailsSection({
                       setRemoteStates(next);
                       touch();
                     }}
-                    className={`px-2.5 py-1 text-[11px] font-bold tracking-[0.5px] border transition-colors ${
+                    className={`px-2.5 py-1 text-2xs font-bold tracking-[0.5px] border transition-colors ${
                       checked
                         ? "bg-corporate text-ivory border-corporate"
                         : "bg-card text-ink border-[var(--rule)] hover:border-corporate"
@@ -1184,14 +1184,14 @@ function DetailsSection({
 
         {/* ── Travel ── */}
         <fieldset className="border border-[var(--rule)] p-5 bg-cream/40">
-          <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-corporate">
+          <legend className="px-2 text-2xs font-bold tracking-[2px] uppercase text-corporate">
             Travel{" "}
             <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
               (optional)
             </span>
           </legend>
           <div className="mt-2">
-            <label className="block text-[12px] font-semibold text-ink mb-2">
+            <label className="block text-xs font-semibold text-ink mb-2">
               Travel expectation
             </label>
             <div className="flex flex-wrap gap-2">
@@ -1201,7 +1201,7 @@ function DetailsSection({
                   setTravelExpectation("");
                   touch();
                 }}
-                className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
+                className={`px-3 py-1.5 text-xs font-medium border transition-colors ${
                   travelExpectation === ""
                     ? "bg-corporate text-ivory border-corporate"
                     : "bg-card text-ink border-[var(--rule)] hover:border-corporate"
@@ -1219,7 +1219,7 @@ function DetailsSection({
                       setTravelExpectation(opt.value);
                       touch();
                     }}
-                    className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
+                    className={`px-3 py-1.5 text-xs font-medium border transition-colors ${
                       checked
                         ? "bg-corporate text-ivory border-corporate"
                         : "bg-card text-ink border-[var(--rule)] hover:border-corporate"
@@ -1246,7 +1246,7 @@ function DetailsSection({
 
         {/* ── Reporting structure (collapsible) ── */}
         <fieldset className="border border-[var(--rule)] p-5 bg-cream/40">
-          <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-corporate">
+          <legend className="px-2 text-2xs font-bold tracking-[2px] uppercase text-corporate">
             Reporting structure{" "}
             <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
               (optional)
@@ -1256,7 +1256,7 @@ function DetailsSection({
             <button
               type="button"
               onClick={() => setReportingOpen(true)}
-              className="mt-2 inline-flex items-center gap-1.5 text-[12px] font-bold tracking-[1px] uppercase text-corporate hover:text-ink transition-colors"
+              className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-[1px] uppercase text-corporate hover:text-ink transition-colors"
             >
               <Plus className="h-3.5 w-3.5" />
               Add reporting detail
@@ -1310,7 +1310,7 @@ function DetailsSection({
 
         {/* ── Experience & education ── */}
         <fieldset className="border border-[var(--rule)] p-5 bg-cream/40">
-          <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-corporate">
+          <legend className="px-2 text-2xs font-bold tracking-[2px] uppercase text-corporate">
             Experience & education{" "}
             <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
               (optional)
@@ -1354,7 +1354,7 @@ function DetailsSection({
             />
           </div>
           <div className="mt-5">
-            <label className="block text-[12px] font-semibold text-ink mb-2">
+            <label className="block text-xs font-semibold text-ink mb-2">
               Industry experience
             </label>
             <div className="space-y-2">
@@ -1377,7 +1377,7 @@ function DetailsSection({
                   className="mt-1 accent-corporate"
                 />
                 <div className="flex-1">
-                  <div className="text-[14px] font-bold text-ink">
+                  <div className="text-sm font-bold text-ink">
                     Not specified
                   </div>
                 </div>
@@ -1403,11 +1403,11 @@ function DetailsSection({
                     className="mt-1 accent-corporate"
                   />
                   <div className="flex-1">
-                    <div className="text-[14px] font-bold text-ink">
+                    <div className="text-sm font-bold text-ink">
                       {opt.label}
                     </div>
                     {opt.hint && (
-                      <div className="text-[13px] text-slate-body mt-0.5 leading-relaxed">
+                      <div className="text-xs text-slate-body mt-0.5 leading-relaxed">
                         {opt.hint}
                       </div>
                     )}
@@ -1448,10 +1448,10 @@ function DetailsSection({
         />
 
         <fieldset className="border border-[var(--rule)] p-5 bg-cream/40">
-          <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-corporate">
+          <legend className="px-2 text-2xs font-bold tracking-[2px] uppercase text-corporate">
             Candidate visibility
           </legend>
-          <label className="mt-2 flex items-start gap-2.5 text-[14px] text-ink cursor-pointer">
+          <label className="mt-2 flex items-start gap-2.5 text-sm text-ink cursor-pointer">
             <input
               type="checkbox"
               checked={hideStages}
@@ -1465,7 +1465,7 @@ function DetailsSection({
               <div className="font-bold mb-1">
                 Hide pipeline stages from candidates
               </div>
-              <div className="text-[13px] text-slate-body leading-relaxed">
+              <div className="text-xs text-slate-body leading-relaxed">
                 By default, candidates see exactly where they sit in the
                 pipeline — Submitted, Screening, Interview, Offer. Turn this
                 on for a sensitive executive search and candidates will see
@@ -1701,14 +1701,14 @@ function ScreeningSection({
 
         {questions.length === 0 && (
           <div className="border border-dashed border-[var(--rule-strong)] p-5 text-center bg-cream/40">
-            <p className="text-[14px] text-slate-body">
+            <p className="text-sm text-slate-body">
               No screening questions yet. Add one below.
             </p>
           </div>
         )}
 
         {questions.length >= 2 && (
-          <p className="text-[12px] text-slate-meta">
+          <p className="text-xs text-slate-meta">
             Drag a collapsed card to reorder — or use the arrows.
           </p>
         )}
@@ -1752,7 +1752,7 @@ function ScreeningSection({
         })}
 
         <div>
-          <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+          <div className="text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
             Add a question
           </div>
           <div className="flex flex-wrap gap-2">
@@ -1771,7 +1771,7 @@ function ScreeningSection({
                 key={k}
                 type="button"
                 onClick={() => addQuestion(k)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-[var(--rule-strong)] text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-[var(--rule-strong)] text-ink text-2xs font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
               >
                 <Plus className="h-3 w-3" />
                 {KIND_LABELS[k]}
@@ -1847,10 +1847,10 @@ function QuestionCard({
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta">
+          <span className="text-2xs font-bold tracking-[2px] uppercase text-slate-meta">
             Q{index + 1}
           </span>
-          <span className="text-[10px] font-bold tracking-[2px] uppercase text-corporate px-2 py-1 bg-corporate/[0.08]">
+          <span className="text-2xs font-bold tracking-[2px] uppercase text-corporate px-2 py-1 bg-corporate/[0.08]">
             {KIND_LABELS[question.kind]}
           </span>
         </div>
@@ -1891,7 +1891,7 @@ function QuestionCard({
           className="w-full text-left -mx-1 px-1 py-1 group rounded hover:bg-cream/50 transition-colors"
         >
           <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0 flex-1 text-[14px] text-ink truncate">
+            <div className="min-w-0 flex-1 text-sm text-ink truncate">
               {question.prompt.trim() ? (
                 question.prompt
               ) : (
@@ -1911,7 +1911,7 @@ function QuestionCard({
                   Knockout
                 </span>
               )}
-              <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-corporate group-hover:text-ink transition-colors ml-2">
+              <span className="text-2xs font-bold tracking-[1.5px] uppercase text-corporate group-hover:text-ink transition-colors ml-2">
                 Edit →
               </span>
             </div>
@@ -1936,13 +1936,13 @@ function QuestionCard({
           />
           {isSelect && (
             <div>
-              <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+              <label className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
                 Options <span className="text-corporate">*</span>
               </label>
               <div className="space-y-2">
                 {(question.options ?? []).map((opt, idx) => (
                   <div key={opt.id} className="flex items-center gap-2">
-                    <span className="text-[12px] font-bold text-slate-meta w-6">
+                    <span className="text-xs font-bold text-slate-meta w-6">
                       {idx + 1}.
                     </span>
                     <input
@@ -1950,7 +1950,7 @@ function QuestionCard({
                       value={opt.label}
                       onChange={(e) => updateOption(opt.id, e.target.value)}
                       placeholder={`Option ${idx + 1}`}
-                      className="flex-1 px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-corporate focus:ring-1 focus:ring-corporate transition-colors"
+                      className="flex-1 px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-corporate focus:ring-1 focus:ring-corporate transition-colors"
                     />
                     <button
                       type="button"
@@ -1967,7 +1967,7 @@ function QuestionCard({
               <button
                 type="button"
                 onClick={addOption}
-                className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[1.5px] uppercase text-corporate hover:text-ink transition-colors"
+                className="mt-2 inline-flex items-center gap-1.5 text-2xs font-bold tracking-[1.5px] uppercase text-corporate hover:text-ink transition-colors"
               >
                 <Plus className="h-3 w-3" />
                 Add option
@@ -1976,7 +1976,7 @@ function QuestionCard({
           )}
           {isScale && (
             <div>
-              <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+              <label className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
                 Slider end labels <span className="text-heritage">*</span>
               </label>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -1985,19 +1985,19 @@ function QuestionCard({
                   value={scaleLabel("low")}
                   onChange={(e) => updateOption("low", e.target.value)}
                   placeholder="Left end (1) — e.g. Individual contributor"
-                  className="px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+                  className="px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
                 />
                 <input
                   type="text"
                   value={scaleLabel("high")}
                   onChange={(e) => updateOption("high", e.target.value)}
                   placeholder="Right end (5) — e.g. Enterprise leadership"
-                  className="px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+                  className="px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
                 />
               </div>
             </div>
           )}
-          <label className="flex items-center gap-2.5 text-[14px] text-ink cursor-pointer pt-1">
+          <label className="flex items-center gap-2.5 text-sm text-ink cursor-pointer pt-1">
             <input
               type="checkbox"
               checked={question.required}
@@ -2014,7 +2014,7 @@ function QuestionCard({
             <button
               type="button"
               onClick={onToggleExpand}
-              className="text-[10px] font-bold tracking-[1.5px] uppercase text-corporate hover:text-ink transition-colors"
+              className="text-2xs font-bold tracking-[1.5px] uppercase text-corporate hover:text-ink transition-colors"
             >
               ↑ Collapse this question
             </button>
@@ -2124,13 +2124,13 @@ function StatusSection({
               className="mt-1 accent-corporate"
             />
             <div className="flex-1">
-              <div className="text-[14px] font-bold text-ink flex items-center gap-2">
+              <div className="text-sm font-bold text-ink flex items-center gap-2">
                 {opt.label}
                 {status === opt.value && opt.value === "active" && (
                   <Check className="h-3.5 w-3.5 text-corporate" />
                 )}
               </div>
-              <div className="text-[13px] text-slate-body mt-0.5">
+              <div className="text-xs text-slate-body mt-0.5">
                 {opt.helper}
               </div>
             </div>
@@ -2168,7 +2168,7 @@ function Input({
 }) {
   return (
     <div>
-      <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+      <label className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
         {label} {required && <span className="text-corporate">*</span>}
       </label>
       <input
@@ -2176,7 +2176,7 @@ function Input({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-corporate focus:ring-1 focus:ring-corporate transition-colors"
+        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-corporate focus:ring-1 focus:ring-corporate transition-colors"
       />
     </div>
   );
@@ -2197,13 +2197,13 @@ function Select({
 }) {
   return (
     <div>
-      <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+      <label className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
         {label} {required && <span className="text-corporate">*</span>}
       </label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-corporate focus:ring-1 focus:ring-corporate transition-colors"
+        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-corporate focus:ring-1 focus:ring-corporate transition-colors"
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>

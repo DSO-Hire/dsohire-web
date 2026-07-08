@@ -64,13 +64,13 @@ export function StuckAlert({
 
         {/* Body */}
         <div>
-          <div className="text-[13px] font-extrabold leading-snug text-warning">
+          <div className="text-xs font-extrabold leading-snug text-warning">
             {totalCount === 1
               ? "1 candidate has"
               : `${totalCount} candidates have`}{" "}
             been awaiting review for {slaDays}+ days.
           </div>
-          <div className="text-[11px] mt-1 text-warning">
+          <div className="text-2xs mt-1 text-warning">
             SLA threshold: {slaDays} days · adjustable in Settings
           </div>
 
@@ -79,7 +79,7 @@ export function StuckAlert({
               <Link
                 key={c.applicationId}
                 href={`/employer/applications/${c.applicationId}`}
-                className="inline-flex items-center gap-2 px-3 py-1.5 bg-card border border-warning hover:bg-warning-bg transition-colors text-[11px] text-ink"
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-card border border-warning hover:bg-warning-bg transition-colors text-2xs text-ink"
               >
                 <span>
                   {c.candidateName} · {c.jobTitle}

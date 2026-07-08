@@ -119,13 +119,13 @@ export default async function CareersSettingsPage() {
   return (
     <section className="max-w-[820px]">
       <header className="mb-8">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Careers &amp; Distribution
         </div>
         <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] leading-[1.15] text-ink">
           Put {dsoName}&apos;s open roles everywhere
         </h2>
-        <p className="mt-3 text-[14px] text-slate-body leading-relaxed">
+        <p className="mt-3 text-sm text-slate-body leading-relaxed">
           Your hosted careers page, an embeddable roles widget for your own
           website, and a syndication feed for Indeed and LinkedIn — all served
           from your live postings. Confidential and internal-only roles are

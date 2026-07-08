@@ -90,7 +90,7 @@ export default async function CandidateInboxPage({ searchParams }: PageProps) {
       {(prospectCount ?? 0) > 0 && (
         <Link
           href="/candidate/prospects"
-          className="flex items-center justify-between gap-3 border-b border-[var(--rule)] bg-cream/40 px-4 py-2.5 text-[13px] text-ink hover:bg-cream/70 transition-colors"
+          className="flex items-center justify-between gap-3 border-b border-[var(--rule)] bg-cream/40 px-4 py-2.5 text-xs text-ink hover:bg-cream/70 transition-colors"
         >
           <span>
             <strong className="font-semibold">Employer interest</strong> —{" "}

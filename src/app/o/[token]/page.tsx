@@ -192,7 +192,7 @@ function PublicHeader() {
       >
         DSO Hire
       </a>
-      <div className="mt-3 text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep">
+      <div className="mt-3 text-2xs font-bold tracking-[3px] uppercase text-heritage-deep">
         Your offer
       </div>
     </header>
@@ -201,7 +201,7 @@ function PublicHeader() {
 
 function PublicFooter() {
   return (
-    <footer className="mt-8 text-center text-[12px] text-slate-meta leading-relaxed">
+    <footer className="mt-8 text-center text-xs text-slate-meta leading-relaxed">
       <p>
         Powered by{" "}
         <a
@@ -256,13 +256,13 @@ function AlreadyRespondedView({
       : `${dsoName} has your decision on the ${jobTitle} offer. You can close this window.`;
   return (
     <div className="text-center py-6">
-      <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
+      <div className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
         Already responded
       </div>
       <h1 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink mb-3">
         {firstName === "there" ? headline : `${headline.replace("Thanks", `Thanks, ${firstName}`)}`}
       </h1>
-      <p className="text-[14px] text-slate-body leading-relaxed max-w-[520px] mx-auto">
+      <p className="text-sm text-slate-body leading-relaxed max-w-[520px] mx-auto">
         {body}
         {when && (
           <>

@@ -173,13 +173,13 @@ export function JdGeneratorPanel({
           <Sparkles className="h-4 w-4" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep">
             Draft with AI
           </div>
-          <h3 className="mt-0.5 text-[15px] font-bold text-ink">
+          <h3 className="mt-0.5 text-sm font-bold text-ink">
             Get a starting draft in seconds.
           </h3>
-          <p className="mt-1 text-[13px] text-slate-meta leading-relaxed">
+          <p className="mt-1 text-xs text-slate-meta leading-relaxed">
             Available on every paid tier. Drop a few notes about the role
             and we&apos;ll write a clean structured posting. The draft drops
             straight into your editor below — tweak freely, re-apply any
@@ -190,22 +190,22 @@ export function JdGeneratorPanel({
 
       <div className="mt-5 grid grid-cols-1 sm:grid-cols-[1fr,auto] gap-3">
         <div>
-          <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+          <label className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
             Role
           </label>
-          <div className="flex h-[44px] items-center px-4 bg-cream border border-[var(--rule-strong)] text-ink text-[14px]">
+          <div className="flex h-[44px] items-center px-4 bg-cream border border-[var(--rule-strong)] text-ink text-sm">
             {roleLabel}
           </div>
         </div>
         <div>
-          <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+          <label className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
             Tone
           </label>
           <select
             value={tone}
             onChange={(e) => setTone(e.target.value as Tone)}
             disabled={pending}
-            className="h-[44px] px-4 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors disabled:opacity-60"
+            className="h-[44px] px-4 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors disabled:opacity-60"
           >
             {TONE_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -225,7 +225,7 @@ export function JdGeneratorPanel({
         if (templates.length === 0) return null;
         return (
           <div className="mt-4">
-            <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+            <label className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
               Start from a template <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">(optional)</span>
             </label>
             <div className="flex flex-wrap gap-2">
@@ -242,14 +242,14 @@ export function JdGeneratorPanel({
                     // template's title sitting in the wizard.
                     onApplyTitle(t.title_seed);
                   }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold border border-[var(--rule-strong)] bg-card text-ink hover:border-heritage hover:bg-heritage/[0.06] transition-colors disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border border-[var(--rule-strong)] bg-card text-ink hover:border-heritage hover:bg-heritage/[0.06] transition-colors disabled:opacity-50"
                 >
                   <Wand2 className="h-3 w-3 text-heritage-deep" aria-hidden />
                   {t.label}
                 </button>
               ))}
             </div>
-            <p className="mt-1.5 text-[11px] text-slate-meta leading-relaxed">
+            <p className="mt-1.5 text-2xs text-slate-meta leading-relaxed">
               Drops a starter brief + title into the fields below. Edit
               freely, then hit Generate to draft the full description.
             </p>
@@ -258,7 +258,7 @@ export function JdGeneratorPanel({
       })()}
 
       <div className="mt-3">
-        <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+        <label className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
           Brief (optional)
         </label>
         <textarea
@@ -268,9 +268,9 @@ export function JdGeneratorPanel({
           value={brief}
           onChange={(e) => setBrief(e.target.value)}
           disabled={pending}
-          className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors resize-vertical disabled:opacity-60"
+          className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors resize-vertical disabled:opacity-60"
         />
-        <div className="mt-1 text-[10px] text-slate-meta tracking-[0.5px]">
+        <div className="mt-1 text-2xs text-slate-meta tracking-[0.5px]">
           {brief.length} / 800
         </div>
       </div>
@@ -280,7 +280,7 @@ export function JdGeneratorPanel({
           type="button"
           onClick={run}
           disabled={pending}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-[10px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-2xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {pending ? (
             <>
@@ -300,7 +300,7 @@ export function JdGeneratorPanel({
           )}
         </button>
         {usage && !pending && (
-          <span className="text-[10px] text-slate-meta tracking-[0.5px]">
+          <span className="text-2xs text-slate-meta tracking-[0.5px]">
             {/* Cost intentionally hidden client-side (Cam 2026-05-13): showing
                 "~$0.0027" undercuts the premium positioning of the AI feature.
                 Server-side ai_usage_events still logs cost for the usage-cap
@@ -312,9 +312,9 @@ export function JdGeneratorPanel({
 
       {error && (
         <div className="mt-4 bg-danger-bg border-l-4 border-danger p-4 flex items-start justify-between gap-3">
-          <p className="text-[14px] text-danger">
+          <p className="text-sm text-danger">
             AI generation failed. Try again or simplify the brief.
-            <span className="block mt-1 text-[12px] text-danger/80">
+            <span className="block mt-1 text-xs text-danger/80">
               {error}
             </span>
           </p>
@@ -322,7 +322,7 @@ export function JdGeneratorPanel({
             type="button"
             onClick={run}
             disabled={pending}
-            className="text-[10px] font-bold tracking-[1.5px] uppercase text-danger hover:text-danger/80 transition-colors flex-shrink-0"
+            className="text-2xs font-bold tracking-[1.5px] uppercase text-danger hover:text-danger/80 transition-colors flex-shrink-0"
           >
             Retry
           </button>
@@ -372,13 +372,13 @@ function ResultCard({
   return (
     <div className="mt-5 border border-[var(--rule-strong)] bg-card p-5">
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[var(--rule)]">
-        <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
+        <div className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep">
           AI draft · applied to your editor below
         </div>
         <button
           type="button"
           onClick={onApplyAll}
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-heritage text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-heritage-deep transition-colors"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-heritage text-primary-foreground text-2xs font-bold tracking-[1.5px] uppercase hover:bg-heritage-deep transition-colors"
         >
           <Check className="h-3 w-3" />
           {appliedFlash === "all" ? "Applied ✓" : "Re-apply all"}
@@ -400,7 +400,7 @@ function ResultCard({
         actionLabel={appliedFlash === "title" ? "Applied ✓" : "Use this title"}
         onUse={onApplyTitle}
       >
-        <p className="text-[15px] font-bold text-ink">{jd.title}</p>
+        <p className="text-sm font-bold text-ink">{jd.title}</p>
       </Section>
 
       <Section
@@ -412,7 +412,7 @@ function ResultCard({
         }
         onUse={onApplyDescription}
       >
-        <div className="space-y-3 text-[14px] text-ink leading-relaxed">
+        <div className="space-y-3 text-sm text-ink leading-relaxed">
           <p className="whitespace-pre-wrap">{jd.summary}</p>
 
           <SubSection label="Responsibilities" items={jd.responsibilities} />
@@ -438,13 +438,13 @@ function Section({
   return (
     <div className="mt-4 first:mt-3">
       <div className="flex items-center justify-between mb-2">
-        <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-body">
+        <div className="text-2xs font-bold tracking-[2px] uppercase text-slate-body">
           {label}
         </div>
         <button
           type="button"
           onClick={onUse}
-          className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+          className="text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
         >
           {actionLabel}
         </button>
@@ -458,7 +458,7 @@ function SubSection({ label, items }: { label: string; items: string[] }) {
   if (items.length === 0) return null;
   return (
     <div>
-      <div className="text-[12px] font-bold uppercase tracking-[1.5px] text-slate-meta mb-1">
+      <div className="text-xs font-bold uppercase tracking-[1.5px] text-slate-meta mb-1">
         {label}
       </div>
       <ul className="list-disc pl-5 space-y-1">

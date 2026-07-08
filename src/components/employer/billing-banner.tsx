@@ -144,10 +144,10 @@ function Banner({ tone, icon, title, body, ctaHref, ctaLabel }: BannerProps) {
       <div className="flex-1 flex gap-3">
         <span className={`flex-shrink-0 ${iconClasses[tone]}`}>{icon}</span>
         <div>
-          <p className={`text-[14px] font-bold ${titleClasses[tone]}`}>
+          <p className={`text-sm font-bold ${titleClasses[tone]}`}>
             {title}
           </p>
-          <p className={`mt-1 text-[13px] leading-relaxed ${bodyClasses[tone]}`}>
+          <p className={`mt-1 text-xs leading-relaxed ${bodyClasses[tone]}`}>
             {body}
           </p>
         </div>

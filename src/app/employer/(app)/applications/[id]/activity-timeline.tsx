@@ -23,7 +23,7 @@ export interface ActivityEvent {
 export function ActivityTimeline({ events }: { events: ActivityEvent[] }) {
   if (events.length === 0) {
     return (
-      <p className="text-[14px] text-slate-meta italic">
+      <p className="text-sm text-slate-meta italic">
         No activity recorded yet.
       </p>
     );
@@ -48,16 +48,16 @@ export function ActivityTimeline({ events }: { events: ActivityEvent[] }) {
         return (
           <li key={ev.id} className="relative">
             <span className="absolute -left-[27px] top-1.5 block w-3 h-3 bg-ink rounded-full border-2 border-ivory" />
-            <div className="text-[13px] font-bold text-ink">
+            <div className="text-xs font-bold text-ink">
               {fromLabel
                 ? `${fromLabel} → ${toLabel}`
                 : `Submitted as ${toLabel}`}
             </div>
-            <div className="text-[12px] text-slate-meta mt-0.5">
+            <div className="text-xs text-slate-meta mt-0.5">
               {ev.actor_type} · {new Date(ev.created_at).toLocaleString()}
             </div>
             {ev.note && (
-              <div className="text-[13px] text-slate-body mt-1 leading-snug">
+              <div className="text-xs text-slate-body mt-1 leading-snug">
                 {ev.note}
               </div>
             )}

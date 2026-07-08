@@ -80,13 +80,13 @@ export default async function PipelineSettingsPage() {
   return (
     <section className="max-w-[820px]">
       <header className="mb-6">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Pipeline stages
         </div>
         <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] leading-[1.15] text-ink">
           Customize how your team moves candidates through hiring
         </h2>
-        <p className="mt-3 text-[14px] text-slate-body leading-relaxed">
+        <p className="mt-3 text-sm text-slate-body leading-relaxed">
           Rename the stages on your kanban, recolor them, hide ones you
           don&apos;t use, and add custom stages for your process. Every
           DSO starts with the canonical seven — open, screening,
@@ -133,10 +133,10 @@ export default async function PipelineSettingsPage() {
         <div className="flex items-start gap-2">
           <Info className="h-3.5 w-3.5 text-heritage-deep mt-1 flex-shrink-0" />
           <div className="min-w-0">
-            <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
+            <div className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
               Labels vs. kinds
             </div>
-            <p className="text-[13px] text-slate-body leading-relaxed">
+            <p className="text-xs text-slate-body leading-relaxed">
               The <strong className="text-ink">label</strong> is what
               your team sees on the kanban — rename freely. The{" "}
               <strong className="text-ink">kind</strong>{" "}controls system
@@ -150,7 +150,7 @@ export default async function PipelineSettingsPage() {
       </div>
 
       {/* Capacity counter */}
-      <div className="mb-3 flex items-center justify-between text-[12px] text-slate-meta">
+      <div className="mb-3 flex items-center justify-between text-xs text-slate-meta">
         <span>
           <strong className="text-ink font-semibold">{totalCount}</strong>{" "}
           of {MAX_STAGES_PER_DSO} stages used

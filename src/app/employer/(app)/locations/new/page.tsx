@@ -33,14 +33,14 @@ export default async function NewLocationPage() {
     <>
       <Link
         href="/employer/locations"
-        className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-6"
+        className="inline-flex items-center gap-2 text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-6"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back to Locations
       </Link>
 
       <header className="mb-10 max-w-[720px]">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
           New Practice Location
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.1] text-ink">

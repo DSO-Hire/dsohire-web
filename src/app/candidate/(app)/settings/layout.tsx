@@ -30,13 +30,13 @@ export default function CandidateSettingsLayout({
   return (
     <>
       <header className="mb-8 max-w-[760px]">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
           Account Settings
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-4">
           Settings
         </h1>
-        <p className="text-[14px] text-slate-body leading-relaxed">
+        <p className="text-sm text-slate-body leading-relaxed">
           Account, notifications, privacy, credentials, and data — all
           in one place.
         </p>

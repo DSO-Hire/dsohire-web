@@ -345,7 +345,7 @@ export default async function EmployerDashboard() {
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.6px] leading-tight mb-3">
             Add your first practice location to start posting jobs.
           </h2>
-          <p className="text-[14px] text-hero-foreground/70 leading-relaxed max-w-[560px] mb-6">
+          <p className="text-sm text-hero-foreground/70 leading-relaxed max-w-[560px] mb-6">
             DSO Hire posts jobs across your locations in one flow. We need
             at least one location to enable job posting.
           </p>
@@ -478,10 +478,10 @@ function CommandTile({
         <Icon className="h-4 w-4" />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="text-[14px] font-extrabold text-ink tracking-[-0.2px]">
+        <div className="text-sm font-extrabold text-ink tracking-[-0.2px]">
           {title}
         </div>
-        <div className="text-[11px] text-slate-meta mt-0.5 tabular">{meta}</div>
+        <div className="text-2xs text-slate-meta mt-0.5 tabular">{meta}</div>
       </div>
       <ArrowRight className="h-4 w-4 text-slate-meta group-hover:text-heritage group-hover:translate-x-1 transition-all flex-shrink-0" />
     </Link>
@@ -508,14 +508,14 @@ function HmScopeContextBar({
         <div className="min-w-0 flex-1">
           <Eyebrow className="mb-1">Your hiring-manager scope</Eyebrow>
           {labels.length === 0 ? (
-            <p className="text-[13px] text-warning leading-relaxed">
+            <p className="text-xs text-warning leading-relaxed">
               No locations assigned to you yet. Reach out to whoever invited
               you so they can update your scope on the Team page — until then,
               you&apos;ll only see corporate-scoped jobs.
             </p>
           ) : (
             <>
-              <p className="text-[13px] text-slate-body leading-relaxed">
+              <p className="text-xs text-slate-body leading-relaxed">
                 You&apos;re reviewing applications for{" "}
                 {labels.length === 1 ? "this location" : `these ${labels.length} locations`}{" "}
                 only. Other locations at this DSO won&apos;t appear anywhere
@@ -525,7 +525,7 @@ function HmScopeContextBar({
                 {labels.map((label) => (
                   <span
                     key={label}
-                    className="inline-flex items-center px-2.5 py-0.5 bg-ivory border border-[var(--rule-strong)] text-[10px] font-semibold tracking-[0.4px] text-ink"
+                    className="inline-flex items-center px-2.5 py-0.5 bg-ivory border border-[var(--rule-strong)] text-2xs font-semibold tracking-[0.4px] text-ink"
                   >
                     {label}
                   </span>

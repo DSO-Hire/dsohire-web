@@ -54,7 +54,7 @@ export default async function TierPage({ params }: PageProps) {
     <article className="pt-[120px] pb-24 px-6 sm:px-14 max-w-[1080px] mx-auto">
       <Link
         href="/pricing"
-        className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-8"
+        className="inline-flex items-center gap-2 text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-8"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         All plans
@@ -63,11 +63,11 @@ export default async function TierPage({ params }: PageProps) {
       {/* ── Hero ── */}
       <header className="mb-14 max-w-[760px]">
         <div className="flex items-center gap-3 mb-3">
-          <span className="text-[11px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+          <span className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep">
             Dental Groups · {t.name} plan
           </span>
           {t.badge && (
-            <span className="inline-flex items-center px-2.5 py-1 bg-heritage text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase">
+            <span className="inline-flex items-center px-2.5 py-1 bg-heritage text-primary-foreground text-2xs font-bold tracking-[1.5px] uppercase">
               {t.badge}
             </span>
           )}
@@ -82,7 +82,7 @@ export default async function TierPage({ params }: PageProps) {
         {/* Price block */}
         <div className="flex flex-wrap items-start gap-x-8 gap-y-2 border-y border-[var(--rule)] py-5 mb-8">
           <div>
-            <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-1">
+            <div className="text-2xs font-bold tracking-[2px] uppercase text-slate-meta mb-1">
               Monthly
             </div>
             <div className="text-3xl font-extrabold tracking-[-0.5px] text-ink">
@@ -91,14 +91,14 @@ export default async function TierPage({ params }: PageProps) {
             </div>
           </div>
           <div>
-            <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-1">
+            <div className="text-2xs font-bold tracking-[2px] uppercase text-slate-meta mb-1">
               Billed annually
             </div>
             <div className="text-3xl font-extrabold tracking-[-0.5px] text-heritage-deep">
               ${t.annualMonthlyEquivalent.toLocaleString()}
               <span className="text-base font-semibold text-slate-meta"> / mo</span>
             </div>
-            <div className="text-[12px] text-slate-meta mt-0.5">
+            <div className="text-xs text-slate-meta mt-0.5">
               ${t.annualPrice.toLocaleString()} billed once a year (~10% off)
             </div>
           </div>
@@ -107,14 +107,14 @@ export default async function TierPage({ params }: PageProps) {
         <div className="flex flex-wrap items-center gap-3.5">
           <Link
             href={checkoutHref}
-            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
           >
             Get started with {t.name}
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <Link
             href="/pricing"
-            className="inline-flex items-center gap-2.5 px-7 py-3.5 border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 border border-[var(--rule-strong)] text-ink text-xs font-bold tracking-[2px] uppercase hover:bg-cream transition-colors"
           >
             Compare all plans
           </Link>
@@ -124,20 +124,20 @@ export default async function TierPage({ params }: PageProps) {
       {/* ── Who it's for + best fit ── */}
       <section className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-10 lg:gap-16 mb-14">
         <div>
-          <h2 className="text-[11px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+          <h2 className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
             Who it&apos;s for
           </h2>
-          <p className="text-[15px] text-ink leading-relaxed">
+          <p className="text-sm text-ink leading-relaxed">
             {content.whoItsFor}
           </p>
         </div>
         <div className="border border-[var(--rule)] bg-cream/40 p-6">
-          <h2 className="text-[11px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
+          <h2 className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
             You&apos;re a great fit if…
           </h2>
           <ul className="space-y-3">
             {content.bestIf.map((b) => (
-              <li key={b} className="flex items-start gap-2.5 text-[14px] text-ink leading-snug">
+              <li key={b} className="flex items-start gap-2.5 text-sm text-ink leading-snug">
                 <Check className="mt-0.5 h-4 w-4 shrink-0 text-heritage" />
                 <span>{b}</span>
               </li>
@@ -148,12 +148,12 @@ export default async function TierPage({ params }: PageProps) {
 
       {/* ── What's included ── */}
       <section className="mb-14">
-        <h2 className="text-[11px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-5">
+        <h2 className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-5">
           What&apos;s included
         </h2>
         <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-3.5">
           {t.features.map((f) => (
-            <li key={f} className="flex items-start gap-2.5 text-[14px] text-ink leading-snug">
+            <li key={f} className="flex items-start gap-2.5 text-sm text-ink leading-snug">
               <Check className="mt-0.5 h-4 w-4 shrink-0 text-heritage" />
               <span>{f}</span>
             </li>
@@ -165,13 +165,13 @@ export default async function TierPage({ params }: PageProps) {
       {(content.considerLowerIf || content.considerHigherIf) && (
         <section className="mb-14 space-y-2.5">
           {content.considerLowerIf && (
-            <p className="text-[13px] text-slate-body leading-relaxed">
+            <p className="text-xs text-slate-body leading-relaxed">
               <span className="font-semibold text-ink">Smaller? </span>
               {content.considerLowerIf}
             </p>
           )}
           {content.considerHigherIf && (
-            <p className="text-[13px] text-slate-body leading-relaxed">
+            <p className="text-xs text-slate-body leading-relaxed">
               <span className="font-semibold text-ink">Bigger? </span>
               {content.considerHigherIf}
             </p>
@@ -181,7 +181,7 @@ export default async function TierPage({ params }: PageProps) {
 
       {/* ── Other plans ── */}
       <section className="mb-14">
-        <h2 className="text-[11px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-5">
+        <h2 className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-5">
           Other plans
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-[var(--rule)] border border-[var(--rule)]">
@@ -193,13 +193,13 @@ export default async function TierPage({ params }: PageProps) {
                 href={`/pricing/${o}`}
                 className="group bg-card p-5 hover:bg-cream/50 transition-colors"
               >
-                <div className="text-[15px] font-extrabold text-ink mb-0.5">
+                <div className="text-sm font-extrabold text-ink mb-0.5">
                   {ot.name}
                 </div>
-                <div className="text-[13px] font-semibold text-heritage-deep mb-1.5">
+                <div className="text-xs font-semibold text-heritage-deep mb-1.5">
                   ${ot.monthlyPrice.toLocaleString()} / mo
                 </div>
-                <div className="text-[12px] text-slate-meta leading-snug">
+                <div className="text-xs text-slate-meta leading-snug">
                   {ot.tagline}
                 </div>
               </Link>
@@ -210,7 +210,7 @@ export default async function TierPage({ params }: PageProps) {
 
       {/* ── Final CTA ── */}
       <section className="bg-hero text-hero-foreground p-8 sm:p-10">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-light mb-3">
+        <div className="text-2xs font-bold tracking-[3px] uppercase text-heritage-light mb-3">
           Ready when you are
         </div>
         <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.5px] mb-5 max-w-[640px]">
@@ -219,14 +219,14 @@ export default async function TierPage({ params }: PageProps) {
         <div className="flex flex-wrap items-center gap-3.5">
           <Link
             href={checkoutHref}
-            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ivory text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-ivory-deep transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ivory text-ink text-xs font-bold tracking-[2px] uppercase hover:bg-ivory-deep transition-colors"
           >
             Get started with {t.name}
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <Link
             href="/pricing"
-            className="inline-flex items-center gap-2.5 px-7 py-3.5 border border-hero-foreground/25 text-hero-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-hero-foreground/10 transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 border border-hero-foreground/25 text-hero-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-hero-foreground/10 transition-colors"
           >
             See the full comparison
           </Link>

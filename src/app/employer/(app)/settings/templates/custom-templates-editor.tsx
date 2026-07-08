@@ -103,7 +103,7 @@ export function CustomTemplatesEditor({ initial, canEdit }: Props) {
           type="button"
           onClick={() => setCreating(true)}
           disabled={!canEdit}
-          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Plus className="size-3.5" />
           New custom template
@@ -120,7 +120,7 @@ export function CustomTemplatesEditor({ initial, canEdit }: Props) {
 
       {templates.length === 0 && !creating ? (
         <div className="border border-dashed border-[var(--rule-strong)] bg-cream/30 px-5 py-8 text-center">
-          <p className="text-[14px] text-slate-body leading-relaxed">
+          <p className="text-sm text-slate-body leading-relaxed">
             No custom templates yet. Use the button above to create your first
             one — interview prep, offer details, follow-ups, whatever you
             send often.
@@ -185,11 +185,11 @@ function CustomTemplateCard({
             {template.name}
           </h3>
           {template.description && (
-            <p className="mt-1 text-[12px] text-slate-meta line-clamp-2">
+            <p className="mt-1 text-xs text-slate-meta line-clamp-2">
               {template.description}
             </p>
           )}
-          <p className="mt-2 text-[12px] text-slate-meta truncate">
+          <p className="mt-2 text-xs text-slate-meta truncate">
             <span className="font-semibold">Subject:</span> {template.subject}
           </p>
         </div>
@@ -199,7 +199,7 @@ function CustomTemplateCard({
               type="button"
               onClick={handleArchive}
               disabled={archivePending}
-              className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-card px-2.5 py-1.5 text-[11px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink disabled:opacity-40"
+              className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-card px-2.5 py-1.5 text-2xs font-semibold text-slate-body hover:bg-cream/60 hover:text-ink disabled:opacity-40"
               title="Archive"
             >
               {archivePending ? (
@@ -337,7 +337,7 @@ function CustomTemplateForm({
         <div>
           <label
             htmlFor={`name-${initial.id || "new"}`}
-            className="mb-1.5 block text-[12px] font-semibold text-ink"
+            className="mb-1.5 block text-xs font-semibold text-ink"
           >
             Template name <span className="text-danger">*</span>
           </label>
@@ -358,7 +358,7 @@ function CustomTemplateForm({
         <div>
           <label
             htmlFor={`desc-${initial.id || "new"}`}
-            className="mb-1.5 block text-[12px] font-semibold text-ink"
+            className="mb-1.5 block text-xs font-semibold text-ink"
           >
             Description{" "}
             <span className="text-slate-meta font-normal">(optional)</span>
@@ -383,7 +383,7 @@ function CustomTemplateForm({
       <div>
         <label
           htmlFor={`subject-${initial.id || "new"}`}
-          className="mb-1.5 block text-[12px] font-semibold text-ink"
+          className="mb-1.5 block text-xs font-semibold text-ink"
         >
           Subject <span className="text-danger">*</span>
         </label>
@@ -400,7 +400,7 @@ function CustomTemplateForm({
           placeholder="See you tomorrow at {{job.title}}"
           className="w-full rounded border border-[var(--rule-strong)] bg-card px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta font-mono"
         />
-        <p className="mt-1.5 text-[11px] text-slate-meta">
+        <p className="mt-1.5 text-2xs text-slate-meta">
           Mergefields work in the subject too — type{" "}
           <code className="font-mono">{"{{candidate.first_name}}"}</code> etc.
         </p>
@@ -408,7 +408,7 @@ function CustomTemplateForm({
 
       {/* Body */}
       <div>
-        <label className="mb-1.5 block text-[12px] font-semibold text-ink">
+        <label className="mb-1.5 block text-xs font-semibold text-ink">
           Body <span className="text-danger">*</span>
         </label>
         <TemplateBodyEditor
@@ -449,7 +449,7 @@ function CustomTemplateForm({
             type="button"
             onClick={onCancel}
             disabled={pending}
-            className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-2 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink disabled:opacity-40"
+            className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-2 text-xs font-semibold text-slate-body hover:bg-cream/60 hover:text-ink disabled:opacity-40"
           >
             Cancel
           </button>
@@ -457,7 +457,7 @@ function CustomTemplateForm({
             type="button"
             onClick={onSave}
             disabled={pending || !canEdit}
-            className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {pending ? (
               <>
@@ -485,13 +485,13 @@ function CustomTemplateForm({
 function ReferencePanel({ groups }: { groups: readonly MergefieldGroup[] }) {
   return (
     <details className="border border-[var(--rule)] bg-cream/30 px-4 py-3">
-      <summary className="cursor-pointer text-[12px] font-semibold text-ink">
+      <summary className="cursor-pointer text-xs font-semibold text-ink">
         Available mergefields
       </summary>
       <div className="mt-3 space-y-3">
         {groups.map((group) => (
           <div key={group.id}>
-            <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-1.5">
+            <div className="text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep mb-1.5">
               {group.label}
             </div>
             <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
@@ -500,10 +500,10 @@ function ReferencePanel({ groups }: { groups: readonly MergefieldGroup[] }) {
                   key={f.token}
                   className="flex items-baseline justify-between gap-2 px-2 py-1 rounded hover:bg-card/60"
                 >
-                  <code className="font-mono text-[11px] text-ink">
+                  <code className="font-mono text-2xs text-ink">
                     {`{{${f.token}}}`}
                   </code>
-                  <span className="text-[11px] text-slate-meta truncate">
+                  <span className="text-2xs text-slate-meta truncate">
                     {f.label}
                   </span>
                 </div>
@@ -563,17 +563,17 @@ function PreviewPane({
   return (
     <div>
       <div className="mb-2 flex items-baseline justify-between gap-2">
-        <span className="text-[12px] font-semibold text-ink inline-flex items-center gap-1.5">
+        <span className="text-xs font-semibold text-ink inline-flex items-center gap-1.5">
           <Sparkles className="size-3.5 text-heritage" />
           Preview
         </span>
-        <span className="text-[11px] text-slate-meta">
+        <span className="text-2xs text-slate-meta">
           Rendered with sample data
         </span>
       </div>
 
       {hasIssues && (
-        <div className="mb-3 border border-warning bg-warning-bg px-3 py-2 text-[12px] text-warning">
+        <div className="mb-3 border border-warning bg-warning-bg px-3 py-2 text-xs text-warning">
           <div className="font-semibold inline-flex items-center gap-1.5 mb-1">
             <AlertTriangle className="size-3.5" />
             Unknown mergefields
@@ -594,10 +594,10 @@ function PreviewPane({
 
       <div className="border border-[var(--rule)] bg-cream/30 overflow-hidden">
         <div className="border-b border-[var(--rule)] bg-white px-4 py-2.5">
-          <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-0.5">
+          <div className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta mb-0.5">
             Subject
           </div>
-          <div className="text-[14px] font-semibold text-ink">
+          <div className="text-sm font-semibold text-ink">
             {subjectResult.output || (
               <span className="text-slate-meta italic">
                 (subject missing)
@@ -608,11 +608,11 @@ function PreviewPane({
         <div className="bg-white px-5 py-4">
           {cleanBody ? (
             <div
-              className="dso-prose text-[14px] text-ink"
+              className="dso-prose text-sm text-ink"
               dangerouslySetInnerHTML={{ __html: cleanBody }}
             />
           ) : (
-            <p className="text-[13px] text-slate-meta italic">(body empty)</p>
+            <p className="text-xs text-slate-meta italic">(body empty)</p>
           )}
         </div>
       </div>

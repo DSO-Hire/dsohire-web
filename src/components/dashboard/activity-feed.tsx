@@ -48,7 +48,7 @@ export function ActivityFeed({
       <Eyebrow className="mb-4">{title}</Eyebrow>
       {events.length === 0 ? (
         <div className="border border-[var(--rule)] bg-cream/40 p-6">
-          <p className="text-[13px] text-slate-meta leading-relaxed">
+          <p className="text-xs text-slate-meta leading-relaxed">
             {emptyMessage}
           </p>
         </div>
@@ -100,8 +100,8 @@ function ActivityRowContent({
         <event.icon className="h-3.5 w-3.5" />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="text-[13px] text-ink leading-snug">{event.body}</div>
-        <div className="text-[11px] text-slate-meta tracking-[0.2px] mt-0.5">
+        <div className="text-xs text-ink leading-snug">{event.body}</div>
+        <div className="text-2xs text-slate-meta tracking-[0.2px] mt-0.5">
           {event.timestamp}
         </div>
       </div>

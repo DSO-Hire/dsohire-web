@@ -102,19 +102,19 @@ export function ProfileCard({ email, locations, initial }: ProfileCardProps) {
   };
 
   const labelCls =
-    "block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body mb-1.5";
+    "block text-2xs font-bold tracking-[1.5px] uppercase text-slate-body mb-1.5";
   const inputCls =
-    "w-full text-[14px] px-3 py-2 bg-card border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage";
+    "w-full text-sm px-3 py-2 bg-card border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage";
 
   return (
     <section className="border border-[var(--rule)] bg-card p-7 sm:p-8">
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+      <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
         Your profile
       </div>
       <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink mb-2">
         How you appear to your team
       </h2>
-      <p className="text-[14px] text-slate-body leading-relaxed mb-6 max-w-[560px]">
+      <p className="text-sm text-slate-body leading-relaxed mb-6 max-w-[560px]">
         Your name, photo, and title show up wherever you appear to teammates —
         the team roster, application activity, and chat. A clear title and
         headshot help colleagues at other locations know who you are.
@@ -191,7 +191,7 @@ export function ProfileCard({ email, locations, initial }: ProfileCardProps) {
             placeholder="e.g. Director of Talent Acquisition"
             className={inputCls}
           />
-          <p className="mt-1 text-[11px] text-slate-meta">
+          <p className="mt-1 text-2xs text-slate-meta">
             Your human title — separate from your permission level.
           </p>
         </div>
@@ -233,7 +233,7 @@ export function ProfileCard({ email, locations, initial }: ProfileCardProps) {
               Which practice?
             </label>
             {locations.length === 0 ? (
-              <p className="text-[13px] text-slate-meta">
+              <p className="text-xs text-slate-meta">
                 No locations on file yet. Add practices under Locations first.
               </p>
             ) : (
@@ -293,10 +293,10 @@ export function ProfileCard({ email, locations, initial }: ProfileCardProps) {
         </div>
         <div>
           <label className={labelCls}>Email</label>
-          <div className="w-full text-[14px] px-3 py-2 bg-cream/60 border border-[var(--rule)] text-slate-body truncate">
+          <div className="w-full text-sm px-3 py-2 bg-cream/60 border border-[var(--rule)] text-slate-body truncate">
             {email}
           </div>
-          <p className="mt-1 text-[11px] text-slate-meta">
+          <p className="mt-1 text-2xs text-slate-meta">
             This is your sign-in email and can&apos;t be changed here.
           </p>
         </div>
@@ -316,7 +316,7 @@ export function ProfileCard({ email, locations, initial }: ProfileCardProps) {
           placeholder="A sentence or two so teammates know who you are and what you do."
           className={inputCls + " resize-y"}
         />
-        <p className="mt-1 text-[11px] text-slate-meta">{bio.length}/600</p>
+        <p className="mt-1 text-2xs text-slate-meta">{bio.length}/600</p>
       </div>
 
       {error && (
@@ -330,12 +330,12 @@ export function ProfileCard({ email, locations, initial }: ProfileCardProps) {
           type="button"
           onClick={onSave}
           disabled={saving}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-[13px] font-bold tracking-[1px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-xs font-bold tracking-[1px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60"
         >
           {saving ? "Saving…" : "Save profile"}
         </button>
         {flash && (
-          <span role="status" className="text-[13px] font-medium text-heritage-deep">
+          <span role="status" className="text-xs font-medium text-heritage-deep">
             {flash}
           </span>
         )}

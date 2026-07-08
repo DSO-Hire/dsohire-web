@@ -655,7 +655,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
                 {surface.label}
                 <span
                   className={
-                    "inline-flex items-center justify-center min-w-[24px] h-[20px] px-1.5 text-[11px] font-extrabold tracking-[0.5px] tabular " +
+                    "inline-flex items-center justify-center min-w-[24px] h-[20px] px-1.5 text-2xs font-extrabold tracking-[0.5px] tabular " +
                     surface.chipBgClass
                   }
                 >
@@ -676,7 +676,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
             <Link
               href={buildFunctionHref(null)}
               className={
-                "px-3 py-1.5 text-[12px] font-semibold border transition-colors " +
+                "px-3 py-1.5 text-xs font-semibold border transition-colors " +
                 (activeFunctionSlug === null
                   ? "bg-card text-ink border-[var(--rule-strong)] border-b-2 border-b-corporate"
                   : "bg-card text-ink border-[var(--rule-strong)] hover:border-corporate")
@@ -691,7 +691,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
                   key={fn.slug}
                   href={buildFunctionHref(isActive ? null : fn.slug)}
                   className={
-                    "px-3 py-1.5 text-[12px] font-semibold border transition-colors " +
+                    "px-3 py-1.5 text-xs font-semibold border transition-colors " +
                     (isActive
                       ? "bg-card text-ink border-[var(--rule-strong)] border-b-2 border-b-corporate"
                       : "bg-card text-ink border-[var(--rule-strong)] hover:border-corporate")
@@ -803,7 +803,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
           <Link
             href={buildPostedHref(null)}
             className={
-              "px-3 py-1.5 text-[12px] font-semibold border transition-colors " +
+              "px-3 py-1.5 text-xs font-semibold border transition-colors " +
               (postedFilterValue === null
                 ? "bg-card text-ink border-[var(--rule-strong)] border-b-2 border-b-heritage"
                 : "bg-card text-ink border-[var(--rule-strong)] hover:border-heritage")
@@ -818,7 +818,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
                 key={opt.value}
                 href={buildPostedHref(isActive ? null : opt.value)}
                 className={
-                  "px-3 py-1.5 text-[12px] font-semibold border transition-colors " +
+                  "px-3 py-1.5 text-xs font-semibold border transition-colors " +
                   (isActive
                     ? "bg-card text-ink border-[var(--rule-strong)] border-b-2 border-b-heritage"
                     : "bg-card text-ink border-[var(--rule-strong)] hover:border-heritage")
@@ -877,7 +877,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
             defaultValue={
               withinMilesParsed !== null ? String(withinMilesParsed) : "25"
             }
-            className="px-3 py-1.5 text-[12px] border border-[var(--rule-strong)] bg-card text-ink focus:outline-none focus:border-heritage"
+            className="px-3 py-1.5 text-xs border border-[var(--rule-strong)] bg-card text-ink focus:outline-none focus:border-heritage"
           >
             {WITHIN_MILES_OPTIONS.map((m) => (
               <option key={m} value={String(m)}>
@@ -887,7 +887,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
           </select>
           <button
             type="submit"
-            className="px-3 py-1.5 text-[12px] font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+            className="px-3 py-1.5 text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             Apply
           </button>
@@ -897,7 +897,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
                 "/jobs",
                 filterParams.filter(([k]) => k !== "near" && k !== "within")
               )}
-              className="px-3 py-1.5 text-[12px] font-semibold border border-[var(--rule-strong)] text-slate-body bg-card hover:border-heritage transition-colors"
+              className="px-3 py-1.5 text-xs font-semibold border border-[var(--rule-strong)] text-slate-body bg-card hover:border-heritage transition-colors"
             >
               Clear
             </Link>
@@ -906,7 +906,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
               Surface a quiet hint instead of silently showing un-filtered
               results — otherwise the user thinks the filter is active. */}
           {radiusActive && nearGeo === null && (
-            <span className="text-[11px] text-slate-meta italic ml-1">
+            <span className="text-2xs text-slate-meta italic ml-1">
               Couldn&apos;t find that location — showing all results.
             </span>
           )}
@@ -946,7 +946,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
               <div className="inline-flex border border-[var(--rule-strong)]">
                 <Link
                   href={listViewHref}
-                className={`inline-flex items-center gap-2 px-4 py-2 text-[10px] font-semibold transition-colors ${
+                className={`inline-flex items-center gap-2 px-4 py-2 text-2xs font-semibold transition-colors ${
                   showMap
                     ? "bg-cream text-slate-body hover:text-ink"
                     : "bg-cream text-ink shadow-[inset_0_-2px_0_0_var(--heritage)]"
@@ -958,7 +958,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
               </Link>
               <Link
                 href={mapViewHref}
-                className={`inline-flex items-center gap-2 px-4 py-2 text-[10px] font-semibold transition-colors border-l border-[var(--rule-strong)] ${
+                className={`inline-flex items-center gap-2 px-4 py-2 text-2xs font-semibold transition-colors border-l border-[var(--rule-strong)] ${
                   showMap
                     ? "bg-cream text-ink shadow-[inset_0_-2px_0_0_var(--heritage)]"
                     : "bg-cream text-slate-body hover:text-ink"
@@ -975,7 +975,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
 
         {sortKey === "fit" && (
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-l-4 border-heritage bg-cream/70 p-4">
-            <p className="max-w-[640px] text-[13px] leading-relaxed text-slate-body">
+            <p className="max-w-[640px] text-xs leading-relaxed text-slate-body">
               {viewerIsCandidate
                 ? "PracticeFit ranks every open role to your profile — your role, location, pay, schedule, and dental experience. See your full ranked board on your dashboard."
                 : "PracticeFit ranks roles to your profile — your role, location, pay, schedule, and dental experience. Create a free candidate account to unlock it."}
@@ -1001,10 +1001,10 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
             <h3 className="text-[18px] font-extrabold tracking-[-0.4px] text-ink mb-2">
               {activeSurfaceConfig.emptyHeading}
             </h3>
-            <p className="text-[14px] text-slate-body leading-relaxed mb-4">
+            <p className="text-sm text-slate-body leading-relaxed mb-4">
               {activeSurfaceConfig.emptyBody}
             </p>
-            <p className="text-[13px] text-slate-meta leading-relaxed">
+            <p className="text-xs text-slate-meta leading-relaxed">
               Or{" "}
               <Link
                 href="/candidate/sign-up"
@@ -1085,7 +1085,7 @@ function JobCard({
       <div className="text-lg font-extrabold tracking-[-0.4px] text-ink mb-1 leading-tight">
         {job.title}
       </div>
-      <div className="text-[14px] text-slate-body mb-4">
+      <div className="text-sm text-slate-body mb-4">
         {dsoName}
         {locations.length > 0 && (
           <>
@@ -1101,12 +1101,12 @@ function JobCard({
       <div className="mt-auto pt-4 border-t border-[var(--rule)] flex justify-between items-end">
         <div>
           {job.compensation_visible && job.compensation_min !== null && (
-            <div className="text-[14px] font-extrabold text-ink leading-none tabular">
+            <div className="text-sm font-extrabold text-ink leading-none tabular">
               {formatCompensation(job)}
             </div>
           )}
           {job.compensation_visible && job.compensation_period && (
-            <div className="text-[10px] font-semibold text-slate-meta mt-1.5">
+            <div className="text-2xs font-semibold text-slate-meta mt-1.5">
               {compensationPeriodLabel(job.compensation_period)}
             </div>
           )}
@@ -1231,7 +1231,7 @@ function SearchField({
         <select
           name={name}
           defaultValue={defaultValue ?? ""}
-          className="w-full bg-transparent text-[14px] text-ink outline-none focus:outline-none"
+          className="w-full bg-transparent text-sm text-ink outline-none focus:outline-none"
         >
           {options.map((o) => (
             <option key={o.value} value={o.value}>
@@ -1246,7 +1246,7 @@ function SearchField({
           placeholder={placeholder}
           defaultValue={defaultValue}
           maxLength={maxLength}
-          className={`w-full bg-transparent text-[14px] text-ink placeholder:text-slate-meta outline-none focus:outline-none ${
+          className={`w-full bg-transparent text-sm text-ink placeholder:text-slate-meta outline-none focus:outline-none ${
             uppercase ? "uppercase" : ""
           }`}
         />

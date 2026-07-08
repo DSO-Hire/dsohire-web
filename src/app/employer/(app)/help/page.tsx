@@ -128,7 +128,7 @@ export default function HelpPage() {
     <>
       <div className="space-y-10 max-w-[820px]">
         <header>
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
             Help &amp; Support
           </div>
           <h1 className="font-display text-3xl font-extrabold tracking-[-0.8px] text-ink leading-tight">
@@ -146,11 +146,11 @@ export default function HelpPage() {
             <h2 className="font-display text-lg font-bold text-ink mb-1">
               Email support
             </h2>
-            <p className="text-[13px] text-slate-body leading-relaxed mb-3">
+            <p className="text-xs text-slate-body leading-relaxed mb-3">
               The fastest path to support. Every message gets a real reply,
               typically within one business day.
             </p>
-            <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-heritage-deep">
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-heritage-deep">
               {SUPPORT_EMAIL}
               <ArrowRight className="size-3 group-hover:translate-x-0.5 transition-transform" />
             </span>
@@ -161,14 +161,14 @@ export default function HelpPage() {
             <h2 className="font-display text-lg font-bold text-ink mb-1">
               In-app support
             </h2>
-            <p className="text-[13px] text-slate-body leading-relaxed mb-3">
+            <p className="text-xs text-slate-body leading-relaxed mb-3">
               Open the support drawer right here. We auto-attach the page
               you&apos;re on, your role + plan, and your last 5 actions
               so triage is fast.
             </p>
             <OpenSupportButton />
-            <p className="mt-2 text-[11px] text-slate-meta">
-              Tip: press <kbd className="px-1 py-0.5 rounded border border-[var(--rule)] bg-cream/60 font-mono text-[10px]">?</kbd> anywhere to open it.
+            <p className="mt-2 text-2xs text-slate-meta">
+              Tip: press <kbd className="px-1 py-0.5 rounded border border-[var(--rule)] bg-cream/60 font-mono text-2xs">?</kbd> anywhere to open it.
             </p>
           </div>
         </section>
@@ -184,14 +184,14 @@ export default function HelpPage() {
               <li key={i}>
                 <details className="group">
                   <summary className="cursor-pointer flex items-start justify-between gap-4 py-4 list-none">
-                    <span className="font-semibold text-ink text-[14px] leading-snug">
+                    <span className="font-semibold text-ink text-sm leading-snug">
                       {f.q}
                     </span>
                     <span className="text-slate-meta group-open:rotate-90 transition-transform shrink-0">
                       ›
                     </span>
                   </summary>
-                  <p className="text-[13px] text-slate-body leading-relaxed pb-4 pr-8">
+                  <p className="text-xs text-slate-body leading-relaxed pb-4 pr-8">
                     {f.a}
                   </p>
                 </details>
@@ -207,7 +207,7 @@ export default function HelpPage() {
             <BookOpen className="size-4 text-heritage-deep" />
             Quick reference
           </h2>
-          <p className="text-[13px] text-slate-body leading-relaxed mb-4">
+          <p className="text-xs text-slate-body leading-relaxed mb-4">
             Short explanations for the features you&apos;ll touch most. You&apos;ll
             also see the ⓘ icon next to these throughout the app.
           </p>
@@ -216,7 +216,7 @@ export default function HelpPage() {
               .filter(([, e]) => e.lens === "employer" || e.lens === "both")
               .map(([key, e]) => (
                 <div key={key}>
-                  <dt className="text-[13px] font-bold text-ink">{e.title}</dt>
+                  <dt className="text-xs font-bold text-ink">{e.title}</dt>
                   <dd className="mt-0.5 text-[12.5px] text-slate-body leading-relaxed">
                     {e.tip}
                   </dd>

@@ -235,10 +235,10 @@ export function KanbanCard({
           />
         </span>
       )}
-      <div className="text-[14px] font-bold text-ink truncate mb-1 pr-6">
+      <div className="text-sm font-bold text-ink truncate mb-1 pr-6">
         {cand?.full_name ?? "Anonymous candidate"}
       </div>
-      <div className="kb-card-headline text-[12px] text-slate-body truncate mb-2">
+      <div className="kb-card-headline text-xs text-slate-body truncate mb-2">
         {cand?.current_title || cand?.headline || "Profile minimal"}
       </div>
       {application.tags.length > 0 && (
@@ -246,7 +246,7 @@ export function KanbanCard({
           {application.tags.map((tag) => (
             <span
               key={tag.id}
-              className={`inline-flex items-center px-1.5 py-0.5 text-[10px] font-semibold border ${TAG_COLOR_CLASSES[tag.color]}`}
+              className={`inline-flex items-center px-1.5 py-0.5 text-2xs font-semibold border ${TAG_COLOR_CLASSES[tag.color]}`}
             >
               {tag.label}
             </span>
@@ -270,7 +270,7 @@ export function KanbanCard({
                 key={idx}
                 title={`Knockout failed: ${prompt}`}
                 aria-label={`Knockout failed: ${prompt}`}
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-semibold border border-warning bg-warning-bg text-warning max-w-full"
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-2xs font-semibold border border-warning bg-warning-bg text-warning max-w-full"
               >
                 <span className="flex-shrink-0">⚠</span>
                 <span className="truncate">
@@ -280,7 +280,7 @@ export function KanbanCard({
             ))}
           {(application.knockoutFailedQuestions ?? []).length > 2 && (
             <span
-              className="text-[10px] font-semibold text-warning/70 tracking-[0.3px]"
+              className="text-2xs font-semibold text-warning/70 tracking-[0.3px]"
               title={`${(application.knockoutFailedQuestions ?? []).length - 2} more knockout failures — see application detail`}
             >
               +{(application.knockoutFailedQuestions ?? []).length - 2} more
@@ -290,7 +290,7 @@ export function KanbanCard({
       )}
       <div className="flex items-center justify-between gap-2">
         <span
-          className={`text-[10px] font-semibold px-1.5 py-0.5 tabular ${heatClasses}`}
+          className={`text-2xs font-semibold px-1.5 py-0.5 tabular ${heatClasses}`}
         >
           {days}d in stage
         </span>
@@ -298,7 +298,7 @@ export function KanbanCard({
           {application.scorecard_reviewer_count > 0 &&
             application.scorecard_avg !== null && (
               <span
-                className="inline-flex items-center gap-0.5 text-[10px] text-heritage-deep font-semibold tabular-nums"
+                className="inline-flex items-center gap-0.5 text-2xs text-heritage-deep font-semibold tabular-nums"
                 title={`Average ${application.scorecard_avg.toFixed(1)} across ${application.scorecard_reviewer_count} reviewer${application.scorecard_reviewer_count === 1 ? "" : "s"}`}
                 aria-label={`Average score ${application.scorecard_avg.toFixed(1)} across ${application.scorecard_reviewer_count} reviewer${application.scorecard_reviewer_count === 1 ? "" : "s"}`}
               >
@@ -311,7 +311,7 @@ export function KanbanCard({
             )}
           {application.comment_count > 0 && (
             <span
-              className="inline-flex items-center gap-0.5 text-[10px] text-slate-meta tabular-nums"
+              className="inline-flex items-center gap-0.5 text-2xs text-slate-meta tabular-nums"
               title={`${application.comment_count} team comment${application.comment_count === 1 ? "" : "s"}`}
               aria-label={`${application.comment_count} team comment${application.comment_count === 1 ? "" : "s"}`}
             >
@@ -321,7 +321,7 @@ export function KanbanCard({
           )}
           {cand?.years_experience !== null &&
             cand?.years_experience !== undefined && (
-              <span className="text-[10px] text-slate-meta tabular-nums">
+              <span className="text-2xs text-slate-meta tabular-nums">
                 {cand.years_experience}y
               </span>
             )}

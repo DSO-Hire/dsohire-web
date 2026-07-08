@@ -118,13 +118,13 @@ export function DiscoverFilters({ initial, roleOptions }: DiscoverFiltersProps) 
             onChange={(e) => setQ(e.target.value)}
             placeholder={`Skills, title, name — try: hygienist AND invisalign`}
             aria-describedby="discover-search-hint"
-            className="w-full pl-9 pr-3 py-2.5 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+            className="w-full pl-9 pr-3 py-2.5 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
           />
         </div>
         <select
           value={role}
           onChange={(e) => setRole(e.target.value)}
-          className="px-3 py-2.5 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+          className="px-3 py-2.5 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
         >
           {roleOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -135,7 +135,7 @@ export function DiscoverFilters({ initial, roleOptions }: DiscoverFiltersProps) 
       </div>
       <p
         id="discover-search-hint"
-        className="-mt-1 text-[11px] leading-relaxed text-slate-meta"
+        className="-mt-1 text-2xs leading-relaxed text-slate-meta"
       >
         Boolean search:{" "}
         <code className="text-ink">AND</code>,{" "}
@@ -197,7 +197,7 @@ export function DiscoverFilters({ initial, roleOptions }: DiscoverFiltersProps) 
           <button
             type="button"
             onClick={handleClear}
-            className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
           >
             <X className="h-3 w-3" />
             Clear filters
@@ -226,12 +226,12 @@ function ChipGroup({
       <div className="flex items-baseline gap-2 mb-1.5">
         <Eyebrow as="span">{label}</Eyebrow>
         {selected.length > 0 && (
-          <span className="text-[10px] font-semibold text-heritage-deep tabular">
+          <span className="text-2xs font-semibold text-heritage-deep tabular">
             {selected.length} selected
           </span>
         )}
       </div>
-      <p className="text-[11px] text-slate-meta mb-2">{hint}</p>
+      <p className="text-2xs text-slate-meta mb-2">{hint}</p>
       <div className="flex flex-wrap gap-1.5">
         {options.map((opt) => {
           const on = selected.includes(opt.value);
@@ -242,7 +242,7 @@ function ChipGroup({
               onClick={() => onToggle(opt.value)}
               aria-pressed={on}
               className={
-                "px-2.5 py-1 text-[12px] border transition-colors " +
+                "px-2.5 py-1 text-xs border transition-colors " +
                 (on
                   ? "bg-cream text-heritage-deep font-semibold border-heritage shadow-[inset_0_-2px_0_0_var(--heritage)]"
                   : "bg-cream text-ink border-[var(--rule-strong)] hover:border-heritage")
@@ -289,7 +289,7 @@ function FilterField({
         }
         placeholder={placeholder}
         maxLength={maxLength}
-        className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+        className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
       />
     </label>
   );

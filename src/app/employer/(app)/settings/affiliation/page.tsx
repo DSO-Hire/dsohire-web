@@ -89,13 +89,13 @@ export default async function AffiliationSettingsPage() {
   return (
     <section className="max-w-[820px]">
       <header className="mb-8">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Affiliation
         </div>
         <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] leading-[1.15] text-ink">
           When candidates learn the {dsoName} name
         </h2>
-        <p className="mt-3 text-[14px] text-slate-body leading-relaxed">
+        <p className="mt-3 text-sm text-slate-body leading-relaxed">
           Some practices in your portfolio may keep their original
           public brand even though {dsoName} owns the practice. Use the{" "}
           <strong className="text-ink font-semibold">
@@ -114,10 +114,10 @@ export default async function AffiliationSettingsPage() {
         <div className="flex items-start gap-2">
           <Info className="h-3.5 w-3.5 text-heritage-deep mt-1 flex-shrink-0" />
           <div className="min-w-0">
-            <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
+            <div className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
               Current state
             </div>
-            <p className="text-[13px] text-slate-body leading-relaxed">
+            <p className="text-xs text-slate-body leading-relaxed">
               {(privateCount ?? 0) === 0 ? (
                 <>
                   All {totalCount ?? 0} of your locations show{" "}
@@ -160,13 +160,13 @@ export default async function AffiliationSettingsPage() {
           its own header so the two reveal stories don't blur together. */}
       <div className="mt-14 pt-10 border-t border-[var(--rule)]">
         <header className="mb-8">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
             Corporate roles
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] leading-[1.15] text-ink">
             {dsoName} name on corporate-scope job postings
           </h2>
-          <p className="mt-3 text-[14px] text-slate-body leading-relaxed">
+          <p className="mt-3 text-sm text-slate-body leading-relaxed">
             DSO-wide roles (CEO, CFO, regional director, etc.) don&apos;t
             have a specific practice anchor, so the per-location toggle
             doesn&apos;t apply. This setting decides how the AI job

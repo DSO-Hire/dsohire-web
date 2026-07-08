@@ -94,7 +94,7 @@ export function HmRescopeButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:bg-cream transition-colors"
+        className="inline-flex items-center gap-1.5 px-2.5 py-1 text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep hover:bg-cream transition-colors"
         aria-label={`Edit locations for ${hmName}`}
       >
         <Pencil className="h-3 w-3" />
@@ -117,7 +117,7 @@ export function HmRescopeButton({
           >
             <header className="sticky top-0 bg-ivory border-b border-[var(--rule)] px-6 py-4 flex items-center justify-between gap-4">
               <div>
-                <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
+                <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
                   Hiring Manager Scope
                 </div>
                 <h2
@@ -138,14 +138,14 @@ export function HmRescopeButton({
             </header>
 
             <div className="px-6 py-5">
-              <p className="text-[14px] text-slate-body leading-relaxed mb-5">
+              <p className="text-sm text-slate-body leading-relaxed mb-5">
                 {hmName} can review applications at the practice locations
                 checked below. Owners, admins, and recruiters always see
                 every job — this only changes what {hmName.split(" ")[0]} sees.
               </p>
 
               {selected.size === 0 && (
-                <div className="mb-4 flex items-start gap-2 px-3 py-2.5 bg-danger-bg border border-danger text-[13px] text-danger">
+                <div className="mb-4 flex items-start gap-2 px-3 py-2.5 bg-danger-bg border border-danger text-xs text-danger">
                   <AlertCircle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
                   <span>
                     No locations selected — {hmName.split(" ")[0]} won&apos;t
@@ -158,7 +158,7 @@ export function HmRescopeButton({
                 <button
                   type="button"
                   onClick={selectAll}
-                  className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+                  className="text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
                 >
                   Select all
                 </button>
@@ -166,7 +166,7 @@ export function HmRescopeButton({
                 <button
                   type="button"
                   onClick={clearAll}
-                  className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-danger transition-colors"
+                  className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-body hover:text-danger transition-colors"
                 >
                   Clear
                 </button>
@@ -174,7 +174,7 @@ export function HmRescopeButton({
 
               <div className="grid grid-cols-1 gap-px bg-[var(--rule)] border border-[var(--rule)]">
                 {locations.length === 0 ? (
-                  <div className="bg-card p-5 text-[14px] text-slate-meta italic text-center">
+                  <div className="bg-card p-5 text-sm text-slate-meta italic text-center">
                     No locations yet. Add some in the Locations section.
                   </div>
                 ) : (
@@ -194,10 +194,10 @@ export function HmRescopeButton({
                           onChange={() => toggle(loc.id)}
                         />
                         <div className="min-w-0">
-                          <div className="text-[14px] font-semibold text-ink">
+                          <div className="text-sm font-semibold text-ink">
                             {loc.name}
                           </div>
-                          <div className="text-[12px] text-slate-meta">
+                          <div className="text-xs text-slate-meta">
                             {[loc.city, loc.state].filter(Boolean).join(", ") ||
                               "Address not set"}
                           </div>
@@ -219,7 +219,7 @@ export function HmRescopeButton({
                 type="button"
                 onClick={() => setOpen(false)}
                 disabled={pending}
-                className="px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ink hover:bg-cream transition-colors disabled:opacity-40"
+                className="px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-ink hover:bg-cream transition-colors disabled:opacity-40"
               >
                 Cancel
               </button>
@@ -227,7 +227,7 @@ export function HmRescopeButton({
                 type="button"
                 onClick={onSave}
                 disabled={pending}
-                className="inline-flex items-center gap-1.5 px-5 py-2 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-5 py-2 bg-primary text-primary-foreground text-xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
               >
                 {pending ? (
                   "Saving…"

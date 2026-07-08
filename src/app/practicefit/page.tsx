@@ -141,7 +141,7 @@ function Hero({ ctaHref }: { ctaHref: string }) {
                 <div className="text-[16px] font-bold tracking-[-0.3px] text-ink leading-tight">
                   Greenfield Dental Group
                 </div>
-                <div className="text-[12px] text-slate-body mt-0.5">
+                <div className="text-xs text-slate-body mt-0.5">
                   Westerville, OH · 4-day week · Posted pay range
                 </div>
               </div>
@@ -195,14 +195,14 @@ function TwoSides() {
             <Eyebrow className="mb-4">
               If you&apos;re a dental professional
             </Eyebrow>
-            <p className="text-[15px] text-slate-body leading-[1.7] mb-4">
+            <p className="text-sm text-slate-body leading-[1.7] mb-4">
               Take the assessment once — your pace, your schedule, how you
               like to be mentored, what matters most to you. Every opening on
               the board gets a score against it, with a plain-English
               &ldquo;why this match&rdquo; so you know what a practice is
               actually like before you apply.
             </p>
-            <p className="text-[15px] text-slate-body leading-[1.7]">
+            <p className="text-sm text-slate-body leading-[1.7]">
               It&apos;s free, it&apos;s private, and your current office never
               sees you browsing.
             </p>
@@ -215,14 +215,14 @@ function TwoSides() {
             <Eyebrow className="mb-4">
               If you&apos;re hiring for a dental group
             </Eyebrow>
-            <p className="text-[15px] text-slate-body leading-[1.7] mb-4">
+            <p className="text-sm text-slate-body leading-[1.7] mb-4">
               Every applicant lands in your pipeline already scored against
               the role — schedule overlap, PMS fluency, clinical mix, commute,
               licensure. Smart Picks surface the strongest fits per job, and
               your dashboard rolls up today&apos;s top fits across every
               opening you have open.
             </p>
-            <p className="text-[15px] text-slate-body leading-[1.7]">
+            <p className="text-sm text-slate-body leading-[1.7]">
               Your team starts with the best-fit candidates instead of a
               chronological stack of résumés.
             </p>
@@ -273,7 +273,7 @@ function WhatItScores() {
         <div data-reveal>
           <div className="mb-4">
             <PracticeFitWordmark surface="light" tm className="text-[20px]" />
-            <span className="block text-[12px] text-slate-meta mt-1 tracking-[0.4px]">
+            <span className="block text-xs text-slate-meta mt-1 tracking-[0.4px]">
               Clinical + practice-side roles
             </span>
           </div>
@@ -292,7 +292,7 @@ function WhatItScores() {
         <div data-reveal style={{ "--mk-delay": "90ms" } as React.CSSProperties}>
           <div className="mb-4">
             <DsoFitWordmark surface="light" tm className="text-[20px]" />
-            <span className="block text-[12px] text-slate-meta mt-1 tracking-[0.4px]">
+            <span className="block text-xs text-slate-meta mt-1 tracking-[0.4px]">
               Corporate + DSO HQ roles
             </span>
           </div>

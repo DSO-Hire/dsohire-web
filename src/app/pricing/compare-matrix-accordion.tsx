@@ -107,14 +107,14 @@ export function CompareMatrixAccordion({
                   Most popular
                 </Tag>
               )}
-              <div className="text-[15px] font-extrabold tracking-[-0.4px] text-hero-foreground mb-0.5">
+              <div className="text-sm font-extrabold tracking-[-0.4px] text-hero-foreground mb-0.5">
                 {t.name}
               </div>
-              <div className="text-[12px] font-semibold text-hero-foreground/55 tabular">
+              <div className="text-xs font-semibold text-hero-foreground/55 tabular">
                 {t.priceLine}
               </div>
               {t.subLine && (
-                <div className="text-[10px] font-semibold text-hero-foreground/40 mt-0.5">
+                <div className="text-2xs font-semibold text-hero-foreground/40 mt-0.5">
                   {t.subLine}
                 </div>
               )}
@@ -150,14 +150,14 @@ export function CompareMatrixAccordion({
                     }`}
                   />
                   {group.label}
-                  <span className="normal-case tracking-normal font-semibold text-slate-meta text-[11px] tabular">
+                  <span className="normal-case tracking-normal font-semibold text-slate-meta text-2xs tabular">
                     · {group.rows.length}
                   </span>
                 </Eyebrow>
                 {tiers.map((t) => (
                   <span
                     key={t.id}
-                    className={`flex items-center py-4 px-4 text-[10px] font-semibold tabular ${
+                    className={`flex items-center py-4 px-4 text-2xs font-semibold tabular ${
                       t.featured
                         ? "bg-hero text-hero-foreground/70 border-l-2 border-r-2 border-heritage"
                         : "text-slate-meta"
@@ -174,7 +174,7 @@ export function CompareMatrixAccordion({
                     key={row.feature}
                     className={`${GRID} border-t border-[var(--rule)] bg-card hover:bg-cream/40 transition-colors`}
                   >
-                    <div className="text-[14px] text-ink py-3.5 pl-[42px] pr-6 leading-snug font-medium">
+                    <div className="text-sm text-ink py-3.5 pl-[42px] pr-6 leading-snug font-medium">
                       {row.feature}
                     </div>
                     {tiers.map((t) => (
@@ -204,7 +204,7 @@ function ValueCell({
   const isSoft = typeof value === "string" && SOFT_LABEL.test(value);
   return (
     <div
-      className={`flex items-center py-3.5 px-4 text-[14px] ${
+      className={`flex items-center py-3.5 px-4 text-sm ${
         featured ? "bg-hero border-l-2 border-r-2 border-heritage" : ""
       }`}
     >
@@ -230,7 +230,7 @@ function ValueCell({
         )
       ) : isSoft ? (
         <span
-          className={`text-[10px] font-semibold whitespace-nowrap ${
+          className={`text-2xs font-semibold whitespace-nowrap ${
             featured ? "text-hero-foreground/55" : "text-slate-meta"
           }`}
         >

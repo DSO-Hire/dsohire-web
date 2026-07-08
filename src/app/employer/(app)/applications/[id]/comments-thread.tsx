@@ -673,7 +673,7 @@ export function CommentsThread({
         {visibleComments.length === 0 ? (
           <div className="p-8 text-center">
             <AtSign className="h-5 w-5 text-slate-meta mx-auto mb-2" />
-            <p className="text-[14px] text-slate-meta">
+            <p className="text-sm text-slate-meta">
               No team comments yet. Use{" "}
               <span className="font-mono text-ink">@</span> to mention a
               teammate.
@@ -687,7 +687,7 @@ export function CommentsThread({
                   <li
                     key={c.id}
                     id={`comment-${c.id}`}
-                    className="p-4 text-[13px] text-slate-meta italic"
+                    className="p-4 text-xs text-slate-meta italic"
                   >
                     Comment deleted.
                   </li>
@@ -704,16 +704,16 @@ export function CommentsThread({
                 >
                   <div className="flex items-baseline justify-between gap-3 mb-1">
                     <div className="flex items-baseline gap-2 min-w-0">
-                      <span className="text-[14px] font-bold text-ink truncate">
+                      <span className="text-sm font-bold text-ink truncate">
                         {c.authorName ?? "Teammate"}
                       </span>
                       {c.authorRole && (
-                        <span className="text-[10px] font-semibold text-slate-meta">
+                        <span className="text-2xs font-semibold text-slate-meta">
                           {ROLE_LABELS[c.authorRole]}
                         </span>
                       )}
                       <span
-                        className="text-[12px] text-slate-meta tabular"
+                        className="text-xs text-slate-meta tabular"
                         title={new Date(c.created_at).toLocaleString()}
                       >
                         {relativeTime(c.created_at)}
@@ -743,14 +743,14 @@ export function CommentsThread({
                             <button
                               type="button"
                               onClick={() => startEdit(c)}
-                              className="block w-full text-left px-3 py-1.5 text-[13px] text-ink hover:bg-cream"
+                              className="block w-full text-left px-3 py-1.5 text-xs text-ink hover:bg-cream"
                             >
                               Edit
                             </button>
                             <button
                               type="button"
                               onClick={() => void handleDelete(c.id)}
-                              className="block w-full text-left px-3 py-1.5 text-[13px] text-danger hover:bg-cream"
+                              className="block w-full text-left px-3 py-1.5 text-xs text-danger hover:bg-cream"
                             >
                               Delete
                             </button>
@@ -768,7 +768,7 @@ export function CommentsThread({
                         onChange={(e) => handleBodyChange("edit", e)}
                         onKeyDown={(e) => handleKeyDown("edit", e)}
                         rows={3}
-                        className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed"
+                        className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed"
                         autoFocus
                       />
                       {editMentionOpen && (
@@ -794,14 +794,14 @@ export function CommentsThread({
                           Cancel
                         </button>
                         {editingError && (
-                          <span className="text-[13px] text-danger">
+                          <span className="text-xs text-danger">
                             {editingError}
                           </span>
                         )}
                       </div>
                     </div>
                   ) : (
-                    <div className="text-[14px] text-ink leading-relaxed whitespace-pre-wrap">
+                    <div className="text-sm text-ink leading-relaxed whitespace-pre-wrap">
                       {renderBody(c.body)}
                     </div>
                   )}
@@ -821,7 +821,7 @@ export function CommentsThread({
           onKeyDown={(e) => handleKeyDown("compose", e)}
           rows={3}
           placeholder="Comment to your team — type @ to mention a teammate."
-          className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed"
+          className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed"
         />
         {composerMentionOpen && (
           <MentionPopover
@@ -839,12 +839,12 @@ export function CommentsThread({
           >
             {submitting ? "Posting…" : "Post comment"}
           </button>
-          <span className="text-[12px] text-slate-meta">
+          <span className="text-xs text-slate-meta">
             <span className="font-mono">⌘↩</span> to post ·{" "}
             <span className="font-mono">@</span> to mention
           </span>
           {composerError && (
-            <span className="text-[13px] text-danger">{composerError}</span>
+            <span className="text-xs text-danger">{composerError}</span>
           )}
         </div>
       </div>
@@ -889,10 +889,10 @@ function MentionPopover({
                 idx === selectedIdx ? "bg-cream" : "hover:bg-cream"
               }`}
             >
-              <span className="text-[14px] font-semibold text-ink truncate">
+              <span className="text-sm font-semibold text-ink truncate">
                 {u.fullName ?? "Teammate"}
               </span>
-              <span className="text-[10px] font-semibold text-slate-meta">
+              <span className="text-2xs font-semibold text-slate-meta">
                 {ROLE_LABELS[u.role]}
               </span>
             </button>

@@ -94,11 +94,11 @@ export function TrackChooser() {
         </div>
 
         {error && (
-          <p className="mt-6 text-center text-[14px] font-semibold text-danger">
+          <p className="mt-6 text-center text-sm font-semibold text-danger">
             {error}
           </p>
         )}
-        <p className="mt-9 text-center text-[13px] text-slate-meta">
+        <p className="mt-9 text-center text-xs text-slate-meta">
           Not sure? Pick your closest fit. You can always explore the other side later.
         </p>
       </div>
@@ -152,14 +152,14 @@ function Panel({
       </p>
       <ul className="list-none space-y-3 mb-9 flex-1">
         {examples.map((e) => (
-          <li key={e} className={`flex items-start gap-2.5 text-[15px] sm:text-[16px] ${fgFaint}`}>
+          <li key={e} className={`flex items-start gap-2.5 text-sm sm:text-[16px] ${fgFaint}`}>
             <Check className={`h-5 w-5 flex-shrink-0 mt-0.5 ${fgCheck}`} />
             <span>{e}</span>
           </li>
         ))}
       </ul>
       <span
-        className={`inline-flex items-center gap-2 self-start bg-[#F7F4ED] px-6 py-3 text-[15px] font-bold tracking-wide ${ctaText} group-hover:bg-[#F7F4ED]/90 transition-colors`}
+        className={`inline-flex items-center gap-2 self-start bg-[#F7F4ED] px-6 py-3 text-sm font-bold tracking-wide ${ctaText} group-hover:bg-[#F7F4ED]/90 transition-colors`}
       >
         {busy ? "Setting up…" : cta}
         {!busy && <ArrowRight className="h-[18px] w-[18px]" />}

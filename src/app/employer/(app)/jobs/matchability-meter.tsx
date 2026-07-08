@@ -51,12 +51,12 @@ export function MatchabilityMeter({
             PracticeFit on the clinical wizard, DSOFit on corporate. */}
         <div className="flex items-center justify-between gap-2">
           <span className="inline-flex items-baseline gap-2">
-            <FitWordmark product={product} className="text-[13px]" />
+            <FitWordmark product={product} className="text-xs" />
             <span className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta">
               Matchability
             </span>
           </span>
-          <span className="text-[11px] font-bold text-ink tabular-nums">
+          <span className="text-2xs font-bold text-ink tabular-nums">
             {result.scoreable} of {result.total} dimensions
           </span>
         </div>
@@ -67,7 +67,7 @@ export function MatchabilityMeter({
             aria-hidden
           />
         </div>
-        <p className="mt-1.5 text-[10px] leading-snug text-slate-meta">
+        <p className="mt-1.5 text-2xs leading-snug text-slate-meta">
           Every dimension this posting fills in gives{" "}
           {product === "dsofit" ? "DSOFit" : "PracticeFit"} more to work
           with — sharper Smart Picks, better placement in fit-sorted
@@ -81,7 +81,7 @@ export function MatchabilityMeter({
             {scoreable.map((d) => (
               <span
                 key={d.key}
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-semibold text-heritage-deep bg-heritage/10"
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-2xs font-semibold text-heritage-deep bg-heritage/10"
               >
                 <Check className="h-2.5 w-2.5" aria-hidden />
                 {d.label}
@@ -99,7 +99,7 @@ export function MatchabilityMeter({
                 onJumpToStep !== undefined &&
                 (canJumpToStep?.(d.where) ?? true);
               return (
-                <li key={d.key} className="text-[11px] leading-snug">
+                <li key={d.key} className="text-2xs leading-snug">
                   {d.where === "profile" ? (
                     <Link
                       href="/employer/settings/profile"

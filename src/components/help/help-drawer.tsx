@@ -143,7 +143,7 @@ export function HelpDrawer({
             >
               <Info className="h-3.5 w-3.5 text-heritage-deep" />
             </span>
-            <span className="text-[10px] font-bold uppercase tracking-[1.8px] text-heritage-deep">
+            <span className="text-2xs font-bold uppercase tracking-[1.8px] text-heritage-deep">
               Guide
             </span>
           </div>
@@ -161,7 +161,7 @@ export function HelpDrawer({
           <h2 className="font-display text-xl font-extrabold tracking-[-0.5px] text-ink">
             {entry.title}
           </h2>
-          <p className="mt-2 text-[14px] leading-relaxed text-slate-body">
+          <p className="mt-2 text-sm leading-relaxed text-slate-body">
             {entry.tip}
           </p>
 
@@ -173,7 +173,7 @@ export function HelpDrawer({
               {entry.steps.map((s, i) => (
                 <li key={i} className="border-l-2 border-heritage/30 pl-4">
                   {s.heading && (
-                    <div className="text-[13px] font-bold tracking-[-0.1px] text-ink">
+                    <div className="text-xs font-bold tracking-[-0.1px] text-ink">
                       {s.heading}
                     </div>
                   )}
@@ -212,7 +212,7 @@ export function HelpDrawer({
         type="button"
         onClick={() => setOpen(true)}
         className={
-          "inline-flex items-center gap-1.5 text-[12px] font-semibold text-heritage-deep underline-offset-2 transition-colors hover:text-ink hover:underline " +
+          "inline-flex items-center gap-1.5 text-xs font-semibold text-heritage-deep underline-offset-2 transition-colors hover:text-ink hover:underline " +
           className
         }
       >
@@ -243,7 +243,7 @@ function VideoSlot({
         >
           <Play className="h-3.5 w-3.5 text-heritage-deep" />
         </span>
-        <span className="text-[12px] leading-snug text-slate-meta">
+        <span className="text-xs leading-snug text-slate-meta">
           A short walkthrough video is coming soon. The written steps below
           cover everything for now.
         </span>

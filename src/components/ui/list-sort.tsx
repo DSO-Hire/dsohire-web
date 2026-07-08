@@ -61,14 +61,14 @@ export function ListSort({
 
   return (
     <div className={`inline-flex items-center gap-2 ${className ?? ""}`}>
-      <label className="text-[10px] font-bold tracking-[2px] uppercase text-slate-body">
+      <label className="text-2xs font-bold tracking-[2px] uppercase text-slate-body">
         {label}
       </label>
       <select
         value={activeValue}
         onChange={(e) => onChange(e.currentTarget.value)}
         disabled={pending}
-        className="text-[12px] px-2.5 py-1.5 bg-card border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage min-w-[180px]"
+        className="text-xs px-2.5 py-1.5 bg-card border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage min-w-[180px]"
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>

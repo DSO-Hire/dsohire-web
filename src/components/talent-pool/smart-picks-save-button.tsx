@@ -43,7 +43,7 @@ export function SmartPicksSaveButton({
       onClick={handleToggle}
       disabled={pending}
       className={
-        "inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold border transition-colors disabled:opacity-60 " +
+        "inline-flex items-center gap-1 px-2.5 py-1 text-2xs font-semibold border transition-colors disabled:opacity-60 " +
         (saved
           ? "bg-heritage text-primary-foreground border-heritage hover:bg-heritage-deep"
           : "bg-card text-ink border-border hover:bg-cream")

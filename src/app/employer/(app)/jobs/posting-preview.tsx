@@ -140,7 +140,7 @@ export function PostingPreview(props: PostingPreviewProps) {
         <span className="text-[9px] font-bold tracking-[2px] uppercase text-heritage-deep">
           Live preview
         </span>
-        <span className="text-[10px] text-slate-meta">
+        <span className="text-2xs text-slate-meta">
           — what candidates will see
         </span>
       </div>
@@ -153,7 +153,7 @@ export function PostingPreview(props: PostingPreviewProps) {
             </span>
           )}
         </h3>
-        <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] text-slate-meta">
+        <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-meta">
           {locationLine && (
             <span className="inline-flex items-center gap-1">
               <MapPin className="h-3 w-3" aria-hidden />
@@ -170,12 +170,12 @@ export function PostingPreview(props: PostingPreviewProps) {
               // No DollarSign icon here — the headline always leads with
               // its own $ figure (Cam screenshot: "$ $1,200/day" read
               // doubled).
-              <p className="text-[13px] font-bold text-heritage-deep leading-snug">
+              <p className="text-xs font-bold text-heritage-deep leading-snug">
                 {deal.headline}
               </p>
             )}
             {deal.estRange && (
-              <p className="text-[12px] font-semibold text-ink">
+              <p className="text-xs font-semibold text-ink">
                 {deal.estRange}{" "}
                 <span className="font-normal text-slate-meta">
                   (employer estimate)
@@ -187,7 +187,7 @@ export function PostingPreview(props: PostingPreviewProps) {
                 {deal.chips.map((c) => (
                   <span
                     key={c}
-                    className="px-1.5 py-0.5 bg-cream text-[10px] font-semibold text-slate-body border border-[var(--rule)]"
+                    className="px-1.5 py-0.5 bg-cream text-2xs font-semibold text-slate-body border border-[var(--rule)]"
                   >
                     {c}
                   </span>
@@ -200,31 +200,31 @@ export function PostingPreview(props: PostingPreviewProps) {
         {(comp || schedule || props.scheduleEvenings || props.scheduleWeekends) && (
           <p className="mt-3 flex flex-wrap gap-1.5">
             {comp && (
-              <span className="inline-flex items-center gap-1 px-2 py-1 bg-heritage/10 text-[11px] font-bold text-heritage-deep">
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-heritage/10 text-2xs font-bold text-heritage-deep">
                 <DollarSign className="h-3 w-3" aria-hidden />
                 {comp}
               </span>
             )}
             {schedule && (
-              <span className="inline-flex items-center gap-1 px-2 py-1 bg-cream text-[11px] font-semibold text-slate-body border border-[var(--rule)]">
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-cream text-2xs font-semibold text-slate-body border border-[var(--rule)]">
                 <Clock className="h-3 w-3" aria-hidden />
                 {schedule}
               </span>
             )}
             {props.scheduleEvenings && (
-              <span className="px-2 py-1 bg-cream text-[11px] font-semibold text-slate-body border border-[var(--rule)]">
+              <span className="px-2 py-1 bg-cream text-2xs font-semibold text-slate-body border border-[var(--rule)]">
                 Evenings
               </span>
             )}
             {props.scheduleWeekends && (
-              <span className="px-2 py-1 bg-cream text-[11px] font-semibold text-slate-body border border-[var(--rule)]">
+              <span className="px-2 py-1 bg-cream text-2xs font-semibold text-slate-body border border-[var(--rule)]">
                 Weekends
               </span>
             )}
           </p>
         )}
 
-        <div className="mt-3 text-[13px] leading-relaxed text-slate-body">
+        <div className="mt-3 text-xs leading-relaxed text-slate-body">
           {opening ? (
             <p className="line-clamp-4">{opening}</p>
           ) : (
@@ -240,13 +240,13 @@ export function PostingPreview(props: PostingPreviewProps) {
             {props.skills.slice(0, 6).map((s) => (
               <span
                 key={s}
-                className="px-1.5 py-0.5 text-[10px] font-semibold text-slate-body bg-ivory-deep"
+                className="px-1.5 py-0.5 text-2xs font-semibold text-slate-body bg-ivory-deep"
               >
                 {s}
               </span>
             ))}
             {props.skills.length > 6 && (
-              <span className="text-[10px] text-slate-meta self-center">
+              <span className="text-2xs text-slate-meta self-center">
                 +{props.skills.length - 6} more
               </span>
             )}
@@ -254,7 +254,7 @@ export function PostingPreview(props: PostingPreviewProps) {
         )}
 
         <div className="mt-4 pt-3 border-t border-[var(--rule)] flex items-center justify-between gap-2">
-          <span className="inline-flex items-center gap-1.5 text-[11px] text-slate-meta">
+          <span className="inline-flex items-center gap-1.5 text-2xs text-slate-meta">
             <Briefcase className="h-3 w-3" aria-hidden />
             {props.questionCount === 0
               ? "No screening questions"
@@ -268,7 +268,7 @@ export function PostingPreview(props: PostingPreviewProps) {
         </div>
       </div>
 
-      <p className="px-5 pb-3 text-[10px] leading-snug text-slate-meta">
+      <p className="px-5 pb-3 text-2xs leading-snug text-slate-meta">
         Approximation — anonymized locations and confidential-search
         settings apply when the posting goes live.
       </p>

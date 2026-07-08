@@ -63,13 +63,13 @@ export function ExternalLinksField({
 
   return (
     <div>
-      <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+      <label className="block text-xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
         External links{" "}
         <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
           (optional · up to {maxLinks})
         </span>
       </label>
-      <p className="text-[12px] text-slate-meta leading-relaxed mb-3">
+      <p className="text-xs text-slate-meta leading-relaxed mb-3">
         Add <strong>links</strong> (URLs) candidates see alongside the posting
         — a video tour, a &ldquo;meet the team&rdquo; page, or a benefits PDF.
         These are links only; we don&apos;t host file uploads here, so to share
@@ -92,7 +92,7 @@ export function ExternalLinksField({
             onChange={(e) => setField(idx, "label", e.target.value)}
             placeholder="Video tour"
             maxLength={80}
-            className="h-[40px] px-3 bg-card border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+            className="h-[40px] px-3 bg-card border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
           />
           <input
             type="url"
@@ -100,7 +100,7 @@ export function ExternalLinksField({
             value={row.url}
             onChange={(e) => setField(idx, "url", e.target.value)}
             placeholder="https://example.com/tour"
-            className="h-[40px] px-3 bg-card border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+            className="h-[40px] px-3 bg-card border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
           />
           <button
             type="button"
@@ -117,19 +117,19 @@ export function ExternalLinksField({
         type="button"
         onClick={addRow}
         disabled={rows.length >= maxLinks}
-        className="mt-1 inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-semibold border border-[var(--rule-strong)] bg-card text-ink hover:border-heritage hover:bg-heritage/[0.06] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        className="mt-1 inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border border-[var(--rule-strong)] bg-card text-ink hover:border-heritage hover:bg-heritage/[0.06] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
       >
         <Plus className="h-3.5 w-3.5 text-heritage-deep" />
         {rows.length === 0 ? "Add a link" : "Add another link"}
         {rows.length >= maxLinks && (
-          <span className="text-[10px] text-slate-meta tracking-[0.3px] ml-1">
+          <span className="text-2xs text-slate-meta tracking-[0.3px] ml-1">
             (max {maxLinks})
           </span>
         )}
       </button>
 
       {rows.length > 0 && (
-        <p className="mt-3 text-[11px] text-slate-meta inline-flex items-center gap-1.5">
+        <p className="mt-3 text-2xs text-slate-meta inline-flex items-center gap-1.5">
           <ExternalLink className="h-3 w-3" />
           Links render as chips below the job&apos;s benefits on the public page.
         </p>

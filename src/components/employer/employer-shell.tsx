@@ -50,6 +50,7 @@ import { EmployerRailNav, type RailNavGroup } from "./employer-rail-nav";
 import { LocationSwitcher } from "./location-switcher";
 import { CommandPaletteTrigger } from "./command-palette";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { TextSizeToggle } from "@/components/theme/text-size-toggle";
 import { SupportLauncher } from "@/components/support/support-launcher";
 import { ChatWidget } from "@/components/chat/chat-widget";
 
@@ -278,10 +279,10 @@ export function EmployerShell({
               className="ring-1 ring-white/10"
             />
             <div className="rail-org-meta min-w-0 flex-1">
-              <div className="text-[12px] font-semibold text-sidebar-foreground truncate leading-tight">
+              <div className="text-xs font-semibold text-sidebar-foreground truncate leading-tight">
                 {dsoName}
               </div>
-              <div className="text-[11px] font-semibold capitalize text-heritage-bright truncate mt-0.5">
+              <div className="text-2xs font-semibold capitalize text-heritage-bright truncate mt-0.5">
                 {role.replace("_", " ")} · {dsoStatus}
               </div>
             </div>
@@ -304,9 +305,10 @@ export function EmployerShell({
           <EmployerRailNav groups={railGroups} />
         </nav>
 
-        {/* Theme toggle — hidden in the slim rail (rail-flink slim rule). */}
-        <div className="rail-flink px-5 pt-3">
+        {/* Theme + text-size toggles — hidden in the slim rail (rail-flink slim rule). */}
+        <div className="rail-flink px-5 pt-3 flex items-center gap-2">
           <ThemeToggle className="text-sidebar-foreground" />
+          <TextSizeToggle className="text-sidebar-foreground" />
         </div>
         {/* Footer row — Settings · Help · Sign out → (Model H: one quiet
             line; sign out anchors the corner, still the same POST form). */}
@@ -357,7 +359,7 @@ export function EmployerShell({
 
         {/* Active-location badge — persistent reminder when not on "All locations". */}
         {activeLocation && (
-          <div className="border-b border-[var(--rule)] bg-cream/60 px-6 sm:px-10 py-2 text-[12px] text-slate-body inline-flex items-center gap-2">
+          <div className="border-b border-[var(--rule)] bg-cream/60 px-6 sm:px-10 py-2 text-xs text-slate-body inline-flex items-center gap-2">
             <Eyebrow as="span">Viewing</Eyebrow>
             <span className="font-semibold text-ink">{activeLocation.name}</span>
             {activeLocation.subtitle && (

@@ -162,9 +162,9 @@ function guaranteeAmountPlaceholder(
 
 /* ── Small field primitives (match wizard field styling) ── */
 
-const LABEL = "block text-[11px] font-bold tracking-[1px] uppercase text-slate-meta mb-1";
+const LABEL = "block text-2xs font-bold tracking-[1px] uppercase text-slate-meta mb-1";
 const INPUT =
-  "w-full px-3 py-2 bg-card border border-[var(--rule-strong)] text-[14px] text-ink focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage";
+  "w-full px-3 py-2 bg-card border border-[var(--rule-strong)] text-sm text-ink focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage";
 
 function Sel({
   label,
@@ -217,7 +217,7 @@ function Txt({
     <label className="block">
       <span className={LABEL}>{label}</span>
       <span className="flex items-center gap-1">
-        {prefix && <span className="text-[13px] text-slate-meta">{prefix}</span>}
+        {prefix && <span className="text-xs text-slate-meta">{prefix}</span>}
         <input
           type="text"
           inputMode="decimal"
@@ -226,7 +226,7 @@ function Txt({
           placeholder={placeholder}
           className={INPUT}
         />
-        {suffix && <span className="text-[13px] text-slate-meta">{suffix}</span>}
+        {suffix && <span className="text-xs text-slate-meta">{suffix}</span>}
       </span>
     </label>
   );
@@ -306,7 +306,7 @@ export function CompModelBuilder({
               type="button"
               onClick={() => pickModel(m.value)}
               aria-pressed={state.compModel === m.value}
-              className={`px-3 py-1.5 text-[11px] font-bold border transition-colors ${
+              className={`px-3 py-1.5 text-2xs font-bold border transition-colors ${
                 state.compModel === m.value
                   ? "bg-primary text-primary-foreground border-primary"
                   : "bg-card text-slate-body border-[var(--rule-strong)] hover:border-ink"
@@ -322,7 +322,7 @@ export function CompModelBuilder({
           ))}
         </div>
         {percent && (
-          <p className="mt-1.5 text-[11px] text-slate-meta leading-snug">
+          <p className="mt-1.5 text-2xs text-slate-meta leading-snug">
             Structured dental comp — candidates see the deal exactly as
             you define it. Specialty defaults are market suggestions
             (editable, not promises).
@@ -387,7 +387,7 @@ export function CompModelBuilder({
           {hasGuarantee &&
             state.guaranteeKind === "daily" &&
             state.guaranteeDuration === "permanent" && (
-              <p className="flex items-start gap-1.5 -mt-2 text-[11px] leading-snug text-slate-meta">
+              <p className="flex items-start gap-1.5 -mt-2 text-2xs leading-snug text-slate-meta">
                 <Info
                   className="h-3.5 w-3.5 shrink-0 mt-px text-heritage-deep"
                   aria-hidden
@@ -513,7 +513,7 @@ export function CompModelBuilder({
                 placeholder="e.g. 310000"
               />
             </div>
-            <p className="flex items-start gap-1.5 text-[11px] leading-snug text-slate-body">
+            <p className="flex items-start gap-1.5 text-2xs leading-snug text-slate-body">
               <Info className="h-3.5 w-3.5 shrink-0 mt-px text-heritage-deep" aria-hidden />
               <span>
                 The range you in good faith expect a successful hire to
@@ -550,7 +550,7 @@ export function CompModelBuilder({
             { value: "either_negotiable", label: "Either — negotiable" },
           ]}
         />
-        <p className="self-end pb-2 text-[10px] leading-snug text-slate-meta">
+        <p className="self-end pb-2 text-2xs leading-snug text-slate-meta">
           Classification is regulated and state-specific (hygienists and
           assistants under supervision are generally W-2) — confirm with
           your counsel. We display what you choose; we don't advise.

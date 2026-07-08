@@ -55,7 +55,7 @@ export function InterestedInYou({
           Talent pool <ArrowRight className="h-3 w-3" />
         </Link>
       </header>
-      <div className="px-6 py-3 text-[12px] text-slate-meta border-b border-[var(--rule)]">
+      <div className="px-6 py-3 text-xs text-slate-meta border-b border-[var(--rule)]">
         Candidates who saved one of your jobs. Fit is shown for context — reach
         out to anyone who caught your eye, score aside.
       </div>
@@ -72,14 +72,14 @@ export function InterestedInYou({
                 <div className="flex items-center gap-2 min-w-0">
                   <Link
                     href={`/employer/candidates/${c.candidate_id}`}
-                    className="text-[14px] font-bold text-ink hover:text-heritage-deep truncate inline-block max-w-full"
+                    className="text-sm font-bold text-ink hover:text-heritage-deep truncate inline-block max-w-full"
                   >
                     {c.full_name ?? "Candidate"}
                   </Link>
                   {c.mutual && (
                     <span
                       title="You saved them too"
-                      className="inline-flex items-center gap-1 bg-heritage/10 px-1.5 py-0.5 text-[10px] font-semibold text-heritage-deep shrink-0"
+                      className="inline-flex items-center gap-1 bg-heritage/10 px-1.5 py-0.5 text-2xs font-semibold text-heritage-deep shrink-0"
                     >
                       <Heart className="h-3 w-3" /> Mutual
                     </span>
@@ -87,13 +87,13 @@ export function InterestedInYou({
                   {c.anonymized && (
                     <span
                       title="Anonymous until they apply"
-                      className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-meta shrink-0"
+                      className="inline-flex items-center gap-1 text-2xs font-semibold text-slate-meta shrink-0"
                     >
                       <EyeOff className="h-3 w-3" /> Anon
                     </span>
                   )}
                 </div>
-                <div className="text-[12px] text-slate-body truncate mt-0.5">
+                <div className="text-xs text-slate-body truncate mt-0.5">
                   Saved{" "}
                   <Link
                     href={`/employer/jobs/${c.saved_job_id}`}
@@ -108,16 +108,16 @@ export function InterestedInYou({
                 {style && c.fit ? (
                   <>
                     <span
-                      className={`inline-flex items-center px-2 py-0.5 text-[11px] font-bold ${style.cls}`}
+                      className={`inline-flex items-center px-2 py-0.5 text-2xs font-bold ${style.cls}`}
                     >
                       {style.label}
                     </span>
-                    <span className="tabular-nums font-extrabold text-ink text-[14px]">
+                    <span className="tabular-nums font-extrabold text-ink text-sm">
                       {Math.round(c.fit.score)}
                     </span>
                   </>
                 ) : (
-                  <span className="text-[11px] text-slate-meta">Not scored</span>
+                  <span className="text-2xs text-slate-meta">Not scored</span>
                 )}
               </div>
             </li>
@@ -152,7 +152,7 @@ function Avatar({
     .map((s) => s[0]?.toUpperCase())
     .join("");
   return (
-    <div className="h-11 w-11 rounded-full bg-cream flex items-center justify-center text-[13px] font-bold text-slate-body shrink-0">
+    <div className="h-11 w-11 rounded-full bg-cream flex items-center justify-center text-xs font-bold text-slate-body shrink-0">
       {initials || "?"}
     </div>
   );

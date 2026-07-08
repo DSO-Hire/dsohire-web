@@ -963,10 +963,10 @@ export function CorporateJobWizard({
       {draftFound && !draftDismissed && (
         <div className="border border-corporate/50 bg-corporate/[0.08] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
-            <p className="text-[13px] font-bold text-ink mb-0.5">
+            <p className="text-xs font-bold text-ink mb-0.5">
               We saved a draft of an in-progress corporate job posting.
             </p>
-            <p className="text-[12px] text-slate-meta">
+            <p className="text-xs text-slate-meta">
               Last edit {timeAgoShort(new Date(draftFound.savedAt))} ago.
               Resume where you left off?
             </p>
@@ -975,14 +975,14 @@ export function CorporateJobWizard({
             <button
               type="button"
               onClick={restoreDraft}
-              className="px-4 py-2 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
+              className="px-4 py-2 bg-primary text-primary-foreground text-2xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
             >
               Restore draft
             </button>
             <button
               type="button"
               onClick={dismissDraft}
-              className="px-4 py-2 border border-[var(--rule-strong)] text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
+              className="px-4 py-2 border border-[var(--rule-strong)] text-ink text-2xs font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
             >
               Start fresh
             </button>
@@ -997,7 +997,7 @@ export function CorporateJobWizard({
         eyebrow={
           <>
             <BrandLockup height={28} />
-            <span className="text-[12px] font-bold uppercase tracking-[2px] text-slate-meta">
+            <span className="text-xs font-bold uppercase tracking-[2px] text-slate-meta">
               post a corporate role
             </span>
           </>
@@ -1208,7 +1208,7 @@ export function CorporateJobWizard({
 
         {savedFlash && mode === "edit" && (
           <div className="mt-6 bg-cream border-l-4 border-corporate p-4">
-            <p className="text-[14px] text-ink font-semibold">
+            <p className="text-sm text-ink font-semibold">
               Saved. Changes are live.
             </p>
           </div>
@@ -1287,13 +1287,13 @@ function BasicsStep({
   return (
     <div className="space-y-7">
       <div>
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-corporate mb-2">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-corporate mb-2">
           Basics
         </div>
         <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           What corporate role are you hiring for?
         </h2>
-        <p className="mt-3 text-[14px] text-slate-body leading-relaxed">
+        <p className="mt-3 text-sm text-slate-body leading-relaxed">
           Corporate roles are DSO-wide — they post to the Corporate Roles tab
           on the public job board, not a single practice listing.
         </p>
@@ -1336,13 +1336,13 @@ function BasicsStep({
           onChange={onOpenings}
         />
       </div>
-      <p className="-mt-3 text-[12px] text-slate-meta">
+      <p className="-mt-3 text-xs text-slate-meta">
         The corporate function powers the Corporate Roles tab filter on the
         public job board and the role-family landing pages.
       </p>
 
       <div>
-        <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+        <label className="block text-xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
           Authority level <span className="text-corporate">*</span>
         </label>
         <div className="space-y-2">
@@ -1363,20 +1363,20 @@ function BasicsStep({
                 onChange={() => onAuthorityLevel(opt.value)}
                 className="accent-corporate"
               />
-              <span className="text-[14px] text-ink font-semibold">
+              <span className="text-sm text-ink font-semibold">
                 {opt.label}
               </span>
             </label>
           ))}
         </div>
-        <p className="mt-2 text-[12px] text-slate-meta">
+        <p className="mt-2 text-xs text-slate-meta">
           The primary candidate-side filter signal for corporate roles —
           candidates browse by seniority band.
         </p>
       </div>
 
       <div>
-        <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
+        <label className="block text-xs font-bold tracking-[2px] uppercase text-slate-body mb-3">
           Anchor location{" "}
           <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
             (optional)
@@ -1400,10 +1400,10 @@ function BasicsStep({
                     onChange={() => onToggleLocation(loc.id)}
                   />
                   <div className="min-w-0">
-                    <div className="text-[14px] font-semibold text-ink">
+                    <div className="text-sm font-semibold text-ink">
                       {loc.name}
                     </div>
-                    <div className="text-[13px] text-slate-meta tracking-[0.3px]">
+                    <div className="text-xs text-slate-meta tracking-[0.3px]">
                       {[loc.city, loc.state].filter(Boolean).join(", ") ||
                         "Address not set"}
                     </div>
@@ -1413,12 +1413,12 @@ function BasicsStep({
             })}
           </div>
         ) : (
-          <p className="text-[13px] text-slate-meta italic border border-dashed border-[var(--rule-strong)] p-4 bg-cream/40">
+          <p className="text-xs text-slate-meta italic border border-dashed border-[var(--rule-strong)] p-4 bg-cream/40">
             No practice locations on file. That&apos;s fine — corporate roles
             don&apos;t require one.
           </p>
         )}
-        <p className="mt-2 text-[12px] text-slate-meta">
+        <p className="mt-2 text-xs text-slate-meta">
           Corporate roles are DSO-wide. Pick one or more anchor practices if
           the role reports out of them, or leave blank for fully remote /
           floating roles. Zero, one, or several are all valid.
@@ -1472,7 +1472,7 @@ function DescriptionStep({
   return (
     <div className="space-y-6">
       <div>
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-corporate mb-2">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-corporate mb-2">
           Description
         </div>
         <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
@@ -1507,7 +1507,7 @@ function DescriptionStep({
       />
 
       {title.trim() && (
-        <p className="text-[12px] text-slate-meta">
+        <p className="text-xs text-slate-meta">
           Job title is currently:{" "}
           <span className="font-bold text-ink">{title}</span>. Edit it from
           the Basics step.
@@ -1521,7 +1521,7 @@ function DescriptionStep({
           placeholder="Describe the role, scope, what success looks like, and what makes this DSO worth joining at the corporate level…"
         />
       </div>
-      <p className="text-[12px] text-slate-meta">
+      <p className="text-xs text-slate-meta">
         Headings, bold/italic, lists, links, and blockquotes are supported.
         Skip H1 — that&apos;s reserved for the page title.
       </p>
@@ -1674,7 +1674,7 @@ function DetailsStep({
   return (
     <div className="space-y-7">
       <div>
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-corporate mb-2">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-corporate mb-2">
           Compensation & sandbox
         </div>
         <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
@@ -1736,7 +1736,7 @@ function DetailsStep({
 
       {/* ── Work mode ── */}
       <fieldset className="border border-[var(--rule)] p-6 bg-cream/40">
-        <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-corporate">
+        <legend className="px-2 text-2xs font-bold tracking-[2px] uppercase text-corporate">
           Work mode <span className="text-corporate">*</span>
         </legend>
         <div className="mt-2 space-y-2">
@@ -1758,11 +1758,11 @@ function DetailsStep({
                 className="mt-1 accent-corporate"
               />
               <div className="flex-1">
-                <div className="text-[14px] font-bold text-ink">
+                <div className="text-sm font-bold text-ink">
                   {opt.label}
                 </div>
                 {opt.hint && (
-                  <div className="text-[13px] text-slate-body mt-0.5 leading-relaxed">
+                  <div className="text-xs text-slate-body mt-0.5 leading-relaxed">
                     {opt.hint}
                   </div>
                 )}
@@ -1784,13 +1784,13 @@ function DetailsStep({
 
         {workMode === "remote" && (
           <div className="mt-4">
-            <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+            <label className="block text-xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
               State restrictions{" "}
               <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
                 (optional)
               </span>
             </label>
-            <p className="text-[12px] text-slate-meta leading-relaxed mb-3">
+            <p className="text-xs text-slate-meta leading-relaxed mb-3">
               Pick the states a remote hire must reside in, for tax /
               compliance reasons. Leave blank for no restriction.
             </p>
@@ -1807,7 +1807,7 @@ function DetailsStep({
                       else next.add(st);
                       onRemoteStates(next);
                     }}
-                    className={`px-2.5 py-1 text-[11px] font-bold tracking-[0.5px] border transition-colors ${
+                    className={`px-2.5 py-1 text-2xs font-bold tracking-[0.5px] border transition-colors ${
                       checked
                         ? "bg-corporate text-ivory border-corporate"
                         : "bg-card text-ink border-[var(--rule)] hover:border-corporate"
@@ -1824,21 +1824,21 @@ function DetailsStep({
 
       {/* ── Travel ── */}
       <fieldset className="border border-[var(--rule)] p-6 bg-cream/40">
-        <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-corporate">
+        <legend className="px-2 text-2xs font-bold tracking-[2px] uppercase text-corporate">
           Travel{" "}
           <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
             (optional)
           </span>
         </legend>
         <div className="mt-2">
-          <label className="block text-[12px] font-semibold text-ink mb-2">
+          <label className="block text-xs font-semibold text-ink mb-2">
             Travel expectation
           </label>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => onTravelExpectation("")}
-              className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
+              className={`px-3 py-1.5 text-xs font-medium border transition-colors ${
                 travelExpectation === ""
                   ? "bg-corporate text-ivory border-corporate"
                   : "bg-card text-ink border-[var(--rule)] hover:border-corporate"
@@ -1853,7 +1853,7 @@ function DetailsStep({
                   key={opt.value}
                   type="button"
                   onClick={() => onTravelExpectation(opt.value)}
-                  className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
+                  className={`px-3 py-1.5 text-xs font-medium border transition-colors ${
                     checked
                       ? "bg-corporate text-ivory border-corporate"
                       : "bg-card text-ink border-[var(--rule)] hover:border-corporate"
@@ -1877,7 +1877,7 @@ function DetailsStep({
 
       {/* ── Reporting structure (collapsible) ── */}
       <fieldset className="border border-[var(--rule)] p-6 bg-cream/40">
-        <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-corporate">
+        <legend className="px-2 text-2xs font-bold tracking-[2px] uppercase text-corporate">
           Reporting structure{" "}
           <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
             (optional)
@@ -1887,7 +1887,7 @@ function DetailsStep({
           <button
             type="button"
             onClick={() => setReportingOpen(true)}
-            className="mt-2 inline-flex items-center gap-1.5 text-[12px] font-bold tracking-[1px] uppercase text-corporate hover:text-ink transition-colors"
+            className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-[1px] uppercase text-corporate hover:text-ink transition-colors"
           >
             <Plus className="h-3.5 w-3.5" />
             Add reporting detail
@@ -1932,7 +1932,7 @@ function DetailsStep({
 
       {/* ── Experience & education ── */}
       <fieldset className="border border-[var(--rule)] p-6 bg-cream/40">
-        <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-corporate">
+        <legend className="px-2 text-2xs font-bold tracking-[2px] uppercase text-corporate">
           Experience & education{" "}
           <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
             (optional)
@@ -1967,7 +1967,7 @@ function DetailsStep({
           />
         </div>
         <div className="mt-5">
-          <label className="block text-[12px] font-semibold text-ink mb-2">
+          <label className="block text-xs font-semibold text-ink mb-2">
             Industry experience
           </label>
           <div className="space-y-2">
@@ -1987,7 +1987,7 @@ function DetailsStep({
                 className="mt-1 accent-corporate"
               />
               <div className="flex-1">
-                <div className="text-[14px] font-bold text-ink">
+                <div className="text-sm font-bold text-ink">
                   Not specified
                 </div>
               </div>
@@ -2010,11 +2010,11 @@ function DetailsStep({
                   className="mt-1 accent-corporate"
                 />
                 <div className="flex-1">
-                  <div className="text-[14px] font-bold text-ink">
+                  <div className="text-sm font-bold text-ink">
                     {opt.label}
                   </div>
                   {opt.hint && (
-                    <div className="text-[13px] text-slate-body mt-0.5 leading-relaxed">
+                    <div className="text-xs text-slate-body mt-0.5 leading-relaxed">
                       {opt.hint}
                     </div>
                   )}
@@ -2049,10 +2049,10 @@ function DetailsStep({
 
       {/* ── Candidate visibility ── */}
       <fieldset className="border border-[var(--rule)] p-6 bg-cream/40">
-        <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-corporate">
+        <legend className="px-2 text-2xs font-bold tracking-[2px] uppercase text-corporate">
           Candidate visibility
         </legend>
-        <label className="mt-2 flex items-start gap-2.5 text-[14px] text-ink cursor-pointer">
+        <label className="mt-2 flex items-start gap-2.5 text-sm text-ink cursor-pointer">
           <input
             type="checkbox"
             checked={hideStagesFromCandidate}
@@ -2063,7 +2063,7 @@ function DetailsStep({
             <div className="font-bold mb-1">
               Hide pipeline stages from candidates
             </div>
-            <div className="text-[13px] text-slate-body leading-relaxed">
+            <div className="text-xs text-slate-body leading-relaxed">
               By default, candidates see exactly where they sit in the
               pipeline — Submitted, Screening, Interview, Offer. Turn this on
               for a sensitive executive search and candidates will see an
@@ -2167,13 +2167,13 @@ function ScreeningStep({
   return (
     <div className="space-y-6">
       <div>
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-corporate mb-2">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-corporate mb-2">
           Screening questions
         </div>
         <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
           What do you want to know up front?
         </h2>
-        <p className="mt-3 text-[14px] text-slate-body leading-relaxed">
+        <p className="mt-3 text-sm text-slate-body leading-relaxed">
           Optional. Candidates answer these as part of their application —
           pick the ones that actually filter. You can add more later.
         </p>
@@ -2189,17 +2189,17 @@ function ScreeningStep({
 
       {questions.length === 0 && (
         <div className="border border-dashed border-[var(--rule-strong)] p-6 text-center bg-cream/40">
-          <p className="text-[14px] text-slate-body mb-4">
+          <p className="text-sm text-slate-body mb-4">
             No screening questions yet.
           </p>
-          <p className="text-[12px] text-slate-meta">
+          <p className="text-xs text-slate-meta">
             Add a question below to get started.
           </p>
         </div>
       )}
 
       {questions.length >= 2 && (
-        <p className="text-[12px] text-slate-meta">
+        <p className="text-xs text-slate-meta">
           Drag a collapsed card to reorder — or use the arrows.
         </p>
       )}
@@ -2243,7 +2243,7 @@ function ScreeningStep({
       })}
 
       <div>
-        <div className="text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
+        <div className="text-xs font-bold tracking-[2px] uppercase text-slate-body mb-3">
           Add a question
         </div>
         <div className="flex flex-wrap gap-2">
@@ -2262,7 +2262,7 @@ function ScreeningStep({
               key={k}
               type="button"
               onClick={() => addQuestion(k)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-[var(--rule-strong)] text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-[var(--rule-strong)] text-ink text-2xs font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
             >
               <Plus className="h-3 w-3" />
               {KIND_LABELS[k]}
@@ -2327,10 +2327,10 @@ function QuestionCard({
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta">
+          <span className="text-2xs font-bold tracking-[2px] uppercase text-slate-meta">
             Q{index + 1}
           </span>
-          <span className="text-[10px] font-bold tracking-[2px] uppercase text-corporate px-2 py-1 bg-corporate/[0.08]">
+          <span className="text-2xs font-bold tracking-[2px] uppercase text-corporate px-2 py-1 bg-corporate/[0.08]">
             {KIND_LABELS[question.kind]}
           </span>
         </div>
@@ -2371,7 +2371,7 @@ function QuestionCard({
           className="w-full text-left -mx-1 px-1 py-1 group rounded hover:bg-cream/50 transition-colors"
         >
           <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0 flex-1 text-[14px] text-ink truncate">
+            <div className="min-w-0 flex-1 text-sm text-ink truncate">
               {question.prompt.trim() ? (
                 question.prompt
               ) : (
@@ -2391,7 +2391,7 @@ function QuestionCard({
                   Knockout
                 </span>
               )}
-              <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-corporate group-hover:text-ink transition-colors ml-2">
+              <span className="text-2xs font-bold tracking-[1.5px] uppercase text-corporate group-hover:text-ink transition-colors ml-2">
                 Edit →
               </span>
             </div>
@@ -2417,13 +2417,13 @@ function QuestionCard({
 
           {isSelect && (
             <div>
-              <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+              <label className="block text-xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
                 Options <span className="text-corporate">*</span>
               </label>
               <div className="space-y-2">
                 {(question.options ?? []).map((opt, idx) => (
                   <div key={opt.id} className="flex items-center gap-2">
-                    <span className="text-[12px] font-bold text-slate-meta w-6">
+                    <span className="text-xs font-bold text-slate-meta w-6">
                       {idx + 1}.
                     </span>
                     <input
@@ -2431,7 +2431,7 @@ function QuestionCard({
                       value={opt.label}
                       onChange={(e) => updateOption(opt.id, e.target.value)}
                       placeholder={`Option ${idx + 1}`}
-                      className="flex-1 px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-corporate focus:ring-1 focus:ring-corporate transition-colors"
+                      className="flex-1 px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-corporate focus:ring-1 focus:ring-corporate transition-colors"
                     />
                     <button
                       type="button"
@@ -2448,7 +2448,7 @@ function QuestionCard({
               <button
                 type="button"
                 onClick={addOption}
-                className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[1.5px] uppercase text-corporate hover:text-ink transition-colors"
+                className="mt-2 inline-flex items-center gap-1.5 text-2xs font-bold tracking-[1.5px] uppercase text-corporate hover:text-ink transition-colors"
               >
                 <Plus className="h-3 w-3" />
                 Add option
@@ -2458,10 +2458,10 @@ function QuestionCard({
 
           {isScale && (
             <div>
-              <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+              <label className="block text-xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
                 Slider end labels <span className="text-heritage">*</span>
               </label>
-              <p className="mb-2 text-[13px] text-slate-meta">
+              <p className="mb-2 text-xs text-slate-meta">
                 Candidates drag a <strong>1–5</strong> slider between these two
                 ends — best for attitude or comfort-level questions. For a count
                 or amount (e.g. &ldquo;locations managed&rdquo;), use a{" "}
@@ -2473,20 +2473,20 @@ function QuestionCard({
                   value={scaleLabel("low")}
                   onChange={(e) => updateOption("low", e.target.value)}
                   placeholder="Left end (1) — e.g. Individual contributor"
-                  className="px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+                  className="px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
                 />
                 <input
                   type="text"
                   value={scaleLabel("high")}
                   onChange={(e) => updateOption("high", e.target.value)}
                   placeholder="Right end (5) — e.g. Enterprise leadership"
-                  className="px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+                  className="px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
                 />
               </div>
             </div>
           )}
 
-          <label className="flex items-center gap-2.5 text-[14px] text-ink cursor-pointer pt-1">
+          <label className="flex items-center gap-2.5 text-sm text-ink cursor-pointer pt-1">
             <input
               type="checkbox"
               checked={question.required}
@@ -2504,7 +2504,7 @@ function QuestionCard({
             <button
               type="button"
               onClick={onToggleExpand}
-              className="text-[10px] font-bold tracking-[1.5px] uppercase text-corporate hover:text-ink transition-colors"
+              className="text-2xs font-bold tracking-[1.5px] uppercase text-corporate hover:text-ink transition-colors"
             >
               ↑ Collapse this question
             </button>
@@ -2699,7 +2699,7 @@ function PreviewStep({
   return (
     <div className="space-y-6">
       <div>
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-corporate mb-2">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-corporate mb-2">
           Preview & publish
         </div>
         <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
@@ -2707,7 +2707,7 @@ function PreviewStep({
         </h2>
       </div>
 
-      <div className="inline-flex rounded-full border border-[var(--rule)] bg-cream p-1 text-[12px] font-bold uppercase tracking-[1px]">
+      <div className="inline-flex rounded-full border border-[var(--rule)] bg-cream p-1 text-xs font-bold uppercase tracking-[1px]">
         <button
           type="button"
           onClick={() => setViewAsCandidate(false)}
@@ -2781,11 +2781,11 @@ function PreviewStep({
       <ReviewBlock label="Description" onEdit={() => onJumpTo("description")}>
         {description.replace(/<[^>]*>/g, "").trim() ? (
           <div
-            className="dso-prose text-[14px]"
+            className="dso-prose text-sm"
             dangerouslySetInnerHTML={{ __html: description }}
           />
         ) : (
-          <p className="text-[14px] text-slate-meta italic">
+          <p className="text-sm text-slate-meta italic">
             No description yet.
           </p>
         )}
@@ -2807,10 +2807,10 @@ function PreviewStep({
         </dl>
         {requirements.trim() && (
           <div className="mt-3 pt-3 border-t border-[var(--rule)]">
-            <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1">
+            <div className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta mb-1">
               Requirements
             </div>
-            <pre className="text-[14px] text-ink whitespace-pre-wrap font-sans leading-relaxed">
+            <pre className="text-sm text-ink whitespace-pre-wrap font-sans leading-relaxed">
               {requirements}
             </pre>
           </div>
@@ -2822,13 +2822,13 @@ function PreviewStep({
         onEdit={() => onJumpTo("screening")}
       >
         {questions.length === 0 ? (
-          <p className="text-[14px] text-slate-meta italic">
+          <p className="text-sm text-slate-meta italic">
             None — candidates apply with just resume + cover letter.
           </p>
         ) : (
           <ul className="space-y-2.5">
             {questions.map((q, idx) => (
-              <li key={q.id} className="text-[14px]">
+              <li key={q.id} className="text-sm">
                 <span className="text-slate-meta font-bold mr-2">
                   {idx + 1}.
                 </span>
@@ -2836,11 +2836,11 @@ function PreviewStep({
                   {q.prompt || "(empty prompt)"}
                 </span>
                 {q.required && (
-                  <span className="ml-2 text-[10px] font-bold tracking-[1.5px] uppercase text-corporate">
+                  <span className="ml-2 text-2xs font-bold tracking-[1.5px] uppercase text-corporate">
                     required
                   </span>
                 )}
-                <span className="ml-2 text-[10px] tracking-[0.5px] uppercase text-slate-meta">
+                <span className="ml-2 text-2xs tracking-[0.5px] uppercase text-slate-meta">
                   · {KIND_LABELS[q.kind]}
                 </span>
               </li>
@@ -2852,7 +2852,7 @@ function PreviewStep({
       )}
 
       <div className="border border-[var(--rule)] p-5 bg-cream/40">
-        <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
+        <label className="block text-xs font-bold tracking-[2px] uppercase text-slate-body mb-3">
           Publish status
         </label>
         <div className="space-y-2">
@@ -2874,7 +2874,7 @@ function PreviewStep({
                   onChange={() => onStatus(opt.value)}
                   className="accent-corporate"
                 />
-                <span className="text-[14px] text-ink">{opt.label}</span>
+                <span className="text-sm text-ink">{opt.label}</span>
                 {opt.value === "active" && status === opt.value && (
                   <Check className="h-3.5 w-3.5 text-corporate ml-auto" />
                 )}
@@ -2915,13 +2915,13 @@ function CorporateCandidatePreview({
 }) {
   const hasDesc = description.replace(/<[^>]*>/g, "").trim().length > 0;
   const chip =
-    "rounded-full bg-cream px-3 py-1 text-[12px] font-semibold text-slate-body";
+    "rounded-full bg-cream px-3 py-1 text-xs font-semibold text-slate-body";
   return (
     <div className="border border-[var(--rule)] bg-card p-6 sm:p-8">
-      <div className="mb-3 text-[10px] font-bold uppercase tracking-[2px] text-corporate">
+      <div className="mb-3 text-2xs font-bold uppercase tracking-[2px] text-corporate">
         How candidates see this
       </div>
-      <div className="text-[13px] font-semibold text-slate-meta">
+      <div className="text-xs font-semibold text-slate-meta">
         {employerLabel}
       </div>
       <h3 className="mt-1 text-2xl font-extrabold leading-tight tracking-[-0.5px] text-ink">
@@ -2935,31 +2935,31 @@ function CorporateCandidatePreview({
         <span className={chip}>{employment}</span>
         {locationLabel && <span className={chip}>{locationLabel}</span>}
         {comp && (
-          <span className="rounded-full bg-corporate/10 px-3 py-1 text-[12px] font-semibold text-corporate">
+          <span className="rounded-full bg-corporate/10 px-3 py-1 text-xs font-semibold text-corporate">
             {comp}
           </span>
         )}
       </div>
       {hasDesc ? (
         <div
-          className="dso-prose mt-5 text-[14px]"
+          className="dso-prose mt-5 text-sm"
           dangerouslySetInnerHTML={{ __html: description }}
         />
       ) : (
-        <p className="mt-5 text-[14px] italic text-slate-meta">
+        <p className="mt-5 text-sm italic text-slate-meta">
           No description yet — candidates would see an empty role description.
         </p>
       )}
       {sandboxRows.length > 0 && (
         <div className="mt-5">
-          <div className="mb-2 text-[10px] font-bold uppercase tracking-[1.5px] text-slate-meta">
+          <div className="mb-2 text-2xs font-bold uppercase tracking-[1.5px] text-slate-meta">
             Role details
           </div>
           <dl className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
             {sandboxRows.map((r) => (
               <div key={r.label}>
-                <dt className="text-[12px] text-slate-meta">{r.label}</dt>
-                <dd className="text-[14px] text-ink">{r.value}</dd>
+                <dt className="text-xs text-slate-meta">{r.label}</dt>
+                <dd className="text-sm text-ink">{r.value}</dd>
               </div>
             ))}
           </dl>
@@ -2967,15 +2967,15 @@ function CorporateCandidatePreview({
       )}
       {requirements.trim() && (
         <div className="mt-5">
-          <div className="mb-1 text-[10px] font-bold uppercase tracking-[1.5px] text-slate-meta">
+          <div className="mb-1 text-2xs font-bold uppercase tracking-[1.5px] text-slate-meta">
             Requirements
           </div>
-          <pre className="whitespace-pre-wrap font-sans text-[14px] leading-relaxed text-ink">
+          <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-ink">
             {requirements}
           </pre>
         </div>
       )}
-      <p className="mt-6 border-t border-[var(--rule)] pt-4 text-[13px] text-slate-meta">
+      <p className="mt-6 border-t border-[var(--rule)] pt-4 text-xs text-slate-meta">
         {questionCount > 0
           ? `${questionCount} screening question${questionCount === 1 ? "" : "s"} on apply.`
           : "Candidates apply with just résumé + cover letter."}
@@ -2996,13 +2996,13 @@ function ReviewBlock({
   return (
     <div className="border border-[var(--rule)] p-5">
       <div className="flex items-center justify-between mb-3">
-        <div className="text-[13px] font-bold tracking-[2px] uppercase text-slate-body">
+        <div className="text-xs font-bold tracking-[2px] uppercase text-slate-body">
           {label}
         </div>
         <button
           type="button"
           onClick={onEdit}
-          className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[1.5px] uppercase text-corporate hover:text-ink transition-colors"
+          className="inline-flex items-center gap-1 text-2xs font-bold tracking-[1.5px] uppercase text-corporate hover:text-ink transition-colors"
         >
           <Pencil className="h-3 w-3" />
           Edit
@@ -3016,10 +3016,10 @@ function ReviewBlock({
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+      <dt className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta">
         {label}
       </dt>
-      <dd className="text-[14px] text-ink mt-0.5">{value}</dd>
+      <dd className="text-sm text-ink mt-0.5">{value}</dd>
     </div>
   );
 }

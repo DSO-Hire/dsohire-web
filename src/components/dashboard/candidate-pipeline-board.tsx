@@ -101,7 +101,7 @@ export function CandidatePipelineBoard({ cards }: { cards: BoardCard[] }) {
             </div>
             <div className="flex flex-col gap-2.5">
               {items.length === 0 ? (
-                <p className="px-1.5 py-3 text-center text-[11px] leading-relaxed text-slate-meta/80">
+                <p className="px-1.5 py-3 text-center text-2xs leading-relaxed text-slate-meta/80">
                   {col.kind === "hired"
                     ? "Nothing here yet — your story isn’t finished."
                     : "—"}
@@ -140,7 +140,7 @@ function BoardCardItem({ card: c, tone }: { card: BoardCard; tone: ColTone }) {
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
         <FitPill score={c.fitScore} bucket={c.fitBucket} />
-        <span className="text-[11px] text-slate-meta">
+        <span className="text-2xs text-slate-meta">
           applied {appliedLabel(c.daysSinceApplied)}
         </span>
       </div>

@@ -38,13 +38,13 @@ export default async function LiquidityRadar() {
   return (
     <>
       <header className="mb-8">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
           Marketplace health
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink">
           Liquidity Radar
         </h1>
-        <p className="mt-3 text-[14px] text-slate-body leading-relaxed max-w-[680px]">
+        <p className="mt-3 text-sm text-slate-body leading-relaxed max-w-[680px]">
           Supply vs demand by role &amp; metro, where the funnel leaks, and how
           fast roles get their first applicant. Aggregate-only — the spots to
           point GTM at.
@@ -56,7 +56,7 @@ export default async function LiquidityRadar() {
         {velocity.length === 0 ? (
           <Empty>No applications with posting dates yet.</Empty>
         ) : (
-          <table className="w-full text-[13px]">
+          <table className="w-full text-xs">
             <thead>
               <Th3 a="Role" b="Jobs w/ apps" c="Median days" />
             </thead>
@@ -90,9 +90,9 @@ export default async function LiquidityRadar() {
         {shownMatrix.length === 0 ? (
           <Empty>No active jobs or searchable candidates with location yet.</Empty>
         ) : (
-          <table className="w-full text-[13px]">
+          <table className="w-full text-xs">
             <thead>
-              <tr className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta border-b border-[var(--rule)]">
+              <tr className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta border-b border-[var(--rule)]">
                 <th className="text-left py-2 font-bold">Role</th>
                 <th className="text-left py-2 font-bold">Metro</th>
                 <th className="text-right py-2 font-bold">Demand</th>
@@ -120,7 +120,7 @@ export default async function LiquidityRadar() {
                     </td>
                     <td className="py-1.5 text-right">
                       <span
-                        className={`inline-block px-2 py-0.5 text-[10px] font-bold tracking-[0.5px] uppercase ${TONE_CLASS[flag.tone]}`}
+                        className={`inline-block px-2 py-0.5 text-2xs font-bold tracking-[0.5px] uppercase ${TONE_CLASS[flag.tone]}`}
                       >
                         {flag.label}
                       </span>
@@ -136,19 +136,19 @@ export default async function LiquidityRadar() {
       {/* Leaks */}
       <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-3">
         <div className="lg:col-span-1 border border-[var(--rule)] bg-card p-6">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
             Buyer illiquidity
           </div>
           <div className="text-4xl font-extrabold tracking-[-1px] text-ink leading-none tabular-nums">
             {buyerLeakCount}
           </div>
-          <div className="mt-2 text-[13px] text-slate-body leading-snug">
+          <div className="mt-2 text-xs text-slate-body leading-snug">
             searchable candidates with zero applications — supply sitting idle.
           </div>
         </div>
 
         <div className="lg:col-span-2 border border-[var(--rule)] bg-card p-6">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
             Seller illiquidity · active jobs with 0 applications
           </div>
           {sellerLeaks.length === 0 ? (
@@ -161,14 +161,14 @@ export default async function LiquidityRadar() {
                   className="flex items-center justify-between gap-4 py-2"
                 >
                   <div className="min-w-0">
-                    <div className="text-[13px] text-ink font-semibold truncate">
+                    <div className="text-xs text-ink font-semibold truncate">
                       {j.title}
                     </div>
-                    <div className="text-[11px] text-slate-meta truncate">
+                    <div className="text-2xs text-slate-meta truncate">
                       {j.dso_name} · {j.metro}
                     </div>
                   </div>
-                  <div className="shrink-0 text-[12px] text-slate-meta tabular-nums">
+                  <div className="shrink-0 text-xs text-slate-meta tabular-nums">
                     {j.days_live}d live
                   </div>
                 </li>
@@ -178,7 +178,7 @@ export default async function LiquidityRadar() {
         </div>
       </div>
 
-      <p className="mt-8 text-[11px] text-slate-meta leading-relaxed">
+      <p className="mt-8 text-2xs text-slate-meta leading-relaxed">
         Metro v1 = &ldquo;City, ST&rdquo; (dso_locations for demand, candidate
         current location for supply). Matches are exact-string; a CBSA crosswalk
         upgrade is a later tranche. Counts are aggregate — no candidate identity
@@ -193,7 +193,7 @@ export default async function LiquidityRadar() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mt-4 border border-[var(--rule)] bg-card p-6">
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
+      <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
         {title}
       </div>
       {children}
@@ -202,12 +202,12 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 function Empty({ children }: { children: React.ReactNode }) {
-  return <p className="text-[13px] text-slate-meta italic">{children}</p>;
+  return <p className="text-xs text-slate-meta italic">{children}</p>;
 }
 
 function Th3({ a, b, c }: { a: string; b: string; c: string }) {
   return (
-    <tr className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta border-b border-[var(--rule)]">
+    <tr className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta border-b border-[var(--rule)]">
       <th className="text-left py-2 font-bold">{a}</th>
       <th className="text-right py-2 font-bold">{b}</th>
       <th className="text-right py-2 font-bold">{c}</th>

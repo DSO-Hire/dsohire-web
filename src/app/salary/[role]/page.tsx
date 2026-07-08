@@ -48,7 +48,7 @@ export default async function RoleSalaryIndex({ params }: { params: Promise<Para
     <SiteShell>
       <section className="pt-[140px] pb-12 px-6 sm:px-14">
         <div className="max-w-[1100px] mx-auto">
-          <p className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-5">Dental Salary Data · BLS OEWS</p>
+          <p className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-5">Dental Salary Data · BLS OEWS</p>
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-[-1.5px] leading-[1.04] text-ink mb-6">
             {role.searchTitle} Salary by State
           </h1>
@@ -58,7 +58,7 @@ export default async function RoleSalaryIndex({ params }: { params: Promise<Para
               : <>Pick a state below for {role.searchTitle.toLowerCase()} pay, ranges, and top-paying metros.</>}
           </p>
           {ownerCaveat(role) && (
-            <p className="text-[13px] text-slate-meta italic leading-[1.6] mt-5 max-w-[760px]">{ownerCaveat(role)}</p>
+            <p className="text-xs text-slate-meta italic leading-[1.6] mt-5 max-w-[760px]">{ownerCaveat(role)}</p>
           )}
         </div>
       </section>
@@ -68,7 +68,7 @@ export default async function RoleSalaryIndex({ params }: { params: Promise<Para
           <h2 className="text-2xl font-extrabold tracking-[-1px] text-ink mb-6">Choose a state</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-3 border-t border-[var(--rule)] pt-6">
             {US_STATES.map((s) => (
-              <Link key={s.code} href={`/salary/${role.slug}/${stateSlug(s.name)}`} className="text-ink hover:text-heritage-deep text-[15px]">
+              <Link key={s.code} href={`/salary/${role.slug}/${stateSlug(s.name)}`} className="text-ink hover:text-heritage-deep text-sm">
                 {s.name}
               </Link>
             ))}
@@ -79,16 +79,16 @@ export default async function RoleSalaryIndex({ params }: { params: Promise<Para
       <section className="px-6 sm:px-14 pb-16">
         <div className="max-w-[1100px] mx-auto bg-heritage p-8 sm:p-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div>
-            <p className="text-[10px] font-bold tracking-[3px] uppercase text-primary-foreground/80 mb-2">Hiring {role.searchTitle.toLowerCase()}s?</p>
+            <p className="text-2xs font-bold tracking-[3px] uppercase text-primary-foreground/80 mb-2">Hiring {role.searchTitle.toLowerCase()}s?</p>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-1px] text-primary-foreground">Fill roles across every location, faster.</h2>
           </div>
-          <Link href="/for-dental-groups" className="shrink-0 inline-flex items-center px-8 py-4 bg-ivory text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-card transition-colors">See how it works</Link>
+          <Link href="/for-dental-groups" className="shrink-0 inline-flex items-center px-8 py-4 bg-ivory text-ink text-xs font-bold tracking-[2px] uppercase hover:bg-card transition-colors">See how it works</Link>
         </div>
       </section>
 
       <section className="px-6 sm:px-14 pb-24">
         <div className="max-w-[1100px] mx-auto">
-          <p className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-4">Other dental roles</p>
+          <p className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-4">Other dental roles</p>
           <div className="flex flex-wrap gap-x-6 gap-y-2">
             <Link href={role.hubHref} className="text-ink hover:text-heritage-deep underline underline-offset-4 decoration-[var(--rule-strong)]">{role.searchTitle} careers →</Link>
             {otherRoles.map((x) => (

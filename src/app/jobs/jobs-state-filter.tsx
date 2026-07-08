@@ -71,7 +71,7 @@ export function JobsStateFilter({ defaultValues }: JobsStateFilterProps) {
             aria-haspopup="listbox"
             aria-expanded={open}
             className={cn(
-              "flex w-full items-center justify-between gap-2 bg-transparent px-0 py-0 text-left text-[14px] text-ink transition-colors focus:outline-none",
+              "flex w-full items-center justify-between gap-2 bg-transparent px-0 py-0 text-left text-sm text-ink transition-colors focus:outline-none",
               selected.length === 0 && "text-slate-meta"
             )}
           >
@@ -94,7 +94,7 @@ export function JobsStateFilter({ defaultValues }: JobsStateFilterProps) {
                 onChange={(e) => setFilter(e.target.value)}
                 placeholder="Search states…"
                 aria-label="Search states"
-                className="w-full border border-[var(--rule)] bg-cream px-3 py-2 text-[14px] text-ink placeholder:text-slate-meta focus:border-heritage focus:outline-none"
+                className="w-full border border-[var(--rule)] bg-cream px-3 py-2 text-sm text-ink placeholder:text-slate-meta focus:border-heritage focus:outline-none"
               />
               {selected.length > 0 && (
                 <button
@@ -103,7 +103,7 @@ export function JobsStateFilter({ defaultValues }: JobsStateFilterProps) {
                     e.preventDefault();
                     setSelected([]);
                   }}
-                  className="flex shrink-0 items-center gap-1 px-2 py-1 text-[12px] font-semibold text-slate-meta hover:text-ink"
+                  className="flex shrink-0 items-center gap-1 px-2 py-1 text-xs font-semibold text-slate-meta hover:text-ink"
                   title="Clear all"
                 >
                   <X className="h-3 w-3" /> Clear
@@ -112,7 +112,7 @@ export function JobsStateFilter({ defaultValues }: JobsStateFilterProps) {
             </div>
             <ul role="listbox" aria-multiselectable="true" aria-label="US states" className="max-h-64 overflow-y-auto py-1">
               {filtered.length === 0 ? (
-                <li className="px-3 py-2 text-[13px] italic text-slate-meta">No states match.</li>
+                <li className="px-3 py-2 text-xs italic text-slate-meta">No states match.</li>
               ) : (
                 filtered.map((s) => {
                   const isSelected = selected.includes(s.code);
@@ -126,7 +126,7 @@ export function JobsStateFilter({ defaultValues }: JobsStateFilterProps) {
                         toggle(s.code);
                       }}
                       className={cn(
-                        "flex cursor-pointer items-center gap-2 px-3 py-2 text-[14px] hover:bg-cream",
+                        "flex cursor-pointer items-center gap-2 px-3 py-2 text-sm hover:bg-cream",
                         isSelected ? "font-semibold text-ink" : "text-ink"
                       )}
                     >

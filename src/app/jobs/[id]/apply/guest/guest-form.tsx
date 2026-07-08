@@ -60,13 +60,13 @@ export function GuestApplyForm({
         <h2 className="text-2xl font-extrabold tracking-[-0.5px] text-ink mb-3">
           Application submitted
         </h2>
-        <p className="text-[14px] text-ink leading-relaxed mb-4">
+        <p className="text-sm text-ink leading-relaxed mb-4">
           We&apos;ve sent a confirmation to{" "}
           <strong>{state.email}</strong>. Check your inbox for a magic link
           that lets you claim your account &mdash; you&apos;ll be able to
           track this application and apply to other roles in one click.
         </p>
-        <p className="text-[13px] text-slate-body leading-relaxed">
+        <p className="text-xs text-slate-body leading-relaxed">
           <Mail className="inline h-4 w-4 mr-1 -mt-0.5 text-heritage-deep" />
           The link is valid for 90 days. No password required &mdash; click
           the link and you&apos;re in.
@@ -102,7 +102,7 @@ export function GuestApplyForm({
             required
             autoComplete="given-name"
             placeholder="Jordan"
-            className="w-full px-4 py-3.5 bg-cream border border-[var(--rule-strong)] text-ink text-[15px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+            className="w-full px-4 py-3.5 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
           />
         </div>
 
@@ -121,7 +121,7 @@ export function GuestApplyForm({
             required
             autoComplete="family-name"
             placeholder="Bailey"
-            className="w-full px-4 py-3.5 bg-cream border border-[var(--rule-strong)] text-ink text-[15px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+            className="w-full px-4 py-3.5 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
           />
         </div>
 
@@ -140,9 +140,9 @@ export function GuestApplyForm({
             required
             autoComplete="email"
             placeholder="you@email.com"
-            className="w-full px-4 py-3.5 bg-cream border border-[var(--rule-strong)] text-ink text-[15px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+            className="w-full px-4 py-3.5 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
           />
-          <p className="mt-1.5 text-[12px] text-slate-meta">
+          <p className="mt-1.5 text-xs text-slate-meta">
             Used to send your confirmation + the link to claim your account.
           </p>
         </div>
@@ -153,7 +153,7 @@ export function GuestApplyForm({
             htmlFor="guest-phone"
             className="block text-slate-body mb-2"
           >
-            Phone <span className="text-slate-meta font-medium normal-case tracking-normal text-[11px]">(optional)</span>
+            Phone <span className="text-slate-meta font-medium normal-case tracking-normal text-2xs">(optional)</span>
           </Eyebrow>
           <input
             id="guest-phone"
@@ -161,7 +161,7 @@ export function GuestApplyForm({
             name="phone"
             autoComplete="tel"
             placeholder="(555) 123-4567"
-            className="w-full px-4 py-3.5 bg-cream border border-[var(--rule-strong)] text-ink text-[15px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+            className="w-full px-4 py-3.5 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
           />
         </div>
       </fieldset>
@@ -174,25 +174,25 @@ export function GuestApplyForm({
           htmlFor="guest-resume"
           className="block text-slate-body mb-2"
         >
-          Resume <span className="text-slate-meta font-medium normal-case tracking-normal text-[11px]">(PDF or Word, up to 10&nbsp;MB)</span>
+          Resume <span className="text-slate-meta font-medium normal-case tracking-normal text-2xs">(PDF or Word, up to 10&nbsp;MB)</span>
         </Eyebrow>
         <input
           id="guest-resume"
           type="file"
           name="resume"
           accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-          className="block w-full text-[14px] text-ink file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-xs file:font-semibold file:text-primary-foreground hover:file:bg-primary/90"
+          className="block w-full text-sm text-ink file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-xs file:font-semibold file:text-primary-foreground hover:file:bg-primary/90"
         />
       </fieldset>
 
       {/* Cover letter */}
       <fieldset className="space-y-3">
-        <Eyebrow as="legend" className="mb-3">Cover letter <span className="text-slate-meta font-medium normal-case tracking-normal text-[11px]">(optional)</span></Eyebrow>
+        <Eyebrow as="legend" className="mb-3">Cover letter <span className="text-slate-meta font-medium normal-case tracking-normal text-2xs">(optional)</span></Eyebrow>
         <textarea
           name="cover_letter"
           rows={5}
           placeholder="A short note to the hiring team — what brings you to this role, what excites you about the practice."
-          className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed resize-y"
+          className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed resize-y"
         />
       </fieldset>
 
@@ -213,7 +213,7 @@ export function GuestApplyForm({
       {verificationRequirements.length > 0 && (
         <fieldset className="space-y-3 pt-2 border-t border-[var(--rule)]">
           <Eyebrow as="legend" className="mt-4 mb-3">What this role requires</Eyebrow>
-          <p className="text-[13px] text-slate-body leading-relaxed">
+          <p className="text-xs text-slate-body leading-relaxed">
             The hiring team asks applicants to confirm the items below.
             You&apos;ll confirm these &mdash; and can link supporting
             credentials &mdash; after you create an account from the link
@@ -225,7 +225,7 @@ export function GuestApplyForm({
               return (
                 <li
                   key={req.verification_type}
-                  className="flex items-start gap-2.5 text-[14px] text-ink"
+                  className="flex items-start gap-2.5 text-sm text-ink"
                 >
                   <span
                     className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-heritage"
@@ -239,7 +239,7 @@ export function GuestApplyForm({
                       <span className="text-heritage ml-1">*</span>
                     )}
                     {vt?.candidateHint && (
-                      <span className="block text-[13px] text-slate-body leading-relaxed">
+                      <span className="block text-xs text-slate-body leading-relaxed">
                         {vt.candidateHint}
                       </span>
                     )}
@@ -253,7 +253,7 @@ export function GuestApplyForm({
 
       {state.error && (
         <div className="bg-danger-bg border-l-4 border-danger p-4">
-          <p className="text-[14px] text-danger">{state.error}</p>
+          <p className="text-sm text-danger">{state.error}</p>
         </div>
       )}
 
@@ -266,7 +266,7 @@ export function GuestApplyForm({
           {submitting ? "Submitting…" : "Submit application"}
           {!submitting && <ArrowRight className="h-4 w-4" />}
         </button>
-        <p className="mt-3 text-[12px] text-slate-meta leading-relaxed max-w-[480px]">
+        <p className="mt-3 text-xs text-slate-meta leading-relaxed max-w-[480px]">
           By submitting, you agree to our{" "}
           <Link href="/legal/candidate-terms/" className="underline">
             Candidate Terms
@@ -292,13 +292,13 @@ function ScreeningField({ question }: { question: ScreeningQuestion }) {
       <label
         id={labelId}
         htmlFor={name}
-        className="block text-[13px] font-bold text-ink mb-1.5"
+        className="block text-xs font-bold text-ink mb-1.5"
       >
         {question.prompt}
         {question.required && <span className="text-heritage ml-1">*</span>}
       </label>
       {question.helper_text && (
-        <p className="text-[12px] text-slate-meta mb-2 leading-relaxed">
+        <p className="text-xs text-slate-meta mb-2 leading-relaxed">
           {question.helper_text}
         </p>
       )}
@@ -309,7 +309,7 @@ function ScreeningField({ question }: { question: ScreeningQuestion }) {
           type="text"
           name={name}
           required={question.required}
-          className="w-full px-3 py-2.5 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+          className="w-full px-3 py-2.5 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
         />
       )}
       {question.kind === "long_text" && (
@@ -318,7 +318,7 @@ function ScreeningField({ question }: { question: ScreeningQuestion }) {
           name={name}
           rows={3}
           required={question.required}
-          className="w-full px-3 py-2.5 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed resize-y"
+          className="w-full px-3 py-2.5 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed resize-y"
         />
       )}
       {question.kind === "yes_no" && (
@@ -326,7 +326,7 @@ function ScreeningField({ question }: { question: ScreeningQuestion }) {
           {["yes", "no"].map((v) => (
             <label
               key={v}
-              className="inline-flex items-center gap-2 cursor-pointer text-[14px] text-ink"
+              className="inline-flex items-center gap-2 cursor-pointer text-sm text-ink"
             >
               <input
                 type="radio"
@@ -346,7 +346,7 @@ function ScreeningField({ question }: { question: ScreeningQuestion }) {
           name={name}
           required={question.required}
           defaultValue=""
-          className="w-full px-3 py-2.5 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+          className="w-full px-3 py-2.5 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
         >
           <option value="" disabled>
             Select one…
@@ -363,7 +363,7 @@ function ScreeningField({ question }: { question: ScreeningQuestion }) {
           {options.map((opt) => (
             <label
               key={opt.id}
-              className="flex items-center gap-2 cursor-pointer text-[14px] text-ink"
+              className="flex items-center gap-2 cursor-pointer text-sm text-ink"
             >
               <input type="checkbox" name={name} value={opt.id} className="h-4 w-4" />
               {opt.label}
@@ -378,7 +378,7 @@ function ScreeningField({ question }: { question: ScreeningQuestion }) {
           name={name}
           required={question.required}
           step="1"
-          className="w-44 px-3 py-2.5 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+          className="w-44 px-3 py-2.5 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
         />
       )}
     </div>

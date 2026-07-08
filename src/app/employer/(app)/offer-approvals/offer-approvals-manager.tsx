@@ -58,7 +58,7 @@ export function OfferApprovalsManager({
   return (
     <div className="max-w-[860px]">
       <header className="mb-6">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
           Offer approvals
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-[1.05] text-ink">
@@ -66,7 +66,7 @@ export function OfferApprovalsManager({
             ? `${pending.length} offer${pending.length === 1 ? "" : "s"} waiting on you`
             : "Offer approvals"}
         </h1>
-        <p className="mt-3 text-[14px] text-slate-body leading-relaxed max-w-[640px]">
+        <p className="mt-3 text-sm text-slate-body leading-relaxed max-w-[640px]">
           When a teammate prepares an offer that needs sign-off — because of who
           they are or because the pay falls outside policy — it lands here.
           Approving sends the exact letter to the candidate; rejecting returns it
@@ -83,7 +83,7 @@ export function OfferApprovalsManager({
       </div>
 
       {!approvalsEnabled && (
-        <div className="mb-5 rounded-md border border-warning bg-warning-bg px-4 py-3 text-[13px] text-warning flex items-start gap-2">
+        <div className="mb-5 rounded-md border border-warning bg-warning-bg px-4 py-3 text-xs text-warning flex items-start gap-2">
           <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
           <span>
             Approval routing is a Scale feature and is currently off for your
@@ -96,8 +96,8 @@ export function OfferApprovalsManager({
       {pending.length === 0 ? (
         <div className="border border-[var(--rule)] bg-cream/40 px-6 py-12 text-center">
           <ShieldCheck className="h-8 w-8 text-heritage-deep mx-auto mb-3" />
-          <p className="text-[15px] font-semibold text-ink">You&apos;re all caught up</p>
-          <p className="mt-1 text-[13px] text-slate-meta">
+          <p className="text-sm font-semibold text-ink">You&apos;re all caught up</p>
+          <p className="mt-1 text-xs text-slate-meta">
             No offers are waiting for approval right now.
           </p>
         </div>
@@ -156,7 +156,7 @@ function PendingOfferCard({ offer }: { offer: PendingOffer }) {
       <div className="px-5 py-4">
         <div className="flex items-center gap-2 mb-1 flex-wrap">
           <Clock className="h-3.5 w-3.5 text-warning shrink-0" />
-          <span className="text-[10px] font-bold tracking-[2px] uppercase text-warning">
+          <span className="text-2xs font-bold tracking-[2px] uppercase text-warning">
             Awaiting approval
           </span>
         </div>
@@ -165,18 +165,18 @@ function PendingOfferCard({ offer }: { offer: PendingOffer }) {
             <h2 className="text-[16px] font-extrabold tracking-[-0.3px] text-ink">
               {offer.candidateName}
             </h2>
-            <div className="text-[13px] text-slate-body">{offer.jobTitle}</div>
-            <div className="text-[12px] text-slate-meta mt-1">
+            <div className="text-xs text-slate-body">{offer.jobTitle}</div>
+            <div className="text-xs text-slate-meta mt-1">
               Submitted {submittedAt.toLocaleDateString()} at{" "}
               {submittedAt.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
               {offer.senderName ? ` by ${offer.senderName}` : ""}
               {baseLabel ? ` · Base ${baseLabel}` : ""}
             </div>
-            <div className="text-[12px] text-slate-meta mt-0.5">Subject: {offer.subject}</div>
+            <div className="text-xs text-slate-meta mt-0.5">Subject: {offer.subject}</div>
           </div>
           <Link
             href={`/employer/applications/${offer.applicationId}`}
-            className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[1px] uppercase text-heritage-deep hover:underline shrink-0"
+            className="inline-flex items-center gap-1.5 text-2xs font-bold tracking-[1px] uppercase text-heritage-deep hover:underline shrink-0"
           >
             Open application
             <ExternalLink className="h-3 w-3" />
@@ -186,7 +186,7 @@ function PendingOfferCard({ offer }: { offer: PendingOffer }) {
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-ink bg-card hover:bg-cream"
+          className="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 text-2xs font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] text-ink bg-card hover:bg-cream"
         >
           {open ? (
             <>
@@ -202,20 +202,20 @@ function PendingOfferCard({ offer }: { offer: PendingOffer }) {
 
       {offer.revisedFromDate && (
         <div className="border-t border-warning bg-card px-5 py-3">
-          <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-2">
+          <div className="text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep mb-2">
             What changed from the previous offer
             <span className="text-slate-meta font-semibold normal-case tracking-normal">
               {" "}· revised from {offer.revisedFromDate}
             </span>
           </div>
           {offer.changes.length === 0 ? (
-            <p className="text-[12px] text-slate-meta italic">
+            <p className="text-xs text-slate-meta italic">
               No tracked terms changed — only the letter wording was edited.
             </p>
           ) : (
             <ul className="space-y-1.5">
               {offer.changes.map((c) => (
-                <li key={c.label} className="text-[12px] leading-snug">
+                <li key={c.label} className="text-xs leading-snug">
                   <span className="font-semibold text-ink">{c.label}: </span>
                   <span className="text-slate-meta line-through">{c.from}</span>
                   <span className="text-slate-meta"> → </span>
@@ -248,14 +248,14 @@ function PendingOfferCard({ offer }: { offer: PendingOffer }) {
               rows={2}
               maxLength={1000}
               placeholder="Why are you sending this back? (the sender sees this)"
-              className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage resize-y"
+              className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-xs focus:outline-none focus:border-heritage resize-y"
             />
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={doReject}
                 disabled={pending}
-                className="inline-flex items-center gap-2 bg-danger text-danger-foreground px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-danger/90 disabled:opacity-60"
+                className="inline-flex items-center gap-2 bg-danger text-danger-foreground px-4 py-2 text-2xs font-bold tracking-[1.5px] uppercase hover:bg-danger/90 disabled:opacity-60"
               >
                 {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ThumbsDown className="h-3.5 w-3.5" />}
                 Send back
@@ -267,7 +267,7 @@ function PendingOfferCard({ offer }: { offer: PendingOffer }) {
                   setError(null);
                 }}
                 disabled={pending}
-                className="px-3 py-2 text-[11px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-ink disabled:opacity-60"
+                className="px-3 py-2 text-2xs font-bold tracking-[1.5px] uppercase text-slate-body hover:text-ink disabled:opacity-60"
               >
                 Cancel
               </button>
@@ -279,7 +279,7 @@ function PendingOfferCard({ offer }: { offer: PendingOffer }) {
               type="button"
               onClick={doApprove}
               disabled={pending}
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-2xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
             >
               {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
               Approve &amp; send
@@ -288,7 +288,7 @@ function PendingOfferCard({ offer }: { offer: PendingOffer }) {
               type="button"
               onClick={() => setRejecting(true)}
               disabled={pending}
-              className="inline-flex items-center gap-2 border border-[var(--rule-strong)] text-ink bg-card px-4 py-2 text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-cream disabled:opacity-60"
+              className="inline-flex items-center gap-2 border border-[var(--rule-strong)] text-ink bg-card px-4 py-2 text-2xs font-bold tracking-[1.5px] uppercase hover:bg-cream disabled:opacity-60"
             >
               <ThumbsDown className="h-3.5 w-3.5" />
               Reject
@@ -296,7 +296,7 @@ function PendingOfferCard({ offer }: { offer: PendingOffer }) {
           </div>
         )}
         {error && (
-          <div className="mt-3 rounded-md border border-danger bg-danger-bg px-3 py-2 text-[12px] text-danger flex items-start gap-2">
+          <div className="mt-3 rounded-md border border-danger bg-danger-bg px-3 py-2 text-xs text-danger flex items-start gap-2">
             <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
             <span>{error}</span>
           </div>

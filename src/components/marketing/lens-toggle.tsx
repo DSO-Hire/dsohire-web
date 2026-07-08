@@ -140,7 +140,7 @@ function MenuList({
             <Eyebrow className="mb-0.5">
               {link.eyebrow}
             </Eyebrow>
-            <div className="text-[13px] font-semibold tracking-[-0.1px] text-ink">
+            <div className="text-xs font-semibold tracking-[-0.1px] text-ink">
               {link.label}
             </div>
           </Link>

@@ -53,7 +53,7 @@ export function CareersEditor({
 
   if (!slug) {
     return (
-      <div className="border-l-2 border-heritage bg-cream/60 px-4 py-3 text-[13px] text-slate-body">
+      <div className="border-l-2 border-heritage bg-cream/60 px-4 py-3 text-xs text-slate-body">
         Finish your{" "}
         <a
           href="/employer/settings/profile"
@@ -90,7 +90,7 @@ export function CareersEditor({
     <div className="space-y-8">
       {/* ── Hosted careers page ── */}
       <SectionCard icon={Globe} title="Hosted careers page">
-        <p className="text-[13px] text-slate-body leading-relaxed mb-4">
+        <p className="text-xs text-slate-body leading-relaxed mb-4">
           A ready-made page listing all of {dsoName}&apos;s open roles. Link to
           it from your website nav or share it directly.
         </p>
@@ -99,7 +99,7 @@ export function CareersEditor({
           href={careersUrl}
           target="_blank"
           rel="noopener"
-          className="mt-3 inline-flex items-center gap-1.5 text-[12px] font-semibold text-heritage-deep hover:text-ink transition-colors"
+          className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-heritage-deep hover:text-ink transition-colors"
         >
           Open careers page <ExternalLink className="h-3 w-3" />
         </a>
@@ -107,25 +107,25 @@ export function CareersEditor({
 
       {/* ── Embed ── */}
       <SectionCard icon={Code2} title="Embed on your website">
-        <p className="text-[13px] text-slate-body leading-relaxed mb-4">
+        <p className="text-xs text-slate-body leading-relaxed mb-4">
           Drop your live roles straight onto your own site. The widget restyles
           to match; the iframe is the simplest drop-in.
         </p>
 
         {/* Appearance controls */}
         <div className="flex flex-wrap items-end gap-4 mb-5">
-          <label className="flex flex-col gap-1 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+          <label className="flex flex-col gap-1 text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta">
             Theme
             <select
               value={theme}
               onChange={(e) => setTheme(e.target.value as "light" | "dark")}
-              className="rounded border border-[var(--rule)] bg-card px-2 py-1.5 text-[13px] text-ink"
+              className="rounded border border-[var(--rule)] bg-card px-2 py-1.5 text-xs text-ink"
             >
               <option value="light">Light</option>
               <option value="dark">Dark</option>
             </select>
           </label>
-          <label className="flex flex-col gap-1 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+          <label className="flex flex-col gap-1 text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta">
             Accent
             <input
               type="color"
@@ -135,7 +135,7 @@ export function CareersEditor({
               aria-label="Accent color"
             />
           </label>
-          <label className="flex flex-col gap-1 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+          <label className="flex flex-col gap-1 text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta">
             Max roles
             <input
               type="number"
@@ -147,7 +147,7 @@ export function CareersEditor({
                   Math.min(50, Math.max(1, Number(e.target.value) || 10)),
                 )
               }
-              className="w-20 rounded border border-[var(--rule)] bg-card px-2 py-1.5 text-[13px] text-ink"
+              className="w-20 rounded border border-[var(--rule)] bg-card px-2 py-1.5 text-xs text-ink"
             />
           </label>
         </div>
@@ -160,7 +160,7 @@ export function CareersEditor({
               type="button"
               onClick={() => setTab(t)}
               className={
-                "px-3 py-2 text-[12px] font-bold tracking-[1px] uppercase transition-colors border-b-2 -mb-px " +
+                "px-3 py-2 text-xs font-bold tracking-[1px] uppercase transition-colors border-b-2 -mb-px " +
                 (tab === t
                   ? "border-heritage-deep text-ink"
                   : "border-transparent text-slate-meta hover:text-ink")
@@ -175,7 +175,7 @@ export function CareersEditor({
 
         {/* Live preview */}
         <div className="mt-5">
-          <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-2">
+          <div className="text-2xs font-bold tracking-[2px] uppercase text-slate-meta mb-2">
             Live preview
           </div>
           <div className="rounded-lg border border-[var(--rule)] overflow-hidden bg-card">
@@ -186,7 +186,7 @@ export function CareersEditor({
               className="w-full h-[320px] bg-cream"
             />
           </div>
-          <p className="mt-2 text-[12px] text-slate-meta">
+          <p className="mt-2 text-xs text-slate-meta">
             The preview (and embeds) stay empty until distribution goes live at
             launch.
           </p>
@@ -195,13 +195,13 @@ export function CareersEditor({
 
       {/* ── Per-job distribution ── */}
       <SectionCard icon={Globe} title="Which roles get distributed">
-        <p className="text-[13px] text-slate-body leading-relaxed mb-4">
+        <p className="text-xs text-slate-body leading-relaxed mb-4">
           Every public active role is distributed by default. Turn one off to
           keep it on your DSO Hire job page but out of the feed, API, and embeds.
           Confidential and internal-only roles are always excluded.
         </p>
         {jobs.length === 0 ? (
-          <p className="text-[13px] text-slate-meta py-2">
+          <p className="text-xs text-slate-meta py-2">
             No active roles yet.
           </p>
         ) : (
@@ -215,12 +215,12 @@ export function CareersEditor({
 
       {/* ── Syndication feed ── */}
       <SectionCard icon={Rss} title="List on Indeed & LinkedIn">
-        <p className="text-[13px] text-slate-body leading-relaxed mb-4">
+        <p className="text-xs text-slate-body leading-relaxed mb-4">
           Your roles are formatted as a standard jobs XML feed. Submit this URL
           once and the aggregator re-crawls it automatically.
         </p>
         <CopyField value={feedUrl} />
-        <ol className="mt-4 space-y-2 text-[13px] text-slate-body list-decimal pl-5">
+        <ol className="mt-4 space-y-2 text-xs text-slate-body list-decimal pl-5">
           <li>
             <strong className="text-ink">Indeed:</strong> in your Indeed employer
             account, add an XML feed source and paste the URL above.
@@ -254,7 +254,7 @@ function SectionCard({
     <section className="border border-[var(--rule)] bg-card p-6 sm:p-8">
       <div className="flex items-center gap-2 mb-4">
         <Icon className="h-4 w-4 text-heritage-deep" />
-        <h3 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+        <h3 className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep">
           {title}
         </h3>
       </div>
@@ -274,7 +274,7 @@ function CopyButton({ value }: { value: string }) {
           window.setTimeout(() => setCopied(false), 1800);
         });
       }}
-      className="inline-flex items-center gap-1.5 shrink-0 bg-primary px-3 py-2 text-[11px] font-bold tracking-[1px] uppercase text-primary-foreground hover:bg-primary/90 transition-colors"
+      className="inline-flex items-center gap-1.5 shrink-0 bg-primary px-3 py-2 text-2xs font-bold tracking-[1px] uppercase text-primary-foreground hover:bg-primary/90 transition-colors"
     >
       {copied ? (
         <>
@@ -296,7 +296,7 @@ function CopyField({ value }: { value: string }) {
         readOnly
         value={value}
         onFocus={(e) => e.currentTarget.select()}
-        className="flex-1 min-w-0 rounded border border-[var(--rule)] bg-cream/40 px-3 py-2 text-[13px] text-ink font-mono"
+        className="flex-1 min-w-0 rounded border border-[var(--rule)] bg-cream/40 px-3 py-2 text-xs text-ink font-mono"
       />
       <CopyButton value={value} />
     </div>
@@ -306,7 +306,7 @@ function CopyField({ value }: { value: string }) {
 function CodeBlock({ value }: { value: string }) {
   return (
     <div className="relative">
-      <pre className="overflow-x-auto rounded border border-[var(--rule)] bg-cream/40 p-4 pr-24 text-[12px] leading-relaxed text-ink font-mono whitespace-pre-wrap break-all">
+      <pre className="overflow-x-auto rounded border border-[var(--rule)] bg-cream/40 p-4 pr-24 text-xs leading-relaxed text-ink font-mono whitespace-pre-wrap break-all">
         {value}
       </pre>
       <div className="absolute top-3 right-3">
@@ -340,7 +340,7 @@ function JobToggleRow({ job }: { job: CareersJobRow }) {
   return (
     <li className="flex items-center justify-between gap-6 py-3">
       <div className="min-w-0">
-        <p className="text-[14px] font-semibold text-ink truncate">
+        <p className="text-sm font-semibold text-ink truncate">
           {job.title}
           {job.locationLabel && (
             <span className="ml-2 font-normal text-slate-meta">
@@ -349,7 +349,7 @@ function JobToggleRow({ job }: { job: CareersJobRow }) {
           )}
         </p>
         {locked ? (
-          <span className="inline-flex items-center gap-1 mt-0.5 text-[11px] text-slate-meta">
+          <span className="inline-flex items-center gap-1 mt-0.5 text-2xs text-slate-meta">
             <Lock className="h-3 w-3" />
             Excluded —{" "}
             {job.excludedReason === "confidential"
@@ -357,9 +357,9 @@ function JobToggleRow({ job }: { job: CareersJobRow }) {
               : "internal only"}
           </span>
         ) : error ? (
-          <span className="mt-0.5 text-[11px] text-danger">{error}</span>
+          <span className="mt-0.5 text-2xs text-danger">{error}</span>
         ) : (
-          <span className="mt-0.5 text-[11px] text-slate-meta">
+          <span className="mt-0.5 text-2xs text-slate-meta">
             {enabled ? "Distributed" : "Not distributed"}
           </span>
         )}

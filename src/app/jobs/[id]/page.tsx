@@ -424,7 +424,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
             {isPublicAffiliated ? (
               <Link
                 href={`/companies/${dso?.slug as string}`}
-                className="inline-flex items-center gap-1 text-[15px] text-slate-body hover:text-ink transition-colors"
+                className="inline-flex items-center gap-1 text-sm text-slate-body hover:text-ink transition-colors"
               >
                 at <span className="font-semibold text-ink ml-0.5">{dsoName}</span>
               </Link>
@@ -433,7 +433,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
               // "Multiple locations" for multi-loc private jobs) with
               // NO link to /companies/[slug]. Linking would be the
               // direct leak: the URL slug is the corporate name.
-              <span className="inline-flex items-center gap-1 text-[15px] text-slate-body">
+              <span className="inline-flex items-center gap-1 text-sm text-slate-body">
                 at{" "}
                 <span className="font-semibold text-ink ml-0.5">
                   {displayedEmployerName}
@@ -507,10 +507,10 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
             <div className="flex items-start gap-3">
               <Sparkles className="h-4 w-4 text-heritage-deep mt-0.5 shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold text-ink mb-1">
+                <p className="text-xs font-semibold text-ink mb-1">
                   PracticeFit isn&apos;t scoring this role for you
                 </p>
-                <p className="text-[13px] text-slate-body leading-relaxed mb-3">
+                <p className="text-xs text-slate-body leading-relaxed mb-3">
                   This job&apos;s role isn&apos;t in your preferences,
                   so we&apos;re not comparing it. Your application would
                   still go through — but if your goals have shifted,
@@ -539,7 +539,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                 <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink mb-4">
                   Requirements
                 </h2>
-                <pre className="text-[14px] text-ink leading-relaxed whitespace-pre-wrap font-sans">
+                <pre className="text-sm text-ink leading-relaxed whitespace-pre-wrap font-sans">
                   {job.requirements as string}
                 </pre>
               </section>
@@ -554,7 +554,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                   {(job.benefits as string[]).map((b) => (
                     <li
                       key={b}
-                      className="px-3 py-1.5 text-[13px] font-semibold text-ink bg-cream border border-[var(--rule-strong)]"
+                      className="px-3 py-1.5 text-xs font-semibold text-ink bg-cream border border-[var(--rule-strong)]"
                     >
                       {b}
                     </li>
@@ -589,7 +589,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                           href={l.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-cream border border-[var(--rule-strong)] text-[13px] font-semibold text-ink hover:border-heritage hover:bg-heritage/[0.06] transition-colors"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-cream border border-[var(--rule-strong)] text-xs font-semibold text-ink hover:border-heritage hover:bg-heritage/[0.06] transition-colors"
                         >
                           <ExternalLink className="h-3 w-3 text-heritage-deep" aria-hidden />
                           {l.label}
@@ -610,7 +610,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                   {skills.map((s) => (
                     <li
                       key={s}
-                      className="px-3 py-1.5 text-[13px] font-semibold text-ink bg-cream border border-[var(--rule-strong)]"
+                      className="px-3 py-1.5 text-xs font-semibold text-ink bg-cream border border-[var(--rule-strong)]"
                     >
                       {s}
                     </li>
@@ -657,7 +657,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                       {orderedDays.map((d) => (
                         <li
                           key={d}
-                          className="px-3 py-1.5 text-[13px] font-semibold text-ink bg-cream border border-[var(--rule-strong)]"
+                          className="px-3 py-1.5 text-xs font-semibold text-ink bg-cream border border-[var(--rule-strong)]"
                         >
                           {DAY_LABELS[d] ?? d}
                         </li>
@@ -665,7 +665,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                     </ul>
                   )}
                   {(sched.evenings || sched.weekends) && (
-                    <p className="text-[13px] text-slate-body">
+                    <p className="text-xs text-slate-body">
                       {[
                         sched.evenings ? "Evening hours (5pm or later)" : null,
                         sched.weekends ? "Weekend shifts (Sat/Sun)" : null,
@@ -745,7 +745,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                         workMode as keyof typeof WORK_MODE_LABELS
                       ] ?? workMode}
                       {workModeDetail && (
-                        <span className="block text-[13px] text-slate-body mt-0.5">
+                        <span className="block text-xs text-slate-body mt-0.5">
                           {workModeDetail}
                         </span>
                       )}
@@ -777,7 +777,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                         travelExpectation as keyof typeof TRAVEL_EXPECTATION_LABELS
                       ] ?? travelExpectation}
                       {travelTerritory && (
-                        <span className="block text-[13px] text-slate-body mt-0.5">
+                        <span className="block text-xs text-slate-body mt-0.5">
                           {travelTerritory}
                         </span>
                       )}
@@ -847,7 +847,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                         <Eyebrow as="dt" className="mb-1">
                           {row.label}
                         </Eyebrow>
-                        <dd className="text-[14px] font-semibold text-ink">
+                        <dd className="text-sm font-semibold text-ink">
                           {row.value}
                         </dd>
                       </div>
@@ -887,7 +887,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                   variant="label"
                 />
               </div>
-              <p className="text-[13px] text-slate-meta leading-relaxed max-w-[420px]">
+              <p className="text-xs text-slate-meta leading-relaxed max-w-[420px]">
                 {existingApplicationId
                   ? "You've already applied to this role. Track its status from My Applications."
                   : `Free for candidates. We'll route your application directly to ${displayedEmployerName} — no recruiter middleman, no fees.`}
@@ -950,10 +950,10 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                       !loc.anonymize_name;
                     return (
                       <li key={loc.id}>
-                        <div className="font-semibold text-hero-foreground text-[15px]">
+                        <div className="font-semibold text-hero-foreground text-sm">
                           {publicLocName(loc)}
                         </div>
-                        <div className="text-[14px] text-hero-foreground/70">
+                        <div className="text-sm text-hero-foreground/70">
                           {[loc.city, loc.state].filter(Boolean).join(", ")}
                         </div>
                         {showWebsite && (
@@ -961,7 +961,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
                             href={loc.website as string}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="mt-0.5 inline-block text-[13px] text-heritage-bright hover:text-hero-foreground underline-offset-2 hover:underline"
+                            className="mt-0.5 inline-block text-xs text-heritage-bright hover:text-hero-foreground underline-offset-2 hover:underline"
                           >
                             Practice website →
                           </a>
@@ -977,14 +977,14 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
               <Detail icon={ShieldCheck} label="Verifications">
                 <ul className="space-y-1 mt-1">
                   {verificationTypes.map((vt) => (
-                    <li key={vt} className="text-[14px] text-hero-foreground/85">
+                    <li key={vt} className="text-sm text-hero-foreground/85">
                       {VERIFICATION_TYPE_LABELS[
                         vt as keyof typeof VERIFICATION_TYPE_LABELS
                       ] ?? vt}
                     </li>
                   ))}
                 </ul>
-                <p className="mt-1.5 text-[12px] text-hero-foreground/55 leading-snug">
+                <p className="mt-1.5 text-xs text-hero-foreground/55 leading-snug">
                   Applicants confirm these as part of applying.
                 </p>
               </Detail>
@@ -1153,7 +1153,7 @@ function CompensationGlance({ job }: { job: { [k: string]: unknown } }) {
             </div>
           )}
           {deal.estRange && (
-            <div className="tabular text-[14px] text-hero-foreground/90 font-semibold">
+            <div className="tabular text-sm text-hero-foreground/90 font-semibold">
               {deal.estRange}{" "}
               <span className="font-normal text-hero-foreground/60">
                 (employer estimate)
@@ -1165,7 +1165,7 @@ function CompensationGlance({ job }: { job: { [k: string]: unknown } }) {
               {deal.chips.map((c) => (
                 <span
                   key={c}
-                  className="px-1.5 py-0.5 text-[11px] font-semibold text-hero-foreground/80 border border-hero-foreground/25"
+                  className="px-1.5 py-0.5 text-2xs font-semibold text-hero-foreground/80 border border-hero-foreground/25"
                 >
                   {c}
                 </span>
@@ -1213,11 +1213,11 @@ function CompensationGlance({ job }: { job: { [k: string]: unknown } }) {
             {ote.isRange && ote.ote_low != null && ote.ote_high != null
               ? `~${formatUsd(ote.ote_low)}–${formatUsd(ote.ote_high)}`
               : `~${formatUsd(ote.ote)}`}
-            <span className="ml-1.5 text-[12px] font-semibold text-gold">
+            <span className="ml-1.5 text-xs font-semibold text-gold">
               OTE / yr
             </span>
           </div>
-          <div className="tabular text-[14px] text-hero-foreground/70">
+          <div className="tabular text-sm text-hero-foreground/70">
             {baseLine} base + {formatUsd(ote.variable)} target variable
           </div>
         </>
@@ -1226,18 +1226,18 @@ function CompensationGlance({ job }: { job: { [k: string]: unknown } }) {
       )}
 
       {variableEnabled && variableStructure && (
-        <div className="text-[14px] text-hero-foreground/70">
+        <div className="text-sm text-hero-foreground/70">
           <span className="font-semibold text-hero-foreground">Variable:</span>{" "}
           {variableStructure}
         </div>
       )}
       {bonusEnabled && bonusStructure && (
-        <div className="text-[14px] text-hero-foreground/70">
+        <div className="text-sm text-hero-foreground/70">
           <span className="font-semibold text-hero-foreground">Bonus:</span> {bonusStructure}
         </div>
       )}
       {equityOffered && (
-        <div className="text-[14px] text-hero-foreground/70">
+        <div className="text-sm text-hero-foreground/70">
           <span className="font-semibold text-hero-foreground">Equity:</span>{" "}
           {equityNote || "Offered"}
         </div>

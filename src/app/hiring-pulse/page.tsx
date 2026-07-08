@@ -80,7 +80,7 @@ function Hero({ pulse }: { pulse: PulseSnapshot }) {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-heritage opacity-60" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-heritage" />
           </span>
-          <span className="text-[10px] font-bold tracking-[1.6px] uppercase text-heritage-deep">
+          <span className="text-2xs font-bold tracking-[1.6px] uppercase text-heritage-deep">
             Live marketplace data · recomputed hourly
           </span>
         </span>
@@ -123,7 +123,7 @@ function HeroStat({ value, label }: { value: number; label: string }) {
       <div className="text-[38px] font-extrabold tracking-[-1.5px] leading-none text-ink tabular-nums">
         <CountUp to={value} duration={900} />
       </div>
-      <div className="mt-1.5 text-[10px] font-bold tracking-[1.6px] uppercase text-slate-meta">
+      <div className="mt-1.5 text-2xs font-bold tracking-[1.6px] uppercase text-slate-meta">
         {label}
       </div>
     </div>
@@ -139,7 +139,7 @@ function PayExplorerSection({ pulse }: { pulse: PulseSnapshot }) {
       <div className="max-w-[1080px] mx-auto">
         <div
           data-reveal
-          className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5"
+          className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5"
         >
           Posted-pay explorer
         </div>
@@ -153,7 +153,7 @@ function PayExplorerSection({ pulse }: { pulse: PulseSnapshot }) {
         <p
           data-reveal
           style={{ "--mk-delay": "120ms" } as React.CSSProperties}
-          className="text-[15px] text-slate-body leading-[1.7] max-w-[600px] mb-9"
+          className="text-sm text-slate-body leading-[1.7] max-w-[600px] mb-9"
         >
           Computed from pay ranges on live postings. Pick a role — only roles
           with enough data to be trustworthy appear at all.
@@ -173,7 +173,7 @@ function DemandSection({ pulse }: { pulse: PulseSnapshot }) {
       <div className="max-w-[1080px] mx-auto">
         <div
           data-reveal
-          className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5"
+          className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5"
         >
           Where demand is
         </div>
@@ -187,7 +187,7 @@ function DemandSection({ pulse }: { pulse: PulseSnapshot }) {
         <p
           data-reveal
           style={{ "--mk-delay": "120ms" } as React.CSSProperties}
-          className="text-[15px] text-slate-body leading-[1.7] max-w-[600px] mb-9"
+          className="text-sm text-slate-body leading-[1.7] max-w-[600px] mb-9"
         >
           States light up as groups join — watching this grid fill in is the
           growth story, live.
@@ -225,7 +225,7 @@ function DemandSection({ pulse }: { pulse: PulseSnapshot }) {
             </div>
           ))}
         </div>
-        <p className="mt-6 text-[12px] text-slate-meta leading-[1.6]">
+        <p className="mt-6 text-xs text-slate-meta leading-[1.6]">
           A role posted across practices in multiple states counts in each
           state it&rsquo;s hiring in.
         </p>
@@ -241,7 +241,7 @@ function WarmingUp() {
         <h2 className="text-[20px] font-extrabold tracking-[-0.4px] text-ink mb-3">
           The Pulse is warming up.
         </h2>
-        <p className="text-[14px] text-slate-body leading-[1.75]">
+        <p className="text-sm text-slate-body leading-[1.75]">
           This page publishes live market statistics only when there&rsquo;s
           enough inventory to be trustworthy — no projections, no padding.
           Check back as the marketplace grows, or browse what&rsquo;s live
@@ -249,7 +249,7 @@ function WarmingUp() {
         </p>
         <Link
           href="/jobs"
-          className="inline-flex items-center gap-2 mt-7 px-6 py-3 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1.6px] uppercase hover:bg-primary/90 transition-colors"
+          className="inline-flex items-center gap-2 mt-7 px-6 py-3 bg-primary text-primary-foreground text-2xs font-bold tracking-[1.6px] uppercase hover:bg-primary/90 transition-colors"
         >
           Browse Dental Jobs
           <ArrowRight className="h-3.5 w-3.5" />
@@ -286,7 +286,7 @@ function ClosingCta() {
         <p
           data-reveal
           style={{ "--mk-delay": "60ms" } as React.CSSProperties}
-          className="text-[15px] text-hero-foreground/60 leading-[1.7] max-w-[520px] mx-auto mb-9"
+          className="text-sm text-hero-foreground/60 leading-[1.7] max-w-[520px] mx-auto mb-9"
         >
           Every number on this page is a real opening at a real dental group —
           posted direct, no agencies. Join either side of it.
@@ -298,14 +298,14 @@ function ClosingCta() {
         >
           <Link
             href="/jobs"
-            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ivory text-ink text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-ivory-deep transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-ivory text-ink text-xs font-bold tracking-[1.8px] uppercase hover:bg-ivory-deep transition-colors"
           >
             Browse Dental Jobs
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <Link
             href="/for-dental-groups"
-            className="inline-flex items-center px-7 py-[13px] border border-hero-foreground/35 text-hero-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:border-heritage-light hover:text-heritage-light transition-colors"
+            className="inline-flex items-center px-7 py-[13px] border border-hero-foreground/35 text-hero-foreground text-xs font-bold tracking-[1.8px] uppercase hover:border-heritage-light hover:text-heritage-light transition-colors"
           >
             Hire On DSO Hire
           </Link>

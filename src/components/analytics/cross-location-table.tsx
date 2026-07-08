@@ -30,25 +30,25 @@ export function CrossLocationTable({ rows }: CrossLocationTableProps) {
     <section className="border border-[var(--rule)] bg-card">
       <header className="px-6 pt-5 pb-3 border-b border-[var(--rule)] flex items-center justify-between">
         <div>
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
             By location
           </div>
-          <div className="text-[12px] text-slate-meta">
+          <div className="text-xs text-slate-meta">
             {rows.length} practice locations · 30-day apps · 90-day hires
           </div>
         </div>
         <Link
           href="/employer/locations"
-          className="text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink inline-flex items-center gap-1"
+          className="text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink inline-flex items-center gap-1"
         >
           Manage locations <ArrowRight className="h-3 w-3" />
         </Link>
       </header>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-[13px]">
+        <table className="w-full text-xs">
           <thead>
-            <tr className="text-left text-[10px] font-bold tracking-[2px] uppercase text-slate-meta border-b border-[var(--rule)]">
+            <tr className="text-left text-2xs font-bold tracking-[2px] uppercase text-slate-meta border-b border-[var(--rule)]">
               <th className="px-6 py-3 font-bold">Location</th>
               <th className="px-3 py-3 font-bold text-right">Open roles</th>
               <th className="px-3 py-3 font-bold text-right">Apps · 30d</th>
@@ -80,7 +80,7 @@ export function CrossLocationTable({ rows }: CrossLocationTableProps) {
                         <div className="font-semibold text-ink truncate">
                           {row.name}
                         </div>
-                        <div className="text-[11px] text-slate-meta truncate">
+                        <div className="text-2xs text-slate-meta truncate">
                           {cityState}
                         </div>
                       </div>

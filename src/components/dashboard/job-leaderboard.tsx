@@ -82,8 +82,8 @@ export function JobLeaderboard({
             className="h-6 w-6 text-slate-meta mx-auto mb-3"
             strokeWidth={1.5}
           />
-          <div className="text-[13px] text-ink">No jobs yet.</div>
-          <div className="text-[12px] text-slate-meta mt-1">
+          <div className="text-xs text-ink">No jobs yet.</div>
+          <div className="text-xs text-slate-meta mt-1">
             Post your first to see it ranked here.
           </div>
         </div>
@@ -109,7 +109,7 @@ export function JobLeaderboard({
                   className="group grid grid-cols-[28px_1fr_auto_auto_16px] gap-3 sm:gap-4 items-center px-7 py-3 hover:bg-cream/40 transition-colors"
                 >
                   <span
-                    className={`text-[10px] font-extrabold tracking-[1.2px] tabular ${
+                    className={`text-2xs font-extrabold tracking-[1.2px] tabular ${
                       i === 0 ? "text-heritage" : "text-slate-meta"
                     }`}
                   >
@@ -117,7 +117,7 @@ export function JobLeaderboard({
                   </span>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-[13px] font-bold text-ink leading-tight tracking-[-0.1px] truncate">
+                      <span className="text-xs font-bold text-ink leading-tight tracking-[-0.1px] truncate">
                         {j.title}
                       </span>
                       {j.locationLabel && (
@@ -131,7 +131,7 @@ export function JobLeaderboard({
                         </Tag>
                       )}
                     </div>
-                    <div className="text-[10px] text-slate-meta tracking-[0.3px] mt-0.5">
+                    <div className="text-2xs text-slate-meta tracking-[0.3px] mt-0.5">
                       {j.subline}
                     </div>
                   </div>

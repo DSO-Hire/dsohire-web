@@ -53,7 +53,7 @@ export function AssigneePicker({
         value={value}
         disabled={pending}
         onChange={(e) => change(e.target.value)}
-        className="w-full max-w-xs rounded border border-[var(--rule-strong)] bg-cream px-3 py-2 text-[14px] text-ink focus:border-heritage focus:outline-none disabled:opacity-50"
+        className="w-full max-w-xs rounded border border-[var(--rule-strong)] bg-cream px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:opacity-50"
       >
         <option value="">Unassigned</option>
         {teammates.map((t) => (
@@ -62,7 +62,7 @@ export function AssigneePicker({
           </option>
         ))}
       </select>
-      {err && <p className="mt-1 text-[12px] text-danger">{err}</p>}
+      {err && <p className="mt-1 text-xs text-danger">{err}</p>}
     </div>
   );
 }

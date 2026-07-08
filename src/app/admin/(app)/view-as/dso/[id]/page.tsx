@@ -47,14 +47,14 @@ export default async function ViewAsDso({
       <div className="mb-6 flex items-center justify-between gap-4 border border-heritage-deep/30 bg-heritage/10 px-4 py-3">
         <div className="flex items-center gap-2.5">
           <Eye className="h-4 w-4 text-heritage-deep" />
-          <span className="text-[13px] text-ink">
+          <span className="text-xs text-ink">
             Viewing as <strong className="font-bold">{m.name}</strong> —{" "}
             <span className="font-bold text-heritage-deep">READ ONLY</span>
           </span>
         </div>
         <Link
           href={`/admin/dso/${m.id}`}
-          className="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+          className="inline-flex items-center gap-1.5 text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Exit
         </Link>
@@ -64,7 +64,7 @@ export default async function ViewAsDso({
         <h1 className="text-3xl font-extrabold tracking-[-1px] text-ink">
           {m.name}
         </h1>
-        <p className="mt-1 text-[13px] text-slate-meta">
+        <p className="mt-1 text-xs text-slate-meta">
           {m.tier ?? "no plan"}
           {m.subscriptionStatus ? ` · ${m.subscriptionStatus}` : ""} ·{" "}
           {m.status ?? "—"}
@@ -75,11 +75,11 @@ export default async function ViewAsDso({
         <div className="lg:col-span-2">
           <Panel title={`Jobs (${m.jobs.length})`}>
             {m.jobs.length === 0 ? (
-              <p className="text-[13px] text-slate-meta italic">No jobs yet.</p>
+              <p className="text-xs text-slate-meta italic">No jobs yet.</p>
             ) : (
-              <table className="w-full text-[13px]">
+              <table className="w-full text-xs">
                 <thead>
-                  <tr className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta border-b border-[var(--rule)]">
+                  <tr className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta border-b border-[var(--rule)]">
                     <th className="text-left py-2 font-bold">Title</th>
                     <th className="text-left py-2 font-bold">Status</th>
                     <th className="text-right py-2 font-bold">Apps</th>
@@ -109,14 +109,14 @@ export default async function ViewAsDso({
 
         <Panel title={`Team (${m.team.length})`}>
           {m.team.length === 0 ? (
-            <p className="text-[13px] text-slate-meta italic">No members.</p>
+            <p className="text-xs text-slate-meta italic">No members.</p>
           ) : (
             m.team.map((t, i) => <Row key={i} k={t.name} v={t.role} />)
           )}
         </Panel>
       </div>
 
-      <p className="mt-8 text-[11px] text-slate-meta leading-relaxed">
+      <p className="mt-8 text-2xs text-slate-meta leading-relaxed">
         Read-only mirror via service-role. Aggregate only — individual applicant
         identities aren&apos;t shown here (anonymity-safe); applicant detail with
         masking re-applied is a follow-on. EEO is never shown.

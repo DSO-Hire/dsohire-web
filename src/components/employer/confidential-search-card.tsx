@@ -69,7 +69,7 @@ export function ConfidentialSearchCard({
         <button
           type="submit"
           disabled={pending || !dirty}
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-2xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           {pending ? (
             "Saving…"
@@ -81,10 +81,10 @@ export function ConfidentialSearchCard({
           )}
         </button>
         {state.error && (
-          <span className="text-[13px] text-danger">{state.error}</span>
+          <span className="text-xs text-danger">{state.error}</span>
         )}
         {state.ok && state.message && !dirty && (
-          <span className="text-[13px] text-heritage-deep">{state.message}</span>
+          <span className="text-xs text-heritage-deep">{state.message}</span>
         )}
       </div>
     </form>

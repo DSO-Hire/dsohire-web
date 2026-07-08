@@ -45,12 +45,12 @@ export function YourMarketCard({
       <div className="mt-2 flex items-baseline gap-2">
         <span className="text-[22px] font-extrabold tracking-[-0.5px] text-ink leading-none tabular">
           {band}
-          <span className="text-[13px] font-bold text-slate-meta">
+          <span className="text-xs font-bold text-slate-meta">
             {unitLabel}
           </span>
         </span>
       </div>
-      <p className="mt-1 text-[12px] text-slate-meta">
+      <p className="mt-1 text-xs text-slate-meta">
         Typical 25th–75th percentile{AREA_SUFFIX[range.areaLevel]} · median{" "}
         <span className="font-bold text-ink tabular">
           {money(range.p50, range.unit)}
@@ -66,13 +66,13 @@ export function YourMarketCard({
 
       <Link
         href={browseHref}
-        className="mt-3 inline-flex items-center gap-1.5 text-[12px] font-bold text-heritage-deep hover:text-heritage transition-colors"
+        className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-heritage-deep hover:text-heritage transition-colors"
       >
         See roles in your range
         <ArrowRight className="h-3.5 w-3.5" aria-hidden />
       </Link>
 
-      <p className="mt-3 text-[11px] leading-relaxed text-slate-meta">
+      <p className="mt-3 text-2xs leading-relaxed text-slate-meta">
         Source: {range.source}
         {range.vintage ? `, ${range.vintage}` : ""} · {range.areaName}. Base pay
         for W-2 roles; excludes bonuses &amp; production.

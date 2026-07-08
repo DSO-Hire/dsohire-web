@@ -49,14 +49,14 @@ export default async function CandidateProspectsPage() {
         <h1 className="text-2xl font-extrabold tracking-[-0.6px] text-ink">
           Employer interest
         </h1>
-        <p className="mt-2 text-[14px] text-slate-body">
+        <p className="mt-2 text-sm text-slate-body">
           Dental groups that reached out to you. You&apos;re anonymous until you
           reply and choose to share your profile — or apply.
         </p>
       </header>
 
       {threads.length === 0 ? (
-        <div className="rounded-lg border border-[var(--rule)] bg-cream/30 px-6 py-10 text-center text-[14px] text-slate-body">
+        <div className="rounded-lg border border-[var(--rule)] bg-cream/30 px-6 py-10 text-center text-sm text-slate-body">
           No employer messages yet.
         </div>
       ) : (
@@ -68,10 +68,10 @@ export default async function CandidateProspectsPage() {
                 className="flex items-center justify-between gap-4 rounded-lg border border-[var(--rule)] bg-card px-4 py-3 hover:border-heritage-deep transition-colors"
               >
                 <div className="min-w-0">
-                  <p className="text-[14px] font-semibold text-ink truncate">
+                  <p className="text-sm font-semibold text-ink truncate">
                     {t.dsos?.name ?? "A dental group"}
                   </p>
-                  <p className="text-[12px] text-slate-meta">
+                  <p className="text-xs text-slate-meta">
                     {t.status === "blocked"
                       ? "Blocked"
                       : t.status === "muted"
@@ -81,7 +81,7 @@ export default async function CandidateProspectsPage() {
                           : "Anonymous"}
                   </p>
                 </div>
-                <span className="text-[12px] text-heritage-deep font-semibold shrink-0">
+                <span className="text-xs text-heritage-deep font-semibold shrink-0">
                   View →
                 </span>
               </Link>

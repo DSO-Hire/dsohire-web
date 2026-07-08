@@ -25,7 +25,7 @@ export default function EmployerSettingsLayout({ children }: LayoutProps) {
   return (
     <>
       <header className="mb-8 max-w-[820px]">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
           Settings
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-[1.05] text-ink">

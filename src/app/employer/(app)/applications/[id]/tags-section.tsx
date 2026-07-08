@@ -94,7 +94,7 @@ export function TagsSection({
         {tags.map((tag) => (
           <span
             key={tag.id}
-            className={`inline-flex items-center gap-1.5 px-2 py-1 text-[12px] font-semibold border ${TAG_COLOR_CLASSES[tag.color]}`}
+            className={`inline-flex items-center gap-1.5 px-2 py-1 text-xs font-semibold border ${TAG_COLOR_CLASSES[tag.color]}`}
           >
             {tag.label}
             <button
@@ -113,7 +113,7 @@ export function TagsSection({
           <button
             type="button"
             onClick={() => setAdding(true)}
-            className="inline-flex items-center gap-1 px-2 py-1 text-[12px] font-semibold text-slate-body border border-dashed border-[var(--rule-strong)] hover:text-ink hover:border-ink transition-colors"
+            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold text-slate-body border border-dashed border-[var(--rule-strong)] hover:text-ink hover:border-ink transition-colors"
           >
             <Plus className="h-3 w-3" />
             Add tag
@@ -121,7 +121,7 @@ export function TagsSection({
         )}
 
         {tags.length === 0 && !adding && (
-          <span className="text-[13px] text-slate-meta">
+          <span className="text-xs text-slate-meta">
             No tags yet.
           </span>
         )}
@@ -147,7 +147,7 @@ export function TagsSection({
                 setError(null);
               }
             }}
-            className="px-3 py-1.5 bg-cream border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+            className="px-3 py-1.5 bg-cream border border-[var(--rule-strong)] text-ink text-xs focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
           />
           <div className="flex items-center gap-1.5" role="group" aria-label="Tag color">
             {TAG_COLORS.map((c) => (
@@ -180,7 +180,7 @@ export function TagsSection({
               setLabel("");
               setError(null);
             }}
-            className="text-[12px] text-slate-meta hover:text-ink underline underline-offset-2"
+            className="text-xs text-slate-meta hover:text-ink underline underline-offset-2"
           >
             Cancel
           </button>
@@ -190,7 +190,7 @@ export function TagsSection({
             (s) => !tags.some((t) => t.label.toLowerCase() === s.label.toLowerCase())
           ) && (
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-[11px] text-slate-meta">Or pick one:</span>
+              <span className="text-2xs text-slate-meta">Or pick one:</span>
               {SUGGESTED_TAGS.filter(
                 (s) => !tags.some((t) => t.label.toLowerCase() === s.label.toLowerCase())
               ).map((s) => (
@@ -199,7 +199,7 @@ export function TagsSection({
                   type="button"
                   disabled={pending}
                   onClick={() => quickAdd(s.label, s.color)}
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold border ${TAG_COLOR_CLASSES[s.color]} hover:opacity-80 disabled:opacity-50`}
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 text-2xs font-semibold border ${TAG_COLOR_CLASSES[s.color]} hover:opacity-80 disabled:opacity-50`}
                 >
                   <Plus className="h-2.5 w-2.5" /> {s.label}
                 </button>
@@ -210,7 +210,7 @@ export function TagsSection({
       )}
 
       {error && (
-        <p role="alert" className="mt-2 text-[12px] text-danger">
+        <p role="alert" className="mt-2 text-xs text-danger">
           {error}
         </p>
       )}

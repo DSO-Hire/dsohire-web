@@ -75,7 +75,7 @@ export default async function OnboardingPage() {
       </div>
       <main className="px-6 sm:px-10 py-12">
       <header className="mb-10 max-w-[760px]">
-        <div className="flex items-center gap-3 text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-4">
+        <div className="flex items-center gap-3 text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-4">
           <CheckCircle2 className="h-4 w-4 text-heritage" />
           Email verified — welcome to DSO Hire
         </div>
@@ -97,26 +97,26 @@ export default async function OnboardingPage() {
 
         {/* Side: DSO summary */}
         <aside className="bg-cream p-8 sm:p-10">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
             Your DSO
           </div>
           <div className="text-[20px] font-extrabold tracking-[-0.4px] text-ink mb-1">
             {dso?.name}
           </div>
-          <div className="text-[13px] font-mono text-slate-meta tracking-[0.3px] mb-6">
+          <div className="text-xs font-mono text-slate-meta tracking-[0.3px] mb-6">
             dsohire.com/companies/{dso?.slug}
           </div>
 
-          <div className="text-[12px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+          <div className="text-xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
             Status
           </div>
-          <div className="text-[14px] text-ink mb-6">
+          <div className="text-sm text-ink mb-6">
             {dso?.status === "pending"
               ? "Pending — we're verifying your DSO. You can keep setting up while we review."
               : dso?.status}
           </div>
 
-          <div className="pt-6 border-t border-[var(--rule)] text-[13px] text-slate-meta leading-relaxed">
+          <div className="pt-6 border-t border-[var(--rule)] text-xs text-slate-meta leading-relaxed">
             Need help? Email{" "}
             <a
               href={SUPPORT_MAILTO}

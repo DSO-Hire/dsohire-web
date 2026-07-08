@@ -45,13 +45,13 @@ export default async function ClaimPage({ searchParams }: PageProps) {
   return (
     <SiteShell>
       <div className="pt-[140px] pb-24 px-6 sm:px-14 max-w-[640px] mx-auto">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
+        <div className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
           Claim your account
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold tracking-[-1px] leading-[1.1] text-ink mb-4">
           Sign in to track your application
         </h1>
-        <p className="text-[14px] text-slate-body leading-relaxed mb-8 max-w-[480px]">
+        <p className="text-sm text-slate-body leading-relaxed mb-8 max-w-[480px]">
           You applied as a guest. Enter your email and we&apos;ll send you a
           magic link &mdash; click it and your guest profile becomes a full
           DSO Hire account. No password required.
@@ -66,7 +66,7 @@ export default async function ClaimPage({ searchParams }: PageProps) {
             <h2 className="text-lg font-extrabold tracking-[-0.3px] text-ink mb-2">
               Check your inbox
             </h2>
-            <p className="text-[14px] text-ink leading-relaxed">
+            <p className="text-sm text-ink leading-relaxed">
               We sent a magic link to <strong>{email}</strong>. Click it to
               finish claiming your account. The link works once and expires
               in 1 hour.
@@ -80,7 +80,7 @@ export default async function ClaimPage({ searchParams }: PageProps) {
                 role="alert"
                 className="bg-danger-bg border-l-4 border-danger p-4"
               >
-                <p className="text-[14px] text-danger leading-relaxed">
+                <p className="text-sm text-danger leading-relaxed">
                   We couldn&apos;t send your magic link. Check your spam folder
                   for a recent email, wait a few minutes, or try again.
                 </p>
@@ -89,7 +89,7 @@ export default async function ClaimPage({ searchParams }: PageProps) {
             <div>
               <label
                 htmlFor="claim-email"
-                className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+                className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2"
               >
                 Email <span className="text-heritage">*</span>
               </label>
@@ -100,12 +100,12 @@ export default async function ClaimPage({ searchParams }: PageProps) {
                 required
                 autoComplete="email"
                 defaultValue={email}
-                className="w-full px-4 py-3.5 bg-cream border border-[var(--rule-strong)] text-ink text-[15px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+                className="w-full px-4 py-3.5 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
               />
             </div>
             <button
               type="submit"
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
             >
               <Mail className="h-4 w-4" />
               Send me a magic link
@@ -114,7 +114,7 @@ export default async function ClaimPage({ searchParams }: PageProps) {
         )}
 
         <div className="mt-12 pt-8 border-t border-[var(--rule)]">
-          <p className="text-[13px] text-slate-body leading-relaxed">
+          <p className="text-xs text-slate-body leading-relaxed">
             Already have an account?{" "}
             <Link
               href={`/candidate/sign-in?next=${encodeURIComponent(next)}`}

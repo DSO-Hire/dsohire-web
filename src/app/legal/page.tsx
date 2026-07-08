@@ -22,7 +22,7 @@ export default function LegalIndex() {
 
   return (
     <div className="pt-[120px] pb-24 px-6 sm:px-14 max-w-[1000px] mx-auto">
-      <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
+      <div className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
         Legal
       </div>
       <h1 className="text-4xl sm:text-6xl font-extrabold tracking-[-2px] leading-[1.05] text-ink mb-5">
@@ -48,7 +48,7 @@ export default function LegalIndex() {
                 <div className="text-sm text-slate-body leading-relaxed max-w-[560px]">
                   {doc.blurb}
                 </div>
-                <div className="text-[10px] font-semibold tracking-[1.5px] uppercase text-slate-meta mt-3">
+                <div className="text-2xs font-semibold tracking-[1.5px] uppercase text-slate-meta mt-3">
                   Effective {doc.effectiveDate}
                 </div>
               </div>
@@ -58,7 +58,7 @@ export default function LegalIndex() {
         ))}
       </ul>
 
-      <p className="mt-12 text-[14px] text-slate-meta leading-relaxed max-w-[640px]">
+      <p className="mt-12 text-sm text-slate-meta leading-relaxed max-w-[640px]">
         Questions about any of these policies? Email{" "}
         <a
           href={SUPPORT_MAILTO}

@@ -289,7 +289,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
       <article className="px-6 sm:px-14 max-w-[1100px] mx-auto pt-12 pb-24">
         <Link
           href="/companies"
-          className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase hover:text-ink transition-colors mb-8"
+          className="inline-flex items-center gap-2 text-2xs font-bold tracking-[2.5px] uppercase hover:text-ink transition-colors mb-8"
           style={{ color: brandColor }}
         >
           <ArrowLeft className="h-3.5 w-3.5" />
@@ -299,7 +299,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
         {/* Title block */}
         <header className="pb-10 border-b border-[var(--rule)] mb-12">
           <div
-            className="flex items-center gap-2.5 text-[10px] font-bold tracking-[2.5px] uppercase mb-3"
+            className="flex items-center gap-2.5 text-2xs font-bold tracking-[2.5px] uppercase mb-3"
             style={{ color: brandColor }}
           >
             <Building2 className="h-3.5 w-3.5" />
@@ -334,7 +334,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
           )}
 
           {/* Stats strip */}
-          <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-[14px] text-slate-body">
+          <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-body">
             {cityState && (
               <span className="inline-flex items-center gap-1.5">
                 <MapPin
@@ -374,7 +374,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
               {cultureChips.map((chip) => (
                 <span
                   key={chip}
-                  className="rounded-full border border-[var(--rule-strong)] bg-cream/40 px-3 py-1 text-[12px] font-semibold text-ink"
+                  className="rounded-full border border-[var(--rule-strong)] bg-cream/40 px-3 py-1 text-xs font-semibold text-ink"
                 >
                   {chip}
                 </span>
@@ -395,7 +395,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
             {dsoRow.description && (
               <section>
                 <h2
-                  className="text-[10px] font-bold tracking-[2.5px] uppercase mb-3"
+                  className="text-2xs font-bold tracking-[2.5px] uppercase mb-3"
                   style={{ color: brandColor }}
                 >
                   About
@@ -403,10 +403,10 @@ export default async function CompanyDetailPage({ params }: PageProps) {
                 {dsoRow.description.trim().startsWith("<") ? (
                   <RenderedJobDescription
                     html={dsoRow.description}
-                    className="text-[15px] text-ink leading-[1.7]"
+                    className="text-sm text-ink leading-[1.7]"
                   />
                 ) : (
-                  <p className="text-[15px] text-ink leading-[1.7] whitespace-pre-wrap">
+                  <p className="text-sm text-ink leading-[1.7] whitespace-pre-wrap">
                     {dsoRow.description}
                   </p>
                 )}
@@ -417,7 +417,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
             {whyBlocks.length > 0 && (
               <section>
                 <h2
-                  className="text-[10px] font-bold tracking-[2.5px] uppercase mb-5"
+                  className="text-2xs font-bold tracking-[2.5px] uppercase mb-5"
                   style={{ color: brandColor }}
                 >
                   Why join us
@@ -441,7 +441,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
                       <h3 className="text-[18px] font-bold text-ink leading-tight mb-2">
                         {b.title}
                       </h3>
-                      <p className="text-[14px] text-slate-body leading-relaxed">
+                      <p className="text-sm text-slate-body leading-relaxed">
                         {b.body}
                       </p>
                     </article>
@@ -454,7 +454,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
             {photos.length > 0 && (
               <section>
                 <h2
-                  className="text-[10px] font-bold tracking-[2.5px] uppercase mb-5"
+                  className="text-2xs font-bold tracking-[2.5px] uppercase mb-5"
                   style={{ color: brandColor }}
                 >
                   Inside our practices
@@ -475,7 +475,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
                         />
                       </div>
                       {photo.caption && (
-                        <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2 text-[12px] text-ivory">
+                        <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2 text-xs text-ivory">
                           {photo.caption}
                         </figcaption>
                       )}
@@ -490,7 +490,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
               <section>
                 <a
                   href={dsoRow.contact_cta_url}
-                  className="inline-flex items-center gap-2 px-6 py-3 text-[12px] font-bold uppercase tracking-[1.5px] text-ivory transition-opacity hover:opacity-90"
+                  className="inline-flex items-center gap-2 px-6 py-3 text-xs font-bold uppercase tracking-[1.5px] text-ivory transition-opacity hover:opacity-90"
                   style={{ backgroundColor: brandColor }}
                   target={
                     dsoRow.contact_cta_url.startsWith("mailto:") ||
@@ -512,7 +512,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
                 <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink">
                   Open roles
                 </h2>
-                <span className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta">
+                <span className="text-2xs font-bold tracking-[2px] uppercase text-slate-meta">
                   {jobs.length === 0
                     ? "None right now"
                     : jobs.length === 1
@@ -524,7 +524,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
               {jobs.length === 0 ? (
                 <div className="border border-[var(--rule)] bg-cream p-8 text-center">
                   <Briefcase className="h-7 w-7 text-slate-meta mx-auto mb-3" />
-                  <p className="text-[14px] text-slate-body leading-relaxed">
+                  <p className="text-sm text-slate-body leading-relaxed">
                     {dsoRow.name} doesn&apos;t have any active job postings right
                     now. Check back later, or{" "}
                     <Link
@@ -556,13 +556,13 @@ export default async function CompanyDetailPage({ params }: PageProps) {
           <aside>
             <div className="border border-[var(--rule)] bg-cream/50 p-6 sticky top-[120px]">
               <h2
-                className="text-[10px] font-bold tracking-[2.5px] uppercase mb-4"
+                className="text-2xs font-bold tracking-[2.5px] uppercase mb-4"
                 style={{ color: brandColor }}
               >
                 Practice locations
               </h2>
               {locations.length === 0 ? (
-                <p className="text-[14px] text-slate-body leading-relaxed">
+                <p className="text-sm text-slate-body leading-relaxed">
                   Practice locations aren&apos;t publicly listed for
                   this DSO. Visit individual job postings to see where
                   each role is based.
@@ -571,11 +571,11 @@ export default async function CompanyDetailPage({ params }: PageProps) {
                 <ul className="list-none space-y-3">
                   {locations.map((loc) => (
                     <li key={loc.id}>
-                      <div className="text-[14px] font-bold text-ink leading-tight">
+                      <div className="text-sm font-bold text-ink leading-tight">
                         {loc.name}
                       </div>
                       {(loc.city || loc.state) && (
-                        <div className="text-[12px] text-slate-meta tracking-[0.3px] mt-0.5">
+                        <div className="text-xs text-slate-meta tracking-[0.3px] mt-0.5">
                           {[loc.city, loc.state].filter(Boolean).join(", ")}
                         </div>
                       )}
@@ -664,12 +664,12 @@ function JobRowItem({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-1.5">
               <span
-                className="text-[10px] font-bold tracking-[1.5px] uppercase"
+                className="text-2xs font-bold tracking-[1.5px] uppercase"
                 style={{ color: brandColor }}
               >
                 {ROLE_LABELS[job.role_category] ?? job.role_category}
               </span>
-              <span className="text-[10px] tracking-[0.5px] text-slate-meta">
+              <span className="text-2xs tracking-[0.5px] text-slate-meta">
                 {EMP_LABELS[job.employment_type] ?? job.employment_type}
               </span>
             </div>
@@ -677,7 +677,7 @@ function JobRowItem({
               {job.title}
             </div>
             {locations.length > 0 && (
-              <div className="text-[13px] tracking-[0.3px] text-slate-meta inline-flex items-center gap-1">
+              <div className="text-xs tracking-[0.3px] text-slate-meta inline-flex items-center gap-1">
                 <MapPin className="h-3 w-3" />
                 {formatLocations(locations)}
               </div>
@@ -687,7 +687,7 @@ function JobRowItem({
           <div className="flex items-center gap-6 text-right flex-shrink-0">
             {job.compensation_visible && job.compensation_min !== null && (
               <div>
-                <div className="text-[15px] font-extrabold text-ink leading-none">
+                <div className="text-sm font-extrabold text-ink leading-none">
                   {formatCompensation(job)}
                 </div>
                 {job.compensation_period && (

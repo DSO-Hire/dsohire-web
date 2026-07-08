@@ -29,23 +29,23 @@ export function CareersPageShare({ url }: { url: string }) {
     <div className="max-w-[820px] border border-[var(--rule)] bg-cream/40 p-4">
       <div className="flex items-center gap-2 text-heritage-deep mb-2">
         <Globe className="size-4" aria-hidden />
-        <span className="text-[10px] font-bold tracking-[1.5px] uppercase">
+        <span className="text-2xs font-bold tracking-[1.5px] uppercase">
           Your careers page
         </span>
       </div>
-      <p className="text-[13px] text-slate-body leading-relaxed mb-3">
+      <p className="text-xs text-slate-body leading-relaxed mb-3">
         This is your hosted, branded careers page — your open roles, culture,
         and photos in one link. Add it to your website&apos;s &ldquo;Careers&rdquo;
         button or share it directly with candidates.
       </p>
       <div className="flex flex-wrap items-center gap-2">
-        <code className="flex-1 min-w-[220px] truncate border border-[var(--rule-strong)] bg-card px-3 py-2 text-[13px] text-ink">
+        <code className="flex-1 min-w-[220px] truncate border border-[var(--rule-strong)] bg-card px-3 py-2 text-xs text-ink">
           {url}
         </code>
         <button
           type="button"
           onClick={copy}
-          className="inline-flex items-center gap-1.5 px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase bg-primary text-primary-foreground hover:bg-primary/90 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
+          className="inline-flex items-center gap-1.5 px-4 py-2 text-2xs font-bold tracking-[1.5px] uppercase bg-primary text-primary-foreground hover:bg-primary/90 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2"
         >
           {copied ? (
             <>
@@ -61,7 +61,7 @@ export function CareersPageShare({ url }: { url: string }) {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] bg-card text-slate-body hover:bg-cream transition-colors"
+          className="inline-flex items-center gap-1.5 px-4 py-2 text-2xs font-bold tracking-[1.5px] uppercase border border-[var(--rule-strong)] bg-card text-slate-body hover:bg-cream transition-colors"
         >
           Open <ExternalLink className="size-3" aria-hidden />
         </a>

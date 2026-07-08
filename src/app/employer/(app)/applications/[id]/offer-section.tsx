@@ -238,7 +238,7 @@ export function OfferSection({
   return (
     <div ref={sectionRef} id="offer-composer" className="space-y-4 scroll-mt-24">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <p className="text-[13px] text-slate-meta leading-relaxed max-w-[520px] tabular">
+        <p className="text-xs text-slate-meta leading-relaxed max-w-[520px] tabular">
           {sentCount > 0
             ? `${sentCount} offer${sentCount === 1 ? "" : "s"} sent to ${candidateName}.`
             : latestPending
@@ -365,17 +365,17 @@ function LatestSendCard({
               Offer sent
             </Eyebrow>
             {prev && (
-              <span className="text-[10px] font-semibold text-slate-meta border border-[var(--rule-strong)] px-1.5 py-0.5">
+              <span className="text-2xs font-semibold text-slate-meta border border-[var(--rule-strong)] px-1.5 py-0.5">
                 Revised
               </span>
             )}
             {send.template_name && (
-              <span className="text-[11px] text-slate-meta">
+              <span className="text-2xs text-slate-meta">
                 · {send.template_name}
               </span>
             )}
           </div>
-          <div className="text-[13px] text-ink leading-snug">
+          <div className="text-xs text-ink leading-snug">
             <strong>{sentAt.toLocaleDateString()}</strong> at{" "}
             {sentAt.toLocaleTimeString([], {
               hour: "numeric",
@@ -383,7 +383,7 @@ function LatestSendCard({
             })}{" "}
             to <span className="break-all">{send.recipient_email}</span>
           </div>
-          <div className="text-[12px] text-slate-meta mt-0.5">
+          <div className="text-xs text-slate-meta mt-0.5">
             Subject: {send.subject}
             {send.sender_name ? ` · Sent by ${send.sender_name}` : ""}
           </div>
@@ -450,7 +450,7 @@ function OfferResponseStrip({
           <Eyebrow className={eyebrowCls}>
             {eyebrowLabel}
           </Eyebrow>
-          <div className="text-[13px] text-ink leading-snug">
+          <div className="text-xs text-ink leading-snug">
             <strong>{respondedAt.toLocaleDateString()}</strong> at{" "}
             {respondedAt.toLocaleTimeString([], {
               hour: "numeric",
@@ -458,13 +458,13 @@ function OfferResponseStrip({
             })}
           </div>
           {accepted && response.signed_name && (
-            <div className="text-[12px] text-slate-meta mt-0.5">
+            <div className="text-xs text-slate-meta mt-0.5">
               Typed name on file:{" "}
               <strong className="text-ink">{response.signed_name}</strong>
             </div>
           )}
           {!accepted && response.reason && (
-            <div className="text-[12px] text-slate-meta mt-1 italic">
+            <div className="text-xs text-slate-meta mt-1 italic">
               “{response.reason}”
             </div>
           )}
@@ -520,13 +520,13 @@ function OfferDiff({
         </span>
       </Eyebrow>
       {changes.length === 0 ? (
-        <p className="text-[12px] text-slate-meta italic">
+        <p className="text-xs text-slate-meta italic">
           No tracked terms changed — only the letter wording was edited.
         </p>
       ) : (
         <ul className="space-y-1.5 tabular">
           {changes.map((c) => (
-            <li key={c.label} className="text-[12px] leading-snug">
+            <li key={c.label} className="text-xs leading-snug">
               <span className="font-semibold text-ink">{c.label}: </span>
               <span className="text-slate-meta line-through">{c.from}</span>
               <span className="text-slate-meta"> → </span>
@@ -593,15 +593,15 @@ function PendingApprovalCard({
             Awaiting approval
           </Eyebrow>
           {send.template_name && (
-            <span className="text-[11px] text-slate-meta">· {send.template_name}</span>
+            <span className="text-2xs text-slate-meta">· {send.template_name}</span>
           )}
         </div>
-        <div className="text-[13px] text-ink leading-snug">
+        <div className="text-xs text-ink leading-snug">
           Submitted <strong>{submittedAt.toLocaleDateString()}</strong> at{" "}
           {submittedAt.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
           {send.sender_name ? ` by ${send.sender_name}` : ""}.
         </div>
-        <div className="text-[12px] text-slate-meta mt-0.5 tabular">
+        <div className="text-xs text-slate-meta mt-0.5 tabular">
           Subject: {send.subject}
           {baseLabel ? ` · Base ${baseLabel}` : ""}
         </div>
@@ -634,7 +634,7 @@ function PendingApprovalCard({
       <div className="border-t border-warning bg-card px-4 py-3">
         {viewerCanApprove ? (
           <div className="space-y-3">
-            <p className="text-[12px] text-slate-body leading-relaxed">
+            <p className="text-xs text-slate-body leading-relaxed">
               Nothing has been sent to the candidate yet. Approving sends this
               exact letter; rejecting returns it to the sender with your note.
             </p>
@@ -646,7 +646,7 @@ function PendingApprovalCard({
                   rows={2}
                   maxLength={1000}
                   placeholder="Why are you sending this back? (the sender sees this)"
-                  className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage resize-y"
+                  className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-xs focus:outline-none focus:border-heritage resize-y"
                 />
                 <div className="flex items-center gap-2">
                   <button
@@ -695,13 +695,13 @@ function PendingApprovalCard({
             )}
           </div>
         ) : (
-          <p className="text-[12px] text-slate-body leading-relaxed">
+          <p className="text-xs text-slate-body leading-relaxed">
             An owner or admin will review this offer before it&apos;s sent to the
             candidate. You&apos;ll be notified when they approve or send it back.
           </p>
         )}
         {error && (
-          <div className="mt-3 rounded-md border border-danger bg-danger-bg px-3 py-2 text-[12px] text-danger flex items-start gap-2">
+          <div className="mt-3 rounded-md border border-danger bg-danger-bg px-3 py-2 text-xs text-danger flex items-start gap-2">
             <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
             <span>{error}</span>
           </div>
@@ -732,13 +732,13 @@ function RejectedOfferCard({
             Not approved
           </Eyebrow>
         </div>
-        <div className="text-[13px] text-ink leading-snug">
+        <div className="text-xs text-ink leading-snug">
           Sent back on <strong>{decidedAt.toLocaleDateString()}</strong>
           {send.sender_name ? ` · originally drafted by ${send.sender_name}` : ""}.
           Nothing went to the candidate.
         </div>
         {send.approval_note && (
-          <div className="mt-2 border-l-2 border-border pl-3 text-[12px] text-slate-body italic">
+          <div className="mt-2 border-l-2 border-border pl-3 text-xs text-slate-body italic">
             “{send.approval_note}”
           </div>
         )}
@@ -791,7 +791,7 @@ function EarlierSendsAccordion({
                   : null;
             const baseLabel = fmtBase(s.base_amount, s.base_period);
             return (
-              <li key={s.id} className="px-4 py-3 text-[12px] text-slate-body">
+              <li key={s.id} className="px-4 py-3 text-xs text-slate-body">
                 <div className="font-semibold text-ink flex items-center gap-2 flex-wrap">
                   {new Date(s.sent_at).toLocaleDateString()} ·{" "}
                   {new Date(s.sent_at).toLocaleTimeString([], {
@@ -799,12 +799,12 @@ function EarlierSendsAccordion({
                     minute: "2-digit",
                   })}
                   {prev && (
-                    <span className="text-[10px] font-semibold text-slate-meta border border-[var(--rule-strong)] px-1.5 py-0.5">
+                    <span className="text-2xs font-semibold text-slate-meta border border-[var(--rule-strong)] px-1.5 py-0.5">
                       Revised
                     </span>
                   )}
                   {statusLabel && (
-                    <span className="text-[11px] font-semibold text-muted-foreground">
+                    <span className="text-2xs font-semibold text-muted-foreground">
                       · {statusLabel}
                     </span>
                   )}
@@ -816,7 +816,7 @@ function EarlierSendsAccordion({
                 {prev && changes.length > 0 && (
                   <ul className="mt-1.5 space-y-0.5 tabular">
                     {changes.map((c) => (
-                      <li key={c.label} className="text-[11px] leading-snug">
+                      <li key={c.label} className="text-2xs leading-snug">
                         <span className="font-semibold text-ink">{c.label}: </span>
                         <span className="text-slate-meta line-through">{c.from}</span>
                         <span className="text-slate-meta"> → </span>
@@ -868,7 +868,7 @@ function ConfirmRevisionDialog({
             Send a revised offer to {candidateName}?
           </h2>
         </header>
-        <div className="p-5 text-[13px] text-slate-body leading-relaxed">
+        <div className="p-5 text-xs text-slate-body leading-relaxed">
           <p>
             {candidateName} already accepted the most recent offer for{" "}
             <strong className="text-ink">{jobTitle}</strong>. Sending a new
@@ -918,7 +918,7 @@ function NoticeBox({
       ? "border-warning bg-warning-bg text-warning"
       : "border-[var(--rule)] bg-cream/40 text-ink";
   return (
-    <div className={`border ${cls} p-4 text-[13px] leading-relaxed`}>
+    <div className={`border ${cls} p-4 text-xs leading-relaxed`}>
       <div className="flex items-start gap-2">
         <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
         <div>{children}</div>
@@ -1214,7 +1214,7 @@ function SendOfferModal({
             <h2 className="text-[18px] font-extrabold tracking-[-0.4px] text-ink">
               Send an offer to {candidateName}
             </h2>
-            <div className="mt-1 text-[12px] text-slate-meta tabular">
+            <div className="mt-1 text-xs text-slate-meta tabular">
               Step {step} of 4 ·{" "}
               {step === 1
                 ? "Pick a template"
@@ -1301,7 +1301,7 @@ function SendOfferModal({
             />
           )}
           {error && !submittedPending && (
-            <div className="mt-4 rounded-md border border-danger bg-danger-bg px-3 py-2 text-[13px] text-danger flex items-start gap-2">
+            <div className="mt-4 rounded-md border border-danger bg-danger-bg px-3 py-2 text-xs text-danger flex items-start gap-2">
               <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
@@ -1396,7 +1396,7 @@ function Step1PickTemplate({
 }) {
   if (templates.length === 0) {
     return (
-      <p className="text-[13px] text-slate-body">
+      <p className="text-xs text-slate-body">
         No active templates available. An owner needs to create one under
         Settings → Offer letters before you can send.
       </p>
@@ -1404,7 +1404,7 @@ function Step1PickTemplate({
   }
   return (
     <div className="space-y-2">
-      <p className="text-[13px] text-slate-body leading-relaxed">
+      <p className="text-xs text-slate-body leading-relaxed">
         Pick a template. You&apos;ll fill in the per-offer specifics
         (start date, comp, etc.) in the next step.
       </p>
@@ -1424,14 +1424,14 @@ function Step1PickTemplate({
                 }
               >
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-[14px] font-semibold text-ink">
+                  <span className="text-sm font-semibold text-ink">
                     {t.name}
                   </span>
                   {selected && (
                     <CheckCircle2 className="h-4 w-4 text-heritage-deep" />
                   )}
                 </div>
-                <div className="text-[12px] text-slate-meta mt-0.5 line-clamp-2">
+                <div className="text-xs text-slate-meta mt-0.5 line-clamp-2">
                   {t.body.slice(0, 220)}
                   {t.body.length > 220 ? "…" : ""}
                 </div>
@@ -1487,7 +1487,7 @@ function OfferBaseCompField({
       <Eyebrow className="mb-1">
         Base compensation
       </Eyebrow>
-      <p className="text-[12px] text-slate-body leading-relaxed mb-2.5">
+      <p className="text-xs text-slate-body leading-relaxed mb-2.5">
         The structured base we check against your posted range and use in offer
         analytics. The full pay details still go in the “Compensation” field below.
         {!hasRange && " (This job has no posted range, so there's nothing to check against.)"}
@@ -1516,12 +1516,12 @@ function OfferBaseCompField({
         </select>
       </div>
       {guardrail.severity === "ok" && guardrail.message && (
-        <div className="mt-2 rounded border border-heritage/30 bg-heritage/[0.06] px-3 py-2 text-[12px] font-medium text-heritage-deep">
+        <div className="mt-2 rounded border border-heritage/30 bg-heritage/[0.06] px-3 py-2 text-xs font-medium text-heritage-deep">
           ✓ {guardrail.message}
         </div>
       )}
       {guardrail.severity === "out_of_range" && guardrail.message && (
-        <div className="mt-2 flex items-start gap-2 rounded border border-warning bg-warning-bg px-3 py-2 text-[12px] text-warning">
+        <div className="mt-2 flex items-start gap-2 rounded border border-warning bg-warning-bg px-3 py-2 text-xs text-warning">
           <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
           <span>
             {guardrail.message}{" "}
@@ -1532,7 +1532,7 @@ function OfferBaseCompField({
         </div>
       )}
       {guardrail.severity !== "out_of_range" && willRouteToApproval && (
-        <div className="mt-2 flex items-start gap-2 rounded border border-heritage/30 bg-heritage/[0.06] px-3 py-2 text-[12px] text-heritage-deep">
+        <div className="mt-2 flex items-start gap-2 rounded border border-heritage/30 bg-heritage/[0.06] px-3 py-2 text-xs text-heritage-deep">
           <ShieldCheck className="h-3.5 w-3.5 mt-0.5 shrink-0" />
           <span>
             This offer will be sent to an owner or admin for approval before it
@@ -1576,7 +1576,7 @@ function Step2FillFields({
 
   if (usedFields.length === 0) {
     return (
-      <p className="text-[13px] text-slate-body">
+      <p className="text-xs text-slate-body">
         This template doesn&apos;t reference any sender-filled merge fields.
         You can move on to the preview.
       </p>
@@ -1585,7 +1585,7 @@ function Step2FillFields({
 
   return (
     <div className="space-y-3">
-      <p className="text-[13px] text-slate-body leading-relaxed">
+      <p className="text-xs text-slate-body leading-relaxed">
         Fill in the values that change per offer. Required fields are marked.
       </p>
       {usedFields.some((f) => f.key === "offer.compensation") && (
@@ -1720,7 +1720,7 @@ function DateOfferField({
           {field.label}
         </Eyebrow>
         {field.required && (
-          <span className="text-[10px] font-semibold text-danger">
+          <span className="text-2xs font-semibold text-danger">
             Required
           </span>
         )}
@@ -1737,10 +1737,10 @@ function DateOfferField({
               : ""
           )
         }
-        className="w-full sm:w-auto px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+        className="w-full sm:w-auto px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-xs focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
       />
       {value && (
-        <p className="mt-1 text-[11px] text-slate-meta">
+        <p className="mt-1 text-2xs text-slate-meta">
           Appears in the letter as:{" "}
           <span className="text-slate-body">{value}</span>
         </p>
@@ -1784,13 +1784,13 @@ function OfferField({
           {label}
         </Eyebrow>
         {field.required && (
-          <span className="text-[10px] font-semibold text-danger">
+          <span className="text-2xs font-semibold text-danger">
             Required
           </span>
         )}
       </div>
       {helper && (
-        <p className="text-[11px] text-slate-meta leading-snug mb-1.5">{helper}</p>
+        <p className="text-2xs text-slate-meta leading-snug mb-1.5">{helper}</p>
       )}
       {isLong ? (
         <textarea
@@ -1798,7 +1798,7 @@ function OfferField({
           onChange={(e) => onChange(e.target.value)}
           rows={3}
           placeholder={field.example}
-          className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage resize-y"
+          className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-xs focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage resize-y"
         />
       ) : (
         <input
@@ -1806,7 +1806,7 @@ function OfferField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={field.example}
-          className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+          className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-xs focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
         />
       )}
     </label>
@@ -1844,7 +1844,7 @@ function Step3Preview({
   return (
     <div>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-[13px] text-slate-body">
+        <p className="text-xs text-slate-body">
           {editing
             ? "Editing this offer's text. Your saved template isn't changed."
             : "Preview of the rendered offer letter. The email also adds the standard DSO Hire header + closing chrome."}
@@ -1880,7 +1880,7 @@ function Step3Preview({
       </div>
 
       {hasEdits && !editing && (
-        <div className="mb-3 inline-flex items-center gap-1.5 rounded border border-heritage/30 bg-heritage/[0.06] px-2.5 py-1 text-[11px] font-semibold text-heritage-deep">
+        <div className="mb-3 inline-flex items-center gap-1.5 rounded border border-heritage/30 bg-heritage/[0.06] px-2.5 py-1 text-2xs font-semibold text-heritage-deep">
           <CheckCircle2 className="h-3 w-3" /> Custom edits applied to this offer
         </div>
       )}
@@ -1892,9 +1892,9 @@ function Step3Preview({
             onChange={(e) => onChangeText(e.target.value)}
             rows={18}
             spellCheck
-            className="w-full px-3 py-2.5 bg-card border border-[var(--rule-strong)] text-ink text-[13px] leading-relaxed font-mono focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage resize-y"
+            className="w-full px-3 py-2.5 bg-card border border-[var(--rule-strong)] text-ink text-xs leading-relaxed font-mono focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage resize-y"
           />
-          <p className="mt-1.5 text-[11px] text-slate-meta leading-snug">
+          <p className="mt-1.5 text-2xs text-slate-meta leading-snug">
             Basic formatting: <code>##</code> heading, <code>**bold**</code>,
             <code>*italic*</code>, and <code>-</code> for bullets. Hit{" "}
             <strong>Preview</strong> to see the rendered letter.
@@ -1935,7 +1935,7 @@ function Step4Confirm({
   return (
     <div className="space-y-4">
       {willRouteToApproval ? (
-        <div className="flex items-start gap-2 rounded border border-heritage/30 bg-heritage/[0.06] px-3 py-2.5 text-[13px] text-heritage-deep">
+        <div className="flex items-start gap-2 rounded border border-heritage/30 bg-heritage/[0.06] px-3 py-2.5 text-xs text-heritage-deep">
           <ShieldCheck className="h-4 w-4 mt-0.5 shrink-0" />
           <span>
             This offer needs approval first. When you submit, an owner or admin
@@ -1945,7 +1945,7 @@ function Step4Confirm({
           </span>
         </div>
       ) : null}
-      <p className="text-[13px] text-slate-body leading-relaxed">
+      <p className="text-xs text-slate-body leading-relaxed">
         {willRouteToApproval ? (
           <>
             You&apos;re about to submit this offer for{" "}
@@ -1971,10 +1971,10 @@ function Step4Confirm({
           value={subject}
           onChange={(e) => onSubjectChange(e.target.value)}
           maxLength={200}
-          className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+          className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
         />
       </label>
-      <div className="text-[12px] text-slate-meta leading-relaxed">
+      <div className="text-xs text-slate-meta leading-relaxed">
         The recipient sees the rendered offer letter wrapped in the standard
         DSO Hire email chrome. A snapshot of the exact HTML is saved on the
         application so the legal record is preserved even if the template is
@@ -2002,13 +2002,13 @@ function PendingSubmittedPanel({
       <h3 className="text-[17px] font-extrabold tracking-[-0.4px] text-ink">
         Submitted for approval
       </h3>
-      <p className="mx-auto mt-2 max-w-[440px] text-[13px] text-slate-body leading-relaxed">
+      <p className="mx-auto mt-2 max-w-[440px] text-xs text-slate-body leading-relaxed">
         Your offer to <strong>{candidateName}</strong> is now waiting on an owner
         or admin. <strong>Nothing has been sent to the candidate.</strong> You
         and the approver will be notified once they approve it or send it back.
       </p>
       {reason && (
-        <p className="mx-auto mt-3 max-w-[440px] text-[12px] text-slate-meta">
+        <p className="mx-auto mt-3 max-w-[440px] text-xs text-slate-meta">
           Why approval was needed: {offerGateReasonLabel(reason).toLowerCase()}.
         </p>
       )}

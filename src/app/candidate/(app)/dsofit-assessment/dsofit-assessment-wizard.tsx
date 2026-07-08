@@ -137,7 +137,7 @@ export function DsoFitAssessmentWizard({
         <h1 className="text-[26px] sm:text-[31px] font-extrabold tracking-[-0.5px] leading-tight text-ink mb-3">
           The fit score DSOs see — built in 5 minutes.
         </h1>
-        <p className="text-[15px] sm:text-[16px] text-slate-body leading-relaxed mb-6 max-w-[580px]">
+        <p className="text-sm sm:text-[16px] text-slate-body leading-relaxed mb-6 max-w-[580px]">
           DSOFit ranks every open DSO and corporate role by how well it fits
           your function, level, multi-site experience, and how you want to
           work — the things a résumé can&apos;t show. Take it once and you&apos;ll:
@@ -148,7 +148,7 @@ export function DsoFitAssessmentWizard({
             "Get surfaced to DSOs hiring for your function, by fit — not keywords.",
             "Save your résumé to your profile and apply in one click.",
           ].map((line) => (
-            <li key={line} className="flex items-start gap-3 text-[15px] text-slate-body">
+            <li key={line} className="flex items-start gap-3 text-sm text-slate-body">
               <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-heritage/15">
                 <Check className="h-3.5 w-3.5 text-heritage-deep" />
               </span>
@@ -163,11 +163,11 @@ export function DsoFitAssessmentWizard({
           <div className="text-[16px] font-extrabold text-ink">
             Drop your résumé to save time
           </div>
-          <p className="mx-auto mt-1 mb-4 max-w-[420px] text-[13px] text-slate-meta">
+          <p className="mx-auto mt-1 mb-4 max-w-[420px] text-xs text-slate-meta">
             We&apos;ll save it to your profile and pre-fill what we can. PDF or
             Word — totally optional.
           </p>
-          <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-heritage-deep bg-card px-5 py-2.5 text-[14px] font-bold text-heritage-deep hover:bg-heritage/5 transition-colors">
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-heritage-deep bg-card px-5 py-2.5 text-sm font-bold text-heritage-deep hover:bg-heritage/5 transition-colors">
             {resumeFile ? "Choose a different file" : "Choose your résumé"}
             <input
               type="file"
@@ -178,21 +178,21 @@ export function DsoFitAssessmentWizard({
           </label>
           {resumeFile && (
             <div className="mt-4">
-              <div className="mb-3 text-[13px] text-slate-body">
+              <div className="mb-3 text-xs text-slate-body">
                 Selected: <span className="font-semibold text-ink">{resumeFile.name}</span>
               </div>
               <button
                 type="button"
                 onClick={autofillFromResume}
                 disabled={parsing}
-                className="inline-flex items-center gap-2 rounded-full bg-heritage-deep px-6 py-2.5 text-[14px] font-bold text-primary-foreground disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-full bg-heritage-deep px-6 py-2.5 text-sm font-bold text-primary-foreground disabled:opacity-60"
               >
                 {parsing ? "Reading your résumé…" : "Use this résumé & start →"}
               </button>
             </div>
           )}
           {autofillNote && (
-            <p className="mt-3 text-[12px] text-slate-meta">{autofillNote}</p>
+            <p className="mt-3 text-xs text-slate-meta">{autofillNote}</p>
           )}
         </div>
 
@@ -200,7 +200,7 @@ export function DsoFitAssessmentWizard({
           <button
             type="button"
             onClick={() => setStarted(true)}
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-[15px] font-bold text-primary-foreground hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             Start without a résumé →
           </button>
@@ -208,7 +208,7 @@ export function DsoFitAssessmentWizard({
             <button
               type="button"
               onClick={() => setSkipNudge(true)}
-              className="text-[13px] text-slate-meta hover:text-ink hover:underline underline-offset-2"
+              className="text-xs text-slate-meta hover:text-ink hover:underline underline-offset-2"
             >
               Skip for now
             </button>
@@ -218,11 +218,11 @@ export function DsoFitAssessmentWizard({
         {/* Soft skip nudge — make the case once, then let them go. */}
         {skipNudge && (
           <div className="mt-5 rounded-xl border border-heritage/30 bg-cream/50 p-5">
-            <p className="text-[14px] font-bold text-ink">
+            <p className="text-sm font-bold text-ink">
               You can skip — but it&apos;s only about 5 minutes, and it&apos;s
               what powers everything.
             </p>
-            <p className="mt-1.5 text-[13px] text-slate-body leading-relaxed max-w-[520px]">
+            <p className="mt-1.5 text-xs text-slate-body leading-relaxed max-w-[520px]">
               Without it, we can&apos;t rank DSO roles for you or surface you to
               DSOs hiring for your function — those stay dark until you finish.
               It&apos;s mostly taps, and you can stop anytime.
@@ -234,13 +234,13 @@ export function DsoFitAssessmentWizard({
                   setSkipNudge(false);
                   setStarted(true);
                 }}
-                className="inline-flex items-center gap-2 rounded-full bg-heritage-deep px-5 py-2.5 text-[14px] font-bold text-primary-foreground hover:bg-heritage transition-colors"
+                className="inline-flex items-center gap-2 rounded-full bg-heritage-deep px-5 py-2.5 text-sm font-bold text-primary-foreground hover:bg-heritage transition-colors"
               >
                 Take 5 minutes →
               </button>
               <Link
                 href="/candidate/dashboard"
-                className="text-[13px] text-slate-meta hover:text-ink hover:underline underline-offset-2"
+                className="text-xs text-slate-meta hover:text-ink hover:underline underline-offset-2"
               >
                 Skip anyway
               </Link>

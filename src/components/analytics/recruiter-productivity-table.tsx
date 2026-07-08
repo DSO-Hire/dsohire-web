@@ -50,10 +50,10 @@ export function RecruiterProductivityTable({
     <section className="border border-[var(--rule)] bg-card">
       <header className="px-6 pt-5 pb-3 border-b border-[var(--rule)] flex items-center justify-between gap-4">
         <div>
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
             By recruiter
           </div>
-          <div className="text-[12px] text-slate-meta">
+          <div className="text-xs text-slate-meta">
             {rows.length} {rows.length === 1 ? "teammate" : "teammates"} active
             · last {windowDays} days
           </div>
@@ -62,9 +62,9 @@ export function RecruiterProductivityTable({
       </header>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-[13px]">
+        <table className="w-full text-xs">
           <thead>
-            <tr className="text-left text-[10px] font-bold tracking-[2px] uppercase text-slate-meta border-b border-[var(--rule)]">
+            <tr className="text-left text-2xs font-bold tracking-[2px] uppercase text-slate-meta border-b border-[var(--rule)]">
               <th className="px-6 py-3 font-bold">Recruiter</th>
               <th className="px-3 py-3 font-bold">Role</th>
               <th className="px-3 py-3 font-bold text-right">Candidates moved</th>

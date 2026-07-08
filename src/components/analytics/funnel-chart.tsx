@@ -33,10 +33,10 @@ export function FunnelChart({
   if (max === 0) {
     return (
       <section className="border border-[var(--rule)] bg-card p-6">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
           {title}
         </div>
-        <p className="text-[13px] text-slate-meta italic">
+        <p className="text-xs text-slate-meta italic">
           No applications yet — funnel populates as candidates apply.
         </p>
       </section>
@@ -45,7 +45,7 @@ export function FunnelChart({
 
   return (
     <section className="border border-[var(--rule)] bg-card p-6">
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
+      <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
         {title}
       </div>
 
@@ -55,7 +55,7 @@ export function FunnelChart({
           const conversionPct = (row.conversion_from_prev * 100).toFixed(0);
           return (
             <li key={row.stage} className="space-y-1">
-              <div className="flex items-baseline justify-between gap-3 text-[13px]">
+              <div className="flex items-baseline justify-between gap-3 text-xs">
                 <span className="font-bold text-ink">{row.label}</span>
                 <span className="tabular-nums text-slate-body">
                   <strong className="text-ink">{row.count}</strong>
@@ -78,7 +78,7 @@ export function FunnelChart({
       </ul>
 
       {(rejected !== undefined || withdrawn !== undefined) && (
-        <div className="mt-5 pt-4 border-t border-[var(--rule)] flex items-center gap-4 text-[12px] text-slate-meta">
+        <div className="mt-5 pt-4 border-t border-[var(--rule)] flex items-center gap-4 text-xs text-slate-meta">
           {rejected !== undefined && (
             <span>
               Rejected: <strong className="text-ink tabular-nums">{rejected}</strong>

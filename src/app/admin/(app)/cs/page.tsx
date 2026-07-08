@@ -367,18 +367,18 @@ export default async function CustomerSuccessDashboard() {
     <main className="min-h-screen bg-cream/30 px-6 py-10">
       <div className="mx-auto max-w-[1200px] space-y-8">
         <header className="space-y-2">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep inline-flex items-center gap-2">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep inline-flex items-center gap-2">
             <ShieldCheck className="size-3" />
             Admin · Customer Success
           </div>
           <h1 className="font-display text-3xl font-extrabold tracking-[-0.8px] text-ink leading-tight">
             Where your customers actually stand
           </h1>
-          <p className="text-[13px] text-slate-meta">
+          <p className="text-xs text-slate-meta">
             Read-only ops dashboard. Every metric below is computed live
             from the database — no caching, no stale numbers.
           </p>
-          <nav className="flex items-center gap-2 pt-2 text-[12px]">
+          <nav className="flex items-center gap-2 pt-2 text-xs">
             <Link
               href="/admin/support/conversations"
               className="text-heritage-deep underline-offset-2 hover:underline"
@@ -453,10 +453,10 @@ export default async function CustomerSuccessDashboard() {
                   <RiskBadge flag={flag} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-bold text-ink text-[14px]">
+                      <span className="font-bold text-ink text-sm">
                         {dso.name}
                       </span>
-                      <span className="text-[10px] font-bold tracking-[1px] uppercase text-slate-meta">
+                      <span className="text-2xs font-bold tracking-[1px] uppercase text-slate-meta">
                         {tier ?? "no_sub"}
                       </span>
                       <RiskLabel flag={flag} />
@@ -479,28 +479,28 @@ export default async function CustomerSuccessDashboard() {
             icon={BarChart3}
           />
           <div className="border border-[var(--rule)] bg-card overflow-x-auto">
-            <table className="w-full text-[12px]">
+            <table className="w-full text-xs">
               <thead className="bg-cream/40 border-b border-[var(--rule)]">
                 <tr>
-                  <th className="text-left px-3 py-2 font-bold tracking-[0.5px] uppercase text-[10px] text-slate-body">
+                  <th className="text-left px-3 py-2 font-bold tracking-[0.5px] uppercase text-2xs text-slate-body">
                     DSO
                   </th>
-                  <th className="text-left px-3 py-2 font-bold tracking-[0.5px] uppercase text-[10px] text-slate-body">
+                  <th className="text-left px-3 py-2 font-bold tracking-[0.5px] uppercase text-2xs text-slate-body">
                     Tier
                   </th>
-                  <th className="text-center px-3 py-2 font-bold tracking-[0.5px] uppercase text-[10px] text-slate-body">
+                  <th className="text-center px-3 py-2 font-bold tracking-[0.5px] uppercase text-2xs text-slate-body">
                     Sub
                   </th>
-                  <th className="text-center px-3 py-2 font-bold tracking-[0.5px] uppercase text-[10px] text-slate-body">
+                  <th className="text-center px-3 py-2 font-bold tracking-[0.5px] uppercase text-2xs text-slate-body">
                     Posted Job
                   </th>
-                  <th className="text-center px-3 py-2 font-bold tracking-[0.5px] uppercase text-[10px] text-slate-body">
+                  <th className="text-center px-3 py-2 font-bold tracking-[0.5px] uppercase text-2xs text-slate-body">
                     Team 2+
                   </th>
-                  <th className="text-center px-3 py-2 font-bold tracking-[0.5px] uppercase text-[10px] text-slate-body">
+                  <th className="text-center px-3 py-2 font-bold tracking-[0.5px] uppercase text-2xs text-slate-body">
                     Loc 2+
                   </th>
-                  <th className="text-center px-3 py-2 font-bold tracking-[0.5px] uppercase text-[10px] text-slate-body">
+                  <th className="text-center px-3 py-2 font-bold tracking-[0.5px] uppercase text-2xs text-slate-body">
                     Custom Template
                   </th>
                 </tr>
@@ -520,7 +520,7 @@ export default async function CustomerSuccessDashboard() {
                       <td className="px-3 py-2 font-semibold text-ink">
                         {dso.name}
                       </td>
-                      <td className="px-3 py-2 text-slate-meta uppercase text-[10px] tracking-[1px] font-bold">
+                      <td className="px-3 py-2 text-slate-meta uppercase text-2xs tracking-[1px] font-bold">
                         {tier}
                       </td>
                       <td className="text-center px-3 py-2">
@@ -564,7 +564,7 @@ export default async function CustomerSuccessDashboard() {
               {topQuestions.map(([question, count], i) => (
                 <li
                   key={i}
-                  className="flex items-start gap-3 px-4 py-2.5 text-[13px]"
+                  className="flex items-start gap-3 px-4 py-2.5 text-xs"
                 >
                   <span className="font-mono text-slate-meta w-5 shrink-0 text-right">
                     {count}
@@ -574,7 +574,7 @@ export default async function CustomerSuccessDashboard() {
               ))}
             </ul>
           )}
-          <p className="text-[11px] text-slate-meta mt-2">
+          <p className="text-2xs text-slate-meta mt-2">
             Questions are case-normalized + truncated to ~80 chars before
             grouping; counts are approximate (variant phrasings may not
             collapse).
@@ -626,7 +626,7 @@ function SummaryCard({
   return (
     <div className={"border p-4 " + toneClass}>
       <div className="flex items-center justify-between mb-1.5">
-        <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+        <span className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta">
           {label}
         </span>
         <Icon
@@ -640,7 +640,7 @@ function SummaryCard({
         {value}
       </div>
       {sub && (
-        <div className="text-[11px] text-slate-meta mt-0.5">{sub}</div>
+        <div className="text-2xs text-slate-meta mt-0.5">{sub}</div>
       )}
     </div>
   );
@@ -662,7 +662,7 @@ function SectionHeader({
         <h2 className="font-display text-lg font-bold tracking-[-0.3px] text-ink leading-tight">
           {title}
         </h2>
-        <p className="text-[12px] text-slate-meta">{subtitle}</p>
+        <p className="text-xs text-slate-meta">{subtitle}</p>
       </div>
     </div>
   );
@@ -689,8 +689,8 @@ function EmptyCard({
     <div className={"border px-5 py-4 inline-flex items-start gap-3 " + toneClass}>
       <Icon className={"size-4 mt-0.5 shrink-0 " + iconColor} />
       <div>
-        <p className="font-semibold text-ink text-[13px]">{title}</p>
-        <p className="text-[12px] text-slate-meta">{body}</p>
+        <p className="font-semibold text-ink text-xs">{title}</p>
+        <p className="text-xs text-slate-meta">{body}</p>
       </div>
     </div>
   );
@@ -739,7 +739,7 @@ function RiskLabel({
   return (
     <span
       className={
-        "inline-flex items-center px-1.5 py-0.5 text-[10px] font-bold tracking-[1px] uppercase " +
+        "inline-flex items-center px-1.5 py-0.5 text-2xs font-bold tracking-[1px] uppercase " +
         color
       }
     >
@@ -767,9 +767,9 @@ function FunnelStep({
 }) {
   const pct = total > 0 ? Math.round((count / total) * 100) : 0;
   return (
-    <li className="grid grid-cols-[1fr_auto_120px] items-center gap-3 px-4 py-2.5 text-[13px]">
+    <li className="grid grid-cols-[1fr_auto_120px] items-center gap-3 px-4 py-2.5 text-xs">
       <span className="text-ink">{label}</span>
-      <span className="font-mono text-slate-meta tabular-nums text-[12px]">
+      <span className="font-mono text-slate-meta tabular-nums text-xs">
         {count} / {total}
       </span>
       <div className="flex items-center gap-2">
@@ -779,7 +779,7 @@ function FunnelStep({
             style={{ width: `${pct}%` }}
           />
         </div>
-        <span className="font-mono text-slate-meta tabular-nums text-[10px] w-8 text-right">
+        <span className="font-mono text-slate-meta tabular-nums text-2xs w-8 text-right">
           {pct}%
         </span>
       </div>

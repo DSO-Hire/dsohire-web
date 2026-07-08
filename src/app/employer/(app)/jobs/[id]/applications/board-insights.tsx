@@ -125,7 +125,7 @@ export function BoardInsights({
             <header className="shrink-0 flex items-start justify-between gap-3 px-5 py-4 border-b border-[var(--rule)]">
               <div className="min-w-0">
                 <Eyebrow as="p">Board insights</Eyebrow>
-                <p className="text-[14px] font-bold text-ink truncate">
+                <p className="text-sm font-bold text-ink truncate">
                   {jobTitle}
                 </p>
               </div>
@@ -151,7 +151,7 @@ export function BoardInsights({
                     const widthPct =
                       first > 0 ? Math.max(4, (row.count / first) * 100) : 0;
                     return (
-                      <li key={row.stage} className="text-[12px]">
+                      <li key={row.stage} className="text-xs">
                         <div className="flex items-baseline justify-between gap-2">
                           <span className="font-semibold text-ink">
                             {row.label}
@@ -175,7 +175,7 @@ export function BoardInsights({
                   })}
                 </ol>
                 {(funnel.rejected > 0 || funnel.withdrawn > 0) && (
-                  <p className="mt-2 text-[11px] text-slate-meta tabular">
+                  <p className="mt-2 text-2xs text-slate-meta tabular">
                     {funnel.rejected} rejected · {funnel.withdrawn} withdrawn
                   </p>
                 )}
@@ -187,7 +187,7 @@ export function BoardInsights({
                   <Eyebrow as="p" className="text-stage-brick mb-1">
                     Bottleneck · {bottleneck.label}
                   </Eyebrow>
-                  <p className="text-[12px] leading-relaxed text-ink tabular">
+                  <p className="text-xs leading-relaxed text-ink tabular">
                     Median dwell here is{" "}
                     <span className="font-bold">{bottleneck.median}d</span> vs
                     your 90-day norm of{" "}
@@ -204,7 +204,7 @@ export function BoardInsights({
                 </section>
               ) : (
                 <section className="border-l-2 border-heritage/50 bg-cream/50 px-3 py-2.5">
-                  <p className="text-[12px] leading-relaxed text-slate-body">
+                  <p className="text-xs leading-relaxed text-slate-body">
                     {hasNorms
                       ? "No bottlenecks flagged — every stage with enough candidates is at or near your usual pace."
                       : "Not enough stage history yet to compute your norms — insights sharpen as candidates move through the pipeline."}
@@ -217,7 +217,7 @@ export function BoardInsights({
                   <Eyebrow as="p" className="text-heritage-deep mb-1">
                     Working well · {workingWell.label}
                   </Eyebrow>
-                  <p className="text-[12px] leading-relaxed text-ink tabular">
+                  <p className="text-xs leading-relaxed text-ink tabular">
                     Median dwell{" "}
                     <span className="font-bold">{workingWell.median}d</span> vs
                     your norm of{" "}
@@ -227,7 +227,7 @@ export function BoardInsights({
                 </section>
               )}
 
-              <p className="text-[10px] text-slate-meta leading-relaxed">
+              <p className="text-2xs text-slate-meta leading-relaxed">
                 Norms are medians of completed stage durations across your
                 organization, trailing 90 days. Stages need a norm and at
                 least two current candidates before they're called out.

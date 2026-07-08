@@ -27,7 +27,7 @@ export function FitProofCard({ proof }: { proof: FitOutcomeProof }) {
   return (
     <section className="mb-6 border border-[var(--rule)] bg-card p-6 sm:p-7">
       <header className="mb-4 flex items-center gap-2 text-heritage-deep">
-        <span className="text-[10px] font-bold tracking-[2.5px] uppercase">
+        <span className="text-2xs font-bold tracking-[2.5px] uppercase">
           Proof
         </span>
       </header>
@@ -37,7 +37,7 @@ export function FitProofCard({ proof }: { proof: FitOutcomeProof }) {
           <h3 className="font-display text-lg font-bold text-ink">
             Your proof is still building.
           </h3>
-          <p className="mt-1.5 text-[13px] text-slate-body leading-relaxed max-w-[560px]">
+          <p className="mt-1.5 text-xs text-slate-body leading-relaxed max-w-[560px]">
             As candidates move through your pipeline, we track how the fit score
             predicted who advanced. You&apos;ve got{" "}
             <span className="font-bold text-ink">{proof.total_scored}</span>{" "}
@@ -50,7 +50,7 @@ export function FitProofCard({ proof }: { proof: FitOutcomeProof }) {
         <div>
           {proof.strong_advance_rate !== null &&
             proof.weak_advance_rate !== null && (
-              <p className="mb-5 text-[15px] leading-relaxed text-ink max-w-[640px]">
+              <p className="mb-5 text-sm leading-relaxed text-ink max-w-[640px]">
                 Your <strong>excellent &amp; strong</strong> fits advanced past
                 initial review{" "}
                 <strong className="text-heritage-deep">
@@ -67,7 +67,7 @@ export function FitProofCard({ proof }: { proof: FitOutcomeProof }) {
               const meta = BUCKET_META[b.bucket] ?? BUCKET_META.solid;
               return (
                 <div key={b.bucket} className="flex items-center gap-3">
-                  <div className="w-20 shrink-0 text-[12px] font-bold text-ink">
+                  <div className="w-20 shrink-0 text-xs font-bold text-ink">
                     {meta.label}
                   </div>
                   <div className="relative h-6 flex-1 overflow-hidden rounded-sm bg-cream">
@@ -79,7 +79,7 @@ export function FitProofCard({ proof }: { proof: FitOutcomeProof }) {
                       }}
                     />
                   </div>
-                  <div className="w-32 shrink-0 text-right text-[12px] text-slate-body tabular-nums">
+                  <div className="w-32 shrink-0 text-right text-xs text-slate-body tabular-nums">
                     <span className="font-bold text-ink">
                       {pct(b.advance_rate)}
                     </span>{" "}
@@ -91,7 +91,7 @@ export function FitProofCard({ proof }: { proof: FitOutcomeProof }) {
               );
             })}
           </div>
-          <p className="mt-4 text-[11px] text-slate-meta leading-relaxed max-w-[560px]">
+          <p className="mt-4 text-2xs text-slate-meta leading-relaxed max-w-[560px]">
             &ldquo;Advanced&rdquo; = reached interview, offer, or hire at any
             point (counts candidates who interviewed even if not ultimately
             hired). Based on {proof.total_scored} scored applications.

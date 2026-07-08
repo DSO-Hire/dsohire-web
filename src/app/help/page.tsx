@@ -79,14 +79,14 @@ export default function HelpCenterPage() {
     <SiteShell>
       <div className="bg-cream/40 border-b border-[var(--rule)]">
         <div className="mx-auto max-w-[1100px] px-6 py-14 sm:py-20">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3 inline-flex items-center gap-2">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3 inline-flex items-center gap-2">
             <ShieldCheck className="size-3" />
             Help center
           </div>
           <h1 className="font-display text-4xl sm:text-5xl font-extrabold tracking-[-1.2px] text-ink leading-tight max-w-[680px]">
             How DSO Hire works, in plain language.
           </h1>
-          <p className="mt-4 text-[15px] text-slate-body leading-relaxed max-w-[640px]">
+          <p className="mt-4 text-sm text-slate-body leading-relaxed max-w-[640px]">
             Quick answers and walkthroughs for both employers and candidates.
             Can&apos;t find what you need?{" "}
             <a
@@ -147,7 +147,7 @@ function HelpCategoryColumn({
           <h2 className="font-display text-2xl font-bold tracking-[-0.4px] text-ink leading-tight">
             {label}
           </h2>
-          <p className="mt-1 text-[13px] text-slate-meta leading-relaxed">
+          <p className="mt-1 text-xs text-slate-meta leading-relaxed">
             {description}
           </p>
         </div>
@@ -161,7 +161,7 @@ function HelpCategoryColumn({
             >
               <ArrowRight className="size-3.5 text-slate-meta mt-1 shrink-0 group-hover:text-heritage-deep group-hover:translate-x-0.5 transition-all" />
               <div className="min-w-0 flex-1">
-                <div className="font-semibold text-ink text-[14px] leading-tight">
+                <div className="font-semibold text-ink text-sm leading-tight">
                   {e.title}
                 </div>
                 <p className="mt-0.5 text-[12.5px] text-slate-meta leading-snug line-clamp-2">
@@ -185,13 +185,13 @@ function SupportCTA() {
           <h3 className="font-display text-lg font-bold text-ink mb-1">
             Still stuck?
           </h3>
-          <p className="text-[13px] text-slate-body leading-relaxed mb-3">
+          <p className="text-xs text-slate-body leading-relaxed mb-3">
             Email is the fastest path. Every message gets a real reply —
             typically within one business day.
           </p>
           <a
             href={SUPPORT_MAILTO}
-            className="inline-flex items-center gap-1.5 text-[12px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink"
+            className="inline-flex items-center gap-1.5 text-xs font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink"
           >
             {SUPPORT_EMAIL}
             <ArrowRight className="size-3" />

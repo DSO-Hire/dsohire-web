@@ -84,7 +84,7 @@ export function PipelineHqBoard({
             <SquareKanban className="h-5 w-5 text-heritage" aria-hidden />
             Pipeline HQ
           </h1>
-          <p className="text-[13px] text-slate-body mt-0.5">
+          <p className="text-xs text-slate-body mt-0.5">
             Every practice. Every role. One pipeline.
             {truncated && (
               <span className="text-slate-meta">
@@ -102,7 +102,7 @@ export function PipelineHqBoard({
               key={opt.value}
               type="button"
               onClick={() => setMinFit(opt.value)}
-              className={`px-3 py-1.5 text-[11px] font-bold border transition-colors ${
+              className={`px-3 py-1.5 text-2xs font-bold border transition-colors ${
                 minFit === opt.value
                   ? "bg-primary text-primary-foreground border-primary"
                   : "bg-card text-slate-body border-[var(--rule-strong)] hover:border-ink"
@@ -112,7 +112,7 @@ export function PipelineHqBoard({
             </button>
           ))}
           {minFit > 0 && (
-            <span className="ml-1 text-[10px] text-slate-meta">scored only</span>
+            <span className="ml-1 text-2xs text-slate-meta">scored only</span>
           )}
         </div>
       </div>

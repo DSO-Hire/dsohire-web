@@ -195,7 +195,7 @@ function Hero({ ctaHref }: { ctaHref: string }) {
             </Link>
           </div>
 
-          <div className="flex items-center gap-2.5 text-[13px] text-slate-body tracking-[0.4px]">
+          <div className="flex items-center gap-2.5 text-xs text-slate-body tracking-[0.4px]">
             <span className="block w-1.5 h-1.5 bg-heritage rounded-full" />
             <span>
               <strong className="text-ink font-bold">Free forever</strong>{" "}
@@ -392,7 +392,7 @@ function CandidateApplicationsPreview() {
           <span className="block w-2 h-2 rounded-full bg-ink/10" />
           <span className="block w-2 h-2 rounded-full bg-ink/10" />
           <span className="block w-2 h-2 rounded-full bg-ink/10" />
-          <span className="ml-3 text-[10px] tracking-[0.4px] text-slate-meta">
+          <span className="ml-3 text-2xs tracking-[0.4px] text-slate-meta">
             dsohire.com / candidate / applications
           </span>
         </div>
@@ -402,11 +402,11 @@ function CandidateApplicationsPreview() {
             <Eyebrow className="text-heritage-deep">
               Your Applications
             </Eyebrow>
-            <div className="text-[10px] tracking-[0.5px] text-slate-meta">
+            <div className="text-2xs tracking-[0.5px] text-slate-meta">
               · Live
             </div>
           </div>
-          <div className="text-[12px] text-slate-meta mb-4 tabular">
+          <div className="text-xs text-slate-meta mb-4 tabular">
             {PREVIEW_APPS.length} active
           </div>
 
@@ -419,7 +419,7 @@ function CandidateApplicationsPreview() {
                   className="border border-[var(--rule)] p-3 bg-card hover:border-heritage transition-colors"
                 >
                   <div className="flex items-start justify-between gap-3 mb-1.5">
-                    <span className="text-[13px] font-extrabold text-ink leading-tight truncate flex-1 min-w-0">
+                    <span className="text-xs font-extrabold text-ink leading-tight truncate flex-1 min-w-0">
                       {app.dso}
                     </span>
                     <span
@@ -431,7 +431,7 @@ function CandidateApplicationsPreview() {
                       {stage.label}
                     </span>
                   </div>
-                  <div className="flex items-center gap-3 text-[11px] text-slate-meta tracking-[0.2px]">
+                  <div className="flex items-center gap-3 text-2xs text-slate-meta tracking-[0.2px]">
                     <span className="font-semibold text-slate-body">
                       {app.role}
                     </span>
@@ -451,7 +451,7 @@ function CandidateApplicationsPreview() {
 
           {/* Footer note — mirrors the "Realtime sync · just now" notification
               style from the landing kanban mock for visual consistency. */}
-          <div className="mt-4 pt-3 border-t border-[var(--rule)] flex items-center gap-2 text-[10px] text-slate-meta tracking-[0.3px] tabular">
+          <div className="mt-4 pt-3 border-t border-[var(--rule)] flex items-center gap-2 text-2xs text-slate-meta tracking-[0.3px] tabular">
             <Sparkles className="h-3 w-3 text-heritage" />
             <span>License renewal alert · 47 days · KS RDH-12345</span>
           </div>
@@ -496,7 +496,7 @@ function Promises() {
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink max-w-[760px] mb-4">
           Built around what dental pros actually want.
         </h2>
-        <p className="text-[15px] text-slate-body leading-[1.7] max-w-[640px] mb-12">
+        <p className="text-sm text-slate-body leading-[1.7] max-w-[640px] mb-12">
           Most dental job boards were built for solo practices a decade ago,
           then bolted on multi-location features. DSO Hire was built the
           other way around — for dental professionals applying to real
@@ -515,7 +515,7 @@ function Promises() {
               <h3 className="text-[20px] font-extrabold tracking-[-0.4px] leading-tight text-ink mb-2.5">
                 {title}
               </h3>
-              <p className="text-[14px] text-slate-body leading-[1.7]">
+              <p className="text-sm text-slate-body leading-[1.7]">
                 {body}
               </p>
             </div>
@@ -612,7 +612,7 @@ function RoleBreakdown() {
       <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink max-w-[760px] mb-4">
         What's in it for you, by role.
       </h2>
-      <p className="text-[15px] text-slate-body leading-[1.7] max-w-[640px] mb-12">
+      <p className="text-sm text-slate-body leading-[1.7] max-w-[640px] mb-12">
         DSO employment looks genuinely different depending on where you sit.
         Here's an honest read of what each role typically gets at a real
         multi-location DSO.
@@ -642,7 +642,7 @@ function RoleBreakdown() {
               {advantages.map((adv, i) => (
                 <li
                   key={i}
-                  className="text-[13px] text-ink leading-[1.55] flex items-start gap-2"
+                  className="text-xs text-ink leading-[1.55] flex items-start gap-2"
                 >
                   <span
                     aria-hidden
@@ -694,7 +694,7 @@ function RoleBreakdown() {
             ].map((adv, i) => (
               <li
                 key={i}
-                className="text-[13px] text-ink leading-[1.55] flex items-start gap-2"
+                className="text-xs text-ink leading-[1.55] flex items-start gap-2"
               >
                 <span
                   aria-hidden
@@ -782,7 +782,7 @@ function HonestTake() {
 
         {/* Pull-quote-style attribution block */}
         <div className="mt-12 pt-10 border-t border-heritage/30">
-          <p className="text-[14px] text-slate-body leading-[1.65] italic">
+          <p className="text-sm text-slate-body leading-[1.65] italic">
             We&apos;re building DSO Hire to make the choice clearer — not to
             push you one direction. The job board you actually use should
             respect that the decision is yours.
@@ -838,7 +838,7 @@ function CandidateBenefits() {
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink max-w-[760px] mb-4">
           Built for you, not just the employer.
         </h2>
-        <p className="text-[15px] text-slate-body leading-[1.7] max-w-[640px] mb-12">
+        <p className="text-sm text-slate-body leading-[1.7] max-w-[640px] mb-12">
           A two-sided marketplace only works when both sides win. Here&apos;s
           the candidate side — the parts of DSO Hire designed to make your
           job hunt and your career easier, not just to fill the employer&apos;s
@@ -859,7 +859,7 @@ function CandidateBenefits() {
                   {title}
                 </h3>
               </div>
-              <p className="text-[14px] text-slate-body leading-[1.7]">
+              <p className="text-sm text-slate-body leading-[1.7]">
                 {body}
               </p>
             </div>
@@ -899,7 +899,7 @@ function FinalCta({ ctaHref }: { ctaHref: string }) {
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-5">
           Browse open roles, or just see what&apos;s out there.
         </h2>
-        <p className="text-[15px] sm:text-[16px] text-slate-body leading-[1.7] mb-9 max-w-[560px] mx-auto">
+        <p className="text-sm sm:text-[16px] text-slate-body leading-[1.7] mb-9 max-w-[560px] mx-auto">
           Free profile takes a couple minutes. Browse without an account if
           you&apos;d rather. No upsells, no premium tier, no agency calls —
           just dental jobs at real dental groups.

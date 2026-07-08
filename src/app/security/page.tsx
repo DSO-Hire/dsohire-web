@@ -82,7 +82,7 @@ export default function SecurityPage() {
     <SiteShell>
       {/* Hero */}
       <section className="pt-[140px] pb-14 px-6 sm:px-14 max-w-[1240px] mx-auto">
-        <div data-reveal className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
+        <div data-reveal className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
           Security &amp; Trust
         </div>
         <h1
@@ -124,7 +124,7 @@ export default function SecurityPage() {
               <h2 className="text-[17px] font-extrabold tracking-[-0.4px] leading-tight text-ink mb-2.5">
                 {p.title}
               </h2>
-              <p className="text-[14px] text-slate-body leading-[1.65]">{p.body}</p>
+              <p className="text-sm text-slate-body leading-[1.65]">{p.body}</p>
             </div>
           ))}
         </div>
@@ -137,7 +137,7 @@ export default function SecurityPage() {
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink mb-4">
               Infrastructure
             </h2>
-            <p className="text-[15px] text-slate-body leading-[1.7]">
+            <p className="text-sm text-slate-body leading-[1.7]">
               DSO Hire runs on Vercel (application) and Supabase on AWS
               (Postgres database, authentication, file storage) with automated
               backups. Email is delivered through Resend with per-category
@@ -151,7 +151,7 @@ export default function SecurityPage() {
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink mb-4">
               Your data, your call
             </h2>
-            <p className="text-[15px] text-slate-body leading-[1.7]">
+            <p className="text-sm text-slate-body leading-[1.7]">
               Owners can export their organization&apos;s complete data or
               delete the organization outright from Settings — no support
               ticket required. We don&apos;t sell candidate data, we
@@ -164,7 +164,7 @@ export default function SecurityPage() {
 
       {/* Honest roadmap */}
       <section className="px-6 sm:px-14 py-20 max-w-[1240px] mx-auto">
-        <div data-reveal className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
+        <div data-reveal className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
           The Honest Part
         </div>
         <h2
@@ -181,15 +181,15 @@ export default function SecurityPage() {
               data-reveal
               className="py-5 border-b border-[var(--rule)] flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-8"
             >
-              <span className="sm:w-[260px] shrink-0 inline-flex items-center gap-2 text-[15px] font-extrabold text-ink">
+              <span className="sm:w-[260px] shrink-0 inline-flex items-center gap-2 text-sm font-extrabold text-ink">
                 <FileCheck className="h-4 w-4 text-heritage-deep shrink-0" />
                 {r.item}
               </span>
-              <span className="text-[14px] text-slate-body leading-relaxed">{r.status}</span>
+              <span className="text-sm text-slate-body leading-relaxed">{r.status}</span>
             </li>
           ))}
         </ul>
-        <p data-reveal className="mt-8 text-[14px] text-slate-body leading-relaxed max-w-[680px]">
+        <p data-reveal className="mt-8 text-sm text-slate-body leading-relaxed max-w-[680px]">
           Security questions, disclosure reports, or due-diligence requests:{" "}
           <Link href={INFO_MAILTO} className="font-semibold text-heritage-deep underline underline-offset-2 hover:text-ink transition-colors">
             {INFO_EMAIL}
@@ -216,7 +216,7 @@ export default function SecurityPage() {
             data-reveal
             style={{ "--mk-delay": "140ms" } as React.CSSProperties}
             href="/contact"
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-ivory text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-ivory-deep transition-colors"
+            className="inline-flex items-center gap-2.5 px-9 py-4 bg-ivory text-ink text-xs font-bold tracking-[2px] uppercase hover:bg-ivory-deep transition-colors"
           >
             Talk To Us
             <ArrowRight className="h-3.5 w-3.5" />

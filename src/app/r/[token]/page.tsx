@@ -208,7 +208,7 @@ function PublicHeader() {
       >
         DSO Hire
       </a>
-      <div className="mt-3 text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep">
+      <div className="mt-3 text-2xs font-bold tracking-[3px] uppercase text-heritage-deep">
         Reference Request
       </div>
     </header>
@@ -217,7 +217,7 @@ function PublicHeader() {
 
 function PublicFooter() {
   return (
-    <footer className="mt-8 text-center text-[12px] text-slate-meta leading-relaxed">
+    <footer className="mt-8 text-center text-xs text-slate-meta leading-relaxed">
       <p>
         Powered by{" "}
         <a
@@ -262,13 +262,13 @@ function AlreadyCompletedView({
     : null;
   return (
     <div className="text-center py-6">
-      <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
+      <div className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
         Already received
       </div>
       <h1 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink mb-3">
         Thanks, {firstName} — we have your response.
       </h1>
-      <p className="text-[14px] text-slate-body leading-relaxed max-w-[480px] mx-auto">
+      <p className="text-sm text-slate-body leading-relaxed max-w-[480px] mx-auto">
         Your reference for{" "}
         <strong className="text-ink">
           {candidateName ?? "the candidate"}
@@ -285,13 +285,13 @@ function AlreadyCompletedView({
 function WithdrawnView({ dsoName }: { dsoName: string | null }) {
   return (
     <div className="text-center py-6">
-      <div className="text-[10px] font-bold tracking-[3px] uppercase text-slate-meta mb-3">
+      <div className="text-2xs font-bold tracking-[3px] uppercase text-slate-meta mb-3">
         Request withdrawn
       </div>
       <h1 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink mb-3">
         This reference request was withdrawn.
       </h1>
-      <p className="text-[14px] text-slate-body leading-relaxed max-w-[480px] mx-auto">
+      <p className="text-sm text-slate-body leading-relaxed max-w-[480px] mx-auto">
         {dsoName ?? "The hiring team"} no longer needs a response here. You
         don&apos;t need to do anything. If they still want a reference, expect a
         fresh email from them.

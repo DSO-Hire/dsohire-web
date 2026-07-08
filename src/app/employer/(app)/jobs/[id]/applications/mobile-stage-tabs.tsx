@@ -118,7 +118,7 @@ export function MobileStageTabs({
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => selectTab(tab)}
-                className={`px-3 py-2 text-[12px] font-semibold border-b-2 transition-colors ${
+                className={`px-3 py-2 text-xs font-semibold border-b-2 transition-colors ${
                   isActive
                     ? "border-b-heritage text-ink"
                     : "border-b-transparent text-slate-meta hover:text-ink"
@@ -159,7 +159,7 @@ function MobileTabContent({
     const label = active === CLOSED_TAB ? "Closed" : activeStage?.label ?? "Stage";
     return (
       <div className="border border-dashed border-[var(--rule)] bg-cream/60 p-8 text-center">
-        <p className="text-[14px] text-slate-meta italic">
+        <p className="text-sm text-slate-meta italic">
           No candidates in {label} yet
         </p>
       </div>
@@ -182,10 +182,10 @@ function MobileTabContent({
               className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-cream transition-colors"
             >
               <div className="min-w-0 flex-1">
-                <div className="text-[14px] font-bold text-ink truncate">
+                <div className="text-sm font-bold text-ink truncate">
                   {app.candidate?.full_name ?? "Anonymous candidate"}
                 </div>
-                <div className="text-[12px] text-slate-meta truncate tabular">
+                <div className="text-xs text-slate-meta truncate tabular">
                   {stageLabel} ·{" "}
                   {new Date(app.created_at).toLocaleDateString()}
                 </div>
@@ -215,21 +215,21 @@ function MobileTabContent({
             href={`/employer/applications/${app.id}`}
             className={`block bg-card border border-[var(--rule)] border-t-2 ${colors?.text ?? ""} p-3 hover:border-[var(--rule-strong)] transition-colors`}
           >
-            <div className="text-[14px] font-bold text-ink truncate mb-1">
+            <div className="text-sm font-bold text-ink truncate mb-1">
               {cand?.full_name ?? "Anonymous candidate"}
             </div>
-            <div className="text-[13px] text-slate-body truncate mb-2">
+            <div className="text-xs text-slate-body truncate mb-2">
               {cand?.current_title || cand?.headline || "Profile minimal"}
             </div>
             <div className="flex items-center justify-between">
               <span
-                className={`text-[10px] font-semibold px-1.5 py-0.5 tabular ${heatClasses}`}
+                className={`text-2xs font-semibold px-1.5 py-0.5 tabular ${heatClasses}`}
               >
                 {days}d in stage
               </span>
               {cand?.years_experience !== null &&
                 cand?.years_experience !== undefined && (
-                  <span className="text-[10px] text-slate-meta tabular-nums">
+                  <span className="text-2xs text-slate-meta tabular-nums">
                     {cand.years_experience}y
                   </span>
                 )}

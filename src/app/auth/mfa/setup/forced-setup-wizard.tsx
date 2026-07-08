@@ -108,7 +108,7 @@ export function ForcedSetupWizard() {
         role="alert"
         className="border border-danger bg-danger-bg p-6 space-y-3"
       >
-        <div className="flex items-start gap-2 text-[13px] text-danger">
+        <div className="flex items-start gap-2 text-xs text-danger">
           <AlertTriangle className="size-4 shrink-0 mt-0.5" />
           <div>
             <p className="font-semibold">We couldn&apos;t start your 2FA setup.</p>
@@ -121,7 +121,7 @@ export function ForcedSetupWizard() {
           type="button"
           onClick={() => startTransition(runEnroll)}
           disabled={pending}
-          className="inline-flex items-center gap-2 bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
+          className="inline-flex items-center gap-2 bg-primary px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
         >
           {pending ? (
             <>
@@ -143,7 +143,7 @@ export function ForcedSetupWizard() {
     return (
       <div className="space-y-6">
         <div>
-          <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
+          <div className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
             Step 1 of 2
           </div>
           <h2 className="font-display text-lg font-bold text-ink">
@@ -161,12 +161,12 @@ export function ForcedSetupWizard() {
             />
           </div>
           <div className="space-y-3">
-            <p className="text-[13px] text-slate-body leading-relaxed">
+            <p className="text-xs text-slate-body leading-relaxed">
               Open your authenticator app (1Password, Authy, Google
               Authenticator, etc.) and scan the QR code, or enter this
               setup key manually:
             </p>
-            <div className="border border-[var(--rule)] bg-cream/40 p-3 font-mono text-[12px] text-ink break-all">
+            <div className="border border-[var(--rule)] bg-cream/40 p-3 font-mono text-xs text-ink break-all">
               {secret}
             </div>
             <CopyButton value={secret} label="Copy setup key" />
@@ -176,7 +176,7 @@ export function ForcedSetupWizard() {
         <div className="border-t border-[var(--rule)] pt-5 space-y-3">
           <label
             htmlFor="totp-code"
-            className="block text-[12px] font-semibold text-ink"
+            className="block text-xs font-semibold text-ink"
           >
             Enter the 6-digit code from your app
           </label>
@@ -197,7 +197,7 @@ export function ForcedSetupWizard() {
           {error && (
             <p
               role="alert"
-              className="text-[12px] text-danger inline-flex items-center gap-1.5"
+              className="text-xs text-danger inline-flex items-center gap-1.5"
             >
               <AlertTriangle className="size-3.5" />
               {error}
@@ -207,7 +207,7 @@ export function ForcedSetupWizard() {
             type="button"
             onClick={onVerify}
             disabled={pending || code.length !== 6}
-            className="inline-flex items-center gap-2 bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
+            className="inline-flex items-center gap-2 bg-primary px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
           >
             {pending ? (
               <>
@@ -227,14 +227,14 @@ export function ForcedSetupWizard() {
     return (
       <div className="space-y-5">
         <div>
-          <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-1 inline-flex items-center gap-1.5">
+          <div className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep mb-1 inline-flex items-center gap-1.5">
             <CheckCircle2 className="size-3.5" />
             Step 2 of 2 · 2FA enabled
           </div>
           <h2 className="font-display text-lg font-bold text-ink">
             Save your recovery codes somewhere safe
           </h2>
-          <p className="mt-1.5 text-[13px] text-slate-body leading-relaxed">
+          <p className="mt-1.5 text-xs text-slate-body leading-relaxed">
             Each code works exactly once if you lose your authenticator.
             <strong className="text-ink"> This is the only time we&apos;ll show them.</strong>
           </p>
@@ -244,7 +244,7 @@ export function ForcedSetupWizard() {
           {recoveryCodes.map((c) => (
             <code
               key={c}
-              className="font-mono text-[14px] tracking-[1px] text-ink"
+              className="font-mono text-sm tracking-[1px] text-ink"
             >
               {c}
             </code>
@@ -260,7 +260,7 @@ export function ForcedSetupWizard() {
           <button
             type="button"
             onClick={onDone}
-            className="ml-auto inline-flex items-center gap-2 bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90"
+            className="ml-auto inline-flex items-center gap-2 bg-primary px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90"
           >
             I&apos;ve saved my codes
           </button>
@@ -286,7 +286,7 @@ function CopyButton({ value, label }: { value: string; label: string }) {
           /* select-and-copy fallback */
         }
       }}
-      className="inline-flex items-center gap-1.5 border border-[var(--rule-strong)] bg-card px-3 py-1.5 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
+      className="inline-flex items-center gap-1.5 border border-[var(--rule-strong)] bg-card px-3 py-1.5 text-xs font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
     >
       {copied ? (
         <>
@@ -324,7 +324,7 @@ function DownloadButton({
         a.remove();
         URL.revokeObjectURL(url);
       }}
-      className="inline-flex items-center gap-1.5 border border-[var(--rule-strong)] bg-card px-3 py-1.5 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
+      className="inline-flex items-center gap-1.5 border border-[var(--rule-strong)] bg-card px-3 py-1.5 text-xs font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
     >
       <Download className="size-3.5" />
       Download .txt

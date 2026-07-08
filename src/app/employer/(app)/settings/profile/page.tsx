@@ -118,7 +118,7 @@ export default async function PublicProfileSettingsPage({
   return (
     <div className="space-y-6 max-w-[1100px]">
       <header className="space-y-3 pb-2 max-w-[820px]">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep">
           Public profile
         </div>
         <h1 className="font-display text-3xl font-extrabold tracking-[-0.8px] text-ink leading-tight">
@@ -204,7 +204,7 @@ function EditPreviewTabs({
           href={`/companies/${slug}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-heritage-deep underline-offset-2 hover:underline"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-heritage-deep underline-offset-2 hover:underline"
         >
           Open in new tab
           <ExternalLink className="size-3" />
@@ -231,7 +231,7 @@ function TabLink({
       role="tab"
       aria-selected={isActive}
       className={
-        "inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-[13px] font-semibold transition-colors -mb-px " +
+        "inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs font-semibold transition-colors -mb-px " +
         (isActive
           ? "border-ink text-ink"
           : "border-transparent text-slate-meta hover:text-ink")
@@ -256,7 +256,7 @@ function TabLink({
 function ProfilePreviewPane({ slug }: { slug: string }) {
   return (
     <div className="border border-[var(--rule)] bg-card overflow-hidden">
-      <div className="border-b border-[var(--rule)] bg-cream/40 px-4 py-2 text-[11px] font-medium text-slate-body">
+      <div className="border-b border-[var(--rule)] bg-cream/40 px-4 py-2 text-2xs font-medium text-slate-body">
         Previewing <code className="font-mono">/companies/{slug}</code> as a
         logged-out visitor would see it. Saved changes appear here within a
         few seconds.

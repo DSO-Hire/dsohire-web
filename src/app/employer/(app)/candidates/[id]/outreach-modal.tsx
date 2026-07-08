@@ -118,7 +118,7 @@ export function OutreachModal({
         <header className="px-6 py-4 border-b border-[var(--rule)] flex items-center justify-between">
           <h2
             id="outreach-modal-title"
-            className="text-[14px] font-bold tracking-[-0.2px] text-ink"
+            className="text-sm font-bold tracking-[-0.2px] text-ink"
           >
             Message {candidateName ?? "candidate"}
           </h2>
@@ -139,17 +139,17 @@ export function OutreachModal({
               className="h-8 w-8 text-heritage-deep mx-auto mb-3"
               aria-hidden
             />
-            <h3 className="text-[15px] font-bold text-ink mb-2">
+            <h3 className="text-sm font-bold text-ink mb-2">
               Message sent.
             </h3>
-            <p className="text-[13px] text-slate-body leading-relaxed max-w-[360px] mx-auto mb-5">
+            <p className="text-xs text-slate-body leading-relaxed max-w-[360px] mx-auto mb-5">
               {candidateName ?? "The candidate"} will see your message in
               their inbox. Replies come back to your email.
             </p>
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
+              className="px-5 py-2 bg-primary text-primary-foreground text-xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
             >
               Close
             </button>
@@ -158,7 +158,7 @@ export function OutreachModal({
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             {templates.length > 0 ? (
               <div>
-                <label className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
+                <label className="block text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
                   Start from a template
                   <span className="ml-2 text-slate-meta font-normal normal-case tracking-normal">
                     (optional)
@@ -168,7 +168,7 @@ export function OutreachModal({
                   <select
                     value={templateId}
                     onChange={(e) => applyTemplate(e.target.value)}
-                    className="flex-1 px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+                    className="flex-1 px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
                   >
                     <option value="">— Blank message —</option>
                     {templates.map((t) => (
@@ -181,14 +181,14 @@ export function OutreachModal({
                     href="/employer/settings/outreach-templates"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[11px] font-semibold text-heritage-deep hover:text-ink underline underline-offset-2 whitespace-nowrap"
+                    className="text-2xs font-semibold text-heritage-deep hover:text-ink underline underline-offset-2 whitespace-nowrap"
                   >
                     Manage
                   </Link>
                 </div>
               </div>
             ) : (
-              <div className="rounded-md border border-[var(--rule)] bg-cream/40 px-3 py-2.5 text-[12px] text-slate-body inline-flex items-center gap-2">
+              <div className="rounded-md border border-[var(--rule)] bg-cream/40 px-3 py-2.5 text-xs text-slate-body inline-flex items-center gap-2">
                 <Mail className="h-3.5 w-3.5 text-heritage-deep" aria-hidden />
                 <span>
                   Tip: save reusable outreach messages in{" "}
@@ -208,7 +208,7 @@ export function OutreachModal({
               <div className="flex items-baseline justify-between mb-1.5 gap-3">
                 <label
                   htmlFor="outreach-subject"
-                  className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta"
+                  className="block text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta"
                 >
                   Subject
                 </label>
@@ -225,14 +225,14 @@ export function OutreachModal({
                 onChange={(e) => setSubject(e.target.value)}
                 placeholder="e.g. Associate Dentist role at our Prairie Village practice"
                 maxLength={200}
-                className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+                className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
               />
             </div>
             <div>
               <div className="flex items-baseline justify-between mb-1.5 gap-3">
                 <label
                   htmlFor="outreach-body"
-                  className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta"
+                  className="block text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta"
                 >
                   Message
                 </label>
@@ -249,28 +249,28 @@ export function OutreachModal({
                 rows={9}
                 placeholder="Introduce yourself, the role, and why you think they'd be a great fit. The candidate doesn't see your email address — replies route through DSO Hire back to you."
                 maxLength={8000}
-                className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage leading-relaxed resize-y"
+                className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage leading-relaxed resize-y"
               />
-              <div className="mt-1 text-[10px] text-slate-meta text-right">
+              <div className="mt-1 text-2xs text-slate-meta text-right">
                 {body.length} / 8000
               </div>
             </div>
 
             {error && (
-              <div className="rounded-md border border-danger bg-danger-bg px-3 py-2 text-[13px] text-danger">
+              <div className="rounded-md border border-danger bg-danger-bg px-3 py-2 text-xs text-danger">
                 {error}
               </div>
             )}
 
             <div className="flex items-center justify-between gap-3 pt-2">
-              <p className="text-[11px] text-slate-meta leading-relaxed flex-1">
+              <p className="text-2xs text-slate-meta leading-relaxed flex-1">
                 Sent from <strong>no-reply@dsohire.com</strong>. Candidate
                 replies route to your email directly.
               </p>
               <button
                 type="submit"
                 disabled={pending || !subject.trim() || !body.trim()}
-                className="inline-flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60 shrink-0"
+                className="inline-flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground text-xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60 shrink-0"
               >
                 {pending ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -304,7 +304,7 @@ export function OutreachLauncher({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
+        className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground text-xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
       >
         <Send className="h-3.5 w-3.5" aria-hidden />
         Message

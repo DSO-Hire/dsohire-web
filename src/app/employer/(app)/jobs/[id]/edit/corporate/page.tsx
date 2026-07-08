@@ -236,14 +236,14 @@ export default async function EditCorporateJobPage({ params }: PageProps) {
     <>
       <Link
         href={`/employer/jobs/${initial.id}`}
-        className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-corporate hover:text-ink transition-colors mb-6"
+        className="inline-flex items-center gap-2 text-2xs font-bold tracking-[2.5px] uppercase text-corporate hover:text-ink transition-colors mb-6"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back to Pipeline
       </Link>
 
       <header className="mb-8">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-corporate mb-2">
+        <div className="text-2xs font-bold tracking-[3px] uppercase text-corporate mb-2">
           Edit Corporate Job
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink">
@@ -254,7 +254,7 @@ export default async function EditCorporateJobPage({ params }: PageProps) {
             href={`/jobs/${job.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-3 inline-flex items-center gap-1 text-[13px] text-corporate hover:text-ink transition-colors font-semibold"
+            className="mt-3 inline-flex items-center gap-1 text-xs text-corporate hover:text-ink transition-colors font-semibold"
           >
             View public listing
             <ExternalLink className="h-3 w-3" />
@@ -275,7 +275,7 @@ export default async function EditCorporateJobPage({ params }: PageProps) {
 
       {/* #83 Phase 4 — confidential search (the DSOFit quiet C-suite flow). */}
       <div className="mt-8 max-w-[820px]">
-        <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+        <h2 className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
           Team Visibility
         </h2>
         <ConfidentialSearchCard
@@ -288,13 +288,13 @@ export default async function EditCorporateJobPage({ params }: PageProps) {
 
       {/* Soft-delete (separated from main form for safety) */}
       <section className="mt-16 pt-10 border-t border-[var(--rule)] max-w-[820px]">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-danger mb-2">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-danger mb-2">
           Danger Zone
         </div>
         <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink mb-2">
           Delete this job posting
         </h2>
-        <p className="text-[14px] text-slate-body leading-relaxed mb-5 max-w-[560px]">
+        <p className="text-sm text-slate-body leading-relaxed mb-5 max-w-[560px]">
           Soft-deletes the job. It stops showing publicly immediately, but
           historical applications stay linked for your records.
         </p>
@@ -302,7 +302,7 @@ export default async function EditCorporateJobPage({ params }: PageProps) {
           <input type="hidden" name="job_id" value={initial.id} />
           <button
             type="submit"
-            className="inline-flex items-center gap-2 px-5 py-2.5 border border-danger text-danger text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-danger-bg transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 border border-danger text-danger text-xs font-bold tracking-[1.5px] uppercase hover:bg-danger-bg transition-colors"
           >
             <Trash2 className="h-3.5 w-3.5" />
             Delete Job

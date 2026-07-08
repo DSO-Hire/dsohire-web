@@ -395,7 +395,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink">
           Applications
         </h1>
-        <p className="mt-3 text-[14px] text-slate-body leading-relaxed max-w-[640px]">
+        <p className="mt-3 text-sm text-slate-body leading-relaxed max-w-[640px]">
           Every application sent to your jobs. Click into a row to review the
           candidate, read their cover letter, and update status.
         </p>
@@ -478,7 +478,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
               ? `Stuck — in "New" past ${STUCK_SLA_DAYS} days`
               : `Stale — no movement for ${STALE_STAGE_DAYS}+ days`}
           </span>
-          <span className="text-[12px] text-slate-body tabular">
+          <span className="text-xs text-slate-body tabular">
             {apps.length} {apps.length === 1 ? "application" : "applications"} need attention.
           </span>
           <Link
@@ -515,7 +515,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
       {apps.length === 0 ? (
         <div className="border border-[var(--rule)] bg-card p-12 text-center max-w-[680px]">
           <Eyebrow className="mb-3">No applications yet</Eyebrow>
-          <p className="text-[15px] text-ink leading-relaxed mb-2">
+          <p className="text-sm text-ink leading-relaxed mb-2">
             {sp.job || sp.status || sp.min_fit || wantStuck || wantStale
               ? wantStuck
                 ? "Nothing is stuck — no New-stage applications are past your response goal. Nice."
@@ -524,7 +524,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                   : "Nothing matches your current filters."
               : "Once candidates start applying to your jobs, they'll show up here."}
           </p>
-          <p className="text-[14px] text-slate-body leading-relaxed">
+          <p className="text-sm text-slate-body leading-relaxed">
             <Link
               href="/employer/jobs"
               className="text-heritage underline underline-offset-2 hover:text-heritage-deep font-semibold"
@@ -575,7 +575,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-3 mb-1.5 flex-wrap">
-                      <div className="text-[15px] font-bold text-ink truncate">
+                      <div className="text-sm font-bold text-ink truncate">
                         {displayName}
                       </div>
                       <span
@@ -591,7 +591,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                       )}
                       {app.assignedTo && assigneeMap.get(app.assignedTo) && (
                         <span
-                          className="inline-flex flex-shrink-0 items-center gap-1 border border-ink/15 bg-ink/[0.04] px-2 py-0.5 text-[10px] font-semibold tracking-[0.3px] text-ink/70"
+                          className="inline-flex flex-shrink-0 items-center gap-1 border border-ink/15 bg-ink/[0.04] px-2 py-0.5 text-2xs font-semibold tracking-[0.3px] text-ink/70"
                           title={`Assigned to ${assigneeMap.get(app.assignedTo)}`}
                         >
                           <UserRound className="h-2.5 w-2.5" strokeWidth={2.5} />
@@ -599,7 +599,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                         </span>
                       )}
                     </div>
-                    <div className="text-[14px] text-slate-body mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <div className="text-sm text-slate-body mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
                       <span>Applied to</span>
                       {job ? (
                         <Link
@@ -614,7 +614,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                       )}
                       {locationLabel && (
                         <span
-                          className="inline-flex flex-shrink-0 items-center gap-1 border border-ink/15 bg-ink/[0.04] px-2 py-0.5 text-[10px] font-semibold tracking-[0.5px] text-ink/70 tabular"
+                          className="inline-flex flex-shrink-0 items-center gap-1 border border-ink/15 bg-ink/[0.04] px-2 py-0.5 text-2xs font-semibold tracking-[0.5px] text-ink/70 tabular"
                           title={`Practice: ${locationLabel}`}
                         >
                           <MapPin className="h-2.5 w-2.5" strokeWidth={2.5} />
@@ -622,7 +622,7 @@ export default async function ApplicationsPage({ searchParams }: PageProps) {
                         </span>
                       )}
                     </div>
-                    <div className="text-[13px] text-slate-meta tabular">
+                    <div className="text-xs text-slate-meta tabular">
                       {[cand?.current_title, cand?.headline]
                         .filter(Boolean)
                         .join(" · ") || "Profile minimal"}
@@ -661,7 +661,7 @@ function FilterSelect({
       <select
         name={name}
         defaultValue={value}
-        className="px-3 py-2.5 bg-card border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+        className="px-3 py-2.5 bg-card border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>

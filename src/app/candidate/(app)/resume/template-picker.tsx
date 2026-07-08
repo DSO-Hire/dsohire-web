@@ -33,7 +33,7 @@ export function TemplatePicker({ current }: { current: ResumeTemplateId }) {
 
   return (
     <div className="no-print mx-auto mb-4 max-w-[760px] px-4">
-      <div className="mb-2 text-[10px] font-bold uppercase tracking-[2.5px] text-slate-meta">
+      <div className="mb-2 text-2xs font-bold uppercase tracking-[2.5px] text-slate-meta">
         Template
       </div>
       <div className="flex flex-wrap gap-2">
@@ -47,7 +47,7 @@ export function TemplatePicker({ current }: { current: ResumeTemplateId }) {
               disabled={pending}
               title={tpl.blurb}
               className={
-                "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-semibold transition-colors disabled:opacity-60 " +
+                "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-60 " +
                 (active
                   ? "border-heritage-deep bg-heritage-deep text-primary-foreground"
                   : "border-[var(--rule)] bg-card text-slate-body hover:border-heritage-deep")

@@ -69,7 +69,7 @@ export function HelpSearchClient({ entries }: Props) {
           }}
           onFocus={() => setOpen(true)}
           placeholder="Search help — try 'bulk locations' or 'two-factor'"
-          className="w-full border border-[var(--rule-strong)] bg-card pl-10 pr-10 py-3.5 text-[14px] text-ink placeholder:text-slate-meta focus:border-heritage focus:outline-none"
+          className="w-full border border-[var(--rule-strong)] bg-card pl-10 pr-10 py-3.5 text-sm text-ink placeholder:text-slate-meta focus:border-heritage focus:outline-none"
         />
         {query && (
           <button
@@ -89,7 +89,7 @@ export function HelpSearchClient({ entries }: Props) {
       {open && query.trim() && (
         <div className="absolute left-0 right-0 top-full mt-1 border border-[var(--rule-strong)] bg-popover shadow-lg z-20 max-h-[360px] overflow-y-auto">
           {results.length === 0 ? (
-            <div className="px-4 py-3 text-[13px] text-slate-meta italic">
+            <div className="px-4 py-3 text-xs text-slate-meta italic">
               Nothing matched &ldquo;{query}&rdquo;. Try a different word, or
               email support.
             </div>
@@ -106,11 +106,11 @@ export function HelpSearchClient({ entries }: Props) {
                       <div className="font-semibold text-ink text-[13.5px]">
                         {r.title}
                       </div>
-                      <span className="text-[10px] font-semibold tracking-[1px] uppercase text-slate-meta shrink-0">
+                      <span className="text-2xs font-semibold tracking-[1px] uppercase text-slate-meta shrink-0">
                         {lensLabel(r.lens)}
                       </span>
                     </div>
-                    <p className="mt-0.5 text-[12px] text-slate-meta line-clamp-2 leading-snug">
+                    <p className="mt-0.5 text-xs text-slate-meta line-clamp-2 leading-snug">
                       {r.tip}
                     </p>
                   </Link>

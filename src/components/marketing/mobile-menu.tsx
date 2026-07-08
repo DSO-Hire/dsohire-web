@@ -35,6 +35,7 @@ import { ChevronDown } from "lucide-react";
 import { Eyebrow } from "@/components/brand/eyebrow";
 import { FitWordmark } from "@/components/practice-fit/brand/fit-wordmark";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { TextSizeToggle } from "@/components/theme/text-size-toggle";
 
 const ROLE_LINKS = [
   { href: "/for-candidates", label: "Overview" },
@@ -158,9 +159,9 @@ export function MobileMenu({
               <div className="border border-[var(--rule-strong)] divide-y divide-[var(--rule-strong)]">
                 <details className="group">
                   <summary className="flex items-center justify-between gap-3 px-4 py-3.5 cursor-pointer list-none [&::-webkit-details-marker]:hidden hover:bg-cream/60 transition-colors">
-                    <span className="text-[15px] font-semibold text-ink">
+                    <span className="text-sm font-semibold text-ink">
                       Dental Groups
-                      <span className="block text-[12px] font-medium text-slate-body mt-0.5">
+                      <span className="block text-xs font-medium text-slate-body mt-0.5">
                         Hiring for your practices
                       </span>
                     </span>
@@ -174,7 +175,7 @@ export function MobileMenu({
                       <Link
                         href="/for-dental-groups"
                         onClick={close}
-                        className="block pl-7 pr-4 py-2.5 text-[13px] font-bold text-heritage-deep hover:text-ink transition-colors"
+                        className="block pl-7 pr-4 py-2.5 text-xs font-bold text-heritage-deep hover:text-ink transition-colors"
                       >
                         Overview →
                       </Link>
@@ -184,7 +185,7 @@ export function MobileMenu({
                         <Link
                           href={link.href}
                           onClick={close}
-                          className="block pl-7 pr-4 py-2.5 text-[13px] font-semibold text-slate-body hover:text-heritage-deep transition-colors"
+                          className="block pl-7 pr-4 py-2.5 text-xs font-semibold text-slate-body hover:text-heritage-deep transition-colors"
                         >
                           {link.label}
                         </Link>
@@ -194,9 +195,9 @@ export function MobileMenu({
                 </details>
                 <details className="group">
                   <summary className="flex items-center justify-between gap-3 px-4 py-3.5 cursor-pointer list-none [&::-webkit-details-marker]:hidden hover:bg-cream/60 transition-colors">
-                    <span className="text-[15px] font-semibold text-ink">
+                    <span className="text-sm font-semibold text-ink">
                       Job Candidates
-                      <span className="block text-[12px] font-medium text-slate-body mt-0.5">
+                      <span className="block text-xs font-medium text-slate-body mt-0.5">
                         Find your next role
                       </span>
                     </span>
@@ -210,7 +211,7 @@ export function MobileMenu({
                       <Link
                         href="/for-candidates"
                         onClick={close}
-                        className="block pl-7 pr-4 py-2.5 text-[13px] font-bold text-heritage-deep hover:text-ink transition-colors"
+                        className="block pl-7 pr-4 py-2.5 text-xs font-bold text-heritage-deep hover:text-ink transition-colors"
                       >
                         Overview →
                       </Link>
@@ -220,7 +221,7 @@ export function MobileMenu({
                         <Link
                           href={link.href}
                           onClick={close}
-                          className="block pl-7 pr-4 py-2.5 text-[13px] font-semibold text-slate-body hover:text-heritage-deep transition-colors"
+                          className="block pl-7 pr-4 py-2.5 text-xs font-semibold text-slate-body hover:text-heritage-deep transition-colors"
                         >
                           {link.label}
                         </Link>
@@ -236,10 +237,10 @@ export function MobileMenu({
                 <Eyebrow className="mb-3">Our fit products</Eyebrow>
                 <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
                   <Link href="/practicefit" onClick={close} aria-label="PracticeFit">
-                    <FitWordmark product="practicefit" surface="light" tm className="text-[15px]" />
+                    <FitWordmark product="practicefit" surface="light" tm className="text-sm" />
                   </Link>
                   <Link href="/practicefit" onClick={close} aria-label="DSOFit">
-                    <FitWordmark product="dsofit" surface="light" tm className="text-[15px]" />
+                    <FitWordmark product="dsofit" surface="light" tm className="text-sm" />
                   </Link>
                 </div>
               </div>
@@ -261,6 +262,10 @@ export function MobileMenu({
               <div className="flex items-center justify-between">
                 <Eyebrow as="span">Theme</Eyebrow>
                 <ThemeToggle className="text-ink" />
+              </div>
+              <div className="flex items-center justify-between">
+                <Eyebrow as="span">Text size</Eyebrow>
+                <TextSizeToggle className="text-ink" />
               </div>
               <Link
                 href={signInHref}
@@ -321,7 +326,7 @@ function MobileMenuLink({
       <Link
         href={href}
         onClick={onClose}
-        className="block py-3 text-[15px] font-semibold text-ink hover:text-heritage-deep transition-colors"
+        className="block py-3 text-sm font-semibold text-ink hover:text-heritage-deep transition-colors"
       >
         {children}
       </Link>

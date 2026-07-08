@@ -169,18 +169,18 @@ export function WhyThisMatch({
         className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left ${style.bgClass} ${style.textClass} hover:opacity-95`}
       >
         <span className="inline-flex items-center gap-2 flex-wrap">
-          <FitWordmark product={fit.product} surface="inherit" className="text-[15px]" />
-          <span className="text-[14px] font-semibold">
+          <FitWordmark product={fit.product} surface="inherit" className="text-sm" />
+          <span className="text-sm font-semibold">
             {style.label}
           </span>
-          <span className="text-[12px] opacity-80">· {style.tagline}</span>
+          <span className="text-xs opacity-80">· {style.tagline}</span>
           {partialCoverage && (
-            <span className="text-[11px] opacity-70 font-medium tabular">
+            <span className="text-2xs opacity-70 font-medium tabular">
               · {fit.coverage.scored_count} of {fit.coverage.total_count} dims
             </span>
           )}
         </span>
-        <span className="inline-flex items-center gap-1 text-[12px] font-medium">
+        <span className="inline-flex items-center gap-1 text-xs font-medium">
           {open ? "Hide details" : "Why this match"}
           {open ? (
             <ChevronUp className="h-3.5 w-3.5" />
@@ -206,12 +206,12 @@ export function WhyThisMatch({
                   <NarrativeSkeleton product={fit.product} />
                 )}
                 {narrative.status === "ready" && narrativeText && (
-                  <p className="text-[13px] leading-relaxed text-ink">
+                  <p className="text-xs leading-relaxed text-ink">
                     {narrativeText}
                   </p>
                 )}
                 {narrative.status === "error" && (
-                  <p className="text-[12px] text-slate-meta italic">
+                  <p className="text-xs text-slate-meta italic">
                     Match notes couldn&apos;t load right now — the
                     dimension breakdown below covers the same ground.
                   </p>
@@ -231,7 +231,7 @@ export function WhyThisMatch({
             )
           )}
           <li className="px-4 py-3 bg-muted/50">
-            <p className="text-[11px] text-slate-meta leading-relaxed">
+            <p className="text-2xs text-slate-meta leading-relaxed">
               {fit.product === "dsofit" ? (
                 <>
                   DSOFit weighs function, seniority and scope, multi-site
@@ -303,8 +303,8 @@ function ScoredDimRow({
   return (
     <li className="px-4 py-3">
       <div className="flex items-baseline justify-between gap-3 mb-1">
-        <p className="text-[13px] font-semibold text-ink">{dim.label}</p>
-        <span className="text-[11px] tabular text-slate-meta">
+        <p className="text-xs font-semibold text-ink">{dim.label}</p>
+        <span className="text-2xs tabular text-slate-meta">
           +{Math.round(dim.contribution)} of {dim.weight}
         </span>
       </div>
@@ -314,7 +314,7 @@ function ScoredDimRow({
           style={{ width: `${fillPct}%` }}
         />
       </div>
-      <p className="mt-2 text-[12px] text-slate-body leading-snug">
+      <p className="mt-2 text-xs text-slate-body leading-snug">
         {detail}
       </p>
     </li>
@@ -343,14 +343,14 @@ function UnscoredDimRow({
   return (
     <li className="px-4 py-3 bg-muted/40">
       <div className="flex items-baseline justify-between gap-3 mb-1">
-        <p className="text-[13px] font-semibold text-slate-meta">
+        <p className="text-xs font-semibold text-slate-meta">
           {dim.label}
         </p>
-        <span className="text-[11px] tabular text-slate-meta opacity-70">
+        <span className="text-2xs tabular text-slate-meta opacity-70">
           not scored
         </span>
       </div>
-      <p className="text-[12px] text-slate-body leading-snug">
+      <p className="text-xs text-slate-body leading-snug">
         {detail}
       </p>
       {/*
@@ -365,7 +365,7 @@ function UnscoredDimRow({
       {isCandidate && !dim.cta_inline && dim.cta_href && dim.cta_label && (
         <Link
           href={dim.cta_href}
-          className="mt-2 inline-flex items-center gap-1 text-[12px] font-semibold text-heritage-deep hover:underline"
+          className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-heritage-deep hover:underline"
         >
           <Plus className="h-3 w-3" aria-hidden />
           {dim.cta_label}

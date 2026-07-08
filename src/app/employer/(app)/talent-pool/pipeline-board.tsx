@@ -93,7 +93,7 @@ export function PipelineBoard({ initial }: { initial: ProspectCard[] }) {
   return (
     <div>
       {error && (
-        <div className="mb-3 text-[12px] text-danger">{error}</div>
+        <div className="mb-3 text-xs text-danger">{error}</div>
       )}
       <DndContext
         sensors={sensors}
@@ -138,7 +138,7 @@ function Column({
         <Eyebrow as="span" className={PROSPECT_STAGE_ACCENT[stage]}>
           {PROSPECT_STAGE_LABELS[stage]}
         </Eyebrow>
-        <span className="text-[11px] text-slate-meta tabular">{cards.length}</span>
+        <span className="text-2xs text-slate-meta tabular">{cards.length}</span>
       </div>
       <div className="space-y-2">
         {cards.map((c) => (
@@ -178,7 +178,7 @@ function Card({ card, overlay }: { card: ProspectCard; overlay?: boolean }) {
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            <p className="text-[13px] font-semibold text-ink truncate">
+            <p className="text-xs font-semibold text-ink truncate">
               {card.displayName}
             </p>
             {card.masked && (
@@ -189,11 +189,11 @@ function Card({ card, overlay }: { card: ProspectCard; overlay?: boolean }) {
             )}
           </div>
           {(card.currentTitle || card.headline) && (
-            <p className="text-[11px] text-slate-body truncate mt-0.5">
+            <p className="text-2xs text-slate-body truncate mt-0.5">
               {card.currentTitle ?? card.headline}
             </p>
           )}
-          <p className="text-[11px] text-slate-meta mt-0.5 tabular">
+          <p className="text-2xs text-slate-meta mt-0.5 tabular">
             {[
               card.location,
               card.yearsExperience != null
@@ -207,7 +207,7 @@ function Card({ card, overlay }: { card: ProspectCard; overlay?: boolean }) {
       </div>
       <div className="mt-2 flex items-center gap-2 flex-wrap">
         {card.applied && (
-          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-heritage">
+          <span className="inline-flex items-center gap-1 text-2xs font-semibold text-heritage">
             <CheckCircle2 className="h-3 w-3" /> Applied
           </span>
         )}
@@ -217,7 +217,7 @@ function Card({ card, overlay }: { card: ProspectCard; overlay?: boolean }) {
         {card.tags?.slice(0, 2).map((t) => (
           <span
             key={t}
-            className="bg-cream px-2 py-0.5 text-[10px] font-semibold text-slate-body"
+            className="bg-cream px-2 py-0.5 text-2xs font-semibold text-slate-body"
           >
             {t}
           </span>
@@ -227,7 +227,7 @@ function Card({ card, overlay }: { card: ProspectCard; overlay?: boolean }) {
           <a
             href={`/employer/talent-pool/prospects/${card.candidateId}`}
             onPointerDown={(e) => e.stopPropagation()}
-            className="text-[10px] font-semibold text-heritage-deep hover:text-ink"
+            className="text-2xs font-semibold text-heritage-deep hover:text-ink"
           >
             Message →
           </a>

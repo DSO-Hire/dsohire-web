@@ -506,7 +506,7 @@ export function PracticeFitSection({
         options={PRACTICE_FIT_OPTIONS}
       />
       {consent === "off" && (
-        <div className="rounded-md border border-warning bg-warning-bg px-3.5 py-3 text-[13px] leading-relaxed text-warning">
+        <div className="rounded-md border border-warning bg-warning-bg px-3.5 py-3 text-xs leading-relaxed text-warning">
           PracticeFit is one of the most useful things on DSO Hire — with it
           off, your roles stop ranking and dental groups can&apos;t find you by
           fit. Worried about your privacy? You can keep PracticeFit on and still
@@ -571,10 +571,10 @@ function AnonymousModeSection({ initial }: { initial: boolean }) {
           className="mt-1 h-4 w-4 flex-shrink-0 accent-heritage"
         />
         <div>
-          <div className="text-[14px] font-semibold text-foreground">
+          <div className="text-sm font-semibold text-foreground">
             Browse anonymously
           </div>
-          <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
             When on, employers searching the Talent Pool see a generic label
             like{" "}
             <span className="font-semibold text-foreground">

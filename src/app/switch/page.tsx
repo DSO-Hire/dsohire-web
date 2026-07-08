@@ -48,7 +48,7 @@ export default function SwitchPage() {
   return (
     <SiteShell ctaIntent="dso">
       <section className="pt-[140px] pb-14 px-6 sm:px-14 max-w-[1240px] mx-auto">
-        <div data-reveal className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
+        <div data-reveal className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-3.5">
           Switching To DSO Hire
         </div>
         <h1
@@ -86,7 +86,7 @@ export default function SwitchPage() {
               <h2 className="text-[17px] font-extrabold tracking-[-0.4px] leading-tight text-ink mb-2.5">
                 {s.title}
               </h2>
-              <p className="text-[14px] text-slate-body leading-[1.65]">{s.body}</p>
+              <p className="text-sm text-slate-body leading-[1.65]">{s.body}</p>
             </div>
           ))}
         </div>
@@ -101,7 +101,7 @@ export default function SwitchPage() {
             </h2>
             <ul className="list-none space-y-3">
               {MIGRATES.map((m) => (
-                <li key={m} className="flex items-start gap-3 text-[15px] text-slate-body leading-relaxed">
+                <li key={m} className="flex items-start gap-3 text-sm text-slate-body leading-relaxed">
                   <Check className="h-4 w-4 text-heritage-deep shrink-0 mt-1" />
                   {m}
                 </li>
@@ -112,7 +112,7 @@ export default function SwitchPage() {
             <h2 className="text-2xl sm:text-4xl font-extrabold tracking-[-1.2px] text-ink mb-5 max-w-[480px]">
               The honest scope
             </h2>
-            <p className="text-[15px] text-slate-body leading-[1.7] mb-4">
+            <p className="text-sm text-slate-body leading-[1.7] mb-4">
               We work from what your current system exports, and we&apos;ll
               tell you exactly what made it over — itemized, before you
               cancel anything. One thing no ATS migration can honestly
@@ -121,7 +121,7 @@ export default function SwitchPage() {
               old applicant list stays with you as your export, and your
               pipeline refills through your live postings from day one.
             </p>
-            <p className="text-[15px] text-slate-body leading-[1.7]">
+            <p className="text-sm text-slate-body leading-[1.7]">
               And the door swings both ways: if DSO Hire ever isn&apos;t the
               right fit, your full data exports from Settings without a
               support ticket. We&apos;d rather earn the renewal than lock the
@@ -194,14 +194,14 @@ export default function SwitchPage() {
           >
             <Link
               href="/contact"
-              className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-ivory text-ink text-[12px] font-bold tracking-[2px] uppercase hover:bg-ivory-deep transition-colors"
+              className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-ivory text-ink text-xs font-bold tracking-[2px] uppercase hover:bg-ivory-deep transition-colors"
             >
               Scope My Migration
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
             <Link
               href="/pricing"
-              className="inline-flex items-center justify-center px-9 py-4 border border-hero-foreground/30 text-hero-foreground text-[12px] font-bold tracking-[2px] uppercase hover:border-hero-foreground hover:bg-hero-foreground/5 transition-colors"
+              className="inline-flex items-center justify-center px-9 py-4 border border-hero-foreground/30 text-hero-foreground text-xs font-bold tracking-[2px] uppercase hover:border-hero-foreground hover:bg-hero-foreground/5 transition-colors"
             >
               See Pricing
             </Link>

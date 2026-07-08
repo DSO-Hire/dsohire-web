@@ -83,14 +83,14 @@ export default async function NewCorporateJobPage() {
     <>
       <Link
         href="/employer/jobs"
-        className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-corporate hover:text-ink transition-colors mb-6"
+        className="inline-flex items-center gap-2 text-2xs font-bold tracking-[2.5px] uppercase text-corporate hover:text-ink transition-colors mb-6"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back to Jobs
       </Link>
 
       <header className="mb-8">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-corporate mb-2">
+        <div className="text-2xs font-bold tracking-[3px] uppercase text-corporate mb-2">
           New Corporate Job Posting
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.1] text-ink">
@@ -111,10 +111,10 @@ export default async function NewCorporateJobPage() {
         <div className="flex items-start gap-3">
           <Building2 className="h-5 w-5 text-primary-foreground flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-[14px] font-bold text-primary-foreground mb-0.5">
+            <p className="text-sm font-bold text-primary-foreground mb-0.5">
               Hiring for a practice role instead?
             </p>
-            <p className="text-[12px] text-primary-foreground/80 leading-relaxed">
+            <p className="text-xs text-primary-foreground/80 leading-relaxed">
               Dentists, hygienists, assistants, and front-office roles use
               the practice job wizard.
             </p>
@@ -122,7 +122,7 @@ export default async function NewCorporateJobPage() {
         </div>
         <Link
           href="/employer/jobs/new"
-          className="flex-shrink-0 inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
+          className="flex-shrink-0 inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-2xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
         >
           Practice job wizard
           <ArrowRight className="h-3.5 w-3.5" />

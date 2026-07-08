@@ -44,7 +44,7 @@ export default function ChangelogPage() {
               <h2 className="text-[22px] font-extrabold tracking-[-0.4px] text-ink">
                 {m.label}
               </h2>
-              <span className="text-[10px] font-bold tracking-[1.2px] uppercase text-slate-meta">
+              <span className="text-2xs font-bold tracking-[1.2px] uppercase text-slate-meta">
                 {m.entries.length} {m.entries.length === 1 ? "ship" : "ships"}
               </span>
             </div>
@@ -57,7 +57,7 @@ export default function ChangelogPage() {
               >
                 <time
                   dateTime={e.date}
-                  className="text-[12px] font-bold text-slate-meta tabular-nums pt-0.5"
+                  className="text-xs font-bold text-slate-meta tabular-nums pt-0.5"
                 >
                   {formatDay(e.date)}
                 </time>
@@ -89,7 +89,7 @@ function Hero({ lastShipped }: { lastShipped: string }) {
       <div className="max-w-[880px] mx-auto">
         <div data-reveal className="flex items-center gap-3.5 mb-8">
           <span className="block w-7 h-px bg-heritage" />
-          <span className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep">
+          <span className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep">
             Changelog
           </span>
         </div>
@@ -126,7 +126,7 @@ function Hero({ lastShipped }: { lastShipped: string }) {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-heritage opacity-60" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-heritage" />
             </span>
-            <span className="text-[10px] font-bold tracking-[1.6px] uppercase text-heritage-deep">
+            <span className="text-2xs font-bold tracking-[1.6px] uppercase text-heritage-deep">
               Last shipped: {lastShipped}
             </span>
           </div>

@@ -284,7 +284,7 @@ export function StageSelector({
                     role="menuitem"
                     disabled={pending || active}
                     onClick={() => handleClosedMenuItem(t)}
-                    className={`block w-full text-left px-4 py-2.5 text-[13px] font-semibold transition-colors focus:outline-none focus-visible:bg-cream disabled:opacity-50 disabled:cursor-not-allowed ${
+                    className={`block w-full text-left px-4 py-2.5 text-xs font-semibold transition-colors focus:outline-none focus-visible:bg-cream disabled:opacity-50 disabled:cursor-not-allowed ${
                       t.tone === "danger"
                         ? "text-danger hover:bg-danger-bg"
                         : "text-ink hover:bg-cream"
@@ -302,7 +302,7 @@ export function StageSelector({
       {error && (
         <p
           role="alert"
-          className="mt-3 text-[13px] text-danger"
+          className="mt-3 text-xs text-danger"
         >
           {error}
         </p>
@@ -406,9 +406,9 @@ function ClosedTransitionDialog({
             onChange={(e) => setReason(e.target.value.slice(0, 1000))}
             rows={3}
             placeholder="Add context for your team's audit log…"
-            className="w-full resize-y border border-[var(--rule-strong)] bg-card px-3 py-2 text-[14px] text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
+            className="w-full resize-y border border-[var(--rule-strong)] bg-card px-3 py-2 text-sm text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
           />
-          <p className="text-[12px] text-slate-meta">
+          <p className="text-xs text-slate-meta">
             {transition.dialogReasonHelper}
           </p>
         </div>

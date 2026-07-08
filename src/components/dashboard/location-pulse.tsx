@@ -77,7 +77,7 @@ export function LocationPulse({
                     }}
                   />
                 </span>
-                <span className="text-[12px] font-extrabold text-ink tabular-nums w-7 text-right">
+                <span className="text-xs font-extrabold text-ink tabular-nums w-7 text-right">
                   {l.applicationCount}
                 </span>
               </Link>

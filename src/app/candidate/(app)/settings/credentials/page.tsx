@@ -369,7 +369,7 @@ function ExpiryRow({
       <div className="flex flex-col items-end gap-1">
         <ExpiryBadge status={status} />
         {privateField && (
-          <span className="inline-flex items-center gap-1 text-[10px] text-meta-foreground">
+          <span className="inline-flex items-center gap-1 text-2xs text-meta-foreground">
             <Lock className="size-3" />
             Number hidden
           </span>

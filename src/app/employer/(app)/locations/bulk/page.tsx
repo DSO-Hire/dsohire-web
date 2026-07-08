@@ -41,14 +41,14 @@ export default async function BulkLocationsPage() {
       <div className="space-y-8 max-w-[920px]">
         <Link
           href="/employer/locations"
-          className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-slate-meta hover:text-ink"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-meta hover:text-ink"
         >
           <ArrowLeft className="size-3.5" />
           All locations
         </Link>
 
         <header className="space-y-3">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep inline-flex items-center gap-2">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep inline-flex items-center gap-2">
             <Upload className="size-3" />
             Bulk import
           </div>
@@ -57,9 +57,9 @@ export default async function BulkLocationsPage() {
           </h1>
           <p className="text-sm text-slate-body leading-relaxed max-w-[640px]">
             Drop in a CSV or Excel file with one row per practice. Required
-            columns: <code className="font-mono text-[12px] bg-cream/60 px-1 rounded">name</code>,{" "}
-            <code className="font-mono text-[12px] bg-cream/60 px-1 rounded">city</code>,{" "}
-            <code className="font-mono text-[12px] bg-cream/60 px-1 rounded">state</code>.
+            columns: <code className="font-mono text-xs bg-cream/60 px-1 rounded">name</code>,{" "}
+            <code className="font-mono text-xs bg-cream/60 px-1 rounded">city</code>,{" "}
+            <code className="font-mono text-xs bg-cream/60 px-1 rounded">state</code>.
             Optional: street address, suite/unit, postal code. We&apos;ll
             geocode each row in the background.
           </p>

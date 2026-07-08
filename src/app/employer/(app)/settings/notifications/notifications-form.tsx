@@ -98,7 +98,7 @@ export function EmployerNotificationsForm({
           key={group}
           className="border border-[var(--rule)] bg-card p-6 sm:p-8"
         >
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
             {group}
           </div>
           <ul className="divide-y divide-[var(--rule)]">
@@ -116,7 +116,7 @@ export function EmployerNotificationsForm({
 
       {/* Sticky save bar */}
       <div className="sticky bottom-4 z-10 flex items-center justify-between border border-[var(--rule-strong)] bg-card/95 px-5 py-3 backdrop-blur shadow-md">
-        <div className="text-[13px]">
+        <div className="text-xs">
           {error ? (
             <span className="inline-flex items-center gap-1.5 text-danger">
               <AlertCircle className="h-3.5 w-3.5" /> {error}
@@ -138,7 +138,7 @@ export function EmployerNotificationsForm({
           type="button"
           onClick={onSave}
           disabled={saving || dirty.length === 0}
-          className="inline-flex items-center gap-2 bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="inline-flex items-center gap-2 bg-primary px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           {saving ? (
             "Saving…"
@@ -171,7 +171,7 @@ function EventRow({
     <li className="flex items-start justify-between gap-6 py-4">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <p className="text-[14px] font-bold text-ink">{event.title}</p>
+          <p className="text-sm font-bold text-ink">{event.title}</p>
           {event.forced && (
             <span
               className="inline-flex items-center gap-1 rounded-full bg-cream border border-[var(--rule-strong)] px-2 py-0.5 text-[9px] font-bold tracking-[1px] uppercase text-slate-body"
@@ -187,7 +187,7 @@ function EventRow({
             </span>
           )}
         </div>
-        <p className="mt-0.5 text-[13px] text-slate-body leading-relaxed">
+        <p className="mt-0.5 text-xs text-slate-body leading-relaxed">
           {event.description}
         </p>
       </div>
@@ -226,7 +226,7 @@ function ChannelToggle({
   onChange: () => void;
 }) {
   return (
-    <label className="flex flex-col items-center gap-1 text-[10px] uppercase tracking-[1px] text-slate-meta">
+    <label className="flex flex-col items-center gap-1 text-2xs uppercase tracking-[1px] text-slate-meta">
       <span>{label}</span>
       <button
         type="button"

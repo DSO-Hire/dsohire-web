@@ -147,7 +147,7 @@ function NewRepliesBody({ unreadCount, replies }: NewRepliesProps) {
         New Replies
       </Eyebrow>
       <div
-        className="inline-flex items-center gap-1.5 px-2 py-1 mb-5 self-start text-[10px] font-semibold text-heritage-bright bg-heritage-bright/15"
+        className="inline-flex items-center gap-1.5 px-2 py-1 mb-5 self-start text-2xs font-semibold text-heritage-bright bg-heritage-bright/15"
       >
         <span className="block w-1.5 h-1.5 rounded-full animate-pulse bg-heritage-bright" />
         Live
@@ -157,12 +157,12 @@ function NewRepliesBody({ unreadCount, replies }: NewRepliesProps) {
         <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground tabular">
           {unreadCount}
         </div>
-        <span className="px-2 py-1 text-[12px] font-bold tracking-[0.4px] text-heritage-bright bg-heritage-bright/15">
+        <span className="px-2 py-1 text-xs font-bold tracking-[0.4px] text-heritage-bright bg-heritage-bright/15">
           unread
         </span>
       </div>
 
-      <div className="text-[13px] leading-[1.55] max-w-[400px] text-hero-foreground/70 mb-5">
+      <div className="text-xs leading-[1.55] max-w-[400px] text-hero-foreground/70 mb-5">
         Employers replied to your applications. Open the inbox to read and
         respond before they move on to other candidates.
       </div>
@@ -181,11 +181,11 @@ function NewRepliesBody({ unreadCount, replies }: NewRepliesProps) {
               className="shrink-0"
             />
             <div className="flex-1 min-w-0">
-              <div className="text-[13px] text-hero-foreground leading-tight truncate">
+              <div className="text-xs text-hero-foreground leading-tight truncate">
                 <strong className="font-bold">{reply.senderName}</strong>
                 <span className="text-hero-foreground/55"> · {reply.dsoName}</span>
               </div>
-              <div className="text-[11px] text-hero-foreground/55 mt-0.5 truncate">
+              <div className="text-2xs text-hero-foreground/55 mt-0.5 truncate">
                 &ldquo;{reply.preview}&rdquo; · {reply.timestamp} · {reply.jobTitle}
               </div>
             </div>
@@ -204,7 +204,7 @@ function ActiveAppsBody({ activeCount, hint, stages }: ActiveAppsProps) {
         Active Applications
       </Eyebrow>
       <div
-        className="inline-flex items-center gap-1.5 px-2 py-1 mb-5 self-start text-[10px] font-semibold text-heritage-bright bg-heritage-bright/15"
+        className="inline-flex items-center gap-1.5 px-2 py-1 mb-5 self-start text-2xs font-semibold text-heritage-bright bg-heritage-bright/15"
       >
         <span className="block w-1.5 h-1.5 rounded-full animate-pulse bg-heritage-bright" />
         In flight
@@ -216,7 +216,7 @@ function ActiveAppsBody({ activeCount, hint, stages }: ActiveAppsProps) {
         </div>
       </div>
 
-      <div className="text-[13px] leading-[1.55] max-w-[400px] text-hero-foreground/70">
+      <div className="text-xs leading-[1.55] max-w-[400px] text-hero-foreground/70">
         {hint}
       </div>
 
@@ -232,10 +232,10 @@ function ActiveAppsBody({ activeCount, hint, stages }: ActiveAppsProps) {
                   style={{ width: `${pct}%` }}
                 />
               </div>
-              <div className="text-[10px] font-semibold text-hero-foreground/55">
+              <div className="text-2xs font-semibold text-hero-foreground/55">
                 {stage.label}
               </div>
-              <div className="text-[14px] font-extrabold text-hero-foreground mt-0.5 tabular">
+              <div className="text-sm font-extrabold text-hero-foreground mt-0.5 tabular">
                 {stage.count}
               </div>
             </div>
@@ -253,7 +253,7 @@ function InterviewBody({ interviewCount, items, hint }: InterviewProps) {
         Interviewing
       </Eyebrow>
       <div
-        className="inline-flex items-center gap-1.5 px-2 py-1 mb-5 self-start text-[10px] font-semibold text-heritage-bright bg-heritage-bright/15"
+        className="inline-flex items-center gap-1.5 px-2 py-1 mb-5 self-start text-2xs font-semibold text-heritage-bright bg-heritage-bright/15"
       >
         <span className="block w-1.5 h-1.5 rounded-full animate-pulse bg-heritage-bright" />
         In progress
@@ -268,7 +268,7 @@ function InterviewBody({ interviewCount, items, hint }: InterviewProps) {
         </span>
       </div>
 
-      <div className="text-[13px] leading-[1.55] max-w-[400px] text-hero-foreground/70">
+      <div className="text-xs leading-[1.55] max-w-[400px] text-hero-foreground/70">
         {hint}
       </div>
 
@@ -281,7 +281,7 @@ function InterviewBody({ interviewCount, items, hint }: InterviewProps) {
             }`}
           >
             <span className="block w-1.5 h-1.5 rounded-full shrink-0 bg-heritage-bright" />
-            <div className="text-[13px] text-hero-foreground leading-tight truncate">
+            <div className="text-xs text-hero-foreground leading-tight truncate">
               <strong className="font-bold">{it.role}</strong>
               <span className="text-hero-foreground/55"> · {it.dsoName}</span>
             </div>
@@ -299,7 +299,7 @@ function SetupBody({ totalSteps, doneSteps, hint, steps }: SetupProps) {
         Get Hired
       </Eyebrow>
       <div
-        className="inline-flex items-center gap-1.5 px-2 py-1 mb-5 self-start text-[10px] font-semibold text-heritage-bright bg-heritage-bright/15 tabular"
+        className="inline-flex items-center gap-1.5 px-2 py-1 mb-5 self-start text-2xs font-semibold text-heritage-bright bg-heritage-bright/15 tabular"
       >
         <span className="block w-1.5 h-1.5 rounded-full bg-heritage-bright" />
         {doneSteps} of {totalSteps} done
@@ -312,7 +312,7 @@ function SetupBody({ totalSteps, doneSteps, hint, steps }: SetupProps) {
         <span className="text-[32px] text-hero-foreground/50">steps</span>
       </div>
 
-      <div className="text-[13px] leading-[1.55] max-w-[420px] text-hero-foreground/70">
+      <div className="text-xs leading-[1.55] max-w-[420px] text-hero-foreground/70">
         {hint}
       </div>
 
@@ -325,7 +325,7 @@ function SetupBody({ totalSteps, doneSteps, hint, steps }: SetupProps) {
             }`}
           >
             <div
-              className={`w-6 h-6 grid place-items-center text-[11px] font-extrabold ${
+              className={`w-6 h-6 grid place-items-center text-2xs font-extrabold ${
                 step.done ? "text-hero-foreground" : "text-hero-foreground/50"
               }`}
               style={{
@@ -337,7 +337,7 @@ function SetupBody({ totalSteps, doneSteps, hint, steps }: SetupProps) {
               {step.done ? "✓" : i + 1}
             </div>
             <div
-              className={`text-[13px] flex-1 ${
+              className={`text-xs flex-1 ${
                 step.upNext
                   ? "text-hero-foreground font-bold"
                   : step.done
@@ -348,12 +348,12 @@ function SetupBody({ totalSteps, doneSteps, hint, steps }: SetupProps) {
               {step.label}
             </div>
             {step.done && (
-              <div className="text-[10px] font-semibold text-hero-foreground/40">
+              <div className="text-2xs font-semibold text-hero-foreground/40">
                 Done
               </div>
             )}
             {step.upNext && (
-              <div className="text-[10px] font-semibold text-heritage-bright">
+              <div className="text-2xs font-semibold text-heritage-bright">
                 Up next
               </div>
             )}

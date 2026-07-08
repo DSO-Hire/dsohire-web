@@ -94,7 +94,7 @@ export function InlineDimEditor({ dimKey }: InlineDimEditorProps) {
                 value={minSalary}
                 onChange={(e) => setMinSalary(e.target.value)}
                 placeholder="50"
-                className="w-full px-2 py-1.5 text-[13px] border border-[var(--rule)] focus:border-heritage focus:outline-none"
+                className="w-full px-2 py-1.5 text-xs border border-[var(--rule)] focus:border-heritage focus:outline-none"
               />
             </div>
             <div className="min-w-[120px]">
@@ -104,7 +104,7 @@ export function InlineDimEditor({ dimKey }: InlineDimEditorProps) {
               <select
                 value={salaryUnit}
                 onChange={(e) => setSalaryUnit(e.target.value)}
-                className="w-full px-2 py-1.5 text-[13px] border border-[var(--rule)] focus:border-heritage focus:outline-none bg-card"
+                className="w-full px-2 py-1.5 text-xs border border-[var(--rule)] focus:border-heritage focus:outline-none bg-card"
               >
                 <option value="hourly">hour</option>
                 <option value="yearly">year</option>
@@ -127,7 +127,7 @@ export function InlineDimEditor({ dimKey }: InlineDimEditorProps) {
               value={years}
               onChange={(e) => setYears(e.target.value)}
               placeholder="3"
-              className="w-full px-2 py-1.5 text-[13px] border border-[var(--rule)] focus:border-heritage focus:outline-none"
+              className="w-full px-2 py-1.5 text-xs border border-[var(--rule)] focus:border-heritage focus:outline-none"
             />
           </div>
         )}
@@ -147,7 +147,7 @@ export function InlineDimEditor({ dimKey }: InlineDimEditorProps) {
                   key={opt.value}
                   type="button"
                   onClick={() => setTempOrPerm(opt.value)}
-                  className={`px-2.5 py-1 text-[11px] font-medium border transition-colors ${
+                  className={`px-2.5 py-1 text-2xs font-medium border transition-colors ${
                     tempOrPerm === opt.value
                       ? "border-heritage text-heritage-deep shadow-[inset_0_0_0_1px_var(--color-heritage)] bg-card"
                       : "bg-card text-ink border-[var(--rule)] hover:border-heritage"
@@ -176,7 +176,7 @@ export function InlineDimEditor({ dimKey }: InlineDimEditorProps) {
                   key={opt.value}
                   type="button"
                   onClick={() => setDsoSize(opt.value)}
-                  className={`px-2.5 py-1 text-[11px] font-medium border transition-colors ${
+                  className={`px-2.5 py-1 text-2xs font-medium border transition-colors ${
                     dsoSize === opt.value
                       ? "border-heritage text-heritage-deep shadow-[inset_0_0_0_1px_var(--color-heritage)] bg-card"
                       : "bg-card text-ink border-[var(--rule)] hover:border-heritage"
@@ -201,10 +201,10 @@ export function InlineDimEditor({ dimKey }: InlineDimEditorProps) {
         </button>
       </div>
       {error && (
-        <p className="mt-2 text-[11px] text-danger leading-snug">{error}</p>
+        <p className="mt-2 text-2xs text-danger leading-snug">{error}</p>
       )}
       {saved && (
-        <p className="mt-2 text-[11px] text-heritage-deep leading-snug">
+        <p className="mt-2 text-2xs text-heritage-deep leading-snug">
           Saved. Reload to see your updated score.
         </p>
       )}

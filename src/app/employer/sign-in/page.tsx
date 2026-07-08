@@ -26,7 +26,7 @@ export default async function SignInPage({ searchParams }: PageProps) {
   return (
     <SiteShell>
       <section className="pt-[140px] pb-24 px-6 sm:px-14 max-w-[640px] mx-auto">
-        <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-4">
+        <div className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-4">
           Employer Sign In
         </div>
         <h1 className="text-4xl sm:text-6xl font-extrabold tracking-[-1.8px] leading-[1.05] text-ink mb-6">
@@ -41,7 +41,7 @@ export default async function SignInPage({ searchParams }: PageProps) {
           <SignInForm next={next} />
         </div>
 
-        <p className="mt-10 text-[14px] text-slate-body leading-relaxed">
+        <p className="mt-10 text-sm text-slate-body leading-relaxed">
           Don&apos;t have an account yet?{" "}
           <Link
             href={
@@ -54,7 +54,7 @@ export default async function SignInPage({ searchParams }: PageProps) {
             View DSO pricing
           </Link>
         </p>
-        <p className="mt-3 text-[14px] text-slate-body leading-relaxed">
+        <p className="mt-3 text-sm text-slate-body leading-relaxed">
           Looking for a job?{" "}
           <Link
             href="/candidate/sign-in"

@@ -308,7 +308,7 @@ function HeroKanbanPreview() {
           <span className="block w-2 h-2 rounded-full bg-ivory-deep" />
           <span className="block w-2 h-2 rounded-full bg-ivory-deep" />
           <span className="block w-2 h-2 rounded-full bg-ivory-deep" />
-          <span className="ml-3 text-[12px] tracking-[0.4px] text-slate-meta truncate">
+          <span className="ml-3 text-xs tracking-[0.4px] text-slate-meta truncate">
             dsohire.com / employer / jobs /{" "}
             <strong className="text-ink font-semibold">applications</strong>
           </span>
@@ -325,10 +325,10 @@ function HeroKanbanPreview() {
           <Eyebrow className="text-[9px] text-heritage-deep mb-1.5">
             Pipeline · Live
           </Eyebrow>
-          <div className="text-[15px] font-bold tracking-[-0.3px] text-ink leading-tight">
+          <div className="text-sm font-bold tracking-[-0.3px] text-ink leading-tight">
             Greenfield Dental Group
           </div>
-          <div className="text-[12px] text-slate-body mt-0.5 tabular">
+          <div className="text-xs text-slate-body mt-0.5 tabular">
             8 candidates · 3 locations · 2 reviewers online
           </div>
         </div>
@@ -392,12 +392,12 @@ function HeroKanbanPreview() {
           boxShadow: "0 14px 28px -14px rgba(7,15,28,0.18)",
         }}
       >
-        <span className="flex items-center justify-center w-8 h-8 bg-heritage text-primary-foreground font-extrabold text-[13px] tracking-[-0.3px]">
+        <span className="flex items-center justify-center w-8 h-8 bg-heritage text-primary-foreground font-extrabold text-xs tracking-[-0.3px]">
           M
         </span>
-        <div className="text-[12px] text-ink leading-snug font-semibold">
+        <div className="text-xs text-ink leading-snug font-semibold">
           Maya moved Dr. Chen to Interview
-          <small className="block text-[10px] font-normal text-slate-body tracking-[0.3px] mt-0.5">
+          <small className="block text-2xs font-normal text-slate-body tracking-[0.3px] mt-0.5">
             Realtime sync · just now
           </small>
         </div>
@@ -465,7 +465,7 @@ function ProofStrip() {
 
 function ProofTagline({ children }: { children: React.ReactNode }) {
   return (
-    <span className="font-extrabold tracking-[-0.3px] text-[15px] text-slate-meta opacity-55">
+    <span className="font-extrabold tracking-[-0.3px] text-sm text-slate-meta opacity-55">
       {children}
     </span>
   );
@@ -550,7 +550,7 @@ function AnswerCard() {
           <h3 className="text-[26px] sm:text-[32px] font-extrabold tracking-[-0.8px] leading-tight mt-8 mb-4">
             A flat-fee hiring platform, built for dental groups.
           </h3>
-          <p className="text-[15px] text-hero-foreground/70 leading-[1.7] max-w-[420px]">
+          <p className="text-sm text-hero-foreground/70 leading-[1.7] max-w-[420px]">
             Subscribe once, post across every practice you operate. One
             account, no per-listing fees, no placement fees, cancel anytime.
           </p>
@@ -565,7 +565,7 @@ function AnswerCard() {
           ].map((item, i) => (
             <li
               key={i}
-              className="flex items-start gap-2.5 text-[14px] text-hero-foreground leading-[1.55]"
+              className="flex items-start gap-2.5 text-sm text-hero-foreground leading-[1.55]"
             >
               <Check
                 className="h-4 w-4 text-heritage-light flex-shrink-0 mt-0.5"
@@ -594,14 +594,14 @@ function ProblemCard({
       <h3 className="text-[22px] font-extrabold tracking-[-0.6px] text-ink mb-2">
         {heading}
       </h3>
-      <div className="text-[14px] text-slate-body mb-6 leading-snug">
+      <div className="text-sm text-slate-body mb-6 leading-snug">
         {tagline}
       </div>
       <ul className="list-none border-t border-[var(--rule)] pt-5">
         {points.map((point, i) => (
           <li
             key={i}
-            className="text-[14px] text-slate-body py-2.5 flex items-start gap-2.5 leading-[1.55]"
+            className="text-sm text-slate-body py-2.5 flex items-start gap-2.5 leading-[1.55]"
           >
             <Minus className="h-4 w-4 text-slate-meta/50 flex-shrink-0 mt-0.5" />
             <span>{point}</span>
@@ -726,7 +726,7 @@ function RoiCard({
         {rows.map((row, i) => (
           <li
             key={i}
-            className="flex items-baseline justify-between gap-6 py-3.5 border-b border-[var(--rule)] text-[14px]"
+            className="flex items-baseline justify-between gap-6 py-3.5 border-b border-[var(--rule)] text-sm"
           >
             <span className="text-slate-body">{row.item}</span>
             <span className="font-bold text-ink whitespace-nowrap tabular">
@@ -832,7 +832,7 @@ function PracticeFitBand() {
                 <div className="text-[16px] font-bold tracking-[-0.3px] text-ink leading-tight">
                   Sarah Chen, RDH
                 </div>
-                <div className="text-[12px] text-slate-body mt-0.5 tabular">
+                <div className="text-xs text-slate-body mt-0.5 tabular">
                   7 yrs · Eaglesoft · Westerville, OH
                 </div>
               </div>
@@ -1104,7 +1104,7 @@ function PricingTeaser() {
           ))}
         </div>
 
-        <p className="mt-10 text-[14px] text-slate-body text-center leading-relaxed">
+        <p className="mt-10 text-sm text-slate-body text-center leading-relaxed">
           All tiers include multi-location posting, candidate dashboards, and
           Stripe-secured billing.{" "}
           <strong className="text-ink font-bold">
@@ -1160,7 +1160,7 @@ function PricingTier({ tier }: { tier: TierConfig }) {
           ${tier.monthlyPrice.toLocaleString()}
         </div>
         <div
-          className={`text-[14px] font-medium ${
+          className={`text-sm font-medium ${
             isFeatured ? "text-hero-foreground/70" : "text-slate-body"
           }`}
         >
@@ -1168,7 +1168,7 @@ function PricingTier({ tier }: { tier: TierConfig }) {
         </div>
       </div>
       <div
-        className={`text-[12px] tracking-[0.4px] mb-7 min-h-[32px] leading-[1.45] ${
+        className={`text-xs tracking-[0.4px] mb-7 min-h-[32px] leading-[1.45] ${
           isFeatured ? "text-hero-foreground/55" : "text-slate-meta"
         }`}
       >

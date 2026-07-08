@@ -82,7 +82,7 @@ export function CredentialsCard({
 
       {ranked.length === 0 ? (
         <div>
-          <p className="text-[13px] leading-relaxed text-slate-body">
+          <p className="text-xs leading-relaxed text-slate-body">
             Add your license &amp; certifications so practices can see you’re
             ready to work.
           </p>
@@ -117,7 +117,7 @@ export function CredentialsCard({
                 )}
               </span>
               <div className="min-w-0 flex-1">
-                <div className="text-[13px] font-bold leading-tight text-ink">
+                <div className="text-xs font-bold leading-tight text-ink">
                   {it.label}
                   {it.detail ? (
                     <span className="font-normal text-slate-meta"> · {it.detail}</span>
@@ -128,18 +128,18 @@ export function CredentialsCard({
               {st.action ? (
                 <Link
                   href={addHref}
-                  className="shrink-0 text-[11px] font-bold text-warning hover:underline"
+                  className="shrink-0 text-2xs font-bold text-warning hover:underline"
                 >
                   {st.action} →
                 </Link>
               ) : (
-                <span className="shrink-0 text-[11px] font-bold text-heritage-deep">
+                <span className="shrink-0 text-2xs font-bold text-heritage-deep">
                   Verified
                 </span>
               )}
             </div>
           ))}
-          <p className="mt-3 text-[11px] leading-relaxed text-slate-meta">
+          <p className="mt-3 text-2xs leading-relaxed text-slate-meta">
             We track expirations so a practice never has to ask. Clinical roles
             also track state license, DEA &amp; malpractice — no other ATS does
             this for dental.

@@ -63,7 +63,7 @@ export default async function HiringReportPage() {
     <SiteShell>
       <article className="mx-auto max-w-4xl px-6 py-16 sm:py-24">
         <header className="mb-12 max-w-[760px]">
-          <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
+          <div className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
             Dental Hiring Report · 2026
           </div>
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-5">
@@ -74,7 +74,7 @@ export default async function HiringReportPage() {
             from the DSO Hire platform. Continuously updated as dental groups post
             jobs and candidates apply — refreshed every six hours.
           </p>
-          <p className="text-[12px] text-slate-meta uppercase tracking-wide">
+          <p className="text-xs text-slate-meta uppercase tracking-wide">
             Last updated{" "}
             {new Date(snapshot.generated_at).toLocaleDateString("en-US", {
               month: "long",
@@ -119,13 +119,13 @@ export default async function HiringReportPage() {
 
         {/* Compensation bands */}
         <section className="mb-16">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
             Compensation · Section 1
           </div>
           <h2 className="text-3xl font-extrabold tracking-[-0.8px] text-ink mb-3">
             What dental roles pay.
           </h2>
-          <p className="text-[14px] text-slate-body leading-relaxed max-w-[640px] mb-8">
+          <p className="text-sm text-slate-body leading-relaxed max-w-[640px] mb-8">
             Median ranges from posted compensation across the platform.
             P25 = lower quartile, P75 = upper quartile — useful for
             calibrating an offer against the broader market. Bands with
@@ -153,13 +153,13 @@ export default async function HiringReportPage() {
 
         {/* Role mix */}
         <section className="mb-16">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
             Role mix · Section 2
           </div>
           <h2 className="text-3xl font-extrabold tracking-[-0.8px] text-ink mb-3">
             What dental groups are hiring most.
           </h2>
-          <p className="text-[14px] text-slate-body leading-relaxed max-w-[640px] mb-8">
+          <p className="text-sm text-slate-body leading-relaxed max-w-[640px] mb-8">
             Open jobs and application volume by role category.
             Application count reflects total applications received across
             all postings in that role.
@@ -174,13 +174,13 @@ export default async function HiringReportPage() {
 
         {/* By state */}
         <section className="mb-16">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
             Geography · Section 3
           </div>
           <h2 className="text-3xl font-extrabold tracking-[-0.8px] text-ink mb-3">
             Where the hiring is happening.
           </h2>
-          <p className="text-[14px] text-slate-body leading-relaxed max-w-[640px] mb-8">
+          <p className="text-sm text-slate-body leading-relaxed max-w-[640px] mb-8">
             Top 15 states by application activity. Reflects job postings
             on the platform and the candidates applying to them — not a
             census of dental employment overall.
@@ -195,10 +195,10 @@ export default async function HiringReportPage() {
 
         {/* Methodology */}
         <section className="mb-16 border-l-4 border-heritage bg-cream p-6">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
             Methodology
           </div>
-          <p className="text-[13px] text-slate-body leading-relaxed mb-3">
+          <p className="text-xs text-slate-body leading-relaxed mb-3">
             All figures are anonymized by construction — medians and
             percentile bands only, never individual employer data.
             Compensation bands use the midpoint of each posted range.
@@ -206,12 +206,12 @@ export default async function HiringReportPage() {
             the date of its first hire. State activity reflects practice
             location, not candidate residence.
           </p>
-          <p className="text-[13px] text-slate-body leading-relaxed mb-3">
+          <p className="text-xs text-slate-body leading-relaxed mb-3">
             Aggregates drawn from {snapshot.jobs_with_comp_count.toLocaleString()}{" "}
             job postings with disclosed compensation. Slices with fewer than{" "}
             {MIN_REPORT_SAMPLE_SIZE} samples are excluded.
           </p>
-          <p className="text-[12px] text-slate-meta">
+          <p className="text-xs text-slate-meta">
             For interview requests, custom data pulls, or feedback on
             methodology, reach out at{" "}
             <a
@@ -281,7 +281,7 @@ function HeadlineTile({
 }) {
   return (
     <div className="border border-[var(--rule)] bg-card p-5">
-      <div className="flex items-center gap-1.5 text-[10px] font-bold tracking-[2px] uppercase text-slate-meta mb-3">
+      <div className="flex items-center gap-1.5 text-2xs font-bold tracking-[2px] uppercase text-slate-meta mb-3">
         <Icon className="h-3 w-3" aria-hidden />
         {label}
       </div>
@@ -289,7 +289,7 @@ function HeadlineTile({
         {value}
       </div>
       {secondary && (
-        <div className="text-[11px] text-slate-body">{secondary}</div>
+        <div className="text-2xs text-slate-body">{secondary}</div>
       )}
     </div>
   );
@@ -307,10 +307,10 @@ function CompBandsTable({
   if (bands.length === 0) {
     return (
       <div>
-        <div className="text-[12px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-2">
+        <div className="text-xs font-bold tracking-[1.5px] uppercase text-slate-meta mb-2">
           {title}
         </div>
-        <div className="text-[13px] text-slate-meta italic">
+        <div className="text-xs text-slate-meta italic">
           Sample size below threshold — bands appear as the platform scales.
         </div>
       </div>
@@ -318,13 +318,13 @@ function CompBandsTable({
   }
   return (
     <div>
-      <div className="text-[12px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-3">
+      <div className="text-xs font-bold tracking-[1.5px] uppercase text-slate-meta mb-3">
         {title}
       </div>
       <div className="overflow-x-auto border border-[var(--rule)]">
-        <table className="w-full text-[13px] bg-card">
+        <table className="w-full text-xs bg-card">
           <thead>
-            <tr className="text-left text-[10px] font-bold tracking-[2px] uppercase text-slate-meta border-b border-[var(--rule)]">
+            <tr className="text-left text-2xs font-bold tracking-[2px] uppercase text-slate-meta border-b border-[var(--rule)]">
               <th className="px-4 py-3">Role</th>
               <th className="px-3 py-3 text-right">P25</th>
               <th className="px-3 py-3 text-right">Median</th>
@@ -354,7 +354,7 @@ function CompBandsTable({
                     ? `$${b.p75.toFixed(0)}/hr`
                     : currency(b.p75)}
                 </td>
-                <td className="px-4 py-3 text-right text-[11px] text-slate-meta">
+                <td className="px-4 py-3 text-right text-2xs text-slate-meta">
                   n = {b.sample_size}
                 </td>
               </tr>
@@ -370,9 +370,9 @@ function RoleMixTable({ rows }: { rows: RoleVolumeRow[] }) {
   const maxApps = Math.max(...rows.map((r) => r.applications), 1);
   return (
     <div className="overflow-x-auto border border-[var(--rule)] bg-card">
-      <table className="w-full text-[13px]">
+      <table className="w-full text-xs">
         <thead>
-          <tr className="text-left text-[10px] font-bold tracking-[2px] uppercase text-slate-meta border-b border-[var(--rule)]">
+          <tr className="text-left text-2xs font-bold tracking-[2px] uppercase text-slate-meta border-b border-[var(--rule)]">
             <th className="px-4 py-3">Role</th>
             <th className="px-3 py-3 text-right">Jobs</th>
             <th className="px-3 py-3 text-right">Applications</th>
@@ -423,9 +423,9 @@ function StateActivityTable({ rows }: { rows: StateActivityRow[] }) {
   const maxApps = Math.max(...rows.map((r) => r.applications), 1);
   return (
     <div className="overflow-x-auto border border-[var(--rule)] bg-card">
-      <table className="w-full text-[13px]">
+      <table className="w-full text-xs">
         <thead>
-          <tr className="text-left text-[10px] font-bold tracking-[2px] uppercase text-slate-meta border-b border-[var(--rule)]">
+          <tr className="text-left text-2xs font-bold tracking-[2px] uppercase text-slate-meta border-b border-[var(--rule)]">
             <th className="px-4 py-3">State</th>
             <th className="px-3 py-3 text-right">Jobs</th>
             <th className="px-3 py-3 text-right">Applications</th>
@@ -474,7 +474,7 @@ function StateActivityTable({ rows }: { rows: StateActivityRow[] }) {
 
 function DataAccruingNotice() {
   return (
-    <div className="border border-[var(--rule)] bg-cream/40 p-5 text-[13px] text-slate-body italic leading-relaxed">
+    <div className="border border-[var(--rule)] bg-cream/40 p-5 text-xs text-slate-body italic leading-relaxed">
       Sample size below threshold ({MIN_REPORT_SAMPLE_SIZE}) for this
       section. Data will populate as more dental groups and candidates join the
       platform.
@@ -500,16 +500,16 @@ function CallToActionCard({
       href={href}
       className="block border border-[var(--rule)] bg-card p-6 hover:bg-cream/40 transition-colors"
     >
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+      <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
         {eyebrow}
       </div>
       <div className="text-xl font-extrabold tracking-[-0.4px] text-ink mb-2">
         {title}
       </div>
-      <p className="text-[13px] text-slate-body leading-relaxed mb-3">
+      <p className="text-xs text-slate-body leading-relaxed mb-3">
         {description}
       </p>
-      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
+      <span className="inline-flex items-center gap-1.5 text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep">
         {cta} <ArrowRight className="h-3 w-3" />
       </span>
     </Link>

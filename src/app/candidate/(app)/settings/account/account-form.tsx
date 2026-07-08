@@ -340,7 +340,7 @@ export function LanguageStub() {
         >
           <option>English</option>
         </select>
-        <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+        <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-2xs font-medium uppercase tracking-wide text-muted-foreground">
           Coming soon
         </span>
       </div>

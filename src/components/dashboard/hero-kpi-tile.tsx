@@ -112,7 +112,7 @@ export function HeroKpiTile({
       <ChevronRight className="absolute top-5 right-5 h-4 w-4 text-hero-foreground/50 group-hover:text-[var(--heritage-bright,#8db8a3)] group-hover:translate-x-1 transition-all" />
 
       {/* Eyebrow */}
-      <div className="text-[10px] font-extrabold tracking-[2.5px] uppercase text-[var(--heritage-bright,#8db8a3)] mb-1">
+      <div className="text-2xs font-extrabold tracking-[2.5px] uppercase text-[var(--heritage-bright,#8db8a3)] mb-1">
         {label}
       </div>
 
@@ -136,7 +136,7 @@ export function HeroKpiTile({
         </div>
         {slaChip && (
           <span
-            className="px-2 py-1 text-[12px] font-bold tracking-[0.4px]"
+            className="px-2 py-1 text-xs font-bold tracking-[0.4px]"
             style={
               slaChip.tone === "breach"
                 ? { background: "rgba(216,90,48,0.20)", color: "#f0997b" }
@@ -148,7 +148,7 @@ export function HeroKpiTile({
         )}
         {deltaSince && (
           <span
-            className="px-2 py-1 text-[12px] font-bold tracking-[0.4px] text-[var(--heritage-bright,#8db8a3)]"
+            className="px-2 py-1 text-xs font-bold tracking-[0.4px] text-[var(--heritage-bright,#8db8a3)]"
             style={{ background: "rgba(141,184,163,0.16)" }}
           >
             {deltaSince}
@@ -158,7 +158,7 @@ export function HeroKpiTile({
 
       {/* Hint */}
       {hint && (
-        <div className="text-[13px] leading-[1.55] max-w-[360px] text-hero-foreground/70">
+        <div className="text-xs leading-[1.55] max-w-[360px] text-hero-foreground/70">
           {hint}
         </div>
       )}
@@ -172,7 +172,7 @@ export function HeroKpiTile({
             <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-hero-foreground/45">
               {sparkLabel ?? "Trend · last 7 days"}
             </span>
-            <span className="text-[12px] font-bold text-hero-foreground/80">
+            <span className="text-xs font-bold text-hero-foreground/80">
               {sparkTotal} total
             </span>
           </div>
@@ -192,7 +192,7 @@ export function HeroKpiTile({
       )}
 
       {/* CTA */}
-      <div className="mt-auto pt-5 inline-flex items-center gap-1.5 text-[11px] font-extrabold tracking-[2px] uppercase text-[var(--heritage-bright,#8db8a3)] border-t border-hero-foreground/10">
+      <div className="mt-auto pt-5 inline-flex items-center gap-1.5 text-2xs font-extrabold tracking-[2px] uppercase text-[var(--heritage-bright,#8db8a3)] border-t border-hero-foreground/10">
         <span className="pt-5">
           {ctaLabel}
         </span>
@@ -286,7 +286,7 @@ function StageStrip({
             <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-hero-foreground/55">
               {s.label}
             </div>
-            <div className="text-[14px] font-extrabold text-hero-foreground mt-0.5">
+            <div className="text-sm font-extrabold text-hero-foreground mt-0.5">
               {s.count}
             </div>
           </div>

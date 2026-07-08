@@ -70,10 +70,10 @@ export function AccentColorPicker({ initial }: { initial: string | null }) {
 
   return (
     <div>
-      <h3 className="text-[12px] font-semibold text-ink">
+      <h3 className="text-xs font-semibold text-ink">
         Profile header color
       </h3>
-      <p className="mt-0.5 mb-2.5 text-[12px] text-muted-foreground leading-snug">
+      <p className="mt-0.5 mb-2.5 text-xs text-muted-foreground leading-snug">
         Personalize the banner at the top of your profile. Leave it blank for
         our default green.
       </p>
@@ -108,23 +108,23 @@ export function AccentColorPicker({ initial }: { initial: string | null }) {
           <button
             type="button"
             onClick={reset}
-            className="text-[12px] font-medium text-muted-foreground underline-offset-2 hover:text-ink hover:underline"
+            className="text-xs font-medium text-muted-foreground underline-offset-2 hover:text-ink hover:underline"
           >
             Reset to default
           </button>
         )}
         {saving && (
-          <span className="inline-flex items-center gap-1 text-[12px] text-muted-foreground">
+          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
             <Loader2 className="size-3.5 animate-spin" /> Saving…
           </span>
         )}
         {saved && !saving && (
-          <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-heritage">
+          <span className="inline-flex items-center gap-1 text-xs font-semibold text-heritage">
             <Check className="size-3.5" /> Saved
           </span>
         )}
         {error && (
-          <span className="text-[12px] text-danger">{error}</span>
+          <span className="text-xs text-danger">{error}</span>
         )}
       </div>
     </div>

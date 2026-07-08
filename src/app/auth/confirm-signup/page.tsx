@@ -33,7 +33,7 @@ export default async function ConfirmSignupPage({
     return (
       <SiteShell>
         <section className="mx-auto max-w-[560px] px-6 pb-24 pt-[160px] text-center sm:px-14">
-          <div className="mb-4 text-[10px] font-bold uppercase tracking-[3.5px] text-heritage-deep">
+          <div className="mb-4 text-2xs font-bold uppercase tracking-[3.5px] text-heritage-deep">
             Confirm your account
           </div>
           <h1 className="mb-5 text-3xl font-extrabold leading-[1.1] tracking-[-1.5px] text-ink sm:text-4xl">
@@ -46,13 +46,13 @@ export default async function ConfirmSignupPage({
           <div className="flex flex-wrap justify-center gap-3.5">
             <Link
               href="/employer/sign-up"
-              className="inline-flex items-center bg-primary px-9 py-4 text-[12px] font-bold uppercase tracking-[2px] text-primary-foreground transition-colors hover:bg-primary/90"
+              className="inline-flex items-center bg-primary px-9 py-4 text-xs font-bold uppercase tracking-[2px] text-primary-foreground transition-colors hover:bg-primary/90"
             >
               Employer sign-up
             </Link>
             <Link
               href="/candidate/sign-up"
-              className="inline-flex items-center border border-[var(--rule-strong)] px-9 py-[15px] text-[12px] font-bold uppercase tracking-[2px] text-ink transition-colors hover:border-ink"
+              className="inline-flex items-center border border-[var(--rule-strong)] px-9 py-[15px] text-xs font-bold uppercase tracking-[2px] text-ink transition-colors hover:border-ink"
             >
               Job-seeker sign-up
             </Link>
@@ -66,7 +66,7 @@ export default async function ConfirmSignupPage({
     <SiteShell>
       <section className="mx-auto max-w-[520px] px-6 pb-24 pt-[160px] sm:px-14">
         <div className="text-center">
-          <div className="mb-4 text-[10px] font-bold uppercase tracking-[3.5px] text-heritage-deep">
+          <div className="mb-4 text-2xs font-bold uppercase tracking-[3.5px] text-heritage-deep">
             Confirm your account
           </div>
           <h1 className="mb-3 text-3xl font-extrabold leading-[1.1] tracking-[-1.5px] text-ink sm:text-4xl">
@@ -80,7 +80,7 @@ export default async function ConfirmSignupPage({
         </div>
 
         {errorMessage && (
-          <div className="mb-6 border border-danger bg-danger-bg px-4 py-3 text-[13px] leading-relaxed text-danger">
+          <div className="mb-6 border border-danger bg-danger-bg px-4 py-3 text-xs leading-relaxed text-danger">
             {errorMessage}
           </div>
         )}
@@ -90,7 +90,7 @@ export default async function ConfirmSignupPage({
           <div>
             <label
               htmlFor="code"
-              className="mb-2 block text-[12px] font-semibold uppercase tracking-[1.5px] text-slate-meta"
+              className="mb-2 block text-xs font-semibold uppercase tracking-[1.5px] text-slate-meta"
             >
               Verification code
             </label>
@@ -107,13 +107,13 @@ export default async function ConfirmSignupPage({
           </div>
           <button
             type="submit"
-            className="w-full bg-primary px-9 py-4 text-[12px] font-bold uppercase tracking-[2px] text-primary-foreground transition-colors hover:bg-primary/90"
+            className="w-full bg-primary px-9 py-4 text-xs font-bold uppercase tracking-[2px] text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Confirm &amp; continue
           </button>
         </form>
 
-        <p className="mt-6 text-center text-[12px] leading-relaxed text-slate-meta">
+        <p className="mt-6 text-center text-xs leading-relaxed text-slate-meta">
           Code expired or not working?{" "}
           <Link href="/employer/sign-up" className="font-semibold text-heritage-deep hover:underline">
             Start sign-up again

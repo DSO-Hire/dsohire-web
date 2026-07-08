@@ -91,13 +91,13 @@ export default async function ReferralsPage() {
   return (
     <>
       <header className="mb-8 max-w-[820px]">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Referrals
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-tight text-ink">
           Turn word-of-mouth into hires
         </h1>
-        <p className="mt-3 text-[14px] text-slate-body leading-relaxed">
+        <p className="mt-3 text-sm text-slate-body leading-relaxed">
           Your team and their network are your best sourcing channel. Refer
           someone directly, or share your link so anyone can pass along a great
           name — every referral lands here and you can track it through to hire.
@@ -110,11 +110,11 @@ export default async function ReferralsPage() {
 
       {/* Share link */}
       <section className="mb-8 max-w-[680px]">
-        <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+        <h2 className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
           Your shareable referral link
         </h2>
         <ShareLinkBox code={code} />
-        <p className="mt-2 text-[12px] text-slate-meta leading-snug">
+        <p className="mt-2 text-xs text-slate-meta leading-snug">
           Anyone with this link can submit a referral — no account needed. Great
           for current staff, dental-school contacts, and past colleagues.
         </p>
@@ -128,11 +128,11 @@ export default async function ReferralsPage() {
       {/* List */}
       <section>
         <div className="flex flex-wrap items-baseline justify-between gap-3 mb-4">
-          <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+          <h2 className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep">
             Referrals ({referrals.length})
           </h2>
           {referrals.length > 0 && (
-            <div className="text-[12px] text-slate-meta">
+            <div className="text-xs text-slate-meta">
               {openCount} open · {hiredCount} hired
             </div>
           )}
@@ -141,7 +141,7 @@ export default async function ReferralsPage() {
         {referrals.length === 0 ? (
           <div className="border border-[var(--rule)] bg-cream/30 p-8 text-center max-w-[680px]">
             <UserPlus className="h-10 w-10 text-slate-meta mx-auto mb-3" aria-hidden />
-            <p className="text-[14px] text-slate-body leading-relaxed max-w-[480px] mx-auto">
+            <p className="text-sm text-slate-body leading-relaxed max-w-[480px] mx-auto">
               No referrals yet. Use{" "}
               <span className="font-semibold text-ink">Refer someone</span> above
               or share your link to start collecting names.
@@ -158,7 +158,7 @@ export default async function ReferralsPage() {
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[15px] font-semibold text-ink">
+                      <span className="text-sm font-semibold text-ink">
                         {r.candidate_name}
                       </span>
                       <span
@@ -169,13 +169,13 @@ export default async function ReferralsPage() {
                         {STATUS_LABEL[r.status] ?? r.status}
                       </span>
                     </div>
-                    <div className="mt-0.5 text-[12px] text-slate-meta">
+                    <div className="mt-0.5 text-xs text-slate-meta">
                       {[r.candidate_email, r.candidate_phone]
                         .filter(Boolean)
                         .join(" · ") || "No contact info"}
                       {job?.title ? ` · for ${job.title}` : ""}
                     </div>
-                    <div className="mt-1 text-[12px] text-slate-body">
+                    <div className="mt-1 text-xs text-slate-body">
                       Referred by{" "}
                       <span className="font-medium text-ink">
                         {r.referrer_name || "Someone"}
@@ -185,7 +185,7 @@ export default async function ReferralsPage() {
                       </span>
                     </div>
                     {r.note && (
-                      <p className="mt-1.5 text-[12px] text-slate-body italic leading-snug max-w-[560px]">
+                      <p className="mt-1.5 text-xs text-slate-body italic leading-snug max-w-[560px]">
                         &ldquo;{r.note}&rdquo;
                       </p>
                     )}

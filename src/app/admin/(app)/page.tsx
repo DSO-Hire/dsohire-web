@@ -54,13 +54,13 @@ export default async function AdminCommandCenter() {
   return (
     <>
       <header className="mb-8">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
           Founder cockpit
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink">
           Today
         </h1>
-        <p className="mt-3 text-[14px] text-slate-body leading-relaxed max-w-[640px]">
+        <p className="mt-3 text-sm text-slate-body leading-relaxed max-w-[640px]">
           Platform pulse + what needs you now. First-party data, founder-only.
         </p>
       </header>
@@ -110,11 +110,11 @@ export default async function AdminCommandCenter() {
 
       {/* Needs you now */}
       <section>
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
           Needs you now
         </div>
         {queue.every((r) => r.count === 0) ? (
-          <div className="flex items-center gap-2.5 border border-[var(--rule)] bg-card p-6 text-[14px] text-slate-body">
+          <div className="flex items-center gap-2.5 border border-[var(--rule)] bg-card p-6 text-sm text-slate-body">
             <CheckCircle2 className="h-5 w-5 text-heritage-deep" />
             All clear — nothing in the queue right now.
           </div>
@@ -138,7 +138,7 @@ function QueueItem({ row }: { row: QueueRow }) {
     <>
       <div className="flex items-center gap-3">
         <span
-          className={`inline-flex items-center justify-center min-w-[2.25rem] h-9 px-2 text-[15px] font-extrabold tabular-nums ${
+          className={`inline-flex items-center justify-center min-w-[2.25rem] h-9 px-2 text-sm font-extrabold tabular-nums ${
             muted
               ? "text-slate-meta bg-cream"
               : row.tone === "warn"
@@ -149,7 +149,7 @@ function QueueItem({ row }: { row: QueueRow }) {
           {row.count}
         </span>
         <span
-          className={`text-[14px] font-semibold ${
+          className={`text-sm font-semibold ${
             muted ? "text-slate-meta" : "text-ink"
           }`}
         >

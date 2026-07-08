@@ -174,7 +174,7 @@ function EventRow({
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium text-foreground">{event.title}</p>
           {!event.shipped && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-2xs font-medium uppercase tracking-wide text-muted-foreground">
               Coming soon
             </span>
           )}
@@ -213,7 +213,7 @@ function ChannelToggle({
   onChange: () => void;
 }) {
   return (
-    <label className="flex flex-col items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+    <label className="flex flex-col items-center gap-1 text-2xs uppercase tracking-wider text-muted-foreground">
       <span>{label}</span>
       <button
         type="button"

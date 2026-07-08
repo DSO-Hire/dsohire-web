@@ -85,7 +85,7 @@ export function ApplicationJourneys({
           <Eyebrow as="h2">
             Your applications — as journeys
           </Eyebrow>
-          <div className="text-[12px] text-slate-meta mt-1">
+          <div className="text-xs text-slate-meta mt-1">
             Where each one stands, start to finish.
           </div>
         </div>
@@ -124,16 +124,16 @@ function JourneyRow({ journey: j }: { journey: ApplicationJourney }) {
     >
       <div className="flex items-baseline justify-between gap-3 flex-wrap">
         <div className="min-w-0">
-          <span className="text-[13px] font-bold text-ink leading-tight">
+          <span className="text-xs font-bold text-ink leading-tight">
             {j.role}
           </span>
-          <span className="text-[11px] text-slate-meta tracking-[0.3px]">
+          <span className="text-2xs text-slate-meta tracking-[0.3px]">
             {" "}
             — {j.dsoName}
             {j.locationName ? ` · ${j.locationName}` : ""}
           </span>
         </div>
-        <span className="text-[10px] text-slate-meta tracking-[0.3px] shrink-0">
+        <span className="text-2xs text-slate-meta tracking-[0.3px] shrink-0">
           applied {appliedLabel(j.daysSinceApplied)}
         </span>
       </div>
@@ -161,7 +161,7 @@ function JourneyRow({ journey: j }: { journey: ApplicationJourney }) {
                   {done ? <Check className="h-3 w-3" /> : i + 1}
                 </span>
                 <span
-                  className={`text-[10px] font-semibold whitespace-nowrap ${
+                  className={`text-2xs font-semibold whitespace-nowrap ${
                     current
                       ? "text-heritage-deep"
                       : done
@@ -193,7 +193,7 @@ function JourneyRow({ journey: j }: { journey: ApplicationJourney }) {
 function StatusLine({ journey: j }: { journey: ApplicationJourney }) {
   if (j.offerPending) {
     return (
-      <p className="mt-2.5 text-[12px] text-ink flex items-center gap-1.5">
+      <p className="mt-2.5 text-xs text-ink flex items-center gap-1.5">
         <Star className="h-3 w-3 text-heritage shrink-0" aria-hidden />
         <span>
           <strong className="font-bold">Offer extended</strong> — review and
@@ -204,7 +204,7 @@ function StatusLine({ journey: j }: { journey: ApplicationJourney }) {
   }
   if (j.hasUnreadMessage) {
     return (
-      <p className="mt-2.5 text-[12px] text-ink flex items-center gap-1.5">
+      <p className="mt-2.5 text-xs text-ink flex items-center gap-1.5">
         <MessageCircle className="h-3 w-3 text-heritage shrink-0" aria-hidden />
         <span>
           <strong className="font-bold">New message</strong> from the hiring
@@ -219,7 +219,7 @@ function StatusLine({ journey: j }: { journey: ApplicationJourney }) {
     j.medianResponseDays != null
   ) {
     return (
-      <p className="mt-2.5 text-[12px] text-slate-body">
+      <p className="mt-2.5 text-xs text-slate-body">
         In review — this practice typically responds within{" "}
         <strong className="font-bold text-ink">
           ~{j.medianResponseDays} day{j.medianResponseDays === 1 ? "" : "s"}

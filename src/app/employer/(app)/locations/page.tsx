@@ -116,13 +116,13 @@ export default async function EmployerLocationsPage({ searchParams }: PageProps)
     <>
       <header className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div>
-          <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
+          <div className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
             Locations
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-tight text-ink">
             Your practice locations
           </h1>
-          <p className="mt-3 text-[14px] text-slate-body max-w-[640px]">
+          <p className="mt-3 text-sm text-slate-body max-w-[640px]">
             Each location is a tag you can attach to job postings. Add every
             office your DSO operates so candidates can filter and apply by city.
           </p>
@@ -130,14 +130,14 @@ export default async function EmployerLocationsPage({ searchParams }: PageProps)
         <div className="flex items-center gap-2.5 flex-wrap">
           <Link
             href="/employer/locations/bulk"
-            className="inline-flex items-center gap-2 px-4 py-3.5 bg-card border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-cream/60 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-3.5 bg-card border border-[var(--rule-strong)] text-ink text-xs font-bold tracking-[1.8px] uppercase hover:bg-cream/60 transition-colors"
           >
             <Upload className="h-3.5 w-3.5" />
             Bulk Import
           </Link>
           <Link
             href="/employer/locations/new"
-            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-xs font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
           >
             <Plus className="h-4 w-4" />
             Add Location
@@ -191,14 +191,14 @@ function EmptyState() {
       <h2 className="text-2xl font-extrabold tracking-[-0.5px] text-ink mb-3">
         No locations yet.
       </h2>
-      <p className="text-[14px] text-slate-body leading-relaxed max-w-[440px] mx-auto mb-7">
+      <p className="text-sm text-slate-body leading-relaxed max-w-[440px] mx-auto mb-7">
         Add your first practice location to start posting jobs. You can add as
         many as you want — each one becomes a tag you can attach to job
         listings.
       </p>
       <Link
         href="/employer/locations/new"
-        className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
+        className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-xs font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
       >
         <Plus className="h-4 w-4" />
         Add Location

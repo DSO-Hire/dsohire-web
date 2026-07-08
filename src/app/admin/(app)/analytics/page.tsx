@@ -74,7 +74,7 @@ export default async function VantageDashboard({ searchParams }: PageProps) {
       {/* Header */}
       <div className="flex items-end justify-between gap-4 flex-wrap">
         <div>
-          <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-1">
+          <div className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-1">
             Founder analytics · first-party · cookieless
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-[-1px] text-ink">
@@ -86,7 +86,7 @@ export default async function VantageDashboard({ searchParams }: PageProps) {
             <Link
               key={w}
               href={`/admin/analytics?days=${w}`}
-              className={`px-3 py-1.5 text-[11px] font-bold tracking-[1.5px] uppercase border transition-colors ${
+              className={`px-3 py-1.5 text-2xs font-bold tracking-[1.5px] uppercase border transition-colors ${
                 days === w
                   ? "bg-primary text-primary-foreground border-primary"
                   : "border-[var(--rule-strong)] text-slate-body hover:bg-cream/60"
@@ -101,7 +101,7 @@ export default async function VantageDashboard({ searchParams }: PageProps) {
       {/* Live now */}
       <div className="mt-6 inline-flex items-center gap-2 border border-[var(--rule)] bg-card px-4 py-2">
         <Activity className="h-4 w-4 text-heritage" />
-        <span className="text-[13px] text-slate-body">
+        <span className="text-xs text-slate-body">
           <span className="font-extrabold text-ink">{overview.live5min}</span>{" "}
           visitor{overview.live5min === 1 ? "" : "s"} in the last 5 min
         </span>
@@ -125,7 +125,7 @@ export default async function VantageDashboard({ searchParams }: PageProps) {
               const pct = Math.round((c.visitors / max) * 100);
               return (
                 <div key={c.channel} className="flex items-center gap-3">
-                  <div className="w-36 shrink-0 text-[13px] text-ink font-semibold truncate">
+                  <div className="w-36 shrink-0 text-xs text-ink font-semibold truncate">
                     {c.channel}
                   </div>
                   <div className="flex-1 h-5 bg-cream/60 relative">
@@ -134,7 +134,7 @@ export default async function VantageDashboard({ searchParams }: PageProps) {
                       style={{ width: `${pct}%` }}
                     />
                   </div>
-                  <div className="w-28 shrink-0 text-right text-[12px] text-slate-meta tabular-nums">
+                  <div className="w-28 shrink-0 text-right text-xs text-slate-meta tabular-nums">
                     <span className="text-ink font-bold">{c.visitors}</span> vis ·{" "}
                     {c.pageviews} pv
                   </div>
@@ -156,9 +156,9 @@ export default async function VantageDashboard({ searchParams }: PageProps) {
         {pages.length === 0 ? (
           <Empty>No pageviews yet in this window.</Empty>
         ) : (
-          <table className="w-full text-[13px]">
+          <table className="w-full text-xs">
             <thead>
-              <tr className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta border-b border-[var(--rule)]">
+              <tr className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta border-b border-[var(--rule)]">
                 <th className="text-left py-2 font-bold">Path</th>
                 <th className="text-right py-2 font-bold">Pageviews</th>
                 <th className="text-right py-2 font-bold">Visitors</th>
@@ -167,7 +167,7 @@ export default async function VantageDashboard({ searchParams }: PageProps) {
             <tbody>
               {pages.map((p) => (
                 <tr key={p.path} className="border-b border-[var(--rule)]/60">
-                  <td className="py-1.5 text-ink font-mono text-[12px] truncate max-w-[520px]">
+                  <td className="py-1.5 text-ink font-mono text-xs truncate max-w-[520px]">
                     {p.path}
                   </td>
                   <td className="py-1.5 text-right text-ink font-semibold tabular-nums">
@@ -188,9 +188,9 @@ export default async function VantageDashboard({ searchParams }: PageProps) {
         {loop.length === 0 ? (
           <Empty>No signups recorded yet.</Empty>
         ) : (
-          <table className="w-full text-[13px]">
+          <table className="w-full text-xs">
             <thead>
-              <tr className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta border-b border-[var(--rule)]">
+              <tr className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta border-b border-[var(--rule)]">
                 <th className="text-left py-2 font-bold">Channel</th>
                 <th className="text-right py-2 font-bold">Employer signups</th>
                 <th className="text-right py-2 font-bold">Paying</th>
@@ -219,7 +219,7 @@ export default async function VantageDashboard({ searchParams }: PageProps) {
         )}
       </Section>
 
-      <p className="mt-8 text-[11px] text-slate-meta leading-relaxed">
+      <p className="mt-8 text-2xs text-slate-meta leading-relaxed">
         {ANALYTICS_PRODUCT_NAME} is first-party + cookieless. Visitors are counted
         via a daily-rotating salted hash (no cookies, no cross-day/-site
         identity); raw IP &amp; User-Agent are never stored. Channel attribution
@@ -234,12 +234,12 @@ export default async function VantageDashboard({ searchParams }: PageProps) {
 function TopLineCard({ label, win }: { label: string; win: VantageOverview["today"] }) {
   return (
     <div className="border border-[var(--rule)] bg-card p-5">
-      <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-3">
+      <div className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep mb-3">
         {label}
       </div>
       <div className="flex items-center gap-5">
         <div>
-          <div className="flex items-center gap-1.5 text-slate-meta text-[11px] mb-0.5">
+          <div className="flex items-center gap-1.5 text-slate-meta text-2xs mb-0.5">
             <Users className="h-3.5 w-3.5" /> Visitors
           </div>
           <div className="text-2xl font-extrabold tracking-[-0.5px] text-ink tabular-nums">
@@ -247,7 +247,7 @@ function TopLineCard({ label, win }: { label: string; win: VantageOverview["toda
           </div>
         </div>
         <div>
-          <div className="flex items-center gap-1.5 text-slate-meta text-[11px] mb-0.5">
+          <div className="flex items-center gap-1.5 text-slate-meta text-2xs mb-0.5">
             <MousePointerClick className="h-3.5 w-3.5" /> Pageviews
           </div>
           <div className="text-2xl font-extrabold tracking-[-0.5px] text-ink tabular-nums">
@@ -262,7 +262,7 @@ function TopLineCard({ label, win }: { label: string; win: VantageOverview["toda
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mt-4 border border-[var(--rule)] bg-card p-6">
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
+      <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
         {title}
       </div>
       {children}
@@ -271,7 +271,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 function Empty({ children }: { children: React.ReactNode }) {
-  return <p className="text-[13px] text-slate-meta italic">{children}</p>;
+  return <p className="text-xs text-slate-meta italic">{children}</p>;
 }
 
 function Funnel({
@@ -284,7 +284,7 @@ function Funnel({
   const top = rows[0]?.count || 0;
   return (
     <section className="border border-[var(--rule)] bg-card p-6">
-      <div className="flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
+      <div className="flex items-center gap-2 text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
         <Globe className="h-3.5 w-3.5" /> {title}
       </div>
       <div className="space-y-2.5">
@@ -295,7 +295,7 @@ function Funnel({
             prev && prev > 0 ? Math.round((r.count / prev) * 100) : null;
           return (
             <div key={r.label}>
-              <div className="flex items-center justify-between text-[12px] mb-1">
+              <div className="flex items-center justify-between text-xs mb-1">
                 <span className="text-ink font-semibold">{r.label}</span>
                 <span className="text-slate-meta tabular-nums">
                   <span className="text-ink font-bold">{r.count}</span>

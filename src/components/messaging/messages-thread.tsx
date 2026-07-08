@@ -277,7 +277,7 @@ function renderTemplatePreview(body: string): React.ReactNode[] {
     nodes.push(
       <span
         key={`c-${key++}`}
-        className="inline-block px-1 py-0.5 -my-0.5 bg-heritage/15 text-heritage-deep text-[11px] font-semibold rounded-sm whitespace-nowrap"
+        className="inline-block px-1 py-0.5 -my-0.5 bg-heritage/15 text-heritage-deep text-2xs font-semibold rounded-sm whitespace-nowrap"
       >
         {TOKEN_CHIP_LABELS[match[1]] ?? match[1]}
       </span>
@@ -968,10 +968,10 @@ export function MessagesThread({
       {/* Top banner — External + audience reminder, single row */}
       <div className="shrink-0 flex items-center gap-2 px-4 py-2 border-b border-heritage/30 bg-heritage-tint">
         <Eye className="h-3.5 w-3.5 text-heritage-deep shrink-0" />
-        <span className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep shrink-0">
+        <span className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep shrink-0">
           External
         </span>
-        <span className="text-[12px] text-heritage-deep/90 leading-tight truncate">
+        <span className="text-xs text-heritage-deep/90 leading-tight truncate">
           · Visible to {externalAudienceLabel}{" "}
           <span className="font-semibold">{externalAudienceName}</span>{" "}
           {isEmployerView
@@ -989,7 +989,7 @@ export function MessagesThread({
         {visibleCount === 0 ? (
           <div className="p-8 text-center">
             <MessageCircle className="h-5 w-5 text-slate-meta mx-auto mb-2" />
-            <p className="text-[14px] text-slate-meta">
+            <p className="text-sm text-slate-meta">
               No messages yet. Start the conversation with{" "}
               <span className="font-bold text-ink">{otherPartyName}</span>.
             </p>
@@ -1017,21 +1017,21 @@ export function MessagesThread({
                         <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-warning shrink-0">
                           Internal note
                         </span>
-                        <span className="text-[14px] font-bold text-ink truncate">
+                        <span className="text-sm font-bold text-ink truncate">
                           {n.author_name}
                         </span>
                         <span
-                          className="text-[12px] text-slate-meta whitespace-nowrap"
+                          className="text-xs text-slate-meta whitespace-nowrap"
                           title={new Date(n.created_at).toLocaleString()}
                         >
                           {relativeTime(n.created_at)}
                           {n.edited_at ? " · edited" : ""}
                         </span>
                       </div>
-                      <div className="text-[14px] leading-relaxed text-ink whitespace-pre-wrap break-words">
+                      <div className="text-sm leading-relaxed text-ink whitespace-pre-wrap break-words">
                         {renderNoteBody(n.body)}
                       </div>
-                      <p className="mt-1 text-[11px] text-warning/80">
+                      <p className="mt-1 text-2xs text-warning/80">
                         Visible to your team only — never sent to the
                         candidate.
                       </p>
@@ -1045,7 +1045,7 @@ export function MessagesThread({
                   <li
                     key={m.id}
                     id={`message-${m.id}`}
-                    className="p-4 text-[13px] text-slate-meta italic"
+                    className="p-4 text-xs text-slate-meta italic"
                   >
                     Message deleted.
                   </li>
@@ -1074,14 +1074,14 @@ export function MessagesThread({
                           isMine ? "flex-row-reverse" : "flex-row"
                         }`}
                       >
-                        <span className="text-[14px] font-bold text-ink truncate">
+                        <span className="text-sm font-bold text-ink truncate">
                           {senderLabel}
                         </span>
                         <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
                           {roleLabel(m.sender_role)}
                         </span>
                         <span
-                          className="text-[12px] text-slate-meta"
+                          className="text-xs text-slate-meta"
                           title={new Date(m.created_at).toLocaleString()}
                         >
                           {relativeTime(m.created_at)}
@@ -1106,7 +1106,7 @@ export function MessagesThread({
                     id={`message-${m.id}`}
                     className="px-4 py-3"
                   >
-                    <div className="flex items-center gap-2 text-[12px] text-slate-meta italic justify-center">
+                    <div className="flex items-center gap-2 text-xs text-slate-meta italic justify-center">
                       <span
                         className="inline-block h-px flex-1 bg-[var(--rule)]"
                         aria-hidden
@@ -1114,7 +1114,7 @@ export function MessagesThread({
                       <EventIcon className="h-3 w-3 text-heritage-deep" />
                       <span className="px-2 text-center">{m.body}</span>
                       <span
-                        className="text-[10px] text-slate-meta whitespace-nowrap"
+                        className="text-2xs text-slate-meta whitespace-nowrap"
                         title={new Date(m.created_at).toLocaleString()}
                       >
                         {relativeTime(m.created_at)}
@@ -1153,14 +1153,14 @@ export function MessagesThread({
                         isMine ? "flex-row-reverse" : "flex-row"
                       }`}
                     >
-                      <span className="text-[14px] font-bold text-ink truncate">
+                      <span className="text-sm font-bold text-ink truncate">
                         {senderLabel}
                       </span>
                       <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
                         {senderRoleLabel}
                       </span>
                       <span
-                        className="text-[12px] text-slate-meta"
+                        className="text-xs text-slate-meta"
                         title={new Date(m.created_at).toLocaleString()}
                       >
                         {relativeTime(m.created_at)}
@@ -1178,26 +1178,26 @@ export function MessagesThread({
                           onKeyDown={handleEditKeyDown}
                           rows={3}
                           maxLength={MAX_BODY}
-                          className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed"
+                          className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed"
                           autoFocus
                         />
                         <div className="flex items-center gap-2 mt-2">
                           <button
                             type="button"
                             onClick={() => void handleEditSave()}
-                            className="px-3 py-1.5 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
+                            className="px-3 py-1.5 bg-primary text-primary-foreground text-2xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
                           >
                             Save
                           </button>
                           <button
                             type="button"
                             onClick={cancelEdit}
-                            className="px-3 py-1.5 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-ink transition-colors"
+                            className="px-3 py-1.5 text-2xs font-bold tracking-[1.5px] uppercase text-slate-body hover:text-ink transition-colors"
                           >
                             Cancel
                           </button>
                           {editingError && (
-                            <span className="text-[13px] text-danger">
+                            <span className="text-xs text-danger">
                               {editingError}
                             </span>
                           )}
@@ -1205,7 +1205,7 @@ export function MessagesThread({
                       </div>
                     ) : (
                       <div
-                        className={`max-w-[520px] px-4 py-3 text-[14px] leading-relaxed whitespace-pre-wrap break-words border ${
+                        className={`max-w-[520px] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap break-words border ${
                           isMine
                             ? "bg-heritage/15 border-heritage/40 text-ink"
                             : "bg-[var(--heritage-tint)] border-heritage/25 text-ink"
@@ -1231,10 +1231,10 @@ export function MessagesThread({
                                     title={`Open ${att.file_name}`}
                                   >
                                     <Icon className="h-4 w-4 text-heritage-deep shrink-0" />
-                                    <span className="truncate text-[13px] font-medium">
+                                    <span className="truncate text-xs font-medium">
                                       {att.file_name}
                                     </span>
-                                    <span className="ml-auto text-[11px] text-slate-meta shrink-0">
+                                    <span className="ml-auto text-2xs text-slate-meta shrink-0">
                                       {formatBytes(att.size_bytes)}
                                     </span>
                                   </button>
@@ -1250,7 +1250,7 @@ export function MessagesThread({
                       <div className="flex items-center gap-2 mt-1">
                         {m.read_at ? (
                           <span
-                            className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[1px] uppercase text-heritage-deep"
+                            className="inline-flex items-center gap-1 text-2xs font-bold tracking-[1px] uppercase text-heritage-deep"
                             title={`Read ${new Date(
                               m.read_at
                             ).toLocaleString()}`}
@@ -1259,7 +1259,7 @@ export function MessagesThread({
                             Read
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[1px] uppercase text-slate-meta">
+                          <span className="inline-flex items-center gap-1 text-2xs font-bold tracking-[1px] uppercase text-slate-meta">
                             <Check className="h-3 w-3" />
                             Sent
                           </span>
@@ -1287,14 +1287,14 @@ export function MessagesThread({
                                 <button
                                   type="button"
                                   onClick={() => startEdit(m)}
-                                  className="block w-full text-left px-3 py-1.5 text-[13px] text-ink hover:bg-cream"
+                                  className="block w-full text-left px-3 py-1.5 text-xs text-ink hover:bg-cream"
                                 >
                                   Edit
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => void handleDelete(m.id)}
-                                  className="block w-full text-left px-3 py-1.5 text-[13px] text-danger hover:bg-cream"
+                                  className="block w-full text-left px-3 py-1.5 text-xs text-danger hover:bg-cream"
                                 >
                                   Delete
                                 </button>
@@ -1324,7 +1324,7 @@ export function MessagesThread({
         {slashOpen && (
           <div className="absolute bottom-full left-2 right-2 mb-1 z-20 bg-popover border border-heritage/40 shadow-[0_14px_30px_-12px_rgba(7,15,28,0.35)] max-h-72 overflow-y-auto">
             {slashMatches.length === 0 ? (
-              <p className="px-3 py-2.5 text-[12px] text-slate-meta">
+              <p className="px-3 py-2.5 text-xs text-slate-meta">
                 No templates match &ldquo;{slashFilter}&rdquo; — keep typing
                 to write your own message.
               </p>
@@ -1341,15 +1341,15 @@ export function MessagesThread({
                       }`}
                     >
                       <span className="flex items-baseline gap-2">
-                        <span className="font-mono text-[12px] font-bold text-heritage-deep shrink-0">
+                        <span className="font-mono text-xs font-bold text-heritage-deep shrink-0">
                           {t.label}
                         </span>
-                        <span className="text-[12px] text-slate-meta truncate">
+                        <span className="text-xs text-slate-meta truncate">
                           {t.description}
                         </span>
                       </span>
                       {i === slashIdx && (
-                        <span className="block mt-1 text-[12px] leading-relaxed text-ink/80 whitespace-pre-wrap max-h-24 overflow-hidden">
+                        <span className="block mt-1 text-xs leading-relaxed text-ink/80 whitespace-pre-wrap max-h-24 overflow-hidden">
                           {renderTemplatePreview(t.body)}
                         </span>
                       )}
@@ -1358,7 +1358,7 @@ export function MessagesThread({
                 ))}
               </ul>
             )}
-            <p className="px-3 py-1.5 text-[10px] text-slate-meta border-t border-[var(--rule)] bg-cream/40">
+            <p className="px-3 py-1.5 text-2xs text-slate-meta border-t border-[var(--rule)] bg-cream/40">
               <span className="font-mono">↑↓</span> choose ·{" "}
               <span className="font-mono">↩</span> insert ·{" "}
               <span className="font-mono">Esc</span> dismiss — fields fill
@@ -1368,14 +1368,14 @@ export function MessagesThread({
         )}
         {noteMode ? (
           /* Note-mode strip replaces the medical reminder. */
-          <p className="flex items-center gap-1.5 text-[11px] font-semibold text-warning mb-2 leading-snug">
+          <p className="flex items-center gap-1.5 text-2xs font-semibold text-warning mb-2 leading-snug">
             <Lock className="h-3 w-3 shrink-0" aria-hidden />
             Internal note — added to the timeline for your team only, never
             sent to the candidate.
           </p>
         ) : (
           /* Compressed medical-info reminder — single line italic */
-          <p className="text-[11px] italic text-heritage-deep/80 mb-2 leading-snug">
+          <p className="text-2xs italic text-heritage-deep/80 mb-2 leading-snug">
             Don&apos;t share medical information here — discuss accommodations
             directly with HR.
           </p>
@@ -1390,10 +1390,10 @@ export function MessagesThread({
                   className="inline-flex items-center gap-2 px-2 py-1 rounded-md bg-card border border-heritage/30 max-w-[260px]"
                 >
                   <Icon className="h-3.5 w-3.5 text-heritage-deep shrink-0" />
-                  <span className="truncate text-[12px] text-ink font-medium">
+                  <span className="truncate text-xs text-ink font-medium">
                     {file.name}
                   </span>
-                  <span className="text-[10px] text-slate-meta shrink-0">
+                  <span className="text-2xs text-slate-meta shrink-0">
                     {formatBytes(file.size)}
                   </span>
                   <button
@@ -1475,7 +1475,7 @@ export function MessagesThread({
                   ? `Message ${otherPartyName}… ("/" for templates)`
                   : `Message ${otherPartyName}…`
             }
-            className={`flex-1 px-3 py-2 text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:ring-1 transition-colors leading-relaxed resize-none border ${
+            className={`flex-1 px-3 py-2 text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:ring-1 transition-colors leading-relaxed resize-none border ${
               noteMode
                 ? "bg-warning-bg border-warning focus:border-warning focus:ring-warning"
                 : "bg-card border-heritage/40 focus:border-heritage focus:ring-heritage"
@@ -1491,7 +1491,7 @@ export function MessagesThread({
               (composerBody.trim().length === 0 &&
                 (noteMode || stagedFiles.length === 0))
             }
-            className={`px-4 py-2 text-[10px] font-bold tracking-[1.5px] uppercase transition-colors disabled:opacity-60 disabled:cursor-not-allowed shrink-0 ${
+            className={`px-4 py-2 text-2xs font-bold tracking-[1.5px] uppercase transition-colors disabled:opacity-60 disabled:cursor-not-allowed shrink-0 ${
               noteMode
                 ? "bg-warning text-warning-foreground hover:bg-warning/90"
                 : "bg-primary text-primary-foreground hover:bg-primary/90"
@@ -1506,7 +1506,7 @@ export function MessagesThread({
                 : "Send"}
           </button>
         </div>
-        <div className="flex items-center gap-3 mt-1.5 text-[10px] text-slate-meta flex-wrap">
+        <div className="flex items-center gap-3 mt-1.5 text-2xs text-slate-meta flex-wrap">
           <span>
             <span className="font-mono">↩</span> {noteMode ? "saves" : "sends"},{" "}
             <span className="font-mono">Shift+↩</span> for newline
@@ -1525,7 +1525,7 @@ export function MessagesThread({
             </span>
           )}
           {composerError && (
-            <span className="text-[11px] text-danger">{composerError}</span>
+            <span className="text-2xs text-danger">{composerError}</span>
           )}
         </div>
       </div>

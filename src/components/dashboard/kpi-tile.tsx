@@ -120,7 +120,7 @@ export function KpiTile({
 
       {/* Optional secondary signal line */}
       {hint && (
-        <div className={`text-[12px] tracking-[0.2px] leading-snug tabular ${navy ? "text-hero-foreground/70" : "text-slate-body"}`}>
+        <div className={`text-xs tracking-[0.2px] leading-snug tabular ${navy ? "text-hero-foreground/70" : "text-slate-body"}`}>
           {hint}
         </div>
       )}
@@ -148,7 +148,7 @@ export function KpiTile({
 
       {/* Route label — only on clickable tiles. Pushes to the bottom. */}
       {isClickable && routeLabel && (
-        <div className={`mt-auto pt-3.5 flex items-center gap-1.5 text-[10px] font-semibold transition-colors ${navy ? "text-hero-foreground/50 group-hover:text-heritage-bright border-t border-hero-foreground/10" : "text-slate-meta group-hover:text-heritage-deep border-t border-[var(--rule)]"}`}>
+        <div className={`mt-auto pt-3.5 flex items-center gap-1.5 text-2xs font-semibold transition-colors ${navy ? "text-hero-foreground/50 group-hover:text-heritage-bright border-t border-hero-foreground/10" : "text-slate-meta group-hover:text-heritage-deep border-t border-[var(--rule)]"}`}>
           {routeLabel}
           <ChevronRight className="h-2.5 w-2.5" strokeWidth={3} />
         </div>

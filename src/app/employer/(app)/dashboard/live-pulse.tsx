@@ -181,7 +181,7 @@ export function LivePulse({
       </header>
       <div className="p-2 overflow-hidden">
         {items.length === 0 && (
-          <div className="px-3 py-6 text-[12px] text-slate-body leading-relaxed">
+          <div className="px-3 py-6 text-xs text-slate-body leading-relaxed">
             Quiet for now — applications, replies, and scorecards stream in
             here the moment they happen.
           </div>
@@ -198,10 +198,10 @@ export function LivePulse({
               aria-hidden
               className={`mt-1.5 h-2 w-2 flex-none ${KIND_DOT[e.kind]}`}
             />
-            <span className="text-[12px] leading-[1.5] text-ink min-w-0">
+            <span className="text-xs leading-[1.5] text-ink min-w-0">
               {e.text}
             </span>
-            <span className="ml-auto text-[10px] text-slate-meta whitespace-nowrap pt-0.5 tabular">
+            <span className="ml-auto text-2xs text-slate-meta whitespace-nowrap pt-0.5 tabular">
               {e.ago}
             </span>
           </Link>

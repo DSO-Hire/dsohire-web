@@ -118,10 +118,10 @@ export function BulkLocationsUploader() {
       {/* Sample download */}
       <div className="border border-[var(--rule)] bg-cream/30 p-4 flex items-start justify-between gap-4 flex-wrap">
         <div className="flex-1 min-w-0">
-          <h3 className="text-[13px] font-semibold text-ink mb-0.5">
+          <h3 className="text-xs font-semibold text-ink mb-0.5">
             New to this? Start from the sample.
           </h3>
-          <p className="text-[12px] text-slate-meta leading-relaxed">
+          <p className="text-xs text-slate-meta leading-relaxed">
             Three example rows showing exactly the columns we expect.
             Replace the rows with your own locations and upload.
           </p>
@@ -129,7 +129,7 @@ export function BulkLocationsUploader() {
         <button
           type="button"
           onClick={downloadSample}
-          className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-2 text-[12px] font-semibold text-ink hover:bg-cream/60"
+          className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-2 text-xs font-semibold text-ink hover:bg-cream/60"
         >
           <Download className="size-3.5" />
           Download sample CSV
@@ -153,10 +153,10 @@ export function BulkLocationsUploader() {
       >
         {file ? (
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2.5 text-[14px] text-ink font-semibold">
+            <div className="inline-flex items-center gap-2.5 text-sm text-ink font-semibold">
               <FileSpreadsheet className="size-4 text-heritage-deep" />
               {file.name}
-              <span className="text-[12px] font-normal text-slate-meta">
+              <span className="text-xs font-normal text-slate-meta">
                 ({(file.size / 1024).toFixed(1)} KB)
               </span>
             </div>
@@ -169,7 +169,7 @@ export function BulkLocationsUploader() {
                   setError(null);
                   if (inputRef.current) inputRef.current.value = "";
                 }}
-                className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-2 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
+                className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-2 text-xs font-semibold text-slate-body hover:bg-cream/60 hover:text-ink"
               >
                 <Trash2 className="size-3.5" />
                 Pick a different file
@@ -178,7 +178,7 @@ export function BulkLocationsUploader() {
                 type="button"
                 onClick={onSubmit}
                 disabled={pending}
-                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
+                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
               >
                 {pending ? (
                   <>
@@ -197,7 +197,7 @@ export function BulkLocationsUploader() {
         ) : (
           <div className="space-y-3">
             <Upload className="size-6 mx-auto text-slate-meta" />
-            <div className="text-[14px] text-slate-body">
+            <div className="text-sm text-slate-body">
               <button
                 type="button"
                 onClick={() => inputRef.current?.click()}
@@ -207,7 +207,7 @@ export function BulkLocationsUploader() {
               </button>{" "}
               or drag it here.
             </div>
-            <p className="text-[11px] text-slate-meta">
+            <p className="text-2xs text-slate-meta">
               .csv, .xlsx, or .xls — up to 5 MB · 1000 rows max
             </p>
           </div>
@@ -223,7 +223,7 @@ export function BulkLocationsUploader() {
 
       {/* Error from server */}
       {error && (
-        <div className="border border-danger bg-danger-bg px-4 py-3 text-[13px] text-danger inline-flex items-start gap-2">
+        <div className="border border-danger bg-danger-bg px-4 py-3 text-xs text-danger inline-flex items-start gap-2">
           <AlertTriangle className="size-4 mt-0.5 shrink-0" />
           <span>{error}</span>
         </div>
@@ -273,7 +273,7 @@ function ResultCard({
         <div className="flex-1 min-w-0">
           <h3
             className={
-              "text-[14px] font-bold " +
+              "text-sm font-bold " +
               (allOk
                 ? "text-heritage-deep"
                 : noneOk
@@ -288,7 +288,7 @@ function ResultCard({
                 : `Added ${succeededCount} of ${totalRows} locations — ${failed.length} skipped.`}
           </h3>
           {allOk && (
-            <p className="mt-1 text-[12px] text-heritage-deep/80">
+            <p className="mt-1 text-xs text-heritage-deep/80">
               Each location is being geocoded in the background. They&apos;ll
               show up on the map view within a minute.
             </p>
@@ -297,7 +297,7 @@ function ResultCard({
         {succeededCount > 0 && (
           <Link
             href="/employer/locations"
-            className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-[11px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 shrink-0"
+            className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-2xs font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 shrink-0"
           >
             View all
             <ArrowRight className="size-3.5" />
@@ -308,19 +308,19 @@ function ResultCard({
       {failed.length > 0 && (
         <div className="border-t border-current/20 pt-3 space-y-2">
           <div className="flex items-center justify-between gap-2">
-            <div className="text-[11px] font-bold tracking-[1.5px] uppercase text-current opacity-80">
+            <div className="text-2xs font-bold tracking-[1.5px] uppercase text-current opacity-80">
               Skipped rows ({failed.length})
             </div>
             <button
               type="button"
               onClick={() => onDownloadErrors(failed)}
-              className="inline-flex items-center gap-1.5 text-[12px] font-semibold underline-offset-2 hover:underline"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold underline-offset-2 hover:underline"
             >
               <Download className="size-3.5" />
               Download as CSV
             </button>
           </div>
-          <ul className="space-y-1 text-[12px]">
+          <ul className="space-y-1 text-xs">
             {failed.slice(0, 10).map((f) => (
               <li key={`${f.rowNumber}-${f.name}`} className="flex gap-2">
                 <span className="font-mono opacity-60 shrink-0">

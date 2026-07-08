@@ -164,14 +164,14 @@ export default async function AdminConversationsPage({ searchParams }: PageProps
     <main className="min-h-screen bg-cream/30 px-6 py-10">
       <div className="mx-auto max-w-[1200px] space-y-6">
         <header className="space-y-2">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep inline-flex items-center gap-2">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep inline-flex items-center gap-2">
             <ShieldCheck className="size-3" />
             Admin · Support conversations
           </div>
           <h1 className="font-display text-3xl font-extrabold tracking-[-0.8px] text-ink leading-tight">
             Tier 2 chat review queue
           </h1>
-          <p className="text-[13px] text-slate-body">
+          <p className="text-xs text-slate-body">
             Every Claude support conversation across all customers. Click a row
             to read the transcript and mark it reviewed or flag it.{" "}
             {first100 ? (
@@ -185,7 +185,7 @@ export default async function AdminConversationsPage({ searchParams }: PageProps
           </p>
         </header>
 
-        <nav className="flex items-center gap-1 flex-wrap text-[12px]">
+        <nav className="flex items-center gap-1 flex-wrap text-xs">
           <FilterPill
             label={`All (${(unreviewedCount ?? 0) + (flaggedCount ?? 0) + (reviewedCount ?? 0)})`}
             href="/admin/support/conversations?review=all"
@@ -211,7 +211,7 @@ export default async function AdminConversationsPage({ searchParams }: PageProps
         </nav>
 
         {rows.length === 0 ? (
-          <div className="border border-dashed border-[var(--rule-strong)] bg-card px-6 py-12 text-center text-[13px] text-slate-meta">
+          <div className="border border-dashed border-[var(--rule-strong)] bg-card px-6 py-12 text-center text-xs text-slate-meta">
             No conversations match this filter.
           </div>
         ) : (
@@ -228,12 +228,12 @@ export default async function AdminConversationsPage({ searchParams }: PageProps
                   >
                     <StatusBadge status={r.review_status} />
                     <div className="flex-1 min-w-0 space-y-1">
-                      <div className="flex items-center gap-2 flex-wrap text-[12px]">
+                      <div className="flex items-center gap-2 flex-wrap text-xs">
                         <span className="font-bold text-ink">
                           {dso ?? "(no DSO)"}
                         </span>
                         <span className="text-slate-meta">·</span>
-                        <span className="text-slate-meta uppercase tracking-[1px] text-[10px] font-bold">
+                        <span className="text-slate-meta uppercase tracking-[1px] text-2xs font-bold">
                           {r.tier_snapshot ?? "?"}
                         </span>
                         <span className="text-slate-meta">·</span>
@@ -241,7 +241,7 @@ export default async function AdminConversationsPage({ searchParams }: PageProps
                           {new Date(r.created_at).toLocaleString()}
                         </span>
                       </div>
-                      <div className="text-[14px] text-ink line-clamp-2">
+                      <div className="text-sm text-ink line-clamp-2">
                         {r.body}
                       </div>
                       {r.auto_flag_reason && (
@@ -250,7 +250,7 @@ export default async function AdminConversationsPage({ searchParams }: PageProps
                           {r.auto_flag_reason}
                         </div>
                       )}
-                      <div className="flex items-center gap-3 text-[11px] text-slate-meta">
+                      <div className="flex items-center gap-3 text-2xs text-slate-meta">
                         <span className="inline-flex items-center gap-1">
                           <MessageSquare className="size-3" />
                           {counts?.assistant ?? 0} turn
@@ -298,7 +298,7 @@ function FilterPill({
   tone?: "red" | "amber";
 }) {
   const base =
-    "inline-flex items-center px-3 py-1.5 border text-[11px] font-bold tracking-[1px] uppercase ";
+    "inline-flex items-center px-3 py-1.5 border text-2xs font-bold tracking-[1px] uppercase ";
   const toneActive =
     tone === "red"
       ? "border-danger bg-danger text-danger-foreground"

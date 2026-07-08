@@ -30,7 +30,7 @@ export default async function CandidateSignUpPage({ searchParams }: PageProps) {
   return (
     <SiteShell>
       <section className="pt-[140px] pb-24 px-6 sm:px-14 max-w-[1100px] mx-auto">
-        <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-4">
+        <div className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-4">
           Candidate Sign-Up
         </div>
         <h1 className="text-4xl sm:text-6xl font-extrabold tracking-[-1.8px] leading-[1.05] text-ink mb-6 max-w-[820px]">
@@ -47,13 +47,13 @@ export default async function CandidateSignUpPage({ searchParams }: PageProps) {
           </div>
 
           <aside className="bg-cream p-8 sm:p-10">
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+            <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
               What You Get
             </div>
             <div className="text-2xl font-extrabold tracking-[-0.5px] text-ink mb-2">
               Always free
             </div>
-            <div className="text-[14px] text-slate-body mb-6 leading-snug">
+            <div className="text-sm text-slate-body mb-6 leading-snug">
               No subscriptions, no fees, no upsells. Ever.
             </div>
 
@@ -67,7 +67,7 @@ export default async function CandidateSignUpPage({ searchParams }: PageProps) {
               ].map((f, i) => (
                 <li
                   key={i}
-                  className="text-[14px] text-ink flex items-start gap-2 leading-snug"
+                  className="text-sm text-ink flex items-start gap-2 leading-snug"
                 >
                   <span className="text-heritage-light font-extrabold flex-shrink-0">
                     ✓
@@ -79,7 +79,7 @@ export default async function CandidateSignUpPage({ searchParams }: PageProps) {
           </aside>
         </div>
 
-        <p className="mt-10 text-[14px] text-slate-body leading-relaxed">
+        <p className="mt-10 text-sm text-slate-body leading-relaxed">
           Already have a candidate account?{" "}
           <Link
             href="/candidate/sign-in"
@@ -88,7 +88,7 @@ export default async function CandidateSignUpPage({ searchParams }: PageProps) {
             Sign in
           </Link>
         </p>
-        <p className="mt-3 text-[14px] text-slate-body leading-relaxed">
+        <p className="mt-3 text-sm text-slate-body leading-relaxed">
           Are you a DSO?{" "}
           <Link
             href="/pricing"

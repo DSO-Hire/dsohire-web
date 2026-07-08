@@ -19,10 +19,10 @@ export function ContactForm() {
   if (state.ok) {
     return (
       <div className="bg-cream border-l-4 border-heritage p-6">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Sent
         </div>
-        <p className="text-[15px] text-ink leading-relaxed">{state.message}</p>
+        <p className="text-sm text-ink leading-relaxed">{state.message}</p>
       </div>
     );
   }
@@ -45,7 +45,7 @@ export function ContactForm() {
       <div>
         <label
           htmlFor="contact-message"
-          className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+          className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2"
         >
           Message <span className="text-heritage">*</span>
         </label>
@@ -56,26 +56,26 @@ export function ContactForm() {
           rows={6}
           maxLength={5000}
           placeholder="What's on your mind?"
-          className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] leading-relaxed placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors resize-vertical"
+          className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm leading-relaxed placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors resize-vertical"
         />
       </div>
 
       {state.error && (
         <div className="bg-danger-bg border-l-4 border-danger p-4">
-          <p className="text-[14px] text-danger">{state.error}</p>
+          <p className="text-sm text-danger">{state.error}</p>
         </div>
       )}
 
       <button
         type="submit"
         disabled={pending}
-        className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {pending ? "Sending…" : "Send Message"}
         {!pending && <Send className="h-3.5 w-3.5" />}
       </button>
 
-      <p className="text-[13px] text-slate-meta leading-relaxed">
+      <p className="text-xs text-slate-meta leading-relaxed">
         We&apos;ll only use your email to reply. Read our{" "}
         <a
           href="/legal/privacy"
@@ -104,7 +104,7 @@ function Field({
     <div>
       <label
         htmlFor={`contact-${name}`}
-        className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+        className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2"
       >
         {label} {required && <span className="text-heritage">*</span>}
       </label>
@@ -122,7 +122,7 @@ function Field({
                 ? "organization"
                 : "off"
         }
-        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
       />
     </div>
   );

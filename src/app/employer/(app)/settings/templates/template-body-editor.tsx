@@ -230,7 +230,7 @@ function InsertVariableMenu({
         disabled={disabled}
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "inline-flex items-center gap-1.5 px-2 h-8 text-[12px] font-semibold text-slate-body hover:bg-ivory-deep hover:text-ink rounded transition-colors",
+          "inline-flex items-center gap-1.5 px-2 h-8 text-xs font-semibold text-slate-body hover:bg-ivory-deep hover:text-ink rounded transition-colors",
           open && "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground",
           disabled && "opacity-40 cursor-not-allowed"
         )}
@@ -250,7 +250,7 @@ function InsertVariableMenu({
           <div className="absolute left-0 top-full z-50 mt-1 w-[280px] max-w-[calc(100vw-2rem)] max-h-[360px] overflow-y-auto border border-[var(--rule-strong)] bg-popover shadow-lg">
             {groups.map((group) => (
               <div key={group.id}>
-                <div className="border-b border-t border-[var(--rule)] bg-cream/50 px-3 py-1.5 text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
+                <div className="border-b border-t border-[var(--rule)] bg-cream/50 px-3 py-1.5 text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep">
                   {group.label}
                 </div>
                 {group.fields.map((field) => (
@@ -258,12 +258,12 @@ function InsertVariableMenu({
                     key={field.token}
                     type="button"
                     onClick={() => insert(field.token)}
-                    className="block w-full text-left px-3 py-2 text-[13px] hover:bg-cream/50 transition-colors"
+                    className="block w-full text-left px-3 py-2 text-xs hover:bg-cream/50 transition-colors"
                   >
-                    <div className="font-mono text-[12px] text-ink">
+                    <div className="font-mono text-xs text-ink">
                       {`{{${field.token}}}`}
                     </div>
-                    <div className="text-[11px] text-slate-meta mt-0.5">
+                    <div className="text-2xs text-slate-meta mt-0.5">
                       {field.label} · &ldquo;{field.example}&rdquo;
                     </div>
                   </button>

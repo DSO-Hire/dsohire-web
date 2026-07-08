@@ -24,6 +24,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, LifeBuoy, LogOut } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { TextSizeToggle } from "@/components/theme/text-size-toggle";
 import { Avatar } from "@/components/ui/avatar";
 import { isNavItemActive } from "./nav-active";
 
@@ -107,10 +108,10 @@ export function CandidateMobileNav({
               className="ring-1 ring-white/10"
             />
             <div className="min-w-0">
-              <div className="text-[13px] font-semibold text-sidebar-foreground truncate leading-tight">
+              <div className="text-xs font-semibold text-sidebar-foreground truncate leading-tight">
                 {user.fullName}
               </div>
-              <div className="text-[10px] text-sidebar-foreground/50 truncate">
+              <div className="text-2xs text-sidebar-foreground/50 truncate">
                 {user.subtitle}
               </div>
             </div>
@@ -140,16 +141,22 @@ export function CandidateMobileNav({
 
         <div className="border-t border-sidebar-border p-3 space-y-1">
           <div className="flex items-center justify-between px-3 py-2">
-            <span className="text-[11px] font-bold uppercase tracking-[1.5px] text-sidebar-muted">
+            <span className="text-2xs font-bold uppercase tracking-[1.5px] text-sidebar-muted">
               Theme
             </span>
             <ThemeToggle className="text-sidebar-foreground" />
+          </div>
+          <div className="flex items-center justify-between px-3 py-2">
+            <span className="text-2xs font-bold uppercase tracking-[1.5px] text-sidebar-muted">
+              Text size
+            </span>
+            <TextSizeToggle className="text-sidebar-foreground" />
           </div>
           <Link
             href={help.href}
             onClick={() => setOpen(false)}
             className={
-              "flex items-center gap-3 px-3 py-2.5 text-[13px] font-semibold rounded " +
+              "flex items-center gap-3 px-3 py-2.5 text-xs font-semibold rounded " +
               (isNavItemActive(pathname, { id: help.id, href: help.href })
                 ? "bg-white/10 text-sidebar-foreground"
                 : "text-sidebar-foreground/65 hover:bg-white/5 hover:text-sidebar-foreground")
@@ -161,7 +168,7 @@ export function CandidateMobileNav({
           <form action="/candidate/sign-out" method="post">
             <button
               type="submit"
-              className="flex w-full items-center gap-3 px-3 py-2.5 text-[13px] font-semibold text-sidebar-foreground/55 hover:text-sidebar-foreground hover:bg-white/5 rounded transition-colors"
+              className="flex w-full items-center gap-3 px-3 py-2.5 text-xs font-semibold text-sidebar-foreground/55 hover:text-sidebar-foreground hover:bg-white/5 rounded transition-colors"
             >
               <LogOut className="size-4 flex-shrink-0" />
               Sign out
@@ -209,7 +216,7 @@ function MobileRow({
         href={item.href}
         onClick={onSelect}
         className={
-          "flex items-center gap-3 px-3 py-2.5 text-[13px] font-semibold tracking-[0.5px] rounded transition-colors " +
+          "flex items-center gap-3 px-3 py-2.5 text-xs font-semibold tracking-[0.5px] rounded transition-colors " +
           (isActive
             ? "bg-white/10 text-sidebar-foreground"
             : "text-sidebar-foreground/65 hover:bg-white/5 hover:text-sidebar-foreground")

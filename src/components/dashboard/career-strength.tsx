@@ -89,7 +89,7 @@ export function CareerStrength({
           Profile strength
         </Eyebrow>
         {facts.length > 0 && (
-          <p className="mt-1 text-[13px] text-slate-body leading-relaxed">
+          <p className="mt-1 text-xs text-slate-body leading-relaxed">
             {facts.join(" · ")}
           </p>
         )}
@@ -102,10 +102,10 @@ export function CareerStrength({
             }
           >
             <div className="min-w-0">
-              <p className="text-[14px] font-bold text-ink leading-snug">
+              <p className="text-sm font-bold text-ink leading-snug">
                 {nextAction.label}
               </p>
-              <p className="text-[12px] text-slate-meta leading-snug">
+              <p className="text-xs text-slate-meta leading-snug">
                 {nextAction.payoff}
               </p>
             </div>
@@ -118,12 +118,12 @@ export function CareerStrength({
             </Link>
           </div>
         ) : (
-          <p className="mt-3 text-[13px] font-semibold text-heritage-deep">
+          <p className="mt-3 text-xs font-semibold text-heritage-deep">
             Your profile is fully tuned — every match dimension is working
             for you.
           </p>
         )}
-        <p className="mt-2 text-[10px] text-slate-meta">
+        <p className="mt-2 text-2xs text-slate-meta">
           One suggestion at a time, biggest unlock first — your profile,
           your pace.
         </p>

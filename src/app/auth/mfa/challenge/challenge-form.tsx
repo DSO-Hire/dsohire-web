@@ -26,7 +26,7 @@ export function ChallengeForm({ next }: { next: string | null }) {
       <div>
         <label
           htmlFor="mfa-code"
-          className="mb-1.5 block text-[12px] font-semibold text-ink"
+          className="mb-1.5 block text-xs font-semibold text-ink"
         >
           Code
         </label>
@@ -47,7 +47,7 @@ export function ChallengeForm({ next }: { next: string | null }) {
             className="w-full border border-[var(--rule-strong)] bg-card pl-9 pr-3 py-3 font-mono text-[16px] text-ink focus:border-heritage focus:outline-none"
           />
         </div>
-        <p className="mt-1.5 text-[11px] text-slate-meta">
+        <p className="mt-1.5 text-2xs text-slate-meta">
           6-digit authenticator code or a 12-character recovery code.
         </p>
       </div>
@@ -55,14 +55,14 @@ export function ChallengeForm({ next }: { next: string | null }) {
       {state.error && (
         <p
           role="alert"
-          className="inline-flex items-start gap-1.5 text-[13px] text-danger"
+          className="inline-flex items-start gap-1.5 text-xs text-danger"
         >
           <AlertTriangle className="size-3.5 shrink-0 mt-0.5" />
           {state.error}
         </p>
       )}
 
-      <label className="flex items-start gap-2.5 cursor-pointer text-[13px] text-slate-body">
+      <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-body">
         <input
           type="checkbox"
           name="trust_device"
@@ -81,7 +81,7 @@ export function ChallengeForm({ next }: { next: string | null }) {
       <button
         type="submit"
         disabled={pending}
-        className="inline-flex w-full items-center justify-center gap-2 bg-primary px-4 py-3 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
+        className="inline-flex w-full items-center justify-center gap-2 bg-primary px-4 py-3 text-xs font-bold tracking-[1.5px] uppercase text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
       >
         {pending ? (
           <>
@@ -93,7 +93,7 @@ export function ChallengeForm({ next }: { next: string | null }) {
         )}
       </button>
 
-      <p className="pt-3 text-center text-[11px] text-slate-meta border-t border-[var(--rule)]">
+      <p className="pt-3 text-center text-2xs text-slate-meta border-t border-[var(--rule)]">
         Locked out entirely?{" "}
         <a
           href={SUPPORT_MAILTO}

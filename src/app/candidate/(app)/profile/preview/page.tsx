@@ -95,7 +95,7 @@ export default async function CandidateProfilePreviewPage() {
     <>
       <Link
         href="/candidate/profile"
-        className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-6"
+        className="inline-flex items-center gap-2 text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-6"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back to editing
@@ -110,7 +110,7 @@ export default async function CandidateProfilePreviewPage() {
           <Eye className="h-3.5 w-3.5 text-heritage-deep" />
         </span>
         <div className="min-w-0">
-          <p className="text-[13px] font-bold text-ink">
+          <p className="text-xs font-bold text-ink">
             This is how employers see you.
           </p>
           <p className="mt-0.5 text-[12.5px] text-slate-body leading-relaxed">
@@ -125,7 +125,7 @@ export default async function CandidateProfilePreviewPage() {
       {/* Profile-strength nudge — only when there's an easy win to point at. */}
       {topMissing.length > 0 && (
         <div className="mb-6 border border-[var(--rule-strong)] bg-cream/60 px-4 py-3">
-          <p className="text-[13px] text-ink leading-relaxed">
+          <p className="text-xs text-ink leading-relaxed">
             <span className="font-bold">Make a stronger first impression.</span>{" "}
             Profiles with more detail get more recruiter interest — consider
             adding {joinWithAnd(topMissing)}.{" "}

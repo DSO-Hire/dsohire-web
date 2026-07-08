@@ -148,7 +148,7 @@ export function SendCustomEmailButton({
               <div>
                 <label
                   htmlFor="custom-template-select"
-                  className="mb-1.5 block text-[12px] font-semibold text-ink"
+                  className="mb-1.5 block text-xs font-semibold text-ink"
                 >
                   Template
                 </label>
@@ -169,7 +169,7 @@ export function SendCustomEmailButton({
                   ))}
                 </select>
                 {selected?.description && (
-                  <p className="mt-1.5 text-[12px] text-slate-meta">
+                  <p className="mt-1.5 text-xs text-slate-meta">
                     {selected.description}
                   </p>
                 )}
@@ -187,13 +187,13 @@ export function SendCustomEmailButton({
           )}
 
           {error && (
-            <div className="border border-danger bg-danger-bg px-3 py-2 text-[13px] text-danger inline-flex items-start gap-2">
+            <div className="border border-danger bg-danger-bg px-3 py-2 text-xs text-danger inline-flex items-start gap-2">
               <AlertTriangle className="size-3.5 mt-0.5 shrink-0" />
               {error}
             </div>
           )}
           {sent && !error && (
-            <div className="border border-heritage/40 bg-heritage/[0.08] px-3 py-2 text-[13px] text-heritage-deep inline-flex items-center gap-2">
+            <div className="border border-heritage/40 bg-heritage/[0.08] px-3 py-2 text-xs text-heritage-deep inline-flex items-center gap-2">
               <CheckCircle2 className="size-3.5" />
               <span className="font-semibold">Sent.</span>
             </div>
@@ -274,7 +274,7 @@ function PreviewPane({
     <div className="border border-[var(--rule)] bg-cream/30 overflow-hidden max-h-[320px] flex flex-col">
       <div className="border-b border-[var(--rule)] bg-card px-4 py-2">
         <Eyebrow className="mb-0.5">Preview · sample data</Eyebrow>
-        <div className="text-[13px] font-semibold text-ink truncate">
+        <div className="text-xs font-semibold text-ink truncate">
           {subjectResult.output || (
             <span className="text-slate-meta italic">(subject missing)</span>
           )}
@@ -283,11 +283,11 @@ function PreviewPane({
       <div className="bg-card px-4 py-3 overflow-y-auto flex-1">
         {cleanBody ? (
           <div
-            className="dso-prose text-[13px] text-ink"
+            className="dso-prose text-xs text-ink"
             dangerouslySetInnerHTML={{ __html: cleanBody }}
           />
         ) : (
-          <p className="text-[12px] text-slate-meta italic">(body empty)</p>
+          <p className="text-xs text-slate-meta italic">(body empty)</p>
         )}
       </div>
     </div>

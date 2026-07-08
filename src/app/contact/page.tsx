@@ -24,7 +24,7 @@ export default function ContactPage() {
       <section className="pt-[140px] pb-24 px-6 sm:px-14 max-w-[1100px] mx-auto">
         <div className="flex items-center gap-3.5 mb-8">
           <span className="block w-7 h-px bg-heritage" />
-          <span className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep">
+          <span className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep">
             Contact
           </span>
         </div>
@@ -40,7 +40,7 @@ export default function ContactPage() {
         <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-px bg-[var(--rule)] border border-[var(--rule)]">
           {/* Form column */}
           <div className="bg-card p-8 sm:p-10">
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-5">
+            <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-5">
               Send a Message
             </div>
             <ContactForm />
@@ -48,14 +48,14 @@ export default function ContactPage() {
 
           {/* Direct contact column */}
           <div className="bg-cream p-8 sm:p-10">
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-5">
+            <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-5">
               Direct
             </div>
             <ul className="list-none space-y-7">
               <ContactRow label="Email">
                 <Link
                   href={SUPPORT_MAILTO}
-                  className="text-[15px] font-semibold text-ink hover:text-heritage-deep transition-colors"
+                  className="text-sm font-semibold text-ink hover:text-heritage-deep transition-colors"
                 >
                   {SUPPORT_EMAIL}
                 </Link>
@@ -63,7 +63,7 @@ export default function ContactPage() {
               <ContactRow label="Press / partnerships">
                 <Link
                   href={`${SUPPORT_MAILTO}?subject=Press%20%2F%20partnership%20inquiry`}
-                  className="text-[15px] font-semibold text-ink hover:text-heritage-deep transition-colors"
+                  className="text-sm font-semibold text-ink hover:text-heritage-deep transition-colors"
                 >
                   Send a partnership inquiry
                 </Link>
@@ -71,7 +71,7 @@ export default function ContactPage() {
               <ContactRow label="Legal / DPA / Compliance">
                 <Link
                   href={`${SUPPORT_MAILTO}?subject=Legal%20%2F%20DPA%20inquiry`}
-                  className="text-[15px] font-semibold text-ink hover:text-heritage-deep transition-colors"
+                  className="text-sm font-semibold text-ink hover:text-heritage-deep transition-colors"
                 >
                   Request a DPA or legal review
                 </Link>
@@ -79,7 +79,7 @@ export default function ContactPage() {
               <ContactRow label="DMCA notices">
                 <Link
                   href="/legal/dmca"
-                  className="text-[15px] font-semibold text-ink hover:text-heritage-deep transition-colors"
+                  className="text-sm font-semibold text-ink hover:text-heritage-deep transition-colors"
                 >
                   See takedown procedure
                 </Link>
@@ -90,7 +90,7 @@ export default function ContactPage() {
               <div className="text-[9px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-2">
                 DSO Hire LLC
               </div>
-              <p className="text-[14px] text-slate-body leading-[1.7]">
+              <p className="text-sm text-slate-body leading-[1.7]">
                 Founded 2026 · Built for dental groups, US-hosted.
               </p>
             </div>

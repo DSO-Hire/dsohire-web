@@ -33,7 +33,7 @@ export function ReferForm({
   const [done, setDone] = useState(false);
 
   const inputCls =
-    "w-full h-11 px-3.5 bg-card border border-[var(--rule-strong)] text-ink text-[15px] focus:outline-none focus:border-heritage";
+    "w-full h-11 px-3.5 bg-card border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage";
 
   const submit = () => {
     setError(null);
@@ -57,7 +57,7 @@ export function ReferForm({
       <div className="border border-heritage/30 bg-heritage/5 p-8 text-center">
         <CheckCircle2 className="h-10 w-10 text-heritage-deep mx-auto mb-3" />
         <h2 className="text-xl font-bold text-ink mb-1">Thank you!</h2>
-        <p className="text-[14px] text-slate-body leading-relaxed max-w-[420px] mx-auto">
+        <p className="text-sm text-slate-body leading-relaxed max-w-[420px] mx-auto">
           Your referral for{" "}
           <span className="font-semibold text-ink">{candidateName}</span> has
           been sent to the hiring team. We appreciate you passing along a great
@@ -70,7 +70,7 @@ export function ReferForm({
   return (
     <div className="space-y-5">
       <div>
-        <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep mb-2">
           About you
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -80,7 +80,7 @@ export function ReferForm({
       </div>
 
       <div>
-        <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep mb-2">
           Who you&apos;re referring
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -101,17 +101,17 @@ export function ReferForm({
           value={note}
           onChange={(e) => setNote(e.target.value)}
           rows={3}
-          className="mt-3 w-full px-3.5 py-2.5 bg-card border border-[var(--rule-strong)] text-ink text-[15px] focus:outline-none focus:border-heritage resize-y"
+          className="mt-3 w-full px-3.5 py-2.5 bg-card border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage resize-y"
         />
       </div>
 
-      {error && <p role="alert" className="text-[14px] text-danger">{error}</p>}
+      {error && <p role="alert" className="text-sm text-danger">{error}</p>}
 
       <button
         type="button"
         onClick={submit}
         disabled={saving || !referrerName.trim() || !candidateName.trim()}
-        className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-[13px] font-bold tracking-[1px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
+        className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-xs font-bold tracking-[1px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
       >
         {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
         Submit referral

@@ -472,7 +472,7 @@ export function InboxView({
   return (
     <div className="flex flex-col">
       <header className="mb-6 max-w-[820px]">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Inbox
         </div>
         <h1 className="font-display text-3xl font-extrabold tracking-[-0.8px] text-ink leading-tight">
@@ -819,7 +819,7 @@ function TabButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex-1 px-2 py-2.5 text-[12px] font-semibold whitespace-nowrap transition-colors border-b-2 ${
+      className={`flex-1 px-2 py-2.5 text-xs font-semibold whitespace-nowrap transition-colors border-b-2 ${
         active
           ? "border-heritage-deep text-ink bg-cream/40"
           : "border-transparent text-slate-meta hover:text-ink hover:bg-cream/20"
@@ -828,7 +828,7 @@ function TabButton({
       {label}
       {count > 0 && (
         <span
-          className={`ml-1.5 inline-flex items-center justify-center rounded-full px-1.5 text-[10px] font-bold ${
+          className={`ml-1.5 inline-flex items-center justify-center rounded-full px-1.5 text-2xs font-bold ${
             badge && count > 0 && !active
               ? "bg-heritage-deep text-primary-foreground"
               : "bg-muted text-foreground"
@@ -901,7 +901,7 @@ function ThreadRow({
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-2">
           <p
-            className={`text-[13px] truncate ${
+            className={`text-xs truncate ${
               thread.unread_count > 0 && !active
                 ? "font-bold text-ink"
                 : "font-semibold text-ink"
@@ -910,12 +910,12 @@ function ThreadRow({
             {thread.peer.display_name}
           </p>
           {thread.last_message_at && (
-            <span className="text-[10px] text-slate-meta whitespace-nowrap shrink-0">
+            <span className="text-2xs text-slate-meta whitespace-nowrap shrink-0">
               {timeAgo(thread.last_message_at)}
             </span>
           )}
         </div>
-        <p className="text-[11px] text-slate-meta truncate">
+        <p className="text-2xs text-slate-meta truncate">
           {thread.job_title}
         </p>
         {(() => {
@@ -930,7 +930,7 @@ function ThreadRow({
               thread.latest_note_at > thread.last_message_at);
           if (noteIsLatest) {
             return (
-              <p className="mt-1 text-[12px] truncate text-slate-body">
+              <p className="mt-1 text-xs truncate text-slate-body">
                 <span className="font-semibold text-warning">Note: </span>
                 {thread.latest_note_preview}
               </p>
@@ -939,7 +939,7 @@ function ThreadRow({
           if (!thread.last_message_preview) return null;
           return (
             <p
-              className={`mt-1 text-[12px] truncate ${
+              className={`mt-1 text-xs truncate ${
                 thread.unread_count > 0 && !active
                   ? "text-ink"
                   : "text-slate-body"
@@ -973,7 +973,7 @@ function ThreadRow({
       </div>
       <div className="flex flex-col items-end gap-1 shrink-0">
         {thread.unread_count > 0 && (
-          <span className="inline-flex items-center justify-center rounded-full bg-heritage-deep px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
+          <span className="inline-flex items-center justify-center rounded-full bg-heritage-deep px-1.5 py-0.5 text-2xs font-bold text-primary-foreground">
             {thread.unread_count}
           </span>
         )}

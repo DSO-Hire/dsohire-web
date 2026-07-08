@@ -104,7 +104,7 @@ export default async function DsoProspectThreadPage({
     <div className="mx-auto max-w-[680px] px-4 py-8">
       <Link
         href="/employer/talent-pool?tab=pipeline"
-        className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-heritage-deep hover:text-ink mb-5"
+        className="inline-flex items-center gap-1.5 text-xs font-semibold text-heritage-deep hover:text-ink mb-5"
       >
         <ArrowLeft className="h-3.5 w-3.5" /> Pipeline
       </Link>
@@ -114,12 +114,12 @@ export default async function DsoProspectThreadPage({
           {displayName}
         </h1>
         {masked && (
-          <span className="inline-flex items-center gap-1 text-[11px] text-slate-meta">
+          <span className="inline-flex items-center gap-1 text-2xs text-slate-meta">
             <Lock className="h-3 w-3" /> Anonymous
           </span>
         )}
       </div>
-      <p className="text-[12px] text-slate-meta mb-5">
+      <p className="text-xs text-slate-meta mb-5">
         {[candidate.current_title, candidate.current_location_state]
           .filter(Boolean)
           .join(" · ")}
@@ -127,7 +127,7 @@ export default async function DsoProspectThreadPage({
 
       <div className="space-y-3 mb-6">
         {messages.length === 0 && (
-          <p className="text-[13px] text-slate-meta">
+          <p className="text-xs text-slate-meta">
             No messages yet. Your first message reveals your DSO to the candidate;
             they stay anonymous to you until they reply &amp; share or apply.
           </p>
@@ -139,9 +139,9 @@ export default async function DsoProspectThreadPage({
             <div key={m.id} className={mine ? "flex justify-end" : "flex justify-start"}>
               <div
                 className={
-                  "max-w-[85%] rounded-lg px-3.5 py-2.5 text-[14px] whitespace-pre-wrap " +
+                  "max-w-[85%] rounded-lg px-3.5 py-2.5 text-sm whitespace-pre-wrap " +
                   (system
-                    ? "bg-cream text-slate-body text-[12px] italic"
+                    ? "bg-cream text-slate-body text-xs italic"
                     : mine
                       ? "bg-heritage text-primary-foreground"
                       : "bg-card border border-[var(--rule)] text-ink")
@@ -155,7 +155,7 @@ export default async function DsoProspectThreadPage({
       </div>
 
       {blocked ? (
-        <div className="rounded-lg border border-[var(--rule)] bg-cream/40 px-4 py-3 text-[13px] text-slate-body">
+        <div className="rounded-lg border border-[var(--rule)] bg-cream/40 px-4 py-3 text-xs text-slate-body">
           This candidate has blocked your group. You can no longer message them.
         </div>
       ) : (

@@ -212,14 +212,14 @@ export function AssessmentWizard({
       <div className="max-w-[680px]">
         <div className="mb-3 flex items-center gap-2">
           <PracticeFitWordmark surface="light" tm className="text-3xl" />
-          <span className="text-[12px] font-bold uppercase tracking-[2px] text-slate-meta">
+          <span className="text-xs font-bold uppercase tracking-[2px] text-slate-meta">
             assessment
           </span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-[-0.5px] leading-tight text-ink">
           Find the practices that actually fit you.
         </h1>
-        <p className="mt-3 text-[15px] leading-relaxed text-slate-body">
+        <p className="mt-3 text-sm leading-relaxed text-slate-body">
           PracticeFit is our matching engine. Answer a few quick questions about
           your work style, clinical focus, and what matters most — and we&apos;ll
           score how well every role and practice fits <em>you</em>, then surface
@@ -232,7 +232,7 @@ export function AssessmentWizard({
             "Get found by practices whose culture + priorities match yours.",
             "We pre-fill what we can from your profile, so it's fast.",
           ].map((b) => (
-            <li key={b} className="flex items-start gap-2.5 text-[14px] text-ink">
+            <li key={b} className="flex items-start gap-2.5 text-sm text-ink">
               <Sparkles className="mt-0.5 h-4 w-4 flex-shrink-0 text-heritage-deep" />
               <span>{b}</span>
             </li>
@@ -242,21 +242,21 @@ export function AssessmentWizard({
             full profile (+ saves the file for reuse). Optional; Start still works. */}
         {hasResume ? (
           <div className="mt-6 rounded-lg border border-heritage/40 bg-heritage/[0.06] p-4">
-            <p className="flex items-center gap-2 text-[13px] font-bold text-ink">
+            <p className="flex items-center gap-2 text-xs font-bold text-ink">
               <Check className="h-4 w-4 flex-shrink-0 text-heritage-deep" />
               Your résumé is on file
             </p>
-            <p className="mt-1 text-[12px] leading-relaxed text-slate-meta">
+            <p className="mt-1 text-xs leading-relaxed text-slate-meta">
               We&apos;ve prefilled your basics from it — just review as you go. You
               can update your résumé anytime from the Résumé tab.
             </p>
           </div>
         ) : (
           <div className="mt-6 rounded-lg border border-heritage/40 bg-heritage/[0.06] p-4">
-            <p className="text-[13px] font-bold text-ink">
+            <p className="text-xs font-bold text-ink">
               Fastest start: autofill from your résumé
             </p>
-            <p className="mt-1 text-[12px] leading-relaxed text-slate-meta">
+            <p className="mt-1 text-xs leading-relaxed text-slate-meta">
               Upload it once — we&apos;ll prefill this assessment <em>and</em> your
               profile, so applying later is faster. You review everything as you go.
             </p>
@@ -268,19 +268,19 @@ export function AssessmentWizard({
                   setResumeFile(e.target.files?.[0] ?? null);
                   setAutofillNote(null);
                 }}
-                className="block text-[13px] text-ink file:mr-3 file:cursor-pointer file:border-0 file:bg-primary file:px-4 file:py-2 file:text-[10px] file:font-bold file:uppercase file:tracking-[1.5px] file:text-primary-foreground hover:file:bg-primary/90"
+                className="block text-xs text-ink file:mr-3 file:cursor-pointer file:border-0 file:bg-primary file:px-4 file:py-2 file:text-2xs file:font-bold file:uppercase file:tracking-[1.5px] file:text-primary-foreground hover:file:bg-primary/90"
               />
               <button
                 type="button"
                 onClick={autofillFromResume}
                 disabled={!resumeFile || parsing}
-                className="inline-flex items-center justify-center gap-2 border border-heritage-deep px-4 py-2 text-[12px] font-bold uppercase tracking-[1.5px] text-heritage-deep transition-colors hover:bg-heritage/10 disabled:opacity-40"
+                className="inline-flex items-center justify-center gap-2 border border-heritage-deep px-4 py-2 text-xs font-bold uppercase tracking-[1.5px] text-heritage-deep transition-colors hover:bg-heritage/10 disabled:opacity-40"
               >
                 {parsing ? "Reading…" : "Autofill from résumé"}
               </button>
             </div>
             {autofillNote && (
-              <p className="mt-2 text-[12px] font-semibold leading-relaxed text-heritage-deep">
+              <p className="mt-2 text-xs font-semibold leading-relaxed text-heritage-deep">
                 {autofillNote}
               </p>
             )}
@@ -295,7 +295,7 @@ export function AssessmentWizard({
               if (typeof window !== "undefined")
                 window.scrollTo({ top: 0, behavior: "smooth" });
             }}
-            className="inline-flex items-center gap-2 bg-primary px-7 py-3.5 text-[13px] font-bold uppercase tracking-[1.5px] text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center gap-2 bg-primary px-7 py-3.5 text-xs font-bold uppercase tracking-[1.5px] text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Start now
             <ArrowRight className="h-4 w-4" />
@@ -304,17 +304,17 @@ export function AssessmentWizard({
             <button
               type="button"
               onClick={() => setSkipNudge(true)}
-              className="text-[12px] font-semibold text-slate-meta underline underline-offset-2 hover:text-ink"
+              className="text-xs font-semibold text-slate-meta underline underline-offset-2 hover:text-ink"
             >
               Skip for now — I&apos;ll take this later
             </button>
           ) : (
             <div className="rounded-xl border border-heritage/30 bg-cream/50 p-5">
-              <p className="text-[14px] font-bold text-ink">
+              <p className="text-sm font-bold text-ink">
                 You can skip — but it&apos;s only about 5 minutes, and it&apos;s
                 what sharpens your matches.
               </p>
-              <p className="mt-1.5 max-w-[520px] text-[13px] leading-relaxed text-slate-body">
+              <p className="mt-1.5 max-w-[520px] text-xs leading-relaxed text-slate-body">
                 Without it we match you on your profile alone — pace, autonomy,
                 the procedures you love and the team you thrive on stay
                 invisible. It&apos;s mostly taps, and you can stop anytime.
@@ -328,14 +328,14 @@ export function AssessmentWizard({
                     if (typeof window !== "undefined")
                       window.scrollTo({ top: 0, behavior: "smooth" });
                   }}
-                  className="inline-flex items-center gap-2 rounded-full bg-heritage-deep px-5 py-2.5 text-[14px] font-bold text-primary-foreground transition-colors hover:bg-heritage"
+                  className="inline-flex items-center gap-2 rounded-full bg-heritage-deep px-5 py-2.5 text-sm font-bold text-primary-foreground transition-colors hover:bg-heritage"
                 >
                   Take 5 minutes
                   <ArrowRight className="h-4 w-4" />
                 </button>
                 <Link
                   href="/candidate/dashboard"
-                  className="text-[13px] text-slate-meta underline underline-offset-2 hover:text-ink"
+                  className="text-xs text-slate-meta underline underline-offset-2 hover:text-ink"
                 >
                   Skip anyway
                 </Link>
@@ -353,7 +353,7 @@ export function AssessmentWizard({
       <div className="mb-6">
         <div className="mb-2 flex items-center gap-2">
           <PracticeFitWordmark surface="light" tm className="text-2xl" />
-          <span className="text-[12px] font-bold uppercase tracking-[2px] text-slate-meta">
+          <span className="text-xs font-bold uppercase tracking-[2px] text-slate-meta">
             assessment
           </span>
         </div>
@@ -364,12 +364,12 @@ export function AssessmentWizard({
               style={{ width: `${Math.max(6, pct)}%` }}
             />
           </div>
-          <span className="inline-flex items-center gap-1 text-[12px] font-bold text-heritage-deep">
+          <span className="inline-flex items-center gap-1 text-xs font-bold text-heritage-deep">
             <Sparkles className="h-3.5 w-3.5" />
             {pct}% match strength
           </span>
         </div>
-        <p className="mt-2 text-[12px] text-slate-meta">
+        <p className="mt-2 text-xs text-slate-meta">
           Step {stepIdx + 1} of {sections.length} · {step.label}
         </p>
       </div>
@@ -388,7 +388,7 @@ export function AssessmentWizard({
       </div>
 
       {error && (
-        <div className="mt-5 border-l-4 border-danger bg-danger-bg p-3 text-[13px] text-danger">
+        <div className="mt-5 border-l-4 border-danger bg-danger-bg p-3 text-xs text-danger">
           {error}
         </div>
       )}
@@ -399,7 +399,7 @@ export function AssessmentWizard({
           type="button"
           onClick={back}
           disabled={stepIdx === 0 || saving}
-          className="inline-flex items-center gap-1.5 px-3 py-2 text-[13px] font-semibold text-slate-body hover:text-ink disabled:opacity-30"
+          className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-body hover:text-ink disabled:opacity-30"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
@@ -408,7 +408,7 @@ export function AssessmentWizard({
           type="button"
           onClick={next}
           disabled={saving}
-          className="inline-flex items-center gap-2 bg-primary px-6 py-3 text-[12px] font-bold uppercase tracking-[1.5px] text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
+          className="inline-flex items-center gap-2 bg-primary px-6 py-3 text-xs font-bold uppercase tracking-[1.5px] text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
         >
           {isLast ? (saving ? "Saving…" : "See my matches") : "Continue"}
           {isLast ? <Check className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
@@ -422,7 +422,7 @@ export function AssessmentWizard({
         <div className="mt-4 text-center">
           <Link
             href="/candidate/dashboard"
-            className="text-[12px] font-semibold text-slate-meta underline underline-offset-2 hover:text-ink"
+            className="text-xs font-semibold text-slate-meta underline underline-offset-2 hover:text-ink"
           >
             Skip for now — I&apos;ll take this later
           </Link>
@@ -471,16 +471,16 @@ function QuestionField({
 
   return (
     <fieldset>
-      <legend className="text-[15px] font-bold text-ink">
+      <legend className="text-sm font-bold text-ink">
         {q.prompt}
         {q.optional && (
-          <span className="ml-2 text-[12px] font-medium text-slate-meta">
+          <span className="ml-2 text-xs font-medium text-slate-meta">
             optional
           </span>
         )}
       </legend>
       {q.help && (
-        <p className="mt-1 text-[13px] leading-relaxed text-slate-meta">{q.help}</p>
+        <p className="mt-1 text-xs leading-relaxed text-slate-meta">{q.help}</p>
       )}
 
       <div className="mt-3">
@@ -494,7 +494,7 @@ function QuestionField({
                   type="button"
                   onClick={() => onChange(q.key, opt.value)}
                   className={
-                    "flex w-full items-center justify-between gap-3 border px-4 py-3 text-left text-[14px] transition-colors " +
+                    "flex w-full items-center justify-between gap-3 border px-4 py-3 text-left text-sm transition-colors " +
                     (active
                       ? "border-heritage-deep bg-heritage/10 font-semibold text-ink"
                       : "border-[var(--rule)] bg-card text-slate-body hover:border-heritage-deep")
@@ -511,7 +511,7 @@ function QuestionField({
         {q.type === "multi" && (
           <div className="flex flex-wrap gap-2">
             {options.length === 0 ? (
-              <p className="text-[13px] italic text-slate-meta">
+              <p className="text-xs italic text-slate-meta">
                 No items for your role — skip ahead.
               </p>
             ) : (
@@ -529,7 +529,7 @@ function QuestionField({
                       onChange(q.key, nextArr);
                     }}
                     className={
-                      "rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition-colors " +
+                      "rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors " +
                       (active
                         ? "border-heritage-deep bg-heritage-deep text-primary-foreground"
                         : "border-[var(--rule)] text-slate-body hover:border-heritage-deep")
@@ -567,7 +567,7 @@ function QuestionField({
                     onChange(q.key, next);
                   }}
                   className={
-                    "flex w-full items-center justify-between gap-3 border px-4 py-3 text-left text-[14px] transition-colors " +
+                    "flex w-full items-center justify-between gap-3 border px-4 py-3 text-left text-sm transition-colors " +
                     (active
                       ? "border-heritage-deep bg-heritage/10 font-semibold text-ink"
                       : full
@@ -577,14 +577,14 @@ function QuestionField({
                 >
                   <span>{opt.label}</span>
                   {active && (
-                    <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-heritage-deep text-[12px] font-bold text-primary-foreground">
+                    <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-heritage-deep text-xs font-bold text-primary-foreground">
                       {rank + 1}
                     </span>
                   )}
                 </button>
               );
             })}
-            <p className="text-[12px] text-slate-meta">
+            <p className="text-xs text-slate-meta">
               Tap up to 3 in priority order — tap again to remove.
             </p>
           </div>
@@ -597,12 +597,12 @@ function QuestionField({
                 ONE row above a full-width track; flanked low | slider | high
                 from sm up. */}
             <div>
-              <div className="mb-1.5 flex items-center justify-between gap-3 text-[12px] text-slate-meta sm:hidden">
+              <div className="mb-1.5 flex items-center justify-between gap-3 text-xs text-slate-meta sm:hidden">
                 <span>{q.sliderLabels?.low}</span>
                 <span className="text-right">{q.sliderLabels?.high}</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="hidden w-28 text-right text-[12px] text-slate-meta sm:inline">
+                <span className="hidden w-28 text-right text-xs text-slate-meta sm:inline">
                   {q.sliderLabels?.low}
                 </span>
                 <div className="w-full sm:flex-1">
@@ -621,7 +621,7 @@ function QuestionField({
                       <span
                         key={t}
                         className={
-                          "text-[11px] tabular-nums " +
+                          "text-2xs tabular-nums " +
                           (value === t ? "font-bold text-ink" : "text-slate-meta")
                         }
                       >
@@ -630,12 +630,12 @@ function QuestionField({
                     ))}
                   </div>
                 </div>
-                <span className="hidden w-28 text-[12px] text-slate-meta sm:inline">
+                <span className="hidden w-28 text-xs text-slate-meta sm:inline">
                   {q.sliderLabels?.high}
                 </span>
               </div>
             </div>
-            <p className="text-center text-[12px] font-semibold text-slate-body">
+            <p className="text-center text-xs font-semibold text-slate-body">
               {typeof value === "number"
                 ? `Your answer: ${value} of 5`
                 : "Drag to choose — 1 to 5"}
@@ -645,7 +645,7 @@ function QuestionField({
 
         {q.type === "salary" && (
           <div className="flex items-center gap-2">
-            <span className="text-[15px] font-bold text-ink">$</span>
+            <span className="text-sm font-bold text-ink">$</span>
             <input
               type="text"
               inputMode="numeric"
@@ -659,12 +659,12 @@ function QuestionField({
                 onChange(q.key, digits ? Number(digits) : null);
               }}
               placeholder="0"
-              className="w-40 border border-[var(--rule)] bg-card px-3 py-2 text-[14px] text-ink focus:border-heritage focus:outline-none"
+              className="w-40 border border-[var(--rule)] bg-card px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none"
             />
             <select
               value={(answers.salary_unit as string | undefined) ?? "hourly"}
               onChange={(e) => onChange("salary_unit", e.target.value)}
-              className="border border-[var(--rule)] bg-card px-2 py-2 text-[14px] text-ink focus:border-heritage focus:outline-none"
+              className="border border-[var(--rule)] bg-card px-2 py-2 text-sm text-ink focus:border-heritage focus:outline-none"
             >
               <option value="hourly">/ hour</option>
               <option value="yearly">/ year</option>
@@ -681,7 +681,7 @@ function QuestionField({
             rows={3}
             maxLength={600}
             placeholder="A sentence or two — totally optional."
-            className="w-full border border-[var(--rule)] bg-card px-3 py-2 text-[14px] text-ink focus:border-heritage focus:outline-none"
+            className="w-full border border-[var(--rule)] bg-card px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none"
           />
         )}
       </div>

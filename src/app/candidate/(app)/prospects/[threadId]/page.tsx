@@ -65,14 +65,14 @@ export default async function CandidateProspectThreadPage({
     <div className="mx-auto max-w-[680px] px-4 py-8">
       <Link
         href="/candidate/prospects"
-        className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-heritage-deep hover:text-ink mb-5"
+        className="inline-flex items-center gap-1.5 text-xs font-semibold text-heritage-deep hover:text-ink mb-5"
       >
         <ArrowLeft className="h-3.5 w-3.5" /> Employer interest
       </Link>
       <h1 className="text-xl font-extrabold tracking-[-0.4px] text-ink mb-1">
         {dsoName}
       </h1>
-      <p className="text-[12px] text-slate-meta mb-5">
+      <p className="text-xs text-slate-meta mb-5">
         {thread.candidate_revealed
           ? "You've shared your profile with this employer."
           : "You're anonymous to this employer."}
@@ -94,7 +94,7 @@ export default async function CandidateProspectThreadPage({
               ? `/companies/${dsoSlug}?source=sourcing`
               : `/jobs?source=sourcing`
           }
-          className="text-[13px] font-semibold text-heritage-deep hover:text-ink"
+          className="text-xs font-semibold text-heritage-deep hover:text-ink"
         >
           Explore open roles at {dsoName} →
         </Link>

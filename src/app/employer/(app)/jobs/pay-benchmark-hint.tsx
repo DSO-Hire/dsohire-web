@@ -101,10 +101,10 @@ export function PayBenchmarkHint({
 
   return (
     <div className="mt-4 border border-[var(--rule)] bg-card p-3.5" aria-live="polite">
-      <div className={`text-[10px] font-bold tracking-[1.5px] uppercase ${accentText}`}>
+      <div className={`text-2xs font-bold tracking-[1.5px] uppercase ${accentText}`}>
         Market pay · {bench.label} · {scopeLabel}
       </div>
-      <div className="mt-1 text-[14px] text-ink">
+      <div className="mt-1 text-sm text-ink">
         Median{" "}
         <span className="font-bold">${money(marketHourly)}/hr</span>
         {bench.median_annual != null && (
@@ -121,7 +121,7 @@ export function PayBenchmarkHint({
         )}
       </div>
       {bench.p25_hourly != null && bench.p75_hourly != null && (
-        <div className="mt-0.5 text-[12px] text-slate-meta">
+        <div className="mt-0.5 text-xs text-slate-meta">
           Typical range{" "}
           <span className="font-semibold text-ink">
             ${money(bench.p25_hourly)}–${money(bench.p75_hourly)}/hr
@@ -132,7 +132,7 @@ export function PayBenchmarkHint({
       {yourHourly != null && (
         <p
           className={
-            "mt-1 text-[12px] leading-snug " +
+            "mt-1 text-xs leading-snug " +
             (below ? "text-warning" : above ? "text-heritage-deep" : "text-slate-body")
           }
         >
@@ -143,7 +143,7 @@ export function PayBenchmarkHint({
               : `Your pay (~$${money(yourHourly)}/hr) is in line with the market.`}
         </p>
       )}
-      <p className="mt-1.5 text-[10px] text-slate-meta leading-snug">
+      <p className="mt-1.5 text-2xs text-slate-meta leading-snug">
         {formatSource(bench.source)} · {bench.vintage}. Guidance only — set pay using your own judgment.
       </p>
     </div>

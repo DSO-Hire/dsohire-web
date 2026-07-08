@@ -280,13 +280,13 @@ export default async function TeamPage({ searchParams }: PageProps) {
         </div>
       )}
       <header className="mb-10 max-w-[820px]">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
           Team
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-tight text-ink">
           Your DSO Hire team
         </h1>
-        <p className="mt-3 text-[14px] text-slate-body leading-relaxed">
+        <p className="mt-3 text-sm text-slate-body leading-relaxed">
           Add the people who&apos;ll post jobs and review applications. Each
           teammate gets their own login.{" "}
           {!canManage &&
@@ -297,7 +297,7 @@ export default async function TeamPage({ searchParams }: PageProps) {
       {/* Invite form */}
       {canManage && (
         <section className="mb-12">
-          <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+          <h2 className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
             Invite a Teammate
           </h2>
           <div className="mb-5">
@@ -310,7 +310,7 @@ export default async function TeamPage({ searchParams }: PageProps) {
       {/* Members */}
       <section className="mb-12">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+          <h2 className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep">
             Active Team ({memberRows.length}
             {roleFilter ? ` of ${allMemberRows.length}` : ""})
           </h2>
@@ -349,7 +349,7 @@ export default async function TeamPage({ searchParams }: PageProps) {
       {/* Pending invitations */}
       {canManage && inviteRows.length > 0 && (
         <section>
-          <h2 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
+          <h2 className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
             Pending Invitations ({inviteRows.length})
           </h2>
           <ul className="list-none border-t border-[var(--rule)] max-w-[820px]">
@@ -442,7 +442,7 @@ function MemberRowItem({
       />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[15px] font-semibold text-ink">
+          <span className="text-sm font-semibold text-ink">
             {member.full_name || (email ?? "Teammate")}
           </span>
           {isCurrentUser && (
@@ -452,25 +452,25 @@ function MemberRowItem({
           )}
         </div>
         {member.title && (
-          <div className="text-[13px] font-medium text-ink leading-snug">
+          <div className="text-xs font-medium text-ink leading-snug">
             {member.title}
           </div>
         )}
         {(() => {
           const base = describeWorkBase(member, locationsById);
           return base ? (
-            <div className="text-[12px] tracking-[0.2px] text-heritage-deep">
+            <div className="text-xs tracking-[0.2px] text-heritage-deep">
               {base}
             </div>
           ) : null;
         })()}
-        <div className="text-[13px] tracking-[0.3px] text-slate-meta">
+        <div className="text-xs tracking-[0.3px] text-slate-meta">
           {email ?? "—"} · Joined {formatDate(member.created_at)}
         </div>
         {isHm && (
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
             {scopedLocationIds.length === 0 ? (
-              <span className="text-[12px] tracking-[0.3px] text-danger">
+              <span className="text-xs tracking-[0.3px] text-danger">
                 No locations assigned — this user can&apos;t see jobs except
                 corporate-scoped ones.
               </span>
@@ -481,7 +481,7 @@ function MemberRowItem({
                 return (
                   <span
                     key={id}
-                    className="inline-flex items-center px-2 py-0.5 bg-cream border border-[var(--rule-strong)] text-[10px] font-semibold tracking-[0.4px] text-ink"
+                    className="inline-flex items-center px-2 py-0.5 bg-cream border border-[var(--rule-strong)] text-2xs font-semibold tracking-[0.4px] text-ink"
                   >
                     {loc.name}
                     {loc.state ? ` · ${loc.state}` : ""}
@@ -573,7 +573,7 @@ function RoleBadge({ role }: { role: string }) {
           : "bg-cream text-ink border border-[var(--rule-strong)]";
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase whitespace-nowrap ${cls}`}
+      className={`inline-flex items-center px-2.5 py-1 text-2xs font-bold tracking-[1.5px] uppercase whitespace-nowrap ${cls}`}
     >
       {ROLE_LABELS[role] ?? role}
     </span>
@@ -597,10 +597,10 @@ function InviteRowItem({
         <UserPlus className="h-4 w-4 text-slate-meta" />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="text-[14px] font-semibold text-ink truncate">
+        <div className="text-sm font-semibold text-ink truncate">
           {invitation.email}
         </div>
-        <div className="text-[13px] tracking-[0.3px] text-slate-meta">
+        <div className="text-xs tracking-[0.3px] text-slate-meta">
           Invited as{" "}
           <span className="text-ink font-semibold">
             {ROLE_LABELS[invitation.role] ?? invitation.role}
@@ -618,7 +618,7 @@ function InviteRowItem({
               return (
                 <span
                   key={id}
-                  className="inline-flex items-center px-2 py-0.5 bg-cream border border-[var(--rule-strong)] text-[10px] font-semibold tracking-[0.4px] text-ink"
+                  className="inline-flex items-center px-2 py-0.5 bg-cream border border-[var(--rule-strong)] text-2xs font-semibold tracking-[0.4px] text-ink"
                 >
                   {loc.name}
                   {loc.state ? ` · ${loc.state}` : ""}
@@ -634,7 +634,7 @@ function InviteRowItem({
         <button
           type="submit"
           aria-label="Revoke invitation"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-danger hover:bg-danger-bg transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-2xs font-bold tracking-[1.5px] uppercase text-slate-body hover:text-danger hover:bg-danger-bg transition-colors"
         >
           <X className="h-3 w-3" />
           Revoke

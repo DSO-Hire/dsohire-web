@@ -135,7 +135,7 @@ export function ProfilePhotoGallery({
   return (
     <section className="border border-[var(--rule)] bg-card p-6 sm:p-8">
       <header className="mb-5">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1.5">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1.5">
           05 — Photo gallery
         </div>
         <h2 className="font-display text-lg font-bold text-ink">
@@ -170,7 +170,7 @@ export function ProfilePhotoGallery({
 
         {canEdit && remaining > 0 && (
           <div className="border border-dashed border-[var(--rule-strong)] bg-cream/30 p-4">
-            <div className="mb-3 text-[12px] font-semibold text-ink">
+            <div className="mb-3 text-xs font-semibold text-ink">
               Add a photo ({remaining} {remaining === 1 ? "spot" : "spots"} left)
             </div>
             <ImageUpload
@@ -254,7 +254,7 @@ function PhotoRow({
 
       {/* Caption editor */}
       <div className="min-w-0">
-        <label className="mb-1.5 block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+        <label className="mb-1.5 block text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta">
           Caption (optional)
         </label>
         <textarea
@@ -271,7 +271,7 @@ function PhotoRow({
             type="button"
             onClick={() => onSaveCaption(caption)}
             disabled={isBusy}
-            className="mt-2 rounded-md bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-[1.5px] text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
+            className="mt-2 rounded-md bg-primary px-3 py-1 text-2xs font-bold uppercase tracking-[1.5px] text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
           >
             Save caption
           </button>

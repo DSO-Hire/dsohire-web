@@ -84,11 +84,11 @@ export function SharedCommandPaletteTrigger({ config }: { config: PaletteConfig 
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="w-full flex items-center gap-2 px-3 py-2 rounded text-left text-[12px] font-semibold text-hero-foreground/65 hover:bg-hero-foreground/5 hover:text-hero-foreground transition-colors"
+        className="w-full flex items-center gap-2 px-3 py-2 rounded text-left text-xs font-semibold text-hero-foreground/65 hover:bg-hero-foreground/5 hover:text-hero-foreground transition-colors"
       >
         <Search className="size-3.5 flex-shrink-0" />
         <span className="flex-1">Search…</span>
-        <kbd className="text-[10px] tracking-[0.5px] text-hero-foreground/40 border border-hero-foreground/15 rounded px-1.5 py-0.5 font-sans">
+        <kbd className="text-2xs tracking-[0.5px] text-hero-foreground/40 border border-hero-foreground/15 rounded px-1.5 py-0.5 font-sans">
           ⌘K
         </kbd>
       </button>
@@ -236,12 +236,12 @@ function PaletteModal({
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onKeyDown}
             placeholder={config.placeholder}
-            className="flex-1 bg-transparent text-[15px] text-ink placeholder:text-slate-meta focus:outline-none"
+            className="flex-1 bg-transparent text-sm text-ink placeholder:text-slate-meta focus:outline-none"
           />
           {loading ? (
             <Loader2 className="size-4 text-slate-meta animate-spin" />
           ) : (
-            <kbd className="text-[10px] text-slate-meta border border-[var(--rule)] rounded px-1.5 py-0.5 font-sans">
+            <kbd className="text-2xs text-slate-meta border border-[var(--rule)] rounded px-1.5 py-0.5 font-sans">
               Esc
             </kbd>
           )}
@@ -283,17 +283,17 @@ function PaletteModal({
                           >
                             <Icon className="size-3.5 text-slate-meta flex-shrink-0" />
                             <span className="min-w-0 flex-1">
-                              <span className="block text-[14px] font-semibold text-ink truncate">
+                              <span className="block text-sm font-semibold text-ink truncate">
                                 {item.title}
                               </span>
                               {item.subtitle && (
-                                <span className="block text-[11px] text-slate-meta truncate mt-0.5">
+                                <span className="block text-2xs text-slate-meta truncate mt-0.5">
                                   {item.subtitle}
                                 </span>
                               )}
                             </span>
                             {isActive && (
-                              <span className="text-[10px] tracking-[0.5px] text-slate-meta font-semibold">
+                              <span className="text-2xs tracking-[0.5px] text-slate-meta font-semibold">
                                 ↵
                               </span>
                             )}
@@ -309,7 +309,7 @@ function PaletteModal({
         </div>
 
         {/* Footer */}
-        <div className="border-t border-[var(--rule)] bg-cream/30 px-4 py-2 flex items-center justify-between text-[10px] text-slate-meta">
+        <div className="border-t border-[var(--rule)] bg-cream/30 px-4 py-2 flex items-center justify-between text-2xs text-slate-meta">
           <span className="inline-flex items-center gap-1.5">
             <CommandIcon className="size-3" />
             <kbd className="font-sans">↑↓</kbd>
@@ -327,8 +327,8 @@ function PaletteModal({
 function Hint({ items }: { items: string[] }) {
   return (
     <div className="px-4 py-6 text-sm text-slate-meta space-y-2">
-      <p className="text-ink font-semibold text-[13px]">Try searching:</p>
-      <ul className="list-none space-y-1.5 text-[13px]">
+      <p className="text-ink font-semibold text-xs">Try searching:</p>
+      <ul className="list-none space-y-1.5 text-xs">
         {items.map((it) => (
           <li key={it}>• {it}</li>
         ))}

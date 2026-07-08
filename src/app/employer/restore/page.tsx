@@ -81,7 +81,7 @@ export default async function EmployerRestorePage() {
         </div>
 
         <div className="border border-warning bg-warning-bg p-6 sm:p-8">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-warning-bg px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-warning">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-warning-bg px-3 py-1 text-2xs font-bold uppercase tracking-wider text-warning">
             Organization scheduled for deletion
           </div>
           <h1 className="font-display text-2xl font-extrabold tracking-[-0.5px] text-ink mb-3">

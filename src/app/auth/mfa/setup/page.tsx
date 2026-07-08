@@ -66,14 +66,14 @@ export default async function ForcedMfaSetupPage() {
   return (
     <main className="flex min-h-screen items-start justify-center bg-cream/30 px-6 py-12">
       <div className="w-full max-w-[640px] rounded border border-[var(--rule)] bg-card p-8 sm:p-10 my-8">
-        <div className="mb-6 inline-flex items-center gap-2.5 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+        <div className="mb-6 inline-flex items-center gap-2.5 text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep">
           <ShieldCheck className="size-3.5" />
           Two-factor required
         </div>
         <h1 className="font-display text-2xl font-extrabold tracking-[-0.5px] text-ink mb-2 leading-tight">
           {(dso?.name as string | undefined) ?? "Your DSO"} requires 2FA.
         </h1>
-        <p className="text-[14px] text-slate-body leading-relaxed mb-8">
+        <p className="text-sm text-slate-body leading-relaxed mb-8">
           Set up an authenticator app to continue. You&apos;ll also get 10
           one-time recovery codes in case you lose access to your device.
           This is a one-time setup — future sign-ins just need your code.

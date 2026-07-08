@@ -80,8 +80,8 @@ export function InsertMergeFieldButton({
 
   const btnCls =
     size === "sm"
-      ? "inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep border border-[var(--rule)] bg-card hover:bg-cream"
-      : "inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep border border-[var(--rule-strong)] bg-card hover:bg-cream";
+      ? "inline-flex items-center gap-1 px-2 py-1 text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep border border-[var(--rule)] bg-card hover:bg-cream"
+      : "inline-flex items-center gap-1.5 px-3 py-1.5 text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep border border-[var(--rule-strong)] bg-card hover:bg-cream";
 
   return (
     <div ref={menuRef} className="relative inline-block">
@@ -110,14 +110,14 @@ export function InsertMergeFieldButton({
                   className="w-full text-left px-3 py-2 hover:bg-cream"
                   role="menuitem"
                 >
-                  <div className="text-[12px] font-bold text-ink">
+                  <div className="text-xs font-bold text-ink">
                     {f.label}
                   </div>
                   <div className="mt-0.5 flex items-center gap-2">
-                    <code className="text-[10px] bg-cream px-1.5 py-0.5 rounded text-heritage-deep">
+                    <code className="text-2xs bg-cream px-1.5 py-0.5 rounded text-heritage-deep">
                       {f.token}
                     </code>
-                    <span className="text-[10px] text-slate-meta">
+                    <span className="text-2xs text-slate-meta">
                       e.g. {f.example}
                     </span>
                   </div>

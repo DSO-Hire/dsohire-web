@@ -93,7 +93,7 @@ export function PlanFinder() {
                   key={opt}
                   type="button"
                   onClick={() => pick(i)}
-                  className={`px-4 py-2.5 text-[13px] font-bold border transition-colors ${
+                  className={`px-4 py-2.5 text-xs font-bold border transition-colors ${
                     answers[step] === i
                       ? "border-heritage-bright text-heritage-bright shadow-[inset_0_-2px_0_0_var(--heritage-bright)]"
                       : "border-hero-foreground/30 text-hero-foreground hover:border-heritage-light hover:text-heritage-light"
@@ -107,7 +107,7 @@ export function PlanFinder() {
               <button
                 type="button"
                 onClick={() => setStep(step - 1)}
-                className="mt-4 text-[10px] font-semibold text-hero-foreground/45 hover:text-hero-foreground"
+                className="mt-4 text-2xs font-semibold text-hero-foreground/45 hover:text-hero-foreground"
               >
                 ← Back
               </button>
@@ -121,7 +121,7 @@ export function PlanFinder() {
             <div className="text-[28px] font-extrabold tracking-[-0.8px] mb-2">
               {TIER_NAMES[rec]}
             </div>
-            <p className="text-[13px] text-hero-foreground/65 leading-[1.65] max-w-[440px] mx-auto mb-5">
+            <p className="text-xs text-hero-foreground/65 leading-[1.65] max-w-[440px] mx-auto mb-5">
               {WHYS[TIER_NAMES[rec]]}
             </p>
             <a
@@ -134,7 +134,7 @@ export function PlanFinder() {
               <button
                 type="button"
                 onClick={reset}
-                className="mt-3.5 text-[10px] font-semibold text-hero-foreground/45 hover:text-hero-foreground"
+                className="mt-3.5 text-2xs font-semibold text-hero-foreground/45 hover:text-hero-foreground"
               >
                 Start over
               </button>

@@ -94,11 +94,11 @@ export function SavedEntryCard({
                 notes editor below carry `relative z-10` to stay above it. */}
             <Link
               href={`/employer/candidates/${candidateId}`}
-              className="text-[14px] font-bold text-ink hover:text-heritage-deep after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-heritage/40"
+              className="text-sm font-bold text-ink hover:text-heritage-deep after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-heritage/40"
             >
               {fullName ?? "Unnamed candidate"}
             </Link>
-            <span className="ml-2 text-[11px] text-slate-meta">
+            <span className="ml-2 text-2xs text-slate-meta">
               Added {timeAgo(addedAt)}
             </span>
           </div>
@@ -118,9 +118,9 @@ export function SavedEntryCard({
         </div>
 
         {headline && (
-          <div className="text-[13px] text-ink mb-1.5">{headline}</div>
+          <div className="text-xs text-ink mb-1.5">{headline}</div>
         )}
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-slate-meta mb-3">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-meta mb-3">
           {currentTitle && <span>{currentTitle}</span>}
           {yearsExperience !== null && (
             <span className="tabular">
@@ -148,7 +148,7 @@ export function SavedEntryCard({
                 value={draftNotes}
                 onChange={(e) => setDraftNotes(e.target.value)}
                 rows={3}
-                className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage resize-y"
+                className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-xs focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage resize-y"
               />
               <div className="flex gap-2">
                 <button
@@ -165,7 +165,7 @@ export function SavedEntryCard({
                     setDraftNotes(currentNotes ?? "");
                     setEditingNotes(false);
                   }}
-                  className="text-[11px] font-semibold text-slate-meta hover:text-ink"
+                  className="text-2xs font-semibold text-slate-meta hover:text-ink"
                 >
                   Cancel
                 </button>
@@ -175,7 +175,7 @@ export function SavedEntryCard({
             <button
               type="button"
               onClick={() => setEditingNotes(true)}
-              className="text-[13px] text-ink leading-relaxed hover:bg-cream/40 px-2 py-1 -mx-2 rounded text-left whitespace-pre-wrap"
+              className="text-xs text-ink leading-relaxed hover:bg-cream/40 px-2 py-1 -mx-2 rounded text-left whitespace-pre-wrap"
             >
               {currentNotes}
             </button>
@@ -183,7 +183,7 @@ export function SavedEntryCard({
             <button
               type="button"
               onClick={() => setEditingNotes(true)}
-              className="text-[12px] text-slate-meta italic hover:text-heritage-deep"
+              className="text-xs text-slate-meta italic hover:text-heritage-deep"
             >
               + Add notes
             </button>
@@ -191,7 +191,7 @@ export function SavedEntryCard({
         </div>
 
         {error && (
-          <div className="mt-2 text-[12px] text-danger">{error}</div>
+          <div className="mt-2 text-xs text-danger">{error}</div>
         )}
       </div>
     </div>
@@ -222,7 +222,7 @@ function Avatar({
     .map((s) => s[0]?.toUpperCase())
     .join("");
   return (
-    <div className="h-12 w-12 rounded-full bg-heritage text-primary-foreground flex items-center justify-center font-bold text-[14px] shrink-0">
+    <div className="h-12 w-12 rounded-full bg-heritage text-primary-foreground flex items-center justify-center font-bold text-sm shrink-0">
       {initials || "?"}
     </div>
   );

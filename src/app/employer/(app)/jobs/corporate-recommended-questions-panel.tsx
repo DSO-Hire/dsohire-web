@@ -162,12 +162,12 @@ export function CorporateRecommendedQuestionsPanel({
       <div className="flex items-start justify-between gap-4 mb-1">
         <div className="min-w-0">
           <div
-            className="text-[10px] font-bold tracking-[2.5px] uppercase mb-1"
+            className="text-2xs font-bold tracking-[2.5px] uppercase mb-1"
             style={{ color: CORP_ACCENT }}
           >
             Recommended for {rec.label}
           </div>
-          <p className="text-[13px] text-slate-meta leading-relaxed">
+          <p className="text-xs text-slate-meta leading-relaxed">
             Curated from corporate hiring best practices for multi-practice
             DSOs. Click Add — the question moves into your screening list
             below, where you can edit it.
@@ -176,7 +176,7 @@ export function CorporateRecommendedQuestionsPanel({
         {/* Remaining-count chip. The panel auto-hides when this hits
             zero, so the chip never reads "0". */}
         <div className="flex-shrink-0">
-          <span className="inline-flex items-center px-2.5 py-1 bg-cream text-slate-meta border border-[var(--rule-strong)] text-[10px] font-bold tracking-[1.2px] uppercase">
+          <span className="inline-flex items-center px-2.5 py-1 bg-cream text-slate-meta border border-[var(--rule-strong)] text-2xs font-bold tracking-[1.2px] uppercase">
             {remainingCount} suggestion{remainingCount === 1 ? "" : "s"}
           </span>
         </div>
@@ -189,7 +189,7 @@ export function CorporateRecommendedQuestionsPanel({
 
           return (
             <div key={category}>
-              <div className="text-[13px] font-bold tracking-[2px] uppercase text-slate-meta mb-2.5 pb-1.5 border-b border-[var(--rule)]">
+              <div className="text-xs font-bold tracking-[2px] uppercase text-slate-meta mb-2.5 pb-1.5 border-b border-[var(--rule)]">
                 {CORPORATE_CATEGORY_LABELS[category]}
               </div>
               <div className="space-y-2.5">
@@ -234,33 +234,33 @@ function CorporateRecommendedCard({
     >
       <div className="flex flex-wrap items-center gap-1.5 mb-2">
         <span
-          className="text-[13px] font-bold tracking-[2px] uppercase px-2 py-0.5"
+          className="text-xs font-bold tracking-[2px] uppercase px-2 py-0.5"
           style={{ color: CORP_ACCENT, backgroundColor: "var(--corporate-bg)" }}
         >
           {KIND_LABELS[rq.kind]}
         </span>
         {rq.knockout && (
-          <span className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[1.5px] uppercase text-danger px-2 py-0.5 bg-danger-bg border border-danger">
+          <span className="inline-flex items-center gap-1 text-2xs font-bold tracking-[1.5px] uppercase text-danger px-2 py-0.5 bg-danger-bg border border-danger">
             <ShieldAlert className="h-3 w-3" />
             Knockout
           </span>
         )}
         {rq.required && (
-          <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+          <span className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta">
             Required
           </span>
         )}
       </div>
 
-      <p className="text-[14px] text-ink font-semibold leading-snug">
+      <p className="text-sm text-ink font-semibold leading-snug">
         {rq.prompt}
       </p>
-      <p className="mt-1 text-[13px] text-slate-meta leading-relaxed italic">
+      <p className="mt-1 text-xs text-slate-meta leading-relaxed italic">
         {rq.rationale}
       </p>
       {optionPreview && (
-        <p className="mt-2 text-[12px] text-slate-body">
-          <span className="text-slate-meta tracking-[0.3px] uppercase font-bold text-[10px] mr-1.5">
+        <p className="mt-2 text-xs text-slate-body">
+          <span className="text-slate-meta tracking-[0.3px] uppercase font-bold text-2xs mr-1.5">
             Options
           </span>
           {optionPreview}
@@ -271,7 +271,7 @@ function CorporateRecommendedCard({
         <button
           type="button"
           onClick={onAdd}
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-primary-foreground text-2xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
         >
           <Plus className="h-3 w-3" />
           Add
@@ -279,7 +279,7 @@ function CorporateRecommendedCard({
         <button
           type="button"
           onClick={onSkip}
-          className="ml-auto text-[12px] tracking-[0.5px] text-slate-meta hover:text-ink transition-colors"
+          className="ml-auto text-xs tracking-[0.5px] text-slate-meta hover:text-ink transition-colors"
         >
           Skip
         </button>

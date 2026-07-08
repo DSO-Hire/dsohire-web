@@ -221,11 +221,11 @@ function MiniDial() {
           92
         </span>
       </div>
-      <div className="text-[11px] leading-snug text-primary-foreground/70">
+      <div className="text-2xs leading-snug text-primary-foreground/70">
         {/* The real two-tone wordmark, on an ivory pill so it survives the
             green door (Cam, Day 31). It embeds its own sparkle mark. */}
         <span className="inline-flex items-center bg-ivory px-2 py-1 mb-1.5">
-          <PracticeFitWordmark surface="light" tm className="text-[14px]" />
+          <PracticeFitWordmark surface="light" tm className="text-sm" />
         </span>
         <span className="block">
           Every opening, scored against how you work — schedule, pace,
@@ -323,7 +323,7 @@ function DoorwayPanel({
       <div className={`text-[24px] sm:text-[28px] font-extrabold tracking-[-0.6px] leading-[1.08] ${fg} mb-2.5`}>
         {title}
       </div>
-      <p className={`text-[14px] ${fg80} leading-[1.55] mb-3.5`}>{body}</p>
+      <p className={`text-sm ${fg80} leading-[1.55] mb-3.5`}>{body}</p>
 
       {/* Single-line proof — dot-separated keyword chips */}
       <div className={`text-xs font-semibold ${fg55}`}>
@@ -458,13 +458,13 @@ function MarqueeCard({ job, ariaHidden }: { job: MarqueeJob; ariaHidden?: boolea
       tabIndex={ariaHidden ? -1 : undefined}
       className="group/card flex flex-col w-[280px] shrink-0 bg-card border border-[var(--rule)] px-5 py-4 hover:border-heritage hover:shadow-[0_14px_28px_-16px_rgba(7,15,28,0.22)] transition-all"
     >
-      <span className="inline-flex self-start items-center px-1.5 py-0.5 mb-2.5 text-[10px] font-semibold text-heritage-deep border border-heritage/30" style={{ background: "var(--heritage-tint)" }}>
+      <span className="inline-flex self-start items-center px-1.5 py-0.5 mb-2.5 text-2xs font-semibold text-heritage-deep border border-heritage/30" style={{ background: "var(--heritage-tint)" }}>
         {job.chip}
       </span>
       <span className="text-[14.5px] font-extrabold tracking-[-0.3px] leading-snug text-ink mb-1.5 line-clamp-2">
         {job.title}
       </span>
-      <span className="mt-auto flex items-center justify-between gap-3 text-[12px] text-slate-body">
+      <span className="mt-auto flex items-center justify-between gap-3 text-xs text-slate-body">
         <span className="inline-flex items-center gap-1 min-w-0">
           <MapPin className="h-3 w-3 shrink-0 text-slate-meta" />
           <span className="truncate">{job.location ?? "Multiple locations"}</span>
@@ -585,10 +585,10 @@ function MachineBand() {
                 f.hg ? "border-t-heritage" : "border-t-ink"
               }`}
             >
-              <h3 className="text-[15px] font-extrabold tracking-[-0.2px] leading-tight text-ink mb-1.5">
+              <h3 className="text-sm font-extrabold tracking-[-0.2px] leading-tight text-ink mb-1.5">
                 {f.title}
               </h3>
-              <p className="text-[13px] text-slate-body leading-[1.65]">{f.body}</p>
+              <p className="text-xs text-slate-body leading-[1.65]">{f.body}</p>
             </div>
           ))}
         </div>

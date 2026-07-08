@@ -48,7 +48,7 @@ export default async function ViewAsCandidate({
       <div className="mb-6 flex items-center justify-between gap-4 border border-heritage-deep/30 bg-heritage/10 px-4 py-3">
         <div className="flex items-center gap-2.5">
           <Eye className="h-4 w-4 text-heritage-deep" />
-          <span className="text-[13px] text-ink">
+          <span className="text-xs text-ink">
             Viewing as{" "}
             <strong className="font-bold">{m.fullName ?? "candidate"}</strong>{" "}
             — <span className="font-bold text-heritage-deep">READ ONLY</span>
@@ -56,7 +56,7 @@ export default async function ViewAsCandidate({
         </div>
         <Link
           href={`/admin/candidate/${m.id}`}
-          className="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+          className="inline-flex items-center gap-1.5 text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Exit
         </Link>
@@ -67,7 +67,7 @@ export default async function ViewAsCandidate({
           {m.fullName ?? "(no name)"}
         </h1>
         {(m.currentTitle || m.headline) && (
-          <p className="mt-1 text-[14px] text-slate-body">
+          <p className="mt-1 text-sm text-slate-body">
             {m.currentTitle ?? m.headline}
           </p>
         )}
@@ -87,7 +87,7 @@ export default async function ViewAsCandidate({
 
         <Panel title={`Applications (${m.applications.length})`}>
           {m.applications.length === 0 ? (
-            <p className="text-[13px] text-slate-meta italic">
+            <p className="text-xs text-slate-meta italic">
               No applications yet.
             </p>
           ) : (
@@ -98,14 +98,14 @@ export default async function ViewAsCandidate({
                   className="flex items-center justify-between gap-3 py-2"
                 >
                   <div className="min-w-0">
-                    <div className="text-[13px] text-ink font-semibold truncate">
+                    <div className="text-xs text-ink font-semibold truncate">
                       {a.jobTitle}
                     </div>
-                    <div className="text-[11px] text-slate-meta truncate">
+                    <div className="text-2xs text-slate-meta truncate">
                       {a.dsoName} · {fmtDate(a.appliedAt)}
                     </div>
                   </div>
-                  <span className="shrink-0 text-[10px] font-bold tracking-[0.5px] uppercase text-heritage-deep bg-heritage/10 px-2 py-0.5">
+                  <span className="shrink-0 text-2xs font-bold tracking-[0.5px] uppercase text-heritage-deep bg-heritage/10 px-2 py-0.5">
                     {a.status}
                   </span>
                 </li>
@@ -115,7 +115,7 @@ export default async function ViewAsCandidate({
         </Panel>
       </div>
 
-      <p className="mt-8 text-[11px] text-slate-meta leading-relaxed">
+      <p className="mt-8 text-2xs text-slate-meta leading-relaxed">
         Read-only mirror via service-role — the candidate&apos;s own view. EEO is
         never shown. Covers profile, readiness (résumé + fit completion), and
         applications; full fit-score detail is a further follow-on.

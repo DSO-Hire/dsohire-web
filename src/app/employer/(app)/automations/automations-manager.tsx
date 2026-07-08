@@ -315,18 +315,18 @@ function RuleRow({
           <div className="flex items-center gap-2">
             <span className="truncate text-sm font-semibold text-ink">{rule.name}</span>
             {rule.is_system && (
-              <span className="rounded bg-ink/5 px-1.5 py-0.5 text-[11px] font-medium text-ink/60">
+              <span className="rounded bg-ink/5 px-1.5 py-0.5 text-2xs font-medium text-ink/60">
                 Default
               </span>
             )}
           </div>
-          <p className="mt-1 text-[13px] leading-snug text-ink/60">
+          <p className="mt-1 text-xs leading-snug text-ink/60">
             {ruleSentence(rule.trigger_kind, rule.conditions, rule.actions, jobs, teammates)}
           </p>
-          <p className="mt-1.5 text-[11px] text-ink/40">
+          <p className="mt-1.5 text-2xs text-ink/40">
             Fired {rule.firedCount} {rule.firedCount === 1 ? "time" : "times"}
           </p>
-          {err && <p className="mt-1 text-[12px] text-danger">{err}</p>}
+          {err && <p className="mt-1 text-xs text-danger">{err}</p>}
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {canManage && (
@@ -484,7 +484,7 @@ function RuleForm({
       </div>
 
       {/* name */}
-      <label className="mb-1 block text-[12px] font-medium text-ink/70">Name</label>
+      <label className="mb-1 block text-xs font-medium text-ink/70">Name</label>
       <input
         value={draft.name}
         onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
@@ -494,11 +494,11 @@ function RuleForm({
 
       {/* trigger */}
       <div className="mb-4">
-        <label className="mb-1 block text-[12px] font-medium text-ink/70">When</label>
+        <label className="mb-1 block text-xs font-medium text-ink/70">When</label>
         {existing ? (
           <div className="rounded border border-ink/10 bg-ink/[0.02] px-3 py-2 text-sm text-ink/80">
             {TRIGGER_OPTS.find((t) => t.value === draft.trigger_kind)?.label}
-            <span className="ml-2 text-[11px] text-ink/40">A rule's trigger can't be changed</span>
+            <span className="ml-2 text-2xs text-ink/40">A rule's trigger can't be changed</span>
           </div>
         ) : (
           <select
@@ -517,7 +517,7 @@ function RuleForm({
 
       {isIdle && (
         <div className="mb-4">
-          <label className="mb-1 block text-[12px] font-medium text-ink/70">
+          <label className="mb-1 block text-xs font-medium text-ink/70">
             After how many days in a stage
           </label>
           <div className="flex items-center gap-2 text-sm text-ink/70">
@@ -549,7 +549,7 @@ function RuleForm({
       />
 
       {/* live sentence */}
-      <div className="mt-4 rounded bg-heritage/5 px-3 py-2 text-[13px] text-ink/75">{sentence}</div>
+      <div className="mt-4 rounded bg-heritage/5 px-3 py-2 text-xs text-ink/75">{sentence}</div>
 
       {/* dry run — stage-change trigger only */}
       {isStageTrigger && (
@@ -557,12 +557,12 @@ function RuleForm({
           <button
             onClick={runDry}
             disabled={pending}
-            className="inline-flex items-center gap-1.5 rounded border border-ink/15 px-2.5 py-1.5 text-[12px] font-medium text-ink/70 hover:bg-ink/5 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded border border-ink/15 px-2.5 py-1.5 text-xs font-medium text-ink/70 hover:bg-ink/5 disabled:opacity-50"
           >
             <FlaskConical className="size-3.5" /> Test against recent moves
           </button>
           {dry && (
-            <span className="text-[12px] text-ink/60">
+            <span className="text-xs text-ink/60">
               Would have fired on <strong className="text-ink">{dry.matched}</strong> of your last{" "}
               {dry.sampled} stage move{dry.sampled === 1 ? "" : "s"}.
             </span>
@@ -570,7 +570,7 @@ function RuleForm({
         </div>
       )}
 
-      {err && <p className="mt-3 text-[12px] text-danger">{err}</p>}
+      {err && <p className="mt-3 text-xs text-danger">{err}</p>}
 
       <div className="mt-5 flex items-center gap-2">
         <button
@@ -588,7 +588,7 @@ function RuleForm({
           Cancel
         </button>
         {!existing && (
-          <span className="ml-auto text-[11px] text-ink/40">New automations start turned off.</span>
+          <span className="ml-auto text-2xs text-ink/40">New automations start turned off.</span>
         )}
       </div>
     </div>
@@ -653,7 +653,7 @@ function ConditionsEditor({
 
   return (
     <div className="mb-4">
-      <label className="mb-1 block text-[12px] font-medium text-ink/70">
+      <label className="mb-1 block text-xs font-medium text-ink/70">
         Only if <span className="font-normal text-ink/40">(optional — leave empty for every one)</span>
       </label>
       <div className="space-y-2">
@@ -662,7 +662,7 @@ function ConditionsEditor({
             <select
               value={c.field}
               onChange={(e) => update(idx, { field: e.target.value, op: "in", value: [] })}
-              className="rounded border border-ink/15 px-2 py-1.5 text-[13px]"
+              className="rounded border border-ink/15 px-2 py-1.5 text-xs"
             >
               {allowedFields.includes("to_kind") && (
                 <option value="to_kind">
@@ -680,7 +680,7 @@ function ConditionsEditor({
                 onChange={(e) =>
                   update(idx, { ...c, value: Array.from(e.target.selectedOptions).map((o) => o.value) })
                 }
-                className="min-w-[12rem] flex-1 rounded border border-ink/15 px-2 py-1.5 text-[13px]"
+                className="min-w-[12rem] flex-1 rounded border border-ink/15 px-2 py-1.5 text-xs"
               >
                 {jobs.map((j) => (
                   <option key={j.id} value={j.id}>
@@ -702,7 +702,7 @@ function ConditionsEditor({
                         update(idx, { ...c, value: next });
                       }}
                       className={
-                        "rounded-full px-2.5 py-1 text-[12px] font-medium " +
+                        "rounded-full px-2.5 py-1 text-xs font-medium " +
                         (selected ? "bg-heritage text-primary-foreground" : "bg-ink/5 text-ink/60 hover:bg-ink/10")
                       }
                     >
@@ -727,7 +727,7 @@ function ConditionsEditor({
       <button
         type="button"
         onClick={addCondition}
-        className="mt-2 inline-flex items-center gap-1 text-[12px] font-medium text-heritage hover:underline"
+        className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-heritage hover:underline"
       >
         <Plus className="size-3.5" /> Add condition
       </button>
@@ -774,14 +774,14 @@ function ActionsEditor({
 
   return (
     <div className="mb-2">
-      <label className="mb-1 block text-[12px] font-medium text-ink/70">Then</label>
+      <label className="mb-1 block text-xs font-medium text-ink/70">Then</label>
       <div className="space-y-2">
         {actions.map((a, idx) => (
           <div key={idx} className="flex flex-wrap items-center gap-2 rounded border border-ink/10 p-2">
             <select
               value={a.action_kind}
               onChange={(e) => changeKind(idx, e.target.value as DraftAction["action_kind"])}
-              className="rounded border border-ink/15 px-2 py-1.5 text-[13px]"
+              className="rounded border border-ink/15 px-2 py-1.5 text-xs"
             >
               {allowed.map((k) => (
                 <option key={k} value={k}>
@@ -799,14 +799,14 @@ function ActionsEditor({
                   }
                   placeholder="Tag label"
                   maxLength={40}
-                  className="flex-1 rounded border border-ink/15 px-2 py-1.5 text-[13px]"
+                  className="flex-1 rounded border border-ink/15 px-2 py-1.5 text-xs"
                 />
                 <select
                   value={a.config.color}
                   onChange={(e) =>
                     update(idx, { action_kind: "add_tag", config: { ...a.config, color: e.target.value } })
                   }
-                  className="rounded border border-ink/15 px-2 py-1.5 text-[13px]"
+                  className="rounded border border-ink/15 px-2 py-1.5 text-xs"
                 >
                   {TAG_COLORS.map((c) => (
                     <option key={c} value={c}>
@@ -822,7 +822,7 @@ function ActionsEditor({
                 onChange={(e) =>
                   update(idx, { action_kind: a.action_kind, config: { target_dso_user_id: e.target.value } })
                 }
-                className="flex-1 rounded border border-ink/15 px-2 py-1.5 text-[13px]"
+                className="flex-1 rounded border border-ink/15 px-2 py-1.5 text-xs"
               >
                 <option value="">Choose a teammate…</option>
                 {teammates.map((t) => (
@@ -841,7 +841,7 @@ function ActionsEditor({
                   }
                   placeholder="Subject — e.g. Still interested, {{first_name}}?"
                   maxLength={200}
-                  className="w-full rounded border border-ink/15 px-2 py-1.5 text-[13px]"
+                  className="w-full rounded border border-ink/15 px-2 py-1.5 text-xs"
                 />
                 <textarea
                   value={a.config.body}
@@ -851,18 +851,18 @@ function ActionsEditor({
                   placeholder="Your message to the candidate…"
                   rows={4}
                   maxLength={4000}
-                  className="w-full rounded border border-ink/15 px-2 py-1.5 text-[13px] leading-relaxed"
+                  className="w-full rounded border border-ink/15 px-2 py-1.5 text-xs leading-relaxed"
                 />
-                <p className="text-[11px] text-ink/40">
+                <p className="text-2xs text-ink/40">
                   {"Personalize with {{first_name}} and {{job_title}}."}
                 </p>
               </div>
             )}
             {a.action_kind === "email_candidate" && (
-              <span className="text-[12px] text-ink/45">uses your “Stage moved” template</span>
+              <span className="text-xs text-ink/45">uses your “Stage moved” template</span>
             )}
             {a.action_kind === "inbox_system_message" && (
-              <span className="text-[12px] text-ink/45">drops a “moved to …” note in their inbox</span>
+              <span className="text-xs text-ink/45">drops a “moved to …” note in their inbox</span>
             )}
 
             {actions.length > 1 && (
@@ -881,7 +881,7 @@ function ActionsEditor({
       <button
         type="button"
         onClick={add}
-        className="mt-2 inline-flex items-center gap-1 text-[12px] font-medium text-heritage hover:underline"
+        className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-heritage hover:underline"
       >
         <Plus className="size-3.5" /> Add action
       </button>

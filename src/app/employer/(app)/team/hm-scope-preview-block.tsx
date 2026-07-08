@@ -103,10 +103,10 @@ export function HmScopePreviewBlock({
   if (showEmpty) {
     return (
       <div className={wrapper}>
-        <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
+        <div className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
           Preview
         </div>
-        <p className="text-[13px] text-slate-body leading-relaxed">
+        <p className="text-xs text-slate-body leading-relaxed">
           With no locations checked, this hiring manager will see{" "}
           <strong className="text-ink font-semibold">no jobs</strong> at this
           DSO. Pick at least one location.
@@ -118,7 +118,7 @@ export function HmScopePreviewBlock({
   return (
     <div className={wrapper}>
       <div className="flex items-center justify-between gap-3 mb-2">
-        <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
+        <div className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep">
           Preview
           {pending && (
             <span className="ml-2 text-slate-meta lowercase tracking-normal font-normal">
@@ -127,7 +127,7 @@ export function HmScopePreviewBlock({
           )}
         </div>
         {data.locationNames.length > 0 && (
-          <div className="hidden sm:flex items-center gap-1 text-[11px] text-slate-meta">
+          <div className="hidden sm:flex items-center gap-1 text-2xs text-slate-meta">
             <MapPin className="h-3 w-3" />
             <span className="truncate max-w-[280px]">
               {data.locationNames.length === 1
@@ -162,7 +162,7 @@ export function HmScopePreviewBlock({
       </div>
 
       {data.regionalOrCorporateJobs > 0 && (
-        <p className="mt-2 pt-2 border-t border-[var(--rule)] text-[12px] text-slate-meta leading-relaxed">
+        <p className="mt-2 pt-2 border-t border-[var(--rule)] text-xs text-slate-meta leading-relaxed">
           Includes{" "}
           <strong className="text-ink font-semibold">
             {data.regionalOrCorporateJobs}
@@ -174,7 +174,7 @@ export function HmScopePreviewBlock({
       )}
 
       {!data.ok && data.error && (
-        <p className="mt-2 text-[12px] text-warning">
+        <p className="mt-2 text-xs text-warning">
           Preview unavailable — proceed if the location list looks right.
         </p>
       )}
@@ -201,12 +201,12 @@ function PreviewMetric({
           <span className="text-2xl font-extrabold tracking-[-0.5px] text-ink tabular-nums">
             {value}
           </span>
-          <span className="text-[12px] tracking-[0.3px] text-slate-body">
+          <span className="text-xs tracking-[0.3px] text-slate-body">
             {label}
           </span>
         </div>
         {subline && (
-          <div className="text-[11px] text-slate-meta leading-tight">
+          <div className="text-2xs text-slate-meta leading-tight">
             {subline}
           </div>
         )}

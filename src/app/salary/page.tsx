@@ -37,7 +37,7 @@ export default async function SalaryHome() {
     <SiteShell>
       <section className="pt-[140px] pb-12 px-6 sm:px-14">
         <div className="max-w-[1100px] mx-auto">
-          <p className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-5">Dental Salary Data · BLS OEWS</p>
+          <p className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-5">Dental Salary Data · BLS OEWS</p>
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-[-1.5px] leading-[1.04] text-ink mb-6">
             Dental Salary Data
           </h1>
@@ -56,9 +56,9 @@ export default async function SalaryHome() {
               <Link key={role.slug} href={`/salary/${role.slug}`} className="group border border-[var(--rule)] hover:border-ink p-6 transition-colors flex items-center justify-between gap-4">
                 <div>
                   <p className="text-lg font-bold text-ink group-hover:text-heritage-deep">{role.searchTitle} Salary</p>
-                  <p className="text-[13px] text-slate-meta mt-1">By state &amp; metro</p>
+                  <p className="text-xs text-slate-meta mt-1">By state &amp; metro</p>
                 </div>
-                {med && <span className="text-[15px] font-bold text-heritage-deep shrink-0">{med}</span>}
+                {med && <span className="text-sm font-bold text-heritage-deep shrink-0">{med}</span>}
               </Link>
             );
           })}

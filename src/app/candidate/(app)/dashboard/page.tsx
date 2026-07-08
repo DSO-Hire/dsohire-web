@@ -899,7 +899,7 @@ export default async function CandidateDashboardPage() {
               <Eyebrow as="h2">
                 Your applications
               </Eyebrow>
-              <p className="text-[12px] text-slate-meta mt-1">
+              <p className="text-xs text-slate-meta mt-1">
                 Where each one stands — your whole search at a glance.
               </p>
             </div>
@@ -911,7 +911,7 @@ export default async function CandidateDashboardPage() {
             </Link>
           </div>
           <CandidatePipelineBoard cards={boardCards} />
-          <p className="mt-3 text-[11px] text-slate-meta">
+          <p className="mt-3 text-2xs text-slate-meta">
             Honest by design — no “days-in-stage” countdowns. The only clock is
             your own “applied X ago.”
           </p>
@@ -1060,10 +1060,10 @@ export default async function CandidateDashboardPage() {
               className="h-8 w-8 text-slate-meta mx-auto mb-4"
               strokeWidth={1.5}
             />
-            <p className="text-[15px] text-ink leading-relaxed mb-2">
+            <p className="text-sm text-ink leading-relaxed mb-2">
               You haven&apos;t applied to any jobs yet.
             </p>
-            <p className="text-[14px] text-slate-body leading-relaxed mb-6">
+            <p className="text-sm text-slate-body leading-relaxed mb-6">
               Browse open roles at multi-location dental groups.
             </p>
             <Link

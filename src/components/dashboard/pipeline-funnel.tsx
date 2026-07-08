@@ -104,7 +104,7 @@ export function PipelineFunnel({
           <Eyebrow as="h2">
             Pipeline Funnel
           </Eyebrow>
-          <div className="text-[12px] text-slate-meta mt-1">
+          <div className="text-xs text-slate-meta mt-1">
             {windowLabel} · Where your pipeline leaks and where it converts.
           </div>
         </div>
@@ -139,7 +139,7 @@ export function PipelineFunnel({
               <Eyebrow as="div" className="mb-0.5">
                 {stage.label}
               </Eyebrow>
-              <div className="text-[11px] text-slate-meta">
+              <div className="text-2xs text-slate-meta">
                 {stage.showConv && conv !== null ? (
                   <>
                     <strong className="text-ink font-bold tabular">{conv}%</strong>{" "}
@@ -157,17 +157,17 @@ export function PipelineFunnel({
       </div>
 
       {/* Footer summary */}
-      <div className="mt-6 pt-5 border-t border-[var(--rule)] flex flex-wrap items-baseline gap-x-7 gap-y-2 text-[12px] text-slate-body">
+      <div className="mt-6 pt-5 border-t border-[var(--rule)] flex flex-wrap items-baseline gap-x-7 gap-y-2 text-xs text-slate-body">
         <div className="flex gap-1.5 items-baseline">
           Application → Hire{" "}
-          <strong className="text-ink font-extrabold text-[14px] tracking-[-0.3px] tabular">
+          <strong className="text-ink font-extrabold text-sm tracking-[-0.3px] tabular">
             {e2ePct}%
           </strong>
         </div>
         {worstIdx >= 0 && conversions[worstIdx] !== null && (
           <div className="flex gap-1.5 items-baseline">
             {STAGES[worstIdx - 1].label} → {STAGES[worstIdx].label}{" "}
-            <strong className="text-ink font-extrabold text-[14px] tracking-[-0.3px] tabular">
+            <strong className="text-ink font-extrabold text-sm tracking-[-0.3px] tabular">
               {conversions[worstIdx]}%
             </strong>{" "}
             <span className="text-danger">↘ biggest drop</span>
@@ -175,7 +175,7 @@ export function PipelineFunnel({
         )}
         <div className="flex gap-1.5 items-baseline">
           Median time to hire{" "}
-          <strong className="text-ink font-extrabold text-[14px] tracking-[-0.3px] tabular">
+          <strong className="text-ink font-extrabold text-sm tracking-[-0.3px] tabular">
             {medianTimeToHireDays != null
               ? `${medianTimeToHireDays} day${medianTimeToHireDays === 1 ? "" : "s"}`
               : "—"}

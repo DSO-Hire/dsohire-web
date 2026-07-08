@@ -125,7 +125,7 @@ export function CorporateAffiliationPolicyForm({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <Icon className="h-3.5 w-3.5 text-heritage-deep flex-shrink-0" />
-                    <span className="text-[14px] font-extrabold tracking-[-0.2px] text-ink">
+                    <span className="text-sm font-extrabold tracking-[-0.2px] text-ink">
                       {opt.label}
                     </span>
                     {isCurrent && (
@@ -135,14 +135,14 @@ export function CorporateAffiliationPolicyForm({
                       </span>
                     )}
                   </div>
-                  <p className="text-[13px] text-slate-body leading-relaxed mb-2">
+                  <p className="text-xs text-slate-body leading-relaxed mb-2">
                     {opt.blurb}
                   </p>
                   <ul className="space-y-0.5">
                     {opt.implications.map((line, i) => (
                       <li
                         key={i}
-                        className="text-[12px] text-slate-meta leading-relaxed flex items-start gap-1.5"
+                        className="text-xs text-slate-meta leading-relaxed flex items-start gap-1.5"
                       >
                         <span className="text-heritage-deep mt-0.5">·</span>
                         <span>{line}</span>
@@ -159,12 +159,12 @@ export function CorporateAffiliationPolicyForm({
       {state.error && (
         <div className="bg-danger-bg border-l-4 border-danger p-3 flex items-start gap-2">
           <AlertCircle className="h-4 w-4 text-danger mt-0.5 flex-shrink-0" />
-          <p className="text-[13px] text-danger">{state.error}</p>
+          <p className="text-xs text-danger">{state.error}</p>
         </div>
       )}
       {state.ok && state.message && (
         <div className="bg-cream border-l-4 border-heritage p-3">
-          <p className="text-[13px] text-ink font-semibold">{state.message}</p>
+          <p className="text-xs text-ink font-semibold">{state.message}</p>
         </div>
       )}
 
@@ -172,16 +172,16 @@ export function CorporateAffiliationPolicyForm({
         <button
           type="submit"
           disabled={pending || selected === effectivePolicy}
-          className="inline-flex items-center gap-2 px-7 py-3 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 px-7 py-3 bg-primary text-primary-foreground text-xs font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {pending ? "Saving…" : "Save policy"}
         </button>
         {selected !== effectivePolicy && !pending && (
-          <span className="text-[12px] text-slate-meta">Unsaved change.</span>
+          <span className="text-xs text-slate-meta">Unsaved change.</span>
         )}
       </div>
 
-      <p className="text-[11px] text-slate-meta leading-relaxed pt-3 border-t border-[var(--rule)]">
+      <p className="text-2xs text-slate-meta leading-relaxed pt-3 border-t border-[var(--rule)]">
         Only affects 0-anchor-location corporate-scope postings. Jobs at a
         specific practice still follow that practice&apos;s per-location
         affiliation toggle. Regional / multi-practice jobs still follow

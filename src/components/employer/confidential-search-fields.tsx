@@ -63,11 +63,11 @@ export function ConfidentialSearchFields({
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <EyeOff className="h-3.5 w-3.5 text-heritage-deep" />
-            <span className="text-[14px] font-semibold text-ink">
+            <span className="text-sm font-semibold text-ink">
               Confidential search
             </span>
           </div>
-          <p className="text-[12px] text-slate-meta leading-snug mt-1">
+          <p className="text-xs text-slate-meta leading-snug mt-1">
             Restrict this posting and its applicants to owners, admins, and
             the teammates you pick below — for quiet searches like replacing
             an executive. Candidates still see the public posting normally.
@@ -77,15 +77,15 @@ export function ConfidentialSearchFields({
 
       {confidential && (
         <div className="border-t border-[var(--rule)] px-4 py-3">
-          <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-2">
+          <div className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep mb-2">
             Who&apos;s on this search?
           </div>
-          <p className="text-[12px] text-slate-meta leading-snug mb-3">
+          <p className="text-xs text-slate-meta leading-snug mb-3">
             Owners and admins always have access. You&apos;re included
             automatically.
           </p>
           {assignable.length === 0 ? (
-            <p className="text-[13px] text-slate-meta italic">
+            <p className="text-xs text-slate-meta italic">
               No recruiters or hiring managers on your team yet — only
               owners and admins will see this job.
             </p>
@@ -106,10 +106,10 @@ export function ConfidentialSearchFields({
                       checked={checked}
                       onChange={() => toggleAssignee(t.id)}
                     />
-                    <span className="text-[13px] font-semibold text-ink">
+                    <span className="text-xs font-semibold text-ink">
                       {t.name}
                     </span>
-                    <span className="text-[11px] text-slate-meta">
+                    <span className="text-2xs text-slate-meta">
                       {ROLE_SHORT[t.role] ?? t.role}
                     </span>
                   </label>

@@ -74,12 +74,12 @@ export function SequenceEnrollControl({
             <Eyebrow className="mb-0.5 inline-flex items-center gap-1.5">
               <Mail className="h-3 w-3" /> In a nurture sequence
             </Eyebrow>
-            <div className="text-[13px] text-ink leading-snug tabular">
+            <div className="text-xs text-ink leading-snug tabular">
               <strong>{enrollment.sequenceName}</strong> · step{" "}
               {Math.min(enrollment.currentStep + 1, enrollment.totalSteps)} of{" "}
               {enrollment.totalSteps}
             </div>
-            <div className="text-[12px] text-slate-meta mt-0.5">
+            <div className="text-xs text-slate-meta mt-0.5">
               {next
                 ? `Next email ${next.toLocaleDateString()} at ${next.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`
                 : "Scheduling…"}{" "}
@@ -97,7 +97,7 @@ export function SequenceEnrollControl({
           </button>
         </div>
         {error && (
-          <div className="mt-2 text-[12px] text-danger flex items-start gap-1.5">
+          <div className="mt-2 text-xs text-danger flex items-start gap-1.5">
             <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" /> {error}
           </div>
         )}
@@ -108,7 +108,7 @@ export function SequenceEnrollControl({
   // Not enrolled + has access.
   if (sequences.length === 0) {
     return (
-      <div className="border border-[var(--rule)] bg-cream/40 p-3 text-[12px] text-slate-body">
+      <div className="border border-[var(--rule)] bg-cream/40 p-3 text-xs text-slate-body">
         <span className="font-semibold text-ink">Nurture sequences:</span> create
         one under{" "}
         <a href="/employer/automations?tab=sequences" className="text-heritage-deep underline">
@@ -129,7 +129,7 @@ export function SequenceEnrollControl({
           value={picked}
           onChange={(e) => setPicked(e.target.value)}
           disabled={pending}
-          className="flex-1 min-w-[180px] px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage"
+          className="flex-1 min-w-[180px] px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-xs focus:outline-none focus:border-heritage"
         >
           {sequences.map((s) => (
             <option key={s.id} value={s.id}>
@@ -148,7 +148,7 @@ export function SequenceEnrollControl({
         </button>
       </div>
       {error && (
-        <div className="mt-2 text-[12px] text-danger flex items-start gap-1.5">
+        <div className="mt-2 text-xs text-danger flex items-start gap-1.5">
           <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" /> {error}
         </div>
       )}

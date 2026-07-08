@@ -91,7 +91,7 @@ export function EmployerInterviewSection({
       </header>
 
       {!active ? (
-        <p className="text-[13px] text-slate-meta leading-relaxed">
+        <p className="text-xs text-slate-meta leading-relaxed">
           No interview proposed yet. Click <strong>Propose times</strong> to
           send a list of available slots; the candidate picks one and you
           both get a confirmation email.
@@ -109,7 +109,7 @@ export function EmployerInterviewSection({
       {proposals.filter((p) => p.proposal_id !== active?.proposal_id).slice(0, 3)
         .length > 0 && (
         <details className="mt-4 pt-3 border-t border-[var(--rule)]">
-          <summary className="cursor-pointer text-[11px] font-bold tracking-[1.5px] uppercase text-slate-meta hover:text-ink">
+          <summary className="cursor-pointer text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta hover:text-ink">
             History ({proposals.length - (active ? 1 : 0)})
           </summary>
           <ul className="mt-3 space-y-2">
@@ -118,11 +118,11 @@ export function EmployerInterviewSection({
               .map((p) => (
                 <li
                   key={p.proposal_id}
-                  className="text-[12px] text-slate-body flex items-center gap-2"
+                  className="text-xs text-slate-body flex items-center gap-2"
                 >
                   <span
                     className={
-                      "uppercase text-[10px] font-bold tracking-[1.5px] px-1.5 py-0.5 " +
+                      "uppercase text-2xs font-bold tracking-[1.5px] px-1.5 py-0.5 " +
                       (p.status === "booked"
                         ? "bg-success-bg text-success"
                         : p.status === "cancelled"
@@ -154,7 +154,7 @@ function PendingView({ proposal }: { proposal: InterviewProposalState }) {
           className="h-4 w-4 text-warning mt-0.5 shrink-0"
           aria-hidden
         />
-        <div className="text-[13px] text-warning leading-relaxed">
+        <div className="text-xs text-warning leading-relaxed">
           Waiting on the candidate to pick a time. Sent{" "}
           {new Date(proposal.created_at).toLocaleDateString()}.
         </div>
@@ -163,13 +163,13 @@ function PendingView({ proposal }: { proposal: InterviewProposalState }) {
         {proposal.options.map((opt) => (
           <li
             key={opt.id}
-            className="text-[12px] text-warning tabular-nums"
+            className="text-xs text-warning tabular-nums"
           >
             {formatSlot(opt.start_at)}
           </li>
         ))}
       </ul>
-      <div className="mt-3 pt-2 border-t border-warning flex items-center gap-3 text-[11px] text-warning">
+      <div className="mt-3 pt-2 border-t border-warning flex items-center gap-3 text-2xs text-warning">
         <span className="inline-flex items-center gap-1">
           <Clock className="h-3 w-3" />
           {proposal.duration_minutes} min
@@ -209,15 +209,15 @@ function BookedView({
           aria-hidden
         />
         <div>
-          <div className="text-[14px] font-bold text-success mb-0.5">
+          <div className="text-sm font-bold text-success mb-0.5">
             Interview confirmed
           </div>
-          <div className="text-[15px] font-extrabold text-ink mt-1">
+          <div className="text-sm font-extrabold text-ink mt-1">
             {formatSlot(opt.start_at)}
           </div>
         </div>
       </div>
-      <div className="text-[12px] text-success space-y-1 pl-6">
+      <div className="text-xs text-success space-y-1 pl-6">
         <div className="flex items-center gap-2">
           <Clock className="h-3 w-3" />
           {proposal.duration_minutes} minutes ·{" "}
@@ -231,10 +231,10 @@ function BookedView({
         )}
         {proposal.booking.candidate_notes && (
           <div className="mt-2 pt-2 border-t border-success">
-            <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-success mb-1">
+            <div className="text-2xs font-bold tracking-[1.5px] uppercase text-success mb-1">
               Candidate&apos;s note
             </div>
-            <p className="text-[12px] italic">
+            <p className="text-xs italic">
               {proposal.booking.candidate_notes}
             </p>
           </div>

@@ -47,6 +47,7 @@ import { CandidateCommandPaletteTrigger } from "./command-palette";
 import { NavBadgeRealtime } from "@/components/inbox/nav-badge-realtime";
 import { SupportLauncher } from "@/components/support/support-launcher";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { TextSizeToggle } from "@/components/theme/text-size-toggle";
 import { ToastProvider } from "@/components/app/toast";
 
 interface CandidateShellProps {
@@ -216,7 +217,7 @@ export function CandidateShell({
               className="ring-1 ring-white/10"
             />
             <div className="rail-org-meta min-w-0 flex-1">
-              <div className="text-[12px] font-semibold text-sidebar-foreground truncate leading-tight">
+              <div className="text-xs font-semibold text-sidebar-foreground truncate leading-tight">
                 {candidateName}
               </div>
               <Eyebrow className="text-[8.5px] tracking-[1.2px] text-heritage-bright truncate mt-0.5">Candidate</Eyebrow>
@@ -234,28 +235,29 @@ export function CandidateShell({
           <CandidateRailNav items={railItems} isDso={isDso} />
         </nav>
 
-        {/* Theme toggle — hidden in the slim rail (rail-flink slim rule). */}
-        <div className="rail-flink px-5 pt-3">
+        {/* Theme + text-size toggles — hidden in the slim rail (rail-flink slim rule). */}
+        <div className="rail-flink px-5 pt-3 flex items-center gap-2">
           <ThemeToggle className="text-sidebar-foreground" />
+          <TextSizeToggle className="text-sidebar-foreground" />
         </div>
         {/* Footer line — Settings · Help · Sign out → (Model H parity). */}
         <div className="rail-foot border-t border-sidebar-border px-5 py-3.5 flex items-center gap-4">
           <Link
             href="/candidate/settings"
-            className="rail-flink text-[10px] font-semibold text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
+            className="rail-flink text-2xs font-semibold text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
           >
             Settings
           </Link>
           <Link
             href="/candidate/help"
-            className="rail-flink text-[10px] font-semibold text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
+            className="rail-flink text-2xs font-semibold text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
           >
             Help
           </Link>
           <form action="/candidate/sign-out" method="post" className="ml-auto">
             <button
               type="submit"
-              className="rail-out text-[10px] font-semibold text-heritage-bright hover:text-sidebar-foreground transition-colors"
+              className="rail-out text-2xs font-semibold text-heritage-bright hover:text-sidebar-foreground transition-colors"
             >
               Sign out →
             </button>

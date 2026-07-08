@@ -39,11 +39,11 @@ export function EmptyState({
           {icon}
         </span>
       )}
-      <div className="text-[15px] font-extrabold tracking-[-0.3px] text-ink">
+      <div className="text-sm font-extrabold tracking-[-0.3px] text-ink">
         {title}
       </div>
       {body && (
-        <p className="mx-auto mt-1.5 max-w-[420px] text-[13px] leading-[1.7] text-slate-body">
+        <p className="mx-auto mt-1.5 max-w-[420px] text-xs leading-[1.7] text-slate-body">
           {body}
         </p>
       )}

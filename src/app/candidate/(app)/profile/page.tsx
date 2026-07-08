@@ -137,13 +137,13 @@ export default async function CandidateProfilePage() {
   return (
     <>
       <header className="mb-10 max-w-[760px]">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
           Your Profile
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-4">
           The version of you employers see.
         </h1>
-        <p className="text-[14px] text-slate-body leading-relaxed">
+        <p className="text-sm text-slate-body leading-relaxed">
           Edit any section below. Saved changes show up immediately — no
           publish button to remember.
         </p>
@@ -158,13 +158,13 @@ export default async function CandidateProfilePage() {
       <div className="mb-4 flex max-w-[820px] flex-wrap items-center justify-end gap-x-5 gap-y-2">
         <a
           href="/candidate/resume"
-          className="inline-flex items-center gap-1.5 bg-heritage px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ivory hover:bg-heritage-deep transition-colors"
+          className="inline-flex items-center gap-1.5 bg-heritage px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-ivory hover:bg-heritage-deep transition-colors"
         >
           Build / download my résumé →
         </a>
         <a
           href="/candidate/profile/preview"
-          className="inline-flex items-center gap-1.5 text-[12px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
         >
           Preview as employers see you →
         </a>
@@ -176,14 +176,14 @@ export default async function CandidateProfilePage() {
           Signal: `last_parsed_at` is set by the parse-and-confirm action. */}
       {hasImportedResume ? (
         <div className="mb-6 flex max-w-[820px] items-center justify-between gap-4 border border-[var(--rule)] bg-card px-4 py-2.5">
-          <p className="text-[12px] text-slate-body leading-snug">
+          <p className="text-xs text-slate-body leading-snug">
             <span className="font-semibold text-ink">Resume on file.</span>{" "}
             Edit any section below to update — or re-import if you have a
             newer resume.
           </p>
           <a
             href="/candidate/profile/import"
-            className="shrink-0 text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:underline"
+            className="shrink-0 text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep hover:underline"
           >
             Re-import →
           </a>

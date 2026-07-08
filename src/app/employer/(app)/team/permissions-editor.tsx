@@ -135,7 +135,7 @@ export function PermissionsEditorButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:bg-cream transition-colors whitespace-nowrap"
+        className="inline-flex items-center gap-1.5 px-2.5 py-1 text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep hover:bg-cream transition-colors whitespace-nowrap"
         aria-label={`Edit permissions for ${targetName}`}
       >
         <SlidersHorizontal className="h-3 w-3" />
@@ -155,7 +155,7 @@ export function PermissionsEditorButton({
           <div className="bg-ivory border border-[var(--rule-strong)] w-full max-w-[620px] max-h-[85vh] overflow-y-auto">
             <header className="sticky top-0 z-10 bg-ivory border-b border-[var(--rule)] px-6 py-4 flex items-center justify-between gap-4">
               <div>
-                <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
+                <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
                   Permissions · {ROLE_LABEL[targetRole]} preset
                 </div>
                 <h2
@@ -178,10 +178,10 @@ export function PermissionsEditorButton({
             <div className="px-6 py-5">
               {!editable && (
                 <div className="mb-5 px-4 py-3 bg-cream border border-[var(--rule-strong)]">
-                  <div className="text-[12px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-1">
+                  <div className="text-xs font-bold tracking-[1.5px] uppercase text-heritage-deep mb-1">
                     Upgrade to customize permissions
                   </div>
-                  <p className="text-[13px] text-slate-body leading-relaxed">
+                  <p className="text-xs text-slate-body leading-relaxed">
                     On your current plan teammates use their role&apos;s
                     standard permissions, shown below. Per-teammate
                     fine-tuning — like hiding pay fields or granting direct
@@ -190,7 +190,7 @@ export function PermissionsEditorButton({
                 </div>
               )}
 
-              <p className="text-[14px] text-slate-body leading-relaxed mb-5">
+              <p className="text-sm text-slate-body leading-relaxed mb-5">
                 {editable
                   ? `Tune exactly what ${targetName.split(" ")[0]} can do. Toggles that differ from the ${ROLE_LABEL[targetRole]} preset are marked Custom; every change is recorded in your audit log.`
                   : `What ${targetName.split(" ")[0]} can do as a ${ROLE_LABEL[targetRole]}.`}
@@ -198,7 +198,7 @@ export function PermissionsEditorButton({
 
               {groups.map(({ group, items }) => (
                 <section key={group} className="mb-5">
-                  <h3 className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+                  <h3 className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
                     {group}
                   </h3>
                   <div className="grid grid-cols-1 gap-px bg-[var(--rule)] border border-[var(--rule)]">
@@ -233,7 +233,7 @@ export function PermissionsEditorButton({
                           />
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-[14px] font-semibold text-ink">
+                              <span className="text-sm font-semibold text-ink">
                                 {m.label}
                               </span>
                               {isCustom && (
@@ -246,7 +246,7 @@ export function PermissionsEditorButton({
                               )}
                             </div>
                             {m.help && (
-                              <div className="text-[12px] text-slate-meta leading-snug mt-0.5">
+                              <div className="text-xs text-slate-meta leading-snug mt-0.5">
                                 {m.help}
                               </div>
                             )}
@@ -259,7 +259,7 @@ export function PermissionsEditorButton({
               ))}
 
               {error && (
-                <div className="mb-4 px-3 py-2.5 bg-danger-bg border border-danger text-[13px] text-danger">
+                <div className="mb-4 px-3 py-2.5 bg-danger-bg border border-danger text-xs text-danger">
                   {error}
                 </div>
               )}
@@ -272,7 +272,7 @@ export function PermissionsEditorButton({
                     type="button"
                     onClick={resetToPreset}
                     disabled={pending}
-                    className="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[1.5px] uppercase text-slate-body hover:text-ink transition-colors disabled:opacity-40"
+                    className="inline-flex items-center gap-1.5 text-2xs font-bold tracking-[1.5px] uppercase text-slate-body hover:text-ink transition-colors disabled:opacity-40"
                   >
                     <RotateCcw className="h-3 w-3" />
                     Reset to {ROLE_LABEL[targetRole]} defaults
@@ -284,7 +284,7 @@ export function PermissionsEditorButton({
                   type="button"
                   onClick={() => setOpen(false)}
                   disabled={pending}
-                  className="px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-ink hover:bg-cream transition-colors disabled:opacity-40"
+                  className="px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-ink hover:bg-cream transition-colors disabled:opacity-40"
                 >
                   {editable ? "Cancel" : "Close"}
                 </button>
@@ -293,7 +293,7 @@ export function PermissionsEditorButton({
                     type="button"
                     onClick={onSave}
                     disabled={pending || !dirty}
-                    className="inline-flex items-center gap-1.5 px-5 py-2 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 px-5 py-2 bg-primary text-primary-foreground text-xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
                   >
                     {pending ? (
                       "Saving…"

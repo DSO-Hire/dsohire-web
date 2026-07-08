@@ -410,7 +410,7 @@ export function LocationAutocompleteInput({
         )}
       </div>
       {!token && (
-        <span className="mt-1 block text-[11px] text-meta-foreground">
+        <span className="mt-1 block text-2xs text-meta-foreground">
           Type a full “City, ST” and press Enter.
         </span>
       )}

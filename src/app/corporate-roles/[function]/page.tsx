@@ -108,7 +108,7 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
         <div className="flex items-center gap-3.5 mb-6">
           <span className="block w-7 h-px" style={{ background: "var(--corporate)" }} />
           <span
-            className="text-[10px] font-bold tracking-[3.5px] uppercase"
+            className="text-2xs font-bold tracking-[3.5px] uppercase"
             style={{ color: "var(--corporate)" }}
           >
             Corporate Roles · {fn.label}
@@ -125,14 +125,14 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
       {/* Sub-role chips — useful as candidate intent + helps SEO surface
           long-tail title variants. */}
       <section className="px-6 sm:px-14 pb-12 max-w-[1240px] mx-auto">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-slate-meta mb-3">
           Common titles in {fn.label}
         </div>
         <ul className="flex flex-wrap gap-2">
           {fn.subRoles.map((sr) => (
             <li
               key={sr}
-              className="px-3 py-1.5 text-[13px] font-semibold border border-[var(--rule-strong)] bg-card text-ink"
+              className="px-3 py-1.5 text-xs font-semibold border border-[var(--rule-strong)] bg-card text-ink"
             >
               {sr}
             </li>
@@ -143,7 +143,7 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
       {/* Open jobs feed for this function. */}
       <section className="px-6 sm:px-14 pb-24 max-w-[1240px] mx-auto">
         <div className="flex items-center justify-between mb-5">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-slate-meta">
             {jobs.length === 0
               ? `No ${fn.label} roles open right now`
               : jobs.length === 1
@@ -152,7 +152,7 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
           </div>
           <Link
             href="/jobs?surface=corporate"
-            className="inline-flex items-center gap-1.5 text-[12px] font-bold tracking-[1.5px] uppercase hover:opacity-75"
+            className="inline-flex items-center gap-1.5 text-xs font-bold tracking-[1.5px] uppercase hover:opacity-75"
             style={{ color: "var(--corporate)" }}
           >
             View all Corporate Roles
@@ -165,14 +165,14 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
             <h3 className="text-[18px] font-extrabold tracking-[-0.4px] text-ink mb-2">
               No {fn.label} roles open right now.
             </h3>
-            <p className="text-[14px] text-slate-body leading-relaxed mb-4">
+            <p className="text-sm text-slate-body leading-relaxed mb-4">
               Corporate roles at multi-practice dental groups don&apos;t open as
               often as practice-side hires. Check back, or browse all
               currently-open corporate roles.
             </p>
             <Link
               href={ctaHref}
-              className="text-heritage underline underline-offset-2 hover:text-heritage-deep font-semibold text-[13px]"
+              className="text-heritage underline underline-offset-2 hover:text-heritage-deep font-semibold text-xs"
             >
               Create a free candidate account
             </Link>
@@ -191,7 +191,7 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
                   className="block bg-card hover:bg-cream/60 transition-colors p-6"
                 >
                   <div
-                    className="inline-flex items-center gap-1.5 mb-2 text-[10px] font-bold tracking-[2px] uppercase"
+                    className="inline-flex items-center gap-1.5 mb-2 text-2xs font-bold tracking-[2px] uppercase"
                     style={{ color: "var(--corporate)" }}
                   >
                     <Building2 className="h-3 w-3" />
@@ -200,7 +200,7 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
                   <h3 className="text-[18px] font-extrabold tracking-[-0.3px] leading-snug text-ink mb-2">
                     {job.title}
                   </h3>
-                  <div className="text-[13px] text-slate-body mb-3">
+                  <div className="text-xs text-slate-body mb-3">
                     {dso?.name ?? "—"}
                   </div>
                   {/* 5G.d (2026-05-14) — work mode + authority level chips,
@@ -210,7 +210,7 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
                     <div className="flex flex-wrap gap-1.5 mb-3">
                       {job.work_mode && (
                         <span
-                          className="px-2 py-0.5 text-[11px] font-semibold border"
+                          className="px-2 py-0.5 text-2xs font-semibold border"
                           style={{
                             color: "var(--corporate)",
                             borderColor: "var(--corporate)",
@@ -224,7 +224,7 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
                       )}
                       {job.authority_level && (
                         <span
-                          className="px-2 py-0.5 text-[11px] font-semibold border"
+                          className="px-2 py-0.5 text-2xs font-semibold border"
                           style={{
                             color: "var(--corporate)",
                             borderColor: "var(--corporate)",
@@ -238,7 +238,7 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
                       )}
                     </div>
                   )}
-                  <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-[12px] text-slate-meta">
+                  <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-slate-meta">
                     <span className="inline-flex items-center gap-1">
                       <MapPin className="h-3 w-3" />
                       DSO-wide
@@ -260,7 +260,7 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
       {/* Cross-link to the other 11 functions — keeps the candidate inside
           the corporate landscape if this one isn't a fit. */}
       <section className="px-6 sm:px-14 pb-24 max-w-[1240px] mx-auto border-t border-[var(--rule)] pt-12">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-4">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-slate-meta mb-4">
           Explore other corporate functions
         </div>
         <ul className="flex flex-wrap gap-2">
@@ -268,7 +268,7 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
             <li key={f.slug}>
               <Link
                 href={`/corporate-roles/${f.slug}`}
-                className="px-3 py-1.5 text-[13px] font-semibold border border-[var(--rule-strong)] bg-card text-ink hover:bg-cream/60 transition-colors inline-block"
+                className="px-3 py-1.5 text-xs font-semibold border border-[var(--rule-strong)] bg-card text-ink hover:bg-cream/60 transition-colors inline-block"
               >
                 {f.label}
               </Link>

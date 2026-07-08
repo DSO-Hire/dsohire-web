@@ -164,13 +164,13 @@ export default async function AnalyticsHubPage({ searchParams }: PageProps) {
     <>
       <header className="mb-6 flex flex-wrap items-start justify-between gap-6">
         <div className="max-w-[820px]">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
             Analytics
           </div>
           <h1 className="font-display text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-3">
             Your hiring, measured.
           </h1>
-          <p className="text-[14px] text-slate-body leading-relaxed">
+          <p className="text-sm text-slate-body leading-relaxed">
             Every metric across your jobs, locations, and recruiters — live as
             candidates apply and move through the pipeline.
           </p>
@@ -209,7 +209,7 @@ export default async function AnalyticsHubPage({ searchParams }: PageProps) {
                 key={t.id}
                 href={hrefFor(t.id)}
                 className={
-                  "px-4 py-3 text-[12px] font-bold tracking-[0.5px] border-b-2 transition-colors " +
+                  "px-4 py-3 text-xs font-bold tracking-[0.5px] border-b-2 transition-colors " +
                   (active
                     ? "border-heritage text-ink"
                     : "border-transparent text-slate-meta hover:text-ink hover:border-[var(--rule-strong)]")
@@ -239,7 +239,7 @@ export default async function AnalyticsHubPage({ searchParams }: PageProps) {
                   key={w.value}
                   href={winHref(w.value)}
                   className={
-                    "px-3 py-1.5 text-[11px] font-semibold border transition-colors " +
+                    "px-3 py-1.5 text-2xs font-semibold border transition-colors " +
                     (active
                       ? "bg-primary text-primary-foreground border-primary"
                       : "bg-card text-slate-body border-[var(--rule-strong)] hover:border-ink")
@@ -254,7 +254,7 @@ export default async function AnalyticsHubPage({ searchParams }: PageProps) {
       </div>
 
       {scopedLocation && (
-        <div className="mb-6 -mt-2 flex items-center gap-2 text-[12px] text-slate-body">
+        <div className="mb-6 -mt-2 flex items-center gap-2 text-xs text-slate-body">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-cream border border-[var(--rule-strong)]">
             <span className="font-semibold text-ink">
               {scopedLocation.name}
@@ -495,7 +495,7 @@ function SourcesTab({ overview }: { overview: AnalyticsOverview }) {
 function SourcingTab({ funnel }: { funnel: SourcingFunnel | null }) {
   if (!funnel || funnel.total === 0) {
     return (
-      <p className="text-[13px] text-slate-meta italic">
+      <p className="text-xs text-slate-meta italic">
         No sourced prospects yet. Save candidates from Discover and reach out to
         start the sourcing funnel.
       </p>
@@ -536,13 +536,13 @@ function SourcingTab({ funnel }: { funnel: SourcingFunnel | null }) {
         />
       </section>
       <section className="border border-[var(--rule)] bg-card p-6 max-w-[760px]">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
           Sourcing funnel
         </div>
         <div className="space-y-2.5">
           {stages.map((s) => (
             <div key={s.label} className="flex items-center gap-3">
-              <span className="w-24 shrink-0 text-[12px] font-semibold text-slate-body">
+              <span className="w-24 shrink-0 text-xs font-semibold text-slate-body">
                 {s.label}
               </span>
               <div className="flex-1 h-5 bg-cream/50 overflow-hidden rounded">
@@ -551,13 +551,13 @@ function SourcingTab({ funnel }: { funnel: SourcingFunnel | null }) {
                   style={{ width: `${(s.n / max) * 100}%` }}
                 />
               </div>
-              <span className="w-10 shrink-0 text-right text-[13px] font-extrabold tabular-nums text-ink">
+              <span className="w-10 shrink-0 text-right text-xs font-extrabold tabular-nums text-ink">
                 {s.n}
               </span>
             </div>
           ))}
         </div>
-        <p className="mt-4 text-[11px] text-slate-meta leading-snug">
+        <p className="mt-4 text-2xs text-slate-meta leading-snug">
           Converted = the prospect applied. Counts reflect stored pipeline
           stages and reconcile to the pipeline board.
         </p>
@@ -583,7 +583,7 @@ function LocationsTab({
 }) {
   if (rows.length < 2) {
     return (
-      <p className="text-[13px] text-slate-meta italic">
+      <p className="text-xs text-slate-meta italic">
         Location comparison appears once you have jobs across two or more
         practices.
       </p>
@@ -606,10 +606,10 @@ function BenchmarksTab({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <section className="border border-[var(--rule)] bg-card p-6">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
           Your pay vs. market
         </div>
-        <p className="text-[12px] text-slate-body leading-snug mb-3">
+        <p className="text-xs text-slate-body leading-snug mb-3">
           Your average offered pay against the BLS OEWS median for each role.
           The marker is the market median; the bar is your average.
         </p>
@@ -636,7 +636,7 @@ function BenchmarksTab({
             />
           );
         })}
-        <p className="mt-3 text-[11px] text-slate-meta leading-snug">
+        <p className="mt-3 text-2xs text-slate-meta leading-snug">
           BLS OEWS employee medians (a lagging government survey). Temp/1099 day
           rates often run higher, and state figures mask metro and cost-of-living
           variation. Directional guide, not legal/comp advice.
@@ -644,10 +644,10 @@ function BenchmarksTab({
       </section>
 
       <section className="border border-[var(--rule)] bg-card p-6">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
           Cost of open chairs
         </div>
-        <p className="text-[12px] text-slate-body leading-snug mb-4">
+        <p className="text-xs text-slate-body leading-snug mb-4">
           Estimated production lost each month while clinical seats sit unfilled
           — the dollar case for hiring speed.
         </p>
@@ -657,11 +657,11 @@ function BenchmarksTab({
               {usd(vacancy.monthly_low)}
               <span className="text-slate-meta font-bold"> – </span>
               {usd(vacancy.monthly_high)}
-              <span className="ml-2 text-[13px] font-semibold text-slate-meta">
+              <span className="ml-2 text-xs font-semibold text-slate-meta">
                 / month
               </span>
             </div>
-            <div className="mt-4 space-y-1.5 text-[13px] text-slate-body">
+            <div className="mt-4 space-y-1.5 text-xs text-slate-body">
               {vacancy.hygiene_open > 0 && (
                 <div>
                   <span className="font-bold text-ink">
@@ -681,11 +681,11 @@ function BenchmarksTab({
             </div>
           </>
         ) : (
-          <p className="text-[13px] text-slate-meta italic">
+          <p className="text-xs text-slate-meta italic">
             No open hygienist or dentist reqs right now — nothing to estimate.
           </p>
         )}
-        <p className="mt-4 text-[11px] text-slate-meta leading-snug">
+        <p className="mt-4 text-2xs text-slate-meta leading-snug">
           Industry estimate (not government data): hygiene seat ≈ $1,000–$1,500
           production/day, dentist seat ≈ $3,500–$5,000/day. Your practice&apos;s
           actual figures may differ.
@@ -712,11 +712,11 @@ function ReqAgingCard({
   ];
   return (
     <section className="border border-[var(--rule)] bg-card p-6">
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
+      <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
         Open requisitions by age
       </div>
       {total === 0 ? (
-        <p className="text-[13px] text-slate-meta italic">No open reqs.</p>
+        <p className="text-xs text-slate-meta italic">No open reqs.</p>
       ) : (
         <>
           <div className="flex h-3 w-full overflow-hidden mb-4 border border-[var(--rule)]">
@@ -737,7 +737,7 @@ function ReqAgingCard({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {segs.map((s) => (
               <div key={s.label}>
-                <div className="flex items-center gap-1.5 text-[10px] font-bold tracking-[1px] uppercase text-slate-meta mb-1">
+                <div className="flex items-center gap-1.5 text-2xs font-bold tracking-[1px] uppercase text-slate-meta mb-1">
                   <span
                     className="inline-block h-2 w-2"
                     style={{ background: s.color }}
@@ -751,7 +751,7 @@ function ReqAgingCard({
             ))}
           </div>
           {aging.oldest_days !== null && (
-            <p className="mt-4 text-[12px] text-slate-body">
+            <p className="mt-4 text-xs text-slate-body">
               Oldest open req:{" "}
               <span className="font-bold text-ink">
                 {Math.round(aging.oldest_days)} days
@@ -783,17 +783,17 @@ function SourcePerformance({
   const display = showAll ? rows : rows.slice(0, 8);
   return (
     <section className="border border-[var(--rule)] bg-card p-6">
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
+      <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
         Source performance
       </div>
       {rows.length === 0 ? (
-        <p className="text-[13px] text-slate-meta italic">
+        <p className="text-xs text-slate-meta italic">
           No applications yet. Source data appears as candidates apply.
         </p>
       ) : (
-        <table className="w-full text-[13px]">
+        <table className="w-full text-xs">
           <thead>
-            <tr className="text-[10px] font-bold tracking-[1px] uppercase text-slate-meta border-b border-[var(--rule)]">
+            <tr className="text-2xs font-bold tracking-[1px] uppercase text-slate-meta border-b border-[var(--rule)]">
               <th className="text-left py-2">Source</th>
               <th className="text-right py-2">Apps</th>
               <th className="text-right py-2">Hires</th>
@@ -834,11 +834,11 @@ function OfferBreakdown({
 }) {
   return (
     <section className="border border-[var(--rule)] bg-card p-6">
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
+      <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-4">
         Offers
       </div>
       {offers.sent === 0 ? (
-        <p className="text-[13px] text-slate-meta italic">
+        <p className="text-xs text-slate-meta italic">
           No offers sent yet. Offer analytics appear once you extend offers.
         </p>
       ) : (
@@ -856,14 +856,14 @@ function OfferBreakdown({
           />
           {offers.decline_reasons.length > 0 && (
             <div className="col-span-2 sm:col-span-4 mt-2 pt-3 border-t border-[var(--rule)]">
-              <div className="text-[10px] font-bold tracking-[1px] uppercase text-slate-meta mb-2">
+              <div className="text-2xs font-bold tracking-[1px] uppercase text-slate-meta mb-2">
                 Why offers were declined
               </div>
               <div className="flex flex-wrap gap-2">
                 {offers.decline_reasons.map((d) => (
                   <span
                     key={d.reason}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-cream border border-[var(--rule)] text-[12px] text-ink"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-cream border border-[var(--rule)] text-xs text-ink"
                   >
                     {d.reason}
                     <span className="font-bold tabular-nums text-slate-meta">
@@ -883,7 +883,7 @@ function OfferBreakdown({
 function MiniStat({ label, value }: { label: string; value: string | number }) {
   return (
     <div>
-      <div className="text-[10px] font-bold tracking-[1px] uppercase text-slate-meta mb-1">
+      <div className="text-2xs font-bold tracking-[1px] uppercase text-slate-meta mb-1">
         {label}
       </div>
       <div className="text-[24px] font-extrabold tabular-nums text-ink leading-none">
@@ -896,20 +896,20 @@ function MiniStat({ label, value }: { label: string; value: string | number }) {
 function PublicReportCallout() {
   return (
     <section className="border border-[var(--rule)] bg-cream/40 p-6">
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+      <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
         Public report
       </div>
       <h2 className="text-lg font-extrabold tracking-[-0.3px] text-ink mb-2">
         Dental Hiring Report · 2026
       </h2>
-      <p className="text-[13px] text-slate-body leading-relaxed max-w-[560px] mb-3">
+      <p className="text-xs text-slate-body leading-relaxed max-w-[560px] mb-3">
         Anonymized, continuously-updated industry trend report drawn from the
         DSO Hire platform: compensation bands by role, role mix, top states,
         time-to-fill. Public-facing and SEO-indexed.
       </p>
       <Link
         href="/dental-hiring-report"
-        className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink"
+        className="inline-flex items-center gap-1.5 text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink"
       >
         View the report <ArrowRight className="h-3 w-3" />
       </Link>

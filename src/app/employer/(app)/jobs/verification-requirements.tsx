@@ -62,12 +62,12 @@ export function VerificationRequirements({
   return (
     <fieldset className="border border-[var(--rule)] p-6 bg-cream/40">
       <legend
-        className={`px-2 text-[13px] font-bold tracking-[2px] uppercase ${a.text}`}
+        className={`px-2 text-xs font-bold tracking-[2px] uppercase ${a.text}`}
       >
         Verification requirements
       </legend>
 
-      <p className="mt-1 mb-4 text-[12px] text-slate-meta leading-relaxed">
+      <p className="mt-1 mb-4 text-xs text-slate-meta leading-relaxed">
         Pick what this role requires. Candidates confirm each one as part of
         their application — and can attach a matching credential from their
         profile as proof. Optional; leave all unchecked if none apply.
@@ -90,10 +90,10 @@ export function VerificationRequirements({
                 className={`mt-0.5 ${a.check}`}
               />
               <span className="min-w-0">
-                <span className="block text-[13px] font-bold text-ink">
+                <span className="block text-xs font-bold text-ink">
                   {vt.label}
                 </span>
-                <span className="block text-[11px] text-slate-meta leading-snug">
+                <span className="block text-2xs text-slate-meta leading-snug">
                   {vt.recruiterHint}
                 </span>
               </span>

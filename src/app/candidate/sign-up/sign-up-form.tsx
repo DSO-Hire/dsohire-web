@@ -38,10 +38,10 @@ export function CandidateSignUpForm({ next }: { next?: string }) {
     return (
       <div className="space-y-5">
         <div className="border-l-4 border-heritage bg-cream p-5">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1.5">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1.5">
             Account created
           </div>
-          <p className="text-[14px] text-ink leading-relaxed">
+          <p className="text-sm text-ink leading-relaxed">
             {resendState.ok && resendState.message
               ? resendState.message
               : formState.message}
@@ -55,7 +55,7 @@ export function CandidateSignUpForm({ next }: { next?: string }) {
           <div>
             <label
               htmlFor="csignup-otp"
-              className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+              className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2"
             >
               6-Digit Code <span className="text-heritage">*</span>
             </label>
@@ -70,26 +70,26 @@ export function CandidateSignUpForm({ next }: { next?: string }) {
               maxLength={10}
               pattern="[0-9 ]{6,16}"
               placeholder="Enter code from email"
-              className="w-full px-4 py-4 bg-cream border border-[var(--rule-strong)] text-ink text-[22px] font-bold tracking-[6px] text-center placeholder:text-slate-meta placeholder:font-medium placeholder:text-[14px] placeholder:tracking-[1px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+              className="w-full px-4 py-4 bg-cream border border-[var(--rule-strong)] text-ink text-[22px] font-bold tracking-[6px] text-center placeholder:text-slate-meta placeholder:font-medium placeholder:text-sm placeholder:tracking-[1px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
             />
           </div>
 
           {verifyState.error && (
             <div role="alert" className="bg-danger-bg border-l-4 border-danger p-4">
-              <p className="text-[14px] text-danger">{verifyState.error}</p>
+              <p className="text-sm text-danger">{verifyState.error}</p>
             </div>
           )}
 
           <button
             type="submit"
             disabled={verifying}
-            className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {verifying ? "Verifying…" : "Verify & Continue"}
             {!verifying && <ArrowRight className="h-4 w-4" />}
           </button>
 
-          <p className="text-[13px] text-slate-meta leading-relaxed">
+          <p className="text-xs text-slate-meta leading-relaxed">
             After verifying you&apos;ll land
             {carriedNext && carriedNext.startsWith("/jobs/")
               ? " back on the job you were applying to."
@@ -101,7 +101,7 @@ export function CandidateSignUpForm({ next }: { next?: string }) {
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
           >
             <ArrowLeft className="h-3 w-3" />
             Back to form
@@ -113,7 +113,7 @@ export function CandidateSignUpForm({ next }: { next?: string }) {
             <button
               type="submit"
               disabled={resending}
-              className="text-[13px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2 disabled:opacity-60"
+              className="text-xs font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2 disabled:opacity-60"
             >
               {resending ? "Sending…" : "Send a new code"}
             </button>
@@ -166,20 +166,20 @@ export function CandidateSignUpForm({ next }: { next?: string }) {
 
       {formState.error && (
         <div role="alert" className="bg-danger-bg border-l-4 border-danger p-4">
-          <p className="text-[14px] text-danger">{formState.error}</p>
+          <p className="text-sm text-danger">{formState.error}</p>
         </div>
       )}
 
       <button
         type="submit"
         disabled={submittingForm}
-        className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {submittingForm ? "Creating Account…" : "Create Account & Send Code"}
         {!submittingForm && <ArrowRight className="h-4 w-4" />}
       </button>
 
-      <p className="text-[13px] text-slate-meta leading-relaxed">
+      <p className="text-xs text-slate-meta leading-relaxed">
         By continuing you agree to our{" "}
         <a
           href="/legal/candidate-terms"
@@ -201,7 +201,7 @@ export function CandidateSignUpForm({ next }: { next?: string }) {
         <div className="absolute inset-0 flex items-center" aria-hidden>
           <div className="w-full border-t border-[var(--rule)]" />
         </div>
-        <div className="relative flex justify-center text-[10px] font-bold tracking-[2px] uppercase">
+        <div className="relative flex justify-center text-2xs font-bold tracking-[2px] uppercase">
           <span className="bg-card px-3 text-slate-meta">or</span>
         </div>
       </div>
@@ -232,7 +232,7 @@ function Field({
     <div>
       <label
         htmlFor={`csignup-${name}`}
-        className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+        className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2"
       >
         {label} {required && <span className="text-heritage">*</span>}
       </label>
@@ -243,10 +243,10 @@ function Field({
         required={required}
         autoComplete={autoComplete}
         placeholder={placeholder}
-        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
       />
       {helper && (
-        <p className="mt-1.5 text-[12px] text-slate-meta leading-relaxed">
+        <p className="mt-1.5 text-xs text-slate-meta leading-relaxed">
           {helper}
         </p>
       )}
@@ -259,7 +259,7 @@ function SalutationField() {
     <div>
       <label
         htmlFor="csignup-salutation"
-        className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+        className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2"
       >
         Title
       </label>
@@ -267,7 +267,7 @@ function SalutationField() {
         id="csignup-salutation"
         name="salutation"
         defaultValue=""
-        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
       >
         <option value="">No title</option>
         {SALUTATIONS.map((s) => (

@@ -92,7 +92,7 @@ export default async function UnsubscribePage({ searchParams }: PageProps) {
         <div className="mt-7">
           <Link
             href={settingsHref}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-xs font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
           >
             Manage all preferences
           </Link>
@@ -153,7 +153,7 @@ export default async function UnsubscribePage({ searchParams }: PageProps) {
           <input type="hidden" name="token" value={sp.token} />
           <button
             type="submit"
-            className="inline-flex items-center gap-2 px-6 py-3 border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[1.8px] uppercase hover:border-ink transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 border border-[var(--rule-strong)] text-ink text-xs font-bold tracking-[1.8px] uppercase hover:border-ink transition-colors"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             Resubscribe
@@ -161,7 +161,7 @@ export default async function UnsubscribePage({ searchParams }: PageProps) {
         </form>
         <Link
           href={settingsHref}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-xs font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
         >
           Manage all preferences
         </Link>
@@ -184,7 +184,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-4">
+    <div className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-4">
       {children}
     </div>
   );
@@ -211,13 +211,13 @@ function ManageLinks() {
     <div className="mt-7 flex flex-wrap gap-3.5">
       <Link
         href="/employer/settings/notifications"
-        className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
+        className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-xs font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
       >
         Employer settings
       </Link>
       <Link
         href="/candidate/settings/notifications"
-        className="inline-flex items-center gap-2 px-6 py-3 border border-[var(--rule-strong)] text-ink text-[12px] font-bold tracking-[1.8px] uppercase hover:border-ink transition-colors"
+        className="inline-flex items-center gap-2 px-6 py-3 border border-[var(--rule-strong)] text-ink text-xs font-bold tracking-[1.8px] uppercase hover:border-ink transition-colors"
       >
         Candidate settings
       </Link>

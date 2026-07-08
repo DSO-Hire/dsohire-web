@@ -58,7 +58,7 @@ export default async function EmployerDataPage() {
   return (
     <div className="max-w-[820px] space-y-6">
       <header>
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Data &amp; deletion
         </div>
         <h2 className="font-display text-2xl font-extrabold tracking-[-0.6px] text-ink leading-tight">

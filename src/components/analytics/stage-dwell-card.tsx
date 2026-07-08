@@ -24,13 +24,13 @@ export function StageDwellCard({ rows }: StageDwellCardProps) {
     <section className="border border-[var(--rule)] bg-card p-6">
       <div className="flex items-center gap-2 mb-4">
         <Clock className="h-4 w-4 text-heritage-deep" aria-hidden />
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep">
           Time in stage
         </div>
       </div>
 
       {!hasAnyData ? (
-        <p className="text-[13px] text-slate-meta italic leading-relaxed">
+        <p className="text-xs text-slate-meta italic leading-relaxed">
           Time-in-stage populates as candidates move through the
           pipeline. Once a few apps transition stages, you&apos;ll see
           the average days each stage holds candidates.
@@ -40,7 +40,7 @@ export function StageDwellCard({ rows }: StageDwellCardProps) {
           {rows.map((row) => (
             <li
               key={row.stage}
-              className="flex items-baseline justify-between gap-3 text-[13px]"
+              className="flex items-baseline justify-between gap-3 text-xs"
             >
               <span className="font-semibold text-ink">{row.label}</span>
               <span className="tabular-nums text-slate-body">
@@ -53,7 +53,7 @@ export function StageDwellCard({ rows }: StageDwellCardProps) {
                     <strong className="text-ink">
                       {row.avg_days.toFixed(1)}d
                     </strong>
-                    <span className="ml-2 text-slate-meta text-[11px]">
+                    <span className="ml-2 text-slate-meta text-2xs">
                       avg · {row.observed_transitions}{" "}
                       {row.observed_transitions === 1
                         ? "transition"

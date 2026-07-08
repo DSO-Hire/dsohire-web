@@ -42,7 +42,7 @@ export function PracticeFitChip({
   if (size === "sm") {
     return (
       <span
-        className={`inline-flex items-center gap-1 border border-l-2 px-2 py-0.5 text-[10px] font-semibold ${style.bgClass} ${style.textClass} ${style.borderClass}`}
+        className={`inline-flex items-center gap-1 border border-l-2 px-2 py-0.5 text-2xs font-semibold ${style.bgClass} ${style.textClass} ${style.borderClass}`}
         title={buildChipTooltip(fit, style.label, brand)}
       >
         {mark}
@@ -62,7 +62,7 @@ export function PracticeFitChip({
       {mark}
       {brand} · {style.label}
       {showScore && (
-        <span className="tabular text-[10px] opacity-70">
+        <span className="tabular text-2xs opacity-70">
           {fit.score}/100
         </span>
       )}

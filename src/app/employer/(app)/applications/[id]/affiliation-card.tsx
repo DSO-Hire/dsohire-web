@@ -93,7 +93,7 @@ export function AffiliationCard({
           </Eyebrow>
 
           {policy === "never" && (
-            <p className="text-[13px] text-slate-body leading-relaxed">
+            <p className="text-xs text-slate-body leading-relaxed">
               <strong className="text-ink">{candidateFirstName}</strong>{" "}
               will <strong className="text-ink">never see</strong> the{" "}
               <strong className="text-ink">{dsoName}</strong> name in
@@ -110,7 +110,7 @@ export function AffiliationCard({
           )}
 
           {policy === "after_hire" && applicationStatus !== "hired" && (
-            <p className="text-[13px] text-slate-body leading-relaxed">
+            <p className="text-xs text-slate-body leading-relaxed">
               <strong className="text-ink">{candidateFirstName}</strong>{" "}
               will see the <strong className="text-ink">{dsoName}</strong>{" "}
               name <strong className="text-ink">when you mark them hired</strong>.
@@ -120,7 +120,7 @@ export function AffiliationCard({
           )}
 
           {policy === "after_hire" && applicationStatus === "hired" && (
-            <p className="text-[13px] text-slate-body leading-relaxed">
+            <p className="text-xs text-slate-body leading-relaxed">
               <strong className="text-ink">{candidateFirstName}</strong>{" "}
               now sees the{" "}
               <strong className="text-ink">{dsoName}</strong> name —
@@ -131,7 +131,7 @@ export function AffiliationCard({
 
           {policy === "per_application" && !revealed && (
             <>
-              <p className="text-[13px] text-slate-body leading-relaxed mb-3">
+              <p className="text-xs text-slate-body leading-relaxed mb-3">
                 <strong className="text-ink">{candidateFirstName}</strong>{" "}
                 currently doesn&apos;t see the{" "}
                 <strong className="text-ink">{dsoName}</strong> name —
@@ -151,20 +151,20 @@ export function AffiliationCard({
               {error && (
                 <div className="mt-3 bg-danger-bg border-l-4 border-danger p-2 flex items-start gap-2">
                   <AlertCircle className="h-3.5 w-3.5 text-danger mt-0.5 flex-shrink-0" />
-                  <p className="text-[12px] text-danger">{error}</p>
+                  <p className="text-xs text-danger">{error}</p>
                 </div>
               )}
             </>
           )}
 
           {policy === "per_application" && revealed && (
-            <p className="text-[13px] text-slate-body leading-relaxed">
+            <p className="text-xs text-slate-body leading-relaxed">
               <Check className="inline h-3.5 w-3.5 text-heritage-deep mr-1" />
               <strong className="text-ink">{candidateFirstName}</strong>{" "}
               now sees the{" "}
               <strong className="text-ink">{dsoName}</strong> name.
               {revealedByName && revealedAt && (
-                <span className="block mt-1 text-[12px] text-slate-meta">
+                <span className="block mt-1 text-xs text-slate-meta">
                   Revealed by {revealedByName} on{" "}
                   {formatDate(revealedAt)}.
                 </span>

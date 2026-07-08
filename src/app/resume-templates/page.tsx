@@ -117,7 +117,7 @@ export default async function ResumeTemplatesLanding() {
       {/* Hero */}
       <section className="border-b border-[var(--rule)] bg-ivory">
         <div className="mx-auto max-w-[1080px] px-6 py-16 sm:py-20 text-center">
-          <div className="text-[11px] font-bold uppercase tracking-[3px] text-heritage-deep mb-3">
+          <div className="text-2xs font-bold uppercase tracking-[3px] text-heritage-deep mb-3">
             Free for dental professionals
           </div>
           <h1 className="mx-auto max-w-[820px] text-4xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink">
@@ -132,18 +132,18 @@ export default async function ResumeTemplatesLanding() {
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
               href={resumeHref}
-              className="inline-flex items-center gap-2 bg-primary px-6 py-3 text-[13px] font-bold uppercase tracking-[1.5px] text-primary-foreground hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-2 bg-primary px-6 py-3 text-xs font-bold uppercase tracking-[1.5px] text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               Build mine free <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/jobs"
-              className="inline-flex items-center gap-2 px-4 py-3 text-[13px] font-bold uppercase tracking-[1.5px] text-heritage-deep hover:text-ink transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-3 text-xs font-bold uppercase tracking-[1.5px] text-heritage-deep hover:text-ink transition-colors"
             >
               Browse dental jobs
             </Link>
           </div>
-          <ul className="mx-auto mt-8 flex max-w-[760px] flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[13px] text-slate-body">
+          <ul className="mx-auto mt-8 flex max-w-[760px] flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-slate-body">
             {[
               "ATS-friendly (passes the résumé scanners)",
               "Built from your profile — no retyping",
@@ -163,7 +163,7 @@ export default async function ResumeTemplatesLanding() {
         <h2 className="text-2xl sm:text-3xl font-bold tracking-[-0.6px] text-ink text-center">
           Pick a style. Switch any time.
         </h2>
-        <p className="mx-auto mt-3 max-w-[600px] text-center text-[14px] text-slate-body">
+        <p className="mx-auto mt-3 max-w-[600px] text-center text-sm text-slate-body">
           Every template is single-column and parser-safe, so a beautiful résumé
           never costs you the interview. Your content stays the same — only the
           look changes.
@@ -187,15 +187,15 @@ export default async function ResumeTemplatesLanding() {
               </div>
               <div className="rounded-b-lg border border-t-0 border-[var(--rule)] bg-card p-4">
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-[15px] font-bold text-ink">{tpl.name}</h3>
+                  <h3 className="text-sm font-bold text-ink">{tpl.name}</h3>
                   <Link
                     href={resumeHref}
-                    className="shrink-0 text-[12px] font-bold uppercase tracking-[1px] text-heritage-deep hover:text-ink"
+                    className="shrink-0 text-xs font-bold uppercase tracking-[1px] text-heritage-deep hover:text-ink"
                   >
                     Use this →
                   </Link>
                 </div>
-                <p className="mt-1 text-[13px] leading-snug text-slate-body">
+                <p className="mt-1 text-xs leading-snug text-slate-body">
                   {tpl.blurb}
                 </p>
               </div>
@@ -226,8 +226,8 @@ export default async function ResumeTemplatesLanding() {
               },
             ].map((c) => (
               <div key={c.t}>
-                <h3 className="text-[15px] font-bold text-ink">{c.t}</h3>
-                <p className="mt-1.5 text-[14px] leading-relaxed text-slate-body">
+                <h3 className="text-sm font-bold text-ink">{c.t}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-slate-body">
                   {c.d}
                 </p>
               </div>
@@ -242,14 +242,14 @@ export default async function ResumeTemplatesLanding() {
           <h2 className="text-2xl sm:text-3xl font-bold tracking-[-0.6px] text-hero-foreground">
             Your dental résumé, done in minutes.
           </h2>
-          <p className="mx-auto mt-3 max-w-[560px] text-[15px] leading-relaxed text-hero-foreground/80">
+          <p className="mx-auto mt-3 max-w-[560px] text-sm leading-relaxed text-hero-foreground/80">
             Create a free DSO Hire profile, build your résumé, and apply to
             multi-location dental groups — all in one place.
           </p>
           <div className="mt-8">
             <Link
               href={resumeHref}
-              className="inline-flex items-center gap-2 bg-ivory px-6 py-3 text-[13px] font-bold uppercase tracking-[1.5px] text-ink hover:bg-cream transition-colors"
+              className="inline-flex items-center gap-2 bg-ivory px-6 py-3 text-xs font-bold uppercase tracking-[1.5px] text-ink hover:bg-cream transition-colors"
             >
               Build mine free <ArrowRight className="h-4 w-4" />
             </Link>

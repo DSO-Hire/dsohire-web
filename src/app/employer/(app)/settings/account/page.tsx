@@ -132,13 +132,13 @@ export default async function AccountSettingsPage() {
       />
 
       <section className="border border-[var(--rule)] bg-card p-7 sm:p-8">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Password
         </div>
         <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink mb-2">
           Set or change your password
         </h2>
-        <p className="text-[14px] text-slate-body leading-relaxed mb-6 max-w-[560px]">
+        <p className="text-sm text-slate-body leading-relaxed mb-6 max-w-[560px]">
           Setting a password lets you sign in without an emailed code each
           time. You can always fall back to a code if you forget it.
         </p>
@@ -164,7 +164,7 @@ export default async function AccountSettingsPage() {
         className="group flex items-center justify-between gap-4 border border-[var(--rule)] bg-cream/40 p-5 hover:bg-cream/70"
       >
         <div>
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
             Looking for your logo?
           </div>
           <p className="text-sm text-slate-body leading-relaxed">

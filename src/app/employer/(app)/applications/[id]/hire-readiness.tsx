@@ -143,12 +143,12 @@ export function HireReadinessChecklist({
           <AlertTriangle className="h-5 w-5 text-warning shrink-0" />
         )}
         <div className="min-w-0">
-          <div className="text-[14px] font-bold text-ink tabular">
+          <div className="text-sm font-bold text-ink tabular">
             {ready
               ? "Ready to hire — all checks clear"
               : `${attention} item${attention === 1 ? "" : "s"} need attention before start`}
           </div>
-          <div className="text-[12px] text-slate-body mt-0.5 tabular">
+          <div className="text-xs text-slate-body mt-0.5 tabular">
             {requiredVerifs.length > 0 && (
               <>
                 {requiredVerifs.length - verifsOutstanding.length}/
@@ -174,7 +174,7 @@ export function HireReadinessChecklist({
             <Eyebrow className="mb-3">Required verifications</Eyebrow>
             <ul className="space-y-2">
               {requiredVerifs.map((v) => (
-                <li key={v.label} className="flex items-center gap-2.5 text-[13px]">
+                <li key={v.label} className="flex items-center gap-2.5 text-xs">
                   {v.attested ? (
                     <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
                   ) : (
@@ -184,7 +184,7 @@ export function HireReadinessChecklist({
                     {v.label}
                   </span>
                   {!v.attested && (
-                    <span className="text-[11px] text-warning">— not yet attested</span>
+                    <span className="text-2xs text-warning">— not yet attested</span>
                   )}
                 </li>
               ))}
@@ -200,7 +200,7 @@ export function HireReadinessChecklist({
               {credentials.map((c, i) => (
                 <li
                   key={`${c.label}-${i}`}
-                  className="flex flex-wrap items-center gap-2 text-[13px]"
+                  className="flex flex-wrap items-center gap-2 text-xs"
                 >
                   {c.verified ? (
                     <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
@@ -209,7 +209,7 @@ export function HireReadinessChecklist({
                   )}
                   <span className="text-ink">{c.label}</span>
                   <span
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold tabular ${expiryPill(c.expiryState)}`}
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 text-2xs font-semibold tabular ${expiryPill(c.expiryState)}`}
                   >
                     {c.expiryState === "expired" ||
                     c.expiryState === "expiring_imminent" ? (
@@ -222,13 +222,13 @@ export function HireReadinessChecklist({
                     {c.expiryLabel}
                   </span>
                   {!c.verified && (
-                    <span className="text-[11px] text-slate-meta">— verify below</span>
+                    <span className="text-2xs text-slate-meta">— verify below</span>
                   )}
                 </li>
               ))}
             </ul>
             {expiringCreds.length > 0 && (
-              <p className="mt-3 text-[12px] text-warning leading-snug tabular">
+              <p className="mt-3 text-xs text-warning leading-snug tabular">
                 {expiringCreds.length} credential
                 {expiringCreds.length === 1 ? "" : "s"} expired or expiring soon —
                 ask {`the candidate`} to upload a current copy before their start date.

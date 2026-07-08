@@ -118,7 +118,7 @@ export function KanbanColumn({
           <Eyebrow as="span" className="text-inherit">
             {stage.label}
           </Eyebrow>
-          <span className="text-[11px] font-bold tabular">
+          <span className="text-2xs font-bold tabular">
             {applications.length}
           </span>
         </div>
@@ -162,7 +162,7 @@ export function KanbanColumn({
       >
         {applications.length === 0 ? (
           <div
-            className={`text-[13px] italic px-3 py-6 text-center border border-dashed bg-cream/60 ${
+            className={`text-xs italic px-3 py-6 text-center border border-dashed bg-cream/60 ${
               isOver
                 ? "border-heritage/50 text-heritage-deep"
                 : "border-[var(--rule)] text-slate-meta"
@@ -176,7 +176,7 @@ export function KanbanColumn({
           lanes.map((lane, idx) => (
             <div key={lane.label} className="space-y-2">
               <div
-                className={`text-[10px] font-semibold text-slate-meta tabular ${
+                className={`text-2xs font-semibold text-slate-meta tabular ${
                   idx === 0
                     ? ""
                     : "pt-1.5 border-t border-dashed border-[var(--rule-strong)]"

@@ -78,7 +78,7 @@ export function LocationSwitcher({
   // No locations to switch between → render a static badge.
   if (locations.length === 0) {
     return (
-      <div className="px-3 py-2 text-[11px] text-sidebar-foreground/40 inline-flex items-center gap-1.5">
+      <div className="px-3 py-2 text-2xs text-sidebar-foreground/40 inline-flex items-center gap-1.5">
         <MapPin className="size-3" />
         No locations yet
       </div>
@@ -94,7 +94,7 @@ export function LocationSwitcher({
         disabled={pending}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="w-full flex items-center gap-2 px-3 py-2 rounded text-left text-[12px] font-semibold text-sidebar-foreground/85 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground transition-colors disabled:opacity-50"
+        className="w-full flex items-center gap-2 px-3 py-2 rounded text-left text-xs font-semibold text-sidebar-foreground/85 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground transition-colors disabled:opacity-50"
       >
         <MapPin className="size-3.5 flex-shrink-0 text-heritage" />
         <span className="flex-1 truncate">
@@ -167,11 +167,11 @@ function SwitcherOption({
           }
         />
         <span className="min-w-0 flex-1">
-          <span className="block text-[13px] font-semibold leading-tight truncate">
+          <span className="block text-xs font-semibold leading-tight truncate">
             {label}
           </span>
           {subtitle && (
-            <span className="block text-[10px] tracking-[0.5px] text-sidebar-foreground/50 truncate mt-0.5">
+            <span className="block text-2xs tracking-[0.5px] text-sidebar-foreground/50 truncate mt-0.5">
               {subtitle}
             </span>
           )}

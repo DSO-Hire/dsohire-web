@@ -84,10 +84,10 @@ export function JobHealth({
               className="grid grid-cols-[1fr_auto_auto] sm:grid-cols-[1.4fr_2fr_auto_auto] items-center gap-4 px-5 py-3 border-t border-[var(--rule)] first:border-t-0"
             >
               <div className="min-w-0">
-                <div className="text-[13px] font-extrabold tracking-[-0.2px] text-ink truncate">
+                <div className="text-xs font-extrabold tracking-[-0.2px] text-ink truncate">
                   {r.title}
                   {r.locationLabel && (
-                    <span className="ml-2 text-[10px] font-semibold text-slate-meta">
+                    <span className="ml-2 text-2xs font-semibold text-slate-meta">
                       {r.locationLabel}
                     </span>
                   )}
@@ -116,10 +116,10 @@ export function JobHealth({
                       }`}
                     >
                       <span className={`h-[3px] w-full ${s.cls}`} />
-                      <span className="text-[13px] font-extrabold text-ink leading-none pt-1.5 tabular-nums">
+                      <span className="text-xs font-extrabold text-ink leading-none pt-1.5 tabular-nums">
                         {count}
                       </span>
-                      <span className="text-[10px] font-semibold text-slate-meta pb-1 pt-0.5">
+                      <span className="text-2xs font-semibold text-slate-meta pb-1 pt-0.5">
                         {s.label}
                       </span>
                     </span>

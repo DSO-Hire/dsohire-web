@@ -189,7 +189,7 @@ function numOrNull(s: string): number | null {
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
-    <label className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-2">
+    <label className="block text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta mb-2">
       {children}
     </label>
   );
@@ -217,7 +217,7 @@ function MoneyInput({
     <div>
       <FieldLabel>{label}</FieldLabel>
       <div className="relative">
-        <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[14px] text-slate-meta">
+        <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-meta">
           $
         </span>
         <input
@@ -226,7 +226,7 @@ function MoneyInput({
           placeholder={placeholder}
           value={display}
           onChange={(e) => onChange(e.target.value.replace(/[^\d]/g, ""))}
-          className={`w-full h-[44px] pl-7 pr-4 bg-card border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:ring-1 transition-colors ${ACCENT[accent].ring}`}
+          className={`w-full h-[44px] pl-7 pr-4 bg-card border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:ring-1 transition-colors ${ACCENT[accent].ring}`}
         />
       </div>
     </div>
@@ -268,7 +268,7 @@ export function CompensationSection(props: CompensationSectionProps) {
   return (
     <fieldset className="border border-[var(--rule)] p-6 bg-cream/40">
       <legend
-        className={`px-2 text-[13px] font-bold tracking-[2px] uppercase ${a.text}`}
+        className={`px-2 text-xs font-bold tracking-[2px] uppercase ${a.text}`}
       >
         Compensation
       </legend>
@@ -286,22 +286,22 @@ export function CompensationSection(props: CompensationSectionProps) {
           {enforcing ? (
             <>
               <div
-                className={`text-[11px] font-bold tracking-[1.5px] uppercase ${a.text}`}
+                className={`text-2xs font-bold tracking-[1.5px] uppercase ${a.text}`}
               >
                 Pay transparency · {enf.coveredLabel}
               </div>
-              <p className="mt-1 text-[13px] text-ink leading-snug">
+              <p className="mt-1 text-xs text-ink leading-snug">
                 {enf.message} We&apos;ve made the range required and pay public
                 below.
               </p>
               {enf.requiresBenefits && (
-                <p className="mt-1.5 text-[12px] text-slate-body leading-snug">
+                <p className="mt-1.5 text-xs text-slate-body leading-snug">
                   These states also require a general description of benefits
                   and other compensation — add benefits in the next section.
                 </p>
               )}
               {enf.remoteRisk && (
-                <p className="mt-1.5 text-[12px] text-slate-body leading-snug">
+                <p className="mt-1.5 text-xs text-slate-body leading-snug">
                   <span className="font-semibold text-ink">Remote role:</span>{" "}
                   {enf.remoteRiskLabel || "Colorado and Washington"} read their
                   laws to cover any remote job performable in-state — and
@@ -309,10 +309,10 @@ export function CompensationSection(props: CompensationSectionProps) {
                   post a range regardless.
                 </p>
               )}
-              <p className="mt-2 text-[11px] text-slate-meta leading-snug">
+              <p className="mt-2 text-2xs text-slate-meta leading-snug">
                 {PAY_TRANSPARENCY_DISCLAIMER}
               </p>
-              <label className="mt-2.5 flex items-start gap-2 text-[12px] text-slate-body cursor-pointer">
+              <label className="mt-2.5 flex items-start gap-2 text-xs text-slate-body cursor-pointer">
                 <input
                   type="checkbox"
                   checked={false}
@@ -326,7 +326,7 @@ export function CompensationSection(props: CompensationSectionProps) {
               </label>
             </>
           ) : (
-            <p className="text-[12px] text-slate-body leading-snug">
+            <p className="text-xs text-slate-body leading-snug">
               Marked <span className="font-semibold text-ink">exempt</span> from
               pay-transparency rules in {enf.coveredLabel}.{" "}
               <button
@@ -352,7 +352,7 @@ export function CompensationSection(props: CompensationSectionProps) {
                 key={opt.value}
                 type="button"
                 onClick={() => props.onCompType(opt.value)}
-                className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
+                className={`px-3 py-1.5 text-xs font-medium border transition-colors ${
                   checked ? a.activeBtn : a.inactiveBtn
                 }`}
                 title={opt.helper}
@@ -362,7 +362,7 @@ export function CompensationSection(props: CompensationSectionProps) {
             );
           })}
         </div>
-        <p className="mt-2 text-[11px] text-slate-meta leading-snug">
+        <p className="mt-2 text-2xs text-slate-meta leading-snug">
           {COMP_TYPE_OPTIONS.find((o) => o.value === props.compType)?.helper}
         </p>
       </div>
@@ -400,7 +400,7 @@ export function CompensationSection(props: CompensationSectionProps) {
             <select
               value={props.compPeriod}
               onChange={(e) => props.onCompPeriod(e.target.value)}
-              className={`w-full h-[44px] px-4 bg-card border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:ring-1 transition-colors ${a.ring}`}
+              className={`w-full h-[44px] px-4 bg-card border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:ring-1 transition-colors ${a.ring}`}
             >
               <option value="">—</option>
               <option value="hourly">Per hour</option>
@@ -426,7 +426,7 @@ export function CompensationSection(props: CompensationSectionProps) {
       )}
 
       <label
-        className={`mt-4 flex items-start gap-2.5 text-[14px] text-ink ${
+        className={`mt-4 flex items-start gap-2.5 text-sm text-ink ${
           lockPay ? "cursor-not-allowed" : "cursor-pointer"
         }`}
       >
@@ -458,7 +458,7 @@ export function CompensationSection(props: CompensationSectionProps) {
       {/* ── Composable components ── */}
       <div className="mt-6 pt-5 border-t border-[var(--rule)]">
         <FieldLabel>Add to this package</FieldLabel>
-        <p className="mb-3 text-[11px] text-slate-meta leading-snug">
+        <p className="mb-3 text-2xs text-slate-meta leading-snug">
           Layer on variable pay, a bonus, or equity. Each one you turn on
           adds its own fields — and variable pay + bonus targets roll up
           into the On-Target Earnings figure below.
@@ -490,7 +490,7 @@ export function CompensationSection(props: CompensationSectionProps) {
                   onChange={(e) =>
                     props.onVariableCompStructure(e.target.value)
                   }
-                  className={`w-full h-[44px] px-4 bg-card border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:ring-1 transition-colors ${a.ring}`}
+                  className={`w-full h-[44px] px-4 bg-card border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:ring-1 transition-colors ${a.ring}`}
                 />
               </div>
             </div>
@@ -519,7 +519,7 @@ export function CompensationSection(props: CompensationSectionProps) {
                   placeholder="Annual company performance bonus · paid Q1"
                   value={props.bonusStructure}
                   onChange={(e) => props.onBonusStructure(e.target.value)}
-                  className={`w-full h-[44px] px-4 bg-card border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:ring-1 transition-colors ${a.ring}`}
+                  className={`w-full h-[44px] px-4 bg-card border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:ring-1 transition-colors ${a.ring}`}
                 />
               </div>
             </div>
@@ -540,7 +540,7 @@ export function CompensationSection(props: CompensationSectionProps) {
                 placeholder="0.1–0.3% with a 4-year vest · partnership buy-in eligible at year 2"
                 value={props.equityNote}
                 onChange={(e) => props.onEquityNote(e.target.value)}
-                className={`w-full px-4 py-3 bg-card border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:ring-1 transition-colors resize-vertical ${a.ring}`}
+                className={`w-full px-4 py-3 bg-card border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:ring-1 transition-colors resize-vertical ${a.ring}`}
               />
             </div>
           </ComponentRow>
@@ -555,18 +555,18 @@ export function CompensationSection(props: CompensationSectionProps) {
         >
           {ote.ote != null ? (
             <>
-              <div className={`text-[13px] font-bold tracking-[2px] uppercase ${a.text}`}>
+              <div className={`text-xs font-bold tracking-[2px] uppercase ${a.text}`}>
                 On-Target Earnings
               </div>
               <div className="mt-0.5 text-[20px] font-extrabold text-ink">
                 {ote.isRange && ote.ote_low != null && ote.ote_high != null
                   ? `~${formatUsd(ote.ote_low)}–${formatUsd(ote.ote_high)}`
                   : `~${formatUsd(ote.ote)}`}
-                <span className="ml-2 text-[12px] font-medium text-slate-meta">
+                <span className="ml-2 text-xs font-medium text-slate-meta">
                   / year
                 </span>
               </div>
-              <p className="mt-1 text-[11px] text-slate-meta leading-snug">
+              <p className="mt-1 text-2xs text-slate-meta leading-snug">
                 {formatUsd(ote.base ?? 0)} base
                 {props.compType === "range" && !ote.isRange ? " (midpoint)" : ""} +{" "}
                 {formatUsd(ote.variable)} target variable
@@ -574,7 +574,7 @@ export function CompensationSection(props: CompensationSectionProps) {
               </p>
             </>
           ) : (
-            <p className="text-[12px] text-slate-body leading-snug">
+            <p className="text-xs text-slate-body leading-snug">
               <span className="font-semibold text-ink">
                 {formatUsd(ote.variable)}
               </span>{" "}
@@ -620,8 +620,8 @@ function ComponentRow({
           className={`mt-0.5 ${a.check}`}
         />
         <span className="min-w-0">
-          <span className="block text-[13px] font-bold text-ink">{label}</span>
-          <span className="block text-[11px] text-slate-meta leading-snug">
+          <span className="block text-xs font-bold text-ink">{label}</span>
+          <span className="block text-2xs text-slate-meta leading-snug">
             {hint}
           </span>
         </span>

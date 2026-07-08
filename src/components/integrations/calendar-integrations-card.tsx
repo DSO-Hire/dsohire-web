@@ -53,7 +53,7 @@ export function CalendarIntegrationsCard({
         <h2 className="text-2xl font-extrabold tracking-[-0.6px] text-ink mb-2">
           Calendar integrations
         </h2>
-        <p className="text-[14px] text-slate-body leading-relaxed">
+        <p className="text-sm text-slate-body leading-relaxed">
           Connect your work calendar so interviews scheduled in DSO Hire
           auto-create events with a video link — Google Meet for
           Google, Microsoft Teams for Outlook — and stay in sync with
@@ -110,7 +110,7 @@ function StatusBanner({
     return (
       <div
         role="status"
-        className="mb-5 border-l-4 border-heritage bg-cream text-heritage-deep px-4 py-3 text-[13px] font-semibold"
+        className="mb-5 border-l-4 border-heritage bg-cream text-heritage-deep px-4 py-3 text-xs font-semibold"
       >
         Calendar connected successfully.
       </div>
@@ -121,7 +121,7 @@ function StatusBanner({
     return (
       <div
         role="status"
-        className="mb-5 border-l-4 border-[var(--rule-strong)] bg-cream/60 text-slate-body px-4 py-3 text-[13px]"
+        className="mb-5 border-l-4 border-[var(--rule-strong)] bg-cream/60 text-slate-body px-4 py-3 text-xs"
       >
         Calendar connection cancelled.
       </div>
@@ -131,7 +131,7 @@ function StatusBanner({
   return (
     <div
       role="alert"
-      className="mb-5 border-l-4 border-danger bg-danger-bg text-danger px-4 py-3 text-[13px]"
+      className="mb-5 border-l-4 border-danger bg-danger-bg text-danger px-4 py-3 text-xs"
     >
       Couldn&apos;t connect calendar{message ? ` — ${message}` : "."}
     </div>
@@ -182,19 +182,19 @@ function ProviderCard({
       <div className="flex items-start gap-3 mb-3">
         <ProviderLogo provider={provider} />
         <div className="flex-1 min-w-0">
-          <h3 className="text-[15px] font-bold text-ink leading-snug">
+          <h3 className="text-sm font-bold text-ink leading-snug">
             {name}
           </h3>
         </div>
         <StatusTag connected={status.connected} />
       </div>
 
-      <p className="text-[13px] text-slate-body leading-relaxed mb-4">
+      <p className="text-xs text-slate-body leading-relaxed mb-4">
         {valueProp}
       </p>
 
       <div className="mt-auto pt-3 border-t border-[var(--rule)]">
-        <div className="flex items-center gap-2 mb-3 text-[12px]">
+        <div className="flex items-center gap-2 mb-3 text-xs">
           <span
             aria-hidden
             className={
@@ -225,7 +225,7 @@ function ProviderCard({
             type="button"
             onClick={handleDisconnect}
             disabled={pending}
-            className="inline-flex items-center gap-2 border border-rule text-slate-body hover:bg-cream px-4 py-2 rounded text-[13px] font-semibold disabled:opacity-60"
+            className="inline-flex items-center gap-2 border border-rule text-slate-body hover:bg-cream px-4 py-2 rounded text-xs font-semibold disabled:opacity-60"
           >
             {pending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
             Disconnect
@@ -233,7 +233,7 @@ function ProviderCard({
         ) : (
           <a
             href={connectHref}
-            className="inline-flex items-center gap-2 bg-heritage text-primary-foreground hover:bg-heritage-deep px-4 py-2 rounded text-[13px] font-semibold"
+            className="inline-flex items-center gap-2 bg-heritage text-primary-foreground hover:bg-heritage-deep px-4 py-2 rounded text-xs font-semibold"
           >
             {provider === "google"
               ? "Connect Google Calendar"
@@ -242,7 +242,7 @@ function ProviderCard({
         )}
 
         {error && (
-          <div className="mt-3 rounded-md border border-danger bg-danger-bg px-3 py-2 text-[12px] text-danger">
+          <div className="mt-3 rounded-md border border-danger bg-danger-bg px-3 py-2 text-xs text-danger">
             {error}
           </div>
         )}
@@ -254,13 +254,13 @@ function ProviderCard({
 function StatusTag({ connected }: { connected: boolean }) {
   if (connected) {
     return (
-      <span className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep bg-cream px-2 py-1 rounded">
+      <span className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep bg-cream px-2 py-1 rounded">
         Connected
       </span>
     );
   }
   return (
-    <span className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta bg-cream/60 px-2 py-1 rounded">
+    <span className="text-2xs font-bold tracking-[2px] uppercase text-slate-meta bg-cream/60 px-2 py-1 rounded">
       Off
     </span>
   );

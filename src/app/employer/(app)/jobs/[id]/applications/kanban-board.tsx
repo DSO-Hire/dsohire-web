@@ -1071,7 +1071,7 @@ export function KanbanBoard({
             className="flex items-start gap-3 border border-danger bg-danger-bg px-4 py-3"
           >
             <AlertCircle className="h-4 w-4 text-danger flex-shrink-0 mt-0.5" />
-            <div className="flex-1 text-[14px] text-danger leading-relaxed">
+            <div className="flex-1 text-sm text-danger leading-relaxed">
               {error.kind === "network" ? (
                 <>
                   <span className="font-bold">Move failed.</span> Check your
@@ -1086,7 +1086,7 @@ export function KanbanBoard({
                   {error.reason && (
                     <>
                       {" "}
-                      <span className="block mt-1 text-[12px] text-danger">
+                      <span className="block mt-1 text-xs text-danger">
                         Server said: {error.reason}
                       </span>
                     </>
@@ -1133,7 +1133,7 @@ export function KanbanBoard({
             className="flex items-start gap-3 border border-heritage/30 bg-heritage/[0.08] px-4 py-3"
           >
             <Users className="h-4 w-4 text-heritage-deep flex-shrink-0 mt-0.5" />
-            <div className="flex-1 text-[14px] text-heritage-deep leading-relaxed">
+            <div className="flex-1 text-sm text-heritage-deep leading-relaxed">
               <span className="font-bold">Teammate</span> moved{" "}
               <span className="font-bold">{remoteToast.candidateName}</span> to{" "}
               <span className="font-bold">{remoteToast.stageLabel}</span>.
@@ -1337,7 +1337,7 @@ export function KanbanBoard({
               </button>
             )}
           </div>
-          <div className="flex items-center gap-3 text-[10px] text-slate-meta tabular">
+          <div className="flex items-center gap-3 text-2xs text-slate-meta tabular">
             <Eyebrow as="span">Aging</Eyebrow>
             <span className="inline-flex items-center gap-1">
               <span className="h-2 w-2 bg-heritage/70" aria-hidden />
@@ -1458,7 +1458,7 @@ function SelectionToolbar({
     "inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold border transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-offset-2";
   return (
     <div className="sticky top-[80px] z-30 flex flex-wrap items-center justify-between gap-3 border border-heritage/40 bg-heritage/[0.08] px-4 py-2.5">
-      <div className="flex items-center gap-3 text-[14px] text-heritage-deep">
+      <div className="flex items-center gap-3 text-sm text-heritage-deep">
         <span className="font-bold tabular">{count} selected</span>
         <span className="text-slate-meta">·</span>
         <button
@@ -1484,7 +1484,7 @@ function SelectionToolbar({
               <DropdownMenuItem
                 key={stage.id}
                 onSelect={() => onMove(stage)}
-                className="text-[13px] font-semibold tracking-[0.5px] text-ink"
+                className="text-xs font-semibold tracking-[0.5px] text-ink"
               >
                 {stage.label}
               </DropdownMenuItem>
@@ -1596,7 +1596,7 @@ function BulkConfirmDialog({
               onApply={(body) => setReason(body.slice(0, 1000))}
             />
           ) : count > 1 ? (
-            <p className="text-[13px] text-slate-meta border border-[var(--rule)] bg-cream/40 px-3 py-2.5 leading-relaxed">
+            <p className="text-xs text-slate-meta border border-[var(--rule)] bg-cream/40 px-3 py-2.5 leading-relaxed">
               Generate AI suggestions one candidate at a time — select a single
               candidate to see suggestions.
             </p>
@@ -1611,9 +1611,9 @@ function BulkConfirmDialog({
             onChange={(e) => setReason(e.target.value.slice(0, 1000))}
             rows={3}
             placeholder="Add context for your team's audit log…"
-            className="w-full resize-y border border-[var(--rule-strong)] bg-card px-3 py-2 text-[14px] text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
+            className="w-full resize-y border border-[var(--rule-strong)] bg-card px-3 py-2 text-sm text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
           />
-          <p className="text-[12px] text-slate-meta">{reasonHelper}</p>
+          <p className="text-xs text-slate-meta">{reasonHelper}</p>
         </div>
         <DialogFooter>
           <button
@@ -1675,9 +1675,9 @@ function BulkMessageDialog({
             onChange={(e) => setBody(e.target.value.slice(0, MAX))}
             rows={5}
             placeholder="Write the message your selected candidates will receive…"
-            className="w-full resize-y border border-[var(--rule-strong)] bg-card px-3 py-2 text-[14px] text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
+            className="w-full resize-y border border-[var(--rule-strong)] bg-card px-3 py-2 text-sm text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
           />
-          <p className="text-[12px] text-slate-meta tabular">
+          <p className="text-xs text-slate-meta tabular">
             Sent individually — candidates can&apos;t see who else received it.{" "}
             {body.length}/{MAX}
           </p>
@@ -1760,10 +1760,10 @@ function BulkResultDisplay({
         className={`h-4 w-4 ${tone.text} flex-shrink-0 mt-0.5`}
         aria-hidden="true"
       />
-      <div className={`flex-1 text-[14px] ${tone.text} leading-relaxed`}>
+      <div className={`flex-1 text-sm ${tone.text} leading-relaxed`}>
         <div className="font-bold tabular">{summary}</div>
         {failed > 0 && (
-          <ul className="mt-1.5 space-y-0.5 text-[13px] tabular">
+          <ul className="mt-1.5 space-y-0.5 text-xs tabular">
             {banner.failures.slice(0, 5).map((f) => (
               <li key={f.id}>
                 <span className="font-semibold">{f.candidateName}</span>
@@ -1918,13 +1918,13 @@ function ClosedSubsection({
     <section className="border-b border-[var(--rule)] last:border-0">
       <header className="px-5 py-2 bg-cream/40 flex items-center gap-3">
         <Eyebrow as="span">{label}</Eyebrow>
-        <span className="text-[11px] font-bold text-slate-meta tabular">
+        <span className="text-2xs font-bold text-slate-meta tabular">
           {apps.length}
         </span>
       </header>
       <div className="divide-y divide-[var(--rule)]">
         {apps.length === 0 ? (
-          <div className="px-5 py-3 text-[13px] text-slate-meta italic">
+          <div className="px-5 py-3 text-xs text-slate-meta italic">
             Nothing here yet.
           </div>
         ) : variant === "rejected" ? (
@@ -1954,10 +1954,10 @@ function WithdrawnRow({ application }: { application: KanbanApplication }) {
       className="flex items-center justify-between gap-4 px-5 py-3 hover:bg-cream transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage focus-visible:ring-inset"
     >
       <div className="min-w-0 flex-1">
-        <div className="text-[14px] italic font-semibold text-slate-body truncate">
+        <div className="text-sm italic font-semibold text-slate-body truncate">
           {cand?.full_name ?? "Anonymous candidate"}
         </div>
-        <div className="text-[12px] text-slate-meta truncate tabular">
+        <div className="text-xs text-slate-meta truncate tabular">
           Withdrawn · {new Date(application.created_at).toLocaleDateString()}
         </div>
       </div>
@@ -2000,7 +2000,7 @@ function BulkDragPreview({
         <KanbanCard application={activeApp} isOverlay selected />
         {/* Count badge — top-right corner */}
         <div
-          className="absolute -top-2 -right-2 z-10 inline-flex items-center justify-center bg-heritage-deep px-2 min-w-[24px] h-6 text-[11px] font-bold text-primary-foreground tabular shadow-md ring-2 ring-card"
+          className="absolute -top-2 -right-2 z-10 inline-flex items-center justify-center bg-heritage-deep px-2 min-w-[24px] h-6 text-2xs font-bold text-primary-foreground tabular shadow-md ring-2 ring-card"
           aria-hidden
         >
           {count}

@@ -22,6 +22,7 @@ import { MotionMount } from "./motion";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import { ToastProvider } from "@/components/app/toast";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { TextSizeToggle } from "@/components/theme/text-size-toggle";
 
 export function SiteShell({
   children,
@@ -167,6 +168,7 @@ export async function SiteNav({
       </ul>
       <div className="flex items-center gap-3">
         <ThemeToggle className="hidden sm:inline-flex text-slate-body" />
+        <TextSizeToggle className="hidden sm:inline-flex text-slate-body" />
         <Link
           href={signInHref}
           className="hidden sm:inline-flex text-xs font-semibold text-slate-body hover:text-ink transition-colors"
@@ -215,7 +217,7 @@ export function SiteFooter() {
         <div className="grid grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-10 lg:gap-14 pb-12 border-b border-hero-foreground/10 mb-9">
           <div>
             <BrandLockup dark height={56} />
-            <p className="text-[14px] text-hero-foreground/55 leading-[1.7] mt-5 max-w-[280px]">
+            <p className="text-sm text-hero-foreground/55 leading-[1.7] mt-5 max-w-[280px]">
               Dental hiring, done direct. The hiring platform built for
               multi-location DSOs. One flat monthly fee, unlimited postings.
               Born from ten years inside the business of dentistry.
@@ -262,10 +264,10 @@ export function SiteFooter() {
         </div>
 
         <div className="flex flex-wrap justify-between items-center gap-4">
-          <div className="text-[12px] tracking-[0.5px] text-hero-foreground/40">
+          <div className="text-xs tracking-[0.5px] text-hero-foreground/40">
             © {new Date().getFullYear()} DSO Hire LLC
           </div>
-          <div className="flex gap-6 text-[12px] text-hero-foreground/40">
+          <div className="flex gap-6 text-xs text-hero-foreground/40">
             <Link
               href="/legal/privacy"
               className="hover:text-hero-foreground/70 transition-colors"
@@ -305,7 +307,7 @@ function FooterLink({ href, children }: { href: string; children: React.ReactNod
     <li>
       <Link
         href={href}
-        className="text-[14px] text-hero-foreground/60 hover:text-hero-foreground transition-colors"
+        className="text-sm text-hero-foreground/60 hover:text-hero-foreground transition-colors"
       >
         {children}
       </Link>

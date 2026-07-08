@@ -60,7 +60,7 @@ export function ComingSoonCard({
 
       {alternatives && alternatives.length > 0 && (
         <section className="border border-[var(--rule)] bg-cream p-7">
-          <p className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+          <p className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
             What you can do today
           </p>
           <ul className="list-none space-y-2">
@@ -68,7 +68,7 @@ export function ComingSoonCard({
               <li key={alt.href}>
                 <Link
                   href={alt.href}
-                  className="inline-flex items-center gap-1.5 text-[14px] font-semibold text-heritage hover:text-heritage-deep"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-heritage hover:text-heritage-deep"
                 >
                   {alt.label}
                   <ArrowRight className="size-3.5" />

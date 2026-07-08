@@ -61,7 +61,7 @@ export function DetailSection({
           {title}
         </h2>
         {subtitle && (
-          <p className="text-[13px] text-slate-meta mt-2 leading-relaxed">
+          <p className="text-xs text-slate-meta mt-2 leading-relaxed">
             {subtitle}
           </p>
         )}
@@ -89,10 +89,10 @@ export function PracticeFitConsentOffBanner() {
       <div className="flex items-start gap-3">
         <Sparkles className="h-4 w-4 text-heritage-deep mt-0.5 shrink-0" />
         <div>
-          <p className="text-[13px] font-semibold text-ink mb-1">
+          <p className="text-xs font-semibold text-ink mb-1">
             PracticeFit isn&apos;t available for this pair
           </p>
-          <p className="text-[13px] text-slate-body leading-relaxed">
+          <p className="text-xs text-slate-body leading-relaxed">
             This can happen when the candidate&apos;s privacy settings
             keep their score private, or when their role preferences
             don&apos;t cover this posting. Their application stands on
@@ -138,7 +138,7 @@ export function DetailRow({ label, value }: { label: string; value: string }) {
       <Eyebrow className="mb-1">
         {label}
       </Eyebrow>
-      <div className="text-[14px] text-ink leading-snug">{value}</div>
+      <div className="text-sm text-ink leading-snug">{value}</div>
     </div>
   );
 }

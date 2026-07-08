@@ -42,14 +42,14 @@ export function AnalyticsNarrative({
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-3">
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+            <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep">
               AI summary
             </div>
             <button
               type="button"
               onClick={run}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground text-2xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60"
             >
               {pending ? (
                 <>
@@ -70,15 +70,15 @@ export function AnalyticsNarrative({
             </button>
           </div>
           {text ? (
-            <p className="mt-2 text-[14px] text-ink leading-relaxed">{text}</p>
+            <p className="mt-2 text-sm text-ink leading-relaxed">{text}</p>
           ) : (
-            <p className="mt-2 text-[13px] text-slate-body leading-relaxed">
+            <p className="mt-2 text-xs text-slate-body leading-relaxed">
               Get a plain-English read on what stands out in this view and what
               to act on — generated from your live numbers.
             </p>
           )}
           {error && (
-            <p className="mt-2 text-[12px] text-danger">{error}</p>
+            <p className="mt-2 text-xs text-danger">{error}</p>
           )}
         </div>
       </div>

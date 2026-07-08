@@ -35,7 +35,7 @@ export function ProspectComposer({ candidateId }: { candidateId: string }) {
   return (
     <div className="rounded-lg border border-[var(--rule)] bg-card p-3">
       <div className="mb-2 flex items-center justify-between gap-2">
-        <span className="text-[11px] text-slate-meta">
+        <span className="text-2xs text-slate-meta">
           Personalization fills in on send (left blank for anonymous
           candidates).
         </span>
@@ -52,11 +52,11 @@ export function ProspectComposer({ candidateId }: { candidateId: string }) {
         placeholder="Write a message…"
         rows={4}
         disabled={pending}
-        className="w-full resize-none rounded border border-[var(--rule)] bg-cream/30 px-3 py-2 text-[14px] text-ink focus:outline-none focus:border-heritage-deep"
+        className="w-full resize-none rounded border border-[var(--rule)] bg-cream/30 px-3 py-2 text-sm text-ink focus:outline-none focus:border-heritage-deep"
       />
-      {error && <p className="mt-1 text-[12px] text-danger">{error}</p>}
+      {error && <p className="mt-1 text-xs text-danger">{error}</p>}
       <div className="mt-2 flex items-center justify-between">
-        <span className="text-[11px] text-slate-meta">
+        <span className="text-2xs text-slate-meta">
           Sent in-app + an email nudge. Replies come back here — never to your
           inbox.
         </span>

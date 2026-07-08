@@ -295,10 +295,10 @@ function EmptyState() {
   return (
     <div className="p-8 text-center">
       <ShieldCheck className="h-6 w-6 text-slate-meta mx-auto mb-3" />
-      <p className="text-[14px] font-semibold text-ink mb-1">
+      <p className="text-sm font-semibold text-ink mb-1">
         No credentials on file yet
       </p>
-      <p className="text-[13px] text-slate-body max-w-[420px] mx-auto leading-relaxed">
+      <p className="text-xs text-slate-body max-w-[420px] mx-auto leading-relaxed">
         This candidate hasn&apos;t added any licenses or certifications.
         Most DSOs want at least the active state license + CPR/BLS on
         file before extending an offer — consider asking the candidate
@@ -323,12 +323,12 @@ function CredentialGroup({
     <div>
       <div className="px-5 py-3 bg-cream/40 border-b border-[var(--rule)] flex items-center justify-between">
         <Eyebrow>{title}</Eyebrow>
-        <div className="text-[11px] font-bold text-slate-meta tabular">
+        <div className="text-2xs font-bold text-slate-meta tabular">
           {count} on file
         </div>
       </div>
       {count === 0 ? (
-        <p className="px-5 py-6 text-[13px] text-slate-meta italic">
+        <p className="px-5 py-6 text-xs text-slate-meta italic">
           {emptyCopy}
         </p>
       ) : (
@@ -516,27 +516,27 @@ function CredentialRowShell({
     <div id={`credential-${rowId}`} className="p-5 scroll-mt-24">
       <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
         <div className="min-w-0 flex-1">
-          <div className="text-[14px] font-semibold text-ink leading-snug">
+          <div className="text-sm font-semibold text-ink leading-snug">
             {heading}
           </div>
           {subtitle && (
-            <div className="text-[12px] text-slate-body mt-0.5">{subtitle}</div>
+            <div className="text-xs text-slate-body mt-0.5">{subtitle}</div>
           )}
           <div className="flex flex-wrap items-center gap-x-2 gap-y-2 mt-3">
             <span
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold tabular ${expiry.pillClass}`}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-2xs font-semibold tabular ${expiry.pillClass}`}
             >
               <ExpiryIcon className="h-3 w-3" />
               {expiry.label}
             </span>
             {issuedDate && (
-              <span className="text-[11px] text-slate-meta">
+              <span className="text-2xs text-slate-meta">
                 Issued {formatShortDate(issuedDate)}
               </span>
             )}
             {badge && (
               <span
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold ${badge.pillClass}`}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-2xs font-semibold ${badge.pillClass}`}
               >
                 <BadgeIcon className="h-3 w-3" />
                 {badge.label}
@@ -563,7 +563,7 @@ function CredentialRowShell({
               View document
             </button>
           ) : (
-            <span className="inline-flex items-center gap-1.5 text-[11px] text-slate-meta">
+            <span className="inline-flex items-center gap-1.5 text-2xs text-slate-meta">
               <Paperclip className="h-3 w-3" />
               No document attached
             </span>
@@ -638,7 +638,7 @@ function CredentialRowShell({
       </div>
 
       {error && (
-        <div className="mt-3 text-[12px] text-danger bg-danger-bg border border-danger px-3 py-2">
+        <div className="mt-3 text-xs text-danger bg-danger-bg border border-danger px-3 py-2">
           {error}
         </div>
       )}

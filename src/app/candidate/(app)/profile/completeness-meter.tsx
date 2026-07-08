@@ -46,7 +46,7 @@ export function CompletenessMeter({
             <Sparkles className="size-5" aria-hidden />
           </div>
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[2.5px] text-heritage">
+            <p className="text-2xs font-semibold uppercase tracking-[2.5px] text-heritage">
               {meta.label}
             </p>
             <h2 className="mt-1 font-display text-xl font-bold text-foreground">
@@ -63,7 +63,7 @@ export function CompletenessMeter({
     <section className="border border-border bg-card p-6 sm:p-8">
       <header className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[2.5px] text-heritage">
+          <p className="text-2xs font-semibold uppercase tracking-[2.5px] text-heritage">
             Profile strength
           </p>
           <h2 className="mt-1 font-display text-lg font-bold text-foreground">
@@ -78,7 +78,7 @@ export function CompletenessMeter({
               /{report.total}
             </span>
           </p>
-          <p className="text-[10px] uppercase tracking-wider text-meta-foreground">
+          <p className="text-2xs uppercase tracking-wider text-meta-foreground">
             steps done
           </p>
         </div>
@@ -103,7 +103,7 @@ export function CompletenessMeter({
           );
         })}
       </div>
-      <p className="mt-1 text-right text-[10px] text-meta-foreground">
+      <p className="mt-1 text-right text-2xs text-meta-foreground">
         {pct}% complete
       </p>
 

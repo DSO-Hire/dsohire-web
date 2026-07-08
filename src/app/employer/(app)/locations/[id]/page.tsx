@@ -95,20 +95,20 @@ export default async function EditLocationPage({ params }: PageProps) {
     <>
       <Link
         href="/employer/locations"
-        className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-6"
+        className="inline-flex items-center gap-2 text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-6"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back to Locations
       </Link>
 
       <header className="mb-10 max-w-[720px]">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
           Edit Location
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.1] text-ink">
           {initial.name}
         </h1>
-        <p className="mt-3 text-[14px] tracking-[0.3px] text-slate-meta">
+        <p className="mt-3 text-sm tracking-[0.3px] text-slate-meta">
           Currently tagged on{" "}
           <span className="font-semibold text-ink">
             {liveJobCount} {liveJobCount === 1 ? "job" : "jobs"}
@@ -121,13 +121,13 @@ export default async function EditLocationPage({ params }: PageProps) {
           the form's save path. Shown above the form so the visual
           identity is the first thing the admin manages. */}
       <section className="mb-10 max-w-[720px] border border-[var(--rule)] bg-card p-6 sm:p-8">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Practice Logo
         </div>
         <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink mb-2">
           Visual identity for {initial.name}
         </h2>
-        <p className="text-[14px] text-slate-body leading-relaxed mb-6 max-w-[560px]">
+        <p className="text-sm text-slate-body leading-relaxed mb-6 max-w-[560px]">
           Renders next to this practice on the locations list, application
           inbox, and job leaderboard. Optional — if blank, we render
           colored initials from the practice name.

@@ -289,7 +289,7 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
       <section className="pt-[140px] pb-12 px-6 sm:px-14 max-w-[1240px] mx-auto">
         <div className="flex items-center gap-3.5 mb-6">
           <span className="block w-7 h-px bg-heritage" />
-          <span className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep">
+          <span className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep">
             Dental Groups on DSO Hire
           </span>
         </div>
@@ -314,7 +314,7 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
         />
 
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-slate-meta">
             {dsos.length === 0
               ? "No dental groups match these filters"
               : dsos.length === 1
@@ -513,7 +513,7 @@ function DsoCard({
       </h3>
 
       {(cityState || dso.practice_count) && (
-        <div className="text-[13px] tracking-[0.3px] text-slate-meta mb-2 flex flex-wrap gap-x-3 gap-y-1">
+        <div className="text-xs tracking-[0.3px] text-slate-meta mb-2 flex flex-wrap gap-x-3 gap-y-1">
           {cityState && (
             <span className="inline-flex items-center gap-1">
               <MapPin className="h-3 w-3" />
@@ -532,7 +532,7 @@ function DsoCard({
       {/* Multi-state coverage — only when 2+ states. Single-state DSOs
           don't get this signal; it's the multi-location scale moat. */}
       {showStateCoverage && (
-        <div className="text-[11px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-4">
+        <div className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta mb-4">
           Active in {stateList.length} states
           <span className="ml-2 font-normal tracking-normal normal-case text-slate-body">
             {stateCoverageLabel}
@@ -541,7 +541,7 @@ function DsoCard({
       )}
 
       {descriptionText && (
-        <p className="text-[14px] text-slate-body leading-relaxed line-clamp-3 mb-4">
+        <p className="text-sm text-slate-body leading-relaxed line-clamp-3 mb-4">
           {descriptionText}
         </p>
       )}
@@ -554,7 +554,7 @@ function DsoCard({
           {topRoles.map((label) => (
             <span
               key={label}
-              className="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold tracking-[0.5px] bg-cream text-slate-body border border-[var(--rule)]"
+              className="inline-flex items-center px-2 py-0.5 text-2xs font-semibold tracking-[0.5px] bg-cream text-slate-body border border-[var(--rule)]"
             >
               {label}
             </span>
@@ -583,12 +583,12 @@ function DsoCard({
             {recentJobs.map((job, i) => (
               <li
                 key={i}
-                className="flex items-baseline justify-between gap-3 text-[12px]"
+                className="flex items-baseline justify-between gap-3 text-xs"
               >
                 <span className="text-ink font-semibold truncate">
                   {job.title}
                 </span>
-                <span className="text-slate-meta text-[10px] shrink-0">
+                <span className="text-slate-meta text-2xs shrink-0">
                   {relativePostedAt(job.posted_at)}
                 </span>
               </li>
@@ -689,10 +689,10 @@ function FeaturedDsoSpotlight({
 
       {/* Featured tag — top-right corner, sits over the banner */}
       <span
-        className="absolute top-4 right-4 z-20 inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold tracking-[2px] uppercase rounded-full text-white"
+        className="absolute top-4 right-4 z-20 inline-flex items-center gap-1.5 px-3 py-1 text-2xs font-bold tracking-[2px] uppercase rounded-full text-white"
         style={{ background: accentColor }}
       >
-        <span className="text-[11px]">★</span> Featured Member
+        <span className="text-2xs">★</span> Featured Member
       </span>
 
       {/* Banner (when set) — taller than regular cards to emphasize the
@@ -740,7 +740,7 @@ function FeaturedDsoSpotlight({
               <h3 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink mb-1.5 leading-tight">
                 {dso.name}
               </h3>
-              <div className="text-[13px] tracking-[0.3px] text-slate-meta flex flex-wrap gap-x-3 gap-y-1">
+              <div className="text-xs tracking-[0.3px] text-slate-meta flex flex-wrap gap-x-3 gap-y-1">
                 {cityState && (
                   <span className="inline-flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
@@ -763,7 +763,7 @@ function FeaturedDsoSpotlight({
           </div>
 
           {descriptionText && (
-            <p className="text-[15px] text-slate-body leading-relaxed line-clamp-3 mb-5 max-w-[640px]">
+            <p className="text-sm text-slate-body leading-relaxed line-clamp-3 mb-5 max-w-[640px]">
               {descriptionText}
             </p>
           )}
@@ -773,7 +773,7 @@ function FeaturedDsoSpotlight({
               {topRoles.map((label) => (
                 <span
                   key={label}
-                  className="inline-flex items-center px-2.5 py-1 text-[11px] font-semibold tracking-[0.5px] bg-cream text-slate-body border border-[var(--rule)]"
+                  className="inline-flex items-center px-2.5 py-1 text-2xs font-semibold tracking-[0.5px] bg-cream text-slate-body border border-[var(--rule)]"
                 >
                   {label}
                 </span>
@@ -791,10 +791,10 @@ function FeaturedDsoSpotlight({
             >
               {openJobs}
             </div>
-            <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mt-2">
+            <div className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta mt-2">
               {openJobs === 1 ? "Open role" : "Open roles"}
             </div>
-            <div className="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[1px] uppercase mt-1.5" style={{ color: accentColor }}>
+            <div className="inline-flex items-center gap-1.5 text-2xs font-bold tracking-[1px] uppercase mt-1.5" style={{ color: accentColor }}>
               <span className="relative flex h-1.5 w-1.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ background: accentColor }} />
                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full" style={{ background: accentColor }} />
@@ -803,7 +803,7 @@ function FeaturedDsoSpotlight({
             </div>
           </div>
           <div
-            className="inline-flex items-center gap-2 px-5 py-3 text-[11px] font-bold tracking-[1.5px] uppercase border transition-colors group-hover:bg-[var(--card-accent)] group-hover:text-white w-fit"
+            className="inline-flex items-center gap-2 px-5 py-3 text-2xs font-bold tracking-[1.5px] uppercase border transition-colors group-hover:bg-[var(--card-accent)] group-hover:text-white w-fit"
             style={{
               color: "var(--card-accent)",
               borderColor: "var(--card-accent)",
@@ -846,7 +846,7 @@ function CompaniesFilters({
   };
 
   const chipBaseClass =
-    "px-3 py-1.5 text-[12px] font-semibold border transition-colors whitespace-nowrap";
+    "px-3 py-1.5 text-xs font-semibold border transition-colors whitespace-nowrap";
   const chipActiveClass =
     "bg-heritage-deep text-primary-foreground border-heritage-deep";
   const chipInactiveClass =
@@ -856,7 +856,7 @@ function CompaniesFilters({
     <div className="mb-6 space-y-3">
       {/* Practice-count tier */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mr-2 shrink-0">
+        <span className="text-2xs font-bold tracking-[2.5px] uppercase text-slate-meta mr-2 shrink-0">
           Size
         </span>
         <Link
@@ -883,7 +883,7 @@ function CompaniesFilters({
           choose between; with 0-1 the filter is meaningless. */}
       {availableStates.length >= 2 && (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-meta mr-2 shrink-0">
+          <span className="text-2xs font-bold tracking-[2.5px] uppercase text-slate-meta mr-2 shrink-0">
             State
           </span>
           <Link
@@ -917,7 +917,7 @@ function EmptyState() {
       <h2 className="text-2xl font-extrabold tracking-[-0.5px] text-ink mb-3">
         No dental groups listed yet.
       </h2>
-      <p className="text-[14px] text-slate-body leading-relaxed max-w-[440px] mx-auto">
+      <p className="text-sm text-slate-body leading-relaxed max-w-[440px] mx-auto">
         DSO Hire is in early launch — dental groups are onboarding through
         summer 2026. Check back soon, or{" "}
         <Link

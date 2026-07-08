@@ -48,7 +48,7 @@ export default async function SignUpPage({ searchParams }: PageProps) {
   return (
     <SiteShell>
       <section className="pt-[140px] pb-24 px-6 sm:px-14 max-w-[1100px] mx-auto">
-        <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-4">
+        <div className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-4">
           Start a DSO Subscription
         </div>
         <h1 className="text-4xl sm:text-6xl font-extrabold tracking-[-1.8px] leading-[1.05] text-ink mb-6 max-w-[820px]">
@@ -68,13 +68,13 @@ export default async function SignUpPage({ searchParams }: PageProps) {
 
           {/* Tier sidebar */}
           <aside className="bg-cream p-8 sm:p-10">
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+            <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
               You&apos;re Signing Up For
             </div>
             <div className="text-2xl font-extrabold tracking-[-0.5px] text-ink mb-2">
               {selectedTier.name}
             </div>
-            <div className="text-[14px] text-slate-body mb-5 leading-snug">
+            <div className="text-sm text-slate-body mb-5 leading-snug">
               {selectedTier.tagline}
             </div>
             {/* Period toggle on sign-up — 2026-05-26 — so a visitor who picked
@@ -90,10 +90,10 @@ export default async function SignUpPage({ searchParams }: PageProps) {
                 <div className="text-4xl font-extrabold tracking-[-1px] text-ink">
                   ${headlinePrice.toLocaleString()}
                 </div>
-                <div className="text-[14px] text-slate-body font-medium">/ month</div>
+                <div className="text-sm text-slate-body font-medium">/ month</div>
               </div>
               {isAnnual && (
-                <div className="mt-1 text-[12px] text-slate-meta">
+                <div className="mt-1 text-xs text-slate-meta">
                   Billed annually · ${selectedTier.annualPrice.toLocaleString()}/yr
                 </div>
               )}
@@ -103,7 +103,7 @@ export default async function SignUpPage({ searchParams }: PageProps) {
               {selectedTier.features.map((f, i) => (
                 <li
                   key={i}
-                  className="text-[14px] text-ink flex items-start gap-2 leading-snug"
+                  className="text-sm text-ink flex items-start gap-2 leading-snug"
                 >
                   <span className="text-heritage-light font-extrabold flex-shrink-0">
                     ✓
@@ -113,7 +113,7 @@ export default async function SignUpPage({ searchParams }: PageProps) {
               ))}
             </ul>
 
-            <p className="mt-7 pt-5 border-t border-[var(--rule)] text-[13px] text-slate-meta leading-relaxed">
+            <p className="mt-7 pt-5 border-t border-[var(--rule)] text-xs text-slate-meta leading-relaxed">
               Payment via Stripe. Cancel or change tiers anytime. No setup fees
               or implementation costs.
             </p>
@@ -121,7 +121,7 @@ export default async function SignUpPage({ searchParams }: PageProps) {
             <div className="mt-5">
               <Link
                 href="/pricing"
-                className="text-[13px] font-semibold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink underline underline-offset-2"
+                className="text-xs font-semibold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink underline underline-offset-2"
               >
                 ← Change tier
               </Link>
@@ -129,7 +129,7 @@ export default async function SignUpPage({ searchParams }: PageProps) {
           </aside>
         </div>
 
-        <p className="mt-10 text-[14px] text-slate-body leading-relaxed">
+        <p className="mt-10 text-sm text-slate-body leading-relaxed">
           Already have an account?{" "}
           <Link
             href="/employer/sign-in"

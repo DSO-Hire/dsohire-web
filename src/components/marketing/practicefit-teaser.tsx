@@ -83,7 +83,7 @@ export function PracticeFitTeaser({
           <Eyebrow className="text-heritage-deep mb-1">
             Try it · 3 questions · 30 seconds
           </Eyebrow>
-          <div className="text-[15px] font-bold tracking-[-0.3px] text-ink leading-tight">
+          <div className="text-sm font-bold tracking-[-0.3px] text-ink leading-tight">
             {done ? "Here's how your score assembles" : "How do you like to work?"}
           </div>
         </div>
@@ -157,7 +157,7 @@ export function PracticeFitTeaser({
                 </li>
               ))}
             </ul>
-            <p className="text-[13px] text-slate-body leading-relaxed mb-6">
+            <p className="text-xs text-slate-body leading-relaxed mb-6">
               Your real PracticeFit uses 25+ dimensions — schedule overlap
               with actual openings, commute from your area, PMS fluency,
               clinical mix, and more. Five minutes, free, private.

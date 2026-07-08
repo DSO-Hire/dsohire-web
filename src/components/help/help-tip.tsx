@@ -90,7 +90,7 @@ export function HelpTip({
           }
         >
           {title && (
-            <span className="mb-1 block text-[11px] font-bold uppercase tracking-[1.5px] text-heritage-deep">
+            <span className="mb-1 block text-2xs font-bold uppercase tracking-[1.5px] text-heritage-deep">
               {title}
             </span>
           )}

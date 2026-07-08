@@ -42,7 +42,7 @@ export function BrandLoader({
         />
       </svg>
       {label ? (
-        <span className="text-[11px] font-bold uppercase tracking-[2px] text-slate-meta">
+        <span className="text-2xs font-bold uppercase tracking-[2px] text-slate-meta">
           {label}
         </span>
       ) : null}

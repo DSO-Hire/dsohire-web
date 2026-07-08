@@ -27,7 +27,7 @@ export default async function ReferPage({
             <h1 className="text-2xl font-bold text-ink mb-2">
               This referral link isn&apos;t active
             </h1>
-            <p className="text-[14px] text-slate-body leading-relaxed">
+            <p className="text-sm text-slate-body leading-relaxed">
               The link may be mistyped or no longer in use. Check with the
               person who shared it for an updated link.
             </p>
@@ -35,13 +35,13 @@ export default async function ReferPage({
         ) : (
           <>
             <header className="mb-7 text-center">
-              <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+              <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
                 Refer a candidate
               </div>
               <h1 className="text-3xl font-extrabold tracking-[-1px] text-ink">
                 Know someone great for {dso.dsoName}?
               </h1>
-              <p className="mt-3 text-[15px] text-slate-body leading-relaxed">
+              <p className="mt-3 text-sm text-slate-body leading-relaxed">
                 Pass along their name and the hiring team will reach out. It
                 only takes a minute — no account needed.
               </p>
@@ -49,7 +49,7 @@ export default async function ReferPage({
             <div className="border border-[var(--rule)] bg-cream/40 p-6 sm:p-8">
               <ReferForm code={code} jobs={dso.jobs} />
             </div>
-            <p className="mt-5 text-center text-[11px] text-slate-meta">
+            <p className="mt-5 text-center text-2xs text-slate-meta">
               Powered by DSO Hire
             </p>
           </>

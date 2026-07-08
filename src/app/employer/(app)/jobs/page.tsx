@@ -383,7 +383,7 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
     <>
       <CapNudge kind="jobs" usage={capStatus.jobs} tier={capStatus.tier} />
       {(autoPausedCount ?? 0) > 0 && (
-        <div className="mb-6 rounded-md border border-warning bg-warning-bg px-4 py-3 text-[13px] text-warning">
+        <div className="mb-6 rounded-md border border-warning bg-warning-bg px-4 py-3 text-xs text-warning">
           <strong>
             {autoPausedCount} listing{autoPausedCount === 1 ? "" : "s"} paused
             after your plan change.
@@ -403,17 +403,17 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
                 <span className="absolute inline-flex h-full w-full rounded-full bg-heritage opacity-75 animate-ping" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-heritage" />
               </span>
-              <span className="text-[10px] font-extrabold tracking-[3px] uppercase text-heritage-deep">
+              <span className="text-2xs font-extrabold tracking-[3px] uppercase text-heritage-deep">
                 Jobs
               </span>
-              <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta border-l border-rule pl-3.5">
+              <span className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta border-l border-rule pl-3.5">
                 {dateLabel}
               </span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-tight text-ink">
               Your job listings
             </h1>
-            <p className="mt-2 text-[14px] text-slate-body">
+            <p className="mt-2 text-sm text-slate-body">
               {allJobs.length === 0
                 ? "Post your first job to start receiving applications."
                 : `${activeJobsCount} active · ${apps7dTotal} application${apps7dTotal === 1 ? "" : "s"} in the last 7 days.`}
@@ -422,7 +422,7 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
           {canPostJobs && (
             <Link
               href="/employer/jobs/new"
-              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-xs font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
             >
               <Plus className="h-4 w-4" />
               Post a Job
@@ -433,7 +433,7 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
 
       {notice === "no_post_permission" && (
         <div className="mb-6 border-l-2 border-warning bg-warning-bg px-4 py-3">
-          <p className="text-[13px] text-warning leading-relaxed">
+          <p className="text-xs text-warning leading-relaxed">
             Posting jobs is limited to owners, admins, and recruiters. Your role
             can review applications and view jobs, but not create them — reach
             out to an owner or admin if you need posting access.
@@ -507,7 +507,7 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
             <Link
               key={filter.value}
               href={href}
-              className={`inline-flex items-center gap-2 px-4 py-2.5 text-[10px] font-extrabold tracking-[1.6px] uppercase transition-colors border ${
+              className={`inline-flex items-center gap-2 px-4 py-2.5 text-2xs font-extrabold tracking-[1.6px] uppercase transition-colors border ${
                 isActive
                   ? "bg-primary text-primary-foreground border-primary"
                   : "bg-card text-slate-body border-rule hover:border-rule-strong hover:text-ink"
@@ -568,7 +568,7 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
         />
       ) : listJobs.length === 0 ? (
         // The only filtered job was the hero — nothing else to show.
-        <div className="text-[12px] text-slate-meta italic px-1 py-2">
+        <div className="text-xs text-slate-meta italic px-1 py-2">
           That&apos;s your only {activeStatus === "all" ? "job" : `${activeStatus} job`} for now.
         </div>
       ) : (
@@ -635,7 +635,7 @@ function SummaryTile({
         {value}
       </div>
       {meta && (
-        <div className="text-[11px] text-slate-meta line-clamp-1">{meta}</div>
+        <div className="text-2xs text-slate-meta line-clamp-1">{meta}</div>
       )}
       {typeof trendPillDelta === "number" && (
         <div className="mt-1.5">
@@ -717,10 +717,10 @@ function HeroJobCard({
             >
               {status}
             </span>
-            <span className="text-[10px] font-bold tracking-[1.4px] uppercase text-[#8db8a3]">
+            <span className="text-2xs font-bold tracking-[1.4px] uppercase text-[#8db8a3]">
               {roleCategory}
             </span>
-            <span className="text-[10px] font-bold tracking-[1.4px] uppercase text-[#8db8a3]">
+            <span className="text-2xs font-bold tracking-[1.4px] uppercase text-[#8db8a3]">
               {employmentType}
             </span>
           </div>
@@ -736,7 +736,7 @@ function HeroJobCard({
               {locations.slice(0, 2).map((loc) => (
                 <span
                   key={loc.id}
-                  className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.3px] text-hero-foreground border border-hero-foreground/20"
+                  className="inline-flex items-center px-1.5 py-0.5 text-2xs font-semibold tracking-[0.3px] text-hero-foreground border border-hero-foreground/20"
                   style={{ background: "rgba(255,255,255,0.06)" }}
                 >
                   {loc.name}
@@ -744,13 +744,13 @@ function HeroJobCard({
                 </span>
               ))}
               {locations.length > 2 && (
-                <span className="text-[10px] font-semibold tracking-[0.3px] text-hero-foreground/55">
+                <span className="text-2xs font-semibold tracking-[0.3px] text-hero-foreground/55">
                   +{locations.length - 2} more
                 </span>
               )}
             </div>
           )}
-          <div className="text-[11px] text-hero-foreground/55 tracking-[0.4px] mb-5">
+          <div className="text-2xs text-hero-foreground/55 tracking-[0.4px] mb-5">
             Updated {updated.toLocaleDateString()}
           </div>
 
@@ -765,7 +765,7 @@ function HeroJobCard({
               {(thisWeek > 0 || lastWeek > 0) && (
                 <div className="mt-1.5">
                   <span
-                    className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-bold tracking-[0.4px] text-[#8db8a3]"
+                    className="inline-flex items-center gap-1 px-1.5 py-0.5 text-2xs font-bold tracking-[0.4px] text-[#8db8a3]"
                     style={{ background: "rgba(141,184,163,0.18)" }}
                   >
                     {delta > 0 ? "↗" : delta < 0 ? "↘" : "—"}{" "}
@@ -795,7 +795,7 @@ function HeroJobCard({
 
         <div className="flex flex-col items-stretch lg:items-end justify-between gap-5 lg:min-w-[260px]">
           <HeroJobSpark data={spark} />
-          <div className="inline-flex items-center gap-1.5 text-[10px] font-extrabold tracking-[1.8px] uppercase text-[#8db8a3] self-start lg:self-end">
+          <div className="inline-flex items-center gap-1.5 text-2xs font-extrabold tracking-[1.8px] uppercase text-[#8db8a3] self-start lg:self-end">
             Open job
             <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
           </div>
@@ -919,7 +919,7 @@ function JobRow({
         scheduledPublishAt={job.scheduled_publish_at}
       />
       <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-3 mb-1.5 text-[10px] font-bold tracking-[1.4px] uppercase text-slate-meta">
+        <div className="flex flex-wrap items-center gap-3 mb-1.5 text-2xs font-bold tracking-[1.4px] uppercase text-slate-meta">
           <span>{humanRoleCategory(job.role_category)}</span>
           <span>{humanEmploymentType(job.employment_type)}</span>
           {job.visibility === "internal_only" && (
@@ -941,20 +941,20 @@ function JobRow({
             {locations.slice(0, 2).map((loc) => (
               <span
                 key={loc.id}
-                className="inline-flex items-center px-1.5 py-0.5 bg-cream border border-[var(--rule-strong)] text-[10px] font-semibold tracking-[0.3px] text-ink"
+                className="inline-flex items-center px-1.5 py-0.5 bg-cream border border-[var(--rule-strong)] text-2xs font-semibold tracking-[0.3px] text-ink"
               >
                 {loc.name}
                 {loc.state ? ` · ${loc.state}` : ""}
               </span>
             ))}
             {locations.length > 2 && (
-              <span className="text-[10px] font-semibold tracking-[0.3px] text-slate-meta">
+              <span className="text-2xs font-semibold tracking-[0.3px] text-slate-meta">
                 +{locations.length - 2} more
               </span>
             )}
           </div>
         ) : null}
-        <div className="text-[11px] text-slate-meta tracking-[0.3px]">
+        <div className="text-2xs text-slate-meta tracking-[0.3px]">
           Updated {updated.toLocaleDateString()}
         </div>
       </div>
@@ -976,7 +976,7 @@ function JobRow({
             ariaLabel={`${thisWeek} applications in the last 7 days`}
           />
         ) : (
-          <div className="h-[28px] flex items-center text-[11px] text-slate-meta italic">
+          <div className="h-[28px] flex items-center text-2xs text-slate-meta italic">
             No 7d activity
           </div>
         )}
@@ -1075,7 +1075,7 @@ function EmptyState({
           ? `No ${activeStatus} jobs.`
           : "No jobs yet."}
       </h2>
-      <p className="text-[14px] text-slate-body leading-relaxed max-w-[440px] mx-auto mb-7">
+      <p className="text-sm text-slate-body leading-relaxed max-w-[440px] mx-auto mb-7">
         {hasJobsButFiltered
           ? `Switch the filter to see your other jobs, or post a new one in this status.`
           : canPostJobs
@@ -1085,7 +1085,7 @@ function EmptyState({
       {canPostJobs && !hasJobsButFiltered && (
         <Link
           href="/employer/jobs/new"
-          className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
+          className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-xs font-bold tracking-[1.8px] uppercase hover:bg-primary/90 transition-colors"
         >
           <Plus className="h-4 w-4" />
           Post a Job

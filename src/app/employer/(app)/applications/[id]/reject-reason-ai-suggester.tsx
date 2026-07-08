@@ -72,7 +72,7 @@ export function RejectReasonAiSuggester({
             <Eyebrow>
               AI rejection-reason suggester
             </Eyebrow>
-            <p className="mt-1 text-[13px] text-slate-meta leading-relaxed">
+            <p className="mt-1 text-xs text-slate-meta leading-relaxed">
               Available on Growth tier and above.{" "}
               <Link
                 href="/pricing"
@@ -121,7 +121,7 @@ export function RejectReasonAiSuggester({
           <Eyebrow>
             Suggest with AI
           </Eyebrow>
-          <p className="mt-0.5 text-[13px] text-slate-meta leading-relaxed">
+          <p className="mt-0.5 text-xs text-slate-meta leading-relaxed">
             Get 2-3 draft rejection reasons based on this candidate&apos;s
             screening answers and scorecards.
           </p>
@@ -153,12 +153,12 @@ export function RejectReasonAiSuggester({
           )}
         </button>
         {!hasContext && !suggestions && (
-          <span className="text-[12px] text-slate-meta">
+          <span className="text-xs text-slate-meta">
             Need at least one screening answer or scorecard.
           </span>
         )}
         {usage && !pending && (
-          <span className="text-[10px] text-slate-meta tracking-[0.5px] tabular">
+          <span className="text-2xs text-slate-meta tracking-[0.5px] tabular">
             Generated in {(usage.elapsed_ms / 1000).toFixed(1)}s · ~$
             {usage.cost_usd.toFixed(4)}
           </span>
@@ -167,7 +167,7 @@ export function RejectReasonAiSuggester({
 
       {error && (
         <div className="mt-3 flex items-start justify-between gap-3 border-l-4 border-danger bg-danger-bg p-3">
-          <div className="flex items-start gap-2 text-[13px] text-danger leading-relaxed">
+          <div className="flex items-start gap-2 text-xs text-danger leading-relaxed">
             <AlertCircle
               className="h-3.5 w-3.5 mt-0.5 flex-shrink-0"
               aria-hidden="true"
@@ -199,7 +199,7 @@ export function RejectReasonAiSuggester({
                 }`}
               >
                 <div className="flex items-center justify-between gap-3">
-                  <span className="inline-flex items-center px-2 py-0.5 bg-heritage/10 text-heritage-deep text-[10px] font-semibold">
+                  <span className="inline-flex items-center px-2 py-0.5 bg-heritage/10 text-heritage-deep text-2xs font-semibold">
                     {s.label}
                   </span>
                   <button
@@ -220,7 +220,7 @@ export function RejectReasonAiSuggester({
                     )}
                   </button>
                 </div>
-                <p className="mt-2 text-[14px] text-ink leading-relaxed whitespace-pre-wrap">
+                <p className="mt-2 text-sm text-ink leading-relaxed whitespace-pre-wrap">
                   {s.body}
                 </p>
               </li>

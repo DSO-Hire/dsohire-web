@@ -48,7 +48,7 @@ export default function NotFound() {
         />
 
         <div className="relative z-10 max-w-[820px] mx-auto text-center">
-          <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-deep mb-4">
+          <div className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-4">
             Error 404
           </div>
           <h1 className="text-5xl sm:text-7xl font-extrabold tracking-[-0.025em] leading-[1.02] text-ink mb-5">
@@ -71,13 +71,13 @@ export default function NotFound() {
               <span className="inline-flex items-center justify-center w-9 h-9 mb-3 bg-ivory text-ink" aria-hidden>
                 <Building2 className="h-4 w-4" />
               </span>
-              <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-hero-foreground/65 mb-1">
+              <div className="text-2xs font-bold tracking-[2.5px] uppercase text-hero-foreground/65 mb-1">
                 Dental Groups
               </div>
               <div className="text-[18px] font-extrabold tracking-[-0.4px] leading-tight text-hero-foreground mb-4">
                 Hiring across your practices
               </div>
-              <span className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[1.8px] uppercase text-hero-foreground/85 group-hover:text-hero-foreground transition-colors">
+              <span className="inline-flex items-center gap-2 text-2xs font-bold tracking-[1.8px] uppercase text-hero-foreground/85 group-hover:text-hero-foreground transition-colors">
                 Go to /for-dental-groups
                 <ArrowRight className="h-3.5 w-3.5 motion-safe:transition-transform motion-safe:group-hover:translate-x-1" />
               </span>
@@ -93,13 +93,13 @@ export default function NotFound() {
               <span className="inline-flex items-center justify-center w-9 h-9 mb-3 bg-ivory text-heritage-deep" aria-hidden>
                 <Stethoscope className="h-4 w-4" />
               </span>
-              <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-hero-foreground/65 mb-1">
+              <div className="text-2xs font-bold tracking-[2.5px] uppercase text-hero-foreground/65 mb-1">
                 Job Candidates
               </div>
               <div className="text-[18px] font-extrabold tracking-[-0.4px] leading-tight text-hero-foreground mb-4">
                 Find your next dental role
               </div>
-              <span className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[1.8px] uppercase text-hero-foreground/85 group-hover:text-hero-foreground transition-colors">
+              <span className="inline-flex items-center gap-2 text-2xs font-bold tracking-[1.8px] uppercase text-hero-foreground/85 group-hover:text-hero-foreground transition-colors">
                 Go to /for-candidates
                 <ArrowRight className="h-3.5 w-3.5 motion-safe:transition-transform motion-safe:group-hover:translate-x-1" />
               </span>
@@ -107,7 +107,7 @@ export default function NotFound() {
           </div>
 
           {/* Tertiary — back home / browse jobs / contact */}
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-7 gap-y-3 text-[12px] font-bold tracking-[1.8px] uppercase">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-7 gap-y-3 text-xs font-bold tracking-[1.8px] uppercase">
             <Link
               href="/"
               className="inline-flex items-center gap-1.5 text-slate-body hover:text-ink transition-colors"

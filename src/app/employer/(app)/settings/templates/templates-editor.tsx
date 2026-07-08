@@ -162,13 +162,13 @@ function TemplateCard({
       >
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
+            <span className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep">
               {meta.label}
             </span>
             <StatusPill isCustom={isCustom} updatedAt={updatedAt} />
             {!meta.dispatchWired && (
               <span
-                className="text-[10px] tracking-[1px] uppercase text-slate-meta inline-flex items-center gap-1 border border-[var(--rule)] px-1.5 py-0.5 rounded"
+                className="text-2xs tracking-[1px] uppercase text-slate-meta inline-flex items-center gap-1 border border-[var(--rule)] px-1.5 py-0.5 rounded"
                 title="Saved here, but the dispatch path that sends this email isn't wired yet — it will be in a follow-up."
               >
                 Not auto-sending yet
@@ -178,7 +178,7 @@ function TemplateCard({
           <h2 className="font-display text-lg font-bold text-ink leading-tight">
             {meta.description}
           </h2>
-          <p className="mt-2 text-[12px] text-slate-meta truncate">
+          <p className="mt-2 text-xs text-slate-meta truncate">
             <span className="font-semibold">Subject:</span> {snapshot.subject}
           </p>
         </div>
@@ -201,7 +201,7 @@ function TemplateCard({
           <div>
             <label
               htmlFor={`subject-${template.kind}`}
-              className="mb-1.5 block text-[12px] font-semibold text-ink"
+              className="mb-1.5 block text-xs font-semibold text-ink"
             >
               Subject
             </label>
@@ -218,7 +218,7 @@ function TemplateCard({
               maxLength={200}
               className="w-full rounded border border-[var(--rule-strong)] bg-card px-3 py-2 text-sm text-ink focus:border-heritage focus:outline-none disabled:bg-cream/40 disabled:text-slate-meta font-mono"
             />
-            <p className="mt-1.5 text-[11px] text-slate-meta">
+            <p className="mt-1.5 text-2xs text-slate-meta">
               Mergefields work in the subject too — type{" "}
               <code className="font-mono">{"{{candidate.first_name}}"}</code>{" "}
               etc.
@@ -227,7 +227,7 @@ function TemplateCard({
 
           {/* Body */}
           <div>
-            <label className="mb-1.5 block text-[12px] font-semibold text-ink">
+            <label className="mb-1.5 block text-xs font-semibold text-ink">
               Body
             </label>
             <TemplateBodyEditor
@@ -274,7 +274,7 @@ function TemplateCard({
                   type="button"
                   onClick={onRevert}
                   disabled={pending}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-2 text-[12px] font-semibold text-slate-body hover:bg-cream/60 hover:text-ink disabled:opacity-40"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rule-strong)] bg-card px-3 py-2 text-xs font-semibold text-slate-body hover:bg-cream/60 hover:text-ink disabled:opacity-40"
                 >
                   <RotateCcw className="size-3.5" />
                   Revert to default
@@ -284,7 +284,7 @@ function TemplateCard({
                 type="button"
                 onClick={onSave}
                 disabled={!dirty || pending || !canEdit}
-                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {pending ? (
                   <>
@@ -316,7 +316,7 @@ function StatusPill({
 }) {
   if (!isCustom) {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full border border-[var(--rule)] bg-cream/40 px-2 py-0.5 text-[10px] font-semibold tracking-[0.5px] uppercase text-slate-meta">
+      <span className="inline-flex items-center gap-1 rounded-full border border-[var(--rule)] bg-cream/40 px-2 py-0.5 text-2xs font-semibold tracking-[0.5px] uppercase text-slate-meta">
         System default
       </span>
     );
@@ -324,7 +324,7 @@ function StatusPill({
   const ts = updatedAt ? new Date(updatedAt) : null;
   const tsLabel = ts ? formatRelativeTime(ts) : null;
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-heritage-deep/10 px-2 py-0.5 text-[10px] font-semibold tracking-[0.5px] uppercase text-heritage-deep">
+    <span className="inline-flex items-center gap-1 rounded-full bg-heritage-deep/10 px-2 py-0.5 text-2xs font-semibold tracking-[0.5px] uppercase text-heritage-deep">
       <Sparkles className="size-3" />
       Custom{tsLabel ? ` · ${tsLabel}` : ""}
     </span>
@@ -350,13 +350,13 @@ function formatRelativeTime(d: Date): string {
 function ReferencePanel({ groups }: { groups: readonly MergefieldGroup[] }) {
   return (
     <details className="border border-[var(--rule)] bg-cream/30 px-4 py-3">
-      <summary className="cursor-pointer text-[12px] font-semibold text-ink">
+      <summary className="cursor-pointer text-xs font-semibold text-ink">
         Available mergefields
       </summary>
       <div className="mt-3 space-y-3">
         {groups.map((group) => (
           <div key={group.id}>
-            <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-1.5">
+            <div className="text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep mb-1.5">
               {group.label}
             </div>
             <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
@@ -365,10 +365,10 @@ function ReferencePanel({ groups }: { groups: readonly MergefieldGroup[] }) {
                   key={f.token}
                   className="flex items-baseline justify-between gap-2 px-2 py-1 rounded hover:bg-card/60"
                 >
-                  <code className="font-mono text-[11px] text-ink">
+                  <code className="font-mono text-2xs text-ink">
                     {`{{${f.token}}}`}
                   </code>
-                  <span className="text-[11px] text-slate-meta truncate">
+                  <span className="text-2xs text-slate-meta truncate">
                     {f.label}
                   </span>
                 </div>
@@ -437,14 +437,14 @@ function PreviewPane({
   return (
     <div>
       <div className="mb-2 flex items-baseline justify-between gap-2">
-        <span className="text-[12px] font-semibold text-ink">Preview</span>
-        <span className="text-[11px] text-slate-meta">
+        <span className="text-xs font-semibold text-ink">Preview</span>
+        <span className="text-2xs text-slate-meta">
           Rendered with sample data
         </span>
       </div>
 
       {hasIssues && (
-        <div className="mb-3 border border-warning bg-warning-bg px-3 py-2 text-[12px] text-warning">
+        <div className="mb-3 border border-warning bg-warning-bg px-3 py-2 text-xs text-warning">
           <div className="font-semibold inline-flex items-center gap-1.5 mb-1">
             <AlertTriangle className="size-3.5" />
             Unknown mergefields
@@ -462,10 +462,10 @@ function PreviewPane({
 
       <div className="border border-[var(--rule)] bg-cream/30 overflow-hidden">
         <div className="border-b border-[var(--rule)] bg-white px-4 py-2.5">
-          <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-0.5">
+          <div className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta mb-0.5">
             Subject
           </div>
-          <div className="text-[14px] font-semibold text-ink">
+          <div className="text-sm font-semibold text-ink">
             {subjectResult.output || (
               <span className="text-slate-meta italic">
                 (subject missing)
@@ -476,11 +476,11 @@ function PreviewPane({
         <div className="bg-white px-5 py-4">
           {cleanBody ? (
             <div
-              className="dso-prose text-[14px] text-ink"
+              className="dso-prose text-sm text-ink"
               dangerouslySetInnerHTML={{ __html: cleanBody }}
             />
           ) : (
-            <p className="text-[13px] text-slate-meta italic">
+            <p className="text-xs text-slate-meta italic">
               (body empty)
             </p>
           )}

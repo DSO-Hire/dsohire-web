@@ -40,7 +40,7 @@ export function EnrollControl({
       <select
         value={sequenceId}
         onChange={(e) => setSequenceId(e.target.value)}
-        className="rounded border border-[var(--rule)] bg-card px-2 py-1.5 text-[13px] text-ink"
+        className="rounded border border-[var(--rule)] bg-card px-2 py-1.5 text-xs text-ink"
       >
         <option value="">Add to sequence…</option>
         {sequences.map((s) => (
@@ -57,7 +57,7 @@ export function EnrollControl({
       >
         Enroll
       </button>
-      {msg && <span className="text-[12px] text-slate-body">{msg}</span>}
+      {msg && <span className="text-xs text-slate-body">{msg}</span>}
     </div>
   );
 }

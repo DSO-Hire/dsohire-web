@@ -229,17 +229,17 @@ export function DashboardMiniMap({
         ) : (
           /* Empty state — geocoding not yet run, or no locations on file. */
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-cream text-center px-6">
-            <div className="text-[13px] text-ink mb-1">
+            <div className="text-xs text-ink mb-1">
               Add a location to light up the map.
             </div>
-            <div className="text-[11px] text-slate-meta">
+            <div className="text-2xs text-slate-meta">
               Each city becomes a pin sized by application volume.
             </div>
           </div>
         )}
       </div>
 
-      <div className="flex items-center gap-2 px-6 py-3 border-t border-[var(--rule)] bg-ivory text-[11px] text-slate-meta">
+      <div className="flex items-center gap-2 px-6 py-3 border-t border-[var(--rule)] bg-ivory text-2xs text-slate-meta">
         <span className="block w-2 h-2 bg-heritage flex-shrink-0" />
         <span>{legendCaption}</span>
       </div>

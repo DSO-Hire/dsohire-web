@@ -142,7 +142,7 @@ export function JobsBrowser({
           </>
         ) : (
           <>
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep">
+            <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep">
               Jobs
             </div>
             <h1 className="font-display text-3xl font-extrabold tracking-[-0.8px] text-ink leading-tight">
@@ -163,14 +163,14 @@ export function JobsBrowser({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search role or practice…"
-              className="w-full rounded-md border border-[var(--rule)] bg-card pl-9 pr-3 py-2 text-[13px] text-ink placeholder:text-slate-meta focus:border-heritage focus:outline-none"
+              className="w-full rounded-md border border-[var(--rule)] bg-card pl-9 pr-3 py-2 text-xs text-ink placeholder:text-slate-meta focus:border-heritage focus:outline-none"
             />
           </label>
           {stateOptions.length > 0 && (
             <select
               value={stateFilter}
               onChange={(e) => setStateFilter(e.target.value)}
-              className="rounded-md border border-[var(--rule)] bg-card px-3 py-2 text-[13px] text-ink focus:border-heritage focus:outline-none"
+              className="rounded-md border border-[var(--rule)] bg-card px-3 py-2 text-xs text-ink focus:border-heritage focus:outline-none"
             >
               <option value="">All states</option>
               {stateOptions.map((s) => (
@@ -185,7 +185,7 @@ export function JobsBrowser({
               type="button"
               onClick={() => setTopOnly((v) => !v)}
               className={
-                "inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-[12px] font-semibold transition-colors " +
+                "inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-semibold transition-colors " +
                 (topOnly
                   ? "border-heritage-deep bg-heritage/10 text-heritage-deep"
                   : "border-[var(--rule)] text-slate-body hover:border-heritage-deep hover:text-heritage-deep")
@@ -199,7 +199,7 @@ export function JobsBrowser({
             <button
               type="button"
               onClick={clearAll}
-              className="inline-flex items-center gap-1 text-[12px] font-semibold text-slate-meta hover:text-ink"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-slate-meta hover:text-ink"
             >
               <X className="h-3 w-3" />
               Clear
@@ -217,7 +217,7 @@ export function JobsBrowser({
                   type="button"
                   onClick={() => toggleRole(r.value)}
                   className={
-                    "rounded-full border px-3 py-1 text-[11px] font-semibold tracking-[0.3px] transition-colors " +
+                    "rounded-full border px-3 py-1 text-2xs font-semibold tracking-[0.3px] transition-colors " +
                     (active
                       ? "border-heritage-deep bg-heritage-deep text-primary-foreground"
                       : "border-[var(--rule)] text-slate-body hover:border-heritage-deep hover:text-heritage-deep")
@@ -234,7 +234,7 @@ export function JobsBrowser({
       {/* Results */}
       {totalShown === 0 ? (
         <div className="border border-[var(--rule)] bg-cream p-8 text-center">
-          <p className="text-[14px] text-slate-body leading-relaxed">
+          <p className="text-sm text-slate-body leading-relaxed">
             {jobs.length === 0
               ? "No active roles right now — dental groups post throughout the week. We'll email you when a fitting role opens."
               : "No roles match your filters."}
@@ -243,7 +243,7 @@ export function JobsBrowser({
             <button
               type="button"
               onClick={clearAll}
-              className="mt-3 text-[12px] font-bold tracking-[1px] uppercase text-heritage-deep hover:underline"
+              className="mt-3 text-xs font-bold tracking-[1px] uppercase text-heritage-deep hover:underline"
             >
               Clear filters
             </button>
@@ -304,12 +304,12 @@ function JobSection({
             {title}
           </h2>
           {eyebrow && (
-            <p className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mt-0.5">
+            <p className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta mt-0.5">
               {eyebrow}
             </p>
           )}
         </div>
-        <span className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta">
+        <span className="text-2xs font-bold tracking-[2px] uppercase text-slate-meta">
           {jobs.length === 1 ? "1 role" : `${jobs.length} roles`}
         </span>
       </div>
@@ -336,15 +336,15 @@ function Row({ job }: { job: BrowseJob }) {
         <div className="flex items-start justify-between gap-6">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-1.5 flex-wrap">
-              <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
+              <span className="text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep">
                 {job.roleLabel}
               </span>
-              <span className="text-[10px] tracking-[0.5px] text-slate-meta">
+              <span className="text-2xs tracking-[0.5px] text-slate-meta">
                 {job.employmentLabel}
               </span>
               {style && (
                 <span
-                  className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${style.bgClass} ${style.textClass} ${style.borderClass}`}
+                  className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-2xs font-bold tracking-wider uppercase ${style.bgClass} ${style.textClass} ${style.borderClass}`}
                   title={`${fitBrand} · ${style.label} · ${job.fitScore}/100`}
                 >
                   {job.fitProduct === "dsofit" ? (
@@ -359,7 +359,7 @@ function Row({ job }: { job: BrowseJob }) {
                 </span>
               )}
               {job.applied && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-heritage text-primary-foreground text-[10px] font-bold tracking-[1.2px] uppercase">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-heritage text-primary-foreground text-2xs font-bold tracking-[1.2px] uppercase">
                   Applied
                 </span>
               )}
@@ -367,7 +367,7 @@ function Row({ job }: { job: BrowseJob }) {
             <div className="text-[17px] font-extrabold tracking-[-0.3px] text-ink leading-tight mb-1 transition-colors group-hover:text-heritage-deep">
               {job.title}
             </div>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-slate-meta">
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-meta">
               {job.dsoName && (
                 <span className="font-semibold text-slate-body">{job.dsoName}</span>
               )}
@@ -383,7 +383,7 @@ function Row({ job }: { job: BrowseJob }) {
           <div className="flex items-center gap-6 text-right flex-shrink-0">
             {job.compLabel && (
               <div>
-                <div className="text-[15px] font-extrabold text-ink leading-none">
+                <div className="text-sm font-extrabold text-ink leading-none">
                   {job.compLabel}
                 </div>
                 {job.compPeriodLabel && (
@@ -409,13 +409,13 @@ function PracticeFitOffBanner({
   const name = product === "dsofit" ? "DSOFit" : "PracticeFit";
   return (
     <div className="mt-2 flex flex-wrap items-center justify-between gap-3 border-l-2 border-heritage bg-cream/60 px-4 py-3">
-      <p className="text-[13px] text-slate-body leading-relaxed">
+      <p className="text-xs text-slate-body leading-relaxed">
         Turn on {name} to rank these roles to your profile and let dental
         groups find you by fit.
       </p>
       <Link
         href={product === "dsofit" ? "/candidate/dsofit" : "/candidate/practice-fit"}
-        className="inline-flex items-center gap-1.5 rounded-md bg-heritage px-3 py-2 text-[11px] font-bold tracking-[1px] uppercase text-primary-foreground hover:bg-heritage-deep"
+        className="inline-flex items-center gap-1.5 rounded-md bg-heritage px-3 py-2 text-2xs font-bold tracking-[1px] uppercase text-primary-foreground hover:bg-heritage-deep"
       >
         <FitMark product={product} className="h-3 w-3" />
         Turn on {name}

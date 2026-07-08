@@ -96,7 +96,7 @@ export function LocationsView({
     <>
       {showFootprint && (
         <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 border border-[var(--rule)] bg-card px-4 py-3">
-          <span className="inline-flex items-center gap-1.5 text-[12px] font-bold text-ink">
+          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-ink">
             <MapPin className="h-3.5 w-3.5 text-heritage" />
             {activeState
               ? `Showing ${activeState} — ${filtered.length} of ${footprint.total}`
@@ -110,7 +110,7 @@ export function LocationsView({
               <button
                 type="button"
                 onClick={() => setActiveState(null)}
-                className="inline-flex items-center gap-1 border border-[var(--rule-strong)] bg-card px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.5px] text-slate-meta hover:text-ink"
+                className="inline-flex items-center gap-1 border border-[var(--rule-strong)] bg-card px-2 py-0.5 text-2xs font-bold uppercase tracking-[0.5px] text-slate-meta hover:text-ink"
               >
                 <X className="h-3 w-3" /> All
               </button>
@@ -125,7 +125,7 @@ export function LocationsView({
                   aria-pressed={on}
                   title={`Show only ${st} locations`}
                   className={
-                    "inline-flex items-center gap-1 border px-2 py-0.5 text-[11px] font-semibold transition-colors " +
+                    "inline-flex items-center gap-1 border px-2 py-0.5 text-2xs font-semibold transition-colors " +
                     (on
                       ? "border-primary bg-primary text-primary-foreground"
                       : "border-[var(--rule)] bg-cream/70 text-slate-body hover:border-heritage")
@@ -237,7 +237,7 @@ function LocationRowItem({ location }: { location: LocationCardData }) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-1.5">
               <MapPin className="h-3.5 w-3.5 text-heritage flex-shrink-0" />
-              <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+              <span className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta">
                 {cityState || "Address incomplete"}
               </span>
             </div>
@@ -245,7 +245,7 @@ function LocationRowItem({ location }: { location: LocationCardData }) {
               {location.name}
             </div>
             {street && (
-              <div className="text-[13px] tracking-[0.3px] text-slate-meta truncate">
+              <div className="text-xs tracking-[0.3px] text-slate-meta truncate">
                 {street}
                 {location.postal_code ? ` · ${location.postal_code}` : ""}
               </div>
@@ -316,16 +316,16 @@ function LocationCard({ location }: { location: LocationCardData }) {
       {/* footer — active-jobs pill + View affordance */}
       <div className="mt-3 flex items-center justify-between border-t border-[var(--rule)] px-4 py-3">
         {activeJobs > 0 ? (
-          <span className="inline-flex items-center gap-1.5 bg-heritage/[0.10] px-2 py-1 text-[11px] font-bold text-heritage-deep">
+          <span className="inline-flex items-center gap-1.5 bg-heritage/[0.10] px-2 py-1 text-2xs font-bold text-heritage-deep">
             <Briefcase className="h-3 w-3" />
             {activeJobs} active {activeJobs === 1 ? "job" : "jobs"}
           </span>
         ) : (
-          <span className="text-[11px] font-semibold text-slate-meta">
+          <span className="text-2xs font-semibold text-slate-meta">
             No active jobs
           </span>
         )}
-        <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[1px] text-slate-meta transition-colors group-hover:text-heritage-deep">
+        <span className="inline-flex items-center gap-1 text-2xs font-bold uppercase tracking-[1px] text-slate-meta transition-colors group-hover:text-heritage-deep">
           View
           <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
         </span>

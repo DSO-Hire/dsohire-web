@@ -212,7 +212,7 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
                     title={`DSO Hire ${tier.name}: ${fmtUsd(dsoHireAnnual)}`}
                   />
                 </BarRow>
-                <div className="flex gap-4 mt-2 text-[10px] font-semibold text-hero-foreground/40">
+                <div className="flex gap-4 mt-2 text-2xs font-semibold text-hero-foreground/40">
                   <span className="inline-flex items-center gap-1.5">
                     <span className="w-2 h-2 bg-ivory/40" /> Agencies
                   </span>
@@ -241,7 +241,7 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
             </div>
 
             {/* Channel-aware payback line — strongest true claim wins. */}
-            <p className="text-[13px] text-hero-foreground/70 leading-relaxed mb-7">
+            <p className="text-xs text-hero-foreground/70 leading-relaxed mb-7">
               {boardSpend >= dsoHireAnnual && listings > 0 ? (
                 <>
                   Your job-board spend <strong className="text-hero-foreground">alone</strong>{" "}
@@ -384,7 +384,7 @@ function OutputRow({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-4">
-      <span className="text-[13px] text-hero-foreground/65 leading-snug">{label}</span>
+      <span className="text-xs text-hero-foreground/65 leading-snug">{label}</span>
       <span
         className={`text-[20px] font-extrabold tracking-[-0.6px] tabular whitespace-nowrap ${
           accent ? "text-heritage-bright" : "text-hero-foreground"

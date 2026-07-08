@@ -84,10 +84,10 @@ export function CandidateHero({
               {displayName}
             </h1>
             {titleLine && (
-              <div className="text-[15px] text-slate-body">{titleLine}</div>
+              <div className="text-sm text-slate-body">{titleLine}</div>
             )}
             {(headerMetaParts.length > 0 || candidateLocation) && (
-              <div className="text-[13px] text-slate-meta mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+              <div className="text-xs text-slate-meta mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
                 {candidateLocation && (
                   <span className="inline-flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
@@ -111,7 +111,7 @@ export function CandidateHero({
       </div>
 
       {/* Contact strip — replaces the old sidebar Contact card */}
-      <div className="mt-6 pt-5 border-t border-[var(--rule)] flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px]">
+      <div className="mt-6 pt-5 border-t border-[var(--rule)] flex flex-wrap items-center gap-x-5 gap-y-2 text-xs">
         {candidateEmail ? (
           <a
             href={`mailto:${candidateEmail}?subject=${encodeURIComponent(
@@ -145,13 +145,13 @@ export function CandidateHero({
             LinkedIn
           </a>
         )}
-        <span className="ml-auto text-slate-meta text-[12px]">
+        <span className="ml-auto text-slate-meta text-xs">
           Replies to your email also route to this application.
         </span>
       </div>
 
       {/* Job context bar */}
-      <div className="mt-5 pt-5 border-t border-[var(--rule)] flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-slate-body">
+      <div className="mt-5 pt-5 border-t border-[var(--rule)] flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-body">
         <Briefcase className="h-3.5 w-3.5 text-heritage-deep" />
         <span>Applied to</span>
         <Link

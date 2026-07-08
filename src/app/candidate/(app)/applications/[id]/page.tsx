@@ -336,7 +336,7 @@ export default async function CandidateApplicationDetailPage({
         </h1>
         <div className="flex items-center gap-3 flex-wrap">
           {displayed && (
-            <div className="text-[14px] text-slate-body inline-flex items-center gap-2">
+            <div className="text-sm text-slate-body inline-flex items-center gap-2">
               <Building2 className="h-4 w-4" />
               {displayed.name}
             </div>
@@ -355,7 +355,7 @@ export default async function CandidateApplicationDetailPage({
             <div className="text-xl font-bold text-ink mb-2">
               {STATUS_LABELS[app.status as StageKind] ?? app.status}
             </div>
-            <div className="text-[13px] text-slate-body inline-flex items-center gap-2">
+            <div className="text-xs text-slate-body inline-flex items-center gap-2">
               <Calendar className="h-3 w-3" />
               Submitted {submitted.toLocaleDateString()} at{" "}
               {submitted.toLocaleTimeString([], {
@@ -392,10 +392,10 @@ export default async function CandidateApplicationDetailPage({
                 <div className="flex items-start gap-3">
                   <PracticeFitMark className="h-4 w-4 text-heritage-deep mt-0.5 shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold text-ink mb-1">
+                    <p className="text-xs font-semibold text-ink mb-1">
                       This role isn&apos;t in your preferences
                     </p>
-                    <p className="text-[13px] text-slate-body leading-relaxed mb-3">
+                    <p className="text-xs text-slate-body leading-relaxed mb-3">
                       PracticeFit only scores roles you&apos;ve told us
                       you&apos;re interested in. Your application still
                       stands — but if your goals have changed, update
@@ -420,7 +420,7 @@ export default async function CandidateApplicationDetailPage({
             <Eyebrow as="h2" className="mb-3">
               Messages
             </Eyebrow>
-            <p className="text-[13px] text-slate-meta mb-3">
+            <p className="text-xs text-slate-meta mb-3">
               Direct conversation with{" "}
               <span className="font-bold text-ink">{otherPartyName}</span>{" "}
               about this application.
@@ -443,11 +443,11 @@ export default async function CandidateApplicationDetailPage({
               <Eyebrow className="mb-3">The Role</Eyebrow>
               <Link
                 href={`/jobs/${job.id}`}
-                className="text-[15px] font-bold text-ink hover:text-heritage-deep transition-colors block mb-1.5"
+                className="text-sm font-bold text-ink hover:text-heritage-deep transition-colors block mb-1.5"
               >
                 {job.title}
               </Link>
-              <div className="text-[13px] text-slate-body inline-flex items-center gap-1.5">
+              <div className="text-xs text-slate-body inline-flex items-center gap-1.5">
                 <Briefcase className="h-3 w-3" />
                 {job.role_category} · {job.employment_type}
               </div>

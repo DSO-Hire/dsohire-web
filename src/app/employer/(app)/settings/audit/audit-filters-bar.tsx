@@ -79,14 +79,14 @@ export function AuditFiltersBar({
   return (
     <div className="border border-[var(--rule)] bg-cream/40 px-4 py-3 space-y-3">
       <div className="flex flex-wrap items-center gap-3">
-        <label className="text-[10px] font-bold tracking-[2px] uppercase text-slate-body">
+        <label className="text-2xs font-bold tracking-[2px] uppercase text-slate-body">
           Range
         </label>
         <select
           value={activeRange}
           onChange={(e) => setParam("range", e.currentTarget.value)}
           disabled={pending}
-          className="text-[12px] px-2 py-1.5 bg-card border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage"
+          className="text-xs px-2 py-1.5 bg-card border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage"
         >
           {RANGE_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -95,14 +95,14 @@ export function AuditFiltersBar({
           ))}
         </select>
 
-        <label className="ml-2 text-[10px] font-bold tracking-[2px] uppercase text-slate-body">
+        <label className="ml-2 text-2xs font-bold tracking-[2px] uppercase text-slate-body">
           Actor
         </label>
         <select
           value={activeActor}
           onChange={(e) => setParam("actor", e.currentTarget.value || null)}
           disabled={pending}
-          className="text-[12px] px-2 py-1.5 bg-card border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage min-w-[160px]"
+          className="text-xs px-2 py-1.5 bg-card border border-[var(--rule-strong)] text-ink focus:outline-none focus:border-heritage min-w-[160px]"
         >
           <option value="">All teammates</option>
           {teammates.map((t) => (
@@ -117,7 +117,7 @@ export function AuditFiltersBar({
             type="button"
             onClick={clearAll}
             disabled={pending}
-            className="ml-auto text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta hover:text-danger transition-colors"
+            className="ml-auto text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta hover:text-danger transition-colors"
           >
             Clear filters
           </button>
@@ -125,7 +125,7 @@ export function AuditFiltersBar({
       </div>
 
       <div className="flex flex-wrap items-center gap-1.5">
-        <label className="text-[10px] font-bold tracking-[2px] uppercase text-slate-body mr-2">
+        <label className="text-2xs font-bold tracking-[2px] uppercase text-slate-body mr-2">
           Event kinds
         </label>
         {Object.entries(eventKinds).map(([kind, label]) => {
@@ -137,7 +137,7 @@ export function AuditFiltersBar({
               onClick={() => toggleKind(kind)}
               disabled={pending}
               className={
-                "text-[10px] font-semibold tracking-[0.5px] px-2 py-1 transition-colors " +
+                "text-2xs font-semibold tracking-[0.5px] px-2 py-1 transition-colors " +
                 (active
                   ? "bg-heritage text-primary-foreground"
                   : "bg-card text-ink border border-[var(--rule-strong)] hover:bg-cream")

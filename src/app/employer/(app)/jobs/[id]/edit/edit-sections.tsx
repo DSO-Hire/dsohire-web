@@ -314,7 +314,7 @@ function SaveBar({
         type="button"
         onClick={onSave}
         disabled={!dirty || saving}
-        className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
+        className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {saving ? (
           <>
@@ -506,7 +506,7 @@ function BasicsSection({
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+          <label className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
             {scope === "corporate" ? "Anchor location" : "Practice locations"}{" "}
             {scope === "corporate" ? (
               <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
@@ -533,10 +533,10 @@ function BasicsSection({
                     onChange={() => toggleLocation(loc.id)}
                   />
                   <div className="min-w-0">
-                    <div className="text-[14px] font-semibold text-ink">
+                    <div className="text-sm font-semibold text-ink">
                       {loc.name}
                     </div>
-                    <div className="text-[13px] text-slate-meta tracking-[0.3px]">
+                    <div className="text-xs text-slate-meta tracking-[0.3px]">
                       {[loc.city, loc.state].filter(Boolean).join(", ") ||
                         "Address not set"}
                     </div>
@@ -545,7 +545,7 @@ function BasicsSection({
               );
             })}
           </div>
-          <p className="mt-2 text-[12px] text-slate-meta">
+          <p className="mt-2 text-xs text-slate-meta">
             {scope === "corporate"
               ? "Corporate roles are DSO-wide. Pick an anchor practice if the role reports out of one, or leave blank for fully remote / floating roles."
               : scope === "regional"
@@ -555,7 +555,7 @@ function BasicsSection({
         </div>
 
         <div>
-          <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-3">
+          <label className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-3">
             Job scope
           </label>
           <div className="space-y-2">
@@ -580,17 +580,17 @@ function BasicsSection({
                   className="mt-1 accent-heritage"
                 />
                 <div className="flex-1">
-                  <div className="text-[14px] font-bold text-ink">
+                  <div className="text-sm font-bold text-ink">
                     {opt.label}
                   </div>
-                  <div className="text-[13px] text-slate-body mt-0.5 leading-relaxed">
+                  <div className="text-xs text-slate-body mt-0.5 leading-relaxed">
                     {opt.helper}
                   </div>
                 </div>
               </label>
             ))}
           </div>
-          <p className="mt-2 text-[12px] text-slate-meta">
+          <p className="mt-2 text-xs text-slate-meta">
             Owners, admins, and recruiters always see every job — scope only
             changes what hiring managers see.
           </p>
@@ -602,7 +602,7 @@ function BasicsSection({
           <div>
             <label
               htmlFor="corporate_function_edit"
-              className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+              className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2"
             >
               Corporate function{" "}
               <span className="text-slate-meta font-normal normal-case tracking-[0.3px]">
@@ -616,7 +616,7 @@ function BasicsSection({
                 setCorporateFunction(e.target.value);
                 setSaved(false);
               }}
-              className="w-full max-w-[420px] h-[44px] px-3 bg-card border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+              className="w-full max-w-[420px] h-[44px] px-3 bg-card border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
             >
               <option value="">Not specified</option>
               {CORPORATE_FUNCTIONS.map((f) => (
@@ -625,7 +625,7 @@ function BasicsSection({
                 </option>
               ))}
             </select>
-            <p className="mt-2 text-[12px] text-slate-meta">
+            <p className="mt-2 text-xs text-slate-meta">
               Powers the Corporate Roles tab filter on the public job
               board and the role-family landing pages.
             </p>
@@ -736,7 +736,7 @@ function DescriptionSection({
           }}
         />
         {initialTitle.trim() && (
-          <p className="text-[12px] text-slate-meta">
+          <p className="text-xs text-slate-meta">
             Editing description for{" "}
             <span className="font-bold text-ink">{initialTitle}</span>.
           </p>
@@ -753,7 +753,7 @@ function DescriptionSection({
             placeholder="Describe the role, responsibilities, day-to-day, and what makes this DSO a great place to work…"
           />
         </div>
-        <p className="text-[12px] text-slate-meta">
+        <p className="text-xs text-slate-meta">
           Headings, bold/italic, lists, links, and blockquotes supported. Skip
           H1 — that&apos;s reserved for the page title. The AI draft above is a
           read-only preview — your edits live below.
@@ -1268,16 +1268,16 @@ function DetailsSection({
         </CompModelBuilder>
 
         <fieldset className="border border-[var(--rule)] p-5 bg-cream/40">
-          <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
+          <legend className="px-2 text-2xs font-bold tracking-[2px] uppercase text-heritage-deep">
             Match scoring
           </legend>
-          <p className="mt-1 text-[12px] text-slate-meta leading-relaxed">
+          <p className="mt-1 text-xs text-slate-meta leading-relaxed">
             Drives PracticeFit — the proprietary match score on every
             application. Both fields are optional; the score adapts to
             whatever you fill in.
           </p>
           <div className="mt-4">
-            <label className="block text-[12px] font-semibold text-ink mb-2">
+            <label className="block text-xs font-semibold text-ink mb-2">
               Specialty{" "}
               <span className="text-slate-meta font-normal">
                 (pick any that apply)
@@ -1297,7 +1297,7 @@ function DetailsSection({
                       setSpecialty(next);
                       touch();
                     }}
-                    className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
+                    className={`px-3 py-1.5 text-xs font-medium border transition-colors ${
                       checked
                         ? "bg-heritage-deep text-primary-foreground border-heritage-deep"
                         : "bg-card text-ink border-[var(--rule)] hover:border-heritage"
@@ -1320,13 +1320,13 @@ function DetailsSection({
                 touch();
               }}
             />
-            <p className="mt-1 text-[11px] text-slate-meta">
+            <p className="mt-1 text-2xs text-slate-meta">
               Leave blank if there&apos;s no minimum. Excluded from the
               score when blank — doesn&apos;t penalize newer candidates.
             </p>
           </div>
           <div className="mt-5">
-            <label className="block text-[12px] font-semibold text-ink mb-2">
+            <label className="block text-xs font-semibold text-ink mb-2">
               Staffed days{" "}
               <span className="text-slate-meta font-normal">(optional)</span>
             </label>
@@ -1352,7 +1352,7 @@ function DetailsSection({
                       setScheduleDays(next);
                       touch();
                     }}
-                    className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
+                    className={`px-3 py-1.5 text-xs font-medium border transition-colors ${
                       checked
                         ? "bg-heritage-deep text-primary-foreground border-heritage-deep"
                         : "bg-card text-ink border-[var(--rule)] hover:border-heritage"
@@ -1364,7 +1364,7 @@ function DetailsSection({
               })}
             </div>
             <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2">
-              <label className="inline-flex items-start gap-2 text-[12px] text-ink">
+              <label className="inline-flex items-start gap-2 text-xs text-ink">
                 <input
                   type="checkbox"
                   checked={scheduleEvenings}
@@ -1376,7 +1376,7 @@ function DetailsSection({
                 />
                 <span>Evening hours (5pm or later)</span>
               </label>
-              <label className="inline-flex items-start gap-2 text-[12px] text-ink">
+              <label className="inline-flex items-start gap-2 text-xs text-ink">
                 <input
                   type="checkbox"
                   checked={scheduleWeekends}
@@ -1389,7 +1389,7 @@ function DetailsSection({
                 <span>Weekend shifts (Sat/Sun)</span>
               </label>
             </div>
-            <p className="mt-2 text-[11px] text-slate-meta">
+            <p className="mt-2 text-2xs text-slate-meta">
               Powers PracticeFit&apos;s schedule overlap dimension. Leave
               blank if scheduling is flexible.
             </p>
@@ -1471,10 +1471,10 @@ function DetailsSection({
         />
 
         <fieldset className="border border-[var(--rule)] p-5 bg-cream/40">
-          <legend className="px-2 text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep">
+          <legend className="px-2 text-2xs font-bold tracking-[2px] uppercase text-heritage-deep">
             Candidate visibility
           </legend>
-          <label className="mt-2 flex items-start gap-2.5 text-[14px] text-ink cursor-pointer">
+          <label className="mt-2 flex items-start gap-2.5 text-sm text-ink cursor-pointer">
             <input
               type="checkbox"
               checked={hideStages}
@@ -1488,7 +1488,7 @@ function DetailsSection({
               <div className="font-bold mb-1">
                 Hide pipeline stages from candidates
               </div>
-              <div className="text-[13px] text-slate-body leading-relaxed">
+              <div className="text-xs text-slate-body leading-relaxed">
                 By default, candidates see exactly where they sit in the
                 pipeline — Submitted, Screening, Interview, Offer. Turn this on
                 for a sensitive role and candidates will see an abstracted
@@ -1697,7 +1697,7 @@ function ScreeningSection({
 
         {questions.length === 0 && (
           <div className="border border-dashed border-[var(--rule-strong)] p-5 text-center bg-cream/40">
-            <p className="text-[14px] text-slate-body">
+            <p className="text-sm text-slate-body">
               No screening questions yet. Add one below or apply a recommended
               set above.
             </p>
@@ -1705,7 +1705,7 @@ function ScreeningSection({
         )}
 
         {questions.length >= 2 && (
-          <p className="text-[12px] text-slate-meta">
+          <p className="text-xs text-slate-meta">
             Drag a collapsed card to reorder — or use the arrows.
           </p>
         )}
@@ -1749,7 +1749,7 @@ function ScreeningSection({
         })}
 
         <div>
-          <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+          <div className="text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
             Add a question
           </div>
           <div className="flex flex-wrap gap-2">
@@ -1768,7 +1768,7 @@ function ScreeningSection({
                 key={k}
                 type="button"
                 onClick={() => addQuestion(k)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-[var(--rule-strong)] text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-[var(--rule-strong)] text-ink text-2xs font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
               >
                 <Plus className="h-3 w-3" />
                 {KIND_LABELS[k]}
@@ -1842,10 +1842,10 @@ function QuestionCard({
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta">
+          <span className="text-2xs font-bold tracking-[2px] uppercase text-slate-meta">
             Q{index + 1}
           </span>
-          <span className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep px-2 py-1 bg-heritage/[0.08]">
+          <span className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep px-2 py-1 bg-heritage/[0.08]">
             {KIND_LABELS[question.kind]}
           </span>
         </div>
@@ -1890,7 +1890,7 @@ function QuestionCard({
           className="w-full text-left -mx-1 px-1 py-1 group rounded hover:bg-cream/50 transition-colors"
         >
           <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0 flex-1 text-[14px] text-ink truncate">
+            <div className="min-w-0 flex-1 text-sm text-ink truncate">
               {question.prompt.trim() ? (
                 question.prompt
               ) : (
@@ -1910,7 +1910,7 @@ function QuestionCard({
                   Knockout
                 </span>
               )}
-              <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep group-hover:text-ink transition-colors ml-2">
+              <span className="text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep group-hover:text-ink transition-colors ml-2">
                 Edit →
               </span>
             </div>
@@ -1935,13 +1935,13 @@ function QuestionCard({
         />
         {isSelect && (
           <div>
-            <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+            <label className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
               Options <span className="text-heritage">*</span>
             </label>
             <div className="space-y-2">
               {(question.options ?? []).map((opt, idx) => (
                 <div key={opt.id} className="flex items-center gap-2">
-                  <span className="text-[12px] font-bold text-slate-meta w-6">
+                  <span className="text-xs font-bold text-slate-meta w-6">
                     {idx + 1}.
                   </span>
                   <input
@@ -1949,7 +1949,7 @@ function QuestionCard({
                     value={opt.label}
                     onChange={(e) => updateOption(opt.id, e.target.value)}
                     placeholder={`Option ${idx + 1}`}
-                    className="flex-1 px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+                    className="flex-1 px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
                   />
                   <button
                     type="button"
@@ -1966,7 +1966,7 @@ function QuestionCard({
             <button
               type="button"
               onClick={addOption}
-              className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+              className="mt-2 inline-flex items-center gap-1.5 text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
             >
               <Plus className="h-3 w-3" />
               Add option
@@ -1975,7 +1975,7 @@ function QuestionCard({
         )}
         {isScale && (
           <div>
-            <label className="block text-[13px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+            <label className="block text-xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
               Slider end labels <span className="text-heritage">*</span>
             </label>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -1984,19 +1984,19 @@ function QuestionCard({
                 value={scaleLabel("low")}
                 onChange={(e) => updateOption("low", e.target.value)}
                 placeholder="Left end (1) — e.g. Prefer clinical focus"
-                className="px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+                className="px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
               />
               <input
                 type="text"
                 value={scaleLabel("high")}
                 onChange={(e) => updateOption("high", e.target.value)}
                 placeholder="Right end (5) — e.g. I love patient interaction"
-                className="px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+                className="px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
               />
             </div>
           </div>
         )}
-        <label className="flex items-center gap-2.5 text-[14px] text-ink cursor-pointer pt-1">
+        <label className="flex items-center gap-2.5 text-sm text-ink cursor-pointer pt-1">
           <input
             type="checkbox"
             checked={question.required}
@@ -2020,7 +2020,7 @@ function QuestionCard({
           <button
             type="button"
             onClick={onToggleExpand}
-            className="text-[10px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
+            className="text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors"
           >
             ↑ Collapse this question
           </button>
@@ -2143,7 +2143,7 @@ function ScheduleSection({
       <div className="space-y-5">
         {isDraft && (
           <div>
-            <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+            <label className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
               Schedule publish for
             </label>
             <div className="flex items-center gap-3">
@@ -2155,7 +2155,7 @@ function ScheduleSection({
                   setScheduled(e.target.value);
                   setSaved(false);
                 }}
-                className="px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+                className="px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
               />
               {scheduled && (
                 <button
@@ -2164,13 +2164,13 @@ function ScheduleSection({
                     setScheduled("");
                     setSaved(false);
                   }}
-                  className="text-[12px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
+                  className="text-xs font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
                 >
                   Clear
                 </button>
               )}
             </div>
-            <p className="mt-2 text-[12px] text-slate-meta leading-relaxed">
+            <p className="mt-2 text-xs text-slate-meta leading-relaxed">
               {scheduled
                 ? "This draft will go live automatically at the start of that day. Leave it as a draft until then."
                 : "Leave empty to keep this as a manual draft. Set a date to have it publish itself."}
@@ -2179,7 +2179,7 @@ function ScheduleSection({
         )}
 
         <div>
-          <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+          <label className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
             Auto-expire on
           </label>
           <div className="flex items-center gap-3">
@@ -2191,7 +2191,7 @@ function ScheduleSection({
                 setExpires(e.target.value);
                 setSaved(false);
               }}
-              className="px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+              className="px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
             />
             {expires && (
               <button
@@ -2200,13 +2200,13 @@ function ScheduleSection({
                   setExpires("");
                   setSaved(false);
                 }}
-                className="text-[12px] font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
+                className="text-xs font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
               >
                 Clear
               </button>
             )}
           </div>
-          <p className="mt-2 text-[12px] text-slate-meta leading-relaxed">
+          <p className="mt-2 text-xs text-slate-meta leading-relaxed">
             {expires
               ? "The listing stays live through this day, then closes itself and drops off the public job board."
               : "Leave empty for no expiration — the listing stays live until you pause or fill it."}
@@ -2284,13 +2284,13 @@ function StatusSection({
               className="mt-1 accent-heritage"
             />
             <div className="flex-1">
-              <div className="text-[14px] font-bold text-ink flex items-center gap-2">
+              <div className="text-sm font-bold text-ink flex items-center gap-2">
                 {opt.label}
                 {status === opt.value && opt.value === "active" && (
                   <Check className="h-3.5 w-3.5 text-heritage-deep" />
                 )}
               </div>
-              <div className="text-[13px] text-slate-body mt-0.5">
+              <div className="text-xs text-slate-body mt-0.5">
                 {opt.helper}
               </div>
             </div>
@@ -2328,7 +2328,7 @@ function Input({
 }) {
   return (
     <div>
-      <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+      <label className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
         {label} {required && <span className="text-heritage">*</span>}
       </label>
       <input
@@ -2336,7 +2336,7 @@ function Input({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
       />
     </div>
   );
@@ -2357,13 +2357,13 @@ function Select({
 }) {
   return (
     <div>
-      <label className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2">
+      <label className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2">
         {label} {required && <span className="text-heritage">*</span>}
       </label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>

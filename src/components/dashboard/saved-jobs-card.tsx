@@ -61,7 +61,7 @@ export function SavedJobsCard({
         ))}
       </div>
 
-      <p className="mt-3 text-[11px] leading-relaxed text-slate-meta">
+      <p className="mt-3 text-2xs leading-relaxed text-slate-meta">
         Exploring isn&apos;t applying — saved jobs stay private to you.
       </p>
       <Link

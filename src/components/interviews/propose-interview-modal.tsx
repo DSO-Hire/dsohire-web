@@ -48,7 +48,7 @@ export function ProposeInterviewLauncher({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
+        className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground text-2xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
       >
         <Calendar className="h-3 w-3" aria-hidden />
         {hasActiveProposal ? "Propose new times" : "Propose times"}
@@ -102,7 +102,7 @@ export function CancelInterviewButton({ bookingId }: CancelInterviewButtonProps)
           router.refresh();
         }}
         disabled={busy}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-danger bg-card text-[11px] font-bold tracking-[1.5px] uppercase text-danger hover:bg-danger-bg disabled:opacity-50"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-danger bg-card text-2xs font-bold tracking-[1.5px] uppercase text-danger hover:bg-danger-bg disabled:opacity-50"
       >
         {busy ? (
           <Loader2 className="h-3 w-3 animate-spin" />
@@ -112,7 +112,7 @@ export function CancelInterviewButton({ bookingId }: CancelInterviewButtonProps)
         Cancel interview
       </button>
       {error && (
-        <p className="mt-1 text-[11px] text-danger">{error}</p>
+        <p className="mt-1 text-2xs text-danger">{error}</p>
       )}
     </>
   );
@@ -144,7 +144,7 @@ export function RescheduleInterviewLauncher({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-success bg-card text-[11px] font-bold tracking-[1.5px] uppercase text-success hover:bg-success-bg"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-success bg-card text-2xs font-bold tracking-[1.5px] uppercase text-success hover:bg-success-bg"
       >
         <Calendar className="h-3 w-3" aria-hidden />
         Reschedule
@@ -336,7 +336,7 @@ function ProposeInterviewModal({
     >
       <div className="bg-card border border-[var(--rule)] w-full max-w-2xl shadow-2xl mt-4 mb-4 sm:mt-12 sm:mb-12">
         <header className="px-6 py-4 border-b border-[var(--rule)] flex items-center justify-between">
-          <h2 className="text-[14px] font-bold tracking-[-0.2px] text-ink">
+          <h2 className="text-sm font-bold tracking-[-0.2px] text-ink">
             {isReschedule
               ? `Reschedule interview${candidateName ? ` · ${candidateName}` : ""}`
               : `Propose interview times${candidateName ? ` · ${candidateName}` : ""}`}
@@ -358,10 +358,10 @@ function ProposeInterviewModal({
               className="h-8 w-8 text-heritage-deep mx-auto mb-3"
               aria-hidden
             />
-            <h3 className="text-[15px] font-bold text-ink mb-2">
+            <h3 className="text-sm font-bold text-ink mb-2">
               Proposal sent
             </h3>
-            <p className="text-[13px] text-slate-body leading-relaxed max-w-[400px] mx-auto mb-5">
+            <p className="text-xs text-slate-body leading-relaxed max-w-[400px] mx-auto mb-5">
               {candidateName ?? "The candidate"} will get an email with the
               time options. You&apos;ll see this section update when they
               pick a slot.
@@ -369,7 +369,7 @@ function ProposeInterviewModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
+              className="px-5 py-2 bg-primary text-primary-foreground text-xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90"
             >
               Close
             </button>
@@ -378,7 +378,7 @@ function ProposeInterviewModal({
           <form onSubmit={handleSubmit} className="p-6 space-y-5">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
+                <label className="block text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
                   Interview type
                 </label>
                 <select
@@ -392,7 +392,7 @@ function ProposeInterviewModal({
                         | "other"
                     )
                   }
-                  className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+                  className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
                 >
                   <option value="video">Video call</option>
                   <option value="phone">Phone call</option>
@@ -401,7 +401,7 @@ function ProposeInterviewModal({
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
+                <label className="block text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
                   Duration (min)
                 </label>
                 <input
@@ -413,13 +413,13 @@ function ProposeInterviewModal({
                   onChange={(e) =>
                     setDuration(Number(e.target.value) || 30)
                   }
-                  className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+                  className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
+              <label className="block text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
                 {kind === "phone"
                   ? "Phone number"
                   : kind === "in_person"
@@ -443,17 +443,17 @@ function ProposeInterviewModal({
                         : "Where to meet"
                 }
                 maxLength={300}
-                className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+                className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
               />
               {kind === "video" && (
-                <p className="mt-1.5 text-[11px] text-slate-meta leading-relaxed">
+                <p className="mt-1.5 text-2xs text-slate-meta leading-relaxed">
                   Leave blank for a fresh video link on each interview. Both calendars will get a join URL automatically.
                 </p>
               )}
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
+              <label className="block text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
                 Message to candidate
                 <span className="ml-2 text-slate-meta normal-case tracking-normal font-normal">
                   (optional)
@@ -465,32 +465,32 @@ function ProposeInterviewModal({
                 rows={3}
                 placeholder="A short note about what to expect or who they'll be meeting with."
                 maxLength={1000}
-                className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage leading-relaxed resize-y"
+                className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage leading-relaxed resize-y"
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+                <label className="block text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta">
                   Proposed times ({slots.length} of 6)
                 </label>
                 <button
                   type="button"
                   onClick={addSlot}
                   disabled={slots.length >= 6}
-                  className="inline-flex items-center gap-1 text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink disabled:opacity-40"
+                  className="inline-flex items-center gap-1 text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink disabled:opacity-40"
                 >
                   <Plus className="h-3 w-3" /> Add slot
                 </button>
               </div>
               <div className="mb-2 flex items-center gap-2 px-3 py-2 bg-cream border border-[var(--rule)]">
-                <span className="text-[11px] text-slate-body shrink-0">
+                <span className="text-2xs text-slate-body shrink-0">
                   Times below are in
                 </span>
                 <select
                   value={timezone}
                   onChange={(e) => setTimezone(e.target.value)}
-                  className="flex-1 min-w-0 px-2 py-1 bg-card border border-[var(--rule-strong)] text-ink text-[12px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+                  className="flex-1 min-w-0 px-2 py-1 bg-card border border-[var(--rule-strong)] text-ink text-xs focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
                   aria-label="Timezone for proposed times"
                 >
                   {/* If the browser TZ isn't in our US list, surface it as
@@ -511,7 +511,7 @@ function ProposeInterviewModal({
               <ul className="space-y-2">
                 {slots.map((s, i) => (
                   <li key={s.id} className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold tabular-nums text-slate-meta w-6">
+                    <span className="text-2xs font-bold tabular-nums text-slate-meta w-6">
                       #{i + 1}
                     </span>
                     <input
@@ -520,7 +520,7 @@ function ProposeInterviewModal({
                       onChange={(e) =>
                         handleSlotChange(s.id, "date", e.target.value)
                       }
-                      className="px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+                      className="px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
                     />
                     <input
                       type="time"
@@ -529,7 +529,7 @@ function ProposeInterviewModal({
                       onChange={(e) =>
                         handleSlotChange(s.id, "time", e.target.value)
                       }
-                      className="px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+                      className="px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
                     />
                     <button
                       type="button"
@@ -546,7 +546,7 @@ function ProposeInterviewModal({
             </div>
 
             {error && (
-              <div className="rounded-md border border-danger bg-danger-bg px-3 py-2 text-[13px] text-danger">
+              <div className="rounded-md border border-danger bg-danger-bg px-3 py-2 text-xs text-danger">
                 {error}
               </div>
             )}
@@ -556,14 +556,14 @@ function ProposeInterviewModal({
                 type="button"
                 onClick={onClose}
                 disabled={pending}
-                className="px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-slate-meta hover:text-ink"
+                className="px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-slate-meta hover:text-ink"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={pending}
-                className="inline-flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
+                className="inline-flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground text-xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
               >
                 {pending ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />

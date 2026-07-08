@@ -149,18 +149,18 @@ export function CandidateInterviewPicker({
           aria-hidden
         />
         <div>
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
             Interview proposed · {kindLabel}
           </div>
           <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink leading-tight mb-1">
             Schedule your {kindLabel.toLowerCase()}.
           </h2>
-          <p className="text-[13px] text-slate-body leading-relaxed mb-1">
+          <p className="text-xs text-slate-body leading-relaxed mb-1">
             {capitalizeFirst(proposal.dso_name)} has proposed
             {proposal.options.length === 1 ? " a time" : " a few times"} below.
             Pick the one that works.
           </p>
-          <div className="flex items-center gap-3 text-[12px] text-slate-body">
+          <div className="flex items-center gap-3 text-xs text-slate-body">
             <span className="inline-flex items-center gap-1">
               <Clock className="h-3 w-3" />
               {proposal.duration_minutes} minutes
@@ -176,21 +176,21 @@ export function CandidateInterviewPicker({
       </div>
 
       {proposal.message_to_candidate && (
-        <div className="mb-4 px-3 py-2 bg-card border-l-2 border-[var(--rule)] text-[13px] text-ink italic leading-relaxed">
+        <div className="mb-4 px-3 py-2 bg-card border-l-2 border-[var(--rule)] text-xs text-ink italic leading-relaxed">
           “{proposal.message_to_candidate}”
         </div>
       )}
 
       <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-        <div className="text-[10px] font-bold tracking-[2px] uppercase text-slate-meta">
+        <div className="text-2xs font-bold tracking-[2px] uppercase text-slate-meta">
           Pick a time
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[11px] text-slate-meta">Show in</span>
+          <span className="text-2xs text-slate-meta">Show in</span>
           <select
             value={displayTz}
             onChange={(e) => setDisplayTz(e.target.value)}
-            className="px-2 py-1 bg-card border border-[var(--rule-strong)] text-ink text-[12px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+            className="px-2 py-1 bg-card border border-[var(--rule-strong)] text-ink text-xs focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
             aria-label="Display timezone"
           >
             {/* If the candidate's browser TZ isn't a standard US zone,
@@ -225,10 +225,10 @@ export function CandidateInterviewPicker({
               >
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <div className="text-[13px] font-bold text-ink">
+                    <div className="text-xs font-bold text-ink">
                       {line1}
                     </div>
-                    <div className="text-[12px] text-slate-body">{line2}</div>
+                    <div className="text-xs text-slate-body">{line2}</div>
                   </div>
                   {selected && (
                     <CheckCircle2
@@ -244,7 +244,7 @@ export function CandidateInterviewPicker({
       </ul>
 
       <details className="mb-4">
-        <summary className="cursor-pointer text-[11px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink">
+        <summary className="cursor-pointer text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink">
           Add a note (optional)
         </summary>
         <textarea
@@ -253,12 +253,12 @@ export function CandidateInterviewPicker({
           rows={3}
           maxLength={500}
           placeholder="Anything you'd like the team to know ahead of the call?"
-          className="mt-2 w-full px-3 py-2 bg-card border border-[var(--rule-strong)] text-ink text-[13px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage leading-relaxed resize-y"
+          className="mt-2 w-full px-3 py-2 bg-card border border-[var(--rule-strong)] text-ink text-xs focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage leading-relaxed resize-y"
         />
       </details>
 
       {error && (
-        <div className="mb-3 rounded-md border border-danger bg-danger-bg px-3 py-2 text-[13px] text-danger flex items-start gap-2">
+        <div className="mb-3 rounded-md border border-danger bg-danger-bg px-3 py-2 text-xs text-danger flex items-start gap-2">
           <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" aria-hidden />
           <span>{error}</span>
         </div>
@@ -274,7 +274,7 @@ export function CandidateInterviewPicker({
               ? "Pick a time above to enable this button"
               : undefined
           }
-          className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary"
+          className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary"
         >
           {pending ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -284,7 +284,7 @@ export function CandidateInterviewPicker({
           Confirm interview
         </button>
         {!selectedOptionId && (
-          <span className="text-[12px] text-slate-meta italic">
+          <span className="text-xs text-slate-meta italic">
             Pick a time above to enable
           </span>
         )}
@@ -310,21 +310,21 @@ function BookedView({
           aria-hidden
         />
         <div className="flex-1">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
+          <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
             Interview confirmed
           </div>
           <h2 className="text-xl font-extrabold tracking-[-0.4px] text-ink leading-tight mb-1">
             {line1}
           </h2>
-          <p className="text-[14px] text-ink">
+          <p className="text-sm text-ink">
             {line2} · {proposal.duration_minutes} minutes · {kindLabel}
           </p>
           {proposal.location_text && (
-            <p className="mt-1 text-[13px] text-slate-body inline-flex items-center gap-1">
+            <p className="mt-1 text-xs text-slate-body inline-flex items-center gap-1">
               <MapPin className="h-3 w-3" /> {proposal.location_text}
             </p>
           )}
-          <p className="mt-3 text-[12px] text-slate-meta leading-relaxed">
+          <p className="mt-3 text-xs text-slate-meta leading-relaxed">
             Reply to your confirmation email if you need to reschedule.
           </p>
         </div>

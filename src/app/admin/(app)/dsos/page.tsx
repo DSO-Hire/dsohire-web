@@ -137,14 +137,14 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
     <>
       <Link
         href="/admin"
-        className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-6"
+        className="inline-flex items-center gap-2 text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-6"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back to Overview
       </Link>
 
       <header className="mb-8">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
           DSO Verification
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink">
@@ -162,7 +162,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
                 ? "/admin/dsos"
                 : `/admin/dsos?status=${opt.value}`
             }
-            className={`text-[10px] font-bold tracking-[1.5px] uppercase px-3.5 py-1.5 transition-colors ${
+            className={`text-2xs font-bold tracking-[1.5px] uppercase px-3.5 py-1.5 transition-colors ${
               statusFilter === opt.value
                 ? "bg-primary text-primary-foreground"
                 : "bg-cream text-ink hover:bg-[var(--rule)]"
@@ -175,10 +175,10 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
 
       {enriched.length === 0 ? (
         <div className="border border-[var(--rule)] bg-card p-12 text-center max-w-[680px]">
-          <p className="text-[15px] text-ink leading-relaxed mb-2">
+          <p className="text-sm text-ink leading-relaxed mb-2">
             No DSOs match this filter.
           </p>
-          <p className="text-[14px] text-slate-body leading-relaxed">
+          <p className="text-sm text-slate-body leading-relaxed">
             Once a DSO signs up, they&apos;ll show up under{" "}
             <span className="font-semibold">Pending verification</span>.
           </p>
@@ -202,11 +202,11 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
                   </span>
                 </div>
 
-                <div className="text-[13px] text-slate-meta tracking-[0.3px] mb-3 font-mono">
+                <div className="text-xs text-slate-meta tracking-[0.3px] mb-3 font-mono">
                   /companies/{dso.slug}
                 </div>
 
-                <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-2 text-[13px]">
+                <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-2 text-xs">
                   <div>
                     <dt className="text-slate-meta font-bold tracking-[1px] uppercase text-[9px] mb-0.5">
                       Owner
@@ -246,7 +246,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
                   </div>
                 </dl>
 
-                <div className="mt-3 text-[12px] text-slate-meta">
+                <div className="mt-3 text-xs text-slate-meta">
                   Signed up {new Date(dso.created_at).toLocaleString()}
                 </div>
               </div>
@@ -255,7 +255,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
                 <Link
                   href={`/companies/${dso.slug}`}
                   target="_blank"
-                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2 border border-[var(--rule-strong)] text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2 border border-[var(--rule-strong)] text-ink text-2xs font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
                 >
                   <ExternalLink className="h-3 w-3" />
                   Public page
@@ -267,7 +267,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
                     <input type="hidden" name="new_status" value="active" />
                     <button
                       type="submit"
-                      className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
+                      className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-2xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
                     >
                       Activate
                     </button>
@@ -301,7 +301,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
                               <input type="hidden" name="action" value="clear" />
                               <button
                                 type="submit"
-                                className="w-full inline-flex items-center justify-center px-3 py-1.5 border border-warning text-warning text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-warning-bg transition-colors"
+                                className="w-full inline-flex items-center justify-center px-3 py-1.5 border border-warning text-warning text-2xs font-bold tracking-[1.5px] uppercase hover:bg-warning-bg transition-colors"
                               >
                                 Remove from Spotlight
                               </button>
@@ -320,7 +320,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
                             <input type="hidden" name="action" value="+30d" />
                             <button
                               type="submit"
-                              className="w-full inline-flex items-center justify-center px-3 py-1.5 border border-[var(--rule-strong)] text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
+                              className="w-full inline-flex items-center justify-center px-3 py-1.5 border border-[var(--rule-strong)] text-ink text-2xs font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
                             >
                               ★ Feature 30d
                             </button>
@@ -334,7 +334,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
                             <input type="hidden" name="action" value="+90d" />
                             <button
                               type="submit"
-                              className="w-full inline-flex items-center justify-center px-3 py-1.5 border border-[var(--rule-strong)] text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
+                              className="w-full inline-flex items-center justify-center px-3 py-1.5 border border-[var(--rule-strong)] text-ink text-2xs font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
                             >
                               ★ Feature 90d
                             </button>
@@ -347,7 +347,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
                       <input type="hidden" name="new_status" value="pending" />
                       <button
                         type="submit"
-                        className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 border border-[var(--rule-strong)] text-ink text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
+                        className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 border border-[var(--rule-strong)] text-ink text-2xs font-bold tracking-[1.5px] uppercase hover:bg-cream transition-colors"
                       >
                         Revert to Pending
                       </button>
@@ -362,7 +362,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
                         />
                         <ConfirmSubmitButton
                           confirmMessage={`Suspend ${dso.name}? Their public page and active jobs will be taken down.`}
-                          className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 border border-danger text-danger text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-danger-bg transition-colors"
+                          className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 border border-danger text-danger text-2xs font-bold tracking-[1.5px] uppercase hover:bg-danger-bg transition-colors"
                         >
                           Suspend
                         </ConfirmSubmitButton>
@@ -377,7 +377,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
                     <input type="hidden" name="new_status" value="active" />
                     <button
                       type="submit"
-                      className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-[10px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
+                      className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-2xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
                     >
                       Reactivate
                     </button>

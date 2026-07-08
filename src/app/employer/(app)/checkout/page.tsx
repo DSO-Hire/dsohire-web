@@ -105,7 +105,7 @@ export default async function CheckoutPage({ searchParams }: PageProps) {
     return (
       <>
         <div className="max-w-[640px]">
-          <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
+          <div className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-2">
             Activate your subscription
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.1] text-ink">
@@ -117,13 +117,13 @@ export default async function CheckoutPage({ searchParams }: PageProps) {
             you can post jobs.
           </p>
           <div className="mt-6 border border-[var(--rule-strong)] bg-cream/60 p-6">
-            <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-2">
+            <div className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep mb-2">
               Selected plan
             </div>
             <div className="text-[20px] font-extrabold tracking-[-0.4px] text-ink">
               {tierConfig.name}
             </div>
-            <div className="text-[14px] text-slate-body mt-1">
+            <div className="text-sm text-slate-body mt-1">
               ${displayPrice.toLocaleString()}/month
               {isAnnual ? " (billed annually)" : ""} · {tierConfig.tagline}
             </div>
@@ -133,13 +133,13 @@ export default async function CheckoutPage({ searchParams }: PageProps) {
             <input type="hidden" name="period" value={period} />
             <button
               type="submit"
-              className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors"
             >
               Resume Checkout
               <ArrowRight className="h-4 w-4" />
             </button>
           </form>
-          <p className="mt-4 text-[13px] text-slate-meta">
+          <p className="mt-4 text-xs text-slate-meta">
             Need a different plan?{" "}
             <Link
               href="/pricing"
@@ -178,7 +178,7 @@ export default async function CheckoutPage({ searchParams }: PageProps) {
           <h1 className="text-3xl font-extrabold tracking-[-1px] text-ink mb-4">
             Stripe checkout is temporarily unavailable.
           </h1>
-          <p className="text-[14px] text-slate-body leading-relaxed mb-6">
+          <p className="text-sm text-slate-body leading-relaxed mb-6">
             Something went wrong creating your checkout session. Refresh to
             retry, or email{" "}
             <a

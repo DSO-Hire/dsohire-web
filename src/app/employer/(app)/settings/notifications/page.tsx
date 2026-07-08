@@ -61,13 +61,13 @@ export default async function EmployerNotificationsPage() {
   return (
     <div>
       <header className="mb-6 max-w-[680px]">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+        <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
           Notifications
         </div>
         <h2 className="text-2xl font-extrabold tracking-[-0.5px] text-ink">
           How DSO Hire reaches you
         </h2>
-        <p className="mt-2 text-[14px] text-slate-body leading-relaxed">
+        <p className="mt-2 text-sm text-slate-body leading-relaxed">
           Toggle email and in-app notifications per event. SMS rolls out in
           a follow-up release. Your preferences here are the source of
           truth — the dispatcher never overrides them, with the single

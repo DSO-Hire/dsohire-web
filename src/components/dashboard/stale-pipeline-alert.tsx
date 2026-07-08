@@ -57,13 +57,13 @@ export function StalePipelineAlert({
         </div>
 
         <div>
-          <div className="text-[13px] font-extrabold leading-snug text-ink">
+          <div className="text-xs font-extrabold leading-snug text-ink">
             {totalCount === 1
               ? "1 candidate has"
               : `${totalCount} candidates have`}{" "}
             been in the same stage for {thresholdDays}+ days.
           </div>
-          <div className="text-[11px] mt-1 text-slate-meta">
+          <div className="text-2xs mt-1 text-slate-meta">
             Follow up or move them forward so good people don&apos;t go cold.
           </div>
 
@@ -72,7 +72,7 @@ export function StalePipelineAlert({
               <Link
                 key={c.applicationId}
                 href={`/employer/applications/${c.applicationId}`}
-                className="inline-flex items-center gap-2 px-3 py-1.5 bg-card border border-[var(--rule-strong)] hover:bg-ivory-deep transition-colors text-[11px] text-ink"
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-card border border-[var(--rule-strong)] hover:bg-ivory-deep transition-colors text-2xs text-ink"
               >
                 <span>
                   {c.candidateName} ·{" "}

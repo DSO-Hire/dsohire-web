@@ -73,7 +73,7 @@ export function TemplatesManager({ initialTemplates }: TemplatesManagerProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="text-[12px] text-slate-meta">
+        <div className="text-xs text-slate-meta">
           {initialTemplates.length}{" "}
           {initialTemplates.length === 1 ? "template" : "templates"} saved
         </div>
@@ -82,7 +82,7 @@ export function TemplatesManager({ initialTemplates }: TemplatesManagerProps) {
             type="button"
             onClick={() => setEditingId("new")}
             disabled={pending}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-2xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
           >
             <Plus className="h-3 w-3" /> New template
           </button>
@@ -101,7 +101,7 @@ export function TemplatesManager({ initialTemplates }: TemplatesManagerProps) {
 
       {initialTemplates.length === 0 && editingId !== "new" ? (
         <div className="border border-[var(--rule)] bg-cream/30 p-8 text-center">
-          <p className="text-[14px] text-slate-body leading-relaxed max-w-[440px] mx-auto">
+          <p className="text-sm text-slate-body leading-relaxed max-w-[440px] mx-auto">
             No templates saved yet. Click <strong>New template</strong> to
             create your first one.
           </p>
@@ -125,19 +125,19 @@ export function TemplatesManager({ initialTemplates }: TemplatesManagerProps) {
                 className="border border-[var(--rule)] bg-card p-4 flex items-start justify-between gap-4"
               >
                 <div className="flex-1 min-w-0">
-                  <div className="text-[14px] font-bold text-ink mb-0.5">
+                  <div className="text-sm font-bold text-ink mb-0.5">
                     {t.name}
                   </div>
-                  <div className="text-[12px] text-slate-meta mb-2 truncate">
+                  <div className="text-xs text-slate-meta mb-2 truncate">
                     {t.subject}
                   </div>
-                  <div className="text-[12px] text-slate-body line-clamp-2 whitespace-pre-wrap">
+                  <div className="text-xs text-slate-body line-clamp-2 whitespace-pre-wrap">
                     {t.body.length > 220
                       ? `${t.body.slice(0, 220).trim()}…`
                       : t.body}
                   </div>
                   {t.usage_count > 0 && (
-                    <div className="mt-2 text-[10px] text-slate-meta uppercase tracking-wide">
+                    <div className="mt-2 text-2xs text-slate-meta uppercase tracking-wide">
                       Used {t.usage_count} {t.usage_count === 1 ? "time" : "times"}
                       {t.last_used_at && (
                         <> · last on{" "}
@@ -203,7 +203,7 @@ function TemplateForm({
         <input type="hidden" name="id" value={template.id} />
       )}
       <div>
-        <label className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
+        <label className="block text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
           Template name
         </label>
         <input
@@ -213,14 +213,14 @@ function TemplateForm({
           placeholder="e.g. Associate Dentist outreach v1"
           maxLength={80}
           required
-          className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+          className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
         />
       </div>
       <div>
         <div className="flex items-baseline justify-between mb-1.5 gap-3">
           <label
             htmlFor="template-subject"
-            className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta"
+            className="block text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta"
           >
             Subject
           </label>
@@ -239,14 +239,14 @@ function TemplateForm({
           placeholder="e.g. {{candidate.first_name}}, an Associate Dentist role you'd be perfect for"
           maxLength={200}
           required
-          className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
+          className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage"
         />
       </div>
       <div>
         <div className="flex items-baseline justify-between mb-1.5 gap-3">
           <label
             htmlFor="template-body"
-            className="block text-[10px] font-bold tracking-[1.5px] uppercase text-slate-meta"
+            className="block text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta"
           >
             Body
           </label>
@@ -262,18 +262,18 @@ function TemplateForm({
           required
           placeholder="Hi {{candidate.first_name}},&#10;&#10;I'm {{sender.first_name}} at {{dso.name}}. We have an Associate Dentist role opening at our Prairie Village practice and your background looked like a strong fit.&#10;&#10;Open to a quick conversation this week?"
           maxLength={8000}
-          className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage leading-relaxed resize-y font-mono"
+          className="w-full px-3 py-2 bg-cream border border-[var(--rule-strong)] text-ink text-sm focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage leading-relaxed resize-y font-mono"
         />
       </div>
 
-      <details className="text-[12px]">
+      <details className="text-xs">
         <summary className="cursor-pointer text-heritage-deep font-semibold inline-flex items-center gap-1">
           Available merge fields
         </summary>
         <ul className="mt-2 space-y-1 pl-3 border-l-2 border-[var(--rule)]">
           {SUPPORTED_MERGE_FIELDS.map((f) => (
             <li key={f.token} className="text-slate-body">
-              <code className="bg-cream px-1 py-0.5 rounded text-[11px]">
+              <code className="bg-cream px-1 py-0.5 rounded text-2xs">
                 {f.token}
               </code>{" "}
               — {f.label} (e.g. {f.example})
@@ -283,7 +283,7 @@ function TemplateForm({
       </details>
 
       {error && (
-        <div className="rounded-md border border-danger bg-danger-bg px-3 py-2 text-[13px] text-danger">
+        <div className="rounded-md border border-danger bg-danger-bg px-3 py-2 text-xs text-danger">
           {error}
         </div>
       )}
@@ -293,7 +293,7 @@ function TemplateForm({
           type="button"
           onClick={onCancel}
           disabled={pending}
-          className="px-4 py-2 text-[12px] font-bold tracking-[1.5px] uppercase text-slate-meta hover:text-ink"
+          className="px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-slate-meta hover:text-ink"
         >
           <X className="inline h-3 w-3 mr-1" />
           Cancel
@@ -301,7 +301,7 @@ function TemplateForm({
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
+          className="inline-flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground text-xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90 disabled:opacity-60"
         >
           {pending ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />

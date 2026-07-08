@@ -221,7 +221,7 @@ export default async function CandidateDetailPage({ params }: PageProps) {
     <>
       <Link
         href="/employer/talent-pool"
-        className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-6"
+        className="inline-flex items-center gap-2 text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep hover:text-ink transition-colors mb-6"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back to Talent Pool
@@ -229,10 +229,10 @@ export default async function CandidateDetailPage({ params }: PageProps) {
 
       {masked && (
         <div className="mb-6 max-w-[820px] border-l-2 border-heritage bg-cream/60 px-4 py-3">
-          <div className="text-[10px] font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
+          <div className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep mb-1">
             Browsing anonymously
           </div>
-          <p className="text-[13px] text-slate-body leading-relaxed">
+          <p className="text-xs text-slate-body leading-relaxed">
             This candidate keeps their name, photo, and contact details hidden
             while open to opportunities. Their experience, skills, and PracticeFit
             are all here — and their identity reveals automatically the moment
@@ -285,7 +285,7 @@ export default async function CandidateDetailPage({ params }: PageProps) {
         footerSections={
           outreachHistory.length > 0 ? (
             <section>
-              <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
+              <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
                 Outreach history ({outreachHistory.length})
               </div>
               <ul className="space-y-3">
@@ -295,10 +295,10 @@ export default async function CandidateDetailPage({ params }: PageProps) {
                     className="border border-[var(--rule)] bg-card p-4"
                   >
                     <div className="flex items-baseline justify-between gap-3 mb-1">
-                      <span className="text-[13px] font-bold text-ink">
+                      <span className="text-xs font-bold text-ink">
                         {m.subject}
                       </span>
-                      <span className="text-[11px] text-slate-meta whitespace-nowrap">
+                      <span className="text-2xs text-slate-meta whitespace-nowrap">
                         {new Date(m.sent_at).toLocaleDateString(undefined, {
                           year: "numeric",
                           month: "short",
@@ -307,11 +307,11 @@ export default async function CandidateDetailPage({ params }: PageProps) {
                       </span>
                     </div>
                     {m.sender_name && (
-                      <div className="text-[11px] text-slate-meta uppercase tracking-wide mb-2">
+                      <div className="text-2xs text-slate-meta uppercase tracking-wide mb-2">
                         From {m.sender_name}
                       </div>
                     )}
-                    <p className="text-[13px] text-slate-body leading-relaxed whitespace-pre-wrap">
+                    <p className="text-xs text-slate-body leading-relaxed whitespace-pre-wrap">
                       {m.body.length > 280
                         ? `${m.body.slice(0, 280).trim()}…`
                         : m.body}

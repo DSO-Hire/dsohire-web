@@ -22,7 +22,7 @@ export function NotesEditor({
         defaultValue={initialValue}
         rows={5}
         placeholder="Internal notes about this candidate. Only visible to your team."
-        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed"
+        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors leading-relaxed"
       />
       <div className="flex items-center gap-3">
         <button
@@ -33,10 +33,10 @@ export function NotesEditor({
           {pending ? "Saving…" : "Save notes"}
         </button>
         {state.error && (
-          <span className="text-[13px] text-danger">{state.error}</span>
+          <span className="text-xs text-danger">{state.error}</span>
         )}
         {state.ok && state.message && (
-          <span className="text-[13px] text-heritage-deep font-semibold">
+          <span className="text-xs text-heritage-deep font-semibold">
             {state.message}
           </span>
         )}

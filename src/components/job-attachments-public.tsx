@@ -56,7 +56,7 @@ export function JobAttachmentsPublic({ attachments }: JobAttachmentsPublicProps)
           Attachments
         </h2>
       </div>
-      <p className="text-[13px] text-slate-body mb-5 max-w-[560px] leading-relaxed">
+      <p className="text-xs text-slate-body mb-5 max-w-[560px] leading-relaxed">
         Documents the practice shared to help you evaluate this role.
       </p>
       <ul className="space-y-2">
@@ -71,10 +71,10 @@ export function JobAttachmentsPublic({ attachments }: JobAttachmentsPublicProps)
             >
               <Icon className="h-5 w-5 text-heritage-deep shrink-0" aria-hidden />
               <div className="flex-1 min-w-0">
-                <div className="truncate text-[14px] font-semibold text-ink">
+                <div className="truncate text-sm font-semibold text-ink">
                   {att.display_name}
                 </div>
-                <div className="mt-0.5 flex items-center gap-2 text-[12px] text-slate-body">
+                <div className="mt-0.5 flex items-center gap-2 text-xs text-slate-body">
                   <span>{mimeLabel(att.mime_type)}</span>
                   <span aria-hidden>&middot;</span>
                   <span>{formatSize(att.file_size_bytes)}</span>
@@ -95,13 +95,13 @@ export function JobAttachmentsPublic({ attachments }: JobAttachmentsPublicProps)
                   target="_blank"
                   rel="noopener noreferrer"
                   download={!isImage ? att.display_name : undefined}
-                  className="inline-flex items-center gap-1.5 text-[12px] font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors shrink-0"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold tracking-[1.5px] uppercase text-heritage-deep hover:text-ink transition-colors shrink-0"
                 >
                   <Download className="h-3.5 w-3.5" />
                   {isImage ? "View" : "Download"}
                 </a>
               ) : (
-                <span className="text-[12px] text-meta-foreground italic shrink-0">
+                <span className="text-xs text-meta-foreground italic shrink-0">
                   Unavailable
                 </span>
               )}

@@ -386,20 +386,20 @@ export default async function PerJobPipelinePage({
               {jobLocations.slice(0, 3).map((loc) => (
                 <span
                   key={loc.id}
-                  className="inline-flex items-center px-2 py-0.5 bg-cream border border-[var(--rule-strong)] text-[11px] font-semibold tracking-[0.3px] text-ink"
+                  className="inline-flex items-center px-2 py-0.5 bg-cream border border-[var(--rule-strong)] text-2xs font-semibold tracking-[0.3px] text-ink"
                 >
                   {loc.name}
                   {loc.state ? ` · ${loc.state}` : ""}
                 </span>
               ))}
               {jobLocations.length > 3 && (
-                <span className="text-[11px] font-semibold tracking-[0.3px] text-slate-meta">
+                <span className="text-2xs font-semibold tracking-[0.3px] text-slate-meta">
                   +{jobLocations.length - 3} more
                 </span>
               )}
             </div>
           )}
-          <div className="mt-3 flex flex-wrap items-center gap-5 text-[13px] text-slate-body">
+          <div className="mt-3 flex flex-wrap items-center gap-5 text-xs text-slate-body">
             <span className="inline-flex items-center gap-1">
               <Users className="size-3.5 text-slate-meta" />
               <strong className="text-ink font-bold">

@@ -84,13 +84,13 @@ export function ReferenceForm({
     return (
       <div className="text-center py-6">
         <CheckCircle2 className="mx-auto h-10 w-10 text-heritage mb-4" />
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
+        <div className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
           Thank you
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink mb-3">
           Your reference has been sent.
         </h1>
-        <p className="text-[14px] text-slate-body leading-relaxed max-w-[480px] mx-auto">
+        <p className="text-sm text-slate-body leading-relaxed max-w-[480px] mx-auto">
           {dsoName ?? "The hiring team"} has been notified. You can close this
           window — there&apos;s nothing else to do.
         </p>
@@ -105,13 +105,13 @@ export function ReferenceForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-7">
       <div>
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
+        <div className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-3">
           {firstName ? `Hi ${firstName} —` : "Reference form"}
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink mb-3 leading-[1.15]">
           Tell {dsoCopy} what it&apos;s like to work with {safeCandidate}.
         </h1>
-        <p className="text-[14px] text-slate-body leading-relaxed">
+        <p className="text-sm text-slate-body leading-relaxed">
           {requesterCopy} is considering {safeCandidate}
           {jobTitle ? (
             <>
@@ -140,7 +140,7 @@ export function ReferenceForm({
       {error && (
         <div
           role="alert"
-          className="flex items-start gap-2 border border-danger bg-danger-bg text-danger px-4 py-3 text-[13px]"
+          className="flex items-start gap-2 border border-danger bg-danger-bg text-danger px-4 py-3 text-xs"
         >
           <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
           <span>{error}</span>
@@ -148,13 +148,13 @@ export function ReferenceForm({
       )}
 
       <div className="pt-2 flex flex-wrap items-center gap-4 justify-between">
-        <p className="text-[12px] text-slate-meta leading-relaxed">
+        <p className="text-xs text-slate-meta leading-relaxed">
           Your response goes only to {dsoCopy}&apos;s hiring team.
         </p>
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 text-[13px] font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 text-xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {pending ? (
             <>
@@ -199,7 +199,7 @@ function FieldRow({
   const header = (
     <>
       <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 mb-1.5">
-        <span className="text-[14px] font-semibold text-ink leading-snug">
+        <span className="text-sm font-semibold text-ink leading-snug">
           {prompt}
         </span>
         {field.required ? (
@@ -213,7 +213,7 @@ function FieldRow({
         )}
       </div>
       {field.helperText && (
-        <div className="text-[12px] text-slate-meta mb-2 leading-snug">
+        <div className="text-xs text-slate-meta mb-2 leading-snug">
           {field.helperText}
         </div>
       )}
@@ -271,7 +271,7 @@ function FieldInput({
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
           maxLength={500}
-          className="w-full border border-[var(--rule-strong)] bg-card px-3 py-2.5 text-[14px] text-ink focus:outline-none focus:ring-2 focus:ring-heritage/40 disabled:bg-muted disabled:cursor-not-allowed"
+          className="w-full border border-[var(--rule-strong)] bg-card px-3 py-2.5 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-heritage/40 disabled:bg-muted disabled:cursor-not-allowed"
         />
       );
     case "long_text":
@@ -282,7 +282,7 @@ function FieldInput({
           disabled={disabled}
           maxLength={4000}
           rows={field.rows ?? 4}
-          className="w-full border border-[var(--rule-strong)] bg-card px-3 py-2.5 text-[14px] text-ink leading-relaxed focus:outline-none focus:ring-2 focus:ring-heritage/40 disabled:bg-muted disabled:cursor-not-allowed resize-y"
+          className="w-full border border-[var(--rule-strong)] bg-card px-3 py-2.5 text-sm text-ink leading-relaxed focus:outline-none focus:ring-2 focus:ring-heritage/40 disabled:bg-muted disabled:cursor-not-allowed resize-y"
         />
       );
     case "scale_1_5":
@@ -296,7 +296,7 @@ function FieldInput({
                 type="button"
                 disabled={disabled}
                 onClick={() => onChange(String(n))}
-                className={`min-w-[44px] h-[40px] border text-[14px] font-bold transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
+                className={`min-w-[44px] h-[40px] border text-sm font-bold transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
                   selected
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-[var(--rule-strong)] bg-card text-ink hover:bg-cream"
@@ -307,7 +307,7 @@ function FieldInput({
               </button>
             );
           })}
-          <div className="ml-2 text-[11px] text-slate-meta">
+          <div className="ml-2 text-2xs text-slate-meta">
             1 = Poor · 5 = Excellent
           </div>
         </div>
@@ -327,7 +327,7 @@ function FieldInput({
                 type="button"
                 disabled={disabled}
                 onClick={() => onChange(opt.v)}
-                className={`px-4 py-2 border text-[13px] font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
+                className={`px-4 py-2 border text-xs font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
                   selected
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-[var(--rule-strong)] bg-card text-ink hover:bg-cream"

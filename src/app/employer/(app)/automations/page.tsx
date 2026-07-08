@@ -205,7 +205,7 @@ function TabLink({
     <Link
       href={href}
       className={
-        "px-5 py-2 rounded-md text-[12px] font-bold tracking-[1px] uppercase transition-colors " +
+        "px-5 py-2 rounded-md text-xs font-bold tracking-[1px] uppercase transition-colors " +
         (active
           ? "bg-primary text-primary-foreground shadow-sm"
           : "text-slate-body hover:text-ink hover:bg-card/70")

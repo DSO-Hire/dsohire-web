@@ -17,7 +17,7 @@ export function OnboardingForm({ dsoId }: { dsoId: string }) {
       <div>
         <label
           htmlFor="loc-name"
-          className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+          className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2"
         >
           Location name <span className="text-heritage">*</span>
         </label>
@@ -27,9 +27,9 @@ export function OnboardingForm({ dsoId }: { dsoId: string }) {
           required
           autoComplete="organization"
           placeholder="Downtown Office"
-          className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+          className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
         />
-        <p className="mt-1.5 text-[12px] text-slate-meta leading-relaxed">
+        <p className="mt-1.5 text-xs text-slate-meta leading-relaxed">
           The name candidates see on the job listing — usually a neighborhood,
           mall, or street name. Not your DSO name.
         </p>
@@ -38,7 +38,7 @@ export function OnboardingForm({ dsoId }: { dsoId: string }) {
       <div>
         <label
           htmlFor="loc-address"
-          className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+          className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2"
         >
           Street address (optional)
         </label>
@@ -47,7 +47,7 @@ export function OnboardingForm({ dsoId }: { dsoId: string }) {
           name="address_line1"
           autoComplete="street-address"
           placeholder="123 Main Street"
-          className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+          className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
         />
       </div>
 
@@ -55,7 +55,7 @@ export function OnboardingForm({ dsoId }: { dsoId: string }) {
         <div className="sm:col-span-2">
           <label
             htmlFor="loc-city"
-            className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+            className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2"
           >
             City &amp; state <span className="text-heritage">*</span>
           </label>
@@ -69,7 +69,7 @@ export function OnboardingForm({ dsoId }: { dsoId: string }) {
         <div>
           <label
             htmlFor="loc-zip"
-            className="block text-[10px] font-bold tracking-[2px] uppercase text-slate-body mb-2"
+            className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2"
           >
             ZIP (optional)
           </label>
@@ -78,27 +78,27 @@ export function OnboardingForm({ dsoId }: { dsoId: string }) {
             name="postal_code"
             autoComplete="postal-code"
             placeholder="66208"
-            className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-[14px] placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+            className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
           />
         </div>
       </div>
 
       {state.error && (
         <div className="bg-danger-bg border-l-4 border-danger p-4">
-          <p className="text-[14px] text-danger">{state.error}</p>
+          <p className="text-sm text-danger">{state.error}</p>
         </div>
       )}
 
       <button
         type="submit"
         disabled={pending}
-        className="inline-flex items-center justify-center gap-2.5 w-full sm:w-auto px-9 py-4 bg-primary text-primary-foreground text-[12px] font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        className="inline-flex items-center justify-center gap-2.5 w-full sm:w-auto px-9 py-4 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {pending ? "Saving…" : "Add Location & Continue"}
         {!pending && <ArrowRight className="h-4 w-4" />}
       </button>
 
-      <p className="text-[13px] text-slate-meta leading-relaxed">
+      <p className="text-xs text-slate-meta leading-relaxed">
         You can add more locations after onboarding. Maps and lat/lng are
         looked up automatically when you save the address.
       </p>

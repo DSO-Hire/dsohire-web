@@ -38,13 +38,13 @@ export default async function ComingSoonPage({ searchParams }: PageProps) {
           <span className="ml-1 h-2 w-2 rounded-full bg-heritage" aria-hidden="true" />
         </div>
 
-        <div className="text-[10px] font-bold tracking-[3.5px] uppercase text-heritage-light mb-4">
+        <div className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-light mb-4">
           Private Testing
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold tracking-[-1px] leading-[1.12] mb-5">
           We&apos;re putting the finishing touches on DSO Hire.
         </h1>
-        <p className="text-[15px] leading-[1.7] text-hero-foreground/70 mb-8">
+        <p className="text-sm leading-[1.7] text-hero-foreground/70 mb-8">
           The platform is in private testing right now. If you&apos;re an invited
           tester, enter your access code to continue.
         </p>
@@ -59,23 +59,23 @@ export default async function ComingSoonPage({ searchParams }: PageProps) {
             spellCheck={false}
             placeholder="Access code"
             aria-label="Access code"
-            className="flex-1 bg-hero-foreground/5 border border-hero-foreground/20 px-4 py-3 text-[15px] text-hero-foreground placeholder:text-hero-foreground/40 outline-none focus:border-heritage focus:bg-hero-foreground/10 transition-colors"
+            className="flex-1 bg-hero-foreground/5 border border-hero-foreground/20 px-4 py-3 text-sm text-hero-foreground placeholder:text-hero-foreground/40 outline-none focus:border-heritage focus:bg-hero-foreground/10 transition-colors"
           />
           <button
             type="submit"
-            className="px-6 py-3 bg-heritage text-primary-foreground text-[12px] font-bold tracking-[1.8px] uppercase hover:bg-heritage-deep transition-colors whitespace-nowrap"
+            className="px-6 py-3 bg-heritage text-primary-foreground text-xs font-bold tracking-[1.8px] uppercase hover:bg-heritage-deep transition-colors whitespace-nowrap"
           >
             Enter
           </button>
         </form>
 
         {wrongCode && (
-          <p className="mt-3 text-[13px] text-danger">
+          <p className="mt-3 text-xs text-danger">
             That code didn&apos;t work — double-check it, or email us for access.
           </p>
         )}
 
-        <p className="mt-10 pt-6 border-t border-hero-foreground/15 text-[13px] text-hero-foreground/55 leading-relaxed">
+        <p className="mt-10 pt-6 border-t border-hero-foreground/15 text-xs text-hero-foreground/55 leading-relaxed">
           Testers only. Need a code?{" "}
           <a
             href={SUPPORT_MAILTO}

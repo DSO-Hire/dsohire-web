@@ -479,7 +479,7 @@ function IdentityCard({
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-[10px] font-semibold uppercase tracking-wider text-meta-foreground">
+      <dt className="text-2xs font-semibold uppercase tracking-wider text-meta-foreground">
         {label}
       </dt>
       <dd className="text-foreground">{value}</dd>
@@ -753,7 +753,7 @@ function ChipPreview({
     options?.find((o) => o.value === v)?.label ?? v;
   return (
     <div>
-      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-meta-foreground">
+      <p className="mb-1 text-2xs font-semibold uppercase tracking-wider text-meta-foreground">
         {label}
       </p>
       {values.length === 0 ? (
@@ -1932,7 +1932,7 @@ function CredentialFileControls({
 function VerificationBadge({ status }: { status: string }) {
   if (status === "verified") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-success-bg px-2 py-0.5 text-[11px] font-medium text-success">
+      <span className="inline-flex items-center gap-1 rounded-full bg-success-bg px-2 py-0.5 text-2xs font-medium text-success">
         <ShieldCheck className="size-3" />
         Verified
       </span>
@@ -1940,21 +1940,21 @@ function VerificationBadge({ status }: { status: string }) {
   }
   if (status === "pending") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-warning-bg px-2 py-0.5 text-[11px] font-medium text-warning">
+      <span className="inline-flex items-center gap-1 rounded-full bg-warning-bg px-2 py-0.5 text-2xs font-medium text-warning">
         Pending review
       </span>
     );
   }
   if (status === "revoked") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-danger-bg px-2 py-0.5 text-[11px] font-medium text-danger">
+      <span className="inline-flex items-center gap-1 rounded-full bg-danger-bg px-2 py-0.5 text-2xs font-medium text-danger">
         Revoked
       </span>
     );
   }
   if (status === "expired") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-danger-bg px-2 py-0.5 text-[11px] font-medium text-danger">
+      <span className="inline-flex items-center gap-1 rounded-full bg-danger-bg px-2 py-0.5 text-2xs font-medium text-danger">
         Expired
       </span>
     );
@@ -1996,7 +1996,7 @@ function JobPreferencesCard({
       <div className="space-y-3 text-sm">
         {visibility && (
           <div className="rounded-md bg-muted p-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-heritage">
+            <p className="text-2xs font-semibold uppercase tracking-wider text-heritage">
               Visibility
             </p>
             <p className="mt-0.5 font-medium text-foreground">{visibility.label}</p>
