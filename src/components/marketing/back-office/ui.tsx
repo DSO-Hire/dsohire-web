@@ -41,7 +41,7 @@ export function SceneHead({
   pulsing?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 mb-3.5">
+    <div className="flex items-center justify-between gap-x-3 gap-y-1.5 mb-3.5 flex-wrap">
       <div className="text-sm font-extrabold tracking-[-0.2px]">{title}</div>
       <span
         className="inline-flex items-center gap-1.5 text-2xs font-extrabold tracking-[1.2px] uppercase px-2 py-1 text-heritage-deep whitespace-nowrap"

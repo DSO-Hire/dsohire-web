@@ -158,7 +158,7 @@ export function BackOfficeShowcase() {
                   id={`bo-panel-${i}`}
                   aria-labelledby={`bo-tab-${i}`}
                   aria-hidden={i !== current}
-                  className={`[grid-area:1/1] ${i === current ? "" : "invisible"}`}
+                  className={`[grid-area:1/1] min-w-0 ${i === current ? "" : "invisible"}`}
                 >
                   <Panel active={i === current} enhanced={enhanced} nonce={playNonce} />
                 </div>

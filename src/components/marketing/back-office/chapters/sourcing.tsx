@@ -73,7 +73,7 @@ export function SourcingChapter({
           <div className="text-xs leading-relaxed border border-dashed border-[var(--rule-strong)] p-3 min-h-[70px]">
             {SOURCING.message}
           </div>
-          <div className="flex gap-1.5 mt-3">
+          <div className="flex flex-wrap gap-1.5 mt-3">
             {SOURCING_STEPS.map((label, i) => (
               <div
                 key={label}

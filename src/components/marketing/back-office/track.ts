@@ -99,25 +99,48 @@ export const COMP_GUARDRAIL =
 
 export const COMP_ESTIMATE = { min: 185, max: 232 }; // $k
 
-/* ── CH3 · Two-sided fit ── */
+/* ── CH3 · PracticeFit — one score, two sides of data ──
+ *
+ * The honest model (lib/practice-fit/compute.ts + track.ts): ONE engine
+ * scores a candidate↔job pair from BOTH sides' declared data — the
+ * candidate's PracticeFit assessment × the job + practice profile. A
+ * dimension only scores when both sides answered (unscored dims drop out
+ * of the denominator — nothing is guessed). PracticeFit covers practice-
+ * level roles (clinical/admin tracks); DSOFit is the corporate track —
+ * same engine, per-function weight profiles (seniority, org scale,
+ * leadership scope). A pair is never scored across tracks. */
 
-/** Dimension weights mirror lib/practice-fit/compute.ts WEIGHTS (comp 25,
- *  location 20, specialty 15, skills 15, experience 10, employment 10,
- *  DSO-fit 5) — restated here because WEIGHTS is module-private. */
-export const FIT_DIMENSIONS: ReadonlyArray<{ label: string; weight: number }> = [
-  { label: "Compensation", weight: 25 },
-  { label: "Location", weight: 20 },
-  { label: "Specialty", weight: 15 },
-  { label: "Skills", weight: 15 },
+/** Paired inputs — candidate assessment answer × practice profile answer.
+ *  Vocabulary mirrors the real assessment + practice-profile fields
+ *  (work_pace/practice_pace, mentorship, comp_priority tilt, PMS). */
+export const FIT_PAIRS: ReadonlyArray<{
+  dim: string;
+  candidate: string;
+  practice: string;
+}> = [
+  { dim: "Work pace", candidate: "Steady & thorough", practice: "Steady" },
+  { dim: "Mentorship", candidate: "Wants a mentor", practice: "Offered — clinical director" },
+  { dim: "PMS fluency", candidate: "Dentrix · Eaglesoft", practice: "Dentrix" },
+  { dim: "Matters most", candidate: "Compensation", practice: "$750/day + 32%" },
 ];
 
-export const TWO_SIDED = {
-  practiceFit: 94,
-  dsoFit: 91,
-  leftCaption: "How the practice scores Dr. Chen",
-  rightCaption: "How Dr. Chen scores the practice",
-  note: "Both sides opt in on real fit — that's why the best candidates raise their hand here.",
-};
+export const FIT_SCORE = 94;
+
+/** Real v8 dimension weights (lib/practice-fit/compute.ts WEIGHTS — module-
+ *  private, restated; 20 practice-track dims, normalized over scored only). */
+export const FIT_DIM_CHIPS: ReadonlyArray<{ label: string; weight: number }> = [
+  { label: "Location", weight: 14 },
+  { label: "Role fit", weight: 12 },
+  { label: "Compensation", weight: 10 },
+  { label: "PMS fluency", weight: 9 },
+];
+export const FIT_DIM_MORE = "+ 16 more";
+
+export const FIT_HONESTY_NOTE =
+  "A dimension only counts when both sides answered — nothing is guessed.";
+
+export const DSOFIT_NOTE =
+  "Corporate & multi-practice leadership roles run the same engine — weighted per function: seniority, org scale, leadership scope.";
 
 /* ── CH4 · Draft with AI ── */
 
@@ -196,11 +219,12 @@ export const CHAPTERS: ReadonlyArray<ChapterMeta> = [
     durationMs: 6800,
   },
   {
-    kicker: "03 · Two-sided fit",
-    title: "Fit runs both directions",
+    kicker: "03 · PracticeFit",
+    title: "One score, two sides of data",
     url: "app.dsohire.com/employer/candidates/chen",
-    caption: "PracticeFit and DSOFit — both sides score the match.",
-    durationMs: 6200,
+    caption:
+      "Dr. Chen's assessment meets the practice's profile — dimensions only count when both sides answered. DSOFit runs corporate roles the same way.",
+    durationMs: 7400,
   },
   {
     kicker: "04 · AI JD",
