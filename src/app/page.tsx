@@ -41,7 +41,7 @@ import {
 } from "lucide-react";
 import { Eyebrow } from "@/components/brand/eyebrow";
 import { SiteShell } from "@/components/marketing/site-shell";
-import { FilmStrip } from "@/components/marketing/film-strip";
+import { BackOfficeShowcase } from "@/components/marketing/back-office/showcase";
 import { CountUp } from "@/components/marketing/motion";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import { DsoFitWordmark } from "@/components/practice-fit/brand/dsofit-wordmark";
@@ -66,7 +66,7 @@ export default async function Home() {
     <SiteShell>
       <Hero />
       <LiveMarketBand live={live} />
-      <FilmStrip />
+      <BackOfficeShowcase />
       <MachineBand />
       <CandidateStrip />
       <FounderLine />

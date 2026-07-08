@@ -932,6 +932,42 @@ html, body {
   background: var(--rule-strong);
 }
 
+/* ── Back-office showcase (marketing/back-office, 2026-07-08) ──
+   Chapter-choreography accents. All gated to scripting+motion-ok so
+   reduced-motion and no-JS visitors see the settled final states. */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .bo-rt {
+    animation: bo-rt 1.4s ease-out infinite;
+  }
+  .bo-spark {
+    animation: bo-spark 0.5s ease;
+  }
+  .bo-blink {
+    animation: bo-blink 1s step-end infinite;
+  }
+  .bo-pulse {
+    animation: bo-pulse 1.1s ease 2;
+  }
+}
+@keyframes bo-rt {
+  0% { box-shadow: 0 0 0 0 rgba(77, 122, 96, 0.55); }
+  70% { box-shadow: 0 0 0 9px rgba(77, 122, 96, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(77, 122, 96, 0); }
+}
+@keyframes bo-spark {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes bo-blink {
+  50% { opacity: 0; }
+}
+@keyframes bo-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(141, 184, 163, 0.5); }
+  70% { box-shadow: 0 0 0 12px rgba(141, 184, 163, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(141, 184, 163, 0); }
+}
+
 .film-scroll {
   scrollbar-width: thin;
   scrollbar-color: var(--color-heritage) transparent;
