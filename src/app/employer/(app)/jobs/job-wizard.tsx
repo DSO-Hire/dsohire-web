@@ -28,6 +28,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { findNameLeaks, stripHtml } from "@/lib/dso/name-leak";
+import { setWizardStep } from "@/lib/ui/wizard-step";
 import { JobDescriptionEditor } from "@/components/job-description-editor";
 import {
   ConfidentialSearchFields,
@@ -413,6 +414,13 @@ export function JobWizard({
   const [maxStepReached, setMaxStepReached] = useState(
     mode === "edit" ? STEPS.length - 1 : 0
   );
+
+  // Publish the step so route-level launchpad chrome (hero, cross-link
+  // banner, "Start from" chips) can collapse past Step 1.
+  useEffect(() => {
+    setWizardStep(stepIdx);
+    return () => setWizardStep(0);
+  }, [stepIdx]);
 
   // v1.8 — draft autosave. Only on create (we don't want a stale local
   // draft overriding edits on a saved job). Key per dso so multiple
@@ -1252,7 +1260,7 @@ export function JobWizard({
       )}
       {/* Note 5 — contextual help. First-run nudge (create only) + a
           walkthrough drawer that's always one tap away. */}
-      {mode !== "edit" && (
+      {mode !== "edit" && stepIdx === 0 && (
         <Coachmark
           id="wizard"
           message="First time posting a job? Tap any ⓘ for a quick explanation of a field — or open “How posting works” for the full walkthrough."

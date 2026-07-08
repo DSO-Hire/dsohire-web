@@ -73,6 +73,7 @@ import {
   type ExternalLinkPair,
 } from "@/components/external-links-field";
 import { CORPORATE_FUNCTIONS } from "@/lib/corporate/functions";
+import { setWizardStep } from "@/lib/ui/wizard-step";
 import {
   WORK_MODES,
   TRAVEL_EXPECTATIONS,
@@ -250,6 +251,13 @@ export function CorporateJobWizard({
   const [maxStepReached, setMaxStepReached] = useState(
     mode === "edit" ? STEPS.length - 1 : 0
   );
+
+  // Publish the step so route-level launchpad chrome (hero, cross-link
+  // banner) can collapse past Step 1.
+  useEffect(() => {
+    setWizardStep(stepIdx);
+    return () => setWizardStep(0);
+  }, [stepIdx]);
 
   // 5G.d — draft autosave (create mode only). Key per DSO. Keyed
   // dsohire-corporate-wizard-draft-${dsoId} so it never collides with the
