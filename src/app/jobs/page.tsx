@@ -29,6 +29,7 @@ import { geocodeCityState } from "@/lib/geocoding/mapbox";
 import {
   MIN_COMP_OPTIONS,
   parseMinComp,
+  effectiveAnnualMax,
   type SavedSearchFilters,
 } from "@/lib/jobs/saved-search-filters";
 import { SaveSearchButton } from "./save-search-button";
@@ -350,16 +351,16 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
     activeSurface === "corporate" ? filteredCorporateJobs : practiceJobs;
 
   // Comp filter honesty note: count roles on the ACTIVE surface that the
-  // pay floor hid solely because they have no published range (null
-  // est_annual_max). Roles with a published range below the floor are
-  // legitimately filtered and aren't counted.
+  // pay floor hid solely because they carry NO comp signal at all — no
+  // est_annual atoms AND no visible published range to annualize
+  // (effectiveAnnualMax mirrors the SQL predicate). Roles whose effective
+  // comp is below the floor are legitimately filtered and aren't counted.
   let hiddenNoCompCount = 0;
   if (minCompAmount !== null && noCompResult?.data) {
     const scopes =
       activeSurface === "corporate" ? corporateScopes : practiceScopes;
     hiddenNoCompCount = (noCompResult.data as JobRow[]).filter((j) => {
-      if (j.est_annual_max !== null && j.est_annual_max !== undefined)
-        return false;
+      if (effectiveAnnualMax(j) !== null) return false;
       if (!scopes.has((j.scope as string) ?? "location")) return false;
       if (
         activeSurface === "corporate" &&

@@ -45,6 +45,7 @@ import {
   savedSearchFiltersToRpcArgs,
   savedSearchFiltersToJobsUrl,
   jobMatchesSurfaceFilters,
+  effectiveAnnualMax,
   type SavedSearchFilters,
 } from "@/lib/jobs/saved-search-filters";
 import {
@@ -93,6 +94,10 @@ interface JobRpcRow {
   corporate_function: string | null;
   est_annual_min: number | null;
   est_annual_max: number | null;
+  compensation_visible: boolean;
+  compensation_min: number | null;
+  compensation_max: number | null;
+  compensation_period: string | null;
 }
 
 export async function GET(request: Request) {
@@ -315,12 +320,26 @@ export async function GET(request: Request) {
   return NextResponse.json(report);
 }
 
-/** "$150K–$180K est." from the good-faith annual range; null when unset. */
+/**
+ * "$150K–$180K est." annual comp line for the alert email. est_annual atoms
+ * win; else the visible published range annualized via effectiveAnnualMax
+ * (same fallback the min_comp filter matches on, so a comp-floored alert
+ * never lists a job without a comp line).
+ */
 function compLabel(j: JobRpcRow): string | null {
-  if (j.est_annual_max === null) return null;
   const k = (n: number) => `$${Math.round(n / 1000)}K`;
-  if (j.est_annual_min !== null && j.est_annual_min !== j.est_annual_max) {
-    return `${k(j.est_annual_min)}–${k(j.est_annual_max)} est.`;
+  if (j.est_annual_max !== null) {
+    if (j.est_annual_min !== null && j.est_annual_min !== j.est_annual_max) {
+      return `${k(j.est_annual_min)}–${k(j.est_annual_max)} est.`;
+    }
+    return `${k(j.est_annual_max)} est.`;
   }
-  return `${k(j.est_annual_max)} est.`;
+  const max = effectiveAnnualMax(j);
+  if (max === null) return null;
+  const min =
+    j.compensation_min !== null
+      ? effectiveAnnualMax({ ...j, compensation_max: j.compensation_min })
+      : null;
+  if (min !== null && min !== max) return `${k(min)}–${k(max)} est.`;
+  return `${k(max)} est.`;
 }

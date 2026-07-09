@@ -16,8 +16,17 @@
  * dispatcher applies them the same way, post-RPC.
  */
 
-/** Whitelisted min-comp thresholds (annual $). URL uses the "150k" form. */
+/** Whitelisted min-comp thresholds (annual $). URL uses the "150k" form.
+ *  The ladder spans every dental role, not just doctors: front desk / DA
+ *  ($40-70k), hygienist ($70-130k), office/regional ($60-150k), docs
+ *  ($100k+). $10k steps below $100k, $25k above. */
 export const MIN_COMP_OPTIONS = [
+  { value: "40k", label: "$40k+", amount: 40_000 },
+  { value: "50k", label: "$50k+", amount: 50_000 },
+  { value: "60k", label: "$60k+", amount: 60_000 },
+  { value: "70k", label: "$70k+", amount: 70_000 },
+  { value: "80k", label: "$80k+", amount: 80_000 },
+  { value: "90k", label: "$90k+", amount: 90_000 },
   { value: "100k", label: "$100k+", amount: 100_000 },
   { value: "125k", label: "$125k+", amount: 125_000 },
   { value: "150k", label: "$150k+", amount: 150_000 },
@@ -30,6 +39,35 @@ export type MinCompValue = (typeof MIN_COMP_OPTIONS)[number]["value"];
 export function parseMinComp(raw: string | undefined | null): number | null {
   if (!raw) return null;
   return MIN_COMP_OPTIONS.find((o) => o.value === raw)?.amount ?? null;
+}
+
+/**
+ * The effective annual comp ceiling the min_comp filter compares against —
+ * MUST mirror the SQL in search_jobs_public (migration 20260709150000):
+ * est_annual_max wins; else the visible published comp range annualized
+ * (hourly × 2080, daily × 260, annual as-is). Null = no comp signal at all
+ * (the only case the /jobs "N roles hidden" note counts).
+ */
+export function effectiveAnnualMax(job: {
+  est_annual_max?: number | null;
+  compensation_visible?: boolean | null;
+  compensation_max?: number | null;
+  compensation_period?: string | null;
+}): number | null {
+  if (job.est_annual_max !== null && job.est_annual_max !== undefined) {
+    return job.est_annual_max;
+  }
+  if (!job.compensation_visible || job.compensation_max == null) return null;
+  switch (job.compensation_period) {
+    case "hourly":
+      return job.compensation_max * 2080;
+    case "daily":
+      return job.compensation_max * 260;
+    case "annual":
+      return job.compensation_max;
+    default:
+      return null;
+  }
 }
 
 /** The jsonb stored in candidate_saved_searches.filter_state. All optional —
