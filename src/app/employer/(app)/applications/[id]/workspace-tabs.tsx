@@ -16,6 +16,7 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
+import { TabStrip } from "@/components/ui/tab-strip";
 import {
   Briefcase,
   ClipboardList,
@@ -131,44 +132,27 @@ export function WorkspaceTabs({
 
   return (
     <div className="min-w-0">
-      {/* Tab bar — sticky below the mobile shell header; document-level
-          scroll only (no overflow ancestors — keeps sticky working). */}
-      <div
-        role="tablist"
-        aria-label="Candidate workspace"
-        className="sticky top-[64px] lg:top-0 z-10 bg-ivory border-b border-[var(--rule-strong)] flex flex-wrap gap-x-1 -mt-2 pt-2"
-      >
-        {tabs.map((t) => {
-          const Icon = TAB_ICON[t.id];
-          const isActive = active === t.id;
-          return (
-            <button
-              key={t.id}
-              role="tab"
-              aria-selected={isActive}
-              onClick={() => setActive(t.id)}
-              className={`inline-flex items-center gap-2 px-3.5 py-3 -mb-px border-b-2 text-xs font-semibold transition-colors ${
-                isActive
-                  ? "border-heritage text-ink"
-                  : "border-transparent text-slate-meta hover:text-ink"
-              }`}
-            >
-              <Icon className="h-3.5 w-3.5" />
-              {t.label}
-              {t.badge !== undefined && (
-                <span className="inline-flex items-center justify-center min-w-[18px] px-1.5 py-0.5 bg-ink text-ivory text-2xs font-bold leading-none tabular">
-                  {t.badge}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
+      {/* Tab bar — the shared TabStrip primitive (design program 2b):
+          same 2px heritage rule + icons, PLUS arrow-key navigation and
+          aria-controls wiring the hand-rolled strip lacked. Sticky below
+          the mobile shell header; document-level scroll only (no overflow
+          ancestors — keeps sticky working; wrap avoids x-scroll here). */}
+      <TabStrip
+        ariaLabel="Candidate workspace"
+        tabs={tabs.map((t) => ({ ...t, icon: TAB_ICON[t.id] }))}
+        activeId={active}
+        onSelect={(id) => setActive(id as TabId)}
+        panelIdFor={(id) => `workspace-pane-${id}`}
+        wrap
+        className="sticky top-[64px] lg:top-0 z-10 bg-ivory border-b border-[var(--rule-strong)] -mt-2 pt-2"
+      />
 
       {panes.map((p) => (
         <div
           key={p.id}
+          id={`workspace-pane-${p.id}`}
           role="tabpanel"
+          aria-labelledby={`tab-${p.id}`}
           hidden={active !== p.id}
           className="pt-8"
         >

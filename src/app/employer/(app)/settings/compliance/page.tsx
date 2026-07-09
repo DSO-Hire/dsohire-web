@@ -34,6 +34,14 @@ import {
   adverseImpactTable,
   EEO_SMALL_CELL_THRESHOLD,
 } from "@/lib/eeo/export";
+import {
+  DataTable,
+  DataTableHead,
+  DataTableBody,
+  DataTableRow,
+  DataTableTH,
+  DataTableTD,
+} from "@/components/ui/data-table";
 import { loadApplicantFlowAggregate } from "./data";
 import type { Metadata } from "next";
 
@@ -290,57 +298,50 @@ export default async function ComplianceSettingsPage({
                       No applicants in scope.
                     </p>
                   ) : (
-                    <table className="w-full max-w-[640px] border border-[var(--rule)] text-sm">
-                      <thead>
-                        <tr className="bg-cream text-left">
-                          <th className="px-3 py-2 text-2xs font-bold tracking-[1px] uppercase text-slate-body">
-                            Group
-                          </th>
-                          <th className="px-3 py-2 text-2xs font-bold tracking-[1px] uppercase text-slate-body text-right">
-                            Applicants
-                          </th>
-                          <th className="px-3 py-2 text-2xs font-bold tracking-[1px] uppercase text-slate-body text-right">
-                            Hired
-                          </th>
-                          <th className="px-3 py-2 text-2xs font-bold tracking-[1px] uppercase text-slate-body text-right">
-                            Selection rate
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {rows.map((r) => (
-                          <tr
-                            key={r.group}
-                            className="border-t border-[var(--rule)]"
-                          >
-                            <td className="px-3 py-2 text-ink">{r.group}</td>
-                            {r.suppressed ? (
-                              <td
-                                colSpan={3}
-                                className="px-3 py-2 text-right text-xs italic text-slate-meta"
-                              >
-                                Suppressed (&lt;{EEO_SMALL_CELL_THRESHOLD}{" "}
-                                applicants)
-                              </td>
-                            ) : (
-                              <>
-                                <td className="px-3 py-2 text-right tabular text-ink">
-                                  {r.applicants}
+                    <div className="max-w-[640px] border border-[var(--rule)]">
+                      <DataTable className="text-sm">
+                        <DataTableHead>
+                          <DataTableRow header className="bg-cream">
+                            <DataTableTH>Group</DataTableTH>
+                            <DataTableTH numeric>Applicants</DataTableTH>
+                            <DataTableTH numeric>Hired</DataTableTH>
+                            <DataTableTH numeric>Selection rate</DataTableTH>
+                          </DataTableRow>
+                        </DataTableHead>
+                        <DataTableBody>
+                          {rows.map((r) => (
+                            <DataTableRow key={r.group}>
+                              <DataTableTD className="text-ink py-2">
+                                {r.group}
+                              </DataTableTD>
+                              {r.suppressed ? (
+                                <td
+                                  colSpan={3}
+                                  className="px-3 py-2 pr-6 text-right text-xs italic text-slate-meta"
+                                >
+                                  Suppressed (&lt;{EEO_SMALL_CELL_THRESHOLD}{" "}
+                                  applicants)
                                 </td>
-                                <td className="px-3 py-2 text-right tabular text-ink">
-                                  {r.hired}
-                                </td>
-                                <td className="px-3 py-2 text-right tabular text-ink">
-                                  {r.selectionRate === null
-                                    ? "—"
-                                    : `${Math.round(r.selectionRate * 100)}%`}
-                                </td>
-                              </>
-                            )}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                              ) : (
+                                <>
+                                  <DataTableTD numeric className="py-2">
+                                    {r.applicants}
+                                  </DataTableTD>
+                                  <DataTableTD numeric className="py-2">
+                                    {r.hired}
+                                  </DataTableTD>
+                                  <DataTableTD numeric className="py-2">
+                                    {r.selectionRate === null
+                                      ? "—"
+                                      : `${Math.round(r.selectionRate * 100)}%`}
+                                  </DataTableTD>
+                                </>
+                              )}
+                            </DataTableRow>
+                          ))}
+                        </DataTableBody>
+                      </DataTable>
+                    </div>
                   )}
                 </div>
               );
