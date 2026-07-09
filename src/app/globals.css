@@ -320,6 +320,32 @@ html, body {
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* ── Route transitions (design program 5a, 2026-07-09) ──
+   Every route change settles in: fade + 6px rise on the brand curve.
+   Entrance-only (no exit choreography — never blocks interaction, no
+   experimental view-transition flag on prod). Applied via template.tsx
+   in the app shells + the SiteShell content wrapper. Inert under
+   reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .route-enter {
+    /* fill-mode BACKWARDS, not both/forwards — a retained transform would
+       make this wrapper a containing block and silently break every
+       sticky/fixed descendant (kanban headers, workspace tab strip).
+       After the entrance completes, all animated styles evaporate. */
+    animation: route-enter var(--duration-base) var(--ease-settle) backwards;
+  }
+  @keyframes route-enter {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
 .dark {
   /* ═══════════════════════════════════════════════════════════════
      DSO Hire — approved brand-dark palette (signed off 2026-06-18).

@@ -51,7 +51,11 @@ export function SiteShell({
             here (not under the candidate shell), so its "Job saved" toast had
             no provider. The <main> is a sibling of the backdrop-blurred nav, so
             the fixed toast viewport isn't trapped by a containing block. */}
-        <ToastProvider>{children}</ToastProvider>
+        <ToastProvider>
+          {/* 5a — marketing pages fully re-render per nav; the route-enter
+              settle makes that read as intentional motion, not a flash. */}
+          <div className="route-enter">{children}</div>
+        </ToastProvider>
       </main>
       <SiteFooter />
     </>
