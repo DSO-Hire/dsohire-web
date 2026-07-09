@@ -96,7 +96,7 @@ const GROUPS: NavGroup[] = [
     id: "money-trust",
     entries: [
       { id: "billing", label: "Billing", href: "/employer/billing", Icon: CreditCard, external: true },
-      { id: "compliance", label: "Compliance", href: "/employer/settings/compliance", Icon: ShieldCheck, comingSoon: true },
+      { id: "compliance", label: "Compliance", href: "/employer/settings/compliance", Icon: ShieldCheck },
     ],
   },
   {
