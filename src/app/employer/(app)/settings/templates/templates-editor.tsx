@@ -23,9 +23,9 @@
  */
 
 import { useMemo, useState, useTransition } from "react";
+import { useToast } from "@/components/app/toast";
 import {
   AlertTriangle,
-  CheckCircle2,
   ChevronDown,
   ChevronUp,
   Loader2,
@@ -96,14 +96,13 @@ function TemplateCard({
 
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
+  const toast = useToast();
 
   const dirty =
     subject !== snapshot.subject || bodyHtml !== snapshot.bodyHtml;
 
   const onSave = () => {
     setError(null);
-    setSaved(false);
     if (!subject.trim()) {
       setError("Subject is required.");
       return;
@@ -125,7 +124,7 @@ function TemplateCard({
       setSnapshot({ subject, bodyHtml });
       setIsCustom(true);
       setUpdatedAt(new Date().toISOString());
-      setSaved(true);
+      toast({ title: "Template saved", body: "Candidates now get your customized email." });
     });
   };
 
@@ -138,7 +137,6 @@ function TemplateCard({
       return;
     }
     setError(null);
-    setSaved(false);
     startTransition(async () => {
       const result = await revertTemplate({ kind: template.kind });
       if (!result.ok) {
@@ -150,7 +148,7 @@ function TemplateCard({
       // the editor was originally seeded with.
       setIsCustom(false);
       setUpdatedAt(null);
-      setSaved(true);
+      toast({ title: "Reverted to the system default" });
     });
   };
 
@@ -211,8 +209,7 @@ function TemplateCard({
               value={subject}
               disabled={!canEdit}
               onChange={(e) => {
-                setSaved(false);
-                setError(null);
+                            setError(null);
                 setSubject(e.target.value);
               }}
               maxLength={200}
@@ -233,8 +230,7 @@ function TemplateCard({
             <TemplateBodyEditor
               value={bodyHtml}
               onChange={(html) => {
-                setSaved(false);
-                setError(null);
+                            setError(null);
                 setBodyHtml(html);
               }}
               groups={meta.groups}
@@ -259,12 +255,6 @@ function TemplateCard({
                 <p className="inline-flex items-center gap-1.5 text-danger">
                   <AlertTriangle className="size-3.5 shrink-0" />
                   {error}
-                </p>
-              )}
-              {!error && saved && (
-                <p className="inline-flex items-center gap-1.5 text-heritage-deep">
-                  <CheckCircle2 className="size-3.5" />
-                  <span className="font-semibold">Saved.</span>
                 </p>
               )}
             </div>

@@ -18,7 +18,8 @@
  */
 
 import { useMemo, useState, useTransition } from "react";
-import { Check, Save, AlertCircle, Sparkles, Lock } from "lucide-react";
+import { useToast } from "@/components/app/toast";
+import { Check, Save, AlertCircle, Lock } from "lucide-react";
 import {
   EMPLOYER_NOTIFICATION_EVENTS,
   EMPLOYER_NOTIFICATION_GROUP_ORDER,
@@ -43,7 +44,7 @@ export function EmployerNotificationsForm({
   const [, startSaving] = useTransition();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [savedFlash, setSavedFlash] = useState<string | null>(null);
+  const toast = useToast();
 
   const dirty = useMemo(() => {
     const out: PreferenceRow[] = [];
@@ -70,7 +71,6 @@ export function EmployerNotificationsForm({
   const onSave = () => {
     if (dirty.length === 0) return;
     setError(null);
-    setSavedFlash(null);
     setSaving(true);
     startSaving(async () => {
       const result = await saveEmployerNotificationPreferences(dirty);
@@ -79,10 +79,10 @@ export function EmployerNotificationsForm({
         setError(result.error);
         return;
       }
-      setSavedFlash(
-        `Saved · ${result.saved} preference${result.saved === 1 ? "" : "s"} updated.`
-      );
-      window.setTimeout(() => setSavedFlash(null), 2500);
+      toast({
+        title: "Notification preferences saved",
+        body: `${result.saved} preference${result.saved === 1 ? "" : "s"} updated.`,
+      });
     });
   };
 
@@ -120,10 +120,6 @@ export function EmployerNotificationsForm({
           {error ? (
             <span className="inline-flex items-center gap-1.5 text-danger">
               <AlertCircle className="h-3.5 w-3.5" /> {error}
-            </span>
-          ) : savedFlash ? (
-            <span className="inline-flex items-center gap-1.5 text-heritage-deep font-semibold">
-              <Sparkles className="h-3.5 w-3.5" /> {savedFlash}
             </span>
           ) : dirty.length > 0 ? (
             <span className="text-ink">

@@ -15,7 +15,8 @@
  */
 
 import { useMemo, useState, useTransition } from "react";
-import { Check, Save, AlertCircle, Sparkles } from "lucide-react";
+import { useToast } from "@/components/app/toast";
+import { Check, Save, AlertCircle } from "lucide-react";
 import {
   CANDIDATE_NOTIFICATION_EVENTS,
   CANDIDATE_NOTIFICATION_GROUP_ORDER,
@@ -38,7 +39,7 @@ export function NotificationsForm({ initial }: NotificationsFormProps) {
   const [, startSaving] = useTransition();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [savedFlash, setSavedFlash] = useState<string | null>(null);
+  const toast = useToast();
 
   // Identify changed rows by comparing against `initial`.
   const dirty = useMemo(() => {
@@ -66,7 +67,6 @@ export function NotificationsForm({ initial }: NotificationsFormProps) {
   const onSave = () => {
     if (dirty.length === 0) return;
     setError(null);
-    setSavedFlash(null);
     setSaving(true);
     startSaving(async () => {
       const result = await saveNotificationPreferences(dirty);
@@ -75,14 +75,12 @@ export function NotificationsForm({ initial }: NotificationsFormProps) {
         setError(result.error);
         return;
       }
-      setSavedFlash(
-        `Saved · ${result.saved} preference${result.saved === 1 ? "" : "s"} updated.`
-      );
-      // Clear the flash and reset the dirty baseline by lifting `prefs`
-      // into `initial` via reload-effect: the page is re-fetched on
-      // revalidate, so on re-mount `initial` reflects the new state.
-      // For UX immediacy, we also fade the flash after 2.5s.
-      window.setTimeout(() => setSavedFlash(null), 2500);
+      // One confirmation dialect (design program 2c): success speaks
+      // through the heritage toast, not an inline flash.
+      toast({
+        title: "Notification preferences saved",
+        body: `${result.saved} preference${result.saved === 1 ? "" : "s"} updated.`,
+      });
     });
   };
 
@@ -122,10 +120,6 @@ export function NotificationsForm({ initial }: NotificationsFormProps) {
           {error ? (
             <span className="inline-flex items-center gap-1 text-danger">
               <AlertCircle className="size-4" /> {error}
-            </span>
-          ) : savedFlash ? (
-            <span className="inline-flex items-center gap-1 text-heritage">
-              <Sparkles className="size-4" /> {savedFlash}
             </span>
           ) : dirty.length > 0 ? (
             <span className="text-foreground">
