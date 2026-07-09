@@ -81,6 +81,15 @@ export const NOTIFICATION_DEFAULTS: DefaultsMap = {
     in_app: { enabled: false, frequency: "off" },
     sms: { enabled: false, frequency: "off" },
   },
+  "job_alert.match": {
+    // Saved-search alerts. Cadence lives on candidate_saved_searches.frequency
+    // (the cron dispatcher is the scheduler), so like practice_fit_digest the
+    // dispatcher-level frequency is 'instant' — send when the cron invokes it.
+    // One-click unsubscribe rides the candidate.jobs category.
+    email: { enabled: true, frequency: "instant" },
+    in_app: { enabled: false, frequency: "off" },
+    sms: { enabled: false, frequency: "off" },
+  },
   "prospect.interested_nudge": {
     // Sourcing CRM — a DSO reached out to a sourced (pre-application) prospect.
     // Opt-out honored (candidate can mute/block the DSO from the thread); the

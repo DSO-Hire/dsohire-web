@@ -21,7 +21,9 @@ import { getAcquisition } from "@/lib/analytics/acquisition";
 import { recordGoal } from "@/lib/analytics/record-goal";
 import { after } from "next/server";
 
-const NEXT_ALLOWLIST = /^\/(candidate\/|jobs\/)/;
+// /candidate/* and /jobs/* pages, plus the bare /jobs list (with or without a
+// query string) — the save-search CTA returns to /jobs?<filters>&save=1.
+const NEXT_ALLOWLIST = /^\/(candidate\/|jobs(\/|\?|$))/;
 
 export interface CandidateSignUpState {
   ok: boolean;

@@ -1,0 +1,44 @@
+name: Saved-search job alerts
+
+# Saved-search alert dispatcher (comp-filter + save-search spec, 2026-07-09).
+# Runs from GitHub Actions (not vercel.json) because the Vercel Hobby tier caps
+# cron entries — same pattern as practice-fit-digest / interview-reminders.
+#
+# Cadence: daily at 13:15 UTC (~8:15am US Central) — after new-job activity has
+# accumulated overnight, just after the Monday digests' slots. The route itself
+# handles frequency semantics: instant + daily searches every run, weekly
+# searches on Monday runs only.
+#
+# Setup: reuses the existing CRON_SECRET repo secret; it must match the
+# CRON_SECRET env var in Vercel.
+
+on:
+  schedule:
+    - cron: '15 13 * * *'
+  # Allow manual triggering from the Actions tab for debugging.
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Hit the job-alert-dispatch cron route
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::error::CRON_SECRET is not set. Add it in repo Settings → Secrets → Actions."
+            exit 1
+          fi
+          response=$(curl -sS --fail-with-body -w "\n%{http_code}" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "https://dsohire.com/api/cron/job-alert-dispatch")
+          status=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+          echo "HTTP $status"
+          echo "$body"
+          if [ "$status" != "200" ]; then
+            echo "::error::Cron route returned $status"
+            exit 1
+          fi

@@ -81,7 +81,7 @@ export const CANDIDATE_NOTIFICATION_EVENTS: ReadonlyArray<CandidateNotificationE
       description:
         "Email alerts when new jobs match a saved search. Manage searches in Credentials.",
       channels: ["email"],
-      shipped: false,
+      shipped: true,
     },
     {
       event_kind: "job_alert.recommended",

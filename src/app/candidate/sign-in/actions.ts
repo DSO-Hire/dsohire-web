@@ -14,7 +14,9 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getMfaState } from "@/lib/auth/mfa";
 import { readMfaTrustCookie } from "@/lib/auth/mfa-trust";
 
-const NEXT_ALLOWLIST = /^\/(candidate\/|jobs\/)/;
+// /candidate/* and /jobs/* pages, plus the bare /jobs list (with or without a
+// query string) — the save-search CTA returns to /jobs?<filters>&save=1.
+const NEXT_ALLOWLIST = /^\/(candidate\/|jobs(\/|\?|$))/;
 
 export interface CandidateSignInState {
   ok: boolean;

@@ -26,6 +26,12 @@ import { normalizeStateInput } from "@/lib/us-states";
 import { CORPORATE_FUNCTIONS } from "@/lib/corporate/functions";
 import { ListSort } from "@/components/ui/list-sort";
 import { geocodeCityState } from "@/lib/geocoding/mapbox";
+import {
+  MIN_COMP_OPTIONS,
+  parseMinComp,
+  type SavedSearchFilters,
+} from "@/lib/jobs/saved-search-filters";
+import { SaveSearchButton } from "./save-search-button";
 import type { Metadata } from "next";
 
 /** E7.4 — Allowed radius values for the Near-me filter. Anything else
@@ -137,6 +143,10 @@ interface PageProps {
     near?: string;
     /** E7.4 — "Within": radius in miles. Must be one of WITHIN_MILES_OPTIONS. */
     within?: string;
+    /** Comp filter — min annual pay, whitelisted "100k".."200k" values. */
+    comp?: string;
+    /** Save-search post-auth return flag: "1" auto-saves the current search. */
+    save?: string;
     /** Phase D Day 2 — preview flag for the deck.gl heatmap overlay.
      *  Hidden behind ?heatmap=1 so production users keep the pin-only
      *  map until Day 4 wires this into the style picker. */
@@ -244,6 +254,14 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
     ? await geocodeCityState(nearParsed!.city, nearParsed!.state)
     : null;
 
+  // Comp filter — whitelisted thresholds only; anything else in the URL is
+  // treated as "Any" (no filter).
+  const minCompAmount = parseMinComp(sp.comp);
+  const minCompValue =
+    minCompAmount !== null
+      ? MIN_COMP_OPTIONS.find((o) => o.amount === minCompAmount)!.value
+      : null;
+
   // RPC args. Radius args are only spread in when an active geocoded
   // radius filter is in play — keeps the named-args call backward-compatible
   // with the pre-E7.4 RPC signature so a deploy ahead of the migration
@@ -262,11 +280,29 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
     rpcArgs.near_lng = nearGeo.lng;
     rpcArgs.within_miles = withinMilesParsed;
   }
-  const { data: rawJobs } = await supabase.rpc(
-    "search_jobs_public",
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    rpcArgs as any
-  );
+  // Same deploy-ahead-of-migration guard as the radius args: only include
+  // min_comp when the filter is active.
+  if (minCompAmount !== null) {
+    rpcArgs.min_comp = minCompAmount;
+  }
+  // When the comp filter is active, a parallel no-comp call feeds the
+  // "N roles hidden — no published pay range" note: jobs with no
+  // est_annual_max can't match a pay floor, and they shouldn't vanish
+  // without a trace.
+  const [{ data: rawJobs }, noCompResult] = await Promise.all([
+    supabase.rpc(
+      "search_jobs_public",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      rpcArgs as any
+    ),
+    minCompAmount !== null
+      ? supabase.rpc(
+          "search_jobs_public",
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          { ...rpcArgs, min_comp: null } as any
+        )
+      : Promise.resolve(null),
+  ]);
 
   // Apply candidate-side sort. RPC returns a relevance-blended order; for
   // anything other than the default we re-sort the slice in memory. Always
@@ -312,6 +348,28 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
 
   const jobs =
     activeSurface === "corporate" ? filteredCorporateJobs : practiceJobs;
+
+  // Comp filter honesty note: count roles on the ACTIVE surface that the
+  // pay floor hid solely because they have no published range (null
+  // est_annual_max). Roles with a published range below the floor are
+  // legitimately filtered and aren't counted.
+  let hiddenNoCompCount = 0;
+  if (minCompAmount !== null && noCompResult?.data) {
+    const scopes =
+      activeSurface === "corporate" ? corporateScopes : practiceScopes;
+    hiddenNoCompCount = (noCompResult.data as JobRow[]).filter((j) => {
+      if (j.est_annual_max !== null && j.est_annual_max !== undefined)
+        return false;
+      if (!scopes.has((j.scope as string) ?? "location")) return false;
+      if (
+        activeSurface === "corporate" &&
+        activeFunctionSlug &&
+        (j.corporate_function as string | null) !== activeFunctionSlug
+      )
+        return false;
+      return true;
+    }).length;
+  }
   const practiceCount = practiceJobs.length;
   // Corporate tab count chip in the surface tabs reflects the UNFILTERED
   // corporate pool so the function-filter doesn't make the tab look
@@ -510,6 +568,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
   if (sp.employment) filterParams.push(["employment", sp.employment]);
   if (sp.category) filterParams.push(["category", sp.category]);
   if (postedFilterValue) filterParams.push(["posted", postedFilterValue]);
+  if (minCompValue) filterParams.push(["comp", minCompValue]);
   // 5G.b — surface lives in filterParams too so tab state survives any
   // view toggle / sort change / filter submit. Practice is default, so
   // we only push when explicitly on Corporate.
@@ -552,6 +611,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
     if (sp.employment) params.push(["employment", sp.employment]);
     if (sp.category) params.push(["category", sp.category]);
     if (postedFilterValue) params.push(["posted", postedFilterValue]);
+    if (minCompValue) params.push(["comp", minCompValue]);
     if (sortKey !== "newest") params.push(["sort", sortKey]);
     if (surface === "corporate") params.push(["surface", "corporate"]);
     pushNearWithin(params);
@@ -567,6 +627,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
     if (sp.employment) params.push(["employment", sp.employment]);
     if (sp.category) params.push(["category", sp.category]);
     if (postedFilterValue) params.push(["posted", postedFilterValue]);
+    if (minCompValue) params.push(["comp", minCompValue]);
     if (sortKey !== "newest") params.push(["sort", sortKey]);
     params.push(["surface", "corporate"]);
     if (slug) params.push(["function", slug]);
@@ -581,6 +642,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
     pushStates(params);
     if (sp.employment) params.push(["employment", sp.employment]);
     if (sp.category) params.push(["category", sp.category]);
+    if (minCompValue) params.push(["comp", minCompValue]);
     if (showMap) params.push(["view", "map"]);
     if (sortKey !== "newest") params.push(["sort", sortKey]);
     if (value) params.push(["posted", value]);
@@ -598,6 +660,39 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
       : [...filterParams, ["sort", sortKey] as [string, string]];
   const listViewHref = buildHref("/jobs", listViewParams);
   const mapViewHref = buildHref("/jobs", [...filterParams, ["view", "map"]]);
+
+  // Save-search CTA — serialize the CURRENT filter state into the shape
+  // candidate_saved_searches stores (lib/jobs/saved-search-filters.ts).
+  // Radius is stored pre-geocoded so the alert dispatcher never needs
+  // a Mapbox call.
+  const savedSearchFilters: SavedSearchFilters = {
+    ...(sp.q ? { q: sp.q } : {}),
+    ...(selectedStates.length ? { states: selectedStates } : {}),
+    ...(sp.employment ? { employment: sp.employment } : {}),
+    ...(sp.category ? { category: sp.category } : {}),
+    ...(postedWithinDays ? { posted_within_days: postedWithinDays } : {}),
+    ...(minCompAmount !== null ? { min_comp: minCompAmount } : {}),
+    ...(activeSurface === "corporate" ? { surface: "corporate" as const } : {}),
+    ...(activeFunctionSlug ? { corporate_function: activeFunctionSlug } : {}),
+    ...(nearGeo && nearParsed && withinMilesParsed !== null
+      ? {
+          near_label: `${nearParsed.city}, ${nearParsed.state}`,
+          near_lat: nearGeo.lat,
+          near_lng: nearGeo.lng,
+          within_miles: withinMilesParsed,
+        }
+      : {}),
+  };
+  // Signed-out path: through sign-up (house rule — no dead ends), carrying
+  // ?next= back to this exact search with save=1 so the save completes
+  // right after auth.
+  const currentSearchWithSave = buildHref("/jobs", [
+    ...listViewParams,
+    ["save", "1"],
+  ]);
+  const saveSearchSignUpHref = `/candidate/sign-up?next=${encodeURIComponent(
+    currentSearchWithSave
+  )}`;
 
   return (
     <SiteShell>
@@ -707,7 +802,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
         {/* Search bar */}
         <form
           method="get"
-          className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_auto] gap-px bg-[var(--rule)] border border-[var(--rule)] bg-card"
+          className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr_auto] gap-px bg-[var(--rule)] border border-[var(--rule)] bg-card"
         >
           {showMap && <input type="hidden" name="view" value="map" />}
           {/* C1.10 — posted filter is chip-based (below the form). Hidden
@@ -783,6 +878,23 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
               })),
             ]}
             defaultValue={sp.employment}
+          />
+          {/* Comp filter — the pay-transparency moat, finally usable in
+              search. Filters on est_annual_max ("this role can pay at
+              least X"); roles with no published range are excluded and
+              counted in the note under the results header. */}
+          <SearchField
+            label="Min pay"
+            name="comp"
+            select
+            options={[
+              { value: "", label: "Any" },
+              ...MIN_COMP_OPTIONS.map((o) => ({
+                value: o.value,
+                label: o.label,
+              })),
+            ]}
+            defaultValue={minCompValue ?? ""}
             noBorderRight
           />
           <button
@@ -851,6 +963,9 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
           )}
           {postedFilterValue && (
             <input type="hidden" name="posted" value={postedFilterValue} />
+          )}
+          {minCompValue && (
+            <input type="hidden" name="comp" value={minCompValue} />
           )}
           {activeSurface === "corporate" && (
             <input type="hidden" name="surface" value="corporate" />
@@ -931,6 +1046,13 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
           </Eyebrow>
 
           <div className="flex items-center gap-3">
+            <SaveSearchButton
+              filters={savedSearchFilters}
+              viewerIsCandidate={viewerIsCandidate}
+              signUpHref={saveSearchSignUpHref}
+              autoSave={sp.save === "1"}
+            />
+
             {!showMap && jobs.length > 1 && (
               <ListSort
                 basePath="/jobs"
@@ -972,6 +1094,25 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
             )}
           </div>
         </div>
+
+        {/* Comp-filter honesty note — roles with no published pay range
+            can't match a pay floor; say so instead of letting them vanish. */}
+        {minCompAmount !== null && hiddenNoCompCount > 0 && (
+          <p className="mb-5 -mt-1 text-2xs italic text-slate-meta">
+            <span className="tabular">{hiddenNoCompCount}</span>{" "}
+            {hiddenNoCompCount === 1 ? "role" : "roles"} hidden — no published
+            pay range.{" "}
+            <Link
+              href={buildHref(
+                "/jobs",
+                listViewParams.filter(([k]) => k !== "comp")
+              )}
+              className="not-italic font-semibold text-heritage underline underline-offset-2 hover:text-heritage-deep"
+            >
+              Clear pay filter
+            </Link>
+          </p>
+        )}
 
         {sortKey === "fit" && (
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-l-4 border-heritage bg-cream/70 p-4">
@@ -1049,6 +1190,9 @@ interface JobRow {
   compensation_max: number | null;
   compensation_period: string | null;
   compensation_visible: boolean;
+  /** Good-faith expected annual earnings (comp-model atoms) — nullable. */
+  est_annual_min: number | null;
+  est_annual_max: number | null;
   posted_at: string | null;
   /** 5G.b — drives Practice vs Corporate surface filter. */
   scope: "location" | "regional" | "corporate";

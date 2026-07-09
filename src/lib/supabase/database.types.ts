@@ -1,7 +1,7 @@
 /**
  * Database type — generated from the live schema.
  *
- * Regenerated 2026-05-14 via the Supabase MCP `generate_typescript_types`
+ * Regenerated 2026-07-09 via the Supabase MCP `generate_typescript_types`
  * tool against project viapivvlhjqvjhoflxmp (dsohire-prod), after migration
  * 20260514000003_job_verifications (Phase 5G.e Tier 2 — job_verification_
  * requirements + application_verifications tables).
@@ -9,7 +9,6 @@
  * Do not hand-edit; rerun after each migration that touches table shape,
  * enum values, or RPC signatures.
  */
-
 export type Json =
   | string
   | number
@@ -160,301 +159,46 @@ export type Database = {
           },
         ]
       }
-      application_tags: {
+      application_eeo_responses: {
         Row: {
           application_id: string
-          color: string
-          created_at: string
-          created_by: string | null
+          disability_status: string | null
+          gender: string | null
           id: string
-          label: string
+          race_ethnicity: string | null
+          submitted_at: string
+          updated_at: string
+          veteran_status: string | null
         }
         Insert: {
           application_id: string
-          color?: string
-          created_at?: string
-          created_by?: string | null
+          disability_status?: string | null
+          gender?: string | null
           id?: string
-          label: string
+          race_ethnicity?: string | null
+          submitted_at?: string
+          updated_at?: string
+          veteran_status?: string | null
         }
         Update: {
           application_id?: string
-          color?: string
-          created_at?: string
-          created_by?: string | null
+          disability_status?: string | null
+          gender?: string | null
           id?: string
-          label?: string
+          race_ethnicity?: string | null
+          submitted_at?: string
+          updated_at?: string
+          veteran_status?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "application_tags_application_id_fkey"
+            foreignKeyName: "application_eeo_responses_application_id_fkey"
             columns: ["application_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "applications"
             referencedColumns: ["id"]
           },
         ]
-      }
-      automation_rules: {
-        Row: {
-          conditions: Json
-          created_at: string
-          created_by: string | null
-          dso_id: string
-          id: string
-          is_enabled: boolean
-          is_system: boolean
-          name: string
-          sort_order: number
-          trigger_kind: string
-          updated_at: string
-        }
-        Insert: {
-          conditions?: Json
-          created_at?: string
-          created_by?: string | null
-          dso_id: string
-          id?: string
-          is_enabled?: boolean
-          is_system?: boolean
-          name: string
-          sort_order?: number
-          trigger_kind: string
-          updated_at?: string
-        }
-        Update: {
-          conditions?: Json
-          created_at?: string
-          created_by?: string | null
-          dso_id?: string
-          id?: string
-          is_enabled?: boolean
-          is_system?: boolean
-          name?: string
-          sort_order?: number
-          trigger_kind?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "automation_rules_dso_id_fkey"
-            columns: ["dso_id"]
-            isOneToOne: false
-            referencedRelation: "dsos"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      automation_rule_actions: {
-        Row: {
-          action_kind: string
-          config: Json
-          created_at: string
-          id: string
-          rule_id: string
-          sort_order: number
-        }
-        Insert: {
-          action_kind: string
-          config?: Json
-          created_at?: string
-          id?: string
-          rule_id: string
-          sort_order?: number
-        }
-        Update: {
-          action_kind?: string
-          config?: Json
-          created_at?: string
-          id?: string
-          rule_id?: string
-          sort_order?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "automation_rule_actions_rule_id_fkey"
-            columns: ["rule_id"]
-            isOneToOne: false
-            referencedRelation: "automation_rules"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      automation_rule_runs: {
-        Row: {
-          application_id: string | null
-          created_at: string
-          detail: Json
-          dso_id: string
-          id: string
-          rule_id: string
-          status: string
-          trigger_event: string
-        }
-        Insert: {
-          application_id?: string | null
-          created_at?: string
-          detail?: Json
-          dso_id: string
-          id?: string
-          rule_id: string
-          status: string
-          trigger_event: string
-        }
-        Update: {
-          application_id?: string | null
-          created_at?: string
-          detail?: Json
-          dso_id?: string
-          id?: string
-          rule_id?: string
-          status?: string
-          trigger_event?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "automation_rule_runs_rule_id_fkey"
-            columns: ["rule_id"]
-            isOneToOne: false
-            referencedRelation: "automation_rules"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      automation_sequences: {
-        Row: {
-          created_at: string
-          created_by_dso_user_id: string | null
-          dso_id: string
-          id: string
-          is_enabled: boolean
-          name: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          created_by_dso_user_id?: string | null
-          dso_id: string
-          id?: string
-          is_enabled?: boolean
-          name: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          created_by_dso_user_id?: string | null
-          dso_id?: string
-          id?: string
-          is_enabled?: boolean
-          name?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      automation_sequence_steps: {
-        Row: {
-          body: string
-          created_at: string
-          delay_days: number
-          id: string
-          sequence_id: string
-          step_order: number
-          subject: string
-        }
-        Insert: {
-          body: string
-          created_at?: string
-          delay_days?: number
-          id?: string
-          sequence_id: string
-          step_order: number
-          subject: string
-        }
-        Update: {
-          body?: string
-          created_at?: string
-          delay_days?: number
-          id?: string
-          sequence_id?: string
-          step_order?: number
-          subject?: string
-        }
-        Relationships: []
-      }
-      automation_sequence_enrollments: {
-        Row: {
-          application_id: string
-          created_at: string
-          current_step: number
-          dso_id: string
-          enrolled_at: string
-          enrolled_by_dso_user_id: string | null
-          enrolled_stage_id: string | null
-          exit_reason: string | null
-          exited_at: string | null
-          id: string
-          last_sent_at: string | null
-          next_send_at: string | null
-          sequence_id: string
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          application_id: string
-          created_at?: string
-          current_step?: number
-          dso_id: string
-          enrolled_at?: string
-          enrolled_by_dso_user_id?: string | null
-          enrolled_stage_id?: string | null
-          exit_reason?: string | null
-          exited_at?: string | null
-          id?: string
-          last_sent_at?: string | null
-          next_send_at?: string | null
-          sequence_id: string
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          application_id?: string
-          created_at?: string
-          current_step?: number
-          dso_id?: string
-          enrolled_at?: string
-          enrolled_by_dso_user_id?: string | null
-          enrolled_stage_id?: string | null
-          exit_reason?: string | null
-          exited_at?: string | null
-          id?: string
-          last_sent_at?: string | null
-          next_send_at?: string | null
-          sequence_id?: string
-          status?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      automation_sequence_sends: {
-        Row: {
-          enrollment_id: string
-          id: string
-          sent_at: string
-          step_id: string
-        }
-        Insert: {
-          enrollment_id: string
-          id?: string
-          sent_at?: string
-          step_id: string
-        }
-        Update: {
-          enrollment_id?: string
-          id?: string
-          sent_at?: string
-          step_id?: string
-        }
-        Relationships: []
       }
       application_message_attachments: {
         Row: {
@@ -567,9 +311,9 @@ export type Database = {
         Row: {
           application_id: string
           created_at: string
+          decline_reason_code: string | null
           id: string
           ip: string | null
-          decline_reason_code: string | null
           offer_send_id: string
           reason: string | null
           responded_at: string
@@ -580,9 +324,9 @@ export type Database = {
         Insert: {
           application_id: string
           created_at?: string
+          decline_reason_code?: string | null
           id?: string
           ip?: string | null
-          decline_reason_code?: string | null
           offer_send_id: string
           reason?: string | null
           responded_at?: string
@@ -593,9 +337,9 @@ export type Database = {
         Update: {
           application_id?: string
           created_at?: string
+          decline_reason_code?: string | null
           id?: string
           ip?: string | null
-          decline_reason_code?: string | null
           offer_send_id?: string
           reason?: string | null
           responded_at?: string
@@ -690,51 +434,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "application_offer_sends_revised_from_offer_send_id_fkey"
+            columns: ["revised_from_offer_send_id"]
+            isOneToOne: false
+            referencedRelation: "application_offer_sends"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "application_offer_sends_template_id_fkey"
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "dso_offer_letter_templates"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      application_eeo_responses: {
-        Row: {
-          application_id: string
-          disability_status: string | null
-          gender: string | null
-          id: string
-          race_ethnicity: string | null
-          submitted_at: string
-          updated_at: string
-          veteran_status: string | null
-        }
-        Insert: {
-          application_id: string
-          disability_status?: string | null
-          gender?: string | null
-          id?: string
-          race_ethnicity?: string | null
-          submitted_at?: string
-          updated_at?: string
-          veteran_status?: string | null
-        }
-        Update: {
-          application_id?: string
-          disability_status?: string | null
-          gender?: string | null
-          id?: string
-          race_ethnicity?: string | null
-          submitted_at?: string
-          updated_at?: string
-          veteran_status?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "application_eeo_responses_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: true
-            referencedRelation: "applications"
             referencedColumns: ["id"]
           },
         ]
@@ -922,6 +632,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "application_status_events_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      application_tags: {
+        Row: {
+          application_id: string
+          color: string
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string
+        }
+        Insert: {
+          application_id: string
+          color?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label: string
+        }
+        Update: {
+          application_id?: string
+          color?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_tags_application_id_fkey"
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "applications"
@@ -1122,6 +867,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "applications_assigned_to_dso_user_id_fkey"
+            columns: ["assigned_to_dso_user_id"]
+            isOneToOne: false
+            referencedRelation: "dso_users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "applications_candidate_id_fkey"
             columns: ["candidate_id"]
             isOneToOne: false
@@ -1133,6 +885,13 @@ export type Database = {
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_moved_from_application_id_fkey"
+            columns: ["moved_from_application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
             referencedColumns: ["id"]
           },
           {
@@ -1233,6 +992,368 @@ export type Database = {
           target_table?: string | null
         }
         Relationships: []
+      }
+      automation_rule_actions: {
+        Row: {
+          action_kind: string
+          config: Json
+          created_at: string
+          id: string
+          rule_id: string
+          sort_order: number
+        }
+        Insert: {
+          action_kind: string
+          config?: Json
+          created_at?: string
+          id?: string
+          rule_id: string
+          sort_order?: number
+        }
+        Update: {
+          action_kind?: string
+          config?: Json
+          created_at?: string
+          id?: string
+          rule_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_rule_actions_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "automation_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automation_rule_runs: {
+        Row: {
+          application_id: string | null
+          created_at: string
+          detail: Json
+          dso_id: string
+          id: string
+          rule_id: string
+          status: string
+          trigger_event: string
+        }
+        Insert: {
+          application_id?: string | null
+          created_at?: string
+          detail?: Json
+          dso_id: string
+          id?: string
+          rule_id: string
+          status: string
+          trigger_event: string
+        }
+        Update: {
+          application_id?: string | null
+          created_at?: string
+          detail?: Json
+          dso_id?: string
+          id?: string
+          rule_id?: string
+          status?: string
+          trigger_event?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_rule_runs_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_rule_runs_dso_id_fkey"
+            columns: ["dso_id"]
+            isOneToOne: false
+            referencedRelation: "dsos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_rule_runs_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "automation_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automation_rules: {
+        Row: {
+          conditions: Json
+          created_at: string
+          created_by: string | null
+          dso_id: string
+          id: string
+          is_enabled: boolean
+          is_system: boolean
+          name: string
+          sort_order: number
+          trigger_kind: string
+          updated_at: string
+        }
+        Insert: {
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          dso_id: string
+          id?: string
+          is_enabled?: boolean
+          is_system?: boolean
+          name: string
+          sort_order?: number
+          trigger_kind: string
+          updated_at?: string
+        }
+        Update: {
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          dso_id?: string
+          id?: string
+          is_enabled?: boolean
+          is_system?: boolean
+          name?: string
+          sort_order?: number
+          trigger_kind?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_rules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "dso_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_rules_dso_id_fkey"
+            columns: ["dso_id"]
+            isOneToOne: false
+            referencedRelation: "dsos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automation_sequence_enrollments: {
+        Row: {
+          application_id: string | null
+          created_at: string
+          current_step: number
+          dso_id: string
+          enrolled_at: string
+          enrolled_by_dso_user_id: string | null
+          enrolled_stage_id: string | null
+          exit_reason: string | null
+          exited_at: string | null
+          id: string
+          last_sent_at: string | null
+          next_send_at: string | null
+          prospect_thread_id: string | null
+          sequence_id: string
+          status: string
+          subject_kind: string
+          updated_at: string
+        }
+        Insert: {
+          application_id?: string | null
+          created_at?: string
+          current_step?: number
+          dso_id: string
+          enrolled_at?: string
+          enrolled_by_dso_user_id?: string | null
+          enrolled_stage_id?: string | null
+          exit_reason?: string | null
+          exited_at?: string | null
+          id?: string
+          last_sent_at?: string | null
+          next_send_at?: string | null
+          prospect_thread_id?: string | null
+          sequence_id: string
+          status?: string
+          subject_kind?: string
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string | null
+          created_at?: string
+          current_step?: number
+          dso_id?: string
+          enrolled_at?: string
+          enrolled_by_dso_user_id?: string | null
+          enrolled_stage_id?: string | null
+          exit_reason?: string | null
+          exited_at?: string | null
+          id?: string
+          last_sent_at?: string | null
+          next_send_at?: string | null
+          prospect_thread_id?: string | null
+          sequence_id?: string
+          status?: string
+          subject_kind?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_sequence_enrollments_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_sequence_enrollments_dso_id_fkey"
+            columns: ["dso_id"]
+            isOneToOne: false
+            referencedRelation: "dsos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_sequence_enrollments_enrolled_by_dso_user_id_fkey"
+            columns: ["enrolled_by_dso_user_id"]
+            isOneToOne: false
+            referencedRelation: "dso_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_sequence_enrollments_prospect_thread_id_fkey"
+            columns: ["prospect_thread_id"]
+            isOneToOne: false
+            referencedRelation: "prospect_threads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_sequence_enrollments_sequence_id_fkey"
+            columns: ["sequence_id"]
+            isOneToOne: false
+            referencedRelation: "automation_sequences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automation_sequence_sends: {
+        Row: {
+          enrollment_id: string
+          id: string
+          sent_at: string
+          step_id: string
+        }
+        Insert: {
+          enrollment_id: string
+          id?: string
+          sent_at?: string
+          step_id: string
+        }
+        Update: {
+          enrollment_id?: string
+          id?: string
+          sent_at?: string
+          step_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_sequence_sends_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "automation_sequence_enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_sequence_sends_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "automation_sequence_steps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automation_sequence_steps: {
+        Row: {
+          body: string
+          created_at: string
+          delay_days: number
+          id: string
+          sequence_id: string
+          step_order: number
+          subject: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          delay_days?: number
+          id?: string
+          sequence_id: string
+          step_order: number
+          subject: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          delay_days?: number
+          id?: string
+          sequence_id?: string
+          step_order?: number
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_sequence_steps_sequence_id_fkey"
+            columns: ["sequence_id"]
+            isOneToOne: false
+            referencedRelation: "automation_sequences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automation_sequences: {
+        Row: {
+          created_at: string
+          created_by_dso_user_id: string | null
+          dso_id: string
+          id: string
+          is_enabled: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by_dso_user_id?: string | null
+          dso_id: string
+          id?: string
+          is_enabled?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by_dso_user_id?: string | null
+          dso_id?: string
+          id?: string
+          is_enabled?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_sequences_created_by_dso_user_id_fkey"
+            columns: ["created_by_dso_user_id"]
+            isOneToOne: false
+            referencedRelation: "dso_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_sequences_dso_id_fkey"
+            columns: ["dso_id"]
+            isOneToOne: false
+            referencedRelation: "dsos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       calendar_connections: {
         Row: {
@@ -1582,25 +1703,47 @@ export type Database = {
       }
       candidates: {
         Row: {
+          acquisition_channel: string | null
+          acquisition_source: string | null
+          anonymous_mode: boolean
+          assessment_completed_at: string | null
+          assessment_note: string | null
+          assessment_responses: Json | null
+          assessment_version: string | null
           auth_user_id: string | null
+          autonomy_pref: string | null
           availability:
             | Database["public"]["Enums"]["candidate_availability"]
             | null
           avatar_url: string | null
+          benefit_priorities: string[]
+          career_trajectory: string | null
+          ce_growth_importance: number | null
           claim_expires_at: string | null
+          clinician_exploring_corporate: boolean | null
+          commute_max_minutes: number | null
+          comp_priorities: string[]
+          comp_priority: string | null
           contact_info_visibility: string
+          corporate_comp_interests: string[] | null
           created_at: string
           current_location_city: string | null
           current_location_state: string | null
           current_location_zip: string | null
           current_title: string | null
           cv_visibility: Database["public"]["Enums"]["candidate_visibility"]
+          deal_breakers: string[]
           deleted_at: string | null
           desired_location_points: Json
           desired_locations: string[] | null
           desired_roles: string[] | null
           desired_specialty: string[]
+          domain_background: string | null
+          domain_years: number | null
           dso_size_preference: string | null
+          dsofit_assessment_completed_at: string | null
+          dsofit_function_targets: string[] | null
+          dsofit_skills: string[] | null
           email: string | null
           first_name: string | null
           full_name: string | null
@@ -1613,73 +1756,95 @@ export type Database = {
           last_parsed_at: string | null
           license_states: string[]
           linkedin_url: string | null
-          min_salary: number | null
-          parsed_resume_json: Json | null
-          profile_accent_color: string | null
-          phone: string | null
-          pms_systems: string[]
-          practice_fit_consent: string
-          work_pace: string | null
-          autonomy_pref: string | null
-          patient_facing_energy: number | null
           mentorship_pref: string | null
+          mgmt_span: string | null
+          min_salary: number | null
+          org_scale_experience: string | null
+          parsed_resume_json: Json | null
+          patient_facing_energy: number | null
+          patient_population_pref: string[]
+          phone: string | null
+          pl_scope: string | null
+          pms_proficiency: string | null
+          pms_systems: string[]
+          practice_feel: string | null
+          practice_fit_consent: string
+          preferred_timezone: string
+          primary_fit_product: string | null
+          privacy_choices_reviewed_at: string | null
           procedures_confident: string[]
           procedures_growth: string[]
-          practice_feel: string | null
-          ce_growth_importance: number | null
-          work_life_priority: number | null
-          career_trajectory: string | null
-          commute_max_minutes: number | null
-          comp_priority: string | null
-          comp_priorities: string[]
-          pms_proficiency: string | null
-          team_size_pref: string | null
-          patient_population_pref: string[]
-          benefit_priorities: string[]
-          deal_breakers: string[]
-          relocation_pref: string | null
-          assessment_note: string | null
-          assessment_responses: Json | null
-          assessment_completed_at: string | null
-          assessment_version: string | null
-          privacy_choices_reviewed_at: string | null
-          preferred_timezone: string
+          profile_accent_color: string | null
           pronouns: string | null
+          relocation_pref: string | null
+          resume_custom_sections: Json
+          resume_section_order: Json
+          resume_template: string
           resume_url: string | null
           resume_visibility: string
           salary_unit: string | null
           salutation: string | null
           schedule_preferences: Json
           search_doc: unknown
+          seed_batch: string | null
+          seniority_level: string | null
           skills: string[]
           summary: string | null
+          team_size_pref: string | null
           temp_or_perm: string | null
+          travel_tolerance: string | null
           updated_at: string
+          work_life_priority: number | null
+          work_mode_pref: string | null
+          work_pace: string | null
           years_experience: number | null
           years_experience_dental: number | null
         }
         Insert: {
+          acquisition_channel?: string | null
+          acquisition_source?: string | null
+          anonymous_mode?: boolean
+          assessment_completed_at?: string | null
+          assessment_note?: string | null
+          assessment_responses?: Json | null
+          assessment_version?: string | null
           auth_user_id?: string | null
+          autonomy_pref?: string | null
           availability?:
             | Database["public"]["Enums"]["candidate_availability"]
             | null
           avatar_url?: string | null
+          benefit_priorities?: string[]
+          career_trajectory?: string | null
+          ce_growth_importance?: number | null
           claim_expires_at?: string | null
+          clinician_exploring_corporate?: boolean | null
+          commute_max_minutes?: number | null
+          comp_priorities?: string[]
+          comp_priority?: string | null
           contact_info_visibility?: string
+          corporate_comp_interests?: string[] | null
           created_at?: string
           current_location_city?: string | null
           current_location_state?: string | null
           current_location_zip?: string | null
           current_title?: string | null
           cv_visibility?: Database["public"]["Enums"]["candidate_visibility"]
+          deal_breakers?: string[]
           deleted_at?: string | null
           desired_location_points?: Json
           desired_locations?: string[] | null
           desired_roles?: string[] | null
           desired_specialty?: string[]
+          domain_background?: string | null
+          domain_years?: number | null
           dso_size_preference?: string | null
+          dsofit_assessment_completed_at?: string | null
+          dsofit_function_targets?: string[] | null
+          dsofit_skills?: string[] | null
           email?: string | null
           first_name?: string | null
+          full_name?: string | null
           headline?: string | null
           id?: string
           is_guest?: boolean
@@ -1689,72 +1854,95 @@ export type Database = {
           last_parsed_at?: string | null
           license_states?: string[]
           linkedin_url?: string | null
-          min_salary?: number | null
-          parsed_resume_json?: Json | null
-          profile_accent_color?: string | null
-          phone?: string | null
-          pms_systems?: string[]
-          practice_fit_consent?: string
-          work_pace?: string | null
-          autonomy_pref?: string | null
-          patient_facing_energy?: number | null
           mentorship_pref?: string | null
+          mgmt_span?: string | null
+          min_salary?: number | null
+          org_scale_experience?: string | null
+          parsed_resume_json?: Json | null
+          patient_facing_energy?: number | null
+          patient_population_pref?: string[]
+          phone?: string | null
+          pl_scope?: string | null
+          pms_proficiency?: string | null
+          pms_systems?: string[]
+          practice_feel?: string | null
+          practice_fit_consent?: string
+          preferred_timezone?: string
+          primary_fit_product?: string | null
+          privacy_choices_reviewed_at?: string | null
           procedures_confident?: string[]
           procedures_growth?: string[]
-          practice_feel?: string | null
-          ce_growth_importance?: number | null
-          work_life_priority?: number | null
-          career_trajectory?: string | null
-          commute_max_minutes?: number | null
-          comp_priority?: string | null
-          comp_priorities?: string[]
-          pms_proficiency?: string | null
-          team_size_pref?: string | null
-          patient_population_pref?: string[]
-          benefit_priorities?: string[]
-          deal_breakers?: string[]
-          relocation_pref?: string | null
-          assessment_note?: string | null
-          assessment_responses?: Json | null
-          assessment_completed_at?: string | null
-          assessment_version?: string | null
-          privacy_choices_reviewed_at?: string | null
-          preferred_timezone?: string
+          profile_accent_color?: string | null
           pronouns?: string | null
+          relocation_pref?: string | null
+          resume_custom_sections?: Json
+          resume_section_order?: Json
+          resume_template?: string
           resume_url?: string | null
           resume_visibility?: string
           salary_unit?: string | null
           salutation?: string | null
           schedule_preferences?: Json
+          search_doc?: unknown
+          seed_batch?: string | null
+          seniority_level?: string | null
           skills?: string[]
           summary?: string | null
+          team_size_pref?: string | null
           temp_or_perm?: string | null
+          travel_tolerance?: string | null
           updated_at?: string
+          work_life_priority?: number | null
+          work_mode_pref?: string | null
+          work_pace?: string | null
           years_experience?: number | null
           years_experience_dental?: number | null
         }
         Update: {
+          acquisition_channel?: string | null
+          acquisition_source?: string | null
+          anonymous_mode?: boolean
+          assessment_completed_at?: string | null
+          assessment_note?: string | null
+          assessment_responses?: Json | null
+          assessment_version?: string | null
           auth_user_id?: string | null
+          autonomy_pref?: string | null
           availability?:
             | Database["public"]["Enums"]["candidate_availability"]
             | null
           avatar_url?: string | null
+          benefit_priorities?: string[]
+          career_trajectory?: string | null
+          ce_growth_importance?: number | null
           claim_expires_at?: string | null
+          clinician_exploring_corporate?: boolean | null
+          commute_max_minutes?: number | null
+          comp_priorities?: string[]
+          comp_priority?: string | null
           contact_info_visibility?: string
+          corporate_comp_interests?: string[] | null
           created_at?: string
           current_location_city?: string | null
           current_location_state?: string | null
           current_location_zip?: string | null
           current_title?: string | null
           cv_visibility?: Database["public"]["Enums"]["candidate_visibility"]
+          deal_breakers?: string[]
           deleted_at?: string | null
           desired_location_points?: Json
           desired_locations?: string[] | null
           desired_roles?: string[] | null
           desired_specialty?: string[]
+          domain_background?: string | null
+          domain_years?: number | null
           dso_size_preference?: string | null
+          dsofit_assessment_completed_at?: string | null
+          dsofit_function_targets?: string[] | null
+          dsofit_skills?: string[] | null
           email?: string | null
           first_name?: string | null
+          full_name?: string | null
           headline?: string | null
           id?: string
           is_guest?: boolean
@@ -1764,47 +1952,47 @@ export type Database = {
           last_parsed_at?: string | null
           license_states?: string[]
           linkedin_url?: string | null
-          min_salary?: number | null
-          parsed_resume_json?: Json | null
-          profile_accent_color?: string | null
-          phone?: string | null
-          pms_systems?: string[]
-          practice_fit_consent?: string
-          work_pace?: string | null
-          autonomy_pref?: string | null
-          patient_facing_energy?: number | null
           mentorship_pref?: string | null
+          mgmt_span?: string | null
+          min_salary?: number | null
+          org_scale_experience?: string | null
+          parsed_resume_json?: Json | null
+          patient_facing_energy?: number | null
+          patient_population_pref?: string[]
+          phone?: string | null
+          pl_scope?: string | null
+          pms_proficiency?: string | null
+          pms_systems?: string[]
+          practice_feel?: string | null
+          practice_fit_consent?: string
+          preferred_timezone?: string
+          primary_fit_product?: string | null
+          privacy_choices_reviewed_at?: string | null
           procedures_confident?: string[]
           procedures_growth?: string[]
-          practice_feel?: string | null
-          ce_growth_importance?: number | null
-          work_life_priority?: number | null
-          career_trajectory?: string | null
-          commute_max_minutes?: number | null
-          comp_priority?: string | null
-          comp_priorities?: string[]
-          pms_proficiency?: string | null
-          team_size_pref?: string | null
-          patient_population_pref?: string[]
-          benefit_priorities?: string[]
-          deal_breakers?: string[]
-          relocation_pref?: string | null
-          assessment_note?: string | null
-          assessment_responses?: Json | null
-          assessment_completed_at?: string | null
-          assessment_version?: string | null
-          privacy_choices_reviewed_at?: string | null
-          preferred_timezone?: string
+          profile_accent_color?: string | null
           pronouns?: string | null
+          relocation_pref?: string | null
+          resume_custom_sections?: Json
+          resume_section_order?: Json
+          resume_template?: string
           resume_url?: string | null
           resume_visibility?: string
           salary_unit?: string | null
           salutation?: string | null
           schedule_preferences?: Json
+          search_doc?: unknown
+          seed_batch?: string | null
+          seniority_level?: string | null
           skills?: string[]
           summary?: string | null
+          team_size_pref?: string | null
           temp_or_perm?: string | null
+          travel_tolerance?: string | null
           updated_at?: string
+          work_life_priority?: number | null
+          work_mode_pref?: string | null
+          work_pace?: string | null
           years_experience?: number | null
           years_experience_dental?: number | null
         }
@@ -1863,113 +2051,191 @@ export type Database = {
           },
         ]
       }
-      referrals: {
+      claude_usage_log: {
         Row: {
-          id: string
-          dso_id: string
-          source: string
-          referred_by_dso_user_id: string | null
-          referrer_name: string | null
-          referrer_email: string | null
-          candidate_name: string
-          candidate_email: string | null
-          candidate_phone: string | null
-          job_id: string | null
-          note: string | null
-          status: string
-          application_id: string | null
+          auth_user_id: string
+          cached_input_tokens: number
+          cost_cents: number
           created_at: string
-          updated_at: string
+          dso_id: string | null
+          id: string
+          input_tokens: number
+          model: string
+          output_tokens: number
+          request_id: string | null
+          surface: string
         }
         Insert: {
-          id?: string
-          dso_id: string
-          source: string
-          referred_by_dso_user_id?: string | null
-          referrer_name?: string | null
-          referrer_email?: string | null
-          candidate_name: string
-          candidate_email?: string | null
-          candidate_phone?: string | null
-          job_id?: string | null
-          note?: string | null
-          status?: string
-          application_id?: string | null
+          auth_user_id: string
+          cached_input_tokens?: number
+          cost_cents?: number
           created_at?: string
-          updated_at?: string
+          dso_id?: string | null
+          id?: string
+          input_tokens?: number
+          model: string
+          output_tokens?: number
+          request_id?: string | null
+          surface: string
         }
         Update: {
-          id?: string
-          dso_id?: string
-          source?: string
-          referred_by_dso_user_id?: string | null
-          referrer_name?: string | null
-          referrer_email?: string | null
-          candidate_name?: string
-          candidate_email?: string | null
-          candidate_phone?: string | null
-          job_id?: string | null
-          note?: string | null
-          status?: string
-          application_id?: string | null
+          auth_user_id?: string
+          cached_input_tokens?: number
+          cost_cents?: number
           created_at?: string
+          dso_id?: string | null
+          id?: string
+          input_tokens?: number
+          model?: string
+          output_tokens?: number
+          request_id?: string | null
+          surface?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claude_usage_log_dso_id_fkey"
+            columns: ["dso_id"]
+            isOneToOne: false
+            referencedRelation: "dsos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claude_usage_log_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "support_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comp_benchmarks: {
+        Row: {
+          area_code: string
+          area_level: string
+          area_name: string
+          id: string
+          p25: number | null
+          p50: number | null
+          p75: number | null
+          pay_unit: string
+          soc_code: string
+          source: string
+          updated_at: string
+          vintage: string
+        }
+        Insert: {
+          area_code: string
+          area_level: string
+          area_name: string
+          id?: string
+          p25?: number | null
+          p50?: number | null
+          p75?: number | null
+          pay_unit: string
+          soc_code: string
+          source?: string
           updated_at?: string
+          vintage: string
+        }
+        Update: {
+          area_code?: string
+          area_level?: string
+          area_name?: string
+          id?: string
+          p25?: number | null
+          p50?: number | null
+          p75?: number | null
+          pay_unit?: string
+          soc_code?: string
+          source?: string
+          updated_at?: string
+          vintage?: string
         }
         Relationships: []
       }
       dm_conversations: {
         Row: {
-          id: string
-          dso_id: string
-          created_by: string | null
           created_at: string
+          created_by: string | null
+          dso_id: string
+          id: string
+          is_group: boolean
           last_message_at: string
           title: string | null
-          is_group: boolean
         }
         Insert: {
-          id?: string
-          dso_id: string
-          created_by?: string | null
           created_at?: string
+          created_by?: string | null
+          dso_id: string
+          id?: string
+          is_group?: boolean
           last_message_at?: string
           title?: string | null
-          is_group?: boolean
         }
         Update: {
-          id?: string
-          dso_id?: string
-          created_by?: string | null
           created_at?: string
+          created_by?: string | null
+          dso_id?: string
+          id?: string
+          is_group?: boolean
           last_message_at?: string
           title?: string | null
-          is_group?: boolean
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "dm_conversations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "dso_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dm_conversations_dso_id_fkey"
+            columns: ["dso_id"]
+            isOneToOne: false
+            referencedRelation: "dsos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       dm_messages: {
         Row: {
-          id: string
-          conversation_id: string
-          sender_dso_user_id: string
           body: string
+          conversation_id: string
           created_at: string
+          id: string
+          sender_dso_user_id: string
         }
         Insert: {
-          id?: string
-          conversation_id: string
-          sender_dso_user_id: string
           body: string
+          conversation_id: string
           created_at?: string
+          id?: string
+          sender_dso_user_id: string
         }
         Update: {
-          id?: string
-          conversation_id?: string
-          sender_dso_user_id?: string
           body?: string
+          conversation_id?: string
           created_at?: string
+          id?: string
+          sender_dso_user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "dm_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "dm_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dm_messages_sender_dso_user_id_fkey"
+            columns: ["sender_dso_user_id"]
+            isOneToOne: false
+            referencedRelation: "dso_users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       dm_participants: {
         Row: {
@@ -1987,7 +2253,22 @@ export type Database = {
           dso_user_id?: string
           last_read_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "dm_participants_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "dm_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dm_participants_dso_user_id_fkey"
+            columns: ["dso_user_id"]
+            isOneToOne: false
+            referencedRelation: "dso_users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       dso_invitations: {
         Row: {
@@ -2050,6 +2331,7 @@ export type Database = {
         Row: {
           address_line1: string | null
           address_line2: string | null
+          anonymize_name: boolean
           city: string | null
           created_at: string
           dso_id: string
@@ -2073,6 +2355,7 @@ export type Database = {
         Insert: {
           address_line1?: string | null
           address_line2?: string | null
+          anonymize_name?: boolean
           city?: string | null
           created_at?: string
           dso_id: string
@@ -2096,6 +2379,7 @@ export type Database = {
         Update: {
           address_line1?: string | null
           address_line2?: string | null
+          anonymize_name?: boolean
           city?: string | null
           created_at?: string
           dso_id?: string
@@ -2367,6 +2651,58 @@ export type Database = {
           },
         ]
       }
+      dso_prospect_activities: {
+        Row: {
+          actor_dso_user_id: string | null
+          candidate_id: string
+          created_at: string
+          dso_id: string
+          id: string
+          kind: string
+          metadata: Json
+        }
+        Insert: {
+          actor_dso_user_id?: string | null
+          candidate_id: string
+          created_at?: string
+          dso_id: string
+          id?: string
+          kind: string
+          metadata?: Json
+        }
+        Update: {
+          actor_dso_user_id?: string | null
+          candidate_id?: string
+          created_at?: string
+          dso_id?: string
+          id?: string
+          kind?: string
+          metadata?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dso_prospect_activities_actor_dso_user_id_fkey"
+            columns: ["actor_dso_user_id"]
+            isOneToOne: false
+            referencedRelation: "dso_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dso_prospect_activities_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dso_prospect_activities_dso_id_fkey"
+            columns: ["dso_id"]
+            isOneToOne: false
+            referencedRelation: "dsos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dso_slug_history: {
         Row: {
           changed_at: string
@@ -2403,7 +2739,9 @@ export type Database = {
           created_at: string
           dso_id: string
           id: string
+          last_activity_at: string
           notes: string | null
+          pipeline_stage: Database["public"]["Enums"]["prospect_pipeline_stage"]
           tags: string[] | null
           updated_at: string
         }
@@ -2413,7 +2751,9 @@ export type Database = {
           created_at?: string
           dso_id: string
           id?: string
+          last_activity_at?: string
           notes?: string | null
+          pipeline_stage?: Database["public"]["Enums"]["prospect_pipeline_stage"]
           tags?: string[] | null
           updated_at?: string
         }
@@ -2423,7 +2763,9 @@ export type Database = {
           created_at?: string
           dso_id?: string
           id?: string
+          last_activity_at?: string
           notes?: string | null
+          pipeline_stage?: Database["public"]["Enums"]["prospect_pipeline_stage"]
           tags?: string[] | null
           updated_at?: string
         }
@@ -2501,6 +2843,7 @@ export type Database = {
           full_name: string | null
           id: string
           last_name: string | null
+          permission_overrides: Json
           phone: string | null
           preferred_timezone: string
           pronouns: string | null
@@ -2519,8 +2862,10 @@ export type Database = {
           created_at?: string
           dso_id: string
           first_name?: string | null
+          full_name?: string | null
           id?: string
           last_name?: string | null
+          permission_overrides?: Json
           phone?: string | null
           preferred_timezone?: string
           pronouns?: string | null
@@ -2539,8 +2884,10 @@ export type Database = {
           created_at?: string
           dso_id?: string
           first_name?: string | null
+          full_name?: string | null
           id?: string
           last_name?: string | null
+          permission_overrides?: Json
           phone?: string | null
           preferred_timezone?: string
           pronouns?: string | null
@@ -2550,6 +2897,13 @@ export type Database = {
           work_base?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "dso_users_base_location_id_fkey"
+            columns: ["base_location_id"]
+            isOneToOne: false
+            referencedRelation: "dso_locations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "dso_users_dso_id_fkey"
             columns: ["dso_id"]
@@ -2561,124 +2915,133 @@ export type Database = {
       }
       dsos: {
         Row: {
+          acquisition_channel: string | null
+          acquisition_source: string | null
           affiliation_reveal_policy: Database["public"]["Enums"]["dso_affiliation_reveal_policy"]
+          autonomy_level: string | null
           banner_url: string | null
           brand_color: string | null
+          candidate_reply_to_email: string | null
+          ce_support: number | null
           contact_cta_label: string | null
           contact_cta_url: string | null
           corporate_affiliation_policy: string
           created_at: string
           culture_chips: string[]
-          practice_pace: string | null
-          autonomy_level: string | null
-          mentorship_offered: string | null
-          practice_feel: string | null
-          ce_support: number | null
-          work_life_balance: number | null
-          patient_populations: string[]
-          practice_profile_completed_at: string | null
           deleted_at: string | null
           description: string | null
           featured_until: string | null
-          candidate_reply_to_email: string | null
           headquarters_city: string | null
           headquarters_state: string | null
           id: string
           is_demo: boolean
           legal_name: string | null
           logo_url: string | null
+          mentorship_offered: string | null
           mission: string | null
           name: string
           offer_approval_policy: Json
+          patient_populations: string[]
           practice_count: number | null
+          practice_feel: string | null
+          practice_pace: string | null
+          practice_profile_completed_at: string | null
           referral_code: string | null
           require_mfa: boolean
+          seed_batch: string | null
           slug: string
           status: Database["public"]["Enums"]["dso_status"]
           updated_at: string
           verified_at: string | null
           website: string | null
           why_join_us: Json
+          work_life_balance: number | null
         }
         Insert: {
+          acquisition_channel?: string | null
+          acquisition_source?: string | null
           affiliation_reveal_policy?: Database["public"]["Enums"]["dso_affiliation_reveal_policy"]
+          autonomy_level?: string | null
           banner_url?: string | null
           brand_color?: string | null
+          candidate_reply_to_email?: string | null
+          ce_support?: number | null
           contact_cta_label?: string | null
           contact_cta_url?: string | null
           corporate_affiliation_policy?: string
           created_at?: string
           culture_chips?: string[]
-          practice_pace?: string | null
-          autonomy_level?: string | null
-          mentorship_offered?: string | null
-          practice_feel?: string | null
-          ce_support?: number | null
-          work_life_balance?: number | null
-          patient_populations?: string[]
-          practice_profile_completed_at?: string | null
           deleted_at?: string | null
           description?: string | null
           featured_until?: string | null
-          candidate_reply_to_email?: string | null
           headquarters_city?: string | null
           headquarters_state?: string | null
           id?: string
           is_demo?: boolean
           legal_name?: string | null
           logo_url?: string | null
+          mentorship_offered?: string | null
           mission?: string | null
           name: string
           offer_approval_policy?: Json
+          patient_populations?: string[]
           practice_count?: number | null
+          practice_feel?: string | null
+          practice_pace?: string | null
+          practice_profile_completed_at?: string | null
           referral_code?: string | null
           require_mfa?: boolean
+          seed_batch?: string | null
           slug: string
           status?: Database["public"]["Enums"]["dso_status"]
           updated_at?: string
           verified_at?: string | null
           website?: string | null
           why_join_us?: Json
+          work_life_balance?: number | null
         }
         Update: {
+          acquisition_channel?: string | null
+          acquisition_source?: string | null
           affiliation_reveal_policy?: Database["public"]["Enums"]["dso_affiliation_reveal_policy"]
+          autonomy_level?: string | null
           banner_url?: string | null
           brand_color?: string | null
+          candidate_reply_to_email?: string | null
+          ce_support?: number | null
           contact_cta_label?: string | null
           contact_cta_url?: string | null
           corporate_affiliation_policy?: string
           created_at?: string
           culture_chips?: string[]
-          practice_pace?: string | null
-          autonomy_level?: string | null
-          mentorship_offered?: string | null
-          practice_feel?: string | null
-          ce_support?: number | null
-          work_life_balance?: number | null
-          patient_populations?: string[]
-          practice_profile_completed_at?: string | null
           deleted_at?: string | null
           description?: string | null
           featured_until?: string | null
-          candidate_reply_to_email?: string | null
           headquarters_city?: string | null
           headquarters_state?: string | null
           id?: string
           is_demo?: boolean
           legal_name?: string | null
           logo_url?: string | null
+          mentorship_offered?: string | null
           mission?: string | null
           name?: string
           offer_approval_policy?: Json
+          patient_populations?: string[]
           practice_count?: number | null
+          practice_feel?: string | null
+          practice_pace?: string | null
+          practice_profile_completed_at?: string | null
           referral_code?: string | null
           require_mfa?: boolean
+          seed_batch?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["dso_status"]
           updated_at?: string
           verified_at?: string | null
           website?: string | null
           why_join_us?: Json
+          work_life_balance?: number | null
         }
         Relationships: []
       }
@@ -3236,6 +3599,42 @@ export type Database = {
           },
         ]
       }
+      job_team_access: {
+        Row: {
+          created_at: string
+          dso_user_id: string
+          id: string
+          job_id: string
+        }
+        Insert: {
+          created_at?: string
+          dso_user_id: string
+          id?: string
+          job_id: string
+        }
+        Update: {
+          created_at?: string
+          dso_user_id?: string
+          id?: string
+          job_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_team_access_dso_user_id_fkey"
+            columns: ["dso_user_id"]
+            isOneToOne: false
+            referencedRelation: "dso_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_team_access_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_verification_requirements: {
         Row: {
           created_at: string
@@ -3308,29 +3707,15 @@ export type Database = {
       }
       jobs: {
         Row: {
-          comp_model: Database["public"]["Enums"]["comp_model"] | null
-          guarantee_kind: Database["public"]["Enums"]["comp_guarantee_kind"] | null
-          guarantee_amount: number | null
-          guarantee_duration: Database["public"]["Enums"]["comp_guarantee_duration"] | null
-          percent_rate_min: number | null
-          percent_rate_max: number | null
-          percent_basis: Database["public"]["Enums"]["comp_percent_basis"] | null
-          percent_tiers_note: string | null
-          hygiene_exam_credited: boolean | null
-          hygienist_work_credited: boolean | null
-          lab_fee_policy: Database["public"]["Enums"]["comp_lab_fee_policy"] | null
-          basis_exclusions_note: string | null
-          reconciliation: Database["public"]["Enums"]["comp_reconciliation"] | null
-          pay_cadence: Database["public"]["Enums"]["comp_pay_cadence"] | null
-          est_annual_min: number | null
-          est_annual_max: number | null
-          worker_classification: Database["public"]["Enums"]["worker_classification"] | null
           applications_count: number
           authority_level: string | null
+          auto_paused_reason: string | null
+          basis_exclusions_note: string | null
           benefits: string[] | null
           bonus_enabled: boolean
           bonus_structure: string | null
           bonus_target: number | null
+          comp_model: Database["public"]["Enums"]["comp_model"] | null
           compensation_max: number | null
           compensation_min: number | null
           compensation_period:
@@ -3338,6 +3723,7 @@ export type Database = {
             | null
           compensation_type: string
           compensation_visible: boolean
+          confidential: boolean
           corporate_function: string | null
           created_at: string
           created_by: string | null
@@ -3345,22 +3731,47 @@ export type Database = {
           description: string
           direct_reports_band: string | null
           distribution_enabled: boolean
+          domain_preference: string | null
           dso_id: string
           education_requirement: string | null
           employment_type: Database["public"]["Enums"]["employment_type"]
           equity_note: string | null
           equity_offered: boolean
+          est_annual_max: number | null
+          est_annual_min: number | null
           expires_at: string | null
-          scheduled_publish_at: string | null
           external_links: Json
+          guarantee_amount: number | null
+          guarantee_duration:
+            | Database["public"]["Enums"]["comp_guarantee_duration"]
+            | null
+          guarantee_kind:
+            | Database["public"]["Enums"]["comp_guarantee_kind"]
+            | null
           hide_stages_from_candidate: boolean
+          hygiene_exam_credited: boolean | null
+          hygienist_work_credited: boolean | null
           id: string
           indirect_reports_band: string | null
           industry_experience: string | null
+          lab_fee_policy:
+            | Database["public"]["Enums"]["comp_lab_fee_policy"]
+            | null
           max_years_corporate_experience: number | null
           min_years_corporate_experience: number | null
           min_years_experience: number | null
+          openings: number
+          pay_cadence: Database["public"]["Enums"]["comp_pay_cadence"] | null
+          percent_basis:
+            | Database["public"]["Enums"]["comp_percent_basis"]
+            | null
+          percent_rate_max: number | null
+          percent_rate_min: number | null
+          percent_tiers_note: string | null
           posted_at: string | null
+          reconciliation:
+            | Database["public"]["Enums"]["comp_reconciliation"]
+            | null
           remote_state_restrictions: string[]
           reports_to: string | null
           requirements: string | null
@@ -3368,8 +3779,8 @@ export type Database = {
           schedule_days: string[]
           schedule_evenings: boolean
           schedule_weekends: boolean
+          scheduled_publish_at: string | null
           scope: Database["public"]["Enums"]["job_scope"]
-          visibility: Database["public"]["Enums"]["job_visibility"]
           search_vector: unknown
           slug: string
           specialty: string[]
@@ -3382,33 +3793,23 @@ export type Database = {
           variable_comp_structure: string | null
           variable_comp_target: number | null
           views: number
+          visibility: Database["public"]["Enums"]["job_visibility"]
           work_mode: string | null
           work_mode_detail: string | null
+          worker_classification:
+            | Database["public"]["Enums"]["worker_classification"]
+            | null
         }
         Insert: {
-          comp_model?: Database["public"]["Enums"]["comp_model"] | null
-          guarantee_kind?: Database["public"]["Enums"]["comp_guarantee_kind"] | null
-          guarantee_amount?: number | null
-          guarantee_duration?: Database["public"]["Enums"]["comp_guarantee_duration"] | null
-          percent_rate_min?: number | null
-          percent_rate_max?: number | null
-          percent_basis?: Database["public"]["Enums"]["comp_percent_basis"] | null
-          percent_tiers_note?: string | null
-          hygiene_exam_credited?: boolean | null
-          hygienist_work_credited?: boolean | null
-          lab_fee_policy?: Database["public"]["Enums"]["comp_lab_fee_policy"] | null
-          basis_exclusions_note?: string | null
-          reconciliation?: Database["public"]["Enums"]["comp_reconciliation"] | null
-          pay_cadence?: Database["public"]["Enums"]["comp_pay_cadence"] | null
-          est_annual_min?: number | null
-          est_annual_max?: number | null
-          worker_classification?: Database["public"]["Enums"]["worker_classification"] | null
           applications_count?: number
           authority_level?: string | null
+          auto_paused_reason?: string | null
+          basis_exclusions_note?: string | null
           benefits?: string[] | null
           bonus_enabled?: boolean
           bonus_structure?: string | null
           bonus_target?: number | null
+          comp_model?: Database["public"]["Enums"]["comp_model"] | null
           compensation_max?: number | null
           compensation_min?: number | null
           compensation_period?:
@@ -3416,6 +3817,7 @@ export type Database = {
             | null
           compensation_type?: string
           compensation_visible?: boolean
+          confidential?: boolean
           corporate_function?: string | null
           created_at?: string
           created_by?: string | null
@@ -3423,22 +3825,47 @@ export type Database = {
           description?: string
           direct_reports_band?: string | null
           distribution_enabled?: boolean
+          domain_preference?: string | null
           dso_id: string
           education_requirement?: string | null
           employment_type?: Database["public"]["Enums"]["employment_type"]
           equity_note?: string | null
           equity_offered?: boolean
+          est_annual_max?: number | null
+          est_annual_min?: number | null
           expires_at?: string | null
-          scheduled_publish_at?: string | null
           external_links?: Json
+          guarantee_amount?: number | null
+          guarantee_duration?:
+            | Database["public"]["Enums"]["comp_guarantee_duration"]
+            | null
+          guarantee_kind?:
+            | Database["public"]["Enums"]["comp_guarantee_kind"]
+            | null
           hide_stages_from_candidate?: boolean
+          hygiene_exam_credited?: boolean | null
+          hygienist_work_credited?: boolean | null
           id?: string
           indirect_reports_band?: string | null
           industry_experience?: string | null
+          lab_fee_policy?:
+            | Database["public"]["Enums"]["comp_lab_fee_policy"]
+            | null
           max_years_corporate_experience?: number | null
           min_years_corporate_experience?: number | null
           min_years_experience?: number | null
+          openings?: number
+          pay_cadence?: Database["public"]["Enums"]["comp_pay_cadence"] | null
+          percent_basis?:
+            | Database["public"]["Enums"]["comp_percent_basis"]
+            | null
+          percent_rate_max?: number | null
+          percent_rate_min?: number | null
+          percent_tiers_note?: string | null
           posted_at?: string | null
+          reconciliation?:
+            | Database["public"]["Enums"]["comp_reconciliation"]
+            | null
           remote_state_restrictions?: string[]
           reports_to?: string | null
           requirements?: string | null
@@ -3446,8 +3873,8 @@ export type Database = {
           schedule_days?: string[]
           schedule_evenings?: boolean
           schedule_weekends?: boolean
+          scheduled_publish_at?: string | null
           scope?: Database["public"]["Enums"]["job_scope"]
-          visibility?: Database["public"]["Enums"]["job_visibility"]
           search_vector?: unknown
           slug: string
           specialty?: string[]
@@ -3460,33 +3887,23 @@ export type Database = {
           variable_comp_structure?: string | null
           variable_comp_target?: number | null
           views?: number
+          visibility?: Database["public"]["Enums"]["job_visibility"]
           work_mode?: string | null
           work_mode_detail?: string | null
+          worker_classification?:
+            | Database["public"]["Enums"]["worker_classification"]
+            | null
         }
         Update: {
-          comp_model?: Database["public"]["Enums"]["comp_model"] | null
-          guarantee_kind?: Database["public"]["Enums"]["comp_guarantee_kind"] | null
-          guarantee_amount?: number | null
-          guarantee_duration?: Database["public"]["Enums"]["comp_guarantee_duration"] | null
-          percent_rate_min?: number | null
-          percent_rate_max?: number | null
-          percent_basis?: Database["public"]["Enums"]["comp_percent_basis"] | null
-          percent_tiers_note?: string | null
-          hygiene_exam_credited?: boolean | null
-          hygienist_work_credited?: boolean | null
-          lab_fee_policy?: Database["public"]["Enums"]["comp_lab_fee_policy"] | null
-          basis_exclusions_note?: string | null
-          reconciliation?: Database["public"]["Enums"]["comp_reconciliation"] | null
-          pay_cadence?: Database["public"]["Enums"]["comp_pay_cadence"] | null
-          est_annual_min?: number | null
-          est_annual_max?: number | null
-          worker_classification?: Database["public"]["Enums"]["worker_classification"] | null
           applications_count?: number
           authority_level?: string | null
+          auto_paused_reason?: string | null
+          basis_exclusions_note?: string | null
           benefits?: string[] | null
           bonus_enabled?: boolean
           bonus_structure?: string | null
           bonus_target?: number | null
+          comp_model?: Database["public"]["Enums"]["comp_model"] | null
           compensation_max?: number | null
           compensation_min?: number | null
           compensation_period?:
@@ -3494,6 +3911,7 @@ export type Database = {
             | null
           compensation_type?: string
           compensation_visible?: boolean
+          confidential?: boolean
           corporate_function?: string | null
           created_at?: string
           created_by?: string | null
@@ -3501,22 +3919,47 @@ export type Database = {
           description?: string
           direct_reports_band?: string | null
           distribution_enabled?: boolean
+          domain_preference?: string | null
           dso_id?: string
           education_requirement?: string | null
           employment_type?: Database["public"]["Enums"]["employment_type"]
           equity_note?: string | null
           equity_offered?: boolean
+          est_annual_max?: number | null
+          est_annual_min?: number | null
           expires_at?: string | null
-          scheduled_publish_at?: string | null
           external_links?: Json
+          guarantee_amount?: number | null
+          guarantee_duration?:
+            | Database["public"]["Enums"]["comp_guarantee_duration"]
+            | null
+          guarantee_kind?:
+            | Database["public"]["Enums"]["comp_guarantee_kind"]
+            | null
           hide_stages_from_candidate?: boolean
+          hygiene_exam_credited?: boolean | null
+          hygienist_work_credited?: boolean | null
           id?: string
           indirect_reports_band?: string | null
           industry_experience?: string | null
+          lab_fee_policy?:
+            | Database["public"]["Enums"]["comp_lab_fee_policy"]
+            | null
           max_years_corporate_experience?: number | null
           min_years_corporate_experience?: number | null
           min_years_experience?: number | null
+          openings?: number
+          pay_cadence?: Database["public"]["Enums"]["comp_pay_cadence"] | null
+          percent_basis?:
+            | Database["public"]["Enums"]["comp_percent_basis"]
+            | null
+          percent_rate_max?: number | null
+          percent_rate_min?: number | null
+          percent_tiers_note?: string | null
           posted_at?: string | null
+          reconciliation?:
+            | Database["public"]["Enums"]["comp_reconciliation"]
+            | null
           remote_state_restrictions?: string[]
           reports_to?: string | null
           requirements?: string | null
@@ -3524,8 +3967,8 @@ export type Database = {
           schedule_days?: string[]
           schedule_evenings?: boolean
           schedule_weekends?: boolean
+          scheduled_publish_at?: string | null
           scope?: Database["public"]["Enums"]["job_scope"]
-          visibility?: Database["public"]["Enums"]["job_visibility"]
           search_vector?: unknown
           slug?: string
           specialty?: string[]
@@ -3538,8 +3981,12 @@ export type Database = {
           variable_comp_structure?: string | null
           variable_comp_target?: number | null
           views?: number
+          visibility?: Database["public"]["Enums"]["job_visibility"]
           work_mode?: string | null
           work_mode_detail?: string | null
+          worker_classification?:
+            | Database["public"]["Enums"]["worker_classification"]
+            | null
         }
         Relationships: [
           {
@@ -3731,6 +4178,41 @@ export type Database = {
         }
         Relationships: []
       }
+      practice_fit_digest_sends: {
+        Row: {
+          candidate_id: string
+          created_at: string
+          id: string
+          job_ids: string[]
+          kind: string
+          sent_at: string
+        }
+        Insert: {
+          candidate_id: string
+          created_at?: string
+          id?: string
+          job_ids?: string[]
+          kind: string
+          sent_at?: string
+        }
+        Update: {
+          candidate_id?: string
+          created_at?: string
+          id?: string
+          job_ids?: string[]
+          kind?: string
+          sent_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "practice_fit_digest_sends_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       practice_fit_scores: {
         Row: {
           bucket: string
@@ -3790,6 +4272,122 @@ export type Database = {
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prospect_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          read_at: string | null
+          sender_dso_user_id: string | null
+          sender_role: string
+          sender_user_id: string | null
+          thread_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_dso_user_id?: string | null
+          sender_role: string
+          sender_user_id?: string | null
+          thread_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_dso_user_id?: string | null
+          sender_role?: string
+          sender_user_id?: string | null
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prospect_messages_sender_dso_user_id_fkey"
+            columns: ["sender_dso_user_id"]
+            isOneToOne: false
+            referencedRelation: "dso_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prospect_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "prospect_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prospect_threads: {
+        Row: {
+          application_id: string | null
+          candidate_id: string
+          candidate_revealed: boolean
+          created_at: string
+          created_by: string | null
+          dso_id: string
+          id: string
+          last_message_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          application_id?: string | null
+          candidate_id: string
+          candidate_revealed?: boolean
+          created_at?: string
+          created_by?: string | null
+          dso_id: string
+          id?: string
+          last_message_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string | null
+          candidate_id?: string
+          candidate_revealed?: boolean
+          created_at?: string
+          created_by?: string | null
+          dso_id?: string
+          id?: string
+          last_message_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prospect_threads_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prospect_threads_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prospect_threads_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "dso_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prospect_threads_dso_id_fkey"
+            columns: ["dso_id"]
+            isOneToOne: false
+            referencedRelation: "dsos"
             referencedColumns: ["id"]
           },
         ]
@@ -3866,6 +4464,89 @@ export type Database = {
           },
         ]
       }
+      referrals: {
+        Row: {
+          application_id: string | null
+          candidate_email: string | null
+          candidate_name: string
+          candidate_phone: string | null
+          created_at: string
+          dso_id: string
+          id: string
+          job_id: string | null
+          note: string | null
+          referred_by_dso_user_id: string | null
+          referrer_email: string | null
+          referrer_name: string | null
+          source: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          application_id?: string | null
+          candidate_email?: string | null
+          candidate_name: string
+          candidate_phone?: string | null
+          created_at?: string
+          dso_id: string
+          id?: string
+          job_id?: string | null
+          note?: string | null
+          referred_by_dso_user_id?: string | null
+          referrer_email?: string | null
+          referrer_name?: string | null
+          source: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string | null
+          candidate_email?: string | null
+          candidate_name?: string
+          candidate_phone?: string | null
+          created_at?: string
+          dso_id?: string
+          id?: string
+          job_id?: string | null
+          note?: string | null
+          referred_by_dso_user_id?: string | null
+          referrer_email?: string | null
+          referrer_name?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_dso_id_fkey"
+            columns: ["dso_id"]
+            isOneToOne: false
+            referencedRelation: "dsos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referred_by_dso_user_id_fkey"
+            columns: ["referred_by_dso_user_id"]
+            isOneToOne: false
+            referencedRelation: "dso_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_jobs: {
         Row: {
           candidate_id: string
@@ -3902,47 +4583,67 @@ export type Database = {
           },
         ]
       }
-      claude_usage_log: {
+      subscriptions: {
         Row: {
-          auth_user_id: string
-          cached_input_tokens: number
-          cost_cents: number
+          cancel_at_period_end: boolean
           created_at: string
-          dso_id: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          dso_id: string
           id: string
-          input_tokens: number
-          model: string
-          output_tokens: number
-          request_id: string | null
-          surface: string
+          listings_used: number
+          seat_pack_qty: number
+          seats_used: number
+          status: Database["public"]["Enums"]["subscription_status"]
+          stripe_customer_id: string | null
+          stripe_price_id: string | null
+          stripe_subscription_id: string | null
+          tier: Database["public"]["Enums"]["subscription_tier"]
+          updated_at: string
         }
         Insert: {
-          auth_user_id: string
-          cached_input_tokens?: number
-          cost_cents?: number
+          cancel_at_period_end?: boolean
           created_at?: string
-          dso_id?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          dso_id: string
           id?: string
-          input_tokens?: number
-          model: string
-          output_tokens?: number
-          request_id?: string | null
-          surface: string
+          listings_used?: number
+          seat_pack_qty?: number
+          seats_used?: number
+          status?: Database["public"]["Enums"]["subscription_status"]
+          stripe_customer_id?: string | null
+          stripe_price_id?: string | null
+          stripe_subscription_id?: string | null
+          tier: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string
         }
         Update: {
-          auth_user_id?: string
-          cached_input_tokens?: number
-          cost_cents?: number
+          cancel_at_period_end?: boolean
           created_at?: string
-          dso_id?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          dso_id?: string
           id?: string
-          input_tokens?: number
-          model?: string
-          output_tokens?: number
-          request_id?: string | null
-          surface?: string
+          listings_used?: number
+          seat_pack_qty?: number
+          seats_used?: number
+          status?: Database["public"]["Enums"]["subscription_status"]
+          stripe_customer_id?: string | null
+          stripe_price_id?: string | null
+          stripe_subscription_id?: string | null
+          tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_dso_id_fkey"
+            columns: ["dso_id"]
+            isOneToOne: true
+            referencedRelation: "dsos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       support_chat_feedback: {
         Row: {
@@ -3972,7 +4673,22 @@ export type Database = {
           rating?: string
           request_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "support_chat_feedback_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "support_chat_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_chat_feedback_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "support_requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       support_chat_messages: {
         Row: {
@@ -4026,37 +4742,15 @@ export type Database = {
           tool_name?: string | null
           tool_output?: Json | null
         }
-        Relationships: []
-      }
-      support_response_cache: {
-        Row: {
-          cache_key: string
-          created_at: string
-          expires_at: string
-          hit_count: number
-          id: string
-          question: string
-          response: string
-        }
-        Insert: {
-          cache_key: string
-          created_at?: string
-          expires_at: string
-          hit_count?: number
-          id?: string
-          question: string
-          response: string
-        }
-        Update: {
-          cache_key?: string
-          created_at?: string
-          expires_at?: string
-          hit_count?: number
-          id?: string
-          question?: string
-          response?: string
-        }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "support_chat_messages_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "support_requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       support_requests: {
         Row: {
@@ -4122,106 +4816,107 @@ export type Database = {
           tier_snapshot?: string | null
           updated_at?: string
         }
-        Relationships: []
-      }
-      subscriptions: {
-        Row: {
-          cancel_at_period_end: boolean
-          created_at: string
-          current_period_end: string | null
-          current_period_start: string | null
-          dso_id: string
-          id: string
-          listings_used: number
-          seats_used: number
-          status: Database["public"]["Enums"]["subscription_status"]
-          stripe_customer_id: string | null
-          stripe_price_id: string | null
-          stripe_subscription_id: string | null
-          tier: Database["public"]["Enums"]["subscription_tier"]
-          updated_at: string
-        }
-        Insert: {
-          cancel_at_period_end?: boolean
-          created_at?: string
-          current_period_end?: string | null
-          current_period_start?: string | null
-          dso_id: string
-          id?: string
-          listings_used?: number
-          seats_used?: number
-          status?: Database["public"]["Enums"]["subscription_status"]
-          stripe_customer_id?: string | null
-          stripe_price_id?: string | null
-          stripe_subscription_id?: string | null
-          tier: Database["public"]["Enums"]["subscription_tier"]
-          updated_at?: string
-        }
-        Update: {
-          cancel_at_period_end?: boolean
-          created_at?: string
-          current_period_end?: string | null
-          current_period_start?: string | null
-          dso_id?: string
-          id?: string
-          listings_used?: number
-          seats_used?: number
-          status?: Database["public"]["Enums"]["subscription_status"]
-          stripe_customer_id?: string | null
-          stripe_price_id?: string | null
-          stripe_subscription_id?: string | null
-          tier?: Database["public"]["Enums"]["subscription_tier"]
-          updated_at?: string
-        }
         Relationships: [
           {
-            foreignKeyName: "subscriptions_dso_id_fkey"
+            foreignKeyName: "support_requests_dso_id_fkey"
             columns: ["dso_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "dsos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_requests_dso_user_id_fkey"
+            columns: ["dso_user_id"]
+            isOneToOne: false
+            referencedRelation: "dso_users"
             referencedColumns: ["id"]
           },
         ]
       }
-      wage_benchmarks: {
+      support_response_cache: {
         Row: {
-          id: string
-          role_category: string
-          scope: string
-          state: string | null
-          median_hourly: number | null
-          median_annual: number | null
-          mean_hourly: number | null
-          mean_annual: number | null
-          source: string
-          vintage: string
+          cache_key: string
           created_at: string
+          expires_at: string
+          hit_count: number
+          id: string
+          question: string
+          response: string
         }
         Insert: {
-          id?: string
-          role_category: string
-          scope: string
-          state?: string | null
-          median_hourly?: number | null
-          median_annual?: number | null
-          mean_hourly?: number | null
-          mean_annual?: number | null
-          source: string
-          vintage: string
+          cache_key: string
           created_at?: string
+          expires_at: string
+          hit_count?: number
+          id?: string
+          question: string
+          response: string
         }
         Update: {
+          cache_key?: string
+          created_at?: string
+          expires_at?: string
+          hit_count?: number
           id?: string
+          question?: string
+          response?: string
+        }
+        Relationships: []
+      }
+      wage_benchmarks: {
+        Row: {
+          created_at: string
+          id: string
+          mean_annual: number | null
+          mean_hourly: number | null
+          median_annual: number | null
+          median_hourly: number | null
+          role_category: string
+          scope: string
+          source: string
+          state: string | null
+          vintage: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mean_annual?: number | null
+          mean_hourly?: number | null
+          median_annual?: number | null
+          median_hourly?: number | null
+          role_category: string
+          scope: string
+          source: string
+          state?: string | null
+          vintage: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mean_annual?: number | null
+          mean_hourly?: number | null
+          median_annual?: number | null
+          median_hourly?: number | null
           role_category?: string
           scope?: string
-          state?: string | null
-          median_hourly?: number | null
-          median_annual?: number | null
-          mean_hourly?: number | null
-          mean_annual?: number | null
           source?: string
+          state?: string | null
           vintage?: string
-          created_at?: string
+        }
+        Relationships: []
+      }
+      zip_cbsa: {
+        Row: {
+          cbsa: string
+          zip: string
+        }
+        Insert: {
+          cbsa: string
+          zip: string
+        }
+        Update: {
+          cbsa?: string
+          zip?: string
         }
         Relationships: []
       }
@@ -4276,11 +4971,52 @@ export type Database = {
       }
     }
     Functions: {
+      _haversine_miles: {
+        Args: { lat1: number; lat2: number; lng1: number; lng2: number }
+        Returns: number
+      }
+      admin_expiring_credentials_count: {
+        Args: { p_within_days: number }
+        Returns: number
+      }
+      admin_liquidity_buyer_leak: { Args: never; Returns: number }
+      admin_liquidity_matrix: {
+        Args: never
+        Returns: {
+          demand: number
+          metro: string
+          role_category: string
+          supply: number
+        }[]
+      }
+      admin_liquidity_seller_leaks: {
+        Args: { p_limit: number }
+        Returns: {
+          days_live: number
+          dso_name: string
+          job_id: string
+          metro: string
+          posted_at: string
+          title: string
+        }[]
+      }
+      admin_liquidity_velocity: {
+        Args: never
+        Returns: {
+          jobs_with_apps: number
+          median_days: number
+          role_category: string
+        }[]
+      }
       current_dso_id: { Args: never; Returns: string }
+      current_dso_user_id: { Args: never; Returns: string }
       current_dso_user_role: {
         Args: never
         Returns: Database["public"]["Enums"]["dso_user_role"]
       }
+      demo_seed_count_events: { Args: never; Returns: number }
+      demo_seed_delete_events: { Args: never; Returns: number }
+      demo_seed_insert_events: { Args: { p_events: Json }; Returns: number }
       dso_can_read_candidate: {
         Args: { p_candidate_id: string }
         Returns: boolean
@@ -4289,10 +5025,12 @@ export type Database = {
         Args: { p_candidate_id: string; p_job_id: string }
         Returns: boolean
       }
+      immutable_text_array_join: { Args: { arr: string[] }; Returns: string }
       increment_job_view_count: {
         Args: { p_job_id: string }
         Returns: undefined
       }
+      is_dm_participant: { Args: { conv_id: string }; Returns: boolean }
       is_dso_admin: { Args: { target_dso_id: string }; Returns: boolean }
       is_internal_admin: { Args: never; Returns: boolean }
       is_kind_stage: {
@@ -4312,47 +5050,51 @@ export type Database = {
         Returns: boolean
       }
       list_distribution_jobs: {
-        Args: { p_dso_slug?: string | null }
+        Args: { p_dso_slug?: string }
         Returns: {
-          job_id: string
-          title: string
-          slug: string
-          description: string
-          employment_type: string
-          role_category: string
-          scope: string
-          posted_at: string | null
-          expires_at: string | null
-          compensation_min: number | null
-          compensation_max: number | null
+          compensation_max: number
+          compensation_min: number
           compensation_period: string
           compensation_visible: boolean
+          description: string
           dso_id: string
           dso_name: string
           dso_slug: string
+          employment_type: string
+          expires_at: string
           is_public_affiliated: boolean
+          job_id: string
           locations: Json
+          posted_at: string
+          role_category: string
+          scope: string
+          slug: string
+          title: string
         }[]
       }
       search_jobs_public: {
         Args: {
           category_filter?: Database["public"]["Enums"]["role_category"]
           employment_filter?: Database["public"]["Enums"]["employment_type"]
-          near_lat?: number | null
-          near_lng?: number | null
+          min_comp?: number
+          near_lat?: number
+          near_lng?: number
           posted_within_days?: number
           query_text?: string
           state_filter?: string
-          states_filter?: string[] | null
-          within_miles?: number | null
+          states_filter?: string[]
+          within_miles?: number
         }
         Returns: {
           applications_count: number
           authority_level: string | null
+          auto_paused_reason: string | null
+          basis_exclusions_note: string | null
           benefits: string[] | null
           bonus_enabled: boolean
           bonus_structure: string | null
           bonus_target: number | null
+          comp_model: Database["public"]["Enums"]["comp_model"] | null
           compensation_max: number | null
           compensation_min: number | null
           compensation_period:
@@ -4360,6 +5102,7 @@ export type Database = {
             | null
           compensation_type: string
           compensation_visible: boolean
+          confidential: boolean
           corporate_function: string | null
           created_at: string
           created_by: string | null
@@ -4367,22 +5110,47 @@ export type Database = {
           description: string
           direct_reports_band: string | null
           distribution_enabled: boolean
+          domain_preference: string | null
           dso_id: string
           education_requirement: string | null
           employment_type: Database["public"]["Enums"]["employment_type"]
           equity_note: string | null
           equity_offered: boolean
+          est_annual_max: number | null
+          est_annual_min: number | null
           expires_at: string | null
-          scheduled_publish_at: string | null
           external_links: Json
+          guarantee_amount: number | null
+          guarantee_duration:
+            | Database["public"]["Enums"]["comp_guarantee_duration"]
+            | null
+          guarantee_kind:
+            | Database["public"]["Enums"]["comp_guarantee_kind"]
+            | null
           hide_stages_from_candidate: boolean
+          hygiene_exam_credited: boolean | null
+          hygienist_work_credited: boolean | null
           id: string
           indirect_reports_band: string | null
           industry_experience: string | null
+          lab_fee_policy:
+            | Database["public"]["Enums"]["comp_lab_fee_policy"]
+            | null
           max_years_corporate_experience: number | null
           min_years_corporate_experience: number | null
           min_years_experience: number | null
+          openings: number
+          pay_cadence: Database["public"]["Enums"]["comp_pay_cadence"] | null
+          percent_basis:
+            | Database["public"]["Enums"]["comp_percent_basis"]
+            | null
+          percent_rate_max: number | null
+          percent_rate_min: number | null
+          percent_tiers_note: string | null
           posted_at: string | null
+          reconciliation:
+            | Database["public"]["Enums"]["comp_reconciliation"]
+            | null
           remote_state_restrictions: string[]
           reports_to: string | null
           requirements: string | null
@@ -4390,8 +5158,8 @@ export type Database = {
           schedule_days: string[]
           schedule_evenings: boolean
           schedule_weekends: boolean
+          scheduled_publish_at: string | null
           scope: Database["public"]["Enums"]["job_scope"]
-          visibility: Database["public"]["Enums"]["job_visibility"]
           search_vector: unknown
           slug: string
           specialty: string[]
@@ -4404,8 +5172,12 @@ export type Database = {
           variable_comp_structure: string | null
           variable_comp_target: number | null
           views: number
+          visibility: Database["public"]["Enums"]["job_visibility"]
           work_mode: string | null
           work_mode_detail: string | null
+          worker_classification:
+            | Database["public"]["Enums"]["worker_classification"]
+            | null
         }[]
         SetofOptions: {
           from: "*"
@@ -4413,6 +5185,10 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      seed_dso_default_automation_rules: {
+        Args: { p_dso_id: string }
+        Returns: undefined
       }
       seed_dso_default_pipeline_stages: {
         Args: { p_dso_id: string }
@@ -4426,25 +5202,84 @@ export type Database = {
       show_trgm: { Args: { "": string }; Returns: string[] }
       unaccent: { Args: { "": string }; Returns: string }
       user_accessible_location_ids: { Args: never; Returns: string[] }
+      user_assigned_to_job: { Args: { p_job_id: string }; Returns: boolean }
       user_can_access_application_interview: {
         Args: { p_application_id: string }
         Returns: boolean
       }
       user_can_access_job: { Args: { p_job_id: string }; Returns: boolean }
+      vantage_acquisition_loop: {
+        Args: never
+        Returns: {
+          candidate_signups: number
+          channel: string
+          employer_paying: number
+          employer_signups: number
+        }[]
+      }
+      vantage_channels: {
+        Args: { p_days: number }
+        Returns: {
+          channel: string
+          pageviews: number
+          visitors: number
+        }[]
+      }
+      vantage_current_salt: { Args: never; Returns: string }
+      vantage_daily_pageviews: {
+        Args: { p_days: number }
+        Returns: {
+          day: string
+          pageviews: number
+        }[]
+      }
+      vantage_goals: {
+        Args: { p_days: number }
+        Returns: {
+          event_name: string
+          events: number
+          visitors: number
+        }[]
+      }
+      vantage_overview: { Args: never; Returns: Json }
+      vantage_record_event: {
+        Args: {
+          p_browser: string
+          p_channel: string
+          p_country: string
+          p_device: string
+          p_event_name: string
+          p_event_type: number
+          p_os: string
+          p_path: string
+          p_props: Json
+          p_referrer_host: string
+          p_region: string
+          p_session_id: string
+          p_utm_campaign: string
+          p_utm_content: string
+          p_utm_medium: string
+          p_utm_source: string
+          p_utm_term: string
+          p_visitor_id: string
+        }
+        Returns: undefined
+      }
+      vantage_top_pages: {
+        Args: { p_days: number; p_limit: number }
+        Returns: {
+          pageviews: number
+          path: string
+          visitors: number
+        }[]
+      }
+      vantage_weekly_compare: { Args: never; Returns: Json }
     }
     Enums: {
       admin_role: "superadmin" | "support"
       calendar_provider: "google" | "microsoft"
       candidate_availability: "immediate" | "2_weeks" | "1_month" | "passive"
       candidate_visibility: "hidden" | "recruiters_only" | "open_to_work"
-      compensation_period: "hourly" | "daily" | "annual"
-      comp_model:
-        | "simple"
-        | "guarantee_plus_percent"
-        | "percent_only"
-        | "draw_against_percent"
-        | "salary_vs_percent"
-      comp_guarantee_kind: "none" | "hourly" | "daily" | "per_period" | "annual_salary"
       comp_guarantee_duration:
         | "permanent"
         | "intro_90d"
@@ -4452,15 +5287,27 @@ export type Database = {
         | "year_1"
         | "years_1_3"
         | "custom"
+      comp_guarantee_kind:
+        | "none"
+        | "hourly"
+        | "daily"
+        | "per_period"
+        | "annual_salary"
+      comp_lab_fee_policy: "practice_paid" | "split_50" | "deducted" | "other"
+      comp_model:
+        | "simple"
+        | "guarantee_plus_percent"
+        | "percent_only"
+        | "draw_against_percent"
+        | "salary_vs_percent"
+      comp_pay_cadence: "weekly" | "biweekly" | "semimonthly" | "monthly"
       comp_percent_basis:
         | "production"
         | "adjusted_production"
         | "collections"
         | "case_starts"
-      comp_lab_fee_policy: "practice_paid" | "split_50" | "deducted" | "other"
       comp_reconciliation: "greater_of" | "draw_against" | "additive"
-      comp_pay_cadence: "weekly" | "biweekly" | "semimonthly" | "monthly"
-      worker_classification: "w2" | "c1099" | "either_negotiable"
+      compensation_period: "hourly" | "daily" | "annual"
       dso_affiliation_reveal_policy: "never" | "after_hire" | "per_application"
       dso_status: "pending" | "active" | "suspended" | "cancelled"
       dso_user_role: "owner" | "admin" | "recruiter" | "hiring_manager"
@@ -4472,13 +5319,20 @@ export type Database = {
       interview_kind: "phone" | "video" | "in_person" | "other"
       interview_proposal_status: "pending" | "booked" | "cancelled" | "expired"
       job_scope: "location" | "regional" | "corporate"
-      job_visibility: "public" | "internal_only"
       job_status:
         | "draft"
         | "active"
         | "paused"
         | "expired"
         | "filled"
+        | "archived"
+      job_visibility: "public" | "internal_only"
+      prospect_pipeline_stage:
+        | "sourced"
+        | "contacted"
+        | "responded"
+        | "nurturing"
+        | "converted"
         | "archived"
       role_category:
         | "dentist"
@@ -4516,6 +5370,7 @@ export type Database = {
       support_chat_role: "user" | "assistant" | "system" | "tool"
       support_request_status: "new" | "in_progress" | "resolved" | "closed"
       support_review_status: "unreviewed" | "reviewed" | "flagged_bad"
+      worker_classification: "w2" | "c1099" | "either_negotiable"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -4647,15 +5502,6 @@ export const Constants = {
       calendar_provider: ["google", "microsoft"],
       candidate_availability: ["immediate", "2_weeks", "1_month", "passive"],
       candidate_visibility: ["hidden", "recruiters_only", "open_to_work"],
-      compensation_period: ["hourly", "daily", "annual"],
-      comp_model: [
-        "simple",
-        "guarantee_plus_percent",
-        "percent_only",
-        "draw_against_percent",
-        "salary_vs_percent",
-      ],
-      comp_guarantee_kind: ["none", "hourly", "daily", "per_period", "annual_salary"],
       comp_guarantee_duration: [
         "permanent",
         "intro_90d",
@@ -4664,16 +5510,30 @@ export const Constants = {
         "years_1_3",
         "custom",
       ],
+      comp_guarantee_kind: [
+        "none",
+        "hourly",
+        "daily",
+        "per_period",
+        "annual_salary",
+      ],
+      comp_lab_fee_policy: ["practice_paid", "split_50", "deducted", "other"],
+      comp_model: [
+        "simple",
+        "guarantee_plus_percent",
+        "percent_only",
+        "draw_against_percent",
+        "salary_vs_percent",
+      ],
+      comp_pay_cadence: ["weekly", "biweekly", "semimonthly", "monthly"],
       comp_percent_basis: [
         "production",
         "adjusted_production",
         "collections",
         "case_starts",
       ],
-      comp_lab_fee_policy: ["practice_paid", "split_50", "deducted", "other"],
       comp_reconciliation: ["greater_of", "draw_against", "additive"],
-      comp_pay_cadence: ["weekly", "biweekly", "semimonthly", "monthly"],
-      worker_classification: ["w2", "c1099", "either_negotiable"],
+      compensation_period: ["hourly", "daily", "annual"],
       dso_affiliation_reveal_policy: ["never", "after_hire", "per_application"],
       dso_status: ["pending", "active", "suspended", "cancelled"],
       dso_user_role: ["owner", "admin", "recruiter", "hiring_manager"],
@@ -4686,13 +5546,21 @@ export const Constants = {
       interview_kind: ["phone", "video", "in_person", "other"],
       interview_proposal_status: ["pending", "booked", "cancelled", "expired"],
       job_scope: ["location", "regional", "corporate"],
-      job_visibility: ["public", "internal_only"],
       job_status: [
         "draft",
         "active",
         "paused",
         "expired",
         "filled",
+        "archived",
+      ],
+      job_visibility: ["public", "internal_only"],
+      prospect_pipeline_stage: [
+        "sourced",
+        "contacted",
+        "responded",
+        "nurturing",
+        "converted",
         "archived",
       ],
       role_category: [
@@ -4731,6 +5599,10 @@ export const Constants = {
         "unpaid",
       ],
       subscription_tier: ["starter", "growth", "enterprise", "solo", "scale"],
+      support_chat_role: ["user", "assistant", "system", "tool"],
+      support_request_status: ["new", "in_progress", "resolved", "closed"],
+      support_review_status: ["unreviewed", "reviewed", "flagged_bad"],
+      worker_classification: ["w2", "c1099", "either_negotiable"],
     },
   },
 } as const
