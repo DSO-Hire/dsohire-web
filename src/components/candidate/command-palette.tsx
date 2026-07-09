@@ -8,12 +8,83 @@
  * (open jobs with masked DSO names, own applications, shortcuts).
  */
 
-import { Briefcase, FileText, Sparkles } from "lucide-react";
+import {
+  Bell,
+  Briefcase,
+  FileText,
+  Gauge,
+  LayoutDashboard,
+  Moon,
+  Search,
+  Sparkles,
+  Type,
+} from "lucide-react";
 import {
   SharedCommandPaletteTrigger,
+  type PaletteCommand,
   type PaletteConfig,
 } from "@/components/shared/command-palette";
 import { candidateSearch } from "@/lib/candidate/search-action";
+import { toggleTheme, cycleTextSize } from "@/components/theme/quick-actions";
+
+/** Design-excellence 4a — static commands, visible the moment ⌘K opens. */
+const CANDIDATE_COMMANDS: PaletteCommand[] = [
+  {
+    id: "browse-jobs",
+    title: "Browse jobs",
+    subtitle: "The public jobs board",
+    icon: Search,
+    keywords: ["find", "openings", "search"],
+    href: "/jobs",
+  },
+  {
+    id: "fit-board",
+    title: "Open your PracticeFit board",
+    subtitle: "Every open role, ranked to your profile",
+    icon: Gauge,
+    keywords: ["matches", "ranked", "fit", "score"],
+    href: "/candidate/jobs",
+  },
+  {
+    id: "my-applications",
+    title: "My applications",
+    icon: FileText,
+    keywords: ["status", "applied"],
+    href: "/candidate/applications",
+  },
+  {
+    id: "job-alerts",
+    title: "Manage job alerts",
+    subtitle: "Saved searches + email cadence",
+    icon: Bell,
+    keywords: ["saved search", "notifications", "email"],
+    href: "/candidate/settings/credentials",
+  },
+  {
+    id: "go-dashboard",
+    title: "Go to dashboard",
+    icon: LayoutDashboard,
+    keywords: ["home", "overview"],
+    href: "/candidate/dashboard",
+  },
+  {
+    id: "toggle-theme",
+    title: "Toggle dark mode",
+    icon: Moon,
+    keywords: ["theme", "light", "appearance", "night"],
+    run: () => void toggleTheme(),
+    keepOpen: true,
+  },
+  {
+    id: "cycle-text-size",
+    title: "Cycle text size",
+    subtitle: "Default → Large → Larger",
+    icon: Type,
+    keywords: ["font", "zoom", "accessibility", "bigger"],
+    run: () => void cycleTextSize(),
+    keepOpen: true,
+  },
+];
 
 const CANDIDATE_PALETTE: PaletteConfig = {
   search: candidateSearch,
@@ -22,12 +93,13 @@ const CANDIDATE_PALETTE: PaletteConfig = {
     { key: "jobs", label: "Open jobs", icon: Briefcase },
     { key: "applications", label: "Your applications", icon: FileText },
   ],
-  placeholder: "Search jobs, your applications, and shortcuts…",
+  placeholder: "Search or run a command…",
   hintItems: [
     "A job title (e.g. “hygienist”)",
     "One of your applications",
     "A shortcut (e.g. “résumé” or “privacy”)",
   ],
+  commands: CANDIDATE_COMMANDS,
 };
 
 export function CandidateCommandPaletteTrigger() {

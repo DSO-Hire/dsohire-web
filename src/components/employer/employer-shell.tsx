@@ -296,7 +296,7 @@ export function EmployerShell({
 
         {/* Cmd-K universal search trigger (Phase 4.6.e) */}
         <div className="rail-search px-3 pt-2">
-          <CommandPaletteTrigger />
+          <CommandPaletteTrigger navPerms={navPerms} />
         </div>
 
         {/* Grouped nav — active highlight derived from the URL (client). */}
