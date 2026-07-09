@@ -49,6 +49,7 @@ import {
   Briefcase,
 } from "lucide-react";
 import { Eyebrow } from "@/components/brand/eyebrow";
+import { Button } from "@/components/ui/button";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import { PracticeFitTeaser } from "@/components/marketing/practicefit-teaser";
@@ -180,19 +181,17 @@ function Hero({ ctaHref }: { ctaHref: string }) {
           </p>
 
           <div className="flex flex-wrap items-center gap-3.5 mb-9">
-            <Link
-              href="/jobs"
-              className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
-            >
-              Browse Open Roles
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-            <Link
-              href={ctaHref}
-              className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-sm font-bold hover:border-ink hover:bg-cream transition-colors"
-            >
-              Create a Free Profile
-            </Link>
+            <Button asChild variant="primary" size="xl">
+              <Link href="/jobs">
+                Browse Open Roles
+                <ArrowRight className="size-3.5" />
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="xl">
+              <Link href={ctaHref}>
+                Create a Free Profile
+              </Link>
+            </Button>
           </div>
 
           <div className="flex items-center gap-2.5 text-xs text-slate-body tracking-[0.4px]">
@@ -905,19 +904,17 @@ function FinalCta({ ctaHref }: { ctaHref: string }) {
           just dental jobs at real dental groups.
         </p>
         <div className="flex flex-wrap gap-3.5 justify-center">
-          <Link
-            href="/jobs"
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
-          >
-            Browse Open Roles
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-          <Link
-            href={ctaHref}
-            className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-sm font-bold hover:border-ink hover:bg-cream transition-colors"
-          >
-            Create a Free Profile
-          </Link>
+          <Button asChild variant="primary" size="xl">
+            <Link href="/jobs">
+              Browse Open Roles
+              <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="xl">
+            <Link href={ctaHref}>
+              Create a Free Profile
+            </Link>
+          </Button>
         </div>
       </div>
     </section>

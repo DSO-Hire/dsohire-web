@@ -24,6 +24,7 @@ import { BillingPeriodToggle } from "./billing-period-toggle";
 import { PlanFinder } from "./plan-finder";
 import { CompareMatrixAccordion } from "./compare-matrix-accordion";
 import { Eyebrow } from "@/components/brand/eyebrow";
+import { Button } from "@/components/ui/button";
 import { Tag } from "@/components/brand/tag";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import { MotionMount } from "@/components/marketing/motion";
@@ -1062,12 +1063,11 @@ function FinalCta({ nextParam }: { nextParam: string | null }) {
             Sign up
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
-          <Link
-            href="/contact"
-            className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-sm font-semibold hover:border-ink transition-colors"
-          >
-            Contact us
-          </Link>
+          <Button asChild variant="outline" size="xl">
+            <Link href="/contact">
+              Contact us
+            </Link>
+          </Button>
         </div>
       </div>
     </section>

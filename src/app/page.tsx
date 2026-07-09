@@ -40,6 +40,7 @@ import {
   Stethoscope,
 } from "lucide-react";
 import { Eyebrow } from "@/components/brand/eyebrow";
+import { Button } from "@/components/ui/button";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { BackOfficeShowcase } from "@/components/marketing/back-office/showcase";
 import { CountUp } from "@/components/marketing/motion";
@@ -337,13 +338,12 @@ function DoorwayPanel({
           buttons sit at identical heights regardless of demo height
           (symmetry — Cam). */}
       <div className="mt-auto pt-6 flex flex-col">
-        <Link
-          href={ctaHref}
-          className="inline-flex items-center justify-center gap-2.5 px-6 py-3 text-sm font-bold bg-ivory text-ink hover:bg-ivory-deep transition-colors"
-        >
-          {ctaLabel}
-          <ArrowRight className="h-3.5 w-3.5 motion-safe:transition-transform motion-safe:group-hover:translate-x-1" />
-        </Link>
+        <Button asChild variant="inverse" size="lg">
+          <Link href={ctaHref}>
+            {ctaLabel}
+            <ArrowRight className="size-3.5 motion-safe:transition-transform motion-safe:group-hover:translate-x-1" />
+          </Link>
+        </Button>
 
         {/* Secondary — the pitch/detail page, named for what it is. */}
         <Link
@@ -597,19 +597,15 @@ function MachineBand() {
           data-reveal
           className="flex flex-wrap gap-3.5 mt-10"
         >
-          <Link
-            href="/for-dental-groups"
-            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
-          >
-            Explore the platform
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
-          <Link
-            href="/pricing"
-            className="inline-flex items-center px-7 py-[13px] border border-[var(--rule-strong)] text-ink text-sm font-semibold hover:border-ink hover:bg-cream transition-colors"
-          >
-            See pricing
-          </Link>
+          <Button asChild variant="primary" size="lg">
+            <Link href="/for-dental-groups">
+              Explore the platform
+              <ArrowRight className="size-3.5" />
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="lg">
+            <Link href="/pricing">See pricing</Link>
+          </Button>
         </div>
       </div>
     </section>
@@ -678,19 +674,15 @@ function CandidateStrip() {
             style={{ "--mk-delay": "200ms" } as React.CSSProperties}
             className="flex flex-wrap gap-3.5"
           >
-            <Link
-              href="/jobs"
-              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-heritage text-primary-foreground text-sm font-bold hover:bg-heritage-deep transition-colors"
-            >
-              Browse dental jobs
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-            <Link
-              href="/practicefit"
-              className="inline-flex items-center px-7 py-[13px] border border-[var(--rule-strong)] text-ink text-sm font-semibold hover:border-ink hover:bg-cream transition-colors"
-            >
-              Meet PracticeFit
-            </Link>
+            <Button asChild variant="heritage" size="lg">
+              <Link href="/jobs">
+                Browse dental jobs
+                <ArrowRight className="size-3.5" />
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link href="/practicefit">Meet PracticeFit</Link>
+            </Button>
           </div>
         </div>
       </div>
@@ -780,20 +772,18 @@ function ClosingDoorways() {
           style={{ "--mk-delay": "140ms" } as React.CSSProperties}
           className="flex flex-col sm:flex-row gap-3.5 justify-center"
         >
-          <Link
-            href="/for-dental-groups"
-            className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-ivory text-ink text-sm font-bold hover:bg-ivory-deep transition-colors"
-          >
-            <Building2 className="h-4 w-4" />
-            I&apos;m a dental group
-          </Link>
-          <Link
-            href="/for-candidates"
-            className="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-heritage text-primary-foreground text-sm font-bold hover:bg-heritage-deep transition-colors"
-          >
-            <Stethoscope className="h-4 w-4" />
-            I&apos;m a dental professional
-          </Link>
+          <Button asChild variant="inverse" size="xl">
+            <Link href="/for-dental-groups">
+              <Building2 className="size-4" />
+              I&apos;m a dental group
+            </Link>
+          </Button>
+          <Button asChild variant="heritage" size="xl">
+            <Link href="/for-candidates">
+              <Stethoscope className="size-4" />
+              I&apos;m a dental professional
+            </Link>
+          </Button>
         </div>
       </div>
     </section>

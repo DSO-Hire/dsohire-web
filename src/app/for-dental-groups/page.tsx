@@ -38,6 +38,7 @@ import {
   Workflow,
 } from "lucide-react";
 import { Eyebrow } from "@/components/brand/eyebrow";
+import { Button } from "@/components/ui/button";
 import { Tag } from "@/components/brand/tag";
 import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
@@ -173,19 +174,17 @@ function Hero() {
             </p>
 
             <div className="flex flex-wrap items-center gap-3.5 mb-9">
-              <Link
-                href="#pricing"
-                className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
-              >
-                Start Posting Jobs
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-              <Link
-                href="/contact"
-                className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-sm font-bold hover:border-ink transition-colors"
-              >
-                Contact Sales
-              </Link>
+              <Button asChild variant="primary" size="xl">
+                <Link href="#pricing">
+                  Start Posting Jobs
+                  <ArrowRight className="size-3.5" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="xl">
+                <Link href="/contact">
+                  Contact Sales
+                </Link>
+              </Button>
             </div>
 
             <div className="flex items-center gap-2.5 text-xs text-slate-body tracking-[0.4px]">
@@ -1230,19 +1229,17 @@ function FinalCta() {
           email. Ask the questions you actually want answered.
         </p>
         <div className="flex flex-wrap gap-3.5 justify-center">
-          <Link
-            href="/contact"
-            className="inline-flex items-center gap-2.5 px-9 py-4 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
-          >
-            Contact Us
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
-          <Link
-            href="/pricing"
-            className="inline-flex items-center px-9 py-[15px] border border-[var(--rule-strong)] text-ink text-sm font-bold hover:border-ink transition-colors"
-          >
-            See Pricing
-          </Link>
+          <Button asChild variant="primary" size="xl">
+            <Link href="/contact">
+              Contact Us
+              <ArrowRight className="size-3.5" />
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="xl">
+            <Link href="/pricing">
+              See Pricing
+            </Link>
+          </Button>
         </div>
       </div>
     </section>
