@@ -456,7 +456,7 @@ function MarqueeCard({ job, ariaHidden }: { job: MarqueeJob; ariaHidden?: boolea
       href={`/jobs/${job.id}`}
       aria-hidden={ariaHidden || undefined}
       tabIndex={ariaHidden ? -1 : undefined}
-      className="group/card flex flex-col w-[280px] shrink-0 bg-card border border-[var(--rule)] px-5 py-4 hover:border-heritage hover:shadow-[0_14px_28px_-16px_rgba(7,15,28,0.22)] transition-all"
+      className="group/card flex flex-col w-[280px] shrink-0 bg-card border border-[var(--rule)] px-5 py-4 hover:border-heritage hover:shadow-2 transition-all"
     >
       <span className="inline-flex self-start items-center px-1.5 py-0.5 mb-2.5 text-2xs font-semibold text-heritage-deep border border-heritage/30" style={{ background: "var(--heritage-tint)" }}>
         {job.chip}

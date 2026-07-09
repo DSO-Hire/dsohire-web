@@ -389,7 +389,7 @@ function HeroKanbanPreview() {
       <div
         className="hk-notif absolute -bottom-5 -left-6 bg-card border border-[var(--rule)] px-4 py-3.5 flex items-center gap-3 max-w-[260px]"
         style={{
-          boxShadow: "0 14px 28px -14px rgba(7,15,28,0.18)",
+          boxShadow: "var(--elevation-2)",
         }}
       >
         <span className="flex items-center justify-center w-8 h-8 bg-heritage text-primary-foreground font-extrabold text-xs tracking-[-0.3px]">
@@ -985,7 +985,7 @@ function FeatureCard({ feature }: { feature: ShowcaseFeature }) {
   const isLive = feature.status === "now";
   return (
     <div
-      className="relative bg-card border border-[var(--rule)] p-7 flex flex-col motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1 hover:border-[var(--rule-strong)] hover:shadow-[0_18px_36px_-20px_rgba(7,15,28,0.20)]"
+      className="relative bg-card border border-[var(--rule)] p-7 flex flex-col motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1 hover:border-[var(--rule-strong)] hover:shadow-3"
     >
       {/* Status pill */}
       <Tag
@@ -1127,7 +1127,7 @@ function PricingTier({ tier }: { tier: TierConfig }) {
       className={`relative p-9 flex flex-col motion-safe:transition-all motion-safe:duration-200 ${
         isFeatured
           ? "bg-hero text-hero-foreground"
-          : "bg-card text-ink motion-safe:hover:-translate-y-1 hover:shadow-[0_12px_28px_-14px_rgba(7,15,28,0.18)] hover:bg-cream/30"
+          : "bg-card text-ink motion-safe:hover:-translate-y-1 hover:shadow-2 hover:bg-cream/30"
       }`}
     >
       {isFeatured && (

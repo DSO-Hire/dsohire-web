@@ -115,7 +115,7 @@ export function FitDial({
               fill="none"
               strokeDasharray={CIRC}
               strokeDashoffset={CIRC * (1 - score / 100)}
-              style={{ transition: "stroke-dashoffset 1.4s cubic-bezier(0.22,1,0.36,1)" }}
+              style={{ transition: "stroke-dashoffset 1.4s var(--ease-settle)" }}
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
@@ -157,7 +157,7 @@ export function FitDial({
                 className="absolute inset-0 bg-heritage not-italic"
                 style={{
                   right: `${100 - d.value}%`,
-                  transition: "right 1.1s cubic-bezier(0.22,1,0.36,1)",
+                  transition: "right 1.1s var(--ease-settle)",
                 }}
               />
             </span>

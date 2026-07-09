@@ -1216,7 +1216,7 @@ function JobCard({
   return (
     <Link
       href={`/jobs/${job.id}`}
-      className="group block bg-card p-7 hover:bg-cream motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-14px_rgba(7,15,28,0.18)] flex flex-col"
+      className="group block bg-card p-7 hover:bg-cream motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-2 flex flex-col"
     >
       <div className="flex items-center justify-between gap-2 mb-3">
         <Eyebrow>

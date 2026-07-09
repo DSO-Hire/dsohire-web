@@ -331,7 +331,7 @@ function Row({ job }: { job: BrowseJob }) {
     <li className="border-b border-[var(--rule)]">
       <Link
         href={`/jobs/${job.id}`}
-        className="group relative block py-5 -mx-4 pl-5 pr-4 border-l-4 border-l-transparent transition-all duration-150 hover:border-l-heritage-deep hover:bg-card hover:shadow-[0_2px_18px_-12px_rgba(20,35,63,0.25)]"
+        className="group relative block py-5 -mx-4 pl-5 pr-4 border-l-4 border-l-transparent transition-all duration-150 hover:border-l-heritage-deep hover:bg-card hover:shadow-1"
       >
         <div className="flex items-start justify-between gap-6">
           <div className="flex-1 min-w-0">

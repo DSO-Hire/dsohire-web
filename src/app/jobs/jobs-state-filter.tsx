@@ -83,7 +83,7 @@ export function JobsStateFilter({ defaultValues }: JobsStateFilterProps) {
           <PopoverPrimitive.Content
             sideOffset={8}
             align="start"
-            className="z-50 w-(--radix-popover-trigger-width) min-w-[240px] border border-[var(--rule-strong)] bg-popover shadow-[0_18px_44px_-22px_rgba(7,15,28,0.28)] data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0"
+            className="z-50 w-(--radix-popover-trigger-width) min-w-[240px] border border-[var(--rule-strong)] bg-popover shadow-3 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0"
             onOpenAutoFocus={(e) => e.preventDefault()}
           >
             <div className="flex items-center gap-2 border-b border-[var(--rule)] p-2">

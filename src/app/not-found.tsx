@@ -65,7 +65,7 @@ export default function NotFound() {
               href="/for-dental-groups"
               className="group bg-hero hover:bg-hero/90 text-hero-foreground p-6 motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1"
               style={{
-                boxShadow: "0 18px 36px -18px rgba(7,15,28,0.30)",
+                boxShadow: "var(--elevation-3)",
               }}
             >
               <span className="inline-flex items-center justify-center w-9 h-9 mb-3 bg-ivory text-ink" aria-hidden>
@@ -87,7 +87,7 @@ export default function NotFound() {
               href="/for-candidates"
               className="group bg-heritage hover:bg-heritage-deep text-hero-foreground p-6 motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1"
               style={{
-                boxShadow: "0 18px 36px -18px rgba(7,15,28,0.30)",
+                boxShadow: "var(--elevation-3)",
               }}
             >
               <span className="inline-flex items-center justify-center w-9 h-9 mb-3 bg-ivory text-heritage-deep" aria-hidden>

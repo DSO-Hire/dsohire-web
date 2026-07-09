@@ -42,7 +42,7 @@ export function CompChapter({
     return () => cancels.forEach((c) => c());
   });
 
-  const ease = { transitionTimingFunction: "cubic-bezier(0.22,1,0.36,1)" };
+  const ease = { transitionTimingFunction: "var(--ease-settle)" };
 
   return (
     <div>

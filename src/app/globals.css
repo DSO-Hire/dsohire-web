@@ -75,6 +75,32 @@
   --rule: rgba(20, 35, 63, 0.08);
   --rule-strong: rgba(20, 35, 63, 0.14);
 
+  /* ── Motion tokens (design-system foundations, 2026-07-09) ──
+     The house motion personality: precise, settling, architectural.
+     --ease-settle is THE brand curve (the D-mark draw-on, kanban card
+     landings, showcase choreography all use it). JS-driven animation
+     (WAAPI/rAF) can't read CSS vars — mirror lives in src/lib/motion.ts;
+     change BOTH together. */
+  --ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 120ms;  /* hover feedback, chip state flips */
+  --duration-base: 240ms;  /* most transitions: fades, slides, reveals */
+  --duration-slow: 420ms;  /* page-level moves, large surfaces settling */
+
+  /* ── Elevation ladder (design-system foundations, 2026-07-09) ──
+     Structure separates by HAIRLINE, not shadow — elevation is reserved
+     for things that genuinely float. Cool navy tint, low spread; the
+     rung values are the house's own most-used shadows, canonized:
+       1 — quiet float (subtle emphasis, resting overlays)
+       2 — raised (hover-lift cards, dropdown menus)
+       3 — overlay (modals, popovers, toasts, marketing device frames)
+     Exposed as Tailwind utilities shadow-1/2/3 via @theme. Directional
+     shadows (drawer edges, sticky-bar tops) and inset rules/focus rings
+     are NOT elevation — they stay bespoke. Dark values below in .dark. */
+  --elevation-1: 0 1px 2px rgba(7, 15, 28, 0.05), 0 4px 14px -10px rgba(7, 15, 28, 0.12);
+  --elevation-2: 0 10px 24px -14px rgba(7, 15, 28, 0.18);
+  --elevation-3: 0 18px 44px -22px rgba(7, 15, 28, 0.30);
+
   /* ─── shadcn semantic tokens — REWIRED to DSO Hire brand ─── */
   --background: #F7F4ED;             /* ivory */
   --foreground: #14233F;             /* ink */
@@ -215,6 +241,13 @@ html, body {
   --color-slate-meta: var(--slate-meta);
   --color-gold: var(--gold);
 
+  /* ── Elevation ladder → shadow-1 / shadow-2 / shadow-3 utilities ──
+     Raw values live in :root/.dark as --elevation-* (so dark can
+     override); this maps them into Tailwind's shadow namespace. */
+  --shadow-1: var(--elevation-1);
+  --shadow-2: var(--elevation-2);
+  --shadow-3: var(--elevation-3);
+
   /* ── Stage palette ── */
   --color-stage-stone: var(--stage-stone);
   --color-stage-mist: var(--stage-mist);
@@ -296,6 +329,12 @@ html, body {
      role tokens; off-role brand fills (bg-ink, text-ivory) are re-pointed
      to role tokens during the migration, not solved here.
   ═══════════════════════════════════════════════════════════════ */
+
+  /* ── Elevation ladder — dark surfaces need deeper, truer shadows to
+     read as lift against navy (ambient light is gone; alpha carries it) ── */
+  --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.30), 0 4px 14px -10px rgba(0, 0, 0, 0.40);
+  --elevation-2: 0 10px 24px -14px rgba(0, 0, 0, 0.50);
+  --elevation-3: 0 18px 44px -22px rgba(0, 0, 0, 0.65);
 
   /* ── Brand constants — keep identity, shift brightness ── */
   --ink: #F1ECDF;          /* DOMINANT role is body text → goes light */
@@ -660,15 +699,15 @@ html, body {
     opacity: 0;
     transform: translateY(12px);
     transition:
-      opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-      transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+      opacity 0.45s var(--ease-settle),
+      transform 0.45s var(--ease-settle);
     transition-delay: var(--mk-delay, 0ms);
     /* Safety net: if a page carries [data-reveal] but never mounts
        <MotionMount /> (the /pricing gray-slab incident), content fades
        itself in after 2.5s instead of staying hidden forever. Pages WITH
        the observer cancel this via html.mk-armed below, preserving the
        scroll-triggered entrances. */
-    animation: mk-autoreveal 0.45s cubic-bezier(0.22, 1, 0.36, 1) 2.5s forwards;
+    animation: mk-autoreveal 0.45s var(--ease-settle) 2.5s forwards;
   }
   html.mk-armed [data-reveal] {
     animation: none;
@@ -692,12 +731,12 @@ html, body {
   .lockup-draw .lockup-arch {
     stroke-dasharray: 112;
     stroke-dashoffset: 112;
-    animation: mk-draw 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards;
+    animation: mk-draw 0.9s var(--ease-settle) 0.15s forwards;
   }
   .lockup-draw .lockup-bar {
     stroke-dasharray: 18;
     stroke-dashoffset: 18;
-    animation: mk-draw 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.8s forwards;
+    animation: mk-draw 0.45s var(--ease-settle) 0.8s forwards;
   }
   .lockup-draw .lockup-fade {
     opacity: 0;
@@ -768,7 +807,7 @@ html, body {
   }
   .hk-notif {
     opacity: 0;
-    animation: hk-notif-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) 2.3s forwards;
+    animation: hk-notif-in 0.45s var(--ease-settle) 2.3s forwards;
   }
 }
 /* Rotation lives here (not inline on the element) so the entrance
@@ -867,7 +906,7 @@ html, body {
 }
 @media (prefers-reduced-motion: no-preference) {
   .mini-dial-arc {
-    animation: mini-dial-fill 1.2s cubic-bezier(0.22, 1, 0.36, 1) 1.2s forwards;
+    animation: mini-dial-fill 1.2s var(--ease-settle) 1.2s forwards;
   }
   .mini-dial-num {
     opacity: 0;
@@ -982,12 +1021,12 @@ html, body {
   .bo-veil-arch {
     stroke-dasharray: 120;
     stroke-dashoffset: 120;
-    animation: rail-draw 340ms cubic-bezier(0.22, 1, 0.36, 1) 140ms forwards;
+    animation: rail-draw 340ms var(--ease-settle) 140ms forwards;
   }
   .bo-veil-bar {
     stroke-dasharray: 120;
     stroke-dashoffset: 120;
-    animation: rail-draw 200ms cubic-bezier(0.22, 1, 0.36, 1) 470ms forwards;
+    animation: rail-draw 200ms var(--ease-settle) 470ms forwards;
   }
 }
 @keyframes bo-veil {
@@ -1023,7 +1062,7 @@ html, body {
 /* save-flash — a field/form value commits (apply to the input) */
 @media (prefers-reduced-motion: no-preference) {
   .save-flash {
-    animation: save-flash 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    animation: save-flash 0.7s var(--ease-settle);
   }
 }
 @keyframes save-flash {
@@ -1034,7 +1073,7 @@ html, body {
 /* row-commit — a list/table row lands or updates in place */
 @media (prefers-reduced-motion: no-preference) {
   .row-commit {
-    animation: row-commit 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    animation: row-commit 0.5s var(--ease-settle);
   }
 }
 @keyframes row-commit {
@@ -1059,7 +1098,7 @@ html, body {
    a quick scale-down + heritage ring that fades as the card seats itself. */
 @media (prefers-reduced-motion: no-preference) {
   .kb-settle {
-    animation: kb-settle 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    animation: kb-settle 0.4s var(--ease-settle);
   }
 }
 @keyframes kb-settle {
@@ -1133,13 +1172,13 @@ html, body {
    collapse-to-72px icon rail (.rail-slim toggled by RailCollapse). */
 @keyframes rail-draw { to { stroke-dashoffset: 0; } }
 .rail-draw1, .rail-draw2 { stroke-dasharray: 120; stroke-dashoffset: 120; }
-.rail-draw1 { animation: rail-draw 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards; }
-.rail-draw2 { animation: rail-draw 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.75s forwards; }
+.rail-draw1 { animation: rail-draw 1.1s var(--ease-settle) 0.1s forwards; }
+.rail-draw2 { animation: rail-draw 0.6s var(--ease-settle) 0.75s forwards; }
 @keyframes rail-settle { from { height: 0; } 60% { height: 82%; } to { height: 64%; } }
 .rail-item-on::before {
   content: ""; position: absolute; left: -1px; top: 50%; width: 2.5px;
   transform: translateY(-50%); background: #8db8a3;
-  animation: rail-settle 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: rail-settle 0.45s var(--ease-settle) forwards;
 }
 .rail-nav { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.18) transparent; }
 .rail-nav::-webkit-scrollbar { width: 4px; }
@@ -1179,7 +1218,7 @@ html, body {
 @keyframes rail-ic-draw { from { stroke-dashoffset: 90; } to { stroke-dashoffset: 0; } }
 .rail-item:hover .rail-ic > * {
   stroke-dasharray: 90 1000;
-  animation: rail-ic-draw 1.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: rail-ic-draw 1.5s var(--ease-settle) both;
 }
 .rail-item:hover .rail-ic > *:nth-child(2) { animation-delay: 0.25s; }
 .rail-item:hover .rail-ic > *:nth-child(3) { animation-delay: 0.5s; }
@@ -1198,10 +1237,10 @@ html, body {
   70% { transform: translateY(1.5px); }
   100% { transform: translateY(0); }
 }
-.rail-item:hover .rail-ic-inbox { animation: rail-inbox-thunk 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+.rail-item:hover .rail-ic-inbox { animation: rail-inbox-thunk 0.8s var(--ease-settle); }
 .rail-item:hover .rail-ic-inbox > * { stroke-dasharray: none; animation: none; }
 .rail-item:hover .rail-ic-inbox > *:first-child {
-  animation: rail-mail-drop 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: rail-mail-drop 0.65s var(--ease-settle) both;
 }
 
 /* Analytics — the bars pump up from the baseline, staggered. */
@@ -1213,7 +1252,7 @@ html, body {
 .rail-item:hover .rail-ic-reports > * {
   stroke-dasharray: none;
   transform-origin: center bottom;
-  animation: rail-bar-pump 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: rail-bar-pump 0.6s var(--ease-settle) both;
 }
 .rail-item:hover .rail-ic-reports > *:nth-child(2) { animation-delay: 0.08s; }
 .rail-item:hover .rail-ic-reports > *:nth-child(3) { animation-delay: 0.16s; }
@@ -1226,7 +1265,7 @@ html, body {
   100% { transform: translateY(0); }
 }
 .rail-item:hover .rail-ic-locations {
-  animation: rail-pin-hop 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: rail-pin-hop 0.5s var(--ease-settle);
 }
 .rail-item:hover .rail-ic-locations > * {
   stroke-dasharray: none;
@@ -1250,7 +1289,7 @@ html, body {
 .rail-item:hover .rail-ic-dashboard > * {
   stroke-dasharray: none;
   transform-origin: center;
-  animation: rail-tile-pop 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: rail-tile-pop 0.4s var(--ease-settle) both;
 }
 .rail-item:hover .rail-ic-dashboard > *:nth-child(2) { animation-delay: 0.09s; }
 .rail-item:hover .rail-ic-dashboard > *:nth-child(3) { animation-delay: 0.18s; }
@@ -1265,7 +1304,7 @@ html, body {
 }
 .rail-item:hover .rail-ic-pipeline > * { stroke-dasharray: none; animation: none; }
 .rail-item:hover .rail-ic-pipeline > *:nth-child(n + 2) {
-  animation: rail-kan-bob 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: rail-kan-bob 0.55s var(--ease-settle) both;
 }
 .rail-item:hover .rail-ic-pipeline > *:nth-child(3) { animation-delay: 0.1s; }
 .rail-item:hover .rail-ic-pipeline > *:nth-child(4) { animation-delay: 0.2s; }
@@ -1279,7 +1318,7 @@ html, body {
 .rail-item:hover .rail-ic-referrals > * { stroke-dasharray: none; animation: none; }
 .rail-item:hover .rail-ic-referrals > *:nth-child(n + 3) {
   transform-origin: center;
-  animation: rail-plus-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+  animation: rail-plus-pop 0.45s var(--ease-settle) 0.15s both;
 }
 
 /* Billing — the card holds still, the stripe sweeps across it
@@ -1291,7 +1330,7 @@ html, body {
 .rail-item:hover .rail-ic-billing > * { stroke-dasharray: none; animation: none; }
 .rail-item:hover .rail-ic-billing > *:last-child {
   stroke-dasharray: 30 1000;
-  animation: rail-stripe-sweep 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+  animation: rail-stripe-sweep 0.7s var(--ease-settle) 0.15s both;
 }
 
 /* Offer approvals — the checkmark draws itself in, then settles. */
@@ -1304,7 +1343,7 @@ html, body {
 .rail-item:hover .rail-ic-offer-approvals > *:last-child {
   stroke-dasharray: 90 1000;
   transform-origin: center;
-  animation: rail-check-draw 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+  animation: rail-check-draw 0.7s var(--ease-settle) 0.15s both;
 }
 
 /* ── Candidate rail: PREMIUM fit-mark animations (Day 35) ──────────
@@ -1329,7 +1368,7 @@ html, body {
 }
 .rail-ic-practicefit { animation: pf-idle 3.4s ease-in-out infinite; }
 .rail-item:hover .rail-ic-practicefit {
-  animation: pf-burst 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: pf-burst 0.9s var(--ease-settle);
   filter: drop-shadow(0 0 4px rgba(141, 184, 163, 0.95))
     drop-shadow(0 0 9px rgba(233, 200, 115, 0.55));
 }
@@ -1368,7 +1407,7 @@ html, body {
 }
 .rail-item:hover .rail-ic-dsofit > * {
   stroke-dasharray: none; transform-origin: center;
-  animation: dsofit-assemble 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: dsofit-assemble 0.5s var(--ease-settle) both;
 }
 .rail-item:hover .rail-ic-dsofit > *:nth-child(2) { animation-delay: 0.08s; }
 .rail-item:hover .rail-ic-dsofit > *:nth-child(3) { animation-delay: 0.16s; }

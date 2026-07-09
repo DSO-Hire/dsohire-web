@@ -34,6 +34,7 @@ import { Eyebrow } from "@/components/brand/eyebrow";
 import { SceneHead, DemoKbCard, FitChip } from "../ui";
 import { KANBAN_COLUMNS, AUTOMATION_TOAST, type DemoCard } from "../track";
 import { useCue } from "../use-player";
+import { EASE_SETTLE } from "@/lib/motion";
 
 const SARAH = KANBAN_COLUMNS[1].cards[0];
 
@@ -91,7 +92,7 @@ export function PipelineChapter({
           transform: `translate(${d.left - s.left}px, ${d.top - s.top}px) rotate(-1.5deg)`,
         },
       ],
-      { duration: 750, easing: "cubic-bezier(0.22,1,0.36,1)", fill: "forwards" }
+      { duration: 750, easing: EASE_SETTLE, fill: "forwards" }
     ).finished.then(() => {
       clone.remove();
       commit();
@@ -184,7 +185,7 @@ export function PipelineChapter({
             ? "opacity-100 translate-y-0"
             : "opacity-0 translate-y-[18px] pointer-events-none max-sm:hidden"
         }`}
-        style={{ transitionTimingFunction: "cubic-bezier(0.22,1,0.36,1)" }}
+        style={{ transitionTimingFunction: "var(--ease-settle)" }}
       >
         <div className="flex items-center gap-1.5 text-2xs font-extrabold tracking-[1.4px] uppercase text-heritage-bright mb-1">
           <span aria-hidden className={phase === "toast" ? "bo-spark inline-block" : ""}>

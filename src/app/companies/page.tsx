@@ -449,7 +449,7 @@ function DsoCard({
   return (
     <Link
       href={`/companies/${dso.slug}`}
-      className="group relative block bg-card overflow-hidden hover:bg-cream motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-14px_rgba(7,15,28,0.18)] flex flex-col"
+      className="group relative block bg-card overflow-hidden hover:bg-cream motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-2 flex flex-col"
       style={{ ["--card-accent" as string]: accentColor }}
     >
       {/* Left-edge brand accent strip — full card height, 4px wide.
@@ -676,7 +676,7 @@ function FeaturedDsoSpotlight({
   return (
     <Link
       href={`/companies/${dso.slug}`}
-      className="group relative block bg-card overflow-hidden hover:bg-cream motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-18px_rgba(7,15,28,0.25)] border border-[var(--rule)] mb-6"
+      className="group relative block bg-card overflow-hidden hover:bg-cream motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-3 border border-[var(--rule)] mb-6"
       style={{ ["--card-accent" as string]: accentColor }}
     >
       {/* Left accent strip — wider (6px) than the regular grid cards to

@@ -279,7 +279,7 @@ function LocationCard({ location }: { location: LocationCardData }) {
   return (
     <Link
       href={`/employer/locations/${location.id}`}
-      className="group relative block overflow-hidden border border-[var(--rule)] bg-card transition-all hover:border-heritage/40 hover:shadow-[0_10px_28px_-14px_rgba(20,35,63,0.3)]"
+      className="group relative block overflow-hidden border border-[var(--rule)] bg-card transition-all hover:border-heritage/40 hover:shadow-2"
     >
       {/* growing left accent on hover */}
       <span className="absolute left-0 top-0 bottom-0 w-[3px] origin-top scale-y-0 bg-heritage transition-transform duration-200 group-hover:scale-y-100" />

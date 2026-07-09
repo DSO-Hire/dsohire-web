@@ -125,7 +125,7 @@ function BoardCardItem({ card: c, tone }: { card: BoardCard; tone: ColTone }) {
   return (
     <Link
       href={c.href}
-      className={`block rounded-lg border p-3 transition-shadow hover:shadow-[0_8px_24px_rgba(11,35,64,0.12)] ${
+      className={`block rounded-lg border p-3 transition-shadow hover:shadow-2 ${
         isOffer
           ? "border-warning bg-warning-bg/50"
           : "border-[var(--rule)] bg-cream/40"

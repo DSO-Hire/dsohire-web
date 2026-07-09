@@ -98,7 +98,7 @@ function resolveLens(pathname: string): "dso" | "candidate" | "neutral" {
 }
 
 const MENU_SHADOW =
-  "shadow-[0_20px_40px_-20px_rgba(7,15,28,0.20),0_8px_20px_-12px_rgba(7,15,28,0.10)]";
+  "shadow-3";
 
 function Chevron({ group }: { group: string }) {
   return (

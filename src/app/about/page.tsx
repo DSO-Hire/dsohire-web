@@ -83,7 +83,7 @@ function FounderLetter() {
         {/* the letter */}
         <div
           data-reveal
-          className="bg-cream border border-[var(--rule-strong)] border-t-[3px] border-t-heritage px-7 py-10 sm:px-14 sm:py-13 shadow-[0_30px_60px_-40px_rgba(20,35,63,0.3)]"
+          className="bg-cream border border-[var(--rule-strong)] border-t-[3px] border-t-heritage px-7 py-10 sm:px-14 sm:py-13 shadow-3"
         >
           <div className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-5">
             A letter from the founder

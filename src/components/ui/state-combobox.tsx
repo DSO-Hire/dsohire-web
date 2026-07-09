@@ -168,7 +168,7 @@ export function StateCombobox({
           <PopoverPrimitive.Content
             sideOffset={4}
             align="start"
-            className="z-50 w-(--radix-popover-trigger-width) min-w-[220px] bg-popover border border-[var(--rule-strong)] shadow-[0_18px_44px_-22px_rgba(7,15,28,0.28)] data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0"
+            className="z-50 w-(--radix-popover-trigger-width) min-w-[220px] bg-popover border border-[var(--rule-strong)] shadow-3 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0"
             onOpenAutoFocus={(e) => {
               // We focus the filter input ourselves via the effect above.
               e.preventDefault();

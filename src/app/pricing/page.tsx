@@ -394,7 +394,7 @@ function TierCard({
       className={`relative p-9 flex flex-col flex-1 w-full motion-safe:transition-all motion-safe:duration-200 ${
         isFeatured
           ? "bg-hero text-hero-foreground"
-          : "bg-card text-ink motion-safe:hover:-translate-y-1 hover:shadow-[0_12px_28px_-14px_rgba(7,15,28,0.18)] hover:bg-cream/30"
+          : "bg-card text-ink motion-safe:hover:-translate-y-1 hover:shadow-2 hover:bg-cream/30"
       }`}
     >
       {/* Floats above the card top edge — doesn't push content down, so all

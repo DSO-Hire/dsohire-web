@@ -32,7 +32,7 @@ import {
 } from "../track";
 import { useCue, animateCount } from "../use-player";
 
-const EASE = { transitionTimingFunction: "cubic-bezier(0.22,1,0.36,1)" };
+const EASE = { transitionTimingFunction: "var(--ease-settle)" };
 
 export function TwoSidedChapter({
   active,

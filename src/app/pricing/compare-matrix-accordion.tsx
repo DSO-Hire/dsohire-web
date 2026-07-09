@@ -92,7 +92,7 @@ export function CompareMatrixAccordion({
       <div className="min-w-[860px] border border-[var(--rule-strong)]">
         {/* ── Sticky tier header ── */}
         <div
-          className={`${GRID} sticky top-[80px] z-20 bg-hero shadow-[0_4px_12px_-8px_rgba(7,15,28,0.25)]`}
+          className={`${GRID} sticky top-[80px] z-20 bg-hero shadow-1`}
         >
           <Eyebrow className="py-5 pl-5 pr-4 flex items-end text-hero-foreground/60">Category</Eyebrow>
           {tiers.map((t) => (
