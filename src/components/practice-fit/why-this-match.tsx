@@ -37,6 +37,7 @@ import type {
 import { generatePracticeFitNarrative } from "@/lib/practice-fit/narrative-action";
 import type { PracticeFitNarrativeAudience } from "@/lib/practice-fit/narrative-types";
 import { InlineDimEditor } from "@/components/practice-fit/inline-dim-editor";
+import { ScoreRing } from "@/components/practice-fit/score-ring";
 import { Eyebrow } from "@/components/brand/eyebrow";
 
 export interface WhyThisMatchProps {
@@ -192,6 +193,22 @@ export function WhyThisMatch({
 
       {open && (
         <ul className="list-none divide-y divide-[var(--rule)]">
+          {/* 5c signature moment — the score reveals itself when the
+              panel opens: ring sweep + count-up on the brand curve.
+              currentColor rides the bucket's text ramp (navy PracticeFit
+              / heritage DSOFit, dark-adaptive). Static under reduced
+              motion; always the exact stored score (fit-honesty). */}
+          <li className={`flex items-center gap-4 px-4 py-4 ${style.textClass}`}>
+            <ScoreRing score={fit.score} />
+            <span className="text-xs leading-relaxed text-slate-body">
+              <span className="block font-bold text-ink">
+                {fit.score} out of 100 · {style.label}
+              </span>
+              {fit.coverage
+                ? `Scored on ${fit.coverage.scored_count} of ${fit.coverage.total_count} factors from both sides' declared data.`
+                : "Scored from both sides' declared data."}
+            </span>
+          </li>
           {/* v1 narrative band — only renders when we have ids + the
               bucket isn't 'low' AND we have something to show.
               Skipped/idle don't render a band to avoid empty whitespace. */}

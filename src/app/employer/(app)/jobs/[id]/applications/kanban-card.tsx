@@ -22,7 +22,7 @@
 
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useDraggable } from "@dnd-kit/core";
 import { ArrowRight, MessageCircle, Star } from "lucide-react";
@@ -105,15 +105,28 @@ export function KanbanCard({
   // reduced-motion users see nothing extra (CSS-gated).
   const wasPendingRef = useRef(false);
   const [settling, setSettling] = useState(false);
+  // 5c — bulk-advance cascade: a deterministic 0–120ms stagger hashed from
+  // the card's own id. When a BULK move confirms, every card settles at a
+  // slightly different beat, so the group reads as candidates landing in
+  // quick succession instead of one synchronized blink. Single-card moves
+  // are imperceptibly affected (confirm timing already varies more than
+  // this). Display-only — no board threading, drag machinery untouched.
+  const settleDelayMs = useMemo(() => {
+    let h = 0;
+    for (let i = 0; i < application.id.length; i++) {
+      h = (h * 31 + application.id.charCodeAt(i)) | 0;
+    }
+    return Math.abs(h) % 121;
+  }, [application.id]);
   useEffect(() => {
     const was = wasPendingRef.current;
     wasPendingRef.current = pending;
     if (was && !pending && !isOverlay) {
       setSettling(true);
-      const t = setTimeout(() => setSettling(false), 450);
+      const t = setTimeout(() => setSettling(false), 450 + settleDelayMs);
       return () => clearTimeout(t);
     }
-  }, [pending, isOverlay]);
+  }, [pending, isOverlay, settleDelayMs]);
 
   const days = daysInStage(application.stage_entered_at);
   const heat = stageHeatLevel(days);
@@ -160,7 +173,9 @@ export function KanbanCard({
     <button
       type="button"
       ref={isOverlay ? undefined : setNodeRef}
-      style={style}
+      style={
+        settling ? { ...style, animationDelay: `${settleDelayMs}ms` } : style
+      }
       {...(isOverlay ? {} : listeners)}
       {...(isOverlay ? {} : attributes)}
       className={`${baseClasses} ${borderClass} ${ageEdgeClass} ${interactiveClasses} ${
