@@ -44,6 +44,7 @@ import {
 // BOH Lane 2c — HelpDisclosure + HeroKpiTile retired from this page
 // (About box → help center + ? launcher; hero → slim KPI strip).
 import { OnboardingChecklist } from "@/components/onboarding/onboarding-checklist";
+import { FirstRunDashboard } from "./first-run";
 import { BillingBanner } from "@/components/employer/billing-banner";
 import { Eyebrow } from "@/components/brand/eyebrow";
 import { KpiTile } from "@/components/dashboard/kpi-tile";
@@ -148,6 +149,10 @@ export default async function EmployerDashboard() {
   });
 
   const isDsoAdmin = dsoUser?.role === "owner" || dsoUser?.role === "admin";
+  // Day one = no job has ever been posted. HMs are excluded — they don't
+  // set up the account and their scoped view handles empty on its own.
+  const isFirstRun =
+    (jobsCount ?? 0) === 0 && dsoUser?.role !== "hiring_manager";
   const employerOnboardingItems = [
     {
       key: "job",
@@ -234,6 +239,21 @@ export default async function EmployerDashboard() {
         </div>
       </header>
 
+      {/* Design program 3b — day one (no job posted yet) swaps the wall
+          of zero tiles for the calm first-run composition. Graduates to
+          the full cockpit the moment the first job exists. HMs never see
+          it (they don't set up the account). */}
+      {isFirstRun ? (
+        <>
+          <BillingBanner subscription={subscription} />
+          <FirstRunDashboard
+            firstName={dsoUser?.full_name?.split(" ")[0] ?? "there"}
+            hasLocation={(locationsCount ?? 0) > 0}
+            items={employerOnboardingItems}
+          />
+        </>
+      ) : (
+        <>
       {dsoUser?.role !== "hiring_manager" && (
         <div className="mb-8">
           <OnboardingChecklist
@@ -451,7 +471,8 @@ export default async function EmployerDashboard() {
           <LocationPulseSection />
         </Suspense>
       </section>
-
+        </>
+      )}
     </>
   );
 }
