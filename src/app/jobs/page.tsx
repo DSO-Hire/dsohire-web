@@ -717,9 +717,9 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
           </em>
         </h1>
         <p className="text-base sm:text-lg text-slate-body leading-relaxed max-w-[640px]">
-          Every employer on DSO Hire agrees to our Acceptable Use Policy —
-          staffing agencies, recruiter reposts, and solo-practice reposts
-          are prohibited.{" "}
+          Real openings from real dental groups — never staffing agencies,
+          recruiter reposts, or middlemen. Every employer agrees to our
+          Acceptable Use Policy.{" "}
           <Link
             href="/companies"
             className="text-heritage hover:text-heritage-deep underline underline-offset-2 font-semibold"

@@ -65,7 +65,7 @@ export default async function Home() {
   const live = await getHomeLiveSnapshot();
   return (
     <SiteShell>
-      <Hero />
+      <Hero live={live} />
       <LiveMarketBand live={live} />
       <BackOfficeShowcase />
       <MachineBand />
@@ -80,7 +80,7 @@ export default async function Home() {
    HERO — equal-weight doors that DEMONSTRATE
 ═══════════════════════════════════════════════════════ */
 
-function Hero() {
+function Hero({ live }: { live: HomeLiveSnapshot }) {
   return (
     <section className="relative overflow-hidden pt-[120px] pb-16 px-6 sm:px-14">
       {/* 80px brand grid, masked toward the top-left */}
@@ -136,7 +136,23 @@ function Hero() {
           directly. No agencies, no per-listing fees, no middlemen.
         </p>
 
-        {/* ── The equal-weight dual entry — now demonstrating, not describing ── */}
+        {/* Live proof (2026-07-10, Cam) — real counts from the same
+            honesty-gated snapshot as LiveMarketBand; hidden below the
+            floor so we never brag about small numbers. */}
+        {live.showCounters && (
+          <p
+            style={{ "--mk-delay": "180ms" } as React.CSSProperties}
+            className="mk-hero -mt-5 mb-9 text-sm font-semibold text-heritage-deep tabular-nums"
+          >
+            {live.activeJobs.toLocaleString("en-US")} open roles across{" "}
+            {live.states} states — updated daily
+          </p>
+        )}
+
+        {/* ── The equal-weight dual entry — now demonstrating, not describing.
+            Candidate door leads on mobile (Cam 2026-07-10: candidates are
+            the bulk of phone traffic); employer door keeps the left slot
+            on md+ so the desktop composition is unchanged. ── */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-left">
           <DoorwayPanel
             accent="ink"
@@ -165,6 +181,7 @@ function Hero() {
             secondaryLabel="How it works for candidates"
             secondaryHref="/for-candidates"
             revealDelay={280}
+            className="order-first md:order-none"
           />
         </div>
       </div>
@@ -249,6 +266,7 @@ function DoorwayPanel({
   secondaryLabel,
   secondaryHref,
   revealDelay,
+  className,
 }: {
   /** "ink" = navy block, "heritage" = green block. Equal weight, distinct identity. */
   accent: "ink" | "heritage";
@@ -270,6 +288,8 @@ function DoorwayPanel({
   secondaryHref: string;
   /** #115 FOH-1 — scroll-settle stagger (ms). */
   revealDelay?: number;
+  /** Extra classes on the panel root (e.g. mobile order flip). */
+  className?: string;
 }) {
   const isInk = accent === "ink";
   // The navy door stays navy in both modes → light text. The green door
@@ -287,7 +307,7 @@ function DoorwayPanel({
     <div
       className={`mk-hero group relative flex flex-col p-7 sm:p-8 ${fg} motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1 overflow-hidden ${
         isInk ? "bg-hero" : "bg-heritage"
-      }`}
+      }${className ? ` ${className}` : ""}`}
       style={
         {
           boxShadow:
