@@ -18,6 +18,7 @@ import {
 import { SUPPORT_EMAIL } from "@/lib/contact";
 import { composeName, parseSalutation } from "@/lib/candidate/name";
 import { getAcquisition } from "@/lib/analytics/acquisition";
+import { claimGuestCandidateRow } from "@/lib/candidate/claim-guest";
 import { recordGoal } from "@/lib/analytics/record-goal";
 import { after } from "next/server";
 
@@ -100,6 +101,42 @@ export async function signUpCandidate(
   }
 
   const authUserId = createdUser.user.id;
+
+  // Punch #5 (2026-07-10) — if this email applied as a guest, promote that
+  // guest row instead of inserting a second candidates row for the same
+  // human (which would split their application history and let them apply
+  // to the same job twice). Sign-in still requires the OTP/password, so a
+  // squatter claiming someone else's guest row can never authenticate.
+  const claimedId = await claimGuestCandidateRow(admin, {
+    authUserId,
+    email,
+    firstName,
+    lastName,
+  });
+  if (claimedId) {
+    after(() => recordGoal("signup_candidate", { channel: "guest_claim" }));
+    const supabaseClaim = await createSupabaseServerClient();
+    const { error: otpClaimError } = await supabaseClaim.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: false },
+    });
+    if (otpClaimError) {
+      return {
+        ok: false,
+        step: "form",
+        next,
+        error:
+          "Account created but we couldn't send the verification email. Try signing in.",
+      };
+    }
+    return {
+      ok: true,
+      step: "verify",
+      email,
+      next,
+      message: `We sent a 6-digit verification code to ${email}. Enter it below — it expires in 15 minutes.`,
+    };
+  }
 
   // Vantage §4.6 — stamp last-touch acquisition for the closed-loop funnel.
   const acq = await getAcquisition();

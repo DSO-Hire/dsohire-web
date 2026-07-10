@@ -17,6 +17,7 @@ import {
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
 import { splitFullName } from "@/lib/candidate/name";
+import { claimGuestCandidateRow } from "@/lib/candidate/claim-guest";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -68,32 +69,14 @@ export async function GET(request: Request) {
     // can't update it themselves).
     if (!candidate && user.email) {
       const admin = createSupabaseServiceRoleClient();
-      const { data: guestRow } = await admin
-        .from("candidates")
-        .select("id, claim_expires_at")
-        .ilike("email", user.email)
-        .eq("is_guest", true)
-        .maybeSingle();
-      if (guestRow) {
-        const expiresAt = guestRow.claim_expires_at as string | null;
-        const stillClaimable = !expiresAt || new Date(expiresAt) > new Date();
-        if (stillClaimable) {
-          const { error: claimErr } = await admin
-            .from("candidates")
-            .update({
-              auth_user_id: user.id,
-              is_guest: false,
-              email: null, // post-claim, auth.users is source of truth
-              claim_expires_at: null,
-            })
-            .eq("id", guestRow.id as string);
-          if (!claimErr) {
-            return NextResponse.redirect(
-              `${origin}${requestedNext.startsWith("/") ? requestedNext : "/candidate/dashboard"}`
-            );
-          }
-          console.warn("[auth/callback] guest claim failed", claimErr);
-        }
+      const claimedId = await claimGuestCandidateRow(admin, {
+        authUserId: user.id,
+        email: user.email,
+      });
+      if (claimedId) {
+        return NextResponse.redirect(
+          `${origin}${requestedNext.startsWith("/") ? requestedNext : "/candidate/dashboard"}`
+        );
       }
     }
 
@@ -129,6 +112,23 @@ export async function GET(request: Request) {
 
     if (looksLikeCandidate && roleHint !== "employer") {
       const admin = createSupabaseServiceRoleClient();
+      // Punch #5 — OAuth users with a guest application history get their
+      // guest row promoted instead of a blind second candidates row.
+      // (OAuth providers verify the email before we ever see it.)
+      if (user.email) {
+        const claimedId = await claimGuestCandidateRow(admin, {
+          authUserId: user.id,
+          email: user.email,
+        });
+        if (claimedId) {
+          const safeNext =
+            requestedNext.startsWith("/candidate") ||
+            requestedNext.startsWith("/jobs/")
+              ? requestedNext
+              : "/candidate/dashboard";
+          return NextResponse.redirect(`${origin}${safeNext}`);
+        }
+      }
       const fullName =
         (userMeta.full_name as string | undefined) ??
         (userMeta.name as string | undefined) ??

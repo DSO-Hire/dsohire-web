@@ -1362,6 +1362,42 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     }
   }
 
+  // ── Punch #5 (2026-07-10) — cross-job footprint ──────────────────
+  // The same candidate's other applications across this DSO's jobs.
+  // RLS scopes the read to jobs the caller can see; one indexed query.
+  // Surfaces as an "Also in your pipeline" strip so a recruiter never
+  // dispositions someone without knowing they're live in another req.
+  const { data: rawOtherApps } = await supabase
+    .from("applications")
+    .select("id, stage_id, created_at, jobs:jobs(id, title)")
+    .eq("candidate_id", app.candidate_id as string)
+    .neq("id", app.id as string)
+    .order("created_at", { ascending: false })
+    .limit(8);
+  const alsoApplied = ((rawOtherApps ?? []) as Array<{
+    id: string;
+    stage_id: string;
+    created_at: string;
+    jobs:
+      | { id: string; title: string }
+      | Array<{ id: string; title: string }>
+      | null;
+  }>)
+    .map((row) => {
+      // PostgREST to-one embed normalize (house gotcha: object, not array).
+      const jobRow = Array.isArray(row.jobs) ? row.jobs[0] : row.jobs;
+      if (!jobRow) return null;
+      const stageRow = findStage(stages, row.stage_id);
+      const kind: StageKind = (stageRow?.kind ?? "open") as StageKind;
+      return {
+        id: row.id,
+        jobTitle: jobRow.title,
+        stageLabel: stageRow?.label ?? KIND_DEFAULT_LABELS[kind],
+        kind,
+      };
+    })
+    .filter((r): r is NonNullable<typeof r> => r !== null);
+
   const titleLine = cand?.current_title ?? cand?.headline ?? null;
 
   // Location label for the candidate (preferred over their full address)
@@ -1436,6 +1472,29 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
         employmentTypeLabel={String(job.employment_type).replace(/_/g, " ")}
         submitted={submitted}
       />
+
+      {/* Punch #5 — cross-job footprint strip. Renders only when the
+          candidate is in other pipelines, so the common case adds no
+          chrome. */}
+      {alsoApplied.length > 0 && (
+        <div className="mb-6 border border-[var(--rule)] bg-cream/40 px-4 py-3">
+          <span className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep">
+            Also in your pipeline
+          </span>
+          <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1.5">
+            {alsoApplied.map((other) => (
+              <Link
+                key={other.id}
+                href={`/employer/applications/${other.id}`}
+                className="inline-flex items-baseline gap-2 text-xs text-ink hover:text-heritage-deep transition-colors"
+              >
+                <span className="font-semibold">{other.jobTitle}</span>
+                <span className="text-slate-meta">· {other.stageLabel}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* DSO Affiliation card — only renders when the job has at least
           one private-affiliation location. Self-suppresses for
