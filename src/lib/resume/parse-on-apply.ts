@@ -93,6 +93,12 @@ export async function parseResumeForApplication(
     const ext = filename.split(".").pop()?.toLowerCase() ?? "";
     const mimeType = MIME_BY_EXT[ext] ?? blob.type ?? "application/octet-stream";
     const bytes = await blob.arrayBuffer();
+    // pdfjs (inside extractResumeText) TRANSFERS the ArrayBuffer to its
+    // worker, detaching it — reading `bytes` after a failed extraction
+    // throws "Cannot perform Construct on a detached ArrayBuffer" (caught
+    // live 2026-07-10). Copy up front so the vision fallback keeps its
+    // own bytes regardless of what extraction does to the original.
+    const visionBytes = new Uint8Array(bytes.slice(0));
 
     let text: string | null = null;
     let textFailure: { kind: string; message: string } | null = null;
@@ -124,7 +130,7 @@ export async function parseResumeForApplication(
         textFailure.kind === "extraction_failed";
       if (isPdf && visionWorthy) {
         const visionResult = await parseResumeFromPdfWithAI({
-          pdfBytes: bytes,
+          pdfBytes: visionBytes,
           userId: input.userIdForUsageLog,
         });
         if (visionResult.ok) {
