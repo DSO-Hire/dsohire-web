@@ -18,7 +18,7 @@
  * heritage rails through every state.
  */
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Check, ChevronRight } from "lucide-react";
 
 import { Eyebrow } from "@/components/brand/eyebrow";
@@ -66,6 +66,10 @@ function coverageChip(group: MatrixGroupData, tierId: string): string {
 
 const GRID = "grid grid-cols-[minmax(220px,1.4fr)_repeat(4,minmax(118px,1fr))]";
 
+/** Full-bleed gutter trick shared by both scroll wrappers so their
+ *  scrollLeft ranges stay identical below lg. */
+const BLEED = "-mx-6 sm:-mx-14 px-6 sm:px-14";
+
 export function CompareMatrixAccordion({
   groups,
   tiers,
@@ -74,6 +78,7 @@ export function CompareMatrixAccordion({
   tiers: MatrixTierHead[];
 }) {
   const [open, setOpen] = useState<Set<number>>(() => new Set([0]));
+  const headerScroller = useRef<HTMLDivElement>(null);
   const toggle = (i: number) =>
     setOpen((prev) => {
       const next = new Set(prev);
@@ -83,16 +88,21 @@ export function CompareMatrixAccordion({
     });
 
   return (
-    // NOTE: no overflow wrapper here — an `overflow-x` ancestor breaks
-    // vertical position:sticky (the Day-32 "header collapsed into the
-    // first row" bug, Cam catch). The PAGE-level wrapper provides
-    // overflow-x-auto on small screens and goes overflow-visible on lg
-    // so the tier header can stick — same trick the old table used.
+    // An `overflow-x` ancestor breaks vertical position:sticky (the Day-32
+    // "header collapsed into the first row" bug, Cam catch) — and the old
+    // page-level overflow-x-auto wrapper meant the tier header never stuck
+    // below lg at all. So the header and body live in SEPARATE bleed
+    // wrappers: the header wrapper is sticky at page level (overflow-x
+    // hidden, scrollLeft driven from the body), the body wrapper owns the
+    // horizontal scroll. Both go overflow-visible on lg.
     <div>
-      <div className="min-w-[860px] border border-[var(--rule-strong)]">
-        {/* ── Sticky tier header ── */}
+      {/* ── Sticky tier header ── */}
+      <div
+        ref={headerScroller}
+        className={`${BLEED} sticky top-[80px] z-20 overflow-x-hidden lg:overflow-visible`}
+      >
         <div
-          className={`${GRID} sticky top-[80px] z-20 bg-hero shadow-1`}
+          className={`${GRID} min-w-[860px] bg-hero shadow-1 border border-b-0 border-[var(--rule-strong)]`}
         >
           <Eyebrow className="py-5 pl-5 pr-4 flex items-end text-hero-foreground/60">Category</Eyebrow>
           {tiers.map((t) => (
@@ -121,9 +131,19 @@ export function CompareMatrixAccordion({
             </div>
           ))}
         </div>
+      </div>
 
-        {/* ── Bands ── */}
-        {groups.map((group, gi) => {
+      {/* ── Bands (horizontal scroller below lg; drives the header) ── */}
+      <div
+        className={`${BLEED} overflow-x-auto lg:overflow-visible`}
+        onScroll={(e) => {
+          if (headerScroller.current) {
+            headerScroller.current.scrollLeft = e.currentTarget.scrollLeft;
+          }
+        }}
+      >
+        <div className="min-w-[860px] border border-t-0 border-[var(--rule-strong)]">
+          {groups.map((group, gi) => {
           const isRoadmap = group.label.startsWith("On the roadmap");
           const isOpen = open.has(gi);
           return (
@@ -188,7 +208,8 @@ export function CompareMatrixAccordion({
                 ))}
             </div>
           );
-        })}
+          })}
+        </div>
       </div>
     </div>
   );

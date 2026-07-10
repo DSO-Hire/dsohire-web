@@ -953,7 +953,10 @@ function CompareMatrix({
           bands w/ per-tier coverage chips replace the flat ~60-row table.
           The consolidation above still runs server-side; the client
           component only owns open/close state. */}
-      <div className="-mx-6 sm:-mx-14 px-6 sm:px-14 overflow-x-auto lg:overflow-visible">
+      {/* Overflow lives INSIDE CompareMatrixAccordion now (split sticky
+          header + body scrollers) so the tier header can stick below lg.
+          An overflow-x ancestor here would break it again. */}
+      <div>
         <p className="text-xs text-slate-meta mb-5 max-w-[680px] leading-relaxed">
           <strong className="text-ink font-semibold">Reading this matrix:</strong>{" "}
           expand a category — the chips on each band show how much of it a
