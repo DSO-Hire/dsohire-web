@@ -41,6 +41,12 @@ export interface ApplicationsListItem {
     current_title: string | null;
     headline: string | null;
     years_experience: number | null;
+    /**
+     * States the candidate holds a license in (candidates.license_states).
+     * Optional — only the per-job board's server entry selects it; older
+     * call sites omit it and the board's license filter offers no options.
+     */
+    license_states?: string[] | null;
   } | null;
   jobTitle: string;
   /** PracticeFit (Phase 5D) — null when consent off OR not yet computed. */

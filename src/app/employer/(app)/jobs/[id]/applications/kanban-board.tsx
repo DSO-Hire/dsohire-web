@@ -342,6 +342,28 @@ export function KanbanBoard({
     }
   }, [applications, reseed]);
 
+  // ── Punch #2 — qualification filters + fit sort ────────────────
+  // Display-layer only: filters narrow which cards render, fit-sort
+  // reorders within columns. Neither touches pipeline_position, drag
+  // machinery, or the realtime feed. Ephemeral by design (no
+  // localStorage) — a recruiter returning to the board always sees the
+  // full pipeline.
+  const [sortByFit, setSortByFit] = useState(false);
+  const [minFit, setMinFit] = useState<0 | 45 | 60 | 75>(0);
+  const [knockoutFilter, setKnockoutFilter] = useState<
+    "all" | "hide_failed" | "only_failed"
+  >("all");
+  const [licenseState, setLicenseState] = useState<string>("");
+
+  const filtersActive =
+    minFit > 0 || knockoutFilter !== "all" || licenseState !== "";
+
+  function clearFilters() {
+    setMinFit(0);
+    setKnockoutFilter("all");
+    setLicenseState("");
+  }
+
   const [optimisticApps, applyOptimistic] = useOptimistic<
     KanbanApplication[],
     OptimisticMove
@@ -366,27 +388,67 @@ export function KanbanBoard({
     useSensor(KeyboardSensor)
   );
 
+  // License-state filter options — derived from the candidates actually on
+  // this board, so the menu never offers a state that matches nothing.
+  const licenseStateOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const app of optimisticApps) {
+      for (const s of app.candidate?.license_states ?? []) set.add(s);
+    }
+    return Array.from(set).sort();
+  }, [optimisticApps]);
+
+  // Apply qualification filters BEFORE bucketing so columns, counts,
+  // selection order and bulk actions all agree on what's visible.
+  const visibleApps = useMemo(() => {
+    if (!filtersActive) return optimisticApps;
+    return optimisticApps.filter((app) => {
+      if (minFit > 0 && (app.practiceFit?.score ?? -1) < minFit) return false;
+      const failed = (app.knockoutFailedQuestions ?? []).length > 0;
+      if (knockoutFilter === "hide_failed" && failed) return false;
+      if (knockoutFilter === "only_failed" && !failed) return false;
+      if (
+        licenseState !== "" &&
+        !(app.candidate?.license_states ?? []).includes(licenseState)
+      ) {
+        return false;
+      }
+      return true;
+    });
+  }, [optimisticApps, filtersActive, minFit, knockoutFilter, licenseState]);
+
+  const hiddenByFilters = optimisticApps.length - visibleApps.length;
+
   // Bucket apps by stage_id for rendering.
   const byStageId = useMemo(() => {
     const m = new Map<string, KanbanApplication[]>();
     for (const stage of kanbanStages) m.set(stage.id, []);
     for (const stage of terminalStages) m.set(stage.id, []);
-    for (const app of optimisticApps) {
+    for (const app of visibleApps) {
       const bucket = m.get(app.stage_id);
       if (bucket) bucket.push(app);
     }
     for (const list of m.values()) {
       list.sort((a, b) => {
-        const ap = a.pipeline_position ?? Number.POSITIVE_INFINITY;
-        const bp = b.pipeline_position ?? Number.POSITIVE_INFINITY;
-        if (ap !== bp) return ap - bp;
+        if (sortByFit) {
+          // Fit sort — display-only ordering, highest score first,
+          // unscored cards last (recency tiebreak). pipeline_position
+          // is untouched; toggling back restores manual order.
+          const af = a.practiceFit?.score ?? -1;
+          const bf = b.practiceFit?.score ?? -1;
+          if (af !== bf) return bf - af;
+        } else {
+          const ap = a.pipeline_position ?? Number.POSITIVE_INFINITY;
+          const bp = b.pipeline_position ?? Number.POSITIVE_INFINITY;
+          if (ap !== bp) return ap - bp;
+        }
         return (
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
       });
     }
     return m;
-  }, [optimisticApps, kanbanStages, terminalStages]);
+  }, [visibleApps, kanbanStages, terminalStages, sortByFit]);
 
   // Apps in any rejected-kind stage (drop-target lane) vs withdrawn-kind
   // (read-only). Collapse all rejected-kind rows across all rejected
@@ -1335,6 +1397,75 @@ export function KanbanBoard({
               >
                 Lanes · job
               </button>
+            )}
+
+            {/* Punch #2 — fit sort + qualification filters. */}
+            <button
+              type="button"
+              onClick={() => setSortByFit((v) => !v)}
+              aria-pressed={sortByFit}
+              title="Order each column by fit score — highest first, unscored last. Manual order is untouched."
+              className={`px-2.5 py-1 text-xs font-semibold border transition-colors ${
+                sortByFit
+                  ? "bg-card text-ink border-[var(--rule-strong)] shadow-[inset_0_-2px_0_0_var(--heritage)]"
+                  : "bg-card text-slate-body border-[var(--rule-strong)] hover:bg-cream"
+              }`}
+            >
+              Sort · fit
+            </button>
+            <select
+              value={minFit}
+              onChange={(e) =>
+                setMinFit(Number(e.target.value) as 0 | 45 | 60 | 75)
+              }
+              aria-label="Minimum fit"
+              className="border border-[var(--rule-strong)] bg-card px-2 py-1 text-xs font-semibold text-slate-body hover:bg-cream"
+            >
+              <option value={0}>Any fit</option>
+              <option value={45}>Solid+</option>
+              <option value={60}>Strong+</option>
+              <option value={75}>Excellent</option>
+            </select>
+            <select
+              value={knockoutFilter}
+              onChange={(e) =>
+                setKnockoutFilter(
+                  e.target.value as "all" | "hide_failed" | "only_failed"
+                )
+              }
+              aria-label="Knockout filter"
+              className="border border-[var(--rule-strong)] bg-card px-2 py-1 text-xs font-semibold text-slate-body hover:bg-cream"
+            >
+              <option value="all">Knockouts · all</option>
+              <option value="hide_failed">Passed only</option>
+              <option value="only_failed">Failed only</option>
+            </select>
+            {licenseStateOptions.length > 0 && (
+              <select
+                value={licenseState}
+                onChange={(e) => setLicenseState(e.target.value)}
+                aria-label="Licensed in state"
+                className="border border-[var(--rule-strong)] bg-card px-2 py-1 text-xs font-semibold text-slate-body hover:bg-cream"
+              >
+                <option value="">Licensed · any</option>
+                {licenseStateOptions.map((s) => (
+                  <option key={s} value={s}>
+                    Licensed · {s}
+                  </option>
+                ))}
+              </select>
+            )}
+            {filtersActive && hiddenByFilters > 0 && (
+              <span className="text-2xs text-slate-meta tabular">
+                {hiddenByFilters} hidden by filters ·{" "}
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="font-semibold text-heritage-deep hover:text-ink underline underline-offset-2"
+                >
+                  Clear
+                </button>
+              </span>
             )}
           </div>
           <div className="flex items-center gap-3 text-2xs text-slate-meta tabular">

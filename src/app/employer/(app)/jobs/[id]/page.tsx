@@ -154,7 +154,9 @@ export default async function PerJobPipelinePage({
   const { data: rawCands } = candidateIds.length
     ? await supabase
         .from("candidates")
-        .select("id, full_name, current_title, headline, years_experience")
+        .select(
+          "id, full_name, current_title, headline, years_experience, license_states"
+        )
         .in("id", candidateIds)
     : { data: [] };
 
@@ -164,6 +166,7 @@ export default async function PerJobPipelinePage({
     current_title: string | null;
     headline: string | null;
     years_experience: number | null;
+    license_states: string[] | null;
   };
   const cands = (rawCands ?? []) as CandRow[];
   const candMap = new Map(cands.map((c) => [c.id, c]));
