@@ -301,6 +301,8 @@ async function runEmailCandidate(event: AutomationEvent): Promise<ActionOutcome>
     dsoId: e.dsoId,
     fromStageLabel: e.fromStageLabel,
     toStageLabel: e.toStageLabel,
+    // Punch #6 — rejected-kind moves get the dedicated close-out template.
+    toStageKind: e.toKind,
   });
   return { action_kind: "email_candidate", status: "ran" };
 }

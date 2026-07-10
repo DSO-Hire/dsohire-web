@@ -43,4 +43,11 @@ export const DEFAULT_TEMPLATES: Record<PredefinedTemplateKind, DefaultTemplate> 
 <p>Quick update on your application for <strong>{{job.title}}</strong> at <strong>{{dso.name}}</strong>: it moved from <strong>{{stage.from_label}}</strong> to <strong>{{stage.to_label}}</strong>.</p>
 <p>You can see the full status in your candidate dashboard.</p>`,
   },
+  "candidate.application_rejected": {
+    subject: "An update on your application for {{job.title}}",
+    body_html: `<p>Hi {{candidate.first_name}},</p>
+<p>Thank you for applying for <strong>{{job.title}}</strong> at <strong>{{dso.name}}</strong>, and for the time you put into your application.</p>
+<p>After careful review, the hiring team has decided to move forward with other candidates for this role. This decision isn't a reflection of your qualifications &mdash; hiring often comes down to a very specific mix of needs for a single opening.</p>
+<p>Your profile stays active on DSO Hire, and new dental roles are posted every week.</p>`,
+  },
 };

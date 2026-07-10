@@ -128,6 +128,7 @@ export const CANDIDATE_NOTIFICATION_DEFAULTS: Record<
 > = {
   "candidate.application_received": { email: true, in_app: true },
   "candidate.stage_changed": { email: true, in_app: true },
+  "candidate.application_rejected": { email: true, in_app: true },
   "application.message_received": { email: true, in_app: true },
   "job_alert.match": { email: true },
   "job_alert.recommended": { email: true },

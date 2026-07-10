@@ -22,6 +22,7 @@ export type NotificationEventKind =
   | "candidate.application_received"        // apply confirmation
   | "application.message_received"          // DM from employer
   | "candidate.stage_changed"               // application moved between pipeline stages (Phase 4.5.f registers as a kind; dispatch wiring lands when status-change emails ship)
+  | "candidate.application_rejected"        // Punch #6 — application moved to a rejected-kind stage (dedicated close-out email; replaces stage_changed on that transition)
   | "candidate.nurture"                     // N16 automation re-engagement message from an employer
   | "candidate.practice_fit_digest"         // B.2 weekly PracticeFit drip — top new high-fit roles
   | "job_alert.match"                       // saved-search alert — new jobs matched a candidate's saved /jobs filters
@@ -60,6 +61,7 @@ export const EVENT_KIND_LABELS: Record<NotificationEventKind, string> = {
   "candidate.application_received": "Application confirmation",
   "application.message_received": "New message",
   "candidate.stage_changed": "Stage moved",
+  "candidate.application_rejected": "Application closed",
   "candidate.nurture": "Re-engagement message",
   "candidate.practice_fit_digest": "Weekly PracticeFit matches",
   "job_alert.match": "Saved-search job alert",

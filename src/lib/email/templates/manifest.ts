@@ -37,7 +37,8 @@
 export type PredefinedTemplateKind =
   | "candidate.application_received"
   | "application.message_received"
-  | "candidate.stage_changed";
+  | "candidate.stage_changed"
+  | "candidate.application_rejected";
 
 /**
  * Any template kind — predefined string literal OR a user-defined slug
@@ -188,12 +189,22 @@ export const TEMPLATE_META: Record<PredefinedTemplateKind, TemplateMeta> = {
     dispatchWired: true,
     groups: [CANDIDATE_GROUP, JOB_GROUP, DSO_GROUP, STAGE_GROUP],
   },
+  "candidate.application_rejected": {
+    kind: "candidate.application_rejected",
+    label: "Application closed",
+    description:
+      "Sent to a candidate when their application is moved to a Rejected stage. Replaces the generic stage-moved email for that transition. Internal disposition reasons are never included.",
+    audience: "candidate",
+    dispatchWired: true,
+    groups: [CANDIDATE_GROUP, JOB_GROUP, DSO_GROUP],
+  },
 };
 
 export const PREDEFINED_TEMPLATE_KINDS: PredefinedTemplateKind[] = [
   "candidate.application_received",
   "application.message_received",
   "candidate.stage_changed",
+  "candidate.application_rejected",
 ];
 
 /**

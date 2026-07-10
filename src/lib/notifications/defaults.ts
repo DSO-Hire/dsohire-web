@@ -64,6 +64,13 @@ export const NOTIFICATION_DEFAULTS: DefaultsMap = {
     in_app: { enabled: true, frequency: "instant" },
     sms: { enabled: false, frequency: "off" },
   },
+  "candidate.application_rejected": {
+    // Punch #6 — close-out email on rejection. Transactional; default on
+    // (a candidate should always learn their application closed).
+    email: { enabled: true, frequency: "instant" },
+    in_app: { enabled: true, frequency: "instant" },
+    sms: { enabled: false, frequency: "off" },
+  },
   "candidate.nurture": {
     // Employer-initiated message about the candidate's own application —
     // relationship/transactional, default on.

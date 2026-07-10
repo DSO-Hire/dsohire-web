@@ -20,6 +20,7 @@ import { dispatchCandidateEmail } from "./dispatch";
 import { resolveCandidateReplyTo } from "@/lib/email/candidate-reply-to";
 import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
 import { StageChanged } from "@/emails/StageChanged";
+import { ApplicationRejected } from "@/emails/ApplicationRejected";
 import { greetingFirstName } from "@/lib/candidate/name";
 
 const SITE_URL =
@@ -34,6 +35,13 @@ export interface StageChangedDispatchInput {
   /** Pre-resolved human-readable stage labels (e.g. "New", "Interview"). */
   fromStageLabel: string;
   toStageLabel: string;
+  /**
+   * Punch #6 — the destination stage KIND. When "rejected", the dispatch
+   * swaps to the dedicated `candidate.application_rejected` template (a
+   * respectful close-out) instead of the generic stage-mechanics email.
+   * Optional so legacy call sites keep the old behavior.
+   */
+  toStageKind?: string;
 }
 
 /**
@@ -104,11 +112,10 @@ export async function dispatchStageChangedEmail(
       console.warn("[stage-changed] dso name resolve failed", e);
     }
 
-    const fallbackSubject = `Update on your application for ${input.jobTitle}`;
     const replyTo = await resolveCandidateReplyTo(input.dsoId);
+    const isRejection = input.toStageKind === "rejected";
 
-    await dispatchCandidateEmail({
-      kind: "candidate.stage_changed",
+    const shared = {
       dsoId: input.dsoId,
       recipientUserId: authUserId,
       recipientEmail,
@@ -123,16 +130,40 @@ export async function dispatchStageChangedEmail(
         title: input.jobTitle,
         url: jobUrl,
       },
+      relatedDsoId: input.dsoId,
+      relatedCandidateId: input.candidateId,
+    };
+
+    if (isRejection) {
+      // Dedicated close-out — no stage mechanics, no internal disposition
+      // reason (employer-only by design).
+      await dispatchCandidateEmail({
+        ...shared,
+        kind: "candidate.application_rejected",
+        fallback: {
+          subject: `An update on your application for ${input.jobTitle}`,
+          react: ApplicationRejected({
+            recipientName: firstName,
+            jobTitle: input.jobTitle,
+            dsoName,
+            jobsUrl: `${SITE_URL}/jobs`,
+          }),
+        },
+      });
+      return;
+    }
+
+    await dispatchCandidateEmail({
+      ...shared,
+      kind: "candidate.stage_changed",
       extraContext: {
         stage: {
           from_label: input.fromStageLabel,
           to_label: input.toStageLabel,
         },
       },
-      relatedDsoId: input.dsoId,
-      relatedCandidateId: input.candidateId,
       fallback: {
-        subject: fallbackSubject,
+        subject: `Update on your application for ${input.jobTitle}`,
         react: StageChanged({
           recipientName: firstName,
           jobTitle: input.jobTitle,
